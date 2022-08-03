@@ -31,4 +31,8 @@ public class SimilarityFunction {
     public double computeSimilarity(long n, long m) {
         return similarityComputer.safeSimilarity(n, m);
     }
+
+    public boolean isSymmetric() {
+        return similarityComputer.isSymmetric();
+    }
 }

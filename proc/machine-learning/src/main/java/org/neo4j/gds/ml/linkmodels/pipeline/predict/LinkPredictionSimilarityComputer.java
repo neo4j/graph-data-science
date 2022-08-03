@@ -73,6 +73,11 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
         public long lowerBoundOfPotentialNeighbours(long node) {
             return graph.nodeCount() - 1 - graph.degree(node);
         }
+
+        @Override
+        public boolean isSymmetric() {
+            return graph.isUndirected();
+        }
     }
 
     static class LinkFilterFactory implements NeighborFilterFactory {

@@ -508,9 +508,12 @@ public class Knn extends Algorithm<Knn.Result> {
                         continue;
                     }
 
-                    // TODO the similarity is defined symmetric? (we could only try the second join if the first succeeded)
-                    updateCount += join(rng, similarityFunction, allNeighbors, elem1, elem2);
-                    updateCount += join(rng, similarityFunction, allNeighbors, elem2, elem1);
+                    if (neighborFilter.isSymmetric() && similarityFunction.isSymmetric()) {
+                        updateCount += joinSymmetric(rng, similarityFunction, allNeighbors, elem1, elem2);
+                    } else {
+                        updateCount += join(rng, similarityFunction, allNeighbors, elem1, elem2);
+                        updateCount += join(rng, similarityFunction, allNeighbors, elem2, elem1);
+                    }
                 }
 
                 // try out joining the old neighbors with the new neighbor / join(new_nbd, old_ndb)
@@ -522,9 +525,12 @@ public class Knn extends Algorithm<Knn.Result> {
                             continue;
                         }
 
-                        // TODO the similarity is defined symmetric? (we could only try the second join if the first succeeded)
-                        updateCount += join(rng, similarityFunction, allNeighbors, elem1, elem2);
-                        updateCount += join(rng, similarityFunction, allNeighbors, elem2, elem1);
+                        if (neighborFilter.isSymmetric() && similarityFunction.isSymmetric()) {
+                            updateCount += joinSymmetric(rng, similarityFunction, allNeighbors, elem1, elem2);
+                        } else {
+                            updateCount += join(rng, similarityFunction, allNeighbors, elem1, elem2);
+                            updateCount += join(rng, similarityFunction, allNeighbors, elem2, elem1);
+                        }
                     }
                 }
             }
@@ -565,6 +571,39 @@ public class Knn extends Algorithm<Knn.Result> {
                 // random joins are not counted towards the actual update counter
                 join(rng, computer, allNeighbors, nodeId, randomNodeId);
             }
+        }
+
+        private long joinSymmetric(
+            SplittableRandom splittableRandom,
+            SimilarityFunction similarityFunction,
+            HugeObjectArray<NeighborList> allNeighbors,
+            long node1,
+            long node2
+        ) {
+            assert node1 != node2;
+
+            if (neighborFilter.excludeNodePair(node1, node2)) {
+                return 0;
+            }
+
+            nodePairsConsidered++;
+            var similarity = similarityFunction.computeSimilarity(node1, node2);
+
+            var neighbors1 = allNeighbors.get(node1);
+
+            var updates = 0L;
+
+            synchronized (neighbors1) {
+                updates += neighbors1.add(node2, similarity, splittableRandom, perturbationRate);
+            }
+
+            var neighbors2 = allNeighbors.get(node2);
+
+            synchronized (neighbors2) {
+                updates += neighbors2.add(node1, similarity, splittableRandom, perturbationRate);
+            }
+
+            return updates;
         }
 
         private long join(

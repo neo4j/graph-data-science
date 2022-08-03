@@ -24,4 +24,6 @@ public interface NeighborFilter {
     boolean excludeNodePair(long firstNodeId, long secondNodeId);
 
     long lowerBoundOfPotentialNeighbours(long node);
+
+    boolean isSymmetric();
 }
