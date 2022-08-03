@@ -14,6 +14,12 @@ Calls to GDS `write` procedures are internally directed to the cluster `LEADER` 
 
 == Deployment
 
+[NOTE]
+====
+Please refer to the https://neo4j.com/docs/operations-manual/current/clustering/[official Neo4j documentation] for details on how to setup Neo4j Causal Cluster.
+Note that the link points to the latest Neo4j version documentation and the configuration settings may differ from earlier versions.
+====
+
 * The cluster must contain at least one _Read Replica_ instance
 ** single _Core member_ and a _Read Replica_ is a valid scenario.
 ** GDS workloads are not load-balanced if there are more than one _Read Replica_ instances.
