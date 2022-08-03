@@ -87,7 +87,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"1, 44, 1", "2, 59, 1"})
+    @CsvSource(value = {"1, 75, 2", "2, 89, 1"})
     void shouldPredictWithTopK(int topK, long expectedLinksConsidered, int ranIterations) {
         var modelData = ImmutableLinkLogisticRegressionData.of(
             new Weights<>(
@@ -166,7 +166,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
 
         var expectedLinks = List.of(
             PredictedLink.of(0, 4, 0.49750002083312506),
-            PredictedLink.of(1, 0, 0.11506673204554983),
+            PredictedLink.of(1, 4, 0.11815697780926958),
             PredictedLink.of(2, 0, 2.0547103309367397E-4),
             PredictedLink.of(3, 0, 0.0024726231566347774),
             PredictedLink.of(4, 0, 0.49750002083312506)

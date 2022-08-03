@@ -33,7 +33,9 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.loading.NullPropertyMap;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -45,6 +47,7 @@ import org.neo4j.gds.nodeproperties.DoubleTestProperties;
 import org.neo4j.gds.nodeproperties.FloatArrayTestProperties;
 
 import java.util.Comparator;
+import java.util.SplittableRandom;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -257,6 +260,68 @@ class KnnTest {
         for (int i = 1; i < nodeCount; i++) {
             assertThat(reverseNeighbors.get(i)).isNull();
         }
+    }
+
+    @Test
+    void joinNeighbors() {
+        SplittableRandom random = new SplittableRandom(42);
+        double perturbationRate = 0.0;
+        var allNeighbors = HugeObjectArray.of(
+            new NeighborList(1),
+            new NeighborList(1),
+            new NeighborList(1)
+        );
+        // setting an artificial priority to assure they will be replaced
+        allNeighbors.get(0).add(1, 0.0, random);
+        allNeighbors.get(1).add(2, 0.0, random);
+        allNeighbors.get(2).add(0, 0.0, random);
+
+        var allNewNeighbors = HugeObjectArray.of(
+            LongArrayList.from(1, 2),
+            null,
+            null
+        );
+
+        var allOldNeighbors = HugeObjectArray.newArray(LongArrayList.class, graph.nodeCount(), AllocationTracker.empty());
+
+        var similarityComputer = new SimilarityComputer() {
+            @Override
+            public double similarity(long firstNodeId, long secondNodeId) {
+                return ((double) secondNodeId) / (firstNodeId + secondNodeId);
+            }
+
+            @Override
+            public NeighborFilter createNeighborFilter() {
+                return new KnnNeighborFilter(graph.nodeCount());
+            }
+        };
+
+        var joinNeighbors = new Knn.JoinNeighbors(
+            random,
+            similarityComputer,
+            allNeighbors,
+            allOldNeighbors,
+            allNewNeighbors,
+            HugeObjectArray.newArray(LongArrayList.class, graph.nodeCount(), AllocationTracker.empty()),
+            HugeObjectArray.newArray(LongArrayList.class, graph.nodeCount(), AllocationTracker.empty()),
+            graph.nodeCount(),
+            1,
+            1,
+            0,
+            // simplifying the test by only running over a single node
+            Partition.of(0, 1),
+            ProgressTracker.NULL_TRACKER
+        );
+
+        joinNeighbors.run();
+
+        // 1-0, 2-0, 1-2, 2-1
+        assertThat(joinNeighbors.nodePairsConsidered()).isEqualTo(4);
+
+        assertThat(allNeighbors.get(0).elements()).containsExactly(1L);
+        assertThat(allNeighbors.get(1).elements()).containsExactly(2L);
+        // this gets updated due to joining the new neighbors together
+        assertThat(allNeighbors.get(2).elements()).containsExactly(1L);
     }
 
     @Test

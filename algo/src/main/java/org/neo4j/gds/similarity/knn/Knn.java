@@ -291,7 +291,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         }
     }
 
-    private static final class JoinNeighbors implements Runnable {
+    static final class JoinNeighbors implements Runnable {
         private final SplittableRandom random;
         private final SimilarityComputer computer;
         private final HugeObjectArray<NeighborList> neighbors;
@@ -309,7 +309,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         private final Partition partition;
         private long nodePairsConsidered;
 
-        private JoinNeighbors(
+        JoinNeighbors(
             SplittableRandom random,
             SimilarityComputer computer,
             HugeObjectArray<NeighborList> neighbors,
@@ -436,7 +436,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
 
                 // join(new_nbd, new_ndb)
                 for (int j = i + 1; j < newNeighborsCount; j++) {
-                    var elem2 = newNeighborElements[i];
+                    var elem2 = newNeighborElements[j];
                     if (elem1 == elem2) {
                         continue;
                     }
