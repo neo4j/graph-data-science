@@ -132,7 +132,7 @@ public final class LPGraphStoreFilterFactory {
     }
 
     public static LongPredicate generateNodeLabelFilter(Graph predictGraph, IdMap idMap) {
-        //IdMap can only contain nodes that are in the predictGraph.
+        // IdMap can only contain nodes that are in the predictGraph.
         if (predictGraph.nodeCount() == idMap.nodeCount()) {
             return id -> true;
         } else {
