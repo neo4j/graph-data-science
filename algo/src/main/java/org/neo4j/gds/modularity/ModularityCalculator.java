@@ -82,10 +82,11 @@ public class ModularityCalculator extends Algorithm<List<CommunityModularity>> {
             .run();
 
         List<CommunityModularity> result = new ArrayList<>();
+        var totalRelWeight = totalRelationshipWeight.doubleValue();
         communityTracker.forEachSetBit(communityId -> {
             var ec = insideRelationships.get(communityId);
             var Kc = totalCommunityRelationships.get(communityId);
-            var modularity = ec - Kc * Kc * (1.0 / totalRelationshipWeight.doubleValue());
+            var modularity = (ec - Kc * Kc * (1.0 / totalRelWeight)) / totalRelWeight;
             result.add(CommunityModularity.of(communityId, modularity));
         });
 

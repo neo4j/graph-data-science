@@ -66,8 +66,8 @@ class ModularityCalculatorTest {
 
         assertThat(modularities)
             .containsExactlyInAnyOrder(
-                CommunityModularity.of(0L, 6 - 9 * 9 * (1.0 / 16)),
-                CommunityModularity.of(5L, 4 - 7 * 7 * (1.0 / 16))
+                CommunityModularity.of(0L, (6 - 9 * 9 * (1.0 / 16)) / 16),
+                CommunityModularity.of(5L, (4 - 7 * 7 * (1.0 / 16)) / 16)
             );
     }
 }
