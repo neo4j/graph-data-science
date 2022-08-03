@@ -22,6 +22,8 @@ package org.neo4j.gds.beta.modularity;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.beta.k1coloring.ImmutableK1ColoringStreamConfig;
+import org.neo4j.gds.beta.k1coloring.K1ColoringConfig;
 import org.neo4j.gds.beta.k1coloring.K1ColoringFactory;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
@@ -38,6 +40,8 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
+
+import static org.neo4j.gds.beta.modularity.ModularityOptimization.K1COLORING_MAX_ITERATIONS;
 
 public class ModularityOptimizationFactory<T extends ModularityOptimizationConfig> extends GraphAlgorithmFactory<ModularityOptimization, T> {
 
@@ -117,7 +121,7 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
             MODULARITY_OPTIMIZATION_TASK_NAME,
             Tasks.task(
                 "initialization",
-                K1ColoringFactory.k1ColoringProgressTask(graph, config)
+                K1ColoringFactory.k1ColoringProgressTask(graph, createModularityConfig())
             ),
             Tasks.iterativeDynamic(
                 "compute modularity",
@@ -125,5 +129,13 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
                 config.maxIterations()
             )
         );
+    }
+
+    private static K1ColoringConfig createModularityConfig() {
+        return ImmutableK1ColoringStreamConfig
+            .builder()
+            .maxIterations(K1COLORING_MAX_ITERATIONS)
+            .build();
+
     }
 }

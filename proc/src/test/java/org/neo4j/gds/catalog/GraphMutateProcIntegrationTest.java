@@ -79,18 +79,18 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         ", (j)-[:TYPE]->(k)";
 
     private static final Graph EXPECTED_GRAPH = fromGdl(
-        "(a {nodeId: 0.0,  labelPropagation: 2,  louvain: 6,  pageRank: 0.150000, wcc: 0})" +
-        "(b {nodeId: 1.0,  labelPropagation: 3,  louvain: 6,  pageRank: 0.277500, wcc: 0})" +
-        "(c {nodeId: 2.0,  labelPropagation: 5,  louvain: 6,  pageRank: 0.385875, wcc: 0})" +
+        "(a {nodeId: 0.0,  labelPropagation: 6,  louvain: 6,  pageRank: 0.150000, wcc: 0})" +
+        "(b {nodeId: 1.0,  labelPropagation: 6,  louvain: 6,  pageRank: 0.277500, wcc: 0})" +
+        "(c {nodeId: 2.0,  labelPropagation: 6,  louvain: 6,  pageRank: 0.385875, wcc: 0})" +
         "(d {nodeId: 3.0,  labelPropagation: 6,  louvain: 6,  pageRank: 0.477994, wcc: 0})" +
         "(e {nodeId: 4.0,  labelPropagation: 6,  louvain: 6,  pageRank: 0.556295, wcc: 0})" +
         "(f {nodeId: 5.0,  labelPropagation: 6,  louvain: 6,  pageRank: 0.622850, wcc: 0})" +
         "(g {nodeId: 6.0,  labelPropagation: 6,  louvain: 6,  pageRank: 0.679423, wcc: 0})" +
         "(h {nodeId: 7.0,  labelPropagation: 10, louvain: 10, pageRank: 0.150000, wcc: 7})" +
-        "(i {nodeId: 8.0,  labelPropagation: 11, louvain: 10, pageRank: 0.277500, wcc: 7})" +
+        "(i {nodeId: 8.0,  labelPropagation: 10, louvain: 10, pageRank: 0.277500, wcc: 7})" +
         "(j {nodeId: 9.0,  labelPropagation: 10, louvain: 10, pageRank: 0.150000, wcc: 7})" +
         "(k {nodeId: 10.0, labelPropagation: 10, louvain: 10, pageRank: 0.395438, wcc: 7})" +
-        "(l {nodeId: 11.0, labelPropagation: 11, louvain: 11, pageRank: 0.267938, wcc: 7})" +
+        "(l {nodeId: 11.0, labelPropagation: 11, louvain: 10, pageRank: 0.267938, wcc: 7})" +
         "(a)-[:TYPE {w: 1.0}]->(b)" +
         "(b)-[:TYPE {w: 1.0}]->(c)" +
         "(c)-[:TYPE {w: 1.0}]->(d)" +
@@ -160,13 +160,13 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
             .algo("labelPropagation")
             .mutateMode()
             .addParameter("nodeWeightProperty", "pageRank")
-            .addParameter("mutateProperty", "louvain")
+            .addParameter("mutateProperty", "labelPropagation")
             .yields();
         String louvainQuery = GdsCypher
             .call(TEST_GRAPH)
             .algo("louvain")
             .mutateMode()
-            .addParameter("mutateProperty", "labelPropagation")
+            .addParameter("mutateProperty", "louvain")
             .yields();
         String nodeSimilarityQuery = GdsCypher
             .call(TEST_GRAPH)

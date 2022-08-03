@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
@@ -72,7 +73,7 @@ class LouvainTest {
             .concurrency(1);
     }
 
-    @GdlGraph
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Node {seed: 1})" +        // 0
@@ -118,33 +119,7 @@ class LouvainTest {
         ", (k)-[:TYPE_OUT {weight: 1.0}]->(m)" +
         ", (k)-[:TYPE_OUT {weight: 1.0}]->(l)" +
         ", (l)-[:TYPE_OUT {weight: 1.0}]->(n)" +
-        ", (m)-[:TYPE_OUT {weight: 1.0}]->(n)" +
-
-        ", (a)<-[:TYPE_IN {weight: 1.0}]-(b)" +
-        ", (a)<-[:TYPE_IN {weight: 1.0}]-(d)" +
-        ", (a)<-[:TYPE_IN {weight: 1.0}]-(f)" +
-        ", (b)<-[:TYPE_IN {weight: 1.0}]-(d)" +
-        ", (b)<-[:TYPE_IN {weight: 1.0}]-(x)" +
-        ", (b)<-[:TYPE_IN {weight: 1.0}]-(g)" +
-        ", (b)<-[:TYPE_IN {weight: 1.0}]-(e)" +
-        ", (c)<-[:TYPE_IN {weight: 1.0}]-(x)" +
-        ", (c)<-[:TYPE_IN {weight: 1.0}]-(f)" +
-        ", (d)<-[:TYPE_IN {weight: 1.0}]-(k)" +
-        ", (e)<-[:TYPE_IN {weight: 1.0}]-(x)" +
-        ", (e)<-[:TYPE_IN {weight: 0.01}]-(f)" +
-        ", (e)<-[:TYPE_IN {weight: 1.0}]-(h)" +
-        ", (f)<-[:TYPE_IN {weight: 1.0}]-(g)" +
-        ", (g)<-[:TYPE_IN {weight: 1.0}]-(h)" +
-        ", (h)<-[:TYPE_IN {weight: 1.0}]-(i)" +
-        ", (h)<-[:TYPE_IN {weight: 1.0}]-(j)" +
-        ", (i)<-[:TYPE_IN {weight: 1.0}]-(k)" +
-        ", (j)<-[:TYPE_IN {weight: 1.0}]-(k)" +
-        ", (j)<-[:TYPE_IN {weight: 1.0}]-(m)" +
-        ", (j)<-[:TYPE_IN {weight: 1.0}]-(n)" +
-        ", (k)<-[:TYPE_IN {weight: 1.0}]-(m)" +
-        ", (k)<-[:TYPE_IN {weight: 1.0}]-(l)" +
-        ", (l)<-[:TYPE_IN {weight: 1.0}]-(n)" +
-        ", (m)<-[:TYPE_IN {weight: 1.0}]-(n)";
+        ", (m)-[:TYPE_OUT {weight: 1.0}]->(n)";
 
     @Inject
     private GraphStore graphStore;
@@ -156,7 +131,7 @@ class LouvainTest {
     void testUnweighted() {
         var graph = graphStore.getGraph(
             NodeLabel.listOf("Node"),
-            RelationshipType.listOf("TYPE_OUT", "TYPE_IN"),
+            RelationshipType.listOf("TYPE_OUT"),
             Optional.empty()
         );
 
@@ -196,7 +171,7 @@ class LouvainTest {
     void testWeighted() {
         var graph = graphStore.getGraph(
             NodeLabel.listOf("Node"),
-            RelationshipType.listOf("TYPE_OUT", "TYPE_IN"),
+            RelationshipType.listOf("TYPE_OUT"),
             Optional.of("weight")
         );
 
@@ -236,7 +211,7 @@ class LouvainTest {
     void testSeeded() {
         var graph = graphStore.getGraph(
             NodeLabel.listOf("Node"),
-            RelationshipType.listOf("TYPE_OUT", "TYPE_IN"),
+            RelationshipType.listOf("TYPE_OUT"),
             Optional.of("weight")
         );
 
@@ -272,7 +247,7 @@ class LouvainTest {
     void testTolerance() {
         var graph = graphStore.getGraph(
             NodeLabel.listOf("Node"),
-            RelationshipType.listOf("TYPE_OUT", "TYPE_IN"),
+            RelationshipType.listOf("TYPE_OUT"),
             Optional.empty()
         );
 
@@ -299,7 +274,7 @@ class LouvainTest {
     void testMaxLevels() {
         var graph = graphStore.getGraph(
             NodeLabel.listOf("Node"),
-            RelationshipType.listOf("TYPE_OUT", "TYPE_IN"),
+            RelationshipType.listOf("TYPE_OUT"),
             Optional.empty()
         );
 
@@ -324,12 +299,12 @@ class LouvainTest {
 
     static Stream<Arguments> memoryEstimationTuples() {
         return Stream.of(
-            arguments(1, 1, 6414137, 23057664),
-            arguments(1, 10, 6414137, 30258024),
-            arguments(4, 1, 6417425, 29057928),
-            arguments(4, 10, 6417425, 36258288),
-            arguments(42, 1, 6459073, 105061272),
-            arguments(42, 10, 6459073, 112261632)
+            arguments(1, 1, 6_414_129, 23_057_656),
+            arguments(1, 10, 6_414_129, 30_258_016),
+            arguments(4, 1, 6_417_417, 29_057_920),
+            arguments(4, 10, 6_417_417, 36_258_280),
+            arguments(42, 1, 6_459_065, 105_061_264),
+            arguments(42, 10, 6_459_065, 112_261_624)
         );
     }
 
@@ -420,7 +395,7 @@ class LouvainTest {
     void testLogging() {
         var graph = graphStore.getGraph(
             NodeLabel.listOf("Node"),
-            RelationshipType.listOf("TYPE_OUT", "TYPE_IN"),
+            RelationshipType.listOf("TYPE_OUT"),
             Optional.empty()
         );
 

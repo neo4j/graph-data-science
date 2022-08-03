@@ -127,7 +127,9 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
 
         runQueryWithRowConsumer(query, (row) -> {
             assertTrue(row.getBoolean("didConverge"));
-            assertEquals(1, row.getNumber("ranIterations").longValue());
+            // Cannot converge after one iteration,
+            // because it doesn't have anything to compare the computed modularity against.
+            assertEquals(2, row.getNumber("ranIterations").longValue());
         });
     }
 

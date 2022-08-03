@@ -86,4 +86,6 @@ public class K1ColoringFactory<T extends K1ColoringConfig> extends GraphAlgorith
             config.maxIterations()
         );
     }
+
+
 }

@@ -69,6 +69,8 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private final NodePropertyValues seedProperty;
     private final ExecutorService executor;
 
+    private final ModularityManager modularityManager;
+
     private int iterationCounter;
     private boolean didConverge = false;
     private double totalNodeWeight = 0.0;
@@ -79,8 +81,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private HugeLongArray nextCommunities;
     private HugeLongArray reverseSeedCommunityMapping;
     private HugeDoubleArray cumulativeNodeWeights;
-    private HugeDoubleArray nodeCommunityInfluences;
-    private HugeAtomicDoubleArray communityWeights;
     private HugeAtomicDoubleArray communityWeightUpdates;
 
     public ModularityOptimization(
@@ -102,7 +102,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.executor = executor;
         this.concurrency = concurrency;
         this.minBatchSize = minBatchSize;
-
+        this.modularityManager = new ModularityManager(graph, concurrency);
         if (maxIterations < 1) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Need to run at least one iteration, but got %d",
@@ -120,6 +120,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         computeColoring();
         initSeeding();
         init();
+        modularityManager.setTotalWeight(totalNodeWeight);
         progressTracker.endSubTask();
 
 
@@ -128,8 +129,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             progressTracker.beginSubTask();
 
             boolean hasConverged;
-
-            nodeCommunityInfluences.fill(0.0);
 
             long currentColor = colorsUsed.nextSetBit(0);
             while (currentColor != -1) {
@@ -205,15 +204,14 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private void init() {
         this.nextCommunities = HugeLongArray.newArray(nodeCount);
         this.cumulativeNodeWeights = HugeDoubleArray.newArray(nodeCount);
-        this.nodeCommunityInfluences = HugeDoubleArray.newArray(nodeCount);
-        this.communityWeights = HugeAtomicDoubleArray.newArray(nodeCount);
+
         this.communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount);
 
         var initTasks = PartitionUtils.rangePartition(concurrency, nodeCount, (partition) ->
             new InitTask(
                 graph.concurrentCopy(),
                 currentCommunities,
-                communityWeights,
+                modularityManager,
                 cumulativeNodeWeights,
                 seedProperty != null,
                 partition
@@ -224,7 +222,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         var doubleTotalNodeWeight = initTasks.stream().mapToDouble(InitTask::localSum).sum();
 
-        totalNodeWeight = doubleTotalNodeWeight / 2.0;
+        totalNodeWeight = doubleTotalNodeWeight;
         currentCommunities.copyTo(nextCommunities, nodeCount);
     }
 
@@ -234,7 +232,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         private final HugeLongArray currentCommunities;
 
-        private final HugeAtomicDoubleArray communityWeights;
+        ModularityManager modularityManager;
 
         private final HugeDoubleArray cumulativeNodeWeights;
 
@@ -247,14 +245,14 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         private InitTask(
             RelationshipIterator relationshipIterator,
             HugeLongArray currentCommunities,
-            HugeAtomicDoubleArray communityWeights,
+            ModularityManager modularityManager,
             HugeDoubleArray cumulativeNodeWeights,
             boolean isSeeded,
             Partition partition
         ) {
             this.relationshipIterator = relationshipIterator;
             this.currentCommunities = currentCommunities;
-            this.communityWeights = communityWeights;
+            this.modularityManager = modularityManager;
             this.cumulativeNodeWeights = cumulativeNodeWeights;
             this.isSeeded = isSeeded;
             this.partition = partition;
@@ -264,6 +262,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         @Override
         public void run() {
             var cumulativeWeight = new MutableDouble();
+            var insideWeightContribution = new MutableDouble();
 
             partition.consume(nodeId -> {
                 if (!isSeeded) {
@@ -271,16 +270,21 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                 }
 
                 cumulativeWeight.setValue(0.0D);
-
+                insideWeightContribution.setValue(0.0D);
+                long currentCommunity = currentCommunities.get(nodeId);
                 relationshipIterator.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
                     cumulativeWeight.add(w);
+                    if (currentCommunity == currentCommunities.get(t) && isSeeded) {
+                        insideWeightContribution.add(w);
+                    }
                     return true;
                 });
 
-                communityWeights.update(
+                modularityManager.communityWeightUpdate(
                     currentCommunities.get(nodeId),
-                    acc -> acc + cumulativeWeight.doubleValue()
+                    cumulativeWeight.doubleValue()
                 );
+
 
                 cumulativeNodeWeights.set(nodeId, cumulativeWeight.doubleValue());
 
@@ -310,7 +314,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             concurrency,
             stream -> stream.forEach(nodeId -> {
                 final double update = communityWeightUpdates.get(nodeId);
-                communityWeights.update(nodeId, w -> w + update);
+                modularityManager.communityWeightUpdate(nodeId, update);
             })
         );
 
@@ -331,9 +335,8 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                 currentCommunities,
                 nextCommunities,
                 cumulativeNodeWeights,
-                nodeCommunityInfluences,
-                communityWeights,
                 communityWeightUpdates,
+                modularityManager,
                 progressTracker
             ),
             Optional.of((int) minBatchSize)
@@ -344,40 +347,24 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         double oldModularity = this.modularity;
         this.modularity = calculateModularity();
 
+        // We have nothing to compare against in the first iteration => the modularity was updated.
+        if (iterationCounter == 0) {
+            return true;
+        }
+
         return this.modularity > oldModularity && Math.abs(this.modularity - oldModularity) > tolerance;
     }
 
     private double calculateModularity() {
-        double ex = ParallelUtil.parallelStream(
-            LongStream.range(0, nodeCount),
-            concurrency,
-            nodeStream ->
-                nodeStream
-                    .mapToDouble(nodeCommunityInfluences::get)
-                    .reduce(Double::sum)
-                    .orElseThrow(() -> new RuntimeException("Error while computing modularity"))
-        );
-
-        double ax = ParallelUtil.parallelStream(
-            LongStream.range(0, nodeCount),
-            concurrency,
-            nodeStream ->
-                nodeStream
-                    .mapToDouble(nodeId -> Math.pow(communityWeights.get(nodeId), 2.0))
-                    .reduce(Double::sum)
-                    .orElseThrow(() -> new RuntimeException("Error while computing modularity"))
-        );
-
-        return (ex / (2 * totalNodeWeight)) - (ax / (Math.pow(2 * totalNodeWeight, 2)));
+        modularityManager.registerCommunities(currentCommunities);
+        return modularityManager.getModularity();
     }
 
     @Override
     public void release() {
         this.nextCommunities.release();
-        this.communityWeights.release();
         this.communityWeightUpdates.release();
         this.cumulativeNodeWeights.release();
-        this.nodeCommunityInfluences.release();
         this.colors.release();
         this.colorsUsed = null;
     }
