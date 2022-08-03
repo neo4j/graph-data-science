@@ -17,6 +17,9 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 == Introduction
 
+https://en.wikipedia.org/wiki/Modularity_(networks)[Modularity] is a metric that allows you to evaluate the quality of a community detection.
+Relationships of nodes in a community `C` connect to nodes either within `C` or outside `C`.
+Graphs with high modularity have dense connections between the nodes within communities but sparse connections between nodes in different communities.
 
 
 == Syntax
@@ -74,12 +77,12 @@ include::partial$/algorithms/shared/examples-intro.adoc[]
 [source, cypher, role=noplay setup-query]
 ----
 CREATE
-  (nAlice:User {name: 'Alice', seed: 42}),
-  (nBridget:User {name: 'Bridget', seed: 42}),
-  (nCharles:User {name: 'Charles', seed: 42}),
-  (nDoug:User {name: 'Doug'}),
-  (nMark:User {name: 'Mark'}),
-  (nMichael:User {name: 'Michael'}),
+  (nAlice:User {name: 'Alice', community: 3}),
+  (nBridget:User {name: 'Bridget', community: 2}),
+  (nCharles:User {name: 'Charles', community: 2}),
+  (nDoug:User {name: 'Doug', community: 3}),
+  (nMark:User {name: 'Mark', community: 5}),
+  (nMichael:User {name: 'Michael', community: 5}),
 
   (nAlice)-[:LINK {weight: 1}]->(nBridget),
   (nAlice)-[:LINK {weight: 1}]->(nCharles),
@@ -92,12 +95,13 @@ CREATE
   (nMichael)-[:LINK {weight: 1}]->(nMark);
 ----
 
-This graph has two clusters of _Users_, that are closely connected.
-Between those clusters there is one single edge.
+This graph has three pre-computed communities of _Users_, that are closely connected.
+For more details on the available community detection algorithms, please refer to xref:algorithms/community.adoc[Community algorithms] section of the documentation.
+The communities are indicated by the `community` node property on each node.
 The relationships that connect the nodes in each component have a property `weight` which determines the strength of the relationship.
 
 We can now project the graph and store it in the graph catalog.
-We load the `LINK` relationships with orientation set to `UNDIRECTED` as this works best with the Louvain algorithm which we will use to create the communities that we evaluate using Modularity.
+We load the `LINK` relationships with orientation set to `UNDIRECTED`.
 
 include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
@@ -113,49 +117,11 @@ CALL gds.graph.project(
         }
     },
     {
-        nodeProperties: 'seed',
+        nodeProperties: 'community',
         relationshipProperties: 'weight'
     }
 )
 ----
-
-We now run the xref:algorithms/louvain.adoc[Louvain algorithm] to create a division of the nodes into communities that we can then evalutate.
-
-[role=query-example, group=louvain-modularity]
---
-.The following will run the Louvain algorithm and store the results in `myGraph`:
-[source, cypher, role=noplay]
-----
-CALL gds.louvain.mutate('myGraph', { mutateProperty: 'community', relationshipWeightProperty: 'weight' })
-YIELD communityCount
-----
-
-.Results
-[opts="header"]
-|===
-| communityCount
-| 3
-|===
---
-
-Now our in-memory graph `myGraph` is populated with node properties under the key `community` that we can set as input for our evaluation using Modularity.
-The nodes are now assigned to communities in the following way:
-
-.Community assignments
-[opts="header"]
-|===
-| name      | community
-| "Alice"   | 3
-| "Bridget" | 2
-| "Charles" | 2
-| "Doug"    | 3
-| "Mark"    | 5
-| "Michael" | 5
-|===
-
-Please see the xref:graph-catalog-node-ops.adoc#catalog-graph-stream-single-node-property-example[stream node properties] procedure for how to obtain such an assignment table.
-
-For more information about Louvain, see its xref:algorithms/louvain.adoc[algorithm page].
 
 
 === Stream
@@ -168,7 +134,7 @@ This allows us to inspect the results directly or post-process them in Cypher wi
 
 For more details on the stream mode in general, see xref:common-usage/running-algos.adoc#running-algos-stream[Stream].
 
-[role=query-example, group=louvain-modularity]
+[role=query-example]
 --
 .The following will run the Modularity algorithm in `stream` mode:
 [source, cypher, role=noplay]
@@ -186,3 +152,6 @@ YIELD communityId, modularity
 | 5           | 0.130165289256198
 |===
 --
+
+We can see that the community of the weighted graph with the highest modularity is community 5.
+This means that 5 is the community that is most "well-knit" in the sense that most of its relationship weights are internal to the community.
