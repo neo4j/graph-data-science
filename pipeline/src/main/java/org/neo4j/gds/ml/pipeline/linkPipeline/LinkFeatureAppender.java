@@ -37,4 +37,8 @@ public interface LinkFeatureAppender {
      * @return the number of entries to append in to the existing features
      */
     int dimension();
+
+    default boolean isSymmetric() {
+        return true;
+    }
 }

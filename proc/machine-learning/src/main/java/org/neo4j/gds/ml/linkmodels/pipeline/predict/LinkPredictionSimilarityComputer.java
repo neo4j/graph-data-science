@@ -46,6 +46,11 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
         return classifier.predictProbabilities(features)[POSITIVE_CLASS_INDEX];
     }
 
+    @Override
+    public boolean isSymmetric() {
+        return linkFeatureExtractor.isSymmetric();
+    }
+
     static final class LinkFilter implements NeighborFilter {
 
         private final Graph graph;

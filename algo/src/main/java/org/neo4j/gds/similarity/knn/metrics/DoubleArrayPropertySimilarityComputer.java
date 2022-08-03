@@ -40,4 +40,9 @@ final class DoubleArrayPropertySimilarityComputer implements SimilarityComputer 
         var right = nodePropertyValues.doubleArrayValue(secondNodeId);
         return metric.compute(left, right);
     }
+
+    @Override
+    public boolean isSymmetric() {
+        return metric.isSymmetric();
+    }
 }

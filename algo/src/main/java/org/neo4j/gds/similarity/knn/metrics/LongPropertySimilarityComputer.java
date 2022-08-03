@@ -42,4 +42,9 @@ final class LongPropertySimilarityComputer implements SimilarityComputer {
         }
         return 1.0 / (1.0 + abs);
     }
+
+    @Override
+    public boolean isSymmetric() {
+        return true;
+    }
 }

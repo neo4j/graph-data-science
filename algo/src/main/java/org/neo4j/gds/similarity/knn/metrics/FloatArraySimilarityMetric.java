@@ -21,4 +21,8 @@ package org.neo4j.gds.similarity.knn.metrics;
 
 interface FloatArraySimilarityMetric {
     double compute(float[] left, float[] right);
+
+    default boolean isSymmetric() {
+        return true;
+    }
 }

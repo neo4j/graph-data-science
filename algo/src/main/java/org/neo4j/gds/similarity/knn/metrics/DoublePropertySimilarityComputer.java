@@ -38,4 +38,9 @@ final class DoublePropertySimilarityComputer implements SimilarityComputer {
         var right = nodePropertyValues.doubleValue(secondNodeId);
         return 1.0 / (1.0 + Math.abs(left - right));
     }
+
+    @Override
+    public boolean isSymmetric() {
+        return true;
+    }
 }

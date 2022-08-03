@@ -40,6 +40,8 @@ public interface SimilarityComputer {
 
     double similarity(long firstNodeId, long secondNodeId);
 
+    boolean isSymmetric();
+
     static SimilarityComputer ofProperties(Graph graph, List<KnnNodePropertySpec> knnNodeProperties) {
         if (knnNodeProperties.size() == 1) {
             return ofProperty(graph, knnNodeProperties.get(0));

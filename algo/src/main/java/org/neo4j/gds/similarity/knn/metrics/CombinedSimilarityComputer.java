@@ -22,11 +22,13 @@ package org.neo4j.gds.similarity.knn.metrics;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
 
+import java.util.Arrays;
 import java.util.List;
 
 final class CombinedSimilarityComputer implements SimilarityComputer {
     private final SimilarityComputer[] similarityComputers;
     private final int numOfProperties;
+    private final boolean isSymmetric;
 
     CombinedSimilarityComputer(Graph graph, List<KnnNodePropertySpec> propertyNames) {
         this.numOfProperties = propertyNames.size();
@@ -35,6 +37,8 @@ final class CombinedSimilarityComputer implements SimilarityComputer {
         for (int i = 0; i < numOfProperties; ++i) {
             this.similarityComputers[i] = SimilarityComputer.ofProperty(graph, propertyNames.get(i));
         }
+
+        this.isSymmetric = Arrays.stream(similarityComputers).allMatch(SimilarityComputer::isSymmetric);
     }
 
     @Override
@@ -44,5 +48,10 @@ final class CombinedSimilarityComputer implements SimilarityComputer {
             sum += similarityComputer.safeSimilarity(firstNodeId, secondNodeId);
         }
         return sum / numOfProperties;
+    }
+
+    @Override
+    public boolean isSymmetric() {
+        return isSymmetric;
     }
 }

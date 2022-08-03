@@ -40,4 +40,9 @@ final class FloatArrayPropertySimilarityComputer implements SimilarityComputer {
         var right = nodePropertyValues.floatArrayValue(secondNodeId);
         return metric.compute(left, right);
     }
+
+    @Override
+    public boolean isSymmetric() {
+        return metric.isSymmetric();
+    }
 }

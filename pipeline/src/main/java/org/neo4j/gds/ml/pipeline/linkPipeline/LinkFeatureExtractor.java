@@ -43,10 +43,12 @@ import java.util.stream.Collectors;
 public final class LinkFeatureExtractor {
     private final List<LinkFeatureAppender> linkFeatureAppenders;
     private final int featureDimension;
+    private final boolean isSymmetric;
 
     private LinkFeatureExtractor(List<LinkFeatureAppender> linkFeatureAppenders) {
         this.linkFeatureAppenders = linkFeatureAppenders;
         this.featureDimension = linkFeatureAppenders.stream().mapToInt(LinkFeatureAppender::dimension).sum();
+        this.isSymmetric = linkFeatureAppenders.stream().allMatch(LinkFeatureAppender::isSymmetric);
     }
 
     public static LinkFeatureExtractor of(Graph graph, List<LinkFeatureStep> linkFeatureSteps) {
@@ -116,4 +118,7 @@ public final class LinkFeatureExtractor {
         return featuresForLink;
     }
 
+    public boolean isSymmetric() {
+        return isSymmetric;
+    }
 }

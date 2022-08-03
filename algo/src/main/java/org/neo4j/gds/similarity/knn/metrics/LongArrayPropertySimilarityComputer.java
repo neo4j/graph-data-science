@@ -45,6 +45,11 @@ final class LongArrayPropertySimilarityComputer implements SimilarityComputer {
         return metric.compute(left, right);
     }
 
+    @Override
+    public boolean isSymmetric() {
+        return metric.isSymmetric();
+    }
+
     static final class SortedLongArrayPropertyValues implements LongArrayNodePropertyValues {
 
         private final HugeObjectArray<long[]> properties;
