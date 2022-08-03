@@ -1,0 +1,2 @@
+| communityProperty          | String   | n/a     | no       | The node property that holds the community ID as an integer for each node. Note that only non-negative community IDs are considered valid and will have their conductance computed.
+| relationshipWeightProperty | String   | null    | yes      | Relationship Weight.

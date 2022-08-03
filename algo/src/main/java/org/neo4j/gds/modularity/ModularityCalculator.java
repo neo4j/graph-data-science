@@ -21,7 +21,7 @@ package org.neo4j.gds.modularity;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
@@ -37,13 +37,13 @@ import java.util.function.LongUnaryOperator;
 public class ModularityCalculator extends Algorithm<List<CommunityModularity>> {
 
     private final Graph graph;
-    private final LongNodePropertyValues communityIdProperty;
+    private final NodePropertyValues communityIdProperty;
     private final int concurrency;
 
 
     protected ModularityCalculator(
         Graph graph,
-        LongNodePropertyValues communityIdProperty,
+        NodePropertyValues communityIdProperty,
         int concurrency
     ) {
         super(ProgressTracker.NULL_TRACKER);

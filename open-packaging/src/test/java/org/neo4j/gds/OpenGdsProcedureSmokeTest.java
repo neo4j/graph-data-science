@@ -84,6 +84,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.maxkcut.stream",
         "gds.alpha.maxkcut.stream.estimate",
 
+        "gds.alpha.modularity.stream",
+
         "gds.alpha.hits.mutate",
         "gds.alpha.hits.mutate.estimate",
         "gds.alpha.hits.stats",
@@ -498,7 +500,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 350;
+        int expectedCount = 351;
         assertEquals(
             expectedCount,
             registeredProcedures.size(),

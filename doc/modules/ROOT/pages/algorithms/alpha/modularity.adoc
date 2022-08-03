@@ -1,0 +1,157 @@
+[[alpha-algorithms-modularity]]
+[.alpha]
+= Modularity metric
+:description: This section describes the Modularity metric algorithm in the Neo4j Graph Data Science library.
+:entity: node
+:result: modularity
+:algorithm: Modularity Metric
+
+include::partial$/operations-reference/alpha-note.adoc[]
+
+:directed:
+:undirected:
+:homogeneous:
+:weighted:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
+== Introduction
+
+https://en.wikipedia.org/wiki/Modularity_(networks)[Modularity] is a metric that allows you to evaluate the quality of a community detection.
+Relationships of nodes in a community `C` connect to nodes either within `C` or outside `C`.
+Graphs with high modularity have dense connections between the nodes within communities but sparse connections between nodes in different communities.
+
+
+== Syntax
+
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.Modularity syntax per mode
+[.tabbed-example]
+====
+
+
+[.include-with-stream]
+======
+.Run Modularity in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.modularity.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+  communityId: Integer,
+  modularity: Float
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/alpha/modularity/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header"]
+|===
+| Name        | Type    | Description
+| communityId   | Integer | Community ID.
+| modularity | Float   | Modularity of the community.
+|===
+======
+
+====
+
+
+== Examples
+
+:algorithm-name: Modularity
+:graph-description: social network
+:image-file: two-user-communities.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (nAlice:User {name: 'Alice', community: 3}),
+  (nBridget:User {name: 'Bridget', community: 2}),
+  (nCharles:User {name: 'Charles', community: 2}),
+  (nDoug:User {name: 'Doug', community: 3}),
+  (nMark:User {name: 'Mark', community: 5}),
+  (nMichael:User {name: 'Michael', community: 5}),
+
+  (nAlice)-[:LINK {weight: 1}]->(nBridget),
+  (nAlice)-[:LINK {weight: 1}]->(nCharles),
+  (nCharles)-[:LINK {weight: 1}]->(nBridget),
+
+  (nAlice)-[:LINK {weight: 5}]->(nDoug),
+
+  (nMark)-[:LINK {weight: 1}]->(nDoug),
+  (nMark)-[:LINK {weight: 1}]->(nMichael),
+  (nMichael)-[:LINK {weight: 1}]->(nMark);
+----
+
+This graph has three pre-computed communities of _Users_, that are closely connected.
+For more details on the available community detection algorithms, please refer to xref:algorithms/community.adoc[Community algorithms] section of the documentation.
+The communities are indicated by the `community` node property on each node.
+The relationships that connect the nodes in each component have a property `weight` which determines the strength of the relationship.
+
+We can now project the graph and store it in the graph catalog.
+We load the `LINK` relationships with orientation set to `UNDIRECTED`.
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+.The following statement will project the graph and store it in the graph catalog.
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+    'myGraph',
+    'User',
+    {
+        LINK: {
+            orientation: 'UNDIRECTED'
+        }
+    },
+    {
+        nodeProperties: 'community',
+        relationshipProperties: 'weight'
+    }
+)
+----
+
+
+=== Stream
+
+Since we now have a community detection, we can evaluate how good it is under the modularity metric.
+Note that we in this case we use the feature of relationships being weighted by a relationship property.
+
+The Modularity stream procedure returns the modularity for each community.
+This allows us to inspect the results directly or post-process them in Cypher without any side effects.
+
+For more details on the stream mode in general, see xref:common-usage/running-algos.adoc#running-algos-stream[Stream].
+
+[role=query-example]
+--
+.The following will run the Modularity algorithm in `stream` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.modularity.stream('myGraph', { communityProperty: 'community', relationshipWeightProperty: 'weight' })
+YIELD communityId, modularity
+----
+
+.Results
+[opts="header"]
+|===
+| communityId | modularity
+| 2           | 0.057851239669421
+| 3           | 0.105371900826446
+| 5           | 0.130165289256198
+|===
+--
+
+We can see that the community of the weighted graph with the highest modularity is community 5.
+This means that 5 is the community that is most "well-knit" in the sense that most of its relationship weights are internal to the community.
