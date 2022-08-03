@@ -26,6 +26,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 
 import java.util.Optional;
@@ -42,8 +43,8 @@ class WeightedBetweennessCentralityTest {
     //    (e)
     //     |
     //    (f)
-    @GdlGraph
-    private static final String gdlGraphString =
+    @GdlGraph(graphNamePrefix = "equallyWeighted")
+    private static final String equallyWeightedGdl =
         "CREATE " +
         "  (a1)-[:REL {weight: 1.0}]->(b)" +
         ", (a2)-[:REL {weight: 1.0}]->(b)" +
@@ -54,12 +55,28 @@ class WeightedBetweennessCentralityTest {
         ", (e) -[:REL {weight: 1.0}]->(f)";
 
     @Inject
-    private Graph graph;
+    private Graph equallyWeightedGraph;
+
+    @GdlGraph(graphNamePrefix = "weighted")
+    private static final String weightedGdl =
+        "CREATE " +
+        "  (a1)-[:REL {weight: 1.0}]->(b)" +
+        ", (a2)-[:REL {weight: 1.0}]->(b)" +
+        ", (b) -[:REL {weight: 1.0}]->(c)" +
+        ", (b) -[:REL {weight: 1.3}]->(d)" +
+        ", (c) -[:REL {weight: 1.0}]->(e)" +
+        ", (d) -[:REL {weight: 0.2}]->(e)" +
+        ", (e) -[:REL {weight: 1.0}]->(f)";
+    @Inject
+    private Graph weightedGraph;
+
+    @Inject
+    private IdFunction weightedIdFunction;
 
     @Test
     void shouldEqualWithUnweightedWhenWeightsAreEqual() {
         var algoWeighted = new BetweennessCentrality(
-            graph,
+            equallyWeightedGraph,
             new SelectionStrategy.RandomDegree(7, Optional.of(42L)),
             true,
             Pools.DEFAULT,
@@ -67,7 +84,7 @@ class WeightedBetweennessCentralityTest {
             ProgressTracker.NULL_TRACKER
         );
         var algoUnweighted = new BetweennessCentrality(
-            graph,
+            equallyWeightedGraph,
             new SelectionStrategy.RandomDegree(7, Optional.of(42L)),
             false,
             Pools.DEFAULT,
@@ -78,12 +95,34 @@ class WeightedBetweennessCentralityTest {
         var resultUnweighted = algoUnweighted.compute();
 
         SoftAssertions softAssertions = new SoftAssertions();
-        graph.forEachNode(nodeId -> {
+        equallyWeightedGraph.forEachNode(nodeId -> {
                 softAssertions.assertThat(resultWeighted.get(nodeId)).isEqualTo(resultUnweighted.get(nodeId));
                 return true;
             }
         );
 
+        softAssertions.assertAll();
+    }
+
+    @Test
+    void shouldComputeWithWeights() {
+         var bc = new BetweennessCentrality(
+             weightedGraph,
+             new SelectionStrategy.RandomDegree(7, Optional.of(42L)),
+             true,
+             Pools.DEFAULT,
+             8,
+             ProgressTracker.NULL_TRACKER
+         );
+        var result = bc.compute();
+        var softAssertions = new SoftAssertions();
+        softAssertions.assertThat(result.get(weightedIdFunction.of("a1"))).isEqualTo(0.0D);
+        softAssertions.assertThat(result.get(weightedIdFunction.of("a2"))).isEqualTo(0.0D);
+        softAssertions.assertThat(result.get(weightedIdFunction.of("b"))).isEqualTo(8.0D);
+        softAssertions.assertThat(result.get(weightedIdFunction.of("c"))).isEqualTo(0.0D);
+        softAssertions.assertThat(result.get(weightedIdFunction.of("d"))).isEqualTo(6.0D);
+        softAssertions.assertThat(result.get(weightedIdFunction.of("e"))).isEqualTo(5.0D);
+        softAssertions.assertThat(result.get(weightedIdFunction.of("f"))).isEqualTo(0.0D);
         softAssertions.assertAll();
     }
 }
