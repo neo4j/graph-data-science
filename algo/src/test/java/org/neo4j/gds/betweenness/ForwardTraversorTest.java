@@ -27,7 +27,6 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -77,8 +76,7 @@ class ForwardTraversorTest {
             predecessors,
             backwardNodes,
             sigma,
-            TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER
+            TerminationFlag.RUNNING_TRUE
         );
         unweightedForwardTraversor.clear();
 
@@ -119,8 +117,7 @@ class ForwardTraversorTest {
             predecessors,
             backwardNodes,
             sigma,
-            TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER
+            TerminationFlag.RUNNING_TRUE
         );
         weightedForwardTraversor.clear();
 

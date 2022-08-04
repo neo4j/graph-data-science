@@ -26,18 +26,16 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 
-class WeightedForwardTraversor implements ForwardTraversor {
+final class WeightedForwardTraversor implements ForwardTraversor {
 
     static WeightedForwardTraversor create(
         Graph graph,
         HugeObjectArray<LongArrayList> predecessors,
         HugeLongArrayStack backwardNodes,
         HugeLongArray sigma,
-        TerminationFlag terminationFlag,
-        ProgressTracker progressTracker
+        TerminationFlag terminationFlag
     ) {
         var nodeCount = graph.nodeCount();
         var nodeQueue = HugeLongPriorityQueue.min(nodeCount);
@@ -49,14 +47,12 @@ class WeightedForwardTraversor implements ForwardTraversor {
             sigma,
             nodeQueue,
             visited,
-            terminationFlag,
-            progressTracker
+            terminationFlag
         );
     }
 
     private final Graph graph;
     private final TerminationFlag terminationFlag;
-    private final ProgressTracker progressTracker;
     private final HugeLongArrayStack backwardNodes;
     private final HugeLongArray sigma;
     private final HugeLongPriorityQueue nodeQueue;
@@ -70,8 +66,7 @@ class WeightedForwardTraversor implements ForwardTraversor {
         HugeLongArray sigma,
         HugeLongPriorityQueue nodeQueue,
         BitSet visited,
-        TerminationFlag terminationFlag,
-        ProgressTracker progressTracker
+        TerminationFlag terminationFlag
     ) {
         this.predecessors = predecessors;
         this.backwardNodes = backwardNodes;
@@ -80,7 +75,6 @@ class WeightedForwardTraversor implements ForwardTraversor {
         this.visited = visited;
         this.graph = graph;
         this.terminationFlag = terminationFlag;
-        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -92,9 +86,6 @@ class WeightedForwardTraversor implements ForwardTraversor {
             nodeQueue.pop();
             backwardNodes.push(node);
             visited.set(node);
-
-            // For disconnected graphs, this will not reach 100%.
-            progressTracker.logProgress(graph.degree(node));
 
             graph.forEachRelationship(
                 node,

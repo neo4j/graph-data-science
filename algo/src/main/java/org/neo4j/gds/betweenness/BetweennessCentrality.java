@@ -110,8 +110,7 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
                 predecessors,
                 backwardNodes,
                 sigma,
-                terminationFlag,
-                progressTracker
+                terminationFlag
             );
 
             for (;;) {

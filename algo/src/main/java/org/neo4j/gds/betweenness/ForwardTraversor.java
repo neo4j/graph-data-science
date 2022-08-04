@@ -25,7 +25,6 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 interface ForwardTraversor {
 
@@ -39,8 +38,7 @@ interface ForwardTraversor {
         HugeObjectArray<LongArrayList> predecessors,
         HugeLongArrayStack backwardNodes,
         HugeLongArray sigma,
-        TerminationFlag terminationFlag,
-        ProgressTracker progressTracker
+        TerminationFlag terminationFlag
     ) {
         if (weighted) {
             return WeightedForwardTraversor.create(
@@ -48,8 +46,7 @@ interface ForwardTraversor {
                 predecessors,
                 backwardNodes,
                 sigma,
-                terminationFlag,
-                progressTracker
+                terminationFlag
             );
         } else {
             return UnweightedForwardTraversor.create(
@@ -57,8 +54,7 @@ interface ForwardTraversor {
                 predecessors,
                 backwardNodes,
                 sigma,
-                terminationFlag,
-                progressTracker
+                terminationFlag
             );
         }
     }

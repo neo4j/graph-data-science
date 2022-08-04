@@ -27,7 +27,6 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 class UnweightedForwardTraversor implements ForwardTraversor {
 
@@ -36,8 +35,7 @@ class UnweightedForwardTraversor implements ForwardTraversor {
         HugeObjectArray<LongArrayList> predecessors,
         HugeLongArrayStack backwardNodes,
         HugeLongArray sigma,
-        TerminationFlag terminationFlag,
-        ProgressTracker progressTracker
+        TerminationFlag terminationFlag
     ) {
         var nodeCount = graph.nodeCount();
         var distances = HugeIntArray.newArray(nodeCount);
@@ -50,8 +48,7 @@ class UnweightedForwardTraversor implements ForwardTraversor {
             sigma,
             nodeQueue,
             distances,
-            terminationFlag,
-            progressTracker
+            terminationFlag
         );
     }
 
@@ -62,7 +59,6 @@ class UnweightedForwardTraversor implements ForwardTraversor {
     private final HugeLongArrayQueue nodeQueue;
     private final HugeIntArray distances;
     private final TerminationFlag terminationFlag;
-    private final ProgressTracker progressTracker;
 
     UnweightedForwardTraversor(
         Graph graph,
@@ -71,8 +67,7 @@ class UnweightedForwardTraversor implements ForwardTraversor {
         HugeLongArray sigma,
         HugeLongArrayQueue nodeQueue,
         HugeIntArray distances,
-        TerminationFlag terminationFlag,
-        ProgressTracker progressTracker
+        TerminationFlag terminationFlag
     ) {
         this.graph = graph;
         this.predecessors = predecessors;
@@ -81,7 +76,6 @@ class UnweightedForwardTraversor implements ForwardTraversor {
         this.nodeQueue = nodeQueue;
         this.distances = distances;
         this.terminationFlag = terminationFlag;
-        this.progressTracker = progressTracker;
     }
 
     @Override
