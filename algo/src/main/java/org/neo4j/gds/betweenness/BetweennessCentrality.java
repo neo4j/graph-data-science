@@ -27,7 +27,6 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -77,7 +76,7 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
     public HugeAtomicDoubleArray compute() {
         progressTracker.beginSubTask();
         nodeQueue.set(0);
-        ParallelUtil.run(ParallelUtil.tasks(concurrency, () -> new BCTask()), executorService);
+        ParallelUtil.run(ParallelUtil.tasks(concurrency, BCTask::new), executorService);
         progressTracker.endSubTask();
         return centrality;
     }
@@ -94,7 +93,6 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
         private final HugeLongArrayStack backwardNodes;
         private final HugeDoubleArray delta;
         private final HugeLongArray sigma;
-        private final HugeIntArray distance;
 
         private BCTask() {
             this.predecessors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
@@ -102,7 +100,6 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
             this.backwardNodes = HugeLongArrayStack.newStack(nodeCount);
             this.sigma = HugeLongArray.newArray(nodeCount);
             this.delta = HugeDoubleArray.newArray(nodeCount);
-            this.distance = HugeIntArray.newArray(nodeCount);
         }
 
         @Override
@@ -134,7 +131,6 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
                 forwardTraversor.clear();
 
                 sigma.addTo(startNodeId, 1);
-                distance.set(startNodeId, 0);
 
 
                 forwardTraversor.traverse(startNodeId);

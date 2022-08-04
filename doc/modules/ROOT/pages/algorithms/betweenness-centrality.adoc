@@ -303,7 +303,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 7         | 7                 | 2912     | 2912     | "2912 Bytes"
+| 7         | 7                 | 2944     | 2944     | "2944 Bytes"
 |===
 --
 
@@ -311,7 +311,7 @@ As is discussed in xref:algorithms/betweenness-centrality.adoc#algorithms-betwee
 
 [role=query-example]
 --
-.The following will estimate the memory requirements for running the algorithm:
+.The following will estimate the memory requirements for running the algorithm single-threaded:
 [source, cypher, role=noplay]
 ----
 CALL gds.betweenness.write.estimate('myGraph', { writeProperty: 'betweenness', concurrency: 1 })
@@ -322,7 +322,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 7         | 7                 | 848      | 848      | "848 Bytes"
+| 7         | 7                 | 856      | 856      | "856 Bytes"
 |===
 --
 

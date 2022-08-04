@@ -166,9 +166,9 @@ class BetweennessCentralityTest {
 
     static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
-            Arguments.of(1, 6_000_360L, 6_000_360L),
-            Arguments.of(4, 21_601_128L, 21_601_128L),
-            Arguments.of(42, 219_210_856L, 219_210_856L)
+            Arguments.of(1, 6_000_376L, 6_000_376L),
+            Arguments.of(4, 21_601_192L, 21_601_192L),
+            Arguments.of(42, 219_211_528L, 219_211_528L)
         );
     }
 
