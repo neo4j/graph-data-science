@@ -43,6 +43,8 @@ import static org.neo4j.gds.TestSupport.fromGdl;
 class BetweennessCentralityTest {
 
     private static final BetweennessCentralityStreamConfig DEFAULT_CONFIG = BetweennessCentralityStreamConfig.of(CypherMapWrapper.empty());
+    private static final BetweennessCentralityStreamConfig WEIGHTED_CONFIG =
+        BetweennessCentralityStreamConfig.of(CypherMapWrapper.create(Map.of("relationshipWeightProperty", "foo")));
 
     private static final String DIAMOND =
         "CREATE " +
@@ -182,4 +184,24 @@ class BetweennessCentralityTest {
             MemoryRange.of(expectedMinBytes, expectedMaxBytes)
         );
     }
+
+    @ParameterizedTest
+    @MethodSource("expectedWeightedMemoryEstimation")
+    void testMemoryEstimationWeighted(int concurrency, long expectedMinBytes, long expectedMaxBytes) {
+        assertMemoryEstimation(
+            () -> new BetweennessCentralityFactory<>().memoryEstimation(WEIGHTED_CONFIG),
+            100_000L,
+            concurrency,
+            MemoryRange.of(expectedMinBytes, expectedMaxBytes)
+        );
+    }
+
+    static Stream<Arguments> expectedWeightedMemoryEstimation() {
+        return Stream.of(
+            Arguments.of(1, 6_425_504L, 6_425_504L),
+            Arguments.of(4, 23_301_704L, 23_301_704L),
+            Arguments.of(42, 237_066_904L, 237_066_904L)
+        );
+    }
+
 }

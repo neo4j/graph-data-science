@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.betweenness;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -32,6 +33,8 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
@@ -67,27 +70,49 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return MemoryEstimations.builder(BetweennessCentrality.class)
+        var builder = MemoryEstimations.builder(BetweennessCentrality.class)
             .perNode("centrality scores", HugeAtomicDoubleArray::memoryEstimation)
-            .perThread("compute task", MemoryEstimations.builder(BetweennessCentrality.BCTask.class)
-                .add("predecessors", MemoryEstimations.setup("", (dimensions, concurrency) -> {
-                    // Predecessors are represented by LongArrayList which wrap a long[]
-                    long averagePredecessorSize = sizeOfLongArray(dimensions.averageDegree());
-                    return MemoryEstimations.builder(HugeObjectArray.class)
-                        .perNode("array", nodeCount -> nodeCount * averagePredecessorSize)
-                        .build();
-                }))
-                .perNode("forwardNodes", HugeLongArray::memoryEstimation)
-                .perNode("backwardNodes", HugeLongArray::memoryEstimation)
-                .perNode("deltas", HugeDoubleArray::memoryEstimation)
-                .perNode("sigmas", HugeLongArray::memoryEstimation)
-                .add("ForwardTraverser", MemoryEstimations.setup("traversor",
+            .perThread("compute task",
+                bcTaskMemoryEstimationBuilder(configuration.hasRelationshipWeightProperty()).build()
+            );
+        return builder
+            .build();
+    }
+
+    @NotNull
+    private static MemoryEstimations.Builder bcTaskMemoryEstimationBuilder(boolean weighted) {
+        var builder = MemoryEstimations.builder(BetweennessCentrality.BCTask.class)
+            .add("predecessors", MemoryEstimations.setup("", (dimensions, concurrency) -> {
+                // Predecessors are represented by LongArrayList which wrap a long[]
+                long averagePredecessorSize = sizeOfLongArray(dimensions.averageDegree());
+                return MemoryEstimations.builder(HugeObjectArray.class)
+                    .perNode("array", nodeCount -> nodeCount * averagePredecessorSize)
+                    .build();
+            }))
+            .perNode("backwardNodes", HugeLongArray::memoryEstimation)
+            .perNode("deltas", HugeDoubleArray::memoryEstimation)
+            .perNode("sigmas", HugeLongArray::memoryEstimation);
+
+        if (weighted) {
+            builder.add("ForwardTraverser", MemoryEstimations.setup(
+                    "traverser",
+                    (dimensions, concurrency) -> MemoryEstimations.builder(ForwardTraverser.class)
+                        .add("nodeQueue", HugeLongPriorityQueue.memoryEstimation())
+                        .perNode("visited", MemoryUsage::sizeOfBitset)
+                        .build()
+                )
+            );
+        } else {
+            builder.add("ForwardTraverser", MemoryEstimations.setup(
+                    "traverser",
                     (dimensions, concurrency) -> MemoryEstimations.builder(ForwardTraverser.class)
                         .perNode("distances", HugeIntArray::memoryEstimation)
-                        .build())
-                ).build()
-            )
-            .build();
+                        .perNode("forwardNodes", HugeLongArray::memoryEstimation)
+                        .build()
+                )
+            );
+        }
+        return builder;
     }
 
     @Override
