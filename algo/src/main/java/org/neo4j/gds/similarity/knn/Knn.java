@@ -610,21 +610,21 @@ public class Knn extends Algorithm<Knn.Result> {
             SplittableRandom splittableRandom,
             SimilarityFunction similarityFunction,
             HugeObjectArray<NeighborList> allNeighbors,
-            long baseNode,
-            long candidate
+            long node1,
+            long node2
         ) {
-            assert baseNode != candidate;
+            assert node1 != node2;
 
-            if (neighborFilter.excludeNodePair(baseNode, candidate)) {
+            if (neighborFilter.excludeNodePair(node1, node2)) {
                 return 0;
             }
 
-            var similarity = similarityFunction.computeSimilarity(baseNode, candidate);
+            var similarity = similarityFunction.computeSimilarity(node1, node2);
             nodePairsConsidered++;
-            var neighbors = allNeighbors.get(baseNode);
+            var neighbors = allNeighbors.get(node1);
 
             synchronized (neighbors) {
-                return neighbors.add(candidate, similarity, splittableRandom, perturbationRate);
+                return neighbors.add(node2, similarity, splittableRandom, perturbationRate);
             }
         }
 
