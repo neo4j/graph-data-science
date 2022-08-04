@@ -78,10 +78,12 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
                 return true;
             }
 
-            boolean validNodePair = (sourceNodeFilter.apply(firstNodeId) && targetNodeFilter.apply(secondNodeId)) || (sourceNodeFilter.apply(secondNodeId) && targetNodeFilter.apply(firstNodeId));
-
             // This is a slower but memory-efficient approach (could be replaced by a dedicated data structure)
-            return graph.exists(firstNodeId, secondNodeId) || !validNodePair;
+
+            return graph.exists(firstNodeId, secondNodeId)
+                   || !(sourceNodeFilter.apply(firstNodeId) && targetNodeFilter.apply(secondNodeId)
+                        || sourceNodeFilter.apply(secondNodeId) && targetNodeFilter.apply(firstNodeId)
+            );
         }
 
         @Override
