@@ -23,7 +23,9 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -55,6 +57,20 @@ public class KmeansStreamProc extends AlgoBaseProc<
             streamSpec,
             executionContext()
         ).compute(graphName, configuration, true, true);
+    }
+
+    @Procedure(value = "gds.alpha.kmeans.stream.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphName,
+        @Name(value = "algoConfiguration") Map<String, Object> configuration
+    ) {
+        var writeSpec = new KmeansStreamSpec();
+
+        return new MemoryEstimationExecutor<>(
+            writeSpec,
+            executionContext()
+        ).computeEstimate(graphName, configuration);
     }
 
     @Override

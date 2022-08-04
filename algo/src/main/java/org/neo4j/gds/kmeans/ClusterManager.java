@@ -22,6 +22,10 @@ package org.neo4j.gds.kmeans;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.Intersections;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -97,6 +101,18 @@ abstract class ClusterManager {
             }
         }
         return community;
+    }
+
+    static MemoryEstimation memoryEstimation(int k, int fakeDimensions) {
+        var builder = MemoryEstimations.builder(ClusterManager.class);
+        builder
+            .fixed("nodesInCluster", MemoryUsage.sizeOfLongArray(k))
+            .fixed("shouldReset", MemoryUsage.sizeOfArray(k, 1L))
+            .add("centroidsSize", MemoryEstimations.of("centroidsSize", MemoryRange.of(
+                MemoryUsage.sizeOfFloatArray(fakeDimensions),
+                MemoryUsage.sizeOfDoubleArray(fakeDimensions)
+            )));
+        return builder.build();
     }
 
     public abstract void assignSeededCentroids(List<List<Double>> seededCentroids);

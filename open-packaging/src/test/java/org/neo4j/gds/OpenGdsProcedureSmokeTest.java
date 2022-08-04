@@ -70,9 +70,13 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.leiden.write",
 
         "gds.alpha.kmeans.mutate",
+        "gds.alpha.kmeans.mutate.estimate",
         "gds.alpha.kmeans.stats",
+        "gds.alpha.kmeans.stats.estimate",
         "gds.alpha.kmeans.stream",
+        "gds.alpha.kmeans.stream.estimate",
         "gds.alpha.kmeans.write",
+        "gds.alpha.kmeans.write.estimate",
 
         "gds.alpha.knn.filtered.mutate",
         "gds.alpha.knn.filtered.stats",
@@ -500,7 +504,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 351;
+        int expectedCount = 355;
         assertEquals(
             expectedCount,
             registeredProcedures.size(),

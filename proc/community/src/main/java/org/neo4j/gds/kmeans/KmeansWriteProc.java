@@ -24,7 +24,9 @@ import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -53,6 +55,20 @@ public class KmeansWriteProc extends BaseProc {
             writeSpec,
             executionContext()
         ).compute(graphName, configuration, true, true);
+    }
+
+    @Procedure(value = "gds.alpha.kmeans.write.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphName,
+        @Name(value = "algoConfiguration") Map<String, Object> configuration
+    ) {
+        var writeSpec = new KmeansWriteSpec();
+
+        return new MemoryEstimationExecutor<>(
+            writeSpec,
+            executionContext()
+        ).computeEstimate(graphName, configuration);
     }
 
     @Override

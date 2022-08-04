@@ -100,4 +100,10 @@ public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, Rand
     default List<List<Double>> seedCentroids() {
         return List.of();
     }
+
+    @Configuration.Ignore
+    @Value.Derived
+    default boolean isSeeded() {
+        return !seedCentroids().isEmpty();
+    }
 }

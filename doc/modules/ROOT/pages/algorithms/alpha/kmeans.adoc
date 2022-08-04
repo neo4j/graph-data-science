@@ -289,6 +289,34 @@ CALL gds.graph.project(
 
 In the following examples we will demonstrate using the K-Means algorithm on this graph to find communities of cities that are close to each other geographically.
 
+
+[[alpha-algorithms-k-means-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.kmeans.write.estimate('cities', {
+  writeProperty: 'kmeans',
+  nodeProperty: 'coordinates'
+})
+YIELD nodeCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header",cols="1,1,1,1"]
+|===
+| nodeCount | bytesMin | bytesMax | requiredMemory
+| 8         | 33264    | 54256    | "[32 KiB \... 52 KiB]"
+|===
+--
+
+
 [[alpha-algorithms-k-means-examples-stream]]
 === Stream
 

@@ -20,31 +20,35 @@
 package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Arrays;
 
 
 public abstract class KmeansTask implements Runnable {
-    ClusterManager clusterManager;
-    final Partition partition;
+    private final ClusterManager clusterManager;
+    private final Partition partition;
     final NodePropertyValues nodePropertyValues;
 
-    final HugeDoubleArray distanceFromCentroid;
+    private final HugeDoubleArray distanceFromCentroid;
 
     final HugeIntArray communities;
     final long[] communitySizes;
     final int k;
     final int dimensions;
-    long swaps;
+    private long swaps;
 
-    double distance;
+    private double distance;
 
-    double squaredDistance = 0;
+    private double squaredDistance = 0;
 
-    TaskPhase phase;
+    private TaskPhase phase;
 
     long getNumAssignedAtCluster(int ith) {
         return communitySizes[ith];
@@ -52,6 +56,17 @@ public abstract class KmeansTask implements Runnable {
 
     long getSwaps() {
         return swaps;
+    }
+
+    static MemoryEstimation memoryEstimation(int k, int fakeDimensions) {
+        var builder = MemoryEstimations.builder(KmeansTask.class);
+        builder
+            .fixed("communitySizes", MemoryUsage.sizeOfLongArray(k))
+            .add("communityCoordinateSums", MemoryEstimations.of("communityCoordinateSums", MemoryRange.of(
+                k * MemoryUsage.sizeOfFloatArray(fakeDimensions),
+                k * MemoryUsage.sizeOfDoubleArray(fakeDimensions)
+            )));
+        return builder.build();
     }
 
     abstract void reset();
