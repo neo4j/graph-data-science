@@ -471,6 +471,7 @@ public class Knn extends Algorithm<Knn.Result> {
 
             var newNeighborElements = newNeighbors.buffer;
             var newNeighborsCount = newNeighbors.elementsCount;
+            boolean similarityIsSymmetric = similarityFunction.isSymmetric();
 
             for (int i = 0; i < newNeighborsCount; i++) {
                 var elem1 = newNeighborElements[i];
@@ -486,7 +487,7 @@ public class Knn extends Algorithm<Knn.Result> {
                         continue;
                     }
 
-                    if (neighborFilter.isSymmetric() && similarityFunction.isSymmetric()) {
+                    if (similarityIsSymmetric) {
                         updateCount += joinSymmetric(elem1, elem2);
                     } else {
                         updateCount += join(elem1, elem2);
@@ -503,7 +504,7 @@ public class Knn extends Algorithm<Knn.Result> {
                             continue;
                         }
 
-                        if (neighborFilter.isSymmetric() && similarityFunction.isSymmetric()) {
+                        if (similarityIsSymmetric) {
                             updateCount += joinSymmetric(elem1, elem2);
                         } else {
                             updateCount += join(elem1, elem2);

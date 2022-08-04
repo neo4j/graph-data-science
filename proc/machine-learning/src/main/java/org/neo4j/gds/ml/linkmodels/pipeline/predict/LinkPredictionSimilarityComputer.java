@@ -93,11 +93,6 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
                 return Math.max(validSouceNodeCount - 1 - graph.degree(node), 0L);
             }
         }
-
-        @Override
-        public boolean isSymmetric() {
-            return graph.isUndirected();
-        }
     }
 
     static class LinkFilterFactory implements NeighborFilterFactory {

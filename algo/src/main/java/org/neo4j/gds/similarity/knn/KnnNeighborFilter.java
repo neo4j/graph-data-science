@@ -36,9 +36,4 @@ public class KnnNeighborFilter implements NeighborFilter {
         // excluding the node itself
         return nodeCount - 1;
     }
-
-    @Override
-    public boolean isSymmetric() {
-        return true;
-    }
 }
