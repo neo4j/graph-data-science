@@ -80,10 +80,9 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
 
             // This is a slower but memory-efficient approach (could be replaced by a dedicated data structure)
 
-            return graph.exists(firstNodeId, secondNodeId)
-                   || !(sourceNodeFilter.apply(firstNodeId) && targetNodeFilter.apply(secondNodeId)
-                        || sourceNodeFilter.apply(secondNodeId) && targetNodeFilter.apply(firstNodeId)
-            );
+            return !(sourceNodeFilter.apply(firstNodeId) && targetNodeFilter.apply(secondNodeId)
+                     || sourceNodeFilter.apply(secondNodeId) && targetNodeFilter.apply(firstNodeId)
+            ) || graph.exists(firstNodeId, secondNodeId);
         }
 
         @Override
