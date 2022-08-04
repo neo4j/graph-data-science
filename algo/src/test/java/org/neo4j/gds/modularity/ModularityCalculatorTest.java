@@ -64,7 +64,7 @@ class ModularityCalculatorTest {
             4
         );
 
-        var modularities = modularityCalculator.compute();
+        var modularities = modularityCalculator.compute().toArray();
 
         assertThat(modularities)
             .containsExactlyInAnyOrder(

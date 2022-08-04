@@ -101,7 +101,7 @@ include::partial$/algorithms/alpha/modularity/specific-configuration.adoc[]
 | relationshipCount     | Integer       | The number of relationships in the graph.
 | communityCount        | Integer       | The number of communities.
 | modularity            | Float         | The total modularity score.
-| modularities          | List of Float | The modularity scores for each community.
+| modularities          | List of Float | The modularity scores for each community. Note that the list may be incomplete if the number of communities is higher thant `Ingeter.MAX_VALUE`.
 | preProcessingMillis   | Integer       | Milliseconds for preprocessing the data.
 | computeMillis         | Integer       | Milliseconds for running the algorithm.
 | postProcessingMillis  | Integer       | Milliseconds for computing percentiles and community count.

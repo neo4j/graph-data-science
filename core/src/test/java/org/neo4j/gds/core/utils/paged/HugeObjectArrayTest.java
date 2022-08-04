@@ -21,6 +21,7 @@ package org.neo4j.gds.core.utils.paged;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.data.Percentage;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -82,6 +83,13 @@ final class HugeObjectArrayTest extends HugeArrayTestBase<String[], String, Huge
                         .containsExactly(doubles.get(nodeId));
                 }
             });
+    }
+
+    @Test
+    void shouldCreateEmptyArray() {
+        var array = HugeObjectArray.of();
+        assertThat(array).isNotNull();
+        assertThat(array.size()).isEqualTo(0L);
     }
 
     @ParameterizedTest

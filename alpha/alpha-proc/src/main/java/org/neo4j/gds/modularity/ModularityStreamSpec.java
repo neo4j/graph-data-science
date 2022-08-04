@@ -19,20 +19,21 @@
  */
 package org.neo4j.gds.modularity;
 
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.modularity.ModularityStreamProc.DESCRIPTION;
 
 @GdsCallable(name = "gds.alpha.modularity.stream", description = DESCRIPTION, executionMode = STREAM)
-public class ModularityStreamSpec implements AlgorithmSpec<ModularityCalculator, List<CommunityModularity>, ModularityStreamConfig, Stream<StreamResult>, ModularityCalculatorFactory<ModularityStreamConfig>> {
+public class ModularityStreamSpec implements AlgorithmSpec<ModularityCalculator, HugeObjectArray<CommunityModularity>, ModularityStreamConfig, Stream<StreamResult>, ModularityCalculatorFactory<ModularityStreamConfig>> {
     @Override
     public String name() {
         return "ModularityStream";
@@ -49,10 +50,15 @@ public class ModularityStreamSpec implements AlgorithmSpec<ModularityCalculator,
     }
 
     @Override
-    public ComputationResultConsumer<ModularityCalculator, List<CommunityModularity>, ModularityStreamConfig, Stream<StreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> Optional.ofNullable(computationResult.result())
-            .orElseGet(List::of)
-            .stream()
-            .map(StreamResult::from);
+    public ComputationResultConsumer<ModularityCalculator, HugeObjectArray<CommunityModularity>, ModularityStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+        return (computationResult, executionContext) -> {
+            var communityModularities = Optional.ofNullable(computationResult.result())
+                .orElseGet(HugeObjectArray::of);
+
+            return LongStream
+                .range(0, communityModularities.size())
+                .mapToObj(communityModularities::get)
+                .map(StreamResult::from);
+        };
     }
 }

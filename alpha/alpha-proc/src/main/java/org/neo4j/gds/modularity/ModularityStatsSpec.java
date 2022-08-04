@@ -19,21 +19,23 @@
  */
 package org.neo4j.gds.modularity;
 
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 import static org.neo4j.gds.modularity.ModularityStreamProc.DESCRIPTION;
 
 @GdsCallable(name = "gds.alpha.modularity.stats", description = DESCRIPTION, executionMode = STATS)
-public class ModularityStatsSpec implements AlgorithmSpec<ModularityCalculator, List<CommunityModularity>, ModularityStatsConfig, Stream<StatsResult>, ModularityCalculatorFactory<ModularityStatsConfig>> {
+public class ModularityStatsSpec implements AlgorithmSpec<ModularityCalculator, HugeObjectArray<CommunityModularity>, ModularityStatsConfig, Stream<StatsResult>, ModularityCalculatorFactory<ModularityStatsConfig>> {
     @Override
     public String name() {
         return "ModularityStats";
@@ -50,17 +52,23 @@ public class ModularityStatsSpec implements AlgorithmSpec<ModularityCalculator, 
     }
 
     @Override
-    public ComputationResultConsumer<ModularityCalculator, List<CommunityModularity>, ModularityStatsConfig, Stream<StatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<ModularityCalculator, HugeObjectArray<CommunityModularity>, ModularityStatsConfig, Stream<StatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
 
-            var result = Optional.ofNullable(computationResult.result())
-                .orElseGet(List::of);
 
             var config = computationResult.config();
             var statsBuilder = new StatsResult.StatsBuilder(executionContext.callContext(), config.concurrency());
+            var result = Optional.ofNullable(computationResult.result())
+                .orElseGet(HugeObjectArray::of);
 
-            var statsResult = statsBuilder.withModularities(result.stream().map(CommunityModularity::modularity).collect(Collectors.toList()))
-                .withModularity(result.stream().mapToDouble(CommunityModularity::modularity).sum())
+            var modularity = LongStream
+                .range(0, result.size())
+                .mapToObj(result::get)
+                .mapToDouble(CommunityModularity::modularity)
+                .sum();
+
+            var statsResult = statsBuilder.withModularities(Arrays.stream(result.toArray()).map(CommunityModularity::modularity).collect(Collectors.toList()))
+                .withModularity(modularity)
                 .withCommunityCount(result.size())
                 .withRelationshipCount(computationResult.graph().relationshipCount())
                 .withPreProcessingMillis(computationResult.preProcessingMillis())
