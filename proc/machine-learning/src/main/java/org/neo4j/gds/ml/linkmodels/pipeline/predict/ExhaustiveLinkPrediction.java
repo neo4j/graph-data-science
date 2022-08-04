@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -41,6 +42,7 @@ import java.util.stream.LongStream;
 public class ExhaustiveLinkPrediction extends LinkPrediction {
     private final int topN;
     private final double threshold;
+    private final TerminationFlag terminationFlag;
 
     public ExhaustiveLinkPrediction(
         Classifier classifier,
@@ -51,7 +53,8 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
         int concurrency,
         int topN,
         double threshold,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(
             classifier,
@@ -64,6 +67,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
         );
         this.topN = topN;
         this.threshold = threshold;
+        this.terminationFlag = terminationFlag;
     }
 
     public static MemoryEstimation estimate(LinkPredictionPredictPipelineBaseConfig config, int linkFeatureDimension) {
@@ -98,6 +102,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
 
         RunWithConcurrency.builder()
             .concurrency(concurrency)
+            .terminationFlag(terminationFlag)
             .tasks(tasks)
             .run();
 

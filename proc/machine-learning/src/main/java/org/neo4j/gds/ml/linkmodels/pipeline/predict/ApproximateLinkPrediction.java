@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -47,6 +48,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
     private final long validSourceNodeCount;
 
     private final long validTargetNodeCount;
+    private final TerminationFlag terminationFlag;
 
     public ApproximateLinkPrediction(
         Classifier classifier,
@@ -57,7 +59,8 @@ public class ApproximateLinkPrediction extends LinkPrediction {
         long validSourceNodeCount,
         long validTargetNodeCount,
         KnnBaseConfig knnConfig,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(
             classifier,
@@ -71,6 +74,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
         this.knnConfig = knnConfig;
         this.validSourceNodeCount = validSourceNodeCount;
         this.validTargetNodeCount = validTargetNodeCount;
+        this.terminationFlag = terminationFlag;
     }
 
     public static MemoryEstimation estimate(LinkPredictionPredictPipelineBaseConfig config) {
@@ -84,16 +88,25 @@ public class ApproximateLinkPrediction extends LinkPrediction {
 
     @Override
     LinkPredictionResult predictLinks(LinkPredictionSimilarityComputer linkPredictionSimilarityComputer) {
-        var knnResult = Knn.create(
+        var knn = Knn.create(
             graph,
             knnConfig,
             linkPredictionSimilarityComputer,
-            new LinkPredictionSimilarityComputer.LinkFilterFactory(graph, sourceNodeFilter, targetNodeFilter, validSourceNodeCount, validTargetNodeCount),
+            new LinkPredictionSimilarityComputer.LinkFilterFactory(
+                graph,
+                sourceNodeFilter,
+                targetNodeFilter,
+                validSourceNodeCount,
+                validTargetNodeCount
+            ),
             ImmutableKnnContext.of(
                 Pools.DEFAULT,
                 progressTracker
             )
-        ).compute();
+        );
+        
+        knn.setTerminationFlag(terminationFlag);
+        var knnResult = knn.compute();
 
         return new Result(knnResult);
     }

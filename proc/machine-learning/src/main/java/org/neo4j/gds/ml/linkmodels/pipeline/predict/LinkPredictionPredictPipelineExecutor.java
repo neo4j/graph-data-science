@@ -188,7 +188,6 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
         LongPredicate targetNodeFilter = LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, targetNodes);
 
         if (isApproximateStrategy) {
-            // TODO: use filtered knn if needed
             return new ApproximateLinkPrediction(
                 classifier,
                 linkFeatureExtractor,
@@ -198,7 +197,8 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 sourceNodes.nodeCount(),
                 targetNodes.nodeCount(),
                 config.approximateConfig(),
-                progressTracker
+                progressTracker,
+                terminationFlag
             );
         } else {
             return new ExhaustiveLinkPrediction(
@@ -210,7 +210,8 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 config.concurrency(),
                 config.topN().orElseThrow(),
                 config.thresholdOrDefault(),
-                progressTracker
+                progressTracker,
+                terminationFlag
             );
         }
     }

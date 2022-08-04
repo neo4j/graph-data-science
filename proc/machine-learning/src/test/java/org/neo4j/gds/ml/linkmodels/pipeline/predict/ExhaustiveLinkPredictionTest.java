@@ -26,6 +26,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -116,7 +117,8 @@ class ExhaustiveLinkPredictionTest {
             concurrency,
             topN,
             0D,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var predictionResult = linkPrediction.compute();
@@ -181,7 +183,8 @@ class ExhaustiveLinkPredictionTest {
             4,
             6,
             threshold,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
         var predictionResult = linkPrediction.compute();
         var predictedLinks = predictionResult.stream().collect(Collectors.toList());
@@ -221,7 +224,8 @@ class ExhaustiveLinkPredictionTest {
             4,
             topN,
             0D,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var predictionResult = linkPrediction.compute();

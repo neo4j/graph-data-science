@@ -29,6 +29,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -112,7 +113,8 @@ class ApproximateLinkPredictionTest {
                 .topK(topK)
                 .nodeProperties(List.of(new KnnNodePropertySpec("DUMMY")))
                 .build(),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
         var predictionResult = linkPrediction.compute();
         assertThat(predictionResult.samplingStats()).isEqualTo(
@@ -188,7 +190,8 @@ class ApproximateLinkPredictionTest {
                     .topK(1)
                     .nodeProperties(List.of(new KnnNodePropertySpec("DUMMY")))
                     .build(),
-                ProgressTracker.NULL_TRACKER
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
             );
 
             var predictionResult = linkPrediction.compute();
@@ -236,7 +239,8 @@ class ApproximateLinkPredictionTest {
                 .topK(topK)
                 .nodeProperties(List.of(new KnnNodePropertySpec("DUMMY")))
                 .build(),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
         var predictionResult = linkPrediction.compute();
 
@@ -289,7 +293,8 @@ class ApproximateLinkPredictionTest {
                 .topK(topK)
                 .nodeProperties(List.of(new KnnNodePropertySpec("DUMMY")))
                 .build(),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
         var predictionResult = linkPrediction.compute();
 
