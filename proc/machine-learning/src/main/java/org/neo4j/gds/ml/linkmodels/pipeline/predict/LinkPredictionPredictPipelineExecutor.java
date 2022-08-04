@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
@@ -184,8 +183,8 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
         IdMap sourceNodes = graphStore.getGraph(graphStoreFilter.sourceNodeLabels());
         IdMap targetNodes = graphStore.getGraph(graphStoreFilter.targetNodeLabels());
 
-        LongPredicate sourceNodeFilter = LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, sourceNodes);
-        LongPredicate targetNodeFilter = LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, targetNodes);
+        var sourceNodeFilter = LPNodeFilter.of(graph, sourceNodes);
+        var targetNodeFilter = LPNodeFilter.of(graph, targetNodes);
 
         if (isApproximateStrategy) {
             return new ApproximateLinkPrediction(
@@ -194,8 +193,6 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 graph,
                 sourceNodeFilter,
                 targetNodeFilter,
-                sourceNodes.nodeCount(),
-                targetNodes.nodeCount(),
                 config.approximateConfig(),
                 progressTracker,
                 terminationFlag

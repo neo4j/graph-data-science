@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -99,10 +98,8 @@ class ApproximateLinkPredictionTest {
             LogisticRegressionClassifier.from(modelData),
             LinkFeatureExtractor.of(graphN, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
             graphN,
-            LPGraphStoreFilterFactory.generateNodeLabelFilter(graphN, graphN),
-            LPGraphStoreFilterFactory.generateNodeLabelFilter(graphN, graphN),
-            5,
-            5,
+            LPNodeFilter.of(graphN, graphN),
+            LPNodeFilter.of(graphN, graphN),
             ImmutableKnnBaseConfig.builder()
                 .randomSeed(42L)
                 .concurrency(1)
@@ -176,10 +173,8 @@ class ApproximateLinkPredictionTest {
                 LogisticRegressionClassifier.from(modelData),
                 LinkFeatureExtractor.of(graphN, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
                 graphN,
-                LPGraphStoreFilterFactory.generateNodeLabelFilter(graphN, graphN),
-                LPGraphStoreFilterFactory.generateNodeLabelFilter(graphN, graphN),
-                5,
-                5,
+                LPNodeFilter.of(graphN, graphN),
+                LPNodeFilter.of(graphN, graphN),
                 ImmutableKnnBaseConfig.builder()
                     .randomSeed(42L)
                     .concurrency(1)
@@ -225,10 +220,8 @@ class ApproximateLinkPredictionTest {
             LogisticRegressionClassifier.from(modelData),
             LinkFeatureExtractor.of(graphN, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
             graphN,
-            LPGraphStoreFilterFactory.generateNodeLabelFilter(graphN, graphN),
-            LPGraphStoreFilterFactory.generateNodeLabelFilter(graphN, graphN),
-            5,
-            5,
+            LPNodeFilter.of(graphN, graphN),
+            LPNodeFilter.of(graphN, graphN),
             ImmutableKnnBaseConfig.builder()
                 .randomSeed(42L)
                 .concurrency(1)
@@ -272,8 +265,8 @@ class ApproximateLinkPredictionTest {
         NodeLabel targetLabel = NodeLabel.of("M");
 
         var graph = graphStore.getGraph(List.of(sourceLabel, targetLabel));
-        LongPredicate sourceNodeLabelFilter = LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(sourceLabel));
-        LongPredicate targetNodeLabelFilter = LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(targetLabel));
+        var sourceNodeLabelFilter = LPNodeFilter.of(graph, graphStore.getGraph(sourceLabel));
+        var targetNodeLabelFilter = LPNodeFilter.of(graph, graphStore.getGraph(targetLabel));
 
         var linkPrediction = new ApproximateLinkPrediction(
             LogisticRegressionClassifier.from(modelData),
@@ -281,8 +274,6 @@ class ApproximateLinkPredictionTest {
             graph,
             sourceNodeLabelFilter,
             targetNodeLabelFilter,
-            5,
-            1,
             ImmutableKnnBaseConfig.builder()
                 .randomSeed(42L)
                 .concurrency(1)
@@ -302,8 +293,8 @@ class ApproximateLinkPredictionTest {
             assertThat(graph.exists(predictedLink.sourceId(), predictedLink.targetId())).isFalse();
             assertThat(graph.exists(predictedLink.targetId(), predictedLink.sourceId())).isFalse();
             assertThat(predictedLink.targetId()).isNotEqualTo(predictedLink.sourceId());
-            assertThat((sourceNodeLabelFilter.apply(predictedLink.sourceId()) && targetNodeLabelFilter.apply(predictedLink.targetId())) ||
-                       (sourceNodeLabelFilter.apply(predictedLink.targetId()) && targetNodeLabelFilter.apply(predictedLink.sourceId()))).isTrue();
+            assertThat((sourceNodeLabelFilter.test(predictedLink.sourceId()) && targetNodeLabelFilter.test(predictedLink.targetId())) ||
+                       (sourceNodeLabelFilter.test(predictedLink.targetId()) && targetNodeLabelFilter.test(predictedLink.sourceId()))).isTrue();
         });
     }
 

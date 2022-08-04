@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
@@ -90,7 +89,8 @@ class LinkPredictionSimilarityComputerTest {
 
     @Test
     void filterExistingRelationships() {
-        NeighborFilter filter = new LinkFilterFactory(graph, nodeId->true, nodeId->true, 3, 3).create();
+        var nodeFilter = LPNodeFilter.of(graph, graph);
+        NeighborFilter filter = new LinkFilterFactory(graph, nodeFilter, nodeFilter).create();
 
         // The node filter does not support self-loops as a node is always similar to itself so a-->a should be false.
         assertThat(filter.excludeNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("a"))).isEqualTo(true);
@@ -106,8 +106,8 @@ class LinkPredictionSimilarityComputerTest {
 
     @Test
     void filterNodeLabelsAndExistingRelationships() {
-        LongPredicate nodeLabelFilter = LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(NodeLabel.of("N")));
-        NeighborFilter filter = new LinkFilterFactory(graph, nodeLabelFilter, nodeLabelFilter, 2, 2).create();
+        var nodeFilter = LPNodeFilter.of(graph, graphStore.getGraph(NodeLabel.of("N")));
+        NeighborFilter filter = new LinkFilterFactory(graph, nodeFilter, nodeFilter).create();
 
         // The node filter does not support self-loops as a node is always similar to itself so a-->a should be false.
         assertThat(filter.excludeNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("a"))).isEqualTo(true);
@@ -124,7 +124,8 @@ class LinkPredictionSimilarityComputerTest {
 
     @Test
     void neighbourEstimates() {
-        NeighborFilter filter = new LinkFilterFactory(graph, nodeId->true, nodeId->true, 3, 3).create();
+        var nodeFilter = LPNodeFilter.of(graph, graph);
+        NeighborFilter filter = new LinkFilterFactory(graph, nodeFilter, nodeFilter).create();
 
         assertThat(filter.lowerBoundOfPotentialNeighbours(graph.toMappedNodeId("a")))
             .isLessThanOrEqualTo(1)

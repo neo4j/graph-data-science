@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -44,20 +43,14 @@ import java.util.stream.Stream;
 
 public class ApproximateLinkPrediction extends LinkPrediction {
     private final KnnBaseConfig knnConfig;
-
-    private final long validSourceNodeCount;
-
-    private final long validTargetNodeCount;
     private final TerminationFlag terminationFlag;
 
     public ApproximateLinkPrediction(
         Classifier classifier,
         LinkFeatureExtractor linkFeatureExtractor,
         Graph graph,
-        LongPredicate sourceNodeFilter,
-        LongPredicate targetNodeFilter,
-        long validSourceNodeCount,
-        long validTargetNodeCount,
+        LPNodeFilter sourceNodeFilter,
+        LPNodeFilter targetNodeFilter,
         KnnBaseConfig knnConfig,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
@@ -72,8 +65,6 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             progressTracker
         );
         this.knnConfig = knnConfig;
-        this.validSourceNodeCount = validSourceNodeCount;
-        this.validTargetNodeCount = validTargetNodeCount;
         this.terminationFlag = terminationFlag;
     }
 
@@ -95,9 +86,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             new LinkPredictionSimilarityComputer.LinkFilterFactory(
                 graph,
                 sourceNodeFilter,
-                targetNodeFilter,
-                validSourceNodeCount,
-                validTargetNodeCount
+                targetNodeFilter
             ),
             ImmutableKnnContext.of(
                 Pools.DEFAULT,

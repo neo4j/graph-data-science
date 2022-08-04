@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
@@ -54,22 +53,14 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
 
     static final class LinkFilter implements NeighborFilter {
 
-        private final LongPredicate sourceNodeFilter;
-
-        private final LongPredicate targetNodeFilter;
-
-        private final long validSouceNodeCount;
-
-        private final long validTargetNodeCount;
-
+        private final LPNodeFilter sourceNodeFilter;
+        private final LPNodeFilter targetNodeFilter;
         private final Graph graph;
 
-        private LinkFilter(Graph graph, LongPredicate sourceNodeFilter, LongPredicate targetNodeFilter, long validSourceNodeCount, long validTargetNodeCount) {
+        private LinkFilter(Graph graph, LPNodeFilter sourceNodeFilter, LPNodeFilter targetNodeFilter) {
             this.graph = graph;
             this.sourceNodeFilter = sourceNodeFilter;
             this.targetNodeFilter = targetNodeFilter;
-            this.validSouceNodeCount = validSourceNodeCount;
-            this.validTargetNodeCount = validTargetNodeCount;
         }
 
         @Override
@@ -80,17 +71,17 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
 
             // This is a slower but memory-efficient approach (could be replaced by a dedicated data structure)
 
-            return !(sourceNodeFilter.apply(firstNodeId) && targetNodeFilter.apply(secondNodeId)
-                     || sourceNodeFilter.apply(secondNodeId) && targetNodeFilter.apply(firstNodeId)
+            return !(sourceNodeFilter.test(firstNodeId) && targetNodeFilter.test(secondNodeId)
+                     || sourceNodeFilter.test(secondNodeId) && targetNodeFilter.test(firstNodeId)
             ) || graph.exists(firstNodeId, secondNodeId);
         }
 
         @Override
         public long lowerBoundOfPotentialNeighbours(long node) {
-            if (sourceNodeFilter.apply(node)) {
-                return Math.max(validTargetNodeCount - 1 - graph.degree(node), 0L);
+            if (sourceNodeFilter.test(node)) {
+                return Math.max(targetNodeFilter.validNodes() - 1 - graph.degree(node), 0L);
             } else {
-                return Math.max(validSouceNodeCount - 1 - graph.degree(node), 0L);
+                return Math.max(sourceNodeFilter.validNodes() - 1 - graph.degree(node), 0L);
             }
         }
     }
@@ -99,25 +90,19 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
 
         private final Graph graph;
 
-        private final LongPredicate sourceNodeFilter;
+        private final LPNodeFilter sourceNodeFilter;
 
-        private final LongPredicate targetNodeFilter;
+        private final LPNodeFilter targetNodeFilter;
 
-        private final long validSourceNodeCount;
-
-        private final long validTargetNodeCount;
-
-        LinkFilterFactory(Graph graph, LongPredicate sourceNodeFilter, LongPredicate targetNodeFilter, long validSourceNodeCount, long validTargetNodeCount) {
+        LinkFilterFactory(Graph graph, LPNodeFilter sourceNodeFilter, LPNodeFilter targetNodeFilter) {
             this.graph = graph;
             this.sourceNodeFilter = sourceNodeFilter;
             this.targetNodeFilter = targetNodeFilter;
-            this.validSourceNodeCount = validSourceNodeCount;
-            this.validTargetNodeCount = validTargetNodeCount;
         }
 
         @Override
         public NeighborFilter create() {
-            return new LinkPredictionSimilarityComputer.LinkFilter(graph.concurrentCopy(), sourceNodeFilter, targetNodeFilter, validSourceNodeCount, validTargetNodeCount);
+            return new LinkPredictionSimilarityComputer.LinkFilter(graph.concurrentCopy(), sourceNodeFilter, targetNodeFilter);
         }
     }
 }
