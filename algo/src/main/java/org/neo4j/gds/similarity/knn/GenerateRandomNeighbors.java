@@ -34,7 +34,6 @@ final class GenerateRandomNeighbors implements Runnable {
     private final SimilarityFunction similarityFunction;
     private final NeighborFilter neighborFilter;
     private final HugeObjectArray<NeighborList> neighbors;
-    private final int k;
     private final int boundedK;
     private final ProgressTracker progressTracker;
     private final Partition partition;
@@ -48,7 +47,6 @@ final class GenerateRandomNeighbors implements Runnable {
         SimilarityFunction similarityFunction,
         NeighborFilter neighborFilter,
         HugeObjectArray<NeighborList> neighbors,
-        int k,
         int boundedK,
         Partition partition,
         ProgressTracker progressTracker,
@@ -59,7 +57,6 @@ final class GenerateRandomNeighbors implements Runnable {
         this.similarityFunction = similarityFunction;
         this.neighborFilter = neighborFilter;
         this.neighbors = neighbors;
-        this.k = k;
         this.boundedK = boundedK;
         this.progressTracker = progressTracker;
         this.partition = partition;
@@ -71,7 +68,6 @@ final class GenerateRandomNeighbors implements Runnable {
     public void run() {
         var rng = random;
         var similarityFunction = this.similarityFunction;
-        var k = this.k;
         var boundedK = this.boundedK;
         var neighborFilter = this.neighborFilter;
 
@@ -83,14 +79,13 @@ final class GenerateRandomNeighbors implements Runnable {
                 l -> neighborFilter.excludeNodePair(nodeId, l)
             );
 
-            var neighbors = new NeighborList(k, neighbourConsumers.get(nodeId));
+            var neighbors = new NeighborList(boundedK, neighbourConsumers.get(nodeId));
             for (long candidate : chosen) {
                 double similarity = similarityFunction.computeSimilarity(nodeId, candidate);
                 neighbors.add(candidate, similarity, rng, 0.0);
             }
 
             assert neighbors.size() >= Math.min(neighborFilter.lowerBoundOfPotentialNeighbours(nodeId), boundedK);
-            assert neighbors.size() <= k;
 
             this.neighbors.set(nodeId, neighbors);
             neighborsFound += neighbors.size();

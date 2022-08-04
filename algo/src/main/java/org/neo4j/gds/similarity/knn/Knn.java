@@ -230,7 +230,6 @@ public class Knn extends Algorithm<Knn.Result> {
                     this.similarityFunction,
                     this.neighborFilterFactory.create(),
                     neighbors,
-                    k,
                     boundedK,
                     partition,
                     progressTracker,
