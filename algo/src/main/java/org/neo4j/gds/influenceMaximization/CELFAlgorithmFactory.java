@@ -80,42 +80,36 @@ public class CELFAlgorithmFactory<CONFIG extends InfluenceMaximizationBaseConfig
                 MemoryUsage.sizeOfLongDoubleScatterMap(configuration.seedSetSize())
             )
             .fixed("firstK", MemoryUsage.sizeOfLongArray(DEFAULT_BATCH_SIZE))
-            .perNode("LazyForwarding: spread priority queue", HugeLongPriorityQueue.memoryEstimation())
+            .add("LazyForwarding: spread priority queue", HugeLongPriorityQueue.memoryEstimation())
             .perNode("greedy part: single spread array: ", HugeDoubleArray::memoryEstimation);
 
         //ICInitTask class
 
         builder
-            .perGraphDimension(
-                "active",
-                (dimensions, concurrency) -> MemoryRange.of(MemoryUsage.sizeOfBitset(dimensions.nodeCount()))
-            );
-        builder.perNode("newActive", HugeLongArrayStack.memoryEstimation().times(configuration.concurrency()));
+            .perThread("ICInit", ICInitMemoryEstimationBuilder().build());
 
 
         //ICLazyMC
         builder.fixed("spread", MemoryUsage.sizeOfDoubleArray(DEFAULT_BATCH_SIZE));
         //ICLazyMCTask class
-
-        builder
-            .perGraphDimension(
-                "seedActive",
-                (dimensions, concurrency) -> MemoryRange.of(MemoryUsage.sizeOfBitset(dimensions.nodeCount()))
-            ).perGraphDimension(
-                "candidateActive",
-                (dimensions, concurrency) -> MemoryRange.of(MemoryUsage.sizeOfBitset(dimensions.nodeCount()))
-            ).perGraphDimension(
-                "seedSetNodes",
-                (dimensions, concurrency) -> MemoryRange.of(MemoryUsage.sizeOfLongArray(configuration.seedSetSize()))
-            ).perGraphDimension(
-                "candidateNodeIds",
-                (dimensions, concurrency) -> MemoryRange.of(MemoryUsage.sizeOfLongArray(DEFAULT_BATCH_SIZE))
-            ).perGraphDimension(
-                "localSpread",
-                (dimensions, concurrency) -> MemoryRange.of(MemoryUsage.sizeOfDoubleArray(DEFAULT_BATCH_SIZE))
-            );
-        builder.perNode("newActive", HugeLongArrayStack.memoryEstimation().times(configuration.concurrency()));
+        builder.add("newActive", ICLazyMemoryEstimationBuilder(configuration).build());
         return builder.build();
+    }
+
+    private MemoryEstimations.Builder ICInitMemoryEstimationBuilder() {
+        return MemoryEstimations.builder(ICLazyForwardTask.class)
+            .perNode("active", MemoryUsage::sizeOfBitset)
+            .add("newActive", HugeLongArrayStack.memoryEstimation());
+    }
+
+    private MemoryEstimations.Builder ICLazyMemoryEstimationBuilder(CONFIG configuration) {
+        return MemoryEstimations.builder(ICLazyForwardTask.class)
+            .perNode("seedActive", MemoryUsage::sizeOfBitset)
+            .perNode("candidateActive", MemoryUsage::sizeOfBitset)
+            .fixed("localSpread", MemoryRange.of(MemoryUsage.sizeOfDoubleArray(DEFAULT_BATCH_SIZE)))
+            .fixed("candidateNodeIds", MemoryRange.of(MemoryUsage.sizeOfLongArray(DEFAULT_BATCH_SIZE)))
+            .fixed("seedSetNodeIds", MemoryRange.of(MemoryUsage.sizeOfLongArray(configuration.seedSetSize())))
+            .add("newActive", HugeLongArrayStack.memoryEstimation());
     }
 
 }
