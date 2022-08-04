@@ -1,2 +1,3 @@
 | samplingSize  | Integer | node count | yes      | The number of source nodes to consider for computing centrality scores.
 | samplingSeed  | Integer | null       | yes      | The seed value for the random number generator that selects start nodes.
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String   | null    | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.

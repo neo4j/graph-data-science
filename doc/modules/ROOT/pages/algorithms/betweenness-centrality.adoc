@@ -261,13 +261,13 @@ CREATE
   (frank:User {name: 'Frank'}),
   (gale:User {name: 'Gale'}),
 
-  (alice)-[:FOLLOWS]->(carol),
-  (bob)-[:FOLLOWS]->(carol),
-  (carol)-[:FOLLOWS]->(dan),
-  (carol)-[:FOLLOWS]->(eve),
-  (dan)-[:FOLLOWS]->(frank),
-  (eve)-[:FOLLOWS]->(frank),
-  (frank)-[:FOLLOWS]->(gale);
+  (alice)-[:FOLLOWS {weight: 1.0}]->(carol),
+  (bob)-[:FOLLOWS {weight: 1.0}]->(carol),
+  (carol)-[:FOLLOWS {weight: 1.0}]->(dan),
+  (carol)-[:FOLLOWS {weight: 1.3}]->(eve),
+  (dan)-[:FOLLOWS {weight: 1.0}]->(frank),
+  (eve)-[:FOLLOWS {weight: 0.5}]->(frank),
+  (frank)-[:FOLLOWS {weight: 1.0}]->(gale);
 ----
 
 With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
@@ -278,7 +278,7 @@ include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 .The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project('myGraph', 'User', 'FOLLOWS')
+CALL gds.graph.project('myGraph', 'User', {FOLLOWS: {properties: 'weight'}})
 ----
 
 In the following examples we will demonstrate using the Betweenness Centrality algorithm on this graph.
@@ -548,3 +548,32 @@ ORDER BY name ASC
 
 The central nodes now have slightly higher scores, due to the fact that there are more shortest paths in the graph, and these are more likely to pass through the central nodes.
 The 'Dan' and 'Eve' nodes retain the same centrality scores as in the directed case.
+
+[[algorithms-betweenness-centrality-examples-weighted]]
+=== Weighted
+
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode using weights:
+[source, cypher, role=noplay]
+----
+CALL gds.betweenness.stream('myGraph', {relationshipWeightProperty: 'weight'})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name    | score
+| "Alice" | 0.0
+| "Bob"   | 0.0
+| "Carol" | 8.0
+| "Dan"   | 0.0
+| "Eve"   | 6.0
+| "Frank" | 5.0
+| "Gale"  | 0.0
+|===
+--
