@@ -192,6 +192,7 @@ public class Knn extends Algorithm<Knn.Result> {
                 RunWithConcurrency.builder()
                     .concurrency(config.concurrency())
                     .tasks(neighborFilterTasks)
+                    .terminationFlag(terminationFlag)
                     .executor(this.executorService)
                     .run();
             }
@@ -242,6 +243,7 @@ public class Knn extends Algorithm<Knn.Result> {
         RunWithConcurrency.builder()
             .concurrency(config.concurrency())
             .tasks(randomNeighborGenerators)
+            .terminationFlag(terminationFlag)
             .executor(this.executorService)
             .run();
 
@@ -336,6 +338,7 @@ public class Knn extends Algorithm<Knn.Result> {
         RunWithConcurrency.builder()
             .concurrency(concurrency)
             .tasks(neighborsJoiners)
+            .terminationFlag(terminationFlag)
             .executor(this.executorService)
             .run();
         progressTracker.endSubTask();
