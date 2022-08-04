@@ -21,11 +21,12 @@ package org.neo4j.gds.betweenness;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.RelationshipWeightConfig;
 
 import java.util.Locale;
 import java.util.Optional;
 
-public interface BetweennessCentralityBaseConfig extends AlgoBaseConfig {
+public interface BetweennessCentralityBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
     Optional<Long> samplingSize();
 

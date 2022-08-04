@@ -58,7 +58,7 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
         return new BetweennessCentrality(
             graph,
             strategy,
-            false,
+            configuration.hasRelationshipWeightProperty(),
             Pools.DEFAULT,
             configuration.concurrency(),
             progressTracker
