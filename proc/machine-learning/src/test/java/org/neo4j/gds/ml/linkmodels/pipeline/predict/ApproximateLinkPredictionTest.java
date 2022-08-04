@@ -73,14 +73,11 @@ class ApproximateLinkPredictionTest {
     @Inject
     private GraphStore graphStore;
 
-    @Inject
-    private Graph fullGraph;
-
-    private Graph graph;
+    private Graph graphN;
 
     @BeforeEach
     void setUp() {
-        graph = graphStore.getGraph(NodeLabel.of("N"));
+        graphN = graphStore.getGraph(NodeLabel.of("N"));
     }
 
     @ParameterizedTest
@@ -99,10 +96,10 @@ class ApproximateLinkPredictionTest {
 
         var linkPrediction = new ApproximateLinkPrediction(
             LogisticRegressionClassifier.from(modelData),
-            LinkFeatureExtractor.of(graph, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
-            graph,
-            LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(NodeLabel.of("N"))),
-            LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(NodeLabel.of("N"))),
+            LinkFeatureExtractor.of(graphN, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
+            graphN,
+            LPGraphStoreFilterFactory.generateNodeLabelFilter(graphN, graphN),
+            LPGraphStoreFilterFactory.generateNodeLabelFilter(graphN, graphN),
             5,
             5,
             ImmutableKnnBaseConfig.builder()
@@ -129,7 +126,7 @@ class ApproximateLinkPredictionTest {
 
         var predictedLinks = predictionResult.stream().collect(Collectors.toList());
 
-        assertThat(predictedLinks.size()).isLessThanOrEqualTo((int) (topK * graph.nodeCount()));
+        assertThat(predictedLinks.size()).isLessThanOrEqualTo((int) (topK * graphN.nodeCount()));
 
         var expectedLinks = List.of(
             PredictedLink.of(0, 4, 0.497),
@@ -147,8 +144,7 @@ class ApproximateLinkPredictionTest {
         assertThat(predictedLinks)
             .usingElementComparator(compareWithPrecision(1e-3))
             .isSubsetOf(expectedLinks)
-            .allMatch(prediction -> !graph.exists(prediction.sourceId(), prediction.targetId()));
-
+            .allMatch(prediction -> !graphN.exists(prediction.sourceId(), prediction.targetId()));
     }
 
     @Test
@@ -176,10 +172,10 @@ class ApproximateLinkPredictionTest {
         for (int i = 0; i < 2; i++) {
             var linkPrediction = new ApproximateLinkPrediction(
                 LogisticRegressionClassifier.from(modelData),
-                LinkFeatureExtractor.of(graph, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
-                graph,
-                LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(NodeLabel.of("N"))),
-                LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(NodeLabel.of("N"))),
+                LinkFeatureExtractor.of(graphN, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
+                graphN,
+                LPGraphStoreFilterFactory.generateNodeLabelFilter(graphN, graphN),
+                LPGraphStoreFilterFactory.generateNodeLabelFilter(graphN, graphN),
                 5,
                 5,
                 ImmutableKnnBaseConfig.builder()
@@ -224,10 +220,10 @@ class ApproximateLinkPredictionTest {
 
         var linkPrediction = new ApproximateLinkPrediction(
             LogisticRegressionClassifier.from(modelData),
-            LinkFeatureExtractor.of(graph, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
-            graph,
-            LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(NodeLabel.of("N"))),
-            LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(NodeLabel.of("N"))),
+            LinkFeatureExtractor.of(graphN, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
+            graphN,
+            LPGraphStoreFilterFactory.generateNodeLabelFilter(graphN, graphN),
+            LPGraphStoreFilterFactory.generateNodeLabelFilter(graphN, graphN),
             5,
             5,
             ImmutableKnnBaseConfig.builder()
@@ -245,8 +241,8 @@ class ApproximateLinkPredictionTest {
         var predictionResult = linkPrediction.compute();
 
         predictionResult.stream().forEach(predictedLink -> {
-            assertThat(graph.exists(predictedLink.sourceId(), predictedLink.targetId())).isFalse();
-            assertThat(graph.exists(predictedLink.targetId(), predictedLink.sourceId())).isFalse();
+            assertThat(graphN.exists(predictedLink.sourceId(), predictedLink.targetId())).isFalse();
+            assertThat(graphN.exists(predictedLink.targetId(), predictedLink.sourceId())).isFalse();
             assertThat(predictedLink.targetId()).isNotEqualTo(predictedLink.sourceId());
         });
     }
@@ -268,8 +264,12 @@ class ApproximateLinkPredictionTest {
             Weights.ofVector(0.0)
         );
 
-        LongPredicate sourceNodeLabelFilter = LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(NodeLabel.of("N")));
-        LongPredicate targetNodeLabelFilter = LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(NodeLabel.of("M")));
+        NodeLabel sourceLabel = NodeLabel.of("N");
+        NodeLabel targetLabel = NodeLabel.of("M");
+
+        var graph = graphStore.getGraph(List.of(sourceLabel, targetLabel));
+        LongPredicate sourceNodeLabelFilter = LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(sourceLabel));
+        LongPredicate targetNodeLabelFilter = LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(targetLabel));
 
         var linkPrediction = new ApproximateLinkPrediction(
             LogisticRegressionClassifier.from(modelData),
