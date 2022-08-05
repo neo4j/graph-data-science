@@ -41,7 +41,9 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.warnings.GlobalUserLogStore;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryExtension;
-import org.neo4j.gds.functions.AsNodeFunc;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 import org.neo4j.values.storable.NumberType;
@@ -61,16 +63,23 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
     private static final String TEST_GRAPH_SAME_PROPERTIES = "testGraph";
     private static final String TEST_GRAPH_DIFFERENT_PROPERTIES = "testGraph2";
 
+    @Neo4jGraph(idOffset = 5)
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a:Label { id: 0 })" +
-        ", (b:Label { id: 1 })" +
+        "  (a:Label)" +
+        ", (b:Label)" +
         ", (a)-[:REL1 { relProp1: 0.0, relProp2: 42.0}]->(a)" +
         ", (b)-[:REL1 { relProp1: 1.0, relProp2: 43.0}]->(b)" +
         ", (a)-[:REL2 { relProp1: 2.0, relProp2: 44.0}]->(a)" +
         ", (b)-[:REL2 { relProp1: 3.0, relProp2: 45.0}]->(b)";
 
     GlobalUserLogStore userLogStore;
+
+    @Inject
+    IdFunction idFunction;
+
+    long nodeA;
+    long nodeB;
 
     @Override
     @ExtensionCallback
@@ -84,8 +93,9 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(GraphProjectProc.class, GraphStreamRelationshipPropertiesProc.class);
-        registerFunctions(AsNodeFunc.class);
-        runQuery(DB_CYPHER);
+
+        nodeA = idFunction.of("a");
+        nodeB = idFunction.of("b");
 
         runQuery(GdsCypher.call(TEST_GRAPH_SAME_PROPERTIES)
             .graphProject()
@@ -128,28 +138,28 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         "   '%s', " +
         "   ['relProp1', 'relProp2']" +
         ") YIELD sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue " +
-        "RETURN gds.util.asNode(sourceNodeId).id AS source, gds.util.asNode(targetNodeId).id AS target, relationshipType, relationshipProperty, propertyValue",
+        "RETURN sourceNodeId AS source, targetNodeId AS target, relationshipType, relationshipProperty, propertyValue",
         // explicit PROJECT_ALL
         "CALL gds.graph.relationshipProperties.stream(" +
         "   '%s', " +
         "   ['relProp1', 'relProp2'], " +
         "   ['*']" +
         ") YIELD sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue " +
-        "RETURN gds.util.asNode(sourceNodeId).id AS source, gds.util.asNode(targetNodeId).id AS target, relationshipType, relationshipProperty, propertyValue"
+        "RETURN sourceNodeId AS source, targetNodeId AS target, relationshipType, relationshipProperty, propertyValue"
     })
     void streamLoadedRelationshipProperties(String graphStreamQueryTemplate) {
         String graphStreamQuery = formatWithLocale(graphStreamQueryTemplate, TEST_GRAPH_SAME_PROPERTIES);
 
         assertCypherResult(graphStreamQuery, List.of(
-            map("source", 0L, "target", 0L, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 0D),
-            map("source", 0L, "target", 0L, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 42D),
-            map("source", 0L, "target", 0L, "relationshipType", "REL2", "relationshipProperty", "relProp1", "propertyValue", 2D),
-            map("source", 0L, "target", 0L, "relationshipType", "REL2", "relationshipProperty", "relProp2", "propertyValue", 44D),
+            map("source", nodeA, "target", nodeA, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 0D),
+            map("source", nodeA, "target", nodeA, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 42D),
+            map("source", nodeA, "target", nodeA, "relationshipType", "REL2", "relationshipProperty", "relProp1", "propertyValue", 2D),
+            map("source", nodeA, "target", nodeA, "relationshipType", "REL2", "relationshipProperty", "relProp2", "propertyValue", 44D),
 
-            map("source", 1L, "target", 1L, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 1D),
-            map("source", 1L, "target", 1L, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 43D),
-            map("source", 1L, "target", 1L, "relationshipType", "REL2", "relationshipProperty", "relProp1", "propertyValue", 3D),
-            map("source", 1L, "target", 1L, "relationshipType", "REL2", "relationshipProperty", "relProp2", "propertyValue", 45D)
+            map("source", nodeB, "target", nodeB, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 1D),
+            map("source", nodeB, "target", nodeB, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 43D),
+            map("source", nodeB, "target", nodeB, "relationshipType", "REL2", "relationshipProperty", "relProp1", "propertyValue", 3D),
+            map("source", nodeB, "target", nodeB, "relationshipType", "REL2", "relationshipProperty", "relProp2", "propertyValue", 45D)
         ));
     }
 
@@ -161,15 +171,15 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             "   ['relProp1', 'relProp2'], " +
             "   ['REL1']" +
             ") YIELD sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue " +
-            "RETURN gds.util.asNode(sourceNodeId).id AS source, gds.util.asNode(targetNodeId).id AS target, relationshipType, relationshipProperty, propertyValue",
+            "RETURN sourceNodeId AS source, targetNodeId AS target, relationshipType, relationshipProperty, propertyValue",
             TEST_GRAPH_SAME_PROPERTIES
         );
 
         assertCypherResult(graphStreamQuery, List.of(
-            map("source", 0L, "target", 0L, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 0D),
-            map("source", 0L, "target", 0L, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 42D),
-            map("source", 1L, "target", 1L, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 1D),
-            map("source", 1L, "target", 1L, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 43D)
+            map("source", nodeA, "target", nodeA, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 0D),
+            map("source", nodeA, "target", nodeA, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 42D),
+            map("source", nodeB, "target", nodeB, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 1D),
+            map("source", nodeB, "target", nodeB, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 43D)
         ));
     }
 
@@ -180,18 +190,18 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             "   '%s', " +
             "   ['newRelProp1', 'newRelProp2']" +
             ") YIELD sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue " +
-            "RETURN gds.util.asNode(sourceNodeId).id AS source, gds.util.asNode(targetNodeId).id AS target, relationshipType, relationshipProperty, propertyValue",
+            "RETURN sourceNodeId AS source, targetNodeId AS target, relationshipType, relationshipProperty, propertyValue",
             TEST_GRAPH_DIFFERENT_PROPERTIES
         );
 
         assertCypherResult(graphStreamQuery, List.of(
-            map("source", 0L, "target", 0L, "relationshipType", "REL1", "relationshipProperty", "newRelProp1", "propertyValue", 0D),
-            map("source", 0L, "target", 0L, "relationshipType", "REL1", "relationshipProperty", "newRelProp2", "propertyValue", 42D),
-            map("source", 0L, "target", 0L, "relationshipType", "REL2", "relationshipProperty", "newRelProp1", "propertyValue", 2D),
+            map("source", nodeA, "target", nodeA, "relationshipType", "REL1", "relationshipProperty", "newRelProp1", "propertyValue", 0D),
+            map("source", nodeA, "target", nodeA, "relationshipType", "REL1", "relationshipProperty", "newRelProp2", "propertyValue", 42D),
+            map("source", nodeA, "target", nodeA, "relationshipType", "REL2", "relationshipProperty", "newRelProp1", "propertyValue", 2D),
 
-            map("source", 1L, "target", 1L, "relationshipType", "REL1", "relationshipProperty", "newRelProp1", "propertyValue", 1D),
-            map("source", 1L, "target", 1L, "relationshipType", "REL1", "relationshipProperty", "newRelProp2", "propertyValue", 43D),
-            map("source", 1L, "target", 1L, "relationshipType", "REL2", "relationshipProperty", "newRelProp1", "propertyValue", 3D)
+            map("source", nodeB, "target", nodeB, "relationshipType", "REL1", "relationshipProperty", "newRelProp1", "propertyValue", 1D),
+            map("source", nodeB, "target", nodeB, "relationshipType", "REL1", "relationshipProperty", "newRelProp2", "propertyValue", 43D),
+            map("source", nodeB, "target", nodeB, "relationshipType", "REL2", "relationshipProperty", "newRelProp1", "propertyValue", 3D)
         ));
     }
 
@@ -214,12 +224,12 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             "   '%s', " +
             "   ['newRelProp3']" +
             ") YIELD sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue " +
-            "RETURN gds.util.asNode(sourceNodeId).id AS source, gds.util.asNode(targetNodeId).id AS target, relationshipType, relationshipProperty, propertyValue",
+            "RETURN sourceNodeId AS source, targetNodeId AS target, relationshipType, relationshipProperty, propertyValue",
             TEST_GRAPH_SAME_PROPERTIES
         );
 
         assertCypherResult(graphStreamQuery, List.of(
-            map("source", 0L, "target", 1L, "relationshipType", "NEW_REL", "relationshipProperty", "newRelProp3", "propertyValue", 23D)
+            map("source", nodeA, "target", nodeB, "relationshipType", "NEW_REL", "relationshipProperty", "newRelProp3", "propertyValue", 23D)
         ));
     }
 
@@ -248,13 +258,13 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             "   'relProp1', " +
             "   ['REL1']" +
             ") YIELD sourceNodeId, targetNodeId, relationshipType, propertyValue " +
-            "RETURN gds.util.asNode(sourceNodeId).id AS source, gds.util.asNode(targetNodeId).id AS target, relationshipType, propertyValue",
+            "RETURN sourceNodeId AS source, targetNodeId AS target, relationshipType, propertyValue",
             TEST_GRAPH_SAME_PROPERTIES
         );
 
         assertCypherResult(graphStreamQuery, List.of(
-            map("source", 0L, "target", 0L, "relationshipType", "REL1", "propertyValue", 0D),
-            map("source", 1L, "target", 1L, "relationshipType", "REL1", "propertyValue", 1D)
+            map("source", nodeA, "target", nodeA, "relationshipType", "REL1", "propertyValue", 0D),
+            map("source", nodeB, "target", nodeB, "relationshipType", "REL1", "propertyValue", 1D)
         ));
     }
 
@@ -265,13 +275,13 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             "   '%s', " +
             "   'newRelProp2'" +
             ") YIELD sourceNodeId, targetNodeId, relationshipType, propertyValue " +
-            "RETURN gds.util.asNode(sourceNodeId).id AS source, gds.util.asNode(targetNodeId).id AS target, relationshipType, propertyValue",
+            "RETURN sourceNodeId AS source, targetNodeId AS target, relationshipType, propertyValue",
             TEST_GRAPH_DIFFERENT_PROPERTIES
         );
 
         assertCypherResult(graphStreamQuery, List.of(
-            map("source", 0L, "target", 0L, "relationshipType", "REL1", "propertyValue", 42D),
-            map("source", 1L, "target", 1L, "relationshipType", "REL1", "propertyValue", 43D)
+            map("source", nodeA, "target", nodeA, "relationshipType", "REL1", "propertyValue", 42D),
+            map("source", nodeB, "target", nodeB, "relationshipType", "REL1", "propertyValue", 43D)
         ));
     }
 
@@ -294,12 +304,12 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             "   '%s', " +
             "   'newRelProp3'" +
             ") YIELD sourceNodeId, targetNodeId, relationshipType, propertyValue " +
-            "RETURN gds.util.asNode(sourceNodeId).id AS source, gds.util.asNode(targetNodeId).id AS target, relationshipType, propertyValue",
+            "RETURN sourceNodeId AS source, targetNodeId AS target, relationshipType, propertyValue",
             TEST_GRAPH_SAME_PROPERTIES
         );
 
         assertCypherResult(graphStreamQuery, List.of(
-            map("source", 0L, "target", 1L, "relationshipType", "NEW_REL", "propertyValue", 23D)
+            map("source", nodeA, "target", nodeB, "relationshipType", "NEW_REL", "propertyValue", 23D)
         ));
     }
 
