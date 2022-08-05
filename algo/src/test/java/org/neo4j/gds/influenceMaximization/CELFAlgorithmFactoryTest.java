@@ -52,12 +52,12 @@ class CELFAlgorithmFactoryTest {
 
     static Stream<Arguments> configurations() {
         return Stream.of(
-            Arguments.of(1, 1, 70_680),
-            Arguments.of(10, 1, 70_928),
-            Arguments.of(1, 2, 104_952),
-            Arguments.of(10, 2, 105_200),
-            Arguments.of(1, 4, 173_496),
-            Arguments.of(10, 4, 173_744)
+            Arguments.of(1, 1, 2_928),
+            Arguments.of(10, 1, 3_176),
+            Arguments.of(1, 2, 3_456),
+            Arguments.of(10, 2, 3_704),
+            Arguments.of(1, 4, 4_512),
+            Arguments.of(10, 4, 4_760)
 
         );
     }
