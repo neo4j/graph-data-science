@@ -391,7 +391,7 @@ public class Knn extends Algorithm<Knn.Result> {
         private final SplittableRandom random;
         private final SimilarityFunction similarityFunction;
         private final NeighborFilter neighborFilter;
-        private final HugeObjectArray<NeighborList> neighbors;
+        private final HugeObjectArray<NeighborList> allNeighbors;
         private final HugeObjectArray<LongArrayList> allOldNeighbors;
         private final HugeObjectArray<LongArrayList> allNewNeighbors;
         private final HugeObjectArray<LongArrayList> allReverseOldNeighbors;
@@ -399,6 +399,7 @@ public class Knn extends Algorithm<Knn.Result> {
         private final int sampledK;
         private final int randomJoins;
         private final ProgressTracker progressTracker;
+        private final long nodeCount;
         private long updateCount;
         private final Partition partition;
         private long nodePairsConsidered;
@@ -408,7 +409,7 @@ public class Knn extends Algorithm<Knn.Result> {
             SplittableRandom random,
             SimilarityFunction similarityFunction,
             NeighborFilter neighborFilter,
-            HugeObjectArray<NeighborList> neighbors,
+            HugeObjectArray<NeighborList> allNeighbors,
             HugeObjectArray<LongArrayList> allOldNeighbors,
             HugeObjectArray<LongArrayList> allNewNeighbors,
             HugeObjectArray<LongArrayList> allReverseOldNeighbors,
@@ -422,7 +423,8 @@ public class Knn extends Algorithm<Knn.Result> {
             this.random = random;
             this.similarityFunction = similarityFunction;
             this.neighborFilter = neighborFilter;
-            this.neighbors = neighbors;
+            this.allNeighbors = allNeighbors;
+            this.nodeCount = allNewNeighbors.size();
             this.allOldNeighbors = allOldNeighbors;
             this.allNewNeighbors = allNewNeighbors;
             this.allReverseOldNeighbors = allReverseOldNeighbors;
@@ -438,16 +440,6 @@ public class Knn extends Algorithm<Knn.Result> {
 
         @Override
         public void run() {
-            var rng = random;
-            var similarityFunction = this.similarityFunction;
-            var nodeCount = this.allNewNeighbors.size();
-            var sampledK = this.sampledK;
-            var allNeighbors = this.neighbors;
-            var allNewNeighbors = this.allNewNeighbors;
-            var allOldNeighbors = this.allOldNeighbors;
-            var allReverseNewNeighbors = this.allReverseNewNeighbors;
-            var allReverseOldNeighbors = this.allReverseOldNeighbors;
-
             var startNode = partition.startNode();
             long endNode = startNode + partition.nodeCount();
 
@@ -455,38 +447,25 @@ public class Knn extends Algorithm<Knn.Result> {
                 // old[v] ∪ Sample(old′[v], ρK)
                 var oldNeighbors = allOldNeighbors.get(nodeId);
                 if (oldNeighbors != null) {
-                    combineNeighbors(rng, sampledK, allReverseOldNeighbors.get(nodeId), oldNeighbors);
+                    combineNeighbors(allReverseOldNeighbors.get(nodeId), oldNeighbors);
                 }
 
 
                 // new[v] ∪ Sample(new′[v], ρK)
                 var newNeighbors = allNewNeighbors.get(nodeId);
                 if (newNeighbors != null) {
-                    combineNeighbors(rng, sampledK, allReverseNewNeighbors.get(nodeId), newNeighbors);
+                    combineNeighbors(allReverseNewNeighbors.get(nodeId), newNeighbors);
 
-                    this.updateCount += joinNewNeighbors(
-                        rng,
-                        similarityFunction,
-                        allNeighbors,
-                        nodeId,
-                        oldNeighbors,
-                        newNeighbors
-                    );
+                    this.updateCount += joinNewNeighbors(nodeId, oldNeighbors, newNeighbors);
                 }
 
                 // this isn't in the paper
-                randomJoins(rng, similarityFunction, nodeCount, allNeighbors, nodeId, this.randomJoins);
+                randomJoins(nodeCount, nodeId);
             }
             progressTracker.logProgress(partition.nodeCount());
         }
 
-        private long joinNewNeighbors(
-            SplittableRandom rng,
-            SimilarityFunction similarityFunction,
-            HugeObjectArray<NeighborList> allNeighbors,
-            long nodeId,
-            LongArrayList oldNeighbors,
-            LongArrayList newNeighbors
+        private long joinNewNeighbors(long nodeId, LongArrayList oldNeighbors, LongArrayList newNeighbors
         ) {
             long updateCount = 0;
 
@@ -498,7 +477,7 @@ public class Knn extends Algorithm<Knn.Result> {
                 assert elem1 != nodeId;
 
                 // join(u1, nodeId), this isn't in the paper
-                updateCount += join(rng, similarityFunction, allNeighbors, elem1, nodeId);
+                updateCount += join(elem1, nodeId);
 
                 //  try out using the new neighbors between themselves / join(new_nbd, new_ndb)
                 for (int j = i + 1; j < newNeighborsCount; j++) {
@@ -508,10 +487,10 @@ public class Knn extends Algorithm<Knn.Result> {
                     }
 
                     if (neighborFilter.isSymmetric() && similarityFunction.isSymmetric()) {
-                        updateCount += joinSymmetric(rng, similarityFunction, allNeighbors, elem1, elem2);
+                        updateCount += joinSymmetric(elem1, elem2);
                     } else {
-                        updateCount += join(rng, similarityFunction, allNeighbors, elem1, elem2);
-                        updateCount += join(rng, similarityFunction, allNeighbors, elem2, elem1);
+                        updateCount += join(elem1, elem2);
+                        updateCount += join(elem2, elem1);
                     }
                 }
 
@@ -525,10 +504,10 @@ public class Knn extends Algorithm<Knn.Result> {
                         }
 
                         if (neighborFilter.isSymmetric() && similarityFunction.isSymmetric()) {
-                            updateCount += joinSymmetric(rng, similarityFunction, allNeighbors, elem1, elem2);
+                            updateCount += joinSymmetric(elem1, elem2);
                         } else {
-                            updateCount += join(rng, similarityFunction, allNeighbors, elem1, elem2);
-                            updateCount += join(rng, similarityFunction, allNeighbors, elem2, elem1);
+                            updateCount += join(elem1, elem2);
+                            updateCount += join(elem2, elem1);
                         }
                     }
                 }
@@ -536,16 +515,11 @@ public class Knn extends Algorithm<Knn.Result> {
             return updateCount;
         }
 
-        private void combineNeighbors(
-            SplittableRandom rng,
-            int sampledK,
-            @Nullable LongArrayList reversedNeighbors,
-            LongArrayList neighbors
-        ) {
+        private void combineNeighbors(@Nullable LongArrayList reversedNeighbors, LongArrayList neighbors) {
             if (reversedNeighbors != null) {
                 var numberOfReverseNeighbors = reversedNeighbors.size();
                 for (var elem : reversedNeighbors) {
-                    if (rng.nextInt(numberOfReverseNeighbors) < sampledK) {
+                    if (random.nextInt(numberOfReverseNeighbors) < sampledK) {
                         // TODO: this could add nodes twice, maybe? should this be a set?
                         neighbors.add(elem.value);
                     }
@@ -553,32 +527,19 @@ public class Knn extends Algorithm<Knn.Result> {
             }
         }
 
-        private void randomJoins(
-            SplittableRandom rng,
-            SimilarityFunction computer,
-            long nodeCount,
-            HugeObjectArray<NeighborList> allNeighbors,
-            long nodeId,
-            int randomJoins
-        ) {
+        private void randomJoins(long nodeCount, long nodeId) {
             for (int i = 0; i < randomJoins; i++) {
-                var randomNodeId = rng.nextLong(nodeCount - 1);
+                var randomNodeId = random.nextLong(nodeCount - 1);
                 // shifting the randomNode as the randomNode was picked from [0, n-1)
                 if (randomNodeId >= nodeId) {
                     ++randomNodeId;
                 }
                 // random joins are not counted towards the actual update counter
-                join(rng, computer, allNeighbors, nodeId, randomNodeId);
+                join(nodeId, randomNodeId);
             }
         }
 
-        private long joinSymmetric(
-            SplittableRandom splittableRandom,
-            SimilarityFunction similarityFunction,
-            HugeObjectArray<NeighborList> allNeighbors,
-            long node1,
-            long node2
-        ) {
+        private long joinSymmetric(long node1, long node2) {
             assert node1 != node2;
 
             if (neighborFilter.excludeNodePair(node1, node2)) {
@@ -593,25 +554,19 @@ public class Knn extends Algorithm<Knn.Result> {
             var updates = 0L;
 
             synchronized (neighbors1) {
-                updates += neighbors1.add(node2, similarity, splittableRandom, perturbationRate);
+                updates += neighbors1.add(node2, similarity, random, perturbationRate);
             }
 
             var neighbors2 = allNeighbors.get(node2);
 
             synchronized (neighbors2) {
-                updates += neighbors2.add(node1, similarity, splittableRandom, perturbationRate);
+                updates += neighbors2.add(node1, similarity, random, perturbationRate);
             }
 
             return updates;
         }
 
-        private long join(
-            SplittableRandom splittableRandom,
-            SimilarityFunction similarityFunction,
-            HugeObjectArray<NeighborList> allNeighbors,
-            long node1,
-            long node2
-        ) {
+        private long join(long node1, long node2) {
             assert node1 != node2;
 
             if (neighborFilter.excludeNodePair(node1, node2)) {
@@ -623,7 +578,7 @@ public class Knn extends Algorithm<Knn.Result> {
             var neighbors = allNeighbors.get(node1);
 
             synchronized (neighbors) {
-                return neighbors.add(node2, similarity, splittableRandom, perturbationRate);
+                return neighbors.add(node2, similarity, random, perturbationRate);
             }
         }
 
