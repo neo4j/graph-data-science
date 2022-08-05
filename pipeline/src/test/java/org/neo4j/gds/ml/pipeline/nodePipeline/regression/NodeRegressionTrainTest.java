@@ -119,9 +119,9 @@ class NodeRegressionTrainTest {
 
         assertThat(trainingStatistics
             .winningModelOuterTrainMetrics()
-            .get(RegressionMetrics.MEAN_SQUARED_ERROR)).isEqualTo(209.59583, Offset.offset(1e-5));
+            .get(RegressionMetrics.MEAN_SQUARED_ERROR)).isEqualTo(864.2091668534075, Offset.offset(1e-5));
         assertThat(trainingStatistics.winningModelTestMetrics().get(RegressionMetrics.MEAN_SQUARED_ERROR)).isEqualTo(
-            1718.22750,
+            245.34750005760998,
             Offset.offset(1e-5)
         );
     }
@@ -163,8 +163,8 @@ class NodeRegressionTrainTest {
 
 
 
-        assertThat(trainingStatistics.winningModelOuterTrainMetrics().get(RegressionMetrics.MEAN_SQUARED_ERROR)).isEqualTo(104.012222, Offset.offset(1e-5));
-        assertThat(trainingStatistics.winningModelTestMetrics().get(RegressionMetrics.MEAN_SQUARED_ERROR)).isEqualTo(1107.292499, Offset.offset(1e-5));
+        assertThat(trainingStatistics.winningModelOuterTrainMetrics().get(RegressionMetrics.MEAN_SQUARED_ERROR)).isEqualTo(416.9288888888889, Offset.offset(1e-5));
+        assertThat(trainingStatistics.winningModelTestMetrics().get(RegressionMetrics.MEAN_SQUARED_ERROR)).isEqualTo(1265.4725, Offset.offset(1e-5));
     }
 
     @Test
@@ -203,7 +203,7 @@ class NodeRegressionTrainTest {
 
         var trainingStatistics = result.trainingStatistics();
 
-        assertThat(trainingStatistics.bestParameters().toMap()).isEqualTo(candidate1.toMap());
+        assertThat(trainingStatistics.bestParameters().toMap()).isEqualTo(candidate2.toMap());
 
         for (RegressionMetrics metric : evaluationMetrics) {
             assertThat(trainingStatistics.getTrainStats(metric)).hasSize(pipeline.numberOfModelSelectionTrials());

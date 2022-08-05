@@ -370,7 +370,7 @@ class NodeClassificationTrainTest {
         var arrayPropertyConfig = createConfig(
             "arrayPropertyModel",
             metricSpecification,
-            42L
+            44L
         );
         var arrayPropertyTrain = NodeClassificationTrain.create(
             graph,

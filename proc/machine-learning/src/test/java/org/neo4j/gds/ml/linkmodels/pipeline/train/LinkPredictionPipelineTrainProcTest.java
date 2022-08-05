@@ -401,7 +401,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             "}) YIELD modelInfo" +
             " RETURN modelInfo.metrics.OUT_OF_BAG_ERROR.validation.min AS min_oob",
             Map.of("graphName", GRAPH_NAME, "pipeline", "pipe", "modelName", "anything"),
-            List.of(Map.of("min_oob", 0.5))
+            List.of(Map.of("min_oob", 0.42857142857142855))
         );
     }
 
