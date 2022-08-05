@@ -46,7 +46,7 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
 
     @Neo4jGraph
     static String DB_CYPHER = "CREATE" +
-                              "  (a), (b), (c)" +
+                              "  (ignore), (a:N), (b:N), (c:N)" +
                               ", (a)-[:REL1]->(b)" +
                               ", (b)-[:REL1]->(c)" +
                               ", (c)-[:REL2]->(b)" +
@@ -61,6 +61,7 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
 
         runQuery(GdsCypher.call("graph")
             .graphProject()
+            .withNodeLabel("N")
             .withRelationshipType("REL1")
             .withRelationshipType("REL2")
             .yields()

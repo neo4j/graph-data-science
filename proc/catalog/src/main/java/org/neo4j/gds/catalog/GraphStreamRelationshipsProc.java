@@ -21,6 +21,7 @@ package org.neo4j.gds.catalog;
 
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.gds.ProcPreconditions;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphStreamRelationshipsConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStreamRelationshipsProc extends CatalogProc {
@@ -76,9 +78,13 @@ public class GraphStreamRelationshipsProc extends CatalogProc {
                 .boxed()
                 .flatMap(nodeId -> relationshipTypesAndGraphs.stream().flatMap(graphAndRelationshipType -> {
                     var relationshipType = graphAndRelationshipType.getOne();
-                    return graphAndRelationshipType.getTwo()
+                    Graph graph = graphAndRelationshipType.getTwo();
+
+                    var originalSourceId = graph.toOriginalNodeId(nodeId);
+
+                    return graph
                         .streamRelationships(nodeId, Double.NaN)
-                        .map(relationshipCursor -> new TopologyResult(relationshipCursor.sourceId(), relationshipCursor.targetId(), relationshipType));
+                        .map(relationshipCursor -> new TopologyResult(originalSourceId, graph.toOriginalNodeId(relationshipCursor.targetId()), relationshipType));
                 }))
         );
     }
@@ -92,6 +98,11 @@ public class GraphStreamRelationshipsProc extends CatalogProc {
             this.sourceNodeId = sourceNodeId;
             this.targetNodeId = targetNodeId;
             this.relationshipType = relationshipType;
+        }
+
+        @Override
+        public String toString() {
+            return formatWithLocale("TopologyResult(%d, %d, type: %s)", sourceNodeId, targetNodeId, relationshipType);
         }
 
         @Override
