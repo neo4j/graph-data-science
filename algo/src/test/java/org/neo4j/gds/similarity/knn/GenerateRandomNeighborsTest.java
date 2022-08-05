@@ -80,7 +80,6 @@ class GenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
             new KnnNeighborFilter(nodeCount),
             allNeighbors,
             k,
-            k,
             Partition.of(0, nodeCount),
             ProgressTracker.NULL_TRACKER,
             NeighbourConsumers.no_op
