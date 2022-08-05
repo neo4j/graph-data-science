@@ -19,11 +19,13 @@
  */
 package org.neo4j.gds.extension;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.QueryRunner;
+import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
@@ -33,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
@@ -60,7 +63,7 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
             .orElseThrow(() -> new IllegalStateException("No database was found."));
 
         Class<?> requiredTestClass = context.getRequiredTestClass();
-        Optional<String> createQuery = graphProjectQuery(requiredTestClass);
+        Optional<Pair<String, Integer>> createQuery = createQueryAndIdOffset(requiredTestClass);
         Map<String, Node> idMap = neo4jGraphSetup(db, createQuery);
         injectFields(context, db, idMap);
     }
@@ -69,16 +72,22 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
         return Optional.ofNullable(context.getStore(DBMS_NAMESPACE).get(DBMS_KEY, DatabaseManagementService.class));
     }
 
-    private Optional<String> graphProjectQuery(Class<?> testClass) {
+    private Optional<Pair<String, Integer>> createQueryAndIdOffset(Class<?> testClass) {
         return Stream.<Class<?>>iterate(testClass, c -> c.getSuperclass() != null, Class::getSuperclass)
             .flatMap(clazz -> stream(clazz.getDeclaredFields()))
             .filter(field -> field.isAnnotationPresent(Neo4jGraph.class))
             .findFirst()
-            .map(ExtensionUtil::getStringValueOfField);
+            .map(field -> Pair.of(
+                ExtensionUtil.getStringValueOfField(field),
+                field.getAnnotation(Neo4jGraph.class).idOffset()
+            ));
     }
 
-    private Map<String, Node> neo4jGraphSetup(GraphDatabaseService db, Optional<String> createQuery) {
-        return createQuery
+    private Map<String, Node> neo4jGraphSetup(GraphDatabaseService db, Optional<Pair<String, Integer>> createQueryAndOffset) {
+        offsetNodeIds(db, createQueryAndOffset.map(Pair::getRight).orElse(0));
+
+        return createQueryAndOffset
+            .map(Pair::getLeft)
             .map(query -> formatWithLocale("%s %s", query, RETURN_STATEMENT))
             .map(query -> QueryRunner.runQuery(db, query, Neo4jSupportExtension::extractVariableIds))
             .orElseGet(Map::of);
@@ -100,6 +109,15 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
         });
 
         return idMap;
+    }
+
+    private void offsetNodeIds(GraphDatabaseService db, int idOffset) {
+        if (idOffset < 1) {
+            return;
+        }
+        // simulate older nodes for id offset. Ideally we could set the neoId manually or pass an offset instead of creating these temporary nodes.
+        QueryRunner.runQuery(db, "CREATE " + StringJoining.join(IntStream.range(0, idOffset).mapToObj(i -> "()"), ",") + " RETURN 0");
+        QueryRunner.runQuery(db, "MATCH (n) DETACH DELETE (n)");
     }
 
     private void injectFields(ExtensionContext context, GraphDatabaseService db, Map<String, Node> idMap) {

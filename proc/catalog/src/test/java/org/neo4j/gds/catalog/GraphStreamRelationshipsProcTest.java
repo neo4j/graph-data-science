@@ -44,9 +44,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class GraphStreamRelationshipsProcTest extends BaseProcTest {
 
-    @Neo4jGraph
+    @Neo4jGraph(idOffset = 10)
     static String DB_CYPHER = "CREATE" +
-                              "  (ignore), (a:N), (b:N), (c:N)" +
+                              "  (a:N), (b:N), (c:N)" +
                               ", (a)-[:REL1]->(b)" +
                               ", (b)-[:REL1]->(c)" +
                               ", (c)-[:REL2]->(b)" +
