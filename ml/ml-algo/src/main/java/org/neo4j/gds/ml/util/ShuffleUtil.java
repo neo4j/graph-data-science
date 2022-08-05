@@ -28,7 +28,7 @@ public final class ShuffleUtil {
 
     public static void shuffleHugeLongArray(HugeLongArray data, SplittableRandom random) {
         for (long offset = 0; offset < data.size() - 1; offset++) {
-            long swapWith = random.nextLong(offset, data.size() - 1);
+            long swapWith = random.nextLong(offset, data.size());
             long tempValue = data.get(swapWith);
             data.set(swapWith, data.get(offset));
             data.set(offset, tempValue);
