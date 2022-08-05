@@ -214,10 +214,10 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
                 .usingRecursiveComparison()
                 .withComparatorForType(new DoubleComparator(1e-6), Double.class)
                 .isEqualTo(Map.of(
-                    "validation", Map.of("avg", 0.24999999, "max", 0.49999999, "min", 0.0),
-                    "train", Map.of("avg", 0.399999996, "max", 0.799999992, "min", 0.0),
-                    "outerTrain",0.666666,
-                    "test",0.799999992
+                    "validation", Map.of("avg", 0.799999992, "max", 0.799999992, "min", 0.799999992),
+                    "train", Map.of("avg", 0.799999992, "max", 0.799999992, "min", 0.799999992),
+                    "outerTrain",0.7999999936,
+                    "test",0.49999999375000004
                 ));
 
             var featurePipeline = modelInfo.extractingByKey("pipeline", soMap);
@@ -369,8 +369,8 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             List.of(Map.of("OOB", Map.of(
                 "test", 1.0,
                 "validation", Map.of(
-                        "avg", 1.0,
-                        "min", 1.0,
+                        "avg", 0.3333333333333333,
+                        "min", 0.0,
                         "max", 1.0
                     )
                 )
