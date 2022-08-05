@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.splitting;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -33,6 +32,7 @@ import org.neo4j.gds.ml.util.ShuffleUtil;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
+import java.util.SplittableRandom;
 import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -49,7 +49,7 @@ public class StratifiedKFoldSplitter {
     private final int k;
     private final ReadOnlyHugeLongArray ids;
     private final LongToLongFunction targets;
-    private final RandomDataGenerator random;
+    private final SplittableRandom random;
     private final SortedSet<Long> distinctTargets;
 
     public static MemoryEstimation memoryEstimationForNodeSet(int k, double trainFraction) {

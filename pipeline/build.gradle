@@ -49,7 +49,6 @@ dependencies {
     implementation project(':memory-usage')
 
     implementation group: 'org.openjdk.jol',    name: 'jol-core',      version: ver.'jol'
-    implementation group: 'org.apache.commons', name: 'commons-math3', version: ver.'commons-math3'
 
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {

@@ -29,7 +29,6 @@ dependencies {
     implementation project(':string-formatting')
 
     implementation group: 'org.openjdk.jol',    name: 'jol-core',      version: ver.'jol'
-    implementation group: 'org.apache.commons', name: 'commons-math3', version: ver.'commons-math3'
 
     // TEST DEPENDENCIES
     testAnnotationProcessor project(':annotations')
