@@ -209,7 +209,7 @@ CALL gds.alpha.pipeline.nodeRegression.train('myGraph', {
   nodeLabels: ['House'],
   modelName: 'nr-pipeline-model',
   targetProperty: 'price',
-  randomSeed: 42,
+  randomSeed: 25,
   concurrency: 1,
   metrics: ['MEAN_SQUARED_ERROR']
 }) YIELD modelInfo
@@ -224,7 +224,7 @@ RETURN
 [opts="header", cols="6, 2, 2, 2"]
 |===
 | winningModel                                                                                                                                | avgTrainScore | outerTrainScore    | testScore
-| {maxDepth=2147483647, minLeafSize=1, minSplitSize=2, numberOfDecisionTrees=5, methodName=RandomForest, numberOfSamplesRatio=1.0} | 1227.8052857714285 | 1568.8735900000001 | 1996.408637333333
+| {maxDepth=2147483647, minLeafSize=1, minSplitSize=2, numberOfDecisionTrees=5, methodName=RandomForest, numberOfSamplesRatio=1.0} | 658.1848249523812 | 1188.6296009999999 | 1583.5897253333333
 |===
 
 Here we can observe that the `RandomForest` candidate with 5 decision trees performed the best in the training phase.

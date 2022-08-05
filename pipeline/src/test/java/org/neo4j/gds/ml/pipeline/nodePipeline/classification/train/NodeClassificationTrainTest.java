@@ -166,11 +166,11 @@ class NodeClassificationTrainTest {
 
         assertThat(trainingStatistics.winningModelTestMetrics())
             .hasSize(1)
-            .containsEntry(OUT_OF_BAG_ERROR, 0.5);
+            .containsEntry(OUT_OF_BAG_ERROR, 0.3333333333333333);
         assertThat(trainingStatistics.bestCandidate().validationStats().get(OUT_OF_BAG_ERROR).toMap())
             .usingRecursiveComparison()
             .withComparatorForType(new DoubleComparator(1e-5), Double.class)
-            .isEqualTo(Map.of("avg", 0.83333, "max", 1.0, "min", 0.66666));
+            .isEqualTo(Map.of("avg", 0.3333333333333333, "max", 0.3333333333333333, "min", 0.3333333333333333));
     }
 
     @ParameterizedTest
@@ -288,7 +288,7 @@ class NodeClassificationTrainTest {
 
         assertThat(validationStats).hasSize(1);
 
-        assertThat(validationStats.get(0).avg()).isCloseTo(0.8, Offset.offset(0.01));
+        assertThat(validationStats.get(0).avg()).isCloseTo(0.9, Offset.offset(0.01));
 
         var actualWinnerParams = result.trainingStatistics().bestParameters();
         assertThat(actualWinnerParams.toMap()).isEqualTo(mlpTrainerConfig.toMap());
@@ -479,7 +479,7 @@ class NodeClassificationTrainTest {
             "arrayPropertyModel",
             GRAPH_NAME,
             metricSpecification,
-            42L
+            44L
         );
         var arrayPropertyTrain = createWithExecutionContext(
             nodeGraphStore,

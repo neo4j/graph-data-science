@@ -299,7 +299,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     "metrics",
                     Map.of("OUT_OF_BAG_ERROR", Map.of(
                             "test", 0.6666666666666666,
-                            "validation", Map.of("avg", 0.75, "max", 0.8333333333333334, "min", 0.6666666666666666)
+                            "validation", Map.of("avg", 0.6666666666666666, "max", 0.6666666666666666, "min", 0.6666666666666666)
                         )
                     )
                 );
