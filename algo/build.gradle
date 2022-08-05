@@ -44,7 +44,6 @@ dependencies {
     testImplementation project(':test-utils')
     testImplementation project(':ml-test-utils')
     testImplementation project(':ml-algo')
-    testImplementation group: 'org.apache.commons', name: 'commons-math3', version: ver.'commons-math3'
     testImplementation group: 'net.jqwik', name: 'jqwik', version: ver.'jqwik'
     testImplementation group: 'com.github.s1ck', name: 'gdl', version: ver.'gdl'
 }

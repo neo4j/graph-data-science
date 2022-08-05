@@ -28,8 +28,6 @@ dependencies {
     implementation project(':config-api')
     implementation project(':string-formatting')
 
-    implementation group: 'org.apache.commons', name: 'commons-math3', version: ver.'commons-math3'
-
     // TEST DEPENDENCIES
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor group: 'org.immutables',           name: 'value',            version: ver.'immutables'

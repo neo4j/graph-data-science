@@ -48,8 +48,6 @@ dependencies {
     implementation project(':string-formatting')
     implementation project(':memory-usage')
 
-    implementation group: 'org.apache.commons', name: 'commons-math3', version: ver.'commons-math3'
-
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
             transitive = false

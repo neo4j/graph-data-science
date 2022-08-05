@@ -64,8 +64,6 @@ shadowJar {
     exclude '*.proto'
     exclude 'google/'
     exclude 'ml/'
-    // Exclude french localization in commons-math
-    exclude 'assets/'
 
     from licenseFile
     from generateLicensesFiles

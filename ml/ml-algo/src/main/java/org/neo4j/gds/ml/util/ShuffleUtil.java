@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.ml.util;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.Optional;
+import java.util.SplittableRandom;
 
 public final class ShuffleUtil {
 
-    public static void shuffleHugeLongArray(HugeLongArray data, RandomDataGenerator random) {
+    public static void shuffleHugeLongArray(HugeLongArray data, SplittableRandom random) {
         for (long offset = 0; offset < data.size() - 1; offset++) {
             long swapWith = random.nextLong(offset, data.size() - 1);
             long tempValue = data.get(swapWith);
@@ -35,10 +35,8 @@ public final class ShuffleUtil {
         }
     }
 
-    public static RandomDataGenerator createRandomDataGenerator(Optional<Long> randomSeed) {
-        var random = new RandomDataGenerator();
-        randomSeed.ifPresent(random::reSeed);
-        return random;
+    public static SplittableRandom createRandomDataGenerator(Optional<Long> randomSeed) {
+        return randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
     }
 
     private ShuffleUtil() {}
