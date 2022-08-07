@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.modularity;
 
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
@@ -33,7 +32,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.modularity.ModularityStreamProc.DESCRIPTION;
 
 @GdsCallable(name = "gds.alpha.modularity.stream", description = DESCRIPTION, executionMode = STREAM)
-public class ModularityStreamSpec implements AlgorithmSpec<ModularityCalculator, HugeObjectArray<CommunityModularity>, ModularityStreamConfig, Stream<StreamResult>, ModularityCalculatorFactory<ModularityStreamConfig>> {
+public class ModularityStreamSpec implements AlgorithmSpec<ModularityCalculator, ModularityResult, ModularityStreamConfig, Stream<StreamResult>, ModularityCalculatorFactory<ModularityStreamConfig>> {
     @Override
     public String name() {
         return "ModularityStream";
@@ -50,13 +49,14 @@ public class ModularityStreamSpec implements AlgorithmSpec<ModularityCalculator,
     }
 
     @Override
-    public ComputationResultConsumer<ModularityCalculator, HugeObjectArray<CommunityModularity>, ModularityStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<ModularityCalculator, ModularityResult, ModularityStreamConfig, Stream<StreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            var communityModularities = Optional.ofNullable(computationResult.result())
-                .orElseGet(HugeObjectArray::of);
+            var modularityResult = Optional.ofNullable(computationResult.result())
+                .orElseGet(ModularityResult::empty);
 
+            var communityModularities = modularityResult.modularityScores();
             return LongStream
-                .range(0, communityModularities.size())
+                .range(0, modularityResult.communityCount())
                 .mapToObj(communityModularities::get)
                 .map(StreamResult::from);
         };

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.modularity;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
@@ -33,7 +34,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.LongUnaryOperator;
 
-public class ModularityCalculator extends Algorithm<HugeObjectArray<CommunityModularity>> {
+public class ModularityCalculator extends Algorithm<ModularityResult> {
 
     private final Graph graph;
     private final LongUnaryOperator communityIdProvider;
@@ -52,7 +53,7 @@ public class ModularityCalculator extends Algorithm<HugeObjectArray<CommunityMod
     }
 
     @Override
-    public HugeObjectArray<CommunityModularity> compute() {
+    public ModularityResult compute() {
         var nodeCount = graph.nodeCount();
 
         var insideRelationships = HugeAtomicDoubleArray.newArray(nodeCount);
@@ -79,20 +80,23 @@ public class ModularityCalculator extends Algorithm<HugeObjectArray<CommunityMod
             .tasks(tasks)
             .run();
 
-        var result = HugeObjectArray.newArray(
+        var communityCount = communityTracker.cardinality();
+        var communityModularities = HugeObjectArray.newArray(
             CommunityModularity.class,
-            communityTracker.cardinality()
+            communityCount
         );
         var totalRelWeight = totalRelationshipWeight.doubleValue();
         var resultTracker = new MutableLong();
+        var totalModularity = new MutableDouble();
         communityTracker.forEachSetBit(communityId -> {
             var ec = insideRelationships.get(communityId);
             var Kc = totalCommunityRelationships.get(communityId);
             var modularity = (ec - Kc * Kc * (1.0 / totalRelWeight)) / totalRelWeight;
-            result.set(resultTracker.getAndIncrement(), CommunityModularity.of(communityId, modularity));
+            totalModularity.add(modularity);
+            communityModularities.set(resultTracker.getAndIncrement(), CommunityModularity.of(communityId, modularity));
         });
 
-        return result;
+        return ModularityResult.of(totalModularity.doubleValue(), communityCount, communityModularities);
     }
 
     @Override
