@@ -23,7 +23,6 @@ import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.results.StandardStatsResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
-import java.util.List;
 import java.util.Map;
 
 public class StatsResult extends StandardStatsResult {
@@ -31,14 +30,12 @@ public class StatsResult extends StandardStatsResult {
     public final long relationshipCount;
     public final long communityCount;
     public final double modularity;
-    public final List<Double> modularities;
 
     StatsResult(
         long nodeCount,
         long relationshipCount,
         long communityCount,
         double modularity,
-        List<Double> modularities,
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
@@ -48,14 +45,12 @@ public class StatsResult extends StandardStatsResult {
         this.nodeCount = nodeCount;
         this.relationshipCount = relationshipCount;
         this.communityCount = communityCount;
-        this.modularities = modularities;
         this.modularity = modularity;
     }
 
     static class StatsBuilder extends AbstractCommunityResultBuilder<StatsResult> {
 
         double modularity;
-        List<Double> modularities;
         private long relationshipCount;
         private long communityCount;
 
@@ -78,11 +73,6 @@ public class StatsResult extends StandardStatsResult {
             return this;
         }
 
-        StatsBuilder withModularities(List<Double> modularities) {
-            this.modularities = modularities;
-            return this;
-        }
-
         @Override
         protected StatsResult buildResult() {
             return new StatsResult(
@@ -90,7 +80,6 @@ public class StatsResult extends StandardStatsResult {
                 relationshipCount,
                 communityCount,
                 modularity,
-                modularities,
                 preProcessingMillis,
                 computeMillis,
                 postProcessingDuration,

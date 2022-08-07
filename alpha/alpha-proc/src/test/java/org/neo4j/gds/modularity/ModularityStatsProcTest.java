@@ -85,9 +85,9 @@ class ModularityStatsProcTest extends BaseProcTest {
         var rowCount = new MutableInt();
         runQueryWithRowConsumer(statsQuery, row -> {
             assertThat(row.getNumber("nodeCount").longValue()).isEqualTo(6L);
+            assertThat(row.getNumber("relationshipCount").longValue()).isEqualTo(16L);
             assertThat(row.getNumber("communityCount").longValue()).isEqualTo(2L);
             assertThat(row.getNumber("modularity").doubleValue()).isEqualTo(0.1171875);
-            assertThat(row.get("modularities")).asList().containsExactlyInAnyOrder(0.05859375, 0.05859375);
 
             assertThat(row.getNumber("preProcessingMillis").longValue()).isGreaterThanOrEqualTo(0L);
             assertThat(row.getNumber("computeMillis").longValue()).isGreaterThanOrEqualTo(0L);

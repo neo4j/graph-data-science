@@ -25,9 +25,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
-import java.util.Arrays;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -67,7 +65,7 @@ public class ModularityStatsSpec implements AlgorithmSpec<ModularityCalculator, 
                 .mapToDouble(CommunityModularity::modularity)
                 .sum();
 
-            var statsResult = statsBuilder.withModularities(Arrays.stream(result.toArray()).map(CommunityModularity::modularity).collect(Collectors.toList()))
+            var statsResult = statsBuilder
                 .withModularity(modularity)
                 .withCommunityCount(result.size())
                 .withRelationshipCount(computationResult.graph().relationshipCount())
