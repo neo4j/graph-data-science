@@ -271,13 +271,13 @@ class PipelineExecutorTest {
         }
 
         @Override
-        public void validateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {}
+        public void validateBeforeExecution(GraphStore graphStore, Collection<NodeLabel> nodeLabels) {}
 
         @Override
-        public void specificValidateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {}
+        public void specificValidateBeforeExecution(GraphStore graphStore) {}
 
         @Override
-        public void validateFeatureProperties(GraphStore graphStore, AlgoBaseConfig config) {}
+        public void validateFeatureProperties(GraphStore graphStore, Collection<NodeLabel> nodeLabels) {}
     }
 
     private class FailingNodePropertyPipeline extends TrainingPipeline<FeatureStep> {
@@ -305,12 +305,12 @@ class PipelineExecutorTest {
         }
 
         @Override
-        public void validateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {}
+        public void validateBeforeExecution(GraphStore graphStore, Collection<NodeLabel> nodeLabels) {}
 
         @Override
-        public void specificValidateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {}
+        public void specificValidateBeforeExecution(GraphStore graphStore) {}
 
         @Override
-        public void validateFeatureProperties(GraphStore graphStore, AlgoBaseConfig config) {}
+        public void validateFeatureProperties(GraphStore graphStore, Collection<NodeLabel> nodeLabels) {}
     }
 }

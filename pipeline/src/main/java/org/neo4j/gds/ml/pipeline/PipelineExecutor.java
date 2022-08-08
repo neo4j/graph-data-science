@@ -83,10 +83,12 @@ public abstract class PipelineExecutor<
     public RESULT compute() {
         progressTracker.beginSubTask();
 
-        pipeline.validateBeforeExecution(graphStore, config);
-
+        //TODO Refactor actually splitting to after validateBeforeExecution, and only keep metadata generation here
         var dataSplits = splitDataset();
         var graphFilter = dataSplits.get(DatasetSplits.FEATURE_INPUT);
+
+        pipeline.validateBeforeExecution(graphStore, graphFilter.nodeLabels());
+
         var nodePropertyStepExecutor = NodePropertyStepExecutor.of(
             executionContext,
             graphStore,
@@ -99,7 +101,7 @@ public abstract class PipelineExecutor<
         try {
             // we are not validating the size of the feature-input graph as not every nodePropertyStep needs relationships
             nodePropertyStepExecutor.executeNodePropertySteps(pipeline.nodePropertySteps());
-            pipeline.validateFeatureProperties(graphStore, config);
+            pipeline.validateFeatureProperties(graphStore, config.nodeLabelIdentifiers(graphStore));
 
             var result = execute(dataSplits);
             progressTracker.endSubTask();

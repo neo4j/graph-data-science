@@ -19,10 +19,11 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -37,8 +38,8 @@ public interface Pipeline<FEATURE_STEP extends FeatureStep> extends ToMapConvert
 
     List<FEATURE_STEP> featureSteps();
 
-    default void validateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {
-        Set<String> invalidProperties = featurePropertiesMissingFromGraph(graphStore, config);
+    default void validateBeforeExecution(GraphStore graphStore, Collection<NodeLabel> nodeLabels) {
+        Set<String> invalidProperties = featurePropertiesMissingFromGraph(graphStore, nodeLabels);
 
         nodePropertySteps().stream()
             .flatMap(step -> Stream.ofNullable((String) step.config().get(MUTATE_PROPERTY_KEY)))
@@ -48,21 +49,21 @@ public interface Pipeline<FEATURE_STEP extends FeatureStep> extends ToMapConvert
             throw Pipeline.missingNodePropertiesFromFeatureSteps(invalidProperties);
         }
 
-        specificValidateBeforeExecution(graphStore, config);
+        specificValidateBeforeExecution(graphStore);
     }
 
-    void specificValidateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config);
+    void specificValidateBeforeExecution(GraphStore graphStore);
 
-    default void validateFeatureProperties(GraphStore graphStore, AlgoBaseConfig config) {
-        Set<String> invalidProperties = featurePropertiesMissingFromGraph(graphStore, config);
+    default void validateFeatureProperties(GraphStore graphStore, Collection<NodeLabel> nodeLabels) {
+        Set<String> invalidProperties = featurePropertiesMissingFromGraph(graphStore, nodeLabels);
 
         if (!invalidProperties.isEmpty()) {
             throw missingNodePropertiesFromFeatureSteps(invalidProperties);
         }
     }
 
-    default Set<String> featurePropertiesMissingFromGraph(GraphStore graphStore, AlgoBaseConfig config) {
-        var graphProperties = graphStore.nodePropertyKeys(config.nodeLabelIdentifiers(graphStore));
+    default Set<String> featurePropertiesMissingFromGraph(GraphStore graphStore, Collection<NodeLabel> nodeLabels) {
+        var graphProperties = graphStore.nodePropertyKeys(nodeLabels);
 
         return featureSteps()
             .stream()

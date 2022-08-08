@@ -68,7 +68,7 @@ public final class NodeFeatureProducer<PIPELINE_CONFIG extends AlgoBaseConfig & 
     public Features procedureFeatures(NodePropertyTrainingPipeline pipeline) {
         try {
             stepExecutor.executeNodePropertySteps(pipeline.nodePropertySteps());
-            pipeline.validateFeatureProperties(graphStore, trainConfig);
+            pipeline.validateFeatureProperties(graphStore, trainConfig.nodeLabelIdentifiers(graphStore));
 
             // We create a graph, that contains the newly created node properties from the steps
             var graph = graphStore.getGraph(trainConfig.nodeLabelIdentifiers(graphStore));

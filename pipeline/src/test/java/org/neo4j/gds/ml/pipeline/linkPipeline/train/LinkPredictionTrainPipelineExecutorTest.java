@@ -632,6 +632,8 @@ final class LinkPredictionTrainPipelineExecutorTest {
             "(x1:X {height: 50})," +
             "(x2:X {height: 50})," +
 
+            "(y1:Y)," +
+
             "(p1)-[:REL2]->(q1)," +
             "(p1)-[:REL2]->(q3)," +
             "(p1)-[:REL2]->(q5)," +
@@ -647,7 +649,9 @@ final class LinkPredictionTrainPipelineExecutorTest {
             "(p1)-[:CONTEXT]->(p3)," +
             "(q1)-[:CONTEXT]->(q1)," +
             "(q1)-[:CONTEXT]->(q4)," +
-            "(p1)-[:CONTEXT]->(p4)";
+            "(p1)-[:CONTEXT]->(p4)," +
+
+            "(x1)-[:CONTEXT]->(y1)";
         private static final String G_BI = "g_bi";
 
         @Inject
@@ -761,6 +765,57 @@ final class LinkPredictionTrainPipelineExecutorTest {
             );
             assertThat(splits.get(TEST).nodeLabels()).containsExactlyInAnyOrder(NodeLabel.of("P"), NodeLabel.of("Q"));
             assertThat(splits.get(TRAIN).nodeLabels()).containsExactlyInAnyOrder(NodeLabel.of("P"), NodeLabel.of("Q"));
+        }
+
+
+        @Test
+        void validateNodePropertiesExistOnNodesInScope() {
+            LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
+
+            pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder()
+                .validationFolds(2)
+                .negativeSamplingRatio(1)
+                .trainFraction(0.5)
+                .testFraction(0.5)
+                .build());
+
+            pipeline.addNodePropertyStep(new TestFilteredNodePropertyStep(
+                ImmutableGraphFilter.builder()
+                    .nodeLabels(List.of(NodeLabel.of("P"), NodeLabel.of("Q"), NodeLabel.of("X"), NodeLabel.of("Y")))
+                    .intermediateRelationshipTypes(List.of(RelationshipType.of("_FEATURE_INPUT_")))
+                    .contextRelationshipTypes(List.of(RelationshipType.of("CONTEXT")))
+                    .build()));
+
+            pipeline.addTrainerConfig(RandomForestClassifierTrainerConfig.DEFAULT);
+
+            pipeline.addFeatureStep(new L2FeatureStep(List.of("height")));
+
+            var config = LinkPredictionTrainConfigImpl.builder()
+                .modelUser(username)
+                .modelName("model")
+                .graphName(G_BI)
+                .targetRelationshipType("REL2")
+                .sourceNodeLabel("P")
+                .targetNodeLabel("Q")
+                .contextRelationshipTypes(List.of("CONTEXT"))
+                .contextNodeLabels(List.of("X", "Y"))
+                .metrics(List.of(LinkMetric.AUCPR.name()))
+                .pipeline("DUMMY")
+                .negativeClassWeight(1)
+                .randomSeed(1337L)
+                .build();
+
+            var executor = new LinkPredictionTrainPipelineExecutor(
+                pipeline,
+                config,
+                ExecutionContext.EMPTY,
+                graphStore,
+                ProgressTracker.NULL_TRACKER
+            );
+
+            assertThatThrownBy(executor::compute)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Node properties [height] defined in the feature steps do not exist in the graph or part of the pipeline");
         }
     }
 
