@@ -27,6 +27,7 @@ import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -40,7 +41,11 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.SplittableRandom;
 
 public class RandomWalkWithRestarts implements NodesSampler {
@@ -66,17 +71,15 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
         progressTracker.setSteps((long) Math.ceil(inputGraph.nodeCount() * config.samplingRatio()));
 
+        var seenNodes = getSeenNodes(inputGraph);
         startNodesUsed = new LongHashSet();
         var rng = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
-        long expectedNodes = Math.round(inputGraph.nodeCount() * config.samplingRatio());
         var initialStartQualities = initializeQualities(inputGraph, rng);
-        var seenNodes = HugeAtomicBitSet.create(inputGraph.nodeCount());
         Optional<HugeAtomicDoubleArray> totalWeights = initializeTotalWeights(inputGraph.nodeCount());
 
         var tasks = ParallelUtil.tasks(config.concurrency(), () ->
             new Walker(
                 seenNodes,
-                expectedNodes,
                 totalWeights,
                 QUALITY_THRESHOLD_BASE / (config.concurrency() * config.concurrency()),
                 new WalkQualities(initialStartQualities),
@@ -94,7 +97,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
         progressTracker.endSubTask(SAMPLING_TASK_NAME);
 
-        return seenNodes;
+        return seenNodes.sampledNodes();
     }
 
     @Override
@@ -105,6 +108,35 @@ public class RandomWalkWithRestarts implements NodesSampler {
     @Override
     public String progressTaskName() {
         return "Random walk with restarts sampling";
+    }
+
+    private SeenNodes getSeenNodes(Graph inputGraph) {
+        long totalExpectedCount = Math.round(inputGraph.nodeCount() * config.samplingRatio());
+
+        if (config.nodeLabelStratification()) {
+            var expectedCounts = getExpectedCountsPerNodeLabelSet(inputGraph);
+            return new SeenNodesByLabelSet(inputGraph, expectedCounts, totalExpectedCount);
+        }
+
+        return new GlobalSeenNodes(
+            HugeAtomicBitSet.create(inputGraph.nodeCount()),
+            totalExpectedCount
+        );
+    }
+
+    private Map<Set<NodeLabel>, Long> getExpectedCountsPerNodeLabelSet(Graph inputGraph) {
+        var counts = new HashMap<Set<NodeLabel>, Long>();
+
+        inputGraph.forEachNode(nodeId -> {
+            // TODO: Can we avoid GC overhead here somehow?
+            var nodeLabelSet = new HashSet<>(inputGraph.nodeLabels(nodeId));
+            counts.put(nodeLabelSet, 1L + counts.getOrDefault(nodeLabelSet, 0L));
+            return true;
+        });
+        // We round up so that the sum of all expected counts are at least as large as the total expected count.
+        counts.replaceAll((unused, count) -> (long) Math.ceil(config.samplingRatio() * count));
+
+        return counts;
     }
 
     private Optional<HugeAtomicDoubleArray> initializeTotalWeights(long nodeCount) {
@@ -146,8 +178,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
     static class Walker implements Runnable {
 
-        private final HugeAtomicBitSet seenNodes;
-        private final long expectedNodes;
+        private final SeenNodes seenNodes;
         private final Optional<HugeAtomicDoubleArray> totalWeights;
         private final double qualityThreshold;
         private final WalkQualities walkQualities;
@@ -156,11 +187,10 @@ public class RandomWalkWithRestarts implements NodesSampler {
         private final RandomWalkWithRestartsConfig config;
         private final ProgressTracker progressTracker;
 
-        private LongSet startNodesUsed;
+        private final LongSet startNodesUsed;
 
         Walker(
-            HugeAtomicBitSet seenNodes,
-            long expectedNodes,
+            SeenNodes seenNodes,
             Optional<HugeAtomicDoubleArray> totalWeights,
             double qualityThreshold,
             WalkQualities walkQualities,
@@ -170,7 +200,6 @@ public class RandomWalkWithRestarts implements NodesSampler {
             ProgressTracker progressTracker
         ) {
             this.seenNodes = seenNodes;
-            this.expectedNodes = expectedNodes;
             this.totalWeights = totalWeights;
             this.qualityThreshold = qualityThreshold;
             this.walkQualities = walkQualities;
@@ -190,8 +219,8 @@ public class RandomWalkWithRestarts implements NodesSampler {
             int nodesConsidered = 1;
             int walksLeft = (int) Math.round(walkQualities.nodeQuality(currentStartNodePosition) * MAX_WALKS_PER_START);
 
-            while (seenNodes.cardinality() < expectedNodes) {
-                if (!seenNodes.getAndSet(currentNode)) {
+            while (!seenNodes.hasSeenEnough()) {
+                if (seenNodes.addNode(currentNode)) {
                     addedNodes++;
                 }
 
@@ -360,6 +389,97 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
         int size() {
             return size;
+        }
+    }
+
+    interface SeenNodes {
+        /**
+         * Tries to add a node to the sample.
+         * Returns true iff it succeeded in doing so.
+         */
+        boolean addNode(long nodeId);
+
+        boolean hasSeenEnough();
+
+        HugeAtomicBitSet sampledNodes();
+    }
+
+    static class SeenNodesByLabelSet implements SeenNodes {
+        private final Graph inputGraph;
+        private final Map<Set<NodeLabel>, Long> seenPerLabelSet;
+        private final Map<Set<NodeLabel>, Long> expectedNodesPerLabelSet;
+        private final HugeAtomicBitSet seenBitSet;
+        private final long totalExpectedNodes;
+
+        SeenNodesByLabelSet(
+            Graph inputGraph,
+            Map<Set<NodeLabel>, Long> expectedNodesPerLabelSet,
+            long totalExpectedNodes
+        ) {
+            this.inputGraph = inputGraph;
+            this.expectedNodesPerLabelSet = expectedNodesPerLabelSet;
+            this.seenBitSet = HugeAtomicBitSet.create(inputGraph.nodeCount());
+            this.totalExpectedNodes = totalExpectedNodes;
+
+            this.seenPerLabelSet = new HashMap<>(expectedNodesPerLabelSet);
+            this.seenPerLabelSet.replaceAll((unused, value) -> 0L);
+        }
+
+        public boolean addNode(long nodeId) {
+            var labelSet = new HashSet<>(inputGraph.nodeLabels(nodeId));
+            // There's a slight race condition here which may cause there to be an extra node or two in a given
+            // node label set bucket, since the cardinality check and the set are not synchronized together.
+            // Since the sampling is inexact by nature this should be fine.
+            if (seenPerLabelSet.get(labelSet) < expectedNodesPerLabelSet.get(labelSet)) {
+                boolean added = !seenBitSet.getAndSet(nodeId);
+                if (added) {
+                    seenPerLabelSet.compute(labelSet, (unused, count) -> count + 1);
+                }
+                return added;
+            }
+
+            return false;
+        }
+
+        public boolean hasSeenEnough() {
+            if (seenBitSet.cardinality() < totalExpectedNodes) {
+                return false;
+            }
+
+            for (var entry : seenPerLabelSet.entrySet()) {
+                if (entry.getValue() < expectedNodesPerLabelSet.get(entry.getKey())) {
+                    // Should only happen is edge cases when the rounding is not fully consistent.
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public HugeAtomicBitSet sampledNodes() {
+            return seenBitSet;
+        }
+    }
+
+    static class GlobalSeenNodes implements SeenNodes {
+        private final HugeAtomicBitSet seenBitSet;
+        private final long expectedNodes;
+
+        GlobalSeenNodes(HugeAtomicBitSet seenBitSet, long expectedNodes) {
+            this.seenBitSet = seenBitSet;
+            this.expectedNodes = expectedNodes;
+        }
+
+        public boolean addNode(long nodeId) {
+            return !seenBitSet.getAndSet(nodeId);
+        }
+
+        public boolean hasSeenEnough() {
+            return seenBitSet.cardinality() >= expectedNodes;
+        }
+
+        public HugeAtomicBitSet sampledNodes() {
+            return seenBitSet;
         }
     }
 }

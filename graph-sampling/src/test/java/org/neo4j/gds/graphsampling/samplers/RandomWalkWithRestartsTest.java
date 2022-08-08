@@ -21,6 +21,7 @@ package org.neo4j.gds.graphsampling.samplers;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -31,12 +32,16 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfigImpl;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-class RandowWalkWithRestartsTest {
+class RandomWalkWithRestartsTest {
 
     @GdlGraph(idOffset = 42)
     private static final String DB_CYPHER =
@@ -295,5 +300,41 @@ class RandowWalkWithRestartsTest {
         var nodes = rwr.compute(getGraph(config), ProgressTracker.NULL_TRACKER);
 
         assertThat(nodes.cardinality()).isEqualTo(14);
+    }
+
+    @Test
+    void shouldSampleWithStratification() {
+        var config = RandomWalkWithRestartsConfigImpl.builder()
+            .startNodes(List.of(idFunction.of("a")))
+            .samplingRatio(0.5)
+            .restartProbability(0.1)
+            .randomSeed(42L)
+            .concurrency(1)
+            .nodeLabelStratification(true)
+            .build();
+
+        var rwr = new RandomWalkWithRestarts(config);
+        var graph = getGraph(config);
+        var nodes = rwr.compute(graph, ProgressTracker.NULL_TRACKER);
+
+        assertThat(nodes.cardinality()).isEqualTo(8);
+
+        var expectedLabelCounts = Map.of(
+            Set.of(NodeLabel.of("X")), 1L,
+            Set.of(NodeLabel.of("Z")), 2L,
+            Set.of(NodeLabel.of("M")), 3L,
+            Set.of(NodeLabel.of("N")), 2L
+        );
+        var labelCounts = new HashMap<Set<NodeLabel>, Long>();
+        for (long nodeId = 0; nodeId < nodes.size(); nodeId++) {
+            if (!nodes.get(nodeId)) {
+                continue;
+            }
+
+            var labelSet = new HashSet<>(graph.nodeLabels(nodeId));
+            labelCounts.put(labelSet, 1L + labelCounts.getOrDefault(labelSet, 0L));
+        }
+
+        assertThat(labelCounts).isEqualTo(expectedLabelCounts);
     }
 }

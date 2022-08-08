@@ -46,6 +46,10 @@ public interface RandomWalkWithRestartsConfig extends GraphSampleAlgoConfig, Sin
         return 0.15;
     }
 
+    default boolean nodeLabelStratification() {
+        return false;
+    }
+
     static RandomWalkWithRestartsConfig of(
         CypherMapWrapper procedureConfig
     ) {
