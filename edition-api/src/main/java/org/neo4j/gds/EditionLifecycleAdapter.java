@@ -33,6 +33,8 @@ import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.context.ExtensionContext;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 
+import java.util.Optional;
+
 import static org.neo4j.gds.utils.PriorityServiceLoader.loadService;
 
 public class EditionLifecycleAdapter extends LifecycleAdapter {
@@ -40,15 +42,18 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
     private final ExtensionContext context;
     private final Config config;
     private final GlobalProcedures globalProceduresRegistry;
+    private final Optional<LicenseState> licenseState;
 
     EditionLifecycleAdapter(
         ExtensionContext context,
         Config config,
-        GlobalProcedures globalProceduresRegistry
+        GlobalProcedures globalProceduresRegistry,
+        Optional<LicenseState> licenseState
     ) {
         this.context = context;
         this.config = config;
         this.globalProceduresRegistry = globalProceduresRegistry;
+        this.licenseState = licenseState;
     }
 
     @Override
@@ -64,15 +69,23 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
     }
 
     private LicenseState registerLicenseState() {
+        var licenseState = this.licenseState.orElseGet(this::loadLicenseState);
+        context.dependencySatisfier().satisfyDependency(licenseState);
+
+        globalProceduresRegistry.registerComponent(
+            LicenseState.class,
+            (context) -> context.dependencyResolver().resolveDependency(LicenseState.class),
+            true
+        );
+        return licenseState;
+    }
+
+    private LicenseState loadLicenseState() {
         var licensingServiceBuilder = loadService(
             LicensingServiceBuilder.class,
             LicensingServiceBuilder::priority
         );
-        var licensingService = licensingServiceBuilder.build(config);
-
-        globalProceduresRegistry.registerComponent(LicenseState.class, (context) -> licensingService.get(), true);
-        context.dependencySatisfier().satisfyDependency(licensingService.get());
-        return licensingService.get();
+        return licensingServiceBuilder.build(config).get();
     }
 
     private void registerSecurityContextService(LicenseState licenseState) {
