@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds;
 
-import java.util.Optional;
-
 public final class OpenGdsLicenseState implements LicenseState {
 
     public static final LicenseState INSTANCE = new OpenGdsLicenseState();
@@ -28,17 +26,7 @@ public final class OpenGdsLicenseState implements LicenseState {
     private OpenGdsLicenseState() {}
 
     @Override
-    public String name() {
-        return "OpenGDS";
-    }
-
-    @Override
-    public Optional<String> errorMessage() {
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean isValid() {
-        return true;
+    public <R, P> R visit(VisitorWithParameter<R, P> visitor, P parameter) {
+        return visitor.unlicensed("OpenGDS", parameter);
     }
 }
