@@ -81,8 +81,8 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
                 .perNode("backwardNodes", HugeLongArray::memoryEstimation)
                 .perNode("deltas", HugeDoubleArray::memoryEstimation)
                 .perNode("sigmas", HugeLongArray::memoryEstimation)
-                .add("ForwardTraversor", MemoryEstimations.setup("traversor",
-                    (dimensions, concurrency) -> MemoryEstimations.builder(ForwardTraversor.class)
+                .add("ForwardTraverser", MemoryEstimations.setup("traversor",
+                    (dimensions, concurrency) -> MemoryEstimations.builder(ForwardTraverser.class)
                         .perNode("distances", HugeIntArray::memoryEstimation)
                         .build())
                 ).build()

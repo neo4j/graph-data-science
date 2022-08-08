@@ -29,11 +29,10 @@ import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 
 @GdlExtension
-class ForwardTraversorTest {
+class ForwardTraverserTest {
 
     @GdlGraph(graphNamePrefix = "equallyWeighted")
     private static final String equallyWeightedGdl =
@@ -62,27 +61,22 @@ class ForwardTraversorTest {
     @Inject
     private Graph weightedGraph;
 
-    @Inject
-    private IdFunction weightedIdFunction;
-
-
     @Test
     void shouldWorkOnUnWeightedGraphs() {
         var backwardNodes = HugeLongArrayStack.newStack(equallyWeightedGraph.nodeCount());
         var predecessors = HugeObjectArray.newArray(LongArrayList.class, equallyWeightedGraph.nodeCount());
         var sigma = HugeLongArray.newArray(equallyWeightedGraph.nodeCount());
-        UnweightedForwardTraversor unweightedForwardTraversor = UnweightedForwardTraversor.create(
+        UnweightedForwardTraverser unweightedForwardTraverser = UnweightedForwardTraverser.create(
             equallyWeightedGraph,
             predecessors,
             backwardNodes,
             sigma,
             TerminationFlag.RUNNING_TRUE
         );
-        unweightedForwardTraversor.clear();
-
+        unweightedForwardTraverser.clear();
 
         sigma.addTo(0, 1);
-        unweightedForwardTraversor.traverse(0);
+        unweightedForwardTraverser.traverse(0);
 
         SoftAssertions softAssertions = new SoftAssertions();
 
@@ -112,7 +106,7 @@ class ForwardTraversorTest {
         var backwardNodes = HugeLongArrayStack.newStack(equallyWeightedGraph.nodeCount());
         var predecessors = HugeObjectArray.newArray(LongArrayList.class, equallyWeightedGraph.nodeCount());
         var sigma = HugeLongArray.newArray(equallyWeightedGraph.nodeCount());
-        WeightedForwardTraversor weightedForwardTraversor = WeightedForwardTraversor.create(
+        WeightedForwardTraverser weightedForwardTraversor = WeightedForwardTraverser.create(
             weightedGraph,
             predecessors,
             backwardNodes,
@@ -120,7 +114,6 @@ class ForwardTraversorTest {
             TerminationFlag.RUNNING_TRUE
         );
         weightedForwardTraversor.clear();
-
 
         sigma.addTo(0, 1);
         weightedForwardTraversor.traverse(0);
@@ -147,6 +140,4 @@ class ForwardTraversorTest {
 
         softAssertions.assertAll();
     }
-
-
 }

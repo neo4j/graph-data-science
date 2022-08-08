@@ -26,13 +26,13 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
-interface ForwardTraversor {
+interface ForwardTraverser {
 
     void traverse(long startNodeId);
 
     void clear();
 
-    static ForwardTraversor create(
+    static ForwardTraverser create(
         boolean weighted,
         Graph graph,
         HugeObjectArray<LongArrayList> predecessors,
@@ -41,7 +41,7 @@ interface ForwardTraversor {
         TerminationFlag terminationFlag
     ) {
         if (weighted) {
-            return WeightedForwardTraversor.create(
+            return WeightedForwardTraverser.create(
                 graph.concurrentCopy(),
                 predecessors,
                 backwardNodes,
@@ -49,7 +49,7 @@ interface ForwardTraversor {
                 terminationFlag
             );
         } else {
-            return UnweightedForwardTraversor.create(
+            return UnweightedForwardTraverser.create(
                 graph.concurrentCopy(),
                 predecessors,
                 backwardNodes,

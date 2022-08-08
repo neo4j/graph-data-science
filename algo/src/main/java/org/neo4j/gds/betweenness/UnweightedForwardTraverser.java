@@ -28,9 +28,9 @@ import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
-class UnweightedForwardTraversor implements ForwardTraversor {
+class UnweightedForwardTraverser implements ForwardTraverser {
 
-    static UnweightedForwardTraversor create(
+    static UnweightedForwardTraverser create(
         Graph graph,
         HugeObjectArray<LongArrayList> predecessors,
         HugeLongArrayStack backwardNodes,
@@ -41,7 +41,7 @@ class UnweightedForwardTraversor implements ForwardTraversor {
         var distances = HugeIntArray.newArray(nodeCount);
         distances.fill(-1);
         var nodeQueue = HugeLongArrayQueue.newQueue(nodeCount);
-        return new UnweightedForwardTraversor(
+        return new UnweightedForwardTraverser(
             graph,
             predecessors,
             backwardNodes,
@@ -60,7 +60,7 @@ class UnweightedForwardTraversor implements ForwardTraversor {
     private final HugeIntArray distances;
     private final TerminationFlag terminationFlag;
 
-    UnweightedForwardTraversor(
+    UnweightedForwardTraverser(
         Graph graph,
         HugeObjectArray<LongArrayList> predecessors,
         HugeLongArrayStack backwardNodes,
@@ -85,7 +85,7 @@ class UnweightedForwardTraversor implements ForwardTraversor {
 
         while (!nodeQueue.isEmpty()) {
             long node = nodeQueue.remove();
-             backwardNodes.push(node);
+            backwardNodes.push(node);
             int distanceNode = distances.get(node);
 
             graph.forEachRelationship(node, (source, target) -> {

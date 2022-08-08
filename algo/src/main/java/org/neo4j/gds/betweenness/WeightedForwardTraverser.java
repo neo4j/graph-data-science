@@ -28,9 +28,9 @@ import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 
-final class WeightedForwardTraversor implements ForwardTraversor {
+final class WeightedForwardTraverser implements ForwardTraverser {
 
-    static WeightedForwardTraversor create(
+    static WeightedForwardTraverser create(
         Graph graph,
         HugeObjectArray<LongArrayList> predecessors,
         HugeLongArrayStack backwardNodes,
@@ -40,7 +40,7 @@ final class WeightedForwardTraversor implements ForwardTraversor {
         var nodeCount = graph.nodeCount();
         var nodeQueue = HugeLongPriorityQueue.min(nodeCount);
         var visited = new BitSet(nodeCount);
-        return new WeightedForwardTraversor(
+        return new WeightedForwardTraverser(
             graph,
             predecessors,
             backwardNodes,
@@ -59,7 +59,7 @@ final class WeightedForwardTraversor implements ForwardTraversor {
     private final HugeObjectArray<LongArrayList> predecessors;
     private final BitSet visited;
 
-    private WeightedForwardTraversor(
+    private WeightedForwardTraverser(
         Graph graph,
         HugeObjectArray<LongArrayList> predecessors,
         HugeLongArrayStack backwardNodes,

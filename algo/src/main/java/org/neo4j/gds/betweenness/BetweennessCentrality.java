@@ -104,7 +104,7 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
 
         @Override
         public void run() {
-            var forwardTraversor = ForwardTraversor.create(
+            var forwardTraversor = ForwardTraverser.create(
                 weighted,
                 graph.concurrentCopy(),
                 predecessors,
