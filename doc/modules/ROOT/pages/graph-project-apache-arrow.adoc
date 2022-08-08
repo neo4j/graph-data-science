@@ -227,6 +227,7 @@ The following table contains all settings for the database import.
 |===
 | Name              | Type              | Optional  | Default value         | Description
 | name              | String            | No        | None                  | The name of the import process and the resulting database.
+| id_type           | String            | Yes       | INTEGER               | Sets the node id type used in the input data. Can be either `INTEGER` or `STRING`.
 | concurrency       | Integer           | Yes       | Available cores       | Number of threads to use for the database creation process.
 | debug_log         | Boolean           | Yes       | False                 | Write the database creation process into the log.
 | id_property       | String            | Yes       | `__originalId__`      | The node property key which stores the node id of the input data.
@@ -238,3 +239,13 @@ The following table contains all settings for the database import.
 
 After sending the action to initialize the import process, the subsequent protocol is the same as for creating an in-memory graph.
 See xref:graph-project-apache-arrow.adoc#arrow-send-nodes[Sending node records via PUT as a Flight stream] and xref:graph-project-apache-arrow.adoc#arrow-send-relationships[Sending relationship records via PUT as a Flight stream] for further details.
+
+
+=== Supported node identifier types
+
+For the `CREATE_DATABASE` action, one can set the `id_type` configuration parameter.
+The two possible options are `INTEGER` and `STRING`, with `INTEGER` being the default.
+If set to `INTEGER`, the node id columns for both node (`nodeId`) and relationship records (`sourceNodeId` and `targetNodeId`), are expected to be represented as `BigIntVector`.
+For the `STRING` id type, the server expects the identifiers to be represented as `VarCharVector`.
+In both cases, the original id is being stored as a property on the imported nodes.
+The property key can be changed by the `id_property` config option.
