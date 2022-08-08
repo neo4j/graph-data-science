@@ -9,6 +9,7 @@
 :directed:
 :undirected:
 :homogeneous:
+:weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 
@@ -18,11 +19,13 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 Betweenness centrality is a way of detecting the amount of influence a node has over the flow of information in a graph.
 It is often used to find nodes that serve as a bridge from one part of a graph to another.
 
-The algorithm calculates unweighted shortest paths between all pairs of nodes in a graph.
+The algorithm calculates shortest paths between all pairs of nodes in a graph.
 Each node receives a score, based on the number of shortest paths that pass through the node.
 Nodes that more frequently lie on shortest paths between other nodes will have higher betweenness centrality scores.
 
+Betweenness centrality is implemented for graphs without weights or with positive weights.
 The GDS implementation is based on https://www.uni-konstanz.de/mmsp/pubsys/publishedFiles/BrPi07.pdf[Brandes' approximate algorithm^] for unweighted graphs.
+For weighted graphs, multiple concurrent xref:algorithms/dijkstra-single-source.adoc[Dijkstra algorithms] are used.
 The implementation requires _O(n + m)_ space and runs in _O(n * m)_ time, where _n_ is the number of nodes and _m_ the number of relationships in the graph.
 
 For more information on this algorithm, see:

@@ -24,7 +24,7 @@ The Dijkstra Single-Source algorithm computes the shortest paths between a sourc
 To compute the shortest path between a source and a target node, xref:algorithms/dijkstra-source-target.adoc[Dijkstra Source-Target] can be used.
 
 The GDS implementation is based on the http://www-m3.ma.tum.de/twiki/pub/MN0506/WebHome/dijkstra.pdf[original description] and uses a binary heap as priority queue.
-The implementation is also used for the xref:algorithms/astar.adoc[A*] and xref:algorithms/yens.adoc[Yen's] algorithms.
+The implementation is also used for the xref:algorithms/astar.adoc[A*] and xref:algorithms/yens.adoc[Yen's] algorithms, as well as xref:algorithms/betweenness-centrality.adoc[weighted Betweenness Centrality].
 The algorithm implementation is executed using a single thread and altering the concurrency configuration has no effect.
 You can consider xref:algorithms/delta-single-source.adoc[Delta-Stepping] for an efficient parallel shortest path algorithm instead.
 
