@@ -26,6 +26,7 @@ import org.neo4j.configuration.SettingValueParser;
 import org.neo4j.gds.annotation.ValueClass;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static org.immutables.builder.Builder.Parameter;
@@ -52,7 +53,23 @@ public interface Setting<T> {
         return false;
     }
 
+    /**
+     * Make this setting immutable.
+     */
+    @Value.Default
+    default boolean immutable() {
+        return false;
+    }
+
     List<SettingConstraint<T>> constraints();
+
+    /**
+     * A setting dependency is used to inherit missing parts of this
+     * setting by whatever is set for the dependency setting.
+     * For example, for relative paths, this could be the root directory;
+     * for a socket addresses, it could be the host or the port.
+     */
+    Optional<org.neo4j.graphdb.config.Setting<T>> dependency();
 
     // consider this private
     Function<Setting<T>, org.neo4j.graphdb.config.Setting<T>> convert();
@@ -61,8 +78,14 @@ public interface Setting<T> {
 
         Builder<T> addConstraint(SettingConstraint<T> constraint);
 
+        Builder<T> dependency(org.neo4j.graphdb.config.Setting<T> dependency);
+
         default Builder<T> dynamic() {
             return dynamic(true);
+        }
+
+        default Builder<T> immutable() {
+            return immutable(true);
         }
 
         default org.neo4j.graphdb.config.Setting<T> build() {
@@ -73,5 +96,7 @@ public interface Setting<T> {
         Setting<T> buildInner();
 
         Builder<T> dynamic(boolean dynamic);
+
+        Builder<T> immutable(boolean dynamic);
     }
 }

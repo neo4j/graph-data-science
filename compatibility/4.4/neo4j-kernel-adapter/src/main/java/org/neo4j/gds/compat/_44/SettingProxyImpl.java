@@ -36,6 +36,10 @@ public class SettingProxyImpl implements SettingProxyApi {
         if (setting.dynamic()) {
             builder = builder.dynamic();
         }
+        if (setting.immutable()) {
+            builder = builder.immutable();
+        }
+        setting.dependency().ifPresent(builder::setDependency);
         setting.constraints().forEach(builder::addConstraint);
         return builder.build();
     }
