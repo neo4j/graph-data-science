@@ -312,3 +312,46 @@ Because we are using the `UNDIRECTED` orientation, we will write twice as many r
 As we can see in the `samplingStats`, we use the approximate search strategy and check 52 possible links during the prediction.
 Though in this small example we actually consider more links that in the exhaustive case, this will typically not be the case for larger graphs.
 Since the relationships we write are undirected, reported `relationshipsWritten` is 16 when we search for the best (`topK = 1`) prediction for each node.
+
+
+
+[[algorithms-link-prediction-pipelines-predict-examples-filtered]]
+=== Predict with context filtering
+
+In `Training the pipeline`, we trained another model `lp-pipeline-model-filtered` on `fullGraph` which uses context `City` nodes and context `LIVES` and `BORN` relationships.
+
+We can leverage this model in prediction, optionally overriding node label or relationship type filterings in prediciton.
+In this case we do not, and prediction will inherit the filtering from train config of the `lp-pipeline-model-filtering`.
+(i.e We predict Person-KNOWS-Person relationships, additionally using `City` nodes and `LIVES` and `BORN` relationships for node properties generation.)
+
+
+[role=query-example, group=lp]
+--
+[source, cypher]
+----
+CALL gds.beta.pipeline.linkPrediction.predict.stream('fullGraph', {
+  modelName: 'lp-pipeline-model-filtered',
+  topN: 5,
+  threshold: 0.45
+})
+ YIELD node1, node2, probability
+ RETURN gds.util.asNode(node1).name AS person1, gds.util.asNode(node2).name AS person2, probability
+ ORDER BY probability DESC, person1
+----
+
+We specified `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
+As the default samplingRate is `1`, we use the xref:machine-learning/linkprediction-pipelines/predict.adoc#algorithms-link-prediction-pipelines-predict-exhaustive-search[exhaustive-search].
+
+.Results
+[opts="header"]
+|===
+| person1   | person2   | probability
+| "Will"      | "Veselin"   | 0.585064825714746
+| "Greg"      | "Veselin"   | 0.5
+| "Mark"      | "Veselin"   | 0.5
+| "Alice"     | "Veselin"   | 0.49887285385083
+| "Alice"     | "Will"      | 0.457493887854147
+|===
+
+We can see that our model predicts the same 5 most likely links with `lp-pipeline-model`. However, the probabilities vary slightly, due to the additional context information used in training and prediction.
+--

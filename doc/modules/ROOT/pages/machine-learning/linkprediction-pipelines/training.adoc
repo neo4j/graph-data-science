@@ -313,7 +313,9 @@ CALL gds.graph.project(
     Person: {
       properties: ['age']
     },
-    City: {}
+    City: {
+      properties: {age: {defaultValue: 1}}
+    }
   },
   {
     KNOWS: {
