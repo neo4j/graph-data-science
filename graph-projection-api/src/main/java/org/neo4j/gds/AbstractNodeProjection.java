@@ -27,6 +27,7 @@ import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 @DataClass
 public abstract class AbstractNodeProjection extends ElementProjection {
@@ -61,8 +62,11 @@ public abstract class AbstractNodeProjection extends ElementProjection {
             return NodeProjection.fromString((String) object);
         }
         if (object instanceof Map) {
-            @SuppressWarnings("unchecked") Map<String, Object> map = (Map) object;
-            return fromMap(map, nodeLabel);
+            var caseInsensitiveMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+            //noinspection unchecked
+            caseInsensitiveMap.putAll((Map<String, Object>) object);
+
+            return fromMap(caseInsensitiveMap, nodeLabel);
         }
         throw new IllegalArgumentException(StringFormatting.formatWithLocale(
             "Cannot construct a node filter out of a %s",

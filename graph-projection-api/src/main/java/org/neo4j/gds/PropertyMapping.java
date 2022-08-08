@@ -29,6 +29,7 @@ import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -79,7 +80,9 @@ public abstract class PropertyMapping {
                 )
             );
         } else if (stringOrMap instanceof Map) {
-            Map<String, Object> propertyMap = (Map) stringOrMap;
+            var propertyMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+            //noinspection unchecked
+            propertyMap.putAll((Map<String, Object>) stringOrMap);
             Object propertyNameValue = propertyMap.getOrDefault(PROPERTY_KEY, propertyKey);
             if (!(propertyNameValue instanceof String)) {
                 throw new IllegalArgumentException(formatWithLocale(
