@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
@@ -27,20 +28,37 @@ import org.neo4j.kernel.extension.ExtensionType;
 import org.neo4j.kernel.extension.context.ExtensionContext;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 
+import java.util.Optional;
+
 @ServiceProvider
 public class EditionFactory extends ExtensionFactory<EditionFactory.Dependencies> {
 
+    private final Optional<LicenseState> licenseState;
+
     public EditionFactory() {
         super(ExtensionType.DATABASE, "gds.edition_factory");
+        this.licenseState = Optional.empty();
+    }
+
+    @TestOnly
+    public EditionFactory(LicenseState licenseState) {
+        super(ExtensionType.DATABASE, "gds.edition_factory");
+        this.licenseState = Optional.of(licenseState);
     }
 
     @Override
     public Lifecycle newInstance(ExtensionContext context, Dependencies dependencies) {
-        return new EditionLifecycleAdapter(context, dependencies.config(), dependencies.globalProceduresRegistry());
+        return new EditionLifecycleAdapter(
+            context,
+            dependencies.config(),
+            dependencies.globalProceduresRegistry(),
+            licenseState
+        );
     }
 
     interface Dependencies {
         Config config();
+
         GlobalProcedures globalProceduresRegistry();
     }
 }
