@@ -154,14 +154,17 @@ image::example-graphs/link-prediction.svg[Visualization of the example graph,ali
 [source, cypher, role=noplay setup-query, group=lp]
 ----
 CREATE
-  (alice:Person {name: 'Alice', numberOfPosts: 38}),
-  (michael:Person {name: 'Michael', numberOfPosts: 67}),
-  (karin:Person {name: 'Karin', numberOfPosts: 30}),
-  (chris:Person {name: 'Chris', numberOfPosts: 132}),
-  (will:Person {name: 'Will', numberOfPosts: 6}),
-  (mark:Person {name: 'Mark', numberOfPosts: 32}),
-  (greg:Person {name: 'Greg', numberOfPosts: 29}),
-  (veselin:Person {name: 'Veselin', numberOfPosts: 3}),
+  (alice:Person {name: 'Alice', age: 38}),
+  (michael:Person {name: 'Michael', age: 67}),
+  (karin:Person {name: 'Karin', age: 30}),
+  (chris:Person {name: 'Chris', age: 52}),
+  (will:Person {name: 'Will', age: 6}),
+  (mark:Person {name: 'Mark', age: 32}),
+  (greg:Person {name: 'Greg', age: 29}),
+  (veselin:Person {name: 'Veselin', age: 3}),
+
+  (london:City {name: 'London'}),
+  (malmo:City {name: 'Malmo'}),
 
   (alice)-[:KNOWS]->(michael),
   (michael)-[:KNOWS]->(karin),
@@ -174,7 +177,21 @@ CREATE
   (greg)-[:KNOWS]->(chris),
   (veselin)-[:KNOWS]->(chris),
   (karin)-[:KNOWS]->(veselin),
-  (chris)-[:KNOWS]->(karin);
+  (chris)-[:KNOWS]->(karin),
+
+  (alice)-[:LIVES]->(london),
+  (michael)-[:LIVES]->(london),
+  (karin)-[:LIVES]->(london),
+  (chris)-[:LIVES]->(malmo),
+  (will)-[:LIVES]->(malmo),
+
+  (alice)-[:BORN]->(london),
+  (michael)-[:BORN]->(london),
+  (karin)-[:BORN]->(malmo),
+  (chris)-[:BORN]->(london),
+  (will)-[:BORN]->(malmo),
+  (greg)-[:BORN]->(london),
+  (veselin)-[:BORN]->(malmo)
 ----
 
 With the graph in Neo4j we can now project it into the graph catalog.
@@ -190,7 +207,7 @@ CALL gds.graph.project(
   'myGraph',
   {
     Person: {
-      properties: ['numberOfPosts']
+      properties: ['age']
     }
   },
   {
@@ -222,8 +239,6 @@ For more details on `estimate` in general, see xref:common-usage/memory-estimati
 CALL gds.beta.pipeline.linkPrediction.train.estimate('myGraph', {
   pipeline: 'pipe',
   modelName: 'lp-pipeline-model',
-  sourceNodeLabel: 'Person',
-  targetNodeLabel: 'Person',
   targetRelationshipType: 'KNOWS'
 })
 YIELD requiredMemory
@@ -250,8 +265,6 @@ CALL gds.beta.pipeline.linkPrediction.train('myGraph', {
   pipeline: 'pipe',
   modelName: 'lp-pipeline-model',
   metrics: ['AUCPR', 'OUT_OF_BAG_ERROR'],
-  sourceNodeLabel: 'Person',
-  targetNodeLabel: 'Person',
   targetRelationshipType: 'KNOWS',
   randomSeed: 73
 }) YIELD modelInfo, modelSelectionStats
@@ -269,8 +282,78 @@ RETURN
 | winningModel                                                                                                                                | avgTrainScore      | outerTrainScore     | testScore | validationScores
 | {maxEpochs=100, minEpochs=1, penalty=1.0, patience=2, methodName=MultilayerPerceptron, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001} | 0.799603174603175 |  0.8 | 0.75 | [0.5555555555555555, 0.7083333333333334, 0.75, 0.5555555555555555, 0.5555555555555555]
 |===
-
+--
 We can see the MLP model configuration won, and has a score of `0.8` on the test set.
 The score computed as the xref:machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-metrics[AUCPR] metric, which is in the range [0, 1].
 A model which gives higher score to all links than non-links will have a score of 1.0, and a model that assigns random scores will on average have a score of 0.5.
+
+
+=== Training with context filters
+
+In the above example we projected a Person-KNOWS-Person subgraph and used it for training and testing.
+Much information in the original graph is not used.
+We might want to utilize more node and relationship types to generate node properties (and link features) and investigate whether it improves link prediction.
+We can do that by passing in `contextNodeLabels` and `contextRelationshipTypes`.
+We explicitly pass in `sourceNodeLabel` and `targetNodeLabel` to specify a narrower set of nodes to be used for training and testing.
+
+The following statement will project the full graph using a native projection and store it in the graph catalog under the name 'fullGraph'.
+[source, cypher, role=noplay graph-project-query, group=lp]
+----
+CALL gds.graph.project(
+  'fullGraph',
+  {
+    Person: {
+      properties: ['age']
+    },
+    City: {}
+  },
+  {
+    KNOWS: {
+      orientation: 'UNDIRECTED'
+    },
+    LIVES: {},
+    BORN: {}
+  }
+)
+----
+
+
+The full graph contains 2 node labels and 3 relationship types.
+We still train a Person-KNOWS-Person model, but use context information Person-LIVES-City, Person-BORN-City to generate node properties that the model uses in training.
+
+[[linkprediction-pipeline-examples-filtered-train-query]]
+[role=query-example,group=lp]
 --
+.The following will train another model using the same pipeline, adding `contextNodeLabels` and `contextRelationshipTypes`:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.linkPrediction.train('fullGraph', {
+  pipeline: 'pipe',
+  modelName: 'lp-pipeline-model-filtered',
+  metrics: ['AUCPR', 'OUT_OF_BAG_ERROR'],
+  sourceNodeLabel: 'Person',
+  targetNodeLabel: 'Person',
+  targetRelationshipType: 'KNOWS',
+  contextNodeLabels: ['City'],
+  contextRelationshipTypes: ['LIVES', 'BORN'],
+  randomSeed: 73
+}) YIELD modelInfo, modelSelectionStats
+RETURN
+  modelInfo.bestParameters AS winningModel,
+  modelInfo.metrics.AUCPR.train.avg AS avgTrainScore,
+  modelInfo.metrics.AUCPR.outerTrain AS outerTrainScore,
+  modelInfo.metrics.AUCPR.test AS testScore,
+  [cand IN modelSelectionStats.modelCandidates | cand.metrics.AUCPR.validation.avg] AS validationScores
+----
+
+.Results
+[opts="header", cols="6, 2, 2, 2, 6"]
+|===
+| winningModel                                                                                                                                | avgTrainScore      | outerTrainScore     | testScore | validationScores
+| {maxEpochs=100, minEpochs=1, penalty=1.0, patience=2, methodName=MultilayerPerceptron, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001} | 0.799603174603175 |  0.8 | 0.75 | [0.5555555555555555, 0.7222222222222222, 0.75, 0.5555555555555555, 0.5555555555555555]
+|===
+--
+
+As we can see the validation score increases slightly for one of the folds.
+This is due to the embeddings taking into account more contextual information.
+While the train and test score stays the same in this toy example, it is likely that the contextual information will have a greater impact for larger datasets.

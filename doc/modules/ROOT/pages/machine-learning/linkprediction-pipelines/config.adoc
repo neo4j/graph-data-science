@@ -230,7 +230,7 @@ The supported types of features can then be described as follows:
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'hadamard', {
-  nodeProperties: ['embedding', 'numberOfPosts']
+  nodeProperties: ['embedding', 'age']
 }) YIELD featureSteps
 ----
 
@@ -238,7 +238,7 @@ CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'hadamard', {
 [opts="header",cols="1"]
 |===
 | featureSteps
-| [{name=HADAMARD, config={nodeProperties=[embedding, numberOfPosts]}}]
+| [{name=HADAMARD, config={nodeProperties=[embedding, age]}}]
 |===
 
 When executing the pipeline, the `nodeProperties` must be either present in the input graph, or created by a previous node property step.

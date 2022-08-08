@@ -218,11 +218,11 @@ As the default samplingRate is `1`, we use the xref:machine-learning/linkpredict
 [opts="header"]
 |===
 | person1   | person2   | probability
-| "Will"      | "Veselin"   | 0.586210196222209
-| "Alice"     | "Veselin"   | 0.5
+| "Will"      | "Veselin"   | 0.584994091515458
 | "Greg"      | "Veselin"   | 0.5
 | "Mark"      | "Veselin"   | 0.5
-| "Alice"     | "Will"      | 0.457786768495719
+| "Alice"     | "Veselin"   | 0.498775697837398
+| "Alice"     | "Will"      | 0.457493656455499
 |===
 
 We can see, that our model predicts the most likely links are the five above.
