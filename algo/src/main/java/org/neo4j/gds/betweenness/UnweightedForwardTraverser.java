@@ -83,7 +83,7 @@ class UnweightedForwardTraverser implements ForwardTraverser {
         distances.set(startNodeId, 0);
         nodeQueue.add(startNodeId);
 
-        while (!nodeQueue.isEmpty()) {
+        while (!nodeQueue.isEmpty() && terminationFlag.running()) {
             long node = nodeQueue.remove();
             backwardNodes.push(node);
             int distanceNode = distances.get(node);
