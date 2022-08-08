@@ -69,19 +69,18 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
                 return true;
             }
 
-            // This is a slower but memory-efficient approach (could be replaced by a dedicated data structure)
+            var matchesFilter = sourceNodeFilter.test(firstNodeId) && targetNodeFilter.test(secondNodeId) || sourceNodeFilter.test(secondNodeId) && targetNodeFilter.test(firstNodeId);
 
-            return !(sourceNodeFilter.test(firstNodeId) && targetNodeFilter.test(secondNodeId)
-                     || sourceNodeFilter.test(secondNodeId) && targetNodeFilter.test(firstNodeId)
-            ) || graph.exists(firstNodeId, secondNodeId);
+            // graph.exists a slower but memory-efficient approach (could be replaced by a dedicated data structure)
+            return !matchesFilter || graph.exists(firstNodeId, secondNodeId);
         }
 
         @Override
         public long lowerBoundOfPotentialNeighbours(long node) {
             if (sourceNodeFilter.test(node)) {
-                return Math.max(targetNodeFilter.validNodes() - 1 - graph.degree(node), 0L);
+                return Math.max(targetNodeFilter.validNodeCount() - 1 - graph.degree(node), 0L);
             } else {
-                return Math.max(sourceNodeFilter.validNodes() - 1 - graph.degree(node), 0L);
+                return Math.max(sourceNodeFilter.validNodeCount() - 1 - graph.degree(node), 0L);
             }
         }
     }

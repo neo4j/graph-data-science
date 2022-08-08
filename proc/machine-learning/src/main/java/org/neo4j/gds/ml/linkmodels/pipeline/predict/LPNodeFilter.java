@@ -26,14 +26,14 @@ import java.util.function.LongPredicate;
 
 public interface LPNodeFilter extends LongPredicate {
 
-    long validNodes();
+    long validNodeCount();
 
     static LPNodeFilter of(Graph predictGraph, IdMap idMap) {
-        // IdMap can only contain nodes that are in the predictGraph.
+        // IdMap will only contain nodes that are in the predictGraph.
         if (predictGraph.nodeCount() == idMap.nodeCount()) {
             return new LPNodeFilter() {
                 @Override
-                public long validNodes() {
+                public long validNodeCount() {
                     return idMap.nodeCount();
                 }
 
@@ -45,7 +45,7 @@ public interface LPNodeFilter extends LongPredicate {
         } else {
             return new LPNodeFilter() {
                 @Override
-                public long validNodes() {
+                public long validNodeCount() {
                     return idMap.nodeCount();
                 }
 
