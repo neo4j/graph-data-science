@@ -36,6 +36,8 @@ public interface SeenNodes {
 
     HugeAtomicBitSet sampledNodes();
 
+    long totalExpectedNodes();
+
     class SeenNodesByLabelSet implements SeenNodes {
         private final Graph inputGraph;
         private final Map<Set<NodeLabel>, Long> seenPerLabelSet;
@@ -45,13 +47,12 @@ public interface SeenNodes {
 
         SeenNodesByLabelSet(
             Graph inputGraph,
-            Map<Set<NodeLabel>, Long> expectedNodesPerLabelSet,
-            long totalExpectedNodes
+            Map<Set<NodeLabel>, Long> expectedNodesPerLabelSet
         ) {
             this.inputGraph = inputGraph;
             this.expectedNodesPerLabelSet = expectedNodesPerLabelSet;
             this.seenBitSet = HugeAtomicBitSet.create(inputGraph.nodeCount());
-            this.totalExpectedNodes = totalExpectedNodes;
+            this.totalExpectedNodes = expectedNodesPerLabelSet.values().stream().mapToLong(Long::longValue).sum();
 
             this.seenPerLabelSet = new HashMap<>(expectedNodesPerLabelSet);
             this.seenPerLabelSet.replaceAll((unused, value) -> 0L);
@@ -74,22 +75,16 @@ public interface SeenNodes {
         }
 
         public boolean hasSeenEnough() {
-            if (seenBitSet.cardinality() < totalExpectedNodes) {
-                return false;
-            }
-
-            for (var entry : seenPerLabelSet.entrySet()) {
-                if (entry.getValue() < expectedNodesPerLabelSet.get(entry.getKey())) {
-                    // Should only happen is edge cases when the rounding is not fully consistent.
-                    return false;
-                }
-            }
-
-            return true;
+            return seenBitSet.cardinality() >= totalExpectedNodes;
         }
 
         public HugeAtomicBitSet sampledNodes() {
             return seenBitSet;
+        }
+
+        @Override
+        public long totalExpectedNodes() {
+            return totalExpectedNodes;
         }
     }
 
@@ -112,6 +107,11 @@ public interface SeenNodes {
 
         public HugeAtomicBitSet sampledNodes() {
             return seenBitSet;
+        }
+
+        @Override
+        public long totalExpectedNodes() {
+            return expectedNodes;
         }
     }
 }

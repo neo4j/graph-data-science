@@ -52,7 +52,6 @@ import java.util.Set;
 import java.util.SplittableRandom;
 
 public class RandomWalkWithRestarts implements NodesSampler {
-    private static final String SAMPLING_TASK_NAME = "Sample with RWR";
     private static final double QUALITY_MOMENTUM = 0.9;
     private static final double QUALITY_THRESHOLD_BASE = 0.05;
     private static final int MAX_WALKS_PER_START = 100;
@@ -70,11 +69,13 @@ public class RandomWalkWithRestarts implements NodesSampler {
     public HugeAtomicBitSet compute(Graph inputGraph, ProgressTracker progressTracker) {
         assert inputGraph.hasRelationshipProperty() == config.hasRelationshipWeightProperty();
 
-        progressTracker.beginSubTask(SAMPLING_TASK_NAME);
+        progressTracker.beginSubTask("Sample nodes");
 
-        progressTracker.setSteps((long) Math.ceil(inputGraph.nodeCount() * config.samplingRatio()));
+        var seenNodes = getSeenNodes(inputGraph, progressTracker);
 
-        var seenNodes = getSeenNodes(inputGraph);
+        progressTracker.beginSubTask("Do random walks");
+        progressTracker.setSteps(seenNodes.totalExpectedNodes());
+
         startNodesUsed = new LongHashSet();
         var rng = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
         var initialStartQualities = initializeQualities(inputGraph, rng);
@@ -98,14 +99,27 @@ public class RandomWalkWithRestarts implements NodesSampler {
             .run();
         tasks.forEach(task -> startNodesUsed.addAll(((Walker) task).startNodesUsed()));
 
-        progressTracker.endSubTask(SAMPLING_TASK_NAME);
+        progressTracker.endSubTask("Do random walks");
+
+        progressTracker.endSubTask("Sample nodes");
 
         return seenNodes.sampledNodes();
     }
 
     @Override
     public Task progressTask(GraphStore graphStore) {
-        return Tasks.leaf(SAMPLING_TASK_NAME, 10 * Math.round(graphStore.nodeCount() * config.samplingRatio()));
+        if (config.nodeLabelStratification()) {
+            return Tasks.task(
+                "Sample nodes",
+                Tasks.leaf("Count node labels", graphStore.nodeCount()),
+                Tasks.leaf("Do random walks", 10 * Math.round(graphStore.nodeCount() * config.samplingRatio()))
+            );
+        } else {
+            return Tasks.task(
+                "Sample nodes",
+                Tasks.leaf("Do random walks", 10 * Math.round(graphStore.nodeCount() * config.samplingRatio()))
+            );
+        }
     }
 
     @Override
@@ -113,25 +127,29 @@ public class RandomWalkWithRestarts implements NodesSampler {
         return "Random walk with restarts sampling";
     }
 
-    private SeenNodes getSeenNodes(Graph inputGraph) {
-        long totalExpectedCount = Math.round(inputGraph.nodeCount() * config.samplingRatio());
-
+    private SeenNodes getSeenNodes(Graph inputGraph, ProgressTracker progressTracker) {
         if (config.nodeLabelStratification()) {
-            var expectedCounts = getExpectedCountsPerNodeLabelSet(inputGraph);
-            return new SeenNodes.SeenNodesByLabelSet(inputGraph, expectedCounts, totalExpectedCount);
+            var expectedCounts = getExpectedCountsPerNodeLabelSet(inputGraph, progressTracker);
+            return new SeenNodes.SeenNodesByLabelSet(inputGraph, expectedCounts);
         }
 
         return new SeenNodes.GlobalSeenNodes(
             HugeAtomicBitSet.create(inputGraph.nodeCount()),
-            totalExpectedCount
+            Math.round(inputGraph.nodeCount() * config.samplingRatio())
         );
     }
 
-    private Map<Set<NodeLabel>, Long> getExpectedCountsPerNodeLabelSet(Graph inputGraph) {
+    private Map<Set<NodeLabel>, Long> getExpectedCountsPerNodeLabelSet(
+        Graph inputGraph,
+        ProgressTracker progressTracker
+    ) {
+        progressTracker.beginSubTask("Count node labels");
+        progressTracker.setSteps(inputGraph.nodeCount());
+
         var tasks = PartitionUtils.rangePartition(
             config.concurrency(),
             inputGraph.nodeCount(),
-            partition -> new LabelSetCounter(inputGraph, partition),
+            partition -> new LabelSetCounter(inputGraph, partition, progressTracker),
             Optional.empty()
         );
         RunWithConcurrency.builder()
@@ -145,8 +163,9 @@ public class RandomWalkWithRestarts implements NodesSampler {
                 totalCounts.put(entry.getKey(), entry.getValue() + totalCounts.getOrDefault(entry.getKey(), 0L));
             }
         });
-        // We round up so that the sum of all expected counts are at least as large as the total expected count.
-        totalCounts.replaceAll((unused, count) -> (long) Math.ceil(config.samplingRatio() * count));
+        totalCounts.replaceAll((unused, count) -> Math.round(config.samplingRatio() * count));
+
+        progressTracker.endSubTask("Count node labels");
 
         return totalCounts;
     }
@@ -409,12 +428,15 @@ public class RandomWalkWithRestarts implements NodesSampler {
         private final Graph inputGraph;
         private final Map<Set<NodeLabel>, Long> counts;
         private final Partition partition;
+        private final ProgressTracker progressTracker;
 
         LabelSetCounter(
             Graph inputGraph,
-            Partition partition
+            Partition partition,
+            ProgressTracker progressTracker
         ) {
             this.inputGraph = inputGraph;
+            this.progressTracker = progressTracker;
             this.counts = new HashMap<>();
             this.partition = partition;
         }
@@ -428,6 +450,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
                     counts.put(nodeLabelSet, 1L + counts.getOrDefault(nodeLabelSet, 0L));
                 }
             );
+            progressTracker.logSteps(partition.nodeCount());
         }
 
         public Map<Set<NodeLabel>, Long> labelSetCounts() {
