@@ -80,23 +80,25 @@ class UnweightedForwardTraverser implements ForwardTraverser {
 
     @Override
     public void traverse(long startNodeId) {
-        distances.set(startNodeId, 0);
         nodeQueue.add(startNodeId);
+        distances.set(startNodeId, 0);
 
         while (!nodeQueue.isEmpty() && terminationFlag.running()) {
             long node = nodeQueue.remove();
             backwardNodes.push(node);
-            int distanceNode = distances.get(node);
+            int nodeDistance = distances.get(node);
 
             graph.forEachRelationship(node, (source, target) -> {
-                if (distances.get(target) < 0) {
+                var targetDistance = nodeDistance + 1;
+                var firstTime = distances.get(target) < 0;
+                if (firstTime) {
                     nodeQueue.add(target);
-                    distances.set(target, distanceNode + 1);
+                    distances.set(target, targetDistance);
                 }
 
-                if (distances.get(target) == distanceNode + 1) {
+                if (distances.get(target) == targetDistance) {
                     sigma.addTo(target, sigma.get(source));
-                    append(target, source);
+                    appendPredecessor(target, source);
                 }
                 return true;
             });
@@ -109,7 +111,7 @@ class UnweightedForwardTraverser implements ForwardTraverser {
     }
 
     // append node to the path at target
-    private void append(long target, long node) {
+    private void appendPredecessor(long target, long node) {
         LongArrayList targetPredecessors = predecessors.get(target);
         if (null == targetPredecessors) {
             targetPredecessors = new LongArrayList();

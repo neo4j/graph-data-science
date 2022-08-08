@@ -68,49 +68,49 @@ final class WeightedForwardTraverser implements ForwardTraverser {
         BitSet visited,
         TerminationFlag terminationFlag
     ) {
+        this.graph = graph;
         this.predecessors = predecessors;
         this.backwardNodes = backwardNodes;
         this.sigma = sigma;
         this.nodeQueue = nodeQueue;
         this.visited = visited;
-        this.graph = graph;
         this.terminationFlag = terminationFlag;
     }
 
     @Override
     public void traverse(long startNodeId) {
         nodeQueue.add(startNodeId, 0.0D);
+
         while (!nodeQueue.isEmpty() && terminationFlag.running()) {
             var node = nodeQueue.top();
-            var thisNodesStoredCost = nodeQueue.cost(node);
-            nodeQueue.pop();
             backwardNodes.push(node);
+            var nodeCost = nodeQueue.cost(node);
+            nodeQueue.pop();
             visited.set(node);
 
             graph.forEachRelationship(
                 node,
                 1.0D,
                 (source, target, weight) -> {
-                    boolean visitedAlready = visited.get(target);
-                    if (!visitedAlready) {
-                        boolean insideQueue = nodeQueue.containsElement(target);
-                        if (!insideQueue) {
-                            nodeQueue.add(target, thisNodesStoredCost + weight);
-                            var targetPredecessors = new LongArrayList();
-                            predecessors.set(target, targetPredecessors);
-                        }
+                    if (visited.get(target)) {
+                        return true;
+                    }
+                    var targetCost = nodeCost + weight;
+                    boolean firstTime = !nodeQueue.containsElement(target);
+                    if (firstTime) {
+                        nodeQueue.add(target, targetCost);
+                    }
 
-                        if (nodeQueue.cost(target) == thisNodesStoredCost + weight) {
-                            var pred = predecessors.get(target);
-                            sigma.addTo(target, sigma.get(source));
-                            pred.add(source);
-                        } else if (weight + thisNodesStoredCost < nodeQueue.cost(target)) {
-                            nodeQueue.set(target, weight + thisNodesStoredCost);
-                            var pred = predecessors.get(target);
-                            pred.clear();
-                            sigma.set(target, sigma.get(source));
-                            pred.add(source);
-                        }
+                    var storedTargetCost = nodeQueue.cost(target);
+                    if (Double.compare(targetCost, storedTargetCost) == 0) {
+                        sigma.addTo(target, sigma.get(source));
+                        appendPredecessor(target, node);
+                    } else if (Double.compare(targetCost, storedTargetCost) < 0) {
+                        nodeQueue.set(target, targetCost);
+                        sigma.set(target, sigma.get(source));
+                        var targetPredecessors = predecessors.get(target);
+                        targetPredecessors.clear();
+                        targetPredecessors.add(source);
                     }
                     return true;
                 }
@@ -121,5 +121,15 @@ final class WeightedForwardTraverser implements ForwardTraverser {
     @Override
     public void clear() {
         visited.clear();
+    }
+
+    // append node to the path at target
+    private void appendPredecessor(long target, long node) {
+        LongArrayList targetPredecessors = predecessors.get(target);
+        if (null == targetPredecessors) {
+            targetPredecessors = new LongArrayList();
+            predecessors.set(target, targetPredecessors);
+        }
+        targetPredecessors.add(node);
     }
 }
