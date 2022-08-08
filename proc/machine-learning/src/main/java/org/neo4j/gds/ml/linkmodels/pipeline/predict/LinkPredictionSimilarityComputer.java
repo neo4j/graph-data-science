@@ -53,10 +53,14 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
 
     static final class LinkFilter implements NeighborFilter {
 
+        private final LPNodeFilter sourceNodeFilter;
+        private final LPNodeFilter targetNodeFilter;
         private final Graph graph;
 
-        private LinkFilter(Graph graph) {
+        private LinkFilter(Graph graph, LPNodeFilter sourceNodeFilter, LPNodeFilter targetNodeFilter) {
             this.graph = graph;
+            this.sourceNodeFilter = sourceNodeFilter;
+            this.targetNodeFilter = targetNodeFilter;
         }
 
         @Override
@@ -65,18 +69,19 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
                 return true;
             }
 
-            // This is a slower but memory-efficient approach (could be replaced by a dedicated data structure)
-            return graph.exists(firstNodeId, secondNodeId);
+            var matchesFilter = sourceNodeFilter.test(firstNodeId) && targetNodeFilter.test(secondNodeId) || sourceNodeFilter.test(secondNodeId) && targetNodeFilter.test(firstNodeId);
+
+            // graph.exists a slower but memory-efficient approach (could be replaced by a dedicated data structure)
+            return !matchesFilter || graph.exists(firstNodeId, secondNodeId);
         }
 
         @Override
         public long lowerBoundOfPotentialNeighbours(long node) {
-            return graph.nodeCount() - 1 - graph.degree(node);
-        }
-
-        @Override
-        public boolean isSymmetric() {
-            return graph.isUndirected();
+            if (sourceNodeFilter.test(node)) {
+                return Math.max(targetNodeFilter.validNodeCount() - 1 - graph.degree(node), 0L);
+            } else {
+                return Math.max(sourceNodeFilter.validNodeCount() - 1 - graph.degree(node), 0L);
+            }
         }
     }
 
@@ -84,13 +89,19 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
 
         private final Graph graph;
 
-        LinkFilterFactory(Graph graph) {
+        private final LPNodeFilter sourceNodeFilter;
+
+        private final LPNodeFilter targetNodeFilter;
+
+        LinkFilterFactory(Graph graph, LPNodeFilter sourceNodeFilter, LPNodeFilter targetNodeFilter) {
             this.graph = graph;
+            this.sourceNodeFilter = sourceNodeFilter;
+            this.targetNodeFilter = targetNodeFilter;
         }
 
         @Override
         public NeighborFilter create() {
-            return new LinkPredictionSimilarityComputer.LinkFilter(graph.concurrentCopy());
+            return new LinkPredictionSimilarityComputer.LinkFilter(graph.concurrentCopy(), sourceNodeFilter, targetNodeFilter);
         }
     }
 }

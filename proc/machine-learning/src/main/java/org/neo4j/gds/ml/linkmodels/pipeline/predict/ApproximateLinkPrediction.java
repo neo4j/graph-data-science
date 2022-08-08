@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -43,15 +43,17 @@ import java.util.stream.Stream;
 
 public class ApproximateLinkPrediction extends LinkPrediction {
     private final KnnBaseConfig knnConfig;
+    private final TerminationFlag terminationFlag;
 
     public ApproximateLinkPrediction(
         Classifier classifier,
         LinkFeatureExtractor linkFeatureExtractor,
         Graph graph,
-        LongPredicate sourceNodeFilter,
-        LongPredicate targetNodeFilter,
+        LPNodeFilter sourceNodeFilter,
+        LPNodeFilter targetNodeFilter,
         KnnBaseConfig knnConfig,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(
             classifier,
@@ -63,6 +65,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             progressTracker
         );
         this.knnConfig = knnConfig;
+        this.terminationFlag = terminationFlag;
     }
 
     public static MemoryEstimation estimate(LinkPredictionPredictPipelineBaseConfig config) {
@@ -76,16 +79,23 @@ public class ApproximateLinkPrediction extends LinkPrediction {
 
     @Override
     LinkPredictionResult predictLinks(LinkPredictionSimilarityComputer linkPredictionSimilarityComputer) {
-        var knnResult = Knn.create(
+        var knn = Knn.create(
             graph,
             knnConfig,
             linkPredictionSimilarityComputer,
-            new LinkPredictionSimilarityComputer.LinkFilterFactory(graph),
+            new LinkPredictionSimilarityComputer.LinkFilterFactory(
+                graph,
+                sourceNodeFilter,
+                targetNodeFilter
+            ),
             ImmutableKnnContext.of(
                 Pools.DEFAULT,
                 progressTracker
             )
-        ).compute();
+        );
+        
+        knn.setTerminationFlag(terminationFlag);
+        var knnResult = knn.compute();
 
         return new Result(knnResult);
     }

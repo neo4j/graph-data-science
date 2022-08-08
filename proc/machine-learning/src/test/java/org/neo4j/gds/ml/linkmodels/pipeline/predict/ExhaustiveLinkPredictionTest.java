@@ -26,6 +26,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -111,12 +112,13 @@ class ExhaustiveLinkPredictionTest {
             LogisticRegressionClassifier.from(modelData),
             linkFeatureExtractor,
             graph,
-            LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(NodeLabel.of("N"))),
-            LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(NodeLabel.of("N"))),
+            LPNodeFilter.of(graph, graphStore.getGraph(NodeLabel.of("N"))),
+            LPNodeFilter.of(graph, graphStore.getGraph(NodeLabel.of("N"))),
             concurrency,
             topN,
             0D,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var predictionResult = linkPrediction.compute();
@@ -176,12 +178,13 @@ class ExhaustiveLinkPredictionTest {
             LogisticRegressionClassifier.from(modelData),
             linkFeatureExtractor,
             graph,
-            LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(NodeLabel.of("N"))),
-            LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(NodeLabel.of("N"))),
+            LPNodeFilter.of(graph, graphStore.getGraph(NodeLabel.of("N"))),
+            LPNodeFilter.of(graph, graphStore.getGraph(NodeLabel.of("N"))),
             4,
             6,
             threshold,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
         var predictionResult = linkPrediction.compute();
         var predictedLinks = predictionResult.stream().collect(Collectors.toList());
@@ -216,12 +219,13 @@ class ExhaustiveLinkPredictionTest {
             LogisticRegressionClassifier.from(modelData),
             linkFeatureExtractor,
             multiLabelGraph,
-            LPGraphStoreFilterFactory.generateNodeLabelFilter(multiLabelGraph, multiLabelGraphStore.getGraph(NodeLabel.of("A"))),
-            LPGraphStoreFilterFactory.generateNodeLabelFilter(multiLabelGraph, multiLabelGraphStore.getGraph(NodeLabel.of("B"))),
+            LPNodeFilter.of(multiLabelGraph, multiLabelGraphStore.getGraph(NodeLabel.of("A"))),
+            LPNodeFilter.of(multiLabelGraph, multiLabelGraphStore.getGraph(NodeLabel.of("B"))),
             4,
             topN,
             0D,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var predictionResult = linkPrediction.compute();

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
@@ -33,9 +32,9 @@ public abstract class LinkPrediction {
     private final LinkFeatureExtractor linkFeatureExtractor;
     protected final Graph graph;
 
-    protected final LongPredicate sourceNodeFilter;
+    protected final LPNodeFilter sourceNodeFilter;
 
-    protected final LongPredicate targetNodeFilter;
+    protected final LPNodeFilter targetNodeFilter;
 
     protected final int concurrency;
     final ProgressTracker progressTracker;
@@ -44,8 +43,8 @@ public abstract class LinkPrediction {
         Classifier classifier,
         LinkFeatureExtractor linkFeatureExtractor,
         Graph graph,
-        LongPredicate sourceNodeFilter,
-        LongPredicate targetNodeFilter,
+        LPNodeFilter sourceNodeFilter,
+        LPNodeFilter targetNodeFilter,
         int concurrency,
         ProgressTracker progressTracker
     ) {

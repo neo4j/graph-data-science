@@ -19,12 +19,9 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
@@ -127,15 +124,6 @@ public final class LPGraphStoreFilterFactory {
                 StringJoining.join(filter.predictRelationshipTypes().stream().map(RelationshipType::name)),
                 StringJoining.join(directedPredictRels)
             ));
-        }
-    }
-
-    public static LongPredicate generateNodeLabelFilter(Graph predictGraph, IdMap idMap) {
-        // IdMap can only contain nodes that are in the predictGraph.
-        if (predictGraph.nodeCount() == idMap.nodeCount()) {
-            return id -> true;
-        } else {
-            return id -> idMap.contains(predictGraph.toOriginalNodeId(id));
         }
     }
 }

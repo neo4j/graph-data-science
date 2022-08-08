@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
@@ -184,11 +183,10 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
         IdMap sourceNodes = graphStore.getGraph(graphStoreFilter.sourceNodeLabels());
         IdMap targetNodes = graphStore.getGraph(graphStoreFilter.targetNodeLabels());
 
-        LongPredicate sourceNodeFilter = LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, sourceNodes);
-        LongPredicate targetNodeFilter = LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, targetNodes);
+        var sourceNodeFilter = LPNodeFilter.of(graph, sourceNodes);
+        var targetNodeFilter = LPNodeFilter.of(graph, targetNodes);
 
         if (isApproximateStrategy) {
-            // TODO: use filtered knn if needed
             return new ApproximateLinkPrediction(
                 classifier,
                 linkFeatureExtractor,
@@ -196,7 +194,8 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 sourceNodeFilter,
                 targetNodeFilter,
                 config.approximateConfig(),
-                progressTracker
+                progressTracker,
+                terminationFlag
             );
         } else {
             return new ExhaustiveLinkPrediction(
@@ -208,7 +207,8 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 config.concurrency(),
                 config.topN().orElseThrow(),
                 config.thresholdOrDefault(),
-                progressTracker
+                progressTracker,
+                terminationFlag
             );
         }
     }
