@@ -42,7 +42,6 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.graphsampling.samplers.NodesSampler;
 
 import java.util.List;
 import java.util.Map;

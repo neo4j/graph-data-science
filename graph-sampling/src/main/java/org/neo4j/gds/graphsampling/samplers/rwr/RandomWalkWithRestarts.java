@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.graphsampling.samplers;
+package org.neo4j.gds.graphsampling.samplers.rwr;
 
 import com.carrotsearch.hppc.DoubleArrayList;
 import com.carrotsearch.hppc.DoubleCollection;
@@ -39,6 +39,7 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.graphsampling.NodesSampler;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 
 import java.util.HashMap;
