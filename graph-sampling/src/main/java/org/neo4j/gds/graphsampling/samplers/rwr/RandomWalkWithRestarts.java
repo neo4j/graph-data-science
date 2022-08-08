@@ -36,6 +36,8 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -126,18 +128,27 @@ public class RandomWalkWithRestarts implements NodesSampler {
     }
 
     private Map<Set<NodeLabel>, Long> getExpectedCountsPerNodeLabelSet(Graph inputGraph) {
-        var counts = new HashMap<Set<NodeLabel>, Long>();
+        var tasks = PartitionUtils.rangePartition(
+            config.concurrency(),
+            inputGraph.nodeCount(),
+            partition -> new LabelSetCounter(inputGraph, partition),
+            Optional.empty()
+        );
+        RunWithConcurrency.builder()
+            .concurrency(config.concurrency())
+            .tasks(tasks)
+            .run();
 
-        inputGraph.forEachNode(nodeId -> {
-            // TODO: Can we avoid GC overhead here somehow?
-            var nodeLabelSet = new HashSet<>(inputGraph.nodeLabels(nodeId));
-            counts.put(nodeLabelSet, 1L + counts.getOrDefault(nodeLabelSet, 0L));
-            return true;
+        var totalCounts = new HashMap<Set<NodeLabel>, Long>();
+        tasks.forEach(labelSetCounter -> {
+            for (var entry : labelSetCounter.labelSetCounts().entrySet()) {
+                totalCounts.put(entry.getKey(), entry.getValue() + totalCounts.getOrDefault(entry.getKey(), 0L));
+            }
         });
         // We round up so that the sum of all expected counts are at least as large as the total expected count.
-        counts.replaceAll((unused, count) -> (long) Math.ceil(config.samplingRatio() * count));
+        totalCounts.replaceAll((unused, count) -> (long) Math.ceil(config.samplingRatio() * count));
 
-        return counts;
+        return totalCounts;
     }
 
     private Optional<HugeAtomicDoubleArray> initializeTotalWeights(long nodeCount) {
@@ -393,4 +404,34 @@ public class RandomWalkWithRestarts implements NodesSampler {
         }
     }
 
+    static class LabelSetCounter implements Runnable {
+
+        private final Graph inputGraph;
+        private final Map<Set<NodeLabel>, Long> counts;
+        private final Partition partition;
+
+        LabelSetCounter(
+            Graph inputGraph,
+            Partition partition
+        ) {
+            this.inputGraph = inputGraph;
+            this.counts = new HashMap<>();
+            this.partition = partition;
+        }
+
+        @Override
+        public void run() {
+            partition.consume(
+                nodeId -> {
+                    // TODO: Can we avoid GC overhead here somehow?
+                    var nodeLabelSet = new HashSet<>(inputGraph.nodeLabels(nodeId));
+                    counts.put(nodeLabelSet, 1L + counts.getOrDefault(nodeLabelSet, 0L));
+                }
+            );
+        }
+
+        public Map<Set<NodeLabel>, Long> labelSetCounts() {
+            return counts;
+        }
+    }
 }
