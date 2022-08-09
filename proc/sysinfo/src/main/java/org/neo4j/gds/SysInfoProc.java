@@ -40,6 +40,8 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.ZonedDateTime;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -61,7 +63,7 @@ public class SysInfoProc {
     @Description("Returns details about the status of the system")
     public Stream<DebugValue> version() throws IOException {
         var properties = BuildInfoProperties.get();
-        var config = GraphDatabaseApiProxy.resolveDependency(db, Config.class);
+        var config = Optional.ofNullable(db).map(db -> GraphDatabaseApiProxy.resolveDependency(db, Config.class));
         return debugValues(properties, Runtime.getRuntime(), config);
     }
 
@@ -79,7 +81,7 @@ public class SysInfoProc {
         }
     }
 
-    private Stream<DebugValue> debugValues(BuildInfoProperties buildInfo, Runtime runtime, Config config) {
+    private Stream<DebugValue> debugValues(BuildInfoProperties buildInfo, Runtime runtime, Optional<Config> config) {
         var values = Stream.<DebugValue>builder();
         values.add(value("gdsVersion", buildInfo.gdsVersion()));
         editionInfo(values);
@@ -92,7 +94,7 @@ public class SysInfoProc {
         systemResources(values);
         vmInfo(values);
         containerInfo(values);
-        configInfo(config, values);
+        config.ifPresent(cfg -> configInfo(cfg, values));
         return values.build();
     }
 
@@ -110,8 +112,9 @@ public class SysInfoProc {
         }
 
         @Override
-        public Void licensed(String name, Stream.Builder<DebugValue> builder) {
+        public Void licensed(String name, ZonedDateTime expirationTime, Stream.Builder<DebugValue> builder) {
             unlicensed(name, builder);
+            builder.add(value("gdsLicenseExpirationTime", expirationTime));
             return null;
         }
 
@@ -119,9 +122,13 @@ public class SysInfoProc {
         public Void invalid(
             String name,
             String errorMessage,
+            Optional<ZonedDateTime> expirationTime,
             Stream.Builder<DebugValue> builder
         ) {
-            licensed(name, builder);
+            expirationTime.ifPresentOrElse(
+                expiration -> licensed(name, expiration, builder),
+                () -> unlicensed(name, builder)
+            );
             builder.add(value("gdsLicenseError", errorMessage));
             return null;
         }
@@ -139,7 +146,10 @@ public class SysInfoProc {
             .add(value("featurePartitionedScan", GdsFeatureToggles.USE_PARTITIONED_SCAN.isEnabled()))
             .add(value("featureBitIdMap", GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled()))
             .add(value("featureShardedIdMap", GdsFeatureToggles.USE_SHARDED_ID_MAP.isEnabled()))
-            .add(value("featureUncompressedAdjacencyList", GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()))
+            .add(value(
+                "featureUncompressedAdjacencyList",
+                GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()
+            ))
             .add(value("featureReorderedAdjacencyList", GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.isEnabled()));
 
     }
