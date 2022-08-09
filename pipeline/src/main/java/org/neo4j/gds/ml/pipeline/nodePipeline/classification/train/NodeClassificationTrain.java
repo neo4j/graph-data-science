@@ -368,7 +368,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
 
         var modelCandidates = new RandomSearch(
             pipeline.trainingParameterSpace(),
-            pipeline.numberOfModelSelectionTrials(),
+            pipeline.autoTuningConfig().maxTrials(),
             trainConfig.randomSeed()
         );
 

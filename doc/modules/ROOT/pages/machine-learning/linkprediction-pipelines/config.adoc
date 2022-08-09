@@ -597,17 +597,16 @@ include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.ad
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.pipeline.linkPrediction.configureAutoTuning('pipe', {
-  maxTrials: 5
-})
-YIELD autoTuningConfig
+  maxTrials: 2
+}) YIELD autoTuningConfig
 ----
 
 .Results
 [opts="header",cols="1"]
 |===
 | autoTuningConfig
-| {maxTrials=5}
+| {maxTrials=2}
 |===
 
-We now reconfigured the auto-tuning to try out at most 5 model candidates during xref:machine-learning/linkprediction-pipelines/training.adoc[training].
+We now reconfigured the auto-tuning to try out at most 2 model candidates during xref:machine-learning/linkprediction-pipelines/training.adoc[training].
 --
