@@ -199,6 +199,10 @@ YIELD requiredMemory
 [[algorithms-link-prediction-pipelines-predict-examples-stream]]
 === Stream
 
+:entity: node pair
+:result: probability of a link
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
 [role=query-example, group=lp]
 --
 [source, cypher]
@@ -206,28 +210,25 @@ YIELD requiredMemory
 CALL gds.beta.pipeline.linkPrediction.predict.stream('myGraph', {
   modelName: 'lp-pipeline-model',
   topN: 5,
-  threshold: 0.45
+  threshold: 0.5
 })
  YIELD node1, node2, probability
  RETURN gds.util.asNode(node1).name AS person1, gds.util.asNode(node2).name AS person2, probability
  ORDER BY probability DESC, person1
 ----
 
-We specified `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
+We specify `threshold` to include only predictions with probability greater than 50%, and `topN` to further limit output to the top 5 relationships.
 As the default samplingRate is `1`, we use the xref:machine-learning/linkprediction-pipelines/predict.adoc#algorithms-link-prediction-pipelines-predict-exhaustive-search[exhaustive-search].
 
 .Results
 [opts="header"]
 |===
 | person1   | person2   | probability
-| "Will"      | "Veselin"   | 0.584994091515458
-| "Greg"      | "Veselin"   | 0.5
-| "Mark"      | "Veselin"   | 0.5
-| "Alice"     | "Veselin"   | 0.498775697837398
-| "Alice"     | "Will"      | 0.457493656455499
+| "Will"    | "Veselin" | 0.584994091515458
 |===
 
-We can see, that our model predicts the most likely links are the five above.
+We can see that the model only thinks that the Will and Veselin nodes should be connected, with a probability higher than 50%.
+Other node pairs have a lower probability and are filtered out of the result.
 --
 
 
@@ -246,26 +247,25 @@ CALL gds.beta.pipeline.linkPrediction.predict.mutate('myGraph', {
   relationshipTypes: ['KNOWS'],
   mutateRelationshipType: 'KNOWS_EXHAUSTIVE_PREDICTED',
   topN: 5,
-  threshold: 0.45
+  threshold: 0.5
 }) YIELD relationshipsWritten, samplingStats
 ----
 
-We specify `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
+We specify `threshold` to include only predictions with probability greater than 50%, and `topN` to further limit output to the top 5 relationships.
 As the default samplingRate is `1`, we use the xref:machine-learning/linkprediction-pipelines/predict.adoc#algorithms-link-prediction-pipelines-predict-exhaustive-search[exhaustive-search].
-Note that we omit setting the `sampleRate` in our configuration as it defaults to 1 implying that the exhaustive search strategy is used.
 Because we are using the `UNDIRECTED` orientation, we will write twice as many relationships to the in-memory graph.
 
 .Results
 [opts="header"]
 |===
 | relationshipsWritten | samplingStats
-| 10                   | {linksConsidered=16, strategy=exhaustive}
+| 2                    | {linksConsidered=16, strategy=exhaustive}
 |===
 --
 
-As we can see in the `samplingStats`, we use the exhaustive search strategy and check 16 possible links during the prediction.
+As we can see in the `samplingStats`, we used the exhaustive search strategy and checked 16 possible links during the prediction.
 Indeed, since there are a total of `8 * (8 - 1) / 2 = 28` possible links in the graph and we already have 12, that means we check all possible new links.
-Although 16 links were considered, we only mutate the best five (since `topN = 5`) that are above our threshold.
+Although 16 links were considered, we only mutate the best five (since `topN = 5`) that are above our threshold, and in fact only one link did pass the threshold (see <<algorithms-link-prediction-pipelines-predict-examples-stream>>).
 
 If our graph is very large there may be a lot of possible new links.
 As such it may take a very long time to run the predictions.
