@@ -38,13 +38,13 @@ public class RandomSearch implements HyperParameterOptimizer {
     private final SplittableRandom random;
     private int numberOfFinishedTrials;
 
-    public RandomSearch(Map<TrainingMethod, List<TunableTrainerConfig>> parameterSpace, int totalNumberOfTrials, long randomSeed) {
-        this(parameterSpace, totalNumberOfTrials, Optional.of(randomSeed));
+    public RandomSearch(Map<TrainingMethod, List<TunableTrainerConfig>> parameterSpace, int maxTrials, long randomSeed) {
+        this(parameterSpace, maxTrials, Optional.of(randomSeed));
     }
 
     public RandomSearch(
         Map<TrainingMethod, List<TunableTrainerConfig>> parameterSpace,
-        int totalNumberOfTrials,
+        int maxTrials,
         Optional<Long> randomSeed
     ) {
         this.concreteConfigs = parameterSpace.values().stream()
@@ -55,7 +55,7 @@ public class RandomSearch implements HyperParameterOptimizer {
             .flatMap(List::stream)
             .filter(tunableTrainerConfig -> !tunableTrainerConfig.isConcrete())
             .collect(Collectors.toList());
-        this.totalNumberOfTrials = totalNumberOfTrials;
+        this.totalNumberOfTrials = maxTrials + this.concreteConfigs.size();
         this.random = randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
         this.numberOfFinishedTrials = 0;
     }

@@ -164,7 +164,7 @@ public final class NodeRegressionTrain {
 
         var modelCandidates = new RandomSearch(
             pipeline.trainingParameterSpace(),
-            pipeline.numberOfModelSelectionTrials(),
+            pipeline.autoTuningConfig().maxTrials(),
             trainConfig.randomSeed()
         );
 
