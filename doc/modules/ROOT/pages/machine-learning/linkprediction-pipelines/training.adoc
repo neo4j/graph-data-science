@@ -350,10 +350,10 @@ RETURN
 [opts="header", cols="6, 2, 2, 2, 6"]
 |===
 | winningModel                                                                                                                                | avgTrainScore      | outerTrainScore     | testScore | validationScores
-| {maxEpochs=100, minEpochs=1, penalty=1.0, patience=2, methodName=MultilayerPerceptron, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001} | 0.799603174603175 |  0.8 | 0.75 | [0.5555555555555555, 0.7222222222222222, 0.75, 0.5555555555555555, 0.5555555555555555]
+| {maxEpochs=100, minEpochs=1, penalty=1.0, patience=2, methodName=MultilayerPerceptron, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001} | 0.799603174603175 |  0.8 | 0.75 | [0.5555555555555555, 0.38888888888888884, 0.75, 0.5555555555555555, 0.5555555555555555]
 |===
 --
 
-As we can see the validation score increases slightly for one of the folds.
-This is due to the embeddings taking into account more contextual information.
+As we can see, the results are effectively identical with a slight decrease of the validation score in one of the folds.
+The change is due to the embeddings taking into account more contextual information.
 While the train and test score stays the same in this toy example, it is likely that the contextual information will have a greater impact for larger datasets.
