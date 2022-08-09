@@ -43,7 +43,7 @@ ext {
         'cypher-dsl'           : '2021.2.0',
         'deeplearning4j'       : '1.0.0-beta7',
         'eclipse-collections'  : '10.4.0',
-        'ejml'                 : '0.40',
+        'ejml'                 : '0.41',
         'fastcsv'              : '1.0.4',
         'gdl'                  : '0.3.8',
         'hamcrest'             : '2.1',
