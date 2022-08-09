@@ -62,13 +62,6 @@ public interface LicenseState {
         }
     }
 
-    interface RequireLicense<R, P> extends LicenseState.VisitorWithParameter<R, P> {
-        @Override
-        default R invalid(String name, String errorMessage, P parameter) {
-            throw new RuntimeException(errorMessage);
-        }
-    }
-
     enum Check implements LicenseState.Visitor<Boolean> {
         LICENSED {
             @Override
