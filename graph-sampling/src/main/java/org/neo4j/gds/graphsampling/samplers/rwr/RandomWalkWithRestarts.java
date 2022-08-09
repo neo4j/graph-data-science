@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.graphsampling.samplers;
+package org.neo4j.gds.graphsampling.samplers.rwr;
 
 import com.carrotsearch.hppc.DoubleArrayList;
 import com.carrotsearch.hppc.DoubleCollection;
@@ -38,13 +38,15 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.graphsampling.NodesSampler;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 
 import java.util.Optional;
 import java.util.SplittableRandom;
 
+import static org.neo4j.gds.graphsampling.samplers.rwr.ExpectedNodesCounter.computeExpectedCountsPerNodeLabelSet;
+
 public class RandomWalkWithRestarts implements NodesSampler {
-    private static final String SAMPLING_TASK_NAME = "Sample with RWR";
     private static final double QUALITY_MOMENTUM = 0.9;
     private static final double QUALITY_THRESHOLD_BASE = 0.05;
     private static final int MAX_WALKS_PER_START = 100;
@@ -62,21 +64,21 @@ public class RandomWalkWithRestarts implements NodesSampler {
     public HugeAtomicBitSet compute(Graph inputGraph, ProgressTracker progressTracker) {
         assert inputGraph.hasRelationshipProperty() == config.hasRelationshipWeightProperty();
 
-        progressTracker.beginSubTask(SAMPLING_TASK_NAME);
+        progressTracker.beginSubTask("Sample nodes");
 
-        progressTracker.setSteps((long) Math.ceil(inputGraph.nodeCount() * config.samplingRatio()));
+        var seenNodes = getSeenNodes(inputGraph, progressTracker);
+
+        progressTracker.beginSubTask("Do random walks");
+        progressTracker.setSteps(seenNodes.totalExpectedNodes());
 
         startNodesUsed = new LongHashSet();
         var rng = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
-        long expectedNodes = Math.round(inputGraph.nodeCount() * config.samplingRatio());
         var initialStartQualities = initializeQualities(inputGraph, rng);
-        var seenNodes = HugeAtomicBitSet.create(inputGraph.nodeCount());
         Optional<HugeAtomicDoubleArray> totalWeights = initializeTotalWeights(inputGraph.nodeCount());
 
         var tasks = ParallelUtil.tasks(config.concurrency(), () ->
             new Walker(
                 seenNodes,
-                expectedNodes,
                 totalWeights,
                 QUALITY_THRESHOLD_BASE / (config.concurrency() * config.concurrency()),
                 new WalkQualities(initialStartQualities),
@@ -92,19 +94,49 @@ public class RandomWalkWithRestarts implements NodesSampler {
             .run();
         tasks.forEach(task -> startNodesUsed.addAll(((Walker) task).startNodesUsed()));
 
-        progressTracker.endSubTask(SAMPLING_TASK_NAME);
+        progressTracker.endSubTask("Do random walks");
 
-        return seenNodes;
+        progressTracker.endSubTask("Sample nodes");
+
+        return seenNodes.sampledNodes();
     }
 
     @Override
     public Task progressTask(GraphStore graphStore) {
-        return Tasks.leaf(SAMPLING_TASK_NAME, 10 * Math.round(graphStore.nodeCount() * config.samplingRatio()));
+        if (config.nodeLabelStratification()) {
+            return Tasks.task(
+                "Sample nodes",
+                Tasks.leaf("Count node labels", graphStore.nodeCount()),
+                Tasks.leaf("Do random walks", 10 * Math.round(graphStore.nodeCount() * config.samplingRatio()))
+            );
+        } else {
+            return Tasks.task(
+                "Sample nodes",
+                Tasks.leaf("Do random walks", 10 * Math.round(graphStore.nodeCount() * config.samplingRatio()))
+            );
+        }
     }
 
     @Override
     public String progressTaskName() {
         return "Random walk with restarts sampling";
+    }
+
+    private SeenNodes getSeenNodes(Graph inputGraph, ProgressTracker progressTracker) {
+        if (config.nodeLabelStratification()) {
+            var expectedCounts = computeExpectedCountsPerNodeLabelSet(
+                inputGraph,
+                config.samplingRatio(),
+                config.concurrency(),
+                progressTracker
+            );
+            return new SeenNodes.SeenNodesByLabelSet(inputGraph, expectedCounts);
+        }
+
+        return new SeenNodes.GlobalSeenNodes(
+            HugeAtomicBitSet.create(inputGraph.nodeCount()),
+            Math.round(inputGraph.nodeCount() * config.samplingRatio())
+        );
     }
 
     private Optional<HugeAtomicDoubleArray> initializeTotalWeights(long nodeCount) {
@@ -146,8 +178,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
     static class Walker implements Runnable {
 
-        private final HugeAtomicBitSet seenNodes;
-        private final long expectedNodes;
+        private final SeenNodes seenNodes;
         private final Optional<HugeAtomicDoubleArray> totalWeights;
         private final double qualityThreshold;
         private final WalkQualities walkQualities;
@@ -156,11 +187,10 @@ public class RandomWalkWithRestarts implements NodesSampler {
         private final RandomWalkWithRestartsConfig config;
         private final ProgressTracker progressTracker;
 
-        private LongSet startNodesUsed;
+        private final LongSet startNodesUsed;
 
         Walker(
-            HugeAtomicBitSet seenNodes,
-            long expectedNodes,
+            SeenNodes seenNodes,
             Optional<HugeAtomicDoubleArray> totalWeights,
             double qualityThreshold,
             WalkQualities walkQualities,
@@ -170,7 +200,6 @@ public class RandomWalkWithRestarts implements NodesSampler {
             ProgressTracker progressTracker
         ) {
             this.seenNodes = seenNodes;
-            this.expectedNodes = expectedNodes;
             this.totalWeights = totalWeights;
             this.qualityThreshold = qualityThreshold;
             this.walkQualities = walkQualities;
@@ -190,8 +219,8 @@ public class RandomWalkWithRestarts implements NodesSampler {
             int nodesConsidered = 1;
             int walksLeft = (int) Math.round(walkQualities.nodeQuality(currentStartNodePosition) * MAX_WALKS_PER_START);
 
-            while (seenNodes.cardinality() < expectedNodes) {
-                if (!seenNodes.getAndSet(currentNode)) {
+            while (!seenNodes.hasSeenEnough()) {
+                if (seenNodes.addNode(currentNode)) {
                     addedNodes++;
                 }
 

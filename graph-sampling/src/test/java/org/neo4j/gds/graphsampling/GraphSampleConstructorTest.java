@@ -20,6 +20,8 @@
 package org.neo4j.gds.graphsampling;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
@@ -37,8 +39,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfigImpl;
-import org.neo4j.gds.graphsampling.samplers.NodesSampler;
-import org.neo4j.gds.graphsampling.samplers.RandomWalkWithRestarts;
+import org.neo4j.gds.graphsampling.samplers.rwr.RandomWalkWithRestarts;
 
 import java.util.List;
 import java.util.Set;
@@ -208,12 +209,14 @@ class GraphSampleConstructorTest {
         assertGraphEquals(fromGdl(expectedGraph), subgraph.getGraph("distance"));
     }
 
-    @Test
-    void shouldLogProgressWithRWR() {
+    @ParameterizedTest
+    @CsvSource(value = {"false", "true"})
+    void shouldLogProgressWithRWR(boolean nodeLabelStratification) {
         var config = RandomWalkWithRestartsConfigImpl.builder()
             .startNodes(List.of(idFunction.of("a")))
             .samplingRatio(0.5)
             .restartProbability(0.1)
+            .nodeLabelStratification(nodeLabelStratification)
             .concurrency(1)
             .randomSeed(42L)
             .build();
@@ -237,48 +240,107 @@ class GraphSampleConstructorTest {
 
         var messages = log.getMessages(TestLog.INFO);
 
-        assertThat(messages)
-            // avoid asserting on the thread id
-            .extracting(removingThreadId())
-            .contains(
-                "Random walk with restarts sampling :: Start",
-                "Random walk with restarts sampling :: Sample with RWR :: Start",
-                "Random walk with restarts sampling :: Sample with RWR 28%",
-                "Random walk with restarts sampling :: Sample with RWR 100%",
-                "Random walk with restarts sampling :: Sample with RWR :: Finished",
-                "Random walk with restarts sampling :: Construct graph :: Start",
-                "Random walk with restarts sampling :: Construct graph :: Construct node id map :: Start",
-                "Random walk with restarts sampling :: Construct graph :: Construct node id map 100%",
-                "Random walk with restarts sampling :: Construct graph :: Construct node id map :: Finished",
-                "Random walk with restarts sampling :: Construct graph :: Filter node properties :: Start",
-                "Random walk with restarts sampling :: Construct graph :: Filter node properties 7%",
-                "Random walk with restarts sampling :: Construct graph :: Filter node properties 14%",
-                "Random walk with restarts sampling :: Construct graph :: Filter node properties 21%",
-                "Random walk with restarts sampling :: Construct graph :: Filter node properties 28%",
-                "Random walk with restarts sampling :: Construct graph :: Filter node properties 35%",
-                "Random walk with restarts sampling :: Construct graph :: Filter node properties 42%",
-                "Random walk with restarts sampling :: Construct graph :: Filter node properties 50%",
-                "Random walk with restarts sampling :: Construct graph :: Filter node properties 57%",
-                "Random walk with restarts sampling :: Construct graph :: Filter node properties 64%",
-                "Random walk with restarts sampling :: Construct graph :: Filter node properties 71%",
-                "Random walk with restarts sampling :: Construct graph :: Filter node properties 78%",
-                "Random walk with restarts sampling :: Construct graph :: Filter node properties 85%",
-                "Random walk with restarts sampling :: Construct graph :: Filter node properties 92%",
-                "Random walk with restarts sampling :: Construct graph :: Filter node properties 100%",
-                "Random walk with restarts sampling :: Construct graph :: Filter node properties :: Finished",
-                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Start",
-                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 :: Start",
-                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 27%",
-                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 45%",
-                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 54%",
-                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 100%",
-                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 :: Finished",
-                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 2 of 2 :: Start",
-                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 2 of 2 100%",
-                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 2 of 2 :: Finished",
-                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Finished",
-                "Random walk with restarts sampling :: Construct graph :: Finished",
-                "Random walk with restarts sampling :: Finished"
-            );
+        if (nodeLabelStratification) {
+            assertThat(messages)
+                // avoid asserting on the thread id
+                .extracting(removingThreadId())
+                .contains(
+                    "Random walk with restarts sampling :: Start",
+                    "Random walk with restarts sampling :: Sample nodes :: Start",
+                    "Random walk with restarts sampling :: Sample nodes :: Count node labels :: Start",
+                    "Random walk with restarts sampling :: Sample nodes :: Count node labels 100%",
+                    "Random walk with restarts sampling :: Sample nodes :: Count node labels :: Finished",
+                    "Random walk with restarts sampling :: Sample nodes :: Do random walks :: Start",
+                    "Random walk with restarts sampling :: Sample nodes :: Do random walks 24%",
+                    "Random walk with restarts sampling :: Sample nodes :: Do random walks 61%",
+                    "Random walk with restarts sampling :: Sample nodes :: Do random walks 74%",
+                    "Random walk with restarts sampling :: Sample nodes :: Do random walks 87%",
+                    "Random walk with restarts sampling :: Sample nodes :: Do random walks 100%",
+                    "Random walk with restarts sampling :: Sample nodes :: Do random walks :: Finished",
+                    "Random walk with restarts sampling :: Sample nodes :: Finished",
+                    "Random walk with restarts sampling :: Construct graph :: Start",
+                    "Random walk with restarts sampling :: Construct graph :: Construct node id map :: Start",
+                    "Random walk with restarts sampling :: Construct graph :: Construct node id map 100%",
+                    "Random walk with restarts sampling :: Construct graph :: Construct node id map :: Finished",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties :: Start",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 6%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 12%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 18%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 25%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 31%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 37%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 43%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 50%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 56%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 62%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 68%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 75%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 81%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 87%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 93%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 100%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties :: Finished",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Start",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 :: Start",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 27%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 45%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 54%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 63%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 100%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 :: Finished",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 2 of 2 :: Start",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 2 of 2 100%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 2 of 2 :: Finished",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Finished",
+                    "Random walk with restarts sampling :: Construct graph :: Finished",
+                    "Random walk with restarts sampling :: Finished"
+                );
+        } else {
+            assertThat(messages)
+                // avoid asserting on the thread id
+                .extracting(removingThreadId())
+                .contains(
+                    "Random walk with restarts sampling :: Start",
+                    "Random walk with restarts sampling :: Sample nodes :: Start",
+                    "Random walk with restarts sampling :: Sample nodes :: Do random walks :: Start",
+                    "Random walk with restarts sampling :: Sample nodes :: Do random walks 28%",
+                    "Random walk with restarts sampling :: Sample nodes :: Do random walks 100%",
+                    "Random walk with restarts sampling :: Sample nodes :: Do random walks :: Finished",
+                    "Random walk with restarts sampling :: Sample nodes :: Finished",
+                    "Random walk with restarts sampling :: Construct graph :: Start",
+                    "Random walk with restarts sampling :: Construct graph :: Construct node id map :: Start",
+                    "Random walk with restarts sampling :: Construct graph :: Construct node id map 100%",
+                    "Random walk with restarts sampling :: Construct graph :: Construct node id map :: Finished",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties :: Start",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 7%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 14%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 21%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 28%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 35%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 42%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 50%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 57%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 64%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 71%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 78%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 85%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 92%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties 100%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter node properties :: Finished",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Start",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 :: Start",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 27%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 45%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 54%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 100%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 :: Finished",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 2 of 2 :: Start",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 2 of 2 100%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 2 of 2 :: Finished",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Finished",
+                    "Random walk with restarts sampling :: Construct graph :: Finished",
+                    "Random walk with restarts sampling :: Finished"
+                );
+        }
     }
 }
