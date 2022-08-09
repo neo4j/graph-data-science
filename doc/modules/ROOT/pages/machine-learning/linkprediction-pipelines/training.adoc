@@ -145,7 +145,8 @@ include::partial$/machine-learning/pipeline-training-logging-note.adoc[]
 == Example
 
 In this example we will create a small graph and use the training pipeline we have built up thus far.
-The graph consists of a handful nodes connected in a particular pattern.
+The graph is a small social network of people and cities, including some information about where people live, were born, and what other people they know.
+We will attempt to train a model to predict which people might know each other.
 The example graph looks like this:
 
 image::example-graphs/link-prediction.svg[Visualization of the example graph,align="center"]
@@ -196,9 +197,11 @@ CREATE
 
 With the graph in Neo4j we can now project it into the graph catalog.
 We do this using a native projection targeting the `Person` nodes and the `KNOWS` relationships.
-We will also project the `numberOfPosts` property, so it can be used when creating link features.
+We will also project the `age` property, so it can be used when creating link features.
 For the relationships we must use the `UNDIRECTED` orientation.
 This is because the Link Prediction pipelines are defined only for undirected graphs.
+We ignore the additional nodes and relationship types, in order for our projection to be mono-partite.
+We will illustrate how to make use of the larger graph in a <<linkprediction-pipeline-examples-train-filtering, subsequent example>>.
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query, group=lp]
@@ -255,6 +258,10 @@ YIELD requiredMemory
 
 === Training
 
+Now we are ready to actually train a LinkPrediction model.
+We must make sure to specify the `targetRelationshipType` to instruct the model to train only using that type.
+With the graph `myGraph` there are actually no other relationship types projected, but that is not always the case.
+
 [[linkprediction-pipeline-examples-train-query]]
 [role=query-example,group=lp]
 --
@@ -288,6 +295,7 @@ The score computed as the xref:machine-learning/linkprediction-pipelines/theory.
 A model which gives higher score to all links than non-links will have a score of 1.0, and a model that assigns random scores will on average have a score of 0.5.
 
 
+[[linkprediction-pipeline-examples-train-filtering]]
 === Training with context filters
 
 In the above example we projected a Person-KNOWS-Person subgraph and used it for training and testing.
@@ -320,6 +328,7 @@ CALL gds.graph.project(
 
 The full graph contains 2 node labels and 3 relationship types.
 We still train a Person-KNOWS-Person model, but use context information Person-LIVES-City, Person-BORN-City to generate node properties that the model uses in training.
+Note that we do not require the UNDIRECTED orientation for the context relationship types, as these are excluded from the LinkPrediction training.
 
 [[linkprediction-pipeline-examples-filtered-train-query]]
 [role=query-example,group=lp]
