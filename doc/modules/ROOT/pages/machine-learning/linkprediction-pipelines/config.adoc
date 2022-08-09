@@ -82,7 +82,8 @@ Such steps producing node properties can be chained one after another and create
 Moreover, the node property steps that are added to the pipeline will be executed both when xref::machine-learning/linkprediction-pipelines/training.adoc[training] a pipeline and when the trained model is xref::machine-learning/linkprediction-pipelines/predict.adoc[applied for prediction].
 
 The name of the procedure that should be added can be a fully qualified GDS procedure name ending with `.mutate`.
-The ending `.mutate` may be omitted and one may also use shorthand forms such as `node2vec` instead of `gds.beta.node2vec.mutate`.
+The ending `.mutate` may be omitted and one may also use shorthand forms such as `beta.node2vec` instead of `gds.beta.node2vec.mutate`.
+But please note that tier qualification (in this case `beta`) must still be given as part of the name.
 
 For example, xref::machine-learning/pre-processing.adoc[pre-processing algorithms] can be used as node property steps.
 
