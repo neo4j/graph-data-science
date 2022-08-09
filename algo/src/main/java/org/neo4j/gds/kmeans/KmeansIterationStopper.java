@@ -33,7 +33,7 @@ public class KmeansIterationStopper {
     }
 
     boolean shouldQuit(long swaps, int iteration) {
-        if (iteration == maxIterations || swaps <= swapsBound) {
+        if (iteration == maxIterations || (iteration > 1 && swaps <= swapsBound)) {
             return true;
         }
         return false;

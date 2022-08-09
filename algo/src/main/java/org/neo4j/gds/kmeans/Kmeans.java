@@ -185,6 +185,11 @@ public class Kmeans extends Algorithm<KmeansResult> {
         HugeDoubleArray currentDistanceFromCentroid,
         int restartIteration
     ) {
+
+        //note: currentDistanceFromCentroid is not reset to a [0,...,0] distance array but it does not have to
+        // it's used only in K-Means++ (where it is essentially reset; see func distanceFromLastSampledCentroid in KmeansTask)
+        // or during final distance calculation where it is reset as well (see calculateFinalDistance in KmeansTask)
+
         ClusterManager clusterManager = ClusterManager.createClusterManager(nodePropertyValues, dimensions, k);
 
         currentCommunities.setAll(v -> UNASSIGNED);
@@ -214,7 +219,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             nodeCount,
             k,
             concurrency,
-            distanceFromCentroid,
+            currentDistanceFromCentroid,
             executorService,
             tasks,
             progressTracker
@@ -246,7 +251,6 @@ public class Kmeans extends Algorithm<KmeansResult> {
                 }
             }
             recomputeCentroids(clusterManager, tasks);
-
             progressTracker.endSubTask(); // Iteration - end
             if (kmeansIterationStopper.shouldQuit(numberOfSwaps, ++iteration)) {
                 break;
