@@ -174,7 +174,51 @@ class RelationshipProjectionsTest {
             IllegalArgumentException.class,
             () -> RelationshipProjections.fromObject(Arrays.asList("T", 42))
         );
-        assertThat(ex.getMessage(), matchesPattern("Cannot construct a relationship projection out of a java.lang.Integer"));
+        assertThat(
+            ex.getMessage(),
+            matchesPattern("Cannot construct a relationship projection out of a java.lang.Integer")
+        );
+    }
+
+    @Test
+    void shouldSupportCaseInsensitiveConfigKeys() {
+        var noProperties = new LinkedHashMap<>();
+        noProperties.put(
+            "MY_TYPE", Map.of(
+                "TYPE", "T",
+                "OrIeNtATiOn", "UNDIRECTED",
+                "AGGREGATION", "SINGLE"
+            ));
+        noProperties.put(
+            "ANOTHER", Map.of(
+                "tYpE", "FOO",
+                "PROPERTIES", Arrays.asList(
+                    "prop1", "prop2"
+                )
+            )
+        );
+
+        RelationshipProjections projections = RelationshipProjections.fromObject(noProperties);
+        assertThat(projections.allProjections(), hasSize(2));
+        assertThat(
+            projections.getFilter(RelationshipType.of("MY_TYPE")),
+            equalTo(RelationshipProjection.of("T", Orientation.UNDIRECTED, SINGLE))
+        );
+        assertThat(
+            projections.getFilter(RelationshipType.of("ANOTHER")),
+            equalTo(RelationshipProjection
+                .builder()
+                .type("FOO")
+                .properties(PropertyMappings
+                    .builder()
+                    .addMapping(PropertyMapping.of("prop1", DefaultValue.DEFAULT))
+                    .addMapping(PropertyMapping.of("prop2", DefaultValue.DEFAULT))
+                    .build()
+                )
+                .build()
+            )
+        );
+        assertThat(projections.typeFilter(), equalTo("T|FOO"));
     }
 
     static Stream<Arguments> syntacticSugarsSimple() {

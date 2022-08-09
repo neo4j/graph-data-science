@@ -62,9 +62,26 @@ class PropertyMappingTest {
             Map.of(
                 "aggregation", "MIN",
                 "defaultValue", 42.0
-            ));
+            )
+        );
         assertEquals(propertyMapping.propertyKey(), "transaction_count");
         assertEquals(propertyMapping.neoPropertyKey(), "transaction_count");
+        assertEquals(propertyMapping.aggregation(), Aggregation.MIN);
+        assertEquals(propertyMapping.defaultValue(), DefaultValue.of(42.0));
+    }
+
+    @Test
+    void shouldSupportCaseInsensitiveConfigKeys() {
+        PropertyMapping propertyMapping = PropertyMapping.fromObject(
+            "transaction_count",
+            Map.of(
+                "PROPERTY", "usd",
+                "AgGrEgAtIoN", "MIN",
+                "DEFAULTValue", 42.0
+            )
+        );
+        assertEquals(propertyMapping.propertyKey(), "transaction_count");
+        assertEquals(propertyMapping.neoPropertyKey(), "usd");
         assertEquals(propertyMapping.aggregation(), Aggregation.MIN);
         assertEquals(propertyMapping.defaultValue(), DefaultValue.of(42.0));
     }
@@ -75,6 +92,9 @@ class PropertyMappingTest {
             IllegalArgumentException.class, () -> PropertyMapping.fromObject("transaction_count", Map.of(
                 "property", 42
             )));
-        assertThat(ex.getMessage(), containsString("Expected the value of 'property' to be of type String, but was 'Integer'."));
+        assertThat(
+            ex.getMessage(),
+            containsString("Expected the value of 'property' to be of type String, but was 'Integer'.")
+        );
     }
 }

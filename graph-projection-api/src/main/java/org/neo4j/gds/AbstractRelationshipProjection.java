@@ -27,6 +27,7 @@ import org.neo4j.gds.core.ConfigKeyValidation;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Function;
 
 import static java.util.Collections.emptyMap;
@@ -96,8 +97,10 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
             return fromString((String) object);
         }
         if (object instanceof Map) {
-            @SuppressWarnings("unchecked") Map<String, Object> map = (Map) object;
-            return fromMap(map, relationshipType);
+            var caseInsensitiveMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+            //noinspection unchecked
+            caseInsensitiveMap.putAll((Map<String, Object>) object);
+            return fromMap(caseInsensitiveMap, relationshipType);
         }
         throw new IllegalArgumentException(formatWithLocale(
             "Cannot construct a relationship filter out of a %s",

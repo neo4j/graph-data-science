@@ -176,7 +176,40 @@ class NodeProjectionsTest {
 
         assertThatThrownBy(builder::build)
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Specifying multiple neoPropertyKeys for the same property is not allowed, found propertyKey: foo, neoPropertyKeys");
+            .hasMessageContaining(
+                "Specifying multiple neoPropertyKeys for the same property is not allowed, found propertyKey: foo, neoPropertyKeys");
+    }
+
+    @Test
+    void shouldSupportCaseInsensitiveConfigKeys() {
+        NodeProjections actual = NodeProjections.fromObject(Map.of(
+            "MY_LABEL", Map.of(
+                "LABEL", "A",
+                "PrOpErTiEs", asList(
+                    "prop1", "prop2"
+                )
+            )
+        ));
+
+        NodeProjections expected = NodeProjections.builder().projections(singletonMap(
+            NodeLabel.of("MY_LABEL"),
+            NodeProjection
+                .builder()
+                .label("A")
+                .properties(PropertyMappings
+                    .builder()
+                    .addMapping(PropertyMapping.of("prop1", DefaultValue.DEFAULT))
+                    .addMapping(PropertyMapping.of("prop2", DefaultValue.DEFAULT))
+                    .build()
+                )
+                .build()
+        )).build();
+
+        assertThat(
+            actual,
+            equalTo(expected)
+        );
+        assertThat(actual.labelProjection(), equalTo("A"));
     }
 
     static Stream<Arguments> syntacticSugarsSimple() {
