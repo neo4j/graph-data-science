@@ -8,6 +8,7 @@ include::partial$/operations-reference/alpha-note.adoc[]
 :directed:
 :undirected:
 :homogeneous:
+:heterogeneous:
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
@@ -25,15 +26,32 @@ The relationships of the sampled subgraph are those induced by the sampled nodes
 
 If at some point it's very unlikely to visit new nodes by random walking from the current set of start nodes (possibly due to the original graph being disconnected), the algorithm will lazily expand the pool of start nodes one at a time by picking nodes uniformly at random from the original graph.
 
-If the graph is weighted and xref:algorithms/alpha/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`relationshipWeightProperty`]  is specified, the random walks are weighted.
-This means that the probability of walking along a relationship is the weight of that relationship divided by the sum of weights of outgoing relationships from the current node.
-
 It was shown by Leskovec et al. in the paper _"Sampling from Large Graphs"_ that RWR is a very good sampling algorithm for preserving structural features of the original graph that was sampled from. Additionally, RWR has been successfully used throughout the literature to sample batches for graph neural network (GNN) training.
-
 
 [Note]
 ====
 Random walk with restarts is sometimes also referred to as _rooted_ or _personalized_ random walk.
+====
+
+
+=== Relationship weights
+
+If the graph is weighted and xref:algorithms/alpha/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`relationshipWeightProperty`]  is specified, the random walks are weighted.
+This means that the probability of walking along a relationship is the weight of that relationship divided by the sum of weights of outgoing relationships from the current node.
+
+
+=== Node label stratification
+
+In some cases it may be desirable for the sampled graph to preserve the distribution of node labels of the original graph.
+To enable such stratification, one can set xref:algorithms/alpha/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`nodeLabelStratification`] to `true` in the algorithm configuration.
+The stratified sampling is then performed by only adding a node to the sampled graph when visiting it if more nodes of that node's particular set of labels are needed to uphold the original graph's node label distribution.
+
+By default, the algorithm treats all nodes in the same way no matter how they are labeled and makes no special effort to preserve the node label distribution of the original graph.
+Please note that the stratified sampling might be a bit slower since it has restrictions on the types of nodes it can add to the sampled graph when crawling it.
+
+[Note]
+====
+At this time there is no support for relationship type stratification.
 ====
 
 
@@ -71,12 +89,13 @@ YIELD
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
-| Name               | Type            | Default                           | Optional | Description
+| Name                    | Type            | Default                           | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
 | xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes       | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
-| samplingRatio      | Float           | 0.15                              | yes      | The fraction of nodes in the original graph to be sampled.
-| restartProbability | Float           | 0.1                               | yes      | The probability that a sampling random walk restarts from one of the start nodes.
-| startNodes         | List of Integer | A node chosen uniformly at random | yes      | IDs of the initial set of nodes of the original graph from which the sampling random walks will start.
+| samplingRatio           | Float           | 0.15                              | yes      | The fraction of nodes in the original graph to be sampled.
+| restartProbability      | Float           | 0.1                               | yes      | The probability that a sampling random walk restarts from one of the start nodes.
+| startNodes              | List of Integer | A node chosen uniformly at random | yes      | IDs of the initial set of nodes of the original graph from which the sampling random walks will start.
+| nodeLabelStratification | Boolean         | false                             | yes      | If true, preserves the node label distribution of the original graph.
 |===
 
 .Results
