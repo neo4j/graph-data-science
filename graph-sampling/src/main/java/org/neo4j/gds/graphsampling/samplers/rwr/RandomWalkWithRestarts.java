@@ -27,7 +27,6 @@ import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -36,20 +35,16 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.gds.core.utils.partition.Partition;
-import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.graphsampling.NodesSampler;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.SplittableRandom;
+
+import static org.neo4j.gds.graphsampling.samplers.rwr.ExpectedNodesCounter.computeExpectedCountsPerNodeLabelSet;
 
 public class RandomWalkWithRestarts implements NodesSampler {
     private static final double QUALITY_MOMENTUM = 0.9;
@@ -129,7 +124,12 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
     private SeenNodes getSeenNodes(Graph inputGraph, ProgressTracker progressTracker) {
         if (config.nodeLabelStratification()) {
-            var expectedCounts = getExpectedCountsPerNodeLabelSet(inputGraph, progressTracker);
+            var expectedCounts = computeExpectedCountsPerNodeLabelSet(
+                inputGraph,
+                config.samplingRatio(),
+                config.concurrency(),
+                progressTracker
+            );
             return new SeenNodes.SeenNodesByLabelSet(inputGraph, expectedCounts);
         }
 
@@ -137,37 +137,6 @@ public class RandomWalkWithRestarts implements NodesSampler {
             HugeAtomicBitSet.create(inputGraph.nodeCount()),
             Math.round(inputGraph.nodeCount() * config.samplingRatio())
         );
-    }
-
-    private Map<Set<NodeLabel>, Long> getExpectedCountsPerNodeLabelSet(
-        Graph inputGraph,
-        ProgressTracker progressTracker
-    ) {
-        progressTracker.beginSubTask("Count node labels");
-        progressTracker.setSteps(inputGraph.nodeCount());
-
-        var tasks = PartitionUtils.rangePartition(
-            config.concurrency(),
-            inputGraph.nodeCount(),
-            partition -> new LabelSetCounter(inputGraph, partition, progressTracker),
-            Optional.empty()
-        );
-        RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
-            .tasks(tasks)
-            .run();
-
-        var totalCounts = new HashMap<Set<NodeLabel>, Long>();
-        tasks.forEach(labelSetCounter -> {
-            for (var entry : labelSetCounter.labelSetCounts().entrySet()) {
-                totalCounts.put(entry.getKey(), entry.getValue() + totalCounts.getOrDefault(entry.getKey(), 0L));
-            }
-        });
-        totalCounts.replaceAll((unused, count) -> Math.round(config.samplingRatio() * count));
-
-        progressTracker.endSubTask("Count node labels");
-
-        return totalCounts;
     }
 
     private Optional<HugeAtomicDoubleArray> initializeTotalWeights(long nodeCount) {
@@ -420,41 +389,6 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
         int size() {
             return size;
-        }
-    }
-
-    static class LabelSetCounter implements Runnable {
-
-        private final Graph inputGraph;
-        private final Map<Set<NodeLabel>, Long> counts;
-        private final Partition partition;
-        private final ProgressTracker progressTracker;
-
-        LabelSetCounter(
-            Graph inputGraph,
-            Partition partition,
-            ProgressTracker progressTracker
-        ) {
-            this.inputGraph = inputGraph;
-            this.progressTracker = progressTracker;
-            this.counts = new HashMap<>();
-            this.partition = partition;
-        }
-
-        @Override
-        public void run() {
-            partition.consume(
-                nodeId -> {
-                    // TODO: Can we avoid GC overhead here somehow?
-                    var nodeLabelSet = new HashSet<>(inputGraph.nodeLabels(nodeId));
-                    counts.put(nodeLabelSet, 1L + counts.getOrDefault(nodeLabelSet, 0L));
-                }
-            );
-            progressTracker.logSteps(partition.nodeCount());
-        }
-
-        public Map<Set<NodeLabel>, Long> labelSetCounts() {
-            return counts;
         }
     }
 }
