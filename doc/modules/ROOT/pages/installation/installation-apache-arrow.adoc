@@ -97,6 +97,7 @@ YIELD
   running: Boolean,
   enabled: Boolean,
   listenAddress: String,
+  advertisedListenAddress: String,
   serverLocation: String,
   batchSize: Integer,
   abortionTimeout: Integer
@@ -105,12 +106,13 @@ YIELD
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name              | Type      | Description
-| running           | Boolean   | True, if the Arrow Flight Server is currently running.
-| enabled           | Boolean   | True, if the corresponding setting is enabled.
-| listenAddress     | String    | Address (host and port) the Arrow Flight Server is bound to.
-| serverLocation    | String    | URI where the Flight stream is available. `NULL` is Arrow is not enabled.
-| batchSize         | Integer   | The batch size used for arrow property export.
-| abortionTimeout   | Duration  | The maximum time to wait for the next command before aborting the import process.
+| Name                      | Type      | Description
+| running                   | Boolean   | True, if the Arrow Flight Server is currently running.
+| enabled                   | Boolean   | True, if the corresponding setting is enabled.
+| listenAddress             | String    | Address (host and port) the Arrow Flight Server is bound to.
+| advertisedListenAddress   | String    | The address (host and port) the Arrow Flight Client should connect to.
+| serverLocation            | String    | URI where the Flight stream is available. `NULL` is Arrow is not enabled.
+| batchSize                 | Integer   | The batch size used for arrow property export.
+| abortionTimeout           | Duration  | The maximum time to wait for the next command before aborting the import process.
 |===
 ======
