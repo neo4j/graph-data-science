@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.graphsampling.samplers.rwr;
 
+import com.carrotsearch.hppc.LongLongHashMap;
+import com.carrotsearch.hppc.procedures.LongLongProcedure;
+import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
@@ -26,13 +29,15 @@ import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-public class ExpectedNodesCounter {
+public final class ExpectedNodesCounter {
 
     static Map<Set<NodeLabel>, Long> computeExpectedCountsPerNodeLabelSet(
         Graph inputGraph,
@@ -73,6 +78,7 @@ public class ExpectedNodesCounter {
         private final Map<Set<NodeLabel>, Long> counts;
         private final Partition partition;
         private final ProgressTracker progressTracker;
+        private final NodeLabel[] availableLabels;
 
         LabelSetCounter(
             Graph inputGraph,
@@ -82,18 +88,45 @@ public class ExpectedNodesCounter {
             this.inputGraph = inputGraph;
             this.progressTracker = progressTracker;
             this.counts = new HashMap<>();
+            this.availableLabels = inputGraph.availableNodeLabels()
+                .stream()
+                .sorted(Comparator.comparing(ElementIdentifier::name))
+                .collect(Collectors.toList())
+                .toArray(NodeLabel[]::new);
             this.partition = partition;
         }
 
         @Override
         public void run() {
+            var labelCounts = new LongLongHashMap(availableLabels.length);
+
             partition.consume(
                 nodeId -> {
-                    // TODO: Can we avoid GC overhead here somehow?
-                    var nodeLabelSet = new HashSet<>(inputGraph.nodeLabels(nodeId));
-                    counts.put(nodeLabelSet, 1L + counts.getOrDefault(nodeLabelSet, 0L));
+                    // We represent the node labels of that node as a bitvector of length 64.
+                    // A bit at index i is set if the node has label at availableNodeLabels[i].
+                    long labelCombination = 0L;
+
+                    for (int i = 0; i < availableLabels.length; i++) {
+                        if (inputGraph.hasLabel(nodeId, availableLabels[i])) {
+                            labelCombination |= 1L << i;
+                        }
+                    }
+
+                    labelCounts.addTo(labelCombination, 1);
                 }
             );
+
+            // Translate label bitvector back to a set of node labels.
+            labelCounts.forEach((LongLongProcedure) (labelCombination, count) -> {
+                var labelSet = new HashSet<NodeLabel>(labelCounts.size());
+                for (int i = 0; i < availableLabels.length; i++) {
+                    if ((labelCombination & 1L << i) != 0) {
+                        labelSet.add(availableLabels[i]);
+                    }
+                }
+                this.counts.put(labelSet, count);
+            });
+
             progressTracker.logSteps(partition.nodeCount());
         }
 
@@ -101,4 +134,6 @@ public class ExpectedNodesCounter {
             return counts;
         }
     }
+
+    private ExpectedNodesCounter() {}
 }
