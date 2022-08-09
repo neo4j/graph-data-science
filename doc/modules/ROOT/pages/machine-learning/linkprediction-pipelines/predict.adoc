@@ -17,9 +17,11 @@ The relationships also have a property which stores the predicted probability of
 Since the model has been trained on features which are created using the feature pipeline, the same feature pipeline is stored within the model and executed at prediction time.
 As during training, intermediate node properties created by the node property steps in the feature pipeline are transient and not visible after execution.
 
-When using the model for prediction, the relationships of the input graph are used in two ways.
-First, the input graph is fed into the feature pipeline and therefore influences predictions if there is at least one step in the pipeline which uses the input relationships (typically any node property step does).
-Second, predictions are carried out on each node pair that is not connected in the input graph.
+When using the model for prediction, relationships in the input graph are separated according to the configuration.
+By default, the configuration will be the same as the configuration used for training the pipeline.
+Relationships marked as context relationships during training are used as such also for computing features in node property steps.
+The target relationship type is used to prevent predicting already existing relationships.
+This configuration may be overridden to specify a different context, or different set of relationships to exclude from prediction.
 
 It is necessary that the predict graph contains the properties that the pipeline requires and that the used array properties have the same dimensions as in the train graph.
 If the predict and train graphs are distinct, it is also beneficial that they have similar origins and semantics, so that the model is able to generalize well.
