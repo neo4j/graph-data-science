@@ -605,5 +605,5 @@ YIELD autoTuningConfig
 | {maxTrials=5}
 |===
 
-We now reconfigured the auto-tuning to try out at most 100 model candidates during xref:machine-learning/linkprediction-pipelines/training.adoc[training].
+We now reconfigured the auto-tuning to try out at most 5 model candidates during xref:machine-learning/linkprediction-pipelines/training.adoc[training].
 --
