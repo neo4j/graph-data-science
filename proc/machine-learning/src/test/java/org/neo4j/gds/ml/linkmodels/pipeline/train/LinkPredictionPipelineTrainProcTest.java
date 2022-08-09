@@ -196,6 +196,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
     @Test
     void failsWhenMissingFeatures() {
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe2')");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe2', {trainFraction: 0.3})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe2', 'pageRank', {mutateProperty: 'pr'})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe2')");
 
@@ -210,6 +211,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
     @Test
     void failsWhenMissingNodeProperty() {
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe')");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe', {trainFraction: 0.3})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe')");
         runQuery(
             "CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'l2', {nodeProperties: ['missingNodeProperty']})");
