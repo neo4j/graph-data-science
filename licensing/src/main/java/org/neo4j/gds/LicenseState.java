@@ -19,11 +19,65 @@
  */
 package org.neo4j.gds;
 
-import java.util.Optional;
-
 public interface LicenseState {
 
-    String name();
-    Optional<String> errorMessage();
-    boolean isValid();
+    <R, P> R visit(VisitorWithParameter<R, P> visitor, P parameter);
+
+    default <R> R visit(Visitor<R> visitor) {
+        return visit(visitor, null);
+    }
+
+    default boolean isLicensed() {
+        return visit(Check.LICENSED);
+    }
+
+    interface VisitorWithParameter<R, P> {
+        R unlicensed(String name, P parameter);
+
+        R licensed(String name, P parameter);
+
+        R invalid(String name, String errorMessage, P parameter);
+    }
+
+    interface Visitor<R> extends VisitorWithParameter<R, Void> {
+        R unlicensed(String name);
+
+        R licensed(String name);
+
+        R invalid(String name, String errorMessage);
+
+        @Override
+        default R unlicensed(String name, Void parameter) {
+            return unlicensed(name);
+        }
+
+        @Override
+        default R licensed(String name, Void parameter) {
+            return licensed(name);
+        }
+
+        @Override
+        default R invalid(String name, String errorMessage, Void parameter) {
+            return invalid(name, errorMessage);
+        }
+    }
+
+    enum Check implements LicenseState.Visitor<Boolean> {
+        LICENSED {
+            @Override
+            public Boolean unlicensed(String name) {
+                return false;
+            }
+
+            @Override
+            public Boolean licensed(String name) {
+                return true;
+            }
+
+            @Override
+            public Boolean invalid(String name, String errorMessage) {
+                return false;
+            }
+        },
+    }
 }
