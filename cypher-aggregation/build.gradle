@@ -25,7 +25,6 @@ dependencies {
     implementation project(':proc-common')
     implementation project(':string-formatting')
 
-    implementation group: 'commons-io',        name: 'commons-io',                version: ver.'commons-io'
     implementation group: 'org.openjdk.jol',   name: 'jol-core',                  version: ver.'jol'
     implementation group: 'org.opencypher',    name: 'cypher-javacc-parser-9.0',  version: ver.'opencypher-front-end', transitive: false
     implementation group: 'org.hdrhistogram',  name: 'HdrHistogram',              version: ver.'HdrHistogram'

@@ -12,7 +12,6 @@ dependencies {
     annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
 
     api project(':proc-common')
-    api group: 'commons-io', name: 'commons-io', version: ver.'commons-io'
 
     implementation project(':annotations')
     implementation project(':config-api')

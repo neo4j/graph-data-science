@@ -25,7 +25,5 @@ dependencies {
         implementation it
     }
 
-    implementation group: 'commons-io', name: 'commons-io', version: ver.'commons-io'
-
     testImplementation project(":test-utils")
 }
