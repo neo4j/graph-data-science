@@ -19,21 +19,22 @@
  */
 package org.neo4j.gds.modularity;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.LongUnaryOperator;
 
-public class ModularityCalculator extends Algorithm<List<CommunityModularity>> {
+public class ModularityCalculator extends Algorithm<ModularityResult> {
 
     private final Graph graph;
     private final LongUnaryOperator communityIdProvider;
@@ -52,7 +53,7 @@ public class ModularityCalculator extends Algorithm<List<CommunityModularity>> {
     }
 
     @Override
-    public List<CommunityModularity> compute() {
+    public ModularityResult compute() {
         var nodeCount = graph.nodeCount();
 
         var insideRelationships = HugeAtomicDoubleArray.newArray(nodeCount);
@@ -79,16 +80,23 @@ public class ModularityCalculator extends Algorithm<List<CommunityModularity>> {
             .tasks(tasks)
             .run();
 
-        List<CommunityModularity> result = new ArrayList<>();
+        var communityCount = communityTracker.cardinality();
+        var communityModularities = HugeObjectArray.newArray(
+            CommunityModularity.class,
+            communityCount
+        );
         var totalRelWeight = totalRelationshipWeight.doubleValue();
+        var resultTracker = new MutableLong();
+        var totalModularity = new MutableDouble();
         communityTracker.forEachSetBit(communityId -> {
             var ec = insideRelationships.get(communityId);
             var Kc = totalCommunityRelationships.get(communityId);
             var modularity = (ec - Kc * Kc * (1.0 / totalRelWeight)) / totalRelWeight;
-            result.add(CommunityModularity.of(communityId, modularity));
+            totalModularity.add(modularity);
+            communityModularities.set(resultTracker.getAndIncrement(), CommunityModularity.of(communityId, modularity));
         });
 
-        return result;
+        return ModularityResult.of(totalModularity.doubleValue(), communityCount, communityModularities);
     }
 
     @Override

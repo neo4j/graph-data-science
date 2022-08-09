@@ -64,12 +64,18 @@ class ModularityCalculatorTest {
             4
         );
 
-        var modularities = modularityCalculator.compute();
+        var result = modularityCalculator.compute();
+        var community_0_score = (6 - 9 * 9 * (1.0 / 16)) / 16;
+        var community_5_score = (4 - 7 * 7 * (1.0 / 16)) / 16;
+        assertThat(result.totalModularity()).isEqualTo(community_0_score + community_5_score);
+        assertThat(result.communityCount()).isEqualTo(2L);
+
+        var modularities = result.modularityScores().toArray();
 
         assertThat(modularities)
             .containsExactlyInAnyOrder(
-                CommunityModularity.of(0L, (6 - 9 * 9 * (1.0 / 16)) / 16),
-                CommunityModularity.of(5L, (4 - 7 * 7 * (1.0 / 16)) / 16)
+                CommunityModularity.of(0L, community_0_score),
+                CommunityModularity.of(5L, community_5_score)
             );
     }
 }

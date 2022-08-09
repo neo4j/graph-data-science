@@ -76,7 +76,6 @@ CALL gds.alpha.modularity.stats(
   relationshipCount: Integer,
   communityCount: Integer,
   modularity: Float,
-  modularities: List of Float,
   postProcessingMillis: Integer,
   preProcessingMillis: Integer,
   computeMillis: Integer,
@@ -101,7 +100,6 @@ include::partial$/algorithms/alpha/modularity/specific-configuration.adoc[]
 | relationshipCount     | Integer       | The number of relationships in the graph.
 | communityCount        | Integer       | The number of communities.
 | modularity            | Float         | The total modularity score.
-| modularities          | List of Float | The modularity scores for each community.
 | preProcessingMillis   | Integer       | Milliseconds for preprocessing the data.
 | computeMillis         | Integer       | Milliseconds for running the algorithm.
 | postProcessingMillis  | Integer       | Milliseconds for computing percentiles and community count.
@@ -214,13 +212,13 @@ For more details on the stream mode in general, see xref:common-usage/running-al
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.modularity.stats('myGraph', { communityProperty: 'community', relationshipWeightProperty: 'weight' })
-YIELD nodeCount, relationshipCount, communityCount, modularity, modularities
+YIELD nodeCount, relationshipCount, communityCount, modularity
 ----
 
 .Results
 [opts="header"]
 |===
-| nodeCount | relationshipCount | communityCount | modularity           | modularities
-| 6         | 14                | 3              | 0.293388429752066    | [0.05785123966942149, 0.10537190082644629, 0.13016528925619833]
+| nodeCount | relationshipCount | communityCount | modularity
+| 6         | 14                | 3              | 0.293388429752066
 |===
 --
