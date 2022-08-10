@@ -27,12 +27,12 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Comparator;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
 public final class NodeLabelHistogram {
@@ -54,10 +54,21 @@ public final class NodeLabelHistogram {
             .collect(Collectors.toList())
             .toArray(NodeLabel[]::new);
 
+        var localLabelCounts = new ConcurrentLinkedQueue<LongLongHashMap>();
+
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             inputGraph.nodeCount(),
-            partition -> new LabelSetCounter(inputGraph, availableNodeLabels, partition, progressTracker),
+            partition -> (Runnable) () -> {
+                var labelCount = new LongLongHashMap();
+                partition.consume(nodeId -> {
+                    labelCount.addTo(
+                        encodedLabelCombination(inputGraph, availableNodeLabels, nodeId),
+                        1
+                    );
+                });
+                localLabelCounts.add(labelCount);
+            },
             Optional.empty()
         );
         RunWithConcurrency.builder()
@@ -66,9 +77,7 @@ public final class NodeLabelHistogram {
             .run();
 
         var totalCounts = new LongLongHashMap();
-
-        tasks.forEach(labelSetCounter -> labelSetCounter
-            .labelSetCounts()
+        localLabelCounts.forEach(labelCount -> labelCount
             .forEach((LongLongProcedure) (labelCombination, count) -> totalCounts.put(
                 labelCombination,
                 totalCounts.getOrDefault(labelCombination, 0) + count
@@ -80,44 +89,6 @@ public final class NodeLabelHistogram {
             .availableNodeLabels(availableNodeLabels)
             .histogram(totalCounts)
             .build();
-    }
-
-    static class LabelSetCounter implements Runnable {
-
-        private final Graph inputGraph;
-        private final LongLongHashMap counts;
-        private final Partition partition;
-        private final ProgressTracker progressTracker;
-        private final NodeLabel[] availableLabels;
-
-        LabelSetCounter(
-            Graph inputGraph,
-            NodeLabel[] availableLabels,
-            Partition partition,
-            ProgressTracker progressTracker
-        ) {
-            this.inputGraph = inputGraph;
-            this.progressTracker = progressTracker;
-            this.counts = new LongLongHashMap(availableLabels.length);
-            this.availableLabels = availableLabels;
-            this.partition = partition;
-        }
-
-        @Override
-        public void run() {
-            var labelCounts = this.counts;
-
-            partition.consume(nodeId -> labelCounts.addTo(
-                encodedLabelCombination(inputGraph, availableLabels, nodeId),
-                1
-            ));
-
-            progressTracker.logSteps(partition.nodeCount());
-        }
-
-        public LongLongHashMap labelSetCounts() {
-            return counts;
-        }
     }
 
     /**

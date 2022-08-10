@@ -39,8 +39,8 @@ public interface SeenNodes {
 
     class SeenNodesByLabelSet implements SeenNodes {
         private final Graph inputGraph;
-        private final LongLongHashMap seenNodesPerLabelCombination;
-        private final LongLongHashMap expectedNodesPerLabelCombination;
+        private final LongLongHashMap seenNodesPerLabels;
+        private final LongLongHashMap expectedNodesPerLabels;
         private final NodeLabel[] availableNodeLabels;
         private final HugeAtomicBitSet seenBitSet;
         private final long totalExpectedNodes;
@@ -50,13 +50,13 @@ public interface SeenNodes {
             this.availableNodeLabels = nodeLabelHistogram.availableNodeLabels();
             this.seenBitSet = HugeAtomicBitSet.create(inputGraph.nodeCount());
 
-            this.expectedNodesPerLabelCombination = new LongLongHashMap(nodeLabelHistogram.histogram().size());
-            this.seenNodesPerLabelCombination = new LongLongHashMap(nodeLabelHistogram.histogram().size());
+            this.expectedNodesPerLabels = new LongLongHashMap(nodeLabelHistogram.histogram().size());
+            this.seenNodesPerLabels = new LongLongHashMap(nodeLabelHistogram.histogram().size());
             nodeLabelHistogram.histogram().forEach((LongLongProcedure) (labelCombination, count) -> {
-                expectedNodesPerLabelCombination.put(labelCombination, Math.round(samplingRatio * count));
-                seenNodesPerLabelCombination.put(labelCombination, 0);
+                expectedNodesPerLabels.put(labelCombination, Math.round(samplingRatio * count));
+                seenNodesPerLabels.put(labelCombination, 0);
             });
-            this.totalExpectedNodes = Arrays.stream(expectedNodesPerLabelCombination.values).sum();
+            this.totalExpectedNodes = Arrays.stream(expectedNodesPerLabels.values).sum();
         }
 
         public boolean addNode(long nodeId) {
@@ -69,10 +69,9 @@ public interface SeenNodes {
             // There's a slight race condition here which may cause there to be an extra node or two in a given
             // node label set bucket, since the cardinality check and the set are not synchronized together.
             // Since the sampling is inexact by nature this should be fine.
-            if (seenNodesPerLabelCombination.get(labelCombination) < expectedNodesPerLabelCombination.get(
-                labelCombination)) {
+            if (seenNodesPerLabels.get(labelCombination) < expectedNodesPerLabels.get(labelCombination)) {
                 if (!seenBitSet.getAndSet(nodeId)) {
-                    seenNodesPerLabelCombination.addTo(labelCombination, 1);
+                    seenNodesPerLabels.addTo(labelCombination, 1);
                     return true;
                 }
             }
