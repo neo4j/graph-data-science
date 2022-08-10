@@ -68,7 +68,7 @@ public class NodeRegressionPredictPipelineExecutor extends PipelineExecutor<
     }
 
     @Override
-    public Map<DatasetSplits, GraphFilter> splitDataset() {
+    public Map<DatasetSplits, GraphFilter> generateDatasetSplitGraphFilters() {
         // For prediction, we don't split the input graph but generate the features and predict over the whole graph
         return Map.of(
             DatasetSplits.FEATURE_INPUT,
@@ -76,6 +76,11 @@ public class NodeRegressionPredictPipelineExecutor extends PipelineExecutor<
                 .nodeLabels(config.nodeLabelIdentifiers(graphStore))
                 .contextRelationshipTypes(config.internalRelationshipTypes(graphStore)).build()
         );
+    }
+
+    @Override
+    public void splitDatasets() {
+        //NodeRegression Predict does not split datasets
     }
 
     @Override

@@ -756,7 +756,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 ExecutionContext.EMPTY,
                 graphStore,
                 ProgressTracker.NULL_TRACKER
-            ).splitDataset();
+            ).generateDatasetSplitGraphFilters();
 
             assertThat(splits.get(FEATURE_INPUT).nodeLabels()).containsExactlyInAnyOrder(
                 NodeLabel.of("P"),

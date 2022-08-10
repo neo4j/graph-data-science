@@ -77,7 +77,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     }
 
     @Override
-    public Map<DatasetSplits, GraphFilter> splitDataset() {
+    public Map<DatasetSplits, GraphFilter> generateDatasetSplitGraphFilters() {
         // For prediction, we don't split the input graph but generate the features and predict over the whole graph
         return Map.of(
             DatasetSplits.FEATURE_INPUT,
@@ -86,6 +86,11 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 .contextRelationshipTypes(graphStoreFilter.nodePropertyStepRelationshipTypes())
                 .build()
         );
+    }
+
+    @Override
+    public void splitDatasets() {
+        //LinkPrediction Predict does not split datasets
     }
 
     @Override

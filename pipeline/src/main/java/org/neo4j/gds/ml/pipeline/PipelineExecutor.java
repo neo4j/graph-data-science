@@ -75,7 +75,9 @@ public abstract class PipelineExecutor<
             .filterRelationshipTypes(Set.copyOf(config.internalRelationshipTypes(graphStore)));
     }
 
-    public abstract Map<DatasetSplits, GraphFilter> splitDataset();
+    public abstract Map<DatasetSplits, GraphFilter> generateDatasetSplitGraphFilters();
+
+    public abstract void splitDatasets();
 
     protected abstract RESULT execute(Map<DatasetSplits, GraphFilter> dataSplits);
 
@@ -83,18 +85,19 @@ public abstract class PipelineExecutor<
     public RESULT compute() {
         progressTracker.beginSubTask();
 
-        //TODO Refactor actually splitting to after validateBeforeExecution, and only keep metadata generation here
-        var dataSplits = splitDataset();
-        var graphFilter = dataSplits.get(DatasetSplits.FEATURE_INPUT);
+        var dataSplitGraphFilters = generateDatasetSplitGraphFilters();
+        var featureInputGraphFilter = dataSplitGraphFilters.get(DatasetSplits.FEATURE_INPUT);
 
-        pipeline.validateBeforeExecution(graphStore, graphFilter.nodeLabels());
+        pipeline.validateBeforeExecution(graphStore, featureInputGraphFilter.nodeLabels());
+
+        splitDatasets();
 
         var nodePropertyStepExecutor = NodePropertyStepExecutor.of(
             executionContext,
             graphStore,
             config,
-            graphFilter.nodeLabels(),
-            graphFilter.relationshipTypes(),
+            featureInputGraphFilter.nodeLabels(),
+            featureInputGraphFilter.relationshipTypes(),
             progressTracker
         );
 
@@ -103,12 +106,12 @@ public abstract class PipelineExecutor<
             nodePropertyStepExecutor.executeNodePropertySteps(pipeline.nodePropertySteps());
             pipeline.validateFeatureProperties(graphStore, config.nodeLabelIdentifiers(graphStore));
 
-            var result = execute(dataSplits);
+            var result = execute(dataSplitGraphFilters);
             progressTracker.endSubTask();
             return result;
         } finally {
             nodePropertyStepExecutor.cleanupIntermediateProperties(pipeline.nodePropertySteps());
-            additionalGraphStoreCleanup(dataSplits);
+            additionalGraphStoreCleanup(dataSplitGraphFilters);
         }
     }
 
