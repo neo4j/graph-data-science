@@ -41,14 +41,22 @@ When doing memory estimation of the training, the feature dimension is computed 
 
 === Graph pre-sampling to reduce time and memory
 
-Since training GraphSAGE may take a lot of time and memory to train on large graphs, it can be helpful to sample a smaller subgraph prior to training, and then training on that subgraph.
+Since training a GraphSAGE model may take a lot of time and memory on large graphs, it can be helpful to sample a smaller subgraph prior to training, and then training on that subgraph.
 The trained model can still be applied to predict embeddings on the full graph (or other graphs) since GraphSAGE is inductive.
 To sample a structurally representative subgraph, see xref:algorithms/alpha/rwr.adoc[Random walk with restarts sampling].
+
+
+=== Usage in machine learning pipelines
+
+It may be useful to generate node embeddings with GraphSAGE as a node property step in a machine learning pipeline (like xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[] and xref:machine-learning/node-property-prediction/index.adoc[]).
+It is not supported to train the GraphSAGE model inside the pipeline, but rather one must first train the model outside the pipeline.
+Once the model is trained, it is possible to add GraphSAGE as a node property step to a pipeline using `gds.beta.graphSage` or the shorthand `beta.graphSage` as the `procedureName` procedure parameter, and referencing the trained model in the procedure configuration map as one would with the <<algorithms-embeddings-graph-sage-syntax, predict mutate mode>>.
 
 
 == Tuning parameters
 
 In general tuning parameters is very dependent on the specific dataset.
+
 
 === Embedding dimension
 
@@ -83,6 +91,7 @@ The more layers the higher memory and computation time.
 A sample size `n` means we try to sample at most `n` neighbors from a node.
 Higher sample sizes also require more memory and computation time.
 
+
 === Batch size
 
 This parameter defines how many training examples are grouped in a single batch.
@@ -91,6 +100,7 @@ The gradients are computed concurrently on the batches using `concurrency` many 
 
 The batch size does not affect the model quality, but can be used to tune for training speed.
 A larger batch size increases the memory consumption of the computation.
+
 
 === Epochs
 
@@ -668,6 +678,7 @@ YIELD nodeId, embedding
 
 NOTE: Due to the random initialisation of the weight variables the results may vary slightly between the runs.
 
+
 [[graph-sage-trained-model-example-mutate]]
 === Mutate
 
@@ -695,6 +706,7 @@ CALL gds.beta.graphSage.mutate(
 | 7         | 7
 |===
 --
+
 
 [[graph-sage-trained-model-example-write]]
 === Write
