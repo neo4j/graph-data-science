@@ -87,7 +87,7 @@ class WeightedBetweennessCentralityTest {
         var algoWeighted = new BetweennessCentrality(
             equallyWeightedGraph,
             new SelectionStrategy.RandomDegree(7, Optional.of(42L)),
-            true,
+            ForwardTraverser.Factory.weighted(),
             Pools.DEFAULT,
             8,
             ProgressTracker.NULL_TRACKER
@@ -95,7 +95,7 @@ class WeightedBetweennessCentralityTest {
         var algoUnweighted = new BetweennessCentrality(
             equallyWeightedGraph,
             new SelectionStrategy.RandomDegree(7, Optional.of(42L)),
-            false,
+            ForwardTraverser.Factory.unweighted(),
             Pools.DEFAULT,
             8,
             ProgressTracker.NULL_TRACKER
@@ -118,7 +118,7 @@ class WeightedBetweennessCentralityTest {
          var bc = new BetweennessCentrality(
              weightedGraph,
              new SelectionStrategy.RandomDegree(7, Optional.of(42L)),
-             true,
+             ForwardTraverser.Factory.weighted(),
              Pools.DEFAULT,
              8,
              ProgressTracker.NULL_TRACKER

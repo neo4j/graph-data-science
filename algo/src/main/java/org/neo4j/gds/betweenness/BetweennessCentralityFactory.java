@@ -58,10 +58,14 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
             ? new SelectionStrategy.RandomDegree(samplingSize.get(), samplingSeed)
             : SelectionStrategy.ALL;
 
+        ForwardTraverser.Factory traverserFactory = configuration.hasRelationshipWeightProperty()
+            ? ForwardTraverser.Factory.weighted()
+            : ForwardTraverser.Factory.unweighted();
+
         return new BetweennessCentrality(
             graph,
             strategy,
-            configuration.hasRelationshipWeightProperty(),
+            traverserFactory,
             Pools.DEFAULT,
             configuration.concurrency(),
             progressTracker

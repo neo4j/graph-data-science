@@ -26,36 +26,27 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
-interface ForwardTraverser {
+public interface ForwardTraverser {
 
     void traverse(long startNodeId);
 
     void clear();
 
-    static ForwardTraverser create(
-        boolean weighted,
-        Graph graph,
-        HugeObjectArray<LongArrayList> predecessors,
-        HugeLongArrayStack backwardNodes,
-        HugeLongArray sigma,
-        TerminationFlag terminationFlag
-    ) {
-        if (weighted) {
-            return WeightedForwardTraverser.create(
-                graph.concurrentCopy(),
-                predecessors,
-                backwardNodes,
-                sigma,
-                terminationFlag
-            );
-        } else {
-            return UnweightedForwardTraverser.create(
-                graph.concurrentCopy(),
-                predecessors,
-                backwardNodes,
-                sigma,
-                terminationFlag
-            );
+    interface Factory {
+        ForwardTraverser create(
+            Graph graph,
+            HugeObjectArray<LongArrayList> predecessors,
+            HugeLongArrayStack backwardNodes,
+            HugeLongArray sigma,
+            TerminationFlag terminationFlag
+        );
+
+        static Factory weighted() {
+            return WeightedForwardTraverser::create;
+        }
+
+        static Factory unweighted() {
+            return UnweightedForwardTraverser::create;
         }
     }
 }

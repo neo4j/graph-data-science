@@ -42,10 +42,10 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
     private final AtomicLong nodeQueue = new AtomicLong();
     private final long nodeCount;
     private final double divisor;
+    private final ForwardTraverser.Factory traverserFactory;
 
     private HugeAtomicDoubleArray centrality;
     private SelectionStrategy selectionStrategy;
-    private final boolean weighted;
 
     private final ExecutorService executorService;
     private final int concurrency;
@@ -54,14 +54,13 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
     public BetweennessCentrality(
         Graph graph,
         SelectionStrategy selectionStrategy,
-        boolean weighted,
+        ForwardTraverser.Factory traverserFactory,
         ExecutorService executorService,
         int concurrency,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.weighted = weighted;
         this.executorService = executorService;
         this.concurrency = concurrency;
         this.nodeCount = graph.nodeCount();
@@ -69,6 +68,7 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
         this.selectionStrategy = selectionStrategy;
         this.selectionStrategy.init(graph, executorService, concurrency);
         this.divisor = graph.isUndirected() ? 2.0 : 1.0;
+        this.traverserFactory = traverserFactory;
 
     }
 
@@ -104,8 +104,7 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
 
         @Override
         public void run() {
-            var forwardTraversor = ForwardTraverser.create(
-                weighted,
+            var forwardTraversor = traverserFactory.create(
                 graph.concurrentCopy(),
                 predecessors,
                 backwardNodes,
