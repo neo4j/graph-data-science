@@ -91,6 +91,7 @@ public abstract class PipelineExecutor<
             executionContext,
             graphStore,
             config,
+            graphFilter.nodeLabels(),
             graphFilter.relationshipTypes(),
             progressTracker
         );

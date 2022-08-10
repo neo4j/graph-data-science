@@ -56,6 +56,7 @@ public final class NodeFeatureProducer<PIPELINE_CONFIG extends AlgoBaseConfig & 
                 executionContext,
                 graphStore,
                 config,
+                config.nodeLabelIdentifiers(graphStore),
                 config.internalRelationshipTypes(graphStore),
                 progressTracker
             ),

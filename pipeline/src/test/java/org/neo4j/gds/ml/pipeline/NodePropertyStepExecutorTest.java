@@ -51,6 +51,7 @@ class NodePropertyStepExecutorTest {
             ExecutionContext.EMPTY,
             new NodePropertyStepExecutorTestConfig(),
             graphStore,
+            graphStore.nodeLabels(),
             graphStore.relationshipTypes(),
             ProgressTracker.NULL_TRACKER
         );
@@ -86,6 +87,7 @@ class NodePropertyStepExecutorTest {
             ExecutionContext.EMPTY,
             new NodePropertyStepExecutorTestConfig(),
             graphStore,
+            graphStore.nodeLabels(),
             graphStore.relationshipTypes(),
             progressTracker
         ).executeNodePropertySteps(steps);

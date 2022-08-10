@@ -17,9 +17,11 @@ The relationships also have a property which stores the predicted probability of
 Since the model has been trained on features which are created using the feature pipeline, the same feature pipeline is stored within the model and executed at prediction time.
 As during training, intermediate node properties created by the node property steps in the feature pipeline are transient and not visible after execution.
 
-When using the model for prediction, the relationships of the input graph are used in two ways.
-First, the input graph is fed into the feature pipeline and therefore influences predictions if there is at least one step in the pipeline which uses the input relationships (typically any node property step does).
-Second, predictions are carried out on each node pair that is not connected in the input graph.
+When using the model for prediction, relationships in the input graph are separated according to the configuration.
+By default, the configuration will be the same as the configuration used for training the pipeline.
+Relationships marked as context relationships during training are again used for computing features in node property steps.
+The target relationship type is used to prevent predicting already existing relationships.
+This configuration may be overridden to specify a different context, or different set of relationships to exclude from prediction.
 
 It is necessary that the predict graph contains the properties that the pipeline requires and that the used array properties have the same dimensions as in the train graph.
 If the predict and train graphs are distinct, it is also beneficial that they have similar origins and semantics, so that the model is able to generalize well.
@@ -197,6 +199,10 @@ YIELD requiredMemory
 [[algorithms-link-prediction-pipelines-predict-examples-stream]]
 === Stream
 
+:entity: node pair
+:result: probability of a link
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
 [role=query-example, group=lp]
 --
 [source, cypher]
@@ -204,28 +210,25 @@ YIELD requiredMemory
 CALL gds.beta.pipeline.linkPrediction.predict.stream('myGraph', {
   modelName: 'lp-pipeline-model',
   topN: 5,
-  threshold: 0.45
+  threshold: 0.5
 })
  YIELD node1, node2, probability
  RETURN gds.util.asNode(node1).name AS person1, gds.util.asNode(node2).name AS person2, probability
  ORDER BY probability DESC, person1
 ----
 
-We specified `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
+We specify `threshold` to include only predictions with probability greater than 50%, and `topN` to further limit output to the top 5 relationships.
 As the default samplingRate is `1`, we use the xref:machine-learning/linkprediction-pipelines/predict.adoc#algorithms-link-prediction-pipelines-predict-exhaustive-search[exhaustive-search].
 
 .Results
 [opts="header"]
 |===
 | person1   | person2   | probability
-| "Will"      | "Veselin"   | 0.586210196222209
-| "Alice"     | "Veselin"   | 0.5
-| "Greg"      | "Veselin"   | 0.5
-| "Mark"      | "Veselin"   | 0.5
-| "Alice"     | "Will"      | 0.457786768495719
+| "Will"    | "Veselin" | 0.584994091515458
 |===
 
-We can see, that our model predicts the most likely links are the five above.
+We can see that the model only thinks that the Will and Veselin nodes should be connected, with a probability higher than 50%.
+Other node pairs have a lower probability and are filtered out of the result.
 --
 
 
@@ -244,26 +247,25 @@ CALL gds.beta.pipeline.linkPrediction.predict.mutate('myGraph', {
   relationshipTypes: ['KNOWS'],
   mutateRelationshipType: 'KNOWS_EXHAUSTIVE_PREDICTED',
   topN: 5,
-  threshold: 0.45
+  threshold: 0.5
 }) YIELD relationshipsWritten, samplingStats
 ----
 
-We specify `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
+We specify `threshold` to include only predictions with probability greater than 50%, and `topN` to further limit output to the top 5 relationships.
 As the default samplingRate is `1`, we use the xref:machine-learning/linkprediction-pipelines/predict.adoc#algorithms-link-prediction-pipelines-predict-exhaustive-search[exhaustive-search].
-Note that we omit setting the `sampleRate` in our configuration as it defaults to 1 implying that the exhaustive search strategy is used.
 Because we are using the `UNDIRECTED` orientation, we will write twice as many relationships to the in-memory graph.
 
 .Results
 [opts="header"]
 |===
 | relationshipsWritten | samplingStats
-| 10                   | {linksConsidered=16, strategy=exhaustive}
+| 2                    | {linksConsidered=16, strategy=exhaustive}
 |===
 --
 
-As we can see in the `samplingStats`, we use the exhaustive search strategy and check 16 possible links during the prediction.
+As we can see in the `samplingStats`, we used the exhaustive search strategy and checked 16 possible links during the prediction.
 Indeed, since there are a total of `8 * (8 - 1) / 2 = 28` possible links in the graph and we already have 12, that means we check all possible new links.
-Although 16 links were considered, we only mutate the best five (since `topN = 5`) that are above our threshold.
+Although 16 links were considered, we only mutate the best five (since `topN = 5`) that are above our threshold, and in fact only one link did pass the threshold (see <<algorithms-link-prediction-pipelines-predict-examples-stream>>).
 
 If our graph is very large there may be a lot of possible new links.
 As such it may take a very long time to run the predictions.
@@ -310,3 +312,42 @@ Because we are using the `UNDIRECTED` orientation, we will write twice as many r
 As we can see in the `samplingStats`, we use the approximate search strategy and check 52 possible links during the prediction.
 Though in this small example we actually consider more links that in the exhaustive case, this will typically not be the case for larger graphs.
 Since the relationships we write are undirected, reported `relationshipsWritten` is 16 when we search for the best (`topK = 1`) prediction for each node.
+
+
+
+[[algorithms-link-prediction-pipelines-predict-examples-filtered]]
+=== Predict with context filtering
+
+In xref:machine-learning/linkprediction-pipelines/training.adoc#linkprediction-pipeline-examples-train-filtering[Training with context filters], we trained another model `lp-pipeline-model-filtered` on `fullGraph` which uses context `City` nodes and context `LIVES` and `BORN` relationships.
+
+We can leverage this model in prediction, optionally overriding node label or relationship type filter configuration in prediction.
+In this case we do not, and instead inherit the filtering configuration from the train configuration of the `lp-pipeline-model-filtering` model.
+In other words, we predict Person-KNOWS-Person relationships, additionally using `City` nodes and `LIVES` and `BORN` relationships for the node property steps.
+
+[role=query-example, group=lp]
+--
+[source, cypher]
+----
+CALL gds.beta.pipeline.linkPrediction.predict.stream('fullGraph', {
+  modelName: 'lp-pipeline-model-filtered',
+  topN: 5,
+  threshold: 0.5
+})
+ YIELD node1, node2, probability
+ RETURN gds.util.asNode(node1).name AS person1, gds.util.asNode(node2).name AS person2, probability
+ ORDER BY probability DESC, person1
+----
+
+We specify `threshold` to include only predictions with probability greater than 50%, and `topN` to further limit output to the top 5 relationships.
+As the default samplingRate is `1`, we use the xref:machine-learning/linkprediction-pipelines/predict.adoc#algorithms-link-prediction-pipelines-predict-exhaustive-search[exhaustive-search].
+
+.Results
+[opts="header"]
+|===
+| person1   | person2   | probability
+| "Will"    | "Veselin" | 0.585064825714746
+|===
+
+We can see that our model predicts the same Will-Veselin link as it did with the unfiltered model `lp-pipeline-model`.
+However, the probabilities vary slightly, due to the additional context information used in training and prediction.
+--

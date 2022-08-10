@@ -32,6 +32,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
@@ -41,7 +42,9 @@ import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -57,6 +60,8 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
+import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
+import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
@@ -65,6 +70,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.test.TestMutateProc;
 import org.neo4j.gds.test.TestProc;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -74,6 +80,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep;
 import static org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil.TestNodePropertyStepWithFixedEstimation;
 import static org.neo4j.gds.ml.pipeline.PipelineExecutor.DatasetSplits.FEATURE_INPUT;
@@ -670,6 +677,13 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .testFraction(0.5)
                 .build());
 
+            pipeline.addNodePropertyStep(new TestFilteredNodePropertyStep(
+                ImmutableGraphFilter.builder()
+                    .nodeLabels(List.of(NodeLabel.of("P"), NodeLabel.of("Q"), NodeLabel.of("X")))
+                    .intermediateRelationshipTypes(List.of(RelationshipType.of("_FEATURE_INPUT_")))
+                    .contextRelationshipTypes(List.of(RelationshipType.of("CONTEXT")))
+                    .build()));
+
             pipeline.addTrainerConfig(RandomForestClassifierTrainerConfig.DEFAULT);
 
             pipeline.addFeatureStep(new L2FeatureStep(List.of("height")));
@@ -682,6 +696,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .sourceNodeLabel("P")
                 .targetNodeLabel("Q")
                 .contextRelationshipTypes(List.of("CONTEXT"))
+                .contextNodeLabels(List.of("X"))
                 .metrics(List.of(LinkMetric.AUCPR.name()))
                 .pipeline("DUMMY")
                 .negativeClassWeight(1)
@@ -746,6 +761,55 @@ final class LinkPredictionTrainPipelineExecutorTest {
             );
             assertThat(splits.get(TEST).nodeLabels()).containsExactlyInAnyOrder(NodeLabel.of("P"), NodeLabel.of("Q"));
             assertThat(splits.get(TRAIN).nodeLabels()).containsExactlyInAnyOrder(NodeLabel.of("P"), NodeLabel.of("Q"));
+        }
+    }
+
+
+    static class TestFilteredNodePropertyStep implements ExecutableNodePropertyStep {
+        private final PipelineExecutor.GraphFilter graphFilter;
+
+        TestFilteredNodePropertyStep(PipelineExecutor.GraphFilter graphFilter) {
+            this.graphFilter = graphFilter;
+        }
+
+        @Override
+        public void execute(
+            ExecutionContext executionContext,
+            String graphName,
+            Collection<NodeLabel> nodeLabels,
+            Collection<RelationshipType> relTypes
+        ) {
+            assertThat(nodeLabels).containsExactlyInAnyOrderElementsOf(graphFilter.nodeLabels());
+            assertThat(relTypes).containsExactlyInAnyOrderElementsOf(graphFilter.relationshipTypes());
+        }
+
+        @Override
+        public Map<String, Object> config() {
+            return Map.of(MUTATE_PROPERTY_KEY, "test");
+        }
+
+        @Override
+        public String procName() {
+            return "assert step filter";
+        }
+
+        @Override
+        public MemoryEstimation estimate(
+            ModelCatalog modelCatalog,
+            List<String> nodeLabels,
+            List<String> relTypes
+        ) {
+            return MemoryEstimations.of("fake", MemoryRange.of(0));
+        }
+
+        @Override
+        public String mutateNodeProperty() {
+            return "test";
+        }
+
+        @Override
+        public Map<String, Object> toMap() {
+            return Map.of();
         }
     }
 }

@@ -231,7 +231,7 @@ The supported types of features can then be described as follows:
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'hadamard', {
-  nodeProperties: ['embedding', 'numberOfPosts']
+  nodeProperties: ['embedding', 'age']
 }) YIELD featureSteps
 ----
 
@@ -239,7 +239,7 @@ CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'hadamard', {
 [opts="header",cols="1"]
 |===
 | featureSteps
-| [{name=HADAMARD, config={nodeProperties=[embedding, numberOfPosts]}}]
+| [{name=HADAMARD, config={nodeProperties=[embedding, age]}}]
 |===
 
 When executing the pipeline, the `nodeProperties` must be either present in the input graph, or created by a previous node property step.
@@ -260,19 +260,22 @@ The splitting of relationships proceeds internally in the following steps:
 1. The graph is filtered according to specified `sourceNodeLabel`, `targetNodeLabel` and `targetRelationshipType`, which are configured at train time.
 2. The relationships remaining after filtering we call _positive_, and they are split into a `test` set and remaining relationships which we refer to as `test-complement` set.[[def-test-complement]]
 * The `test` set contains a `testFraction` fraction of the positive relationships.
-* Random negative relationships, which confirm to the `sourceNodeLabel` and `tagetNodeLabel` filter, are added to the `test` set.
+* Random negative relationships, which conform to the `sourceNodeLabel` and `tagetNodeLabel` filter, are added to the `test` set.
 The number of negative relationships is the number of positive ones multiplied by the `negativeSamplingRatio`.
 * The negative relationships do not coincide with positive relationships.
 3. The relationships in the `test-complement` set are split into a `train` set and a `feature-input` set.
 * The `train` set contains a `trainFraction` fraction of the `test-complement` set.
-* The `feature-input` set contains `(1-trainFraction)` fraction of the `test-complement` set.
-* Random negative relationships, which confirm to the `sourceNodeLabel` and `tagetNodeLabel` filter, are added to the `train` set.
+* The `feature-input` set contains a `(1-trainFraction)` fraction of the `test-complement` set. Additionally, the `feature-input` set can be extended with more relationships by using the `contextRelationshipType` parameter.
+* Random negative relationships, which conform to the `sourceNodeLabel` and `tagetNodeLabel` filter, are added to the `train` set.
 The number of negative relationships is the number of positive ones multiplied by the `negativeSamplingRatio`.
 * The negative relationships do not coincide with positive relationships, nor with test relationships.
 
 The sampled positive and negative relationships are given relationship weights of `1.0` and `0.0` respectively so that they can be distinguished.
 
-The `feature-input` graph is used, both in training and testing, for computing node properties and therefore also features which depend on node properties.
+The `feature-input` graph has nodes with `sourceNodeLabel`, `targetNodeLabel` and `contextNodeLabels` and the relationships from the `feature-input` set plus those of `contextRelationshipTypes`
+This graph is used for computing node properties and features which depend on node properties.
+The node properties generated in the `feature-input` graph are used in training and testing.
+
 
 The `train` and `test` relationship sets are used for:
 

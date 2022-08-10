@@ -49,13 +49,14 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
         ExecutionContext executionContext,
         PIPELINE_CONFIG config,
         GraphStore graphStore,
+        Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes,
         ProgressTracker progressTracker
     ) {
         this.executionContext = executionContext;
         this.config = config;
         this.graphStore = graphStore;
-        this.nodeLabels = config.nodeLabelIdentifiers(graphStore);
+        this.nodeLabels = nodeLabels;
         this.relTypes = relationshipTypes;
         this.progressTracker = progressTracker;
     }
@@ -106,6 +107,7 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
         ExecutionContext executionContext,
         GraphStore graphStore,
         CONFIG config,
+        Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes,
         ProgressTracker progressTracker
     ) {
@@ -113,6 +115,7 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
             executionContext,
             config,
             graphStore,
+            nodeLabels,
             relationshipTypes,
             progressTracker
         );

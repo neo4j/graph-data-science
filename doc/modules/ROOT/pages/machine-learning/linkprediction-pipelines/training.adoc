@@ -7,10 +7,11 @@ The model can be xref:machine-learning/linkprediction-pipelines/predict.adoc[app
 
 More precisely, the procedure will in order:
 
-. Apply `sourceNodeLabel`, `targetNodeLabel`, and `targetRelationshipType` filters to the graph. All subsequent graphs have the same node set.
-. Create a relationship split of the graph into `test`, `train` and `feature-input` sets as described in xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[Configuring the relationship splits].
+
+. Apply node filtering using `sourceNodeLabel` and `targetNodeLabel`, and relationship filtering using `targetRelationshipType`. The resulting graph is used as input to splitting.
+. Create a relationship split of the graph into `test`, `train` and `feature-input` graphs as described in xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[Configuring the relationship splits].
 These graphs are internally managed and exist only for the duration of the training.
-. Apply the node property steps, added according to xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[Adding node properties], on the graph of the `featureInput` and `contextRelationshipTypes`.
+. Apply the node property steps, added according to xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[Adding node properties].
 . Apply the feature steps, added according to xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-features[Adding link features], to the `train` graph, which yields for each `train` relationship an _instance_, that is, a feature vector and a binary label.
 . Split the training instances using stratified k-fold cross-validation.
 The number of folds `k` can be configured using `validationFolds` in `gds.beta.pipeline.linkPrediction.configureSplit`.
@@ -55,8 +56,8 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 | targetRelationshipType                                        | String            | n/a                  | no       | The name of the relationship type to train the model on. The relationship type must be undirected.
 | sourceNodeLabel                                               | String            | '*'                  | yes      | The name of the node label relationships in the training and test sets should start from footnote:label-filter[This helps to train the model to predict links with a certain label combination.].
 | targetNodeLabel                                              | String             | '*'                  | yes      | The name of the node label relationships in the training and test sets should end at footnote:label-filter[].
-| contextNodeLabels                                            | List ofString      | []                   | yes      | The names of context node labels used to execute the xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[nodePropertySteps] over. This is in addition to the `sourceNodeLabel` and `targetNodeLabel`.
-| contextRelationshipTypes                                      | List of String    | []                   | yes      | The names of context relationship types to use to the xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[nodePropertySteps] on. This is in addition to the `feature input` set produced from the `targetRelationshipType` (see xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[Configuring the relationship splits])
+| contextNodeLabels                                            | List of String     | []                   | yes      | Additional node labels used to execute the xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[nodePropertySteps] over. This is in addition to the `sourceNodeLabel` and `targetNodeLabel`.
+| contextRelationshipTypes                                      | List of String    | []                   | yes      | Additional relationship types used to execute the xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[nodePropertySteps] over. This is in addition to the `feature-input` set produced from the `targetRelationshipType` (see xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[Configuring the relationship splits])
 | negativeClassWeight                                           | Float             | 1.0                  | yes      | Weight of negative examples in model evaluation. Positive examples have weight 1. More details xref:machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-classimbalance[here].
 | metrics                                                       | List of String    | [`AUCPR`]            | no       | xref:machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-metrics[Metrics] used to evaluate the models.
 | randomSeed                                                    | Integer           | n/a                  | yes      | Seed for the random number generator used during training.
@@ -144,7 +145,8 @@ include::partial$/machine-learning/pipeline-training-logging-note.adoc[]
 == Example
 
 In this example we will create a small graph and use the training pipeline we have built up thus far.
-The graph consists of a handful nodes connected in a particular pattern.
+The graph is a small social network of people and cities, including some information about where people live, were born, and what other people they know.
+We will attempt to train a model to predict which additional people might know each other.
 The example graph looks like this:
 
 image::example-graphs/link-prediction.svg[Visualization of the example graph,align="center"]
@@ -153,14 +155,17 @@ image::example-graphs/link-prediction.svg[Visualization of the example graph,ali
 [source, cypher, role=noplay setup-query, group=lp]
 ----
 CREATE
-  (alice:Person {name: 'Alice', numberOfPosts: 38}),
-  (michael:Person {name: 'Michael', numberOfPosts: 67}),
-  (karin:Person {name: 'Karin', numberOfPosts: 30}),
-  (chris:Person {name: 'Chris', numberOfPosts: 132}),
-  (will:Person {name: 'Will', numberOfPosts: 6}),
-  (mark:Person {name: 'Mark', numberOfPosts: 32}),
-  (greg:Person {name: 'Greg', numberOfPosts: 29}),
-  (veselin:Person {name: 'Veselin', numberOfPosts: 3}),
+  (alice:Person {name: 'Alice', age: 38}),
+  (michael:Person {name: 'Michael', age: 67}),
+  (karin:Person {name: 'Karin', age: 30}),
+  (chris:Person {name: 'Chris', age: 52}),
+  (will:Person {name: 'Will', age: 6}),
+  (mark:Person {name: 'Mark', age: 32}),
+  (greg:Person {name: 'Greg', age: 29}),
+  (veselin:Person {name: 'Veselin', age: 3}),
+
+  (london:City {name: 'London'}),
+  (malmo:City {name: 'Malmo'}),
 
   (alice)-[:KNOWS]->(michael),
   (michael)-[:KNOWS]->(karin),
@@ -173,14 +178,30 @@ CREATE
   (greg)-[:KNOWS]->(chris),
   (veselin)-[:KNOWS]->(chris),
   (karin)-[:KNOWS]->(veselin),
-  (chris)-[:KNOWS]->(karin);
+  (chris)-[:KNOWS]->(karin),
+
+  (alice)-[:LIVES]->(london),
+  (michael)-[:LIVES]->(london),
+  (karin)-[:LIVES]->(london),
+  (chris)-[:LIVES]->(malmo),
+  (will)-[:LIVES]->(malmo),
+
+  (alice)-[:BORN]->(london),
+  (michael)-[:BORN]->(london),
+  (karin)-[:BORN]->(malmo),
+  (chris)-[:BORN]->(london),
+  (will)-[:BORN]->(malmo),
+  (greg)-[:BORN]->(london),
+  (veselin)-[:BORN]->(malmo)
 ----
 
 With the graph in Neo4j we can now project it into the graph catalog.
 We do this using a native projection targeting the `Person` nodes and the `KNOWS` relationships.
-We will also project the `numberOfPosts` property, so it can be used when creating link features.
+We will also project the `age` property, so it can be used when creating link features.
 For the relationships we must use the `UNDIRECTED` orientation.
 This is because the Link Prediction pipelines are defined only for undirected graphs.
+We ignore the additional nodes and relationship types, in order for our projection to be homogeneous.
+We will illustrate how to make use of the larger graph in a <<linkprediction-pipeline-examples-train-filtering, subsequent example>>.
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query, group=lp]
@@ -189,7 +210,7 @@ CALL gds.graph.project(
   'myGraph',
   {
     Person: {
-      properties: ['numberOfPosts']
+      properties: ['age']
     }
   },
   {
@@ -221,8 +242,6 @@ For more details on `estimate` in general, see xref:common-usage/memory-estimati
 CALL gds.beta.pipeline.linkPrediction.train.estimate('myGraph', {
   pipeline: 'pipe',
   modelName: 'lp-pipeline-model',
-  sourceNodeLabel: 'Person',
-  targetNodeLabel: 'Person',
   targetRelationshipType: 'KNOWS'
 })
 YIELD requiredMemory
@@ -239,6 +258,10 @@ YIELD requiredMemory
 
 === Training
 
+Now we are ready to actually train a LinkPrediction model.
+We must make sure to specify the `targetRelationshipType` to instruct the model to train only using that type.
+With the graph `myGraph` there are actually no other relationship types projected, but that is not always the case.
+
 [[linkprediction-pipeline-examples-train-query]]
 [role=query-example,group=lp]
 --
@@ -249,8 +272,6 @@ CALL gds.beta.pipeline.linkPrediction.train('myGraph', {
   pipeline: 'pipe',
   modelName: 'lp-pipeline-model',
   metrics: ['AUCPR', 'OUT_OF_BAG_ERROR'],
-  sourceNodeLabel: 'Person',
-  targetNodeLabel: 'Person',
   targetRelationshipType: 'KNOWS',
   randomSeed: 73
 }) YIELD modelInfo, modelSelectionStats
@@ -268,8 +289,82 @@ RETURN
 | winningModel                                                                                                                                | avgTrainScore      | outerTrainScore     | testScore | validationScores
 | {maxEpochs=100, minEpochs=1, penalty=1.0, patience=2, methodName=MultilayerPerceptron, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001} | 0.799603174603175 |  0.8 | 0.75 | [0.5555555555555555, 0.7083333333333334, 0.75, 0.5555555555555555, 0.5555555555555555]
 |===
-
+--
 We can see the MLP model configuration won, and has a score of `0.8` on the test set.
 The score computed as the xref:machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-metrics[AUCPR] metric, which is in the range [0, 1].
 A model which gives higher score to all links than non-links will have a score of 1.0, and a model that assigns random scores will on average have a score of 0.5.
+
+
+[[linkprediction-pipeline-examples-train-filtering]]
+=== Training with context filters
+
+In the above example we projected a Person-KNOWS-Person subgraph and used it for training and testing.
+Much information in the original graph is not used.
+We might want to utilize more node and relationship types to generate node properties (and link features) and investigate whether it improves link prediction.
+We can do that by passing in `contextNodeLabels` and `contextRelationshipTypes`.
+We explicitly pass in `sourceNodeLabel` and `targetNodeLabel` to specify a narrower set of nodes to be used for training and testing.
+
+The following statement will project the full graph using a native projection and store it in the graph catalog under the name 'fullGraph'.
+[source, cypher, role=noplay graph-project-query, group=lp]
+----
+CALL gds.graph.project(
+  'fullGraph',
+  {
+    Person: {
+      properties: ['age']
+    },
+    City: {
+      properties: {age: {defaultValue: 1}}
+    }
+  },
+  {
+    KNOWS: {
+      orientation: 'UNDIRECTED'
+    },
+    LIVES: {},
+    BORN: {}
+  }
+)
+----
+
+
+The full graph contains 2 node labels and 3 relationship types.
+We still train a Person-KNOWS-Person model, but use context information Person-LIVES-City, Person-BORN-City to generate node properties that the model uses in training.
+Note that we do not require the UNDIRECTED orientation for the context relationship types, as these are excluded from the LinkPrediction training.
+
+[[linkprediction-pipeline-examples-filtered-train-query]]
+[role=query-example,group=lp]
 --
+.The following will train another model using the same pipeline, adding `contextNodeLabels` and `contextRelationshipTypes`:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.linkPrediction.train('fullGraph', {
+  pipeline: 'pipe',
+  modelName: 'lp-pipeline-model-filtered',
+  metrics: ['AUCPR', 'OUT_OF_BAG_ERROR'],
+  sourceNodeLabel: 'Person',
+  targetNodeLabel: 'Person',
+  targetRelationshipType: 'KNOWS',
+  contextNodeLabels: ['City'],
+  contextRelationshipTypes: ['LIVES', 'BORN'],
+  randomSeed: 73
+}) YIELD modelInfo, modelSelectionStats
+RETURN
+  modelInfo.bestParameters AS winningModel,
+  modelInfo.metrics.AUCPR.train.avg AS avgTrainScore,
+  modelInfo.metrics.AUCPR.outerTrain AS outerTrainScore,
+  modelInfo.metrics.AUCPR.test AS testScore,
+  [cand IN modelSelectionStats.modelCandidates | cand.metrics.AUCPR.validation.avg] AS validationScores
+----
+
+.Results
+[opts="header", cols="6, 2, 2, 2, 6"]
+|===
+| winningModel                                                                                                                                | avgTrainScore      | outerTrainScore     | testScore | validationScores
+| {maxEpochs=100, minEpochs=1, penalty=1.0, patience=2, methodName=MultilayerPerceptron, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001} | 0.799603174603175 |  0.8 | 0.75 | [0.5555555555555555, 0.38888888888888884, 0.75, 0.5555555555555555, 0.5555555555555555]
+|===
+--
+
+As we can see, the results are effectively identical with a slight decrease of the validation score in one of the folds.
+The change is due to the embeddings taking into account more contextual information.
+While the train and test score stays the same in this toy example, it is likely that the contextual information will have a greater impact for larger datasets.
