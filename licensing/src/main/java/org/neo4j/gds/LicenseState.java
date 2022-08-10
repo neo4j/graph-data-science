@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds;
 
+import java.time.ZonedDateTime;
+import java.util.Optional;
+
 public interface LicenseState {
 
     <R, P> R visit(VisitorWithParameter<R, P> visitor, P parameter);
@@ -34,17 +37,17 @@ public interface LicenseState {
     interface VisitorWithParameter<R, P> {
         R unlicensed(String name, P parameter);
 
-        R licensed(String name, P parameter);
+        R licensed(String name, ZonedDateTime expirationTime, P parameter);
 
-        R invalid(String name, String errorMessage, P parameter);
+        R invalid(String name, String errorMessage, Optional<ZonedDateTime> expirationTime, P parameter);
     }
 
     interface Visitor<R> extends VisitorWithParameter<R, Void> {
         R unlicensed(String name);
 
-        R licensed(String name);
+        R licensed(String name, ZonedDateTime expirationTime);
 
-        R invalid(String name, String errorMessage);
+        R invalid(String name, String errorMessage, Optional<ZonedDateTime> expirationTime);
 
         @Override
         default R unlicensed(String name, Void parameter) {
@@ -52,13 +55,13 @@ public interface LicenseState {
         }
 
         @Override
-        default R licensed(String name, Void parameter) {
-            return licensed(name);
+        default R licensed(String name, ZonedDateTime expirationTime, Void parameter) {
+            return licensed(name, expirationTime);
         }
 
         @Override
-        default R invalid(String name, String errorMessage, Void parameter) {
-            return invalid(name, errorMessage);
+        default R invalid(String name, String errorMessage, Optional<ZonedDateTime> expirationTime, Void parameter) {
+            return invalid(name, errorMessage, expirationTime);
         }
     }
 
@@ -70,12 +73,12 @@ public interface LicenseState {
             }
 
             @Override
-            public Boolean licensed(String name) {
+            public Boolean licensed(String name, ZonedDateTime expirationTime) {
                 return true;
             }
 
             @Override
-            public Boolean invalid(String name, String errorMessage) {
+            public Boolean invalid(String name, String errorMessage, Optional<ZonedDateTime> expirationTime) {
                 return false;
             }
         },
