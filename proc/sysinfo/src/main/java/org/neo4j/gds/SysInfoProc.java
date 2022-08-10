@@ -97,8 +97,34 @@ public class SysInfoProc {
     }
 
     private void editionInfo(Stream.Builder<DebugValue> builder) {
-        builder.add(value("gdsEdition", licenseState.name()));
-        licenseState.errorMessage().ifPresent(error -> builder.add(value("gdsLicenseError", error)));
+        licenseState.visit(ADD_EDITION_INFO.INSTANCE, builder);
+    }
+
+    private enum ADD_EDITION_INFO implements LicenseState.VisitorWithParameter<Void, Stream.Builder<DebugValue>> {
+        INSTANCE;
+
+        @Override
+        public Void unlicensed(String name, Stream.Builder<DebugValue> builder) {
+            builder.add(value("gdsEdition", name));
+            return null;
+        }
+
+        @Override
+        public Void licensed(String name, Stream.Builder<DebugValue> builder) {
+            unlicensed(name, builder);
+            return null;
+        }
+
+        @Override
+        public Void invalid(
+            String name,
+            String errorMessage,
+            Stream.Builder<DebugValue> builder
+        ) {
+            licensed(name, builder);
+            builder.add(value("gdsLicenseError", errorMessage));
+            return null;
+        }
     }
 
     private static void features(Stream.Builder<DebugValue> builder) {
