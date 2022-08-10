@@ -35,7 +35,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class WeightedBetweenessStreamProcTest extends BaseProcTest {
+public class WeightedBetweennessStreamProcTest extends BaseProcTest {
 
     @Neo4jGraph
     static final String weightedGdl =
@@ -47,7 +47,7 @@ public class WeightedBetweenessStreamProcTest extends BaseProcTest {
         ", (d: Node)" +
         ", (e: Node)" +
         ", (f: Node)" +
-        ",  (a1)-[:REL {weight: 1.0}]->(b)" +
+        ", (a1)-[:REL {weight: 1.0}]->(b)" +
         ", (a2)-[:REL {weight: 1.0}]->(b)" +
         ", (b) -[:REL {weight: 1.0}]->(c)" +
         ", (b) -[:REL {weight: 1.3}]->(d)" +
@@ -63,7 +63,7 @@ public class WeightedBetweenessStreamProcTest extends BaseProcTest {
             BetweennessCentralityStreamProc.class
         );
 
-        String loadQuery = GdsCypher.call("graph")
+        var loadQuery = GdsCypher.call("graph")
             .graphProject()
             .withNodeLabel("Node")
             .withRelationshipType(
@@ -82,7 +82,6 @@ public class WeightedBetweenessStreamProcTest extends BaseProcTest {
 
     @Test
     void shouldWorkWithWeights() {
-
         var expected = Map.of(
             idFunction.of("a1"), 0.0D,
             idFunction.of("a2"), 0.0D,
@@ -93,8 +92,8 @@ public class WeightedBetweenessStreamProcTest extends BaseProcTest {
             idFunction.of("f"), 0.0D
         );
 
-        String bcQuery = "CALL gds.betweenness.stream('graph',{relationshipWeightProperty: 'weight'})";
-        MutableLong resultRowCount = new MutableLong();
+        var bcQuery = "CALL gds.betweenness.stream('graph',{relationshipWeightProperty: 'weight'})";
+        var resultRowCount = new MutableLong();
         var scores = new HashMap<Long, Double>();
 
         runQueryWithRowConsumer(bcQuery, resultRow -> {
@@ -108,9 +107,5 @@ public class WeightedBetweenessStreamProcTest extends BaseProcTest {
         });
         assertThat(resultRowCount.longValue()).isEqualTo(7L);
         assertThat(scores).containsExactlyInAnyOrderEntriesOf(expected);
-
-
     }
-
-
 }

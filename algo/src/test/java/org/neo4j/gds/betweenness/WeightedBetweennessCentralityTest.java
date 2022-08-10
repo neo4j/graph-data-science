@@ -21,15 +21,24 @@ package org.neo4j.gds.betweenness;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
+
+import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 
 @GdlExtension
 class WeightedBetweennessCentralityTest {
@@ -124,5 +133,29 @@ class WeightedBetweennessCentralityTest {
         softAssertions.assertThat(result.get(weightedIdFunction.of("e"))).isEqualTo(5.0D);
         softAssertions.assertThat(result.get(weightedIdFunction.of("f"))).isEqualTo(0.0D);
         softAssertions.assertAll();
+    }
+
+    @ParameterizedTest
+    @MethodSource("expectedWeightedMemoryEstimation")
+    void testMemoryEstimationWeighted(int concurrency, long expectedMinBytes, long expectedMaxBytes) {
+        var config = BetweennessCentralityStreamConfig.of(
+            CypherMapWrapper.create(
+                Map.of("relationshipWeightProperty", "foo")
+            )
+        );
+        assertMemoryEstimation(
+            () -> new BetweennessCentralityFactory<>().memoryEstimation(config),
+            100_000L,
+            concurrency,
+            MemoryRange.of(expectedMinBytes, expectedMaxBytes)
+        );
+    }
+
+    static Stream<Arguments> expectedWeightedMemoryEstimation() {
+        return Stream.of(
+            Arguments.of(1, 6_425_504L, 6_425_504L),
+            Arguments.of(4, 23_301_704L, 23_301_704L),
+            Arguments.of(42, 237_066_904L, 237_066_904L)
+        );
     }
 }
