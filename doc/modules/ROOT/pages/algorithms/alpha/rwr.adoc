@@ -44,7 +44,7 @@ This means that the probability of walking along a relationship is the weight of
 
 In some cases it may be desirable for the sampled graph to preserve the distribution of node labels of the original graph.
 To enable such stratification, one can set xref:algorithms/alpha/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`nodeLabelStratification`] to `true` in the algorithm configuration.
-The stratified sampling is then performed by only adding a node to the sampled graph when visiting it if more nodes of that node's particular set of labels are needed to uphold the original graph's node label distribution.
+The stratified sampling is performed by only adding a node to the sampled graph if more nodes of that node's particular set of labels are needed to uphold the node label distribution of the original graph.
 
 By default, the algorithm treats all nodes in the same way no matter how they are labeled and makes no special effort to preserve the node label distribution of the original graph.
 Please note that the stratified sampling might be a bit slower since it has restrictions on the types of nodes it can add to the sampled graph when crawling it.
