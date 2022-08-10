@@ -271,7 +271,7 @@ The number of negative relationships is the number of positive ones multiplied b
 
 The sampled positive and negative relationships are given relationship weights of `1.0` and `0.0` respectively so that they can be distinguished.
 
-The `feature-input` graph has nodes with `sourceNodeLabel`, `targetNodeLabel` and `contextNodeLabels` and the `feature-input` set of relationships.
+The `feature-input` graph has nodes with `sourceNodeLabel`, `targetNodeLabel` and `contextNodeLabels` and the relationships from the `feature-input` set plus those of `contextRelationshipTypes`
 This graph is used for computing node properties and features which depend on node properties.
 The node properties generated in the `feature-input` graph are used in training and testing.
 

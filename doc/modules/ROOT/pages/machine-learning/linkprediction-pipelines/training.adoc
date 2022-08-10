@@ -146,7 +146,7 @@ include::partial$/machine-learning/pipeline-training-logging-note.adoc[]
 
 In this example we will create a small graph and use the training pipeline we have built up thus far.
 The graph is a small social network of people and cities, including some information about where people live, were born, and what other people they know.
-We will attempt to train a model to predict which people might know each other.
+We will attempt to train a model to predict which additional people might know each other.
 The example graph looks like this:
 
 image::example-graphs/link-prediction.svg[Visualization of the example graph,align="center"]
@@ -200,7 +200,7 @@ We do this using a native projection targeting the `Person` nodes and the `KNOWS
 We will also project the `age` property, so it can be used when creating link features.
 For the relationships we must use the `UNDIRECTED` orientation.
 This is because the Link Prediction pipelines are defined only for undirected graphs.
-We ignore the additional nodes and relationship types, in order for our projection to be mono-partite.
+We ignore the additional nodes and relationship types, in order for our projection to be homogeneous.
 We will illustrate how to make use of the larger graph in a <<linkprediction-pipeline-examples-train-filtering, subsequent example>>.
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
