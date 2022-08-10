@@ -44,8 +44,6 @@ import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import java.util.Optional;
 import java.util.SplittableRandom;
 
-import static org.neo4j.gds.graphsampling.samplers.rwr.ExpectedNodesCounter.computeExpectedCountsPerNodeLabelSet;
-
 public class RandomWalkWithRestarts implements NodesSampler {
     private static final double QUALITY_MOMENTUM = 0.9;
     private static final double QUALITY_THRESHOLD_BASE = 0.05;
@@ -124,13 +122,13 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
     private SeenNodes getSeenNodes(Graph inputGraph, ProgressTracker progressTracker) {
         if (config.nodeLabelStratification()) {
-            var expectedCounts = computeExpectedCountsPerNodeLabelSet(
+            var nodeLabelHistogram = NodeLabelHistogram.compute(
                 inputGraph,
-                config.samplingRatio(),
                 config.concurrency(),
                 progressTracker
             );
-            return new SeenNodes.SeenNodesByLabelSet(inputGraph, expectedCounts);
+
+            return new SeenNodes.SeenNodesByLabelSet(inputGraph, nodeLabelHistogram, config.samplingRatio());
         }
 
         return new SeenNodes.GlobalSeenNodes(

@@ -19,14 +19,13 @@
  */
 package org.neo4j.gds.graphsampling.samplers.rwr;
 
+import com.carrotsearch.hppc.LongLongHashMap;
+import com.carrotsearch.hppc.procedures.LongLongProcedure;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.Arrays;
 
 public interface SeenNodes {
 
@@ -40,35 +39,42 @@ public interface SeenNodes {
 
     class SeenNodesByLabelSet implements SeenNodes {
         private final Graph inputGraph;
-        private final Map<Set<NodeLabel>, Long> seenPerLabelSet;
-        private final Map<Set<NodeLabel>, Long> expectedNodesPerLabelSet;
+        private final LongLongHashMap seenNodesPerLabelCombination;
+        private final LongLongHashMap expectedNodesPerLabelCombination;
+        private final NodeLabel[] availableNodeLabels;
         private final HugeAtomicBitSet seenBitSet;
         private final long totalExpectedNodes;
 
-        SeenNodesByLabelSet(
-            Graph inputGraph,
-            Map<Set<NodeLabel>, Long> expectedNodesPerLabelSet
-        ) {
+        SeenNodesByLabelSet(Graph inputGraph, NodeLabelHistogram.Result nodeLabelHistogram, double samplingRatio) {
             this.inputGraph = inputGraph;
-            this.expectedNodesPerLabelSet = expectedNodesPerLabelSet;
+            this.availableNodeLabels = nodeLabelHistogram.availableNodeLabels();
             this.seenBitSet = HugeAtomicBitSet.create(inputGraph.nodeCount());
-            this.totalExpectedNodes = expectedNodesPerLabelSet.values().stream().mapToLong(Long::longValue).sum();
 
-            this.seenPerLabelSet = new HashMap<>(expectedNodesPerLabelSet);
-            this.seenPerLabelSet.replaceAll((unused, value) -> 0L);
+            this.expectedNodesPerLabelCombination = new LongLongHashMap(nodeLabelHistogram.histogram().size());
+            this.seenNodesPerLabelCombination = new LongLongHashMap(nodeLabelHistogram.histogram().size());
+            nodeLabelHistogram.histogram().forEach((LongLongProcedure) (labelCombination, count) -> {
+                expectedNodesPerLabelCombination.put(labelCombination, Math.round(samplingRatio * count));
+                seenNodesPerLabelCombination.put(labelCombination, 0);
+            });
+            this.totalExpectedNodes = Arrays.stream(expectedNodesPerLabelCombination.values).sum();
         }
 
         public boolean addNode(long nodeId) {
-            var labelSet = new HashSet<>(inputGraph.nodeLabels(nodeId));
+            var labelCombination = NodeLabelHistogram.encodedLabelCombination(
+                this.inputGraph,
+                this.availableNodeLabels,
+                nodeId
+            );
+
             // There's a slight race condition here which may cause there to be an extra node or two in a given
             // node label set bucket, since the cardinality check and the set are not synchronized together.
             // Since the sampling is inexact by nature this should be fine.
-            if (seenPerLabelSet.get(labelSet) < expectedNodesPerLabelSet.get(labelSet)) {
-                boolean added = !seenBitSet.getAndSet(nodeId);
-                if (added) {
-                    seenPerLabelSet.compute(labelSet, (unused, count) -> count + 1);
+            if (seenNodesPerLabelCombination.get(labelCombination) < expectedNodesPerLabelCombination.get(
+                labelCombination)) {
+                if (!seenBitSet.getAndSet(nodeId)) {
+                    seenNodesPerLabelCombination.addTo(labelCombination, 1);
+                    return true;
                 }
-                return added;
             }
 
             return false;
