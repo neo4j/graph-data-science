@@ -20,6 +20,7 @@ dependencies {
     implementation project(':model-catalog-api')
     implementation project(':transaction')
     implementation project(':string-formatting')
+    implementation project(':defaults-and-limits-configuration')
 
     implementation group: 'org.reflections',  name: 'reflections',  version: ver.doc.'reflections'
 

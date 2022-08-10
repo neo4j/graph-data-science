@@ -47,6 +47,7 @@ dependencies {
     implementation project(':model-catalog-api')
     implementation project(':string-formatting')
     implementation project(':memory-usage')
+    implementation project(':defaults-and-limits-configuration')
 
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {

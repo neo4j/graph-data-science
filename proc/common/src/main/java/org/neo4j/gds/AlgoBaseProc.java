@@ -21,6 +21,8 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.configuration.DefaultsConfiguration;
+import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.AlgoConfigParser;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -41,6 +43,7 @@ import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.executor.validation.Validator;
 import org.neo4j.gds.results.MemoryEstimateResult;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -54,7 +57,10 @@ public abstract class AlgoBaseProc<
     public static final String STATS_DESCRIPTION = "Executes the algorithm and returns result statistics without writing the result to Neo4j.";
 
     public ProcConfigParser<CONFIG> configParser() {
-        return new AlgoConfigParser<>(username(), AlgoBaseProc.this::newConfig);
+        var defaults = new DefaultsConfiguration(Collections.emptyMap(), Collections.emptyMap());
+        var limits = new LimitsConfiguration(Collections.emptyMap(), Collections.emptyMap());
+
+        return new AlgoConfigParser<>(username(), AlgoBaseProc.this::newConfig, defaults, limits);
     }
 
     protected abstract CONFIG newConfig(

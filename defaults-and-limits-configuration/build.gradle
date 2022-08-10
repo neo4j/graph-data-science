@@ -1,0 +1,17 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Defaults and Limits Configuration'
+
+group = 'org.neo4j.gds'
+
+test {
+    useJUnitPlatform()
+}
+
+dependencies {
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: ver.'commons-lang3'
+
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: ver.'junit5'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: ver.'junit5'
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'
+}

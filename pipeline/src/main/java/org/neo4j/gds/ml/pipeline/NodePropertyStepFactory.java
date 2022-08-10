@@ -20,6 +20,8 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.configuration.DefaultsConfiguration;
+import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.executor.AlgoConfigParser;
 import org.neo4j.gds.executor.ExecutionMode;
@@ -27,6 +29,7 @@ import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.utils.StringJoining;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -78,8 +81,11 @@ public final class NodePropertyStepFactory {
             .algorithmSpec()
             .newConfigFunction();
 
+        var defaults = new DefaultsConfiguration(Collections.emptyMap(), Collections.emptyMap());
+        var limits = new LimitsConfiguration(Collections.emptyMap(), Collections.emptyMap());
+
         // passing the EMPTY_USERNAME as we only try to check if the given configuration itself is valid
-        return new AlgoConfigParser<>(Username.EMPTY_USERNAME.username(), newConfigFunction).processInput(configuration);
+        return new AlgoConfigParser<>(Username.EMPTY_USERNAME.username(), newConfigFunction, defaults, limits).processInput(configuration);
     }
 
     private static void validateReservedConfigKeys(Map<String, Object> procedureConfig) {

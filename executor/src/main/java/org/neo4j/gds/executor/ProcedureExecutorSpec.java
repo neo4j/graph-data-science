@@ -21,8 +21,12 @@ package org.neo4j.gds.executor;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.configuration.DefaultsConfiguration;
+import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.executor.validation.Validator;
+
+import java.util.Collections;
 
 public class ProcedureExecutorSpec<
     ALGO extends Algorithm<ALGO_RESULT>,
@@ -34,7 +38,11 @@ public class ProcedureExecutorSpec<
 
     @Override
     public ProcConfigParser<CONFIG> configParser(NewConfigFunction<CONFIG> newConfigFunction, ExecutionContext executionContext) {
-        return new AlgoConfigParser<>(executionContext.username(), newConfigFunction);
+        // no defaults nor limits currently
+        var defaults = new DefaultsConfiguration(Collections.emptyMap(), Collections.emptyMap());
+        var limits = new LimitsConfiguration(Collections.emptyMap(), Collections.emptyMap());
+
+        return new AlgoConfigParser<>(executionContext.username(), newConfigFunction, defaults, limits);
     }
 
     @Override

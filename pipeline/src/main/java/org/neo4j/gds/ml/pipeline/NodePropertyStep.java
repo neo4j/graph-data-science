@@ -25,6 +25,8 @@ import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.configuration.DefaultsConfiguration;
+import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -38,6 +40,7 @@ import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.executor.ProcedureExecutorSpec;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +88,12 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
         var configCopy = new HashMap<>(config);
         configCopy.put("relationshipTypes", relTypes);
         configCopy.put("nodeLabels", nodeLabels);
-        var algoConfig = new AlgoConfigParser<>("", algoSpec.newConfigFunction()).processInput(configCopy);
+
+        // no defaults nor limits currently
+        var defaults = new DefaultsConfiguration(Collections.emptyMap(), Collections.emptyMap());
+        var limits = new LimitsConfiguration(Collections.emptyMap(), Collections.emptyMap());
+
+        var algoConfig = new AlgoConfigParser<>("", algoSpec.newConfigFunction(), defaults, limits).processInput(configCopy);
 
         try {
             algoSpec.algorithmFactory().memoryEstimation(algoConfig);
