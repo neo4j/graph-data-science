@@ -28,24 +28,24 @@ class OpenGdsTransactionContextTest extends TransactionContextTest {
 
     @Test
     void noNodeAccessAllowed() {
-        applyTxWithAccessMode(tx -> assertThat(tx.getAllNodes().stream().count()).isEqualTo(2L), forbiddenNodes());
+        applyTxWithAccessMode(tx -> assertThat(tx.getAllNodes().stream().count()).isEqualTo(0L), forbiddenNodes());
     }
 
     @Test
     void noNode2LabelAccessAllowed() throws KernelException {
-        applyTxWithAccessMode(tx -> assertThat(tx.getAllNodes().stream().count()).isEqualTo(2L), forbiddenLabel("Node2"));
+        applyTxWithAccessMode(tx -> assertThat(tx.getAllNodes().stream().count()).isEqualTo(1L), forbiddenLabel("Node2"));
     }
 
     @Test
     void noRelationshipAccessAllowed() {
-        applyTxWithAccessMode(tx -> assertThat(tx.getAllRelationships().stream().count()).isEqualTo(1L), forbiddenRelationships());
+        applyTxWithAccessMode(tx -> assertThat(tx.getAllRelationships().stream().count()).isEqualTo(0L), forbiddenRelationships());
     }
 
     @Test
     void noPropertyKeyAccessAllowed() throws KernelException {
         applyTxWithAccessMode(tx -> {
             var nodesWithProp1Count = tx.getAllNodes().stream().filter(node -> node.hasProperty("prop1")).count();
-            assertThat(nodesWithProp1Count).isEqualTo(1L);
+            assertThat(nodesWithProp1Count).isEqualTo(0L);
         }, forbiddenProperty("prop1"));
     }
 }

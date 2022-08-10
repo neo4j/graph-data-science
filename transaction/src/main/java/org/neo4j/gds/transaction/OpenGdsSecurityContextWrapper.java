@@ -24,6 +24,6 @@ import org.neo4j.internal.kernel.api.security.SecurityContext;
 public class OpenGdsSecurityContextWrapper implements SecurityContextWrapper {
     @Override
     public SecurityContext wrap(SecurityContext securityContext) {
-        return SecurityContext.AUTH_DISABLED;
+        return securityContext;
     }
 }

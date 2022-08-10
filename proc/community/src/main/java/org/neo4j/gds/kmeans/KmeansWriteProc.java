@@ -37,13 +37,14 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.kmeans.KmeansStreamProc.KMEANS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class KmeansWriteProc extends BaseProc {
 
     @Context
     public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
 
-    @Procedure(value = "gds.alpha.kmeans.write", mode = READ)
+    @Procedure(value = "gds.alpha.kmeans.write", mode = WRITE)
     @Description(KMEANS_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
