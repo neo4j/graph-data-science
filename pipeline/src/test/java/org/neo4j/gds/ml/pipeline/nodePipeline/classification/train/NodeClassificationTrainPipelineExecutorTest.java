@@ -337,7 +337,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                     ),
                     RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(860_200, 927_440)
+                MemoryRange.of(940_200, 1_007_440)
             ),
             Arguments.of(
                 List.of(
@@ -347,7 +347,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                     ),
                     RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(430_030_600, 430_097_840)
+                MemoryRange.of(430_110_600, 430_177_840)
             )
         );
     }
