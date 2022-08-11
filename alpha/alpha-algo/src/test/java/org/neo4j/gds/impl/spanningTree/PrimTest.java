@@ -102,8 +102,19 @@ class PrimTest {
         );
     }
 
+    static Stream<Arguments> parametersMaximum() {
+        return Stream.of(
+            arguments("a", ROOT, "d", "a", "e", "c"),
+            arguments("b", "c", ROOT, "e", "b", "d"),
+            arguments("c", "c", "d", ROOT, "e", "c"),
+            arguments("d", "c", "d", "e", ROOT, "d"),
+            arguments("e", "c", "d", "e", "e", ROOT)
+        );
+    }
+
+
     @ParameterizedTest
-    @MethodSource("parametersMinimum")
+    @MethodSource("parametersMaximum")
     void testMaximum(String nodeId, String parentA, String parentB, String parentC, String parentD, String parentE) {
         var mst = (new Prim(
             graph,
@@ -138,13 +149,14 @@ class PrimTest {
         String parentE
     ) {
         SoftAssertions softAssertions = new SoftAssertions();
-        softAssertions.assertThat(mst.effectiveNodeCount).isEqualTo(5);
-        softAssertions.assertThat(getParent(parentA)).as("a").isEqualTo(mst.parent.get(a));
-        softAssertions.assertThat(getParent(parentB)).as("b").isEqualTo(mst.parent.get(b));
-        softAssertions.assertThat(getParent(parentC)).as("c").isEqualTo(mst.parent.get(c));
-        softAssertions.assertThat(getParent(parentD)).as("d").isEqualTo(mst.parent.get(d));
-        softAssertions.assertThat(getParent(parentE)).as("e").isEqualTo(mst.parent.get(e));
 
+        softAssertions.assertThat(mst.effectiveNodeCount).isEqualTo(5);
+
+        softAssertions.assertThat(getExpectedParent(parentA)).as("a").isEqualTo(mst.parent.get(a));
+        softAssertions.assertThat(getExpectedParent(parentB)).as("b").isEqualTo(mst.parent.get(b));
+        softAssertions.assertThat(getExpectedParent(parentC)).as("c").isEqualTo(mst.parent.get(c));
+        softAssertions.assertThat(getExpectedParent(parentD)).as("d").isEqualTo(mst.parent.get(d));
+        softAssertions.assertThat(getExpectedParent(parentE)).as("e").isEqualTo(mst.parent.get(e));
 
         softAssertions.assertThat(mst.parent.get(y)).as("y").isEqualTo(-1);
         softAssertions.assertThat(mst.parent.get(z)).as("z").isEqualTo(-1);
@@ -153,7 +165,7 @@ class PrimTest {
 
     }
 
-    long getParent(String expectedParent) {
+    long getExpectedParent(String expectedParent) {
         if (expectedParent.equals(ROOT)) {
             return -1;
         } else {
