@@ -197,6 +197,7 @@ public abstract class KmeansTask implements Runnable {
                 }
             }
             if (numAssigned == k) {
+
                 if (distanceFromCentroid.get(nodeId) <= -1) {
                     communities.set(nodeId, (int) -distanceFromCentroid.get(nodeId) - 1);
                     distanceFromCentroid.set(nodeId, 0);
@@ -218,7 +219,6 @@ public abstract class KmeansTask implements Runnable {
             calculateFinalDistance(startNode, endNode);
         } else {
             distanceFromLastSampledCentroid(startNode, endNode, clusterManager.getCurrentlyAssigned());
-
         }
     }
 }

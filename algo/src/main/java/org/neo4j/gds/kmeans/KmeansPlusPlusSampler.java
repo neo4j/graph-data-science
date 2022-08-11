@@ -68,11 +68,9 @@ public class KmeansPlusPlusSampler extends KmeansSampler {
         long firstId = random.nextLong(nodeCount);
 
         BitSet bitSet = new BitSet(nodeCount);
-        clusterManager.initialAssignCluster(firstId);
-        distanceFromClosestCentroid.set(firstId, -1);
-
+        assignToCluster(bitSet, 0, firstId);
         progressTracker.logProgress(1);
-        for (int i = 1; i < k; ++i) {
+        for (int selectionClusterId = 1; selectionClusterId < k; ++selectionClusterId) {
 
             RunWithConcurrency.builder()
                 .concurrency(concurrency)
@@ -112,14 +110,10 @@ public class KmeansPlusPlusSampler extends KmeansSampler {
                     nextNode = random.nextLong(nodeCount);
                 }
             }
-            bitSet.set(nextNode);
-            clusterManager.initialAssignCluster(nextNode);
-            distanceFromClosestCentroid.set(nextNode, -(i + 1));
-
+            assignToCluster(bitSet, selectionClusterId, nextNode);
             progressTracker.logProgress(1);
         }
         //nowe we have k clusters and distanceFromClusterAlso for each node closest communit in 0...k-2
-
         RunWithConcurrency.builder()  //now run one last time just to save  have the vest community in 0...k-1
             .concurrency(concurrency)
             .tasks(tasks)
@@ -129,6 +123,11 @@ public class KmeansPlusPlusSampler extends KmeansSampler {
         for (KmeansTask task : tasks) {
             task.switchToPhase(TaskPhase.ITERATION);
         }
+    }
 
+    private void assignToCluster(BitSet bitSet, int position, long nextNode) {
+        bitSet.set(nextNode);
+        clusterManager.initialAssignCluster(nextNode);
+        distanceFromClosestCentroid.set(nextNode, -(position + 1));
     }
 }
