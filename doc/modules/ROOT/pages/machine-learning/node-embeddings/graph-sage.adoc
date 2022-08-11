@@ -22,12 +22,26 @@ For more information on this algorithm see:
 [[algorithms-embeddings-graph-sage-considerations]]
 == Considerations
 
+
+=== Isolated nodes
+
 If you are embedding a graph that has an isolated node, the aggregation step in GraphSAGE can only draw information from the node itself.
 When all the properties of that node are `0.0`, and the activation function is ReLU, this leads to an all-zero vector for that node.
 However, since GraphSAGE normalizes node embeddings using the L2-norm, and a zero vector cannot be normalized, we assign all-zero embeddings to such nodes under these special circumstances.
 In scenarios where you generate all-zero embeddings for orphan nodes, that may have impacts on downstream tasks such as nearest neighbor or other similarity algorithms. It may be more appropriate to filter out these disconnected nodes prior to running GraphSAGE.
 
+
+=== Memory estimation
+
 When doing memory estimation of the training, the feature dimension is computed as if each feature property is scalar.
+
+
+=== Usage in machine learning pipelines
+
+It may be useful to generate node embeddings with GraphSAGE as a node property step in a machine learning pipeline (like xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[] and xref:machine-learning/node-property-prediction/index.adoc[]).
+It is not supported to train the GraphSAGE model inside the pipeline, but rather one must first train the model outside the pipeline.
+Once the model is trained, it is possible to add GraphSAGE as a node property step to a pipeline using `gds.beta.graphSage` or the shorthand `beta.graphSage` as the `procedureName` procedure parameter, and referencing the trained model in the procedure configuration map as one would with the <<algorithms-embeddings-graph-sage-syntax, predict mutate mode>>.
+
 
 [[algorithms-embeddings-graph-sage-syntax]]
 == Syntax
