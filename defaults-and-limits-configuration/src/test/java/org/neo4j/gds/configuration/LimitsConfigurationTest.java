@@ -46,7 +46,11 @@ class LimitsConfigurationTest {
 
         Set<LimitViolation> violations = limits.validate(Map.of("concurrency", 42), "Jonas Vingegaard");
 
-        assertThat(violations).containsExactly(new LimitViolation("concurrency", "42", "23"));
+        assertThat(violations.size()).isEqualTo(1);
+        assertThat(violations.iterator().next())
+            .satisfies(lv -> assertThat(lv.getKey()).isEqualTo("concurrency"))
+            .satisfies(lv -> assertThat(lv.getLimitValue()).isEqualTo("23"))
+            .satisfies(lv -> assertThat(lv.getProvidedValue()).isEqualTo("42"));
     }
 
     @Test
@@ -58,7 +62,11 @@ class LimitsConfigurationTest {
 
         Set<LimitViolation> violations = limits.validate(Map.of("concurrency", 42), "Jonas Vingegaard");
 
-        assertThat(violations).containsExactly(new LimitViolation("concurrency", "42", "23"));
+        assertThat(violations.size()).isEqualTo(1);
+        assertThat(violations.iterator().next())
+            .satisfies(lv -> assertThat(lv.getKey()).isEqualTo("concurrency"))
+            .satisfies(lv -> assertThat(lv.getLimitValue()).isEqualTo("23"))
+            .satisfies(lv -> assertThat(lv.getProvidedValue()).isEqualTo("42"));
     }
 
     @Test
@@ -70,7 +78,11 @@ class LimitsConfigurationTest {
 
         Set<LimitViolation> violations = limits.validate(Map.of("concurrency", 42), "Jonas Vingegaard");
 
-        assertThat(violations).containsExactly(new LimitViolation("concurrency", "42", "17"));
+        assertThat(violations.size()).isEqualTo(1);
+        assertThat(violations.iterator().next())
+            .satisfies(lv -> assertThat(lv.getKey()).isEqualTo("concurrency"))
+            .satisfies(lv -> assertThat(lv.getLimitValue()).isEqualTo("17"))
+            .satisfies(lv -> assertThat(lv.getProvidedValue()).isEqualTo("42"));
     }
 
     @Test
@@ -82,7 +94,11 @@ class LimitsConfigurationTest {
 
         Set<LimitViolation> violations = limits.validate(Map.of("concurrency", 42), "Jonas Vingegaard");
 
-        assertThat(violations).containsExactly(new LimitViolation("concurrency", "42", "23"));
+        assertThat(violations.size()).isEqualTo(1);
+        assertThat(violations.iterator().next())
+            .satisfies(lv -> assertThat(lv.getKey()).isEqualTo("concurrency"))
+            .satisfies(lv -> assertThat(lv.getLimitValue()).isEqualTo("23"))
+            .satisfies(lv -> assertThat(lv.getProvidedValue()).isEqualTo("42"));
     }
 
     @Test
@@ -94,7 +110,11 @@ class LimitsConfigurationTest {
 
         Set<LimitViolation> violations = limits.validate(Map.of("concurrency", 42), "Jonas Vingegaard");
 
-        assertThat(violations).containsExactly(new LimitViolation("concurrency", "42", "17"));
+        assertThat(violations.size()).isEqualTo(1);
+        assertThat(violations.iterator().next())
+            .satisfies(lv -> assertThat(lv.getKey()).isEqualTo("concurrency"))
+            .satisfies(lv -> assertThat(lv.getLimitValue()).isEqualTo("17"))
+            .satisfies(lv -> assertThat(lv.getProvidedValue()).isEqualTo("42"));
     }
 
     @Test
