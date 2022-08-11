@@ -21,22 +21,14 @@ package org.neo4j.gds.beta.randomwalk;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.SourceNodesConfigTest;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.traversal.RandomWalk;
-import org.neo4j.gds.traversal.RandomWalkStreamConfig;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Path;
 
 import java.time.Instant;
@@ -48,8 +40,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assumptions.assumeThat;
@@ -57,10 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.TestSupport.assertCypherMemoryEstimation;
 
 @SuppressWarnings("unchecked")
-class RandomWalkStreamProcTest extends BaseProcTest implements
-    AlgoBaseProcTest<RandomWalk, RandomWalkStreamConfig, Stream<long[]>>,
-    SourceNodesConfigTest<RandomWalk, RandomWalkStreamConfig, Stream<long[]>>,
-    MemoryEstimateTest<RandomWalk, RandomWalkStreamConfig, Stream<long[]>> {
+class RandomWalkStreamProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -243,35 +230,5 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
         assertCypherMemoryEstimation(db, query, MemoryRange.of(4_016, 100_032), 5, 12);
     }
 
-    @Override
-    public Class<? extends AlgoBaseProc<RandomWalk, Stream<long[]>, RandomWalkStreamConfig, ?>> getProcedureClazz() {
-        return RandomWalkStreamProc.class;
-    }
 
-    @Override
-    public GraphDatabaseService graphDb() {
-        return db;
-    }
-
-    @Override
-    public RandomWalkStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return RandomWalkStreamConfig.of(mapWrapper);
-    }
-
-    @Override
-    public void assertResultEquals(Stream<long[]> result1, Stream<long[]> result2) {
-        var resultList1 = result1.collect(Collectors.toList());
-        var resultList2 = result2.collect(Collectors.toList());
-
-        for (int i = 0; i < resultList1.size(); i++) {
-            var path1 = resultList1.get(i);
-            var path2 = resultList2.get(i);
-            assertThat(path1.length).isEqualTo(path2.length);
-        }
-    }
-
-    @Override
-    public boolean releaseAlgorithm() {
-        return false;
-    }
 }
