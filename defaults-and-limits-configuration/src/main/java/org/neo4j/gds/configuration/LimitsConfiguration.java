@@ -25,7 +25,20 @@ import java.util.Map;
 import java.util.Set;
 
 public class LimitsConfiguration {
+    /**
+     * A JVM-wide singleton we can use to store the limits configuration. Lifecycle of this singleton matches that of
+     * the data it holds - it starts empty and dies when JVM exists.
+     */
+    public static final LimitsConfiguration Instance = new LimitsConfiguration(Collections.emptyMap(), Collections.emptyMap());
+
+    /**
+     * This is a handy singleton for when you need to satisfy a requirement for the configuration, but want to ignore
+     * limits entirely.
+     */
+    public static final LimitsConfiguration Empty = new LimitsConfiguration(Collections.emptyMap(), Collections.emptyMap());
+
     private final Map<String, Limit> globalLimits;
+
     private final Map<String, Map<String, Limit>> personalLimits;
 
     public LimitsConfiguration(Map<String, Limit> globalLimits, Map<String, Map<String, Limit>> personalLimits) {

@@ -40,7 +40,6 @@ import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.executor.ProcedureExecutorSpec;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,9 +88,9 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
         configCopy.put("relationshipTypes", relTypes);
         configCopy.put("nodeLabels", nodeLabels);
 
-        // no defaults nor limits currently
-        var defaults = new DefaultsConfiguration(Collections.emptyMap(), Collections.emptyMap());
-        var limits = new LimitsConfiguration(Collections.emptyMap(), Collections.emptyMap());
+        // no defaults nor limits when considering memory usage
+        var defaults = DefaultsConfiguration.Empty;
+        var limits = LimitsConfiguration.Empty;
 
         var algoConfig = new AlgoConfigParser<>("", algoSpec.newConfigFunction(), defaults, limits).processInput(configCopy);
 

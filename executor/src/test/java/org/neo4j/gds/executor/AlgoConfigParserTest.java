@@ -37,8 +37,8 @@ class AlgoConfigParserTest {
         var configurationParser = new AlgoConfigParser<>(
             "Jonas Vingegaard",
             (NewConfigFunction<FooConfig>) (username, config) -> new FooConfigImpl(config),
-            new DefaultsConfiguration(Collections.emptyMap(), Collections.emptyMap()),
-            new LimitsConfiguration(Collections.emptyMap(), Collections.emptyMap())
+            DefaultsConfiguration.Empty,
+            LimitsConfiguration.Empty
         );
 
         var configuration = configurationParser.processInput(Map.of("bar", 42));
@@ -51,8 +51,8 @@ class AlgoConfigParserTest {
         var configurationParser = new AlgoConfigParser<>(
             "Jonas Vingegaard",
             (NewConfigFunction<FooConfig>) (username, config) -> new FooConfigImpl(config),
-            new DefaultsConfiguration(Collections.emptyMap(), Collections.emptyMap()),
-            new LimitsConfiguration(Collections.emptyMap(), Collections.emptyMap())
+            DefaultsConfiguration.Empty,
+            LimitsConfiguration.Empty
         );
 
         try {
@@ -70,7 +70,7 @@ class AlgoConfigParserTest {
             "Jonas Vingegaard",
             (NewConfigFunction<FooConfig>) (username, config) -> new FooConfigImpl(config),
             new DefaultsConfiguration(Map.of("bar", new Default(42)), Collections.emptyMap()),
-            new LimitsConfiguration(Collections.emptyMap(), Collections.emptyMap())
+            LimitsConfiguration.Empty
         );
 
         var configuration = configurationParser.processInput(Collections.emptyMap(/* no bar?! */));
@@ -87,7 +87,7 @@ class AlgoConfigParserTest {
                 Collections.emptyMap(),
                 Map.of("Jonas Vingegaard", Map.of("bar", new Default(42)))
             ),
-            new LimitsConfiguration(Collections.emptyMap(), Collections.emptyMap())
+            LimitsConfiguration.Empty
         );
 
         var configuration = configurationParser.processInput(Collections.emptyMap(/* no bar?! */));
@@ -100,8 +100,8 @@ class AlgoConfigParserTest {
         var configurationParser = new AlgoConfigParser<>(
             "Jonas Vingegaard",
             (NewConfigFunction<FooConfig>) (username, config) -> new FooConfigImpl(config),
-            new DefaultsConfiguration(Collections.emptyMap(), Collections.emptyMap()),
-            new LimitsConfiguration(Collections.emptyMap(), Collections.emptyMap())
+            DefaultsConfiguration.Empty,
+            LimitsConfiguration.Empty
         );
 
         try {
@@ -119,7 +119,7 @@ class AlgoConfigParserTest {
             "Jonas Vingegaard",
             (NewConfigFunction<FooConfig>) (username, config) -> new FooConfigImpl(config),
             new DefaultsConfiguration(Map.of("baz", new Default(87)), Collections.emptyMap()),
-            new LimitsConfiguration(Collections.emptyMap(), Collections.emptyMap())
+            LimitsConfiguration.Empty
         );
 
         var configuration = configurationParser.processInput(Map.of("bar", 42));
@@ -132,7 +132,7 @@ class AlgoConfigParserTest {
         var configurationParser = new AlgoConfigParser<>(
             "Jonas Vingegaard",
             (NewConfigFunction<FooConfig>) (username, config) -> new FooConfigImpl(config),
-            new DefaultsConfiguration(Collections.emptyMap(), Collections.emptyMap()),
+            DefaultsConfiguration.Empty,
             new LimitsConfiguration(Map.of("bar", new Limit(42)), Collections.emptyMap())
         );
 
@@ -151,7 +151,7 @@ class AlgoConfigParserTest {
         var configurationParser = new AlgoConfigParser<>(
             "Jonas Vingegaard",
             (NewConfigFunction<FooConfig>) (username, config) -> new FooConfigImpl(config),
-            new DefaultsConfiguration(Collections.emptyMap(), Collections.emptyMap()),
+            DefaultsConfiguration.Empty,
             new LimitsConfiguration(Map.of("baz", new Limit(23)), Collections.emptyMap())
         );
 
@@ -170,7 +170,7 @@ class AlgoConfigParserTest {
         var configurationParser = new AlgoConfigParser<>(
             "Jonas Vingegaard",
             (NewConfigFunction<BarConfig>) (username, config) -> new BarConfigImpl(config),
-            new DefaultsConfiguration(Collections.emptyMap(), Collections.emptyMap()),
+            DefaultsConfiguration.Empty,
             new LimitsConfiguration(
                 Map.of(
                     "baz", new Limit(23),

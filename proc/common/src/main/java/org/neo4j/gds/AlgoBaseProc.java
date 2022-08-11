@@ -43,7 +43,6 @@ import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.executor.validation.Validator;
 import org.neo4j.gds.results.MemoryEstimateResult;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -57,8 +56,8 @@ public abstract class AlgoBaseProc<
     public static final String STATS_DESCRIPTION = "Executes the algorithm and returns result statistics without writing the result to Neo4j.";
 
     public ProcConfigParser<CONFIG> configParser() {
-        var defaults = new DefaultsConfiguration(Collections.emptyMap(), Collections.emptyMap());
-        var limits = new LimitsConfiguration(Collections.emptyMap(), Collections.emptyMap());
+        var defaults = DefaultsConfiguration.Instance;
+        var limits = LimitsConfiguration.Instance;
 
         return new AlgoConfigParser<>(username(), AlgoBaseProc.this::newConfig, defaults, limits);
     }
