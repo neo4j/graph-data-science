@@ -41,7 +41,7 @@ public interface GraphProjectFromGdlConfig extends GraphProjectConfig {
 
     @Value.Default
     default Aggregation aggregation() {
-        return Aggregation.NONE;
+        return Aggregation.DEFAULT;
     }
 
     @Override

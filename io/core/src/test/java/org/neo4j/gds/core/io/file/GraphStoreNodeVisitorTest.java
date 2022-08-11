@@ -82,7 +82,7 @@ class GraphStoreNodeVisitorTest {
 
         var graphSchema = GraphSchema.of(
             nodeSchema,
-            RelationshipSchema.builder().addRelationshipType(RelationshipType.ALL_RELATIONSHIPS).build(),
+            RelationshipSchema.builder().addRelationshipType(RelationshipType.ALL_RELATIONSHIPS, true).build(),
             Map.of()
         );
 

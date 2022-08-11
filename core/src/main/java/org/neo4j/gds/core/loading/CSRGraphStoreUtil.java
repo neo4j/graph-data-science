@@ -62,7 +62,10 @@ public final class CSRGraphStoreUtil {
     ) {
         var relationshipType = RelationshipType.of(relationshipTypeString);
         var relationships = graph.relationships();
-        var relationshipSchemaBuilder = RelationshipSchema.builder().addRelationshipType(relationshipType);
+        boolean isUndirected = graph.schema().relationshipSchema().isUndirected();
+        var relationshipSchemaBuilder = RelationshipSchema
+            .builder()
+            .addRelationshipType(relationshipType, isUndirected);
 
         relationshipPropertyKey.ifPresent(property -> {
 
@@ -75,6 +78,7 @@ public final class CSRGraphStoreUtil {
 
             relationshipSchemaBuilder.addProperty(
                 relationshipType,
+                isUndirected,
                 property,
                 ValueType.DOUBLE
             );
@@ -225,19 +229,9 @@ public final class CSRGraphStoreUtil {
 
     public static GraphSchema computeGraphSchema(
         IdMapAndProperties idMapAndProperties,
-        RelationshipsAndProperties relationshipsAndProperties
-    ) {
-        return computeGraphSchema(
-            idMapAndProperties,
-            (__) -> idMapAndProperties.properties().keySet(),
-            relationshipsAndProperties
-        );
-    }
-
-    public static GraphSchema computeGraphSchema(
-        IdMapAndProperties idMapAndProperties,
         Function<NodeLabel, Collection<String>> propertiesByLabel,
-        RelationshipsAndProperties relationshipsAndProperties
+        RelationshipsAndProperties relationshipsAndProperties,
+        boolean isUndirected
     ) {
         var properties = idMapAndProperties.properties().properties();
 
@@ -260,10 +254,14 @@ public final class CSRGraphStoreUtil {
                 .relationshipProperties()
                 .forEach((propertyKey, propertyValues) -> relationshipSchemaBuilder.addProperty(
                     relType,
+                    isUndirected,
                     propertyKey,
                     propertyValues.propertySchema()
                 )));
-        relationshipsAndProperties.relationships().keySet().forEach(relationshipSchemaBuilder::addRelationshipType);
+        relationshipsAndProperties
+            .relationships()
+            .keySet()
+            .forEach(type -> relationshipSchemaBuilder.addRelationshipType(type, isUndirected));
 
         return GraphSchema.of(
             nodeSchemaBuilder.build(),

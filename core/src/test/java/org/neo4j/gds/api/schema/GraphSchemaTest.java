@@ -38,19 +38,19 @@ class GraphSchemaTest {
 
         var graphSchema1 = GraphSchema.of(
             NodeSchema.builder().build(),
-            RelationshipSchema.builder().build(),
+            RelationshipSchema.empty(),
             Map.of("prop1", prop1Schema)
         );
 
         var graphSchema2 = GraphSchema.of(
             NodeSchema.builder().build(),
-            RelationshipSchema.builder().build(),
+            RelationshipSchema.empty(),
             Map.of("prop2", prop2Schema)
         );
 
         var graphSchemaUnion = GraphSchema.of(
             NodeSchema.builder().build(),
-            RelationshipSchema.builder().build(),
+            RelationshipSchema.empty(),
             Map.of(
                 "prop1", prop1Schema,
                 "prop2", prop2Schema
@@ -66,13 +66,13 @@ class GraphSchemaTest {
 
         var graphSchema1 = GraphSchema.of(
             NodeSchema.builder().build(),
-            RelationshipSchema.builder().build(),
+            RelationshipSchema.empty(),
             Map.of("prop1", prop1Schema)
         );
 
         var graphSchema2 = GraphSchema.of(
             NodeSchema.builder().build(),
-            RelationshipSchema.builder().build(),
+            RelationshipSchema.empty(),
             Map.of("prop1", prop1Schema)
         );
 
@@ -86,13 +86,13 @@ class GraphSchemaTest {
 
         var graphSchema1 = GraphSchema.of(
             NodeSchema.builder().build(),
-            RelationshipSchema.builder().build(),
+            RelationshipSchema.empty(),
             Map.of("prop1", prop1Schema1)
         );
 
         var graphSchema2 = GraphSchema.of(
             NodeSchema.builder().build(),
-            RelationshipSchema.builder().build(),
+            RelationshipSchema.empty(),
             Map.of("prop1", prop1Schema2)
         );
 

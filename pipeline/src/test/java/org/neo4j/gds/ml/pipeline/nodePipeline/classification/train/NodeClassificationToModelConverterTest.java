@@ -95,7 +95,7 @@ class NodeClassificationToModelConverterTest {
 
         var originalSchema = ImmutableGraphSchema.builder()
             .nodeSchema(NodeSchema.builder().addLabel(NodeLabel.of("M")).build())
-            .relationshipSchema(RelationshipSchema.builder().addRelationshipType(RelationshipType.of("R")).build())
+            .relationshipSchema(RelationshipSchema.builder().addRelationshipType(RelationshipType.of("R"), true).build())
             .putGraphProperty("array", PropertySchema.of("array", ValueType.DOUBLE_ARRAY))
             .putGraphProperty("scalar", PropertySchema.of("scalar", ValueType.DOUBLE))
             .build();

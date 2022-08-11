@@ -87,6 +87,9 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class CypherAggregation extends BaseProc {
 
+    // Cypher never projects undirected graphs
+    private static final boolean IS_UNDIRECTED = false;
+
     @UserAggregationFunction(name = "gds.alpha.graph.project")
     @Description("Creates a named graph in the catalog for use by algorithms.")
     public GraphAggregator projectFromCypherAggregation() {
@@ -567,6 +570,7 @@ public final class CypherAggregation extends BaseProc {
                 propertyStore.relationshipProperties().forEach((propertyKey, relationshipProperties) -> {
                     relationshipSchemaBuilder.addProperty(
                         relType,
+                        IS_UNDIRECTED,
                         propertyKey,
                         relationshipProperties.propertySchema()
                     );

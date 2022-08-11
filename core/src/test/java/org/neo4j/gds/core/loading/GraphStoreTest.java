@@ -132,7 +132,7 @@ class GraphStoreTest extends BaseTest {
 
         var expectedRelationshipSchema = relTypes
             .stream()
-            .map(relType -> graphStore.schema().relationshipSchema().singleTypeAndProperty(relType, relProperty))
+            .map(relType -> graphStore.schema().relationshipSchema().filter(Set.of(relType)))
             .reduce(RelationshipSchema::union)
             .get();
         assertEquals(expectedRelationshipSchema, filteredGraph.schema().relationshipSchema());

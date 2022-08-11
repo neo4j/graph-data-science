@@ -22,6 +22,7 @@ package org.neo4j.gds.gdl;
 import org.immutables.builder.Builder;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
@@ -40,7 +41,6 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.Username;
@@ -189,6 +189,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         // in case there were no properties add all labels
         idMapAndProperties.idMap().availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
 
+        boolean isUndirected = graphProjectConfig.orientation() == Orientation.UNDIRECTED;
         var relationshipSchemaBuilder = RelationshipSchema.builder();
         relationshipsAndProperties
             .properties()
@@ -196,16 +197,20 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                 .relationshipProperties()
                 .forEach((propertyKey, propertyValues) -> relationshipSchemaBuilder.addProperty(
                     relType,
+                    isUndirected,
                     propertyKey,
                     RelationshipPropertySchema.of(
                         propertyKey,
                         propertyValues.valueType(),
                         propertyValues.valueType().fallbackValue(),
                         PropertyState.PERSISTENT,
-                        Aggregation.NONE
+                        graphProjectConfig.aggregation()
                     )
                 )));
-        relationshipsAndProperties.relationships().keySet().forEach(relationshipSchemaBuilder::addRelationshipType);
+        relationshipsAndProperties
+            .relationships()
+            .keySet()
+            .forEach(type -> relationshipSchemaBuilder.addRelationshipType(type, isUndirected));
 
         return GraphSchema.of(
             nodeSchemaBuilder.build(),
@@ -379,12 +384,13 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     private HashMap<RelationshipType, List<String>> propertyKeysByRelType() {
         var propertyKeysByRelType = new HashMap<RelationshipType, List<String>>();
 
+        boolean isUndirected = graphProjectConfig.orientation() == Orientation.UNDIRECTED;
         var schemaBuilder = RelationshipSchema.builder();
         gdlHandler.getEdges().forEach(edge -> {
             var relType = RelationshipType.of(edge.getLabel());
-            schemaBuilder.addRelationshipType(relType);
+            schemaBuilder.addRelationshipType(relType, isUndirected);
             edge.getProperties().keySet().forEach(propertyKey ->
-                schemaBuilder.addProperty(relType, propertyKey, ValueType.DOUBLE)
+                schemaBuilder.addProperty(relType, isUndirected, propertyKey, ValueType.DOUBLE)
             );
         });
         var schema = schemaBuilder.build();
