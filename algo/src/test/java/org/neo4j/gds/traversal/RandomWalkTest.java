@@ -22,15 +22,20 @@ package org.neo4j.gds.traversal;
 import org.assertj.core.data.Offset;
 import org.assertj.core.data.Percentage;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.node2vec.ImmutableNode2VecStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
@@ -38,6 +43,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,9 +52,12 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
@@ -384,5 +393,82 @@ class RandomWalkTest {
             .matches(walks -> walks.size() == 2)
             .anyMatch(walk -> walk[0] == aInternalId)
             .anyMatch(walk -> walk[0] == bInternalId);
+    }
+
+    @Nested
+    class ProgressTracking {
+
+        @GdlGraph
+        public static final String GDL =
+            "CREATE " +
+            "  (a:Node)" +
+            ", (b:Node)" +
+            ", (c:Node)" +
+            ", (d:Node)" +
+            ", (e:Node)" +
+            ", (f:Node)" +
+            ", (a)-[:REL]->(b)" +
+            ", (a)-[:REL]->(c)" +
+            ", (a)-[:REL]->(d)" +
+            ", (b)-[:REL]->(a)" +
+            ", (b)-[:REL]->(e)" +
+            ", (c)-[:REL]->(a)" +
+            ", (c)-[:REL]->(d)" +
+            ", (c)-[:REL]->(e)" +
+            ", (d)-[:REL]->(a)" +
+            ", (d)-[:REL]->(c)" +
+            ", (d)-[:REL]->(e)" +
+            ", (e)-[:REL]->(a)";
+
+        @Inject
+        TestGraph graph;
+
+        @Test
+        void progressLogging() {
+
+            var config = ImmutableRandomWalkStreamConfig.builder()
+                .walkLength(10)
+                .concurrency(4)
+                .walksPerNode(1000)
+                .walkBufferSize(1000)
+                .returnFactor(0.1)
+                .inOutFactor(100000)
+                .randomSeed(87L)
+                .build();
+
+            var fact = new RandomWalkAlgorithmFactory<RandomWalkStreamConfig>();
+            var log = Neo4jProxy.testLog();
+            var pt = new TestProgressTracker(
+                fact.progressTask(graph, config),
+                log,
+                config.concurrency(),
+                EmptyTaskRegistryFactory.INSTANCE
+            );
+
+            RandomWalk randomWalk = fact.build(graph, config, pt);
+
+            assertThatNoException().isThrownBy(() -> {
+                var randomWalksStream = randomWalk.compute();
+                // Make sure to consume the stream...
+                assertThat(randomWalksStream).hasSize(5000);
+            });
+
+            assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(
+                    "RandomWalk :: Start",
+                    "RandomWalk :: create walks :: Start",
+                    "RandomWalk :: create walks 16%",
+                    "RandomWalk :: create walks 33%",
+                    "RandomWalk :: create walks 50%",
+                    "RandomWalk :: create walks 66%",
+                    "RandomWalk :: create walks 83%",
+                    "RandomWalk :: create walks 100%",
+                    "RandomWalk :: create walks :: Finished",
+                    "RandomWalk :: Finished"
+                );
+        }
+
     }
 }
