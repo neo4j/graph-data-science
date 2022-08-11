@@ -25,6 +25,7 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitViolation;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -110,7 +111,7 @@ public class AlgoConfigParser<CONFIG extends AlgoBaseConfig> implements ProcConf
 
             // report them sorted alphabetically
             violations.stream().sorted(Comparator.comparing(LimitViolation::getKey)).forEach(violation -> {
-                var errorMessage = String.format(
+                var errorMessage = StringFormatting.formatWithLocale(
                     "Configuration parameter '%s' with value '%s' exceeds it's limit of '%s'",
                     violation.getKey(),
                     violation.getProvidedValue(),
