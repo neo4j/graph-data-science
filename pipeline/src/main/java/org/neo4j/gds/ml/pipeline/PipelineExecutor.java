@@ -88,6 +88,7 @@ public abstract class PipelineExecutor<
         var dataSplitGraphFilters = generateDatasetSplitGraphFilters();
         var featureInputGraphFilter = dataSplitGraphFilters.get(DatasetSplits.FEATURE_INPUT);
 
+        //featureInput nodeLabels contain source&target nodeLabel used in training/testing plus contextNodeLabels
         pipeline.validateBeforeExecution(graphStore, featureInputGraphFilter.nodeLabels());
 
         splitDatasets();

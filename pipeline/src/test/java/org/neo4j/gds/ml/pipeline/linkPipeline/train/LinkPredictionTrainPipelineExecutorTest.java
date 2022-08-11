@@ -779,18 +779,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .testFraction(0.5)
                 .build());
 
-            pipeline.addNodePropertyStep(new TestFilteredNodePropertyStep(
-                ImmutableGraphFilter.builder()
-                    .nodeLabels(List.of(NodeLabel.of("P"), NodeLabel.of("Q"), NodeLabel.of("X"), NodeLabel.of("Y")))
-                    .intermediateRelationshipTypes(List.of(RelationshipType.of("_FEATURE_INPUT_")))
-                    .contextRelationshipTypes(List.of(RelationshipType.of("CONTEXT")))
-                    .build()));
-
-            pipeline.addTrainerConfig(RandomForestClassifierTrainerConfig.DEFAULT);
-
-            pipeline.addFeatureStep(new L2FeatureStep(List.of("height")));
-
-            var config = LinkPredictionTrainConfigImpl.builder()
+            var trainConfig = LinkPredictionTrainConfigImpl.builder()
                 .modelUser(username)
                 .modelName("model")
                 .graphName(G_BI)
@@ -805,9 +794,20 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .randomSeed(1337L)
                 .build();
 
+            pipeline.addNodePropertyStep(new TestFilteredNodePropertyStep(
+                ImmutableGraphFilter.builder()
+                    .nodeLabels(trainConfig.featureInputLabels(graphStore))
+                    .intermediateRelationshipTypes(List.of(RelationshipType.of("_FEATURE_INPUT_")))
+                    .contextRelationshipTypes(List.of(RelationshipType.of("CONTEXT")))
+                    .build()));
+
+            pipeline.addTrainerConfig(RandomForestClassifierTrainerConfig.DEFAULT);
+
+            pipeline.addFeatureStep(new L2FeatureStep(List.of("height")));
+
             var executor = new LinkPredictionTrainPipelineExecutor(
                 pipeline,
-                config,
+                trainConfig,
                 ExecutionContext.EMPTY,
                 graphStore,
                 ProgressTracker.NULL_TRACKER
