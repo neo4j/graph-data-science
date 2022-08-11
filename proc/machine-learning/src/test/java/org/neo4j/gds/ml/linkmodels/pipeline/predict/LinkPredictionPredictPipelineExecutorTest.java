@@ -156,7 +156,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             ImmutableLPGraphStoreFilter.builder()
                 .sourceNodeLabels(NodeLabel.listOf("N"))
                 .targetNodeLabels(NodeLabel.listOf("N"))
-                .nodePropertyStepsLabels(List.of())
+                .nodePropertyStepsLabels(List.of(NodeLabel.of("N")))
                 .nodePropertyStepRelationshipTypes(List.of())
                 .predictRelationshipTypes(RelationshipType.listOf("T"))
                 .build(),
@@ -205,7 +205,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             ImmutableLPGraphStoreFilter.builder()
                 .sourceNodeLabels(NodeLabel.listOf("N"))
                 .targetNodeLabels(NodeLabel.listOf("N"))
-                .nodePropertyStepsLabels(List.of())
+                .nodePropertyStepsLabels(List.of(NodeLabel.of("N")))
                 .nodePropertyStepRelationshipTypes(List.of())
                 .predictRelationshipTypes(RelationshipType.listOf("T"))
                 .build(),
@@ -256,7 +256,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             ImmutableLPGraphStoreFilter.builder()
                 .sourceNodeLabels(NodeLabel.listOf("N"))
                 .targetNodeLabels(NodeLabel.listOf("N"))
-                .nodePropertyStepsLabels(List.of())
+                .nodePropertyStepsLabels(List.of(NodeLabel.of("N")))
                 .nodePropertyStepRelationshipTypes(List.of())
                 .predictRelationshipTypes(RelationshipType.listOf("T"))
                 .build(),
@@ -395,7 +395,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             ImmutableLPGraphStoreFilter.builder()
                 .sourceNodeLabels(NodeLabel.listOf("N"))
                 .targetNodeLabels(NodeLabel.listOf("N"))
-                .nodePropertyStepsLabels(List.of())
+                .nodePropertyStepsLabels(List.of(NodeLabel.of("N")))
                 .nodePropertyStepRelationshipTypes(List.of())
                 .predictRelationshipTypes(RelationshipType.listOf("T"))
                 .build(),

@@ -214,9 +214,12 @@ class PipelineExecutorTest {
         }
 
         @Override
-        public Map<DatasetSplits, GraphFilter> splitDataset() {
+        public Map<DatasetSplits, GraphFilter> generateDatasetSplitGraphFilters() {
             return Map.of(DatasetSplits.FEATURE_INPUT, ImmutableGraphFilter.builder().nodeLabels(List.of(NODE_LABEL_N)).build());
         }
+
+        @Override
+        public void splitDatasets() {};
 
         @Override
         protected String execute(Map<DatasetSplits, GraphFilter> dataSplits) {
@@ -271,13 +274,13 @@ class PipelineExecutorTest {
         }
 
         @Override
-        public void validateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {}
+        public void validateBeforeExecution(GraphStore graphStore, Collection<NodeLabel> nodeLabels) {}
 
         @Override
-        public void specificValidateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {}
+        public void specificValidateBeforeExecution(GraphStore graphStore) {}
 
         @Override
-        public void validateFeatureProperties(GraphStore graphStore, AlgoBaseConfig config) {}
+        public void validateFeatureProperties(GraphStore graphStore, Collection<NodeLabel> nodeLabels) {}
     }
 
     private class FailingNodePropertyPipeline extends TrainingPipeline<FeatureStep> {
@@ -305,12 +308,12 @@ class PipelineExecutorTest {
         }
 
         @Override
-        public void validateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {}
+        public void validateBeforeExecution(GraphStore graphStore, Collection<NodeLabel> nodeLabels) {}
 
         @Override
-        public void specificValidateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {}
+        public void specificValidateBeforeExecution(GraphStore graphStore) {}
 
         @Override
-        public void validateFeatureProperties(GraphStore graphStore, AlgoBaseConfig config) {}
+        public void validateFeatureProperties(GraphStore graphStore, Collection<NodeLabel> nodeLabels) {}
     }
 }

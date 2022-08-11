@@ -61,7 +61,7 @@ public abstract class PipelineTrainAlgorithm<
         pipelineTrainer.setTerminationFlag(terminationFlag);
 
         pipeline.validateTrainingParameterSpace();
-        pipeline.validateBeforeExecution(graphStore, config);
+        pipeline.validateBeforeExecution(graphStore, config.nodeLabelIdentifiers(graphStore));
 
         var originalSchema = graphStore
             .schema()

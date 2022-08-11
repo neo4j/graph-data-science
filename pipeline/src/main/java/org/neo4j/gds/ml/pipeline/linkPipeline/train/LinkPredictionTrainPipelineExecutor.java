@@ -130,15 +130,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     }
 
     @Override
-    public Map<DatasetSplits, PipelineExecutor.GraphFilter> splitDataset() {
-        this.relationshipSplitter.splitRelationships(
-            config.internalTargetRelationshipType(),
-            config.sourceNodeLabel(),
-            config.targetNodeLabel(),
-            config.randomSeed(),
-            pipeline.relationshipWeightProperty()
-        );
-
+    public Map<DatasetSplits, PipelineExecutor.GraphFilter> generateDatasetSplitGraphFilters() {
         var splitConfig = pipeline.splitConfig();
 
         return Map.of(
@@ -155,6 +147,17 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
                 .intermediateRelationshipTypes(List.of(splitConfig.featureInputRelationshipType()))
                 .contextRelationshipTypes(config.internalContextRelationshipType(graphStore))
                 .build()
+        );
+    }
+
+    @Override
+    public void splitDatasets() {
+        this.relationshipSplitter.splitRelationships(
+            config.internalTargetRelationshipType(),
+            config.sourceNodeLabel(),
+            config.targetNodeLabel(),
+            config.randomSeed(),
+            pipeline.relationshipWeightProperty()
         );
     }
 

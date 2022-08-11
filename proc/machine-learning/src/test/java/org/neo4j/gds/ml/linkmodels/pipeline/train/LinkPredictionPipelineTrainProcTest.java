@@ -210,6 +210,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
     @Test
     void failsWhenMissingNodeProperty() {
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe')");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe', {trainFraction: 0.3})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe')");
         runQuery(
             "CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'l2', {nodeProperties: ['missingNodeProperty']})");

@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification;
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyTrainingPipeline;
 
@@ -38,7 +37,7 @@ public class NodeClassificationTrainingPipeline extends NodePropertyTrainingPipe
     }
 
     @Override
-    public void specificValidateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {}
+    public void specificValidateBeforeExecution(GraphStore graphStore) {}
 
     @Override
     public boolean requireEagerFeatures() {

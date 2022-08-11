@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.Pipeline;
@@ -80,5 +79,5 @@ public final class LinkPredictionPredictPipeline implements Pipeline<LinkFeature
     }
 
     @Override
-    public void specificValidateBeforeExecution(GraphStore graphStore, AlgoBaseConfig config) {}
+    public void specificValidateBeforeExecution(GraphStore graphStore) {}
 }
