@@ -19,8 +19,11 @@
  */
 package org.neo4j.gds.impl.spanningTree;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -31,7 +34,9 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.impl.spanningTrees.Prim;
 import org.neo4j.gds.impl.spanningTrees.SpanningTree;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 
 /**
@@ -75,76 +80,98 @@ class PrimTest {
     @Inject
     private IdFunction idFunction;
 
+    private static final String ROOT = "-1";
     @BeforeEach
     void setUp() {
-        a = (int) idFunction.of("a");
-        b = (int) idFunction.of("b");
-        c = (int) idFunction.of("c");
-        d = (int) idFunction.of("d");
-        e = (int) idFunction.of("e");
-        y = (int) idFunction.of("y");
-        z = (int) idFunction.of("z");
+        a = idFunction.of("a");
+        b = idFunction.of("b");
+        c = idFunction.of("c");
+        d = idFunction.of("d");
+        e = idFunction.of("e");
+        y = idFunction.of("y");
+        z = idFunction.of("z");
     }
 
-    @Test
-    void testMaximumFromA() {
-        assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, a, ProgressTracker.NULL_TRACKER).compute());
+    static Stream<Arguments> parametersMinimum() {
+        return Stream.of(
+            arguments("a", ROOT, "a", "a", "b", "c"),
+            arguments("b", "b", ROOT, "a", "b", "c"),
+            arguments("c", "c", "a", ROOT, "b", "c"),
+            arguments("d", "b", "d", "a", ROOT, "c"),
+            arguments("e", "c", "a", "e", "b", ROOT)
+        );
     }
 
-    @Test
-    void testMaximumFromB() {
-        assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, b, ProgressTracker.NULL_TRACKER).compute());
+    static Stream<Arguments> parametersMaximum() {
+        return Stream.of(
+            arguments("a", ROOT, "d", "a", "e", "c"),
+            arguments("b", "c", ROOT, "e", "b", "d"),
+            arguments("c", "c", "d", ROOT, "e", "c"),
+            arguments("d", "c", "d", "e", ROOT, "d"),
+            arguments("e", "c", "d", "e", "e", ROOT)
+        );
     }
 
-    @Test
-    void testMaximumFromC() {
-        assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, c, ProgressTracker.NULL_TRACKER).compute());
+
+    @ParameterizedTest
+    @MethodSource("parametersMaximum")
+    void testMaximum(String nodeId, String parentA, String parentB, String parentC, String parentD, String parentE) {
+        var mst = (new Prim(
+            graph,
+            graph,
+            Prim.MAX_OPERATOR,
+            idFunction.of(nodeId),
+            ProgressTracker.NULL_TRACKER
+        ).compute());
+        assertTreeIsCorrect(mst, parentA, parentB, parentC, parentD, parentE);
     }
 
-    @Test
-    void testMaximumFromD() {
-        assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, d, ProgressTracker.NULL_TRACKER).compute());
+    @ParameterizedTest
+    @MethodSource("parametersMinimum")
+    void testMinimum(String nodeId, String parentA, String parentB, String parentC, String parentD, String parentE) {
+        var mst = (new Prim(
+            graph,
+            graph,
+            Prim.MIN_OPERATOR,
+            idFunction.of(nodeId),
+            ProgressTracker.NULL_TRACKER
+        ).compute());
+        assertTreeIsCorrect(mst, parentA, parentB, parentC, parentD, parentE);
     }
 
-    @Test
-    void testMaximumFromE() {
-        assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, e, ProgressTracker.NULL_TRACKER).compute());
+
+    private void assertTreeIsCorrect(
+        SpanningTree mst,
+        String parentA,
+        String parentB,
+        String parentC,
+        String parentD,
+        String parentE
+    ) {
+        SoftAssertions softAssertions = new SoftAssertions();
+
+        softAssertions.assertThat(mst.effectiveNodeCount).isEqualTo(5);
+
+        softAssertions.assertThat(getExpectedParent(parentA)).as("a").isEqualTo(mst.parent.get(a));
+        softAssertions.assertThat(getExpectedParent(parentB)).as("b").isEqualTo(mst.parent.get(b));
+        softAssertions.assertThat(getExpectedParent(parentC)).as("c").isEqualTo(mst.parent.get(c));
+        softAssertions.assertThat(getExpectedParent(parentD)).as("d").isEqualTo(mst.parent.get(d));
+        softAssertions.assertThat(getExpectedParent(parentE)).as("e").isEqualTo(mst.parent.get(e));
+
+        softAssertions.assertThat(mst.parent.get(y)).as("y").isEqualTo(-1);
+        softAssertions.assertThat(mst.parent.get(z)).as("z").isEqualTo(-1);
+
+        softAssertions.assertAll();
+
     }
 
-    @Test
-    void testMinimumFromA() {
-        assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, a, ProgressTracker.NULL_TRACKER).compute());
+    long getExpectedParent(String expectedParent) {
+        if (expectedParent.equals(ROOT)) {
+            return -1;
+        } else {
+            return idFunction.of(expectedParent);
+        }
     }
 
-    @Test
-    void testMinimumFromB() {
-        assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, b, ProgressTracker.NULL_TRACKER).compute());
-    }
 
-    @Test
-    void testMinimumFromC() {
-        assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, c, ProgressTracker.NULL_TRACKER).compute());
-    }
-
-    @Test
-    void testMinimumFromD() {
-        assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, d, ProgressTracker.NULL_TRACKER).compute());
-    }
-
-    @Test
-    void testMinimumFromE() {
-        assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, e, ProgressTracker.NULL_TRACKER).compute());
-    }
-
-    private void assertMinimum(SpanningTree mst) {
-        assertEquals(5, mst.effectiveNodeCount);
-        assertEquals(-1, mst.parent.get(y));
-        assertEquals(-1, mst.parent.get(z));
-    }
-
-    private void assertMaximum(SpanningTree mst) {
-        assertEquals(5, mst.effectiveNodeCount);
-        assertEquals(-1, mst.parent.get(y));
-        assertEquals(-1, mst.parent.get(z));
-    }
 }
