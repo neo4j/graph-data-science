@@ -31,9 +31,10 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.models.Classifier;
-import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
+import org.neo4j.gds.ml.pipeline.ImmutablePipelineGraphFilter;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
+import org.neo4j.gds.ml.pipeline.PipelineGraphFilter;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
@@ -130,19 +131,19 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     }
 
     @Override
-    public Map<DatasetSplits, PipelineExecutor.GraphFilter> generateDatasetSplitGraphFilters() {
+    public Map<DatasetSplits, PipelineGraphFilter> generateDatasetSplitGraphFilters() {
         var splitConfig = pipeline.splitConfig();
 
         return Map.of(
-            DatasetSplits.TRAIN, ImmutableGraphFilter.builder()
+            DatasetSplits.TRAIN, ImmutablePipelineGraphFilter.builder()
                 .nodeLabels(config.nodeLabelIdentifiers(graphStore))
                 .intermediateRelationshipTypes(List.of(splitConfig.trainRelationshipType()))
                 .build(),
-            DatasetSplits.TEST, ImmutableGraphFilter.builder()
+            DatasetSplits.TEST, ImmutablePipelineGraphFilter.builder()
                 .nodeLabels(config.nodeLabelIdentifiers(graphStore))
                 .intermediateRelationshipTypes(List.of(splitConfig.testRelationshipType()))
                 .build(),
-            DatasetSplits.FEATURE_INPUT, ImmutableGraphFilter.builder()
+            DatasetSplits.FEATURE_INPUT, ImmutablePipelineGraphFilter.builder()
                 .nodeLabels(config.featureInputLabels(graphStore))
                 .intermediateRelationshipTypes(List.of(splitConfig.featureInputRelationshipType()))
                 .contextRelationshipTypes(config.internalContextRelationshipType(graphStore))
@@ -162,7 +163,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     }
 
     @Override
-    protected LinkPredictionTrainPipelineResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
+    protected LinkPredictionTrainPipelineResult execute(Map<DatasetSplits, PipelineGraphFilter> dataSplits) {
         pipeline.validateTrainingParameterSpace();
 
         var trainDataSplit = dataSplits.get(DatasetSplits.TRAIN);
@@ -212,7 +213,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         return ImmutableLinkPredictionTrainPipelineResult.of(model, trainResult.trainingStatistics());
     }
 
-    private void removeDataSplitRelationships(Map<DatasetSplits, GraphFilter> datasets) {
+    private void removeDataSplitRelationships(Map<DatasetSplits, PipelineGraphFilter> datasets) {
         datasets.values()
             .stream()
             .flatMap(graphFilter -> graphFilter.intermediateRelationshipTypes().stream())
@@ -222,7 +223,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     }
 
     @Override
-    protected void additionalGraphStoreCleanup(Map<DatasetSplits, GraphFilter> datasets) {
+    protected void additionalGraphStoreCleanup(Map<DatasetSplits, PipelineGraphFilter> datasets) {
         removeDataSplitRelationships(datasets);
         super.additionalGraphStoreCleanup(datasets);
     }

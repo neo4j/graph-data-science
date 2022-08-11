@@ -53,13 +53,13 @@ public abstract class PredictPipelineExecutor<
 
     protected abstract RESULT execute();
 
-    protected abstract PipelineExecutor.GraphFilter nodePropertyStepFilter();
+    protected abstract PipelineGraphFilter nodePropertyStepFilter();
 
     @Override
     public RESULT compute() {
         progressTracker.beginSubTask();
 
-        PipelineExecutor.GraphFilter nodePropertyStepFilter = nodePropertyStepFilter();
+        PipelineGraphFilter nodePropertyStepFilter = nodePropertyStepFilter();
 
         //featureInput nodeLabels contain source&target nodeLabel used in training/testing plus contextNodeLabels
         pipeline.validateBeforeExecution(graphStore, nodePropertyStepFilter.nodeLabels());

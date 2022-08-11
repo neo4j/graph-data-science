@@ -34,9 +34,9 @@ import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.TrainingMethod;
-import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
+import org.neo4j.gds.ml.pipeline.ImmutablePipelineGraphFilter;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
-import org.neo4j.gds.ml.pipeline.PipelineExecutor;
+import org.neo4j.gds.ml.pipeline.PipelineGraphFilter;
 import org.neo4j.gds.ml.pipeline.PredictPipelineExecutor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
@@ -90,8 +90,8 @@ public class LinkPredictionPredictPipelineExecutor extends PredictPipelineExecut
     }
 
     @Override
-    protected PipelineExecutor.GraphFilter nodePropertyStepFilter() {
-        return ImmutableGraphFilter.builder()
+    protected PipelineGraphFilter nodePropertyStepFilter() {
+        return ImmutablePipelineGraphFilter.builder()
             .nodeLabels(graphStoreFilter.nodePropertyStepsLabels())
             .contextRelationshipTypes(graphStoreFilter.nodePropertyStepRelationshipTypes())
             .build();

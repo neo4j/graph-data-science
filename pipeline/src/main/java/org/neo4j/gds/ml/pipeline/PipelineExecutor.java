@@ -19,11 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -31,12 +27,8 @@ import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public abstract class PipelineExecutor<
     PIPELINE_CONFIG extends AlgoBaseConfig & GraphNameConfig,
@@ -75,11 +67,11 @@ public abstract class PipelineExecutor<
             .filterRelationshipTypes(Set.copyOf(config.internalRelationshipTypes(graphStore)));
     }
 
-    public abstract Map<DatasetSplits, GraphFilter> generateDatasetSplitGraphFilters();
+    public abstract Map<DatasetSplits, PipelineGraphFilter> generateDatasetSplitGraphFilters();
 
     public abstract void splitDatasets();
 
-    protected abstract RESULT execute(Map<DatasetSplits, GraphFilter> dataSplits);
+    protected abstract RESULT execute(Map<DatasetSplits, PipelineGraphFilter> dataSplits);
 
     @Override
     public RESULT compute() {
@@ -121,27 +113,7 @@ public abstract class PipelineExecutor<
 
     }
 
-    protected void additionalGraphStoreCleanup(Map<DatasetSplits, GraphFilter> datasets) {
+    protected void additionalGraphStoreCleanup(Map<DatasetSplits, PipelineGraphFilter> datasets) {
     }
 
-    @ValueClass
-    public interface GraphFilter {
-        Collection<NodeLabel> nodeLabels();
-
-        @Value.Derived
-        default Collection<RelationshipType> relationshipTypes() {
-            return Stream.of(intermediateRelationshipTypes(), contextRelationshipTypes()).flatMap(Collection::stream).collect(
-                Collectors.toSet());
-        }
-
-        @Value.Default
-        default Collection<RelationshipType> intermediateRelationshipTypes() {
-            return List.of();
-        }
-
-        @Value.Default
-        default Collection<RelationshipType> contextRelationshipTypes() {
-            return List.of();
-        }
-    }
 }

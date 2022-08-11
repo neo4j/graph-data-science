@@ -30,9 +30,9 @@ import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.models.Regressor;
 import org.neo4j.gds.ml.nodePropertyPrediction.regression.NodeRegressionPredict;
-import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
+import org.neo4j.gds.ml.pipeline.ImmutablePipelineGraphFilter;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
-import org.neo4j.gds.ml.pipeline.PipelineExecutor;
+import org.neo4j.gds.ml.pipeline.PipelineGraphFilter;
 import org.neo4j.gds.ml.pipeline.PredictPipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 import org.neo4j.gds.utils.StringJoining;
@@ -67,8 +67,8 @@ public class NodeRegressionPredictPipelineExecutor extends PredictPipelineExecut
     }
 
     @Override
-    protected PipelineExecutor.GraphFilter nodePropertyStepFilter() {
-        return ImmutableGraphFilter.builder()
+    protected PipelineGraphFilter nodePropertyStepFilter() {
+        return ImmutablePipelineGraphFilter.builder()
             .nodeLabels(config.nodeLabelIdentifiers(graphStore))
             .contextRelationshipTypes(config.internalRelationshipTypes(graphStore)).build();
     }
