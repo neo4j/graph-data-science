@@ -29,7 +29,6 @@ import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.utils.StringJoining;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -81,8 +80,8 @@ public final class NodePropertyStepFactory {
             .algorithmSpec()
             .newConfigFunction();
 
-        var defaults = new DefaultsConfiguration(Collections.emptyMap(), Collections.emptyMap());
-        var limits = new LimitsConfiguration(Collections.emptyMap(), Collections.emptyMap());
+        var defaults = DefaultsConfiguration.Instance;
+        var limits = LimitsConfiguration.Instance;
 
         // passing the EMPTY_USERNAME as we only try to check if the given configuration itself is valid
         return new AlgoConfigParser<>(Username.EMPTY_USERNAME.username(), newConfigFunction, defaults, limits).processInput(configuration);

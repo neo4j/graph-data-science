@@ -24,13 +24,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DefaultsConfiguration {
+    /**
+     * A JVM-wide singleton we can use to store the defaults configuration. Lifecycle of this singleton matches that of
+     * the data it holds - it starts empty and dies when JVM exists.
+     */
+    public static final DefaultsConfiguration Instance = new DefaultsConfiguration(Collections.emptyMap(), Collections.emptyMap());
+
+    /**
+     * This is a handy singleton for when you need to satisfy a requirement for the configuration, but want to ignore
+     * defaults entirely.
+     */
+    public static final DefaultsConfiguration Empty = new DefaultsConfiguration(Collections.emptyMap(), Collections.emptyMap());
+
     private final Map<String, Default> globalDefaults;
+
     private final Map<String, Map<String, Default>> personalDefaults;
 
-    public DefaultsConfiguration(
-        Map<String, Default> globalDefaults,
-        Map<String, Map<String, Default>> personalDefaults
-    ) {
+    public DefaultsConfiguration(Map<String, Default> globalDefaults, Map<String, Map<String, Default>> personalDefaults) {
         this.globalDefaults = globalDefaults;
         this.personalDefaults = personalDefaults;
     }

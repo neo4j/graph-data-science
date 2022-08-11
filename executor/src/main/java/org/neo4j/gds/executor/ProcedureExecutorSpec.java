@@ -26,8 +26,6 @@ import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.executor.validation.Validator;
 
-import java.util.Collections;
-
 public class ProcedureExecutorSpec<
     ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,
@@ -38,9 +36,8 @@ public class ProcedureExecutorSpec<
 
     @Override
     public ProcConfigParser<CONFIG> configParser(NewConfigFunction<CONFIG> newConfigFunction, ExecutionContext executionContext) {
-        // no defaults nor limits currently
-        var defaults = new DefaultsConfiguration(Collections.emptyMap(), Collections.emptyMap());
-        var limits = new LimitsConfiguration(Collections.emptyMap(), Collections.emptyMap());
+        var defaults = DefaultsConfiguration.Instance;
+        var limits = LimitsConfiguration.Instance;
 
         return new AlgoConfigParser<>(executionContext.username(), newConfigFunction, defaults, limits);
     }
