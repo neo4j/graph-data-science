@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.executor;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.configuration.Default;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
@@ -196,12 +195,5 @@ class AlgoConfigParserTest {
                            " - Configuration parameter 'baz' with value '42' exceeds it's limit of '23'\n" +
                            " - Configuration parameter 'qux' with value '117' exceeds it's limit of '87'");
         }
-    }
-
-    // placeholder for future work
-    @Disabled
-    @Test
-    void shouldCheckLimitsOnDifferentTypesIncludingSudo() {
-        fail("TODO: int, long, double, boolean");
     }
 }

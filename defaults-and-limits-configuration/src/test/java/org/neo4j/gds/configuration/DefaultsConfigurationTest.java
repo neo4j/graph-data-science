@@ -19,14 +19,12 @@
  */
 package org.neo4j.gds.configuration;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Fail.fail;
 
 class DefaultsConfigurationTest {
     @Test
@@ -86,12 +84,5 @@ class DefaultsConfigurationTest {
         var configurationWithDefaults = defaults.apply(configuration, "Jonas Vingegaard");
 
         assertThat(configurationWithDefaults).containsEntry("concurrency", 42);
-    }
-
-    // placeholder for future work
-    @Disabled
-    @Test
-    void shouldApplyDefaultsOfAllKinds() {
-        fail("TODO: int, long, double, boolean");
     }
 }

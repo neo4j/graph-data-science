@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.configuration;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -27,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Fail.fail;
 
 class LimitsConfigurationTest {
     @Test
@@ -121,12 +119,5 @@ class LimitsConfigurationTest {
         Set<LimitViolation> violations = limits.validate(Map.of("concurrency", 87), "Jonas Vingegaard");
 
         assertThat(violations).isEmpty();
-    }
-
-    // placeholder for future work
-    @Disabled
-    @Test
-    void shouldApplyLimitsOfAllKinds() {
-        fail("TODO: int, long, double, boolean");
     }
 }
