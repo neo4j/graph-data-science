@@ -184,8 +184,8 @@ class AlgoConfigParserTest {
         try {
             configurationParser.processInput(
                 Map.of(
-                    "qux", 117,
-                    "baz", 42
+                    "baz", 42,
+                    "qux", 117
                 )
             );
 

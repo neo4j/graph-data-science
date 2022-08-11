@@ -19,12 +19,10 @@
  */
 package org.neo4j.gds.executor;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
 @Configuration
 public interface FooConfig extends AlgoBaseConfig {
-    @Value
     int bar();
 }

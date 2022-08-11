@@ -22,10 +22,11 @@ package org.neo4j.gds.executor;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
-import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.configuration.LimitViolation;
+import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.CypherMapWrapper;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -106,7 +107,9 @@ public class AlgoConfigParser<CONFIG extends AlgoBaseConfig> implements ProcConf
                 violationMessages.add("Configuration exceeded multiple limits:");
                 delimeter = "\n - ";
             }
-            for (LimitViolation violation : violations) {
+
+            // report them sorted alphabetically
+            violations.stream().sorted(Comparator.comparing(LimitViolation::getKey)).forEach(violation -> {
                 var errorMessage = String.format(
                     "Configuration parameter '%s' with value '%s' exceeds it's limit of '%s'",
                     violation.getKey(),
@@ -115,7 +118,7 @@ public class AlgoConfigParser<CONFIG extends AlgoBaseConfig> implements ProcConf
                 );
 
                 violationMessages.add(errorMessage);
-            }
+            });
 
             throw new IllegalArgumentException(String.join(delimeter, violationMessages));
         }

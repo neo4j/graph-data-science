@@ -38,17 +38,10 @@ public class DefaultsConfiguration {
     public Map<String, Object> apply(Map<String, Object> configuration, String username) {
         Map<String, Object> configurationWithDefaults = new HashMap<>(configuration);
 
-        personalDefaults.getOrDefault(username, Collections.emptyMap()).forEach((s, d) -> {
-            if (configurationWithDefaults.containsKey(s)) return;
-
-            configurationWithDefaults.put(s, d.getValue());
-        });
-
-        globalDefaults.forEach((s, d) -> {
-            if (configurationWithDefaults.containsKey(s)) return;
-
-            configurationWithDefaults.put(s, d.getValue());
-        });
+        personalDefaults.getOrDefault(username, Collections.emptyMap())
+            .forEach((s, d) -> configurationWithDefaults.putIfAbsent(s, d.getValue()));
+        globalDefaults
+            .forEach((s, d) -> configurationWithDefaults.putIfAbsent(s, d.getValue()));
 
         return configurationWithDefaults;
     }

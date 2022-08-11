@@ -19,15 +19,12 @@
  */
 package org.neo4j.gds.executor;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
 @Configuration
 public interface BarConfig extends AlgoBaseConfig {
-    @Value
     int baz();
 
-    @Value
     int qux();
 }
