@@ -144,9 +144,11 @@ public final class RandomGraphGenerator {
 
     private RelationshipSchema relationshipSchema() {
         var relationshipSchemaBuilder = RelationshipSchema.builder();
-        relationshipSchemaBuilder.addRelationshipType(relationshipType);
+        boolean isUndirected = orientation == Orientation.UNDIRECTED;
+        relationshipSchemaBuilder.addRelationshipType(relationshipType, isUndirected);
         maybeRelationshipPropertyProducer.ifPresent(pp -> relationshipSchemaBuilder.addProperty(
             relationshipType,
+            isUndirected,
             pp.getPropertyName(),
             pp.propertyType()
         ));

@@ -404,12 +404,11 @@ public class CSRGraphStore implements GraphStore {
     ) {
         updateGraphStore(graphStore -> {
             if (!hasRelationshipType(relationshipType)) {
-                RelationshipSchema.Builder relationshipSchemaBuilder = RelationshipSchema
-                    .builder()
-                    .from(schema().relationshipSchema());
+                RelationshipSchema.Builder newSchemaBuilder = RelationshipSchema.builder();
 
                 graphStore.relationships.put(relationshipType, relationships.topology());
-                relationshipSchemaBuilder.addRelationshipType(relationshipType);
+                boolean isUndirected = relationships.topology().orientation() == Orientation.UNDIRECTED;
+                newSchemaBuilder.addRelationshipType(relationshipType, isUndirected);
 
                 if (relationshipPropertyKey.isPresent()
                     && relationshipPropertyType.isPresent()
@@ -423,8 +422,9 @@ public class CSRGraphStore implements GraphStore {
                     );
 
                     ValueType valueType = ValueTypes.fromNumberType(relationshipPropertyType.get());
-                    relationshipSchemaBuilder.addProperty(
+                    newSchemaBuilder.addProperty(
                         relationshipType,
+                        isUndirected,
                         relationshipPropertyKey.get(),
                         RelationshipPropertySchema.of(
                             relationshipPropertyKey.get(),
@@ -435,9 +435,10 @@ public class CSRGraphStore implements GraphStore {
                         ));
                 }
 
+                var resultingRelSchema = schema.relationshipSchema().union(newSchemaBuilder.build());
                 this.schema = GraphSchema.of(
                     schema().nodeSchema(),
-                    relationshipSchemaBuilder.build(),
+                    resultingRelSchema,
                     schema.graphProperties()
                 );
             }
@@ -718,7 +719,7 @@ public class CSRGraphStore implements GraphStore {
             nodeSchema,
             schema()
                 .relationshipSchema()
-                .singleTypeAndProperty(relationshipType, maybeRelationshipProperty),
+                .filter(Set.of(relationshipType)),
             schema.graphProperties()
         );
 

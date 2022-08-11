@@ -28,103 +28,114 @@ import org.neo4j.gds.core.Aggregation;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ValueClass
 public interface RelationshipSchema extends ElementSchema<RelationshipSchema, RelationshipType, RelationshipPropertySchema> {
 
+    /**
+     * Maps each type in this schema to a boolean which is true if and only if relationships of that type are UNDIRECTED.
+     */
+    Map<RelationshipType, Boolean> typeIsUndirected();
+
     @Override
     default RelationshipSchema filter(Set<RelationshipType> relationshipTypesToKeep) {
-        return of(filterProperties(relationshipTypesToKeep));
+        return of(
+            filterProperties(relationshipTypesToKeep),
+            typeIsUndirected().entrySet().stream()
+                .filter(kv -> relationshipTypesToKeep.contains(kv.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+        );
     }
 
     @Override
     default RelationshipSchema union(RelationshipSchema other) {
-        return of(unionSchema(other.properties()));
+        var mismatchTypes = this
+            .typeIsUndirected()
+            .entrySet()
+            .stream()
+            .filter(e -> other.typeIsUndirected().containsKey(e.getKey()))
+            .filter(e -> other.typeIsUndirected().get(e.getKey()) != e.getValue())
+            .map(e -> e.getKey().name)
+            .collect(Collectors.toSet());
+
+        if (!mismatchTypes.isEmpty()) {
+            throw new IllegalArgumentException(String.format(
+                Locale.ENGLISH,
+                "Conflicting directionality for relationship types `%s`",
+                mismatchTypes
+            ));
+        } else {
+            return of(unionSchema(other.properties()), unionTypeIsUndirectedMap(other.typeIsUndirected()));
+        }
+    }
+
+    private Map<RelationshipType, Boolean> unionTypeIsUndirectedMap(Map<RelationshipType, Boolean> otherTypeIsUndirectedMap) {
+        return Stream
+            .concat(typeIsUndirected().entrySet().stream(), otherTypeIsUndirectedMap.entrySet().stream())
+            .distinct()
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     default Set<RelationshipType> availableTypes() {
         return properties().keySet();
     }
 
-    default RelationshipSchema singleTypeAndProperty(
-        RelationshipType relationshipType,
-        Optional<String> maybeProperty
-    ) {
-        if (!properties().containsKey(relationshipType)) {
-           return RelationshipSchema.builder().build();
-        }
-
-        maybeProperty.ifPresent(property -> {
-            if (!properties().get(relationshipType).containsKey(property)) {
-                throw new IllegalArgumentException(String.format(
-                    Locale.ENGLISH,
-                    "Relationship schema does not contain relationship type '%s' and property '%s",
-                    relationshipType.name,
-                    property
-                ));
-            }
-        });
-
-        if (maybeProperty.isPresent()) {
-            return RelationshipSchema
-                .builder()
-                .addProperty(
-                    relationshipType,
-                    maybeProperty.get(),
-                    properties().get(relationshipType).get(maybeProperty.get())
-                )
-                .build();
-        } else {
-            return RelationshipSchema
-                .builder()
-                .addRelationshipType(relationshipType)
-                .build();
-        }
+    default boolean isUndirected() {
+        // a graph with no relationships is considered undirected
+        // this is because algorithms such as TriangleCount are still well-defined
+        // so it is the least restrictive decision
+        return typeIsUndirected().values().stream().allMatch(b -> b);
     }
 
     static RelationshipSchema empty() {
         return builder().build();
     }
 
-    static RelationshipSchema of(Map<RelationshipType, Map<String, RelationshipPropertySchema>> properties) {
-        return RelationshipSchema.builder().properties(properties).build();
+    static RelationshipSchema of(
+        Map<RelationshipType, Map<String, RelationshipPropertySchema>> properties,
+        Map<RelationshipType, Boolean> typeIsUndirected
+    ) {
+        return RelationshipSchema.builder().typeIsUndirected(typeIsUndirected).properties(properties).build();
     }
 
     static Builder builder() {
-        return new Builder().properties(new LinkedHashMap<>());
+        return new Builder().properties(new LinkedHashMap<>()).typeIsUndirected(new LinkedHashMap<>());
     }
 
     @AccessibleFields
     class Builder extends ImmutableRelationshipSchema.Builder {
 
-        public Builder addProperty(RelationshipType type, String propertyName, ValueType valueType) {
-            return addProperty(type, propertyName, RelationshipPropertySchema.of(propertyName, valueType));
+        public Builder addProperty(RelationshipType type, boolean isUndirected, String propertyName, ValueType valueType) {
+            return addProperty(type, isUndirected, propertyName, RelationshipPropertySchema.of(propertyName, valueType));
         }
 
-        public Builder addProperty(RelationshipType type, String propertyName, ValueType valueType, Aggregation aggregation) {
-            return addProperty(type, propertyName, RelationshipPropertySchema.of(propertyName, valueType, aggregation));
+        public Builder addProperty(RelationshipType type, boolean isUndirected, String propertyName, ValueType valueType, Aggregation aggregation) {
+            return addProperty(type, isUndirected, propertyName, RelationshipPropertySchema.of(propertyName, valueType, aggregation));
         }
 
         public Builder addProperty(
             RelationshipType type,
+            boolean isUndirected,
             String propertyName,
             RelationshipPropertySchema propertySchema
         ) {
-            this.properties
-                .computeIfAbsent(type, ignore -> new LinkedHashMap<>())
-                .put(propertyName, propertySchema);
+            addRelationshipType(type, isUndirected);
+            this.properties.get(type).put(propertyName, propertySchema);
             return this;
         }
 
-        public Builder addRelationshipType(RelationshipType type) {
-            this.properties.putIfAbsent(type, new LinkedHashMap<>());
+        public Builder addRelationshipType(RelationshipType type, boolean isUndirected) {
+            this.properties.computeIfAbsent(type, ignore -> new LinkedHashMap<>());
+            this.typeIsUndirected.putIfAbsent(type, isUndirected);
             return this;
         }
 
         public Builder removeRelationshipType(RelationshipType type) {
             this.properties.remove(type);
+            this.typeIsUndirected.remove(type);
             return this;
         }
     }

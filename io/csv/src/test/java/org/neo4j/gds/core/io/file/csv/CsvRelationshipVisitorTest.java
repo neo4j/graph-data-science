@@ -35,7 +35,7 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
 
     @Test
     void visitRelationshipsWithTypes() {
-        var relationshipVisitor = new CsvRelationshipVisitor(tempDir, RelationshipSchema.builder().build());
+        var relationshipVisitor = new CsvRelationshipVisitor(tempDir, RelationshipSchema.empty());
 
         relationshipVisitor.startId(0L);
         relationshipVisitor.endId(1L);
@@ -79,11 +79,11 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
         var bType = RelationshipType.of("B");
 
         var relationshipSchema = RelationshipSchema.builder()
-            .addProperty(aType, "foo", ValueType.LONG)
-            .addProperty(aType, "bar", ValueType.LONG)
+            .addProperty(aType, false, "foo", ValueType.LONG)
+            .addProperty(aType, false, "bar", ValueType.LONG)
 
-            .addProperty(bType, "bar", ValueType.LONG)
-            .addProperty(bType, "baz", ValueType.DOUBLE)
+            .addProperty(bType, false, "bar", ValueType.LONG)
+            .addProperty(bType, false, "baz", ValueType.DOUBLE)
 
             .build();
         var relationshipVisitor= new CsvRelationshipVisitor(tempDir, relationshipSchema);
