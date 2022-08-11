@@ -28,7 +28,6 @@ import org.neo4j.gds.core.IdMapBehaviorFactory;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalogProvider;
-import org.neo4j.gds.transaction.SecurityContextWrapperFactory;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.context.ExtensionContext;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
@@ -59,8 +58,6 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
     @Override
     public void init() {
         var licenseState = registerLicenseState();
-        registerSecurityContextService(licenseState);
-
         setupProcedurePreconditions(licenseState);
         setupIdMapBehavior(licenseState);
         setupConcurrencyValidator(licenseState);
@@ -86,16 +83,6 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
             LicensingServiceBuilder::priority
         );
         return licensingServiceBuilder.build(config).get();
-    }
-
-    private void registerSecurityContextService(LicenseState licenseState) {
-        var securityContextServiceFactory = loadService(
-            SecurityContextWrapperFactory.class,
-            SecurityContextWrapperFactory::priority
-        );
-
-        var securityContextService = securityContextServiceFactory.create(licenseState);
-        context.dependencySatisfier().satisfyDependency(securityContextService);
     }
 
     private void setupProcedurePreconditions(LicenseState licenseState) {

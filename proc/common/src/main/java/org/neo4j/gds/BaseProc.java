@@ -22,7 +22,6 @@ package org.neo4j.gds;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.Username;
@@ -36,7 +35,6 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.executor.MemoryUsageValidator;
-import org.neo4j.gds.transaction.SecurityContextWrapper;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -100,9 +98,10 @@ public abstract class BaseProc {
             // No transaction available (likely we're in a test), no-one is admin here
             return false;
         }
-        return GraphDatabaseApiProxy
-            .resolveDependency(databaseService, SecurityContextWrapper.class)
-            .isAdmin(transaction.securityContext());
+        // this should be the same as the predefined role from enterprise-security
+        // com.neo4j.server.security.enterprise.auth.plugin.api.PredefinedRoles.ADMIN
+        String PREDEFINED_ADMIN_ROLE = "admin";
+        return transaction.securityContext().roles().contains(PREDEFINED_ADMIN_ROLE);
     }
 
     protected final void runWithExceptionLogging(String message, Runnable runnable) {

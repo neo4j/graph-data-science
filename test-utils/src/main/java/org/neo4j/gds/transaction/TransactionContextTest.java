@@ -113,8 +113,6 @@ public abstract class TransactionContextTest extends BaseTest {
     }
 
     protected void applyTxWithAccessMode(Consumer<Transaction> txConsumer, AccessMode noNodesAllowed) {
-        var securityContextService = GraphDatabaseApiProxy.resolveDependency(db, SecurityContextWrapper.class);
-
         try (var topLevelTx = db.beginTx()) {
             var securityContext = Neo4jProxy.securityContext(
                 "",
@@ -124,7 +122,7 @@ public abstract class TransactionContextTest extends BaseTest {
             );
             ((InternalTransaction) topLevelTx)
                 .kernelTransaction()
-                .overrideWith(securityContextService.wrap(securityContext));
+                .overrideWith(securityContext);
 
             txConsumer.accept(topLevelTx);
         }

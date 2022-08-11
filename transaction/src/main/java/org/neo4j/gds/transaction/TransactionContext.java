@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.transaction;
 
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -73,8 +72,6 @@ public final class TransactionContext {
      * Creates a new {@code TransactionContext} with the provided {@link SecurityContext}.
      */
     public static TransactionContext of(GraphDatabaseService databaseService, SecurityContext securityContext) {
-        var securityContextService = GraphDatabaseApiProxy.resolveDependency(databaseService, SecurityContextWrapper.class);
-        securityContext = securityContextService.wrap(securityContext);
         return new TransactionContext(databaseService, securityContext);
     }
 

@@ -23,7 +23,6 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -35,7 +34,6 @@ import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
-import org.neo4j.gds.transaction.SecurityContextWrapper;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -107,9 +105,10 @@ public interface ExecutionContext {
             // No transaction available (likely we're in a test), no-one is admin here
             return false;
         }
-        return GraphDatabaseApiProxy
-            .resolveDependency(databaseService(), SecurityContextWrapper.class)
-            .isAdmin(transaction().securityContext());
+        // this should be the same as the predefined role from enterprise-security
+        // com.neo4j.server.security.enterprise.auth.plugin.api.PredefinedRoles.ADMIN
+        String PREDEFINED_ADMIN_ROLE = "admin";
+        return transaction().securityContext().roles().contains(PREDEFINED_ADMIN_ROLE);
     }
 
     ExecutionContext EMPTY = new ExecutionContext() {
