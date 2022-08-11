@@ -33,14 +33,13 @@ import org.neo4j.gds.ml.nodePropertyPrediction.regression.NodeRegressionPredict;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
+import org.neo4j.gds.ml.pipeline.PredictPipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 import org.neo4j.gds.utils.StringJoining;
 
-import java.util.Map;
-
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class NodeRegressionPredictPipelineExecutor extends PipelineExecutor<
+public class NodeRegressionPredictPipelineExecutor extends PredictPipelineExecutor<
     NodeRegressionPredictPipelineBaseConfig,
     NodePropertyPredictPipeline,
     HugeDoubleArray
@@ -68,23 +67,14 @@ public class NodeRegressionPredictPipelineExecutor extends PipelineExecutor<
     }
 
     @Override
-    public Map<DatasetSplits, GraphFilter> generateDatasetSplitGraphFilters() {
-        // For prediction, we don't split the input graph but generate the features and predict over the whole graph
-        return Map.of(
-            DatasetSplits.FEATURE_INPUT,
-            ImmutableGraphFilter.builder()
-                .nodeLabels(config.nodeLabelIdentifiers(graphStore))
-                .contextRelationshipTypes(config.internalRelationshipTypes(graphStore)).build()
-        );
+    protected PipelineExecutor.GraphFilter nodePropertyStepFilter() {
+        return ImmutableGraphFilter.builder()
+            .nodeLabels(config.nodeLabelIdentifiers(graphStore))
+            .contextRelationshipTypes(config.internalRelationshipTypes(graphStore)).build();
     }
 
     @Override
-    public void splitDatasets() {
-        //NodeRegression Predict does not split datasets
-    }
-
-    @Override
-    protected HugeDoubleArray execute(Map<DatasetSplits, GraphFilter> dataSplits) {
+    protected HugeDoubleArray execute() {
         var nodesGraph = graphStore.getGraph(config.nodeLabelIdentifiers(graphStore));
         Features features = FeaturesFactory.extractLazyFeatures(nodesGraph, pipeline.featureProperties());
 

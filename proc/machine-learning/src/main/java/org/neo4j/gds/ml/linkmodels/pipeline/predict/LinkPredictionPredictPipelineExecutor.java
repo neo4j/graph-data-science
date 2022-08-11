@@ -37,19 +37,19 @@ import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
+import org.neo4j.gds.ml.pipeline.PredictPipelineExecutor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.similarity.knn.KnnFactory;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
+public class LinkPredictionPredictPipelineExecutor extends PredictPipelineExecutor<
     LinkPredictionPredictPipelineBaseConfig,
     LinkPredictionPredictPipeline,
     LinkPredictionResult
@@ -77,24 +77,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     }
 
     @Override
-    public Map<DatasetSplits, GraphFilter> generateDatasetSplitGraphFilters() {
-        // For prediction, we don't split the input graph but generate the features and predict over the whole graph
-        return Map.of(
-            DatasetSplits.FEATURE_INPUT,
-            ImmutableGraphFilter.builder()
-                .nodeLabels(graphStoreFilter.nodePropertyStepsLabels())
-                .contextRelationshipTypes(graphStoreFilter.nodePropertyStepRelationshipTypes())
-                .build()
-        );
-    }
-
-    @Override
-    public void splitDatasets() {
-        //LinkPrediction Predict does not split datasets
-    }
-
-    @Override
-    protected LinkPredictionResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
+    protected LinkPredictionResult execute() {
         var graph = graphStore.getGraph(
             graphStoreFilter.predictNodeLabels(),
             graphStoreFilter.predictRelationshipTypes(),
@@ -104,6 +87,14 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
         var linkFeatureExtractor = LinkFeatureExtractor.of(graph, pipeline.featureSteps());
         var linkPrediction = getLinkPredictionStrategy(graph, config.isApproximateStrategy(), linkFeatureExtractor);
         return linkPrediction.compute();
+    }
+
+    @Override
+    protected PipelineExecutor.GraphFilter nodePropertyStepFilter() {
+        return ImmutableGraphFilter.builder()
+            .nodeLabels(graphStoreFilter.nodePropertyStepsLabels())
+            .contextRelationshipTypes(graphStoreFilter.nodePropertyStepRelationshipTypes())
+            .build();
     }
 
     public static Task progressTask(
@@ -154,7 +145,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 true
             );
         }
-        var predictEstimation= MemoryEstimations.builder("Model prediction")
+        var predictEstimation = MemoryEstimations.builder("Model prediction")
             .add("Strategy runtime", strategyEstimation)
             .add(MemoryEstimations.of("Classifier runtime", classificationRange))
             .build();
@@ -182,7 +173,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 classifier.data().featureDimension(),
                 linkFeatureExtractor.featureDimension(),
                 StringJoining.join(inputNodeProperties)
-                ));
+            ));
         }
 
         IdMap sourceNodes = graphStore.getGraph(graphStoreFilter.sourceNodeLabels());

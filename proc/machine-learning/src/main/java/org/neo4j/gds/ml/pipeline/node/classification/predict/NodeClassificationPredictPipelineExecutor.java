@@ -40,18 +40,18 @@ import org.neo4j.gds.ml.nodeClassification.NodeClassificationPredict;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
+import org.neo4j.gds.ml.pipeline.PredictPipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
+public class NodeClassificationPredictPipelineExecutor extends PredictPipelineExecutor<
     NodeClassificationPredictPipelineBaseConfig,
     NodePropertyPredictPipeline,
     NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult
@@ -114,23 +114,14 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
     }
 
     @Override
-    public Map<DatasetSplits, GraphFilter> generateDatasetSplitGraphFilters() {
-        // For prediction, we don't split the input graph but generate the features and predict over the whole graph
-        return Map.of(
-            DatasetSplits.FEATURE_INPUT,
-            ImmutableGraphFilter.builder()
-                .nodeLabels(config.nodeLabelIdentifiers(graphStore))
-                .contextRelationshipTypes(config.internalRelationshipTypes(graphStore)).build()
-        );
+    protected PipelineExecutor.GraphFilter nodePropertyStepFilter() {
+        return ImmutableGraphFilter.builder()
+            .nodeLabels(config.nodeLabelIdentifiers(graphStore))
+            .contextRelationshipTypes(config.internalRelationshipTypes(graphStore)).build();
     }
 
     @Override
-    public void splitDatasets() {
-        //NodeClassification Predict does not split datasets
-    }
-
-    @Override
-    protected NodeClassificationPipelineResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
+    protected NodeClassificationPipelineResult execute() {
         var nodesGraph = graphStore.getGraph(config.nodeLabelIdentifiers(graphStore));
         var features = FeaturesFactory.extractLazyFeatures(nodesGraph, pipeline.featureProperties());
 
@@ -154,7 +145,6 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
         ).compute();
 
         return NodeClassificationPipelineResult.of(nodeClassificationResult, classIdMap);
-
     }
 
     @ValueClass
