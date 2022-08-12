@@ -37,7 +37,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -145,34 +144,18 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
                     terminationFlag
                 )).collect(Collectors.toList());
 
-//        Pools.newThread(() -> tasksRunner(
-//                this.config.concurrency(),
-//                this.progressTracker,
-//                terminationFlag,
-//                TOMB,
-//                walks,
-//                tasks
-//            ))
-//            .start();
 
-        var future = new CompletableFuture<Void>();
-
-        future.completeAsync(() -> {
-            tasksRunner(
+        CompletableFuture.runAsync(
+            () -> tasksRunner(
                 tasks,
                 walks,
                 TOMB,
                 terminationFlag
-            );
-
-            return null;
-        }).whenComplete((__, ___) -> {
+            ),
+            executorService
+        ).whenComplete((__, ___) -> {
             progressTracker.release();
             release();
-        });
-
-        Executors.newSingleThreadExecutor().submit(() -> {
-            future.complete(null);
         });
     }
 
