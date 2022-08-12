@@ -254,6 +254,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.beta.pipeline.exists",
         "gds.beta.pipeline.list",
 
+        "gds.beta.randomWalk.stats",
+        "gds.beta.randomWalk.stats.estimate",
         "gds.beta.randomWalk.stream",
         "gds.beta.randomWalk.stream.estimate",
 
@@ -505,7 +507,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 356;
+        int expectedCount = 358;
         assertEquals(
             expectedCount,
             registeredProcedures.size(),
