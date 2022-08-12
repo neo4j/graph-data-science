@@ -91,7 +91,7 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
 
     @Override
     public EdgeSplitter.SplitResult compute() {
-        var splitter = graph.isUndirected()
+        var splitter = graph.schema().isUndirected()
             ? new UndirectedEdgeSplitter(
             config.randomSeed(),
             config.negativeSamplingRatio(),

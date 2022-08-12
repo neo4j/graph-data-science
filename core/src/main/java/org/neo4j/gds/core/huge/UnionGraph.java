@@ -294,10 +294,6 @@ public final class UnionGraph implements CSRGraph {
         return first.hasRelationshipProperty();
     }
 
-    @Override
-    public boolean isUndirected() {
-        return graphs.stream().allMatch(Graph::isUndirected);
-    }
 
     @Override
     public boolean isMultiGraph() {

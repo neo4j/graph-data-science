@@ -58,7 +58,7 @@ class GdlFactoryTest {
         assertThat(graph.relationshipCount()).isEqualTo(1);
         assertThat(graph.availableNodeProperties()).isEqualTo(Set.of("foo", "bar"));
         assertThat(graph.hasRelationshipProperty()).isTrue();
-        assertThat(graph.isUndirected()).isFalse();
+        assertThat(graph.schema().isUndirected()).isFalse();
         assertThat(graph.isEmpty()).isFalse();
     }
 

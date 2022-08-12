@@ -138,7 +138,7 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
             ? new HugeAtomicDisjointSetStruct(nodeCount, initialComponents, config.concurrency())
             : new HugeAtomicDisjointSetStruct(nodeCount, config.concurrency());
 
-        if (graph.isUndirected() && !config.hasThreshold()) {
+        if (graph.schema().isUndirected() && !config.hasThreshold()) {
             computeUndirected(dss);
         } else {
             computeDirected(dss);

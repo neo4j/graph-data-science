@@ -61,8 +61,8 @@ class UnionGraphTest {
         Graph unionGraph1 = UnionGraph.of(List.of(naturalGraph, undirectedGraph));
         Graph unionGraph2 = UnionGraph.of(List.of(undirectedGraph, naturalGraph));
 
-        assertFalse(unionGraph1.isUndirected());
-        assertFalse(unionGraph2.isUndirected());
+        assertFalse(unionGraph1.schema().isUndirected());
+        assertFalse(unionGraph2.schema().isUndirected());
     }
 
 

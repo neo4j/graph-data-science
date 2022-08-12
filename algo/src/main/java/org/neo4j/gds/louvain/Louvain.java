@@ -26,10 +26,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.modularity.ImmutableModularityOptimizationStreamConfig;
-import org.neo4j.gds.modularity.ModularityOptimization;
-import org.neo4j.gds.modularity.ModularityOptimizationFactory;
-import org.neo4j.gds.modularity.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -39,6 +35,10 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.modularity.ImmutableModularityOptimizationStreamConfig;
+import org.neo4j.gds.modularity.ModularityOptimization;
+import org.neo4j.gds.modularity.ModularityOptimizationFactory;
+import org.neo4j.gds.modularity.ModularityOptimizationStreamConfig;
 
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -232,10 +232,10 @@ public final class Louvain extends Algorithm<Louvain> {
 
         terminationFlag.assertRunning();
         double scaleCoefficient = 1.0;
-        if (workingGraph.isUndirected()) {
+        if (workingGraph.schema().isUndirected()) {
             scaleCoefficient /= 2.0;
         }
-        Orientation orientation = rootGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
+        Orientation orientation = rootGraph.schema().isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
         IdMap idMap = nodesBuilder.build().idMap();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
