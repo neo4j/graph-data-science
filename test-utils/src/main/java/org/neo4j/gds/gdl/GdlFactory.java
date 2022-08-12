@@ -198,7 +198,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                 .relationshipProperties()
                 .forEach((propertyKey, propertyValues) -> relationshipSchemaBuilder.addProperty(
                     relType,
-                    isUndirected,
+                    relationshipsAndProperties.relationships().get(relType).orientation() == Orientation.UNDIRECTED,
                     propertyKey,
                     RelationshipPropertySchema.of(
                         propertyKey,
@@ -211,7 +211,10 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         relationshipsAndProperties
             .relationships()
             .keySet()
-            .forEach(type -> relationshipSchemaBuilder.addRelationshipType(type, isUndirected));
+            .forEach(type -> {
+                relationshipSchemaBuilder.addRelationshipType(type,
+                    relationshipsAndProperties.relationships().get(type).orientation() == Orientation.UNDIRECTED);
+            });
 
         return GraphSchema.of(
             nodeSchemaBuilder.build(),
