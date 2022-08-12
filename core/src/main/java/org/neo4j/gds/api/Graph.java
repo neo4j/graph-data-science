@@ -58,8 +58,6 @@ public interface Graph extends IdMap, NodePropertyContainer, Degrees, Relationsh
      */
     default void releaseProperties() { }
 
-    boolean isUndirected();
-
     /**
      * Whether the graph is guaranteed to have no parallel relationships.
      * If this returns {@code false} it still may be parallel-free, but we do not know.

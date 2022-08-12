@@ -201,10 +201,10 @@ public final class Louvain extends Algorithm<Louvain> {
 
         terminationFlag.assertRunning();
         double scaleCoefficient = 1.0;
-        if (workingGraph.isUndirected()) {
+        if (workingGraph.schema().isUndirected()) {
             scaleCoefficient /= 2.0;
         }
-        Orientation orientation = rootGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
+        Orientation orientation = rootGraph.schema().isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
         IdMap idMap = nodesBuilder.build().idMap();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)

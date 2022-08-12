@@ -52,10 +52,6 @@ public abstract class GraphAdapter implements Graph {
         return graph.relationshipCount();
     }
 
-    @Override
-    public boolean isUndirected() {
-        return graph.isUndirected();
-    }
 
     @Override
     public boolean hasRelationshipProperty() {
