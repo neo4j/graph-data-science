@@ -99,8 +99,8 @@ public class ListProgressProc extends BaseProc {
 
             this.jobId = jobId.asString();
             this.taskName = taskName;
-            this.progress = StructuredOutputHelper.computeProgress(progressContainer.progress(), progressContainer.volume());
-            this.progressBar = StructuredOutputHelper.progressBar(progressContainer.progress(), progressContainer.volume(), PROGRESS_BAR_LENGTH);
+            this.progress = StructuredOutputHelper.computeProgress(progressContainer);
+            this.progressBar = StructuredOutputHelper.progressBar(progressContainer, PROGRESS_BAR_LENGTH);
             this.status = task.status().name();
             this.timeStarted = localTimeValue(task);
             this.elapsedTime = prettyElapsedTime(task);
