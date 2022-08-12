@@ -117,12 +117,21 @@ public class RandomWalkSampler {
                     if (r < normalizedReturnProbability) {
                         return newNode;
                     }
-                } else if (isNeighbour(previousNode, newNode)) {
-                    if (r < normalizedSameDistanceProbability) {
-                        return newNode;
+                } else {
+                    boolean newNodeIsIgnored = r >= Math.max(
+                        normalizedSameDistanceProbability,
+                        normalizedInOutProbability
+                    );
+                    //isNeighour is expensive, do not call it if you know with certainty newNode shall be ignored
+                    if (!newNodeIsIgnored) {
+                        if (isNeighbour(previousNode, newNode)) {
+                            if (r < normalizedSameDistanceProbability) {
+                                return newNode;
+                            }
+                        } else if (r < normalizedInOutProbability) {
+                            return newNode;
+                        }
                     }
-                } else if (r < normalizedInOutProbability) {
-                    return newNode;
                 }
                 tries++;
             }
