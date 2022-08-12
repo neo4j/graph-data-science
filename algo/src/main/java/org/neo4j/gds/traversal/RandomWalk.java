@@ -22,7 +22,6 @@ package org.neo4j.gds.traversal;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.SourceNodesConfig;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -36,7 +35,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -144,29 +145,48 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
                     terminationFlag
                 )).collect(Collectors.toList());
 
-        Pools.newThread(() -> tasksRunner(
-                this.config.concurrency(),
-                this.progressTracker,
-                terminationFlag,
-                TOMB,
+//        Pools.newThread(() -> tasksRunner(
+//                this.config.concurrency(),
+//                this.progressTracker,
+//                terminationFlag,
+//                TOMB,
+//                walks,
+//                tasks
+//            ))
+//            .start();
+
+        var future = new CompletableFuture<Void>();
+
+        future.completeAsync(() -> {
+            tasksRunner(
+                tasks,
                 walks,
-                tasks
-            ))
-            .start();
+                TOMB,
+                terminationFlag
+            );
+
+            return null;
+        }).whenComplete((__, ___) -> {
+            progressTracker.release();
+            release();
+        });
+
+        Executors.newSingleThreadExecutor().submit(() -> {
+            future.complete(null);
+        });
     }
 
-    private static void tasksRunner(
-        int concurrency,
-        ProgressTracker progressTracker,
-        TerminationFlag terminationFlag,
-        long[] tombstone,
+    private void tasksRunner(
+        Iterable<? extends Runnable> tasks,
         BlockingQueue<long[]> walks,
-        Iterable<? extends Runnable> tasks
+        long[] tombstone,
+        TerminationFlag terminationFlag
     ) {
         progressTracker.beginSubTask("create walks");
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .executor(this.executorService)
+            .concurrency(this.config.concurrency())
             .tasks(tasks)
             .terminationFlag(terminationFlag)
             .mayInterruptIfRunning(true)
