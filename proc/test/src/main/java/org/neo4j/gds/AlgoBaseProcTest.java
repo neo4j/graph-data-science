@@ -52,11 +52,11 @@ import org.neo4j.procedure.Procedure;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -169,7 +169,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
     class InvocationCountingTaskStore extends GlobalTaskStore {
         public int registerTaskInvocations;
         public int removeTaskInvocations;
-        public List<JobId> seenJobIds = new ArrayList<>();
+        Set<JobId> seenJobIds = new HashSet<>();
 
         @Override
         public void store(
