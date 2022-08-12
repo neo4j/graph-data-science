@@ -70,6 +70,41 @@ include::partial$/algorithms/beta/randomWalk/specific-configuration.adoc[]
 | path      | Path            | A `Path` object of the random walk.
 |===
 ======
+
+[.include-with-stats]
+======
+.Run RandomWalk in stats mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.beta.randomWalk.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/beta/randomWalk/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name                  | Type      | Description
+| preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
+| computeMillis         | Integer   | Milliseconds for running the algorithm.
+| configuration         | Map       | The configuration used for running the algorithm.
+|===
+======
 ====
 
 [[algorithms-random-walk-example]]
