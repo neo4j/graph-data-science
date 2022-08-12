@@ -44,10 +44,8 @@ public final class StructuredOutputHelper {
             return formatWithLocale("[~~~~%s~~~]", UNKNOWN);
         }
 
-        var percentage = volume == 0
-            ? 100D
-            : progress / (volume / 100D);
-        var scaledPercentage = (int) ((percentage / 100D) * progressBarLength);
+        var progressPercentage = relativeProgress(progress, volume);
+        var scaledPercentage = (int) (progressPercentage * progressBarLength);
 
         var filledProgressBar = "#".repeat(scaledPercentage);
         var remainingProgressBar = "~".repeat(progressBarLength - scaledPercentage);
@@ -57,14 +55,18 @@ public final class StructuredOutputHelper {
         return formatWithLocale("[%s]", progressBarContent);
     }
 
+    private static double relativeProgress(long progress, long volume) {
+        return volume == 0
+            ? 1.0D
+            : ((double) progress) / volume;
+    }
+
     public static String computeProgress(long progress, long volume) {
         if (volume == Task.UNKNOWN_VOLUME) {
             return UNKNOWN;
         }
 
-        var progressPercentage = volume == 0
-            ? 1.0D
-            : (double) progress / (double) volume;
+        var progressPercentage = relativeProgress(progress, volume);
         var decimalFormat = new DecimalFormat("###.##%", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
         return decimalFormat.format(progressPercentage);
     }
