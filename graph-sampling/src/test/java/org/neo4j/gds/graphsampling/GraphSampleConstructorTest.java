@@ -45,6 +45,9 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -52,7 +55,8 @@ import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 @GdlExtension
 class GraphSampleConstructorTest {
 
-    @GdlGraph(idOffset = 42)
+    @GdlGraph(graphNamePrefix = "undirected", idOffset = 42, orientation = UNDIRECTED)
+    @GdlGraph(graphNamePrefix = "natural", idOffset = 42)
     private static final String DB_CYPHER =
         "CREATE" +
         "  (x:Z {prop: 42})" +
@@ -83,12 +87,18 @@ class GraphSampleConstructorTest {
         ", (h)-[:R2 {cost: 10.0, distance: 5.8}]->(i)";
 
     @Inject
-    private GraphStore graphStore;
+    private GraphStore naturalGraphStore;
 
     @Inject
-    private IdFunction idFunction;
+    private GraphStore undirectedGraphStore;
 
-    class TestNodesSampler implements NodesSampler {
+    @Inject
+    private IdFunction naturalIdFunction;
+
+    @Inject
+    private IdFunction undirectedIdFunction;
+
+    static class TestNodesSampler implements NodesSampler {
 
         private final List<Long> originalIds;
 
@@ -120,7 +130,7 @@ class GraphSampleConstructorTest {
     @Test
     void shouldSampleAndFilterSchema() {
         var config = RandomWalkWithRestartsConfigImpl.builder()
-            .startNodes(List.of(idFunction.of("a")))
+            .startNodes(List.of(naturalIdFunction.of("a")))
             .samplingRatio(0.5)
             .restartProbability(0.1)
             .concurrency(1)
@@ -128,32 +138,34 @@ class GraphSampleConstructorTest {
             .build();
 
         var originalIds = List.of(
-            idFunction.of("a"),
-            idFunction.of("b"),
-            idFunction.of("c"),
-            idFunction.of("d"),
-            idFunction.of("e"),
-            idFunction.of("f"),
-            idFunction.of("g")
+            naturalIdFunction.of("a"),
+            naturalIdFunction.of("b"),
+            naturalIdFunction.of("c"),
+            naturalIdFunction.of("d"),
+            naturalIdFunction.of("e"),
+            naturalIdFunction.of("f"),
+            naturalIdFunction.of("g")
         );
 
         var graphConstructor = new GraphSampleConstructor(
             config,
-            graphStore,
+            naturalGraphStore,
             new TestNodesSampler(originalIds),
             ProgressTracker.NULL_TRACKER
         );
 
         var subgraph = graphConstructor.compute();
         assertThat(subgraph.getUnion().nodeCount()).isEqualTo(7);
-        assertThat(graphStore.schema().nodeSchema().filter(Set.of(NodeLabel.of("N"), NodeLabel.of("M"))))
+        assertThat(naturalGraphStore.schema().nodeSchema().filter(Set.of(NodeLabel.of("N"), NodeLabel.of("M"))))
             .usingRecursiveComparison()
             .isEqualTo(subgraph.schema().nodeSchema());
-        assertThat(graphStore.schema().relationshipSchema().filter(Set.of(RelationshipType.of("R1"))))
+        assertThat(naturalGraphStore.schema().relationshipSchema().filter(Set.of(RelationshipType.of("R1"))))
             .usingRecursiveComparison()
             .isEqualTo(subgraph.schema().relationshipSchema());
-        assertThat(graphStore.capabilities()).usingRecursiveComparison().isEqualTo(subgraph.capabilities());
-        assertThat(graphStore.databaseId()).usingRecursiveComparison().isEqualTo(subgraph.databaseId());
+        assertThat(naturalGraphStore.capabilities()).usingRecursiveComparison().isEqualTo(subgraph.capabilities());
+        assertThat(naturalGraphStore.databaseId()).usingRecursiveComparison().isEqualTo(subgraph.databaseId());
+        assertFalse(subgraph.schema().isUndirected());
+
 
         var expectedGraph =
             "  (a:N {prop: 46})" +
@@ -174,9 +186,74 @@ class GraphSampleConstructorTest {
     }
 
     @Test
+    void shouldSampleAndFilterSchemaUndirected() {
+        var config = RandomWalkWithRestartsConfigImpl.builder()
+            .startNodes(List.of(undirectedIdFunction.of("a")))
+            .samplingRatio(0.5)
+            .restartProbability(0.1)
+            .concurrency(1)
+            .randomSeed(42L)
+            .build();
+
+        var originalIds = List.of(
+            undirectedIdFunction.of("a"),
+            undirectedIdFunction.of("b"),
+            undirectedIdFunction.of("c"),
+            undirectedIdFunction.of("d"),
+            undirectedIdFunction.of("e"),
+            undirectedIdFunction.of("f"),
+            undirectedIdFunction.of("g")
+        );
+
+        var graphConstructor = new GraphSampleConstructor(
+            config,
+            undirectedGraphStore,
+            new TestNodesSampler(originalIds),
+            ProgressTracker.NULL_TRACKER
+        );
+
+        var sampledGraph = graphConstructor.compute();
+        assertThat(sampledGraph.getUnion().nodeCount()).isEqualTo(7);
+        assertThat(undirectedGraphStore.schema().nodeSchema().filter(Set.of(NodeLabel.of("N"), NodeLabel.of("M"))))
+            .usingRecursiveComparison()
+            .isEqualTo(sampledGraph.schema().nodeSchema());
+        assertThat(undirectedGraphStore.schema().relationshipSchema().filter(Set.of(RelationshipType.of("R1"))))
+            .usingRecursiveComparison()
+            .isEqualTo(sampledGraph.schema().relationshipSchema());
+        assertThat(undirectedGraphStore.capabilities()).usingRecursiveComparison().isEqualTo(sampledGraph.capabilities());
+        assertThat(undirectedGraphStore.databaseId()).usingRecursiveComparison().isEqualTo(sampledGraph.databaseId());
+        assertTrue(sampledGraph.schema().isUndirected());
+
+        var expectedGraph =
+            "  (a:N {prop: 46})" +
+            ", (b:N {prop: 47})" +
+            ", (c:N {prop: 48, attr: 48})" +
+            ", (d:N {prop: 49, attr: 48})" +
+            ", (e:M {prop: 50, attr: 48})" +
+            ", (f:M {prop: 51, attr: 48})" +
+            ", (g:M {prop: 52})" +
+            ", (e)-[:R1]->(d)" +
+            ", (e)<-[:R1]-(d)" +
+            ", (a)-[:R1 {distance: 5.8}]->(b)" +
+            ", (a)<-[:R1 {distance: 5.8}]-(b)" +
+            ", (a)-[:R1 {distance: 4.8}]->(c)" +
+            ", (a)<-[:R1 {distance: 4.8}]-(c)" +
+            ", (c)-[:R1 {distance: 5.8}]->(d)" +
+            ", (c)<-[:R1 {distance: 5.8}]-(d)" +
+            ", (d)-[:R1 {distance: 2.6}]->(e)" +
+            ", (d)<-[:R1 {distance: 2.6}]-(e)" +
+            ", (e)-[:R1 {distance: 5.8}]->(f)" +
+            ", (e)<-[:R1 {distance: 5.8}]-(f)" +
+            ", (f)-[:R1 {distance: 9.9}]->(g)" +
+            ", (f)<-[:R1 {distance: 9.9}]-(g)";
+
+        assertGraphEquals(fromGdl(expectedGraph), sampledGraph.getGraph("distance"));
+    }
+
+    @Test
     void shouldFilterGraph() {
         var config = RandomWalkWithRestartsConfigImpl.builder()
-            .startNodes(List.of(idFunction.of("e")))
+            .startNodes(List.of(naturalIdFunction.of("e")))
             .nodeLabels(List.of("M", "X"))
             .relationshipTypes(List.of("R1"))
             .samplingRatio(0.5)
@@ -186,14 +263,14 @@ class GraphSampleConstructorTest {
             .build();
 
         var originalIds = List.of(
-            idFunction.of("e"),
-            idFunction.of("f"),
-            idFunction.of("g")
+            naturalIdFunction.of("e"),
+            naturalIdFunction.of("f"),
+            naturalIdFunction.of("g")
         );
 
         var graphConstructor = new GraphSampleConstructor(
             config,
-            graphStore,
+            naturalGraphStore,
             new TestNodesSampler(originalIds),
             ProgressTracker.NULL_TRACKER
         );
@@ -213,7 +290,7 @@ class GraphSampleConstructorTest {
     @CsvSource(value = {"false", "true"})
     void shouldLogProgressWithRWR(boolean nodeLabelStratification) {
         var config = RandomWalkWithRestartsConfigImpl.builder()
-            .startNodes(List.of(idFunction.of("a")))
+            .startNodes(List.of(naturalIdFunction.of("a")))
             .samplingRatio(0.5)
             .restartProbability(0.1)
             .nodeLabelStratification(nodeLabelStratification)
@@ -224,7 +301,7 @@ class GraphSampleConstructorTest {
 
         var log = Neo4jProxy.testLog();
         var progressTracker = new TaskProgressTracker(
-            GraphSampleConstructor.progressTask(graphStore, rwr),
+            GraphSampleConstructor.progressTask(naturalGraphStore, rwr),
             log,
             1,
             EmptyTaskRegistryFactory.INSTANCE
@@ -232,7 +309,7 @@ class GraphSampleConstructorTest {
 
         var rwrGraphConstructor = new GraphSampleConstructor(
             config,
-            graphStore,
+            naturalGraphStore,
             rwr,
             progressTracker
         );
