@@ -42,8 +42,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @GdlExtension
 class UnionGraphTest {
@@ -57,12 +57,12 @@ class UnionGraphTest {
     TestGraph undirectedGraph;
 
     @Test
-    void isUndirectedOnlyIfAllInnerGraphsAre() {
-        Graph unionGraph1 = UnionGraph.of(List.of(naturalGraph, undirectedGraph));
-        Graph unionGraph2 = UnionGraph.of(List.of(undirectedGraph, naturalGraph));
+    void conflictingDirectionThrowsException() {
+        Graph unionGraph = UnionGraph.of(List.of(naturalGraph, undirectedGraph));
 
-        assertFalse(unionGraph1.schema().isUndirected());
-        assertFalse(unionGraph2.schema().isUndirected());
+        assertThatThrownBy(() -> unionGraph.schema())
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Conflicting directionality for relationship types `[__ALL__]`");
     }
 
 

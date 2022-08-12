@@ -239,8 +239,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         return CSRGraphStoreUtil.computeGraphSchema(
             idMapAndProperties,
             (label) -> storeConfig.nodeProjections().projections().get(label).properties().propertyKeys(),
-            relationshipsAndProperties,
-            isUndirected
+            relationshipsAndProperties
         );
     }
 

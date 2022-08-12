@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
@@ -230,8 +231,7 @@ public final class CSRGraphStoreUtil {
     public static GraphSchema computeGraphSchema(
         IdMapAndProperties idMapAndProperties,
         Function<NodeLabel, Collection<String>> propertiesByLabel,
-        RelationshipsAndProperties relationshipsAndProperties,
-        boolean isUndirected
+        RelationshipsAndProperties relationshipsAndProperties
     ) {
         var properties = idMapAndProperties.properties().properties();
 
@@ -254,14 +254,17 @@ public final class CSRGraphStoreUtil {
                 .relationshipProperties()
                 .forEach((propertyKey, propertyValues) -> relationshipSchemaBuilder.addProperty(
                     relType,
-                    isUndirected,
+                    relationshipsAndProperties.relationships().get(relType).orientation() == Orientation.UNDIRECTED,
                     propertyKey,
                     propertyValues.propertySchema()
                 )));
         relationshipsAndProperties
             .relationships()
             .keySet()
-            .forEach(type -> relationshipSchemaBuilder.addRelationshipType(type, isUndirected));
+            .forEach(type -> {
+                relationshipSchemaBuilder.addRelationshipType(type,
+                    relationshipsAndProperties.relationships().get(type).orientation() == Orientation.UNDIRECTED);
+            });
 
         return GraphSchema.of(
             nodeSchemaBuilder.build(),
