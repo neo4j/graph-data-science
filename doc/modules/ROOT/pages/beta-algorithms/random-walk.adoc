@@ -46,7 +46,7 @@ Before running this algorithm, we recommend that you read xref:common-usage/memo
 CALL gds.beta.randomWalk.stream(
   graphName: String,
   configuration: Map
-) YIELD
+)
 YIELD
   nodeIds: List of Integer,
   path: Path
