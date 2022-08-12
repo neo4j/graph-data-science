@@ -20,17 +20,24 @@
 package org.neo4j.gds;
 
 import org.assertj.core.api.Condition;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.Settings;
 import org.neo4j.kernel.internal.Version;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.Consumer;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -39,6 +46,26 @@ import static org.assertj.core.condition.AnyOf.anyOf;
 import static org.neo4j.gds.GdsEditionTestCondition.GDS_EDITION;
 
 class SysInfoProcTest extends BaseProcTest {
+
+    private static final Collection<String> ALL_COMPATIBILITIES = List.of(
+        "Neo4j Settings 4.x",
+        "Neo4j Settings 5.0.0-drop05.0 (placeholder)",
+        "Neo4j Settings 5.0.0-drop06.0 (placeholder)",
+        "Neo4j Settings 5.0.0-dev (placeholder)",
+        "Neo4j Settings 5.0.0-drop05.0",
+        "Neo4j Settings 5.0.0-drop06.0",
+        "Neo4j Settings 5.0.0-dev",
+        "Neo4j 4.3",
+        "Neo4j 4.4",
+        "Neo4j 4.4.8-drop01.0",
+        "Neo4j 4.4.9-drop01.0",
+        "Neo4j 5.0.0-drop05.0 (placeholder)",
+        "Neo4j 5.0.0-drop06.0 (placeholder)",
+        "Neo4j 5.0.0-dev (placeholder)",
+        "Neo4j 5.0.0-drop05.0",
+        "Neo4j 5.0.0-drop06.0",
+        "Neo4j 5.0.0-dev"
+    );
 
     @BeforeEach
     void setup() throws Exception {
@@ -63,7 +90,18 @@ class SysInfoProcTest extends BaseProcTest {
     @Test
     void testSysInfoProc() throws IOException {
         var result = runQuery("CALL gds.debug.sysInfo()", res -> res.stream().collect(
-            toMap(m -> String.valueOf(m.get("key")), m -> m.get("value"))
+            toMap(m -> String.valueOf(m.get("key")), m -> m.get("value"), (lhs, rhs) -> {
+                if (lhs instanceof List) {
+                    // noinspection unchecked
+                    ((List<Object>) lhs).add(rhs);
+                    return lhs;
+                }
+
+                var newLhs = new ArrayList<>();
+                newLhs.add(lhs);
+                newLhs.add(rhs);
+                return newLhs;
+            })
         ));
         var buildInfoProperties = BuildInfoProperties.get();
         var isNotNull = new Condition<>(Objects::nonNull, "is not null");
@@ -71,8 +109,65 @@ class SysInfoProcTest extends BaseProcTest {
         var isFalse = new Condition<>(Boolean.FALSE::equals, "false");
         var isInteger = new Condition<>(v -> (v instanceof Long) || (v instanceof Integer), "isInteger");
 
+        var neo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
+
+        Set<String> expectedCompatibilities;
+        switch (neo4jVersion) {
+            case V_4_3:
+                expectedCompatibilities = Set.of("Neo4j 4.3", "Neo4j Settings 4.x");
+                break;
+            case V_4_4:
+                expectedCompatibilities = Set.of("Neo4j 4.4", "Neo4j Settings 4.x");
+                break;
+            case V_4_4_8_drop10:
+                expectedCompatibilities = Set.of("Neo4j 4.4.8-drop01.0", "Neo4j Settings 4.x");
+                break;
+            case V_4_4_9_drop10:
+                expectedCompatibilities = Set.of("Neo4j 4.4.9-drop01.0", "Neo4j Settings 4.x");
+                break;
+            case V_5_0_drop50:
+                expectedCompatibilities = Set.of(
+                    "Neo4j Settings 5.0.0-drop05.0 (placeholder)",
+                    "Neo4j Settings 5.0.0-drop05.0",
+                    "Neo4j 5.0.0-drop05.0 (placeholder)",
+                    "Neo4j 5.0.0-drop05.0"
+                );
+                break;
+            case V_5_0_drop60:
+                expectedCompatibilities = Set.of(
+                    "Neo4j Settings 5.0.0-drop06.0 (placeholder)",
+                    "Neo4j Settings 5.0.0-drop06.0",
+                    "Neo4j 5.0.0-drop06.0 (placeholder)",
+                    "Neo4j 5.0.0-drop06.0"
+                );
+                break;
+            case V_Dev:
+                expectedCompatibilities = Set.of(
+                    "Neo4j Settings 5.0.0-dev (placeholder)",
+                    "Neo4j Settings 5.0.0-dev",
+                    "Neo4j 5.0.0-dev (placeholder)",
+                    "Neo4j 5.0.0-dev"
+                );
+                break;
+            default:
+                throw new IllegalStateException("Unexpected Neo4j version: " + neo4jVersion);
+        }
+
+        var allCompatibilities = new HashSet<>(ALL_COMPATIBILITIES);
+        allCompatibilities.removeAll(expectedCompatibilities);
+
+        Consumer<Object> availableCompat = (items) -> assertThat(items)
+            .asInstanceOf(InstanceOfAssertFactories.list(String.class))
+            .isSubsetOf(expectedCompatibilities)
+            .doesNotContainAnyElementsOf(allCompatibilities);
+
+        Consumer<Object> unavailableCompat = (items) -> assertThat(items)
+            .asInstanceOf(InstanceOfAssertFactories.list(String.class))
+            .isSubsetOf(allCompatibilities)
+            .doesNotContainAnyElementsOf(expectedCompatibilities);
+
         assertThat(result)
-            .hasSizeGreaterThanOrEqualTo(43)
+            .hasSizeGreaterThanOrEqualTo(45)
             .containsEntry("gdsVersion", buildInfoProperties.gdsVersion())
             .containsEntry("minimumRequiredJavaVersion", buildInfoProperties.minimumRequiredJavaVersion())
             .containsEntry("buildDate", buildInfoProperties.buildDate())
@@ -80,6 +175,8 @@ class SysInfoProcTest extends BaseProcTest {
             .containsEntry("buildJavaVersion", buildInfoProperties.buildJavaVersion())
             .containsEntry("buildHash", buildInfoProperties.buildHash())
             .containsEntry("neo4jVersion", Version.getNeo4jVersion())
+            .hasEntrySatisfying("availableCompatibility", availableCompat)
+            .hasEntrySatisfying("unavailableCompatibility", unavailableCompat)
             .hasEntrySatisfying("gdsEdition", GDS_EDITION)
             .hasEntrySatisfying("availableCPUs", isInteger)
             .hasEntrySatisfying("physicalCPUs", isInteger)
