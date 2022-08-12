@@ -217,3 +217,30 @@ RETURN nodeIds, [node IN nodes(path) | node.name ] AS pages
 | [1, 0, 6] | [About, Home, Site C]
 |===
 --
+
+
+=== Stats
+
+[role=query-example, no-result=true]
+--
+.Run the RandomWalk stats on `myGraph`
+[source, cypher, role=noplay]
+----
+CALL gds.beta.randomWalk.stats(
+  'myGraph',
+  {
+    walkLength: 3,
+    walksPerNode: 1,
+    randomSeed: 42,
+    concurrency: 1
+  }
+)
+----
+
+.Results
+[opts="header"]
+|===
+| preProcessingMillis | computeMillis | configuration
+| 0                   | 1             | {randomSeed=42, walkLength=3, jobId=b77f3147-6683-4249-8633-4db7da03f24d, sourceNodes=[], walksPerNode=1, inOutFactor=1.0, nodeLabels=[*], sudo=false, relationshipTypes=[*], walkBufferSize=1000, returnFactor=1.0, concurrency=1}
+|===
+--
