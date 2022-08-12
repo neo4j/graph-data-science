@@ -167,12 +167,12 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, GraphNameConf
     @Configuration.GraphStoreValidationCheck
     default void validateTargetRelIsUndirected(
         GraphStore graphStore,
-        Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
+        Collection<NodeLabel> ignoredNL,
+        Collection<RelationshipType> ignoredRT
     ) {
         if (!graphStore.schema().filterRelationshipTypes(Set.of(internalTargetRelationshipType())).isUndirected()) {
             throw new IllegalArgumentException(formatWithLocale(
-                "TargetRelationshipType '%s' must be undirected, but was directed.",
+                "Target relationship type `%s` must be UNDIRECTED, but was directed.",
                 targetRelationshipType()
             ));
         }

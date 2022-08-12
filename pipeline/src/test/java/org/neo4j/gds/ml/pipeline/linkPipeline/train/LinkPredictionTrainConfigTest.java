@@ -81,7 +81,7 @@ class LinkPredictionTrainConfigTest {
             directedGraphStore,
             config.nodeLabelIdentifiers(graphStore),
             config.internalRelationshipTypes(graphStore)
-        )).hasMessage("TargetRelationshipType 'REL' must be undirected, but was directed.");
+        )).hasMessage("Target relationship type `REL` must be UNDIRECTED, but was directed.");
     }
 
     @Test
