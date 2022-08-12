@@ -36,6 +36,7 @@ import org.neo4j.gds.model.ModelConfig;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -169,7 +170,7 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, GraphNameConf
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        if (!graphStore.isUndirected(internalTargetRelationshipType())) {
+        if (!graphStore.schema().filterRelationshipTypes(Set.of(internalTargetRelationshipType())).isUndirected()) {
             throw new IllegalArgumentException(formatWithLocale(
                 "TargetRelationshipType '%s' must be undirected, but was directed.",
                 targetRelationshipType()

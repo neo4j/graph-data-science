@@ -29,6 +29,7 @@ import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -114,7 +115,7 @@ public final class LPGraphStoreFilterFactory {
         var directedPredictRels = filter
             .predictRelationshipTypes()
             .stream()
-            .filter(type -> !graphStore.isUndirected(type))
+            .filter(type -> !graphStore.schema().filterRelationshipTypes(Set.of(type)).isUndirected())
             .map(RelationshipType::name)
             .collect(Collectors.toList());
 
