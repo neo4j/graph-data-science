@@ -25,7 +25,6 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.triangle.IntersectingTriangleCount.TriangleCountResult;
 import org.neo4j.procedure.Description;
@@ -63,12 +62,6 @@ public class TriangleCountStreamProc
         return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-    @Override
-    public ValidationConfiguration<TriangleCountStreamConfig> validationConfig() {
-        return TriangleCountCompanion.getValidationConfig();
-    }
-
-    @Override
     protected Stream<Result> stream(ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig> computationResult) {
         return runWithExceptionLogging("Graph streaming failed", () -> {
             var graph = computationResult.graph();

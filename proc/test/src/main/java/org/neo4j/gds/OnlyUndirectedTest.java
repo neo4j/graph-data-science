@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -47,16 +47,16 @@ public interface OnlyUndirectedTest<ALGORITHM extends Algorithm<RESULT>, CONFIG 
         applyOnProcedure(proc -> {
             getProcedureMethods(proc)
                 .filter(procMethod -> !getProcedureMethodName(procMethod).endsWith(".estimate"))
-                .forEach(noneEstimateMethod -> {
+                .forEach(nonEstimateMethod -> {
                     InvocationTargetException ex = assertThrows(
                         InvocationTargetException.class,
                         () -> {
-                            noneEstimateMethod.invoke(proc, "directed", config.toMap());
+                            nonEstimateMethod.invoke(proc, "directed", config.toMap());
                         }
                     );
                     assertThat(
                         rootCause(ex).getMessage(),
-                        containsString(expectedValidationMessage())
+                        containsString("requires relationship projections to be UNDIRECTED.")
                     );
                 });
         });
@@ -65,7 +65,7 @@ public interface OnlyUndirectedTest<ALGORITHM extends Algorithm<RESULT>, CONFIG 
 
     @MethodSource("filtered")
     @ParameterizedTest(name = "Orientation(s): {1}")
-    default void validateUndirectedFiltering(List<String> filter, String ignoredModeName) {
+    default void validateUndirectedFiltering(List<String> filter, String ignoredTestCaseName) {
         runQuery(graphDb(), "CALL gds.graph.project('directedMultiRels', '*', {" +
                             "  R: { type: '*', orientation: 'REVERSE' }, " +
                             "  U: { type: '*', orientation: 'UNDIRECTED' }, " +
@@ -92,14 +92,10 @@ public interface OnlyUndirectedTest<ALGORITHM extends Algorithm<RESULT>, CONFIG 
                     );
                     assertThat(
                         rootCause(ex).getMessage(),
-                        containsString(expectedValidationMessage())
+                        containsString("requires relationship projections to be UNDIRECTED.")
                     );
                 });
         });
-    }
-
-    default String expectedValidationMessage() {
-        return "Procedure requires relationship projections to be UNDIRECTED.";
     }
 
     static Stream<Arguments> filtered() {

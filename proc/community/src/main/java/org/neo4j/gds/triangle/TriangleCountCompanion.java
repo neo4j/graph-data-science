@@ -22,12 +22,8 @@ package org.neo4j.gds.triangle;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.validation.BeforeLoadValidation;
-import org.neo4j.gds.executor.validation.GraphProjectConfigValidations;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
-import java.util.List;
 import java.util.Optional;
 
 final class TriangleCountCompanion {
@@ -47,17 +43,6 @@ final class TriangleCountCompanion {
     ) {
         var result = Optional.ofNullable(computeResult.result()).orElse(EmptyResult.EMPTY_RESULT);
         return procResultBuilder.withGlobalTriangleCount(result.globalTriangles());
-    }
-
-    static <CONFIG extends TriangleCountBaseConfig> ValidationConfiguration<CONFIG> getValidationConfig() {
-        return new ValidationConfiguration<>() {
-            @Override
-            public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
-                return List.of(
-                    new GraphProjectConfigValidations.UndirectedGraphValidation<>()
-                );
-            }
-        };
     }
 
     abstract static class TriangleCountResultBuilder<PROC_RESULT> extends AbstractResultBuilder<PROC_RESULT> {

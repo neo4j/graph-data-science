@@ -26,7 +26,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -60,11 +59,6 @@ public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTria
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    public ValidationConfiguration<TriangleCountMutateConfig> validationConfig() {
-        return TriangleCountCompanion.getValidationConfig();
     }
 
     @Override

@@ -27,15 +27,11 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.validation.BeforeLoadValidation;
-import org.neo4j.gds.executor.validation.GraphProjectConfigValidations;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.impl.triangle.TriangleStream;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -61,16 +57,6 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
     @Override
     protected TriangleCountBaseConfig newConfig(String username, CypherMapWrapper config) {
         return TriangleCountBaseConfig.of(config);
-    }
-
-    @Override
-    public ValidationConfiguration<TriangleCountBaseConfig> validationConfig() {
-        return new ValidationConfiguration<>() {
-            @Override
-            public List<BeforeLoadValidation<TriangleCountBaseConfig>> beforeLoadValidations() {
-                return List.of(new GraphProjectConfigValidations.UndirectedGraphValidation<>());
-            }
-        };
     }
 
     @Override
