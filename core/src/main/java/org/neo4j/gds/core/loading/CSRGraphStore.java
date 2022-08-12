@@ -339,11 +339,6 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public boolean isUndirected(RelationshipType relationshipType) {
-        return relationships.get(relationshipType).orientation() == Orientation.UNDIRECTED;
-    }
-
-    @Override
     public long relationshipCount() {
         long sum = 0L;
         for (var topology : relationships.values()) {

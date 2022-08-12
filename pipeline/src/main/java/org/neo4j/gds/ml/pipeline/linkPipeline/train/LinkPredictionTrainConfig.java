@@ -34,6 +34,7 @@ import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -80,7 +81,7 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, ModelConfig, 
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
         var invalidTypes = selectedRelationshipTypes.stream()
-            .filter(type -> !graphStore.isUndirected(type))
+            .filter(type -> !graphStore.schema().filterRelationshipTypes(Set.copyOf(selectedRelationshipTypes)).isUndirected())
             .map(RelationshipType::name)
             .collect(Collectors.toList());
 
