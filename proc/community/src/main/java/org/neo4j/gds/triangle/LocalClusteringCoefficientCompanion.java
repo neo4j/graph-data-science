@@ -26,7 +26,6 @@ import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
-import org.neo4j.gds.executor.validation.GraphProjectConfigValidations;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -68,7 +67,6 @@ final class LocalClusteringCoefficientCompanion {
             @Override
             public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
                 return List.of(
-                    new GraphProjectConfigValidations.UndirectedGraphValidation<>(),
                     new WarnOnGraphsWithParallelRelationships<>(log)
                 );
             }

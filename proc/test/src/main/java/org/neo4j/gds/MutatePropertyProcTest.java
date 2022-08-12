@@ -39,7 +39,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.GraphFactoryTestSupport.FactoryType.NATIVE;
 import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -88,13 +87,21 @@ public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<RESULT>, CON
         GraphStoreCatalog.removeAllLoadedGraphs();
 
         runQuery(graphDb(), "CREATE (a1: A), (a2: A), (b: B), (a1)-[:REL]->(a2)");
-        GraphStore graphStore = TestGraphLoaderFactory.graphLoader(graphDb(), NATIVE)
+        var relationshipProjections = relationshipProjections();
+        var orientation = relationshipProjections
+            .projections()
+            .values()
+            .stream()
+            .map(RelationshipProjection::orientation)
+            .findFirst()
+            .orElse(Orientation.NATURAL);
+        GraphStore graphStore = new TestNativeGraphLoader(graphDb())
             .withLabels("A", "B")
-            .withRelationshipTypes("REL")
+            .withDefaultOrientation(orientation)
             .graphStore();
 
         String graphName = "myGraph";
-        var graphProjectConfig = withNameAndRelationshipProjections("", graphName, relationshipProjections());
+        var graphProjectConfig = withNameAndRelationshipProjections("", graphName, relationshipProjections);
         GraphStoreCatalog.set(graphProjectConfig, graphStore);
 
         CypherMapWrapper filterConfig = CypherMapWrapper.empty().withEntry(
