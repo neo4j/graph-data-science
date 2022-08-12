@@ -118,10 +118,22 @@ public class RandomWalkSampler {
                         return newNode;
                     }
                 } else {
+
+                    boolean newNodeIsDefinitelyKept = r < Math.min(
+                        normalizedSameDistanceProbability,
+                        normalizedInOutProbability
+                    );
+
+                    //isNeighour is expensive, do not call it if you know with certainty newNode is kept
+                    if (newNodeIsDefinitelyKept) {
+                        return newNode;
+                    }
+
                     boolean newNodeIsIgnored = r >= Math.max(
                         normalizedSameDistanceProbability,
                         normalizedInOutProbability
                     );
+
                     //isNeighour is expensive, do not call it if you know with certainty newNode shall be ignored
                     if (!newNodeIsIgnored) {
                         if (isNeighbour(previousNode, newNode)) {
@@ -132,6 +144,7 @@ public class RandomWalkSampler {
                             return newNode;
                         }
                     }
+
                 }
                 tries++;
             }
