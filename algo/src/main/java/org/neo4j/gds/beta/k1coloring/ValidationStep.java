@@ -20,6 +20,7 @@
 package org.neo4j.gds.beta.k1coloring;
 
 import com.carrotsearch.hppc.BitSet;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -52,8 +53,10 @@ final class ValidationStep implements Runnable {
 
     @Override
     public void run() {
+        var validatedNodes = new MutableLong(0);
         partition.consume(nodeId -> {
             if (currentNodesToColor.get(nodeId)) {
+                validatedNodes.increment();
                 graph.forEachRelationship(nodeId, (source, target) -> {
                     if (
                         source != target &&
@@ -69,6 +72,6 @@ final class ValidationStep implements Runnable {
             }
         });
 
-        progressTracker.logProgress(partition.nodeCount());
+        progressTracker.logProgress(validatedNodes.longValue());
     }
 }
