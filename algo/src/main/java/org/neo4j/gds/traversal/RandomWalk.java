@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -47,21 +48,25 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
     private final Graph graph;
     private final RandomWalkBaseConfig config;
+    private final ExecutorService executorService;
 
     private RandomWalk(
         Graph graph,
         RandomWalkBaseConfig config,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        ExecutorService executorService
     ) {
         super(progressTracker);
         this.graph = graph;
         this.config = config;
+        this.executorService = executorService;
     }
 
     public static RandomWalk create(
         Graph graph,
         RandomWalkBaseConfig config,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        ExecutorService executorService
     ) {
         if (graph.hasRelationshipProperty()) {
             EmbeddingUtils.validateRelationshipWeightPropertyValue(
@@ -69,11 +74,11 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
                 config.concurrency(),
                 weight -> weight >= 0,
                 "Node2Vec only supports non-negative weights.",
-                Pools.DEFAULT
+                executorService
             );
         }
 
-        return new RandomWalk(graph, config, progressTracker);
+        return new RandomWalk(graph, config, progressTracker, executorService);
     }
 
     @Override
@@ -108,7 +113,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
         return new DegreeCentrality(
             graph,
-            Pools.DEFAULT,
+            executorService,
             degreeCentralityConfig,
             progressTracker
         ).compute();
@@ -177,7 +182,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         }
     }
 
-    private static Stream<long[]> walksQueueConsumer(
+    private Stream<long[]> walksQueueConsumer(
         ExternalTerminationFlag terminationFlag,
         long[] tombstone,
         BlockingQueue<long[]> walks

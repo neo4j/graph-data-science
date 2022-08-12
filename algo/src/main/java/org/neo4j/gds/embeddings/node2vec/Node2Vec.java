@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -58,7 +59,8 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         RandomWalk randomWalk = RandomWalk.create(
             graph,
             config,
-            progressTracker
+            progressTracker,
+            Pools.DEFAULT
         );
 
         var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
