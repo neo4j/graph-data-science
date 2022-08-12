@@ -119,8 +119,7 @@ public class Task {
 
         return ImmutableProgress.builder()
             .volume(volume.getValue())
-            // safe guard to avoid invalid progress logging
-            .progress(Math.min(volume.getValue(), progress.getValue()))
+            .progress(progress.getValue())
             .build();
     }
 
