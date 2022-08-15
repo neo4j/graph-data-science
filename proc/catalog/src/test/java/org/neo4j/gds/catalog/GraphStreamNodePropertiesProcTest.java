@@ -60,7 +60,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     private static final String TEST_GRAPH_SAME_PROPERTIES = "testGraph";
     private static final String TEST_GRAPH_DIFFERENT_PROPERTIES = "testGraph2";
 
-    @Neo4jGraph(idOffset = 12)
+    @Neo4jGraph(offsetIds = true)
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:A {nodeProp1: 0.0, nodeProp2: 42})" +

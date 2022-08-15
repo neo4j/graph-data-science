@@ -40,7 +40,7 @@ class Neo4jSupportExtensionTest extends BaseTest {
     @org.neo4j.test.extension.Inject
     GraphDatabaseService neoInjectedDb;
 
-    @Neo4jGraph(idOffset = 2)
+    @Neo4jGraph(offsetIds = true)
     static final String DB_CYPHER = "CREATE" +
                                             "  (a { id: 0 })" +
                                             ", (b { id: 1 })";

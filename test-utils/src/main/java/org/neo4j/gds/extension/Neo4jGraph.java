@@ -32,5 +32,5 @@ public @interface Neo4jGraph {
      * Offset for ids to nodes in the Neo4j graph.
      * Original node ids will be incremented by this offset.
      */
-    int idOffset() default 0;
+    boolean offsetIds() default false;
 }
