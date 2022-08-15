@@ -34,6 +34,30 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class GraphProjectConfigValidations {
 
+    public static class UndirectedGraphValidation<CONFIG extends AlgoBaseConfig> implements BeforeLoadValidation<CONFIG> {
+        @Override
+        public void validateConfigsBeforeLoad(GraphProjectConfig graphProjectConfig, CONFIG config) {
+            graphProjectConfig.accept(new GraphProjectConfig.Visitor() {
+                @Override
+                public void visit(GraphProjectFromStoreConfig storeConfig) {
+                    storeConfig.relationshipProjections().projections().entrySet().stream()
+                        .filter(entry -> config
+                                             .relationshipTypes()
+                                             .equals(Collections.singletonList(ElementProjection.PROJECT_ALL)) ||
+                                         config.relationshipTypes().contains(entry.getKey().name()))
+                        .filter(entry -> entry.getValue().orientation() != Orientation.UNDIRECTED)
+                        .forEach(entry -> {
+                            throw new IllegalArgumentException(formatWithLocale(
+                                "Procedure requires relationship projections to be UNDIRECTED. Projection for `%s` uses orientation `%s`",
+                                entry.getKey().name,
+                                entry.getValue().orientation()
+                            ));
+                        });
+                }
+            });
+        }
+    }
+
     /**
      * Validates that {@link Orientation#UNDIRECTED} is not mixed with {@link Orientation#NATURAL}
      * and {@link Orientation#REVERSE}. If a relationship type filter is present in the algorithm
