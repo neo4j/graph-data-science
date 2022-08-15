@@ -25,12 +25,15 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.QueryRunner;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.embeddings.graphsage.GraphSageMutateProc;
+import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPipelineMutateProc;
@@ -141,6 +144,8 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(
             GraphProjectProc.class,
+            GraphSageTrainProc.class,
+            GraphSageMutateProc.class,
             ModelListProc.class,
             LinkPredictionPipelineMutateProc.class,
             LinkPredictionPipelineTrainProc.class,
@@ -160,10 +165,10 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         runQuery(createQuery);
 
         graphStore = GraphStoreCatalog
-            .get(getUsername(), DatabaseId.of(db), GRAPH_NAME)
+            .get("", DatabaseId.of(db), GRAPH_NAME)
             .graphStore();
 
-        runQuery(GdsCypher.call(MULTI_GRAPH_NAME)
+        runQueryWithUser(GdsCypher.call(MULTI_GRAPH_NAME)
             .graphProject()
             .withNodeLabels("N", "X", "Z")
             .withRelationshipType("REL_2", Orientation.UNDIRECTED)
@@ -347,4 +352,88 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         assertTrue(multiGraphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED"), "probability"));
     }
 
+
+    @Test
+    void testWithGraphSage() {
+        runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe')");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe', {validationFolds: 2})");
+
+        // train GS model (not as a nodeProperty step as it does not produce a node property)
+        runQuery(
+            "CALL gds.beta.graphSage.train('g', {" +
+            "    modelName: 'gsModel'," +
+            "    embeddingDimension: 32," +
+            "    sampleSizes: [2]," +
+            "    epochs: 1," +
+            "    maxIterations: 1," +
+            "    aggregator: 'MEAN'," +
+            "    featureProperties: $features," +
+            "    randomSeed: 99" +
+            "  }" +
+            ")", Map.of("features", List.of("z")));
+
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'gds.beta.graphSage', {" +
+                 "  modelName: 'gsModel',   " +
+                 "  mutateProperty: 'embedding'" +
+                 "})");
+
+        // let's try both list and single string syntaxes
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'COSINE', {nodeProperties: ['embedding']})");
+
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe')");
+
+        runQuery("CALL gds.beta.pipeline.linkPrediction.train('g', {" +
+                 "   pipeline: 'pipe', " +
+                 "   modelName: 'lpModel', " +
+                 "   negativeClassWeight: 1.0, " +
+                 "   randomSeed: 1337" +
+                 "})");
+
+        assertCypherResult(
+            "CALL gds.beta.model.list() YIELD modelInfo RETURN count(*) AS modelCount",
+            List.of(Map.of("modelCount", 2L))
+        );
+    }
+
+    @Override
+    protected String getUsername() {
+        return "myUser";
+    }
+
+    @Test
+    void runWithGraphSage() {
+        runQueryWithUser("CALL gds.graph.project('g_2',{ N: { properties: ['z']}}, {REL: {orientation: 'UNDIRECTED'}})");
+
+        runQueryWithUser("CALL gds.beta.graphSage.train(" +
+                  "  'g_2'," +
+                  "  {" +
+                  "    modelName: 'exampleTrainModel'," +
+                  "    featureProperties: ['z']," +
+                  "    aggregator: 'mean'," +
+                  "    activationFunction: 'sigmoid'," +
+                  "    randomSeed: 1337," +
+                  "    sampleSizes: [25, 10]" +
+                  "  })");
+
+        runQueryWithUser("CALL gds.beta.pipeline.linkPrediction.create('myPipe') ");
+        runQueryWithUser("CALL gds.beta.pipeline.linkPrediction.configureSplit('myPipe', {validationFolds: 2, testFraction: 0.3, trainFraction: 0.3})");
+        runQueryWithUser("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('myPipe', 'beta.graphSage', {" +
+                 "modelName: 'exampleTrainModel', " +
+                 "mutateProperty: 'embedding'}" +
+                 ") ");
+
+        runQueryWithUser("CALL gds.beta.pipeline.linkPrediction.addFeature('myPipe', 'L2', {nodeProperties: ['embedding']})");
+
+        runQueryWithUser("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('myPipe')");
+
+        runQueryWithUser("CALL gds.beta.pipeline.linkPrediction.train('g_2', {" +
+                         "pipeline: 'myPipe', " +
+                         "modelName: 'model'," +
+                         "targetRelationshipType: 'REL'" +
+                         "})");
+    }
+
+    private void runQueryWithUser(String query) {
+        QueryRunner.runQuery(db, getUsername(), query, Map.of());
+    }
 }
