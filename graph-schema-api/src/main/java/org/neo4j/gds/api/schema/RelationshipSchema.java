@@ -57,7 +57,7 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
             .entrySet()
             .stream()
             .filter(e -> other.typeIsUndirected().containsKey(e.getKey()))
-            .filter(e -> other.typeIsUndirected().get(e.getKey()).equals(e.getValue()))
+            .filter(e -> !other.typeIsUndirected().get(e.getKey()).equals(e.getValue()))
             .map(e -> e.getKey().name)
             .collect(Collectors.toSet());
 
