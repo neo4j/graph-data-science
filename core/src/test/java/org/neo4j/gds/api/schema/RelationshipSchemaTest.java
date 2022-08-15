@@ -102,13 +102,16 @@ class RelationshipSchemaTest {
         assertEquals(aggregation, relationshipPropertySchema.aggregation());
     }
 
-    static Stream<Orientation> orientations() {
-        return Stream.of(UNDIRECTED, NATURAL);
+    static Stream<Arguments> orientations() {
+        return Stream.of(
+            Arguments.of(UNDIRECTED, true),
+            Arguments.of(NATURAL, false)
+        );
     }
 
     @ParameterizedTest
     @MethodSource("orientations")
-    void testFiltering(Orientation orientation) {
+    void testFiltering(Orientation orientation, boolean isUndirected) {
         var label1 = RelationshipType.of("Foo");
         var label2 = RelationshipType.of("Bar");
 
@@ -126,7 +129,7 @@ class RelationshipSchemaTest {
             .build();
 
         assertEquals(expected, relationshipSchema.filter(Set.of(label1)));
-        assertThat(relationshipSchema.isUndirected()).isEqualTo(orientation);
+        assertThat(relationshipSchema.isUndirected()).isEqualTo(isUndirected);
     }
 
     @Test
@@ -152,16 +155,16 @@ class RelationshipSchemaTest {
 
     static Stream<Arguments> unionDirections() {
         return Stream.of(
-            Arguments.of(UNDIRECTED, UNDIRECTED, UNDIRECTED),
-            Arguments.of(UNDIRECTED, NATURAL, NATURAL),
-            Arguments.of(NATURAL, UNDIRECTED, NATURAL),
-            Arguments.of(NATURAL, NATURAL, NATURAL)
+            Arguments.of(UNDIRECTED, UNDIRECTED, true),
+            Arguments.of(UNDIRECTED, NATURAL, false),
+            Arguments.of(NATURAL, UNDIRECTED, false),
+            Arguments.of(NATURAL, NATURAL, false)
         );
     }
 
     @ParameterizedTest
     @MethodSource("unionDirections")
-    void testUnion(Orientation isUndirected1, Orientation isUndirected2, Orientation isUndirectedExpectation) {
+    void testUnion(Orientation isUndirected1, Orientation isUndirected2, Boolean isUndirectedExpectation) {
         var type1 = RelationshipType.of("Foo");
         var type2 = RelationshipType.of("Bar");
 
