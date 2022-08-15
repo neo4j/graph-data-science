@@ -229,13 +229,6 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
     protected GraphSchema computeGraphSchema(
         IdMapAndProperties idMapAndProperties, RelationshipsAndProperties relationshipsAndProperties
     ) {
-        boolean isUndirected = storeConfig
-            .relationshipProjections()
-            .projections()
-            .values()
-            .stream()
-            .allMatch(p -> p.orientation() == Orientation.UNDIRECTED);
-
         return CSRGraphStoreUtil.computeGraphSchema(
             idMapAndProperties,
             (label) -> storeConfig.nodeProjections().projections().get(label).properties().propertyKeys(),
