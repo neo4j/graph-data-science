@@ -24,7 +24,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 
-import java.util.Random;
+import java.util.SplittableRandom;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
@@ -37,13 +37,15 @@ public class RandomWalkSampler {
 
     private final Graph graph;
     private final int walkLength;
-    private final Random random;
+    private SplittableRandom random;
     private final MutableDouble currentWeight;
     private final MutableLong randomNeighbour;
     private final double normalizedReturnProbability;
     private final double normalizedSameDistanceProbability;
     private final double normalizedInOutProbability;
     private final CumulativeWeightSupplier cumulativeWeightSupplier;
+
+    private final long randomSeed;
 
     public RandomWalkSampler(
         CumulativeWeightSupplier cumulativeWeightSupplier,
@@ -52,9 +54,9 @@ public class RandomWalkSampler {
         double normalizedSameDistanceProbability,
         double normalizedInOutProbability,
         Graph graph,
-        Random random
+        long randomSeed
     ) {
-        this.random = random;
+        this.randomSeed = randomSeed;
         this.cumulativeWeightSupplier = cumulativeWeightSupplier;
         this.graph = graph;
         this.walkLength = walkLength;
@@ -170,6 +172,10 @@ public class RandomWalkSampler {
         });
 
         return randomNeighbour.getValue();
+    }
+
+    public void prepareForNewNode(long nodeId) {
+        this.random = new SplittableRandom(randomSeed + nodeId);
     }
 
     private boolean isNeighbour(long source, long target) {

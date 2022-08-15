@@ -61,7 +61,7 @@ class RandomWalkKnnSampler implements KnnSampler {
             0.6,
             1.0,
             graph,
-            new Random(randomSeed.orElseGet(() -> new Random().nextLong()))
+           randomSeed.orElseGet(() -> new Random().nextLong())
         );
         this.uniformSamplerFromRange = new LongUniformSamplerFromRange(random);
         this.exclusiveMax = graph.nodeCount();
@@ -88,6 +88,8 @@ class RandomWalkKnnSampler implements KnnSampler {
         final int numberOfSamples,
         final LongPredicate isInvalidSample
     ) {
+
+        randomWalkSampler.prepareForNewNode(nodeId);
         final var walk = randomWalkSampler.walk(nodeId);
 
         sampledValuesCache.clear();
