@@ -82,13 +82,14 @@ import java.util.OptionalLong;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.config.ConcurrencyConfig.DEFAULT_CONCURRENCY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class CypherAggregation extends BaseProc {
 
     // Cypher never projects undirected graphs
-    private static final boolean IS_UNDIRECTED = false;
+    private static final Orientation orientation = NATURAL;
 
     @UserAggregationFunction(name = "gds.alpha.graph.project")
     @Description("Creates a named graph in the catalog for use by algorithms.")
@@ -337,7 +338,7 @@ public final class CypherAggregation extends BaseProc {
 
             var relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(this.idMapBuilder)
-                .orientation(Orientation.NATURAL)
+                .orientation(NATURAL)
                 .aggregation(Aggregation.NONE)
                 .concurrency(DEFAULT_CONCURRENCY);
 
@@ -570,7 +571,7 @@ public final class CypherAggregation extends BaseProc {
                 propertyStore.relationshipProperties().forEach((propertyKey, relationshipProperties) -> {
                     relationshipSchemaBuilder.addProperty(
                         relType,
-                        IS_UNDIRECTED,
+                        orientation,
                         propertyKey,
                         relationshipProperties.propertySchema()
                     );
@@ -617,7 +618,7 @@ public final class CypherAggregation extends BaseProc {
         @org.immutables.value.Value.Default
         @Configuration.Ignore
         default Orientation orientation() {
-            return Orientation.NATURAL;
+            return NATURAL;
         }
 
         @org.immutables.value.Value.Default

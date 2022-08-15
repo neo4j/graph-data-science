@@ -48,6 +48,8 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.Orientation.NATURAL;
+import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class RandomGraphGeneratorTest {
@@ -513,7 +515,7 @@ class RandomGraphGeneratorTest {
                     .relationshipDistribution(RelationshipDistribution.RANDOM)
                     .build(),
                 NodeSchema.builder().build(),
-                RelationshipSchema.builder().addRelationshipType(RelationshipType.of("REL"), false).build()
+                RelationshipSchema.builder().addRelationshipType(RelationshipType.of("REL"), NATURAL).build()
             ),
             Arguments.of(
                 "node label",
@@ -525,7 +527,7 @@ class RandomGraphGeneratorTest {
                     .relationshipDistribution(RelationshipDistribution.RANDOM)
                     .build(),
                 NodeSchema.builder().addLabel(NodeLabel.of("A")).build(),
-                RelationshipSchema.builder().addRelationshipType(RelationshipType.of("REL"), false).build()
+                RelationshipSchema.builder().addRelationshipType(RelationshipType.of("REL"), NATURAL).build()
             ),
             Arguments.of(
                 "relationship type",
@@ -537,7 +539,7 @@ class RandomGraphGeneratorTest {
                     .relationshipDistribution(RelationshipDistribution.RANDOM)
                     .build(),
                 NodeSchema.builder().build(),
-                RelationshipSchema.builder().addRelationshipType(RelationshipType.of("FOOBAR"), false).build()
+                RelationshipSchema.builder().addRelationshipType(RelationshipType.of("FOOBAR"), NATURAL).build()
             ),
             Arguments.of(
                 "node label and relationship type",
@@ -550,7 +552,7 @@ class RandomGraphGeneratorTest {
                     .relationshipDistribution(RelationshipDistribution.RANDOM)
                     .build(),
                 NodeSchema.builder().addLabel(NodeLabel.of("A")).build(),
-                RelationshipSchema.builder().addRelationshipType(RelationshipType.of("FOOBAR"), false).build()
+                RelationshipSchema.builder().addRelationshipType(RelationshipType.of("FOOBAR"), NATURAL).build()
             ),
             Arguments.of(
                 "node label and node property",
@@ -569,7 +571,7 @@ class RandomGraphGeneratorTest {
                     .build(),
                 RelationshipSchema
                     .builder()
-                    .addRelationshipType(RelationshipType.of("REL"), false)
+                    .addRelationshipType(RelationshipType.of("REL"), NATURAL)
                     .build()
             ),
             Arguments.of(
@@ -585,7 +587,7 @@ class RandomGraphGeneratorTest {
                 NodeSchema.builder().build(),
                 RelationshipSchema
                     .builder()
-                    .addProperty(RelationshipType.of("FOOBAR"), false, "relProperty", ValueType.DOUBLE)
+                    .addProperty(RelationshipType.of("FOOBAR"), NATURAL, "relProperty", ValueType.DOUBLE)
                     .build()
             ),
             Arguments.of(
@@ -607,7 +609,7 @@ class RandomGraphGeneratorTest {
                     .build(),
                 RelationshipSchema
                     .builder()
-                    .addProperty(RelationshipType.of("FOOBAR"), false, "relProp", ValueType.DOUBLE)
+                    .addProperty(RelationshipType.of("FOOBAR"), NATURAL, "relProp", ValueType.DOUBLE)
                     .build()
             ),
             Arguments.of(
@@ -628,7 +630,7 @@ class RandomGraphGeneratorTest {
                     .build(),
                 RelationshipSchema
                     .builder()
-                    .addProperty(RelationshipType.of("FOOBAR"), true, "relProp", ValueType.DOUBLE)
+                    .addProperty(RelationshipType.of("FOOBAR"), UNDIRECTED, "relProp", ValueType.DOUBLE)
                     .build()
             )
         );

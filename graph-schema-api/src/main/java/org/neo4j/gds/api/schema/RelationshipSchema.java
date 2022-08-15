@@ -20,6 +20,7 @@
 package org.neo4j.gds.api.schema;
 
 import org.immutables.builder.Builder.AccessibleFields;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -32,19 +33,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.Orientation.UNDIRECTED;
+
 @ValueClass
 public interface RelationshipSchema extends ElementSchema<RelationshipSchema, RelationshipType, RelationshipPropertySchema> {
 
-    /**
-     * Maps each type in this schema to a boolean which is true if and only if relationships of that type are UNDIRECTED.
-     */
-    Map<RelationshipType, Boolean> typeIsUndirected();
+    Map<RelationshipType, Orientation> relTypeOrientationMap();
 
     @Override
     default RelationshipSchema filter(Set<RelationshipType> relationshipTypesToKeep) {
         return of(
             filterProperties(relationshipTypesToKeep),
-            typeIsUndirected().entrySet().stream()
+            relTypeOrientationMap().entrySet().stream()
                 .filter(kv -> relationshipTypesToKeep.contains(kv.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
         );
@@ -53,11 +53,11 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
     @Override
     default RelationshipSchema union(RelationshipSchema other) {
         var mismatchTypes = this
-            .typeIsUndirected()
+            .relTypeOrientationMap()
             .entrySet()
             .stream()
-            .filter(e -> other.typeIsUndirected().containsKey(e.getKey()))
-            .filter(e -> !other.typeIsUndirected().get(e.getKey()).equals(e.getValue()))
+            .filter(e -> other.relTypeOrientationMap().containsKey(e.getKey()))
+            .filter(e -> !other.relTypeOrientationMap().get(e.getKey()).equals(e.getValue()))
             .map(e -> e.getKey().name)
             .collect(Collectors.toSet());
 
@@ -68,13 +68,13 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
                 mismatchTypes
             ));
         } else {
-            return of(unionSchema(other.properties()), unionTypeIsUndirectedMap(other.typeIsUndirected()));
+            return of(unionSchema(other.properties()), unionTypeIsUndirectedMap(other.relTypeOrientationMap()));
         }
     }
 
-    private Map<RelationshipType, Boolean> unionTypeIsUndirectedMap(Map<RelationshipType, Boolean> otherTypeIsUndirectedMap) {
+    private Map<RelationshipType, Orientation> unionTypeIsUndirectedMap(Map<RelationshipType, Orientation> otherTypeIsUndirectedMap) {
         return Stream
-            .concat(typeIsUndirected().entrySet().stream(), otherTypeIsUndirectedMap.entrySet().stream())
+            .concat(relTypeOrientationMap().entrySet().stream(), otherTypeIsUndirectedMap.entrySet().stream())
             .distinct()
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
@@ -87,7 +87,7 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
         // a graph with no relationships is considered undirected
         // this is because algorithms such as TriangleCount are still well-defined
         // so it is the least restrictive decision
-        return typeIsUndirected().values().stream().allMatch(b -> b);
+        return relTypeOrientationMap().values().stream().allMatch(b -> b == UNDIRECTED);
     }
 
     static RelationshipSchema empty() {
@@ -96,46 +96,46 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
 
     static RelationshipSchema of(
         Map<RelationshipType, Map<String, RelationshipPropertySchema>> properties,
-        Map<RelationshipType, Boolean> typeIsUndirected
+        Map<RelationshipType, Orientation> relTypeOrientationMap
     ) {
-        return RelationshipSchema.builder().typeIsUndirected(typeIsUndirected).properties(properties).build();
+        return RelationshipSchema.builder().relTypeOrientationMap(relTypeOrientationMap).properties(properties).build();
     }
 
     static Builder builder() {
-        return new Builder().properties(new LinkedHashMap<>()).typeIsUndirected(new LinkedHashMap<>());
+        return new Builder().properties(new LinkedHashMap<>()).relTypeOrientationMap(new LinkedHashMap<>());
     }
 
     @AccessibleFields
     class Builder extends ImmutableRelationshipSchema.Builder {
 
-        public Builder addProperty(RelationshipType type, boolean isUndirected, String propertyName, ValueType valueType) {
-            return addProperty(type, isUndirected, propertyName, RelationshipPropertySchema.of(propertyName, valueType));
+        public Builder addProperty(RelationshipType type, Orientation orientation, String propertyName, ValueType valueType) {
+            return addProperty(type, orientation, propertyName, RelationshipPropertySchema.of(propertyName, valueType));
         }
 
-        public Builder addProperty(RelationshipType type, boolean isUndirected, String propertyName, ValueType valueType, Aggregation aggregation) {
-            return addProperty(type, isUndirected, propertyName, RelationshipPropertySchema.of(propertyName, valueType, aggregation));
+        public Builder addProperty(RelationshipType type, Orientation orientation, String propertyName, ValueType valueType, Aggregation aggregation) {
+            return addProperty(type, orientation, propertyName, RelationshipPropertySchema.of(propertyName, valueType, aggregation));
         }
 
         public Builder addProperty(
             RelationshipType type,
-            boolean isUndirected,
+            Orientation orientation,
             String propertyName,
             RelationshipPropertySchema propertySchema
         ) {
-            addRelationshipType(type, isUndirected);
+            addRelationshipType(type, orientation);
             this.properties.get(type).put(propertyName, propertySchema);
             return this;
         }
 
-        public Builder addRelationshipType(RelationshipType type, boolean isUndirected) {
+        public Builder addRelationshipType(RelationshipType type, Orientation orientation) {
             this.properties.computeIfAbsent(type, ignore -> new LinkedHashMap<>());
-            this.typeIsUndirected.putIfAbsent(type, isUndirected);
+            this.relTypeOrientationMap.putIfAbsent(type, orientation);
             return this;
         }
 
         public Builder removeRelationshipType(RelationshipType type) {
             this.properties.remove(type);
-            this.typeIsUndirected.remove(type);
+            this.relTypeOrientationMap.remove(type);
             return this;
         }
     }

@@ -423,8 +423,8 @@ public class CSRGraphStore implements GraphStore {
                 RelationshipSchema.Builder newSchemaBuilder = RelationshipSchema.builder();
 
                 graphStore.relationships.put(relationshipType, relationships.topology());
-                boolean isUndirected = relationships.topology().orientation() == Orientation.UNDIRECTED;
-                newSchemaBuilder.addRelationshipType(relationshipType, isUndirected);
+                Orientation orientation = relationships.topology().orientation();
+                newSchemaBuilder.addRelationshipType(relationshipType, orientation);
 
                 if (relationshipPropertyKey.isPresent()
                     && relationshipPropertyType.isPresent()
@@ -440,7 +440,7 @@ public class CSRGraphStore implements GraphStore {
                     ValueType valueType = ValueTypes.fromNumberType(relationshipPropertyType.get());
                     newSchemaBuilder.addProperty(
                         relationshipType,
-                        isUndirected,
+                        orientation,
                         relationshipPropertyKey.get(),
                         RelationshipPropertySchema.of(
                             relationshipPropertyKey.get(),

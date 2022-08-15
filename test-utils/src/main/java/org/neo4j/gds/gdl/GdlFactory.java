@@ -197,7 +197,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                 .relationshipProperties()
                 .forEach((propertyKey, propertyValues) -> relationshipSchemaBuilder.addProperty(
                     relType,
-                    relationshipsAndProperties.relationships().get(relType).orientation() == Orientation.UNDIRECTED,
+                    relationshipsAndProperties.relationships().get(relType).orientation(),
                     propertyKey,
                     RelationshipPropertySchema.of(
                         propertyKey,
@@ -212,7 +212,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             .keySet()
             .forEach(type -> {
                 relationshipSchemaBuilder.addRelationshipType(type,
-                    relationshipsAndProperties.relationships().get(type).orientation() == Orientation.UNDIRECTED);
+                    relationshipsAndProperties.relationships().get(type).orientation());
             });
 
         return GraphSchema.of(
@@ -387,13 +387,13 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     private HashMap<RelationshipType, List<String>> propertyKeysByRelType() {
         var propertyKeysByRelType = new HashMap<RelationshipType, List<String>>();
 
-        boolean isUndirected = graphProjectConfig.orientation() == Orientation.UNDIRECTED;
+        Orientation orientation = graphProjectConfig.orientation();
         var schemaBuilder = RelationshipSchema.builder();
         gdlHandler.getEdges().forEach(edge -> {
             var relType = RelationshipType.of(edge.getLabel());
-            schemaBuilder.addRelationshipType(relType, isUndirected);
+            schemaBuilder.addRelationshipType(relType, orientation);
             edge.getProperties().keySet().forEach(propertyKey ->
-                schemaBuilder.addProperty(relType, isUndirected, propertyKey, ValueType.DOUBLE)
+                schemaBuilder.addProperty(relType, orientation, propertyKey, ValueType.DOUBLE)
             );
         });
         var schema = schemaBuilder.build();
