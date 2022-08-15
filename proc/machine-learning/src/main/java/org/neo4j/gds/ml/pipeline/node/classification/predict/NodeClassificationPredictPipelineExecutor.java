@@ -93,6 +93,7 @@ public class NodeClassificationPredictPipelineExecutor extends PredictPipelineEx
 
         MemoryEstimation nodePropertyStepEstimation = NodePropertyStepExecutor.estimateNodePropertySteps(
             modelCatalog,
+            configuration.username(),
             pipeline.nodePropertySteps(),
             configuration.nodeLabels(),
             configuration.relationshipTypes()

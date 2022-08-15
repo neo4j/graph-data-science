@@ -81,7 +81,7 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
     }
 
     @Override
-    public MemoryEstimation estimate(ModelCatalog modelCatalog, List<String> nodeLabels, List<String> relTypes)  {
+    public MemoryEstimation estimate(ModelCatalog modelCatalog, String username, List<String> nodeLabels, List<String> relTypes)  {
         var algoSpec = getAlgorithmSpec(modelCatalog);
 
         var configCopy = new HashMap<>(config);
@@ -92,7 +92,7 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
         var defaults = DefaultsConfiguration.Empty;
         var limits = LimitsConfiguration.Empty;
 
-        var algoConfig = new AlgoConfigParser<>("", algoSpec.newConfigFunction(), defaults, limits).processInput(configCopy);
+        var algoConfig = new AlgoConfigParser<>(username, algoSpec.newConfigFunction(), defaults, limits).processInput(configCopy);
 
         try {
             algoSpec.algorithmFactory().memoryEstimation(algoConfig);

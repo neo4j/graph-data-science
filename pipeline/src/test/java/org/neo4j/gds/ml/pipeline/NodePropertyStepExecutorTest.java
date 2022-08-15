@@ -119,6 +119,7 @@ class NodePropertyStepExecutorTest {
 
         MemoryEstimation actualEstimation = NodePropertyStepExecutor.estimateNodePropertySteps(
             new OpenModelCatalog(),
+            "user",
             steps,
             List.of(),
             List.of()

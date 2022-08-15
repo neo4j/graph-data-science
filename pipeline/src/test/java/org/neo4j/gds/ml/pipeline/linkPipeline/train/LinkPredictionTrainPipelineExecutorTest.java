@@ -851,6 +851,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
         @Override
         public MemoryEstimation estimate(
             ModelCatalog modelCatalog,
+            String username,
             List<String> nodeLabels,
             List<String> relTypes
         ) {
