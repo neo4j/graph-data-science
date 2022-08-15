@@ -27,13 +27,13 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;
 
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.Orientation.UNDIRECTED;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 public interface RelationshipSchema extends ElementSchema<RelationshipSchema, RelationshipType, RelationshipPropertySchema> {
@@ -62,8 +62,7 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
             .collect(Collectors.toSet());
 
         if (!mismatchTypes.isEmpty()) {
-            throw new IllegalArgumentException(String.format(
-                Locale.ENGLISH,
+            throw new IllegalArgumentException(formatWithLocale(
                 "Conflicting directionality for relationship types `%s`",
                 mismatchTypes
             ));
