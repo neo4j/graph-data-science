@@ -102,7 +102,7 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
 
     @Override
     public ValidationConfiguration<GraphSageMutateConfig> validationConfig() {
-        return GraphSageCompanion.getValidationConfig(modelCatalog(), username());
+        return GraphSageCompanion.getValidationConfig(modelCatalog());
     }
 
     @Override

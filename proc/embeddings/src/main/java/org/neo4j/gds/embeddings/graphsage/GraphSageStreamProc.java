@@ -95,7 +95,7 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
 
     @Override
     public ValidationConfiguration<GraphSageStreamConfig> validationConfig() {
-        return GraphSageCompanion.getValidationConfig(modelCatalog(), username());
+        return GraphSageCompanion.getValidationConfig(modelCatalog());
     }
 
     @Override

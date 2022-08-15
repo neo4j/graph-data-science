@@ -65,10 +65,7 @@ public final class GraphSageCompanion {
         };
     }
 
-    static <CONFIG extends GraphSageBaseConfig> ValidationConfiguration<CONFIG> getValidationConfig(
-        ModelCatalog catalog,
-        String username
-    ) {
+    static <CONFIG extends GraphSageBaseConfig> ValidationConfiguration<CONFIG> getValidationConfig(ModelCatalog catalog) {
         return new ValidationConfiguration<>() {
             @Override
             public List<AfterLoadValidation<CONFIG>> afterLoadValidations() {
@@ -76,7 +73,7 @@ public final class GraphSageCompanion {
                     (graphStore, graphProjectConfig, graphSageConfig) -> {
                         Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model = GraphSageModelResolver.resolveModel(
                             catalog,
-                            username,
+                            graphSageConfig.username(),
                             graphSageConfig.modelName()
                         );
                         GraphStoreValidation.validate(graphStore, model.trainConfig());
