@@ -60,8 +60,6 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherConfig> {
 
-    // Cypher never projects undirected graphs
-    private static final boolean IS_UNDIRECTED = false;
     private final GraphProjectFromCypherConfig cypherConfig;
     private EstimationResult nodeEstimation;
     private EstimationResult relationshipEstimation;
