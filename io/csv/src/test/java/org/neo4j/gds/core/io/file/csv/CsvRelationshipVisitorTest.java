@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipVisitor.END_ID_COLUMN_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipVisitor.START_ID_COLUMN_NAME;
 
@@ -79,11 +80,11 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
         var bType = RelationshipType.of("B");
 
         var relationshipSchema = RelationshipSchema.builder()
-            .addProperty(aType, false, "foo", ValueType.LONG)
-            .addProperty(aType, false, "bar", ValueType.LONG)
+            .addProperty(aType, NATURAL, "foo", ValueType.LONG)
+            .addProperty(aType, NATURAL, "bar", ValueType.LONG)
 
-            .addProperty(bType, false, "bar", ValueType.LONG)
-            .addProperty(bType, false, "baz", ValueType.DOUBLE)
+            .addProperty(bType, NATURAL, "bar", ValueType.LONG)
+            .addProperty(bType, NATURAL, "baz", ValueType.DOUBLE)
 
             .build();
         var relationshipVisitor= new CsvRelationshipVisitor(tempDir, relationshipSchema);
