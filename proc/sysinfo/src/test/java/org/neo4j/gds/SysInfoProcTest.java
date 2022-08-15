@@ -156,15 +156,21 @@ class SysInfoProcTest extends BaseProcTest {
         var allCompatibilities = new HashSet<>(ALL_COMPATIBILITIES);
         allCompatibilities.removeAll(expectedCompatibilities);
 
-        Consumer<Object> availableCompat = (items) -> assertThat(items)
-            .asInstanceOf(InstanceOfAssertFactories.list(String.class))
-            .isSubsetOf(expectedCompatibilities)
-            .doesNotContainAnyElementsOf(allCompatibilities);
+        Consumer<Object> availableCompat = (items) -> {
+            var actualItems = (items instanceof String) ? List.of(items) : items;
+            assertThat(actualItems)
+                .asInstanceOf(InstanceOfAssertFactories.list(String.class))
+                .isSubsetOf(expectedCompatibilities)
+                .doesNotContainAnyElementsOf(allCompatibilities);
+        };
 
-        Consumer<Object> unavailableCompat = (items) -> assertThat(items)
-            .asInstanceOf(InstanceOfAssertFactories.list(String.class))
-            .isSubsetOf(allCompatibilities)
-            .doesNotContainAnyElementsOf(expectedCompatibilities);
+        Consumer<Object> unavailableCompat = (items) -> {
+            var actualItems = (items instanceof String) ? List.of(items) : items;
+            assertThat(actualItems)
+                .asInstanceOf(InstanceOfAssertFactories.list(String.class))
+                .isSubsetOf(allCompatibilities)
+                .doesNotContainAnyElementsOf(expectedCompatibilities);
+        };
 
         assertThat(result)
             .hasSizeGreaterThanOrEqualTo(45)
