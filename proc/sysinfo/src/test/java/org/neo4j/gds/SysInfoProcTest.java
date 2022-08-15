@@ -160,6 +160,10 @@ class SysInfoProcTest extends BaseProcTest {
                 .doesNotContainAnyElementsOf(expectedCompatibilities);
         };
 
+        if (result.containsKey("unavailableCompatibility")) {
+            assertThat(result).hasEntrySatisfying("unavailableCompatibility", unavailableCompat);
+        }
+
         assertThat(result)
             .hasSizeGreaterThanOrEqualTo(45)
             .containsEntry("gdsVersion", buildInfoProperties.gdsVersion())
@@ -170,7 +174,6 @@ class SysInfoProcTest extends BaseProcTest {
             .containsEntry("buildHash", buildInfoProperties.buildHash())
             .containsEntry("neo4jVersion", Version.getNeo4jVersion())
             .hasEntrySatisfying("availableCompatibility", availableCompat)
-            .hasEntrySatisfying("unavailableCompatibility", unavailableCompat)
             .hasEntrySatisfying("gdsEdition", GDS_EDITION)
             .hasEntrySatisfying("availableCPUs", isInteger)
             .hasEntrySatisfying("physicalCPUs", isInteger)
