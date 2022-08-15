@@ -59,7 +59,7 @@ public class IterativeTask extends Task {
         var progress = super.getProgress();
 
         if (mode == Mode.OPEN && status() != Status.FINISHED) {
-            return ImmutableProgress.of(progress.progress(), -1);
+            return ImmutableProgress.of(progress.progress(), UNKNOWN_VOLUME);
         }
 
         return progress;

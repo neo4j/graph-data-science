@@ -20,6 +20,7 @@
 package org.neo4j.gds.beta.k1coloring;
 
 import com.carrotsearch.hppc.BitSet;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -55,8 +56,10 @@ public final class ColoringStep implements Runnable {
 
     @Override
     public void run() {
+        var coloredNodes = new MutableLong(0);
         partition.consume(nodeId -> {
             if (nodesToColor.get(nodeId)) {
+                coloredNodes.increment();
                 resetForbiddenColors();
 
                 graph.forEachRelationship(nodeId, (s, target) -> {
@@ -74,8 +77,7 @@ public final class ColoringStep implements Runnable {
                 colors.set(nodeId, nextColor);
             }
         });
-
-        progressTracker.logProgress(partition.nodeCount());
+        progressTracker.logProgress(coloredNodes.longValue());
     }
 
     private void resetForbiddenColors() {
