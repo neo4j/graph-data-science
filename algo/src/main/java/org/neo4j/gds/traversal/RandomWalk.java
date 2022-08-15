@@ -22,7 +22,6 @@ package org.neo4j.gds.traversal;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.SourceNodesConfig;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -36,6 +35,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -47,21 +48,25 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
     private final Graph graph;
     private final RandomWalkBaseConfig config;
+    private final ExecutorService executorService;
 
     private RandomWalk(
         Graph graph,
         RandomWalkBaseConfig config,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        ExecutorService executorService
     ) {
         super(progressTracker);
         this.graph = graph;
         this.config = config;
+        this.executorService = executorService;
     }
 
     public static RandomWalk create(
         Graph graph,
         RandomWalkBaseConfig config,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        ExecutorService executorService
     ) {
         if (graph.hasRelationshipProperty()) {
             EmbeddingUtils.validateRelationshipWeightPropertyValue(
@@ -69,11 +74,11 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
                 config.concurrency(),
                 weight -> weight >= 0,
                 "Node2Vec only supports non-negative weights.",
-                Pools.DEFAULT
+                executorService
             );
         }
 
-        return new RandomWalk(graph, config, progressTracker);
+        return new RandomWalk(graph, config, progressTracker, executorService);
     }
 
     @Override
@@ -108,7 +113,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
         return new DegreeCentrality(
             graph,
-            Pools.DEFAULT,
+            executorService,
             degreeCentralityConfig,
             progressTracker
         ).compute();
@@ -139,29 +144,32 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
                     terminationFlag
                 )).collect(Collectors.toList());
 
-        Pools.newThread(() -> tasksRunner(
-                this.config.concurrency(),
-                this.progressTracker,
-                terminationFlag,
-                TOMB,
+
+        CompletableFuture.runAsync(
+            () -> tasksRunner(
+                tasks,
                 walks,
-                tasks
-            ))
-            .start();
+                TOMB,
+                terminationFlag
+            ),
+            executorService
+        ).whenComplete((__, ___) -> {
+            progressTracker.release();
+            release();
+        });
     }
 
-    private static void tasksRunner(
-        int concurrency,
-        ProgressTracker progressTracker,
-        TerminationFlag terminationFlag,
-        long[] tombstone,
+    private void tasksRunner(
+        Iterable<? extends Runnable> tasks,
         BlockingQueue<long[]> walks,
-        Iterable<? extends Runnable> tasks
+        long[] tombstone,
+        TerminationFlag terminationFlag
     ) {
         progressTracker.beginSubTask("create walks");
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .executor(this.executorService)
+            .concurrency(this.config.concurrency())
             .tasks(tasks)
             .terminationFlag(terminationFlag)
             .mayInterruptIfRunning(true)
@@ -177,7 +185,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         }
     }
 
-    private static Stream<long[]> walksQueueConsumer(
+    private Stream<long[]> walksQueueConsumer(
         ExternalTerminationFlag terminationFlag,
         long[] tombstone,
         BlockingQueue<long[]> walks
