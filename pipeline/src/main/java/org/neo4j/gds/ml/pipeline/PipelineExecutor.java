@@ -85,13 +85,14 @@ public abstract class PipelineExecutor<
 
     public static MemoryEstimation estimateNodePropertySteps(
         ModelCatalog modelCatalog,
+        String username,
         List<ExecutableNodePropertyStep> nodePropertySteps,
         List<String> nodeLabels,
         List<String> relationshipTypes
     ) {
         var nodePropertyStepEstimations = nodePropertySteps
             .stream()
-            .map(step -> step.estimate(modelCatalog, nodeLabels, relationshipTypes))
+            .map(step -> step.estimate(modelCatalog, username, nodeLabels, relationshipTypes))
             .collect(Collectors.toList());
 
         // NOTE: This has the drawback, that we disregard the sizes of the mutate-properties, but it's a better approximation than adding all together.
