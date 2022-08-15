@@ -20,5 +20,12 @@ dependencies {
     }
 
     api project(':neo4j-adapter')
+
+    testAnnotationProcessor group: 'org.neo4j', name: 'annotations', version: ver.'neo4j'
+    testImplementation project(':annotations')
+    testImplementation project(':test-utils')
 }
 
+test {
+    useJUnitPlatform()
+}

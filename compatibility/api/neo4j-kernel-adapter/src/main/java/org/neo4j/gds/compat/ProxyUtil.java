@@ -19,77 +19,174 @@
  */
 package org.neo4j.gds.compat;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.SuppressForbidden;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.logging.Log;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.StringJoiner;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public final class ProxyUtil {
 
     private static final AtomicBoolean LOG_ENVIRONMENT = new AtomicBoolean(true);
 
-    @SuppressForbidden(reason = "This is the best we can do at the moment")
+    private static final Map<Class<?>, ProxyInfo<?, ?>> PROXY_INFO_CACHE = new ConcurrentHashMap<>();
+
     public static <PROXY, FACTORY extends ProxyFactory<PROXY>> PROXY findProxy(Class<FACTORY> factoryClass) {
+        return findProxyInfo(factoryClass)
+            .proxy()
+            .get();
+    }
+
+    public static <PROXY, FACTORY extends ProxyFactory<PROXY>> ProxyInfo<FACTORY, PROXY> findProxyInfo(Class<FACTORY> factoryClass) {
+        // we know that this type is correct due to the signature of loadAndValidateProxyInfo
+        // we lose the type information because of the map API
+        //noinspection unchecked
+        return (ProxyInfo<FACTORY, PROXY>) PROXY_INFO_CACHE.computeIfAbsent(
+            factoryClass,
+            fc -> loadAndValidateProxyInfo(factoryClass)
+        );
+    }
+
+    @SuppressForbidden(reason = "This is the best we can do at the moment")
+    private static <PROXY, FACTORY extends ProxyFactory<PROXY>> ProxyInfo<FACTORY, PROXY> loadAndValidateProxyInfo(Class<FACTORY> factoryClass) {
         var log = new OutputStreamLogBuilder(System.out).build();
-        var neo4jVersion = new AtomicReference<Neo4jVersion>();
         var availabilityLog = new StringJoiner(", ", "GDS compatibility: ", "");
+        availabilityLog.setEmptyValue("");
+
+        var proxyInfo = loadProxyInfo(factoryClass);
+
+        // log any errors while looking for the GDS version, but continue since we have a fallback value
+        proxyInfo.gdsVersion().error().ifPresent(e -> e.log(log));
+
         try {
-            neo4jVersion.set(GraphDatabaseApiProxy.neo4jVersion());
-            FACTORY proxyFactory = ServiceLoader
-                .load(factoryClass)
-                .stream()
-                .map(ServiceLoader.Provider::get)
-                .filter(f -> {
-                    var canLoad = f.canLoad(neo4jVersion.get());
-                    availabilityLog.add(String.format(
-                        Locale.ENGLISH,
-                        "for %s -- %s",
-                        f.description(),
-                        canLoad ? "available" : "not available"
-                    ));
-                    return canLoad;
-                })
-                .findFirst()
-                .orElseThrow(() -> new LinkageError(String.format(
+
+            // log any errors while looking for the Neo4j version
+            // stop execution since we don't have a valid Neo4j version fallback value
+            var neo4jVersionError = proxyInfo.neo4jVersion().error();
+            if (neo4jVersionError.isPresent()) {
+                neo4jVersionError.get().log(log);
+                throw new RuntimeException(neo4jVersionError.get().reason());
+            }
+
+            // log any errors while trying to find all proxies
+            // stop execution since we don't have any proxy instances
+            var proxyError = proxyInfo.error();
+            if (proxyError.isPresent()) {
+                proxyError.get().log(log);
+                throw new RuntimeException(proxyError.get().reason());
+            }
+
+            // log availability of all proxy implementations
+            proxyInfo.availability().forEach((name, availability) -> {
+                availabilityLog.add(String.format(
                     Locale.ENGLISH,
-                    "GDS %s is not compatible with Neo4j version: %s",
-                    gdsVersion(log),
-                    neo4jVersion
-                )));
-            availabilityLog.add("selected: " + proxyFactory.description());
-            return proxyFactory.load();
+                    "for %s -- %s",
+                    name,
+                    availability ? "available" : "not available"
+                ));
+            });
+
+            // make sure that we have a proxy available
+
+            var factory = proxyInfo.factory();
+            if (factory.isEmpty()) {
+                return proxyInfo;
+            }
+
+            availabilityLog.add("selected: " + factory.get().description());
+
+            var builder = ImmutableProxyInfo.<FACTORY, PROXY>builder().from(proxyInfo);
+            var proxy = factory.get().load();
+            builder.proxy(() -> proxy);
+            return builder.build();
+
         } finally {
             if (LOG_ENVIRONMENT.getAndSet(false)) {
                 log.debug(
                     "Java vendor: [%s] Java version: [%s] Java home: [%s] GDS version: [%s] Detected Neo4j version: [%s]",
-                    System.getProperty("java.vendor"),
-                    System.getProperty("java.version"),
-                    System.getProperty("java.home"),
-                    gdsVersion(log),
-                    neo4jVersion
+                    proxyInfo.javaInfo().javaVendor(),
+                    proxyInfo.javaInfo().javaVersion(),
+                    proxyInfo.javaInfo().javaHome(),
+                    proxyInfo.gdsVersion().gdsVersion(),
+                    proxyInfo.neo4jVersion().neo4jVersion()
                 );
             }
-            log.info(availabilityLog.toString());
+            var availability = availabilityLog.toString();
+            if (!availability.isEmpty()) {
+                log.info(availability);
+            }
         }
     }
 
-    private static final AtomicReference<String> GDS_VERSION = new AtomicReference<>();
+    private static <PROXY, FACTORY extends ProxyFactory<PROXY>> ProxyInfo<FACTORY, PROXY> loadProxyInfo(Class<FACTORY> factoryClass) {
+        var builder = ImmutableProxyInfo
+            .<FACTORY, PROXY>builder()
+            .factoryType(factoryClass)
+            .neo4jVersion(NEO4J_VERSION_INFO)
+            .gdsVersion(GDS_VERSION_INFO)
+            .javaInfo(JAVA_INFO);
 
-    private static String gdsVersion(Log log) {
-        if (GDS_VERSION.get() == null) {
-            GDS_VERSION.set(getGdsVersion(log));
+        try {
+            var availableProxies = ServiceLoader
+                .load(factoryClass)
+                .stream()
+                .map(ServiceLoader.Provider::get)
+                .filter(f -> {
+                    var canLoad = f.canLoad(NEO4J_VERSION_INFO.neo4jVersion());
+                    builder.putAvailability(f.description(), canLoad);
+                    return canLoad;
+                })
+                .collect(Collectors.toList());
+
+            builder.factory(availableProxies.stream().findFirst());
+        } catch (Exception e) {
+            builder.error(ImmutableErrorInfo
+                .builder()
+                .logLevel(LogLevel.ERROR)
+                .message("Could not load GDS proxy: " + e.getMessage())
+                .reason(e)
+                .build()
+            );
         }
 
-        return GDS_VERSION.get();
+        return builder.build();
     }
 
-    private static String getGdsVersion(Log log) {
+    private static final Neo4jVersionInfo NEO4J_VERSION_INFO = loadNeo4jVersion();
+
+    private static Neo4jVersionInfo loadNeo4jVersion() {
+        try {
+            var neo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
+            return ImmutableNeo4jVersionInfo.builder().neo4jVersion(neo4jVersion).build();
+        } catch (Exception e) {
+            return ImmutableNeo4jVersionInfo.builder()
+                .error(ImmutableErrorInfo
+                    .builder()
+                    .logLevel(LogLevel.WARN)
+                    .message("Could not determine Neo4j version: " + e.getMessage())
+                    .reason(e)
+                    .build()
+                )
+                .neo4jVersion(Neo4jVersion.V_Dev)
+                .build();
+        }
+    }
+
+    private static final GdsVersionInfo GDS_VERSION_INFO = loadGdsVersion();
+
+    private static GdsVersionInfo loadGdsVersion() {
+        var builder = ImmutableGdsVersionInfo.builder();
         try {
             // The class that we use to get the GDS version lives in proc-sysinfo, which is part of the released GDS jar,
             // but we don't want to depend on that here. One reason is that this class gets generated and re-generated
@@ -117,18 +214,137 @@ public final class ProxyUtil {
             var buildInfoProperties = buildInfoPropertiesHandle.invoke();
             // var gdsVersion = buildInfoProperties.gdsVersion()
             var gdsVersion = gdsVersionHandle.invoke(buildInfoProperties);
-            return String.valueOf(gdsVersion);
+
+            return builder
+                .gdsVersion(String.valueOf(gdsVersion))
+                .build();
         } catch (ClassNotFoundException e) {
-            log.debug("Could not determine GDS version, BuildInfoProperties is missing. " +
-                      "This is likely due to not running GDS as a plugin, " +
-                      "for example when running tests or using GDS as a Java module dependency.");
+            builder.error(ImmutableErrorInfo.builder()
+                .logLevel(LogLevel.DEBUG)
+                .message(
+                    "Could not determine GDS version, BuildInfoProperties is missing. " +
+                    "This is likely due to not running GDS as a plugin, " +
+                    "for example when running tests or using GDS as a Java module dependency."
+                )
+                .reason(e)
+                .build()
+            );
         } catch (NoSuchMethodException | IllegalAccessException e) {
-            log.warn("Could not determine GDS version, the according methods on BuildInfoProperties could not be found.", e);
+            builder.error(ImmutableErrorInfo.builder()
+                .logLevel(LogLevel.WARN)
+                .message(
+                    "Could not determine GDS version, the according methods on BuildInfoProperties could not be found.")
+                .reason(e)
+                .build()
+            );
         } catch (Throwable e) {
-            log.warn("Could not determine GDS version, the according methods on BuildInfoProperties failed.", e);
+            builder.error(ImmutableErrorInfo.builder()
+                .logLevel(LogLevel.WARN)
+                .message("Could not determine GDS version, the according methods on BuildInfoProperties failed.")
+                .reason(e)
+                .build()
+            );
         }
 
-        return "Unknown";
+        return builder.gdsVersion("Unknown").build();
+    }
+
+    private static final JavaInfo JAVA_INFO = loadJavaInfo();
+
+    private static JavaInfo loadJavaInfo() {
+        return ImmutableJavaInfo.builder()
+            .javaVendor(System.getProperty("java.vendor"))
+            .javaVersion(System.getProperty("java.version"))
+            .javaHome(System.getProperty("java.home"))
+            .build();
+    }
+
+    @ValueClass
+    public interface ProxyInfo<T, U> {
+        Class<T> factoryType();
+
+        Neo4jVersionInfo neo4jVersion();
+
+        GdsVersionInfo gdsVersion();
+
+        JavaInfo javaInfo();
+
+        Map<String, Boolean> availability();
+
+        Optional<T> factory();
+
+        Optional<ErrorInfo> error();
+
+        @Value.Default
+        default Supplier<U> proxy() {
+            return () -> {
+                throw new LinkageError(String.format(
+                    Locale.ENGLISH,
+                    "GDS %s is not compatible with Neo4j version: %s",
+                    gdsVersion().gdsVersion(),
+                    neo4jVersion().neo4jVersion()
+                ));
+            };
+        }
+    }
+
+    @ValueClass
+    public interface Neo4jVersionInfo {
+
+        Neo4jVersion neo4jVersion();
+
+        Optional<ErrorInfo> error();
+    }
+
+    @ValueClass
+    public interface GdsVersionInfo {
+
+        String gdsVersion();
+
+        Optional<ErrorInfo> error();
+    }
+
+    @ValueClass
+    public interface ErrorInfo {
+
+        String message();
+
+        LogLevel logLevel();
+
+        Throwable reason();
+
+        default void log(Log log) {
+            switch (logLevel()) {
+                case DEBUG:
+                    log.debug(message(), reason());
+                    break;
+                case INFO:
+                    log.info(message(), reason());
+                    break;
+                case WARN:
+                    log.warn(message(), reason());
+                    break;
+                case ERROR:
+                    log.error(message(), reason());
+                    break;
+            }
+        }
+    }
+
+    public enum LogLevel {
+        DEBUG,
+        INFO,
+        WARN,
+        ERROR
+    }
+
+    @ValueClass
+    public interface JavaInfo {
+        String javaVendor();
+
+        String javaVersion();
+
+        String javaHome();
     }
 
     private ProxyUtil() {}
