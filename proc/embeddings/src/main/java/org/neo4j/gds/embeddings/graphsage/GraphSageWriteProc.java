@@ -70,7 +70,7 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
 
     @Override
     public ValidationConfiguration<GraphSageWriteConfig> validationConfig() {
-        return GraphSageCompanion.getValidationConfig(modelCatalog(), username());
+        return GraphSageCompanion.getValidationConfig(modelCatalog());
     }
 
     @Override
