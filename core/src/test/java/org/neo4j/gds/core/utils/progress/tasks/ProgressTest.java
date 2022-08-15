@@ -19,20 +19,18 @@
  */
 package org.neo4j.gds.core.utils.progress.tasks;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
+import org.junit.jupiter.api.Test;
 
-@ValueClass
-public interface Progress {
-    long progress();
+import static org.assertj.core.api.Assertions.assertThat;
 
-    long volume();
+class ProgressTest {
 
-    @Value.Lazy
-    default double relativeProgress() {
-        // progress can be larger if the volume was estimated too low (such as for cypher projections)
-        return progress() >= volume()
-            ? 1.0D
-            : ((double) progress()) / volume();
+    @Test
+    void relativeProgress() {
+        assertThat(ImmutableProgress.of(40, Task.UNKNOWN_VOLUME).relativeProgress()).isEqualTo(1.0);
+        assertThat(ImmutableProgress.of(40, 40).relativeProgress()).isEqualTo(1.0);
+        assertThat(ImmutableProgress.of(44, 40).relativeProgress()).isEqualTo(1.0);
+
+        assertThat(ImmutableProgress.of(10, 40).relativeProgress()).isEqualTo(0.25);
     }
 }

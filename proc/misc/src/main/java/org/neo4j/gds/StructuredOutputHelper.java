@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.core.utils.progress.tasks.Progress;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.text.DecimalFormat;
@@ -39,15 +40,13 @@ public final class StructuredOutputHelper {
     /**
      * Produce a progress bar string in the format of: [######~~~~]
      */
-    static String progressBar(long progress, long volume, int progressBarLength) {
-        if (volume == Task.UNKNOWN_VOLUME) {
+    static String progressBar(Progress progress, int progressBarLength) {
+        if (progress.volume() == Task.UNKNOWN_VOLUME) {
             return formatWithLocale("[~~~~%s~~~]", UNKNOWN);
         }
 
-        var percentage = volume == 0
-            ? 100D
-            : progress / (volume / 100D);
-        var scaledPercentage = (int) ((percentage / 100D) * progressBarLength);
+        var progressPercentage = progress.relativeProgress();
+        var scaledPercentage = (int) (progressPercentage * progressBarLength);
 
         var filledProgressBar = "#".repeat(scaledPercentage);
         var remainingProgressBar = "~".repeat(progressBarLength - scaledPercentage);
@@ -57,14 +56,12 @@ public final class StructuredOutputHelper {
         return formatWithLocale("[%s]", progressBarContent);
     }
 
-    public static String computeProgress(long progress, long volume) {
-        if (volume == Task.UNKNOWN_VOLUME) {
+    public static String computeProgress(Progress progress) {
+        if (progress.volume() == Task.UNKNOWN_VOLUME) {
             return UNKNOWN;
         }
 
-        var progressPercentage = volume == 0
-            ? 1.0D
-            : (double) progress / (double) volume;
+        var progressPercentage = progress.relativeProgress();
         var decimalFormat = new DecimalFormat("###.##%", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
         return decimalFormat.format(progressPercentage);
     }
