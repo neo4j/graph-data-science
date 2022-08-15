@@ -51,7 +51,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 @GdlExtension
-class PipelineExecutorTest {
+class PredictPipelineExecutorTest {
 
     private static final NodeLabel NODE_LABEL_N = NodeLabel.of("N");
 
@@ -63,7 +63,7 @@ class PipelineExecutorTest {
 
     @Test
     void shouldCleanGraphStoreWhenComputationIsComplete() {
-        var pipelineExecutor = new SucceedingPipelineExecutor(
+        var pipelineExecutor = new SucceedingPipelineExecutor<>(
             new BogusNodePropertyPipeline(),
             graphStore,
             new PipelineExecutorTestConfig(),
@@ -76,7 +76,7 @@ class PipelineExecutorTest {
 
     @Test
     void shouldCleanGraphStoreOnFailureWhenExecuting() {
-        var pipelineExecutor = new FailingPipelineExecutor(
+        var pipelineExecutor = new FailingPipelineExecutor<>(
             new BogusNodePropertyPipeline(),
             graphStore,
             new PipelineExecutorTestConfig(),
@@ -91,7 +91,7 @@ class PipelineExecutorTest {
     void shouldHaveCorrectProgressLoggingOnSuccessfulComputation() {
         var log = Neo4jProxy.testLog();
         var pipeline = new BogusNodePropertyPipeline();
-        var pipelineExecutor = new SucceedingPipelineExecutor(
+        var pipelineExecutor = new SucceedingPipelineExecutor<>(
             pipeline,
             graphStore,
             new PipelineExecutorTestConfig(),
@@ -114,7 +114,7 @@ class PipelineExecutorTest {
 
     @Test
     void shouldCleanGraphStoreWhenNodePropertyStepIsFailing() {
-        var pipelineExecutor = new SucceedingPipelineExecutor(
+        var pipelineExecutor = new SucceedingPipelineExecutor<>(
             new FailingNodePropertyPipeline(),
             graphStore,
             new PipelineExecutorTestConfig(),
@@ -130,7 +130,7 @@ class PipelineExecutorTest {
     void shouldHaveCorrectProgressLoggingOnFailure() {
         var log = Neo4jProxy.testLog();
         var pipeline = new BogusNodePropertyPipeline();
-        var pipelineExecutor = new FailingPipelineExecutor(
+        var pipelineExecutor = new FailingPipelineExecutor<>(
             pipeline,
             graphStore,
             new PipelineExecutorTestConfig(),
@@ -154,11 +154,11 @@ class PipelineExecutorTest {
     void failOnInvalidGraphBeforeExecution() {
         var invalidGraphStore = GdlFactory.of("(), ()").build();
         var pipeline = LinkPredictionPredictPipeline.from(
-            Stream.of(),
+            Stream.<ExecutableNodePropertyStep>of(),
             Stream.of(new L2FeatureStep(List.of("a")))
         );
 
-        var executor = new FailingPipelineExecutor(
+        var executor = new FailingPipelineExecutor<>(
             pipeline,
             invalidGraphStore,
             new PipelineExecutorTestConfig(),
@@ -170,7 +170,7 @@ class PipelineExecutorTest {
     }
 
 
-    private Task taskTree(TrainingPipeline<?> pipeline) {
+    private Task taskTree(Pipeline<?> pipeline) {
         return Tasks.task(
             "FailingPipelineExecutor",
             NodePropertyStepExecutor.tasks(pipeline.nodePropertySteps(), 10)
@@ -197,7 +197,7 @@ class PipelineExecutorTest {
     }
 
     private static class SucceedingPipelineExecutor<CONFIG extends AlgoBaseConfig & GraphNameConfig>
-        extends PipelineExecutor<CONFIG, Pipeline<? extends FeatureStep>, String> {
+        extends PredictPipelineExecutor<CONFIG, Pipeline<? extends FeatureStep>, String> {
         SucceedingPipelineExecutor(
             Pipeline<? extends FeatureStep> pipelineStub,
             GraphStore graphStore,
@@ -214,21 +214,17 @@ class PipelineExecutorTest {
         }
 
         @Override
-        public Map<DatasetSplits, PipelineGraphFilter> generateDatasetSplitGraphFilters() {
-            return Map.of(DatasetSplits.FEATURE_INPUT, ImmutablePipelineGraphFilter.builder().nodeLabels(List.of(NODE_LABEL_N)).build());
-        }
-
-        @Override
-        public void splitDatasets() {};
-
-        @Override
-        protected String execute(Map<DatasetSplits, PipelineGraphFilter> dataSplits) {
+        protected String execute() {
             return "I am not failing";
         }
 
+        @Override
+        protected PipelineGraphFilter nodePropertyStepFilter() {
+            return ImmutablePipelineGraphFilter.builder().nodeLabels(List.of(NODE_LABEL_N)).build();
+        }
     }
 
-    private static class FailingPipelineExecutor<CONFIG extends AlgoBaseConfig & GraphNameConfig> extends PipelineExecutorTest.SucceedingPipelineExecutor<CONFIG> {
+    private static class FailingPipelineExecutor<CONFIG extends AlgoBaseConfig & GraphNameConfig> extends PredictPipelineExecutorTest.SucceedingPipelineExecutor<CONFIG> {
         FailingPipelineExecutor(
             Pipeline<? extends FeatureStep> pipelineStub,
             GraphStore graphStore,
@@ -244,14 +240,14 @@ class PipelineExecutorTest {
         }
 
         @Override
-        protected String execute(Map<DatasetSplits, PipelineGraphFilter> dataSplits) {
-            throw new PipelineExecutorTest.PipelineExecutionTestFailure();
+        protected String execute() {
+            throw new PredictPipelineExecutorTest.PipelineExecutionTestFailure();
         }
     }
 
-    private class BogusNodePropertyPipeline extends TrainingPipeline<FeatureStep> {
+    private class BogusNodePropertyPipeline implements Pipeline<FeatureStep> {
 
-        BogusNodePropertyPipeline() {super(TrainingType.REGRESSION);}
+        BogusNodePropertyPipeline() {}
 
         @Override
         public List<ExecutableNodePropertyStep> nodePropertySteps() {
@@ -259,18 +255,8 @@ class PipelineExecutorTest {
         }
 
         @Override
-        public String type() {
-            return "bogus pipeline";
-        }
-
-        @Override
-        protected Map<String, List<Map<String, Object>>> featurePipelineDescription() {
-            return Map.of();
-        }
-
-        @Override
-        protected Map<String, Object> additionalEntries() {
-            return Map.of();
+        public List<FeatureStep> featureSteps() {
+            return List.of();
         }
 
         @Override
@@ -281,11 +267,16 @@ class PipelineExecutorTest {
 
         @Override
         public void validateFeatureProperties(GraphStore graphStore, Collection<NodeLabel> nodeLabels) {}
+
+        @Override
+        public Map<String, Object> toMap() {
+            return Map.of();
+        }
     }
 
-    private class FailingNodePropertyPipeline extends TrainingPipeline<FeatureStep> {
+    private class FailingNodePropertyPipeline implements Pipeline<FeatureStep> {
 
-        FailingNodePropertyPipeline() {super(TrainingType.CLASSIFICATION);}
+        FailingNodePropertyPipeline() {}
 
         @Override
         public List<ExecutableNodePropertyStep> nodePropertySteps() {
@@ -293,18 +284,8 @@ class PipelineExecutorTest {
         }
 
         @Override
-        public String type() {
-            return "failing pipeline";
-        }
-
-        @Override
-        protected Map<String, List<Map<String, Object>>> featurePipelineDescription() {
-            return Map.of();
-        }
-
-        @Override
-        protected Map<String, Object> additionalEntries() {
-            return Map.of();
+        public List<FeatureStep> featureSteps() {
+            return null;
         }
 
         @Override
@@ -315,5 +296,10 @@ class PipelineExecutorTest {
 
         @Override
         public void validateFeatureProperties(GraphStore graphStore, Collection<NodeLabel> nodeLabels) {}
+
+        @Override
+        public Map<String, Object> toMap() {
+            return Map.of();
+        }
     }
 }

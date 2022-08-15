@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
@@ -19,37 +19,25 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
-import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphNameConfig;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.executor.ExecutionContext;
+ import org.neo4j.gds.Algorithm;
+ import org.neo4j.gds.api.GraphStore;
+ import org.neo4j.gds.config.AlgoBaseConfig;
+ import org.neo4j.gds.config.GraphNameConfig;
+ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+ import org.neo4j.gds.executor.ExecutionContext;
 
-import java.util.Map;
-import java.util.Set;
-
-public abstract class PipelineExecutor<
+public abstract class PredictPipelineExecutor<
     PIPELINE_CONFIG extends AlgoBaseConfig & GraphNameConfig,
     PIPELINE extends Pipeline<?>,
     RESULT
     > extends Algorithm<RESULT> {
 
-    public enum DatasetSplits {
-        TRAIN,
-        TEST,
-        TEST_COMPLEMENT,
-        FEATURE_INPUT
-    }
-
     protected final PIPELINE pipeline;
     protected final PIPELINE_CONFIG config;
     protected final ExecutionContext executionContext;
     protected final GraphStore graphStore;
-    protected final GraphSchema schemaBeforeSteps;
 
-    protected PipelineExecutor(
+    protected PredictPipelineExecutor(
         PIPELINE pipeline,
         PIPELINE_CONFIG config,
         ExecutionContext executionContext,
@@ -61,36 +49,27 @@ public abstract class PipelineExecutor<
         this.config = config;
         this.executionContext = executionContext;
         this.graphStore = graphStore;
-        this.schemaBeforeSteps = graphStore
-            .schema()
-            .filterNodeLabels(Set.copyOf(config.nodeLabelIdentifiers(graphStore)))
-            .filterRelationshipTypes(Set.copyOf(config.internalRelationshipTypes(graphStore)));
     }
 
-    public abstract Map<DatasetSplits, PipelineGraphFilter> generateDatasetSplitGraphFilters();
+    protected abstract RESULT execute();
 
-    public abstract void splitDatasets();
-
-    protected abstract RESULT execute(Map<DatasetSplits, PipelineGraphFilter> dataSplits);
+    protected abstract PipelineGraphFilter nodePropertyStepFilter();
 
     @Override
     public RESULT compute() {
         progressTracker.beginSubTask();
 
-        var dataSplitGraphFilters = generateDatasetSplitGraphFilters();
-        var featureInputGraphFilter = dataSplitGraphFilters.get(DatasetSplits.FEATURE_INPUT);
+        PipelineGraphFilter nodePropertyStepFilter = nodePropertyStepFilter();
 
         //featureInput nodeLabels contain source&target nodeLabel used in training/testing plus contextNodeLabels
-        pipeline.validateBeforeExecution(graphStore, featureInputGraphFilter.nodeLabels());
-
-        splitDatasets();
+        pipeline.validateBeforeExecution(graphStore, nodePropertyStepFilter.nodeLabels());
 
         var nodePropertyStepExecutor = NodePropertyStepExecutor.of(
             executionContext,
             graphStore,
             config,
-            featureInputGraphFilter.nodeLabels(),
-            featureInputGraphFilter.relationshipTypes(),
+            nodePropertyStepFilter.nodeLabels(),
+            nodePropertyStepFilter.relationshipTypes(),
             progressTracker
         );
 
@@ -99,12 +78,11 @@ public abstract class PipelineExecutor<
             nodePropertyStepExecutor.executeNodePropertySteps(pipeline.nodePropertySteps());
             pipeline.validateFeatureProperties(graphStore, config.nodeLabelIdentifiers(graphStore));
 
-            var result = execute(dataSplitGraphFilters);
+            var result = execute();
             progressTracker.endSubTask();
             return result;
         } finally {
             nodePropertyStepExecutor.cleanupIntermediateProperties(pipeline.nodePropertySteps());
-            additionalGraphStoreCleanup(dataSplitGraphFilters);
         }
     }
 
@@ -112,8 +90,4 @@ public abstract class PipelineExecutor<
     public void release() {
 
     }
-
-    protected void additionalGraphStoreCleanup(Map<DatasetSplits, PipelineGraphFilter> datasets) {
-    }
-
 }

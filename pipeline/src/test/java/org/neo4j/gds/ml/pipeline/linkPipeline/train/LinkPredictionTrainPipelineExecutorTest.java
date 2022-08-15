@@ -60,8 +60,8 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
-import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
-import org.neo4j.gds.ml.pipeline.PipelineExecutor;
+import org.neo4j.gds.ml.pipeline.ImmutablePipelineGraphFilter;
+import org.neo4j.gds.ml.pipeline.PipelineGraphFilter;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
@@ -682,7 +682,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .build());
 
             pipeline.addNodePropertyStep(new TestFilteredNodePropertyStep(
-                ImmutableGraphFilter.builder()
+                ImmutablePipelineGraphFilter.builder()
                     .nodeLabels(List.of(NodeLabel.of("P"), NodeLabel.of("Q"), NodeLabel.of("X")))
                     .intermediateRelationshipTypes(List.of(RelationshipType.of("_FEATURE_INPUT_")))
                     .contextRelationshipTypes(List.of(RelationshipType.of("CONTEXT")))
@@ -795,7 +795,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .build();
 
             pipeline.addNodePropertyStep(new TestFilteredNodePropertyStep(
-                ImmutableGraphFilter.builder()
+                ImmutablePipelineGraphFilter.builder()
                     .nodeLabels(trainConfig.featureInputLabels(graphStore))
                     .intermediateRelationshipTypes(List.of(RelationshipType.of("_FEATURE_INPUT_")))
                     .contextRelationshipTypes(List.of(RelationshipType.of("CONTEXT")))
@@ -821,9 +821,9 @@ final class LinkPredictionTrainPipelineExecutorTest {
 
 
     static class TestFilteredNodePropertyStep implements ExecutableNodePropertyStep {
-        private final PipelineExecutor.GraphFilter graphFilter;
+        private final PipelineGraphFilter graphFilter;
 
-        TestFilteredNodePropertyStep(PipelineExecutor.GraphFilter graphFilter) {
+        TestFilteredNodePropertyStep(PipelineGraphFilter graphFilter) {
             this.graphFilter = graphFilter;
         }
 
