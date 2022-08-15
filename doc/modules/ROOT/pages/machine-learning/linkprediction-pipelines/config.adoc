@@ -189,7 +189,7 @@ YIELD
 | Name                   | Type    | Description
 | pipelineName           | String  | The name of the pipeline.
 | featureType            | String  | The featureType determines the method used for computing the link feature. See xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-supported-features[supported types].
-| configuration          | Map     | Configuration for splitting the relationships.
+| configuration          | Map     | Configuration for adding the link feature.
 |===
 
 .Configuration
