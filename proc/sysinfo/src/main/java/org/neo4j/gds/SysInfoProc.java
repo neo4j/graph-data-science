@@ -22,6 +22,10 @@ package org.neo4j.gds;
 import org.apache.commons.text.WordUtils;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.Neo4jProxyFactory;
+import org.neo4j.gds.compat.ProxyFactory;
+import org.neo4j.gds.compat.ProxyUtil;
+import org.neo4j.gds.compat.SettingProxyFactory;
 import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.core.utils.mem.GcListenerExtension;
 import org.neo4j.gds.utils.GdsFeatureToggles;
@@ -87,6 +91,7 @@ public class SysInfoProc {
         editionInfo(values);
         values.add(value("neo4jVersion", Version.getNeo4jVersion()));
         values.add(value("minimumRequiredJavaVersion", buildInfo.minimumRequiredJavaVersion()));
+        compatProxies(values);
         features(values);
         buildInfo(buildInfo, values);
         cpuInfo(runtime, values);
@@ -132,6 +137,22 @@ public class SysInfoProc {
             builder.add(value("gdsLicenseError", errorMessage));
             return null;
         }
+    }
+
+    private void compatProxies(Stream.Builder<DebugValue> values) {
+        compatProxy(values, Neo4jProxyFactory.class);
+        compatProxy(values, SettingProxyFactory.class);
+    }
+
+    private <PROXY, FACTORY extends ProxyFactory<PROXY>> void compatProxy(
+        Stream.Builder<DebugValue> values,
+        Class<FACTORY> factoryClass
+    ) {
+        var proxies = ProxyUtil.findProxyInfo(factoryClass);
+        proxies.availability().forEach((name, availability) -> {
+            var key = (availability) ? "availableCompatibility" : "unavailableCompatibility";
+            values.add(value(key, name));
+        });
     }
 
     private static void features(Stream.Builder<DebugValue> builder) {
