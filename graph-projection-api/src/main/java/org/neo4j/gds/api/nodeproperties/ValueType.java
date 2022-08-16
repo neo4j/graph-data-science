@@ -191,7 +191,7 @@ public enum ValueType {
         throw new IllegalArgumentException("Unexpected value: " + csvName);
     }
 
-    interface Visitor<RESULT> {
+    public interface Visitor<RESULT> {
         RESULT visitLong();
         RESULT visitDouble();
         RESULT visitString();

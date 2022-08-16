@@ -279,16 +279,11 @@ final class CsvFileInput implements FileInput {
             var parsedLine = (String[]) LINE_READER.readValue(line);
 
             visitor.labels(header.nodeLabels());
-            visitor.id((Long) CsvImportParsingUtil.parse(parsedLine[0], ValueType.LONG, ValueType.LONG.fallbackValue(), ARRAY_READER));
+            visitor.id(CsvImportParsingUtil.parseId(parsedLine[0]));
 
             visitProperties(header, propertySchemas, visitor, parsedLine);
 
             visitor.endOfEntity();
-        }
-
-        @Override
-        public void close() throws IOException {
-
         }
     }
 
@@ -303,17 +298,12 @@ final class CsvFileInput implements FileInput {
             var parsedLine = (String[]) LINE_READER.readValue(line);
 
             visitor.type(header.relationshipType());
-            visitor.startId((Long) CsvImportParsingUtil.parse(parsedLine[0], ValueType.LONG, ValueType.LONG.fallbackValue(), ARRAY_READER));
-            visitor.endId((Long) CsvImportParsingUtil.parse(parsedLine[1], ValueType.LONG, ValueType.LONG.fallbackValue(), ARRAY_READER));
+            visitor.startId(CsvImportParsingUtil.parseId(parsedLine[0]));
+            visitor.endId(CsvImportParsingUtil.parseId(parsedLine[1]));
 
             visitProperties(header, propertySchemas, visitor, parsedLine);
 
             visitor.endOfEntity();
-        }
-
-        @Override
-        public void close() throws IOException {
-
         }
     }
 
@@ -327,7 +317,7 @@ final class CsvFileInput implements FileInput {
             var stringProperty = parsedLine[headerProperty.position()];
             var propertyKey = headerProperty.propertyKey();
             var defaultValue = propertySchemas.get(propertyKey).defaultValue();
-            var value = CsvImportParsingUtil.parse(stringProperty, headerProperty.valueType(), defaultValue, ARRAY_READER);
+            var value = CsvImportParsingUtil.parseProperty(stringProperty, headerProperty.valueType(), defaultValue, ARRAY_READER);
             visitor.property(propertyKey, value);
         }
     }
