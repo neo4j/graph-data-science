@@ -171,6 +171,22 @@ public final class QueryRunner {
         });
     }
 
+    public static void runQueryWithResultConsumer(
+        GraphDatabaseService db,
+        String username,
+        @Language("Cypher") String query,
+        Map<String, Object> params,
+        Consumer<Result> resultConsumer
+    ) {
+        runInTransaction(db, tx -> {
+            try (KernelTransaction.Revertable ignored = withUsername(tx, username, db.databaseName())) {
+                try (var result = runQueryWithoutClosingTheResult(tx, query, params)) {
+                    resultConsumer.accept(result);
+                }
+            }
+        });
+    }
+
     private static KernelTransaction.Revertable withUsername(Transaction tx, String username, String databaseName) {
         InternalTransaction topLevelTransaction = (InternalTransaction) tx;
         AuthSubject subject = topLevelTransaction.securityContext().subject();
