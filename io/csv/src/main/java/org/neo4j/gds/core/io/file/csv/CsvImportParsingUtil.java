@@ -20,10 +20,13 @@
 package org.neo4j.gds.core.io.file.csv;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
+import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Optional;
 
@@ -44,6 +47,88 @@ final class CsvImportParsingUtil {
 
     static ParsingFunction getParsingFunction(ValueType valueType) {
         return PARSING_FUNCTION_MAPPING.get(valueType);
+    }
+
+    public static Object parse(
+        String value,
+        ValueType valueType,
+        DefaultValue defaultValue,
+        ObjectReader arrayReader
+    ) throws IOException {
+        switch (valueType) {
+            case LONG:
+                if (value.isBlank()) {
+                    return defaultValue.longValue();
+                }
+                return Long.parseLong(value);
+            case DOUBLE:
+                if (value.isBlank()) {
+                    return defaultValue.doubleValue();
+                }
+                return Double.parseDouble(value);
+            case FLOAT_ARRAY:
+                return readFloatArray(value, defaultValue, arrayReader);
+            case DOUBLE_ARRAY:
+                return readDoubleArray(value, defaultValue, arrayReader);
+            case LONG_ARRAY:
+                return readLongArray(value, defaultValue, arrayReader);
+            default:
+                throw new UnsupportedOperationException();
+        }
+    }
+
+    private static float[] readFloatArray(
+        String value,
+        DefaultValue defaultValue,
+        ObjectReader arrayReader
+    ) throws IOException {
+        MappingIterator<String[]> objectMappingIterator = arrayReader.readValues(value);
+        if (objectMappingIterator.hasNext()) {
+            var stringArray = objectMappingIterator.next();
+            var parsedArray = new float[stringArray.length];
+            for (int i = 0; i < stringArray.length; i++) {
+                String s = stringArray[i];
+                parsedArray[i] = Float.parseFloat(s);
+            }
+            return parsedArray;
+        }
+        return defaultValue.floatArrayValue();
+    }
+
+    private static double[] readDoubleArray(
+        String value,
+        DefaultValue defaultValue,
+        ObjectReader arrayReader
+    ) throws IOException {
+        MappingIterator<String[]> objectMappingIterator = arrayReader.readValues(value);
+        if (objectMappingIterator.hasNext()) {
+            var stringArray = objectMappingIterator.next();
+            var parsedArray = new double[stringArray.length];
+            for (int i = 0; i < stringArray.length; i++) {
+                String s = stringArray[i];
+                parsedArray[i] = (double) parse(s, ValueType.DOUBLE, defaultValue, arrayReader);
+            }
+            return parsedArray;
+        }
+        return defaultValue.doubleArrayValue();
+    }
+
+    private static long[] readLongArray(
+        String value,
+        DefaultValue defaultValue,
+        ObjectReader arrayReader
+    ) throws IOException {
+        MappingIterator<String[]> objectMappingIterator = arrayReader.readValues(value);
+        if (objectMappingIterator.hasNext()) {
+            var stringArray = objectMappingIterator.next();
+            var parsedArray = new long[stringArray.length];
+            for (int i = 0; i < stringArray.length; i++) {
+                String s = stringArray[i];
+                parsedArray[i] = (long) parse(s, ValueType.LONG, defaultValue, arrayReader);
+            }
+            return parsedArray;
+        }
+        return defaultValue.longArrayValue();
     }
 
     private static Optional<ParsingFunction> parsingFunctionForValueType(ValueType valueType) {
