@@ -26,6 +26,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
@@ -35,6 +36,7 @@ import org.neo4j.gds.core.io.file.FileHeader;
 import org.neo4j.gds.core.io.file.FileInput;
 import org.neo4j.gds.core.io.file.GraphInfo;
 import org.neo4j.gds.core.io.file.GraphPropertyFileHeader;
+import org.neo4j.gds.core.io.file.HeaderProperty;
 import org.neo4j.gds.core.io.file.MappedListIterator;
 import org.neo4j.gds.core.io.file.NodeFileHeader;
 import org.neo4j.gds.core.io.file.RelationshipFileHeader;
@@ -64,6 +66,8 @@ public final class CsvFileInput implements FileInput {
     private static final char COLUMN_SEPARATOR = ',';
     private static final String ARRAY_ELEMENT_SEPARATOR = ";";
     private static final CsvMapper CSV_MAPPER = new CsvMapper();
+    private static final ObjectReader LINE_READER = CSV_MAPPER.readerFor(String[].class);
+    private static final ObjectReader ARRAY_READER = CSV_MAPPER.readerForArrayOf(String.class);
 
     private final Path importPath;
     private final String userName;
@@ -397,11 +401,17 @@ public final class CsvFileInput implements FileInput {
 
         @Override
         void visitLine(String line, NodeFileHeader header, InputEntityVisitor visitor) throws IOException {
-            NodeDTO node = objectReader.readValue(line);
+            var parsedLine = (String[]) LINE_READER.readValue(line);
 
             visitor.labels(header.nodeLabels());
-            visitor.id(node.id);
-            node.properties.forEach(visitor::property);
+            visitor.id((Long) CsvImportParsingUtil.parse(parsedLine[0], ValueType.LONG, ValueType.LONG.fallbackValue(), ARRAY_READER));
+            for (HeaderProperty headerProperty : header.propertyMappings()) {
+                var stringProperty = parsedLine[headerProperty.position()];
+                var propertyKey = headerProperty.propertyKey();
+                var defaultValue = propertySchemas.get(propertyKey).defaultValue();
+                var value = CsvImportParsingUtil.parse(stringProperty, headerProperty.valueType(), defaultValue, ARRAY_READER);
+                visitor.property(propertyKey, value);
+            }
 
             visitor.endOfEntity();
         }
@@ -420,13 +430,19 @@ public final class CsvFileInput implements FileInput {
 
         @Override
         void visitLine(String line, RelationshipFileHeader header, InputEntityVisitor visitor) throws IOException {
-            RelationshipDTO relationship = objectReader.readValue(line);
+            var parsedLine = (String[]) LINE_READER.readValue(line);
 
             visitor.type(header.relationshipType());
-            visitor.startId(relationship.sourceId);
-            visitor.endId(relationship.targetId);
+            visitor.startId((Long) CsvImportParsingUtil.parse(parsedLine[0], ValueType.LONG, ValueType.LONG.fallbackValue(), ARRAY_READER));
+            visitor.endId((Long) CsvImportParsingUtil.parse(parsedLine[1], ValueType.LONG, ValueType.LONG.fallbackValue(), ARRAY_READER));
 
-            relationship.properties.forEach(visitor::property);
+            for (HeaderProperty headerProperty : header.propertyMappings()) {
+                var stringProperty = parsedLine[headerProperty.position()];
+                var propertyKey = headerProperty.propertyKey();
+                var defaultValue = propertySchemas.get(propertyKey).defaultValue();
+                var value = CsvImportParsingUtil.parse(stringProperty, headerProperty.valueType(), defaultValue, ARRAY_READER);
+                visitor.property(propertyKey, value);
+            }
 
             visitor.endOfEntity();
         }
@@ -447,15 +463,18 @@ public final class CsvFileInput implements FileInput {
         void visitLine(
             String line, GraphPropertyFileHeader header, InputEntityVisitor visitor
         ) throws IOException {
-            var node = objectReader.readTree(line);
+            var parsedValue = ((String[]) LINE_READER.readValue(line))[0];
             var propertyMapping = header.propertyMapping();
             var propertyKey = propertyMapping.propertyKey();
             var defaultValue = propertySchemas.get(propertyKey).defaultValue();
             visitor.property(
                 propertyKey,
-                CsvImportParsingUtil
-                    .getParsingFunction(propertyMapping.valueType())
-                    .fromCsvValue(defaultValue, node.get(propertyKey))
+                CsvImportParsingUtil.parse(
+                    parsedValue,
+                    propertyMapping.valueType(),
+                    defaultValue,
+                    ARRAY_READER
+                )
             );
             visitor.endOfEntity();
         }
