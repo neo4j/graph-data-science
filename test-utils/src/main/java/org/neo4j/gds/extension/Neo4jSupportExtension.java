@@ -27,11 +27,11 @@ import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.QueryRunner;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
 import org.neo4j.internal.id.IdGeneratorFactory;
-import org.neo4j.internal.recordstorage.RecordIdType;
 import org.neo4j.kernel.impl.core.NodeEntity;
 
 import java.util.HashMap;
@@ -59,7 +59,7 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
     private static final String DBMS_KEY = "service";
 
     @Override
-    public void beforeEach(ExtensionContext context) throws Exception {
+    public void beforeEach(ExtensionContext context) {
         GraphDatabaseService db = getDbms(context)
             .map(dbms -> dbms.database(GraphDatabaseSettings.DEFAULT_DATABASE_NAME))
             .orElseThrow(() -> new IllegalStateException("No database was found."));
@@ -120,10 +120,7 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
 
         // try to convince the db that `idOffset` number of nodes have already been allocated
         var idGeneratorFactory = GraphDatabaseApiProxy.resolveDependency(db, IdGeneratorFactory.class);
-        var idGenerator = idGeneratorFactory.get(RecordIdType.NODE);
-        TestSupport.fullAccessTransaction(db).accept((tx, ktx) -> {
-            idGenerator.nextConsecutiveIdRange(42, false, ktx.cursorContext());
-        });
+        TestSupport.fullAccessTransaction(db).accept((tx, ktx) -> Neo4jProxy.reserveNeo4jIds(idGeneratorFactory, 42, ktx.cursorContext()));
     }
 
     private void injectFields(ExtensionContext context, GraphDatabaseService db, Map<String, Node> idMap) {

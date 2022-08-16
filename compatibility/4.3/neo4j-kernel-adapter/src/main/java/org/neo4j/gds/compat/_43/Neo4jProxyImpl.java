@@ -64,6 +64,7 @@ import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.internal.batchimport.staging.StageExecution;
 import org.neo4j.internal.helpers.HostnamePort;
+import org.neo4j.internal.id.IdGenerator;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.IndexQueryConstraints;
@@ -91,6 +92,7 @@ import org.neo4j.internal.schema.IndexValueCapability;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
+import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
@@ -642,5 +644,12 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public long transactionId(KernelTransactionHandle kernelTransactionHandle) {
         return kernelTransactionHandle.lastTransactionTimestampWhenStarted();
+    }
+
+    @Override
+    public void reserveNeo4jIds(IdGeneratorFactory generatorFactory, int size, CursorContext cursorContext) {
+        IdGenerator idGenerator = generatorFactory.get(org.neo4j.internal.id.IdType.NODE);
+
+        idGenerator.nextIdBatch(size, false, cursorContext);
     }
 }
