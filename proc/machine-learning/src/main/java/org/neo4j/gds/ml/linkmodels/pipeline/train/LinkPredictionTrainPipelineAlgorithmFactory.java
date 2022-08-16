@@ -90,7 +90,7 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
             LinkPredictionTrainingPipeline.class
         );
 
-        return LinkPredictionTrainPipelineExecutor.estimate(executionContext.modelCatalog(), pipeline, configuration);
+        return LinkPredictionTrainPipelineExecutor.estimate(executionContext, pipeline, configuration);
     }
 
     @Override

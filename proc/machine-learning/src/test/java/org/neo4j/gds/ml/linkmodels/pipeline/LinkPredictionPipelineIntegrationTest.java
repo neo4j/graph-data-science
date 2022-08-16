@@ -93,23 +93,23 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
     @Neo4jGraph
     static String GRAPH =
         NODES +
-        "(a)-[:REL]->(b), " +
-        "(a)-[:REL]->(c), " +
-        "(a)-[:REL]->(d), " +
-        "(b)-[:REL]->(c), " +
-        "(b)-[:REL]->(d), " +
-        "(c)-[:REL]->(d), " +
-        "(e)-[:REL]->(f), " +
-        "(e)-[:REL]->(g), " +
-        "(f)-[:REL]->(g), " +
-        "(h)-[:REL]->(i), " +
-        "(j)-[:REL]->(k), " +
-        "(j)-[:REL]->(l), " +
-        "(k)-[:REL]->(l), " +
-        "(m)-[:REL]->(n), " +
-        "(m)-[:REL]->(o), " +
-        "(n)-[:REL]->(o), " +
-        "(a)-[:REL]->(p), " +
+        "(a)-[:REL {weight: 5.0}]->(b), " +
+        "(a)-[:REL {weight: 2.0}]->(c), " +
+        "(a)-[:REL {weight: 4.0}]->(d), " +
+        "(b)-[:REL {weight: 5.0}]->(c), " +
+        "(b)-[:REL {weight: 3.0}]->(d), " +
+        "(c)-[:REL {weight: 2.0}]->(d), " +
+        "(e)-[:REL {weight: 1.0}]->(f), " +
+        "(e)-[:REL {weight: 2.0}]->(g), " +
+        "(f)-[:REL {weight: 5.0}]->(g), " +
+        "(h)-[:REL {weight: 5.0}]->(i), " +
+        "(j)-[:REL {weight: 5.0}]->(k), " +
+        "(j)-[:REL {weight: 4.0}]->(l), " +
+        "(k)-[:REL {weight: 5.0}]->(l), " +
+        "(m)-[:REL {weight: 4.0}]->(n), " +
+        "(m)-[:REL {weight: 5.0}]->(o), " +
+        "(n)-[:REL {weight: 2.0}]->(o), " +
+        "(a)-[:REL {weight: 5.0}]->(p), " +
 
         "(a)-[:IGNORED]->(e), " +
 
@@ -364,12 +364,13 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
 
     @Test
     void runWithGraphSage() {
-        runQueryWithUser("CALL gds.graph.project('g_2',{ N: { properties: ['z']}}, {REL: {orientation: 'UNDIRECTED'}})");
+        runQueryWithUser("CALL gds.graph.project('g_2',{ N: { properties: ['z']}}, {REL: {orientation: 'UNDIRECTED', properties: ['weight']}})");
 
         runQueryWithUser("CALL gds.beta.graphSage.train(" +
                          "  'g_2'," +
                          "  {" +
                          "    modelName: 'exampleTrainModel'," +
+                         "    relationshipWeightProperty: 'weight'," +
                          "    featureProperties: ['z']," +
                          "    aggregator: 'mean'," +
                          "    activationFunction: 'sigmoid'," +
