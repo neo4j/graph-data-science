@@ -32,6 +32,8 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 
+import java.util.Optional;
+
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
 import static org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver.resolveModel;
@@ -59,10 +61,10 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
         var graph = graphStore.getGraph(
             configuration.nodeLabelIdentifiers(graphStore),
             configuration.internalRelationshipTypes(graphStore),
-            model.trainConfig().relationshipWeightProperty()
+            Optional.ofNullable(model.trainConfig().relationshipWeightProperty())
         );
 
-        if(model.trainConfig().hasRelationshipWeightProperty()) {
+        if(graph.hasRelationshipProperty()) {
             validateRelationshipWeightPropertyValue(graph, configuration.concurrency(), executorService);
         }
 

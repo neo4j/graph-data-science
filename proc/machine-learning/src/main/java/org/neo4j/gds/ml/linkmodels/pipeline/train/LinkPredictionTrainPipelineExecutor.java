@@ -131,7 +131,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             config.relationshipTypes(),
             config.nodeLabels(),
             config.randomSeed(),
-            pipeline.relationshipWeightProperty()
+            pipeline.relationshipWeightProperty(executionContext)
         );
 
         var splitConfig = pipeline.splitConfig();
