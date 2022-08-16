@@ -455,7 +455,6 @@ CALL gds.graph.project(
     'myGraph',
     {
         Person: {
-            label: 'Person',
             properties: ['age','lotteryNumbers','embedding']
         }
     },

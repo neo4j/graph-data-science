@@ -93,7 +93,6 @@ CALL gds.graph.project(
   'Loc',
   {
     ROAD: {
-      type: 'ROAD',
       properties: 'cost'
     }
   }
