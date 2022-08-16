@@ -45,6 +45,8 @@ Below is a description of the methods on such objects:
                             dict[str, any]              | Series                  | xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-model-candidates[Add a logistic regression model configuration to train as a candidate in the model selection phase]. footnote:range[Ranges can also be given as length two `Tuple`s. I.e. `(x, y)` is the same as `{range: [x, y]}`.]
 | addRandomForest       | parameter_space: +
                             dict[str, any]              | Series                  | xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-model-candidates[Add a random forest model configuration to train as a candidate in the model selection phase]. footnote:range[]
+| addMLP                | parameter_space: +
+                            dict[str, any]              | Series                  | xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-model-candidates[Add an MLP model configuration to train as a candidate in the model selection phase]. footnote:range[]
 | configureAutoTuning   | config: **kwargs
                                                         | Series                  | xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-configure-auto-tuning[Configure the auto-tuning].
 | train                 | G: Graph, +
@@ -193,6 +195,8 @@ Below is a description of the methods on such objects:
                           dict[str, any]                | Series              | xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-model-candidates[Add a logistic regression model configuration to train as a candidate in the model selection phase]. footnote:range[Ranges can also be given as length two `Tuple`s. I.e. `(x, y)` is the same as `{range: [x, y]}`.]
 | addRandomForest       | parameter_space: +
                           dict[str, any]                | Series              | xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-model-candidates[Add a random forest model configuration to train as a candidate in the model selection phase]. footnote:range[]
+| addMLP                | parameter_space: +
+                          dict[str, any]                | Series              | xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-model-candidates[Add an MLP model configuration to train as a candidate in the model selection phase]. footnote:range[]
 | configureAutoTuning   | config: **kwargs
                                                         | Series              | xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-auto-tuning[Configure the auto-tuning].
 | train                 | G: Graph, +
