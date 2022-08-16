@@ -19,14 +19,13 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
+import java.io.IOException;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,10 +56,8 @@ class ValueTypeTest {
 
     @ParameterizedTest
     @MethodSource("formatValues")
-    void testParsingFromCsv(ValueType valueType, Object expected, String value) throws JsonProcessingException {
-        var schema = CsvSchema.builder().addColumn("a", CsvSchemaUtil.csvTypeFromValueType(valueType)).build();
-        var tree = new CsvMapper().reader().with(schema).readTree(value);
-        var node = tree.get("a");
-        assertThat(CsvImportParsingUtil.getParsingFunction(valueType).fromCsvValue(valueType.fallbackValue(), node)).isEqualTo(expected);
+    void testParsingFromCsv(ValueType valueType, Object expected, String value) throws IOException {
+        var arrayReader = new CsvMapper().readerForArrayOf(String.class);
+        assertThat(CsvImportParsingUtil.parse(value, valueType, valueType.fallbackValue(), arrayReader)).isEqualTo(expected);
     }
 }

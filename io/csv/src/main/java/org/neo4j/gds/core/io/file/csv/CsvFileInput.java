@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
-import com.fasterxml.jackson.databind.InjectableValues;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.ElementIdentifier;
@@ -56,20 +55,29 @@ import org.neo4j.internal.batchimport.input.ReadableGroups;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class CsvFileInput implements FileInput {
+final class CsvFileInput implements FileInput {
 
     private static final char COLUMN_SEPARATOR = ',';
     private static final String ARRAY_ELEMENT_SEPARATOR = ";";
     private static final CsvMapper CSV_MAPPER = new CsvMapper();
-    private static final ObjectReader LINE_READER = CSV_MAPPER.readerFor(String[].class);
-    private static final ObjectReader ARRAY_READER = CSV_MAPPER.readerForArrayOf(String.class);
+    private static final ObjectReader LINE_READER = CSV_MAPPER
+        .readerFor(String[].class)
+        .with(CsvSchema
+            .emptySchema()
+            .withColumnSeparator(COLUMN_SEPARATOR)
+        );
+    private static final ObjectReader ARRAY_READER = CSV_MAPPER
+        .readerForArrayOf(String.class)
+        .with(CsvSchema
+            .emptySchema()
+            .withArrayElementSeparator(ARRAY_ELEMENT_SEPARATOR)
+        );
 
     private final Path importPath;
     private final String userName;
@@ -85,15 +93,6 @@ public final class CsvFileInput implements FileInput {
         this.nodeSchema = new NodeSchemaLoader(importPath).load();
         this.relationshipSchema = new RelationshipSchemaLoader(importPath).load();
         this.capabilities = new GraphCapabilitiesLoader(importPath, CSV_MAPPER).load();
-
-        setupCsvMapper();
-    }
-
-    private static void setupCsvMapper() {
-        var module = new SimpleModule()
-            .addDeserializer(NodeDTO.class, new NodeDeserializer())
-            .addDeserializer(RelationshipDTO.class, new RelationshipDeserializer());
-        CSV_MAPPER.registerModule(module);
     }
 
     @Override
@@ -104,20 +103,7 @@ public final class CsvFileInput implements FileInput {
             Map.Entry::getValue
         ));
 
-        var propertySchemas = nodeSchema.unionProperties();
-        CSV_MAPPER.setInjectableValues(new InjectableValues.Std().addValue(
-            NodeDeserializer.NODE_SCHEMA_INJECTION_NAME,
-            propertySchemas
-        ));
-
-        HashMap<NodeFileHeader, ObjectReader> headerToObjectReaderMapping = computeHeaderToObjectReaderMapping(
-            headerToDataFilesMapping,
-            propertySchemas,
-            NodeDTO.class,
-            CsvNodeVisitor.ID_COLUMN_NAME
-        );
-
-        return () -> new NodeImporter(headerToDataFilesMapping, nodeSchema, headerToObjectReaderMapping);
+        return () -> new NodeImporter(headerToDataFilesMapping, nodeSchema);
     }
 
     @Override
@@ -128,42 +114,7 @@ public final class CsvFileInput implements FileInput {
             Map.Entry::getValue
         ));
 
-        var propertySchemas = relationshipSchema.unionProperties();
-
-        CSV_MAPPER.setInjectableValues(new InjectableValues.Std().addValue(
-            RelationshipDeserializer.RELATIONSHIP_SCHEMA_INJECTION_NAME,
-            propertySchemas
-        ));
-
-        var headerToObjectReaderMapping = computeHeaderToObjectReaderMapping(
-            headerToDataFilesMapping,
-            propertySchemas,
-            RelationshipDTO.class,
-            CsvRelationshipVisitor.START_ID_COLUMN_NAME,
-            CsvRelationshipVisitor.END_ID_COLUMN_NAME
-        );
-
-        return () -> new RelationshipImporter(headerToDataFilesMapping, relationshipSchema, headerToObjectReaderMapping);
-    }
-
-    @NotNull
-    private <P extends PropertySchema, HEADER extends FileHeader<?, P>> HashMap<HEADER, ObjectReader> computeHeaderToObjectReaderMapping(
-        Map<HEADER, List<Path>> headerToDataFilesMapping,
-        Map<String, P> propertySchemas,
-        Class<?> deserializationClass,
-        String... elementColumns
-    ) {
-        var headerToObjectReaderMapping = new HashMap<HEADER, ObjectReader>();
-        headerToDataFilesMapping.keySet().forEach(header -> {
-            var csvSchema = CsvSchemaUtil
-                .fromElementSchema(propertySchemas, header, elementColumns)
-                .withColumnSeparator(COLUMN_SEPARATOR)
-                .withArrayElementSeparator(ARRAY_ELEMENT_SEPARATOR);
-
-            var objectReader = CSV_MAPPER.readerFor(deserializationClass).with(csvSchema);
-            headerToObjectReaderMapping.put(header, objectReader);
-        });
-        return headerToObjectReaderMapping;
+        return () -> new RelationshipImporter(headerToDataFilesMapping, relationshipSchema);
     }
 
     @Override
@@ -229,14 +180,11 @@ public final class CsvFileInput implements FileInput {
 
                 assert chunk instanceof LineChunk;
                 var header = entry.getKey();
-                var objectReader = objectReaderForHeader(header);
-                ((LineChunk<HEADER, SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>) chunk).initialize(header, entry.getValue(), objectReader);
+                ((LineChunk<HEADER, SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>) chunk).initialize(header, entry.getValue());
                 return true;
             }
             return false;
         }
-
-        abstract ObjectReader objectReaderForHeader(HEADER header);
 
         @Override
         public void close() {
@@ -245,20 +193,11 @@ public final class CsvFileInput implements FileInput {
 
     static class NodeImporter extends FileImporter<NodeFileHeader, NodeSchema, NodeLabel, PropertySchema> {
 
-        private final Map<NodeFileHeader, ObjectReader> headerToObjectReaderMapping;
-
         NodeImporter(
             Map<NodeFileHeader, List<Path>> headerToDataFilesMapping,
-            NodeSchema nodeSchema,
-            Map<NodeFileHeader, ObjectReader> headerToObjectReaderMapping
+            NodeSchema nodeSchema
         ) {
             super(headerToDataFilesMapping, nodeSchema);
-            this.headerToObjectReaderMapping = headerToObjectReaderMapping;
-        }
-
-        @Override
-        ObjectReader objectReaderForHeader(NodeFileHeader header) {
-            return headerToObjectReaderMapping.get(header);
         }
 
         @Override
@@ -269,21 +208,11 @@ public final class CsvFileInput implements FileInput {
 
     static class RelationshipImporter extends FileImporter<RelationshipFileHeader, RelationshipSchema, RelationshipType, RelationshipPropertySchema> {
 
-        private final Map<RelationshipFileHeader, ObjectReader> headerToObjectReaderMapping;
-
         RelationshipImporter(
             Map<RelationshipFileHeader, List<Path>> headerToDataFilesMapping,
-
-            RelationshipSchema relationshipSchema,
-            Map<RelationshipFileHeader, ObjectReader> headerToObjectReaderMapping
+            RelationshipSchema relationshipSchema
         ) {
             super(headerToDataFilesMapping, relationshipSchema);
-            this.headerToObjectReaderMapping = headerToObjectReaderMapping;
-        }
-
-        @Override
-        ObjectReader objectReaderForHeader(RelationshipFileHeader header) {
-            return headerToObjectReaderMapping.get(header);
         }
 
         @Override
@@ -304,22 +233,16 @@ public final class CsvFileInput implements FileInput {
         Stream<String> lineStream;
         Iterator<String> lineIterator;
         Map<String, PROPERTY_SCHEMA> propertySchemas;
-        ObjectReader objectReader;
 
         LineChunk(SCHEMA schema) {
             this.schema = schema;
         }
 
-        void initialize(
-            HEADER header,
-            Path path,
-            ObjectReader objectReader
-        ) throws IOException {
+        void initialize(HEADER header, Path path) throws IOException {
             this.header = header;
             this.propertySchemas = header.schemaForIdentifier(schema);
             this.lineStream = Files.lines(path);
             this.lineIterator = this.lineStream.iterator();
-            this.objectReader = objectReader;
         }
 
         @Override
