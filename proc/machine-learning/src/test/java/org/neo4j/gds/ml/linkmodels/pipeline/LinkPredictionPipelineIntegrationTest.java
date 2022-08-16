@@ -36,13 +36,17 @@ import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPipelineMutateProc;
+import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPipelineStreamProc;
 import org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionPipelineTrainProc;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.model.catalog.ModelListProc;
+import org.neo4j.graphdb.Result;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -111,7 +115,8 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
             LinkPredictionPipelineCreateProc.class,
             LinkPredictionPipelineAddStepProcs.class,
             LinkPredictionPipelineAddTrainerMethodProcs.class,
-            LinkPredictionPipelineConfigureSplitProc.class
+            LinkPredictionPipelineConfigureSplitProc.class,
+            LinkPredictionPipelineStreamProc.class
         );
 
         String createQuery = GdsCypher.call(GRAPH_NAME)
@@ -233,48 +238,6 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED"), "probability"));
     }
 
-    @Test
-    void testWithGraphSage() {
-        runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe')");
-        runQuery("CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe', {validationFolds: 2})");
-
-        // train GS model (not as a nodeProperty step as it does not produce a node property)
-        runQuery(
-            "CALL gds.beta.graphSage.train('g', {" +
-            "    modelName: 'gsModel'," +
-            "    embeddingDimension: 32," +
-            "    sampleSizes: [2]," +
-            "    epochs: 1," +
-            "    maxIterations: 1," +
-            "    aggregator: 'MEAN'," +
-            "    featureProperties: $features," +
-            "    randomSeed: 99" +
-            "  }" +
-            ")", Map.of("features", List.of("z")));
-
-        runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'gds.beta.graphSage', {" +
-                 "  modelName: 'gsModel',   " +
-                 "  mutateProperty: 'embedding'" +
-                 "})");
-
-        // let's try both list and single string syntaxes
-        runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'COSINE', {nodeProperties: ['embedding']})");
-
-        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe')");
-
-        runQuery("CALL gds.beta.pipeline.linkPrediction.train('g', {" +
-                 "   pipeline: 'pipe', " +
-                 "   modelName: 'lpModel', " +
-                 "   negativeClassWeight: 1.0, " +
-                 "   randomSeed: 1337" +
-                 "})");
-
-        assertCypherResult(
-            "CALL gds.beta.model.list() YIELD modelInfo RETURN count(*) AS modelCount",
-            List.of(Map.of("modelCount", 2L))
-        );
-    }
-
     @Override
     protected String getUsername() {
         return "myUser";
@@ -307,9 +270,20 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         runQueryWithUser("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('myPipe')");
 
         runQueryWithUser("CALL gds.beta.pipeline.linkPrediction.train('g_2', {pipeline: 'myPipe', modelName: 'model'})");
+
+        runQueryWithUser(
+            "CALL gds.beta.pipeline.linkPrediction.predict.stream('g_2', {" +
+            "   modelName: 'model', topN: 2" +
+            "})",
+            result -> assertThat(result.stream().count()).isEqualTo(2)
+        );
     }
 
     private void runQueryWithUser(String query) {
         QueryRunner.runQuery(db, getUsername(), query, Map.of());
+    }
+
+    private void runQueryWithUser(String query, Consumer<Result> resultConsumer) {
+        QueryRunner.runQueryWithResultConsumer(db, getUsername(), query, Map.of(), resultConsumer);
     }
 }
