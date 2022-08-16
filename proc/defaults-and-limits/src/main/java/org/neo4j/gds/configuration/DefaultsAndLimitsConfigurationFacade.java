@@ -49,7 +49,7 @@ class DefaultsAndLimitsConfigurationFacade {
         Optional<String> usernameOfTarget,
         Optional<String> key
     ) {
-        assertAuthorised(usernameOfOperator, operatorIsAdministrator, usernameOfTarget);
+        assertAuthorisedToList(usernameOfOperator, operatorIsAdministrator, usernameOfTarget);
 
         Map<String, Object> defaults = defaultsConfiguration.list(usernameOfTarget, key);
 
@@ -61,7 +61,7 @@ class DefaultsAndLimitsConfigurationFacade {
     /**
      * You are authorised to see settings for other users iff you are an administrator
      */
-    void assertAuthorised(String usernameOfOperator, boolean operatorIsAdministrator, Optional<String> username) {
+    void assertAuthorisedToList(String usernameOfOperator, boolean operatorIsAdministrator, Optional<String> username) {
         if (username.isEmpty()) return; // there is nothing to authorise
 
         if (operatorIsAdministrator) return; // administrator is allowed anything
@@ -70,6 +70,40 @@ class DefaultsAndLimitsConfigurationFacade {
 
         throw new IllegalArgumentException(formatWithLocale(
             "User '%s' not authorized to list default settings for user '%s'",
+            usernameOfOperator,
+            username.get()
+        ));
+    }
+
+    void setDefault(
+        String usernameOfOperator,
+        boolean operatorIsAdministrator,
+        Optional<String> username,
+        String key,
+        Object value
+    ) {
+        assertAuthorisedToSet(usernameOfOperator, operatorIsAdministrator, username);
+
+        defaultsConfiguration.set(key, value, username);
+    }
+
+    private void assertAuthorisedToSet(
+        String usernameOfOperator,
+        boolean operatorIsAdministrator,
+        Optional<String> username
+    ) {
+        if (operatorIsAdministrator) return; // administrators can do anything
+
+        if (username.isEmpty())
+            throw new IllegalArgumentException(formatWithLocale(
+                "User '%s' not authorized to set global defaults",
+                usernameOfOperator
+            ));
+
+        if (usernameOfOperator.equals(username.get())) return; // you can set your own defaults
+
+        throw new IllegalArgumentException(formatWithLocale(
+            "User '%s' not authorized to set default for user '%s'",
             usernameOfOperator,
             username.get()
         ));

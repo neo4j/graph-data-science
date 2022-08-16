@@ -68,9 +68,7 @@ public class DefaultsAndLimitsConfigurationProcedure {
 
     /**
      * If username is supplied, we find the _effective defaults_ for that user. So the meld of global and personal
-     * defaults, without specifying where each came from.
-     *
-     * Or we add a marker, type = global or something? Not until someone asks for it!
+     * defaults, without specifying where each came from. Personal defaults take precedence.
      */
     @Procedure("gds.config.defaults.list")
     @Description("List defaults; global by default, but also optionally for a specific user and/ or key")
@@ -83,6 +81,25 @@ public class DefaultsAndLimitsConfigurationProcedure {
             isAdministratorPredicate.getAsBoolean(),
             Optional.ofNullable(username),
             Optional.ofNullable(key)
+        );
+    }
+
+    /**
+     * If username supplied we set the default just for that user; globally otherwise.
+     */
+    @Procedure("gds.config.defaults.set")
+    @Description("Set a default; global by, default, but also optionally for a specific user")
+    public void setDefault(
+        @Name(value = "username") String username,
+        @Name(value = "key") String key,
+        @Name(value = "value") Object value
+    ) {
+        facade.setDefault(
+            this.username.username(),
+            isAdministratorPredicate.getAsBoolean(),
+            Optional.ofNullable(username),
+            key,
+            value
         );
     }
 

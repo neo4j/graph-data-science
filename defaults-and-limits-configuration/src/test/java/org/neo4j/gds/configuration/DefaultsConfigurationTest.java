@@ -22,6 +22,7 @@ package org.neo4j.gds.configuration;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -249,5 +250,38 @@ class DefaultsConfigurationTest {
 
         assertThat(settings.size()).isEqualTo(1);
         assertThat(settings.get("c")).isEqualTo(117);
+    }
+
+    @Test
+    void shouldSetGlobalDefault() {
+        var configuration = new DefaultsConfiguration(new HashMap<>(), new HashMap<>());
+
+        configuration.set("foo", 42, Optional.empty());
+
+        Object value = configuration.list(Optional.empty(), Optional.empty()).get("foo");
+        assertThat(value).isEqualTo(42);
+    }
+
+    @Test
+    void shouldOverwriteGlobalDefault() {
+        var configuration = new DefaultsConfiguration(new HashMap<>(), new HashMap<>());
+
+        configuration.set("foo", 42, Optional.empty());
+        configuration.set("foo", 87, Optional.empty());
+
+        Object value = configuration.list(Optional.empty(), Optional.empty()).get("foo");
+        assertThat(value).isEqualTo(87);
+    }
+
+    @Test
+    void shouldSetPersonalDefault() {
+        var configuration = new DefaultsConfiguration(new HashMap<>(), new HashMap<>());
+
+        configuration.set("foo", 42, Optional.of("Jonas Vingegaard"));
+
+        Object value = configuration.list(Optional.of("Jonas Vingegaard"), Optional.of("foo")).get("foo");
+        assertThat(value).isEqualTo(42);
+
+        assertThat(configuration.list(Optional.empty(), Optional.empty())).doesNotContainKey("foo");
     }
 }

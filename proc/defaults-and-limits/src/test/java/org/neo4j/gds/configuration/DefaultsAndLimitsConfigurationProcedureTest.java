@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -88,5 +89,35 @@ class DefaultsAndLimitsConfigurationProcedureTest {
                 assertThat(ds.value).isEqualTo(87);
             }
         );
+    }
+
+    @Test
+    void shouldSetGlobalDefault() {
+        var facade = mock(DefaultsAndLimitsConfigurationFacade.class);
+        var procedure = new DefaultsAndLimitsConfigurationProcedure(
+            null,
+            Username.of("some administrator"),
+            () -> true,
+            facade
+        );
+
+        procedure.setDefault(null, "foo", 42);
+
+        verify(facade).setDefault("some administrator", true, Optional.empty(), "foo", 42);
+    }
+
+    @Test
+    void shouldSetPersonalDefault() {
+        var facade = mock(DefaultsAndLimitsConfigurationFacade.class);
+        var procedure = new DefaultsAndLimitsConfigurationProcedure(
+            null,
+            Username.of("some administrator"),
+            () -> true,
+            facade
+        );
+
+        procedure.setDefault("Jonas Vingegaard", "foo", 42);
+
+        verify(facade).setDefault("some administrator", true, Optional.of("Jonas Vingegaard"), "foo", 42);
     }
 }

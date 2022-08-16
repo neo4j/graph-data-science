@@ -31,8 +31,8 @@ public class DefaultsConfiguration {
      * the data it holds - it starts empty and dies when JVM exists.
      */
     public static final DefaultsConfiguration Instance = new DefaultsConfiguration(
-        Collections.emptyMap(),
-        Collections.emptyMap()
+        new HashMap<>(),
+        new HashMap<>()
     );
 
     /**
@@ -87,5 +87,16 @@ public class DefaultsConfiguration {
         Object value = defaults.get(key.get());
 
         return Map.of(key.get(), value);
+    }
+
+    void set(String key, Object value, Optional<String> username) {
+        Default valueAsDefault = new Default((Integer) value);
+
+        if (username.isPresent()) {
+            personalDefaults.putIfAbsent(username.get(), new HashMap<>());
+            personalDefaults.get(username.get()).put(key, valueAsDefault);
+        } else {
+            globalDefaults.put(key, valueAsDefault);
+        }
     }
 }
