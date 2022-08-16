@@ -89,7 +89,6 @@ class RandomWalkKnnSampler implements KnnSampler {
         final LongPredicate isInvalidSample
     ) {
 
-        randomWalkSampler.prepareForNewNode(nodeId);
         final var walk = randomWalkSampler.walk(nodeId);
 
         sampledValuesCache.clear();

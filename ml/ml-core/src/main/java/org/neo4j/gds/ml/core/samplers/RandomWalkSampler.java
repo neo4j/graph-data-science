@@ -63,7 +63,7 @@ public class RandomWalkSampler {
         this.normalizedReturnProbability = normalizedReturnProbability;
         this.normalizedSameDistanceProbability = normalizedSameDistanceProbability;
         this.normalizedInOutProbability = normalizedInOutProbability;
-
+        this.random = new SplittableRandom(randomSeed); //this is used if prepareForNode is never called
         this.currentWeight = new MutableDouble(0);
         this.randomNeighbour = new MutableLong(NO_MORE_NODES);
     }
