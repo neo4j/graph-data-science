@@ -58,7 +58,7 @@ public class ExecutableNodePropertyStepTestUtil {
         }
 
         @Override
-        public MemoryEstimation estimate(ModelCatalog modelCatalog, List<String> nodeLabels, List<String> relTypes) {
+        public MemoryEstimation estimate(ModelCatalog modelCatalog, String username, List<String> nodeLabels, List<String> relTypes) {
             throw new MemoryEstimationNotImplementedException();
         }
 
@@ -130,7 +130,7 @@ public class ExecutableNodePropertyStepTestUtil {
         }
 
         @Override
-        public MemoryEstimation estimate(ModelCatalog modelCatalog, List<String> nodeLabels, List<String> relTypes) {
+        public MemoryEstimation estimate(ModelCatalog modelCatalog, String username, List<String> nodeLabels, List<String> relTypes) {
             return memoryEstimation;
         }
 
@@ -148,7 +148,7 @@ public class ExecutableNodePropertyStepTestUtil {
         }
 
         @Override
-        public MemoryEstimation estimate(ModelCatalog modelCatalog, List<String> nodeLabels, List<String> relTypes) {
+        public MemoryEstimation estimate(ModelCatalog modelCatalog, String username, List<String> nodeLabels, List<String> relTypes) {
             throw new MemoryEstimationNotImplementedException();
         }
 
