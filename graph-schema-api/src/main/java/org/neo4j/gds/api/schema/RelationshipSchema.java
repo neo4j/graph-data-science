@@ -57,7 +57,7 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
             .entrySet()
             .stream()
             .filter(e -> other.relTypeOrientationMap().containsKey(e.getKey()))
-            .filter(e -> !other.relTypeOrientationMap().get(e.getKey()).equals(e.getValue()))
+            .filter(e -> other.relTypeOrientationMap().get(e.getKey()) != e.getValue())
             .map(e -> e.getKey().name)
             .collect(Collectors.toSet());
 

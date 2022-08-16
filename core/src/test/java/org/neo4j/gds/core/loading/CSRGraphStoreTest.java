@@ -45,13 +45,15 @@ class CSRGraphStoreTest {
 
     @Test
     void addRelationshipTypeUndirected() {
-        var graphStore = GdlFactory.builder().graphProjectConfig(
+        var gdlFactory = GdlFactory.builder().graphProjectConfig(
             ImmutableGraphProjectFromGdlConfig.builder()
                 .gdlGraph("(a:A)-[:T]->(b:A), (c:A)-[:T]->(d:A)")
                 .graphName("test")
                 .orientation(Orientation.UNDIRECTED)
                 .build()
-        ).build().build();
+        ).build();
+
+        var graphStore = gdlFactory.build();
 
         assertThat(graphStore.relationshipCount()).isEqualTo(4);
 
@@ -60,8 +62,7 @@ class CSRGraphStoreTest {
             .orientation(Orientation.UNDIRECTED)
             .build();
 
-        // we add a (a)-[:NEW]->(d) relationship
-        relBuilder.add(0, 3);
+        relBuilder.add(gdlFactory.nodeId("a"), gdlFactory.nodeId("d"));
 
         graphStore.addRelationshipType(
             RelationshipType.of("NEW"),
@@ -76,13 +77,15 @@ class CSRGraphStoreTest {
 
     @Test
     void addRelationshipTypeDirected() {
-        var graphStore = GdlFactory.builder().graphProjectConfig(
+        var gdlFactory = GdlFactory.builder().graphProjectConfig(
             ImmutableGraphProjectFromGdlConfig.builder()
                 .gdlGraph("(a:A)-[:T]->(b:A), (c:A)-[:T]->(d:A)")
                 .graphName("test")
                 .orientation(Orientation.NATURAL)
                 .build()
-        ).build().build();
+        ).build();
+
+        var graphStore = gdlFactory.build();
 
         assertThat(graphStore.relationshipCount()).isEqualTo(2);
 
@@ -91,8 +94,7 @@ class CSRGraphStoreTest {
             .orientation(Orientation.NATURAL)
             .build();
 
-        // we add a (a)-[:NEW]->(d) relationship
-        relBuilder.add(0, 3);
+        relBuilder.add(gdlFactory.nodeId("a"), gdlFactory.nodeId("d"));
 
         graphStore.addRelationshipType(
             RelationshipType.of("NEW"),
@@ -115,13 +117,15 @@ class CSRGraphStoreTest {
     @ParameterizedTest
     @MethodSource("mixedOrientation")
     void addRelationshipTypeMixed(Orientation baseOrientation, int baseRelCount, Orientation addedOrientation, int totalRelCount) {
-        var graphStore = GdlFactory.builder().graphProjectConfig(
+        var gdlFactory = GdlFactory.builder().graphProjectConfig(
             ImmutableGraphProjectFromGdlConfig.builder()
                 .gdlGraph("(a:A)-[:T]->(b:A), (c:A)-[:T]->(d:A)")
                 .graphName("test")
                 .orientation(baseOrientation)
                 .build()
-        ).build().build();
+        ).build();
+
+        var graphStore = gdlFactory.build();
 
         assertThat(graphStore.relationshipCount()).isEqualTo(baseRelCount);
 
@@ -130,8 +134,7 @@ class CSRGraphStoreTest {
             .orientation(addedOrientation)
             .build();
 
-        // we add a (a)-[:NEW]->(d) relationship
-        relBuilder.add(0, 3);
+        relBuilder.add(gdlFactory.nodeId("a"), gdlFactory.nodeId("d"));
 
         graphStore.addRelationshipType(
             RelationshipType.of("NEW"),
