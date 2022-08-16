@@ -405,13 +405,8 @@ public final class CsvFileInput implements FileInput {
 
             visitor.labels(header.nodeLabels());
             visitor.id((Long) CsvImportParsingUtil.parse(parsedLine[0], ValueType.LONG, ValueType.LONG.fallbackValue(), ARRAY_READER));
-            for (HeaderProperty headerProperty : header.propertyMappings()) {
-                var stringProperty = parsedLine[headerProperty.position()];
-                var propertyKey = headerProperty.propertyKey();
-                var defaultValue = propertySchemas.get(propertyKey).defaultValue();
-                var value = CsvImportParsingUtil.parse(stringProperty, headerProperty.valueType(), defaultValue, ARRAY_READER);
-                visitor.property(propertyKey, value);
-            }
+
+            visitProperties(header, propertySchemas, visitor, parsedLine);
 
             visitor.endOfEntity();
         }
@@ -424,7 +419,7 @@ public final class CsvFileInput implements FileInput {
 
     static class RelationshipLineChunk extends LineChunk<RelationshipFileHeader, RelationshipSchema, RelationshipPropertySchema> {
 
-        public RelationshipLineChunk(RelationshipSchema relationshipSchema) {
+        RelationshipLineChunk(RelationshipSchema relationshipSchema) {
             super(relationshipSchema);
         }
 
@@ -436,13 +431,7 @@ public final class CsvFileInput implements FileInput {
             visitor.startId((Long) CsvImportParsingUtil.parse(parsedLine[0], ValueType.LONG, ValueType.LONG.fallbackValue(), ARRAY_READER));
             visitor.endId((Long) CsvImportParsingUtil.parse(parsedLine[1], ValueType.LONG, ValueType.LONG.fallbackValue(), ARRAY_READER));
 
-            for (HeaderProperty headerProperty : header.propertyMappings()) {
-                var stringProperty = parsedLine[headerProperty.position()];
-                var propertyKey = headerProperty.propertyKey();
-                var defaultValue = propertySchemas.get(propertyKey).defaultValue();
-                var value = CsvImportParsingUtil.parse(stringProperty, headerProperty.valueType(), defaultValue, ARRAY_READER);
-                visitor.property(propertyKey, value);
-            }
+            visitProperties(header, propertySchemas, visitor, parsedLine);
 
             visitor.endOfEntity();
         }
@@ -463,20 +452,24 @@ public final class CsvFileInput implements FileInput {
         void visitLine(
             String line, GraphPropertyFileHeader header, InputEntityVisitor visitor
         ) throws IOException {
-            var parsedValue = ((String[]) LINE_READER.readValue(line))[0];
-            var propertyMapping = header.propertyMapping();
-            var propertyKey = propertyMapping.propertyKey();
-            var defaultValue = propertySchemas.get(propertyKey).defaultValue();
-            visitor.property(
-                propertyKey,
-                CsvImportParsingUtil.parse(
-                    parsedValue,
-                    propertyMapping.valueType(),
-                    defaultValue,
-                    ARRAY_READER
-                )
-            );
+            var parsedLine = ((String[]) LINE_READER.readValue(line));
+            visitProperties(header, propertySchemas, visitor, parsedLine);
             visitor.endOfEntity();
+        }
+    }
+
+    private static <PROPERTY_SCHEMA extends PropertySchema> void visitProperties(
+        FileHeader<?, PROPERTY_SCHEMA> header,
+        Map<String, PROPERTY_SCHEMA> propertySchemas,
+        InputEntityVisitor visitor,
+        String[] parsedLine
+    ) throws IOException {
+        for (HeaderProperty headerProperty : header.propertyMappings()) {
+            var stringProperty = parsedLine[headerProperty.position()];
+            var propertyKey = headerProperty.propertyKey();
+            var defaultValue = propertySchemas.get(propertyKey).defaultValue();
+            var value = CsvImportParsingUtil.parse(stringProperty, headerProperty.valueType(), defaultValue, ARRAY_READER);
+            visitor.property(propertyKey, value);
         }
     }
 }
