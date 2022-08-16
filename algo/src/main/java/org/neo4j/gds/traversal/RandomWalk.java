@@ -218,7 +218,6 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
     private static final class RandomWalkTask implements Runnable {
 
         private final Graph graph;
-        private final Random random = new Random();
         private final BlockingQueue<long[]> walks;
         private final NextNodeSupplier nextNodeSupplier;
         private final long[][] buffer;
@@ -285,7 +284,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
                 normalizedSameDistanceProbability,
                 normalizedInOutProbability,
                 graph,
-                random
+                randomSeed
             );
 
             this.buffer = new long[1000][];
@@ -305,10 +304,9 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
                     progressTracker.logProgress();
                     continue;
                 }
-
-                random.setSeed(randomSeed + nodeId);
-
                 var walksPerNode = config.walksPerNode();
+
+                sampler.prepareForNewNode(nodeId);
 
                 for (int walkIndex = 0; walkIndex < walksPerNode; walkIndex++) {
                     buffer[bufferLength++] = sampler.walk(nodeId);
