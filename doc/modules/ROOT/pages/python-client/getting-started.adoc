@@ -51,6 +51,15 @@ To check if the GDS server library we're running against is licensed we can make
 using_enterprise = gds.is_licensed()
 ----
 
+[NOTE]
+====
+The client library is designed so that most methods are inferred under the hood as you type them via a string building scheme and overloading the magic `\\__getattr__` method.
+Therefore most methods, such as `pageRank`, will not appear when calling `dir(gds)`.
+Similarly, IDEs and language servers will not be able to detect these automatically inferred methods, meaning that the auto-completion support they provide will be limited.
+
+Rest assured however that despite the lack of this type of discoverability the inferred methods, such as `gds.pageRank.stream`, will still be called correctly.
+====
+
 
 === AuraDS
 
