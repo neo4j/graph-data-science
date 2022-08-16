@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -84,5 +85,169 @@ class DefaultsConfigurationTest {
         var configurationWithDefaults = defaults.apply(configuration, "Jonas Vingegaard");
 
         assertThat(configurationWithDefaults).containsEntry("concurrency", 42);
+    }
+
+    @Test
+    void shouldListGlobalDefaults() {
+        var defaults = new DefaultsConfiguration(
+            Map.of(
+                "a", new Default(42),
+                "b", new Default(87)
+            ),
+            Map.of(
+                "Jonas Vingegaard",
+                Map.of(
+                    "c", new Default(117),
+                    "d", new Default(23)
+                )
+            )
+        );
+
+        var settings = defaults.list(Optional.empty(), Optional.empty());
+
+        assertThat(settings.size()).isEqualTo(2);
+        assertThat(settings.get("a")).isEqualTo(42);
+        assertThat(settings.get("b")).isEqualTo(87);
+    }
+
+    @Test
+    void shouldListPersonalDefaults() {
+        var defaults = new DefaultsConfiguration(
+            Map.of(
+                "a", new Default(42),
+                "b", new Default(87)
+            ),
+            Map.of(
+                "Jonas Vingegaard",
+                Map.of(
+                    "c", new Default(117),
+                    "d", new Default(23)
+                )
+            )
+        );
+
+        var settings = defaults.list(Optional.of("Jonas Vingegaard"), Optional.empty());
+
+        assertThat(settings.size()).isEqualTo(4);
+        assertThat(settings.get("a")).isEqualTo(42);
+        assertThat(settings.get("b")).isEqualTo(87);
+        assertThat(settings.get("c")).isEqualTo(117);
+        assertThat(settings.get("d")).isEqualTo(23);
+    }
+
+    @Test
+    void shouldListGlobalDefaultsForKey() {
+        var defaults = new DefaultsConfiguration(
+            Map.of(
+                "a", new Default(42),
+                "b", new Default(87)
+            ),
+            Map.of(
+                "Jonas Vingegaard",
+                Map.of(
+                    "c", new Default(117),
+                    "d", new Default(23)
+                )
+            )
+        );
+
+        var settings = defaults.list(Optional.empty(), Optional.of("a"));
+
+        assertThat(settings.size()).isEqualTo(1);
+        assertThat(settings.get("a")).isEqualTo(42);
+    }
+
+    @Test
+    void shouldNotListKeysThatDoNotExist() {
+        var defaults = new DefaultsConfiguration(
+            Map.of(
+                "a", new Default(42),
+                "b", new Default(87)
+            ),
+            Map.of(
+                "Jonas Vingegaard",
+                Map.of(
+                    "c", new Default(117),
+                    "d", new Default(23)
+                )
+            )
+        );
+
+        var settings = defaults.list(Optional.empty(), Optional.of("e"));
+
+        assertThat(settings).isEmpty();
+    }
+
+    @Test
+    void shouldListPersonalDefaultsForKey() {
+        var defaults = new DefaultsConfiguration(
+            Map.of(
+                "a", new Default(42),
+                "b", new Default(87)
+            ),
+            Map.of(
+                "Jonas Vingegaard",
+                Map.of(
+                    "c", new Default(117),
+                    "d", new Default(23)
+                )
+            )
+        );
+
+        var settings = defaults.list(Optional.of("Jonas Vingegaard"), Optional.of("c"));
+
+        assertThat(settings.size()).isEqualTo(1);
+        assertThat(settings.get("c")).isEqualTo(117);
+    }
+
+    @Test
+    void shouldOverlayPersonalDefaults() {
+        var defaults = new DefaultsConfiguration(
+            Map.of(
+                "a", new Default(42),
+                "b", new Default(87),
+                "c", new Default(512)
+            ),
+            Map.of(
+                "Jonas Vingegaard",
+                Map.of(
+                    "b", new Default(59),
+                    "c", new Default(117),
+                    "d", new Default(23)
+                )
+            )
+        );
+
+        var settings = defaults.list(Optional.of("Jonas Vingegaard"), Optional.empty());
+
+        assertThat(settings.size()).isEqualTo(4);
+        assertThat(settings.get("a")).isEqualTo(42);
+        assertThat(settings.get("b")).isEqualTo(59);
+        assertThat(settings.get("c")).isEqualTo(117);
+        assertThat(settings.get("d")).isEqualTo(23);
+    }
+
+    @Test
+    void shouldFilterOverlaidPersonalDefaults() {
+        var defaults = new DefaultsConfiguration(
+            Map.of(
+                "a", new Default(42),
+                "b", new Default(87),
+                "c", new Default(512)
+            ),
+            Map.of(
+                "Jonas Vingegaard",
+                Map.of(
+                    "b", new Default(59),
+                    "c", new Default(117),
+                    "d", new Default(23)
+                )
+            )
+        );
+
+        var settings = defaults.list(Optional.of("Jonas Vingegaard"), Optional.of("c"));
+
+        assertThat(settings.size()).isEqualTo(1);
+        assertThat(settings.get("c")).isEqualTo(117);
     }
 }

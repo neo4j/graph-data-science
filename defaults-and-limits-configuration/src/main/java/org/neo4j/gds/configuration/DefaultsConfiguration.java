@@ -22,25 +22,36 @@ package org.neo4j.gds.configuration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class DefaultsConfiguration {
     /**
      * A JVM-wide singleton we can use to store the defaults configuration. Lifecycle of this singleton matches that of
      * the data it holds - it starts empty and dies when JVM exists.
      */
-    public static final DefaultsConfiguration Instance = new DefaultsConfiguration(Collections.emptyMap(), Collections.emptyMap());
+    public static final DefaultsConfiguration Instance = new DefaultsConfiguration(
+        Collections.emptyMap(),
+        Collections.emptyMap()
+    );
 
     /**
      * This is a handy singleton for when you need to satisfy a requirement for the configuration, but want to ignore
      * defaults entirely.
      */
-    public static final DefaultsConfiguration Empty = new DefaultsConfiguration(Collections.emptyMap(), Collections.emptyMap());
+    public static final DefaultsConfiguration Empty = new DefaultsConfiguration(
+        Collections.emptyMap(),
+        Collections.emptyMap()
+    );
 
     private final Map<String, Default> globalDefaults;
 
     private final Map<String, Map<String, Default>> personalDefaults;
 
-    public DefaultsConfiguration(Map<String, Default> globalDefaults, Map<String, Map<String, Default>> personalDefaults) {
+    public DefaultsConfiguration(
+        Map<String, Default> globalDefaults,
+        Map<String, Map<String, Default>> personalDefaults
+    ) {
         this.globalDefaults = globalDefaults;
         this.personalDefaults = personalDefaults;
     }
@@ -54,5 +65,27 @@ public class DefaultsConfiguration {
             .forEach((s, d) -> configurationWithDefaults.putIfAbsent(s, d.getValue()));
 
         return configurationWithDefaults;
+    }
+
+    /**
+     * Return global default settings.
+     *
+     * @param username if supplied, defaults for this user are overlaid
+     * @param key      if supplied, return just the default setting for that key
+     */
+    public Map<String, Object> list(Optional<String> username, Optional<String> key) {
+        var defaults = globalDefaults.entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue()));
+
+        username.ifPresent(s -> personalDefaults.getOrDefault(s, Collections.emptyMap())
+            .forEach((k, v) -> defaults.put(k, v.getValue())));
+
+        if (key.isEmpty()) return defaults;
+
+        if (!defaults.containsKey(key.get())) return Collections.emptyMap();
+
+        Object value = defaults.get(key.get());
+
+        return Map.of(key.get(), value);
     }
 }
