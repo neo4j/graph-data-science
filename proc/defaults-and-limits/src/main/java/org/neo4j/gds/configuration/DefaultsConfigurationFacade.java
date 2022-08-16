@@ -28,10 +28,10 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 /**
  * Here in the UI layer we need to take care of authorisation and dispatch.
  */
-class DefaultsAndLimitsConfigurationFacade {
+class DefaultsConfigurationFacade {
     private final DefaultsConfiguration defaultsConfiguration;
 
-    DefaultsAndLimitsConfigurationFacade(DefaultsConfiguration defaultsConfiguration) {
+    DefaultsConfigurationFacade(DefaultsConfiguration defaultsConfiguration) {
         this.defaultsConfiguration = defaultsConfiguration;
     }
 

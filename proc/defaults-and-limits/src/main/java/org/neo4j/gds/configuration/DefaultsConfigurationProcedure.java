@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 /**
  * Here in the procedure we parse parameters and handle authentication, because that is closely tied to Neo4j
  */
-public class DefaultsAndLimitsConfigurationProcedure {
+public class DefaultsConfigurationProcedure {
     @SuppressWarnings("WeakerAccess")
     @Context
     public KernelTransaction kernelTransaction;
@@ -43,22 +43,22 @@ public class DefaultsAndLimitsConfigurationProcedure {
     public Username username;
 
     private final BooleanSupplier isAdministratorPredicate;
-    private final DefaultsAndLimitsConfigurationFacade facade;
+    private final DefaultsConfigurationFacade facade;
 
     /**
      * Exists to satisfy procedure framework.
      */
     @SuppressWarnings("unused")
-    public DefaultsAndLimitsConfigurationProcedure() {
+    public DefaultsConfigurationProcedure() {
         isAdministratorPredicate = this::isAdministrator;
-        facade = new DefaultsAndLimitsConfigurationFacade(DefaultsConfiguration.Instance);
+        facade = new DefaultsConfigurationFacade(DefaultsConfiguration.Instance);
     }
 
-    DefaultsAndLimitsConfigurationProcedure(
+    DefaultsConfigurationProcedure(
         KernelTransaction kernelTransaction,
         Username username,
         BooleanSupplier isAdministratorPredicate,
-        DefaultsAndLimitsConfigurationFacade facade
+        DefaultsConfigurationFacade facade
     ) {
         this.kernelTransaction = kernelTransaction;
         this.username = username;

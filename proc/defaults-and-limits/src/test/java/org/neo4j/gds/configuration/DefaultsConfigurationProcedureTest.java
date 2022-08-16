@@ -42,11 +42,11 @@ import static org.mockito.Mockito.when;
  * This way, down in the facade, we can cleanly test all the combinations of things that make up the actual business
  * rules, like the one about how if you are not an admin you can't list other people's settings.
  */
-class DefaultsAndLimitsConfigurationProcedureTest {
+class DefaultsConfigurationProcedureTest {
     @Test
     void shouldListGlobalDefaults() {
-        var facade = mock(DefaultsAndLimitsConfigurationFacade.class);
-        var procedure = new DefaultsAndLimitsConfigurationProcedure(
+        var facade = mock(DefaultsConfigurationFacade.class);
+        var procedure = new DefaultsConfigurationProcedure(
             null,
             Username.of("some administrator"),
             () -> true,
@@ -71,8 +71,8 @@ class DefaultsAndLimitsConfigurationProcedureTest {
 
     @Test
     void shouldListPersonalDefaultForSpecificKey() {
-        var facade = mock(DefaultsAndLimitsConfigurationFacade.class);
-        var procedure = new DefaultsAndLimitsConfigurationProcedure(
+        var facade = mock(DefaultsConfigurationFacade.class);
+        var procedure = new DefaultsConfigurationProcedure(
             null,
             Username.of("some administrator"),
             () -> true,
@@ -93,8 +93,8 @@ class DefaultsAndLimitsConfigurationProcedureTest {
 
     @Test
     void shouldSetGlobalDefault() {
-        var facade = mock(DefaultsAndLimitsConfigurationFacade.class);
-        var procedure = new DefaultsAndLimitsConfigurationProcedure(
+        var facade = mock(DefaultsConfigurationFacade.class);
+        var procedure = new DefaultsConfigurationProcedure(
             null,
             Username.of("some administrator"),
             () -> true,
@@ -108,8 +108,8 @@ class DefaultsAndLimitsConfigurationProcedureTest {
 
     @Test
     void shouldSetPersonalDefault() {
-        var facade = mock(DefaultsAndLimitsConfigurationFacade.class);
-        var procedure = new DefaultsAndLimitsConfigurationProcedure(
+        var facade = mock(DefaultsConfigurationFacade.class);
+        var procedure = new DefaultsConfigurationProcedure(
             null,
             Username.of("some administrator"),
             () -> true,

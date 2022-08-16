@@ -31,11 +31,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class DefaultsAndLimitsConfigurationFacadeTest {
+class DefaultsConfigurationFacadeTest {
     @Test
     void shouldListDefaults() {
         var configuration = mock(DefaultsConfiguration.class);
-        var facade = new DefaultsAndLimitsConfigurationFacade(configuration);
+        var facade = new DefaultsConfigurationFacade(configuration);
 
         when(configuration.list(Optional.empty(), Optional.empty())).thenReturn(Map.of("a", 42, "b", 87));
         Stream<DefaultSetting> defaults = facade.listDefaults("operator", true, Optional.empty(), Optional.empty());
@@ -54,7 +54,7 @@ class DefaultsAndLimitsConfigurationFacadeTest {
 
     @Test
     void shouldAuthoriseEverythingForAdministrator() {
-        var facade = new DefaultsAndLimitsConfigurationFacade(null);
+        var facade = new DefaultsConfigurationFacade(null);
 
         facade.assertAuthorisedToList(null, true, Optional.empty());
         facade.assertAuthorisedToList(null, true, Optional.of("Cecilie Uttrup Ludwig"));
@@ -64,7 +64,7 @@ class DefaultsAndLimitsConfigurationFacadeTest {
     // Regular users can see global defaults
     @Test
     void shouldAuthoriseWhenThereIsNothingToAuthoriseFor() {
-        var facade = new DefaultsAndLimitsConfigurationFacade(null);
+        var facade = new DefaultsConfigurationFacade(null);
 
         facade.assertAuthorisedToList(null, false, Optional.empty());
         facade.assertAuthorisedToList(null, true, Optional.empty());
@@ -72,7 +72,7 @@ class DefaultsAndLimitsConfigurationFacadeTest {
 
     @Test
     void shouldNotAuthoriseRegularUserSeeingDefaultsForOtherUser() {
-        var facade = new DefaultsAndLimitsConfigurationFacade(null);
+        var facade = new DefaultsConfigurationFacade(null);
 
         try {
             facade.assertAuthorisedToList("Ludwig", false, Optional.of("Vingegaard"));
@@ -86,7 +86,7 @@ class DefaultsAndLimitsConfigurationFacadeTest {
 
     @Test
     void shouldAuthoriseRegularUsersSeeingTheirOwnDefaultSettings() {
-        var facade = new DefaultsAndLimitsConfigurationFacade(null);
+        var facade = new DefaultsConfigurationFacade(null);
 
         facade.assertAuthorisedToList("Cecilie Uttrup Ludwig", false, Optional.of("Cecilie Uttrup Ludwig"));
     }
@@ -94,7 +94,7 @@ class DefaultsAndLimitsConfigurationFacadeTest {
     @Test
     void shouldSetGlobalDefault() {
         var configuration = mock(DefaultsConfiguration.class);
-        var facade = new DefaultsAndLimitsConfigurationFacade(configuration);
+        var facade = new DefaultsConfigurationFacade(configuration);
 
         facade.setDefault("some administrator", true, Optional.empty(), "foo", 42);
 
@@ -103,7 +103,7 @@ class DefaultsAndLimitsConfigurationFacadeTest {
 
     @Test
     void shouldDisallowRegularUserSettingGlobalDefault() {
-        var facade = new DefaultsAndLimitsConfigurationFacade(null);
+        var facade = new DefaultsConfigurationFacade(null);
 
         try {
             facade.setDefault("Cecilie Uttrup Ludwig", false, Optional.empty(), "foo", 42);
@@ -118,7 +118,7 @@ class DefaultsAndLimitsConfigurationFacadeTest {
     @Test
     void shouldSetPersonalDefault() {
         var configuration = mock(DefaultsConfiguration.class);
-        var facade = new DefaultsAndLimitsConfigurationFacade(configuration);
+        var facade = new DefaultsConfigurationFacade(configuration);
 
         facade.setDefault("some administrator", true, Optional.of("Jonas Vingegaard"), "foo", 42);
 
@@ -127,7 +127,7 @@ class DefaultsAndLimitsConfigurationFacadeTest {
 
     @Test
     void shouldDisallowRegularUserSettingPersonalDefaultForOtherUser() {
-        var facade = new DefaultsAndLimitsConfigurationFacade(null);
+        var facade = new DefaultsConfigurationFacade(null);
 
         try {
             facade.setDefault("Ludwig", false, Optional.of("Vingegaard"), "foo", 42);
@@ -140,7 +140,7 @@ class DefaultsAndLimitsConfigurationFacadeTest {
     @Test
     void shouldAllowRegularUserSettingPersonalDefaultForThemself() {
         var configuration = mock(DefaultsConfiguration.class);
-        var facade = new DefaultsAndLimitsConfigurationFacade(configuration);
+        var facade = new DefaultsConfigurationFacade(configuration);
 
         facade.setDefault("Ludwig", false, Optional.of("Ludwig"), "foo", 42);
 
