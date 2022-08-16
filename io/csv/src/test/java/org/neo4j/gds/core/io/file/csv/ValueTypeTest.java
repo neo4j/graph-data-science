@@ -58,6 +58,6 @@ class ValueTypeTest {
     @MethodSource("formatValues")
     void testParsingFromCsv(ValueType valueType, Object expected, String value) throws IOException {
         var arrayReader = new CsvMapper().readerForArrayOf(String.class);
-        assertThat(CsvImportParsingUtil.parse(value, valueType, valueType.fallbackValue(), arrayReader)).isEqualTo(expected);
+        assertThat(CsvImportParsingUtil.parseProperty(value, valueType, valueType.fallbackValue(), arrayReader)).isEqualTo(expected);
     }
 }
