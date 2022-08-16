@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.api.nodeproperties;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.DefaultValue;
 
 public enum ValueType {
@@ -37,6 +38,11 @@ public enum ValueType {
         public DefaultValue fallbackValue() {
             return DefaultValue.forLong();
         }
+
+        @Override
+        public <RESULT> RESULT accept(Visitor<RESULT> visitor) {
+            return visitor.visitLong();
+        }
     },
     DOUBLE {
         @Override
@@ -52,6 +58,11 @@ public enum ValueType {
         @Override
         public DefaultValue fallbackValue() {
             return DefaultValue.forDouble();
+        }
+
+        @Override
+        public <RESULT> RESULT accept(Visitor<RESULT> visitor) {
+            return visitor.visitDouble();
         }
     },
     STRING {
@@ -69,6 +80,11 @@ public enum ValueType {
         public DefaultValue fallbackValue() {
             return DefaultValue.DEFAULT;
         }
+
+        @Override
+        public <RESULT> RESULT accept(Visitor<RESULT> visitor) {
+            return visitor.visitString();
+        }
     },
     DOUBLE_ARRAY {
         @Override
@@ -84,6 +100,11 @@ public enum ValueType {
         @Override
         public DefaultValue fallbackValue() {
             return DefaultValue.forDoubleArray();
+        }
+
+        @Override
+        public <RESULT> RESULT accept(Visitor<RESULT> visitor) {
+            return visitor.visitDoubleArray();
         }
     },
     FLOAT_ARRAY {
@@ -101,6 +122,11 @@ public enum ValueType {
         public DefaultValue fallbackValue() {
             return DefaultValue.forFloatArray();
         }
+
+        @Override
+        public <RESULT> RESULT accept(Visitor<RESULT> visitor) {
+            return visitor.visitFloatArray();
+        }
     },
     LONG_ARRAY {
         @Override
@@ -116,6 +142,11 @@ public enum ValueType {
         @Override
         public DefaultValue fallbackValue() {
             return DefaultValue.forLongArray();
+        }
+
+        @Override
+        public <RESULT> RESULT accept(Visitor<RESULT> visitor) {
+            return visitor.visitLongArray();
         }
     },
     UNKNOWN {
@@ -133,6 +164,11 @@ public enum ValueType {
         public DefaultValue fallbackValue() {
             return DefaultValue.DEFAULT;
         }
+
+        @Override
+        public <RESULT> RESULT accept(Visitor<RESULT> visitor) {
+            return visitor.visitUnknown();
+        }
     };
 
     public abstract String cypherName();
@@ -140,6 +176,8 @@ public enum ValueType {
     public abstract String csvName();
 
     public abstract DefaultValue fallbackValue();
+
+    public abstract <RESULT> RESULT accept(Visitor<RESULT> visitor);
 
     public static ValueType fromCsvName(String csvName) {
         for (ValueType value : values()) {
@@ -151,5 +189,16 @@ public enum ValueType {
             }
         }
         throw new IllegalArgumentException("Unexpected value: " + csvName);
+    }
+
+    interface Visitor<RESULT> {
+        RESULT visitLong();
+        RESULT visitDouble();
+        RESULT visitString();
+        RESULT visitLongArray();
+        RESULT visitDoubleArray();
+        RESULT visitFloatArray();
+
+        default @Nullable RESULT visitUnknown() { return null; }
     }
 }
