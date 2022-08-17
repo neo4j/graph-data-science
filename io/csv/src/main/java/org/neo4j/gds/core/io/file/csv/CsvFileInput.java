@@ -19,8 +19,10 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.schema.NodeSchema;
@@ -48,13 +50,10 @@ import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 final class CsvFileInput implements FileInput {
 
@@ -62,11 +61,13 @@ final class CsvFileInput implements FileInput {
     private static final String ARRAY_ELEMENT_SEPARATOR = ";";
     private static final CsvMapper CSV_MAPPER = new CsvMapper();
     private static final ObjectReader LINE_READER = CSV_MAPPER
-        .readerFor(String[].class)
+        .readerForArrayOf(String.class)
         .with(CsvSchema
             .emptySchema()
             .withColumnSeparator(COLUMN_SEPARATOR)
-        );
+        )
+        .with(CsvParser.Feature.WRAP_AS_ARRAY)
+        .with(CsvParser.Feature.SKIP_EMPTY_LINES);
     private static final ObjectReader ARRAY_READER = CSV_MAPPER
         .readerForArrayOf(String.class)
         .with(CsvSchema
@@ -258,9 +259,8 @@ final class CsvFileInput implements FileInput {
         private final SCHEMA schema;
 
         HEADER header;
-        Stream<String> lineStream;
-        Iterator<String> lineIterator;
         Map<String, PROPERTY_SCHEMA> propertySchemas;
+        MappingIterator<String[]> lineIterator;
 
         LineChunk(SCHEMA schema) {
             this.schema = schema;
@@ -269,29 +269,28 @@ final class CsvFileInput implements FileInput {
         void initialize(HEADER header, Path path) throws IOException {
             this.header = header;
             this.propertySchemas = header.schemaForIdentifier(schema);
-            this.lineStream = Files.lines(path);
-            this.lineIterator = this.lineStream.iterator();
+            this.lineIterator = LINE_READER.readValues(path.toFile());
         }
 
         @Override
         public boolean next(InputEntityVisitor visitor) throws IOException {
             if (lineIterator.hasNext()) {
-                String line = lineIterator.next();
+                String[] lineArray = lineIterator.next();
                 // Ignore empty lines
-                if (!line.isBlank()) {
-                    visitLine(line, header, visitor);
+                if (lineArray.length != 0) {
+                    visitLine(lineArray, header, visitor);
                 }
                 return true;
             }
             return false;
         }
 
-        abstract void visitLine(String line, HEADER header, InputEntityVisitor visitor) throws IOException;
+        abstract void visitLine(String[] lineArray, HEADER header, InputEntityVisitor visitor) throws IOException;
 
         @Override
         public void close() throws IOException {
-            if (this.lineStream != null) {
-                this.lineStream.close();
+            if (lineIterator != null) {
+                lineIterator.close();
             }
         }
     }
@@ -303,13 +302,11 @@ final class CsvFileInput implements FileInput {
         }
 
         @Override
-        void visitLine(String line, NodeFileHeader header, InputEntityVisitor visitor) throws IOException {
-            var parsedLine = (String[]) LINE_READER.readValue(line);
-
+        void visitLine(String[] lineArray, NodeFileHeader header, InputEntityVisitor visitor) throws IOException {
             visitor.labels(header.nodeLabels());
-            visitor.id(CsvImportParsingUtil.parseId(parsedLine[0]));
+            visitor.id(CsvImportParsingUtil.parseId(lineArray[0]));
 
-            visitProperties(header, propertySchemas, visitor, parsedLine);
+            visitProperties(header, propertySchemas, visitor, lineArray);
 
             visitor.endOfEntity();
         }
@@ -322,14 +319,12 @@ final class CsvFileInput implements FileInput {
         }
 
         @Override
-        void visitLine(String line, RelationshipFileHeader header, InputEntityVisitor visitor) throws IOException {
-            var parsedLine = (String[]) LINE_READER.readValue(line);
-
+        void visitLine(String[] lineArray, RelationshipFileHeader header, InputEntityVisitor visitor) throws IOException {
             visitor.type(header.relationshipType());
-            visitor.startId(CsvImportParsingUtil.parseId(parsedLine[0]));
-            visitor.endId(CsvImportParsingUtil.parseId(parsedLine[1]));
+            visitor.startId(CsvImportParsingUtil.parseId(lineArray[0]));
+            visitor.endId(CsvImportParsingUtil.parseId(lineArray[1]));
 
-            visitProperties(header, propertySchemas, visitor, parsedLine);
+            visitProperties(header, propertySchemas, visitor, lineArray);
 
             visitor.endOfEntity();
         }
@@ -343,10 +338,9 @@ final class CsvFileInput implements FileInput {
 
         @Override
         void visitLine(
-            String line, GraphPropertyFileHeader header, InputEntityVisitor visitor
+            String[] lineArray, GraphPropertyFileHeader header, InputEntityVisitor visitor
         ) throws IOException {
-            var parsedLine = ((String[]) LINE_READER.readValue(line));
-            visitProperties(header, propertySchemas, visitor, parsedLine);
+            visitProperties(header, propertySchemas, visitor, lineArray);
             visitor.endOfEntity();
         }
     }
