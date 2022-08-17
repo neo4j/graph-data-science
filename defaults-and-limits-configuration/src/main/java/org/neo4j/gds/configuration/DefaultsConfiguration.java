@@ -74,19 +74,27 @@ public class DefaultsConfiguration {
      * @param key      if supplied, return just the default setting for that key
      */
     public Map<String, Object> list(Optional<String> username, Optional<String> key) {
-        var defaults = globalDefaults.entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue()));
+        var defaults = startWithGlobalDefaults();
 
-        username.ifPresent(s -> personalDefaults.getOrDefault(s, Collections.emptyMap())
-            .forEach((k, v) -> defaults.put(k, v.getValue())));
+        addPersonalDefaultsIfApplicable(username, defaults);
 
-        if (key.isEmpty()) return defaults;
+        if (key.isEmpty()) return defaults; // if no key specified, we are done
 
-        if (!defaults.containsKey(key.get())) return Collections.emptyMap();
+        if (!defaults.containsKey(key.get())) return Collections.emptyMap(); // done because value does not exist for key
 
         Object value = defaults.get(key.get());
 
         return Map.of(key.get(), value);
+    }
+
+    private Map<String, Object> startWithGlobalDefaults() {
+        return globalDefaults.entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue()));
+    }
+
+    private void addPersonalDefaultsIfApplicable(Optional<String> username, Map<String, Object> defaults) {
+        username.ifPresent(s -> personalDefaults.getOrDefault(s, Collections.emptyMap())
+            .forEach((k, v) -> defaults.put(k, v.getValue())));
     }
 
     void set(String key, Object value, Optional<String> username) {
