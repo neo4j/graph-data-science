@@ -56,27 +56,27 @@ public class DefaultsConfiguration {
         this.personalDefaults = personalDefaults;
     }
 
+    /**
+     * Take user input and apply defaults to fill out fields not supplied by user
+     */
     public Map<String, Object> apply(Map<String, Object> configuration, String username) {
         Map<String, Object> configurationWithDefaults = new HashMap<>(configuration);
 
-        personalDefaults.getOrDefault(username, Collections.emptyMap())
-            .forEach((s, d) -> configurationWithDefaults.putIfAbsent(s, d.getValue()));
-        globalDefaults
-            .forEach((s, d) -> configurationWithDefaults.putIfAbsent(s, d.getValue()));
+        startWithPersonalDefaults(username, configurationWithDefaults);
+        fillInWithGlobalDefaults(configurationWithDefaults);
 
         return configurationWithDefaults;
     }
 
     /**
-     * Return global default settings.
+     * List global default settings.
      *
      * @param username if supplied, defaults for this user are overlaid
      * @param key      if supplied, return just the default setting for that key
      */
     public Map<String, Object> list(Optional<String> username, Optional<String> key) {
         var defaults = startWithGlobalDefaults();
-
-        addPersonalDefaultsIfApplicable(username, defaults);
+        overlayPersonalDefaultsIfApplicable(username, defaults);
 
         if (key.isEmpty()) return defaults; // if no key specified, we are done
 
@@ -87,24 +87,39 @@ public class DefaultsConfiguration {
         return Map.of(key.get(), value);
     }
 
+    /**
+     * Set default for key to value globally.
+     *
+     * @param username if supplied, set the key-value pair just for that user.
+     */
+    void set(String key, Object value, Optional<String> username) {
+        Default valueAsDefault = new Default((Integer) value);
+
+        if (username.isPresent()) {
+            personalDefaults.putIfAbsent(username.get(), new HashMap<>()); // lazy initialisation
+            personalDefaults.get(username.get()).put(key, valueAsDefault);
+        } else {
+            globalDefaults.put(key, valueAsDefault);
+        }
+    }
+
+    private void fillInWithGlobalDefaults(Map<String, Object> configurationWithDefaults) {
+        globalDefaults
+            .forEach((s, d) -> configurationWithDefaults.putIfAbsent(s, d.getValue()));
+    }
+
+    private void startWithPersonalDefaults(String username, Map<String, Object> configurationWithDefaults) {
+        personalDefaults.getOrDefault(username, Collections.emptyMap())
+            .forEach((s, d) -> configurationWithDefaults.putIfAbsent(s, d.getValue()));
+    }
+
     private Map<String, Object> startWithGlobalDefaults() {
         return globalDefaults.entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue()));
     }
 
-    private void addPersonalDefaultsIfApplicable(Optional<String> username, Map<String, Object> defaults) {
+    private void overlayPersonalDefaultsIfApplicable(Optional<String> username, Map<String, Object> defaults) {
         username.ifPresent(s -> personalDefaults.getOrDefault(s, Collections.emptyMap())
             .forEach((k, v) -> defaults.put(k, v.getValue())));
-    }
-
-    void set(String key, Object value, Optional<String> username) {
-        Default valueAsDefault = new Default((Integer) value);
-
-        if (username.isPresent()) {
-            personalDefaults.putIfAbsent(username.get(), new HashMap<>());
-            personalDefaults.get(username.get()).put(key, valueAsDefault);
-        } else {
-            globalDefaults.put(key, valueAsDefault);
-        }
     }
 }
