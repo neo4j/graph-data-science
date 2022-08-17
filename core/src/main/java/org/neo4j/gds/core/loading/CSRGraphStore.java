@@ -451,10 +451,10 @@ public class CSRGraphStore implements GraphStore {
                         ));
                 }
 
-                var resultingRelSchema = schema.relationshipSchema().union(newSchemaBuilder.build());
+                var resultingRelationshipSchema = schema.relationshipSchema().union(newSchemaBuilder.build());
                 this.schema = GraphSchema.of(
                     schema().nodeSchema(),
-                    resultingRelSchema,
+                    resultingRelationshipSchema,
                     schema.graphProperties()
                 );
             }

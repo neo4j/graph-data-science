@@ -36,9 +36,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.Orientation.UNDIRECTED;
 
@@ -46,30 +43,30 @@ class RelationshipSchemaTest {
 
     @Test
     void inAndOutUndirected() {
-        assertTrue(RelationshipSchema.builder().build().isUndirected());
+        assertThat(RelationshipSchema.builder().build().isUndirected()).isTrue();
 
-        assertTrue(RelationshipSchema
-            .of(Map.of(
-                RelationshipType.of("TYPE"),
-                Map.of("prop", RelationshipPropertySchema.of("prop", ValueType.DOUBLE))
-            ), Map.of(RelationshipType.of("TYPE"), UNDIRECTED))
-            .isUndirected());
-        assertFalse(RelationshipSchema.of(Map.of(
-                RelationshipType.of("TYPE"),
-                Map.of("prop", RelationshipPropertySchema.of("prop", ValueType.DOUBLE))
-            ), Map.of(RelationshipType.of("TYPE"), NATURAL)).isUndirected()
+        RelationshipType type = RelationshipType.of("TYPE");
+        var propertySchema = Map.of(
+            type,
+            Map.of("prop", RelationshipPropertySchema.of("prop", ValueType.DOUBLE))
         );
+
+        var undirectedSchema = RelationshipSchema.of(propertySchema, Map.of(type, UNDIRECTED));
+        assertThat(undirectedSchema.isUndirected()).isTrue();
+
+        RelationshipSchema directedSchema = RelationshipSchema.of(propertySchema, Map.of(type, NATURAL));
+        assertThat(directedSchema.isUndirected()).isFalse();
     }
 
     @Test
     void emptyIsUndirected() {
-        assertTrue(RelationshipSchema.empty().isUndirected());
+        assertThat(RelationshipSchema.empty().isUndirected()).isTrue();
     }
 
     @Test
     void handlesOutsideOfSchemaRequests() {
         var empty = RelationshipSchema.empty();
-        assertFalse(empty.hasProperty(RelationshipType.of("NotInSchema"), "notInSchemaEither"));
+        assertThat(empty.hasProperty(RelationshipType.of("NotInSchema"), "notInSchemaEither")).isFalse();
     }
 
     @Test
@@ -95,11 +92,11 @@ class RelationshipSchemaTest {
             ).build();
 
         RelationshipPropertySchema relationshipPropertySchema = relationshipSchema.properties().get(relType).get(propertyName);
-        assertTrue(relationshipPropertySchema.defaultValue().isUserDefined());
+        assertThat(relationshipPropertySchema.defaultValue().isUserDefined()).isTrue();
 
-        assertEquals(defaultValue, relationshipPropertySchema.defaultValue());
-        assertEquals(propertyState, relationshipPropertySchema.state());
-        assertEquals(aggregation, relationshipPropertySchema.aggregation());
+        assertThat(relationshipPropertySchema.defaultValue()).isEqualTo(defaultValue);
+        assertThat(relationshipPropertySchema.state()).isEqualTo(propertyState);
+        assertThat(relationshipPropertySchema.aggregation()).isEqualTo(aggregation);
     }
 
     static Stream<Arguments> orientations() {
@@ -121,14 +118,14 @@ class RelationshipSchemaTest {
             .addProperty(label2, orientation, "baz", ValueType.DOUBLE)
             .build();
 
-        assertEquals(relationshipSchema, relationshipSchema.filter(Set.of(label1, label2)));
+        assertThat(relationshipSchema.filter(Set.of(label1, label2))).isEqualTo(relationshipSchema);
 
         var expected = RelationshipSchema.builder()
             .addProperty(label1, orientation, "bar", ValueType.DOUBLE)
             .addProperty(label1, orientation, "baz", ValueType.DOUBLE)
             .build();
 
-        assertEquals(expected, relationshipSchema.filter(Set.of(label1)));
+        assertThat(relationshipSchema.filter(Set.of(label1))).isEqualTo(expected);
         assertThat(relationshipSchema.isUndirected()).isEqualTo(isUndirected);
     }
 
@@ -145,12 +142,12 @@ class RelationshipSchemaTest {
             .build();
         var mixed = directed.union(undirected);
 
-        assertFalse(mixed.isUndirected());
-        assertFalse(directed.isUndirected());
-        assertTrue(undirected.isUndirected());
-        assertEquals(mixed, mixed.filter(Set.of(directedType, undirectedType)));
-        assertEquals(directed, mixed.filter(Set.of(directedType)));
-        assertEquals(undirected, mixed.filter(Set.of(undirectedType)));
+        assertThat(mixed.isUndirected()).isFalse();
+        assertThat(directed.isUndirected()).isFalse();
+        assertThat(undirected.isUndirected()).isTrue();
+        assertThat(mixed.filter(Set.of(directedType, undirectedType))).isEqualTo(mixed);
+        assertThat(mixed.filter(Set.of(directedType))).isEqualTo(directed);
+        assertThat(mixed.filter(Set.of(undirectedType))).isEqualTo(undirected);
     }
 
     static Stream<Arguments> unionDirections() {
@@ -182,7 +179,7 @@ class RelationshipSchemaTest {
             .build();
 
         var actual = relationshipSchema1.union(relationshipSchema2);
-        assertEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
         assertThat(actual.isUndirected()).isEqualTo(isUndirectedExpectation);
         assertThat(actual.relTypeOrientationMap()).containsExactlyInAnyOrderEntriesOf(Map.of(
             type1, isUndirected1,
@@ -253,7 +250,7 @@ class RelationshipSchemaTest {
         builder.addRelationshipType(RelationshipType.of("Y"), NATURAL);
 
         RelationshipSchema schema = builder.build();
-        assertFalse(schema.isUndirected());
+        assertThat(schema.isUndirected()).isFalse();
         assertThat(schema.availableTypes()).contains(RelationshipType.of("X"), RelationshipType.of("Y"));
         assertThat(schema.properties()).containsExactlyInAnyOrderEntriesOf(Map.of(
             RelationshipType.of("X"), Map.of(),
@@ -274,7 +271,7 @@ class RelationshipSchemaTest {
         builder.addProperty(RelationshipType.of("Z"), UNDIRECTED, "z", RelationshipPropertySchema.of("z", ValueType.DOUBLE));
 
         RelationshipSchema schema = builder.build();
-        assertFalse(schema.isUndirected());
+        assertThat(schema.isUndirected()).isFalse();
         assertThat(schema.availableTypes()).contains(RelationshipType.of("X"), RelationshipType.of("Y"));
         assertThat(schema.properties()).containsExactlyInAnyOrderEntriesOf(Map.of(
             RelationshipType.of("X"), Map.of("x", RelationshipPropertySchema.of("x", ValueType.DOUBLE)),
