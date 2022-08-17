@@ -38,7 +38,7 @@ public class RandomWalkStreamProc extends BaseProc {
         "Random Walk is an algorithm that provides random paths in a graph. " +
         "It’s similar to how a drunk person traverses a city.";
 
-    @Procedure(name = "gds.beta.randomWalk.stream", mode = READ)
+    @Procedure(name = "gds.randomWalk.stream", mode = READ)
     @Description(DESCRIPTION)
 
     public Stream<StreamResult> stream(
@@ -52,7 +52,7 @@ public class RandomWalkStreamProc extends BaseProc {
     }
 
 
-    @Procedure(value = "gds.beta.randomWalk.stream.estimate", mode = READ)
+    @Procedure(value = "gds.randomWalk.stream.estimate", mode = READ)
     @Description(BaseProc.ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,

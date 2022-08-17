@@ -43,7 +43,7 @@ Before running this algorithm, we recommend that you read xref:common-usage/memo
 .Run RandomWalk in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.randomWalk.stream(
+CALL gds.randomWalk.stream(
   graphName: String,
   configuration: Map
 )
@@ -76,7 +76,7 @@ include::partial$/algorithms/beta/randomWalk/specific-configuration.adoc[]
 .Run RandomWalk in stats mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.randomWalk.stats(
+CALL gds.randomWalk.stats(
   graphName: String,
   configuration: Map
 )
@@ -156,7 +156,7 @@ CALL gds.graph.project(
 .Run the RandomWalk algorithm on `myGraph`
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.randomWalk.stream(
+CALL gds.randomWalk.stream(
   'myGraph',
   {
     walkLength: 3,
@@ -195,7 +195,7 @@ RETURN nodeIds, [node IN nodes(path) | node.name ] AS pages
 MATCH (page:Page)
 WHERE page.name IN ['Home', 'About']
 WITH COLLECT(page) as sourceNodes
-CALL gds.beta.randomWalk.stream(
+CALL gds.randomWalk.stream(
   'myGraph',
   {
     sourceNodes: sourceNodes,
@@ -226,7 +226,7 @@ RETURN nodeIds, [node IN nodes(path) | node.name ] AS pages
 .Run the RandomWalk stats on `myGraph`
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.randomWalk.stats(
+CALL gds.randomWalk.stats(
   'myGraph',
   {
     walkLength: 3,

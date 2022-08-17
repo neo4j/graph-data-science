@@ -80,7 +80,7 @@ class RandomWalkStreamProcTest extends BaseProcTest {
     @Test
     void shouldRunSimpleConfig() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds", "beta", "randomWalk")
+            .algo("gds", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 3)
             .addParameter("walkLength", 10)
@@ -104,7 +104,7 @@ class RandomWalkStreamProcTest extends BaseProcTest {
     @Test
     void shouldReturnPath() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds", "beta", "randomWalk")
+            .algo("gds", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 3)
             .addParameter("walkLength", 10)
@@ -147,7 +147,7 @@ class RandomWalkStreamProcTest extends BaseProcTest {
         // walkBufferSize must be small to get threads to block on flushBuffer steps
         var concurrency = 4;
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds", "beta", "randomWalk")
+            .algo("gds", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 10)
             .addParameter("walkLength", 10)
@@ -197,7 +197,7 @@ class RandomWalkStreamProcTest extends BaseProcTest {
     @Test
     void shouldThrowOnUnknownStartNode() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds", "beta", "randomWalk")
+            .algo("gds", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 3)
             .addParameter("walkLength", 10)
@@ -210,7 +210,7 @@ class RandomWalkStreamProcTest extends BaseProcTest {
     @Test
     void shouldThrowOnUnselectedStartNode() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds", "beta", "randomWalk")
+            .algo("gds", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 3)
             .addParameter("walkLength", 10)
@@ -224,7 +224,7 @@ class RandomWalkStreamProcTest extends BaseProcTest {
     @Test
     void shouldRunMemoryEstimation() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds", "beta", "randomWalk")
+            .algo("gds", "randomWalk")
             .estimationMode(GdsCypher.ExecutionModes.STREAM)
             .addParameter("walksPerNode", 3)
             .addParameter("walkLength", 10)

@@ -254,10 +254,10 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.beta.pipeline.exists",
         "gds.beta.pipeline.list",
 
-        "gds.beta.randomWalk.stats",
-        "gds.beta.randomWalk.stats.estimate",
-        "gds.beta.randomWalk.stream",
-        "gds.beta.randomWalk.stream.estimate",
+        "gds.randomWalk.stats",
+        "gds.randomWalk.stats.estimate",
+        "gds.randomWalk.stream",
+        "gds.randomWalk.stream.estimate",
 
         "gds.allShortestPaths.dijkstra.stream",
         "gds.allShortestPaths.dijkstra.stream.estimate",

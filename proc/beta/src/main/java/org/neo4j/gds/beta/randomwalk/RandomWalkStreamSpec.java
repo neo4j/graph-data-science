@@ -41,7 +41,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 
 
-@GdsCallable(name = "gds.beta.randomWalk.stream", description = RandomWalkStreamProc.DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.randomWalk.stream", description = RandomWalkStreamProc.DESCRIPTION, executionMode = STREAM)
 public class RandomWalkStreamSpec implements AlgorithmSpec<RandomWalk, Stream<long[]>, RandomWalkStreamConfig, Stream<StreamResult>, RandomWalkAlgorithmFactory<RandomWalkStreamConfig>> {
     @Override
     public String name() {
