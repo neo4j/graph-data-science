@@ -1,9 +1,6 @@
-[[beta-algorithms-random-walk]]
-[.beta]
+[[algorithms-random-walk]]
 = Random Walk
 :description: This section describes the Random Walk algorithm in the Neo4j Graph Data Science library.
-
-include::partial$/operations-reference/beta-note.adoc[]
 
 Random Walk is an algorithm that provides random paths in a graph.
 
@@ -59,7 +56,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-include::partial$/algorithms/beta/randomWalk/specific-configuration.adoc[]
+include::partial$/algorithms/randomWalk/specific-configuration.adoc[]
 |===
 
 .Results
@@ -93,7 +90,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-include::partial$/algorithms/beta/randomWalk/specific-configuration.adoc[]
+include::partial$/algorithms/randomWalk/specific-configuration.adoc[]
 |===
 
 .Results
@@ -146,6 +143,7 @@ CALL gds.graph.project(
     '*',
     { LINKS: { orientation: 'UNDIRECTED' } }
 );
+
 ----
 
 
