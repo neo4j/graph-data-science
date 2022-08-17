@@ -561,7 +561,6 @@ CALL gds.graph.project(
     'Node',
     {
         TYPE: {
-            type: 'TYPE',
             orientation: 'undirected',
             aggregation: 'NONE'
         }

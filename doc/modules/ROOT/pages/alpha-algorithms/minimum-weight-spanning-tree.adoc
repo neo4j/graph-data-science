@@ -172,7 +172,6 @@ CALL gds.graph.project(
   'Place',
   {
     LINK: {
-      type: 'LINK',
       properties: 'cost',
       orientation: 'UNDIRECTED'
     }

@@ -296,7 +296,6 @@ CALL gds.graph.project(
     ['Person', 'Instrument'],
     {
         LIKES: {
-            type: 'LIKES',
             properties: {
                 strength: {
                     property: 'strength',

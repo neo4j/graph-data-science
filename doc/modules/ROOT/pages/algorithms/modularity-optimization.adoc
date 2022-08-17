@@ -209,7 +209,6 @@ CALL gds.graph.project(
     'Person',
     {
         KNOWS: {
-            type: 'KNOWS',
             orientation: 'UNDIRECTED',
             properties: ['weight']
         }

@@ -392,12 +392,10 @@ CALL gds.graph.project(
   'persons',
   {
     Person: {
-      label: 'Person',
       properties: ['age', 'heightAndWeight']
     }
   }, {
     KNOWS: {
-      type: 'KNOWS',
       orientation: 'UNDIRECTED',
       properties: ['relWeight']
     }
@@ -518,20 +516,16 @@ CALL gds.graph.project(
   'persons_with_instruments',
   {
     Person: {
-      label: 'Person',
       properties: ['age', 'heightAndWeight']
     },
     Instrument: {
-      label: 'Instrument',
       properties: ['cost']
     }
   }, {
     KNOWS: {
-      type: 'KNOWS',
       orientation: 'UNDIRECTED'
     },
     LIKES: {
-      type: 'LIKES',
       orientation: 'UNDIRECTED'
     }
 })
@@ -591,12 +585,11 @@ For the purpose of this example we are going to use the `Persons` graph, but we 
 ----
 CALL gds.graph.project(
   'noPropertiesGraph',
-  'Person', {
-    KNOWS: {
-      type: 'KNOWS',
+  'Person',
+  { KNOWS: {
       orientation: 'UNDIRECTED'
-    }
-})
+  }}
+)
 ----
 
 .Run DegreeCentrality mutate to create a new property for each node

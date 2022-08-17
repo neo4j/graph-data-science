@@ -109,7 +109,6 @@ CALL gds.graph.project(
   ['Person', 'Instrument'],
   {
     PLAYS: {
-      type: 'PLAYS',
       orientation: 'NATURAL'
     },
     PLAYED_BY: {
