@@ -232,6 +232,20 @@ public abstract class BaseTest {
         );
     }
 
+    protected void runQueryWithResultConsumer(
+        String operatorName,
+        @Language("Cypher") String query,
+        Consumer<Result> check
+    ) {
+        QueryRunner.runQueryWithResultConsumer(
+            db,
+            operatorName,
+            query,
+            emptyMap(),
+            check
+        );
+    }
+
     private static BiConsumer<Transaction, Result.ResultRow> discardTx(Consumer<Result.ResultRow> check) {
         return (tx, row) -> check.accept(row);
     }
