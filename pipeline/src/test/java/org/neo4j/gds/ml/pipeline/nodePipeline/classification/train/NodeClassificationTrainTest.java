@@ -132,6 +132,8 @@ class NodeClassificationTrainTest {
     @Inject
     private GraphStore relGraphStore;
 
+    private int numberOfConcreteTrainerConfig = 0;
+
     @Test
     void runWithOnlyOOBError() {
         var pipeline = new NodeClassificationTrainingPipeline();
@@ -190,13 +192,17 @@ class NodeClassificationTrainTest {
             .tolerance(1e-5)
             .build();
         pipeline.addTrainerConfig(expectedWinner);
+        numberOfConcreteTrainerConfig++;
 
         pipeline.addTrainerConfig(MLPClassifierTrainConfigImpl.builder().hiddenLayerSizes(List.of(2)).build());
+        numberOfConcreteTrainerConfig++;
 
         // Should NOT be the winning model, so give bad hyperparams.
         pipeline.addTrainerConfig(
             LogisticRegressionTrainConfigImpl.builder().penalty(1 * 2.0 / 3.0 * 0.5).maxEpochs(1).build()
         );
+        numberOfConcreteTrainerConfig++;
+
         pipeline.addTrainerConfig(
             TunableTrainerConfig.of(
                 Map.of(
@@ -208,6 +214,8 @@ class NodeClassificationTrainTest {
                 ),
                 TrainingMethod.RandomForestClassification
             ));
+        numberOfConcreteTrainerConfig++;
+
         pipeline.addTrainerConfig(
             TunableTrainerConfig.of(
                 Map.of(
@@ -240,7 +248,7 @@ class NodeClassificationTrainTest {
 
         var validationStats = result.trainingStatistics().getValidationStats(metric);
 
-        assertThat(validationStats).hasSize(MAX_TRIALS);
+        assertThat(validationStats).hasSize(MAX_TRIALS + numberOfConcreteTrainerConfig);
 
         double model1Score = validationStats.get(0).avg();
         for (int i = 1; i < MAX_TRIALS; i++) {
@@ -305,6 +313,7 @@ class NodeClassificationTrainTest {
         pipeline.addTrainerConfig(
             LogisticRegressionTrainConfigImpl.builder().penalty(1 * 2.0 / 3.0 * 0.5).maxEpochs(1).build()
         );
+        numberOfConcreteTrainerConfig++;
 
         LogisticRegressionTrainConfig expectedWinner = LogisticRegressionTrainConfigImpl
             .builder()
@@ -313,6 +322,7 @@ class NodeClassificationTrainTest {
             .tolerance(1e-5)
             .build();
         pipeline.addTrainerConfig(expectedWinner);
+        numberOfConcreteTrainerConfig++;
 
         // Should NOT be the winning model, so give it bad hyperparams.
         pipeline.addTrainerConfig(
@@ -325,6 +335,8 @@ class NodeClassificationTrainTest {
                 ),
                 TrainingMethod.RandomForestClassification
             ));
+        numberOfConcreteTrainerConfig++;
+
         pipeline.addTrainerConfig(
             TunableTrainerConfig.of(
                 Map.of(
@@ -369,17 +381,17 @@ class NodeClassificationTrainTest {
 
         assertThat(trainingStatistics.getBestTrialIdx()).isBetween(0, 10);
         assertThat(trainingStatistics.getValidationStats(F1_WEIGHTED))
-            .hasSize(10)
+            .hasSize(MAX_TRIALS + numberOfConcreteTrainerConfig)
             .noneMatch(Objects::isNull);
         assertThat(trainingStatistics.getTrainStats(F1_WEIGHTED))
-            .hasSize(10)
+            .hasSize(MAX_TRIALS + numberOfConcreteTrainerConfig)
             .noneMatch(Objects::isNull);
 
         assertThat(trainingStatistics.winningModelOuterTrainMetrics()).containsKeys(F1_WEIGHTED);
         assertThat(trainingStatistics.winningModelTestMetrics()).containsOnlyKeys(F1_WEIGHTED);
 
         if (includeOOB) {
-            assertThat(trainingStatistics.getValidationStats(OUT_OF_BAG_ERROR)).hasSize(10);
+            assertThat(trainingStatistics.getValidationStats(OUT_OF_BAG_ERROR)).hasSize(MAX_TRIALS + numberOfConcreteTrainerConfig);
             assertThat(trainingStatistics.getTrainStats(OUT_OF_BAG_ERROR)).containsOnlyNulls();
         } else {
             assertThat(trainingStatistics.getValidationStats(OUT_OF_BAG_ERROR)).containsOnlyNulls();
@@ -729,7 +741,7 @@ class NodeClassificationTrainTest {
                     ),
                     RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(859_936, 927_176)
+                MemoryRange.of(939_936, 1_007_176)
             ),
             Arguments.of(
                 List.of(
@@ -739,7 +751,7 @@ class NodeClassificationTrainTest {
                     ),
                     RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(430_030_336, 430_097_576)
+                MemoryRange.of(430_110_336, 430_177_576)
             )
         );
     }

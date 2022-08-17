@@ -190,7 +190,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
 
         var modelCandidates = new RandomSearch(
             pipeline.trainingParameterSpace(),
-            pipeline.numberOfModelSelectionTrials(),
+            pipeline.autoTuningConfig().maxTrials(),
             trainConfig.randomSeed()
         );
 

@@ -511,16 +511,15 @@ include::partial$/machine-learning/node-property-prediction/pipelineInfoResult.a
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.pipeline.nodeClassification.configureAutoTuning('pipe', {
-  maxTrials: 5
-})
-YIELD autoTuningConfig
+  maxTrials: 2
+}) YIELD autoTuningConfig
 ----
 
 .Results
 [opts="header",cols="1"]
 |===
 | autoTuningConfig
-| {maxTrials=5}
+| {maxTrials=2}
 |===
 
 We now reconfigured the auto-tuning to try out at most 100 model candidates during xref:machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[training].

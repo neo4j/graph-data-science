@@ -611,6 +611,89 @@ final class LinkPredictionTrainPipelineExecutorTest {
     }
 
     @Nested
+    class PythonTest extends BaseProcTest {
+
+        @Neo4jGraph
+        private static final String GRAPH =
+            "CREATE" +
+            "(a: Node {age: 2})," +
+            "(b: Node {age: 3})," +
+            "(c: Node {age: 2})," +
+            "(d: Node {age: 1})," +
+            "(e: Node {age: 2})," +
+            "(a)-[:REL]->(b)," +
+            "(a)-[:REL]->(c)," +
+            "(b)-[:REL]->(c)," +
+            "(b)-[:REL]->(a)," +
+            "(c)-[:REL]->(a)," +
+            "(c)-[:REL]->(b)";
+
+        public static final String GRAPH_NAME = "G";
+
+        private GraphStore graphStore;
+
+        @BeforeEach
+        void setup() throws Exception {
+            registerProcedures(
+                GraphProjectProc.class,
+                GraphStreamNodePropertiesProc.class
+            );
+
+            runQuery(GdsCypher.call(GRAPH_NAME)
+                .graphProject()
+                .withNodeLabel("Node")
+                .withRelationshipType("REL", Orientation.UNDIRECTED)
+                .withNodeProperties(List.of("age"), DefaultValue.DEFAULT)
+                .yields());
+
+            graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), GRAPH_NAME).graphStore();
+        }
+
+        @Test
+        void pygraph() {
+            LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
+
+            pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder()
+                .validationFolds(2)
+                //0.33 fails
+                .trainFraction(0.34)
+                .testFraction(0.2)
+                .build());
+
+            pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of(
+                "penalty",
+                1
+            )));
+
+            pipeline.addNodePropertyStep(new NodeIdPropertyStep(graphStore, "degree", "rank"));
+
+            pipeline.addFeatureStep(new L2FeatureStep(List.of("rank")));
+
+            var config = LinkPredictionTrainConfigImpl.builder()
+                .modelUser(getUsername())
+                .modelName("model")
+                .graphName(GRAPH_NAME)
+                .targetRelationshipType("REL")
+                .sourceNodeLabel("Node")
+                .targetNodeLabel("Node")
+                .pipeline("pipe")
+                .randomSeed(42L)
+                .build();
+
+            TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+                var result = new LinkPredictionTrainPipelineExecutor(
+                    pipeline,
+                    config,
+                    caller.executionContext(),
+                    graphStore,
+                    ProgressTracker.NULL_TRACKER
+                ).compute();
+            });
+
+        }
+    }
+
+    @Nested
     @GdlExtension
     class BiPartiteTest {
 
