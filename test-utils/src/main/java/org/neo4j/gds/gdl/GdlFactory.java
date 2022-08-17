@@ -189,7 +189,6 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         // in case there were no properties add all labels
         idMapAndProperties.idMap().availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
 
-        boolean isUndirected = graphProjectConfig.orientation() == Orientation.UNDIRECTED;
         var relationshipSchemaBuilder = RelationshipSchema.builder();
         relationshipsAndProperties
             .properties()
