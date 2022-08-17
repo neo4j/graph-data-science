@@ -20,6 +20,7 @@
 package org.neo4j.gds.beta.randomwalk;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
@@ -99,6 +100,7 @@ class RandomWalkStreamProcTest extends BaseProcTest {
         assertEquals(10, walkForNodeZero.size());
     }
 
+
     @Test
     void shouldReturnPath() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
@@ -125,6 +127,7 @@ class RandomWalkStreamProcTest extends BaseProcTest {
         }
     }
 
+    @Disabled
     @Test
     void shouldStopWhenStreamIsNotLongerConsumed() {
         var pool = (ThreadPoolExecutor) Pools.DEFAULT;
