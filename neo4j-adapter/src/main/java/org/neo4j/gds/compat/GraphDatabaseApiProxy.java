@@ -70,10 +70,19 @@ public final class GraphDatabaseApiProxy {
         return resolver.resolveDependency(dependency, DependencyResolver.SelectionStrategy.SINGLE);
     }
 
-    public static void registerProcedures(GraphDatabaseService db, Class<?>... procedureClasses) throws KernelException {
+    public static void registerProcedures(GraphDatabaseService db, Class<?>... procedureClasses) throws
+        KernelException {
+        registerProcedures(db, false, procedureClasses);
+    }
+
+    public static void registerProcedures(
+        GraphDatabaseService db,
+        boolean overrideCurrentImplementation,
+        Class<?>... procedureClasses
+    ) throws KernelException {
         GlobalProcedures procedures = resolveDependency(db, GlobalProcedures.class);
         for (Class<?> clazz : procedureClasses) {
-            procedures.registerProcedure(clazz);
+            procedures.registerProcedure(clazz, overrideCurrentImplementation);
         }
     }
 

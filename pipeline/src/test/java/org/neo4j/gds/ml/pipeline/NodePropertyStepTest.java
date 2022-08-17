@@ -114,7 +114,7 @@ class NodePropertyStepTest extends BaseProcTest {
 
         // verify exception is caught
         assertThat(step
-            .estimate(new OpenModelCatalog(), List.of(ElementProjection.PROJECT_ALL), List.of(ElementProjection.PROJECT_ALL))
+            .estimate(new OpenModelCatalog(), "myUser", List.of(ElementProjection.PROJECT_ALL), List.of(ElementProjection.PROJECT_ALL))
             .estimate(GraphDimensions.of(1), 4)
             .memoryUsage().max).isZero();
     }

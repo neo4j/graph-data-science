@@ -201,7 +201,7 @@ public final class GdsParallelBatchImporter {
     private void validateDatabaseDoesNotExist(DatabaseLayout databaseLayout) {
         var metaDataPath = databaseLayout.metadataStore();
         var dbExists = Files.exists(metaDataPath) && Files.isReadable(metaDataPath);
-        if (dbExists) {
+        if (dbExists && !config.force()) {
             throw new IllegalArgumentException(formatWithLocale(
                 "The database [%s] already exists. The graph export procedure can only create new databases.",
                 config.dbName()

@@ -101,6 +101,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
 
         MemoryEstimation nodePropertyStepsEstimation = NodePropertyStepExecutor.estimateNodePropertySteps(
             modelCatalog,
+            configuration.username(),
             pipeline.nodePropertySteps(),
             configuration.nodeLabels(),
             configuration.relationshipTypes()
