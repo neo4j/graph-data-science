@@ -21,12 +21,16 @@ package org.neo4j.gds.core;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.CypherLoaderBuilder;
 import org.neo4j.gds.GraphFactoryTestSupport;
 import org.neo4j.gds.GraphFactoryTestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
@@ -36,14 +40,17 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.neo4j.gds.GraphFactoryTestSupport.FactoryType.NATIVE;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.assertTransactionTermination;
@@ -368,19 +375,27 @@ class GraphLoaderTest extends BaseTest {
 
     @Test
     void testDontSkipOrphanNodesByDefault() {
-        // existing graph is `(a)-->(b), (a)-->(c), (b)-->(c)`
-        runQuery("CREATE (:Node1),(:Node2),(:Node1),(n:Node2)-[:REL]->(m:Node3)");
-        Graph graph = TestGraphLoaderFactory.graphLoader(db, NATIVE).graph();
-        assertGraphEquals(fromGdl("(a)-->(b), (a)-->(c), (b)-->(c), (b)-->(c), (d), (e), (f), (g)-->(h)"), graph);
+        runQuery("CREATE (:X),(:Y),(:X),(:Y)-[:Q]->(:Z)");
+        Graph graph = TestGraphLoaderFactory
+            .graphLoader(db, NATIVE)
+            .withLabels("X", "Y", "Z")
+            .withRelationshipTypes("Q")
+            .graph();
+        TestGraph expected = fromGdl("(:X),(:Y),(:X),(:Y)-[:Q]->(:Z)");
+        assertGraphEquals(expected, graph);
     }
 
     @Test
     void testSkipOrphanNodes() {
         SKIP_ORPHANS.enableAndRun(() -> {
-            // existing graph is `(a)-->(b), (a)-->(c), (b)-->(c)`
-            runQuery("CREATE (:Node1),(:Node2),(:Node1),(n:Node2)-[:REL]->(m:Node3)");
-            Graph graph = TestGraphLoaderFactory.graphLoader(db, NATIVE).graph();
-            assertGraphEquals(fromGdl("(a)-->(b), (a)-->(c), (b)-->(c), (b)-->(c), (d)-->(e)"), graph);
+            runQuery("CREATE (:X),(:Y),(:X),(:Y)-[:Q]->(:Z)");
+            Graph graph = TestGraphLoaderFactory
+                .graphLoader(db, NATIVE)
+                .withLabels("X", "Y", "Z")
+                .withRelationshipTypes("Q")
+                .graph();
+            TestGraph expected = fromGdl("(:Y)-[:Q]->(:Z)");
+            assertGraphEquals(expected, graph);
         });
     }
 
@@ -468,5 +483,42 @@ class GraphLoaderTest extends BaseTest {
             .graphStore();
 
         assertThat(graphStore.nodeLabels()).containsExactly(NodeLabel.of("AllNodes"));
+    }
+
+    static Stream<Arguments> orientationCombinations() {
+        return Stream.of(
+            Arguments.of(Orientation.NATURAL, Orientation.NATURAL, false),
+            Arguments.of(Orientation.UNDIRECTED, Orientation.NATURAL, false),
+            Arguments.of(Orientation.NATURAL, Orientation.UNDIRECTED, false),
+            Arguments.of(Orientation.UNDIRECTED, Orientation.UNDIRECTED, true)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("orientationCombinations")
+    void nativeOrientations(Orientation orientation1, Orientation orientation2, boolean undirectedExpectation) {
+        var graphStore = new StoreLoaderBuilder()
+            .databaseService(db)
+            .graphName("graph")
+            .addNodeLabel("Node1")
+            .addRelationshipProjection(RelationshipProjection.of("REL1", orientation1))
+            .addRelationshipProjection(RelationshipProjection.of("REL2", orientation2))
+            .build()
+            .graphStore();
+
+        assertThat(graphStore.schema().relationshipSchema().isUndirected()).isEqualTo(undirectedExpectation);
+    }
+
+    @Test
+    void cypherProjectionsAreNeverUndirected() {
+        var graphStore = new CypherLoaderBuilder()
+            .databaseService(db)
+            .graphName("graph")
+            .nodeQuery("UNWIND [0, 1] AS id RETURN id")
+            .relationshipQuery("RETURN 0 AS source, 1 AS target, 'TEST' AS type")
+            .build()
+            .graphStore();
+
+        assertFalse(graphStore.schema().relationshipSchema().isUndirected());
     }
 }

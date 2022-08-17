@@ -144,9 +144,10 @@ public final class RandomGraphGenerator {
 
     private RelationshipSchema relationshipSchema() {
         var relationshipSchemaBuilder = RelationshipSchema.builder();
-        relationshipSchemaBuilder.addRelationshipType(relationshipType);
+        relationshipSchemaBuilder.addRelationshipType(relationshipType, orientation);
         maybeRelationshipPropertyProducer.ifPresent(pp -> relationshipSchemaBuilder.addProperty(
             relationshipType,
+            orientation,
             pp.getPropertyName(),
             pp.propertyType()
         ));

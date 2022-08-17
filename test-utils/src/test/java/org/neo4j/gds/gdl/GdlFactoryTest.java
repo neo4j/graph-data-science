@@ -21,7 +21,10 @@ package org.neo4j.gds.gdl;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
@@ -41,6 +44,8 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.Orientation.NATURAL;
+import static org.neo4j.gds.Orientation.UNDIRECTED;
 
 class GdlFactoryTest {
 
@@ -55,7 +60,7 @@ class GdlFactoryTest {
         assertThat(graph.relationshipCount()).isEqualTo(1);
         assertThat(graph.availableNodeProperties()).isEqualTo(Set.of("foo", "bar"));
         assertThat(graph.hasRelationshipProperty()).isTrue();
-        assertThat(graph.isUndirected()).isFalse();
+        assertThat(graph.schema().isUndirected()).isFalse();
         assertThat(graph.isEmpty()).isFalse();
     }
 
@@ -206,14 +211,49 @@ class GdlFactoryTest {
         var relationshipSchema = graph.schema().relationshipSchema();
         var expectedRelationshipSchema = RelationshipSchema
             .builder()
-            .addProperty(RelationshipType.of("A"), "prop1", ValueType.DOUBLE, Aggregation.NONE)
-            .addProperty(RelationshipType.of("A"), "prop2", ValueType.DOUBLE, Aggregation.NONE)
-            .addProperty(RelationshipType.of("B"), "prop1", ValueType.DOUBLE, Aggregation.NONE)
-            .addProperty(RelationshipType.of("B"), "prop3", ValueType.DOUBLE, Aggregation.NONE)
-            .addRelationshipType(RelationshipType.of("C"))
+            .addProperty(RelationshipType.of("A"), NATURAL, "prop1", ValueType.DOUBLE, Aggregation.DEFAULT)
+            .addProperty(RelationshipType.of("A"), NATURAL, "prop2", ValueType.DOUBLE, Aggregation.DEFAULT)
+            .addProperty(RelationshipType.of("B"), NATURAL, "prop1", ValueType.DOUBLE, Aggregation.DEFAULT)
+            .addProperty(RelationshipType.of("B"), NATURAL, "prop3", ValueType.DOUBLE, Aggregation.DEFAULT)
+            .addRelationshipType(RelationshipType.of("C"), NATURAL)
             .build();
 
         assertThat(relationshipSchema).isEqualTo(expectedRelationshipSchema);
+    }
+
+    static Stream<Orientation> orientations() {
+        return Stream.of(UNDIRECTED, NATURAL);
+    }
+
+    @ParameterizedTest
+    @MethodSource("orientations")
+    void correctRelationshipSchemaDirection(Orientation orientation) {
+        var graphStore = GdlFactory.builder().graphProjectConfig(
+            ImmutableGraphProjectFromGdlConfig.builder()
+                .gdlGraph(
+                    "  (a1:A   {double: 42.0D, long: 42L, doubleArray: [42.0D], longArray: [42L]})" +
+                    ", (a2b:A  {double: 84.0D})" +
+                    ", (ab:A:B {double: 84.0D, long: 1337L})" +
+                    ", (c:C)" +
+                    ", (a1)-[:A {prop1: 42.0D, prop2: 42.0D}]->(c)" +
+                    ", (a1)-[:A {prop1: 84.0D}]->(c)" +
+                    ", (a1)-[:B {prop1: 84.0D, prop3: 1337.0D}]->(c)" +
+                    ", (a1)-[:C]->(c)"
+                ).graphName("test")
+                .orientation(orientation)
+                .build()
+        ).build().build();
+
+        var expectedRelationshipSchema = RelationshipSchema
+            .builder()
+            .addProperty(RelationshipType.of("A"), orientation, "prop1", ValueType.DOUBLE, Aggregation.DEFAULT)
+            .addProperty(RelationshipType.of("A"), orientation, "prop2", ValueType.DOUBLE, Aggregation.DEFAULT)
+            .addProperty(RelationshipType.of("B"), orientation, "prop1", ValueType.DOUBLE, Aggregation.DEFAULT)
+            .addProperty(RelationshipType.of("B"), orientation, "prop3", ValueType.DOUBLE, Aggregation.DEFAULT)
+            .addRelationshipType(RelationshipType.of("C"), orientation)
+            .build();
+
+        assertThat(graphStore.schema().relationshipSchema()).isEqualTo(expectedRelationshipSchema);
     }
 
     @Test

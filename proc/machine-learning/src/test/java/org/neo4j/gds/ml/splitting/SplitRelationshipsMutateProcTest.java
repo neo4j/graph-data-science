@@ -199,8 +199,8 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
         var testGraph = graphStore.getGraph(NodeLabel.of(nodeLabel), RelationshipType.of("test"), Optional.of(
             EdgeSplitter.RELATIONSHIP_PROPERTY));
         var trainGraph = graphStore.getGraph(NodeLabel.of(nodeLabel), RelationshipType.of("train"), Optional.empty());
-        assertTrue(trainGraph.isUndirected());
-        assertFalse(testGraph.isUndirected());
+        assertTrue(trainGraph.schema().isUndirected());
+        assertFalse(testGraph.schema().isUndirected());
         TestSupport.assertGraphEquals(fromGdl(expectedTest), testGraph);
         TestSupport.assertGraphEquals(fromGdl(expectedTrain), trainGraph);
     }
@@ -270,8 +270,8 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
 
         var testGraph = graphStore.getGraph(NodeLabel.of(nodeLabel), RelationshipType.of("innerTest"), Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY));
         var trainGraph = graphStore.getGraph(NodeLabel.of(nodeLabel), RelationshipType.of("innerTrain"), Optional.empty());
-        assertTrue(trainGraph.isUndirected());
-        assertFalse(testGraph.isUndirected());
+        assertTrue(trainGraph.schema().isUndirected());
+        assertFalse(testGraph.schema().isUndirected());
         TestSupport.assertGraphEquals(fromGdl(expectedTest), testGraph);
         TestSupport.assertGraphEquals(fromGdl(expectedTrain), trainGraph);
     }

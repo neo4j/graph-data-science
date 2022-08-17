@@ -124,6 +124,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
     ) {
         return CSRGraphStoreUtil.computeGraphSchema(
             idMapAndProperties,
+            (__) -> idMapAndProperties.properties().keySet(),
             relationshipsAndProperties
         );
     }

@@ -128,9 +128,6 @@ public interface GraphStore {
 
     boolean hasRelationshipType(RelationshipType relationshipType);
 
-    boolean isUndirected(RelationshipType relationshipType);
-
-
     // Relationship Properties
 
     boolean hasRelationshipProperty(RelationshipType relType, String propertyKey);

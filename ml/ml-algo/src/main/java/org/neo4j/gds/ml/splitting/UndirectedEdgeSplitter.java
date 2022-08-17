@@ -93,10 +93,10 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
         double holdoutFraction
     ) {
         // TODO: move this validation higher into the hierarchy
-        if (!graph.isUndirected()) {
+        if (!graph.schema().isUndirected()) {
             throw new IllegalArgumentException("EdgeSplitter requires graph to be UNDIRECTED");
         }
-        if (!masterGraph.isUndirected()) {
+        if (!masterGraph.schema().isUndirected()) {
             throw new IllegalArgumentException("EdgeSplitter requires master graph to be UNDIRECTED");
         }
 

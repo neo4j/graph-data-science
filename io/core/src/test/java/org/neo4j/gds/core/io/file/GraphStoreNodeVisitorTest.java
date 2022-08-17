@@ -36,6 +36,7 @@ import org.neo4j.gds.extension.Inject;
 
 import java.util.Map;
 
+import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 
 @GdlExtension
@@ -82,7 +83,7 @@ class GraphStoreNodeVisitorTest {
 
         var graphSchema = GraphSchema.of(
             nodeSchema,
-            RelationshipSchema.builder().addRelationshipType(RelationshipType.ALL_RELATIONSHIPS).build(),
+            RelationshipSchema.builder().addRelationshipType(RelationshipType.ALL_RELATIONSHIPS, UNDIRECTED).build(),
             Map.of()
         );
 

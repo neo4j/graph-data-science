@@ -20,111 +20,125 @@
 package org.neo4j.gds.api.schema;
 
 import org.immutables.builder.Builder.AccessibleFields;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;
 
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.neo4j.gds.Orientation.UNDIRECTED;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 public interface RelationshipSchema extends ElementSchema<RelationshipSchema, RelationshipType, RelationshipPropertySchema> {
 
+    Map<RelationshipType, Orientation> relTypeOrientationMap();
+
+    default Orientation orientation(RelationshipType relationshipType) {
+        return relTypeOrientationMap().get(relationshipType);
+    };
+
     @Override
     default RelationshipSchema filter(Set<RelationshipType> relationshipTypesToKeep) {
-        return of(filterProperties(relationshipTypesToKeep));
+        return of(
+            filterProperties(relationshipTypesToKeep),
+            relTypeOrientationMap().entrySet().stream()
+                .filter(kv -> relationshipTypesToKeep.contains(kv.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+        );
     }
 
     @Override
     default RelationshipSchema union(RelationshipSchema other) {
-        return of(unionSchema(other.properties()));
+        var mismatchTypes = this
+            .relTypeOrientationMap()
+            .entrySet()
+            .stream()
+            .filter(e -> other.relTypeOrientationMap().containsKey(e.getKey()))
+            .filter(e -> other.orientation(e.getKey()) != e.getValue())
+            .map(e -> e.getKey().name)
+            .collect(Collectors.toSet());
+
+        if (!mismatchTypes.isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Conflicting directionality for relationship types `%s`",
+                mismatchTypes
+            ));
+        } else {
+            return of(unionSchema(other.properties()), unionTypeIsUndirectedMap(other.relTypeOrientationMap()));
+        }
+    }
+
+    private Map<RelationshipType, Orientation> unionTypeIsUndirectedMap(Map<RelationshipType, Orientation> otherTypeIsUndirectedMap) {
+        return Stream
+            .concat(relTypeOrientationMap().entrySet().stream(), otherTypeIsUndirectedMap.entrySet().stream())
+            .distinct()
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     default Set<RelationshipType> availableTypes() {
         return properties().keySet();
     }
 
-    default RelationshipSchema singleTypeAndProperty(
-        RelationshipType relationshipType,
-        Optional<String> maybeProperty
-    ) {
-        if (!properties().containsKey(relationshipType)) {
-           return RelationshipSchema.builder().build();
-        }
-
-        maybeProperty.ifPresent(property -> {
-            if (!properties().get(relationshipType).containsKey(property)) {
-                throw new IllegalArgumentException(String.format(
-                    Locale.ENGLISH,
-                    "Relationship schema does not contain relationship type '%s' and property '%s",
-                    relationshipType.name,
-                    property
-                ));
-            }
-        });
-
-        if (maybeProperty.isPresent()) {
-            return RelationshipSchema
-                .builder()
-                .addProperty(
-                    relationshipType,
-                    maybeProperty.get(),
-                    properties().get(relationshipType).get(maybeProperty.get())
-                )
-                .build();
-        } else {
-            return RelationshipSchema
-                .builder()
-                .addRelationshipType(relationshipType)
-                .build();
-        }
+    default boolean isUndirected() {
+        // a graph with no relationships is considered undirected
+        // this is because algorithms such as TriangleCount are still well-defined
+        // so it is the least restrictive decision
+        return relTypeOrientationMap().values().stream().allMatch(b -> b == UNDIRECTED);
     }
 
     static RelationshipSchema empty() {
         return builder().build();
     }
 
-    static RelationshipSchema of(Map<RelationshipType, Map<String, RelationshipPropertySchema>> properties) {
-        return RelationshipSchema.builder().properties(properties).build();
+    static RelationshipSchema of(
+        Map<RelationshipType, Map<String, RelationshipPropertySchema>> properties,
+        Map<RelationshipType, Orientation> relTypeOrientationMap
+    ) {
+        return RelationshipSchema.builder().relTypeOrientationMap(relTypeOrientationMap).properties(properties).build();
     }
 
     static Builder builder() {
-        return new Builder().properties(new LinkedHashMap<>());
+        return new Builder().properties(new LinkedHashMap<>()).relTypeOrientationMap(new LinkedHashMap<>());
     }
 
     @AccessibleFields
     class Builder extends ImmutableRelationshipSchema.Builder {
 
-        public Builder addProperty(RelationshipType type, String propertyName, ValueType valueType) {
-            return addProperty(type, propertyName, RelationshipPropertySchema.of(propertyName, valueType));
+        public Builder addProperty(RelationshipType type, Orientation orientation, String propertyName, ValueType valueType) {
+            return addProperty(type, orientation, propertyName, RelationshipPropertySchema.of(propertyName, valueType));
         }
 
-        public Builder addProperty(RelationshipType type, String propertyName, ValueType valueType, Aggregation aggregation) {
-            return addProperty(type, propertyName, RelationshipPropertySchema.of(propertyName, valueType, aggregation));
+        public Builder addProperty(RelationshipType type, Orientation orientation, String propertyName, ValueType valueType, Aggregation aggregation) {
+            return addProperty(type, orientation, propertyName, RelationshipPropertySchema.of(propertyName, valueType, aggregation));
         }
 
         public Builder addProperty(
             RelationshipType type,
+            Orientation orientation,
             String propertyName,
             RelationshipPropertySchema propertySchema
         ) {
-            this.properties
-                .computeIfAbsent(type, ignore -> new LinkedHashMap<>())
-                .put(propertyName, propertySchema);
+            addRelationshipType(type, orientation);
+            this.properties.get(type).put(propertyName, propertySchema);
             return this;
         }
 
-        public Builder addRelationshipType(RelationshipType type) {
-            this.properties.putIfAbsent(type, new LinkedHashMap<>());
+        public Builder addRelationshipType(RelationshipType type, Orientation orientation) {
+            this.properties.computeIfAbsent(type, ignore -> new LinkedHashMap<>());
+            this.relTypeOrientationMap.putIfAbsent(type, orientation);
             return this;
         }
 
         public Builder removeRelationshipType(RelationshipType type) {
             this.properties.remove(type);
+            this.relTypeOrientationMap.remove(type);
             return this;
         }
     }

@@ -22,8 +22,12 @@ package org.neo4j.gds.core.io.schema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 
+import static org.neo4j.gds.Orientation.NATURAL;
+
 public class RelationshipSchemaBuilderVisitor extends RelationshipSchemaVisitor {
 
+    // Graphs read from CSV are assumed to be always directed
+    private static final boolean IS_UNDIRECTED = false;
     private final RelationshipSchema.Builder schemaBuilder;
     private RelationshipSchema schema;
 
@@ -35,10 +39,11 @@ public class RelationshipSchemaBuilderVisitor extends RelationshipSchemaVisitor 
     protected void export() {
         // If the key is null we expect no properties but a relationship type
         if (key() == null) {
-            schemaBuilder.addRelationshipType(relationshipType());
+            schemaBuilder.addRelationshipType(relationshipType(), NATURAL);
         } else {
             schemaBuilder.addProperty(
                 relationshipType(),
+                NATURAL,
                 key(),
                 RelationshipPropertySchema.of(key(), valueType(), defaultValue(), state(), aggregation())
             );

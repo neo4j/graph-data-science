@@ -189,11 +189,6 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     }
 
     @Override
-    public boolean isUndirected(RelationshipType relationshipType) {
-        return graphStore.isUndirected(relationshipType);
-    }
-
-    @Override
     public boolean hasRelationshipProperty(RelationshipType relType, String propertyKey) {
         return graphStore.hasRelationshipProperty(relType, propertyKey);
     }

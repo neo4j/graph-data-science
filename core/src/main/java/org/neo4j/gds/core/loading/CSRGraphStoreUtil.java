@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
@@ -62,7 +63,10 @@ public final class CSRGraphStoreUtil {
     ) {
         var relationshipType = RelationshipType.of(relationshipTypeString);
         var relationships = graph.relationships();
-        var relationshipSchemaBuilder = RelationshipSchema.builder().addRelationshipType(relationshipType);
+        Orientation orientation = graph.relationshipTopology().orientation();
+        var relationshipSchemaBuilder = RelationshipSchema
+            .builder()
+            .addRelationshipType(relationshipType, orientation);
 
         relationshipPropertyKey.ifPresent(property -> {
 
@@ -75,6 +79,7 @@ public final class CSRGraphStoreUtil {
 
             relationshipSchemaBuilder.addProperty(
                 relationshipType,
+                orientation,
                 property,
                 ValueType.DOUBLE
             );
@@ -225,17 +230,6 @@ public final class CSRGraphStoreUtil {
 
     public static GraphSchema computeGraphSchema(
         IdMapAndProperties idMapAndProperties,
-        RelationshipsAndProperties relationshipsAndProperties
-    ) {
-        return computeGraphSchema(
-            idMapAndProperties,
-            (__) -> idMapAndProperties.properties().keySet(),
-            relationshipsAndProperties
-        );
-    }
-
-    public static GraphSchema computeGraphSchema(
-        IdMapAndProperties idMapAndProperties,
         Function<NodeLabel, Collection<String>> propertiesByLabel,
         RelationshipsAndProperties relationshipsAndProperties
     ) {
@@ -260,10 +254,17 @@ public final class CSRGraphStoreUtil {
                 .relationshipProperties()
                 .forEach((propertyKey, propertyValues) -> relationshipSchemaBuilder.addProperty(
                     relType,
+                    relationshipsAndProperties.relationships().get(relType).orientation(),
                     propertyKey,
                     propertyValues.propertySchema()
                 )));
-        relationshipsAndProperties.relationships().keySet().forEach(relationshipSchemaBuilder::addRelationshipType);
+        relationshipsAndProperties
+            .relationships()
+            .keySet()
+            .forEach(type -> {
+                relationshipSchemaBuilder.addRelationshipType(type,
+                    relationshipsAndProperties.relationships().get(type).orientation());
+            });
 
         return GraphSchema.of(
             nodeSchemaBuilder.build(),
