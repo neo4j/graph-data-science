@@ -60,7 +60,7 @@ public interface TriangleCountBaseConfig extends AlgoBaseConfig {
         if (!graphStore.schema().filterRelationshipTypes(Set.copyOf(selectedRelationshipTypes)).isUndirected()) {
             throw new IllegalArgumentException(formatWithLocale(
                 "TriangleCount requires relationship projections to be UNDIRECTED. " +
-                "Selected relationships `%s` are not all undirected",
+                "Selected relationships `%s` are not all undirected.",
                 selectedRelationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toSet())
             ));
         }
