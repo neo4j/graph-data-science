@@ -282,10 +282,10 @@ class GraphSampleConstructorTest {
                     "Random walk with restarts sampling :: Construct graph :: Filter node properties :: Finished",
                     "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Start",
                     "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 :: Start",
-                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 27%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 18%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 36%",
                     "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 45%",
                     "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 54%",
-                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 63%",
                     "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 100%",
                     "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 :: Finished",
                     "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 2 of 2 :: Start",
@@ -299,7 +299,7 @@ class GraphSampleConstructorTest {
             assertThat(messages)
                 // avoid asserting on the thread id
                 .extracting(removingThreadId())
-                .contains(
+                .containsExactly(
                     "Random walk with restarts sampling :: Start",
                     "Random walk with restarts sampling :: Sample nodes :: Start",
                     "Random walk with restarts sampling :: Sample nodes :: Do random walks :: Start",
@@ -329,9 +329,11 @@ class GraphSampleConstructorTest {
                     "Random walk with restarts sampling :: Construct graph :: Filter node properties :: Finished",
                     "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Start",
                     "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 :: Start",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 18%",
                     "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 27%",
-                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 45%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 36%",
                     "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 54%",
+                    "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 63%",
                     "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 100%",
                     "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 :: Finished",
                     "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 2 of 2 :: Start",

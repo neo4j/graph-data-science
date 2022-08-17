@@ -242,8 +242,8 @@ public final class RelationshipsFilter {
 
         @Override
         public void run() {
-            partition.consume(node -> {
-                var neoSource = outputNodes.toOriginalNodeId(node);
+            partition.consume(outputSource -> {
+                var neoSource = outputNodes.toOriginalNodeId(outputSource);
                 var inputSource = inputNodes.toMappedNodeId(neoSource);
 
                 relationshipIterator.forEachRelationship(inputSource, (source, target, properties) -> {
@@ -268,7 +268,7 @@ public final class RelationshipsFilter {
                     return true;
                 });
 
-                progressTracker.logProgress(relationshipIterator.degree(node));
+                progressTracker.logProgress(relationshipIterator.degree(inputSource));
             });
         }
     }
