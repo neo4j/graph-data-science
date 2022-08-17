@@ -19,102 +19,134 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.ObjectReader;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
-import java.util.EnumMap;
-import java.util.Optional;
+import java.io.IOException;
 
 final class CsvImportParsingUtil {
 
-    private static final EnumMap<ValueType, ParsingFunction> PARSING_FUNCTION_MAPPING = new EnumMap<>(ValueType.class);
-
-    static {
-        for (ValueType value : ValueType.values()) {
-            parsingFunctionForValueType(value).map(parsingFunction -> PARSING_FUNCTION_MAPPING.put(value, parsingFunction));
+    private static final ValueType.Visitor<CsvParsingFunction> PARSING_VISITOR = new ValueType.Visitor<>() {
+        @Override
+        public CsvParsingFunction visitLong() {
+            return CsvImportParsingUtil::parseLongValue;
         }
-    }
+
+        @Override
+        public CsvParsingFunction visitDouble() {
+            return CsvImportParsingUtil::parseDoubleValue;
+        }
+
+        @Override
+        public CsvParsingFunction visitString() {
+            throw new UnsupportedOperationException("String value parsing is not supported");
+        }
+
+        @Override
+        public CsvParsingFunction visitLongArray() {
+            return CsvImportParsingUtil::parseLongArray;
+        }
+
+        @Override
+        public CsvParsingFunction visitDoubleArray() {
+            return CsvImportParsingUtil::parseDoubleArray;
+        }
+
+        @Override
+        public CsvParsingFunction visitFloatArray() {
+            return CsvImportParsingUtil::parseFloatArray;
+        }
+    };
 
     @FunctionalInterface
-    interface ParsingFunction {
-        Object fromCsvValue(DefaultValue defaultValue, JsonNode node);
+    interface CsvParsingFunction {
+        Object parse(String value, DefaultValue defaultValue, ObjectReader arrayReader) throws IOException;
     }
 
-    static ParsingFunction getParsingFunction(ValueType valueType) {
-        return PARSING_FUNCTION_MAPPING.get(valueType);
+    public static Object parseProperty(
+        String value,
+        ValueType valueType,
+        DefaultValue defaultValue,
+        ObjectReader arrayReader
+    ) throws IOException {
+        return valueType.accept(PARSING_VISITOR).parse(value, defaultValue, arrayReader);
     }
 
-    private static Optional<ParsingFunction> parsingFunctionForValueType(ValueType valueType) {
-        switch (valueType) {
-            case LONG:
-                return Optional.of(CsvImportParsingUtil::parseLong);
-            case DOUBLE:
-                return Optional.of(CsvImportParsingUtil::parseDouble);
-            case LONG_ARRAY:
-                return Optional.of(CsvImportParsingUtil::parseLongArray);
-            case DOUBLE_ARRAY:
-                return Optional.of(CsvImportParsingUtil::parseDoubleArray);
-            case FLOAT_ARRAY:
-                return Optional.of(CsvImportParsingUtil::parseFloatArray);
-            default:
-                return Optional.empty();
-        }
+    static long parseId(String value) {
+        return Long.parseLong(value);
     }
 
-    private static Object parseLong(DefaultValue defaultValue, JsonNode node) {
-        if (node == null || node.textValue().isBlank()) {
+    private static long parseLongValue(String value, DefaultValue defaultValue, ObjectReader arrayReader) {
+        if (value.isBlank()) {
             return defaultValue.longValue();
         }
-        return node.asLong();
+        return parseId(value);
     }
 
-    private static Object parseDouble(DefaultValue defaultValue, JsonNode node) {
-        if (node == null || node.textValue().isBlank()) {
+    private static double parseDoubleValue(String value, DefaultValue defaultValue, ObjectReader arrayReader) {
+        if (value.isBlank()) {
             return defaultValue.doubleValue();
         }
-        return node.asDouble();
+        return Double.parseDouble(value);
     }
 
-    private static Object parseLongArray(DefaultValue defaultValue, JsonNode node) {
-        if (node == null || node.isEmpty()) {
-            return defaultValue.longArrayValue();
+    private static float[] parseFloatArray(
+        String value,
+        DefaultValue defaultValue,
+        ObjectReader arrayReader
+    ) throws IOException {
+        try (MappingIterator<String[]> objectMappingIterator = arrayReader.readValues(value)) {
+            if (objectMappingIterator.hasNext()) {
+                var stringArray = objectMappingIterator.next();
+                var parsedArray = new float[stringArray.length];
+                for (int i = 0; i < stringArray.length; i++) {
+                    String s = stringArray[i];
+                    parsedArray[i] = Float.parseFloat(s);
+                }
+                return parsedArray;
+            }
         }
-        var arrayNode = (ArrayNode) node;
-        var size = arrayNode.size();
-        var longArray = new long[size];
-        for (int i = 0; i < size; i++) {
-            longArray[i] = arrayNode.get(i).asLong();
-        }
-        return longArray;
+        return defaultValue.floatArrayValue();
     }
 
-    private static Object parseDoubleArray(DefaultValue defaultValue, JsonNode node) {
-        if (node == null || node.isEmpty()) {
-            return defaultValue.doubleArrayValue();
+    private static double[] parseDoubleArray(
+        String value,
+        DefaultValue defaultValue,
+        ObjectReader arrayReader
+    ) throws IOException {
+        try (MappingIterator<String[]> objectMappingIterator = arrayReader.readValues(value)) {
+            if (objectMappingIterator.hasNext()) {
+                var stringArray = objectMappingIterator.next();
+                var parsedArray = new double[stringArray.length];
+                for (int i = 0; i < stringArray.length; i++) {
+                    String s = stringArray[i];
+                    parsedArray[i] = (double) parseProperty(s, ValueType.DOUBLE, defaultValue, arrayReader);
+                }
+                return parsedArray;
+            }
         }
-        var arrayNode = (ArrayNode) node;
-        var size = arrayNode.size();
-        var doubleArray = new double[size];
-        for (int i = 0; i < size; i++) {
-            doubleArray[i] = arrayNode.get(i).asDouble();
-        }
-        return doubleArray;
+        return defaultValue.doubleArrayValue();
     }
 
-    private static Object parseFloatArray(DefaultValue defaultValue, JsonNode node) {
-        if (node == null || node.isEmpty()) {
-            return defaultValue.floatArrayValue();
+    private static long[] parseLongArray(
+        String value,
+        DefaultValue defaultValue,
+        ObjectReader arrayReader
+    ) throws IOException {
+        try (MappingIterator<String[]> objectMappingIterator = arrayReader.readValues(value)) {
+            if (objectMappingIterator.hasNext()) {
+                var stringArray = objectMappingIterator.next();
+                var parsedArray = new long[stringArray.length];
+                for (int i = 0; i < stringArray.length; i++) {
+                    String s = stringArray[i];
+                    parsedArray[i] = (long) parseProperty(s, ValueType.LONG, defaultValue, arrayReader);
+                }
+                return parsedArray;
+            }
         }
-        var arrayNode = (ArrayNode) node;
-        var size = arrayNode.size();
-        var floatArray = new float[size];
-        for (int i = 0; i < size; i++) {
-            floatArray[i] = (float) arrayNode.get(i).asDouble();
-        }
-        return floatArray;
-
+        return defaultValue.longArrayValue();
     }
 
     private CsvImportParsingUtil() {}
