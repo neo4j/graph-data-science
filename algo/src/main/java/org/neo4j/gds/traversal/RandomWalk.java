@@ -146,18 +146,34 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
                 )).collect(Collectors.toList());
 
 
-        CompletableFuture.runAsync(
-            () -> tasksRunner(
-                tasks,
-                walks,
-                TOMB,
-                terminationFlag
-            ),
-            Pools.createSingleThreadPool("futurePool")
-        ).whenComplete((__, ___) -> {
-            progressTracker.release();
-            release();
-        });
+//        CompletableFuture.runAsync(
+//            () -> tasksRunner(
+//                tasks,
+//                walks,
+//                TOMB,
+//                terminationFlag
+//            ),
+//            Pools.createSingleThreadPool("futurePool")
+//        ).whenComplete((__, ___) -> {
+//            progressTracker.release();
+//            release();
+//        });
+        var thread = Pools.newThread(
+            () -> {
+                try {
+                    tasksRunner(
+                        tasks,
+                        walks,
+                        TOMB,
+                        terminationFlag
+                    );
+                } finally {
+                    progressTracker.release();
+                    release();
+                }
+            }
+        );
+        thread.start();
     }
 
     private void tasksRunner(
