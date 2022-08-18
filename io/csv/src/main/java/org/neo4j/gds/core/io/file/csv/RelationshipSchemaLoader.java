@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
@@ -38,6 +39,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+
+import static org.neo4j.gds.Orientation.NATURAL;
 
 public class RelationshipSchemaLoader {
 
@@ -60,6 +63,7 @@ public class RelationshipSchemaLoader {
             while (linesIterator.hasNext()) {
                 var schemaLine = linesIterator.next();
                 schemaBuilder.relationshipType(schemaLine.relationshipType);
+                schemaBuilder.orientation(schemaLine.orientation);
                 if (schemaLine.propertyKey != null) {
                     schemaBuilder.key(schemaLine.propertyKey);
                     schemaBuilder.valueType(schemaLine.valueType);
@@ -82,6 +86,9 @@ public class RelationshipSchemaLoader {
         @JsonProperty
         @JsonDeserialize(converter = JacksonConverters.RelationshipTypeConverter.class)
         RelationshipType relationshipType;
+
+        @JsonProperty
+        Orientation orientation = NATURAL;
 
         @JsonProperty
         String propertyKey;

@@ -52,6 +52,15 @@ public class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
         STATE_COLUMN_NAME
     );
 
+    public static final List<String> OLD_RELATIONSHIP_SCHEMA_COLUMNS = List.of(
+        RELATIONSHIP_TYPE_COLUMN_NAME,
+        PROPERTY_KEY_COLUMN_NAME,
+        VALUE_TYPE_COLUMN_NAME,
+        DEFAULT_VALUE_COLUMN_NAME,
+        AGGREGATION_COLUMN_NAME,
+        STATE_COLUMN_NAME
+    );
+
     @Test
     void writesVisitedNodeSchema() {
         var relationshipSchemaVisitor = new CsvRelationshipSchemaVisitor(tempDir);
