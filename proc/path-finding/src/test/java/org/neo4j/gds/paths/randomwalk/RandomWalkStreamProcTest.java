@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.randomwalk;
+package org.neo4j.gds.paths.randomwalk;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -229,7 +229,6 @@ class RandomWalkStreamProcTest extends BaseProcTest {
             .addParameter("walksPerNode", 3)
             .addParameter("walkLength", 10)
             .yields("bytesMin", "bytesMax", "nodeCount", "relationshipCount");
-
         assertCypherMemoryEstimation(db, query, MemoryRange.of(4_016, 100_032), 5, 12);
     }
 

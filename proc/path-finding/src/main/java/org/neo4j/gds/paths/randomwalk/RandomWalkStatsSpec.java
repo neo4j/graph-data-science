@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.randomwalk;
+package org.neo4j.gds.paths.randomwalk;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -30,8 +30,8 @@ import org.neo4j.gds.traversal.RandomWalkStatsConfig;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.beta.randomwalk.RandomWalkStreamProc.DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
+import static org.neo4j.gds.paths.randomwalk.RandomWalkStreamProc.DESCRIPTION;
 
 @GdsCallable(name = "gds.randomWalk.stats", description = DESCRIPTION, executionMode = STATS)
 public class RandomWalkStatsSpec implements AlgorithmSpec<RandomWalk, Stream<long[]>, RandomWalkStatsConfig, Stream<StandardModeResult>, RandomWalkAlgorithmFactory<RandomWalkStatsConfig>> {

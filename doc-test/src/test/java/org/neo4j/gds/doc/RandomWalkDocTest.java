@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.beta.randomwalk.RandomWalkStatsProc;
-import org.neo4j.gds.beta.randomwalk.RandomWalkStreamProc;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.paths.randomwalk.RandomWalkStatsProc;
+import org.neo4j.gds.paths.randomwalk.RandomWalkStreamProc;
 
 import java.util.List;
 
