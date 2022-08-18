@@ -48,6 +48,7 @@ public final class TestNativeGraphLoader implements TestGraphLoader {
     private boolean addRelationshipPropertiesToLoader;
 
     private Optional<Aggregation> maybeAggregation = Optional.empty();
+    private Optional<Orientation> maybeOrientation = Optional.empty();
     private Optional<Log> maybeLog = Optional.empty();
 
     TestNativeGraphLoader(GraphDatabaseService db) {
@@ -90,6 +91,12 @@ public final class TestNativeGraphLoader implements TestGraphLoader {
         return this;
     }
 
+    public TestNativeGraphLoader withDefaultOrientation(Orientation orientation) {
+        this.maybeOrientation = Optional.of(orientation);
+        return this;
+    }
+
+
     public TestNativeGraphLoader withLog(Log log) {
         this.maybeLog = Optional.of(log);
         return this;
@@ -109,21 +116,24 @@ public final class TestNativeGraphLoader implements TestGraphLoader {
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder().databaseService(db);
         nodeLabels.forEach(storeLoaderBuilder::addNodeLabel);
 
+        var aggregation = maybeAggregation.orElse(DEFAULT);
+        var orientation = maybeOrientation.orElse(NATURAL);
         if (relTypes.isEmpty()) {
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(
                 ALL_RELATIONSHIPS.name,
-                RelationshipProjection.all().withAggregation(maybeAggregation.orElse(DEFAULT))
+                RelationshipProjection.all().withAggregation(aggregation).withOrientation(orientation)
             );
         } else {
             relTypes.forEach(relType -> {
                 RelationshipProjection template = RelationshipProjection.builder()
                     .type(relType)
-                    .aggregation(maybeAggregation.orElse(DEFAULT))
+                    .aggregation(aggregation)
+                    .orientation(orientation)
                     .build();
-                storeLoaderBuilder.addRelationshipProjection(template.withOrientation(NATURAL));
+                storeLoaderBuilder.addRelationshipProjection(template);
             });
         }
-        storeLoaderBuilder.globalAggregation(maybeAggregation.orElse(DEFAULT));
+        storeLoaderBuilder.globalAggregation(aggregation);
         if (!nodeProperties.mappings().isEmpty()) storeLoaderBuilder.nodeProperties(nodeProperties);
         if (addRelationshipPropertiesToLoader) storeLoaderBuilder.relationshipProperties(relProperties);
 
