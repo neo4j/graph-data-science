@@ -33,6 +33,6 @@ class RandomWalkSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/beta-algorithms/random-walk.adoc";
+        return "pages/algorithms/random-walk.adoc";
     }
 }

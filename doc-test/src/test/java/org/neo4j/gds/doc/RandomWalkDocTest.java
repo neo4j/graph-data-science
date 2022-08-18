@@ -38,6 +38,6 @@ class RandomWalkDocTest extends SingleFileDocTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/beta-algorithms/random-walk.adoc";
+        return "pages/algorithms/random-walk.adoc";
     }
 }
