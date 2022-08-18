@@ -245,7 +245,7 @@ YIELD requiredMemory
 [opts="header"]
 |===
 | requiredMemory
-| +"[1264 KiB ... 1338 KiB]"+
+| +"[1186 KiB ... 1260 KiB]"+
 |===
 --
 
@@ -283,7 +283,7 @@ RETURN
 [opts="header", cols="8, 2, 2, 2, 8"]
 |===
 | winningModel                                                                                                                                | avgTrainScore  | outerTrainScore    | testScore   | validationScores
-| {maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001} | 0.999999989939394 | 0.9999999912121211 | 0.999999985 | [0.4909090835454547, 0.07272727163636365, 0.4909090835454547, 0.4909090835454547, 0.4909090835454547]
+| {maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001} | 0.999999989939394 | 0.9999999912121211 | 0.999999985 | [0.4909090835454547, 0.07272727163636365, 0.4909090835454547, 0.4909090835454547]
 |===
 
 Here we can observe that the model candidate with penalty `0.0625` performed the best in the training phase, with an `F1_WEIGHTED` score nearing 1 over the train graph as well as on the test graph.
