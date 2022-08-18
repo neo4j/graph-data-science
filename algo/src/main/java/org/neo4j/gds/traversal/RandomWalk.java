@@ -153,7 +153,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
                 TOMB,
                 terminationFlag
             ),
-            Pools.createSingleThreadPool(":woho:")
+            Pools.createSingleThreadPool("futurePool")
         ).whenComplete((__, ___) -> {
             progressTracker.release();
             release();
