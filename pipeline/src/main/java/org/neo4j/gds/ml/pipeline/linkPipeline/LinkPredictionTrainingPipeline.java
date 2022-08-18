@@ -89,32 +89,36 @@ public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeature
         Map<String, List<String>> tasksByRelationshipProperty = new HashMap<>();
 
         for (ExecutableNodePropertyStep existingStep : nodePropertySteps()) {
-            if (existingStep.config().containsKey(RELATIONSHIP_WEIGHT_PROPERTY)) {
-                var existingProperty = (String) existingStep.config().get(RELATIONSHIP_WEIGHT_PROPERTY);
-                var tasks = tasksByRelationshipProperty.computeIfAbsent(
-                    existingProperty,
-                    key -> new ArrayList<>()
-                );
+            Map<String, Object> config = existingStep.config();
+            Optional<String> maybeProperty = extractRelationshipProperty(executionContext, config);
+
+            maybeProperty.ifPresent(property -> {
+                var tasks = tasksByRelationshipProperty.computeIfAbsent(property, key -> new ArrayList<>());
                 tasks.add(existingStep.procName());
-            } else if (existingStep.config().containsKey(MODEL_NAME_KEY)) {
-                Optional.ofNullable(executionContext.modelCatalog().getUntyped(
-                        executionContext.username(),
-                        ((String) existingStep.config().get(MODEL_NAME_KEY))
-                    ))
-                    .map(Model::trainConfig)
-                    .filter(config -> config instanceof RelationshipWeightConfig)
-                    .flatMap(config -> ((RelationshipWeightConfig) config).relationshipWeightProperty())
-                    .ifPresent(property -> {
-                        var tasks = tasksByRelationshipProperty.computeIfAbsent(
-                            property,
-                            key -> new ArrayList<>()
-                        );
-                        tasks.add(existingStep.procName());
-                    });
-            }
+            });
         }
 
         return tasksByRelationshipProperty;
+    }
+
+    private static Optional<String> extractRelationshipProperty(
+        ExecutionContext executionContext,
+        Map<String, Object> config
+    ) {
+        if (config.containsKey(RELATIONSHIP_WEIGHT_PROPERTY)) {
+            var existingProperty = (String) config.get(RELATIONSHIP_WEIGHT_PROPERTY);
+            return Optional.of(existingProperty);
+        } else if (config.containsKey(MODEL_NAME_KEY)) {
+            return Optional.ofNullable(executionContext.modelCatalog().getUntyped(
+                    executionContext.username(),
+                    ((String) config.get(MODEL_NAME_KEY))
+                ))
+                .map(Model::trainConfig)
+                .filter(trainConfig -> trainConfig instanceof RelationshipWeightConfig)
+                .flatMap(trainConfig -> ((RelationshipWeightConfig) trainConfig).relationshipWeightProperty());
+        }
+
+        return Optional.empty();
     }
 
     public Optional<String> relationshipWeightProperty(ExecutionContext executionContext) {
