@@ -1,5 +1,5 @@
 = Defaults and Limits
-:description: What happens if I leave this out?
+:description: This section explains how to configure defaults and limits in the Neo4j Graph Data Science library.
 
 With the GDS library we offer convenience and safety around repetitive configuration. Specifically, we offer default configuration for those configuration items that you often want to reuse between different procedure invocations. And we offer limits as a way to restrict resource usage so that users will not overwhelm the underlying system.
 
