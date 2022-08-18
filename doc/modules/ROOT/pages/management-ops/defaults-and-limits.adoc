@@ -1,17 +1,17 @@
 = Defaults and Limits
 :description: What happens if I leave this out?
 
-With the GDS library we offer convenience and safety around repetitive configuration. Specifically, we offer default configuration for those pesky configuration items that you often want to reuse between different procedure invocations. And we offer limits as a way to restrict resource usage so that users will not overwhelm the underlying system.
+With the GDS library we offer convenience and safety around repetitive configuration. Specifically, we offer default configuration for those configuration items that you often want to reuse between different procedure invocations. And we offer limits as a way to restrict resource usage so that users will not overwhelm the underlying system.
 
 A good example is concurrency, a configuration parameter that applies to many GDS procedures. You might want to set a global default so that when you invoke a procedure, you automatically get that configured default value instead of the built-in one.
 
-Also, say you have multiple users on the same system, you might want to limit concurrency for each user so that when they all work at the same time, they won't overwhelm and slow down the system excessively.
+Also, assuming have multiple users on the same system, you might want to limit concurrency for each user so that when they all work at the same time, they won't overwhelm and slow down the system excessively.
 
-Lastly, we offer defaults and limits globally or on a per-user basis. Tie breaking is done by having personal settings win. You can think of personal settings being overlaid global settings.
+Lastly, we offer defaults and limits globally or on a per-user basis. Tie breaking is done by having personal settings take precedence.
 
 == Default configuration values
 
-As a busy user of GDS you will often want to use the same general parameters across different procedure invocations. We allow you to set a default to avoid you repeating yourself.
+As a user of GDS you will often want to use the same general parameters across different procedure invocations. We allow you to set a default to avoid you repeating yourself.
 
 === Setting a default
 

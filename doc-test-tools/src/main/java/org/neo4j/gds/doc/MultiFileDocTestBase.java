@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -110,7 +111,7 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
         beforeAllQueries = treeProcessor.beforeAllQueries();
 
         if (!setupNeo4jGraphPerTest()) {
-            beforeAllQueries.forEach(this::runQueryAsUser);
+            beforeAllQueries.forEach(this::runQueryAsOperator);
         }
     }
 
@@ -132,9 +133,9 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
     // This emulates `@BeforeEach`. Typically used to project any GDS Graphs
     private void beforeEachTest() {
         if (setupNeo4jGraphPerTest()) {
-            beforeAllQueries.forEach(this::runQueryAsUser);
+            beforeAllQueries.forEach(this::runQueryAsOperator);
         }
-        beforeEachQueries.forEach(this::runQueryAsUser);
+        beforeEachQueries.forEach(this::runQueryAsOperator);
     }
 
     private DynamicTest createDynamicTest(QueryExampleGroup queryExampleGroup) {
@@ -169,12 +170,12 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
         if (queryExample.assertResults()) {
             runQueryExampleAndAssertResults(queryExample);
         } else {
-            assertThatNoException().isThrownBy(() -> runQueryAsUser(queryExample.query()));
+            assertThatNoException().isThrownBy(() -> runQueryAsOperator(queryExample.query()));
         }
     }
 
     private void runQueryExampleAndAssertResults(QueryExample queryExample) {
-        runQueryAsUserWithResultConsumer(queryExample.query(), result -> {
+        runQueryAsOperatorWithResultConsumer(queryExample.query(), result -> {
             assertThat(queryExample.resultColumns()).containsExactlyElementsOf(result.columns());
 
             var actualResults = new ArrayList<List<String>>();
@@ -220,11 +221,20 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
         }
     }
 
-    private void runQueryAsUser(String query) {
-        super.runQuery(getUsername(), query);
+    private void runQueryAsOperator(String query) {
+        if (getOperator().isPresent()) super.runQuery(getOperator().get(), query);
+        else super.runQuery(query);
     }
 
-    private void runQueryAsUserWithResultConsumer(String query, Consumer<Result> check) {
-        super.runQueryWithResultConsumer(getUsername(), query, check);
+    private void runQueryAsOperatorWithResultConsumer(String query, Consumer<Result> check) {
+        if (getOperator().isPresent()) super.runQueryWithResultConsumer(getOperator().get(), query, check);
+        else super.runQueryWithResultConsumer(query, check);
+    }
+
+    /**
+     * Subclass this if you want to assume an identity
+     */
+    protected Optional<String> getOperator() {
+        return Optional.empty();
     }
 }
