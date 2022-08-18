@@ -113,10 +113,10 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
 
         "(a)-[:IGNORED]->(e), " +
 
-        "(a)-[:REL]->(e), " +
-        "(m)-[:REL]->(a), " +
-        "(m)-[:REL]->(b), " +
-        "(m)-[:REL]->(c), " +
+        "(a)-[:REL {weight: 42.0}]->(e), " +
+        "(m)-[:REL {weight: 42.0}]->(a), " +
+        "(m)-[:REL {weight: 42.0}]->(b), " +
+        "(m)-[:REL {weight: 42.0}]->(c), " +
 
         "(a)-[:REL_2]->(x1), " +
         "(a)-[:REL_2]->(x2), " +
