@@ -93,7 +93,7 @@ public class DefaultsConfiguration {
      * @param username if supplied, set the key-value pair just for that user.
      */
     void set(String key, Object value, Optional<String> username) {
-        Default valueAsDefault = new Default((Integer) value);
+        Default valueAsDefault = new Default((Long) value);
 
         if (username.isPresent()) {
             personalDefaults.putIfAbsent(username.get(), new HashMap<>()); // lazy initialisation

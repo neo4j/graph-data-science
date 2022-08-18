@@ -20,14 +20,14 @@
 package org.neo4j.gds.configuration;
 
 /**
- * This will end up being `IntDefault implements Default` probably, but let's just continue.
+ * This will end up being `LongDefault implements Default` probably, but let's just continue.
  *
  * {@link Default#getValue()} being generic is handy for ^^
  */
 public class Default {
-    private final int value;
+    private final long value;
 
-    public Default(int value) {
+    public Default(long value) {
         this.value = value;
     }
 
