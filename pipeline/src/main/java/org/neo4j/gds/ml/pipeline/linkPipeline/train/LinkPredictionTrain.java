@@ -185,7 +185,7 @@ public final class LinkPredictionTrain {
     ) {
         var modelCandidates = new RandomSearch(
             pipeline.trainingParameterSpace(),
-            pipeline.numberOfModelSelectionTrials(),
+            pipeline.autoTuningConfig().maxTrials(),
             config.randomSeed()
         );
 

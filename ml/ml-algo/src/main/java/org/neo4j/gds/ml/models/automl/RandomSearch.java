@@ -35,16 +35,18 @@ public class RandomSearch implements HyperParameterOptimizer {
     private final List<TunableTrainerConfig> concreteConfigs;
     private final List<TunableTrainerConfig> tunableConfigs;
     private final int totalNumberOfTrials;
+
+    private final int numberOfConcreteTrials;
     private final SplittableRandom random;
     private int numberOfFinishedTrials;
 
-    public RandomSearch(Map<TrainingMethod, List<TunableTrainerConfig>> parameterSpace, int totalNumberOfTrials, long randomSeed) {
-        this(parameterSpace, totalNumberOfTrials, Optional.of(randomSeed));
+    public RandomSearch(Map<TrainingMethod, List<TunableTrainerConfig>> parameterSpace, int maxTrials, long randomSeed) {
+        this(parameterSpace, maxTrials, Optional.of(randomSeed));
     }
 
     public RandomSearch(
         Map<TrainingMethod, List<TunableTrainerConfig>> parameterSpace,
-        int totalNumberOfTrials,
+        int maxTrials,
         Optional<Long> randomSeed
     ) {
         this.concreteConfigs = parameterSpace.values().stream()
@@ -55,7 +57,8 @@ public class RandomSearch implements HyperParameterOptimizer {
             .flatMap(List::stream)
             .filter(tunableTrainerConfig -> !tunableTrainerConfig.isConcrete())
             .collect(Collectors.toList());
-        this.totalNumberOfTrials = totalNumberOfTrials;
+        this.numberOfConcreteTrials = this.concreteConfigs.size();
+        this.totalNumberOfTrials = maxTrials + numberOfConcreteTrials;
         this.random = randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
         this.numberOfFinishedTrials = 0;
     }
@@ -63,7 +66,8 @@ public class RandomSearch implements HyperParameterOptimizer {
 
     @Override
     public boolean hasNext() {
-        return numberOfFinishedTrials < totalNumberOfTrials;
+        //There's a next trial to run if 1.there are more concrete trials or 2.there are actually tunable configs, and we haven't reached total number of allowed trials
+        return (numberOfFinishedTrials < numberOfConcreteTrials) || (numberOfFinishedTrials < totalNumberOfTrials && !tunableConfigs.isEmpty());
     }
 
     @Override

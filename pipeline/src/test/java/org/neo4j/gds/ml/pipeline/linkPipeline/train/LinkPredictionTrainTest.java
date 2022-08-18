@@ -121,6 +121,8 @@ class LinkPredictionTrainTest {
     @Inject
     Graph trainGraph;
 
+    private int numberOfConcreteTrainerConfig = 0;
+
     static Stream<Arguments> paramsForEstimationsWithSplitConfigs() {
         return Stream.of(
             Arguments.of(
@@ -199,7 +201,7 @@ class LinkPredictionTrainTest {
                     ),
                     RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(43_200, 1_371_408)
+                MemoryRange.of(43_280, 1_371_488)
             ),
             Arguments.of(
                 "Default RF and default LR with batch size range",
@@ -210,7 +212,7 @@ class LinkPredictionTrainTest {
                     ),
                     RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(12_816_072, 405_294_312)
+                MemoryRange.of(12_816_152, 405_294_392)
             )
         );
     }
@@ -223,7 +225,7 @@ class LinkPredictionTrainTest {
 
         var result = runLinkPrediction(trainConfig);
 
-        assertThat(result.trainingStatistics().getTrainStats(AUCPR).size()).isEqualTo(MAX_TRIALS);
+        assertThat(result.trainingStatistics().getTrainStats(AUCPR).size()).isEqualTo(MAX_TRIALS + numberOfConcreteTrainerConfig);
 
         var trainedClassifier = result.classifier();
 
@@ -257,17 +259,17 @@ class LinkPredictionTrainTest {
 
         assertThat(trainingStatistics.getBestTrialIdx()).isBetween(0, 10);
         assertThat(trainingStatistics.getValidationStats(AUCPR))
-            .hasSize(10)
+            .hasSize(MAX_TRIALS + numberOfConcreteTrainerConfig)
             .noneMatch(Objects::isNull);
         assertThat(trainingStatistics.getTrainStats(AUCPR))
-            .hasSize(10)
+            .hasSize(MAX_TRIALS + numberOfConcreteTrainerConfig)
             .noneMatch(Objects::isNull);
 
         assertThat(trainingStatistics.winningModelOuterTrainMetrics()).containsKeys(AUCPR);
         assertThat(trainingStatistics.winningModelTestMetrics()).containsOnlyKeys(AUCPR);
 
         if (includeOOB) {
-            assertThat(trainingStatistics.getValidationStats(OUT_OF_BAG_ERROR)).hasSize(10);
+            assertThat(trainingStatistics.getValidationStats(OUT_OF_BAG_ERROR)).hasSize(MAX_TRIALS + numberOfConcreteTrainerConfig);
             assertThat(trainingStatistics.getTrainStats(OUT_OF_BAG_ERROR)).containsOnlyNulls();
         } else {
             assertThat(trainingStatistics.getValidationStats(OUT_OF_BAG_ERROR)).containsOnlyNulls();
@@ -814,11 +816,14 @@ class LinkPredictionTrainTest {
             "patience", 5,
             "tolerance", 0.00001
         )));
+        numberOfConcreteTrainerConfig++;
+
         pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of(
             "penalty", 100,
             "patience", 5,
             "tolerance", 0.00001
         )));
+        numberOfConcreteTrainerConfig++;
 
         // Should NOT be the winning model, so give it bad hyperparams.
         pipeline.addTrainerConfig(
@@ -831,6 +836,7 @@ class LinkPredictionTrainTest {
                 ),
                 TrainingMethod.RandomForestClassification
             ));
+        numberOfConcreteTrainerConfig++;
 
         pipeline.addTrainerConfig(
             TunableTrainerConfig.of(

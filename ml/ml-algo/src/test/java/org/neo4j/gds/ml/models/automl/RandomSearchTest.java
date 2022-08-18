@@ -156,6 +156,95 @@ class RandomSearchTest {
         );
         assertThat(randomSearch.hasNext()).isTrue();
         assertThat(randomSearch.next()).isInstanceOf(RandomForestTrainerConfig.class);
+        assertThat(randomSearch.hasNext()).isTrue();
+        assertThat(randomSearch.next()).isInstanceOf(LogisticRegressionTrainConfig.class);
+        assertThat(randomSearch.hasNext()).isFalse();
+    }
+
+    @Test
+    void runsAllConcreteConfigsRegardlessOfMaxTrials() {
+        var maxTrials = 2;
+        var randomSearch = new RandomSearch(
+            Map.of(
+                TrainingMethod.LogisticRegression,
+                List.of(
+                    TunableTrainerConfig.of(
+                        Map.of(
+                            "penalty", Map.of("range", List.of(1e-4, 1e4))
+                        ),
+                        TrainingMethod.LogisticRegression
+                    ),
+                    TunableTrainerConfig.of(
+                        Map.of(),
+                        TrainingMethod.RandomForestClassification
+                    ),
+                    TunableTrainerConfig.of(
+                        Map.of(),
+                        TrainingMethod.RandomForestClassification
+                    ),
+                    TunableTrainerConfig.of(
+                        Map.of(),
+                        TrainingMethod.RandomForestClassification
+                    ),
+                    TunableTrainerConfig.of(
+                        Map.of(),
+                        TrainingMethod.RandomForestClassification
+                    )
+                )
+            ),
+            maxTrials,
+            System.currentTimeMillis()
+        );
+        // first all the concrete configs
+        for (int i = 0; i < 4; i++) {
+            assertThat(randomSearch.hasNext()).isTrue();
+            assertThat(randomSearch.next()).isInstanceOf(RandomForestTrainerConfig.class);
+        }
+        // then maxTrials (2) auto tuning configs
+        assertThat(randomSearch.hasNext()).isTrue();
+        assertThat(randomSearch.next()).isInstanceOf(LogisticRegressionTrainConfig.class);
+        assertThat(randomSearch.hasNext()).isTrue();
+        assertThat(randomSearch.next()).isInstanceOf(LogisticRegressionTrainConfig.class);
+        // then no more
+        assertThat(randomSearch.hasNext()).isFalse();
+    }
+
+    @Test
+    void foo() {
+        var maxTrials = 5;
+        var randomSearch = new RandomSearch(
+            Map.of(
+                TrainingMethod.LogisticRegression,
+                List.of(
+                    TunableTrainerConfig.of(
+                        Map.of(
+                            "penalty", Map.of("range", List.of(1e-4, 1e4))
+                        ),
+                        TrainingMethod.LogisticRegression
+                    ),
+                    TunableTrainerConfig.of(
+                        Map.of(),
+                        TrainingMethod.RandomForestClassification
+                    ),
+                    TunableTrainerConfig.of(
+                        Map.of(),
+                        TrainingMethod.RandomForestClassification
+                    ),
+                    TunableTrainerConfig.of(
+                        Map.of(),
+                        TrainingMethod.RandomForestClassification
+                    )
+                )
+            ),
+            maxTrials,
+            System.currentTimeMillis()
+        );
+        // first all the concrete configs
+        for (int i = 0; i < 8; i++) {
+            assertThat(randomSearch.hasNext()).isTrue();
+            randomSearch.next();
+        }
+        // then no more
         assertThat(randomSearch.hasNext()).isFalse();
     }
 }
