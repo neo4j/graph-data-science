@@ -347,6 +347,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
 
     private void calculateSilhouette() {
         var nodeCount = graph.nodeCount();
+        progressTracker.beginSubTask();
         this.silhouette = HugeDoubleArray.newArray(nodeCount);
         var tasks = PartitionUtils.rangePartition(
             concurrency,
@@ -372,6 +373,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
         for (var task : tasks) {
             averageSilhouette += task.getAverageSilhouette();
         }
+        progressTracker.endSubTask();
 
     }
 
