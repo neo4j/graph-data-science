@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.GraphStoreAlgorithmFactory;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -32,13 +32,15 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 
+import java.util.Optional;
+
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
 import static org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver.resolveModel;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.core.EmbeddingUtils.validateRelationshipWeightPropertyValue;
 
-public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> extends GraphAlgorithmFactory<GraphSage, CONFIG> {
+public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> extends GraphStoreAlgorithmFactory<GraphSage, CONFIG> {
 
     private final ModelCatalog modelCatalog;
 
@@ -48,17 +50,7 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
     }
 
     @Override
-    public String taskName() {
-        return GraphSage.class.getSimpleName();
-    }
-
-    @Override
-    public GraphSage build(
-        Graph graph,
-        CONFIG configuration,
-        ProgressTracker progressTracker
-    ) {
-
+    public GraphSage build(GraphStore graphStore, CONFIG configuration, ProgressTracker progressTracker) {
         var executorService = Pools.DEFAULT;
         var model = resolveModel(
             modelCatalog,
@@ -66,12 +58,14 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
             configuration.modelName()
         );
 
-        if(model.trainConfig().isWeighted()) {
-            validateRelationshipWeightPropertyValue(graph, configuration.concurrency(), executorService);
-        }
+        var graph = graphStore.getGraph(
+            configuration.nodeLabelIdentifiers(graphStore),
+            configuration.internalRelationshipTypes(graphStore),
+            Optional.ofNullable(model.trainConfig().relationshipWeightProperty())
+        );
 
-        if (!model.trainConfig().isWeighted() && graph.hasRelationshipProperty()) {
-            throw new IllegalStateException("Model was trained without relationship weights. Expected an unweighted graph");
+        if(graph.hasRelationshipProperty()) {
+            validateRelationshipWeightPropertyValue(graph, configuration.concurrency(), executorService);
         }
 
         return new GraphSage(
@@ -81,6 +75,11 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
             executorService,
             progressTracker
         );
+    }
+
+    @Override
+    public String taskName() {
+        return GraphSage.class.getSimpleName();
     }
 
     @Override
@@ -98,8 +97,8 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
     }
 
     @Override
-    public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.leaf(taskName(), graph.nodeCount());
+    public Task progressTask(GraphStore graphStore, CONFIG config) {
+        return Tasks.leaf(taskName(), graphStore.getGraph(config.nodeLabelIdentifiers(graphStore)).nodeCount());
     }
 
     private MemoryEstimation withNodeCount(GraphSageTrainConfig config, long nodeCount, boolean mutate) {

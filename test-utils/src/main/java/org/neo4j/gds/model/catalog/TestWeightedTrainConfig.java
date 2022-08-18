@@ -17,12 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.algo;
+package org.neo4j.gds.model.catalog;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.BatchSizeConfig;
-import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.RelationshipWeightConfig;
 
-public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, ModelConfig {
-    long serialVersionUID = 0x42L;
+@Configuration
+public interface TestWeightedTrainConfig extends RelationshipWeightConfig, TestTrainConfig {
+
 }

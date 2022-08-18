@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -44,9 +44,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPHSAGE_DESCRIPTION;
-import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.getActualConfig;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.getNodeProperties;
-import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.injectRelationshipWeightPropertyFromModel;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
@@ -59,12 +57,6 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        injectRelationshipWeightPropertyFromModel(
-            getActualConfig(graphName, configuration),
-            modelCatalog(),
-            username.username()
-        );
-
         ComputationResult<GraphSage, GraphSage.GraphSageResult, GraphSageMutateConfig> computationResult = compute(
             graphName,
             configuration
@@ -78,12 +70,6 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        injectRelationshipWeightPropertyFromModel(
-            getActualConfig(graphNameOrConfiguration, algoConfiguration),
-            modelCatalog(),
-            username.username()
-        );
-
         return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
@@ -111,7 +97,7 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
     }
 
     @Override
-    public GraphAlgorithmFactory<GraphSage, GraphSageMutateConfig> algorithmFactory() {
+    public GraphStoreAlgorithmFactory<GraphSage, GraphSageMutateConfig> algorithmFactory() {
         return new GraphSageAlgorithmFactory<>(modelCatalog());
     }
 

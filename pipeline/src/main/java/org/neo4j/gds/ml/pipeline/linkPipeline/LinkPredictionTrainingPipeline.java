@@ -21,16 +21,22 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
+import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
 
 public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeatureStep> {
 
@@ -81,9 +87,10 @@ public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeature
         }
     }
 
-    public Map<String, List<String>> tasksByRelationshipProperty() {
+    public Map<String, List<String>> tasksByRelationshipProperty(ExecutionContext executionContext) {
         Map<String, List<String>> tasksByRelationshipProperty = new HashMap<>();
-        nodePropertySteps().forEach(existingStep -> {
+
+        for (ExecutableNodePropertyStep existingStep : nodePropertySteps()) {
             if (existingStep.config().containsKey(RELATIONSHIP_WEIGHT_PROPERTY)) {
                 var existingProperty = (String) existingStep.config().get(RELATIONSHIP_WEIGHT_PROPERTY);
                 var tasks = tasksByRelationshipProperty.computeIfAbsent(
@@ -91,13 +98,30 @@ public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeature
                     key -> new ArrayList<>()
                 );
                 tasks.add(existingStep.procName());
+            } else if (existingStep.config().containsKey(MODEL_NAME_KEY)) {
+                Optional.ofNullable(executionContext.modelCatalog().getUntyped(
+                        executionContext.username(),
+                        ((String) existingStep.config().get(MODEL_NAME_KEY))
+                    ))
+                    .map(Model::trainConfig)
+                    .filter(config -> config instanceof RelationshipWeightConfig)
+                    .map(config -> ((RelationshipWeightConfig) config).relationshipWeightProperty())
+                    .filter(Objects::nonNull)
+                    .ifPresent(property -> {
+                        var tasks = tasksByRelationshipProperty.computeIfAbsent(
+                            property,
+                            key -> new ArrayList<>()
+                        );
+                        tasks.add(existingStep.procName());
+                    });
             }
-        });
+        }
+
         return tasksByRelationshipProperty;
     }
 
-    public Optional<String> relationshipWeightProperty() {
-        var relationshipWeightPropertySet = tasksByRelationshipProperty().entrySet();
+    public Optional<String> relationshipWeightProperty(ExecutionContext executionContext) {
+        var relationshipWeightPropertySet = tasksByRelationshipProperty(executionContext).entrySet();
         return relationshipWeightPropertySet.isEmpty()
             ? Optional.empty()
             : Optional.of(relationshipWeightPropertySet.iterator().next().getKey());

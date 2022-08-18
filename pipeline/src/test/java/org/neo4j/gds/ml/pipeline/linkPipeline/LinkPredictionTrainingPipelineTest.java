@@ -22,24 +22,37 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallableFinder;
+import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
+import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
+import org.neo4j.gds.model.catalog.TestTrainConfigImpl;
+import org.neo4j.gds.model.catalog.TestWeightedTrainConfigImpl;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class LinkPredictionPipelineTest {
+class LinkPredictionTrainingPipelineTest {
 
     @Test
     void canCreateEmptyPipeline() {
@@ -151,6 +164,134 @@ class LinkPredictionPipelineTest {
 
         assertThat(pipeline)
             .returns(splitConfigOverride, LinkPredictionTrainingPipeline::splitConfig);
+    }
+
+    @Test
+    void deriveRelationshipWeightProperty() {
+        var executionContext = ImmutableExecutionContext.builder()
+            .username("")
+            .build();
+
+        var pipeline = new LinkPredictionTrainingPipeline();
+
+        assertThat(pipeline.relationshipWeightProperty(executionContext)).isEmpty();
+
+        var step = new TestNodePropertyStep(Map.of("relationshipWeightProperty", "myWeight"));
+
+        pipeline.addNodePropertyStep(step);
+
+        assertThat(pipeline.relationshipWeightProperty(executionContext)).isPresent().get().isEqualTo("myWeight");
+    }
+
+    @Test
+    void deriveRelationshipWeightPropertyFromTrainedModel() {
+        var modelCatalog = new OpenModelCatalog();
+
+        String modelName = "myModel";
+        modelCatalog.set(Model.of(
+            "",
+            modelName,
+            "myAlgo",
+            GraphSchema.empty(),
+            1L,
+            TestWeightedTrainConfigImpl.builder()
+                .username("")
+                .modelName(modelName)
+                .relationshipWeightProperty("derivedWeight").build(),
+            Map::of
+        ));
+
+        var executionContext = ImmutableExecutionContext.builder()
+            .username("")
+            .modelCatalog(modelCatalog)
+            .build();
+
+        var pipeline = new LinkPredictionTrainingPipeline();
+
+        assertThat(pipeline.relationshipWeightProperty(executionContext)).isEmpty();
+
+        var step = new TestNodePropertyStep(Map.of("modelName", modelName));
+
+        pipeline.addNodePropertyStep(step);
+
+        assertThat(pipeline.relationshipWeightProperty(executionContext)).isPresent().get().isEqualTo("derivedWeight");
+    }
+
+    @Test
+    void notDerivePropertyFromUnweightedTrainedModel() {
+        var modelCatalog = new OpenModelCatalog();
+
+        String modelName = "myModel";
+        modelCatalog.set(Model.of(
+            "",
+            modelName,
+            "myAlgo",
+            GraphSchema.empty(),
+            1L,
+            TestTrainConfigImpl.builder()
+                .username("")
+                .modelName(modelName)
+                .build(),
+            Map::of
+        ));
+
+        var executionContext = ImmutableExecutionContext.builder()
+            .username("")
+            .modelCatalog(modelCatalog)
+            .build();
+
+        var pipeline = new LinkPredictionTrainingPipeline();
+
+        assertThat(pipeline.relationshipWeightProperty(executionContext)).isEmpty();
+
+        var step = new TestNodePropertyStep(Map.of("modelName", modelName));
+
+        pipeline.addNodePropertyStep(step);
+
+        assertThat(pipeline.relationshipWeightProperty(executionContext)).isEmpty();
+    }
+
+    private static class TestNodePropertyStep implements ExecutableNodePropertyStep {
+        private final Map<String, Object> config;
+
+        public TestNodePropertyStep(Map<String, Object> config) {
+            this.config = config;
+        }
+
+        @Override
+        public void execute(
+            ExecutionContext executionContext,
+            String graphName,
+            Collection<NodeLabel> nodeLabels,
+            Collection<RelationshipType> relTypes
+        ) {
+
+        }
+
+        @Override
+        public Map<String, Object> config() {
+            return config;
+        }
+
+        @Override
+        public String procName() {
+            return null;
+        }
+
+        @Override
+        public MemoryEstimation estimate(
+            ModelCatalog modelCatalog,
+            String username,
+            List<String> nodeLabels,
+            List<String> relTypes
+        ) {
+            return null;
+        }
+
+        @Override
+        public Map<String, Object> toMap() {
+            return config;
+        }
     }
 
     @Nested
