@@ -37,6 +37,7 @@
 ** xref:management-ops/create-cypher-db.adoc[]
 ** xref:management-ops/administration.adoc[]
 ** xref:management-ops/backup-restore.adoc[]
+** xref:management-ops/defaults-and-limits.adoc[]
 * xref:algorithms/index.adoc[]
 ** xref:algorithms/syntax.adoc[]
 ** xref:algorithms/centrality.adoc[]

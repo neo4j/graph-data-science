@@ -1,0 +1,85 @@
+= Defaults and Limits
+:description: What happens if I leave this out?
+
+With the GDS library we offer convenience and safety around repetitive configuration. Specifically, we offer default configuration for those pesky configuration items that you often want to reuse between different procedure invocations. And we offer limits as a way to restrict resource usage so that users will not overwhelm the underlying system.
+
+A good example is concurrency, a configuration parameter that applies to many GDS procedures. You might want to set a global default so that when you invoke a procedure, you automatically get that configured default value instead of the built-in one.
+
+Also, say you have multiple users on the same system, you might want to limit concurrency for each user so that when they all work at the same time, they won't overwhelm and slow down the system excessively.
+
+Lastly, we offer defaults and limits globally or on a per-user basis. Tie breaking is done by having personal settings win. You can think of personal settings being overlaid global settings.
+
+== Default configuration values
+
+As a busy user of GDS you will often want to use the same general parameters across different procedure invocations. We allow you to set a default to avoid you repeating yourself.
+
+=== Setting a default
+
+You can set defaults by invoking the `gds.alpha.config.defaults.set` procedure. You need to supply a key-value pair and an optional username.
+
+Here we set the `concurrency` parameter to a default value of 12 for user Alicia; that means Alicia never has to specify the concurrency parameter _except_ in special cases. We also set `maxIterations` to 100:
+
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.alpha.config.defaults.set('concurrency', 12, 'Alicia')
+CALL gds.alpha.config.defaults.set('maxIterations', 100, 'Alicia')
+----
+
+[Note]
+====
+If you leave out the username parameter, the default is set globally, for all users.
+====
+
+=== Listing defaults
+
+You can inspect default settings by invoking the `gds.alpha.config.defaults.list` procedure. You can supply optional username and/ or key parameters to filter results.
+
+Here is an example where we list the `concurrency` default setting for Alicia:
+
+[role=query-example]
+--
+.Querying for personal defaults and filtering by key:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.config.defaults.list({ username: 'Alicia', key: 'concurrency' })
+----
+
+Assuming Alicia didn't have a setting for `concurrency`, we would list the global setting if one existed. So what is output is always the _effective_ setting(s).
+
+.Results
+[opts="header", cols="1, 1"]
+|===
+| key           | value
+| "concurrency" | 12
+|===
+--
+
+We can also leave out the filter and see all defaults settings for Alicia:
+
+[role=query-example]
+--
+.Querying for personal defaults without a filter:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.config.defaults.list({ username: 'Alicia' })
+----
+
+Assuming Alicia didn't have a setting for `concurrency`, we would list the global setting if one existed. So what is output is always the _effective_ setting(s).
+
+.Results
+[opts="header", cols="1, 1"]
+|===
+| key             | value
+| "concurrency"   | 12
+| "maxIterations" | 100
+|===
+--
+
+[Note]
+====
+Again, if you leave out the username parameter, we list defaults globally, for all users.
+====
+
+=== Limitations
+
+When setting defaults or listing them, we ensure that only administrators can set global defaults. We also ensure that only a user themselves or an administrator can set or list personal defaults for that user.

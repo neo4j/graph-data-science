@@ -13,3 +13,4 @@ This chapter is divided into the following sections:
 * xref:management-ops/create-cypher-db.adoc[Cypher on GDS graph]
 * xref:management-ops/administration.adoc[Administration]
 * xref:management-ops/backup-restore.adoc[Backup and Restore]
+* xref:management-ops/defaults-and-limits.adoc[Defaults and Limits]

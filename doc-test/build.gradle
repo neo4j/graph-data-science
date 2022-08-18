@@ -25,6 +25,7 @@ dependencies {
     implementation     group: 'org.reflections', name: 'reflections',  version: ver.doc.'reflections'
 
     testImplementation project(':cypher-aggregation')
+    testImplementation project(':defaults-and-limits')
     testImplementation project(':doc-test-tools')
     testImplementation project(':proc')
     testImplementation project(':pregel-example')
