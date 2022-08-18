@@ -211,7 +211,7 @@ include::partial$/algorithms/degree-centrality/specific-configuration.adoc[]
 ====
 
 
-[[algorithms-degree-centrality-exsamples]]
+[[algorithms-degree-centrality-examples]]
 == Examples
 
 :algorithm-name: {algorithm}
