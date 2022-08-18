@@ -6,7 +6,4 @@ nav:
 - modules/ROOT/content-nav.adoc
 asciidoc:
   attributes:
-    neo4j-version: '4.1'
-    neo4j-version-exact: '4.1.1'
-    neo4j-buildnumber: '4.1'
     docs-version: '2.2'
