@@ -26,9 +26,11 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Map;
 import java.util.Optional;
-import java.util.function.BooleanSupplier;
 import java.util.stream.Stream;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 /**
  * Here in the procedure we parse parameters and handle authentication, because that is closely tied to Neo4j
@@ -42,69 +44,101 @@ public class DefaultsConfigurationProcedure {
     @Context
     public Username username;
 
-    private final BooleanSupplier isAdministratorPredicate;
-    private final DefaultsConfigurationFacade facade;
-
-    /**
-     * Exists to satisfy procedure framework.
-     */
-    @SuppressWarnings("unused")
-    public DefaultsConfigurationProcedure() {
-        isAdministratorPredicate = this::isAdministrator;
-        facade = new DefaultsConfigurationFacade(DefaultsConfiguration.Instance);
-    }
-
-    DefaultsConfigurationProcedure(
-        KernelTransaction kernelTransaction,
-        Username username,
-        BooleanSupplier isAdministratorPredicate,
-        DefaultsConfigurationFacade facade
-    ) {
-        this.kernelTransaction = kernelTransaction;
-        this.username = username;
-        this.isAdministratorPredicate = isAdministratorPredicate;
-        this.facade = facade;
-    }
-
     /**
      * If username is supplied, we find the _effective defaults_ for that user. So the meld of global and personal
      * defaults, without specifying where each came from. Personal defaults take precedence.
      */
-    @Procedure("gds.config.defaults.list")
+    @Procedure("gds.alpha.config.defaults.list")
     @Description("List defaults; global by default, but also optionally for a specific user and/ or key")
-    public Stream<DefaultSetting> listDefaults(
-        @Name(value = "username") String username,
-        @Name(value = "key") String key
-    ) {
-        return facade.listDefaults(
-            this.username.username(),
-            isAdministratorPredicate.getAsBoolean(),
-            Optional.ofNullable(username),
-            Optional.ofNullable(key)
+    public Stream<DefaultSetting> listDefaults(@Name(value = "parameters", defaultValue = "{}") Map<String, Object> parameters) {
+        return getFacade().listDefaults(
+            getOperatorName(),
+            isAdministrator(),
+            getAsOptionalString(parameters, "username"),
+            getAsOptionalString(parameters, "key")
         );
     }
 
     /**
-     * If username supplied we set the default just for that user; globally otherwise.
+     * If username is supplied we set the default just for that user; globally otherwise.
+     *
+     * @param username notice this trick for optional parameters in procedure invocations.
      */
-    @Procedure("gds.config.defaults.set")
+    @Procedure("gds.alpha.config.defaults.set")
     @Description("Set a default; global by, default, but also optionally for a specific user")
     public void setDefault(
-        @Name(value = "username") String username,
         @Name(value = "key") String key,
-        @Name(value = "value") Object value
+        @Name(value = "value") Object value,
+        @Name(value = "username", defaultValue = DefaultsAndLimitsConstants.DummyUsername) String username
     ) {
-        facade.setDefault(
-            this.username.username(),
-            isAdministratorPredicate.getAsBoolean(),
-            Optional.ofNullable(username),
+        getFacade().setDefault(
+            getOperatorName(),
+            isAdministrator(),
+            getUsername(username),
             key,
             value
         );
     }
 
+    /**
+     * Right. Neo4j's procedure framework _actively prevents_ having fields that are not @Context annotated, so what
+     * does one do when one wants to inject behaviour during tests? No field injection in constructor - subclass this
+     * when you want to inject test dependencies.
+     */
+    DefaultsConfigurationFacade getFacade() {
+        return new DefaultsConfigurationFacade(DefaultsConfiguration.Instance);
+    }
+
+    /**
+     * See {@link DefaultsConfigurationProcedure#getFacade()}
+     */
+    String getOperatorName() {
+        return this.username.username();
+    }
+
+    /**
+     * See {@link DefaultsConfigurationProcedure#getFacade()}
+     */
+    boolean isAdministrator() {
+        return IsAdministrator(kernelTransaction);
+    }
+
+    /**
+     * We use this to turn missing parameters into a firmer contract using {@link java.util.Optional}
+     */
+    Optional<String> getAsOptionalString(Map<String, Object> parameters, String key) {
+        if (!parameters.containsKey(key)) return Optional.empty();
+
+        Object valueAsObject = parameters.get(key);
+
+        String valueAsString = assertValueIsString(key, valueAsObject);
+
+        return Optional.of(valueAsString);
+    }
+
+    private String assertValueIsString(String key, Object valueAsObject) {
+        if (valueAsObject instanceof String) return (String) valueAsObject;
+
+        throw new IllegalArgumentException(
+            formatWithLocale(
+                "Supplied parameter '%s' has the wrong type (%s), must be a string",
+                key,
+                valueAsObject
+            )
+        );
+    }
+
+    /**
+     * Here is the trick for letting users do procedure calls with optional parameters. We match a dummy in that case.
+     */
+    private Optional<String> getUsername(String username) {
+        if (username.equals(DefaultsAndLimitsConstants.DummyUsername)) return Optional.empty();
+
+        return Optional.of(username);
+    }
+
     // stolen from BaseProc
-    private boolean isAdministrator() {
+    private static boolean IsAdministrator(KernelTransaction kernelTransaction) {
         if (kernelTransaction == null) {
             // No transaction available (likely we're in a test), no-one is admin here
             return false;

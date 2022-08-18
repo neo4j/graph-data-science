@@ -20,12 +20,14 @@
 package org.neo4j.gds.configuration;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.Username;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,16 +48,11 @@ class DefaultsConfigurationProcedureTest {
     @Test
     void shouldListGlobalDefaults() {
         var facade = mock(DefaultsConfigurationFacade.class);
-        var procedure = new DefaultsConfigurationProcedure(
-            null,
-            Username.of("some administrator"),
-            () -> true,
-            facade
-        );
+        var procedure = new DefaultsConfigurationProcedureAdapter(facade, "some administrator", true);
 
         when(facade.listDefaults("some administrator", true, Optional.empty(), Optional.empty()))
             .thenReturn(Stream.of(new DefaultSetting("a", 42), new DefaultSetting("b", 87)));
-        Stream<DefaultSetting> settings = procedure.listDefaults(null, null);
+        Stream<DefaultSetting> settings = procedure.listDefaults(Collections.emptyMap());
 
         assertThat(settings).satisfiesExactly(
             ds -> {
@@ -72,16 +69,11 @@ class DefaultsConfigurationProcedureTest {
     @Test
     void shouldListPersonalDefaultForSpecificKey() {
         var facade = mock(DefaultsConfigurationFacade.class);
-        var procedure = new DefaultsConfigurationProcedure(
-            null,
-            Username.of("some administrator"),
-            () -> true,
-            facade
-        );
+        var procedure = new DefaultsConfigurationProcedureAdapter(facade, "some administrator", true);
 
         when(facade.listDefaults("some administrator", true, Optional.of("Jonas Vingegaard"), Optional.of("b")))
             .thenReturn(Stream.of(new DefaultSetting("b", 87)));
-        Stream<DefaultSetting> settings = procedure.listDefaults("Jonas Vingegaard", "b");
+        Stream<DefaultSetting> settings = procedure.listDefaults(Map.of("username", "Jonas Vingegaard", "key", "b"));
 
         assertThat(settings).satisfiesExactly(
             ds -> {
@@ -94,14 +86,9 @@ class DefaultsConfigurationProcedureTest {
     @Test
     void shouldSetGlobalDefault() {
         var facade = mock(DefaultsConfigurationFacade.class);
-        var procedure = new DefaultsConfigurationProcedure(
-            null,
-            Username.of("some administrator"),
-            () -> true,
-            facade
-        );
+        var procedure = new DefaultsConfigurationProcedureAdapter(facade, "some administrator", true);
 
-        procedure.setDefault(null, "foo", 42);
+        procedure.setDefault("foo", 42, DefaultsAndLimitsConstants.DummyUsername);
 
         verify(facade).setDefault("some administrator", true, Optional.empty(), "foo", 42);
     }
@@ -109,15 +96,26 @@ class DefaultsConfigurationProcedureTest {
     @Test
     void shouldSetPersonalDefault() {
         var facade = mock(DefaultsConfigurationFacade.class);
-        var procedure = new DefaultsConfigurationProcedure(
-            null,
-            Username.of("some administrator"),
-            () -> true,
-            facade
-        );
+        var procedure = new DefaultsConfigurationProcedureAdapter(facade, "some administrator", true);
 
-        procedure.setDefault("Jonas Vingegaard", "foo", 42);
+        procedure.setDefault("foo", 42, "Jonas Vingegaard");
 
         verify(facade).setDefault("some administrator", true, Optional.of("Jonas Vingegaard"), "foo", 42);
+    }
+
+    @Test
+    void shouldParseConfiguration() {
+        var procedure = new DefaultsConfigurationProcedure();
+
+        assertThat(procedure.getAsOptionalString(Map.of("foo", "bar"), "foo")).hasValue("bar");
+        assertThat(procedure.getAsOptionalString(Map.of(), "foo")).isEmpty();
+
+        try {
+            procedure.getAsOptionalString(Map.of("foo", 42), "foo");
+
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage()).isEqualTo("Supplied parameter 'foo' has the wrong type (42), must be a string");
+        }
     }
 }
