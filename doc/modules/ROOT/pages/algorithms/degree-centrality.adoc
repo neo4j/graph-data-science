@@ -450,7 +450,11 @@ That is because the `score` property value between Bridget and Alice is negative
 By default, node centrality uses the `NATURAL` orientation to compute degrees.
 For some use-cases it makes sense to analyze a different orientation, for example, if we want to find out how many users follow another user.
 In order to change the orientation, we can use the `orientation` configuration key.
-Supported values are `NATURAL` (default), `REVERSE` and `UNDIRECTED`.
+There are three supported values:
+
+* `NATURAL` (default) corresponds to computing the out-degree of each node.
+* `REVERSE`  corresponds to computing the in-degree of each node.
+* `UNDIRECTED` computes and sums both the out-degree and in-degree of each node.
 
 [role=query-example]
 --
