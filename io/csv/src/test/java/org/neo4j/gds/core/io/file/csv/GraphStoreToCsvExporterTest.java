@@ -425,10 +425,10 @@ public class GraphStoreToCsvExporterTest extends CsvTest {
             RELATIONSHIP_SCHEMA_FILE_NAME,
             List.of(
                 CsvRelationshipSchemaVisitorTest.RELATIONSHIP_SCHEMA_COLUMNS,
-                List.of("REL1", "prop1", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name()),
-                List.of("REL1", "prop2", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name()),
-                List.of("REL2", "prop3", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name()),
-                List.of("REL2", "prop4", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name())
+                List.of("REL1", "NATURAL", "prop1", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name()),
+                List.of("REL1", "NATURAL", "prop2", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name()),
+                List.of("REL2", "NATURAL", "prop3", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name()),
+                List.of("REL2", "NATURAL", "prop4", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name())
             )
         );
 
@@ -507,10 +507,10 @@ public class GraphStoreToCsvExporterTest extends CsvTest {
             RELATIONSHIP_SCHEMA_FILE_NAME,
             List.of(
                 CsvRelationshipSchemaVisitorTest.RELATIONSHIP_SCHEMA_COLUMNS,
-                List.of("REL1"),
-                List.of("REL2"),
-                List.of("REL3"),
-                List.of("REL4")
+                List.of("REL1", "NATURAL"),
+                List.of("REL2", "NATURAL"),
+                List.of("REL3", "NATURAL"),
+                List.of("REL4", "NATURAL")
             )
         );
     }
