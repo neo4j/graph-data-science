@@ -221,7 +221,6 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         private final BlockingQueue<long[]> walks;
         private final NextNodeSupplier nextNodeSupplier;
         private final long[][] buffer;
-        private final long randomSeed;
         private final ProgressTracker progressTracker;
         private final TerminationFlag terminationFlag;
         private final RandomWalkBaseConfig config;
@@ -274,7 +273,6 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
             this.graph = graph;
             this.config = config;
             this.walks = walks;
-            this.randomSeed = randomSeed;
             this.progressTracker = progressTracker;
             this.terminationFlag = terminationFlag;
             this.sampler = new RandomWalkSampler(
