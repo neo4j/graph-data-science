@@ -28,6 +28,7 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.graphdb.Result;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.asciidoctor.Asciidoctor.Factory.create;
@@ -108,7 +110,7 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
         beforeAllQueries = treeProcessor.beforeAllQueries();
 
         if (!setupNeo4jGraphPerTest()) {
-            beforeAllQueries.forEach(this::runQuery);
+            beforeAllQueries.forEach(this::runQueryAsUser);
         }
     }
 
@@ -130,9 +132,9 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
     // This emulates `@BeforeEach`. Typically used to project any GDS Graphs
     private void beforeEachTest() {
         if (setupNeo4jGraphPerTest()) {
-            beforeAllQueries.forEach(this::runQuery);
+            beforeAllQueries.forEach(this::runQueryAsUser);
         }
-        beforeEachQueries.forEach(this::runQuery);
+        beforeEachQueries.forEach(this::runQueryAsUser);
     }
 
     private DynamicTest createDynamicTest(QueryExampleGroup queryExampleGroup) {
@@ -167,12 +169,12 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
         if (queryExample.assertResults()) {
             runQueryExampleAndAssertResults(queryExample);
         } else {
-            assertThatNoException().isThrownBy(() -> runQuery(queryExample.query()));
+            assertThatNoException().isThrownBy(() -> runQueryAsUser(queryExample.query()));
         }
     }
 
     private void runQueryExampleAndAssertResults(QueryExample queryExample) {
-        runQueryWithResultConsumer(queryExample.query(), result -> {
+        runQueryAsUserWithResultConsumer(queryExample.query(), result -> {
             assertThat(queryExample.resultColumns()).containsExactlyElementsOf(result.columns());
 
             var actualResults = new ArrayList<List<String>>();
@@ -216,5 +218,13 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
         } else {
             return value.toString();
         }
+    }
+
+    private void runQueryAsUser(String query) {
+        super.runQuery(getUsername(), query);
+    }
+
+    private void runQueryAsUserWithResultConsumer(String query, Consumer<Result> check) {
+        super.runQueryWithResultConsumer(getUsername(), query, check);
     }
 }
