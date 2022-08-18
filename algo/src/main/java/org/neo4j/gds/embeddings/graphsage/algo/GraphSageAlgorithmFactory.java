@@ -62,7 +62,7 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
             model.trainConfig().relationshipWeightProperty()
         );
 
-        if(model.trainConfig().hasRelationshipWeightProperty()) {
+        if(graph.hasRelationshipProperty()) {
             validateRelationshipWeightPropertyValue(graph, configuration.concurrency(), executorService);
         }
 

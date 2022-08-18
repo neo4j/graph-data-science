@@ -72,8 +72,8 @@ public final class GraphSageCompanion {
                         GraphSageTrainConfig trainConfig = model.trainConfig();
                         trainConfig.graphStoreValidation(
                             graphStore,
-                            trainConfig.nodeLabelIdentifiers(graphStore),
-                            trainConfig.internalRelationshipTypes(graphStore)
+                            graphSageConfig.nodeLabelIdentifiers(graphStore),
+                            graphSageConfig.internalRelationshipTypes(graphStore)
                         );
                     }
                 );

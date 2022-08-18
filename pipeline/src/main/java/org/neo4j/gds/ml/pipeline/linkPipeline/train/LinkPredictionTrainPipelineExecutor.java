@@ -23,7 +23,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.CatalogModelContainer;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -94,7 +93,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     }
 
     public static MemoryEstimation estimate(
-        ModelCatalog modelCatalog,
+        ExecutionContext executionContext,
         LinkPredictionTrainingPipeline pipeline,
         LinkPredictionTrainConfig configuration
     ) {
@@ -103,13 +102,13 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         var splitEstimations = splitEstimation(
             pipeline.splitConfig(),
             configuration.targetRelationshipType(),
-            pipeline.relationshipWeightProperty(),
+            pipeline.relationshipWeightProperty(executionContext),
             configuration.sourceNodeLabel(),
             configuration.targetNodeLabel()
         );
 
         MemoryEstimation maxOverNodePropertySteps = NodePropertyStepExecutor.estimateNodePropertySteps(
-            modelCatalog,
+            executionContext.modelCatalog(),
             configuration.username(),
             pipeline.nodePropertySteps(),
             configuration.nodeLabels(),
@@ -159,7 +158,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             config.sourceNodeLabel(),
             config.targetNodeLabel(),
             config.randomSeed(),
-            pipeline.relationshipWeightProperty()
+            pipeline.relationshipWeightProperty(executionContext)
         );
     }
 

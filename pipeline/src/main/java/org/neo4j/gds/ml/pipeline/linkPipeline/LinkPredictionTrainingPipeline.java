@@ -20,7 +20,11 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 
 import java.util.ArrayList;
@@ -30,6 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
+import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
 
 public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeatureStep> {
 
@@ -80,23 +85,44 @@ public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeature
         }
     }
 
-    public Map<String, List<String>> tasksByRelationshipProperty() {
+    public Map<String, List<String>> tasksByRelationshipProperty(ExecutionContext executionContext) {
         Map<String, List<String>> tasksByRelationshipProperty = new HashMap<>();
-        nodePropertySteps().forEach(existingStep -> {
-            if (existingStep.config().containsKey(RELATIONSHIP_WEIGHT_PROPERTY)) {
-                var existingProperty = (String) existingStep.config().get(RELATIONSHIP_WEIGHT_PROPERTY);
-                var tasks = tasksByRelationshipProperty.computeIfAbsent(
-                    existingProperty,
-                    key -> new ArrayList<>()
-                );
+
+        for (ExecutableNodePropertyStep existingStep : nodePropertySteps()) {
+            Map<String, Object> config = existingStep.config();
+            Optional<String> maybeProperty = extractRelationshipProperty(executionContext, config);
+
+            maybeProperty.ifPresent(property -> {
+                var tasks = tasksByRelationshipProperty.computeIfAbsent(property, key -> new ArrayList<>());
                 tasks.add(existingStep.procName());
-            }
-        });
+            });
+        }
+
         return tasksByRelationshipProperty;
     }
 
-    public Optional<String> relationshipWeightProperty() {
-        var relationshipWeightPropertySet = tasksByRelationshipProperty().entrySet();
+    private static Optional<String> extractRelationshipProperty(
+        ExecutionContext executionContext,
+        Map<String, Object> config
+    ) {
+        if (config.containsKey(RELATIONSHIP_WEIGHT_PROPERTY)) {
+            var existingProperty = (String) config.get(RELATIONSHIP_WEIGHT_PROPERTY);
+            return Optional.of(existingProperty);
+        } else if (config.containsKey(MODEL_NAME_KEY)) {
+            return Optional.ofNullable(executionContext.modelCatalog().getUntyped(
+                    executionContext.username(),
+                    ((String) config.get(MODEL_NAME_KEY))
+                ))
+                .map(Model::trainConfig)
+                .filter(trainConfig -> trainConfig instanceof RelationshipWeightConfig)
+                .flatMap(trainConfig -> ((RelationshipWeightConfig) trainConfig).relationshipWeightProperty());
+        }
+
+        return Optional.empty();
+    }
+
+    public Optional<String> relationshipWeightProperty(ExecutionContext executionContext) {
+        var relationshipWeightPropertySet = tasksByRelationshipProperty(executionContext).entrySet();
         return relationshipWeightPropertySet.isEmpty()
             ? Optional.empty()
             : Optional.of(relationshipWeightPropertySet.iterator().next().getKey());

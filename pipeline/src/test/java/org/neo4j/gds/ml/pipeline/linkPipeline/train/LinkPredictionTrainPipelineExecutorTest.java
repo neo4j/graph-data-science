@@ -43,12 +43,12 @@ import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -580,7 +580,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
             );
 
             var actualRange = LinkPredictionTrainPipelineExecutor
-                .estimate(new OpenModelCatalog(), pipeline, config)
+                .estimate(ImmutableExecutionContext.EMPTY, pipeline, config)
                 .estimate(graphDimensions, config.concurrency())
                 .memoryUsage();
 
@@ -602,7 +602,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
             LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
 
             assertThatThrownBy(() -> LinkPredictionTrainPipelineExecutor.estimate(
-                new OpenModelCatalog(),
+                ExecutionContext.EMPTY,
                 pipeline,
                 config
             ))
