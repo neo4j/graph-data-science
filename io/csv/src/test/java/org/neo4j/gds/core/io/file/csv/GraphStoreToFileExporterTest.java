@@ -46,6 +46,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.Orientation.NATURAL;
+import static org.neo4j.gds.Orientation.REVERSE;
+import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.core.io.file.CsvSchemaConstants.NODE_SCHEMA_COLUMNS;
 import static org.neo4j.gds.core.io.file.csv.CsvGraphCapabilitiesWriter.GRAPH_CAPABILITIES_FILE_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
@@ -59,7 +62,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @GdlExtension
 public class GraphStoreToFileExporterTest extends CsvTest {
 
-    @GdlGraph
+    @GdlGraph(orientation = UNDIRECTED)
     private static final String GDL =
         "CREATE" +
         "  (a:A:B { prop1: 0, prop2: 42, prop3: [1L, 3L, 3L, 7L]})" +
@@ -79,7 +82,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
     @Inject
     private IdFunction idFunction;
 
-    @GdlGraph(graphNamePrefix = "concurrent")
+    @GdlGraph(graphNamePrefix = "concurrent", orientation = NATURAL)
     private static final String GDL_FOR_CONCURRENCY =
         "CREATE" +
         "  (a)" +
@@ -96,7 +99,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
     @Inject
     public GraphStore concurrentGraphStore;
 
-    @GdlGraph(graphNamePrefix = "noProperties")
+    @GdlGraph(graphNamePrefix = "noProperties", orientation = REVERSE)
     private static final String GDL_WITHOUT_PROPERTIES =
         "CREATE" +
         "  (a:A)" +
@@ -184,8 +187,12 @@ public class GraphStoreToFileExporterTest extends CsvTest {
             "relationships_REL1_0.csv",
             List.of(
                 List.of(stringIdOf("a"), stringIdOf("a"), "0.0", "42.0"),
+                List.of(stringIdOf("a"), stringIdOf("a"), "0.0", "42.0"),
                 List.of(stringIdOf("a"), stringIdOf("b"), "1.0", "43.0"),
-                List.of(stringIdOf("b"), stringIdOf("a"), "2.0", "44.0")
+                List.of(stringIdOf("b"), stringIdOf("a"), "1.0", "43.0"),
+                List.of(stringIdOf("b"), stringIdOf("a"), "2.0", "44.0"),
+                List.of(stringIdOf("a"), stringIdOf("b"), "2.0", "44.0")
+
             )
         );
 
@@ -194,8 +201,11 @@ public class GraphStoreToFileExporterTest extends CsvTest {
             "relationships_REL2_0.csv",
             List.of(
                 List.of(stringIdOf("b"), stringIdOf("c"), "3.0", "45.0"),
+                List.of(stringIdOf("c"), stringIdOf("b"), "3.0", "45.0"),
                 List.of(stringIdOf("c"), stringIdOf("d"), "4.0", "46.0"),
-                List.of(stringIdOf("d"), stringIdOf("a"), "5.0", "47.0")
+                List.of(stringIdOf("d"), stringIdOf("c"), "4.0", "46.0"),
+                List.of(stringIdOf("d"), stringIdOf("a"), "5.0", "47.0"),
+                List.of(stringIdOf("a"), stringIdOf("d"), "5.0", "47.0")
             )
         );
 
@@ -293,10 +303,10 @@ public class GraphStoreToFileExporterTest extends CsvTest {
             RELATIONSHIP_SCHEMA_FILE_NAME,
             List.of(
                 CsvRelationshipSchemaVisitorTest.RELATIONSHIP_SCHEMA_COLUMNS,
-                List.of("REL1", "NATURAL", "prop1", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name()),
-                List.of("REL1", "NATURAL", "prop2", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name()),
-                List.of("REL2", "NATURAL", "prop3", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name()),
-                List.of("REL2", "NATURAL", "prop4", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name())
+                List.of("REL1", "UNDIRECTED", "prop1", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name()),
+                List.of("REL1", "UNDIRECTED", "prop2", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name()),
+                List.of("REL2", "UNDIRECTED", "prop3", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name()),
+                List.of("REL2", "UNDIRECTED", "prop4", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name())
             )
         );
 
@@ -315,7 +325,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
                     graphStore.databaseId().name(),
                     Long.toString(graphStore.nodeCount()),
                     Long.toString(3L),
-                    CsvMapUtil.relationshipCountsToString(Map.of(RelationshipType.of("REL2"), 3L, RelationshipType.of("REL1"), 3L))
+                    CsvMapUtil.relationshipCountsToString(Map.of(RelationshipType.of("REL2"), 6L, RelationshipType.of("REL1"), 6L))
                 )
             )
         );
@@ -369,10 +379,10 @@ public class GraphStoreToFileExporterTest extends CsvTest {
             RELATIONSHIP_SCHEMA_FILE_NAME,
             List.of(
                 CsvRelationshipSchemaVisitorTest.RELATIONSHIP_SCHEMA_COLUMNS,
-                List.of("REL1", "NATURAL"),
-                List.of("REL2", "NATURAL"),
-                List.of("REL3", "NATURAL"),
-                List.of("REL4", "NATURAL")
+                List.of("REL1", "REVERSE"),
+                List.of("REL2", "REVERSE"),
+                List.of("REL3", "REVERSE"),
+                List.of("REL4", "REVERSE")
             )
         );
     }
