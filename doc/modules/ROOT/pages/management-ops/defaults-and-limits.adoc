@@ -31,6 +31,8 @@ We also set `maxIterations` to 100:
 CALL gds.alpha.config.defaults.set('maxIterations', 100, 'Alicia')
 ----
 
+These configuration values are now applied each time Alicia runs an algorithm that uses `concurrency` or `maxIterations`. See for example xref:algorithms/knn.adoc[K-Nearest Neighbors].
+
 [Note]
 ====
 If you leave out the username parameter, the default is set globally, for all users.
