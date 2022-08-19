@@ -23,7 +23,7 @@ import org.asciidoctor.Asciidoctor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ResourceUtil;
-import org.neo4j.gds.doc.syntax.SetupQuery;
+import org.neo4j.gds.doc.syntax.DocQuery;
 
 import java.util.Collections;
 import java.util.List;
@@ -52,8 +52,8 @@ class QueryCollectingTreeProcessorTest {
     void loadsBeforeAllQueriesCorrectly() {
         var beforeAllQueries = processor.beforeAllQueries();
         assertThat(beforeAllQueries).containsExactly(
-            SetupQuery.builder().query("CREATE (alice:Person {name: 'Alice'})").build(),
-            SetupQuery.builder().query(
+            DocQuery.builder().query("CREATE (alice:Person {name: 'Alice'})").build(),
+            DocQuery.builder().query(
                 "CREATE (bob:Person {name: 'Bob'})").build()
         );
     }
@@ -63,11 +63,11 @@ class QueryCollectingTreeProcessorTest {
         var beforeEachQueries = processor.beforeEachQueries();
 
         assertThat(beforeEachQueries).containsExactly(
-            SetupQuery.builder().query(
+            DocQuery.builder().query(
                 "MATCH (n) RETURN n").build(),
-            SetupQuery.builder().query(
+            DocQuery.builder().query(
                 "MATCH (m) RETURN m").build(),
-            SetupQuery.builder().query(
+            DocQuery.builder().query(
                 "MATCH (q) RETURN q").build()
         );
     }

@@ -23,7 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 
 @ValueClass
-public interface SetupQuery {
+public interface DocQuery {
     String query();
 
     @Value.Derived
@@ -36,7 +36,7 @@ public interface SetupQuery {
         return "";
     }
 
-    static ImmutableSetupQuery.Builder builder() {
-        return ImmutableSetupQuery.builder();
+    static ImmutableDocQuery.Builder builder() {
+        return ImmutableDocQuery.builder();
     }
 }

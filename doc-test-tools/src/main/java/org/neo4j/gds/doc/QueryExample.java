@@ -21,11 +21,12 @@ package org.neo4j.gds.doc;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.doc.syntax.DocQuery;
 
 import java.util.List;
 
 @ValueClass
-public interface QueryExample {
+public interface QueryExample extends DocQuery {
 
     String query();
 
@@ -42,6 +43,17 @@ public interface QueryExample {
     @Value.Default
     default boolean assertResults() {
         return true;
+    }
+
+
+    @Value.Derived
+    default boolean runAsOperator() {
+        return !operator().equals("");
+    }
+
+    @Value.Default
+    default String operator() {
+        return "";
     }
 
     static ImmutableQueryExample.Builder builder() {

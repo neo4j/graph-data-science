@@ -28,7 +28,7 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.doc.syntax.SetupQuery;
+import org.neo4j.gds.doc.syntax.DocQuery;
 import org.neo4j.graphdb.Result;
 
 import java.io.File;
@@ -46,8 +46,9 @@ import java.util.stream.Collectors;
 
 import static org.asciidoctor.Asciidoctor.Factory.create;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+
 
 public abstract class MultiFileDocTestBase extends BaseProcTest {
 
@@ -56,8 +57,8 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
 
     private static final Path ASCIIDOC_PATH = Paths.get("build/doc-sources/modules/ROOT");
 
-    private List<SetupQuery> beforeEachQueries;
-    private List<SetupQuery> beforeAllQueries;
+    private List<DocQuery> beforeEachQueries;
+    private List<DocQuery> beforeAllQueries;
     private List<QueryExampleGroup> queryExampleGroups;
 
     private static final NumberFormat FLOAT_FORMAT = DecimalFormat.getInstance(Locale.ENGLISH);
@@ -113,7 +114,7 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
         beforeAllQueries = treeProcessor.beforeAllQueries();
 
         if (!setupNeo4jGraphPerTest()) {
-            beforeAllQueries.forEach(setupQuery -> {runQueryAsOperator(setupQuery.query());});
+            beforeAllQueries.forEach(this::runDocQuery);
         }
     }
 
@@ -135,20 +136,20 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
     // This emulates `@BeforeEach`. Typically used to project any GDS Graphs
     private void beforeEachTest() {
         if (setupNeo4jGraphPerTest()) {
-            beforeAllQueries.forEach(this::runSetUpQuery);
+            beforeAllQueries.forEach(this::runDocQuery);
         }
-        beforeEachQueries.forEach(this::runSetUpQuery);
+        beforeEachQueries.forEach(this::runDocQuery);
     }
 
-    private void runSetUpQuery(SetupQuery setupQuery) {
-        if (!setupQuery.runAsOperator()) {
-            super.runQuery(setupQuery.query());
+    private void runDocQuery(DocQuery docQuery) {
+        if (!docQuery.runAsOperator()) {
+            super.runQuery(docQuery.query());
         } else {
-            String operatorHandle = setupQuery.operator();
-            if (setupQuery.operator().equals("DEFAULT")) {
+            String operatorHandle = docQuery.operator();
+            if (operatorHandle.equals("DEFAULT")) {
                 operatorHandle = getOperator().get();
             }
-            super.runQuery(operatorHandle, setupQuery.query());
+            super.runQuery(operatorHandle, docQuery.query());
         }
     }
 
@@ -166,30 +167,22 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
         });
     }
 
-    protected abstract List<Class<?>> procedures();
+    private void runQueryΕxampleWithResultConsumer(QueryExample queryExample, Consumer<Result> check) {
 
-    protected List<Class<?>> functions() {
-        return List.of();
-    }
-
-    protected List<Class<?>> aggregationFunctions() {
-        return List.of();
-    }
-
-    Runnable cleanup() {
-        return GraphStoreCatalog::removeAllLoadedGraphs;
-    }
-
-    private void runQueryExample(QueryExample queryExample) {
-        if (queryExample.assertResults()) {
-            runQueryExampleAndAssertResults(queryExample);
+        if (!queryExample.runAsOperator()) {
+            super.runQueryWithResultConsumer(queryExample.query(), check);
         } else {
-            assertThatNoException().isThrownBy(() -> runQueryAsOperator(queryExample.query()));
+            String operatorHandle = queryExample.operator();
+            if (operatorHandle.equals("DEFAULT")) {
+                operatorHandle = getOperator().get();
+            }
+            super.runQueryWithResultConsumer(operatorHandle, queryExample.query(), check);
         }
+
     }
 
     private void runQueryExampleAndAssertResults(QueryExample queryExample) {
-        runQueryAsOperatorWithResultConsumer(queryExample.query(), result -> {
+        runQueryΕxampleWithResultConsumer(queryExample, result -> {
             assertThat(queryExample.resultColumns()).containsExactlyElementsOf(result.columns());
 
             var actualResults = new ArrayList<List<String>>();
@@ -207,6 +200,29 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
                 .containsExactlyElementsOf(expectedResults);
         });
     }
+
+    private void runQueryExample(QueryExample queryExample) {
+        if (queryExample.assertResults()) {
+            runQueryExampleAndAssertResults(queryExample);
+        } else {
+            assertThatNoException().isThrownBy(() -> runDocQuery(queryExample));
+        }
+    }
+
+    protected abstract List<Class<?>> procedures();
+
+    protected List<Class<?>> functions() {
+        return List.of();
+    }
+
+    protected List<Class<?>> aggregationFunctions() {
+        return List.of();
+    }
+
+    Runnable cleanup() {
+        return GraphStoreCatalog::removeAllLoadedGraphs;
+    }
+
 
     private List<List<String>> reducePrecisionOfDoubles(Collection<List<String>> resultsFromDoc) {
         return resultsFromDoc
@@ -235,16 +251,6 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
         }
     }
 
-
-    private void runQueryAsOperator(String query) {
-        if (getOperator().isPresent()) super.runQuery(getOperator().get(), query);
-        else super.runQuery(query);
-    }
-
-    private void runQueryAsOperatorWithResultConsumer(String query, Consumer<Result> check) {
-        if (getOperator().isPresent()) super.runQueryWithResultConsumer(getOperator().get(), query, check);
-        else super.runQueryWithResultConsumer(query, check);
-    }
 
     /**
      * Subclass this if you want to assume an identity

@@ -25,7 +25,7 @@ import org.asciidoctor.ast.Row;
 import org.asciidoctor.ast.StructuralNode;
 import org.asciidoctor.ast.Table;
 import org.asciidoctor.extension.Treeprocessor;
-import org.neo4j.gds.doc.syntax.SetupQuery;
+import org.neo4j.gds.doc.syntax.DocQuery;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,15 +57,15 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
     private static final String TEST_OPERATOR_ATTRIBUTE = "operator";
     private static final String ROLE_SELECTOR = "role";
 
-    private List<SetupQuery> beforeAllQueries;
-    private List<SetupQuery> beforeEachQueries;
+    private List<DocQuery> beforeAllQueries;
+    private List<DocQuery> beforeEachQueries;
     private Map<String, List<QueryExample>> queryExampleMap;
 
-    public List<SetupQuery> beforeAllQueries() {
+    public List<DocQuery> beforeAllQueries() {
         return beforeAllQueries;
     }
 
-    public List<SetupQuery> beforeEachQueries() {
+    public List<DocQuery> beforeEachQueries() {
         return beforeEachQueries;
     }
 
@@ -92,20 +92,17 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
         return document;
     }
 
-    private List<SetupQuery> collectBeforeAllQueries(StructuralNode document) {
+    private List<DocQuery> collectBeforeAllQueries(StructuralNode document) {
         return collectSetupQueries(document, SETUP_QUERY_ROLE);
     }
 
-    private List<SetupQuery> collectBeforeEachQueries(StructuralNode document) {
+    private List<DocQuery> collectBeforeEachQueries(StructuralNode document) {
         return collectSetupQueries(document, GRAPH_PROJECT_QUERY_ROLE);
     }
 
-    private List<SetupQuery> collectSetupQueries(StructuralNode node, String setupQueryType) {
+    private List<DocQuery> collectSetupQueries(StructuralNode node, String setupQueryType) {
         List<StructuralNode> nodes = node.findBy(Map.of(ROLE_SELECTOR, setupQueryType));
-        for (var mynode : nodes) {
-            System.out.println(mynode.getAttribute(TEST_OPERATOR_ATTRIBUTE));
-        }
-
+        
         return nodes
             .stream()
             .map(
@@ -115,9 +112,9 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
 
     }
 
-    private static SetupQuery createSetupQuery(StructuralNode structuralNode) {
+    private static DocQuery createSetupQuery(StructuralNode structuralNode) {
         var content = structuralNode.getContent().toString();
-        var builder = SetupQuery.builder();
+        var builder = DocQuery.builder();
         builder.query(undoReplacements(content)).build();
 
         if (structuralNode.hasAttribute(TEST_OPERATOR_ATTRIBUTE)) {
@@ -149,6 +146,9 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
 
         var queryExampleBuilder = QueryExample.builder().query(query);
 
+        if (queryExampleNode.hasAttribute(TEST_OPERATOR_ATTRIBUTE)) {
+            queryExampleBuilder.operator(queryExampleNode.getAttribute(TEST_OPERATOR_ATTRIBUTE).toString());
+        }
         if (Boolean.parseBoolean(queryExampleNode.getAttribute(TEST_TYPE_NO_RESULT, false).toString())) {
             queryExampleBuilder.assertResults(false);
         } else {
