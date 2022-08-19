@@ -103,6 +103,7 @@ public abstract class SilhouetteTask implements Runnable {
                 double nodeSilhouette = (bi - ai) / Math.max(ai, bi);
                 silhouette.set(nodeId, nodeSilhouette);
                 averageSilhouette += nodeSilhouette;
+                progressTracker.logProgress();
             }
         }
     }

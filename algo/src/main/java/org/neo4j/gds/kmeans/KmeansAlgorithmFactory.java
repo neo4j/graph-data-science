@@ -70,22 +70,31 @@ public final class KmeansAlgorithmFactory<CONFIG extends KmeansBaseConfig> exten
 
         var iterations = config.numberOfRestarts();
         if (iterations == 1) {
-            return kMeansTask(taskName(), config);
+            return kMeansTask(graph,taskName(), config);
         }
 
         return Tasks.iterativeFixed(
             taskName(),
-            () -> List.of(kMeansTask("KMeans Iteration", config)),
+            () -> List.of(kMeansTask(graph,"KMeans Iteration", config)),
             iterations
         );
     }
 
     @NotNull
-    private Task kMeansTask(String description, CONFIG config) {
-        return Tasks.task(description, List.of(
-            Tasks.leaf("Initialization", config.k()),
-            Tasks.iterativeDynamic("Main", () -> List.of(Tasks.leaf("Iteration")), config.maxIterations())
-        ));
+    private Task kMeansTask(Graph graph, String description, CONFIG config) {
+        if (config.computeSilhouette()) {
+            return Tasks.task(description, List.of(
+                Tasks.leaf("Initialization", config.k()),
+                Tasks.iterativeDynamic("Main", () -> List.of(Tasks.leaf("Iteration")), config.maxIterations()),
+                Tasks.leaf("Silhouette", graph.nodeCount())
+
+                ));
+        } else {
+            return Tasks.task(description, List.of(
+                Tasks.leaf("Initialization", config.k()),
+                Tasks.iterativeDynamic("Main", () -> List.of(Tasks.leaf("Iteration")), config.maxIterations())
+            ));
+        }
     }
 
     @Override

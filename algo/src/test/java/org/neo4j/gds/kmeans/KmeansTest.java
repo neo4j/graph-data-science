@@ -371,8 +371,7 @@ class KmeansTest {
             EmptyTaskRegistryFactory.INSTANCE
         );
 
-        var kmeans = factory.build(graph, kmeansConfig, progressTracker);
-        var result = kmeans.compute();
+        factory.build(graph, kmeansConfig, progressTracker).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
@@ -415,8 +414,7 @@ class KmeansTest {
             EmptyTaskRegistryFactory.INSTANCE
         );
 
-        var kmeans = factory.build(graph, kmeansConfig, progressTracker);
-        var result = kmeans.compute();
+        factory.build(graph, kmeansConfig, progressTracker).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
@@ -451,6 +449,56 @@ class KmeansTest {
                 "Kmeans :: KMeans Iteration 2 of 2 :: Main :: Iteration 2 of 5 :: Finished",
                 "Kmeans :: KMeans Iteration 2 of 2 :: Main :: Finished",
                 "Kmeans :: KMeans Iteration 2 of 2 :: Finished",
+                "Kmeans :: Finished"
+            );
+    }
+
+    @Test
+    void progressTrackingWithSilhouette() {
+        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+            .nodeProperty("kmeans")
+            .concurrency(1)
+            .randomSeed(19L)
+            .maxIterations(5)
+            .computeSilhouette(true)
+            .numberOfRestarts(1)
+            .k(2)
+            .build();
+
+        var factory = new KmeansAlgorithmFactory<KmeansBaseConfig>();
+        var log = Neo4jProxy.testLog();
+        var progressTracker = new TestProgressTracker(
+            factory.progressTask(graph, kmeansConfig),
+            log,
+            4,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        factory.build(graph, kmeansConfig, progressTracker).compute();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "Kmeans :: Start",
+                "Kmeans :: Initialization :: Start",
+                "Kmeans :: Initialization 50%",
+                "Kmeans :: Initialization 100%",
+                "Kmeans :: Initialization :: Finished",
+                "Kmeans :: Main :: Start",
+                "Kmeans :: Main :: Iteration 1 of 5 :: Start",
+                "Kmeans :: Main :: Iteration 1 of 5 100%",
+                "Kmeans :: Main :: Iteration 1 of 5 :: Finished",
+                "Kmeans :: Main :: Iteration 2 of 5 :: Start",
+                "Kmeans :: Main :: Iteration 2 of 5 100%",
+                "Kmeans :: Main :: Iteration 2 of 5 :: Finished",
+                "Kmeans :: Main :: Finished",
+                "Kmeans :: Silhouette :: Start",
+                "Kmeans :: Silhouette 25%",
+                "Kmeans :: Silhouette 50%",
+                "Kmeans :: Silhouette 75%",
+                "Kmeans :: Silhouette 100%",
+                "Kmeans :: Silhouette :: Finished",
                 "Kmeans :: Finished"
             );
     }
