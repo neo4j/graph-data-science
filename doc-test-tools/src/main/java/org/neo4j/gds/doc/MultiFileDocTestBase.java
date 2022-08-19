@@ -28,6 +28,7 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.doc.syntax.SetupQuery;
 import org.neo4j.graphdb.Result;
 
 import java.io.File;
@@ -55,11 +56,12 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
 
     private static final Path ASCIIDOC_PATH = Paths.get("build/doc-sources/modules/ROOT");
 
-    private List<String> beforeEachQueries;
-    private List<String> beforeAllQueries;
+    private List<SetupQuery> beforeEachQueries;
+    private List<SetupQuery> beforeAllQueries;
     private List<QueryExampleGroup> queryExampleGroups;
 
     private static final NumberFormat FLOAT_FORMAT = DecimalFormat.getInstance(Locale.ENGLISH);
+
     static {
         FLOAT_FORMAT.setMaximumFractionDigits(15);
         FLOAT_FORMAT.setGroupingUsed(false);
@@ -111,7 +113,7 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
         beforeAllQueries = treeProcessor.beforeAllQueries();
 
         if (!setupNeo4jGraphPerTest()) {
-            beforeAllQueries.forEach(this::runQueryAsOperator);
+            beforeAllQueries.forEach(setupQuery -> {runQueryAsOperator(setupQuery.query());});
         }
     }
 
@@ -133,9 +135,21 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
     // This emulates `@BeforeEach`. Typically used to project any GDS Graphs
     private void beforeEachTest() {
         if (setupNeo4jGraphPerTest()) {
-            beforeAllQueries.forEach(this::runQueryAsOperator);
+            beforeAllQueries.forEach(this::runSetUpQuery);
         }
-        beforeEachQueries.forEach(this::runQueryAsOperator);
+        beforeEachQueries.forEach(this::runSetUpQuery);
+    }
+
+    private void runSetUpQuery(SetupQuery setupQuery) {
+        if (!setupQuery.runAsOperator()) {
+            super.runQuery(setupQuery.query());
+        } else {
+            String operatorHandle = setupQuery.operator();
+            if (setupQuery.operator().equals("DEFAULT")) {
+                operatorHandle = getOperator().get();
+            }
+            super.runQuery(operatorHandle, setupQuery.query());
+        }
     }
 
     private DynamicTest createDynamicTest(QueryExampleGroup queryExampleGroup) {
@@ -220,6 +234,7 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
             return value.toString();
         }
     }
+
 
     private void runQueryAsOperator(String query) {
         if (getOperator().isPresent()) super.runQuery(getOperator().get(), query);
