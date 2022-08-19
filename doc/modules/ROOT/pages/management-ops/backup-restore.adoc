@@ -111,7 +111,7 @@ CREATE
   (alice:Person {name: 'Alice'}),
   (bridget:Person {name: 'Bridget'}),
 
-  (alice)-[:KNOWS]->(bridget),
+  (alice)-[:KNOWS]->(bridget)
 ----
 
 Now we need to project an in-memory graph which we want to back-up.
@@ -131,7 +131,7 @@ We can now run the back-up procedure in order to store the in-memory graph on di
 .The following will run the back-up procedure:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.backup
+CALL gds.alpha.backup()
 YIELD graphName, status
 ----
 
@@ -155,8 +155,8 @@ If we want to restore the backed-up graph, we can simply run the restore procedu
 .The following will run the restore procedure:
 [source, cypher, role=noplay]
 ----
-CALL gds.restore
-YIELD restoredGraphs
+CALL gds.alpha.restore()
+YIELD restoredGraph
 ----
 
 .Results
