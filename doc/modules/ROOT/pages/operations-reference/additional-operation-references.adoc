@@ -25,4 +25,6 @@
 | xref:common-usage/monitoring-system.adoc[Get an overview of the system's workload and available resources] | `gds.alpha.systemMonitor`
 | Back-up graphs and models to disk | `gds.alpha.backup`
 | Restore persisted graphs and models to memory | `gds.alpha.restore`
+| List configured defaults | `gds.alpha.config.defaults.list`
+| Configure a default | `gds.alpha.config.defaults.set`
 |===
