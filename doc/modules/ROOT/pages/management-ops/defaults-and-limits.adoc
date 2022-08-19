@@ -17,11 +17,17 @@ As a user of GDS you will often want to use the same general parameters across d
 
 You can set defaults by invoking the `gds.alpha.config.defaults.set` procedure. You need to supply a key-value pair and an optional username.
 
-Here we set the `concurrency` parameter to a default value of 12 for user Alicia; that means Alicia never has to specify the concurrency parameter _except_ in special cases. We also set `maxIterations` to 100:
+Here we set the `concurrency` parameter to a default value of 12 for user Alicia; that means Alicia never has to specify the concurrency parameter _except_ in special cases:
 
 [source, cypher, role=noplay setup-query]
 ----
 CALL gds.alpha.config.defaults.set('concurrency', 12, 'Alicia')
+----
+
+We also set `maxIterations` to 100:
+
+[source, cypher, role=noplay setup-query]
+----
 CALL gds.alpha.config.defaults.set('maxIterations', 100, 'Alicia')
 ----
 
