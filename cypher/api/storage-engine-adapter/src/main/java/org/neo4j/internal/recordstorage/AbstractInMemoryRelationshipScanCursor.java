@@ -84,6 +84,9 @@ public abstract class AbstractInMemoryRelationshipScanCursor extends InMemoryRel
         this.selection = RelationshipSelection.ALL_RELATIONSHIPS;
         highMark = min(stop, maxRelationshipId);
 
+        if (start > maxRelationshipId) {
+            return false;
+        }
         initializeForRelationshipReference(start);
         return true;
     }

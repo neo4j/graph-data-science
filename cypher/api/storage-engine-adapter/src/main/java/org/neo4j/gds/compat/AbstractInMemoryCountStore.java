@@ -22,6 +22,7 @@ package org.neo4j.gds.compat;
 import org.neo4j.annotations.documented.ReporterFactory;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.counts.CountsVisitor;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.token.TokenHolders;
@@ -48,13 +49,12 @@ public abstract class AbstractInMemoryCountStore implements CountsStore {
             return graphStore.nodeCount();
         }
 
-        String nodeLabel = null;
         try {
-            nodeLabel = tokenHolders.labelTokens().getTokenById(labelId).name();
+            var nodeLabel = tokenHolders.labelTokens().getTokenById(labelId).name();
+            return graphStore.nodes().nodeCount(NodeLabel.of(nodeLabel));
         } catch (TokenNotFoundException e) {
             throw new RuntimeException(e);
         }
-        return -1; //TODO: implement graphStore.nodes().nodeCountForLabels(NodeLabel.listOf(nodeLabel));
     }
 
     @Override
