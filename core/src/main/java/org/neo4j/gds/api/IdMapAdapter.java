@@ -76,6 +76,11 @@ public abstract class IdMapAdapter implements IdMap {
     }
 
     @Override
+    public long nodeCount(NodeLabel nodeLabel) {
+        return idMap.nodeCount(nodeLabel);
+    }
+
+    @Override
     public OptionalLong rootNodeCount() {
         return idMap.rootNodeCount();
     }

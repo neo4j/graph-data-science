@@ -70,6 +70,11 @@ public class DirectIdMap implements IdMap {
     }
 
     @Override
+    public long nodeCount(NodeLabel nodeLabel) {
+        throw new UnsupportedOperationException("No label information is present on DirectIdMap");
+    }
+
+    @Override
     public OptionalLong rootNodeCount() {
         return OptionalLong.of(nodeCount);
     }

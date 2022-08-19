@@ -114,6 +114,11 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
+    public long nodeCount(NodeLabel nodeLabel) {
+        return graph.nodeCount(nodeLabel);
+    }
+
+    @Override
     public OptionalLong rootNodeCount() {
         return graph.rootNodeCount();
     }

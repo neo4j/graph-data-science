@@ -37,10 +37,12 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class SingleLabelInformation implements LabelInformation {
 
+    private final long nodeCount;
     private final NodeLabel label;
     private final Set<NodeLabel> labelSet;
 
-    private SingleLabelInformation(NodeLabel label) {
+    private SingleLabelInformation(long nodeCount, NodeLabel label) {
+        this.nodeCount = nodeCount;
         this.label = label;
         labelSet = Set.of(label);
     }
@@ -68,6 +70,14 @@ final class SingleLabelInformation implements LabelInformation {
     @Override
     public BitSet unionBitSet(Collection<NodeLabel> nodeLabels, long nodeCount) {
        throw new UnsupportedOperationException("Union with empty label information is not supported");
+    }
+
+    @Override
+    public long nodeCountForLabel(NodeLabel nodeLabel) {
+        if (nodeLabel.equals(this.label)) {
+            return this.nodeCount;
+        }
+        throw new IllegalArgumentException(formatWithLocale("No label information for label %s present", nodeLabel));
     }
 
     @Override
@@ -131,7 +141,7 @@ final class SingleLabelInformation implements LabelInformation {
 
         @Override
         public LabelInformation build(long nodeCount, LongUnaryOperator mappedIdFn) {
-            return new SingleLabelInformation(label);
+            return new SingleLabelInformation(nodeCount, label);
         }
     }
 }

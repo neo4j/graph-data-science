@@ -46,6 +46,11 @@ public abstract class LabeledIdMap implements IdMap {
     }
 
     @Override
+    public long nodeCount(NodeLabel nodeLabel) {
+        return labelInformation.nodeCountForLabel(nodeLabel);
+    }
+
+    @Override
     public void forEachNode(LongPredicate consumer) {
         final long count = nodeCount();
         for (long i = 0L; i < count; i++) {

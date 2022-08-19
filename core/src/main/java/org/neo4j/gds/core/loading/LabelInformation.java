@@ -56,6 +56,8 @@ public interface LabelInformation {
 
     BitSet unionBitSet(Collection<NodeLabel> nodeLabels, long nodeCount);
 
+    long nodeCountForLabel(NodeLabel nodeLabel);
+
     boolean hasLabel(long nodeId, NodeLabel nodeLabel);
 
     Set<NodeLabel> availableNodeLabels();

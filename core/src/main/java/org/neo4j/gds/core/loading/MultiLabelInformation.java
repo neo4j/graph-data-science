@@ -87,6 +87,11 @@ public final class MultiLabelInformation implements LabelInformation {
     }
 
     @Override
+    public long nodeCountForLabel(NodeLabel nodeLabel) {
+        return labelInformation.get(nodeLabel).cardinality();
+    }
+
+    @Override
     public boolean hasLabel(long nodeId, NodeLabel nodeLabel) {
         if (nodeLabel.equals(NodeLabel.ALL_NODES)) {
             return true;

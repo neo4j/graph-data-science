@@ -169,6 +169,11 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
+    public long nodeCount(NodeLabel nodeLabel) {
+        return idMap.nodeCount(nodeLabel);
+    }
+
+    @Override
     public OptionalLong rootNodeCount() {
         return idMap.rootNodeCount();
     }

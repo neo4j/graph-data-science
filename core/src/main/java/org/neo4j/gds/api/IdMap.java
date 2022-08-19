@@ -78,6 +78,11 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
      */
     long nodeCount();
 
+    /**
+     * Number of mapped nodeIds for a specific node label
+     */
+    long nodeCount(NodeLabel nodeLabel);
+
     long highestNeoId();
 
     List<NodeLabel> nodeLabels(long mappedNodeId);
