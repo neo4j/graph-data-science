@@ -146,7 +146,7 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
             super.runQuery(docQuery.query());
         } else {
             String operatorHandle = docQuery.operator();
-            if (operatorHandle.equals("DEFAULT")) {
+            if (operatorHandle.toUpperCase(Locale.ROOT).equals("DEFAULT")) {
                 operatorHandle = getOperator().get();
             }
             super.runQuery(operatorHandle, docQuery.query());
@@ -173,7 +173,7 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
             super.runQueryWithResultConsumer(queryExample.query(), check);
         } else {
             String operatorHandle = queryExample.operator();
-            if (operatorHandle.equals("DEFAULT")) {
+            if (operatorHandle.toUpperCase(Locale.ROOT).equals("DEFAULT")) {
                 operatorHandle = getOperator().get();
             }
             super.runQueryWithResultConsumer(operatorHandle, queryExample.query(), check);

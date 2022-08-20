@@ -19,7 +19,7 @@ You can set defaults by invoking the `gds.alpha.config.defaults.set` procedure. 
 
 Here we set the `concurrency` parameter to a default value of 12 for user Alicia; that means Alicia never has to specify the concurrency parameter _except_ in special cases:
 
-[source, cypher, role=noplay setup-query, operator=DEFAULT]
+[source, cypher, role=noplay setup-query, operator=DEFAULt]
 ----
 CALL gds.alpha.config.defaults.set('concurrency', 12, 'Alicia')
 ----
