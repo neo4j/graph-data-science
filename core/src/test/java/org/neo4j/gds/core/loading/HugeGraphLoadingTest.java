@@ -37,6 +37,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.roaringbitmap.longlong.Roaring64Bitmap;
@@ -376,5 +377,31 @@ final class HugeGraphLoadingTest extends BaseTest {
                 return true;
             });
         }
+    }
+
+    @Test
+    void testPartitionedTokenIndexRespectingBatchSize() {
+        // batchSize = prefetch size * PAGE_SIZE / NodeRecord size
+        var expectedBatchSize = 54_656;
+
+        var label = Label.label("Node");
+        long labelCount = 2 * expectedBatchSize;
+
+        runInTransaction(db, tx -> {
+            for (int i = 0; i < labelCount; i++) {
+                tx.createNode(label);
+            }
+        });
+
+        GdsFeatureToggles.USE_PARTITIONED_SCAN.enableAndRun(() -> {
+            var graph = new StoreLoaderBuilder()
+                .databaseService(db)
+                .addNodeLabel(label.name())
+                .concurrency(1)
+                .build()
+                .graph();
+
+            assertThat(graph.nodeCount()).isEqualTo(labelCount);
+        });
     }
 }
