@@ -17,10 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.modularity;
+package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.MutatePropertyProc;
+import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
@@ -36,22 +36,23 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
+import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.beta.modularityOptimization.mutate", description = ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class ModularityOptimizationMutateProc extends MutatePropertyProc<ModularityOptimization, ModularityOptimization, ModularityOptimizationMutateProc.MutateResult, ModularityOptimizationMutateConfig> {
+@GdsCallable(name = "gds.beta.modularityOptimization.write", description = ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimization, ModularityOptimization, ModularityOptimizationWriteProc.WriteResult, ModularityOptimizationWriteConfig> {
 
-    @Procedure(value = "gds.beta.modularityOptimization.mutate", mode = READ)
+    @Procedure(name = "gds.beta.modularityOptimization.write", mode = WRITE)
     @Description(ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION)
-    public Stream<MutateResult> mutate(
+    public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(compute(graphName, configuration));
+        return write(compute(graphName, configuration));
     }
 
-    @Procedure(value = "gds.beta.modularityOptimization.mutate.estimate", mode = READ)
+    @Procedure(value = "gds.beta.modularityOptimization.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
@@ -61,39 +62,37 @@ public class ModularityOptimizationMutateProc extends MutatePropertyProc<Modular
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(
-        ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationMutateConfig> computationResult
-    ) {
+    protected ModularityOptimizationWriteConfig newConfig(String username, CypherMapWrapper config) {
+        return ModularityOptimizationWriteConfig.of(config);
+    }
+
+    @Override
+    public GraphAlgorithmFactory<ModularityOptimization, ModularityOptimizationWriteConfig> algorithmFactory() {
+        return new ModularityOptimizationFactory<>();
+    }
+
+    @Override
+    protected NodePropertyValues nodeProperties(ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationWriteConfig> computationResult) {
         return ModularityOptimizationProc.nodeProperties(computationResult);
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationMutateConfig> computeResult,
+    protected AbstractResultBuilder<WriteResult> resultBuilder(
+        ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return ModularityOptimizationProc.resultBuilder(
-            new MutateResult.Builder(executionContext.callContext(), computeResult.config().concurrency()),
+            new WriteResult.Builder(callContext, computeResult.config().concurrency()),
             computeResult
         );
     }
 
-    @Override
-    protected ModularityOptimizationMutateConfig newConfig(String username, CypherMapWrapper config) {
-        return ModularityOptimizationMutateConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<ModularityOptimization, ModularityOptimizationMutateConfig> algorithmFactory() {
-        return new ModularityOptimizationFactory<>();
-    }
-
     @SuppressWarnings("unused")
-    public static class MutateResult {
+    public static class WriteResult {
 
         public final long preProcessingMillis;
         public final long computeMillis;
-        public final long mutateMillis;
+        public final long writeMillis;
         public final long postProcessingMillis;
         public final long nodes;
         public boolean didConverge;
@@ -103,11 +102,11 @@ public class ModularityOptimizationMutateProc extends MutatePropertyProc<Modular
         public final Map<String, Object> communityDistribution;
         public final Map<String, Object> configuration;
 
-        MutateResult(
+        WriteResult(
             long preProcessingMillis,
             long computeMillis,
             long postProcessingMillis,
-            long mutateMillis,
+            long writeMillis,
             long nodes,
             boolean didConverge,
             long ranIterations,
@@ -118,7 +117,7 @@ public class ModularityOptimizationMutateProc extends MutatePropertyProc<Modular
         ) {
             this.preProcessingMillis = preProcessingMillis;
             this.computeMillis = computeMillis;
-            this.mutateMillis = mutateMillis;
+            this.writeMillis = writeMillis;
             this.postProcessingMillis = postProcessingMillis;
             this.nodes = nodes;
             this.didConverge = didConverge;
@@ -129,19 +128,22 @@ public class ModularityOptimizationMutateProc extends MutatePropertyProc<Modular
             this.configuration = configuration;
         }
 
-        static class Builder extends ModularityOptimizationProc.ModularityOptimizationResultBuilder<MutateResult> {
+        static class Builder extends ModularityOptimizationProc.ModularityOptimizationResultBuilder<WriteResult> {
 
-            Builder(ProcedureCallContext context, int concurrency) {
+            Builder(
+                ProcedureCallContext context,
+                int concurrency
+            ) {
                 super(context, concurrency);
             }
 
             @Override
-            protected MutateResult buildResult() {
-                return new MutateResult(
+            protected WriteResult buildResult() {
+                return new WriteResult(
                     preProcessingMillis,
                     computeMillis,
                     postProcessingDuration,
-                    mutateMillis,
+                    writeMillis,
                     nodeCount,
                     didConverge,
                     ranIterations,

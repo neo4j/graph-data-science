@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.modularity;
+package org.neo4j.gds.modularityoptimization;
 
 import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.apache.commons.lang3.mutable.MutableDouble;

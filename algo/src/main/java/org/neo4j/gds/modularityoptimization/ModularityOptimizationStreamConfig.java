@@ -17,19 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.modularity;
+package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
 @Configuration
+@ValueClass
 @SuppressWarnings("immutables:subtype")
-public interface ModularityOptimizationMutateConfig extends ModularityOptimizationConfig, MutatePropertyConfig {
+public interface ModularityOptimizationStreamConfig extends ModularityOptimizationConfig {
 
-    static ModularityOptimizationMutateConfig of(CypherMapWrapper userInput) {
-        return new ModularityOptimizationMutateConfigImpl(userInput);
+    static ModularityOptimizationStreamConfig of(CypherMapWrapper config) {
+        return new ModularityOptimizationStreamConfigImpl(config);
     }
 }

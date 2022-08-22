@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.modularity;
+package org.neo4j.gds.modularityoptimization;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -55,7 +55,7 @@ import static org.neo4j.gds.CommunityHelper.assertCommunities;
 import static org.neo4j.gds.TestSupport.ids;
 import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
-import static org.neo4j.gds.modularity.ModularityOptimization.K1COLORING_MAX_ITERATIONS;
+import static org.neo4j.gds.modularityoptimization.ModularityOptimization.K1COLORING_MAX_ITERATIONS;
 
 @GdlExtension
 class ModularityOptimizationWithoutOrientationTest {
