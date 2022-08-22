@@ -40,10 +40,12 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SIZE;
 
 /**
  * Many of the following tests were taken from the AtomicLongArray test from the OpenJDK sources, and then adjusted for
@@ -330,6 +332,14 @@ final class HugeAtomicByteArrayTest {
     interface HalaFunction {
 
         void apply(HugeAtomicByteArray array);
+    }
+
+    @Test
+    void testGetAndAddIsWithinBoundsForPagedArray() {
+        var size = PAGE_SIZE * 2 + 1; // We want an array with three pages
+        var index = PAGE_SIZE + 1;    // and look up some index larger than what fits in a single page
+        var array = pagedArray(size);
+        assertDoesNotThrow(() -> array.getAndAdd(index, (byte) 1));
     }
 
     @Test
