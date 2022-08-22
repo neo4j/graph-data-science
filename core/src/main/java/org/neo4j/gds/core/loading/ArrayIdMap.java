@@ -99,6 +99,11 @@ public class ArrayIdMap extends LabeledIdMap {
     }
 
     @Override
+    public long fromRootNodeId(long rootNodeId) {
+        return rootNodeId;
+    }
+
+    @Override
     public IdMap rootIdMap() {
         return this;
     }
@@ -175,12 +180,12 @@ public class ArrayIdMap extends LabeledIdMap {
 
         @Override
         public List<NodeLabel> nodeLabels(long nodeId) {
-            return super.nodeLabels(toOriginalNodeId(nodeId));
+            return super.nodeLabels(super.toOriginalNodeId(nodeId));
         }
 
         @Override
         public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
-            super.forEachNodeLabel(toOriginalNodeId(nodeId), consumer);
+            super.forEachNodeLabel(super.toOriginalNodeId(nodeId), consumer);
         }
 
         @Override
@@ -190,7 +195,27 @@ public class ArrayIdMap extends LabeledIdMap {
 
         @Override
         public long toRootNodeId(long nodeId) {
-            return super.toRootNodeId(toOriginalNodeId(nodeId));
+            return super.toRootNodeId(super.toOriginalNodeId(nodeId));
+        }
+
+        @Override
+        public long fromRootNodeId(long rootNodeId) {
+            return super.toMappedNodeId(super.fromRootNodeId(rootNodeId));
+        }
+
+        @Override
+        public long toOriginalNodeId(long nodeId) {
+            return rootIdMap.toOriginalNodeId(super.toOriginalNodeId(nodeId));
+        }
+
+        @Override
+        public long toMappedNodeId(long nodeId) {
+            return super.toMappedNodeId(rootIdMap.toMappedNodeId(nodeId));
+        }
+
+        @Override
+        public boolean contains(long nodeId) {
+            return super.contains(rootIdMap.toMappedNodeId(nodeId));
         }
 
         @Override
@@ -200,7 +225,7 @@ public class ArrayIdMap extends LabeledIdMap {
 
         @Override
         public boolean hasLabel(long nodeId, NodeLabel label) {
-            return super.hasLabel(toOriginalNodeId(nodeId), label);
+            return super.hasLabel(super.toOriginalNodeId(nodeId), label);
         }
     }
 }

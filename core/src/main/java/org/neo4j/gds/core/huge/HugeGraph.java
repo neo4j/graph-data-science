@@ -353,6 +353,11 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
+    public long fromRootNodeId(long rootNodeId) {
+        return idMap.fromRootNodeId(rootNodeId);
+    }
+
+    @Override
     public boolean contains(long nodeId) {
         return idMap.contains(nodeId);
     }

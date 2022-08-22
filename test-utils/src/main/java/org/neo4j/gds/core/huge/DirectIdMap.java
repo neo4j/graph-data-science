@@ -55,6 +55,11 @@ public class DirectIdMap implements IdMap {
     }
 
     @Override
+    public long fromRootNodeId(long rootNodeId) {
+        return rootNodeId;
+    }
+
+    @Override
     public long highestNeoId() {
         return nodeCount;
     }

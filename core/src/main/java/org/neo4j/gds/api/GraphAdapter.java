@@ -99,6 +99,11 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
+    public long fromRootNodeId(long rootNodeId) {
+        return graph.fromRootNodeId(rootNodeId);
+    }
+
+    @Override
     public IdMap rootIdMap() {
         return graph.rootIdMap();
     }
