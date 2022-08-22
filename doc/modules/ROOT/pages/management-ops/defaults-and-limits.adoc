@@ -19,14 +19,14 @@ You can set defaults by invoking the `gds.alpha.config.defaults.set` procedure. 
 
 Here we set the `concurrency` parameter to a default value of 12 for user Alicia; that means Alicia never has to specify the concurrency parameter _except_ in special cases:
 
-[source, cypher, role=noplay setup-query]
+[source, cypher, role=noplay setup-query, operator=DEFAULt]
 ----
 CALL gds.alpha.config.defaults.set('concurrency', 12, 'Alicia')
 ----
 
 We also set `maxIterations` to 100:
 
-[source, cypher, role=noplay setup-query]
+[source, cypher, role=noplay setup-query, operator=DEFAULT]
 ----
 CALL gds.alpha.config.defaults.set('maxIterations', 100, 'Alicia')
 ----
@@ -44,7 +44,7 @@ You can inspect default settings by invoking the `gds.alpha.config.defaults.list
 
 Here is an example where we list the `concurrency` default setting for Alicia:
 
-[role=query-example]
+[role=query-example, operator=DEFAULT]
 --
 .Querying for personal defaults and filtering by key:
 [source, cypher, role=noplay]
@@ -64,7 +64,7 @@ Assuming Alicia didn't have a setting for `concurrency`, we would list the globa
 
 We can also leave out the filter and see all defaults settings for Alicia:
 
-[role=query-example]
+[role=query-example, operator=DEFAULT]
 --
 .Querying for personal defaults without a filter:
 [source, cypher, role=noplay]

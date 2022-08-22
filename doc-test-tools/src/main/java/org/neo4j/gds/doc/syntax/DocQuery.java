@@ -17,34 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc;
+package org.neo4j.gds.doc.syntax;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.doc.syntax.DocQuery;
-
-import java.util.List;
 
 @ValueClass
-public interface QueryExample extends DocQuery {
-
+public interface DocQuery {
     String query();
-
-    @Value.Default
-    default List<String> resultColumns() {
-        return List.of();
-    }
-
-    @Value.Default
-    default List<List<String>> results() {
-        return List.of();
-    }
-
-    @Value.Default
-    default boolean assertResults() {
-        return true;
-    }
-
 
     @Value.Derived
     default boolean runAsOperator() {
@@ -56,7 +36,7 @@ public interface QueryExample extends DocQuery {
         return "";
     }
 
-    static ImmutableQueryExample.Builder builder() {
-        return ImmutableQueryExample.builder();
+    static ImmutableDocQuery.Builder builder() {
+        return ImmutableDocQuery.builder();
     }
 }

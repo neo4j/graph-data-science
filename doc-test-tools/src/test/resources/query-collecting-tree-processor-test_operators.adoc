@@ -1,0 +1,31 @@
+[role=query-example, operator=gdsteam]
+--
+.This is a test code block
+[source, cypher, role=noplay]
+----
+CALL my.dummy.stream()
+----
+
+.Results
+[opts="header"]
+|===
+| Col1
+| "Alice"
+|===
+--
+
+
+.This is a test code block
+[source, cypher, role=setup-query, operator=ops]
+----
+CALL my.other.dummy()
+----
+--
+
+.This is a test code block
+[source, cypher, role=graph-project-query, operator=ux]
+----
+CALL my.other.other.dummy()
+----
+--
+

@@ -25,6 +25,7 @@ import org.asciidoctor.ast.Row;
 import org.asciidoctor.ast.StructuralNode;
 import org.asciidoctor.ast.Table;
 import org.asciidoctor.extension.Treeprocessor;
+import org.neo4j.gds.doc.syntax.DocQuery;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,17 +53,19 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
     private static final String QUERY_EXAMPLE_ROLE = "query-example";
     private static final String TEST_TYPE_NO_RESULT = "no-result";
     private static final String TEST_GROUP_ATTRIBUTE = "group";
+
+    private static final String TEST_OPERATOR_ATTRIBUTE = "operator";
     private static final String ROLE_SELECTOR = "role";
 
-    private List<String> beforeAllQueries;
-    private List<String> beforeEachQueries;
+    private List<DocQuery> beforeAllQueries;
+    private List<DocQuery> beforeEachQueries;
     private Map<String, List<QueryExample>> queryExampleMap;
 
-    public List<String> beforeAllQueries() {
+    public List<DocQuery> beforeAllQueries() {
         return beforeAllQueries;
     }
 
-    public List<String> beforeEachQueries() {
+    public List<DocQuery> beforeEachQueries() {
         return beforeEachQueries;
     }
 
@@ -89,23 +92,35 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
         return document;
     }
 
-    private List<String> collectBeforeAllQueries(StructuralNode document) {
+    private List<DocQuery> collectBeforeAllQueries(StructuralNode document) {
         return collectSetupQueries(document, SETUP_QUERY_ROLE);
     }
 
-    private List<String> collectBeforeEachQueries(StructuralNode document) {
+    private List<DocQuery> collectBeforeEachQueries(StructuralNode document) {
         return collectSetupQueries(document, GRAPH_PROJECT_QUERY_ROLE);
     }
 
-    private List<String> collectSetupQueries(StructuralNode node, String setupQueryType) {
+    private List<DocQuery> collectSetupQueries(StructuralNode node, String setupQueryType) {
         List<StructuralNode> nodes = node.findBy(Map.of(ROLE_SELECTOR, setupQueryType));
+        
         return nodes
             .stream()
-            .map(StructuralNode::getContent)
-            .map(Object::toString)
-            .map(QueryCollectingTreeProcessor::undoReplacements)
+            .map(
+                QueryCollectingTreeProcessor::createSetupQuery
+            )
             .collect(Collectors.toList());
 
+    }
+
+    private static DocQuery createSetupQuery(StructuralNode structuralNode) {
+        var content = structuralNode.getContent().toString();
+        var builder = DocQuery.builder();
+        builder.query(undoReplacements(content)).build();
+
+        if (structuralNode.hasAttribute(TEST_OPERATOR_ATTRIBUTE)) {
+            builder.operator(structuralNode.getAttribute(TEST_OPERATOR_ATTRIBUTE).toString());
+        }
+        return builder.build();
     }
 
     private void collectQueryExamples(StructuralNode node) {
@@ -131,6 +146,9 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
 
         var queryExampleBuilder = QueryExample.builder().query(query);
 
+        if (queryExampleNode.hasAttribute(TEST_OPERATOR_ATTRIBUTE)) {
+            queryExampleBuilder.operator(queryExampleNode.getAttribute(TEST_OPERATOR_ATTRIBUTE).toString());
+        }
         if (Boolean.parseBoolean(queryExampleNode.getAttribute(TEST_TYPE_NO_RESULT, false).toString())) {
             queryExampleBuilder.assertResults(false);
         } else {
