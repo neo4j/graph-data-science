@@ -38,10 +38,11 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 /**
  * Extension for Asciidoctor.
  * It looks for two kinds of blocks in the AsciiDoc source:
- * 1) Blocks with the role `setup-query`.
+ * 1) Blocks with the role `setup-query` or 'graph-project-query'
  * 2) Blocks with the role `query-example`. The content is expected to contain exactly two blocks:
  * 2.1) First, a block containing a Cypher query example.
  * 2.2) Second, a table containing a Cypher query result.
+ * Each block may have an attribute 'operator' if we want a certain user to execute the query
  */
 public class QueryCollectingTreeProcessor extends Treeprocessor {
 
