@@ -142,13 +142,6 @@
 ** xref:production-deployment/causal-cluster.adoc[]
 ** xref:production-deployment/feature-toggles.adoc[]
 * xref:python-client/index.adoc[]
-** xref:python-client/installation.adoc[]
-** xref:python-client/getting-started.adoc[]
-** xref:python-client/graph-object.adoc[]
-** xref:python-client/algorithms.adoc[]
-** xref:python-client/pipelines.adoc[]
-** xref:python-client/model-object.adoc[]
-** xref:python-client/known-limitations.adoc[]
 * Appendix
 ** xref:operations-reference/appendix-a.adoc[]
 *** xref:operations-reference/graph-operation-references.adoc[]

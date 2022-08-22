@@ -1,23 +1,12 @@
 [[python-client]]
 = Python client
-:description: This chapter documents how to use the dedicated Python Client for Neo4j Graph Data Science.
+:description: This chapter introduces the dedicated Python Client for Neo4j Graph Data Science.
 
 
-To help users of GDS who work with Python as their primary language and environment, there is an official GDS client package called `graphdatascience`.
+To help users of GDS who work with Python as their primary language and environment, there is an official Neo4j GDS client package called `graphdatascience`.
 It enables users to write pure Python code to project graphs, run algorithms, and define and use machine learning pipelines in GDS.
-To avoid naming confusion with the server-side GDS library, we will here refer to the Neo4j Graph Data Science client as the _Python client_.
 
 The Python client API is designed to mimic the GDS Cypher procedure API in Python code.
 It wraps and abstracts the necessary operations of the https://neo4j.com/docs/python-manual/current/[Neo4j Python driver] to offer a simpler surface.
-Except for those listed in xref::python-client/known-limitations.adoc[Known limitations], every operation of the GDS Cypher API should be represented in the Python client API.
-For a high level explanation of how the Cypher API maps to the Python client API please see xref::python-client/getting-started.adoc#python-client-getting-started-mapping[Mapping between Cypher and Python].
 
-This chapter is divided into the following sections:
-
-* xref::python-client/installation.adoc[Installation]
-* xref::python-client/getting-started.adoc[Getting started]
-* xref::python-client/graph-object.adoc[The graph object]
-* xref::python-client/algorithms.adoc[Running algorithms]
-* xref::python-client/pipelines.adoc[Machine learning pipelines]
-* xref::python-client/model-object.adoc[The model object]
-* xref::python-client/known-limitations.adoc[Known limitations]
+Please see https://neo4j.com/docs/graph-data-science-client/[the GDS Python Client manual] for the full documentation of the client.
