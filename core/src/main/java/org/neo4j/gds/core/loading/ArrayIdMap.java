@@ -195,7 +195,7 @@ public class ArrayIdMap extends LabeledIdMap {
         }
 
         @Override
-        public long fromRootNodeId(long rootNodeId) {
+        public long rootToMappedNodeId(long rootNodeId) {
             return super.toMappedNodeId(rootNodeId);
         }
 

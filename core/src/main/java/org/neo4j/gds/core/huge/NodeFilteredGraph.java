@@ -184,8 +184,8 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
     }
 
     @Override
-    public long fromRootNodeId(long rootNodeId) {
-        return filteredIdMap.fromRootNodeId(rootNodeId);
+    public long rootToMappedNodeId(long rootNodeId) {
+        return filteredIdMap.rootToMappedNodeId(rootNodeId);
     }
 
     @Override
@@ -212,11 +212,11 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
     public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
         return super.streamRelationships(filteredIdMap.toRootNodeId(nodeId), fallbackValue)
             .filter(rel -> filteredIdMap.containsRootNodeId(rel.sourceId()) && filteredIdMap.containsRootNodeId(rel.targetId()))
-            .map(rel -> ImmutableRelationshipCursor.of(filteredIdMap.fromRootNodeId(rel.sourceId()), filteredIdMap.fromRootNodeId(rel.targetId()), rel.property()));
+            .map(rel -> ImmutableRelationshipCursor.of(filteredIdMap.rootToMappedNodeId(rel.sourceId()), filteredIdMap.rootToMappedNodeId(rel.targetId()), rel.property()));
     }
 
     public long getFilteredMappedNodeId(long nodeId) {
-        return filteredIdMap.fromRootNodeId(nodeId);
+        return filteredIdMap.rootToMappedNodeId(nodeId);
     }
 
     long getIntermediateOriginalNodeId(long nodeId) {
@@ -302,8 +302,8 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
 
     private boolean filterAndConsume(long source, long target, RelationshipConsumer consumer) {
         if (filteredIdMap.containsRootNodeId(source) && filteredIdMap.containsRootNodeId(target)) {
-            long internalSourceId = filteredIdMap.fromRootNodeId(source);
-            long internalTargetId = filteredIdMap.fromRootNodeId(target);
+            long internalSourceId = filteredIdMap.rootToMappedNodeId(source);
+            long internalTargetId = filteredIdMap.rootToMappedNodeId(target);
             return consumer.accept(internalSourceId, internalTargetId);
         }
         return true;
@@ -311,8 +311,8 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
 
     private boolean filterAndConsume(long source, long target, double propertyValue, RelationshipWithPropertyConsumer consumer) {
         if (filteredIdMap.containsRootNodeId(source) && filteredIdMap.containsRootNodeId(target)) {
-            long internalSourceId = filteredIdMap.fromRootNodeId(source);
-            long internalTargetId = filteredIdMap.fromRootNodeId(target);
+            long internalSourceId = filteredIdMap.rootToMappedNodeId(source);
+            long internalTargetId = filteredIdMap.rootToMappedNodeId(target);
             return consumer.accept(internalSourceId, internalTargetId, propertyValue);
         }
         return true;

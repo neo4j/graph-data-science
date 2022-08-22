@@ -478,8 +478,7 @@ class RandomGraphGeneratorTest {
             .generate();
 
         assertThat(graph.availableNodeLabels()).containsExactly(NodeLabel.ALL_NODES);
-        var filteredIdMap = graph.withFilteredLabels(List.of(NodeLabel.ALL_NODES), 4).get();
-        assertThat(filteredIdMap.nodeCount()).isEqualTo(100);
+        assertThat(graph.nodeCount()).isEqualTo(100);
     }
 
     @Test
