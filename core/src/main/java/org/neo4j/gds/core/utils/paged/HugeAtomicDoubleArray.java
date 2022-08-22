@@ -395,7 +395,7 @@ public abstract class HugeAtomicDoubleArray {
 
             while (true) {
                 double next = prev + delta;
-                double current = (double) ARRAY_HANDLE.compareAndExchangeRelease(page, (int) index, prev, next);
+                double current = (double) ARRAY_HANDLE.compareAndExchangeRelease(page, indexInPage, prev, next);
                 if (Double.compare(prev, current) == 0) {
                     return prev;
                 }

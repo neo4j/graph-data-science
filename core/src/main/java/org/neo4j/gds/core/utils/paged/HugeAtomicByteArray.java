@@ -360,7 +360,7 @@ public abstract class HugeAtomicByteArray implements HugeCursorSupport<byte[]> {
 
             while (true) {
                 byte next = (byte) (prev + delta);
-                byte current = (byte) ARRAY_HANDLE.compareAndExchangeRelease(page, (int) index, prev, next);
+                byte current = (byte) ARRAY_HANDLE.compareAndExchangeRelease(page, indexInPage, prev, next);
                 if (prev == current) {
                     return prev;
                 }
