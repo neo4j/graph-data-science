@@ -16,6 +16,7 @@ For more information on this algorithm, see:
 * https://arxiv.org/pdf/1607.00653.pdf[Grover, Aditya, and Jure Leskovec. "node2vec: Scalable feature learning for networks." Proceedings of the 22nd ACM SIGKDD international conference on Knowledge discovery and data mining. 2016.^]
 * https://snap.stanford.edu/node2vec/
 
+
 [[algorithms-embeddings-node2vec-random-walks]]
 == Random Walks
 
@@ -36,6 +37,21 @@ A relationship property value greater than 1 will increase the likelihood of a r
 
 For every node in the graph Node2Vec generates a series of random walks with the particular node as start node.
 The number of random walks per node can be influenced by the `walkPerNode` configuration parameters, the walk length is controlled by the `walkLength` parameter.
+
+
+== Usage in machine learning pipelines
+
+At this time, using Node2Vec as a node property step in a machine learning pipeline (like xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[] and xref:machine-learning/node-property-prediction/index.adoc[]) is _not_ well supported.
+
+Firstly, it is good to know that node property steps (whether Node2Vec or not) are run both by the training pipeline, and by the prediction models that are created from training a pipeline.
+If a pipeline is trained with some node embeddings as features, it is important that the node embeddings produced during prediction by models are of a similar distribution to those node embeddings produced during training by the pipeline that created the models.
+Otherwise, the machine learning algorithm trained in the pipeline will not be able to make useful predictions.
+
+The final embeddings produced by Node2Vec depends on the randomness in generating the initial node embedding vectors as well as the random walks taken in the computation.
+At this time, Node2Vec will produce non-deterministic results even if the `randomSeed` configuration parameter is set.
+So since embeddings will not be deterministic between runs, Node2Vec should not be used as a node property step in a pipeline at this time.
+
+It may still be useful to use Node2Vec node embeddings as features in a pipeline if they are produced outside the pipeline, as long as one is aware of the data leakage risks of not using the dataset split in the pipeline.
 
 
 [[algorithms-embeddings-node2vec-syntax]]
