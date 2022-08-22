@@ -33,11 +33,11 @@ import org.roaringbitmap.longlong.Roaring64Bitmap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
 
-class MultipleNodeLabelIndexBasedScannerTest extends BaseTest {
+class NodeLabelIndexBasedScannerTest extends BaseTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void testScanner(boolean allowPartitionedScan) {
+    void testMultipleNodeLabels(boolean allowPartitionedScan) {
         var nodeCount = 150_000;
         var prefetchSize = StoreScanner.DEFAULT_PREFETCH_SIZE;
 
@@ -114,6 +114,54 @@ class MultipleNodeLabelIndexBasedScannerTest extends BaseTest {
 
                 assertThat(idList.size()).isEqualTo(idSet.size());
                 assertThat(actualNodeCount.getValue()).isEqualTo(nodeCount);
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false})
+    void testBatchSizeAlignment(boolean allowPartitionedScan) {
+        var prefetchSize = StoreScanner.DEFAULT_PREFETCH_SIZE;
+        // batchSize = prefetch size * PAGE_SIZE / NodeRecord size
+        var expectedBatchSize = 54_656;
+
+        var label = Label.label("Node");
+        long labelCount = 2 * expectedBatchSize;
+
+        runInTransaction(db, tx -> {
+            for (int i = 0; i < labelCount; i++) {
+                tx.createNode(label);
+            }
+        });
+
+        try (var transactions = GraphDatabaseApiProxy.newKernelTransaction(db)) {
+            var txContext = TransactionContext.of(db, transactions.tx());
+            var ktx = transactions.ktx();
+            var labelToken = ktx.tokenRead().nodeLabel(label.name());
+
+            try (
+                var scanner = new NodeLabelIndexBasedScanner(
+                    labelToken,
+                    prefetchSize,
+                    txContext,
+                    allowPartitionedScan
+                );
+                var storeScanner = scanner.createCursor(ktx)
+            ) {
+                assertThat(scanner.batchSize()).isEqualTo(expectedBatchSize);
+
+                var actualNodeCount = new MutableInt(0);
+                var nodesPerPartition = new MutableInt(0);
+
+                while (storeScanner.bulkNext(nodeReference -> {
+                    nodesPerPartition.increment();
+                    actualNodeCount.increment();
+                })) {
+                    assertThat(nodesPerPartition.intValue()).isLessThanOrEqualTo(expectedBatchSize);
+                    nodesPerPartition.setValue(0);
+                }
+
+                assertThat(actualNodeCount.getValue()).isEqualTo(labelCount);
             }
         }
     }
