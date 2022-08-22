@@ -14,7 +14,7 @@ During training, the property representing the class of the node is referred to 
 GDS supports both binary and multi-class node classification.
 
 In GDS, we have Node Classification pipelines which offer an end-to-end workflow, from feature extraction to node classification.
-The training pipelines reside in the xref::pipeline-catalog/index.adoc[pipeline catalog].
+The training pipelines reside in the xref::pipeline-catalog/pipeline-catalog.adoc[pipeline catalog].
 When a training pipeline is xref::machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[executed], a classification model is created and stored in the xref::model-catalog/index.adoc[model catalog].
 
 A training pipeline is a sequence of two phases:
