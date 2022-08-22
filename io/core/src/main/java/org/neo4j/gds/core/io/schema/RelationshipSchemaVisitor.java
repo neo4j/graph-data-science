@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.io.schema;
 
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.Aggregation;
 
@@ -27,8 +28,14 @@ public abstract class RelationshipSchemaVisitor extends InputRelationshipSchemaV
     private RelationshipType relationshipType;
     private Aggregation aggregation;
 
+    private Orientation orientation;
+
     public RelationshipType relationshipType() {
         return relationshipType;
+    }
+
+    public Orientation orientation() {
+        return orientation;
     }
 
     @Override
@@ -45,6 +52,12 @@ public abstract class RelationshipSchemaVisitor extends InputRelationshipSchemaV
     @Override
     public boolean aggregation(Aggregation aggregation) {
         this.aggregation = aggregation;
+        return true;
+    }
+
+    @Override
+    public boolean orientation(Orientation orientation) {
+        this.orientation = orientation;
         return true;
     }
 
