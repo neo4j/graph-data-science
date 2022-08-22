@@ -47,18 +47,18 @@ public abstract class IdMapAdapter implements IdMap {
     }
 
     @Override
-    public long toMappedNodeId(long nodeId) {
-        return idMap.toMappedNodeId(nodeId);
+    public long toMappedNodeId(long neo4jNodeId) {
+        return idMap.toMappedNodeId(neo4jNodeId);
     }
 
     @Override
-    public long toOriginalNodeId(long nodeId) {
-        return idMap.toOriginalNodeId(nodeId);
+    public long toOriginalNodeId(long mappedNodeId) {
+        return idMap.toOriginalNodeId(mappedNodeId);
     }
 
     @Override
-    public long toRootNodeId(long nodeId) {
-        return idMap.toRootNodeId(nodeId);
+    public long toRootNodeId(long mappedOrFilteredNodeId) {
+        return idMap.toRootNodeId(mappedOrFilteredNodeId);
     }
 
     @Override
@@ -67,8 +67,8 @@ public abstract class IdMapAdapter implements IdMap {
     }
 
     @Override
-    public boolean contains(long nodeId) {
-        return idMap.contains(nodeId);
+    public boolean contains(long neo4jNodeId) {
+        return idMap.contains(neo4jNodeId);
     }
 
     @Override
@@ -102,13 +102,13 @@ public abstract class IdMapAdapter implements IdMap {
     }
 
     @Override
-    public List<NodeLabel> nodeLabels(long nodeId) {
-        return idMap.nodeLabels(nodeId);
+    public List<NodeLabel> nodeLabels(long mappedNodeId) {
+        return idMap.nodeLabels(mappedNodeId);
     }
 
     @Override
-    public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
-        idMap.forEachNodeLabel(nodeId, consumer);
+    public void forEachNodeLabel(long mappedNodeId, NodeLabelConsumer consumer) {
+        idMap.forEachNodeLabel(mappedNodeId, consumer);
     }
 
     @Override
@@ -117,8 +117,8 @@ public abstract class IdMapAdapter implements IdMap {
     }
 
     @Override
-    public boolean hasLabel(long nodeId, NodeLabel label) {
-        return idMap.hasLabel(nodeId, label);
+    public boolean hasLabel(long mappedNodeId, NodeLabel label) {
+        return idMap.hasLabel(mappedNodeId, label);
     }
 
     @Override

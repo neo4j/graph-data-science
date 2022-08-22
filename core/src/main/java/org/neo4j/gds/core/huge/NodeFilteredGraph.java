@@ -174,13 +174,13 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
     }
 
     @Override
-    public long toMappedNodeId(long neoNodeId) {
-        return filteredIdMap.toMappedNodeId(neoNodeId);
+    public long toMappedNodeId(long neo4jNodeId) {
+        return filteredIdMap.toMappedNodeId(neo4jNodeId);
     }
 
     @Override
-    public long toRootNodeId(long nodeId) {
-        return filteredIdMap.toRootNodeId(nodeId);
+    public long toRootNodeId(long mappedOrFilteredNodeId) {
+        return filteredIdMap.toRootNodeId(mappedOrFilteredNodeId);
     }
 
     @Override
@@ -189,13 +189,13 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
     }
 
     @Override
-    public boolean contains(long nodeId) {
-        return filteredIdMap.contains(nodeId);
+    public boolean contains(long neo4jNodeId) {
+        return filteredIdMap.contains(neo4jNodeId);
     }
 
     @Override
-    public long toOriginalNodeId(long nodeId) {
-        return filteredIdMap.toOriginalNodeId(nodeId);
+    public long toOriginalNodeId(long mappedNodeId) {
+        return filteredIdMap.toOriginalNodeId(mappedNodeId);
     }
 
     @Override
@@ -266,18 +266,18 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
     }
 
     @Override
-    public List<NodeLabel> nodeLabels(long nodeId) {
-        return filteredIdMap.nodeLabels(nodeId);
+    public List<NodeLabel> nodeLabels(long mappedNodeId) {
+        return filteredIdMap.nodeLabels(mappedNodeId);
     }
 
     @Override
-    public boolean hasLabel(long nodeId, NodeLabel label) {
-        return filteredIdMap.hasLabel(nodeId, label);
+    public boolean hasLabel(long mappedNodeId, NodeLabel label) {
+        return filteredIdMap.hasLabel(mappedNodeId, label);
     }
 
     @Override
-    public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
-        filteredIdMap.forEachNodeLabel(nodeId, consumer);
+    public void forEachNodeLabel(long mappedNodeId, NodeLabelConsumer consumer) {
+        filteredIdMap.forEachNodeLabel(mappedNodeId, consumer);
     }
 
     @Override

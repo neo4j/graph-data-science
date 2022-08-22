@@ -40,18 +40,18 @@ public class DirectIdMap implements IdMap {
     }
 
     @Override
-    public long toMappedNodeId(long nodeId) {
-        return nodeId;
+    public long toMappedNodeId(long neo4jNodeId) {
+        return neo4jNodeId;
     }
 
     @Override
-    public long toOriginalNodeId(long nodeId) {
-        return nodeId;
+    public long toOriginalNodeId(long mappedNodeId) {
+        return mappedNodeId;
     }
 
     @Override
-    public long toRootNodeId(long nodeId) {
-        return nodeId;
+    public long toRootNodeId(long mappedOrFilteredNodeId) {
+        return mappedOrFilteredNodeId;
     }
 
     @Override
@@ -60,8 +60,8 @@ public class DirectIdMap implements IdMap {
     }
 
     @Override
-    public boolean contains(final long nodeId) {
-        return nodeId < nodeCount;
+    public boolean contains(final long neo4jNodeId) {
+        return neo4jNodeId < nodeCount;
     }
 
     @Override
@@ -84,12 +84,12 @@ public class DirectIdMap implements IdMap {
     }
 
     @Override
-    public List<NodeLabel> nodeLabels(long nodeId) {
+    public List<NodeLabel> nodeLabels(long mappedNodeId) {
         return List.of();
     }
 
     @Override
-    public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
+    public void forEachNodeLabel(long mappedNodeId, NodeLabelConsumer consumer) {
 
     }
 
@@ -99,7 +99,7 @@ public class DirectIdMap implements IdMap {
     }
 
     @Override
-    public boolean hasLabel(long nodeId, NodeLabel label) {
+    public boolean hasLabel(long mappedNodeId, NodeLabel label) {
         return false;
     }
 

@@ -85,18 +85,18 @@ public class ArrayIdMap extends LabeledIdMap {
     }
 
     @Override
-    public long toMappedNodeId(long nodeId) {
-        return nodeToGraphIds.get(nodeId);
+    public long toMappedNodeId(long neo4jNodeId) {
+        return nodeToGraphIds.get(neo4jNodeId);
     }
 
     @Override
-    public long toOriginalNodeId(long nodeId) {
-        return graphIds.get(nodeId);
+    public long toOriginalNodeId(long mappedNodeId) {
+        return graphIds.get(mappedNodeId);
     }
 
     @Override
-    public long toRootNodeId(long nodeId) {
-        return nodeId;
+    public long toRootNodeId(long mappedOrFilteredNodeId) {
+        return mappedOrFilteredNodeId;
     }
 
     @Override
@@ -105,8 +105,8 @@ public class ArrayIdMap extends LabeledIdMap {
     }
 
     @Override
-    public boolean contains(final long nodeId) {
-        return nodeToGraphIds.contains(nodeId);
+    public boolean contains(final long neo4jNodeId) {
+        return nodeToGraphIds.contains(neo4jNodeId);
     }
 
     @Override
@@ -175,13 +175,13 @@ public class ArrayIdMap extends LabeledIdMap {
         }
 
         @Override
-        public List<NodeLabel> nodeLabels(long nodeId) {
-            return super.nodeLabels(super.toOriginalNodeId(nodeId));
+        public List<NodeLabel> nodeLabels(long mappedNodeId) {
+            return super.nodeLabels(super.toOriginalNodeId(mappedNodeId));
         }
 
         @Override
-        public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
-            super.forEachNodeLabel(super.toOriginalNodeId(nodeId), consumer);
+        public void forEachNodeLabel(long mappedNodeId, NodeLabelConsumer consumer) {
+            super.forEachNodeLabel(super.toOriginalNodeId(mappedNodeId), consumer);
         }
 
         @Override
@@ -190,8 +190,8 @@ public class ArrayIdMap extends LabeledIdMap {
         }
 
         @Override
-        public long toRootNodeId(long nodeId) {
-            return super.toRootNodeId(super.toOriginalNodeId(nodeId));
+        public long toRootNodeId(long mappedOrFilteredNodeId) {
+            return super.toRootNodeId(super.toOriginalNodeId(mappedOrFilteredNodeId));
         }
 
         @Override
@@ -200,18 +200,18 @@ public class ArrayIdMap extends LabeledIdMap {
         }
 
         @Override
-        public long toOriginalNodeId(long nodeId) {
-            return rootIdMap.toOriginalNodeId(super.toOriginalNodeId(nodeId));
+        public long toOriginalNodeId(long mappedNodeId) {
+            return rootIdMap.toOriginalNodeId(super.toOriginalNodeId(mappedNodeId));
         }
 
         @Override
-        public long toMappedNodeId(long nodeId) {
-            return super.toMappedNodeId(rootIdMap.toMappedNodeId(nodeId));
+        public long toMappedNodeId(long neo4jNodeId) {
+            return super.toMappedNodeId(rootIdMap.toMappedNodeId(neo4jNodeId));
         }
 
         @Override
-        public boolean contains(long nodeId) {
-            return super.contains(rootIdMap.toMappedNodeId(nodeId));
+        public boolean contains(long neo4jNodeId) {
+            return super.contains(rootIdMap.toMappedNodeId(neo4jNodeId));
         }
 
         @Override
@@ -225,8 +225,8 @@ public class ArrayIdMap extends LabeledIdMap {
         }
 
         @Override
-        public boolean hasLabel(long nodeId, NodeLabel label) {
-            return super.hasLabel(super.toOriginalNodeId(nodeId), label);
+        public boolean hasLabel(long mappedNodeId, NodeLabel label) {
+            return super.hasLabel(super.toOriginalNodeId(mappedNodeId), label);
         }
     }
 }

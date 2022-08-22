@@ -21,10 +21,23 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.IdMap;
 
+/**
+ * Extends the IdMap to support an additional
+ * filtered id mapping layer.
+ *
+ * The mapping layers are called the following:
+ * neo4jNodeId -> mappedNodeId -> filteredNodeId
+ *
+ * The first mapping layer (mappedNodeId) is also
+ * referred to as rootNodeId.
+ *
+ * Note that functions like {@link #toOriginalNodeId(long)} or {@link #toMappedNodeId(long)}
+ * will return the outermost or innermost mapped values respectively.
+ */
 public interface FilteredIdMap extends IdMap {
 
     /**
-     * Maps a root internal node id to an internal node id.
+     * Maps a root mapped node id to a filtered mapped node id.
      * This is necessary for nested (filtered) id mappings.
      *
      * If this mapping is a nested mapping, this method
@@ -35,5 +48,9 @@ public interface FilteredIdMap extends IdMap {
      */
     long fromRootNodeId(long rootNodeId);
 
+    /**
+     * Checks if the rootNodeId (mappedNodeId) is
+     * present in the IdMaps mapping information.
+     */
     boolean containsRootNodeId(long rootNodeId);
 }

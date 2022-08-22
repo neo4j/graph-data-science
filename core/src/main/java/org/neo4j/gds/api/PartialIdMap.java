@@ -29,11 +29,13 @@ import java.util.OptionalLong;
 public interface PartialIdMap {
 
     /**
-     * Map original nodeId to inner nodeId
+     * Maps a neo4j node id to a mapped node id.
+     * In case of nested id maps, the mapped node id
+     * is always in the space of the innermost mapping.
      *
-     * @param nodeId must be smaller or equal to the id returned by {@link IdMap#highestNeoId}
+     * @param neo4jNodeId must be smaller or equal to the id returned by {@link IdMap#highestNeoId}
      */
-    long toMappedNodeId(long nodeId);
+    long toMappedNodeId(long neo4jNodeId);
 
     /**
      * Number of mapped node ids in the root mapping.

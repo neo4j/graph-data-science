@@ -64,10 +64,10 @@ public class CypherIdMap extends IdMapAdapter implements NodeLabelUpdater {
     }
 
     @Override
-    public List<NodeLabel> nodeLabels(long nodeId) {
-        var nodeLabels = new ArrayList<>(super.nodeLabels(nodeId));
+    public List<NodeLabel> nodeLabels(long mappedNodeId) {
+        var nodeLabels = new ArrayList<>(super.nodeLabels(mappedNodeId));
         additionalNodeLabels.forEach((nodeLabel, bitSet) -> {
-            if (bitSet.get(nodeId)) {
+            if (bitSet.get(mappedNodeId)) {
                 nodeLabels.add(nodeLabel);
             }
         });
@@ -75,12 +75,12 @@ public class CypherIdMap extends IdMapAdapter implements NodeLabelUpdater {
     }
 
     @Override
-    public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
-        super.forEachNodeLabel(nodeId, consumer);
+    public void forEachNodeLabel(long mappedNodeId, NodeLabelConsumer consumer) {
+        super.forEachNodeLabel(mappedNodeId, consumer);
         for (Map.Entry<NodeLabel, BitSet> entry : additionalNodeLabels.entrySet()) {
             NodeLabel nodeLabel = entry.getKey();
             BitSet bitSet = entry.getValue();
-            if (bitSet.get(nodeId)) {
+            if (bitSet.get(mappedNodeId)) {
                 if (!consumer.accept(nodeLabel)) {
                     break;
                 }
@@ -96,11 +96,11 @@ public class CypherIdMap extends IdMapAdapter implements NodeLabelUpdater {
     }
 
     @Override
-    public boolean hasLabel(long nodeId, NodeLabel nodeLabel) {
-        var hasLoadedLabel = super.hasLabel(nodeId, nodeLabel);
+    public boolean hasLabel(long mappedNodeId, NodeLabel nodeLabel) {
+        var hasLoadedLabel = super.hasLabel(mappedNodeId, nodeLabel);
         if (!hasLoadedLabel) {
             if (additionalNodeLabels.containsKey(nodeLabel)) {
-                return additionalNodeLabels.get(nodeLabel).get(nodeId);
+                return additionalNodeLabels.get(nodeLabel).get(mappedNodeId);
             }
             return false;
         }
