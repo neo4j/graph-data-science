@@ -22,4 +22,18 @@ package org.neo4j.gds.core.loading;
 import org.neo4j.gds.api.IdMap;
 
 public interface FilteredIdMap extends IdMap {
+
+    /**
+     * Maps a root internal node id to an internal node id.
+     * This is necessary for nested (filtered) id mappings.
+     *
+     * If this mapping is a nested mapping, this method
+     * returns the mapped id corresponding to the mapped
+     * id of the parent mapping.
+     * For the root mapping this method returns the given
+     * node id.
+     */
+    long fromRootNodeId(long rootNodeId);
+
+    boolean containsRootNodeId(long rootNodeId);
 }

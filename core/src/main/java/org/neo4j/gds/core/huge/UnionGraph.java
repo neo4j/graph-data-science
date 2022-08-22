@@ -146,11 +146,6 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public long fromRootNodeId(long rootNodeId) {
-        return first.fromRootNodeId(rootNodeId);
-    }
-
-    @Override
     public IdMap rootIdMap() {
         return first.rootIdMap();
     }

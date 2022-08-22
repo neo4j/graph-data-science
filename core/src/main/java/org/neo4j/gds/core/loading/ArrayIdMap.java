@@ -100,11 +100,6 @@ public class ArrayIdMap extends LabeledIdMap {
     }
 
     @Override
-    public long fromRootNodeId(long rootNodeId) {
-        return rootNodeId;
-    }
-
-    @Override
     public IdMap rootIdMap() {
         return this;
     }
@@ -201,7 +196,7 @@ public class ArrayIdMap extends LabeledIdMap {
 
         @Override
         public long fromRootNodeId(long rootNodeId) {
-            return super.toMappedNodeId(super.fromRootNodeId(rootNodeId));
+            return super.toMappedNodeId(rootNodeId);
         }
 
         @Override
@@ -217,6 +212,11 @@ public class ArrayIdMap extends LabeledIdMap {
         @Override
         public boolean contains(long nodeId) {
             return super.contains(rootIdMap.toMappedNodeId(nodeId));
+        }
+
+        @Override
+        public boolean containsRootNodeId(long rootNodeId) {
+            return super.contains(rootNodeId);
         }
 
         @Override

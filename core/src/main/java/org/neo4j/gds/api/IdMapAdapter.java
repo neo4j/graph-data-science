@@ -62,11 +62,6 @@ public abstract class IdMapAdapter implements IdMap {
     }
 
     @Override
-    public long fromRootNodeId(long rootNodeId) {
-        return idMap.fromRootNodeId(rootNodeId);
-    }
-
-    @Override
     public IdMap rootIdMap() {
         return idMap.rootIdMap();
     }

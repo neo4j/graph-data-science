@@ -49,20 +49,20 @@ import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Stream;
 
-public class NodeFilteredGraph extends CSRGraphAdapter {
+public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap {
 
     private static final int NO_DEGREE = -1;
 
-    private final IdMap filteredIdMap;
+    private final FilteredIdMap filteredIdMap;
     private long relationshipCount;
     private final HugeIntArray degreeCache;
     private final CloseableThreadLocal<Graph> threadLocalGraph;
 
-    public NodeFilteredGraph(CSRGraph originalGraph, IdMap filteredIdMap) {
+    public NodeFilteredGraph(CSRGraph originalGraph, FilteredIdMap filteredIdMap) {
         this(originalGraph, filteredIdMap, emptyDegreeCache(filteredIdMap), -1);
     }
 
-    private NodeFilteredGraph(CSRGraph originalGraph, IdMap filteredIdMap, HugeIntArray degreeCache, long relationshipCount) {
+    private NodeFilteredGraph(CSRGraph originalGraph, FilteredIdMap filteredIdMap, HugeIntArray degreeCache, long relationshipCount) {
         super(originalGraph);
 
         this.degreeCache = degreeCache;
@@ -141,6 +141,11 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     }
 
     @Override
+    public boolean containsRootNodeId(long rootNodeId) {
+        return filteredIdMap.containsRootNodeId(rootNodeId);
+    }
+
+    @Override
     public long relationshipCount() {
         if (relationshipCount == -1) {
             doCount();
@@ -206,7 +211,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     @Override
     public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
         return super.streamRelationships(filteredIdMap.toRootNodeId(nodeId), fallbackValue)
-            .filter(rel -> filteredIdMap.contains(csrGraph.toOriginalNodeId(rel.sourceId())) && filteredIdMap.contains(csrGraph.toOriginalNodeId(rel.targetId())))
+            .filter(rel -> filteredIdMap.containsRootNodeId(rel.sourceId()) && filteredIdMap.containsRootNodeId(rel.targetId()))
             .map(rel -> ImmutableRelationshipCursor.of(filteredIdMap.fromRootNodeId(rel.sourceId()), filteredIdMap.fromRootNodeId(rel.targetId()), rel.property()));
     }
 
@@ -296,7 +301,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     }
 
     private boolean filterAndConsume(long source, long target, RelationshipConsumer consumer) {
-        if (filteredIdMap.contains(csrGraph.toOriginalNodeId(source)) && filteredIdMap.contains(csrGraph.toOriginalNodeId(target))) {
+        if (filteredIdMap.containsRootNodeId(source) && filteredIdMap.containsRootNodeId(target)) {
             long internalSourceId = filteredIdMap.fromRootNodeId(source);
             long internalTargetId = filteredIdMap.fromRootNodeId(target);
             return consumer.accept(internalSourceId, internalTargetId);
@@ -305,7 +310,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     }
 
     private boolean filterAndConsume(long source, long target, double propertyValue, RelationshipWithPropertyConsumer consumer) {
-        if (filteredIdMap.contains(csrGraph.toOriginalNodeId(source)) && filteredIdMap.contains(csrGraph.toOriginalNodeId(target))) {
+        if (filteredIdMap.containsRootNodeId(source) && filteredIdMap.containsRootNodeId(target)) {
             long internalSourceId = filteredIdMap.fromRootNodeId(source);
             long internalTargetId = filteredIdMap.fromRootNodeId(target);
             return consumer.accept(internalSourceId, internalTargetId, propertyValue);

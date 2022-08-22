@@ -66,7 +66,7 @@ class NodeFilteredGraphTest {
 
         NodeLabel filterLabel = NodeLabel.of("Person");
 
-        Graph filteredGraph = graphStore.getGraph(
+        NodeFilteredGraph filteredGraph = (NodeFilteredGraph) graphStore.getGraph(
             filterLabel,
             RelationshipType.ALL_RELATIONSHIPS,
             Optional.empty()

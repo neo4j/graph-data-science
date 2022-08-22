@@ -21,12 +21,17 @@ package org.neo4j.gds.core.huge;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.CSRGraph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.huge.FilteredNodePropertyValues.FilteredToOriginalNodePropertyValues;
+import org.neo4j.gds.core.loading.FilteredIdMap;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,10 +41,14 @@ class FilteredToOriginalNodePropertyValuesTest {
     @GdlGraph
     private static final String GDL =
         " (a:A { doubleArray: [1.0], longArray: [1L], floatArray: [1.0F] })" +
-        " (b:B { doubleArray: [1.0, 2.22, 1.337], longArray: [1L, 222L, 1337L], floatArray: [1.0F, 2.22F, 1.337F] })";
+        " (b:B { doubleArray: [1.0, 2.22, 1.337], longArray: [1L, 222L, 1337L], floatArray: [1.0F, 2.22F, 1.337F] })" +
+        " (c:ignore)";
 
     @Inject
     private CSRGraph graph;
+
+    @Inject
+    private GraphStore graphStore;
 
     @Inject
     private IdFunction idFunction;
@@ -48,7 +57,10 @@ class FilteredToOriginalNodePropertyValuesTest {
     void testDoubleArray() {
         var filteredNodeProperties = new FilteredToOriginalNodePropertyValues(
             graph.nodeProperties("doubleArray"),
-            new NodeFilteredGraph(graph, graph)
+            new NodeFilteredGraph(
+                graph,
+                (FilteredIdMap) graphStore.getGraph(Set.of(NodeLabel.of("A"), NodeLabel.of("B")))
+            )
         );
 
         assertThat(filteredNodeProperties.doubleArrayValue(idFunction.of("a"))).containsExactly(1D);
@@ -62,7 +74,10 @@ class FilteredToOriginalNodePropertyValuesTest {
     void testLongArray() {
         var filteredNodeProperties = new FilteredToOriginalNodePropertyValues(
             graph.nodeProperties("longArray"),
-            new NodeFilteredGraph(graph, graph)
+            new NodeFilteredGraph(
+                graph,
+                (FilteredIdMap) graphStore.getGraph(Set.of(NodeLabel.of("A"), NodeLabel.of("B")))
+            )
         );
 
         assertThat(filteredNodeProperties.longArrayValue(idFunction.of("a"))).containsExactly(1L);
@@ -73,7 +88,10 @@ class FilteredToOriginalNodePropertyValuesTest {
     void testFloatArray() {
         var filteredNodeProperties = new FilteredNodePropertyValues.FilteredToOriginalNodePropertyValues(
             graph.nodeProperties("floatArray"),
-            new NodeFilteredGraph(graph, graph)
+            new NodeFilteredGraph(
+                graph,
+                (FilteredIdMap) graphStore.getGraph(Set.of(NodeLabel.of("A"), NodeLabel.of("B")))
+            )
         );
 
         assertThat(filteredNodeProperties.floatArrayValue(idFunction.of("a"))).containsExactly(1.0F);

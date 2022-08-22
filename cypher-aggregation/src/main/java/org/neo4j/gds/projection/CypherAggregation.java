@@ -745,7 +745,15 @@ final class FilteredHighLimitIdMap extends HighLimitIdMap implements FilteredIdM
         this.filteredIdMap = filteredIdMap;
     }
 
+    @Override
+    public long fromRootNodeId(long rootNodeId) {
+        return filteredIdMap.fromRootNodeId(rootNodeId);
+    }
 
+    @Override
+    public boolean containsRootNodeId(long rootNodeId) {
+        return filteredIdMap.containsRootNodeId(rootNodeId);
+    }
 }
 
 final class LazyIdMapBuilder implements PartialIdMap {
