@@ -117,7 +117,7 @@ CREATE
 Now we need to project an in-memory graph which we want to back-up.
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
-[source, cypher, role=noplay graph-project-query]
+[source, cypher, role=noplay graph-project-query, operator=me]
 ----
 CALL gds.graph.project(
   'myGraph',
@@ -128,6 +128,8 @@ CALL gds.graph.project(
 
 We can now run the back-up procedure in order to store the in-memory graph on disk.
 
+[role=query-example, group=backrestoregroup, operator=me]
+--
 .The following will run the back-up procedure:
 [source, cypher, role=noplay]
 ----
@@ -141,17 +143,21 @@ YIELD graphName, status
 | graphName | status
 | "myGraph" | "SUCCESSFUL"
 |===
+--
 
 It is now safe to drop the in-memory graph or shutdown the db, as we can restore it at a later point.
-
+[role=query-example, no-result=true, group=backrestoregroup, operator=me]
+--
 .The following will drop the in-memory graph:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.drop('myGraph')
 ----
+--
 
 If we want to restore the backed-up graph, we can simply run the restore procedure to load it back into memory.
-
+[role=query-example, group=backrestoregroup, operator=me]
+--
 .The following will run the restore procedure:
 [source, cypher, role=noplay]
 ----
@@ -165,5 +171,6 @@ YIELD restoredGraph
 | restoredGraph
 | "myGraph"
 |===
+--
 
 As we can see, one graph with name `myGraph` was restored by the procedure.
