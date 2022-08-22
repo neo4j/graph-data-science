@@ -123,7 +123,7 @@ class SimilarityGraphBuilderTest {
         nodesBuilder.addNode(3, NodeLabel.of("B"));
 
         var inputMapping = nodesBuilder.build().idMap();
-        var filteredIdMap = inputMapping.withFilteredLabels(NodeLabel.listOf("B"), 4);
+        var filteredIdMap = inputMapping.withFilteredLabels(NodeLabel.listOf("B"), 4).get();
 
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
             filteredIdMap,

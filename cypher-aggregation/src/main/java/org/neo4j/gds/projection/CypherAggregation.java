@@ -46,6 +46,7 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
+import org.neo4j.gds.core.loading.FilteredIdMap;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
@@ -694,7 +695,7 @@ public final class CypherAggregation extends BaseProc {
     }
 }
 
-final class HighLimitIdMap extends IdMapAdapter {
+class HighLimitIdMap extends IdMapAdapter {
 
     private final ShardedLongLongMap highToLowIdSpace;
 
@@ -729,10 +730,22 @@ final class HighLimitIdMap extends IdMapAdapter {
     }
 
     @Override
-    public IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
-        var filteredInternalIdMap = super.withFilteredLabels(nodeLabels, concurrency);
-        return new HighLimitIdMap(this.highToLowIdSpace, filteredInternalIdMap);
+    public Optional<FilteredHighLimitIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+        return super.withFilteredLabels(nodeLabels, concurrency)
+            .map(filteredIdMap -> new FilteredHighLimitIdMap(this.highToLowIdSpace, filteredIdMap));
     }
+}
+
+final class FilteredHighLimitIdMap extends HighLimitIdMap implements FilteredIdMap {
+
+    private final FilteredIdMap filteredIdMap;
+
+    FilteredHighLimitIdMap(ShardedLongLongMap intermediateIdMap, FilteredIdMap filteredIdMap) {
+        super(intermediateIdMap, filteredIdMap);
+        this.filteredIdMap = filteredIdMap;
+    }
+
+
 }
 
 final class LazyIdMapBuilder implements PartialIdMap {

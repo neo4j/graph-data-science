@@ -24,6 +24,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
+import org.neo4j.gds.core.loading.FilteredIdMap;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 
 import java.util.Collection;
@@ -169,7 +170,7 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    public Optional<? extends FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         return graph.withFilteredLabels(nodeLabels, concurrency);
     }
 

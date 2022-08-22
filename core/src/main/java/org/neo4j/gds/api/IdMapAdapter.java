@@ -20,10 +20,12 @@
 package org.neo4j.gds.api;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.core.loading.FilteredIdMap;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.PrimitiveIterator;
 import java.util.Set;
@@ -125,7 +127,7 @@ public abstract class IdMapAdapter implements IdMap {
     }
 
     @Override
-    public IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    public Optional<? extends FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         return idMap.withFilteredLabels(nodeLabels, concurrency);
     }
 }

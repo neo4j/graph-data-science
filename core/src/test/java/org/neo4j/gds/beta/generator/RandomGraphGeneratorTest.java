@@ -478,7 +478,7 @@ class RandomGraphGeneratorTest {
             .generate();
 
         assertThat(graph.availableNodeLabels()).containsExactly(NodeLabel.ALL_NODES);
-        var filteredIdMap = graph.withFilteredLabels(List.of(NodeLabel.ALL_NODES), 4);
+        var filteredIdMap = graph.withFilteredLabels(List.of(NodeLabel.ALL_NODES), 4).get();
         assertThat(filteredIdMap.nodeCount()).isEqualTo(100);
     }
 
@@ -500,7 +500,7 @@ class RandomGraphGeneratorTest {
             .generate();
 
         assertThat(graph.availableNodeLabels()).containsExactlyInAnyOrder(NodeLabel.of("LABEL1"), NodeLabel.of("LABEL2"));
-        var filteredIdMap = graph.withFilteredLabels(List.of(NodeLabel.of("LABEL1")), 4);
+        var filteredIdMap = graph.withFilteredLabels(List.of(NodeLabel.of("LABEL1")), 4).get();
         assertThat(filteredIdMap.nodeCount()).isEqualTo(50);
     }
 

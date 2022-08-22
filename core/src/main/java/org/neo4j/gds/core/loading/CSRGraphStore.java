@@ -654,7 +654,7 @@ public class CSRGraphStore implements GraphStore {
         RelationshipType relationshipType,
         Optional<String> maybeRelationshipProperty
     ) {
-        Optional<IdMap> filteredNodes = getFilteredIdMap(nodeLabels);
+        var filteredNodes = getFilteredIdMap(nodeLabels);
         Map<String, NodePropertyValues> filteredNodeProperties = filterNodeProperties(nodeLabels);
         var nodeSchema = schema().nodeSchema().filter(new HashSet<>(nodeLabels));
         return createGraphFromRelationshipType(
@@ -671,7 +671,7 @@ public class CSRGraphStore implements GraphStore {
         Collection<RelationshipType> relationshipTypes,
         Optional<String> maybeRelationshipProperty
     ) {
-        Optional<IdMap> filteredNodes = getFilteredIdMap(filteredLabels);
+        var filteredNodes = getFilteredIdMap(filteredLabels);
         Map<String, NodePropertyValues> filteredNodeProperties = filterNodeProperties(filteredLabels);
         var nodeSchema = schema().nodeSchema().filter(new HashSet<>(filteredLabels));
 
@@ -716,16 +716,16 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @NotNull
-    private Optional<IdMap> getFilteredIdMap(Collection<NodeLabel> filteredLabels) {
+    private Optional<? extends FilteredIdMap> getFilteredIdMap(Collection<NodeLabel> filteredLabels) {
         boolean loadAllNodes = filteredLabels.containsAll(nodeLabels());
 
         return loadAllNodes || schema().nodeSchema().containsOnlyAllNodesLabel()
             ? Optional.empty()
-            : Optional.of(nodes.withFilteredLabels(filteredLabels, concurrency));
+            : nodes.withFilteredLabels(filteredLabels, concurrency);
     }
 
     private CSRGraph createGraphFromRelationshipType(
-        Optional<IdMap> filteredNodes,
+        Optional<? extends FilteredIdMap> filteredNodes,
         Map<String, NodePropertyValues> filteredNodeProperties,
         NodeSchema nodeSchema,
         RelationshipType relationshipType,

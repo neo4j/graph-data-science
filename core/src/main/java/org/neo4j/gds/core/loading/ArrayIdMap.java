@@ -33,6 +33,7 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalLong;
 
 /**
@@ -124,11 +125,11 @@ public class ArrayIdMap extends LabeledIdMap {
     }
 
     @Override
-    public ArrayIdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    public Optional<FilteredArrayIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         labelInformation.validateNodeLabelFilter(nodeLabels);
 
         if (labelInformation.isEmpty()) {
-            return this;
+            return Optional.empty();
         }
 
         BitSet unionBitSet = labelInformation.unionBitSet(nodeLabels, nodeCount());
@@ -152,21 +153,21 @@ public class ArrayIdMap extends LabeledIdMap {
 
         LabelInformation newLabelInformation = labelInformation.filter(nodeLabels);
 
-        return new FilteredIdMap(
+        return Optional.of(new FilteredArrayIdMap(
             this,
             newGraphIds,
             newNodeToGraphIds,
             newLabelInformation,
             newNodeCount,
             highestNeoId
-        );
+        ));
     }
 
-    private static class FilteredIdMap extends ArrayIdMap {
+    private static class FilteredArrayIdMap extends ArrayIdMap implements FilteredIdMap {
 
         private final IdMap rootIdMap;
 
-        FilteredIdMap(
+        FilteredArrayIdMap(
             IdMap rootIdMap,
             HugeLongArray graphIds,
             HugeSparseLongArray nodeToGraphIds,

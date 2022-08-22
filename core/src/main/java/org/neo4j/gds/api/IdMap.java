@@ -20,9 +20,11 @@
 package org.neo4j.gds.api;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.core.loading.FilteredIdMap;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -104,7 +106,7 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
      */
     IdMap rootIdMap();
 
-    default IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    default Optional<? extends FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         throw new UnsupportedOperationException("This node mapping does not support label filtering");
     }
 
