@@ -451,7 +451,7 @@ public abstract class HugeAtomicLongArray implements HugeCursorSupport<long[]> {
 
             while (true) {
                 long next = prev + delta;
-                long current = (long) ARRAY_HANDLE.compareAndExchangeRelease(page, (int) index, prev, next);
+                long current = (long) ARRAY_HANDLE.compareAndExchangeRelease(page, indexInPage, prev, next);
                 if (prev == current) {
                     return prev;
                 }
