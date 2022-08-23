@@ -23,7 +23,6 @@ import org.neo4j.gds.configuration.DefaultsConfigurationProcedure;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 class DefaultsAndLimitsDocTest extends SingleFileDocTestBase {
 
@@ -40,10 +39,5 @@ class DefaultsAndLimitsDocTest extends SingleFileDocTestBase {
     @Override
     protected String adocFile() {
         return "pages/management-ops/defaults-and-limits.adoc";
-    }
-
-    @Override
-    protected Optional<String> getOperator() {
-        return Optional.of("Alicia");
     }
 }
