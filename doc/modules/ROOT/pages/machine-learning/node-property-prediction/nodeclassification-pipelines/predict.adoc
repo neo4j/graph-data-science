@@ -206,9 +206,9 @@ RETURN
 [opts="header",cols="m,m,m"]
 |===
 | classifiedHouse | predictedClass | confidence
-| "Pink"          |              0 | 98.0
-| "Tan"           |              1 | 98.0
-| "Yellow"        |              2 | 80.0
+| "Pink"          |              0 | 96.0
+| "Tan"           |              1 | 97.0
+| "Yellow"        |              2 | 75.0
 |===
 
 As we can see, the model was able to predict the pink house into class 0, tan house into class 1, and yellow house into class 2.
