@@ -20,22 +20,31 @@
 package org.neo4j.gds.configuration;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class LimitsConfiguration {
     /**
      * A JVM-wide singleton we can use to store the limits configuration. Lifecycle of this singleton matches that of
      * the data it holds - it starts empty and dies when JVM exists.
      */
-    public static final LimitsConfiguration Instance = new LimitsConfiguration(Collections.emptyMap(), Collections.emptyMap());
+    public static final LimitsConfiguration Instance = new LimitsConfiguration(
+        new HashMap<>(),
+        new HashMap<>()
+    );
 
     /**
      * This is a handy singleton for when you need to satisfy a requirement for the configuration, but want to ignore
      * limits entirely.
      */
-    public static final LimitsConfiguration Empty = new LimitsConfiguration(Collections.emptyMap(), Collections.emptyMap());
+    public static final LimitsConfiguration Empty = new LimitsConfiguration(
+        Collections.emptyMap(),
+        Collections.emptyMap()
+    );
 
     private final Map<String, Limit> globalLimits;
 
@@ -87,5 +96,40 @@ public class LimitsConfiguration {
         }
 
         return limitViolations;
+    }
+
+    Map<String, Object> list(Optional<String> username, Optional<String> key) {
+        var limits = startWithGlobalLimits();
+
+        overlayPersonalLimitsIfApplicable(username, limits);
+
+        if (key.isEmpty()) return limits;
+
+        if (!limits.containsKey(key.get())) return Collections.emptyMap(); // done because value does not exist for key
+
+        Object value = limits.get(key.get());
+
+        return Map.of(key.get(), value);
+    }
+
+    void set(String key, Object value, Optional<String> username) {
+        var valueAsLimit = new Limit((Long) value);
+
+        if (username.isPresent()) {
+            personalLimits.putIfAbsent(username.get(), new HashMap<>()); // lazy initialisation
+            personalLimits.get(username.get()).put(key, valueAsLimit);
+        } else {
+            globalLimits.put(key, valueAsLimit);
+        }
+    }
+
+    private Map<String, Object> startWithGlobalLimits() {
+        return globalLimits.entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue()));
+    }
+
+    private void overlayPersonalLimitsIfApplicable(Optional<String> username, Map<String, Object> defaults) {
+        username.ifPresent(s -> personalLimits.getOrDefault(s, Collections.emptyMap())
+            .forEach((k, v) -> defaults.put(k, v.getValue())));
     }
 }

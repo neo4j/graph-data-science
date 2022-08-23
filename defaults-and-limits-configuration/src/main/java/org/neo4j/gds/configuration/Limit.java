@@ -26,19 +26,23 @@ package org.neo4j.gds.configuration;
  * enough that we can turn this into an interface and back it with supported types, or something
  */
 public class Limit {
-    private final int value;
+    private final long value;
 
-    public Limit(int value) {
+    public Limit(long value) {
         this.value = value;
     }
 
-    public boolean isViolated(Object inputValue) {
-        int i = (Integer) inputValue;
+    boolean isViolated(Object inputValue) {
+        long i = (Long) inputValue;
 
         return i > value;
     }
 
-    public String getValueAsString() {
+    String getValueAsString() {
         return String.valueOf(value);
+    }
+
+    Object getValue() {
+        return value;
     }
 }
