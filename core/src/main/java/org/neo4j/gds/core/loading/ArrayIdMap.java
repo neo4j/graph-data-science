@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.LabeledIdMap;
 import org.neo4j.gds.collections.HugeSparseCollections;

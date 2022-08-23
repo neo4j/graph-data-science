@@ -20,7 +20,6 @@
 package org.neo4j.gds.api;
 
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.core.loading.FilteredIdMap;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 
 import java.util.Collection;

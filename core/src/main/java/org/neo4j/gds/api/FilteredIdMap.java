@@ -17,9 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
-
-import org.neo4j.gds.api.IdMap;
+package org.neo4j.gds.api;
 
 /**
  * Extends the IdMap to support an additional
