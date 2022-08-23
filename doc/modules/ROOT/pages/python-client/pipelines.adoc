@@ -6,7 +6,7 @@ The GDS pipelines are represented as pipeline objects.
 
 The Python method calls to _create_ the pipelines match their Cypher counterparts exactly.
 However, the rest of the pipeline functionality is deferred to methods on the pipeline objects themselves.
-Once created, the `TrainingPipeline` can be passed as arguments to methods in the Python client, such as the xref:pipeline-catalog/index.adoc[pipeline catalog operations].
+Once created, the `TrainingPipeline` can be passed as arguments to methods in the Python client, such as the xref:pipeline-catalog/pipeline-catalog.adoc[pipeline catalog operations].
 Additionally, the `TrainingPipeline` has convenience methods allowing for inspection of the pipeline represented without explicitly involving the pipeline catalog.
 
 include::partial$/pythonclient/python-client-gds-object.adoc[]
@@ -446,7 +446,7 @@ assert len(results) == H.node_count()
 == The pipeline catalog
 
 The primary way to use pipeline objects is for training models.
-Additionally, pipeline objects can be used as input to xref:pipeline-catalog/index.adoc[GDS Pipeline Catalog operations].
+Additionally, pipeline objects can be used as input to xref:pipeline-catalog/pipeline-catalog.adoc[GDS Pipeline Catalog operations].
 For instance, supposing we have a pipeline object `pipe`, we could:
 
 [source,python]

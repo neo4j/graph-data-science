@@ -14,7 +14,7 @@ More precisely, the input to the machine learning model are _examples_ of node p
 During training, the node pairs are labeled as adjacent or not adjacent.
 
 In GDS, we have Link prediction pipelines which offer an end-to-end workflow, from feature extraction to link prediction.
-The training pipelines reside in the xref:pipeline-catalog/index.adoc[pipeline catalog].
+The training pipelines reside in the xref:pipeline-catalog/pipeline-catalog.adoc[pipeline catalog].
 When a training pipeline is xref:machine-learning/linkprediction-pipelines/training.adoc[executed], a prediction model is created and stored in the xref:model-catalog/index.adoc[model catalog].
 
 A training pipeline is a sequence of three phases:

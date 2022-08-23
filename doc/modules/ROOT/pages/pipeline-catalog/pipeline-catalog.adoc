@@ -1,0 +1,22 @@
+[[pipeline-catalog-ops]]
+= Pipeline catalog
+:description: This section details the pipeline catalog operations available to manage named training pipelines within the Neo4j Graph Data Science library.
+
+The Neo4j Graph Data Science library offers the feature of machine learning pipelines to design an end-to-end workflow, from graph feature extraction to model training.
+The pipeline catalog is a concept within the GDS library that allows managing multiple training pipelines by name.
+
+Once created, a pipeline is stored in the pipeline catalog.
+When configuring a pipeline, it is resolved from the catalog and modified with the requested configuration, such as adding a xref:machine-learning/training-methods/index.adoc[training method].
+A pipeline is used to train a machine learning model which is stored in the xref:model-catalog/index.adoc[].
+
+The different kinds of pipelines supported by GDS are described elsewhere in xref:machine-learning/machine-learning.adoc[this chapter].
+This section explains the available pipeline catalog operations:
+
+[[pipeline-catalog-procs]]
+[opts=header,cols="1m,1"]
+|===
+| Name                                                        | Description
+| xref:pipeline-catalog/list.adoc[gds.beta.pipeline.list]     | Prints information about pipelines that are currently available in the catalog.
+| xref:pipeline-catalog/exists.adoc[gds.beta.pipeline.exists] | Checks if a named pipeline is available in the catalog.
+| xref:pipeline-catalog/drop.adoc[gds.beta.pipeline.drop]     | Drops a named pipeline from the catalog.
+|===
