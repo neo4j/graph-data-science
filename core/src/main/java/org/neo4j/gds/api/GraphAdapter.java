@@ -84,18 +84,18 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public long toMappedNodeId(long nodeId) {
-        return graph.toMappedNodeId(nodeId);
+    public long toMappedNodeId(long originalNodeId) {
+        return graph.toMappedNodeId(originalNodeId);
     }
 
     @Override
-    public long toOriginalNodeId(long nodeId) {
-        return graph.toOriginalNodeId(nodeId);
+    public long toOriginalNodeId(long mappedNodeId) {
+        return graph.toOriginalNodeId(mappedNodeId);
     }
 
     @Override
-    public long toRootNodeId(long nodeId) {
-        return graph.toRootNodeId(nodeId);
+    public long toRootNodeId(long mappedNodeId) {
+        return graph.toRootNodeId(mappedNodeId);
     }
 
     @Override
@@ -104,8 +104,8 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public boolean contains(long nodeId) {
-        return graph.contains(nodeId);
+    public boolean contains(long originalNodeId) {
+        return graph.contains(originalNodeId);
     }
 
     @Override
@@ -144,13 +144,13 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public List<NodeLabel> nodeLabels(long nodeId) {
-        return graph.nodeLabels(nodeId);
+    public List<NodeLabel> nodeLabels(long mappedNodeId) {
+        return graph.nodeLabels(mappedNodeId);
     }
 
     @Override
-    public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
-        graph.forEachNodeLabel(nodeId, consumer);
+    public void forEachNodeLabel(long mappedNodeId, NodeLabelConsumer consumer) {
+        graph.forEachNodeLabel(mappedNodeId, consumer);
     }
 
     @Override
@@ -159,12 +159,12 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public boolean hasLabel(long nodeId, NodeLabel label) {
-        return graph.hasLabel(nodeId, label);
+    public boolean hasLabel(long mappedNodeId, NodeLabel label) {
+        return graph.hasLabel(mappedNodeId, label);
     }
 
     @Override
-    public IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    public Optional<? extends FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         return graph.withFilteredLabels(nodeLabels, concurrency);
     }
 

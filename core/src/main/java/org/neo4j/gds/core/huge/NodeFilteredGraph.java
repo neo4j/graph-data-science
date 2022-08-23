@@ -23,6 +23,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CSRGraphAdapter;
+import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ImmutableRelationshipCursor;
@@ -48,20 +49,20 @@ import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Stream;
 
-public class NodeFilteredGraph extends CSRGraphAdapter {
+public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap {
 
     private static final int NO_DEGREE = -1;
 
-    private final IdMap filteredIdMap;
+    private final FilteredIdMap filteredIdMap;
     private long relationshipCount;
     private final HugeIntArray degreeCache;
     private final CloseableThreadLocal<Graph> threadLocalGraph;
 
-    public NodeFilteredGraph(CSRGraph originalGraph, IdMap filteredIdMap) {
+    public NodeFilteredGraph(CSRGraph originalGraph, FilteredIdMap filteredIdMap) {
         this(originalGraph, filteredIdMap, emptyDegreeCache(filteredIdMap), -1);
     }
 
-    private NodeFilteredGraph(CSRGraph originalGraph, IdMap filteredIdMap, HugeIntArray degreeCache, long relationshipCount) {
+    private NodeFilteredGraph(CSRGraph originalGraph, FilteredIdMap filteredIdMap, HugeIntArray degreeCache, long relationshipCount) {
         super(originalGraph);
 
         this.degreeCache = degreeCache;
@@ -140,6 +141,11 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     }
 
     @Override
+    public boolean containsRootNodeId(long rootNodeId) {
+        return filteredIdMap.containsRootNodeId(rootNodeId);
+    }
+
+    @Override
     public long relationshipCount() {
         if (relationshipCount == -1) {
             doCount();
@@ -168,48 +174,53 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     }
 
     @Override
-    public long toMappedNodeId(long neoNodeId) {
-        return filteredIdMap.toMappedNodeId(super.toMappedNodeId(neoNodeId));
+    public long toMappedNodeId(long originalNodeId) {
+        return filteredIdMap.toMappedNodeId(originalNodeId);
     }
 
     @Override
-    public long toRootNodeId(long nodeId) {
-        return filteredIdMap.toRootNodeId(nodeId);
+    public long toRootNodeId(long mappedNodeId) {
+        return filteredIdMap.toRootNodeId(mappedNodeId);
     }
 
     @Override
-    public boolean contains(long nodeId) {
-        return filteredIdMap.contains(nodeId);
+    public long rootToMappedNodeId(long rootNodeId) {
+        return filteredIdMap.rootToMappedNodeId(rootNodeId);
     }
 
     @Override
-    public long toOriginalNodeId(long nodeId) {
-        return super.toOriginalNodeId(filteredIdMap.toOriginalNodeId(nodeId));
+    public boolean contains(long originalNodeId) {
+        return filteredIdMap.contains(originalNodeId);
+    }
+
+    @Override
+    public long toOriginalNodeId(long mappedNodeId) {
+        return filteredIdMap.toOriginalNodeId(mappedNodeId);
     }
 
     @Override
     public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
-        super.forEachRelationship(filteredIdMap.toOriginalNodeId(nodeId), (s, t) -> filterAndConsume(s, t, consumer));
+        super.forEachRelationship(filteredIdMap.toRootNodeId(nodeId), (s, t) -> filterAndConsume(s, t, consumer));
     }
 
     @Override
     public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
-        super.forEachRelationship(filteredIdMap.toOriginalNodeId(nodeId), fallbackValue, (s, t, p) -> filterAndConsume(s, t, p, consumer));
+        super.forEachRelationship(filteredIdMap.toRootNodeId(nodeId), fallbackValue, (s, t, p) -> filterAndConsume(s, t, p, consumer));
     }
 
     @Override
     public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
-        return super.streamRelationships(filteredIdMap.toOriginalNodeId(nodeId), fallbackValue)
-            .filter(rel -> filteredIdMap.contains(rel.sourceId()) && filteredIdMap.contains(rel.targetId()))
-            .map(rel -> ImmutableRelationshipCursor.of(filteredIdMap.toMappedNodeId(rel.sourceId()), filteredIdMap.toMappedNodeId(rel.targetId()), rel.property()));
+        return super.streamRelationships(filteredIdMap.toRootNodeId(nodeId), fallbackValue)
+            .filter(rel -> filteredIdMap.containsRootNodeId(rel.sourceId()) && filteredIdMap.containsRootNodeId(rel.targetId()))
+            .map(rel -> ImmutableRelationshipCursor.of(filteredIdMap.rootToMappedNodeId(rel.sourceId()), filteredIdMap.rootToMappedNodeId(rel.targetId()), rel.property()));
     }
 
     public long getFilteredMappedNodeId(long nodeId) {
-        return filteredIdMap.toMappedNodeId(nodeId);
+        return filteredIdMap.rootToMappedNodeId(nodeId);
     }
 
     long getIntermediateOriginalNodeId(long nodeId) {
-        return filteredIdMap.toOriginalNodeId(nodeId);
+        return filteredIdMap.toRootNodeId(nodeId);
     }
 
     @Override
@@ -219,7 +230,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
 
     @Override
     public boolean exists(long sourceNodeId, long targetNodeId) {
-        return super.exists(filteredIdMap.toOriginalNodeId(sourceNodeId), filteredIdMap.toOriginalNodeId(targetNodeId));
+        return super.exists(filteredIdMap.toRootNodeId(sourceNodeId), filteredIdMap.toRootNodeId(targetNodeId));
     }
 
     @Override
@@ -230,8 +241,8 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     @Override
     public double relationshipProperty(long sourceNodeId, long targetNodeId, double fallbackValue) {
         return super.relationshipProperty(
-            filteredIdMap.toOriginalNodeId(sourceNodeId),
-            filteredIdMap.toOriginalNodeId(targetNodeId),
+            filteredIdMap.toRootNodeId(sourceNodeId),
+            filteredIdMap.toRootNodeId(targetNodeId),
             fallbackValue
         );
     }
@@ -239,8 +250,8 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     @Override
     public double relationshipProperty(long sourceNodeId, long targetNodeId) {
         return super.relationshipProperty(
-            filteredIdMap.toOriginalNodeId(sourceNodeId),
-            filteredIdMap.toOriginalNodeId(targetNodeId)
+            filteredIdMap.toRootNodeId(sourceNodeId),
+            filteredIdMap.toRootNodeId(targetNodeId)
         );
     }
 
@@ -255,22 +266,22 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     }
 
     @Override
-    public List<NodeLabel> nodeLabels(long nodeId) {
-        return filteredIdMap.nodeLabels(nodeId);
+    public List<NodeLabel> nodeLabels(long mappedNodeId) {
+        return filteredIdMap.nodeLabels(mappedNodeId);
     }
 
     @Override
-    public boolean hasLabel(long nodeId, NodeLabel label) {
-        return filteredIdMap.hasLabel(nodeId, label);
+    public boolean hasLabel(long mappedNodeId, NodeLabel label) {
+        return filteredIdMap.hasLabel(mappedNodeId, label);
     }
 
     @Override
-    public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
-        filteredIdMap.forEachNodeLabel(nodeId, consumer);
+    public void forEachNodeLabel(long mappedNodeId, NodeLabelConsumer consumer) {
+        filteredIdMap.forEachNodeLabel(mappedNodeId, consumer);
     }
 
     @Override
-    public IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    public Optional<? extends FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         return filteredIdMap.withFilteredLabels(nodeLabels, concurrency);
     }
 
@@ -290,18 +301,18 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     }
 
     private boolean filterAndConsume(long source, long target, RelationshipConsumer consumer) {
-        if (filteredIdMap.contains(source) && filteredIdMap.contains(target)) {
-            long internalSourceId = filteredIdMap.toMappedNodeId(source);
-            long internalTargetId = filteredIdMap.toMappedNodeId(target);
+        if (filteredIdMap.containsRootNodeId(source) && filteredIdMap.containsRootNodeId(target)) {
+            long internalSourceId = filteredIdMap.rootToMappedNodeId(source);
+            long internalTargetId = filteredIdMap.rootToMappedNodeId(target);
             return consumer.accept(internalSourceId, internalTargetId);
         }
         return true;
     }
 
     private boolean filterAndConsume(long source, long target, double propertyValue, RelationshipWithPropertyConsumer consumer) {
-        if (filteredIdMap.contains(source) && filteredIdMap.contains(target)) {
-            long internalSourceId = filteredIdMap.toMappedNodeId(source);
-            long internalTargetId = filteredIdMap.toMappedNodeId(target);
+        if (filteredIdMap.containsRootNodeId(source) && filteredIdMap.containsRootNodeId(target)) {
+            long internalSourceId = filteredIdMap.rootToMappedNodeId(source);
+            long internalTargetId = filteredIdMap.rootToMappedNodeId(target);
             return consumer.accept(internalSourceId, internalTargetId, propertyValue);
         }
         return true;

@@ -28,6 +28,7 @@ import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.CSRGraph;
+import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyCursor;
@@ -338,23 +339,23 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
-    public long toMappedNodeId(long nodeId) {
-        return idMap.toMappedNodeId(nodeId);
+    public long toMappedNodeId(long originalNodeId) {
+        return idMap.toMappedNodeId(originalNodeId);
     }
 
     @Override
-    public long toOriginalNodeId(long nodeId) {
-        return idMap.toOriginalNodeId(nodeId);
+    public long toOriginalNodeId(long mappedNodeId) {
+        return idMap.toOriginalNodeId(mappedNodeId);
     }
 
     @Override
-    public long toRootNodeId(long nodeId) {
-        return idMap.toRootNodeId(nodeId);
+    public long toRootNodeId(long mappedNodeId) {
+        return idMap.toRootNodeId(mappedNodeId);
     }
 
     @Override
-    public boolean contains(long nodeId) {
-        return idMap.contains(nodeId);
+    public boolean contains(long originalNodeId) {
+        return idMap.contains(originalNodeId);
     }
 
     @Override
@@ -515,13 +516,13 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
-    public List<NodeLabel> nodeLabels(long nodeId) {
-        return idMap.nodeLabels(nodeId);
+    public List<NodeLabel> nodeLabels(long mappedNodeId) {
+        return idMap.nodeLabels(mappedNodeId);
     }
 
     @Override
-    public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
-        idMap.forEachNodeLabel(nodeId, consumer);
+    public void forEachNodeLabel(long mappedNodeId, NodeLabelConsumer consumer) {
+        idMap.forEachNodeLabel(mappedNodeId, consumer);
     }
 
     @Override
@@ -530,12 +531,12 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
-    public boolean hasLabel(long nodeId, NodeLabel label) {
-        return idMap.hasLabel(nodeId, label);
+    public boolean hasLabel(long mappedNodeId, NodeLabel label) {
+        return idMap.hasLabel(mappedNodeId, label);
     }
 
     @Override
-    public IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    public Optional<? extends FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         return idMap.withFilteredLabels(nodeLabels, concurrency);
     }
 

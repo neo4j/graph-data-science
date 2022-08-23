@@ -131,18 +131,18 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public long toMappedNodeId(long nodeId) {
-        return first.toMappedNodeId(nodeId);
+    public long toMappedNodeId(long originalNodeId) {
+        return first.toMappedNodeId(originalNodeId);
     }
 
     @Override
-    public long toOriginalNodeId(long nodeId) {
-        return first.toOriginalNodeId(nodeId);
+    public long toOriginalNodeId(long mappedNodeId) {
+        return first.toOriginalNodeId(mappedNodeId);
     }
 
     @Override
-    public long toRootNodeId(long nodeId) {
-        return first.toRootNodeId(nodeId);
+    public long toRootNodeId(long mappedNodeId) {
+        return first.toRootNodeId(mappedNodeId);
     }
 
     @Override
@@ -151,8 +151,8 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public boolean contains(final long nodeId) {
-        return first.contains(nodeId);
+    public boolean contains(final long originalNodeId) {
+        return first.contains(originalNodeId);
     }
 
     @Override
@@ -317,13 +317,13 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public List<NodeLabel> nodeLabels(long nodeId) {
-        return first.nodeLabels(nodeId);
+    public List<NodeLabel> nodeLabels(long mappedNodeId) {
+        return first.nodeLabels(mappedNodeId);
     }
 
     @Override
-    public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
-        first.forEachNodeLabel(nodeId, consumer);
+    public void forEachNodeLabel(long mappedNodeId, NodeLabelConsumer consumer) {
+        first.forEachNodeLabel(mappedNodeId, consumer);
     }
 
     @Override
@@ -332,8 +332,8 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public boolean hasLabel(long nodeId, NodeLabel label) {
-        return first.hasLabel(nodeId, label);
+    public boolean hasLabel(long mappedNodeId, NodeLabel label) {
+        return first.hasLabel(mappedNodeId, label);
     }
 
     public boolean isNodeFilteredGraph() {

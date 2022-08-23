@@ -88,8 +88,8 @@ class NodeFilteredAdjacencyCursorTest {
         }
 
         @Override
-        public boolean contains(long nodeId) {
-            return nodeFilter.test(nodeId);
+        public boolean contains(long originalNodeId) {
+            return nodeFilter.test(originalNodeId);
         }
     }
 }

@@ -80,18 +80,18 @@ public abstract class LabeledIdMap implements IdMap {
     }
 
     @Override
-    public List<NodeLabel> nodeLabels(long nodeId) {
-        return labelInformation.nodeLabelsForNodeId(nodeId);
+    public List<NodeLabel> nodeLabels(long mappedNodeId) {
+        return labelInformation.nodeLabelsForNodeId(mappedNodeId);
     }
 
     @Override
-    public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
-        labelInformation.forEachNodeLabel(nodeId, consumer);
+    public void forEachNodeLabel(long mappedNodeId, NodeLabelConsumer consumer) {
+        labelInformation.forEachNodeLabel(mappedNodeId, consumer);
     }
 
     @Override
-    public boolean hasLabel(long nodeId, NodeLabel label) {
-        return labelInformation.hasLabel(nodeId, label);
+    public boolean hasLabel(long mappedNodeId, NodeLabel label) {
+        return labelInformation.hasLabel(mappedNodeId, label);
     }
 
 

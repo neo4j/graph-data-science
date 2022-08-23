@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @GdlExtension
 class NodeFilteredGraphTest {
 
-    @GdlGraph
+    @GdlGraph(idOffset = 1337)
     static String GDL = " (x:Ignore)," +
                         " (a:Person)," +
                         " (b:Ignore:Person)," +
@@ -66,7 +66,7 @@ class NodeFilteredGraphTest {
 
         NodeLabel filterLabel = NodeLabel.of("Person");
 
-        Graph filteredGraph = graphStore.getGraph(
+        NodeFilteredGraph filteredGraph = (NodeFilteredGraph) graphStore.getGraph(
             filterLabel,
             RelationshipType.ALL_RELATIONSHIPS,
             Optional.empty()
@@ -76,7 +76,7 @@ class NodeFilteredGraphTest {
 
 
         unfilteredGraph.forEachNode(nodeId -> {
-            long filteredNodeId = filteredGraph.toMappedNodeId(nodeId);
+            long filteredNodeId = filteredGraph.rootToMappedNodeId(nodeId);
             if (unfilteredGraph.hasLabel(nodeId, filterLabel)) {
                 assertThat(filteredGraph.toOriginalNodeId(filteredNodeId)).isEqualTo(unfilteredGraph.toOriginalNodeId(nodeId));
             } else {
@@ -132,6 +132,18 @@ class NodeFilteredGraphTest {
         assertThat(graph.streamRelationships(filteredIdFunction.apply("a"), Double.NaN).mapToLong(RelationshipCursor::targetId)).containsExactlyInAnyOrder(Stream.of("b").map(filteredIdFunction).toArray(Long[]::new));
         assertThat(graph.streamRelationships(filteredIdFunction.apply("b"), Double.NaN).mapToLong(RelationshipCursor::targetId)).containsExactlyInAnyOrder(Stream.of("c", "d").map(filteredIdFunction).toArray(Long[]::new));
         assertThat(graph.streamRelationships(filteredIdFunction.apply("c"), Double.NaN).mapToLong(RelationshipCursor::targetId)).isEmpty();
+    }
+
+    @Test
+    void containsOnFilteredGraph() {
+        var personGraph = graphStore.getGraph(NodeLabel.of("Person"));
+        assertThat(personGraph.contains(idFunction.of("a"))).isTrue();
+        assertThat(personGraph.contains(idFunction.of("b"))).isTrue();
+        assertThat(personGraph.contains(idFunction.of("c"))).isTrue();
+        assertThat(personGraph.contains(idFunction.of("d"))).isTrue();
+
+        assertThat(personGraph.contains(idFunction.of("x"))).isFalse();
+        assertThat(personGraph.contains(idFunction.of("e"))).isFalse();
     }
 
     Function<String, Long> filteredIdFunction(Graph graph) {

@@ -31,6 +31,7 @@ import org.neo4j.gds.annotation.ReturnType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.IdMapAdapter;
@@ -694,7 +695,7 @@ public final class CypherAggregation extends BaseProc {
     }
 }
 
-final class HighLimitIdMap extends IdMapAdapter {
+class HighLimitIdMap extends IdMapAdapter {
 
     private final ShardedLongLongMap highToLowIdSpace;
 
@@ -704,23 +705,23 @@ final class HighLimitIdMap extends IdMapAdapter {
     }
 
     @Override
-    public long toOriginalNodeId(long nodeId) {
-        return highToLowIdSpace.toOriginalNodeId(super.toOriginalNodeId(nodeId));
+    public long toOriginalNodeId(long mappedNodeId) {
+        return highToLowIdSpace.toOriginalNodeId(super.toOriginalNodeId(mappedNodeId));
     }
 
     @Override
-    public long toMappedNodeId(long nodeId) {
-        return super.toMappedNodeId(this.highToLowIdSpace.toMappedNodeId(nodeId));
+    public long toMappedNodeId(long originalNodeId) {
+        return super.toMappedNodeId(this.highToLowIdSpace.toMappedNodeId(originalNodeId));
     }
 
     @Override
-    public long toRootNodeId(long nodeId) {
-        return highToLowIdSpace.toOriginalNodeId(super.toRootNodeId(nodeId));
+    public long toRootNodeId(long mappedNodeId) {
+        return highToLowIdSpace.toOriginalNodeId(super.toRootNodeId(mappedNodeId));
     }
 
     @Override
-    public boolean contains(long nodeId) {
-        return super.contains(highToLowIdSpace.toMappedNodeId(nodeId));
+    public boolean contains(long originalNodeId) {
+        return super.contains(highToLowIdSpace.toMappedNodeId(originalNodeId));
     }
 
     @Override
@@ -729,9 +730,29 @@ final class HighLimitIdMap extends IdMapAdapter {
     }
 
     @Override
-    public IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
-        var filteredInternalIdMap = super.withFilteredLabels(nodeLabels, concurrency);
-        return new HighLimitIdMap(this.highToLowIdSpace, filteredInternalIdMap);
+    public Optional<FilteredHighLimitIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+        return super.withFilteredLabels(nodeLabels, concurrency)
+            .map(filteredIdMap -> new FilteredHighLimitIdMap(this.highToLowIdSpace, filteredIdMap));
+    }
+}
+
+final class FilteredHighLimitIdMap extends HighLimitIdMap implements FilteredIdMap {
+
+    private final FilteredIdMap filteredIdMap;
+
+    FilteredHighLimitIdMap(ShardedLongLongMap intermediateIdMap, FilteredIdMap filteredIdMap) {
+        super(intermediateIdMap, filteredIdMap);
+        this.filteredIdMap = filteredIdMap;
+    }
+
+    @Override
+    public long rootToMappedNodeId(long rootNodeId) {
+        return filteredIdMap.rootToMappedNodeId(rootNodeId);
+    }
+
+    @Override
+    public boolean containsRootNodeId(long rootNodeId) {
+        return filteredIdMap.containsRootNodeId(rootNodeId);
     }
 }
 
@@ -797,8 +818,8 @@ final class LazyIdMapBuilder implements PartialIdMap {
     }
 
     @Override
-    public long toMappedNodeId(long nodeId) {
-        return nodeId;
+    public long toMappedNodeId(long originalNodeId) {
+        return originalNodeId;
     }
 
     @Override

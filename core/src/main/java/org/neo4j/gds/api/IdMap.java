@@ -23,16 +23,18 @@ import org.neo4j.gds.NodeLabel;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
- * Bi-directional mapping between two id spaces.
+ * Bidirectional mapping between two id spaces.
+ * Usually the IdMap is used to map between neo4j
+ * node ids and consecutive mapped node ids.
  */
 public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
 
     /**
      * Defines the lower bound of mapped ids
-     * TODO: function?
      */
     long START_NODE_ID = 0;
 
@@ -42,34 +44,34 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
     long NOT_FOUND = -1;
 
     /**
-     * Map original nodeId to inner nodeId
+     * Map original nodeId to mapped nodeId
      *
      * Returns org.neo4j.gds.api.IdMap#NOT_FOUND if the nodeId is not mapped.
      */
-    default long safeToMappedNodeId(long nodeId) {
-        return highestNeoId() < nodeId ? NOT_FOUND : toMappedNodeId(nodeId);
+    default long safeToMappedNodeId(long originalNodeId) {
+        return highestNeoId() < originalNodeId ? NOT_FOUND : toMappedNodeId(originalNodeId);
     };
 
     /**
-     * Map inner nodeId back to original nodeId
+     * Map mapped nodeId back to neo4j nodeId
      */
-    long toOriginalNodeId(long nodeId);
+    long toOriginalNodeId(long mappedNodeId);
 
     /**
-     * Maps an internal id to its root internal node id.
+     * Maps a filtered mapped node id to its root mapped node id.
      * This is necessary for nested (filtered) id mappings.
      *
      * If this mapping is a nested mapping, this method
-     * returns the root node id of the parent mapping.
+     * returns the root mapped node id of the parent mapping.
      * For the root mapping this method returns the given
      * node id.
      */
-    long toRootNodeId(long nodeId);
+    long toRootNodeId(long mappedNodeId);
 
     /**
-     * Returns true iff the nodeId is mapped, otherwise false.
+     * Returns true iff the neo4jNodeId is mapped, otherwise false.
      */
-    boolean contains(long nodeId);
+    boolean contains(long originalNodeId);
 
     /**
      * Number of mapped nodeIds.
@@ -78,13 +80,13 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
 
     long highestNeoId();
 
-    List<NodeLabel> nodeLabels(long nodeId);
+    List<NodeLabel> nodeLabels(long mappedNodeId);
 
-    void forEachNodeLabel(long nodeId, IdMap.NodeLabelConsumer consumer);
+    void forEachNodeLabel(long mappedNodeId, IdMap.NodeLabelConsumer consumer);
 
     Set<NodeLabel> availableNodeLabels();
 
-    boolean hasLabel(long nodeId, NodeLabel label);
+    boolean hasLabel(long mappedNodeId, NodeLabel label);
 
     /**
      * Returns the original node mapping if the current node mapping is filtered, otherwise
@@ -92,7 +94,7 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
      */
     IdMap rootIdMap();
 
-    default IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    default Optional<? extends FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         throw new UnsupportedOperationException("This node mapping does not support label filtering");
     }
 
