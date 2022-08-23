@@ -119,7 +119,7 @@
 *** xref:machine-learning/linkprediction-pipelines/training.adoc[]
 *** xref:machine-learning/linkprediction-pipelines/predict.adoc[]
 *** xref:machine-learning/linkprediction-pipelines/theory.adoc[]
-** xref:pipeline-catalog/index.adoc[]
+** xref:pipeline-catalog/pipeline-catalog.adoc[]
 *** xref:pipeline-catalog/list.adoc[]
 *** xref:pipeline-catalog/exists.adoc[]
 *** xref:pipeline-catalog/drop.adoc[]
