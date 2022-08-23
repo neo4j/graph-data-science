@@ -47,8 +47,8 @@ public abstract class IdMapAdapter implements IdMap {
     }
 
     @Override
-    public long toMappedNodeId(long neo4jNodeId) {
-        return idMap.toMappedNodeId(neo4jNodeId);
+    public long toMappedNodeId(long originalNodeId) {
+        return idMap.toMappedNodeId(originalNodeId);
     }
 
     @Override
@@ -57,8 +57,8 @@ public abstract class IdMapAdapter implements IdMap {
     }
 
     @Override
-    public long toRootNodeId(long mappedOrFilteredNodeId) {
-        return idMap.toRootNodeId(mappedOrFilteredNodeId);
+    public long toRootNodeId(long mappedNodeId) {
+        return idMap.toRootNodeId(mappedNodeId);
     }
 
     @Override
@@ -67,8 +67,8 @@ public abstract class IdMapAdapter implements IdMap {
     }
 
     @Override
-    public boolean contains(long neo4jNodeId) {
-        return idMap.contains(neo4jNodeId);
+    public boolean contains(long originalNodeId) {
+        return idMap.contains(originalNodeId);
     }
 
     @Override

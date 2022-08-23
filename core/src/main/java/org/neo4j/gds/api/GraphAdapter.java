@@ -85,8 +85,8 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public long toMappedNodeId(long neo4jNodeId) {
-        return graph.toMappedNodeId(neo4jNodeId);
+    public long toMappedNodeId(long originalNodeId) {
+        return graph.toMappedNodeId(originalNodeId);
     }
 
     @Override
@@ -95,8 +95,8 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public long toRootNodeId(long mappedOrFilteredNodeId) {
-        return graph.toRootNodeId(mappedOrFilteredNodeId);
+    public long toRootNodeId(long mappedNodeId) {
+        return graph.toRootNodeId(mappedNodeId);
     }
 
     @Override
@@ -105,8 +105,8 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public boolean contains(long neo4jNodeId) {
-        return graph.contains(neo4jNodeId);
+    public boolean contains(long originalNodeId) {
+        return graph.contains(originalNodeId);
     }
 
     @Override

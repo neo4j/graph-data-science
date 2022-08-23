@@ -88,8 +88,8 @@ class NodeFilteredAdjacencyCursorTest {
         }
 
         @Override
-        public boolean contains(long neo4jNodeId) {
-            return nodeFilter.test(neo4jNodeId);
+        public boolean contains(long originalNodeId) {
+            return nodeFilter.test(originalNodeId);
         }
     }
 }

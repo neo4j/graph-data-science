@@ -174,13 +174,13 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
     }
 
     @Override
-    public long toMappedNodeId(long neo4jNodeId) {
-        return filteredIdMap.toMappedNodeId(neo4jNodeId);
+    public long toMappedNodeId(long originalNodeId) {
+        return filteredIdMap.toMappedNodeId(originalNodeId);
     }
 
     @Override
-    public long toRootNodeId(long mappedOrFilteredNodeId) {
-        return filteredIdMap.toRootNodeId(mappedOrFilteredNodeId);
+    public long toRootNodeId(long mappedNodeId) {
+        return filteredIdMap.toRootNodeId(mappedNodeId);
     }
 
     @Override
@@ -189,8 +189,8 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
     }
 
     @Override
-    public boolean contains(long neo4jNodeId) {
-        return filteredIdMap.contains(neo4jNodeId);
+    public boolean contains(long originalNodeId) {
+        return filteredIdMap.contains(originalNodeId);
     }
 
     @Override

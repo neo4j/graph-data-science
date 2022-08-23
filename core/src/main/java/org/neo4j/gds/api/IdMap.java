@@ -45,12 +45,12 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
     long NOT_FOUND = -1;
 
     /**
-     * Map neo4j nodeId to mapped nodeId
+     * Map original nodeId to mapped nodeId
      *
      * Returns org.neo4j.gds.api.IdMap#NOT_FOUND if the nodeId is not mapped.
      */
-    default long safeToMappedNodeId(long neo4jNodeId) {
-        return highestNeoId() < neo4jNodeId ? NOT_FOUND : toMappedNodeId(neo4jNodeId);
+    default long safeToMappedNodeId(long originalNodeId) {
+        return highestNeoId() < originalNodeId ? NOT_FOUND : toMappedNodeId(originalNodeId);
     };
 
     /**
@@ -67,12 +67,12 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
      * For the root mapping this method returns the given
      * node id.
      */
-    long toRootNodeId(long mappedOrFilteredNodeId);
+    long toRootNodeId(long mappedNodeId);
 
     /**
      * Returns true iff the neo4jNodeId is mapped, otherwise false.
      */
-    boolean contains(long neo4jNodeId);
+    boolean contains(long originalNodeId);
 
     /**
      * Number of mapped nodeIds.

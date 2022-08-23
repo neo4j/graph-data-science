@@ -710,18 +710,18 @@ class HighLimitIdMap extends IdMapAdapter {
     }
 
     @Override
-    public long toMappedNodeId(long neo4jNodeId) {
-        return super.toMappedNodeId(this.highToLowIdSpace.toMappedNodeId(neo4jNodeId));
+    public long toMappedNodeId(long originalNodeId) {
+        return super.toMappedNodeId(this.highToLowIdSpace.toMappedNodeId(originalNodeId));
     }
 
     @Override
-    public long toRootNodeId(long mappedOrFilteredNodeId) {
-        return highToLowIdSpace.toOriginalNodeId(super.toRootNodeId(mappedOrFilteredNodeId));
+    public long toRootNodeId(long mappedNodeId) {
+        return highToLowIdSpace.toOriginalNodeId(super.toRootNodeId(mappedNodeId));
     }
 
     @Override
-    public boolean contains(long neo4jNodeId) {
-        return super.contains(highToLowIdSpace.toMappedNodeId(neo4jNodeId));
+    public boolean contains(long originalNodeId) {
+        return super.contains(highToLowIdSpace.toMappedNodeId(originalNodeId));
     }
 
     @Override
@@ -818,8 +818,8 @@ final class LazyIdMapBuilder implements PartialIdMap {
     }
 
     @Override
-    public long toMappedNodeId(long neo4jNodeId) {
-        return neo4jNodeId;
+    public long toMappedNodeId(long originalNodeId) {
+        return originalNodeId;
     }
 
     @Override

@@ -85,8 +85,8 @@ public class ArrayIdMap extends LabeledIdMap {
     }
 
     @Override
-    public long toMappedNodeId(long neo4jNodeId) {
-        return nodeToGraphIds.get(neo4jNodeId);
+    public long toMappedNodeId(long originalNodeId) {
+        return nodeToGraphIds.get(originalNodeId);
     }
 
     @Override
@@ -95,8 +95,8 @@ public class ArrayIdMap extends LabeledIdMap {
     }
 
     @Override
-    public long toRootNodeId(long mappedOrFilteredNodeId) {
-        return mappedOrFilteredNodeId;
+    public long toRootNodeId(long mappedNodeId) {
+        return mappedNodeId;
     }
 
     @Override
@@ -105,8 +105,8 @@ public class ArrayIdMap extends LabeledIdMap {
     }
 
     @Override
-    public boolean contains(final long neo4jNodeId) {
-        return nodeToGraphIds.contains(neo4jNodeId);
+    public boolean contains(final long originalNodeId) {
+        return nodeToGraphIds.contains(originalNodeId);
     }
 
     @Override
@@ -190,8 +190,8 @@ public class ArrayIdMap extends LabeledIdMap {
         }
 
         @Override
-        public long toRootNodeId(long mappedOrFilteredNodeId) {
-            return super.toRootNodeId(super.toOriginalNodeId(mappedOrFilteredNodeId));
+        public long toRootNodeId(long mappedNodeId) {
+            return super.toRootNodeId(super.toOriginalNodeId(mappedNodeId));
         }
 
         @Override
@@ -205,13 +205,13 @@ public class ArrayIdMap extends LabeledIdMap {
         }
 
         @Override
-        public long toMappedNodeId(long neo4jNodeId) {
-            return super.toMappedNodeId(rootIdMap.toMappedNodeId(neo4jNodeId));
+        public long toMappedNodeId(long originalNodeId) {
+            return super.toMappedNodeId(rootIdMap.toMappedNodeId(originalNodeId));
         }
 
         @Override
-        public boolean contains(long neo4jNodeId) {
-            return super.contains(rootIdMap.toMappedNodeId(neo4jNodeId));
+        public boolean contains(long originalNodeId) {
+            return super.contains(rootIdMap.toMappedNodeId(originalNodeId));
         }
 
         @Override

@@ -131,8 +131,8 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public long toMappedNodeId(long neo4jNodeId) {
-        return first.toMappedNodeId(neo4jNodeId);
+    public long toMappedNodeId(long originalNodeId) {
+        return first.toMappedNodeId(originalNodeId);
     }
 
     @Override
@@ -141,8 +141,8 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public long toRootNodeId(long mappedOrFilteredNodeId) {
-        return first.toRootNodeId(mappedOrFilteredNodeId);
+    public long toRootNodeId(long mappedNodeId) {
+        return first.toRootNodeId(mappedNodeId);
     }
 
     @Override
@@ -151,8 +151,8 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public boolean contains(final long neo4jNodeId) {
-        return first.contains(neo4jNodeId);
+    public boolean contains(final long originalNodeId) {
+        return first.contains(originalNodeId);
     }
 
     @Override

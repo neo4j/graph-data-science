@@ -40,8 +40,8 @@ public class DirectIdMap implements IdMap {
     }
 
     @Override
-    public long toMappedNodeId(long neo4jNodeId) {
-        return neo4jNodeId;
+    public long toMappedNodeId(long originalNodeId) {
+        return originalNodeId;
     }
 
     @Override
@@ -50,8 +50,8 @@ public class DirectIdMap implements IdMap {
     }
 
     @Override
-    public long toRootNodeId(long mappedOrFilteredNodeId) {
-        return mappedOrFilteredNodeId;
+    public long toRootNodeId(long mappedNodeId) {
+        return mappedNodeId;
     }
 
     @Override
@@ -60,8 +60,8 @@ public class DirectIdMap implements IdMap {
     }
 
     @Override
-    public boolean contains(final long neo4jNodeId) {
-        return neo4jNodeId < nodeCount;
+    public boolean contains(final long originalNodeId) {
+        return originalNodeId < nodeCount;
     }
 
     @Override
