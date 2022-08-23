@@ -123,4 +123,5 @@ public class LeidenWriteSpec implements AlgorithmSpec<Leiden, LeidenResult, Leid
             .withCommunityFunction(leidenResult.communitiesFunction())
             .withConfig(computationResult.config());
     }
+
 }
