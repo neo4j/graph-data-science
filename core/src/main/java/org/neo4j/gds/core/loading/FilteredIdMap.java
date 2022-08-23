@@ -26,7 +26,7 @@ import org.neo4j.gds.api.IdMap;
  * filtered id mapping layer.
  *
  * The mapping layers are called the following:
- * neo4jNodeId -> mappedNodeId -> filteredNodeId
+ * neo4jNodeId -- mappedNodeId -- filteredNodeId
  *
  * The first mapping layer (mappedNodeId) is also
  * referred to as rootNodeId.
