@@ -40,7 +40,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -142,14 +141,13 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
     }
 
     private void runDocQuery(DocQuery docQuery) {
-        if (!docQuery.runAsOperator()) {
-            super.runQuery(docQuery.query());
-        } else {
+        if (docQuery.skipTest()) return;
+
+        if (docQuery.runAsOperator()) {
             String operatorHandle = docQuery.operator();
-            if (operatorHandle.toUpperCase(Locale.ROOT).equals("DEFAULT")) {
-                operatorHandle = getOperator().get();
-            }
             super.runQuery(operatorHandle, docQuery.query());
+        } else {
+            super.runQuery(docQuery.query());
         }
     }
 
@@ -167,22 +165,21 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
         });
     }
 
-    private void runQueryΕxampleWithResultConsumer(QueryExample queryExample, Consumer<Result> check) {
+    private void runQueryExampleWithResultConsumer(QueryExample queryExample, Consumer<Result> check) {
+        if (queryExample.skipTest()) return;
 
         if (!queryExample.runAsOperator()) {
             super.runQueryWithResultConsumer(queryExample.query(), check);
         } else {
             String operatorHandle = queryExample.operator();
-            if (operatorHandle.toUpperCase(Locale.ROOT).equals("DEFAULT")) {
-                operatorHandle = getOperator().get();
-            }
             super.runQueryWithResultConsumer(operatorHandle, queryExample.query(), check);
         }
-
     }
 
     private void runQueryExampleAndAssertResults(QueryExample queryExample) {
-        runQueryΕxampleWithResultConsumer(queryExample, result -> {
+        if (queryExample.skipTest()) return;
+
+        runQueryExampleWithResultConsumer(queryExample, result -> {
             assertThat(queryExample.resultColumns()).containsExactlyElementsOf(result.columns());
 
             var actualResults = new ArrayList<List<String>>();
@@ -202,6 +199,8 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
     }
 
     private void runQueryExample(QueryExample queryExample) {
+        if (queryExample.skipTest()) return;
+
         if (queryExample.assertResults()) {
             runQueryExampleAndAssertResults(queryExample);
         } else {
@@ -249,13 +248,5 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
         } else {
             return value.toString();
         }
-    }
-
-
-    /**
-     * Subclass this if you want to assume an identity
-     */
-    protected Optional<String> getOperator() {
-        return Optional.empty();
     }
 }

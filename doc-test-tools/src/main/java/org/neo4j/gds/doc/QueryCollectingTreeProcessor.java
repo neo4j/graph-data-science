@@ -58,6 +58,8 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
     private static final String TEST_OPERATOR_ATTRIBUTE = "operator";
     private static final String ROLE_SELECTOR = "role";
 
+    private static final String SKIP_TEST = "skip-test";
+
     private List<DocQuery> beforeAllQueries;
     private List<DocQuery> beforeEachQueries;
     private Map<String, List<QueryExample>> queryExampleMap;
@@ -121,6 +123,9 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
         if (structuralNode.hasAttribute(TEST_OPERATOR_ATTRIBUTE)) {
             builder.operator(structuralNode.getAttribute(TEST_OPERATOR_ATTRIBUTE).toString());
         }
+
+        builder.skipTest(parseSkipTest(structuralNode));
+
         return builder.build();
     }
 
@@ -150,6 +155,9 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
         if (queryExampleNode.hasAttribute(TEST_OPERATOR_ATTRIBUTE)) {
             queryExampleBuilder.operator(queryExampleNode.getAttribute(TEST_OPERATOR_ATTRIBUTE).toString());
         }
+
+        queryExampleBuilder.skipTest(parseSkipTest(queryExampleNode));
+
         if (Boolean.parseBoolean(queryExampleNode.getAttribute(TEST_TYPE_NO_RESULT, false).toString())) {
             queryExampleBuilder.assertResults(false);
         } else {
@@ -217,5 +225,9 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
         return content
             .replace("&gt;", ">")
             .replace("&lt;", "<");
+    }
+
+    private static boolean parseSkipTest(StructuralNode node) {
+        return Boolean.parseBoolean(node.getAttribute(SKIP_TEST, false).toString());
     }
 }
