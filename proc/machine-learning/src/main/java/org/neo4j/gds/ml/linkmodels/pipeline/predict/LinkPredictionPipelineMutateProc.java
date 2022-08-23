@@ -40,9 +40,7 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.result.HistogramUtils;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -58,9 +56,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
-import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.PREDICT_DESCRIPTION;
+import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 
 @GdsCallable(name = "gds.beta.pipeline.linkPrediction.predict.mutate", description = PREDICT_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPipelineMutateProc.MutateResult, LinkPredictionPredictPipelineMutateConfig> {
@@ -83,11 +81,6 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
     ) {
         preparePipelineConfig(graphNameOrConfiguration, algoConfiguration);
         return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    public ValidationConfiguration<LinkPredictionPredictPipelineMutateConfig> validationConfig() {
-        return LinkPredictionPipelineCompanion.getValidationConfig();
     }
 
     @Override
