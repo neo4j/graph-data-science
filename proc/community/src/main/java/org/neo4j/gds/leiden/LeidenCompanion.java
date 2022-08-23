@@ -19,22 +19,47 @@
  */
 package org.neo4j.gds.leiden;
 
+import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.executor.ComputationResult;
 
 final class LeidenCompanion {
     private LeidenCompanion() {}
 
-    static NodePropertyValues leidenNodeProperties(
-        LeidenBaseConfig config,
-        LeidenResult leidenResult
+    static <CONFIG extends LeidenBaseConfig> NodePropertyValues leidenNodeProperties(
+
+        ComputationResult<Leiden, LeidenResult, CONFIG> computationResult,
+        String resultProperty
+
     ) {
+        var config = computationResult.config();
+        var leidenResult = computationResult.result();
+
+
         if (config.includeIntermediateCommunities()) {
             return new IntermediateCommunityNodeProperties(
                 leidenResult.communities().size(),
                 leidenResult::getIntermediateCommunities
             );
+        } else {
+            return getCommunities(computationResult, resultProperty);
         }
+    }
 
-        return leidenResult.communities().asNodeProperties();
+    static <CONFIG extends LeidenBaseConfig> NodePropertyValues getCommunities(
+        ComputationResult<Leiden, LeidenResult, CONFIG> computationResult,
+        String resultProperty
+    ) {
+        {
+            var config = computationResult.config();
+            var leidenResult = computationResult.result();
+
+            return CommunityProcCompanion.nodeProperties(
+                config,
+                resultProperty,
+                leidenResult.dendrogramManager().getCurrent().asNodeProperties(),
+                () -> computationResult.graphStore().nodeProperty(config.seedProperty())
+            );
+        }
     }
 }
