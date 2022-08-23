@@ -58,6 +58,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
         "gds.alpha.config.defaults.list",
         "gds.alpha.config.defaults.set",
+        "gds.alpha.config.limits.list",
+        "gds.alpha.config.limits.set",
 
         "gds.beta.closeness.mutate",
         "gds.beta.closeness.stats",
@@ -510,7 +512,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 360;
+        int expectedCount = 362;
         assertEquals(
             expectedCount,
             registeredProcedures.size(),

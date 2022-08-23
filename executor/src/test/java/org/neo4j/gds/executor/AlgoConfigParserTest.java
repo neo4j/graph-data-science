@@ -137,7 +137,7 @@ class AlgoConfigParserTest {
         );
 
         try {
-            configurationParser.processInput(Map.of("bar", 87));
+            configurationParser.processInput(Map.of("bar", 87L));
 
             fail();
         } catch (IllegalArgumentException e) {
@@ -183,8 +183,8 @@ class AlgoConfigParserTest {
         try {
             configurationParser.processInput(
                 Map.of(
-                    "baz", 42,
-                    "qux", 117
+                    "baz", 42L,
+                    "qux", 117L
                 )
             );
 

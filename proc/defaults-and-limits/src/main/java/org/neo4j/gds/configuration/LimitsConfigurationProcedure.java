@@ -35,7 +35,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 /**
  * Here in the procedure we parse parameters and handle authentication, because that is closely tied to Neo4j
  */
-public class DefaultsConfigurationProcedure {
+public class LimitsConfigurationProcedure {
     @SuppressWarnings("WeakerAccess")
     @Context
     public KernelTransaction kernelTransaction;
@@ -48,10 +48,10 @@ public class DefaultsConfigurationProcedure {
      * If username is supplied, we find the _effective defaults_ for that user. So the meld of global and personal
      * defaults, without specifying where each came from. Personal defaults take precedence.
      */
-    @Procedure("gds.alpha.config.defaults.list")
-    @Description("List defaults; global by default, but also optionally for a specific user and/ or key")
-    public Stream<DefaultSetting> listDefaults(@Name(value = "parameters", defaultValue = "{}") Map<String, Object> parameters) {
-        return getFacade().listDefaults(
+    @Procedure("gds.alpha.config.limits.list")
+    @Description("List limits; global by default, but also optionally for a specific user and/ or key")
+    public Stream<LimitSetting> listLimits(@Name(value = "parameters", defaultValue = "{}") Map<String, Object> parameters) {
+        return getFacade().listLimits(
             getOperatorName(),
             isAdministrator(),
             getAsOptionalString(parameters, "username"),
@@ -64,14 +64,14 @@ public class DefaultsConfigurationProcedure {
      *
      * @param username notice this trick for optional parameters in procedure invocations.
      */
-    @Procedure("gds.alpha.config.defaults.set")
-    @Description("Set a default; global by, default, but also optionally for a specific user")
-    public void setDefault(
+    @Procedure("gds.alpha.config.limits.set")
+    @Description("Set a limit; global by, default, but also optionally for a specific user")
+    public void setLimit(
         @Name(value = "key") String key,
         @Name(value = "value") Object value,
         @Name(value = "username", defaultValue = DefaultsAndLimitsConstants.DummyUsername) String username
     ) {
-        getFacade().setDefault(
+        getFacade().setLimit(
             getOperatorName(),
             isAdministrator(),
             getUsername(username),
@@ -85,19 +85,19 @@ public class DefaultsConfigurationProcedure {
      * does one do when one wants to inject behaviour during tests? No field injection in constructor - subclass this
      * when you want to inject test dependencies.
      */
-    DefaultsConfigurationFacade getFacade() {
-        return new DefaultsConfigurationFacade(DefaultsConfiguration.Instance);
+    LimitsConfigurationFacade getFacade() {
+        return new LimitsConfigurationFacade(LimitsConfiguration.Instance);
     }
 
     /**
-     * See {@link DefaultsConfigurationProcedure#getFacade()}
+     * See {@link org.neo4j.gds.configuration.LimitsConfigurationProcedure#getFacade()}
      */
     String getOperatorName() {
         return this.username.username();
     }
 
     /**
-     * See {@link DefaultsConfigurationProcedure#getFacade()}
+     * See {@link org.neo4j.gds.configuration.LimitsConfigurationProcedure#getFacade()}
      */
     boolean isAdministrator() {
         return DefaultsAndLimitsPredicates.IsAdministrator(kernelTransaction);
@@ -106,7 +106,7 @@ public class DefaultsConfigurationProcedure {
     /**
      * We use this to turn missing parameters into a firmer contract using {@link java.util.Optional}
      */
-    Optional<String> getAsOptionalString(Map<String, Object> parameters, String key) {
+    private Optional<String> getAsOptionalString(Map<String, Object> parameters, String key) {
         if (!parameters.containsKey(key)) return Optional.empty();
 
         Object valueAsObject = parameters.get(key);

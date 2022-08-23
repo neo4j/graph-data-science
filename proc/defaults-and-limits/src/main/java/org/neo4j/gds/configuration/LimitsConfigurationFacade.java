@@ -26,12 +26,12 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 /**
- * Here in the UI layer we need to take care of authorisation and marshalling.
+ * Here in the UI layer we need to take care of authorisation and dispatch.
  */
-class DefaultsConfigurationFacade {
-    private final DefaultsConfiguration configuration;
+class LimitsConfigurationFacade {
+    private final LimitsConfiguration configuration;
 
-    DefaultsConfigurationFacade(DefaultsConfiguration configuration) {
+    LimitsConfigurationFacade(LimitsConfiguration configuration) {
         this.configuration = configuration;
     }
 
@@ -43,7 +43,7 @@ class DefaultsConfigurationFacade {
      *
      * If you specify a key, only the corresponding default setting for that key is returned.
      */
-    Stream<DefaultSetting> listDefaults(
+    Stream<LimitSetting> listLimits(
         String usernameOfOperator,
         boolean operatorIsAdministrator,
         Optional<String> usernameOfTarget,
@@ -55,7 +55,7 @@ class DefaultsConfigurationFacade {
 
         return defaults.entrySet().stream()
             .sorted(Map.Entry.comparingByKey())
-            .map(e -> new DefaultSetting(e.getKey(), e.getValue()));
+            .map(e -> new LimitSetting(e.getKey(), e.getValue()));
     }
 
     /**
@@ -69,13 +69,13 @@ class DefaultsConfigurationFacade {
         if (usernameOfOperator.equals(username.get())) return;
 
         throw new IllegalArgumentException(formatWithLocale(
-            "User '%s' not authorized to list default settings for user '%s'",
+            "User '%s' not authorized to list limits for user '%s'",
             usernameOfOperator,
             username.get()
         ));
     }
 
-    void setDefault(
+    void setLimit(
         String usernameOfOperator,
         boolean operatorIsAdministrator,
         Optional<String> username,
@@ -96,14 +96,12 @@ class DefaultsConfigurationFacade {
 
         if (username.isEmpty())
             throw new IllegalArgumentException(formatWithLocale(
-                "User '%s' not authorized to set global defaults",
+                "User '%s' not authorized to set global limits",
                 usernameOfOperator
             ));
 
-        if (usernameOfOperator.equals(username.get())) return; // you can set your own defaults
-
         throw new IllegalArgumentException(formatWithLocale(
-            "User '%s' not authorized to set default for user '%s'",
+            "User '%s' not authorized to set limits for user '%s'",
             usernameOfOperator,
             username.get()
         ));
