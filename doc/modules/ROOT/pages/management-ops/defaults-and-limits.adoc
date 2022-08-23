@@ -90,3 +90,60 @@ Again, if you leave out the username parameter, we list defaults globally, for a
 === Limitations
 
 When setting defaults or listing them, we ensure that only administrators can set global defaults. We also ensure that only a user themselves or an administrator can set or list personal defaults for that user.
+
+== Limits on configuration values
+
+On a system with multiple users you will want to ensure those users are not stepping on each other's toes or worse, overwhelming the system. To achieve this we offer limits on configuration values.
+
+=== Setting a limit
+
+You can set limits by invoking the `gds.alpha.config.limits.set` procedure. You need to supply a key-value pair and an optional username.
+
+Here we set a limit on the `concurrency` parameter of 6 for user Kristian; that means Kristian will never be able to specify a value for the concurrency parameter higher than 6:
+
+.Setting a limit
+[source, cypher, role=noplay setup-query, skip-test=true]
+----
+CALL gds.alpha.config.limits.set('concurrency', 6, 'Kristian')
+----
+
+This limit is now checked each time Kristian runs an algorithm that uses the `concurrency` configuration parameter. See for example xref:algorithms/page-rank.adoc[Page Rank]. He will be able to use a `concurrency` setting of 6 or lower only.
+
+[Note]
+====
+If you leave out the username parameter, the default is set globally, for all users.
+====
+
+=== Listing limits
+
+You can inspect limit settings by invoking the `gds.alpha.config.limits.list` procedure. You can supply optional username and/ or key parameters to filter results.
+
+Here is an example where we list the `concurrency` limit setting for Kristian:
+
+[role=query-example, skip-test=true]
+--
+.Querying for personal limits and filtering by key:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.config.limits.list({ username: 'Kristian', key: 'concurrency' })
+----
+
+.Results
+[opts="header", cols="1, 1"]
+|===
+| key           | value
+| "concurrency" | 6
+|===
+--
+
+We use the same conventions as described above for defaults:
+
+* We list global limit setting by default
+* You have the optional `username` parameter for listing effective setting for a given user
+* Personal limits take precedence over global ones
+* You can filter using the optional `key` parameter
+
+We do have slight differences with permissions though:
+
+* Only administrators can set limits
+* Only administrators or users themselves can list personal limits

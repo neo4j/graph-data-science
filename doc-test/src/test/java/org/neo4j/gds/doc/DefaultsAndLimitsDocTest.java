@@ -20,6 +20,7 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.configuration.DefaultsConfigurationProcedure;
+import org.neo4j.gds.configuration.LimitsConfigurationProcedure;
 
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +34,7 @@ class DefaultsAndLimitsDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {
-        return List.of(DefaultsConfigurationProcedure.class);
+        return List.of(DefaultsConfigurationProcedure.class, LimitsConfigurationProcedure.class);
     }
 
     @Override
