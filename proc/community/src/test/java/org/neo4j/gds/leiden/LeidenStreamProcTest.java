@@ -109,4 +109,25 @@ class LeidenStreamProcTest extends BaseProcTest {
             return true;
         });
     }
+
+    @Test
+    void shouldStreamWithConsecutiveIds() {
+        runQuery("CALL gds.alpha.leiden.stream('leiden', {consecutiveIds: true})", result -> {
+            assertThat(result.columns()).containsExactlyInAnyOrder("nodeId", "communityId", "intermediateCommunityIds");
+            long resultRowCount = 0;
+            var communities = new HashSet<Long>();
+            while (result.hasNext()) {
+                var next = result.next();
+                assertThat(next.get("nodeId")).isInstanceOf(Long.class);
+                assertThat(next.get("communityId")).isInstanceOf(Long.class);
+                assertThat(next.get("intermediateCommunityIds")).isNull();
+                communities.add((Long) next.get("communityId"));
+                resultRowCount++;
+            }
+            assertThat(resultRowCount).isEqualTo(8L);
+            assertThat(communities).hasSize(2);
+            assertThat(communities).containsExactly(0L, 1L);
+            return true;
+        });
+    }
 }
