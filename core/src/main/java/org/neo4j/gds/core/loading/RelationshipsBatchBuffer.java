@@ -70,7 +70,7 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
     }
 
     @Override
-    public void offer(final RelationshipReference record) {
+    public boolean offer(final RelationshipReference record) {
         if ((type == ANY_RELATIONSHIP_TYPE) || (type == record.typeTokenId())) {
             long source = idMap.toMappedNodeId(record.sourceNodeReference());
             long target = idMap.toMappedNodeId(record.targetNodeReference());
@@ -78,13 +78,13 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
             if (throwOnUnMappedNodeIds) {
                 validateSourceNodeIsLoaded(source, record.sourceNodeReference());
                 validateTargetNodeIsLoaded(target, record.targetNodeReference());
-            }
-            else if (source == -1 || target == -1) {
-                return;
+            } else if (source == -1 || target == -1) {
+                return true;
             }
 
             add(source, target, record.relationshipId(), record.propertiesReference());
         }
+        return true;
     }
 
     public void add(long sourceId, long targetId) {

@@ -36,10 +36,12 @@ public final class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<
     }
 
     @Override
-    public void offer(RelationshipReference record) {
+    public boolean offer(RelationshipReference record) {
         for (RelationshipsBatchBuffer buffer : buffers) {
             buffer.offer(record);
         }
+        // TODO: probably something more sophisticated is required if we use partitioned type token index
+        return true;
     }
 
     @Override

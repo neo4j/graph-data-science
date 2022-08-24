@@ -29,10 +29,14 @@ public interface StoreScanner<Reference> extends AutoCloseable {
 
     interface RecordConsumer<Reference> {
         /**
-         * Imports the record at a given position and return the new position.
-         * Can also ignore the record if it is not of interest.
+         * Handles the given record and tells the caller,
+         * if it can accept more records. Can also ignore
+         * the record if it is not of interest.
+         *
+         * @param reference record
+         * @return true, iff the consumer can consume more records
          */
-        void offer(Reference reference);
+        boolean offer(Reference reference);
     }
 
     interface Factory<Reference> {
@@ -40,7 +44,33 @@ public interface StoreScanner<Reference> extends AutoCloseable {
     }
 
     interface ScanCursor<Reference> extends AutoCloseable {
-        boolean bulkNext(RecordConsumer<Reference> consumer);
+        /**
+         * Advances the underlying {@link org.neo4j.internal.kernel.api.EntityCursor}
+         * to the next batch of records.
+         *
+         * @return true, iff the batch contains data and needs to be consumed
+         */
+        boolean scanBatch();
+
+        /**
+         * Consumes the current batch using the given consumer. The consumer is
+         * typically an instance of {@link org.neo4j.gds.core.loading.RecordsBatchBuffer}.
+         * <p/>
+         * The method returns a {@code boolean} to indicate whether
+         * the current batch has been completely consumed or not.
+         * This gives the consumer the option to indicate that, e.g.
+         * its buffer is full and needs to be flushed before it can
+         * continue consuming.
+         * <p/>
+         * This is usually the case if the underlying scan returns
+         * batches that exceed the configured size of the
+         * {@link org.neo4j.gds.core.loading.RecordsBatchBuffer}.
+         *
+         * @param consumer A consumer for the records returned by the scan,
+         *                 usually a {@link org.neo4j.gds.core.loading.RecordsBatchBuffer}.
+         * @return true, iff the batch is completely consumed
+         */
+        boolean consumeBatch(RecordConsumer<Reference> consumer);
 
         @Override
         void close();
