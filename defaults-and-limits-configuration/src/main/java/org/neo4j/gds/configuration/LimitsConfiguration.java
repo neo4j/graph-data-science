@@ -67,13 +67,7 @@ public class LimitsConfiguration {
                 Limit limit = personalLimits.get(username).get(key);
 
                 if (limit.isViolated(value)) {
-                    var limitViolation = new LimitViolation(
-                        key,
-                        String.valueOf(value),
-                        limit.getValueAsString()
-                    );
-
-                    limitViolations.add(limitViolation);
+                    limitViolations.add(new LimitViolation(limit.asErrorMessage(key, value)));
 
                     continue; // we found a violation; skip to next parameter
                 }
@@ -85,11 +79,7 @@ public class LimitsConfiguration {
             var limit = globalLimits.get(key);
 
             if (limit.isViolated(value)) {
-                var limitViolation = new LimitViolation(
-                    key,
-                    String.valueOf(value),
-                    limit.getValueAsString()
-                );
+                var limitViolation = new LimitViolation(limit.asErrorMessage(key, value));
 
                 limitViolations.add(limitViolation);
             }
@@ -113,7 +103,7 @@ public class LimitsConfiguration {
     }
 
     public void set(String key, Object value, Optional<String> username) {
-        var valueAsLimit = new Limit((Long) value);
+        var valueAsLimit = LimitFactory.create(value);
 
         if (username.isPresent()) {
             personalLimits.putIfAbsent(username.get(), new HashMap<>()); // lazy initialisation

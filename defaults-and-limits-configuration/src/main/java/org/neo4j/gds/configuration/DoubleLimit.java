@@ -19,14 +19,27 @@
  */
 package org.neo4j.gds.configuration;
 
-public class LimitViolation {
-    private final String errorMessage;
+class DoubleLimit extends Limit {
+    private final double value;
 
-    LimitViolation(String errorMessage) {
-        this.errorMessage = errorMessage;
+    DoubleLimit(double value) {
+        this.value = value;
     }
 
-    public String getErrorMessage() {
-        return errorMessage;
+    @Override
+    Object getValue() {
+        return value;
+    }
+
+    @Override
+    protected boolean isViolatedInternal(Object inputValue) {
+        double d = (double) inputValue;
+
+        return d > value;
+    }
+
+    @Override
+    String getValueAsString() {
+        throw new UnsupportedOperationException("TODO");
     }
 }

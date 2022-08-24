@@ -25,9 +25,7 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitViolation;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.utils.StringFormatting;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -101,28 +99,21 @@ public class AlgoConfigParser<CONFIG extends AlgoBaseConfig> implements ProcConf
     private void validateLimits(HashMap<String, Object> configurationButWithIrrelevantInputtedKeysRemoved) {
         var violations = limits.validate(configurationButWithIrrelevantInputtedKeysRemoved, username);
 
-        if (!violations.isEmpty()) {
-            var violationMessages = new LinkedList<String>();
-            var delimeter = "\n";
-            if (violations.size() > 1) {
-                violationMessages.add("Configuration exceeded multiple limits:");
-                delimeter = "\n - ";
-            }
+        if (violations.isEmpty()) return;
 
-            // report them sorted alphabetically
-            violations.stream().sorted(Comparator.comparing(LimitViolation::getKey)).forEach(violation -> {
-                var errorMessage = StringFormatting.formatWithLocale(
-                    "Configuration parameter '%s' with value '%s' exceeds it's limit of '%s'",
-                    violation.getKey(),
-                    violation.getProvidedValue(),
-                    violation.getLimitValue()
-                );
-
-                violationMessages.add(errorMessage);
-            });
-
-            throw new IllegalArgumentException(String.join(delimeter, violationMessages));
+        var violationMessages = new LinkedList<String>();
+        var delimeter = "\n";
+        if (violations.size() > 1) {
+            violationMessages.add("Configuration exceeded multiple limits:");
+            delimeter = "\n - ";
         }
+
+        violations.stream()
+            .map(LimitViolation::getErrorMessage)
+            .sorted()
+            .forEach(violationMessages::add);
+
+        throw new IllegalArgumentException(String.join(delimeter, violationMessages));
     }
 
     private CONFIG produceConfig(Map<String, Object> configurationWithDefaultsApplied) {

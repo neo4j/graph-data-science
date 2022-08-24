@@ -9,6 +9,8 @@ test {
 }
 
 dependencies {
+    implementation project(':string-formatting')
+
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: ver.'junit5'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: ver.'junit5'
     testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'

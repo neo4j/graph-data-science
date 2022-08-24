@@ -22,7 +22,7 @@ package org.neo4j.gds.executor;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.configuration.Default;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
-import org.neo4j.gds.configuration.Limit;
+import org.neo4j.gds.configuration.LimitFactory;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 
 import java.util.Collections;
@@ -133,7 +133,7 @@ class AlgoConfigParserTest {
             "Jonas Vingegaard",
             (NewConfigFunction<FooConfig>) (username, config) -> new FooConfigImpl(config),
             DefaultsConfiguration.Empty,
-            new LimitsConfiguration(Map.of("bar", new Limit(42)), Collections.emptyMap())
+            new LimitsConfiguration(Map.of("bar", LimitFactory.create(42L)), Collections.emptyMap())
         );
 
         try {
@@ -152,7 +152,7 @@ class AlgoConfigParserTest {
             "Jonas Vingegaard",
             (NewConfigFunction<FooConfig>) (username, config) -> new FooConfigImpl(config),
             DefaultsConfiguration.Empty,
-            new LimitsConfiguration(Map.of("baz", new Limit(23)), Collections.emptyMap())
+            new LimitsConfiguration(Map.of("baz", LimitFactory.create(23L)), Collections.emptyMap())
         );
 
         try {
@@ -173,8 +173,8 @@ class AlgoConfigParserTest {
             DefaultsConfiguration.Empty,
             new LimitsConfiguration(
                 Map.of(
-                    "baz", new Limit(23),
-                    "qux", new Limit(87)
+                    "baz", LimitFactory.create(23L),
+                    "qux", LimitFactory.create(87L)
                 ),
                 Collections.emptyMap()
             )
