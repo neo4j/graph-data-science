@@ -379,8 +379,9 @@ final class HugeGraphLoadingTest extends BaseTest {
         }
     }
 
-    @Test
-    void testSingleLabelPartitionedTokenIndexRespectingBatchSize() {
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void testSingleLabelPartitionedTokenIndexRespectingBatchSize(int concurrency) {
         // batchSize = prefetch size * PAGE_SIZE / NodeRecord size
         var expectedBatchSize = 54_656;
 
@@ -397,7 +398,7 @@ final class HugeGraphLoadingTest extends BaseTest {
             var graph = new StoreLoaderBuilder()
                 .databaseService(db)
                 .addNodeLabel(label.name())
-                .concurrency(1)
+                .concurrency(concurrency)
                 .build()
                 .graph();
 
@@ -405,15 +406,17 @@ final class HugeGraphLoadingTest extends BaseTest {
         });
     }
 
-    @Test
-    void testMultiLabelPartitionedTokenIndexRespectingBatchSize() {
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void testMultiLabelPartitionedTokenIndexRespectingBatchSize(int concurrency) {
         // batchSize = prefetch size * PAGE_SIZE / NodeRecord size
         var expectedBatchSize = 54_656;
 
         var labelA = Label.label("A");
         var labelB = Label.label("B");
         long labelACount = 2 * expectedBatchSize;
-        long labelBCount = expectedBatchSize;
+        long labelBCount = 3 * expectedBatchSize;
+        long labelABCount = 1 * expectedBatchSize;
 
         runInTransaction(db, tx -> {
             for (int i = 0; i < labelACount; i++) {
@@ -422,6 +425,9 @@ final class HugeGraphLoadingTest extends BaseTest {
             for (int i = 0; i < labelBCount; i++) {
                 tx.createNode(labelB);
             }
+            for (int i = 0; i < labelABCount; i++) {
+                tx.createNode(labelA, labelB);
+            }
         });
 
         GdsFeatureToggles.USE_PARTITIONED_SCAN.enableAndRun(() -> {
@@ -429,11 +435,11 @@ final class HugeGraphLoadingTest extends BaseTest {
                 .databaseService(db)
                 .addNodeLabel(labelA.name())
                 .addNodeLabel(labelB.name())
-                .concurrency(1)
+                .concurrency(concurrency)
                 .build()
                 .graph();
 
-            assertThat(graph.nodeCount()).isEqualTo(labelACount + labelBCount);
+            assertThat(graph.nodeCount()).isEqualTo(labelACount + labelBCount + labelABCount);
         });
     }
 }
