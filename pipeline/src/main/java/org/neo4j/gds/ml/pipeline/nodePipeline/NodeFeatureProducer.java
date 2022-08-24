@@ -19,12 +19,15 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
+
+import java.util.Collection;
 
 public final class NodeFeatureProducer<PIPELINE_CONFIG extends NodePropertyPipelineBaseTrainConfig> {
 
@@ -66,16 +69,37 @@ public final class NodeFeatureProducer<PIPELINE_CONFIG extends NodePropertyPipel
     public Features procedureFeatures(NodePropertyTrainingPipeline pipeline) {
         try {
             stepExecutor.executeNodePropertySteps(pipeline.nodePropertySteps());
-            pipeline.validateFeatureProperties(graphStore, trainConfig.featureInputLabels(graphStore));
+            Collection<NodeLabel> featureInputLabels = trainConfig.featureInputLabels(graphStore);
+            pipeline.validateFeatureProperties(graphStore, featureInputLabels);
 
             // We create a graph, that contains the newly created node properties from the steps
-            var graph = graphStore.getGraph(trainConfig.featureInputLabels(graphStore));
+            var graph = graphStore.getGraph(featureInputLabels);
+            Features unfilteredFeatures;
             if (pipeline.requireEagerFeatures()) {
                 // Random forest uses feature vectors many times each.
-                return FeaturesFactory.extractEagerFeatures(graph, pipeline.featureProperties());
+                unfilteredFeatures = FeaturesFactory.extractEagerFeatures(graph, pipeline.featureProperties());
             } else {
-                return FeaturesFactory.extractLazyFeatures(graph, pipeline.featureProperties());
+                unfilteredFeatures = FeaturesFactory.extractLazyFeatures(graph, pipeline.featureProperties());
             }
+
+            if (featureInputLabels.size() > trainConfig.nodeLabelIdentifiers(graphStore).size()) {
+                //There are additional contextNodeLabels, filter to keep features on targetNodeLabel-nodes only
+                var targetNodeLabelGraph = graphStore.getGraph(trainConfig.nodeLabelIdentifiers(graphStore));
+                return new Features() {
+                    //TODO Refactor this lambda to somewhere as FilteredNodeFeature
+                    @Override
+                    public long size() {
+                        return targetNodeLabelGraph.nodeCount();
+                    }
+                    @Override
+                    public double[] get(long id) {
+                        return unfilteredFeatures.get(graph.toMappedNodeId(targetNodeLabelGraph.toOriginalNodeId(id)));
+                    }
+                };
+            } else {
+                return unfilteredFeatures;
+            }
+
         } finally {
             stepExecutor.cleanupIntermediateProperties(pipeline.nodePropertySteps());
         }

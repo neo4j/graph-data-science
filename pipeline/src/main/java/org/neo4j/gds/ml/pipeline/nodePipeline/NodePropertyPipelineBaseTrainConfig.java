@@ -36,8 +36,6 @@ import java.util.stream.Stream;
 
 public interface NodePropertyPipelineBaseTrainConfig<METRIC> extends AlgoBaseConfig, GraphNameConfig, ModelConfig, RandomSeedConfig, TargetNodePropertyConfig {
 
-    List<METRIC> metrics();
-
     String pipeline();
 
     default List<String> contextNodeLabels() { return List.of(); }
