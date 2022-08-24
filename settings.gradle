@@ -234,6 +234,3 @@ project(':open-write-services').projectDir = file('open-write-services')
 
 include('defaults-and-limits-configuration')
 project(':defaults-and-limits-configuration').projectDir = file('defaults-and-limits-configuration')
-
-include('defaults-and-limits')
-project(':defaults-and-limits').projectDir = file('proc/defaults-and-limits')

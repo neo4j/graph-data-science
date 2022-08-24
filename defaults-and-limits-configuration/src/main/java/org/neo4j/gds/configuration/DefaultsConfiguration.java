@@ -92,7 +92,7 @@ public class DefaultsConfiguration {
      *
      * @param username if supplied, set the key-value pair just for that user.
      */
-    void set(String key, Object value, Optional<String> username) {
+    public void set(String key, Object value, Optional<String> username) {
         Default valueAsDefault = new Default((Long) value);
 
         if (username.isPresent()) {

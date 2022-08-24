@@ -98,7 +98,7 @@ public class LimitsConfiguration {
         return limitViolations;
     }
 
-    Map<String, Object> list(Optional<String> username, Optional<String> key) {
+    public Map<String, Object> list(Optional<String> username, Optional<String> key) {
         var limits = startWithGlobalLimits();
 
         overlayPersonalLimitsIfApplicable(username, limits);
@@ -112,7 +112,7 @@ public class LimitsConfiguration {
         return Map.of(key.get(), value);
     }
 
-    void set(String key, Object value, Optional<String> username) {
+    public void set(String key, Object value, Optional<String> username) {
         var valueAsLimit = new Limit((Long) value);
 
         if (username.isPresent()) {

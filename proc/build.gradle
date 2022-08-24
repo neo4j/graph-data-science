@@ -37,7 +37,6 @@ dependencies {
     api project(':proc-catalog')
     api project(':proc-pipeline-catalog')
     api project(':proc-misc')
-    api project(':defaults-and-limits')
 
     implementation(
         project(':neo4j-adapter')
