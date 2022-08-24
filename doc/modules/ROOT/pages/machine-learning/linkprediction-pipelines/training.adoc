@@ -262,7 +262,7 @@ RETURN
 [opts="header", cols="6, 2, 2, 2, 6"]
 |===
 | winningModel                                                                                                                                | avgTrainScore      | outerTrainScore     | testScore | validationScores
-| {maxDepth=2147483647, minLeafSize=1, criterion=GINI, minSplitSize=2, numberOfDecisionTrees=10, methodName=RandomForest, numberOfSamplesRatio=1.0} | 0.779365079365079 |  0.788888888888889 | 0.766666666666667 | [0.3333333333333333, 0.6388888888888888, 0.3333333333333333, 0.3333333333333333]
+| {maxDepth=2147483647, minLeafSize=1, criterion=GINI, minSplitSize=2, numberOfDecisionTrees=10, methodName=RandomForest, numberOfSamplesRatio=1.0} | 0.698677248677249 |  0.788888888888889 | 0.766666666666667 | [0.3333333333333333, 0.861111111111111, 0.3333333333333333, 0.3333333333333333]
 |===
 
 We can see the RandomForest model configuration with `numberOfDecisionTrees = 10` (and defaults filled for remaining parameters) was selected, and has a score of `0.77` on the test set.

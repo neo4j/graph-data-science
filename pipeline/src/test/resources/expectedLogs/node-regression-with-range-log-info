@@ -9,19 +9,19 @@ MY CONTEXT :: Select best model :: Trial 1 of 2 :: Start
 MY CONTEXT :: Select best model :: Trial 1 of 2 :: Method: RandomForest, Parameters: {numberOfSamplesRatio=1.0, numberOfDecisionTrees=5, maxDepth=3, minSplitSize=2, minLeafSize=1}
 MY CONTEXT :: Select best model :: Trial 1 of 2 50%
 MY CONTEXT :: Select best model :: Trial 1 of 2 100%
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: Main validation metric (MEAN_SQUARED_ERROR): 189.7867
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: Validation metrics: {MEAN_SQUARED_ERROR=189.7866}
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: Training metrics: {MEAN_SQUARED_ERROR=272.2666}
+MY CONTEXT :: Select best model :: Trial 1 of 2 :: Main validation metric (MEAN_SQUARED_ERROR): 1698.1867
+MY CONTEXT :: Select best model :: Trial 1 of 2 :: Validation metrics: {MEAN_SQUARED_ERROR=1698.1866}
+MY CONTEXT :: Select best model :: Trial 1 of 2 :: Training metrics: {MEAN_SQUARED_ERROR=783.76}
 MY CONTEXT :: Select best model :: Trial 1 of 2 :: Finished
 MY CONTEXT :: Select best model :: Trial 2 of 2 :: Start
 MY CONTEXT :: Select best model :: Trial 2 of 2 :: Method: RandomForest, Parameters: {numberOfSamplesRatio=1.0, numberOfDecisionTrees=5, maxDepth=2, minSplitSize=2, minLeafSize=1}
 MY CONTEXT :: Select best model :: Trial 2 of 2 50%
 MY CONTEXT :: Select best model :: Trial 2 of 2 100%
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: Main validation metric (MEAN_SQUARED_ERROR): 189.7867
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: Validation metrics: {MEAN_SQUARED_ERROR=189.7866}
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: Training metrics: {MEAN_SQUARED_ERROR=272.2666}
+MY CONTEXT :: Select best model :: Trial 2 of 2 :: Main validation metric (MEAN_SQUARED_ERROR): 1698.1867
+MY CONTEXT :: Select best model :: Trial 2 of 2 :: Validation metrics: {MEAN_SQUARED_ERROR=1698.1866}
+MY CONTEXT :: Select best model :: Trial 2 of 2 :: Training metrics: {MEAN_SQUARED_ERROR=783.76}
 MY CONTEXT :: Select best model :: Trial 2 of 2 :: Finished
-MY CONTEXT :: Select best model :: Best trial was Trial 1 with main validation metric 189.7867
+MY CONTEXT :: Select best model :: Best trial was Trial 1 with main validation metric 1698.1867
 MY CONTEXT :: Select best model :: Finished
 MY CONTEXT :: Train best model :: Start
 MY CONTEXT :: Train best model :: trained decision tree 1 out of 5
@@ -32,8 +32,8 @@ MY CONTEXT :: Train best model :: trained decision tree 5 out of 5
 MY CONTEXT :: Train best model 100%
 MY CONTEXT :: Train best model :: Finished
 MY CONTEXT :: Evaluate on test data :: Start
-MY CONTEXT :: Evaluate on test data :: Final model metrics on full train set: {MEAN_SQUARED_ERROR=168.2666}
-MY CONTEXT :: Evaluate on test data :: Final model metrics on test set: {MEAN_SQUARED_ERROR=646.7657}
+MY CONTEXT :: Evaluate on test data :: Final model metrics on full train set: {MEAN_SQUARED_ERROR=881.1199}
+MY CONTEXT :: Evaluate on test data :: Final model metrics on test set: {MEAN_SQUARED_ERROR=1598.4457}
 MY CONTEXT :: Evaluate on test data 100%
 MY CONTEXT :: Evaluate on test data :: Finished
 MY CONTEXT :: Retrain best model :: Start

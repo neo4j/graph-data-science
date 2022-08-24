@@ -162,20 +162,20 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             // using explicit type intentionally :)
             NodeClassificationPipelineModelInfo customInfo = model.customInfo();
             var testScore = (double) ((Map) customInfo.metrics().get(metric.toString())).get("test");
-            assertThat(testScore).isCloseTo(0.799999, Offset.offset(1e-5));
+            assertThat(testScore).isCloseTo(0.499999, Offset.offset(1e-5));
             var outerTrainScore = (double) ((Map) customInfo.metrics().get(metric.toString())).get("outerTrain");
-            assertThat(outerTrainScore).isCloseTo(0.666666, Offset.offset(1e-5));
+            assertThat(outerTrainScore).isCloseTo(0.799999, Offset.offset(1e-5));
             var validationStats = (Map) ((Map) customInfo.metrics().get(metric.toString())).get("validation");
             var trainStats = (Map) ((Map) customInfo.metrics().get(metric.toString())).get("train");
             assertThat(validationStats)
                 .usingRecursiveComparison()
                 .withComparatorForType(new DoubleComparator(1e-5), Double.class)
-                .isEqualTo(Map.of("avg",0.649999, "max",0.799999, "min",0.499999));
+                .isEqualTo(Map.of("avg",0.799999992, "max",0.799999992, "min",0.799999992));
 
             assertThat(trainStats)
                 .usingRecursiveComparison()
                 .withComparatorForType(new DoubleComparator(1e-5), Double.class)
-                .isEqualTo(Map.of("avg",0.89999, "max",0.99999, "min",0.79999));
+                .isEqualTo(Map.of("avg",0.799999992, "max",0.799999992, "min",0.799999992));
 
             assertThat(customInfo.pipeline().nodePropertySteps()).isEqualTo(pipeline.nodePropertySteps());
             assertThat(customInfo.pipeline().featureProperties()).isEqualTo(pipeline.featureProperties());
@@ -217,8 +217,8 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             var actualModel = ncPipeTrain.compute().model();
             assertThat(actualModel.customInfo().toMap()).containsEntry("metrics",
                 Map.of("OUT_OF_BAG_ERROR", Map.of(
-                        "test", 0.5,
-                        "validation", Map.of("avg", 0.8333333333333333, "max", 1.0, "min", 0.6666666666666666))
+                        "test", 0.3333333333333333,
+                        "validation", Map.of("avg", 0.3333333333333333, "max", 0.3333333333333333, "min", 0.3333333333333333))
                 )
             );
             assertThat((Map) actualModel.customInfo().toMap().get("metrics")).containsOnlyKeys("OUT_OF_BAG_ERROR");

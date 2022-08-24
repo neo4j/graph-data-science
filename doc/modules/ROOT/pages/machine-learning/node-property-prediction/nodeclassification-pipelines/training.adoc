@@ -268,7 +268,7 @@ CALL gds.beta.pipeline.nodeClassification.train('myGraph', {
   nodeLabels: ['House'],
   modelName: 'nc-pipeline-model',
   targetProperty: 'class',
-  randomSeed: 42,
+  randomSeed: 1337,
   metrics: ['F1_WEIGHTED', 'OUT_OF_BAG_ERROR']
 }) YIELD modelInfo, modelSelectionStats
 RETURN
@@ -283,10 +283,11 @@ RETURN
 [opts="header", cols="8, 2, 2, 2, 8"]
 |===
 | winningModel                                                                                                                                | avgTrainScore  | outerTrainScore    | testScore   | validationScores
-| {maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001} | 0.999999989939394 | 0.9999999912121211 | 0.999999985 | [0.4909090835454547, 0.07272727163636365, 0.4909090835454547, 0.4909090835454547]
+| {maxEpochs=500, minEpochs=1, penalty=5.881039653970664, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001} | 0.999999989939394 | 0.999999991212121 | 0.999999985 | [0.41818181190909104, 0.0, 0.4909090835454547, 0.41818181190909104]
 |===
 
-Here we can observe that the model candidate with penalty `0.0625` performed the best in the training phase, with an `F1_WEIGHTED` score nearing 1 over the train graph as well as on the test graph.
+Here we can observe that the model candidate with penalty `5.881` performed the best in the training phase, with an `F1_WEIGHTED` score nearing 1 over the train graph as well as on the test graph.
+This model is one that the auto-tuning found.
 This indicates that the model reacted very well to the train graph, and was able to generalize fairly well to unseen data.
 Notice that this is just a toy example on a very small graph. In order to achieve a higher test score, we may need to use better features, a larger graph, or different model configuration.
 --

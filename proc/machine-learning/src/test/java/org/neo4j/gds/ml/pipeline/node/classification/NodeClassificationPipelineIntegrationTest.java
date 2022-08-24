@@ -267,7 +267,7 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
             List.of(
                 Map.of("name", "0_hidden", "predictedClass", 0L, "probabilities", listOfSize(3)),
                 Map.of("name", "1_hidden", "predictedClass", 1L, "probabilities", listOfSize(3)),
-                Map.of("name", "2_hidden", "predictedClass", 2L, "probabilities", listOfSize(3))
+                Map.of("name", "2_hidden", "predictedClass", 0L, "probabilities", listOfSize(3))
             )
         );
     }

@@ -229,9 +229,9 @@ final class NodeRegressionPipelineIntegrationTest extends BaseProcTest {
             "RETURN gds.util.asNode(nodeId).name AS name, predictedValue AS predictedCost " +
             "  ORDER BY name ASC",
             List.of(
-                Map.of("name", "0_hidden", "predictedCost", closeTo(23.7784, 1e-4)),
-                Map.of("name", "1_hidden", "predictedCost", closeTo(46.7967, 1e-4)),
-                Map.of("name", "2_hidden", "predictedCost", closeTo(14.4183, 1e-4))
+                Map.of("name", "0_hidden", "predictedCost", closeTo(13.829999999999998, 1e-4)),
+                Map.of("name", "1_hidden", "predictedCost", closeTo(63.975999999999985, 1e-4)),
+                Map.of("name", "2_hidden", "predictedCost", closeTo(7.44, 1e-4))
             )
         );
     }

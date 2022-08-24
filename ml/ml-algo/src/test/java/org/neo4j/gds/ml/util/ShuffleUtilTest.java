@@ -19,9 +19,10 @@
  */
 package org.neo4j.gds.ml.util;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+
+import java.util.SplittableRandom;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,12 +30,11 @@ class ShuffleUtilTest {
 
     @Test
     void testShuffled() {
-        RandomDataGenerator random = new RandomDataGenerator();
-        random.reSeed(123L);
+        var random = new SplittableRandom(123L);
         var data = HugeLongArray.newArray(10);
         data.setAll(i -> i);
         ShuffleUtil.shuffleHugeLongArray(data, random);
-        assertThat(data.toArray()).containsExactly(7L, 5L, 0L, 1L, 3L, 8L, 6L, 9L, 4L, 2L);
+        assertThat(data.toArray()).containsExactly(7L, 4L, 2L, 3L, 5L, 8L, 1L, 0L, 9L, 6L);
     }
 
 }
