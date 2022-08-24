@@ -21,25 +21,19 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphNameConfig;
-import org.neo4j.gds.config.RandomSeedConfig;
-import org.neo4j.gds.config.TargetNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.metrics.regression.RegressionMetrics;
-import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPipelineBaseTrainConfig;
 
 import java.util.List;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface NodeRegressionPipelineTrainConfig extends AlgoBaseConfig, GraphNameConfig, ModelConfig, RandomSeedConfig, TargetNodePropertyConfig {
+public interface NodeRegressionPipelineTrainConfig extends NodePropertyPipelineBaseTrainConfig<RegressionMetrics> {
 
     @Configuration.ConvertWith("org.neo4j.gds.ml.metrics.regression.RegressionMetrics#parseList")
     @Configuration.ToMapValue("org.neo4j.gds.ml.metrics.regression.RegressionMetrics#toString")
     List<RegressionMetrics> metrics();
-
-    String pipeline();
 
     static NodeRegressionPipelineTrainConfig of(String username, CypherMapWrapper config) {
         return new NodeRegressionPipelineTrainConfigImpl(username, config);

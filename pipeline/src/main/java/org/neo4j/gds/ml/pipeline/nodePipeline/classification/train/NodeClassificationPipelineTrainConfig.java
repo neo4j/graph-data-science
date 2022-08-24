@@ -24,25 +24,21 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.LongMultiSet;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphNameConfig;
-import org.neo4j.gds.config.RandomSeedConfig;
-import org.neo4j.gds.config.TargetNodePropertyConfig;
+import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
-import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPipelineBaseTrainConfig;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface NodeClassificationPipelineTrainConfig extends AlgoBaseConfig, GraphNameConfig, ModelConfig, RandomSeedConfig, TargetNodePropertyConfig {
+public interface NodeClassificationPipelineTrainConfig extends NodePropertyPipelineBaseTrainConfig<ClassificationMetricSpecification> {
 
     long serialVersionUID = 0x42L;
 
@@ -50,11 +46,12 @@ public interface NodeClassificationPipelineTrainConfig extends AlgoBaseConfig, G
     @Configuration.ToMapValue("org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification#specificationsToString")
     List<ClassificationMetricSpecification> metrics();
 
-    String pipeline();
-
     default List<String> targetNodeLabels() { return List.of(ElementProjection.PROJECT_ALL); }
 
-    default List<String> contextNodeLabels() { return List.of(); }
+    @Configuration.Ignore
+    default Collection<NodeLabel> targetNodeLabelIdentifiers(GraphStore graphStore) {
+        return ElementTypeValidator.resolve(graphStore, targetNodeLabels());
+    }
 
     @Configuration.Ignore
     default List<Metric> metrics(LocalIdMap classIdMap,  LongMultiSet classCounts) {
@@ -74,14 +71,6 @@ public interface NodeClassificationPipelineTrainConfig extends AlgoBaseConfig, G
 
     static NodeClassificationPipelineTrainConfig of(String username, CypherMapWrapper config) {
         return new NodeClassificationPipelineTrainConfigImpl(username, config);
-    }
-
-    @Configuration.Ignore
-    default Collection<NodeLabel> featureInputLabels(GraphStore graphStore) {
-        return contextNodeLabels().contains(ElementProjection.PROJECT_ALL)
-            ? graphStore.nodeLabels()
-            : Stream.concat(contextNodeLabels().stream().map(NodeLabel::of), nodeLabelIdentifiers(graphStore).stream())
-                .collect(Collectors.toSet());
     }
 
     @Override

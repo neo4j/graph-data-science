@@ -258,7 +258,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         ProgressTracker progressTracker
     ) {
         // we dont resolve the relationships as for extracting the classes they are irrelevant
-        var nodesGraph = graphStore.getGraph(config.nodeLabelIdentifiers(graphStore));
+        var nodesGraph = graphStore.getGraph(config.targetNodeLabelIdentifiers(graphStore));
         pipeline.splitConfig().validateMinNumNodesInSplitSets(nodesGraph);
 
         var targetNodeProperty = nodesGraph.nodeProperties(config.targetProperty());
