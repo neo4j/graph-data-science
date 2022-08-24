@@ -137,7 +137,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
 
     @Override
     public long nodeCount(NodeLabel nodeLabel) {
-        throw new UnsupportedOperationException("No label information is present on node label filtered graphs");
+        return filteredIdMap.nodeCount(nodeLabel);
     }
 
     @Override

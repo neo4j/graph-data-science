@@ -146,6 +146,15 @@ class NodeFilteredGraphTest {
         assertThat(personGraph.contains(idFunction.of("e"))).isFalse();
     }
 
+    @Test
+    void shouldReturnLabelSpecificNodeCount() {
+        var personLabel = NodeLabel.of("Person");
+        var personGraph = graphStore.getGraph(personLabel);
+
+        assertThat(personGraph.nodeCount()).isEqualTo(personGraph.nodeCount(personLabel));
+        assertThat(personGraph.nodeCount(personLabel)).isEqualTo(4);
+    }
+
     Function<String, Long> filteredIdFunction(Graph graph) {
         return (variable) -> graph.toMappedNodeId(idFunction.of(variable));
     }

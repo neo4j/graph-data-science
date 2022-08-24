@@ -88,7 +88,10 @@ public final class MultiLabelInformation implements LabelInformation {
 
     @Override
     public long nodeCountForLabel(NodeLabel nodeLabel) {
-        return labelInformation.get(nodeLabel).cardinality();
+        if (availableNodeLabels().contains(nodeLabel)) {
+            return labelInformation.get(nodeLabel).cardinality();
+        }
+        throw new IllegalArgumentException(formatWithLocale("No label information for label %s present", nodeLabel));
     }
 
     @Override
