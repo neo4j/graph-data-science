@@ -297,4 +297,30 @@ class DefaultsConfigurationTest {
         Object valueFromApply = configuration.apply(new HashMap<>(), "Jonas Vingegaard").get("foo");
         assertThat(valueFromApply).isEqualTo(3.14);
     }
+
+    @Test
+    void shouldSupportBoolean() {
+        var configuration = new DefaultsConfiguration(new HashMap<>(), Collections.emptyMap());
+
+        configuration.set("foo", true, Optional.empty());
+
+        Object valueFromList = configuration.list(Optional.empty(), Optional.of("foo")).get("foo");
+        assertThat(valueFromList).isEqualTo(true);
+
+        Object valueFromApply = configuration.apply(new HashMap<>(), "Jonas Vingegaard").get("foo");
+        assertThat(valueFromApply).isEqualTo(true);
+    }
+
+    @Test
+    void shouldSupportString() {
+        var configuration = new DefaultsConfiguration(new HashMap<>(), Collections.emptyMap());
+
+        configuration.set("foo", "bar", Optional.empty());
+
+        Object valueFromList = configuration.list(Optional.empty(), Optional.of("foo")).get("foo");
+        assertThat(valueFromList).isEqualTo("bar");
+
+        Object valueFromApply = configuration.apply(new HashMap<>(), "Jonas Vingegaard").get("foo");
+        assertThat(valueFromApply).isEqualTo("bar");
+    }
 }
