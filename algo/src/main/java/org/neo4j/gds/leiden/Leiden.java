@@ -21,10 +21,8 @@ package org.neo4j.gds.leiden;
 
 import com.carrotsearch.hppc.LongLongHashMap;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -33,7 +31,6 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.DoubleAdder;
 
 //TODO: take care of potential issues w. self-loops
@@ -78,8 +75,9 @@ public class Leiden extends Algorithm<LeidenResult> {
         this.executorService = Pools.DEFAULT;
         this.concurrency = concurrency;
         this.dendrogramManager = new LeidenDendrogramManager(
-            graph.nodeCount(),
+            rootGraph,
             maxIterations,
+            concurrency,
             includeIntermediateCommunities
         );
 
@@ -103,8 +101,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         double gamma = this.initialGamma * modularityScaleCoefficient;
 
         var communityCount = nodeCount;
-
-        HugeLongArray currentDendrogram = null;
+        HugeLongArray currentCommunities = null;
 
         boolean didConverge = false;
         int iteration;
@@ -149,15 +146,14 @@ public class Leiden extends Algorithm<LeidenResult> {
             var refinedCommunities = refinementPhaseResult.communities();
             var refinedCommunityVolumes = refinementPhaseResult.communityVolumes();
 
-            var dendrogramResult = buildDendrogram(workingGraph, currentDendrogram, refinedCommunities);
-            currentDendrogram = dendrogramResult.dendrogram();
-
-            dendrogramManager.prepareNextLevel(iteration);
-            for (long v = 0; v < rootGraph.nodeCount(); v++) {
-                var currentRefinedCommunityId = currentDendrogram.get(v);
-                var actualCommunityId = localMoveCommunities.get(currentRefinedCommunityId);
-                dendrogramManager.set(v, actualCommunityId);
-            }
+            var dendrogramResult = dendrogramManager.setNextLevel(
+                workingGraph,
+                currentCommunities,
+                refinedCommunities,
+                localMoveCommunities,
+                iteration
+            );
+            currentCommunities = dendrogramResult.dendrogram();
 
             // 3 CREATE NEW GRAPH
             var graphAggregationPhase = new GraphAggregationPhase(
@@ -222,46 +218,6 @@ public class Leiden extends Algorithm<LeidenResult> {
             });
             return 1.0 / rootGraph.relationshipCount();
         }
-    }
-
-    private DendrogramResult buildDendrogram(
-        Graph workingGraph,
-        @Nullable HugeLongArray previousIterationDendrogram,
-        HugeLongArray currentCommunities
-    ) {
-
-        assert workingGraph.nodeCount() == currentCommunities.size() : "The sizes of the graph and communities should match";
-
-        var dendrogram = HugeLongArray.newArray(rootGraph.nodeCount());
-        AtomicLong maxCommunityId = new AtomicLong(0L);
-        ParallelUtil.parallelForEachNode(rootGraph, concurrency, (nodeId) -> {
-            long prevId = previousIterationDendrogram == null
-                ? nodeId
-                : workingGraph.toMappedNodeId(previousIterationDendrogram.get(nodeId));
-
-            long communityId = currentCommunities.get(prevId);
-
-            boolean updatedMaxCurrentId;
-            do {
-                var currentMaxId = maxCommunityId.get();
-                if (communityId > currentMaxId) {
-                    updatedMaxCurrentId = maxCommunityId.compareAndSet(currentMaxId, communityId);
-                } else {
-                    updatedMaxCurrentId = true;
-                }
-            } while (!updatedMaxCurrentId);
-
-            dendrogram.set(nodeId, communityId);
-        });
-
-        return ImmutableDendrogramResult.of(maxCommunityId.get(), dendrogram);
-    }
-
-    @ValueClass
-    interface DendrogramResult {
-        long maxCommunityId();
-
-        HugeLongArray dendrogram();
     }
 
     static @NotNull CommunityData maintainPartition(
