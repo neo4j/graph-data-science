@@ -30,9 +30,57 @@ public abstract class RecordsBatchBuffer<Reference> implements StoreScanner.Reco
         this.buffer = new long[capacity];
     }
 
-    public boolean scan(StoreScanner.ScanCursor<Reference> cursor) {
+    static final class ScanState {
+        private final boolean hasNextBatch;
+        private final boolean batchConsumed;
+
+        ScanState(boolean hasNextBatch, boolean batchConsumed) {
+            this.hasNextBatch = hasNextBatch;
+            this.batchConsumed = batchConsumed;
+        }
+
+        /**
+         * True, if it is safe to advance the underlying scan to the next batch.
+         */
+        boolean scanNextBatch() {
+            return batchConsumed;
+        }
+
+        /**
+         * True, if the underlying buffers must be flushed before consuming more records.
+         */
+        boolean flushBuffer() {
+            return hasNextBatch || !batchConsumed;
+        }
+    }
+
+    /**
+     * Advances the underlying scan to the next batch of records and immediately consumes
+     * the batch into this {@link org.neo4j.gds.core.loading.RecordsBatchBuffer}.
+     * <p/>
+     * There are two scenarios that can happen while consuming a batch of records from the
+     * kernel. If we read in fixed-size batches, these batches usually align with the
+     * buffer size and once we consumed the whole batch, the buffers can be flushed to
+     * the importer tasks. In the second scenario, we read from partitioned index scans
+     * which have varying sizes for partitions that might also exceed the size of the buffer.
+     * In that scenario, we need to flush the buffer <b>before</b> we advance to the next
+     * batch. The two scenarios are indicated by the returned {@code ScanState}.
+     *
+     * @param cursor        A wrapper around a {@link org.neo4j.internal.kernel.api.Cursor} that allows
+     *                      us to consume the entity records using this buffer instance.
+     * @param scanNextBatch Indicates if the underlying kernel scan should advance the cursor to
+     *                      the next batch. This needs to be set to false, if the {@code RecordsBatchBuffer}
+     *                      has not read the complete batch yet, but had to be flushed before that.
+     * @return a {@code ScanState} that indicates if the consumer needs to be flushed and
+     *     if another batch can be read from the underlying scan.
+     */
+    public ScanState scan(StoreScanner.ScanCursor<Reference> cursor, boolean scanNextBatch) {
         reset();
-        return cursor.bulkNext(this);
+
+        boolean batchHasData = !scanNextBatch || cursor.scanBatch();
+        boolean batchConsumed = cursor.consumeBatch(this);
+
+        return new ScanState(batchHasData, batchConsumed);
     }
 
     public int length() {

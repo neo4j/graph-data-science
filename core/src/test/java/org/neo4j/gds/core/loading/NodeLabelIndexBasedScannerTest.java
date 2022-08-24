@@ -83,7 +83,8 @@ class NodeLabelIndexBasedScannerTest extends BaseTest {
                 var idList = new LongArrayList();
                 var idSet = new LongScatterSet();
 
-                while (storeScanner.bulkNext(nodeReference -> {
+
+                while (storeScanner.scanBatch() && storeScanner.consumeBatch(nodeReference -> {
                     actualNodeCount.increment();
 
                     var neoId = nodeReference.nodeId();
@@ -109,6 +110,7 @@ class NodeLabelIndexBasedScannerTest extends BaseTest {
                         assertThat(labelABits.contains(neoId)).isTrue();
                         assertThat(labelBBits.contains(neoId)).isTrue();
                     }
+                    return true;
                 })) {
                 }
 
@@ -153,9 +155,10 @@ class NodeLabelIndexBasedScannerTest extends BaseTest {
                 var actualNodeCount = new MutableInt(0);
                 var nodesPerPartition = new MutableInt(0);
 
-                while (storeScanner.bulkNext(nodeReference -> {
+                while (storeScanner.scanBatch() && storeScanner.consumeBatch(nodeReference -> {
                     nodesPerPartition.increment();
                     actualNodeCount.increment();
+                    return true;
                 })) {
                     assertThat(nodesPerPartition.intValue()).isLessThanOrEqualTo(expectedBatchSize);
                     nodesPerPartition.setValue(0);

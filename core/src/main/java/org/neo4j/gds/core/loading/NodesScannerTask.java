@@ -82,7 +82,16 @@ public final class NodesScannerTask extends StatementAction implements RecordSca
                 .readProperty(nodePropertyImporter != null)
                 .build();
 
-            while (nodesBatchBuffer.scan(cursor)) {
+            boolean scanNextBatch = true;
+            RecordsBatchBuffer.ScanState scanState;
+
+            while ((scanState = nodesBatchBuffer.scan(cursor, scanNextBatch)).flushBuffer()) {
+                // We proceed to the next batch, iff the current batch is
+                // completely consumed. If not, we remain in the current
+                // batch, flush the buffers and consume until the batch is
+                // drained.
+                scanNextBatch = scanState.scanNextBatch();
+
                 terminationFlag.assertRunning();
                 long imported = importNodes(
                     nodesBatchBuffer,

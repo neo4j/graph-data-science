@@ -23,5 +23,12 @@ import org.neo4j.kernel.api.KernelTransaction;
 
 public interface StoreScan<Cursor extends org.neo4j.internal.kernel.api.Cursor> {
 
+    /**
+     * Advances the cursor to the next batch of the underlying scan.
+     *
+     * @param cursor a cursor to read the next batch
+     * @param ktx    kernel transaction
+     * @return true, iff the current batch contains data that must be consumed.
+     */
     boolean scanBatch(Cursor cursor, KernelTransaction ktx);
 }
