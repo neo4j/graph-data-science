@@ -380,7 +380,7 @@ final class HugeGraphLoadingTest extends BaseTest {
     }
 
     @Test
-    void testPartitionedTokenIndexRespectingBatchSize() {
+    void testSingleLabelPartitionedTokenIndexRespectingBatchSize() {
         // batchSize = prefetch size * PAGE_SIZE / NodeRecord size
         var expectedBatchSize = 54_656;
 
@@ -402,6 +402,38 @@ final class HugeGraphLoadingTest extends BaseTest {
                 .graph();
 
             assertThat(graph.nodeCount()).isEqualTo(labelCount);
+        });
+    }
+
+    @Test
+    void testMultiLabelPartitionedTokenIndexRespectingBatchSize() {
+        // batchSize = prefetch size * PAGE_SIZE / NodeRecord size
+        var expectedBatchSize = 54_656;
+
+        var labelA = Label.label("A");
+        var labelB = Label.label("B");
+        long labelACount = 2 * expectedBatchSize;
+        long labelBCount = expectedBatchSize;
+
+        runInTransaction(db, tx -> {
+            for (int i = 0; i < labelACount; i++) {
+                tx.createNode(labelA);
+            }
+            for (int i = 0; i < labelBCount; i++) {
+                tx.createNode(labelB);
+            }
+        });
+
+        GdsFeatureToggles.USE_PARTITIONED_SCAN.enableAndRun(() -> {
+            var graph = new StoreLoaderBuilder()
+                .databaseService(db)
+                .addNodeLabel(labelA.name())
+                .addNodeLabel(labelB.name())
+                .concurrency(1)
+                .build()
+                .graph();
+
+            assertThat(graph.nodeCount()).isEqualTo(labelACount + labelBCount);
         });
     }
 }
