@@ -151,7 +151,7 @@ class NodeClassificationTrainTest {
                 TrainingMethod.RandomForestClassification
             ));
 
-        var config = createConfig("model", metricSpecification, 1L);
+        var config = createConfig("model", metricSpecification, 1337L);
 
         var ncTrain = NodeClassificationTrain.create(
             graph,
