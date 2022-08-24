@@ -59,7 +59,7 @@ class DefaultsConfigurationTest {
         Map<String, Object> configuration = Collections.emptyMap();
         var configurationWithDefaults = defaults.apply(configuration, "Jonas Vingegaard");
 
-        assertThat(configurationWithDefaults).containsEntry("concurrency", 42L);
+        assertThat(configurationWithDefaults).containsEntry("concurrency", 42);
     }
 
     @Test
@@ -72,7 +72,7 @@ class DefaultsConfigurationTest {
         Map<String, Object> configuration = Collections.emptyMap();
         var configurationWithDefaults = defaults.apply(configuration, "Jonas Vingegaard");
 
-        assertThat(configurationWithDefaults).containsEntry("concurrency", 42L);
+        assertThat(configurationWithDefaults).containsEntry("concurrency", 42);
     }
 
     @Test
@@ -85,7 +85,7 @@ class DefaultsConfigurationTest {
         Map<String, Object> configuration = Collections.emptyMap();
         var configurationWithDefaults = defaults.apply(configuration, "Jonas Vingegaard");
 
-        assertThat(configurationWithDefaults).containsEntry("concurrency", 42L);
+        assertThat(configurationWithDefaults).containsEntry("concurrency", 42);
     }
 
     @Test
@@ -107,8 +107,8 @@ class DefaultsConfigurationTest {
         var settings = defaults.list(Optional.empty(), Optional.empty());
 
         assertThat(settings.size()).isEqualTo(2);
-        assertThat(settings.get("a")).isEqualTo(42L);
-        assertThat(settings.get("b")).isEqualTo(87L);
+        assertThat(settings.get("a")).isEqualTo(42);
+        assertThat(settings.get("b")).isEqualTo(87);
     }
 
     @Test
@@ -130,10 +130,10 @@ class DefaultsConfigurationTest {
         var settings = defaults.list(Optional.of("Jonas Vingegaard"), Optional.empty());
 
         assertThat(settings.size()).isEqualTo(4);
-        assertThat(settings.get("a")).isEqualTo(42L);
-        assertThat(settings.get("b")).isEqualTo(87L);
-        assertThat(settings.get("c")).isEqualTo(117L);
-        assertThat(settings.get("d")).isEqualTo(23L);
+        assertThat(settings.get("a")).isEqualTo(42);
+        assertThat(settings.get("b")).isEqualTo(87);
+        assertThat(settings.get("c")).isEqualTo(117);
+        assertThat(settings.get("d")).isEqualTo(23);
     }
 
     @Test
@@ -155,7 +155,7 @@ class DefaultsConfigurationTest {
         var settings = defaults.list(Optional.empty(), Optional.of("a"));
 
         assertThat(settings.size()).isEqualTo(1);
-        assertThat(settings.get("a")).isEqualTo(42L);
+        assertThat(settings.get("a")).isEqualTo(42);
     }
 
     @Test
@@ -198,7 +198,7 @@ class DefaultsConfigurationTest {
         var settings = defaults.list(Optional.of("Jonas Vingegaard"), Optional.of("c"));
 
         assertThat(settings.size()).isEqualTo(1);
-        assertThat(settings.get("c")).isEqualTo(117L);
+        assertThat(settings.get("c")).isEqualTo(117);
     }
 
     @Test
@@ -222,10 +222,10 @@ class DefaultsConfigurationTest {
         var settings = defaults.list(Optional.of("Jonas Vingegaard"), Optional.empty());
 
         assertThat(settings.size()).isEqualTo(4);
-        assertThat(settings.get("a")).isEqualTo(42L);
-        assertThat(settings.get("b")).isEqualTo(59L);
-        assertThat(settings.get("c")).isEqualTo(117L);
-        assertThat(settings.get("d")).isEqualTo(23L);
+        assertThat(settings.get("a")).isEqualTo(42);
+        assertThat(settings.get("b")).isEqualTo(59);
+        assertThat(settings.get("c")).isEqualTo(117);
+        assertThat(settings.get("d")).isEqualTo(23);
     }
 
     @Test
@@ -249,39 +249,52 @@ class DefaultsConfigurationTest {
         var settings = defaults.list(Optional.of("Jonas Vingegaard"), Optional.of("c"));
 
         assertThat(settings.size()).isEqualTo(1);
-        assertThat(settings.get("c")).isEqualTo(117L);
+        assertThat(settings.get("c")).isEqualTo(117);
     }
 
     @Test
     void shouldSetGlobalDefault() {
         var configuration = new DefaultsConfiguration(new HashMap<>(), new HashMap<>());
 
-        configuration.set("foo", 42L, Optional.empty());
+        configuration.set("foo", 42, Optional.empty());
 
         Object value = configuration.list(Optional.empty(), Optional.empty()).get("foo");
-        assertThat(value).isEqualTo(42L);
+        assertThat(value).isEqualTo(42);
     }
 
     @Test
     void shouldOverwriteGlobalDefault() {
         var configuration = new DefaultsConfiguration(new HashMap<>(), new HashMap<>());
 
-        configuration.set("foo", 42L, Optional.empty());
-        configuration.set("foo", 87L, Optional.empty());
+        configuration.set("foo", 42, Optional.empty());
+        configuration.set("foo", 87, Optional.empty());
 
         Object value = configuration.list(Optional.empty(), Optional.empty()).get("foo");
-        assertThat(value).isEqualTo(87L);
+        assertThat(value).isEqualTo(87);
     }
 
     @Test
     void shouldSetPersonalDefault() {
         var configuration = new DefaultsConfiguration(new HashMap<>(), new HashMap<>());
 
-        configuration.set("foo", 42L, Optional.of("Jonas Vingegaard"));
+        configuration.set("foo", 42, Optional.of("Jonas Vingegaard"));
 
         Object value = configuration.list(Optional.of("Jonas Vingegaard"), Optional.of("foo")).get("foo");
-        assertThat(value).isEqualTo(42L);
+        assertThat(value).isEqualTo(42);
 
         assertThat(configuration.list(Optional.empty(), Optional.empty())).doesNotContainKey("foo");
+    }
+
+    @Test
+    void shouldSupportDoubles() {
+        var configuration = new DefaultsConfiguration(new HashMap<>(), Collections.emptyMap());
+
+        configuration.set("foo", 3.14, Optional.empty());
+
+        Object valueFromList = configuration.list(Optional.empty(), Optional.of("foo")).get("foo");
+        assertThat(valueFromList).isEqualTo(3.14);
+
+        Object valueFromApply = configuration.apply(new HashMap<>(), "Jonas Vingegaard").get("foo");
+        assertThat(valueFromApply).isEqualTo(3.14);
     }
 }
