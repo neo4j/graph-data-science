@@ -22,7 +22,6 @@ package org.neo4j.gds.leiden;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -50,8 +49,7 @@ class RefinementPhaseKarateTest {
 
     @Test
     void testRefinementPhase() {
-        var originalCommunities = HugeLongArray.newArray(graph.nodeCount());
-        originalCommunities.setAll(nodeId -> nodeId);
+        var originalCommunities = LeidenUtils.createSingleNodeCommunities(graph.nodeCount());
 
         var nodeVolumes = HugeDoubleArray.newArray(graph.nodeCount());
         nodeVolumes.setAll(graph::degree);

@@ -92,20 +92,17 @@ public class Leiden extends Algorithm<LeidenResult> {
         var workingGraph = rootGraph;
         var nodeCount = workingGraph.nodeCount();
 
-        var seedCommunities = HugeLongArray.newArray(nodeCount);
-        seedCommunities.setAll(v -> v);
+        var partition = LeidenUtils.createSingleNodeCommunities(nodeCount);
 
         // volume -> the sum of the weights of a nodes outgoing relationships
         var nodeVolumes = HugeDoubleArray.newArray(nodeCount);
         // the sum of the node volume for all nodes in a community
         var communityVolumes = HugeDoubleArray.newArray(nodeCount);
-        double modularityScaleCoefficient = initVolumes(nodeVolumes, communityVolumes, seedCommunities);
+        double modularityScaleCoefficient = initVolumes(nodeVolumes, communityVolumes, partition);
 
         double gamma = this.initialGamma * modularityScaleCoefficient;
 
         var communityCount = nodeCount;
-        var partition = HugeLongArray.newArray(communityCount);
-        partition.setAll(v -> v);
 
         HugeLongArray currentDendrogram = null;
 
@@ -185,11 +182,10 @@ public class Leiden extends Algorithm<LeidenResult> {
             nodeVolumes = communityData.aggregatedNodeSeedVolume;
             communityCount = communityData.communityCount;
 
-            seedCommunities = dendrogramManager.getCurrent();
             modularity = modularities[iteration];
         }
         return LeidenResult.of(
-            seedCommunities,
+            dendrogramManager.getCurrent(),
             iteration,
             didConverge,
             dendrogramManager,

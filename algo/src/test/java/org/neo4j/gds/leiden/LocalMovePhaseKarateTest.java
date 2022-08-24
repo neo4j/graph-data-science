@@ -23,7 +23,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -51,8 +50,7 @@ class LocalMovePhaseKarateTest {
 
     @Test
     void testLocalMovePhase() {
-        var localMoveCommunities = HugeLongArray.newArray(graph.nodeCount());
-        localMoveCommunities.setAll(nodeId -> nodeId);
+        var localMoveCommunities = LeidenUtils.createSingleNodeCommunities(graph.nodeCount());
 
         var nodeVolumes = HugeDoubleArray.newArray(graph.nodeCount());
         nodeVolumes.setAll(graph::degree);
