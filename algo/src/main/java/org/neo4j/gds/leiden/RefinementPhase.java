@@ -59,7 +59,9 @@ final class RefinementPhase {
         return new RefinementPhase(
             workingGraph,
             originalCommunities,
-            nodeVolumes, communityVolumes, encounteredCommunities,
+            nodeVolumes,
+            communityVolumes,
+            encounteredCommunities,
             encounteredCommunitiesWeights,
             gamma,
             theta,
@@ -92,7 +94,7 @@ final class RefinementPhase {
         this.relationShipsBetweenCommunties = HugeDoubleArray.newArray(workingGraph.nodeCount());
     }
 
-    Partition run() {
+    RefinementPhaseResult run() {
         var refinedCommunities = HugeLongArray.newArray(workingGraph.nodeCount());
         refinedCommunities.setAll(nodeId -> nodeId); //singleton partition
 
@@ -121,7 +123,7 @@ final class RefinementPhase {
         });
 
         // We don't use the `communityCount` from the RefinementPhase => set it to `-1` in case we try to read it by mistake.
-        return new Partition(refinedCommunities, communityVolumesAfterMerge, -1L, Double.NaN);
+        return new RefinementPhaseResult(refinedCommunities, communityVolumesAfterMerge);
     }
 
     private void mergeNodeSubset(
@@ -245,7 +247,6 @@ final class RefinementPhase {
         });
     }
 
-
     private boolean isWellConnected(
         long nodeOrCommunityId
     ) {
@@ -257,5 +258,22 @@ final class RefinementPhase {
         return relationShipsBetweenCommunties.get(nodeOrCommunityId) >= rightSide;
     }
 
+    static class RefinementPhaseResult {
+        private final HugeLongArray communities;
+        private final HugeDoubleArray communityVolumes;
 
+        RefinementPhaseResult(HugeLongArray communities, HugeDoubleArray communityVolumes) {
+            this.communities = communities;
+            this.communityVolumes = communityVolumes;
+        }
+
+        HugeLongArray communities() {
+            return communities;
+        }
+
+        HugeDoubleArray communityVolumes() {
+            return communityVolumes;
+        }
+
+    }
 }

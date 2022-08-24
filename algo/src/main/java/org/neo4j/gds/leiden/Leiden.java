@@ -41,6 +41,7 @@ import java.util.concurrent.atomic.DoubleAdder;
 public class Leiden extends Algorithm<LeidenResult> {
 
     private final Graph rootGraph;
+    private final Orientation orientation;
 
     private final int maxIterations;
     private final double initialGamma;
@@ -68,6 +69,7 @@ public class Leiden extends Algorithm<LeidenResult> {
     ) {
         super(progressTracker);
         this.rootGraph = graph;
+        this.orientation = rootGraph.schema().isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
         this.maxIterations = maxIterations;
         this.initialGamma = initialGamma;
         this.theta = theta;
@@ -88,31 +90,28 @@ public class Leiden extends Algorithm<LeidenResult> {
     @Override
     public LeidenResult compute() {
         var workingGraph = rootGraph;
-        var orientation = rootGraph.schema().isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
+        var nodeCount = workingGraph.nodeCount();
 
-        var nodeVolumes = HugeDoubleArray.newArray(workingGraph.nodeCount());
-        var communityVolumes = HugeDoubleArray.newArray(workingGraph.nodeCount());
-
-        HugeLongArray partition = HugeLongArray.newArray(workingGraph.nodeCount());
-        partition.setAll(nodeId -> nodeId);
-
-        var communityCount = workingGraph.nodeCount();
-
-        boolean didConverge = false;
-
-        int iteration;
-
-        // move on with refinement -> aggregation -> local move again
-        HugeLongArray seedCommunities = HugeLongArray.newArray(rootGraph.nodeCount());
+        var seedCommunities = HugeLongArray.newArray(nodeCount);
         seedCommunities.setAll(v -> v);
 
+        // volume -> the sum of the weights of a nodes outgoing relationships
+        var nodeVolumes = HugeDoubleArray.newArray(nodeCount);
+        // the sum of the node volume for all nodes in a community
+        var communityVolumes = HugeDoubleArray.newArray(nodeCount);
         double modularityScaleCoefficient = initVolumes(nodeVolumes, communityVolumes, seedCommunities);
+
         double gamma = this.initialGamma * modularityScaleCoefficient;
+
+        var communityCount = nodeCount;
+        var partition = HugeLongArray.newArray(communityCount);
+        partition.setAll(v -> v);
 
         HugeLongArray currentDendrogram = null;
 
+        boolean didConverge = false;
+        int iteration;
         for (iteration = 0; iteration < maxIterations; iteration++) {
-
             // 1. LOCAL MOVE PHASE - over the singleton partition
             var localMovePhase = LocalMovePhase.create(
                 workingGraph,
@@ -122,15 +121,10 @@ public class Leiden extends Algorithm<LeidenResult> {
                 gamma,
                 communityCount
             );
-            var localMovePhasePartition = localMovePhase.run();
+            var communitiesCount = localMovePhase.run();
 
-            partition = localMovePhasePartition.communities();
-            communityVolumes = localMovePhasePartition.communityVolumes();
-
-            var communitiesCount = localMovePhasePartition.communityCount();
-            didConverge = communitiesCount == workingGraph.nodeCount();
-
-            if (localMovePhase.swaps == 0 || didConverge) {
+            didConverge = communitiesCount == workingGraph.nodeCount() || localMovePhase.swaps == 0;
+            if (didConverge) {
                 break;
             }
 
@@ -143,6 +137,7 @@ public class Leiden extends Algorithm<LeidenResult> {
                 concurrency,
                 executorService
             );
+
             // 2 REFINE
             var refinementPhase = RefinementPhase.create(
                 workingGraph,
@@ -153,12 +148,13 @@ public class Leiden extends Algorithm<LeidenResult> {
                 theta,
                 seed
             );
-            var refinedPhasePartition = refinementPhase.run();
-            var refinedPartition = refinedPhasePartition.communities();
+            var refinementPhaseResult = refinementPhase.run();
+            var refinedPartition = refinementPhaseResult.communities();
+            var refinedCommunityVolumes = refinementPhaseResult.communityVolumes();
 
-            var refinedCommunityVolumes = refinedPhasePartition.communityVolumes();
             var dendrogramResult = buildDendrogram(workingGraph, currentDendrogram, refinedPartition);
             currentDendrogram = dendrogramResult.dendrogram();
+
             dendrogramManager.prepareNextLevel(iteration);
             for (long v = 0; v < rootGraph.nodeCount(); v++) {
                 var currentRefinedCommunityId = currentDendrogram.get(v);
@@ -169,7 +165,7 @@ public class Leiden extends Algorithm<LeidenResult> {
             // 3 CREATE NEW GRAPH
             var graphAggregationPhase = new GraphAggregationPhase(
                 workingGraph,
-                orientation,
+                this.orientation,
                 refinedPartition,
                 dendrogramResult.maxCommunityId(),
                 this.executorService,
@@ -202,11 +198,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         );
     }
 
-    private double initVolumes(
-        HugeDoubleArray nodeVolumes,
-        HugeDoubleArray communityVolumes,
-        HugeLongArray seedCommunities
-    ) {
+    private double initVolumes(HugeDoubleArray nodeVolumes, HugeDoubleArray communityVolumes, HugeLongArray seedCommunities) {
         if (rootGraph.hasRelationshipProperty()) {
             ParallelUtil.parallelForEachNode(
                 rootGraph.nodeCount(),
