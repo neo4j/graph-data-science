@@ -31,11 +31,11 @@ public abstract class RecordsBatchBuffer<Reference> implements StoreScanner.Reco
     }
 
     static final class ScanState {
-        private final boolean hasNextBatch;
+        private final boolean batchHasData;
         private final boolean batchConsumed;
 
-        ScanState(boolean hasNextBatch, boolean batchConsumed) {
-            this.hasNextBatch = hasNextBatch;
+        ScanState(boolean batchHasData, boolean batchConsumed) {
+            this.batchHasData = batchHasData;
             this.batchConsumed = batchConsumed;
         }
 
@@ -50,7 +50,7 @@ public abstract class RecordsBatchBuffer<Reference> implements StoreScanner.Reco
          * True, if the underlying buffers must be flushed before consuming more records.
          */
         boolean flushBuffer() {
-            return hasNextBatch || !batchConsumed;
+            return batchHasData;
         }
     }
 
