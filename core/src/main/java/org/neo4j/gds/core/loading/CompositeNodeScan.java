@@ -41,8 +41,8 @@ public class CompositeNodeScan implements StoreScan<CompositeNodeCursor> {
         for (int i = 0; i < scans.size(); i++) {
             NodeLabelIndexCursor indexCursor = cursor.getCursor(i);
             if (indexCursor != null) {
-                var hasNextBatch = scans.get(i).scanBatch(indexCursor, ktx);
-                if (hasNextBatch) {
+                var batchHasData = scans.get(i).scanBatch(indexCursor, ktx);
+                if (batchHasData) {
                     result = true;
                 } else {
                     cursor.removeCursor(i);
