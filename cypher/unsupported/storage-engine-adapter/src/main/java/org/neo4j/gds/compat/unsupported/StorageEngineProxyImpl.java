@@ -85,6 +85,7 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
         String dbName,
         Config config
     ) {
+        throw cypherUnsupportedException();
     }
 
     @Override
