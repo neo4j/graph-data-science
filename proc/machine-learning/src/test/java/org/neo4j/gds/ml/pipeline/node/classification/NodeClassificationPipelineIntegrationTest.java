@@ -144,7 +144,7 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
         runQuery("CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('p', {penalty: 4.0, maxEpochs: 100})");
 
         runQuery("CALL gds.beta.pipeline.nodeClassification.train('g', {" +
-                 " nodeLabels: ['N']," +
+                 " targetNodeLabels: ['N']," +
                  " pipeline: 'p'," +
                  " modelName: 'model'," +
                  " targetProperty: 'class'," +
@@ -205,7 +205,7 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
         runQuery("CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('p')");
 
         runQuery("CALL gds.beta.pipeline.nodeClassification.train('g', {" +
-                 " nodeLabels: ['N']," +
+                 " targetNodeLabels: ['N']," +
                  " pipeline: 'p'," +
                  " modelName: 'model'," +
                  " targetProperty: 'class'," +
@@ -243,7 +243,7 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
                  "})");
 
         assertCypherResult("CALL gds.beta.pipeline.nodeClassification.train('g', {" +
-                 " nodeLabels: ['N']," +
+                 " targetNodeLabels: ['N']," +
                  " pipeline: 'p'," +
                  " modelName: 'model'," +
                  " targetProperty: 'class'," +

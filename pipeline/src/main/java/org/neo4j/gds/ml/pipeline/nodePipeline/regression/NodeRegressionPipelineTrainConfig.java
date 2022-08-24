@@ -29,7 +29,7 @@ import java.util.List;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface NodeRegressionPipelineTrainConfig extends NodePropertyPipelineBaseTrainConfig<RegressionMetrics> {
+public interface NodeRegressionPipelineTrainConfig extends NodePropertyPipelineBaseTrainConfig {
 
     @Configuration.ConvertWith("org.neo4j.gds.ml.metrics.regression.RegressionMetrics#parseList")
     @Configuration.ToMapValue("org.neo4j.gds.ml.metrics.regression.RegressionMetrics#toString")

@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface NodeClassificationPipelineTrainConfig extends NodePropertyPipelineBaseTrainConfig<ClassificationMetricSpecification> {
+public interface NodeClassificationPipelineTrainConfig extends NodePropertyPipelineBaseTrainConfig {
 
     long serialVersionUID = 0x42L;
 

@@ -232,7 +232,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 ----
 CALL gds.beta.pipeline.nodeClassification.train.estimate('myGraph', {
   pipeline: 'pipe',
-  nodeLabels: ['House'],
+  targetNodeLabels: ['House'],
   modelName: 'nc-model',
   targetProperty: 'class',
   randomSeed: 2,
@@ -265,7 +265,7 @@ We will train a model to predict the class in which a house belongs, based on it
 ----
 CALL gds.beta.pipeline.nodeClassification.train('myGraph', {
   pipeline: 'pipe',
-  nodeLabels: ['House'],
+  targetNodeLabels: ['House'],
   modelName: 'nc-pipeline-model',
   targetProperty: 'class',
   randomSeed: 1337,
