@@ -21,7 +21,6 @@ package org.neo4j.gds.leiden;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.modularity.TestGraphs;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.extension.GdlExtension;
@@ -29,6 +28,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.modularity.TestGraphs;
 
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -50,8 +50,8 @@ class RefinementPhaseKarateTest {
 
     @Test
     void testRefinementPhase() {
-        var seed = HugeLongArray.newArray(graph.nodeCount());
-        seed.setAll(nodeId -> nodeId);
+        var originalCommunities = HugeLongArray.newArray(graph.nodeCount());
+        originalCommunities.setAll(nodeId -> nodeId);
 
         var nodeVolumes = HugeDoubleArray.newArray(graph.nodeCount());
         nodeVolumes.setAll(graph::degree);
@@ -60,11 +60,12 @@ class RefinementPhaseKarateTest {
 
         double gamma = 1.0 / graph.relationshipCount();
 
-        var localMovePhase = LocalMovePhase.create(graph, seed, nodeVolumes, communityVolumes, gamma, graph.nodeCount());
+        var localMovePhase = LocalMovePhase.create(graph,
+            originalCommunities, nodeVolumes, communityVolumes, gamma, graph.nodeCount()
+        );
 
         var localMovePhaseResult = localMovePhase.run();
-        var originalCommunities = localMovePhaseResult.communities();
-        var communityVolumesForRefinement = localMovePhaseResult.communityVolumes();
+        var communityVolumesForRefinement = communityVolumes;
 
         var refinementPhase = RefinementPhase.create(
             graph,

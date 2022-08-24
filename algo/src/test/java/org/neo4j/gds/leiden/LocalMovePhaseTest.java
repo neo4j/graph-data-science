@@ -80,16 +80,16 @@ class LocalMovePhaseTest {
 
         double gamma = 1.0 / graph.relationshipCount();
 
-        var localMovePhase = LocalMovePhase.create(
+        HugeLongArray communities = HugeLongArray.of(0, 1, 2, 3, 4, 5, 6, 7);
+        LocalMovePhase.create(
             graph,
-            HugeLongArray.of(0, 1, 2, 3, 4, 5, 6, 7),
+            communities,
             nodeVolumes,
             communityVolumes,
             gamma,
             graph.nodeCount()
-        );
+        ).run();
 
-        var communities = localMovePhase.run().communities();
 
         var communitiesMap = LongStream
             .range(0, 8)

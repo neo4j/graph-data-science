@@ -22,7 +22,6 @@ package org.neo4j.gds.leiden;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.modularity.TestGraphs;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.extension.GdlExtension;
@@ -30,6 +29,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.modularity.TestGraphs;
 
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -51,8 +51,8 @@ class LocalMovePhaseKarateTest {
 
     @Test
     void testLocalMovePhase() {
-        var seed = HugeLongArray.newArray(graph.nodeCount());
-        seed.setAll(nodeId -> nodeId);
+        var localMoveCommunities = HugeLongArray.newArray(graph.nodeCount());
+        localMoveCommunities.setAll(nodeId -> nodeId);
 
         var nodeVolumes = HugeDoubleArray.newArray(graph.nodeCount());
         nodeVolumes.setAll(graph::degree);
@@ -61,14 +61,20 @@ class LocalMovePhaseKarateTest {
 
         double gamma = 1.0 / graph.relationshipCount();
 
-        var localMovePhase = LocalMovePhase.create(graph, seed, nodeVolumes, communityVolumes, gamma, graph.nodeCount());
+        LocalMovePhase.create(
+            graph,
+            localMoveCommunities,
+            nodeVolumes,
+            communityVolumes,
+            gamma,
+            graph.nodeCount()
+        ).run();
 
-        var communities = localMovePhase.run().communities();
 
         var communitiesMap = LongStream
-            .range(0, communities.size())
+            .range(0, localMoveCommunities.size())
             .mapToObj(v -> "a" + v)
-            .collect(Collectors.groupingBy(v -> communities.get(idFunction.of(v))));
+            .collect(Collectors.groupingBy(v -> localMoveCommunities.get(idFunction.of(v))));
 
         assertThat(communitiesMap.values())
             .satisfiesExactlyInAnyOrder(
