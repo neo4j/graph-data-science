@@ -174,7 +174,7 @@ public class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
             if (this.length < this.capacity) {
                 super.offer(record);
             }
-            return this.isFull();
+            return !this.isFull();
         }
     }
 }
