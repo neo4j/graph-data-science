@@ -77,15 +77,15 @@ class ModularityColorArray {
                 colorCoordinates.set(colorId, nodeCount);
             } else {
                 nodeSum += colorCount.get(colorId);
-                colorCoordinates.set(colorId, nodeSum - 1);
+                colorCoordinates.set(colorId, nodeSum);
             }
         }
-        for (long nodeId = 0; nodeId < nodeCount; ++nodeId) {
+        for (long nodeId = nodeCount - 1; nodeId >= 0; --nodeId) {
             long color = colors.get(nodeId);
             long colorId = colorToId.get(color);
-            long coordinate = colorCoordinates.get(colorId);
+            long coordinate = colorCoordinates.get(colorId) - 1;
             sortedNodesByColor.set(coordinate, nodeId);
-            colorCoordinates.set(colorId, coordinate - 1);
+            colorCoordinates.set(colorId, coordinate);
         }
         return new ModularityColorArray(sortedNodesByColor, colorCoordinates, colorToId);
     }
