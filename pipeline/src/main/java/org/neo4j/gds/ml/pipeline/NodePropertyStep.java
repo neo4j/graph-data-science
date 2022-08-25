@@ -81,6 +81,16 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
     }
 
     @Override
+    public List<String> contextNodeLabels() {
+        return contextNodeLabels;
+    }
+
+    @Override
+    public List<String> contextRelationshipTypes() {
+        return contextRelationshipTypes;
+    }
+
+    @Override
     public String mutateNodeProperty() {
         return config().get(MUTATE_PROPERTY_KEY).toString();
     }

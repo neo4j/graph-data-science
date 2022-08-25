@@ -41,6 +41,14 @@ public interface ExecutableNodePropertyStep extends ToMapConvertible {
 
     Map<String, Object> config();
 
+    default List<String> contextNodeLabels() {
+        return List.of();
+    }
+
+    default List<String> contextRelationshipTypes() {
+        return List.of();
+    }
+
     String procName();
 
     default String rootTaskName() {
