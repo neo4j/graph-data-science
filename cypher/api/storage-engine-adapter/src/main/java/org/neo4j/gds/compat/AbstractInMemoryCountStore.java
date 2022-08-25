@@ -49,12 +49,13 @@ public abstract class AbstractInMemoryCountStore implements CountsStore {
             return graphStore.nodeCount();
         }
 
+        String nodeLabel;
         try {
-            var nodeLabel = tokenHolders.labelTokens().getTokenById(labelId).name();
-            return graphStore.nodes().nodeCount(NodeLabel.of(nodeLabel));
+            nodeLabel = tokenHolders.labelTokens().getTokenById(labelId).name();
         } catch (TokenNotFoundException e) {
             throw new RuntimeException(e);
         }
+        return graphStore.nodes().nodeCount(NodeLabel.of(nodeLabel));
     }
 
     @Override
