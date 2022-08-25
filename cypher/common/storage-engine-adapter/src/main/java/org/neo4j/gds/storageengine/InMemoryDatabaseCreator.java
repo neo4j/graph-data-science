@@ -26,19 +26,40 @@ import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.kernel.database.NamedDatabaseId;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import static org.neo4j.gds.core.cypher.CypherGraphStoreCatalogHelper.setWrappedGraphStore;
 
-public class InMemoryDatabaseCreator {
+public final class InMemoryDatabaseCreator {
 
-    public static void createDatabase(GraphDatabaseAPI api, String username, NamedDatabaseId databaseId, String graphName, String dbName) {
-        var dbms = GraphDatabaseApiProxy.resolveDependency(api, DatabaseManagementService.class);
-        var graphStoreWithConfig = GraphStoreCatalog.get(CatalogRequest.of(username, databaseId), graphName);
-        var cypherGraphStore = new CypherGraphStore(graphStoreWithConfig.graphStore());
-        setWrappedGraphStore(graphStoreWithConfig.config(), cypherGraphStore);
-        StorageEngineProxy.createInMemoryDatabase(dbms, dbName, graphName, Config.defaults());
+    private InMemoryDatabaseCreator() {}
+
+    public static void createDatabase(
+        GraphDatabaseService databaseService,
+        String username,
+        String graphName,
+        String dbName
+    ) {
+        createDatabase(databaseService, username, graphName, dbName, Config.defaults());
+    }
+
+    public static void createDatabase(
+        GraphDatabaseService databaseService,
+        String username,
+        String graphName,
+        String dbName,
+        Config config
+    ) {
+        try {
+            var dbms = GraphDatabaseApiProxy.resolveDependency(databaseService, DatabaseManagementService.class);
+            var graphStoreWithConfig = GraphStoreCatalog.get(CatalogRequest.of(username, databaseService.databaseName()), graphName);
+            var cypherGraphStore = new CypherGraphStore(graphStoreWithConfig.graphStore());
+            setWrappedGraphStore(graphStoreWithConfig.config(), cypherGraphStore);
+            StorageEngineProxy.createInMemoryDatabase(dbms, dbName, graphName, config);
+        } catch (Exception e) {
+            InMemoryDatabaseCreationCatalog.removeDatabaseEntry(dbName);
+            throw e;
+        }
     }
 
 }
