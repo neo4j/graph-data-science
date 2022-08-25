@@ -39,6 +39,7 @@ dependencies {
     api(group: 'org.neo4j.community', name: 'it-test-support', version: ver.'neo4j') {
         exclude group:'org.junit.vintage', module: 'junit-vintage-engine'
     }
+    // TODO: Remove when dropping Neo4j 4.3 support
     implementation(group: 'junit', name: 'junit', version: ver.'junit4')
 
     testImplementation project(':edition-api')
