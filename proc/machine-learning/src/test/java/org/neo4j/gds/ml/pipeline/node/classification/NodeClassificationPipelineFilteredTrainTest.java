@@ -54,8 +54,8 @@ public class NodeClassificationPipelineFilteredTrainTest extends BaseProcTest {
         ", (x9:X {class: 0})" +
         ", (x10:X {class: 1})" +
 
-        ", (y1:Y {class: 2})" +
-        ", (y2:Y {class: 2})" +
+        ", (y1:Y {})" +
+        ", (y2:Y {})" +
 
         ", (x2)-[:R]->(y1)" +
         ", (x4)-[:R]->(y1)" +
@@ -123,10 +123,12 @@ public class NodeClassificationPipelineFilteredTrainTest extends BaseProcTest {
                  " randomSeed: 2" +
                  "}) " +
                  "YIELD modelInfo " +
-                           "RETURN modelInfo.metrics.ACCURACY.train.avg AS avgTrainScore," +
+                           "RETURN" +
+                           "  modelInfo.metrics.ACCURACY.validation.avg AS avgValidScore," +
+                           "  modelInfo.metrics.ACCURACY.train.avg AS avgTrainScore," +
                            "  modelInfo.metrics.ACCURACY.outerTrain AS outerTrainScore," +
                            "  modelInfo.metrics.ACCURACY.test AS testScore",
-            List.of(Map.of("avgTrainScore", 1.0, "outerTrainScore", 1.0, "testScore", 1.0))
+            List.of(Map.of("avgTrainScore", 1.0, "avgValidScore", 1.0, "outerTrainScore", 1.0, "testScore", 1.0))
         );
         //Score = 1 means the model is able to recover the perfect correlation between degree-class.
         //This implies the correct contextNodes have been used (for degree to be correct)
