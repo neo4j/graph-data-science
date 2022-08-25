@@ -1,3 +1,6 @@
+[.enterprise-edition]
+[.alpha]
+[[defaults-and-limits]]
 = Defaults and Limits
 :description: This section explains how to configure defaults and limits in the Neo4j Graph Data Science library.
 
