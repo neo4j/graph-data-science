@@ -266,14 +266,15 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         LongMultiSet classCounts = labelsAndClassCounts.classCounts();
         var classIdMap = LocalIdMap.ofSorted(classCounts.keys());
 
+        var metrics = config.metrics(classIdMap, classCounts);
         return new NodeClassificationTrain(
             pipeline,
             config,
             labelsAndClassCounts.labels(),
             classIdMap,
             nodesGraph,
-            config.metrics(classIdMap, classCounts),
-            classificationMetrics(config.metrics(classIdMap, classCounts)),
+            metrics,
+            classificationMetrics(metrics),
             classCounts,
             nodeFeatureProducer,
             progressTracker
