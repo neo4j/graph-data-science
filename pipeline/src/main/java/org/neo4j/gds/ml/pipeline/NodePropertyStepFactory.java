@@ -48,6 +48,15 @@ public final class NodePropertyStepFactory {
         String taskName,
         Map<String, Object> configMap
     ) {
+        return createNodePropertyStep(taskName, configMap, List.of(), List.of());
+    }
+
+    public static NodePropertyStep createNodePropertyStep(
+        String taskName,
+        Map<String, Object> configMap,
+        List<String> contextNodeLabels,
+        List<String> contextRelationshipTypes
+    ) {
         var normalizedName = normalizeName(taskName);
 
         var gdsCallableDefinition = GdsCallableFinder
@@ -69,7 +78,7 @@ public final class NodePropertyStepFactory {
         // validate user-input is valid
         tryParsingConfig(gdsCallableDefinition, configMap);
 
-        return new NodePropertyStep(gdsCallableDefinition, configMap);
+        return new NodePropertyStep(gdsCallableDefinition, configMap, contextNodeLabels, contextRelationshipTypes);
     }
 
     private static AlgoBaseConfig tryParsingConfig(

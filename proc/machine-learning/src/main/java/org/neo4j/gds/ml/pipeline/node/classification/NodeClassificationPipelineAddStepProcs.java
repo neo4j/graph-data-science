@@ -43,6 +43,17 @@ public class NodeClassificationPipelineAddStepProcs extends BaseProc {
         String taskName,
         Map<String, Object> procedureConfig
     ) {
+        return addNodeProperty(username, pipelineName, taskName, procedureConfig, List.of(), List.of());
+    }
+
+    public static NodePipelineInfoResult addNodeProperty(
+        String username,
+        String pipelineName,
+        String taskName,
+        Map<String, Object> procedureConfig,
+        List<String> contextNodeLabels,
+        List<String> contextRelationshipTypes
+    ) {
         var pipeline = PipelineCatalog.getTyped(username, pipelineName, NodeClassificationTrainingPipeline.class);
 
         pipeline.addNodePropertyStep(createNodePropertyStep(taskName, procedureConfig));
@@ -80,7 +91,9 @@ public class NodeClassificationPipelineAddStepProcs extends BaseProc {
     public Stream<NodePipelineInfoResult> addNodeProperty(
         @Name("pipelineName") String pipelineName,
         @Name("procedureName") String taskName,
-        @Name("procedureConfiguration") Map<String, Object> procedureConfig
+        @Name("procedureConfiguration") Map<String, Object> procedureConfig,
+        @Name(value = "contextNodeLabels", defaultValue = "[]") List<String> contextNodeLabels,
+        @Name(value = "contextRelationshipTypes", defaultValue = "[]") List<String> contextRelationshipTypes
     ) {
         return Stream.of(addNodeProperty(
             username(),
