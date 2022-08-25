@@ -106,4 +106,18 @@ public class CypherIdMap extends IdMapAdapter implements NodeLabelUpdater {
         }
         return true;
     }
+
+    @Override
+    public long nodeCount(NodeLabel nodeLabel) {
+        if (super.availableNodeLabels().contains(nodeLabel)) {
+            return super.nodeCount(nodeLabel);
+        }
+        BitSet bitSet = additionalNodeLabels.get(nodeLabel);
+        if (bitSet == null) {
+            // no nodes with this label neither loaded nor added with Cypher
+            return 0;
+        }
+
+        return bitSet.cardinality();
+    }
 }
