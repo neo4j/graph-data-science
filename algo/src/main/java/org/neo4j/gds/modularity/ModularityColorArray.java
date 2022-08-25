@@ -47,6 +47,14 @@ class ModularityColorArray {
         return colorCoordinates.get(colorToId.get(color) + 1);
     }
 
+    long get(long indexId) {
+        return sortedNodesByColor.get(indexId);
+    }
+
+    long getCount(long color) {
+        return getEndingCoordinate(color) - getStartingCoordinate(color);
+    }
+
     static ModularityColorArray createModularityColorArray(HugeLongArray colors, long nodeCount) {
         var sortedNodesByColor = HugeLongArray.newArray(nodeCount);
         LongLongMap colorCount = new LongLongHashMap();

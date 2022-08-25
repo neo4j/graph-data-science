@@ -83,6 +83,8 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private HugeDoubleArray cumulativeNodeWeights;
     private HugeAtomicDoubleArray communityWeightUpdates;
 
+    private ModularityColorArray modularityColorArray;
+
     public ModularityOptimization(
         final Graph graph,
         int maxIterations,
@@ -121,6 +123,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         computeColoring();
         initSeeding();
         init();
+        modularityColorArray = ModularityColorArray.createModularityColorArray(colors, nodeCount);
         progressTracker.endSubTask();
 
 
@@ -208,15 +211,16 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount);
 
         var initTasks = PartitionUtils.rangePartition(concurrency, nodeCount, (partition) ->
-            new InitTask(
-                graph.concurrentCopy(),
-                currentCommunities,
-                modularityManager,
-                cumulativeNodeWeights,
-                seedProperty != null,
-                partition
-            ),
-            Optional.of((int) minBatchSize));
+                new InitTask(
+                    graph.concurrentCopy(),
+                    currentCommunities,
+                    modularityManager,
+                    cumulativeNodeWeights,
+                    seedProperty != null,
+                    partition
+                ),
+            Optional.of((int) minBatchSize)
+        );
 
         ParallelUtil.run(initTasks, executor);
 
@@ -316,9 +320,10 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     }
 
     private Collection<ModularityOptimizationTask> createModularityOptimizationTasks(long currentColor) {
+
         return PartitionUtils.rangePartition(
             concurrency,
-            nodeCount,
+            modularityColorArray.getCount(currentColor),
             partition -> new ModularityOptimizationTask(
                 graph,
                 partition,
@@ -330,6 +335,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                 cumulativeNodeWeights,
                 communityWeightUpdates,
                 modularityManager,
+                modularityColorArray,
                 progressTracker
             ),
             Optional.of((int) minBatchSize)

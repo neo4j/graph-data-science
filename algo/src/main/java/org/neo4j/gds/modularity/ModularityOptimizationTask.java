@@ -45,6 +45,8 @@ final class ModularityOptimizationTask implements Runnable {
     private final ModularityManager modularityManager;
     private final HugeAtomicDoubleArray communityWeightUpdates;
 
+    private final ModularityColorArray modularityColorArray;
+
     ModularityOptimizationTask(
         Graph graph,
         Partition partition,
@@ -56,8 +58,10 @@ final class ModularityOptimizationTask implements Runnable {
         HugeDoubleArray cumulativeNodeWeights,
         HugeAtomicDoubleArray communityWeightUpdates,
         ModularityManager modularityManager,
+        ModularityColorArray modularityColorArray,
         ProgressTracker progressTracker
     ) {
+        this.modularityColorArray = modularityColorArray;
         this.partition = partition;
         this.color = color;
         this.localGraph = graph.concurrentCopy();
@@ -75,10 +79,13 @@ final class ModularityOptimizationTask implements Runnable {
     public void run() {
         LongDoubleMap reuseCommunityInfluences = new LongDoubleHashMap(50);
         var relationshipsProcessed = new MutableLong();
-
-        partition.consume(nodeId -> {
+        final long start = modularityColorArray.getStartingCoordinate(color);
+        partition.consume(indexId -> {
+            long actualIndexId = start + indexId;
+            long nodeId = modularityColorArray.get(actualIndexId);
             if (colors.get(nodeId) != color) {
-                return;
+                throw new RuntimeException(
+                    "this is one of those things that are really really not supposed to happen");
             }
 
             long currentCommunity = currentCommunities.get(nodeId);
