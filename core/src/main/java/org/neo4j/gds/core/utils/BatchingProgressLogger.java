@@ -144,7 +144,7 @@ public class BatchingProgressLogger implements ProgressLogger {
 
     @Override
     public void logMessage(String msg) {
-        logInfo(formatWithLocale("[%s] %s %s", Thread.currentThread().getName(), taskName, msg));
+        log.info("[%s] %s %s", Thread.currentThread().getName(), taskName, msg);
     }
 
     @Override
@@ -158,12 +158,12 @@ public class BatchingProgressLogger implements ProgressLogger {
 
     @Override
     public void logDebug(String message) {
-        log.debug(formatWithLocale("[%s] %s %s", Thread.currentThread().getName(), taskName, message));
+        log.debug("[%s] %s %s", Thread.currentThread().getName(), taskName, message);
     }
 
     @Override
     public void logWarning(String message) {
-        log.warn(formatWithLocale("[%s] %s %s", Thread.currentThread().getName(), taskName, message));
+        log.warn("[%s] %s %s", Thread.currentThread().getName(), taskName, message);
     }
 
     @Override
