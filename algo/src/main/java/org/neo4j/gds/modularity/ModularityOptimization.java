@@ -301,10 +301,18 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             .tasks(createModularityOptimizationTasks(currentColor))
             .executor(executor)
             .run();
-
-        // swap old and new communities
-        nextCommunities.copyTo(currentCommunities, nodeCount);
-
+        long colorCount = modularityColorArray.getCount(currentColor);
+        long start = modularityColorArray.getStartingCoordinate(currentColor);
+        
+        ParallelUtil.parallelStreamConsume(
+            LongStream.range(0, colorCount),
+            concurrency,
+            stream -> stream.forEach(indexId -> {
+                long actualIndexId = start + indexId;
+                long nodeId = modularityColorArray.get(actualIndexId);
+                currentCommunities.set(nodeId, nextCommunities.get(nodeId));
+            })
+        );
         // apply communityWeight updates to communityWeights
         ParallelUtil.parallelStreamConsume(
             LongStream.range(0, nodeCount),
