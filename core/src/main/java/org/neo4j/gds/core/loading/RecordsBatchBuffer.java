@@ -78,7 +78,7 @@ public abstract class RecordsBatchBuffer<Reference> implements StoreScanner.Reco
         reset();
 
         boolean batchHasData = !reserveNextBatch || cursor.reserveBatch();
-        boolean batchConsumed = cursor.consumeBatch(this);
+        boolean batchConsumed = !batchHasData || cursor.consumeBatch(this);
 
         return new ScanState(batchHasData, batchConsumed);
     }
