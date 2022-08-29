@@ -41,88 +41,78 @@ class LimitsConfigurationTest {
     @Test
     void shouldFindGlobalLimitViolations() {
         var limits = new LimitsConfiguration(
-            Map.of("concurrency", new Limit(23)),
+            Map.of("concurrency", LimitFactory.create(23L)),
             Collections.emptyMap()
         );
 
         var violations = limits.validate(Map.of("concurrency", 42L), "Jonas Vingegaard");
 
         assertThat(violations.size()).isEqualTo(1);
-        assertThat(violations.iterator().next())
-            .satisfies(lv -> assertThat(lv.getKey()).isEqualTo("concurrency"))
-            .satisfies(lv -> assertThat(lv.getLimitValue()).isEqualTo("23"))
-            .satisfies(lv -> assertThat(lv.getProvidedValue()).isEqualTo("42"));
+        assertThat(violations.iterator().next().getErrorMessage()).isEqualTo(
+            "Configuration parameter 'concurrency' with value '42' exceeds it's limit of '23'");
     }
 
     @Test
     void shouldFindPersonalLimitViolations() {
         var limits = new LimitsConfiguration(
             Collections.emptyMap(),
-            Map.of("Jonas Vingegaard", Map.of("concurrency", new Limit(23)))
+            Map.of("Jonas Vingegaard", Map.of("concurrency", LimitFactory.create(23L)))
         );
 
         var violations = limits.validate(Map.of("concurrency", 42L), "Jonas Vingegaard");
 
         assertThat(violations.size()).isEqualTo(1);
-        assertThat(violations.iterator().next())
-            .satisfies(lv -> assertThat(lv.getKey()).isEqualTo("concurrency"))
-            .satisfies(lv -> assertThat(lv.getLimitValue()).isEqualTo("23"))
-            .satisfies(lv -> assertThat(lv.getProvidedValue()).isEqualTo("42"));
+        assertThat(violations.iterator().next().getErrorMessage()).isEqualTo(
+            "Configuration parameter 'concurrency' with value '42' exceeds it's limit of '23'");
     }
 
     @Test
     void shouldReportPersonalLimitViolationsOverGlobalOnes() {
         var limits = new LimitsConfiguration(
-            Map.of("concurrency", new Limit(23)),
-            Map.of("Jonas Vingegaard", Map.of("concurrency", new Limit(17)))
+            Map.of("concurrency", LimitFactory.create(23L)),
+            Map.of("Jonas Vingegaard", Map.of("concurrency", LimitFactory.create(17L)))
         );
 
         var violations = limits.validate(Map.of("concurrency", 42L), "Jonas Vingegaard");
 
         assertThat(violations.size()).isEqualTo(1);
-        assertThat(violations.iterator().next())
-            .satisfies(lv -> assertThat(lv.getKey()).isEqualTo("concurrency"))
-            .satisfies(lv -> assertThat(lv.getLimitValue()).isEqualTo("17"))
-            .satisfies(lv -> assertThat(lv.getProvidedValue()).isEqualTo("42"));
+        assertThat(violations.iterator().next().getErrorMessage()).isEqualTo(
+            "Configuration parameter 'concurrency' with value '42' exceeds it's limit of '17'");
     }
 
     @Test
     void shouldReportPersonalLimitViolationsAsTheyAreMoreSpecific() {
         var limits = new LimitsConfiguration(
-            Map.of("concurrency", new Limit(17)),
-            Map.of("Jonas Vingegaard", Map.of("concurrency", new Limit(23)))
+            Map.of("concurrency", LimitFactory.create(17L)),
+            Map.of("Jonas Vingegaard", Map.of("concurrency", LimitFactory.create(23L)))
         );
 
         var violations = limits.validate(Map.of("concurrency", 42L), "Jonas Vingegaard");
 
         assertThat(violations.size()).isEqualTo(1);
-        assertThat(violations.iterator().next())
-            .satisfies(lv -> assertThat(lv.getKey()).isEqualTo("concurrency"))
-            .satisfies(lv -> assertThat(lv.getLimitValue()).isEqualTo("23"))
-            .satisfies(lv -> assertThat(lv.getProvidedValue()).isEqualTo("42"));
+        assertThat(violations.iterator().next().getErrorMessage()).isEqualTo(
+            "Configuration parameter 'concurrency' with value '42' exceeds it's limit of '23'");
     }
 
     @Test
     void shouldReportGlobalLimitViolationsWhenPersonalLimitsAreNotViolated() {
         var limits = new LimitsConfiguration(
-            Map.of("concurrency", new Limit(17)),
-            Map.of("Jonas Vingegaard", Map.of("concurrency", new Limit(87)))
+            Map.of("concurrency", LimitFactory.create(17L)),
+            Map.of("Jonas Vingegaard", Map.of("concurrency", LimitFactory.create(87L)))
         );
 
         var violations = limits.validate(Map.of("concurrency", 42L), "Jonas Vingegaard");
 
         assertThat(violations.size()).isEqualTo(1);
-        assertThat(violations.iterator().next())
-            .satisfies(lv -> assertThat(lv.getKey()).isEqualTo("concurrency"))
-            .satisfies(lv -> assertThat(lv.getLimitValue()).isEqualTo("17"))
-            .satisfies(lv -> assertThat(lv.getProvidedValue()).isEqualTo("42"));
+        assertThat(violations.iterator().next().getErrorMessage()).isEqualTo(
+            "Configuration parameter 'concurrency' with value '42' exceeds it's limit of '17'");
     }
 
     @Test
     void shouldIgnoreLimitsThatAreNotViolated() {
         var limits = new LimitsConfiguration(
-            Map.of("concurrency", new Limit(42)),
-            Map.of("Jonas Vingegaard", Map.of("concurrency", new Limit(87)))
+            Map.of("concurrency", LimitFactory.create(42L)),
+            Map.of("Jonas Vingegaard", Map.of("concurrency", LimitFactory.create(87L)))
         );
 
         var violations = limits.validate(Map.of("concurrency", 23L), "Jonas Vingegaard");
@@ -133,8 +123,8 @@ class LimitsConfigurationTest {
     @Test
     void shouldIgnoreLimitsThatDoNotApply() {
         var limits = new LimitsConfiguration(
-            Map.of("cleverness", new Limit(23)),
-            Map.of("Jonas Vingegaard", Map.of("cleverness", new Limit(42)))
+            Map.of("cleverness", LimitFactory.create(23L)),
+            Map.of("Jonas Vingegaard", Map.of("cleverness", LimitFactory.create(42L)))
         );
 
         var violations = limits.validate(Map.of("concurrency", 87L), "Jonas Vingegaard");
@@ -145,7 +135,7 @@ class LimitsConfigurationTest {
     @Test
     void shouldListGlobalLimits() {
         var configuration = new LimitsConfiguration(
-            Map.of("foo", new Limit(42), "bar", new Limit(87)),
+            Map.of("foo", LimitFactory.create(42L), "bar", LimitFactory.create(87L)),
             null
         );
 
@@ -157,7 +147,7 @@ class LimitsConfigurationTest {
     @Test
     void shouldListGlobalLimitsByKey() {
         var configuration = new LimitsConfiguration(
-            Map.of("foo", new Limit(42), "bar", new Limit(87)),
+            Map.of("foo", LimitFactory.create(42L), "bar", LimitFactory.create(87L)),
             null
         );
 
@@ -170,7 +160,7 @@ class LimitsConfigurationTest {
     void shouldListPersonalLimits() {
         var configuration = new LimitsConfiguration(
             Collections.emptyMap(),
-            Map.of("Jonas Vingegaard", Map.of("foo", new Limit(42), "bar", new Limit(87)))
+            Map.of("Jonas Vingegaard", Map.of("foo", LimitFactory.create(42L), "bar", LimitFactory.create(87L)))
         );
 
         var limits = configuration.list(Optional.of("Jonas Vingegaard"), Optional.empty());
@@ -182,7 +172,7 @@ class LimitsConfigurationTest {
     void shouldListPersonalLimitsByKey() {
         var configuration = new LimitsConfiguration(
             Collections.emptyMap(),
-            Map.of("Jonas Vingegaard", Map.of("foo", new Limit(42), "bar", new Limit(87)))
+            Map.of("Jonas Vingegaard", Map.of("foo", LimitFactory.create(42L), "bar", LimitFactory.create(87L)))
         );
 
         var limits = configuration.list(Optional.of("Jonas Vingegaard"), Optional.of("bar"));
@@ -193,8 +183,8 @@ class LimitsConfigurationTest {
     @Test
     void shouldListEffectiveLimits() {
         var configuration = new LimitsConfiguration(
-            Map.of("foo", new Limit(42), "bar", new Limit(87)),
-            Map.of("Jonas Vingegaard", Map.of("foo", new Limit(23), "baz", new Limit(117)))
+            Map.of("foo", LimitFactory.create(42L), "bar", LimitFactory.create(87L)),
+            Map.of("Jonas Vingegaard", Map.of("foo", LimitFactory.create(23L), "baz", LimitFactory.create(117L)))
         );
 
         var limits = configuration.list(Optional.of("Jonas Vingegaard"), Optional.empty());
@@ -205,8 +195,8 @@ class LimitsConfigurationTest {
     @Test
     void shouldListEffectiveLimitsByKey() {
         var configuration = new LimitsConfiguration(
-            Map.of("foo", new Limit(42), "bar", new Limit(87)),
-            Map.of("Jonas Vingegaard", Map.of("foo", new Limit(23), "baz", new Limit(117)))
+            Map.of("foo", LimitFactory.create(42L), "bar", LimitFactory.create(87L)),
+            Map.of("Jonas Vingegaard", Map.of("foo", LimitFactory.create(23L), "baz", LimitFactory.create(117L)))
         );
 
         var limits = configuration.list(Optional.of("Jonas Vingegaard"), Optional.of("foo"));
@@ -258,5 +248,39 @@ class LimitsConfigurationTest {
         var listing = configuration.list(Optional.of("Jonas Vingegaard"), Optional.of("foo"));
 
         assertThat(listing.get("foo")).isEqualTo(87L);
+    }
+
+    @Test
+    void shouldSupportDoubles() {
+        var configuration = new LimitsConfiguration(new HashMap<>(), Collections.emptyMap());
+
+        configuration.set("foo", 2.71, Optional.empty());
+
+        Object valueFromList = configuration.list(Optional.empty(), Optional.empty()).get("foo");
+        assertThat(valueFromList).isEqualTo(2.71);
+
+        assertThat(configuration.validate(Map.of("foo", 1.61), "Jonas Vingegaard")).isEmpty();
+
+        var violations = configuration.validate(Map.of("foo", 3.14), "Jonas Vingegaard");
+        assertThat(violations.size()).isEqualTo(1);
+        assertThat(violations.iterator().next().getErrorMessage()).isEqualTo(
+            "Configuration parameter 'foo' with value '3.14' exceeds it's limit of '2.71'");
+    }
+
+    @Test
+    void shouldSupportBooleans() {
+        var configuration = new LimitsConfiguration(new HashMap<>(), Collections.emptyMap());
+
+        configuration.set("sudo", false, Optional.empty());
+
+        Object valueFromList = configuration.list(Optional.empty(), Optional.empty()).get("sudo");
+        assertThat(valueFromList).isEqualTo(false);
+
+        assertThat(configuration.validate(Map.of("sudo", false), "Jonas Vingegaard")).isEmpty();
+
+        var violations = configuration.validate(Map.of("sudo", true), "Jonas Vingegaard");
+        assertThat(violations.size()).isEqualTo(1);
+        assertThat(violations.iterator().next().getErrorMessage()).isEqualTo(
+            "Configuration parameter 'sudo' with value 'true' is in violation of it's set limit");
     }
 }

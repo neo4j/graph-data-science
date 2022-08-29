@@ -19,30 +19,62 @@
  */
 package org.neo4j.gds.configuration;
 
-/**
- * For now we support int, this will need to change.
- *
- * And we are prepared, the {@link org.neo4j.gds.configuration.Limit#isViolated(Object)} method ought to be generic
- * enough that we can turn this into an interface and back it with supported types, or something
- */
-public class Limit {
-    private final long value;
+import java.util.Locale;
 
-    public Limit(long value) {
-        this.value = value;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
+abstract class Limit {
+    /**
+     * The raw value that was set
+     */
+    abstract Object getValue();
+
+    /**
+     * Violating a limit is type dependent - boolean is the odd one out.
+     *
+     * We validate the incoming type for compatibility. We support long, double and boolean, the relevant types from
+     * Neo4j's procedure framework.
+     */
+    final boolean isViolated(Object inputValue) {
+        assertTypeCompatible(inputValue);
+
+        return isViolatedInternal(inputValue);
     }
 
-    boolean isViolated(Object inputValue) {
-        long i = (Long) inputValue;
+    /**
+     * Validates the incoming value's type for compatibility
+     *
+     * @throws java.lang.IllegalArgumentException if the incoming value's type is not compatible.
+     */
+    private void assertTypeCompatible(Object inputValue) {
+        if (inputValue.getClass().isAssignableFrom(getValue().getClass())) return;
 
-        return i > value;
+        throw new IllegalArgumentException(formatWithLocale(
+            "Input value '%s' (%s) is not compatible with limit value '%s' (%s)",
+            inputValue,
+            inputValue.getClass().getSimpleName().toLowerCase(Locale.ENGLISH),
+            getValue(),
+            getValue().getClass().getSimpleName().toLowerCase(Locale.ENGLISH)
+        ));
     }
 
-    String getValueAsString() {
-        return String.valueOf(value);
-    }
+    /**
+     * Violating a limit is type dependent - boolean is the odd one out.
+     */
+    protected abstract boolean isViolatedInternal(Object inputValue);
 
-    Object getValue() {
-        return value;
+    /**
+     * This is handy for creating error messages
+     */
+    @Deprecated
+    abstract String getValueAsString();
+
+    String asErrorMessage(String key, Object value) {
+        return formatWithLocale(
+            "Configuration parameter '%s' with value '%s' exceeds it's limit of '%s'",
+            key,
+            value,
+            getValue()
+        );
     }
 }

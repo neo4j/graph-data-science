@@ -19,14 +19,22 @@
  */
 package org.neo4j.gds.configuration;
 
-public class LimitViolation {
-    private final String errorMessage;
+import java.util.Locale;
 
-    LimitViolation(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-    public String getErrorMessage() {
-        return errorMessage;
+public final class LimitFactory {
+    private LimitFactory() {}
+
+    public static Limit create(Object value) {
+        if (value instanceof Boolean) return new BooleanLimit((boolean) value);
+        if (value instanceof Double) return new DoubleLimit((double) value);
+        if (value instanceof Long) return new LongLimit((long) value);
+
+        throw new IllegalArgumentException(formatWithLocale(
+            "Unable to create limit for input value '%s' (%s)",
+            value,
+            value.getClass().getSimpleName().toLowerCase(Locale.ENGLISH)
+        ));
     }
 }
