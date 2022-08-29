@@ -90,10 +90,6 @@ public final class Settings {
         return GraphDatabaseSettings.tx_state_max_off_heap_memory;
     }
 
-    public static Setting<Path> storeInternalLogPath() {
-        return GraphDatabaseSettings.store_internal_log_path;
-    }
-
     public static <T> T disableOnlineBackup(T builder, SettingsUtil.SetConfig<T, Boolean> setConfig) {
         return SettingsUtil.tryConfigure(
             builder,
