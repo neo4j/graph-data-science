@@ -51,7 +51,7 @@ class NodeFeatureProducerTest {
         ", (x8:X {class: 1})" +
         ", (x9:X {class: 0})" +
 
-        ", (y1:Y {class: 2})" +
+        ", (y1:Y {})" +
 
         ", (x2)-[:R]->(y1)" +
         ", (x4)-[:R]->(y1)" +

@@ -69,7 +69,7 @@ public final class NodeFeatureProducer<PIPELINE_CONFIG extends NodePropertyPipel
     public Features procedureFeatures(NodePropertyTrainingPipeline pipeline) {
         try {
             stepExecutor.executeNodePropertySteps(pipeline.nodePropertySteps());
-            Collection<NodeLabel> featureInputLabels = trainConfig.featureInputLabels(graphStore);
+            Collection<NodeLabel> featureInputLabels = trainConfig.nodeLabelIdentifiers(graphStore);
             pipeline.validateFeatureProperties(graphStore, featureInputLabels);
 
             // We create a filtered graph with only targetNodeLabels, that contains the newly created node properties from the steps
