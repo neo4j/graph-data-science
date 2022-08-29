@@ -23,7 +23,6 @@ import org.immutables.builder.Builder;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.log4j.Log4jLogProvider;
-import org.neo4j.logging.log4j.LogConfig;
 
 import java.io.OutputStream;
 import java.util.Optional;
@@ -36,12 +35,7 @@ final class LogBuilders {
         Optional<Level> level,
         Optional<String> category
     ) {
-        var context = LogConfig
-            .createBuilderToOutputStream(outputStream, level.orElse(Level.INFO))
-            .withCategory(category.isPresent())
-            .build();
-
-        return new Log4jLogProvider(context).getLog(category.orElse(""));
+        return new Log4jLogProvider(outputStream, level.orElse(Level.INFO)).getLog(category.orElse(""));
     }
 
     private LogBuilders() {
