@@ -30,5 +30,5 @@ public interface StoreScan<Cursor extends org.neo4j.internal.kernel.api.Cursor> 
      * @param ktx    kernel transaction
      * @return true, iff the current batch contains data that must be consumed.
      */
-    boolean scanBatch(Cursor cursor, KernelTransaction ktx);
+    boolean reserveBatch(Cursor cursor, KernelTransaction ktx);
 }

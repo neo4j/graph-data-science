@@ -84,7 +84,7 @@ class NodeLabelIndexScanTest extends BaseTest {
             var cursor = Neo4jProxy.allocateNodeLabelIndexCursor(ktx);
 
             var aNodesCount = 0;
-            while (storeScan.scanBatch(cursor, ktx)) {
+            while (storeScan.reserveBatch(cursor, ktx)) {
                 while (cursor.next()) {
                     assertThat(expectedSet.contains(cursor.nodeReference())).isTrue();
                     aNodesCount += 1;
