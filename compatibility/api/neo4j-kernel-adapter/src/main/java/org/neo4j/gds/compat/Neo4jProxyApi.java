@@ -60,6 +60,7 @@ import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
+import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
@@ -273,4 +274,6 @@ public interface Neo4jProxyApi {
     );
 
     long transactionId(KernelTransactionHandle kernelTransactionHandle);
+
+    void reserveNeo4jIds(IdGeneratorFactory generatorFactory, int size, CursorContext cursorContext);
 }

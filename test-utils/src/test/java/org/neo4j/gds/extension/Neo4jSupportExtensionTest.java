@@ -27,6 +27,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -39,7 +40,7 @@ class Neo4jSupportExtensionTest extends BaseTest {
     @org.neo4j.test.extension.Inject
     GraphDatabaseService neoInjectedDb;
 
-    @Neo4jGraph
+    @Neo4jGraph(offsetIds = true)
     static final String DB_CYPHER = "CREATE" +
                                             "  (a { id: 0 })" +
                                             ", (b { id: 1 })";
@@ -70,6 +71,16 @@ class Neo4jSupportExtensionTest extends BaseTest {
             "MATCH (n) WHERE n.id = 1 RETURN n",
             Map.of(),
             (tx, row) -> assertEquals(nodeB, row.getNode("n"))
+        );
+    }
+
+    @Test
+    void shouldOffsetIds() {
+        QueryRunner.runQueryWithRowConsumer(
+            db,
+            "MATCH (n) RETURN id(n) AS id",
+            Map.of(),
+            (tx, row) -> assertThat(row.getNumber("id").longValue()).isGreaterThanOrEqualTo(2)
         );
     }
 

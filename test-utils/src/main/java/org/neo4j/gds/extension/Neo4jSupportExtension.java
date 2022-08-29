@@ -19,14 +19,19 @@
  */
 package org.neo4j.gds.extension;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.QueryRunner;
+import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
+import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.kernel.impl.core.NodeEntity;
 
 import java.util.HashMap;
@@ -54,13 +59,13 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
     private static final String DBMS_KEY = "service";
 
     @Override
-    public void beforeEach(ExtensionContext context) throws Exception {
+    public void beforeEach(ExtensionContext context) {
         GraphDatabaseService db = getDbms(context)
             .map(dbms -> dbms.database(GraphDatabaseSettings.DEFAULT_DATABASE_NAME))
             .orElseThrow(() -> new IllegalStateException("No database was found."));
 
         Class<?> requiredTestClass = context.getRequiredTestClass();
-        Optional<String> createQuery = graphProjectQuery(requiredTestClass);
+        Optional<Pair<String, Boolean>> createQuery = createQueryAndIdOffset(requiredTestClass);
         Map<String, Node> idMap = neo4jGraphSetup(db, createQuery);
         injectFields(context, db, idMap);
     }
@@ -69,16 +74,22 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
         return Optional.ofNullable(context.getStore(DBMS_NAMESPACE).get(DBMS_KEY, DatabaseManagementService.class));
     }
 
-    private Optional<String> graphProjectQuery(Class<?> testClass) {
+    private Optional<Pair<String, Boolean>> createQueryAndIdOffset(Class<?> testClass) {
         return Stream.<Class<?>>iterate(testClass, c -> c.getSuperclass() != null, Class::getSuperclass)
             .flatMap(clazz -> stream(clazz.getDeclaredFields()))
             .filter(field -> field.isAnnotationPresent(Neo4jGraph.class))
             .findFirst()
-            .map(ExtensionUtil::getStringValueOfField);
+            .map(field -> Pair.of(
+                ExtensionUtil.getStringValueOfField(field),
+                field.getAnnotation(Neo4jGraph.class).offsetIds()
+            ));
     }
 
-    private Map<String, Node> neo4jGraphSetup(GraphDatabaseService db, Optional<String> createQuery) {
-        return createQuery
+    private Map<String, Node> neo4jGraphSetup(GraphDatabaseService db, Optional<Pair<String, Boolean>> createQueryAndOffset) {
+        offsetNodeIds(db, createQueryAndOffset.map(Pair::getRight).orElse(false));
+
+        return createQueryAndOffset
+            .map(Pair::getLeft)
             .map(query -> formatWithLocale("%s %s", query, RETURN_STATEMENT))
             .map(query -> QueryRunner.runQuery(db, query, Neo4jSupportExtension::extractVariableIds))
             .orElseGet(Map::of);
@@ -100,6 +111,16 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
         });
 
         return idMap;
+    }
+
+    private void offsetNodeIds(GraphDatabaseService db, boolean offsetIds) {
+        if (!offsetIds) {
+            return;
+        }
+
+        // try to convince the db that `idOffset` number of nodes have already been allocated
+        var idGeneratorFactory = GraphDatabaseApiProxy.resolveDependency(db, IdGeneratorFactory.class);
+        TestSupport.fullAccessTransaction(db).accept((tx, ktx) -> Neo4jProxy.reserveNeo4jIds(idGeneratorFactory, 42, ktx.cursorContext()));
     }
 
     private void injectFields(ExtensionContext context, GraphDatabaseService db, Map<String, Node> idMap) {
