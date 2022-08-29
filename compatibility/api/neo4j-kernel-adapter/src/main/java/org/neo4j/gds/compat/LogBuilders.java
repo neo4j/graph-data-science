@@ -22,14 +22,10 @@ package org.neo4j.gds.compat;
 import org.immutables.builder.Builder;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
-import org.neo4j.logging.LogTimeZone;
 import org.neo4j.logging.log4j.Log4jLogProvider;
 import org.neo4j.logging.log4j.LogConfig;
 
 import java.io.OutputStream;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.util.Arrays;
 import java.util.Optional;
 
 final class LogBuilders {
@@ -38,18 +34,11 @@ final class LogBuilders {
     static Log outputStreamLog(
         @Builder.Parameter OutputStream outputStream,
         Optional<Level> level,
-        Optional<ZoneId> zoneId,
         Optional<String> category
     ) {
-        var logTimeZone = Arrays
-            .stream(LogTimeZone.values())
-            .filter(tz -> tz.getZoneId().equals(zoneId.orElse(ZoneOffset.UTC)))
-            .findAny()
-            .orElseThrow(() -> new IllegalArgumentException("Can only log in UTC or " + LogTimeZone.SYSTEM.getZoneId()));
         var context = LogConfig
-            .createBuilder(outputStream, level.orElse(Level.INFO))
+            .createBuilderToOutputStream(outputStream, level.orElse(Level.INFO))
             .withCategory(category.isPresent())
-            .withTimezone(logTimeZone)
             .build();
 
         return new Log4jLogProvider(context).getLog(category.orElse(""));
