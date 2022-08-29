@@ -21,6 +21,10 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.executor.validation.BeforeLoadValidation;
+import org.neo4j.gds.executor.validation.GraphProjectConfigValidations;
+import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPredictPipelineBaseConfig;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
@@ -40,6 +44,15 @@ public final class LinkPredictionPipelineCompanion {
     );
 
     private LinkPredictionPipelineCompanion() {}
+
+    public static <CONFIG extends LinkPredictionPredictPipelineBaseConfig> ValidationConfiguration<CONFIG> getValidationConfig() {
+        return new ValidationConfiguration<>() {
+            @Override
+            public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
+                return List.of(new GraphProjectConfigValidations.UndirectedGraphValidation<>());
+            }
+        };
+    }
 
     public static Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> getTrainedLPPipelineModel(
         ModelCatalog modelCatalog,

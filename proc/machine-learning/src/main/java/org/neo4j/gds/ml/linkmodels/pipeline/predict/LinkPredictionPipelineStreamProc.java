@@ -28,7 +28,9 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -65,6 +67,11 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
     ) {
         preparePipelineConfig(graphNameOrConfiguration, algoConfiguration);
         return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+    }
+
+    @Override
+    public ValidationConfiguration<LinkPredictionPredictPipelineStreamConfig> validationConfig() {
+        return LinkPredictionPipelineCompanion.getValidationConfig();
     }
 
     @Override

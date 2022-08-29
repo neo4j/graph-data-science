@@ -40,7 +40,9 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
+import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.result.HistogramUtils;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -81,6 +83,11 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
     ) {
         preparePipelineConfig(graphNameOrConfiguration, algoConfiguration);
         return computeEstimate(graphNameOrConfiguration, algoConfiguration);
+    }
+
+    @Override
+    public ValidationConfiguration<LinkPredictionPredictPipelineMutateConfig> validationConfig() {
+        return LinkPredictionPipelineCompanion.getValidationConfig();
     }
 
     @Override
