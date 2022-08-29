@@ -110,7 +110,7 @@ public abstract class InMemoryRelationshipCursor
     public boolean next() {
         while (true) {
             if (adjacencyCursor == null || !adjacencyCursor.hasNextVLong()) {
-                if (!progressToNextContext()) {
+                if (this.sourceId == NO_ID || !progressToNextContext()) {
                     return false;
                 }
             } else {
