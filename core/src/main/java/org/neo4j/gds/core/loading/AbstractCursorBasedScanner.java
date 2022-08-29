@@ -48,8 +48,8 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
         }
 
         @Override
-        public boolean scanBatch() {
-            return scan.scanBatch(cursor, ktx);
+        public boolean reserveBatch() {
+            return scan.reserveBatch(cursor, ktx);
         }
 
         @Override

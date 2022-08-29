@@ -145,7 +145,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
             long allImportedRels = 0L;
             long allImportedWeights = 0L;
             boolean scanNextBatch = true;
-            while (compositeBuffer.scan(cursor, scanNextBatch).flushBuffer()) {
+            while (compositeBuffer.scan(cursor, scanNextBatch).requiresFlush()) {
                 terminationFlag.assertRunning();
                 long imported = 0L;
                 for (ThreadLocalSingleTypeRelationshipImporter importer : importers) {

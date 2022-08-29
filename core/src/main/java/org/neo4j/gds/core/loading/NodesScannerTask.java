@@ -85,12 +85,12 @@ public final class NodesScannerTask extends StatementAction implements RecordSca
             boolean scanNextBatch = true;
             RecordsBatchBuffer.ScanState scanState;
 
-            while ((scanState = nodesBatchBuffer.scan(cursor, scanNextBatch)).flushBuffer()) {
+            while ((scanState = nodesBatchBuffer.scan(cursor, scanNextBatch)).requiresFlush()) {
                 // We proceed to the next batch, iff the current batch is
                 // completely consumed. If not, we remain in the current
                 // batch, flush the buffers and consume until the batch is
                 // drained.
-                scanNextBatch = scanState.scanNextBatch();
+                scanNextBatch = scanState.reserveNextBatch();
 
                 terminationFlag.assertRunning();
                 long imported = importNodes(

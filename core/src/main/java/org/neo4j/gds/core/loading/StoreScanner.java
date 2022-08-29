@@ -50,7 +50,7 @@ public interface StoreScanner<Reference> extends AutoCloseable {
          *
          * @return true, iff the batch contains data and needs to be consumed
          */
-        boolean scanBatch();
+        boolean reserveBatch();
 
         /**
          * Consumes the current batch using the given consumer. The consumer is

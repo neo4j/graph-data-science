@@ -84,7 +84,7 @@ class NodeLabelIndexBasedScannerTest extends BaseTest {
                 var idSet = new LongScatterSet();
 
 
-                while (storeScanner.scanBatch() && storeScanner.consumeBatch(nodeReference -> {
+                while (storeScanner.reserveBatch() && storeScanner.consumeBatch(nodeReference -> {
                     actualNodeCount.increment();
 
                     var neoId = nodeReference.nodeId();
@@ -155,7 +155,7 @@ class NodeLabelIndexBasedScannerTest extends BaseTest {
                 var actualNodeCount = new MutableInt(0);
                 var nodesPerPartition = new MutableInt(0);
 
-                while (storeScanner.scanBatch() && storeScanner.consumeBatch(nodeReference -> {
+                while (storeScanner.reserveBatch() && storeScanner.consumeBatch(nodeReference -> {
                     nodesPerPartition.increment();
                     actualNodeCount.increment();
                     return true;

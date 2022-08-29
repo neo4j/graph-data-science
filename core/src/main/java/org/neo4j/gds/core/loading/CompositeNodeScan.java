@@ -36,12 +36,12 @@ public class CompositeNodeScan implements StoreScan<CompositeNodeCursor> {
 
     // This method needs to be synchronized as we need to make sure that every subscan is processing the same batch
     @Override
-    public synchronized boolean scanBatch(CompositeNodeCursor cursor, KernelTransaction ktx) {
+    public synchronized boolean reserveBatch(CompositeNodeCursor cursor, KernelTransaction ktx) {
         boolean result = false;
         for (int i = 0; i < scans.size(); i++) {
             NodeLabelIndexCursor indexCursor = cursor.getCursor(i);
             if (indexCursor != null) {
-                var batchHasData = scans.get(i).scanBatch(indexCursor, ktx);
+                var batchHasData = scans.get(i).reserveBatch(indexCursor, ktx);
                 if (batchHasData) {
                     result = true;
                 } else {

@@ -34,7 +34,7 @@ final class ScanBasedStoreScanImpl<C extends Cursor> implements StoreScan<C> {
     }
 
     @Override
-    public boolean scanBatch(C cursor, KernelTransaction ktx) {
+    public boolean reserveBatch(C cursor, KernelTransaction ktx) {
         return scan.reserveBatch(cursor, batchSize, ktx.cursorContext(), ktx.securityContext().mode());
     }
 }

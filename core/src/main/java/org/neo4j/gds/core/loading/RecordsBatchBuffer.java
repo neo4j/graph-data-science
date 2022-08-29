@@ -42,14 +42,14 @@ public abstract class RecordsBatchBuffer<Reference> implements StoreScanner.Reco
         /**
          * True, if it is safe to advance the underlying scan to the next batch.
          */
-        boolean scanNextBatch() {
+        boolean reserveNextBatch() {
             return batchConsumed;
         }
 
         /**
          * True, if the underlying buffers must be flushed before consuming more records.
          */
-        boolean flushBuffer() {
+        boolean requiresFlush() {
             return batchHasData;
         }
     }
@@ -66,18 +66,18 @@ public abstract class RecordsBatchBuffer<Reference> implements StoreScanner.Reco
      * In that scenario, we need to flush the buffer <b>before</b> we advance to the next
      * batch. The two scenarios are indicated by the returned {@code ScanState}.
      *
-     * @param cursor        A wrapper around a {@link org.neo4j.internal.kernel.api.Cursor} that allows
-     *                      us to consume the entity records using this buffer instance.
-     * @param scanNextBatch Indicates if the underlying kernel scan should advance the cursor to
-     *                      the next batch. This needs to be set to false, if the {@code RecordsBatchBuffer}
-     *                      has not read the complete batch yet, but had to be flushed before that.
+     * @param cursor           A wrapper around a {@link org.neo4j.internal.kernel.api.Cursor} that allows
+     *                         us to consume the entity records using this buffer instance.
+     * @param reserveNextBatch Indicates if the underlying kernel scan should advance the cursor to
+     *                         the next batch. This needs to be set to false, if the {@code RecordsBatchBuffer}
+     *                         has not read the complete batch yet, but had to be flushed before that.
      * @return a {@code ScanState} that indicates if the consumer needs to be flushed and
      *     if another batch can be read from the underlying scan.
      */
-    public ScanState scan(StoreScanner.ScanCursor<Reference> cursor, boolean scanNextBatch) {
+    public ScanState scan(StoreScanner.ScanCursor<Reference> cursor, boolean reserveNextBatch) {
         reset();
 
-        boolean batchHasData = !scanNextBatch || cursor.scanBatch();
+        boolean batchHasData = !reserveNextBatch || cursor.reserveBatch();
         boolean batchConsumed = cursor.consumeBatch(this);
 
         return new ScanState(batchHasData, batchConsumed);
