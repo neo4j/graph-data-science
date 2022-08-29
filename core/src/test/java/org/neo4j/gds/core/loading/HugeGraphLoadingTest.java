@@ -396,7 +396,7 @@ final class HugeGraphLoadingTest extends BaseTest {
 
         GdsFeatureToggles.USE_PARTITIONED_SCAN.enableAndRun(() -> {
             var graph = new StoreLoaderBuilder()
-                .databaseService(db)
+                .api(db)
                 .addNodeLabel(label.name())
                 .concurrency(concurrency)
                 .build()
@@ -432,7 +432,7 @@ final class HugeGraphLoadingTest extends BaseTest {
 
         GdsFeatureToggles.USE_PARTITIONED_SCAN.enableAndRun(() -> {
             var graph = new StoreLoaderBuilder()
-                .databaseService(db)
+                .api(db)
                 .addNodeLabel(labelA.name())
                 .addNodeLabel(labelB.name())
                 .concurrency(concurrency)
