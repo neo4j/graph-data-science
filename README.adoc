@@ -72,7 +72,7 @@ If you are using Neo4j Desktop you can simply add the Graph Data Science library
 |Neo4j 4.4.0 - 4.4.7
 
 .2+<.^|GDS 2.1.x
-|Neo4j 4.3.0 - 4.3.16
+|Neo4j 4.3.0 - 4.3.17
 |Neo4j 4.4.0 - 4.4.10
 |===
 
