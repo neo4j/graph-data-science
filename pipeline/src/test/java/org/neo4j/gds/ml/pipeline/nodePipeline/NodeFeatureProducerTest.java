@@ -88,7 +88,6 @@ class NodeFeatureProducerTest {
             .targetProperty("t")
             .metrics(List.of(metricSpecification))
             .targetNodeLabels(List.of("X"))
-            .contextNodeLabels(List.of("Y"))
             .build();
 
         var ncFeatureProducer = NodeFeatureProducer.create(bipartiteGraphStore, ncTrainConfig, ExecutionContext.EMPTY, ProgressTracker.NULL_TRACKER);
