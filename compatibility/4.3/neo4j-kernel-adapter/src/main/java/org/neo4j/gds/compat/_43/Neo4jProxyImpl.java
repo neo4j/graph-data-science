@@ -28,7 +28,6 @@ import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.configuration.helpers.NormalizedDatabaseName;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.dbms.database.DatabaseManager;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.BoltTransactionRunner;
@@ -39,7 +38,6 @@ import org.neo4j.gds.compat.CompositeNodeCursor;
 import org.neo4j.gds.compat.CustomAccessMode;
 import org.neo4j.gds.compat.GdsDatabaseManagementServiceBuilder;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.LongPropertyReference;
 import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.PropertyReference;
@@ -137,13 +135,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         var normalizedName = new NormalizedDatabaseName(databaseName);
         DatabaseNameValidator.validateExternalDatabaseName(normalizedName);
         return normalizedName.name();
-    }
-
-    @Override
-    public void cacheDatabaseId(GraphDatabaseService db) {
-        var databaseManager = GraphDatabaseApiProxy.resolveDependency(db, DatabaseManager.class);
-        var databaseIdRepository = databaseManager.databaseIdRepository();
-        databaseIdRepository.cache(GraphDatabaseApiProxy.databaseId(db));
     }
 
     @Override

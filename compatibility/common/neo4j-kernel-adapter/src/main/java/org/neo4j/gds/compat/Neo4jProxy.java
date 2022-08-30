@@ -90,11 +90,6 @@ public final class Neo4jProxy {
         return IMPL.validateExternalDatabaseName(databaseName);
     }
 
-    @TestOnly
-    public static void cacheDatabaseId(GraphDatabaseService db) {
-        IMPL.cacheDatabaseId(db);
-    }
-
     public static AccessMode accessMode(CustomAccessMode customAccessMode) {
         return IMPL.accessMode(customAccessMode);
     }

@@ -83,8 +83,6 @@ public interface Neo4jProxyApi {
 
     String validateExternalDatabaseName(String databaseName);
 
-    void cacheDatabaseId(GraphDatabaseService databaseIdRepository);
-
     AccessMode accessMode(CustomAccessMode customAccessMode);
 
     String username(AuthSubject subject);
