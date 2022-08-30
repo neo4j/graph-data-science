@@ -243,6 +243,8 @@ public interface Neo4jProxyApi {
 
     void configureRecordFormat(Config.Builder configBuilder, String recordFormat);
 
+    DatabaseLayout databaseLayout(Config config, String databaseName);
+
     BoltTransactionRunner<?, ?> boltTransactionRunner();
 
     HostnamePort getLocalBoltAddress(ConnectorPortRegister connectorPortRegister);

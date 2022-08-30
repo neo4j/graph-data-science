@@ -368,6 +368,10 @@ public final class Neo4jProxy {
         IMPL.configureRecordFormat(configBuilder, recordFormat);
     }
 
+    public static DatabaseLayout databaseLayout(Config config, String databaseName) {
+        return IMPL.databaseLayout(config, databaseName);
+    }
+
     public static BoltTransactionRunner<?, ?> boltTransactionRunner() {
         return IMPL.boltTransactionRunner();
     }

@@ -91,6 +91,7 @@ import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.internal.schema.IndexValueCapability;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.io.layout.Neo4jLayout;
 import org.neo4j.io.layout.recordstorage.RecordDatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.context.CursorContext;
@@ -554,6 +555,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public void configureRecordFormat(Config.Builder configBuilder, String recordFormat) {
         configBuilder.set(GraphDatabaseSettings.record_format, recordFormat);
+    }
+
+    @Override
+    public DatabaseLayout databaseLayout(Config config, String databaseName) {
+        return Neo4jLayout.of(config).databaseLayout(databaseName);
     }
 
     @Override
