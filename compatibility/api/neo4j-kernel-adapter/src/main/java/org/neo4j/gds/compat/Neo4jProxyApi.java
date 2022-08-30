@@ -67,7 +67,6 @@ import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.procedure.Mode;
@@ -82,8 +81,6 @@ public interface Neo4jProxyApi {
     GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms);
 
     String validateExternalDatabaseName(String databaseName);
-
-    void cacheDatabaseId(GraphDatabaseAPI databaseIdRepository);
 
     AccessMode accessMode(CustomAccessMode customAccessMode);
 

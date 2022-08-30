@@ -68,7 +68,6 @@ import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.procedure.Mode;
@@ -88,11 +87,6 @@ public final class Neo4jProxy {
 
     public static String validateExternalDatabaseName(String databaseName) {
         return IMPL.validateExternalDatabaseName(databaseName);
-    }
-
-    @TestOnly
-    public static void cacheDatabaseId(GraphDatabaseAPI db) {
-        IMPL.cacheDatabaseId(db);
     }
 
     public static AccessMode accessMode(CustomAccessMode customAccessMode) {
