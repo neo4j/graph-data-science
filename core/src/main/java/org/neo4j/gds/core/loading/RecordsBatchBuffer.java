@@ -57,7 +57,7 @@ public abstract class RecordsBatchBuffer<Reference> implements StoreScanner.Reco
     /**
      * Advances the underlying scan to the next batch of records and immediately consumes
      * the batch into this {@link org.neo4j.gds.core.loading.RecordsBatchBuffer}.
-     * <p/>
+     * <br>
      * There are two scenarios that can happen while consuming a batch of records from the
      * kernel. If we read in fixed-size batches, these batches usually align with the
      * buffer size and once we consumed the whole batch, the buffers can be flushed to

@@ -28,7 +28,7 @@ public interface Degrees {
 
     /**
      * Much slower than just degree() because it may have to look up all relationships.
-     * <p></p>
+     * <br>
      * This is not thread-safe, so if this is called concurrently please use {@link RelationshipIterator#concurrentCopy()}.
      *
      * @see Graph#isMultiGraph()
