@@ -45,8 +45,7 @@ public interface StoreScanner<Reference> extends AutoCloseable {
 
     interface ScanCursor<Reference> extends AutoCloseable {
         /**
-         * Advances the underlying {@link org.neo4j.internal.kernel.api.EntityCursor}
-         * to the next batch of records.
+         * Advances the underlying entity cursor to the next batch of records.
          *
          * @return true, iff the batch contains data and needs to be consumed
          */
@@ -55,13 +54,13 @@ public interface StoreScanner<Reference> extends AutoCloseable {
         /**
          * Consumes the current batch using the given consumer. The consumer is
          * typically an instance of {@link org.neo4j.gds.core.loading.RecordsBatchBuffer}.
-         * <p/>
+         * <br>
          * The method returns a {@code boolean} to indicate whether
          * the current batch has been completely consumed or not.
          * This gives the consumer the option to indicate that, e.g.
          * its buffer is full and needs to be flushed before it can
          * continue consuming.
-         * <p/>
+         * <br>
          * This is usually the case if the underlying scan returns
          * batches that exceed the configured size of the
          * {@link org.neo4j.gds.core.loading.RecordsBatchBuffer}.
