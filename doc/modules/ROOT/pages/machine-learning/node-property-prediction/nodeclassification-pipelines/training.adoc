@@ -374,7 +374,6 @@ We are now ready to invoke the training of the newly created pipeline.
 CALL gds.beta.pipeline.nodeClassification.train('paintingGraph', {
   pipeline: 'pipe-with-context',
   targetNodeLabels: ['House'],
-  contextNodeLabels: ['Painter'],
   modelName: 'nc-pipeline-model-contextual',
   targetProperty: 'class',
   randomSeed: 1337,
