@@ -35,10 +35,11 @@ public class RelationshipSchemaBuilderVisitor extends RelationshipSchemaVisitor 
     protected void export() {
         // If the key is null we expect no properties but a relationship type
         if (key() == null) {
-            schemaBuilder.addRelationshipType(relationshipType());
+            schemaBuilder.addRelationshipType(relationshipType(), orientation());
         } else {
             schemaBuilder.addProperty(
                 relationshipType(),
+                orientation(),
                 key(),
                 RelationshipPropertySchema.of(key(), valueType(), defaultValue(), state(), aggregation())
             );

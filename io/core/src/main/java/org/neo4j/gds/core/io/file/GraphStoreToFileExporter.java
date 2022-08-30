@@ -157,10 +157,12 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             relationshipSchema.properties().forEach((relationshipType, properties) -> {
                 if (properties.isEmpty()) {
                     relationshipSchemaVisitor.relationshipType(relationshipType);
+                    relationshipSchemaVisitor.orientation(relationshipSchema.orientation(relationshipType));
                     relationshipSchemaVisitor.endOfEntity();
                 } else {
                     properties.forEach((propertyKey, propertySchema) -> {
                         relationshipSchemaVisitor.relationshipType(relationshipType);
+                        relationshipSchemaVisitor.orientation(relationshipSchema.orientation(relationshipType));
                         relationshipSchemaVisitor.key(propertyKey);
                         relationshipSchemaVisitor.defaultValue(propertySchema.defaultValue());
                         relationshipSchemaVisitor.valueType(propertySchema.valueType());

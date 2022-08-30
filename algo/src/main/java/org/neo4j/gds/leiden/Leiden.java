@@ -83,7 +83,7 @@ public class Leiden extends Algorithm<LeidenResult> {
     @Override
     public LeidenResult compute() {
         var workingGraph = rootGraph;
-        var orientation = rootGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
+        var orientation = rootGraph.schema().isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
 
         var nodeVolumes = HugeDoubleArray.newArray(workingGraph.nodeCount());
         var communityVolumes = HugeDoubleArray.newArray(workingGraph.nodeCount());

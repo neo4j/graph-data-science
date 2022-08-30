@@ -75,6 +75,7 @@ import java.util.OptionalLong;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.config.ConcurrencyConfig.DEFAULT_CONCURRENCY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -305,7 +306,7 @@ public final class CypherAggregation extends BaseProc {
 
             var relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(this.idMapBuilder)
-                .orientation(Orientation.NATURAL)
+                .orientation(NATURAL)
                 .aggregation(Aggregation.NONE)
                 .concurrency(DEFAULT_CONCURRENCY);
 
@@ -513,7 +514,8 @@ public final class CypherAggregation extends BaseProc {
                 var relType = relationshipType == null ? RelationshipType.ALL_RELATIONSHIPS : relationshipType;
 
                 propertyStore.relationshipProperties().forEach((propertyKey, relationshipProperties) -> {
-                    relationshipSchemaBuilder.addProperty(relType, propertyKey, relationshipProperties.propertySchema());
+                    relationshipSchemaBuilder.addProperty(relType,// We do not analyze the cypher query for its orientation
+                        NATURAL, propertyKey, relationshipProperties.propertySchema());
                 });
 
                 graphStoreBuilder.putRelationships(relType, allRelationships.get(0).topology());
@@ -557,7 +559,7 @@ public final class CypherAggregation extends BaseProc {
         @org.immutables.value.Value.Default
         @Configuration.Ignore
         default Orientation orientation() {
-            return Orientation.NATURAL;
+            return NATURAL;
         }
 
         @org.immutables.value.Value.Default

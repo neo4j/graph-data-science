@@ -20,13 +20,21 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -34,6 +42,110 @@ import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
 class CSRGraphStoreTest {
+
+    @Test
+    void addRelationshipTypeUndirected() {
+        var gdlFactory = GdlFactory.builder().graphProjectConfig(
+            ImmutableGraphProjectFromGdlConfig.builder()
+                .gdlGraph("(a:A)-[:T]->(b:A), (c:A)-[:T]->(d:A)")
+                .graphName("test")
+                .orientation(Orientation.UNDIRECTED)
+                .build()
+        ).build();
+
+        var graphStore = gdlFactory.build();
+
+        assertThat(graphStore.relationshipCount()).isEqualTo(4);
+
+        RelationshipsBuilder relBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(graphStore.nodes())
+            .orientation(Orientation.UNDIRECTED)
+            .build();
+
+        relBuilder.add(gdlFactory.nodeId("a"), gdlFactory.nodeId("d"));
+
+        graphStore.addRelationshipType(
+            RelationshipType.of("NEW"),
+            Optional.empty(),
+            Optional.empty(),
+            relBuilder.build()
+        );
+
+        assertThat(graphStore.relationshipCount()).isEqualTo(6);
+        assertThat(graphStore.schema().relationshipSchema().isUndirected()).isEqualTo(true);
+    }
+
+    @Test
+    void addRelationshipTypeDirected() {
+        var gdlFactory = GdlFactory.builder().graphProjectConfig(
+            ImmutableGraphProjectFromGdlConfig.builder()
+                .gdlGraph("(a:A)-[:T]->(b:A), (c:A)-[:T]->(d:A)")
+                .graphName("test")
+                .orientation(Orientation.NATURAL)
+                .build()
+        ).build();
+
+        var graphStore = gdlFactory.build();
+
+        assertThat(graphStore.relationshipCount()).isEqualTo(2);
+
+        RelationshipsBuilder relBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(graphStore.nodes())
+            .orientation(Orientation.NATURAL)
+            .build();
+
+        relBuilder.add(gdlFactory.nodeId("a"), gdlFactory.nodeId("d"));
+
+        graphStore.addRelationshipType(
+            RelationshipType.of("NEW"),
+            Optional.empty(),
+            Optional.empty(),
+            relBuilder.build()
+        );
+
+        assertThat(graphStore.relationshipCount()).isEqualTo(3);
+        assertThat(graphStore.schema().relationshipSchema().isUndirected()).isEqualTo(false);
+    }
+
+    static Stream<Arguments> mixedOrientation() {
+        return Stream.of(
+            Arguments.of(Orientation.UNDIRECTED, 4, Orientation.NATURAL, 5),
+            Arguments.of(Orientation.NATURAL, 2, Orientation.UNDIRECTED, 4)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("mixedOrientation")
+    void addRelationshipTypeMixed(Orientation baseOrientation, int baseRelCount, Orientation addedOrientation, int totalRelCount) {
+        var gdlFactory = GdlFactory.builder().graphProjectConfig(
+            ImmutableGraphProjectFromGdlConfig.builder()
+                .gdlGraph("(a:A)-[:T]->(b:A), (c:A)-[:T]->(d:A)")
+                .graphName("test")
+                .orientation(baseOrientation)
+                .build()
+        ).build();
+
+        var graphStore = gdlFactory.build();
+
+        assertThat(graphStore.relationshipCount()).isEqualTo(baseRelCount);
+
+        RelationshipsBuilder relBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(graphStore.nodes())
+            .orientation(addedOrientation)
+            .build();
+
+        relBuilder.add(gdlFactory.nodeId("a"), gdlFactory.nodeId("d"));
+
+        graphStore.addRelationshipType(
+            RelationshipType.of("NEW"),
+            Optional.empty(),
+            Optional.empty(),
+            relBuilder.build()
+        );
+
+        assertThat(graphStore.relationshipCount()).isEqualTo(totalRelCount);
+        assertThat(graphStore.schema().relationshipSchema().isUndirected()).isEqualTo(false);
+    }
 
     @Test
     void deleteAdditionalRelationshipTypes() {

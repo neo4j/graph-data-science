@@ -339,11 +339,6 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public boolean isUndirected(RelationshipType relationshipType) {
-        return relationships.get(relationshipType).orientation() == Orientation.UNDIRECTED;
-    }
-
-    @Override
     public long relationshipCount() {
         long sum = 0L;
         for (var topology : relationships.values()) {
@@ -404,12 +399,11 @@ public class CSRGraphStore implements GraphStore {
     ) {
         updateGraphStore(graphStore -> {
             if (!hasRelationshipType(relationshipType)) {
-                RelationshipSchema.Builder relationshipSchemaBuilder = RelationshipSchema
-                    .builder()
-                    .from(schema().relationshipSchema());
+                RelationshipSchema.Builder newSchemaBuilder = RelationshipSchema.builder();
 
                 graphStore.relationships.put(relationshipType, relationships.topology());
-                relationshipSchemaBuilder.addRelationshipType(relationshipType);
+                Orientation orientation = relationships.topology().orientation();
+                newSchemaBuilder.addRelationshipType(relationshipType, orientation);
 
                 if (relationshipPropertyKey.isPresent()
                     && relationshipPropertyType.isPresent()
@@ -423,8 +417,9 @@ public class CSRGraphStore implements GraphStore {
                     );
 
                     ValueType valueType = ValueTypes.fromNumberType(relationshipPropertyType.get());
-                    relationshipSchemaBuilder.addProperty(
+                    newSchemaBuilder.addProperty(
                         relationshipType,
+                        orientation,
                         relationshipPropertyKey.get(),
                         RelationshipPropertySchema.of(
                             relationshipPropertyKey.get(),
@@ -435,9 +430,10 @@ public class CSRGraphStore implements GraphStore {
                         ));
                 }
 
+                var resultingRelationshipSchema = schema.relationshipSchema().union(newSchemaBuilder.build());
                 this.schema = GraphSchema.of(
                     schema().nodeSchema(),
-                    relationshipSchemaBuilder.build(),
+                    resultingRelationshipSchema,
                     schema.graphProperties()
                 );
             }
@@ -718,7 +714,7 @@ public class CSRGraphStore implements GraphStore {
             nodeSchema,
             schema()
                 .relationshipSchema()
-                .singleTypeAndProperty(relationshipType, maybeRelationshipProperty),
+                .filter(Set.of(relationshipType)),
             schema.graphProperties()
         );
 

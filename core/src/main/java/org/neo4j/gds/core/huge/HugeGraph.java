@@ -451,10 +451,6 @@ public class HugeGraph implements CSRGraph {
         }
     }
 
-    @Override
-    public boolean isUndirected() {
-        return orientation == Orientation.UNDIRECTED;
-    }
 
     @Override
     public boolean isMultiGraph() {

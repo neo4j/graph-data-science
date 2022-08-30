@@ -115,6 +115,11 @@ public interface GraphSchema {
     }
 
     static GraphSchema empty() {
-        return of(NodeSchema.empty(), RelationshipSchema.of(Map.of()), Map.of());
+        return of(NodeSchema.empty(), RelationshipSchema.empty(), Map.of());
     }
+
+    default boolean isUndirected() {
+        return relationshipSchema().isUndirected();
+    }
+
 }

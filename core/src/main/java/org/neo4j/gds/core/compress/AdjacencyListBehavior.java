@@ -31,8 +31,8 @@ import org.neo4j.gds.core.loading.UncompressedAdjacencyListBuilderFactory;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
+import java.util.Arrays;
 import java.util.function.LongSupplier;
-import java.util.stream.Stream;
 
 /**
  * Manages different configurations of adjacency list building,
@@ -45,11 +45,12 @@ public interface AdjacencyListBehavior {
         PropertyMappings propertyMappings,
         Aggregation[] aggregations
     ) {
-        var noAggregation = Stream.of(aggregations).allMatch(aggregation -> aggregation == Aggregation.NONE);
+        var resolvedAggregations = Arrays.stream(aggregations).map(Aggregation::resolve).toArray(Aggregation[]::new);
+        var noAggregation = Arrays.stream(aggregations).map(Aggregation::resolve).allMatch(Aggregation::equivalentToNone);
 
         return GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()
-            ? uncompressed(nodeCountSupplier, propertyMappings, aggregations, noAggregation)
-            : compressed(nodeCountSupplier, propertyMappings, aggregations, noAggregation);
+            ? uncompressed(nodeCountSupplier, propertyMappings, resolvedAggregations, noAggregation)
+            : compressed(nodeCountSupplier, propertyMappings, resolvedAggregations, noAggregation);
     }
 
     static AdjacencyCompressorFactory compressed(

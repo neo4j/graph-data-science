@@ -62,6 +62,7 @@ class CSRGraphStoreUtilTest {
             1
         );
 
+        assertThat(convertedGraphStore.schema()).isEqualTo(graphStore.schema());
         assertGraphEquals(graphStore.getUnion(), convertedGraphStore.getUnion());
     }
 

@@ -14,4 +14,5 @@ dependencies {
     compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
 
     implementation project(':graph-projection-api')
+    implementation project(':string-formatting')
 }

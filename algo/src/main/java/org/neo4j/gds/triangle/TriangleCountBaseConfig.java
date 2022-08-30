@@ -20,10 +20,19 @@
 package org.neo4j.gds.triangle;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 @Configuration
@@ -39,6 +48,21 @@ public interface TriangleCountBaseConfig extends AlgoBaseConfig {
     default void validateMaxDegree() {
         if (maxDegree() < 2) {
             throw new IllegalArgumentException("The 'maxDegree' parameter must be set to a value greater than 1.");
+        }
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateTargetRelIsUndirected(
+        GraphStore graphStore,
+        Collection<NodeLabel> ignored,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        if (!graphStore.schema().filterRelationshipTypes(Set.copyOf(selectedRelationshipTypes)).isUndirected()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "TriangleCount requires relationship projections to be UNDIRECTED. " +
+                "Selected relationships `%s` are not all undirected.",
+                selectedRelationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toSet())
+            ));
         }
     }
 

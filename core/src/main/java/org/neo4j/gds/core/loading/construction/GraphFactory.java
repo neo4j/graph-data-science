@@ -298,15 +298,17 @@ public final class GraphFactory {
         idMap.availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
         var nodeSchema = nodeSchemaBuilder.build();
 
+        Orientation orientation = relationships.topology().orientation();
         var relationshipSchemaBuilder = RelationshipSchema.builder();
         if (relationships.properties().isPresent()) {
             relationshipSchemaBuilder.addProperty(
                 RelationshipType.of("REL"),
+                orientation,
                 "property",
                 ValueType.DOUBLE
             );
         } else {
-            relationshipSchemaBuilder.addRelationshipType(RelationshipType.of("REL"));
+            relationshipSchemaBuilder.addRelationshipType(RelationshipType.of("REL"), orientation);
         }
 
         var relationshipSchema = relationshipSchemaBuilder.build();

@@ -38,7 +38,7 @@ abstract class ModelProcBaseTest extends BaseProcTest {
         ),
         "relationships", Map.of(
             "REL", Map.of(
-                "r", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)"
+                "r", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)"
             )
         ),
         "graphProperties", Map.of()

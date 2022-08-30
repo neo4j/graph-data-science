@@ -21,11 +21,20 @@ package org.neo4j.gds.triangle;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConfigurableSeedConfig;
 import org.neo4j.gds.core.StringIdentifierValidations;
+
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 @Configuration
@@ -49,4 +58,20 @@ public interface LocalClusteringCoefficientBaseConfig extends AlgoBaseConfig, Co
     static String validateProperty(String input) {
         return StringIdentifierValidations.validateNoWhiteCharacter(input, "triangleCountProperty");
     }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateUndirectedGraph(
+        GraphStore graphStore,
+        Collection<NodeLabel> ignored,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        if (!graphStore.schema().filterRelationshipTypes(Set.copyOf(selectedRelationshipTypes)).isUndirected()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "LocalClusteringCoefficient requires relationship projections to be UNDIRECTED. " +
+                "Selected relationships `%s` are not all undirected.",
+                selectedRelationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toSet())
+            ));
+        }
+    }
+
 }
