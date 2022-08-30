@@ -21,6 +21,9 @@ package org.neo4j.gds.ml.pipeline;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.InspectableTestProgressTracker;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -33,15 +36,39 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep;
+import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil.SumNodePropertyStep;
+import org.neo4j.gds.test.SumNodePropertyStepConfig;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.graphStoreFromGDL;
 
+@GdlExtension
 class NodePropertyStepExecutorTest {
+
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    private static final String MY_TEST_GRAPH =
+        "CREATE" +
+        "(a:A {}), (b1:B1 {}), (b2:B2 {}), " +
+        "(a)-[:R1]->(b1), " +
+        "(a)-[:R1]->(b2), " +
+        "(b1)-[:R1]->(b2), " +
+        "(b1)-[:R2]->(b2)";
+
+    @Inject
+    GraphStore graphStore;
+
+    @Inject
+    IdFunction idFunction;
 
     @Test
     void executeSeveralSteps() {
@@ -70,6 +97,70 @@ class NodePropertyStepExecutorTest {
         executor.cleanupIntermediateProperties(steps);
 
         assertThat(graphStore.nodePropertyKeys()).containsExactly("age");
+    }
+
+    @Test
+    void executeWithContext() {
+        var executor = new NodePropertyStepExecutor<>(
+            ExecutionContext.EMPTY,
+            new NodePropertyStepExecutorTestConfig(),
+            graphStore,
+            List.of(NodeLabel.of("A")),
+            List.of(),
+            ProgressTracker.NULL_TRACKER
+        );
+
+        List<ExecutableNodePropertyStep> steps = List.of(
+            new SumNodePropertyStep(graphStore,
+                SumNodePropertyStepConfig
+                    .builder()
+                    .mutateProperty("r1_degree")
+                    .addContextRelationshipType("R1")
+                    .addAllContextNodeLabels(List.of("B1", "B2"))
+                    .procName("r1_degree")
+                    .build()
+            ),
+            new SumNodePropertyStep(graphStore,
+                SumNodePropertyStepConfig
+                    .builder()
+                    .mutateProperty("r2_sum")
+                    .addContextRelationshipType("R2")
+                    .addAllContextNodeLabels(List.of("B1", "B2"))
+                    .inputProperty("r1_degree")
+                    .procName("r2_sum")
+                    .build()
+            ),
+            new SumNodePropertyStep(graphStore,
+                SumNodePropertyStepConfig
+                    .builder()
+                    .mutateProperty("r2_b1_sum")
+                    .addContextRelationshipType("R2")
+                    .addAllContextNodeLabels(List.of("B1"))
+                    .inputProperty("r1_degree")
+                    .procName("r2_b1_sum")
+                    .build()
+            )
+        );
+
+        executor.executeNodePropertySteps(steps);
+
+        assertThat(graphStore.nodePropertyKeys()).containsExactly("r1_degree", "r2_sum", "r2_b1_sum");
+
+        var expected = graphStoreFromGDL(
+            "(a:A {r1_degree: 2.0, r2_sum: 0.0, r2_b1_sum: 0.0}), " +
+            "(b1:B1 {r1_degree: 2.0, r2_sum: 2.0, r2_b1_sum: 0.0}), " +
+            "(b2:B2 {r1_degree: 2.0, r2_sum: 2.0}), " +
+            "(a)-[:R1]->(b1), " +
+            "(a)-[:R1]->(b2), " +
+            "(b1)-[:R1]->(b2), " +
+            "(b1)-[:R2]->(b2), " +
+            "(b1)-[:R1]->(a), " +
+            "(b2)-[:R1]->(a), " +
+            "(b2)-[:R1]->(b1), " +
+            "(b2)-[:R2]->(b1)"
+        );
+
+        assertGraphEquals(expected.getUnion(), graphStore.getUnion());
     }
 
     @Test

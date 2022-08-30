@@ -57,5 +57,6 @@ dependencies {
 
     testImplementation project(':open-model-catalog')
     testImplementation project(':test-utils')
+    testImplementation project(':algo-test')
     testImplementation project(':proc-test')
 }

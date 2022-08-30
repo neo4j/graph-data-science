@@ -17,16 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.nodePipeline;
+package org.neo4j.gds.test;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphNameConfig;
-import org.neo4j.gds.config.RandomSeedConfig;
-import org.neo4j.gds.config.TargetNodePropertyConfig;
-import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.gds.annotation.ValueClass;
 
-public interface NodePropertyPipelineBaseTrainConfig extends AlgoBaseConfig, GraphNameConfig, ModelConfig, RandomSeedConfig, TargetNodePropertyConfig {
+import java.util.List;
+import java.util.Optional;
 
-    String pipeline();
+@ValueClass
+public interface SumNodePropertyStepConfig {
+    List<String> contextNodeLabels();
 
+    List<String> contextRelationshipTypes();
+
+    String mutateProperty();
+
+    Optional<String> inputProperty();
+
+    String procName();
+
+    static ImmutableSumNodePropertyStepConfig.Builder builder() {
+        return ImmutableSumNodePropertyStepConfig.builder();
+    }
 }

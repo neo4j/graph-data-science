@@ -56,7 +56,7 @@ public class NodeClassificationPipelineAddStepProcs extends BaseProc {
     ) {
         var pipeline = PipelineCatalog.getTyped(username, pipelineName, NodeClassificationTrainingPipeline.class);
 
-        pipeline.addNodePropertyStep(createNodePropertyStep(taskName, procedureConfig));
+        pipeline.addNodePropertyStep(createNodePropertyStep(taskName, procedureConfig, contextNodeLabels, contextRelationshipTypes));
 
         return new NodePipelineInfoResult(pipelineName, pipeline);
     }
@@ -99,7 +99,9 @@ public class NodeClassificationPipelineAddStepProcs extends BaseProc {
             username(),
             pipelineName,
             taskName,
-            procedureConfig
+            procedureConfig,
+            contextNodeLabels,
+            contextRelationshipTypes
         ));
     }
 

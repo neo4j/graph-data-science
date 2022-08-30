@@ -94,7 +94,9 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
         progressTracker.beginSubTask("Execute node property steps");
         for (ExecutableNodePropertyStep step : steps) {
             progressTracker.beginSubTask();
-            step.execute(executionContext, config.graphName(), nodeLabels, relTypes);
+            var featureInputNodeLabels = step.featureInputNodeLabels(graphStore, nodeLabels);
+            var featureInputRelationshipTypes = step.featureInputRelationshipTypes(graphStore, relTypes);
+            step.execute(executionContext, config.graphName(), featureInputNodeLabels, featureInputRelationshipTypes);
             progressTracker.endSubTask();
         }
         progressTracker.endSubTask("Execute node property steps");

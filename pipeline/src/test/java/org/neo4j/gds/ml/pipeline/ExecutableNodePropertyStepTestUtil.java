@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
@@ -27,16 +28,102 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
+import org.neo4j.gds.test.SumNodePropertyStepConfig;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 
 public class ExecutableNodePropertyStepTestUtil {
+
+    public static class SumNodePropertyStep implements ExecutableNodePropertyStep {
+        private final GraphStore graphStore;
+        private final SumNodePropertyStepConfig config;
+
+        public SumNodePropertyStep(
+            GraphStore graphStore,
+            SumNodePropertyStepConfig config
+        ) {
+            this.graphStore = graphStore;
+            this.config = config;
+        }
+
+        @Override
+        public String procName() {
+            return config.procName();
+        }
+
+        @Override
+        public MemoryEstimation estimate(ModelCatalog modelCatalog, String username, List<String> nodeLabels, List<String> relTypes) {
+            throw new MemoryEstimationNotImplementedException();
+        }
+
+        @Override
+        public String mutateNodeProperty() {
+            return config.mutateProperty();
+        }
+
+        @Override
+        public void execute(
+            ExecutionContext executionContext,
+            String graphName,
+            Collection<NodeLabel> nodeLabels,
+            Collection<RelationshipType> relTypes
+        ) {
+            var featureInputNodeLabels = featureInputNodeLabels(graphStore, nodeLabels);
+            var graph = graphStore.getGraph(
+                featureInputNodeLabels,
+                featureInputRelationshipTypes(graphStore, relTypes),
+                Optional.empty()
+            );
+            graphStore.addNodeProperty(
+                featureInputNodeLabels,
+                config.mutateProperty(),
+                new DoubleTestPropertyValues(nodeId -> {
+                    var sum = new MutableDouble();
+                    graph.forEachRelationship(nodeId, (src, trg) -> {
+                        var targetValue = config
+                            .inputProperty()
+                            .map(prop -> graph.nodeProperties(prop).doubleValue(trg))
+                            .orElse(1.0);
+                        sum.add(targetValue);
+                        return true;
+                    });
+                    return sum.getValue();
+                })
+            );
+        }
+
+        @Override
+        public Map<String, Object> config() {
+            return Map.of(
+                MUTATE_PROPERTY_KEY, config.mutateProperty(),
+                "input", config.inputProperty().orElse("n/a")
+            );
+        }
+
+        @Override
+        public Map<String, Object> toMap() {
+            return Map.of();
+        }
+
+        @Override
+        public List<String> contextNodeLabels() {
+            return config.contextNodeLabels();
+        }
+
+        @Override
+        public List<String> contextRelationshipTypes() {
+            return config.contextRelationshipTypes();
+        }
+    }
+
     public static class NodeIdPropertyStep implements ExecutableNodePropertyStep {
         private final GraphStore graphStore;
         private final String propertyName;

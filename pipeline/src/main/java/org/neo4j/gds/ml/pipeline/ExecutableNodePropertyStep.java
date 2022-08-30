@@ -21,6 +21,8 @@ package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -29,6 +31,9 @@ import org.neo4j.gds.executor.ExecutionContext;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public interface ExecutableNodePropertyStep extends ToMapConvertible {
 
@@ -45,8 +50,20 @@ public interface ExecutableNodePropertyStep extends ToMapConvertible {
         return List.of();
     }
 
+    default Set<NodeLabel> featureInputNodeLabels(GraphStore graphStore, Collection<NodeLabel> nodeLabels) {
+        return Stream
+            .concat(nodeLabels.stream(), ElementTypeValidator.resolve(graphStore, contextNodeLabels()).stream())
+            .collect(Collectors.toSet());
+    }
+
     default List<String> contextRelationshipTypes() {
         return List.of();
+    }
+
+    default Set<RelationshipType> featureInputRelationshipTypes(GraphStore graphStore, Collection<RelationshipType> relationshipTypes) {
+        return Stream
+            .concat(relationshipTypes.stream(), ElementTypeValidator.resolveTypes(graphStore, contextRelationshipTypes()).stream())
+            .collect(Collectors.toSet());
     }
 
     String procName();

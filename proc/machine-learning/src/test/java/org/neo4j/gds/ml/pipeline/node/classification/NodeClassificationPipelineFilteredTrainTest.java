@@ -101,8 +101,10 @@ public class NodeClassificationPipelineFilteredTrainTest extends BaseProcTest {
         runQuery("CALL gds.beta.pipeline.nodeClassification.create('p')");
 
         runQuery("CALL gds.beta.pipeline.nodeClassification.addNodeProperty('p', 'degree', {" +
-                 "  mutateProperty: 'degree' " +
-                 "})");
+                 "mutateProperty: 'degree'" +
+                 "}, " +
+                 "['Y']" +
+                 ")");
 
         runQuery("CALL gds.beta.pipeline.nodeClassification.selectFeatures('p', 'degree')");
 
@@ -115,7 +117,6 @@ public class NodeClassificationPipelineFilteredTrainTest extends BaseProcTest {
 
         assertCypherResult("CALL gds.beta.pipeline.nodeClassification.train('g', {" +
                  " targetNodeLabels: ['X']," +
-                 " contextNodeLabels: ['Y']," +
                  " pipeline: 'p'," +
                  " modelName: 'model'," +
                  " targetProperty: 'class'," +

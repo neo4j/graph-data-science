@@ -351,7 +351,7 @@ CALL gds.beta.pipeline.nodeClassification.addNodeProperty('pipe-with-context', '
 embeddingDimension: 64,
 iterationWeights: [0, 1],
 mutateProperty:'embedding'
-})
+}, ['Painter'])
 ----
 
 [source, cypher, role=noplay setup-query,group=nc]
