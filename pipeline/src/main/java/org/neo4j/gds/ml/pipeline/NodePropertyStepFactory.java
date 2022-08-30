@@ -32,6 +32,7 @@ import org.neo4j.gds.utils.StringJoining;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -47,15 +48,6 @@ public final class NodePropertyStepFactory {
     public static NodePropertyStep createNodePropertyStep(
         String taskName,
         Map<String, Object> configMap
-    ) {
-        return createNodePropertyStep(taskName, configMap, List.of(), List.of());
-    }
-
-    public static NodePropertyStep createNodePropertyStep(
-        String taskName,
-        Map<String, Object> configMap,
-        List<String> contextNodeLabels,
-        List<String> contextRelationshipTypes
     ) {
         var normalizedName = normalizeName(taskName);
 
@@ -73,12 +65,26 @@ public final class NodePropertyStepFactory {
             ));
         }
 
-        validateReservedConfigKeys(configMap);
+        var algoConfigMap = configMap
+            .entrySet()
+            .stream()
+            .filter(kv -> !kv.getKey().equals("contextNodeLabels") && !kv.getKey().equals("contextRelationshipTypes"))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        var contextConfigMap = configMap
+            .entrySet()
+            .stream()
+            .filter(kv -> kv.getKey().equals("contextNodeLabels") || kv.getKey().equals("contextRelationshipTypes"))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        var contextConfig = NodePropertyStepContextConfig.of(contextConfigMap);
+
+        validateReservedConfigKeys(algoConfigMap);
 
         // validate user-input is valid
-        tryParsingConfig(gdsCallableDefinition, configMap);
+        tryParsingConfig(gdsCallableDefinition, algoConfigMap);
 
-        return new NodePropertyStep(gdsCallableDefinition, configMap, contextNodeLabels, contextRelationshipTypes);
+        return new NodePropertyStep(gdsCallableDefinition, algoConfigMap, contextConfig.contextNodeLabels(), contextConfig.contextRelationshipTypes());
     }
 
     private static AlgoBaseConfig tryParsingConfig(

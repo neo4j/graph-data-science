@@ -98,10 +98,9 @@ public class NodeClassificationPipelineFilteredTrainTest extends BaseProcTest {
         runQuery("CALL gds.beta.pipeline.nodeClassification.create('p')");
 
         runQuery("CALL gds.beta.pipeline.nodeClassification.addNodeProperty('p', 'degree', {" +
-                 "mutateProperty: 'degree'" +
-                 "}, " +
-                 "['Y']" +
-                 ")");
+                 "mutateProperty: 'degree', " +
+                 "contextNodeLabels: ['Y']" +
+                 "})");
 
         runQuery("CALL gds.beta.pipeline.nodeClassification.selectFeatures('p', 'degree')");
 
