@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
@@ -27,7 +26,6 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryExtension;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.logging.Level;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -45,7 +43,6 @@ public abstract class BaseProgressTest extends BaseTest {
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
-        builder.setConfig(GraphDatabaseSettings.store_internal_log_level, Level.DEBUG);
         builder.setConfig(ProgressFeatureSettings.progress_tracking_enabled, true);
         // make sure that we 1) have our extension under test and 2) have it only once
         builder.removeExtensions(ex -> ex instanceof TaskRegistryExtension);
