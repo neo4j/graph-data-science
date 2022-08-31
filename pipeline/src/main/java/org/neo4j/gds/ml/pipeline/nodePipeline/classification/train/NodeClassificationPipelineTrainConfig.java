@@ -19,12 +19,8 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
-import org.neo4j.gds.ElementProjection;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.LongMultiSet;
-import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.Metric;
@@ -32,7 +28,6 @@ import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPipelineBaseTrainConfig;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,13 +40,6 @@ public interface NodeClassificationPipelineTrainConfig extends NodePropertyPipel
     @Configuration.ConvertWith("org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification.Parser#parse")
     @Configuration.ToMapValue("org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification#specificationsToString")
     List<ClassificationMetricSpecification> metrics();
-
-    default List<String> targetNodeLabels() { return List.of(ElementProjection.PROJECT_ALL); }
-
-    @Configuration.Ignore
-    default Collection<NodeLabel> targetNodeLabelIdentifiers(GraphStore graphStore) {
-        return ElementTypeValidator.resolve(graphStore, targetNodeLabels());
-    }
 
     @Configuration.Ignore
     default List<Metric> metrics(LocalIdMap classIdMap,  LongMultiSet classCounts) {
@@ -71,12 +59,6 @@ public interface NodeClassificationPipelineTrainConfig extends NodePropertyPipel
 
     static NodeClassificationPipelineTrainConfig of(String username, CypherMapWrapper config) {
         return new NodeClassificationPipelineTrainConfigImpl(username, config);
-    }
-
-    @Override
-    @Configuration.Ignore
-    default List<String> nodeLabels() {
-        return targetNodeLabels();
     }
 
 }

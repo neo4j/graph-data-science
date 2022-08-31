@@ -12,7 +12,6 @@ The regression model can be xref:machine-learning/node-property-prediction/noder
 
 More precisely, the training proceeds as follows:
 
-. Apply `nodeLabels` and `relationshipType` filters to the graph.
 . Apply the node property steps, added according to xref:machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-adding-node-properties[Adding node properties], on the whole graph.
 . Select node properties to be used as features, as specified in xref:machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-adding-features[Adding features].
 . Split the input graph into two parts: the train graph and the test graph. This is described in xref:machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-configure-splits[Configuring the node splits].
@@ -66,7 +65,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name                                                          | Type              | Default              | Optional | Description
 | pipeline                                                      | String            | n/a                  | no       | The name of the pipeline to execute.
-| xref:common-usage/running-algos.adoc#common-configuration-node-labels[nodeLabels]               | List of String    | ['*']                | yes      | Filter the named graph using the given node labels.
+| targetNodeLabels                                              | List of String    | ['*']                | yes      | Filter the named graph using the given node labels to obtain nodes that are subject to training and evaluation.
 | xref:common-usage/running-algos.adoc#common-configuration-relationship-types[relationshipTypes] | List of String    | ['*']                | yes      | Filter the named graph using the given relationship types.
 | xref:common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer           | 4                    | yes      | The number of concurrent threads used for running the algorithm.
 | targetProperty                                                | String            | n/a                  | no       | The target property of the node. Must be of type Integer or Float.
@@ -206,7 +205,7 @@ The configuration of the pipeline is the result of running the examples on the p
 ----
 CALL gds.alpha.pipeline.nodeRegression.train('myGraph', {
   pipeline: 'pipe',
-  nodeLabels: ['House'],
+  targetNodeLabels: ['House'],
   modelName: 'nr-pipeline-model',
   targetProperty: 'price',
   randomSeed: 25,

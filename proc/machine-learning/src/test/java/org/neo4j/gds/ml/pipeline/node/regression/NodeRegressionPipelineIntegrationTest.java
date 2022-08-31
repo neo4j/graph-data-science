@@ -153,7 +153,7 @@ final class NodeRegressionPipelineIntegrationTest extends BaseProcTest {
         runQuery("CALL gds.alpha.pipeline.nodeRegression.addLinearRegression('p', {penalty: 4.0, maxEpochs: 100})");
 
         runQuery("CALL gds.alpha.pipeline.nodeRegression.train('g', {" +
-                 " nodeLabels: ['N']," +
+                 " targetNodeLabels: ['N']," +
                  " pipeline: 'p'," +
                  " modelName: 'model'," +
                  " targetProperty: 'cost'," +
@@ -208,7 +208,7 @@ final class NodeRegressionPipelineIntegrationTest extends BaseProcTest {
         runQuery("CALL gds.alpha.pipeline.nodeRegression.addRandomForest('p', {numberOfDecisionTrees: 25, minSplitSize: 5})");
 
         runQuery("CALL gds.alpha.pipeline.nodeRegression.train('g', {" +
-                 " nodeLabels: ['N']," +
+                 " targetNodeLabels: ['N']," +
                  " pipeline: 'p'," +
                  " modelName: 'model'," +
                  " targetProperty: 'cost'," +

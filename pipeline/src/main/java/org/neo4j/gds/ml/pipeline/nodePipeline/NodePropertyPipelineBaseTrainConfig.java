@@ -19,14 +19,35 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline;
 
+import org.neo4j.gds.ElementProjection;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.TargetNodePropertyConfig;
 import org.neo4j.gds.model.ModelConfig;
 
+import java.util.Collection;
+import java.util.List;
+
 public interface NodePropertyPipelineBaseTrainConfig extends AlgoBaseConfig, GraphNameConfig, ModelConfig, RandomSeedConfig, TargetNodePropertyConfig {
 
     String pipeline();
+
+    default List<String> targetNodeLabels() { return List.of(ElementProjection.PROJECT_ALL); }
+
+    @Configuration.Ignore
+    default Collection<NodeLabel> targetNodeLabelIdentifiers(GraphStore graphStore) {
+        return ElementTypeValidator.resolve(graphStore, targetNodeLabels());
+    }
+
+    @Override
+    @Configuration.Ignore
+    default List<String> nodeLabels() {
+        return targetNodeLabels();
+    }
 
 }
