@@ -91,7 +91,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         ProgressTracker progressTracker
     ) {
 
-        var nodesGraph = graphStore.getGraph(config.nodeLabelIdentifiers(graphStore));
+        var nodesGraph = graphStore.getGraph(config.targetNodeLabelIdentifiers(graphStore));
         pipeline.splitConfig().validateMinNumNodesInSplitSets(nodesGraph);
 
         var targetNodeProperty = nodesGraph.nodeProperties(config.targetProperty());
