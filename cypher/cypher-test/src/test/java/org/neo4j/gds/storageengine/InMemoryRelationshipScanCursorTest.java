@@ -44,6 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisableForNeo4jVersion(Neo4jVersion.V_4_4_8_drop10)
 @DisableForNeo4jVersion(Neo4jVersion.V_5_0_drop50)
 @DisableForNeo4jVersion(Neo4jVersion.V_5_0_drop60)
+@DisableForNeo4jVersion(Neo4jVersion.V_5_0_drop80)
 public class InMemoryRelationshipScanCursorTest extends CypherTest {
 
     @Neo4jGraph
