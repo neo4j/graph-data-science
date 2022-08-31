@@ -36,32 +36,6 @@ public final class ModularityComputer {
 
     private ModularityComputer() {}
 
-    public static double modularity(Graph graph, HugeLongArray finalCommunities, double gamma) {
-        double modularity = 0d;
-        HugeDoubleArray sumOfEdges = HugeDoubleArray.newArray(graph.nodeCount());
-        HugeDoubleArray insideEdges = HugeDoubleArray.newArray(graph.nodeCount());
-        double coefficient = 1.0 / graph.relationshipCount();
-        graph.forEachNode(
-            nodeId -> {
-                long communityId = finalCommunities.get(nodeId);
-                graph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
-                    long tCommunityId = finalCommunities.get(t);
-                    if (communityId == tCommunityId)
-                        insideEdges.addTo(communityId, w);
-                    sumOfEdges.addTo(communityId, w);
-                    return true;
-                });
-                return true;
-            }
-        );
-        for (long community = 0; community < graph.nodeCount(); ++community) {
-            double ec = insideEdges.get(community);
-            double Kc = sumOfEdges.get(community);
-            modularity += (ec - Kc * Kc * gamma);
-        }
-        return modularity * coefficient;
-    }
-
     static double compute(
         Graph workingGraph,
         HugeLongArray communities,
