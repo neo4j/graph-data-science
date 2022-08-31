@@ -62,7 +62,7 @@ public final class ModularityComputer {
         return modularity * coefficient;
     }
 
-    static double modularity(
+    static double compute(
         Graph workingGraph,
         HugeLongArray communities,
         HugeDoubleArray communityVolumes,
@@ -94,15 +94,15 @@ public final class ModularityComputer {
             nodeStream ->
                 nodeStream
                     .mapToDouble(communityId -> {
-                        double oc = relationshipsOutsideCommunity.get(communityId);
-                        double Kc = communityVolumes.get(communityId);
-                        double ec = Kc - oc;
-                        return ec - Kc * Kc * gamma;
+                        double outsideRelationships = relationshipsOutsideCommunity.get(communityId);
+                        double totalRelationships = communityVolumes.get(communityId);
+                        double insideRelationships = totalRelationships - outsideRelationships;
+                        return insideRelationships - totalRelationships * totalRelationships * gamma;
                     })
                     .reduce(Double::sum)
                     .orElseThrow(() -> new RuntimeException("Error while computing modularity"))
         );
-        //we do not have the self-loops from  previous merges so we settle from calculating the outside edges between relationships
+        //we do not have the self-loops from previous merges, so we settle from calculating the outside edges between relationships
         //from that and the total sum of weights in communityVolumes we can calculate all inside edges
 
         return modularity * coefficient;

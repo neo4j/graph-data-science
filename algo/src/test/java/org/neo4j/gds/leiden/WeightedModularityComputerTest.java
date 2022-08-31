@@ -77,7 +77,7 @@ class WeightedModularityComputerTest {
             communityVolumes.addTo(localCommunities.get(v), 4 * graph.degree(v));
             return true;
         });
-        double modularity = ModularityComputer.modularity(
+        double modularity = ModularityComputer.compute(
             graph,
             localCommunities,
             communityVolumes,
@@ -108,7 +108,7 @@ class WeightedModularityComputerTest {
         ).run();
         var localCommunitiesCondensed = HugeLongArray.of(0, 1);
         var communityVolumes2 = HugeDoubleArray.of(communityVolumes.get(0), communityVolumes.get(1));
-        double modularity = ModularityComputer.modularity(
+        double modularity = ModularityComputer.compute(
             aggregateGraph,
             localCommunitiesCondensed,
             communityVolumes2,
