@@ -13,7 +13,7 @@ The classification model can be xref:machine-learning/node-property-prediction/n
 More precisely, the training proceeds as follows:
 
 . Apply the node property steps, added according to xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-node-properties[Adding node properties], on the whole graph.
-. Apply `targetNodeLabels` and `relationshipType` filters to the graph.
+. Apply `targetNodeLabels` and `relationshipTypes` filters to the graph.
 . Select node properties to be used as features, as specified in xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-features[Adding features].
 . Split the input graph into two parts: the train graph and the test graph. This is described in xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-configure-splits[Configuring the node splits].
 These graphs are internally managed and exist only for the duration of the training.
