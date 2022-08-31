@@ -218,7 +218,9 @@ class DecisionTreeClassifierTest {
         // Max should scale almost inverse linearly with minSplitSize or minLeafSize.
         " 8_000, 100_000,  2, 1, 72,   9_599_976",
         " 8_000, 100_000, 20, 1, 72,     959_976",
-        " 8_000, 100_000, 20, 19, 72,    505_320"
+        " 8_000, 100_000, 20, 19, 72,    505_320",
+        // corner case of 0 training examples
+        " 8_000,       0, 20, 19,  0,          0"
     })
     void estimateDecisionTree(
         int maxDepth,
