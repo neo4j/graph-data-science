@@ -12,7 +12,6 @@ The classification model can be xref:machine-learning/node-property-prediction/n
 
 More precisely, the training proceeds as follows:
 
-. Apply a filter using the union of `targetNodeLabels` and `contextNodeLabels` and a filter using `relationshipType` to the graph.
 . Apply the node property steps, added according to xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-node-properties[Adding node properties], on the whole graph.
 . Apply `targetNodeLabels` and `relationshipType` filters to the graph.
 . Select node properties to be used as features, as specified in xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-features[Adding features].
@@ -82,7 +81,6 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 | Name                                                          | Type              | Default              | Optional | Description
 | pipeline                                                      | String            | n/a                  | no       | The name of the pipeline to execute.
 | targetNodeLabels                                              | List of String    | ['*']                | yes      | Filter the named graph using the given node labels to obtain nodes that are subject to training and evaluation.
-| contextNodeLabels                                             | List of String    | []                   | yes      | Node labels whose nodes should also be included when applying node property steps.
 | xref:common-usage/running-algos.adoc#common-configuration-relationship-types[relationshipTypes] | List of String    | ['*']                | yes      | Filter the named graph using the given relationship types.
 | xref:common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer           | 4                    | yes      | The number of concurrent threads used for running the algorithm.
 | targetProperty                                                | String            | n/a                  | no       | The class of the node. Must be of type Integer.
