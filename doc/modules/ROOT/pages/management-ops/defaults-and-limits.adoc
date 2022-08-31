@@ -28,14 +28,21 @@ Here we set the `concurrency` parameter to a default value of 12 for user Alicia
 CALL gds.alpha.config.defaults.set('concurrency', 12, 'Alicia')
 ----
 
-We also set `maxIterations` to 100:
+We also set `deltaThreshold` to 5%:
 
 [source, cypher, role=noplay setup-query, operator=Alicia]
 ----
-CALL gds.alpha.config.defaults.set('maxIterations', 100, 'Alicia')
+CALL gds.alpha.config.defaults.set('deltaThreshold', 0.05, 'Alicia')
 ----
 
-These configuration values are now applied each time Alicia runs an algorithm that uses the `concurrency` or `maxIterations` configuration parameters. See for example xref:algorithms/knn.adoc[K-Nearest Neighbors].
+And Alicia wants to always run in `sudo` mode; she is a power user:
+
+[source, cypher, role=noplay setup-query, operator=Alicia]
+----
+CALL gds.alpha.config.defaults.set('sudo', true, 'Alicia')
+----
+
+These configuration values are now applied each time Alicia runs an algorithm that uses the `concurrency`, `maxIterations` or `sudo` configuration parameters. See for example xref:algorithms/knn.adoc[K-Nearest Neighbors].
 
 [Note]
 ====
@@ -79,9 +86,10 @@ CALL gds.alpha.config.defaults.list({ username: 'Alicia' })
 .Results
 [opts="header", cols="1, 1"]
 |===
-| key             | value
-| "concurrency"   | 12
-| "maxIterations" | 100
+| key              | value
+| "concurrency"    | 12
+| "deltaThreshold" | 0.05
+| "sudo"           | true
 |===
 --
 
@@ -110,7 +118,15 @@ Here we set a limit on the `concurrency` parameter of 6 for user Kristian; that 
 CALL gds.alpha.config.limits.set('concurrency', 6, 'Kristian')
 ----
 
-This limit is now checked each time Kristian runs an algorithm that uses the `concurrency` configuration parameter. See for example xref:algorithms/page-rank.adoc[Page Rank]. He will be able to use a `concurrency` setting of 6 or lower only.
+We also disallow Kristian from running in `sudo` mode:
+
+.Setting a limit
+[source, cypher, role=noplay setup-query, skip-test=true]
+----
+CALL gds.alpha.config.limits.set('sudo', false, 'Kristian')
+----
+
+These limits are now checked each time Kristian runs an algorithm that uses the `concurrency` or `sudo` configuration parameters. See for example xref:algorithms/page-rank.adoc[Page Rank]. He will be able to use a `concurrency` setting of 6 or lower only, and he can never run in `sudo` mode.
 
 [Note]
 ====
@@ -136,6 +152,7 @@ CALL gds.alpha.config.limits.list({ username: 'Kristian', key: 'concurrency' })
 |===
 | key           | value
 | "concurrency" | 6
+| "sudo"        | false
 |===
 --
 
