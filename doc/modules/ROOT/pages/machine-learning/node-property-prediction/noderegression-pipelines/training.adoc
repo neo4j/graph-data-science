@@ -230,3 +230,11 @@ Here we can observe that the `RandomForest` candidate with 5 decision trees perf
 Notice that this is just a toy example on a very small graph.
 In order to achieve a higher test score, we may need to use better features, a larger graph, or different model configuration.
 --
+
+[[noderegression-pipelines-examples-train-filtering]]
+=== Providing richer contexts to node property steps
+
+Node property steps can use additional node labels and relationship types by specifying `contextNodeLabels` and `contextRelationshipTypes` when xref:machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-adding-node-properties[adding node property steps].
+
+This makes it possible to create richer generated node properties and thereby also richer features.
+The way that works is essentially identical to the way it works in xref:machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc#nodeclassification-pipelines-examples-train-filtering[Node Classification].
