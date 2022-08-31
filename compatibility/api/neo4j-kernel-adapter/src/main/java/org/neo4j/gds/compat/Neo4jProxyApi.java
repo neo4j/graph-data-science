@@ -83,8 +83,6 @@ public interface Neo4jProxyApi {
 
     String validateExternalDatabaseName(String databaseName);
 
-    void cacheDatabaseId(GraphDatabaseService databaseIdRepository);
-
     AccessMode accessMode(CustomAccessMode customAccessMode);
 
     String username(AuthSubject subject);
@@ -242,6 +240,8 @@ public interface Neo4jProxyApi {
     String defaultRecordFormatSetting();
 
     void configureRecordFormat(Config.Builder configBuilder, String recordFormat);
+
+    DatabaseLayout databaseLayout(Config config, String databaseName);
 
     BoltTransactionRunner<?, ?> boltTransactionRunner();
 

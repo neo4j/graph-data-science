@@ -90,11 +90,6 @@ public final class Neo4jProxy {
         return IMPL.validateExternalDatabaseName(databaseName);
     }
 
-    @TestOnly
-    public static void cacheDatabaseId(GraphDatabaseService db) {
-        IMPL.cacheDatabaseId(db);
-    }
-
     public static AccessMode accessMode(CustomAccessMode customAccessMode) {
         return IMPL.accessMode(customAccessMode);
     }
@@ -366,6 +361,10 @@ public final class Neo4jProxy {
 
     public static void configureRecordFormat(Config.Builder configBuilder, String recordFormat) {
         IMPL.configureRecordFormat(configBuilder, recordFormat);
+    }
+
+    public static DatabaseLayout databaseLayout(Config config, String databaseName) {
+        return IMPL.databaseLayout(config, databaseName);
     }
 
     public static BoltTransactionRunner<?, ?> boltTransactionRunner() {
