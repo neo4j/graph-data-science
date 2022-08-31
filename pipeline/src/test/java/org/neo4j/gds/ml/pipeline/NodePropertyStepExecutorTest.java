@@ -43,7 +43,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil.SumNodePropertyStep;
-import org.neo4j.gds.test.SumNodePropertyStepConfig;
+import org.neo4j.gds.test.SumNodePropertyStepConfigImpl;
 
 import java.util.List;
 import java.util.Optional;
@@ -112,30 +112,30 @@ class NodePropertyStepExecutorTest {
 
         List<ExecutableNodePropertyStep> steps = List.of(
             new SumNodePropertyStep(graphStore,
-                SumNodePropertyStepConfig
+                SumNodePropertyStepConfigImpl
                     .builder()
                     .mutateProperty("r1_degree")
-                    .addContextRelationshipType("R1")
-                    .addAllContextNodeLabels(List.of("B1", "B2"))
+                    .contextRelationshipTypes(List.of("R1"))
+                    .contextNodeLabels(List.of("B1", "B2"))
                     .procName("r1_degree")
                     .build()
             ),
             new SumNodePropertyStep(graphStore,
-                SumNodePropertyStepConfig
+                SumNodePropertyStepConfigImpl
                     .builder()
                     .mutateProperty("r2_sum")
-                    .addContextRelationshipType("R2")
-                    .addAllContextNodeLabels(List.of("B1", "B2"))
+                    .contextRelationshipTypes(List.of("R2"))
+                    .contextNodeLabels(List.of("B1", "B2"))
                     .inputProperty("r1_degree")
                     .procName("r2_sum")
                     .build()
             ),
             new SumNodePropertyStep(graphStore,
-                SumNodePropertyStepConfig
+                SumNodePropertyStepConfigImpl
                     .builder()
                     .mutateProperty("r2_b1_sum")
-                    .addContextRelationshipType("R2")
-                    .addAllContextNodeLabels(List.of("B1"))
+                    .contextRelationshipTypes(List.of("R2"))
+                    .contextNodeLabels(List.of("B1"))
                     .inputProperty("r1_degree")
                     .procName("r2_b1_sum")
                     .build()

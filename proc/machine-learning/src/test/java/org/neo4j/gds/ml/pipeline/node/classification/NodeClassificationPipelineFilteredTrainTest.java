@@ -38,7 +38,6 @@ import java.util.Map;
 public class NodeClassificationPipelineFilteredTrainTest extends BaseProcTest {
 
     private static final String GRAPH_NAME = "g";
-    private static final String MODEL_NAME = "model";
 
     @Neo4jGraph
     private static final String DB_QUERY =
@@ -67,8 +66,6 @@ public class NodeClassificationPipelineFilteredTrainTest extends BaseProcTest {
         ", (x6)-[:R]->(y2)" +
         ", (x8)-[:R]->(y2)" +
         ", (x10)-[:R]->(y2)";
-
-    public static final String PIPELINE_NAME = "pipe";
 
     @BeforeEach
     void setup() throws Exception {

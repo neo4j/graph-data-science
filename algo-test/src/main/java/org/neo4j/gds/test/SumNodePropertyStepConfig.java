@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.test;
 
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.annotation.Configuration;
 
 import java.util.List;
 import java.util.Optional;
 
-@ValueClass
+@Configuration
 public interface SumNodePropertyStepConfig {
     List<String> contextNodeLabels();
 
@@ -35,8 +35,4 @@ public interface SumNodePropertyStepConfig {
     Optional<String> inputProperty();
 
     String procName();
-
-    static ImmutableSumNodePropertyStepConfig.Builder builder() {
-        return ImmutableSumNodePropertyStepConfig.builder();
-    }
 }

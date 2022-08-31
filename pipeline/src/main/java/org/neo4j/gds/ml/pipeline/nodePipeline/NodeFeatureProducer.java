@@ -69,11 +69,11 @@ public final class NodeFeatureProducer<PIPELINE_CONFIG extends NodePropertyPipel
     public Features procedureFeatures(NodePropertyTrainingPipeline pipeline) {
         try {
             stepExecutor.executeNodePropertySteps(pipeline.nodePropertySteps());
-            Collection<NodeLabel> featureInputLabels = trainConfig.nodeLabelIdentifiers(graphStore);
-            pipeline.validateFeatureProperties(graphStore, featureInputLabels);
+            Collection<NodeLabel> targetNodeLabels = trainConfig.nodeLabelIdentifiers(graphStore);
+            pipeline.validateFeatureProperties(graphStore, targetNodeLabels);
 
             // We create a filtered graph with only targetNodeLabels, that contains the newly created node properties from the steps
-            var targetNodeLabelGraph = graphStore.getGraph(trainConfig.nodeLabelIdentifiers(graphStore));
+            var targetNodeLabelGraph = graphStore.getGraph(targetNodeLabels);
             if (pipeline.requireEagerFeatures()) {
                 // Random forest uses feature vectors many times each.
                 return FeaturesFactory.extractEagerFeatures(targetNodeLabelGraph, pipeline.featureProperties());

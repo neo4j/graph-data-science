@@ -44,8 +44,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 
@@ -139,10 +137,8 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
         var configCopy = new HashMap<>(config);
         var nodeLabelStrings = nodeLabels.stream().map(ElementIdentifier::name);
         var relTypeStrings = relTypes.stream().map(ElementIdentifier::name);
-        var allNodeLabelStrings = Stream.concat(nodeLabelStrings, contextNodeLabels.stream()).collect(Collectors.toList());
-        var allRelTypeStrings = Stream.concat(relTypeStrings, contextRelationshipTypes.stream()).collect(Collectors.toList());
-        configCopy.put("nodeLabels", allNodeLabelStrings);
-        configCopy.put("relationshipTypes", allRelTypeStrings);
+        configCopy.put("nodeLabels", nodeLabelStrings);
+        configCopy.put("relationshipTypes", relTypeStrings);
 
         var algorithmSpec = getAlgorithmSpec(executionContext.modelCatalog());
 

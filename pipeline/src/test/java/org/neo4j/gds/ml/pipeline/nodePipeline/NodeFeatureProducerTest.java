@@ -61,16 +61,9 @@ class NodeFeatureProducerTest {
     @Inject
     private GraphStore bipartiteGraphStore;
 
-    private final static NodePropertyPredictionSplitConfig SPLIT_CONFIG = NodePropertyPredictionSplitConfigImpl
-        .builder()
-        .testFraction(0.33)
-        .validationFolds(2)
-        .build();
-
     @Test
     void shouldProduceCorrectNodeFeatures() {
         var pipeline = new NodeClassificationTrainingPipeline();
-        pipeline.setSplitConfig(SPLIT_CONFIG);
         pipeline.addFeatureStep(NodeFeatureStep.of("class"));
 
         var mlpTrainerConfig = MLPClassifierTrainConfigImpl.builder().hiddenLayerSizes(List.of(6,4)).build();
