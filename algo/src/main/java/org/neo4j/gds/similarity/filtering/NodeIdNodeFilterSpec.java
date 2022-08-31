@@ -19,9 +19,16 @@
  */
 package org.neo4j.gds.similarity.filtering;
 
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 
+import java.util.Collection;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class NodeIdNodeFilterSpec implements NodeFilterSpec {
 
@@ -39,5 +46,30 @@ public class NodeIdNodeFilterSpec implements NodeFilterSpec {
     @Override
     public String render() {
         return "NodeFilter" + nodeIds.toString();
+    }
+
+    @Override
+    public void validate(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        String nodeFilterType
+    ) throws IllegalArgumentException {
+        var existingNodeIds = graphStore.nodes();
+
+        var missingNodes = nodeIds
+            .stream()
+            .filter(Predicate.not(existingNodeIds::contains))
+            .map(String::valueOf)
+            .collect(Collectors.joining(","));
+
+        if (!missingNodes.isBlank()) {
+            var errorMessage = formatWithLocale(
+                "Invalid configuration value `%s`, the following nodes are missing from the graph: [%s]",
+                nodeFilterType,
+                String.join(",", missingNodes)
+            );
+
+            throw new IllegalArgumentException(errorMessage);
+        }
     }
 }

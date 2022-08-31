@@ -60,6 +60,7 @@ public interface FilteredKnnBaseConfig extends KnnBaseConfig {
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
+        sourceNodeFilter().validate(graphStore, selectedLabels, "sourceNodeFilter");
     }
 
     @Configuration.GraphStoreValidationCheck
@@ -68,6 +69,7 @@ public interface FilteredKnnBaseConfig extends KnnBaseConfig {
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
+        targetNodeFilter().validate(graphStore, selectedLabels, "targetNodeFilter");
     }
 
 }
