@@ -20,12 +20,10 @@
 package org.neo4j.gds.core.utils.progress;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.logging.Level;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
@@ -43,7 +41,6 @@ abstract class BaseTaskRegistryExtensionTest extends BaseTest {
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
-        builder.setConfig(GraphDatabaseSettings.store_internal_log_level, Level.DEBUG);
         builder.setConfig(ProgressFeatureSettings.progress_tracking_enabled, featureEnabled());
         // make sure that we 1) have our extension under test and 2) have it only once
         builder.removeExtensions(ex -> ex instanceof TaskRegistryExtension);

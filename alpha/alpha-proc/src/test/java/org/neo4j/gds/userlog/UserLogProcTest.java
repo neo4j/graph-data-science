@@ -22,7 +22,6 @@ package org.neo4j.gds.userlog;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -39,7 +38,6 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.wcc.WccStreamProc;
-import org.neo4j.logging.Level;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -54,7 +52,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-
 
 class UserLogProcTest extends BaseProcTest {
 
@@ -77,7 +74,6 @@ class UserLogProcTest extends BaseProcTest {
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
-        builder.setConfig(GraphDatabaseSettings.store_internal_log_level, Level.DEBUG);
         builder.setConfig(ProgressFeatureSettings.progress_tracking_enabled, true);
         // make sure that we 1) have our extension under test and 2) have it only once
         builder.removeExtensions(ex -> ex instanceof TaskRegistryExtension);

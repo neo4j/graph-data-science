@@ -35,7 +35,6 @@ import org.neo4j.internal.batchimport.input.Collectors;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.io.layout.Neo4jLayout;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.impl.scheduler.JobSchedulerFactory;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -147,7 +146,7 @@ public final class GdsParallelBatchImporter {
 
         var importTimer = ProgressTimer.start();
 
-        var databaseLayout = Neo4jLayout.of(databaseConfig).databaseLayout(config.dbName());
+        var databaseLayout = Neo4jProxy.databaseLayout(databaseConfig, config.dbName());
 
         validateWritableDirectories(databaseLayout);
         validateDatabaseDoesNotExist(databaseLayout);

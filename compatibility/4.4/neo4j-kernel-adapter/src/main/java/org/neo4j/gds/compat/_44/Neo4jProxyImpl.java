@@ -27,7 +27,6 @@ import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.dbms.database.DatabaseManager;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.BoltTransactionRunner;
@@ -38,7 +37,6 @@ import org.neo4j.gds.compat.CompositeNodeCursor;
 import org.neo4j.gds.compat.CustomAccessMode;
 import org.neo4j.gds.compat.GdsDatabaseManagementServiceBuilder;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.compat.StoreScan;
@@ -89,6 +87,7 @@ import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.internal.schema.IndexValueCapability;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.io.layout.Neo4jLayout;
 import org.neo4j.io.layout.recordstorage.RecordDatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
@@ -104,7 +103,6 @@ import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.EmptyMemoryTracker;
@@ -136,13 +134,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         var normalizedName = new NormalizedDatabaseName(databaseName);
         DatabaseNameValidator.validateExternalDatabaseName(normalizedName);
         return normalizedName.name();
-    }
-
-    @Override
-    public void cacheDatabaseId(GraphDatabaseAPI db) {
-        var databaseManager = GraphDatabaseApiProxy.resolveDependency(db, DatabaseManager.class);
-        var databaseIdRepository = databaseManager.databaseIdRepository();
-        databaseIdRepository.getById(db.databaseId().databaseId());
     }
 
     @Override
@@ -540,6 +531,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public void configureRecordFormat(Config.Builder configBuilder, String recordFormat) {
         configBuilder.set(GraphDatabaseSettings.record_format, recordFormat);
+    }
+
+    @Override
+    public DatabaseLayout databaseLayout(Config config, String databaseName) {
+        return Neo4jLayout.of(config).databaseLayout(databaseName);
     }
 
     @Override
