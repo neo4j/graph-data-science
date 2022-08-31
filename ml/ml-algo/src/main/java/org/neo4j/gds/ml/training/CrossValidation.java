@@ -47,7 +47,7 @@ public class CrossValidation<MODEL_TYPE> {
     private final ProgressTracker progressTracker;
 
     private final TerminationFlag terminationFlag;
-    private final List<Metric> metrics;
+    private final List<? extends Metric> metrics;
     private final int validationFolds;
     private final Optional<Long> randomSeed;
     private final ModelTrainer<MODEL_TYPE> modelTrainer;
@@ -67,7 +67,7 @@ public class CrossValidation<MODEL_TYPE> {
     public CrossValidation(
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
-        List<Metric> metrics,
+        List<? extends Metric> metrics,
         int validationFolds,
         Optional<Long> randomSeed,
         ModelTrainer<MODEL_TYPE> modelTrainer,

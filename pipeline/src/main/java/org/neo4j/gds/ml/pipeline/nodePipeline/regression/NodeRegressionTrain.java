@@ -29,8 +29,8 @@ import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.MetricConsumer;
+import org.neo4j.gds.ml.metrics.regression.RegressionMetrics;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.RegressionTrainerFactory;
@@ -57,6 +57,8 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
     private final HugeDoubleArray targets;
     private final IdMap nodeIdMap;
     private final NodeRegressionTrainingPipeline pipeline;
+
+    private final List<RegressionMetrics> metrics;
     private final NodeRegressionPipelineTrainConfig trainConfig;
     private final NodeFeatureProducer<NodeRegressionPipelineTrainConfig> nodeFeatureProducer;
     private final ProgressTracker progressTracker;
@@ -103,6 +105,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
             nodeFeatureProducer,
             targets,
             nodesGraph,
+            config.metrics(),
             progressTracker
         );
     }
@@ -113,12 +116,14 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         NodeFeatureProducer<NodeRegressionPipelineTrainConfig> nodeFeatureProducer,
         HugeDoubleArray targets,
         IdMap nodeIdMap,
+        List<RegressionMetrics> metrics,
         ProgressTracker progressTracker
     ) {
         this.pipeline = pipeline;
         this.trainConfig = trainConfig;
         this.nodeFeatureProducer = nodeFeatureProducer;
         this.nodeIdMap = nodeIdMap;
+        this.metrics = metrics;
         this.progressTracker = progressTracker;
         this.targets = targets;
     }
@@ -146,7 +151,6 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
 
         terminationFlag.assertRunning();
 
-        List<Metric> metrics = List.copyOf(trainConfig.metrics());
         var trainingStatistics = new TrainingStatistics(metrics);
 
         var features = nodeFeatureProducer.procedureFeatures(pipeline);
@@ -163,7 +167,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
 
     private void findBestModelCandidate(
         ReadOnlyHugeLongArray trainNodeIds,
-        List<Metric> metrics,
+        List<RegressionMetrics> metrics,
         Features features,
         TrainingStatistics trainingStatistics
     ) {
@@ -225,7 +229,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
             idx -> localTargets.set(idx, targets.get(evaluationSet.get(idx)))
         );
 
-        trainConfig.metrics().forEach(metric -> scoreConsumer.consume(metric, metric.compute(localTargets, localPredictions)));
+        metrics.forEach(metric -> scoreConsumer.consume(metric, metric.compute(localTargets, localPredictions)));
     }
 
     private void evaluateBestModel(

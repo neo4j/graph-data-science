@@ -27,23 +27,23 @@ import java.util.stream.Collectors;
 
 public final class ModelSpecificMetricsHandler {
     public static final ModelSpecificMetricsHandler NOOP = new ModelSpecificMetricsHandler(List.of(), (metric, score) -> {});
-    private final List<Metric> metrics;
+    private final List<? extends Metric> metrics;
 
     private final BiConsumer<Metric, Double> metricConsumer;
 
-    private ModelSpecificMetricsHandler(List<Metric> metrics, BiConsumer<Metric, Double> metricConsumer) {
+    private ModelSpecificMetricsHandler(List<? extends Metric> metrics, BiConsumer<Metric, Double> metricConsumer) {
         this.metrics = metrics;
         this.metricConsumer = metricConsumer;
     }
 
-    public static ModelSpecificMetricsHandler of(List<Metric> metrics, BiConsumer<Metric, Double> metricConsumer) {
+    public static ModelSpecificMetricsHandler of(List<? extends Metric> metrics, BiConsumer<Metric, Double> metricConsumer) {
         return new ModelSpecificMetricsHandler(
             metrics.stream().filter(Metric::isModelSpecific).collect(Collectors.toList()),
             metricConsumer
         );
     }
 
-    public static ModelSpecificMetricsHandler of(List<Metric> metrics, ModelStatsBuilder modelStatsBuilder) {
+    public static ModelSpecificMetricsHandler of(List<? extends Metric> metrics, ModelStatsBuilder modelStatsBuilder) {
         return ModelSpecificMetricsHandler.of(metrics, modelStatsBuilder::update);
     }
 
