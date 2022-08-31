@@ -98,7 +98,9 @@ For example, xref:machine-learning/pre-processing.adoc[pre-processing algorithms
 CALL gds.beta.pipeline.nodeClassification.addNodeProperty(
   pipelineName: String,
   procedureName: String,
-  procedureConfiguration: Map
+  procedureConfiguration: Map,
+  contextNodeLabels: List of String,
+  contextRelationshipTypes: List of String
 )
 YIELD
   name: String,
@@ -116,6 +118,8 @@ YIELD
 | pipelineName              | String  | The name of the pipeline.
 | procedureName             | String  | The name of the procedure to be added to the pipeline.
 | procedureConfiguration    | Map     | The configuration of the procedure, excluding `graphName`, `nodeLabels` and `relationshipTypes`.
+| contextNodeLabels         | List of String     | contextNodeLabels.
+| contextRelationshipTypes  | List of String     | contextRelationshipTypes.
 |===
 
 include::partial$/machine-learning/node-property-prediction/pipelineInfoResult.adoc[]

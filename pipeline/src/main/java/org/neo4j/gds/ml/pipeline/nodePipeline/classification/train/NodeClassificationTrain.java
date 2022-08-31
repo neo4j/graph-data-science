@@ -258,7 +258,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         ProgressTracker progressTracker
     ) {
         // we dont resolve the relationships as for extracting the classes they are irrelevant
-        var nodesGraph = graphStore.getGraph(config.nodeLabelIdentifiers(graphStore));
+        var nodesGraph = graphStore.getGraph(config.targetNodeLabelIdentifiers(graphStore));
         pipeline.splitConfig().validateMinNumNodesInSplitSets(nodesGraph);
 
         var targetNodeProperty = nodesGraph.nodeProperties(config.targetProperty());
@@ -266,14 +266,15 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         LongMultiSet classCounts = labelsAndClassCounts.classCounts();
         var classIdMap = LocalIdMap.ofSorted(classCounts.keys());
 
+        var metrics = config.metrics(classIdMap, classCounts);
         return new NodeClassificationTrain(
             pipeline,
             config,
             labelsAndClassCounts.labels(),
             classIdMap,
             nodesGraph,
-            config.metrics(classIdMap, classCounts),
-            classificationMetrics(config.metrics(classIdMap, classCounts)),
+            metrics,
+            classificationMetrics(metrics),
             classCounts,
             nodeFeatureProducer,
             progressTracker

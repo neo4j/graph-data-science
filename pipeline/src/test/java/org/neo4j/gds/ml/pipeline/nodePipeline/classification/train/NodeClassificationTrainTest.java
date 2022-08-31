@@ -680,7 +680,7 @@ class NodeClassificationTrainTest {
             .randomSeed(42L)
             .targetProperty("t")
             .relationshipTypes(List.of("SOME_REL"))
-            .nodeLabels(List.of("SOME_LABEL"))
+            .targetNodeLabels(List.of("SOME_LABEL"))
             .metrics(List.of(ClassificationMetricSpecification.Parser.parse("F1_WEIGHTED")))
             .build();
 

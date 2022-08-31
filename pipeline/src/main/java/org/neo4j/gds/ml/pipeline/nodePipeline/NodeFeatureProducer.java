@@ -19,16 +19,17 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 
-public final class NodeFeatureProducer<PIPELINE_CONFIG extends AlgoBaseConfig & GraphNameConfig> {
+import java.util.Collection;
+
+public final class NodeFeatureProducer<PIPELINE_CONFIG extends NodePropertyPipelineBaseTrainConfig> {
 
     private final NodePropertyStepExecutor<PIPELINE_CONFIG> stepExecutor;
     private final GraphStore graphStore;
@@ -44,7 +45,7 @@ public final class NodeFeatureProducer<PIPELINE_CONFIG extends AlgoBaseConfig & 
         this.trainConfig = trainConfig;
     }
 
-    public static <PIPELINE_CONFIG extends AlgoBaseConfig & GraphNameConfig> NodeFeatureProducer<PIPELINE_CONFIG> create(
+    public static <PIPELINE_CONFIG extends NodePropertyPipelineBaseTrainConfig> NodeFeatureProducer<PIPELINE_CONFIG> create(
         GraphStore graphStore,
         PIPELINE_CONFIG config,
         ExecutionContext executionContext,
@@ -68,15 +69,16 @@ public final class NodeFeatureProducer<PIPELINE_CONFIG extends AlgoBaseConfig & 
     public Features procedureFeatures(NodePropertyTrainingPipeline pipeline) {
         try {
             stepExecutor.executeNodePropertySteps(pipeline.nodePropertySteps());
-            pipeline.validateFeatureProperties(graphStore, trainConfig.nodeLabelIdentifiers(graphStore));
+            Collection<NodeLabel> targetNodeLabels = trainConfig.nodeLabelIdentifiers(graphStore);
+            pipeline.validateFeatureProperties(graphStore, targetNodeLabels);
 
-            // We create a graph, that contains the newly created node properties from the steps
-            var graph = graphStore.getGraph(trainConfig.nodeLabelIdentifiers(graphStore));
+            // We create a filtered graph with only targetNodeLabels, that contains the newly created node properties from the steps
+            var targetNodeLabelGraph = graphStore.getGraph(targetNodeLabels);
             if (pipeline.requireEagerFeatures()) {
                 // Random forest uses feature vectors many times each.
-                return FeaturesFactory.extractEagerFeatures(graph, pipeline.featureProperties());
+                return FeaturesFactory.extractEagerFeatures(targetNodeLabelGraph, pipeline.featureProperties());
             } else {
-                return FeaturesFactory.extractLazyFeatures(graph, pipeline.featureProperties());
+                return FeaturesFactory.extractLazyFeatures(targetNodeLabelGraph, pipeline.featureProperties());
             }
         } finally {
             stepExecutor.cleanupIntermediateProperties(pipeline.nodePropertySteps());

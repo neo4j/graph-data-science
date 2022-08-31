@@ -12,8 +12,8 @@ The classification model can be xref:machine-learning/node-property-prediction/n
 
 More precisely, the training proceeds as follows:
 
-. Apply `nodeLabels` and `relationshipType` filters to the graph.
 . Apply the node property steps, added according to xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-node-properties[Adding node properties], on the whole graph.
+. Apply `targetNodeLabels` and `relationshipTypes` filters to the graph.
 . Select node properties to be used as features, as specified in xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-features[Adding features].
 . Split the input graph into two parts: the train graph and the test graph. This is described in xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-configure-splits[Configuring the node splits].
 These graphs are internally managed and exist only for the duration of the training.
@@ -80,7 +80,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name                                                          | Type              | Default              | Optional | Description
 | pipeline                                                      | String            | n/a                  | no       | The name of the pipeline to execute.
-| xref:common-usage/running-algos.adoc#common-configuration-node-labels[nodeLabels]               | List of String    | ['*']                | yes      | Filter the named graph using the given node labels.
+| targetNodeLabels                                              | List of String    | ['*']                | yes      | Filter the named graph using the given node labels to obtain nodes that are subject to training and evaluation.
 | xref:common-usage/running-algos.adoc#common-configuration-relationship-types[relationshipTypes] | List of String    | ['*']                | yes      | Filter the named graph using the given relationship types.
 | xref:common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer           | 4                    | yes      | The number of concurrent threads used for running the algorithm.
 | targetProperty                                                | String            | n/a                  | no       | The class of the node. Must be of type Integer.
@@ -186,20 +186,38 @@ image::example-graphs/node_property_pipeline_graph.svg[align="center"]
 [source, cypher, role=noplay setup-query, group=nc]
 ----
 CREATE
-  (:House {color: 'Gold', sizePerStory: [15.5, 23.6, 33.1], class: 0}),
-  (:House {color: 'Red', sizePerStory: [15.5, 23.6, 100.0], class: 0}),
-  (:House {color: 'Blue', sizePerStory: [11.3, 35.1, 22.0], class: 0}),
-  (:House {color: 'Green', sizePerStory: [23.2, 55.1, 0.0], class: 1}),
-  (:House {color: 'Gray', sizePerStory: [34.3, 24.0, 0.0],  class: 1}),
-  (:House {color: 'Black', sizePerStory: [71.66, 55.0, 0.0], class: 1}),
-  (:House {color: 'White', sizePerStory: [11.1, 111.0, 0.0], class: 1}),
-  (:House {color: 'Teal', sizePerStory: [80.8, 0.0, 0.0], class: 2}),
-  (:House {color: 'Beige', sizePerStory: [106.2, 0.0, 0.0], class: 2}),
-  (:House {color: 'Magenta', sizePerStory: [99.9, 0.0, 0.0], class: 2}),
-  (:House {color: 'Purple', sizePerStory: [56.5, 0.0, 0.0], class: 2}),
-  (:UnknownHouse {color: 'Pink', sizePerStory: [23.2, 55.1, 56.1]}),
-  (:UnknownHouse {color: 'Tan', sizePerStory: [22.32, 102.0, 0.0]}),
-  (:UnknownHouse {color: 'Yellow', sizePerStory: [39.0, 0.0, 0.0]});
+  (gold:House {color: 'Gold', sizePerStory: [15.5, 23.6, 33.1], class: 0}),
+  (red:House {color: 'Red', sizePerStory: [15.5, 23.6, 100.0], class: 0}),
+  (blue:House {color: 'Blue', sizePerStory: [11.3, 35.1, 22.0], class: 0}),
+  (green:House {color: 'Green', sizePerStory: [23.2, 55.1, 0.0], class: 1}),
+  (gray:House {color: 'Gray', sizePerStory: [34.3, 24.0, 0.0],  class: 1}),
+  (black:House {color: 'Black', sizePerStory: [71.66, 55.0, 0.0], class: 1}),
+  (white:House {color: 'White', sizePerStory: [11.1, 111.0, 0.0], class: 1}),
+  (teal:House {color: 'Teal', sizePerStory: [80.8, 0.0, 0.0], class: 2}),
+  (beige:House {color: 'Beige', sizePerStory: [106.2, 0.0, 0.0], class: 2}),
+  (magenta:House {color: 'Magenta', sizePerStory: [99.9, 0.0, 0.0], class: 2}),
+  (purple:House {color: 'Purple', sizePerStory: [56.5, 0.0, 0.0], class: 2}),
+  (pink:UnknownHouse {color: 'Pink', sizePerStory: [23.2, 55.1, 56.1]}),
+  (tan:UnknownHouse {color: 'Tan', sizePerStory: [22.32, 102.0, 0.0]}),
+  (yellow:UnknownHouse {color: 'Yellow', sizePerStory: [39.0, 0.0, 0.0]}),
+  (schiele:Painter {name: 'Schiele', surrealist: 0, expressionist: 1}),
+  (picasso:Painter {name: 'Picasso', surrealist: 1, expressionist: 0}),
+  (kahlo:Painter {name: 'Kahlo', surrealist: 1, expressionist: 0}),
+
+  (schiele)-[:PAINTED]->(gold),
+  (schiele)-[:PAINTED]->(red),
+  (schiele)-[:PAINTED]->(blue),
+  (picasso)-[:PAINTED]->(green),
+  (picasso)-[:PAINTED]->(gray),
+  (picasso)-[:PAINTED]->(black),
+  (picasso)-[:PAINTED]->(white),
+  (kahlo)-[:PAINTED]->(teal),
+  (kahlo)-[:PAINTED]->(beige),
+  (kahlo)-[:PAINTED]->(magenta),
+  (kahlo)-[:PAINTED]->(purple),
+  (schiele)-[:PAINTED]->(pink),
+  (schiele)-[:PAINTED]->(tan),
+  (kahlo)-[:PAINTED]->(yellow);
 ----
 
 With the graph in Neo4j we can now project it into the graph catalog to prepare it for the pipeline execution.
@@ -232,11 +250,11 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 ----
 CALL gds.beta.pipeline.nodeClassification.train.estimate('myGraph', {
   pipeline: 'pipe',
-  nodeLabels: ['House'],
+  targetNodeLabels: ['House'],
   modelName: 'nc-model',
   targetProperty: 'class',
   randomSeed: 2,
-  metrics: [ 'F1_WEIGHTED' ]
+  metrics: [ 'ACCURACY' ]
 })
 YIELD requiredMemory
 ----
@@ -265,29 +283,116 @@ We will train a model to predict the class in which a house belongs, based on it
 ----
 CALL gds.beta.pipeline.nodeClassification.train('myGraph', {
   pipeline: 'pipe',
-  nodeLabels: ['House'],
+  targetNodeLabels: ['House'],
   modelName: 'nc-pipeline-model',
   targetProperty: 'class',
   randomSeed: 1337,
-  metrics: ['F1_WEIGHTED', 'OUT_OF_BAG_ERROR']
+  metrics: ['ACCURACY', 'OUT_OF_BAG_ERROR']
 }) YIELD modelInfo, modelSelectionStats
 RETURN
   modelInfo.bestParameters AS winningModel,
-  modelInfo.metrics.F1_WEIGHTED.train.avg AS avgTrainScore,
-  modelInfo.metrics.F1_WEIGHTED.outerTrain AS outerTrainScore,
-  modelInfo.metrics.F1_WEIGHTED.test AS testScore,
-  [cand IN modelSelectionStats.modelCandidates | cand.metrics.F1_WEIGHTED.validation.avg] AS validationScores
+  modelInfo.metrics.ACCURACY.train.avg AS avgTrainScore,
+  modelInfo.metrics.ACCURACY.outerTrain AS outerTrainScore,
+  modelInfo.metrics.ACCURACY.test AS testScore,
+  [cand IN modelSelectionStats.modelCandidates | cand.metrics.ACCURACY.validation.avg] AS validationScores
 ----
 
 .Results
 [opts="header", cols="8, 2, 2, 2, 8"]
 |===
 | winningModel                                                                                                                                | avgTrainScore  | outerTrainScore    | testScore   | validationScores
-| {maxEpochs=500, minEpochs=1, penalty=5.881039653970664, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001} | 0.999999989939394 | 0.999999991212121 | 0.999999985 | [0.41818181190909104, 0.0, 0.32727272236363647, 0.4909090835454547, 0.41818181190909104]
+| {maxEpochs=500, minEpochs=1, penalty=5.881039653970664, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001} | 1 | 1 | 1 | [0.8, 0.0, 0.5, 0.9, 0.8]
 |===
 
-Here we can observe that the model candidate with penalty `5.881` performed the best in the training phase, with an `F1_WEIGHTED` score nearing 1 over the train graph as well as on the test graph.
+Here we can observe that the model candidate with penalty `5.881` performed the best in the training phase, with an `ACCURACY` score of 1 over the train graph as well as on the test graph.
 This model is one that the auto-tuning found.
-This indicates that the model reacted very well to the train graph, and was able to generalize fairly well to unseen data.
+This indicates that the model reacted very well to the train graph, and was able to generalize well to unseen data.
 Notice that this is just a toy example on a very small graph. In order to achieve a higher test score, we may need to use better features, a larger graph, or different model configuration.
 --
+
+
+[[nodeclassification-pipelines-examples-train-filtering]]
+=== Training with context filter
+
+In the above example we projected a Person subgraph without relationships and used it for training and testing.
+Much information in the original graph is not used.
+We might want to utilize more node and relationship types to generate node properties (and link features) and investigate whether it improves node classification.
+We can do that by passing in `contextNodeLabels`.
+Doing so will make available additional nodes and relationships which are not subject to training or prediction during the creation of node properties, which in turn makes it possible to construct richer features.
+
+The following statement will project a graph containing the information about houses and their paintors using a native projection and store it in the graph catalog under the name 'paintingGraph'.
+[source, cypher, role=noplay graph-project-query, group=nc]
+----
+CALL gds.graph.project(
+  'paintingGraph',
+  {
+    House: { properties: ['class'] },
+    Painter: {}
+  },
+  {
+    PAINTED: {orientation: 'UNDIRECTED'}
+  }
+)
+----
+
+We still train a model to predict the class of each house, but use the Painter information instead of node properties to generate new node properties and features that the model uses in training.
+We will begin by creating a new pipeline for that purpose running the following queries.
+
+[source, cypher, role=noplay setup-query,group=nc]
+----
+CALL gds.beta.pipeline.nodeClassification.create('pipe-with-context')
+----
+
+[source, cypher, role=noplay setup-query,group=nc]
+----
+CALL gds.beta.pipeline.nodeClassification.addNodeProperty('pipe-with-context', 'fastRP', {
+embeddingDimension: 64,
+iterationWeights: [0, 1],
+mutateProperty:'embedding'
+}, ['Painter'])
+----
+
+[source, cypher, role=noplay setup-query,group=nc]
+----
+CALL gds.beta.pipeline.nodeClassification.selectFeatures('pipe-with-context', ['embedding'])
+----
+
+[source, cypher, role=noplay setup-query,group=nc]
+----
+CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('pipe-with-context')
+----
+
+We are now ready to invoke the training of the newly created pipeline.
+[[nodeclassification-pipelines-examples-filtered-train-query]]
+[role=query-example,group=nc]
+--
+.The following will train another model using the same pipeline, adding `contextNodeLabels`:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.nodeClassification.train('paintingGraph', {
+  pipeline: 'pipe-with-context',
+  targetNodeLabels: ['House'],
+  modelName: 'nc-pipeline-model-contextual',
+  targetProperty: 'class',
+  randomSeed: 1337,
+  metrics: ['ACCURACY']
+}) YIELD modelInfo, modelSelectionStats
+RETURN
+  modelInfo.bestParameters AS winningModel,
+  modelInfo.metrics.ACCURACY.train.avg AS avgTrainScore,
+  modelInfo.metrics.ACCURACY.outerTrain AS outerTrainScore,
+  modelInfo.metrics.ACCURACY.test AS testScore,
+  [cand IN modelSelectionStats.modelCandidates | cand.metrics.ACCURACY.validation.avg] AS validationScores
+----
+
+.Results
+[opts="header", cols="8, 2, 2, 2, 8"]
+|===
+| winningModel                                                                                                                                | avgTrainScore  | outerTrainScore    | testScore   | validationScores
+| {maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001} | 1 | 1 | 1 | [1.0]
+|===
+--
+
+As we can see, the results indicate that the painter information is sufficient to perfectly classify the houses.
+The change is due to the embeddings taking into account more contextual information.
+While this is a toy example, contextual can sometimes provide more valuable information than node properties, and when used together, performance superior to using either alone can be achieved.

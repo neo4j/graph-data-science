@@ -52,17 +52,41 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
     private final GdsCallableFinder.GdsCallableDefinition callableDefinition;
     private final Map<String, Object> config;
 
+    private final List<String> contextNodeLabels;
+
+    private final List<String> contextRelationshipTypes;
+
     public NodePropertyStep(
         GdsCallableFinder.GdsCallableDefinition callableDefinition,
         Map<String, Object> config
     ) {
+        this(callableDefinition, config, List.of(), List.of());
+    }
+    public NodePropertyStep(
+        GdsCallableFinder.GdsCallableDefinition callableDefinition,
+        Map<String, Object> config,
+        List<String> contextNodeLabels,
+        List<String> contextRelationshipTypes
+    ) {
         this.callableDefinition = callableDefinition;
         this.config = config;
+        this.contextNodeLabels = contextNodeLabels;
+        this.contextRelationshipTypes = contextRelationshipTypes;
     }
 
     @Override
     public Map<String, Object> config() {
         return config;
+    }
+
+    @Override
+    public List<String> contextNodeLabels() {
+        return contextNodeLabels;
+    }
+
+    @Override
+    public List<String> contextRelationshipTypes() {
+        return contextRelationshipTypes;
     }
 
     @Override
