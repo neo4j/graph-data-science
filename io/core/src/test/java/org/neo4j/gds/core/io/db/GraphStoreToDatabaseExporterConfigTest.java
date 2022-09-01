@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.io.db;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.compat.Neo4jProxy;
 
 import java.util.Optional;
 
@@ -41,7 +42,7 @@ class GraphStoreToDatabaseExporterConfigTest {
         assertThat(pbiConfig.batchSize()).isEqualTo(1337);
         assertThat(pbiConfig.pageCacheMemory()).isEqualTo(100_000L);
         assertThat(pbiConfig.highIO()).isTrue();
-        assertThat(pbiConfig.maxNumberOfWorkerThreads()).isEqualTo(42);
+        assertThat(Neo4jProxy.writeConcurrency(pbiConfig)).isEqualTo(42);
     }
 
 }

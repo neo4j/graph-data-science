@@ -99,33 +99,12 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
 
     default org.neo4j.internal.batchimport.Configuration toBatchImporterConfig() {
         var exportConfig = this;
-        return new org.neo4j.internal.batchimport.Configuration() {
-            @Override
-            public int batchSize() {
-                return exportConfig.batchSize();
-            }
-
-            @Override
-            public int maxNumberOfWorkerThreads() {
-                return exportConfig.writeConcurrency();
-            }
-
-            @Override
-            public long pageCacheMemory() {
-                return exportConfig
-                    .pageCacheMemory()
-                    .orElseGet(org.neo4j.internal.batchimport.Configuration.super::pageCacheMemory);
-            }
-
-            @Override
-            public boolean highIO() {
-                return exportConfig.highIO();
-            }
-
-            @Override
-            public IndexConfig indexConfig() {
-                return IndexConfig.DEFAULT.withLabelIndex();
-            }
-        };
+        return Neo4jProxy.batchImporterConfig(
+            exportConfig.batchSize(),
+            exportConfig.writeConcurrency(),
+            exportConfig.pageCacheMemory(),
+            exportConfig.highIO(),
+            IndexConfig.DEFAULT.withLabelIndex()
+        );
     }
 }

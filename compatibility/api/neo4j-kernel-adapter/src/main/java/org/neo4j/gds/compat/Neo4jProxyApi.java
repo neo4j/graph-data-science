@@ -21,6 +21,7 @@ package org.neo4j.gds.compat;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.common.DependencyResolver;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.dbms.api.DatabaseManagementService;
@@ -33,6 +34,7 @@ import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
+import org.neo4j.internal.batchimport.IndexConfig;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
@@ -75,6 +77,7 @@ import org.neo4j.ssl.config.SslPolicyLoader;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 public interface Neo4jProxyApi {
 
@@ -166,6 +169,17 @@ public interface Neo4jProxyApi {
     ) throws KernelException;
 
     CompositeNodeCursor compositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds);
+
+    Configuration batchImporterConfig(
+        int batchSize,
+        int writeConcurrency,
+        Optional<Long> pageCacheMemory,
+        boolean highIO,
+        IndexConfig indexConfig
+    );
+
+    @TestOnly
+    int writeConcurrency(Configuration batchImportConfiguration);
 
     BatchImporter instantiateBatchImporter(
         BatchImporterFactory factory,
