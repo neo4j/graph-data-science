@@ -111,7 +111,7 @@ CALL gds.alpha.pipeline.nodeRegression.addNodeProperty(
 | Name                      | Type    | Description
 | pipelineName              | String  | The name of the pipeline.
 | procedureName             | String  | The name of the procedure to be added to the pipeline.
-| procedureConfiguration    | Map     | The map used to generate the configuration of the procedure. It includes procedure specific configurations except `nodeLabels` and `relationshipTypes`. It can optionally contain parameters in table below.
+| procedureConfiguration    | Map     | The map used to generate the configuration for the node property procedure. It supports all procedure-specific configuration, excluding the parameters `nodeLabels` and `relationshipTypes`. Additionally, it supports the context parameters listed in the below table.
 |===
 
 .Node property step context configuration
