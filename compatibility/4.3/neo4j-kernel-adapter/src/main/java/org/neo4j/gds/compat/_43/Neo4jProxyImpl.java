@@ -43,6 +43,7 @@ import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
@@ -562,7 +563,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         Config databaseConfig,
         FileSystemAbstraction fs,
         LogService logService,
-        DependencyResolver dependencyResolver
+        GraphDatabaseService databaseService
     ) {
         return RecordFormatSelector.selectForConfig(databaseConfig, logService.getInternalLogProvider());
     }
