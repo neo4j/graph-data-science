@@ -97,6 +97,8 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
         return new GraphStoreToDatabaseExporterConfigImpl(normalizedConfig);
     }
 
+    @Value.Default
+    @Configuration.Ignore
     default org.neo4j.internal.batchimport.Configuration toBatchImporterConfig() {
         var exportConfig = this;
         return Neo4jProxy.batchImporterConfig(
