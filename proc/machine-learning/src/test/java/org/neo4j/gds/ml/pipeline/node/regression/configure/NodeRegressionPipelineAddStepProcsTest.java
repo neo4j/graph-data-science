@@ -188,8 +188,7 @@ class NodeRegressionPipelineAddStepProcsTest extends NodeRegressionPipelineBaseP
             "mutateProperty: 'pr'," +
             " nodeLabels: 'LABEL'" +
             "})",
-            "Cannot configure ['nodeLabels', 'relationshipTypes'] for an individual node property step, " +
-            "but can only be configured at `train` and `predict` mode."
+            "Cannot configure ['nodeLabels', 'relationshipTypes'] for an individual node property step."
         );
     }
 

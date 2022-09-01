@@ -103,7 +103,7 @@ public final class NodePropertyStepFactory {
     private static void validateReservedConfigKeys(Map<String, Object> procedureConfig) {
         if (RESERVED_CONFIG_KEYS.stream().anyMatch(procedureConfig::containsKey)) {
             throw new IllegalArgumentException(formatWithLocale(
-                "Cannot configure %s for an individual node property step, but can only be configured at `train` and `predict` mode.",
+                "Cannot configure %s for an individual node property step.",
                 StringJoining.join(RESERVED_CONFIG_KEYS)
             ));
         }

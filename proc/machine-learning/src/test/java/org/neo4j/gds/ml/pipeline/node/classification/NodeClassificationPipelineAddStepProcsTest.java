@@ -234,7 +234,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
         ))
             .isExactlyInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining(
-                "Cannot configure ['nodeLabels', 'relationshipTypes'] for an individual node property step, but can only be configured at `train` and `predict` mode."
+                "Cannot configure ['nodeLabels', 'relationshipTypes'] for an individual node property step."
             );
     }
 
