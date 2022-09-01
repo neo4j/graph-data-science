@@ -89,6 +89,10 @@ public abstract class DecisionTreeTrainer<PREDICTION extends Number> {
         long numberOfTrainingSamples,
         long leafNodeSizeInBytes
     ) {
+        if (numberOfTrainingSamples == 0) {
+            return MemoryRange.empty();
+        }
+
         long maxNumLeafNodes = (long) Math.ceil(
             Math.min(
                 Math.pow(2.0, config.maxDepth()),
