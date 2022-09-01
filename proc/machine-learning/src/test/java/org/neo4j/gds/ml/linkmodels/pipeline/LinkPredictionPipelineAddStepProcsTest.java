@@ -75,6 +75,8 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
         );
     }
 
+    //TODO addNodeProertyWithContextTest
+
     @Test
     void shouldAddFeatureStep() {
         assertCypherResult("CALL gds.beta.pipeline.linkPrediction.addFeature('myPipeline', 'hadamard', {nodeProperties: ['pr']})",

@@ -21,18 +21,12 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ElementProjection;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.gdl.GdlFactory;
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @GdlExtension
@@ -49,22 +43,6 @@ class LinkPredictionTrainConfigTest {
     GraphStore directedGraphStore;
 
     @Test
-    void contextDoesNotIncludeTargetRelType() {
-        var config = LinkPredictionTrainConfigImpl.builder()
-            .pipeline("DUMMY")
-            .graphName("DUMMY")
-            .modelName("DUMMY")
-            .modelUser("DUMMY")
-            .sourceNodeLabel("N")
-            .targetNodeLabel("N")
-            .contextRelationshipTypes(List.of(ElementProjection.PROJECT_ALL))
-            .targetRelationshipType("REL")
-            .build();
-
-        assertThat(config.internalContextRelationshipType(graphStore)).containsExactly(RelationshipType.of("CONTEXT"));
-    }
-
-    @Test
     void targetRelMustBeUndirected() {
         var config = LinkPredictionTrainConfigImpl.builder()
             .pipeline("DUMMY")
@@ -73,7 +51,6 @@ class LinkPredictionTrainConfigTest {
             .modelUser("DUMMY")
             .sourceNodeLabel(ElementProjection.PROJECT_ALL)
             .targetNodeLabel(ElementProjection.PROJECT_ALL)
-            .contextRelationshipTypes(List.of(ElementProjection.PROJECT_ALL))
             .targetRelationshipType("REL")
             .build();
 
@@ -82,30 +59,6 @@ class LinkPredictionTrainConfigTest {
             config.nodeLabelIdentifiers(graphStore),
             config.internalRelationshipTypes(graphStore)
         )).hasMessage("Target relationship type `REL` must be UNDIRECTED, but was directed.");
-    }
-
-    @Test
-    void featureInputNodeLabelsIncludeSourceAndTarget() {
-        var config = LinkPredictionTrainConfigImpl.builder()
-            .pipeline("DUMMY")
-            .graphName("DUMMY")
-            .modelName("DUMMY")
-            .modelUser("DUMMY")
-            .sourceNodeLabel("A")
-            .targetNodeLabel("B")
-            .contextNodeLabels(List.of("C"))
-            .contextRelationshipTypes(List.of(ElementProjection.PROJECT_ALL))
-            .targetRelationshipType("REL")
-            .build();
-
-        var graphStore = GdlFactory.of("(:A)-[:REL]->(:B)-[:CONTEXT]->(:C)").build();
-
-
-        assertThat(config.featureInputLabels(graphStore)).containsExactly(
-            NodeLabel.of("A"),
-            NodeLabel.of("B"),
-            NodeLabel.of("C")
-        );
     }
 
 }

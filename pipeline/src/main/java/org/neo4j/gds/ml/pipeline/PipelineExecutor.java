@@ -90,7 +90,7 @@ public abstract class PipelineExecutor<
             graphStore,
             config,
             featureInputGraphFilter.nodeLabels(),
-            featureInputGraphFilter.relationshipTypes(),
+            featureInputGraphFilter.intermediateRelationshipTypes(),
             progressTracker
         );
 

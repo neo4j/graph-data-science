@@ -26,29 +26,13 @@ import org.neo4j.gds.annotation.ValueClass;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @ValueClass
 public interface PipelineGraphFilter {
     Collection<NodeLabel> nodeLabels();
 
-    @Value.Derived
-    default Collection<RelationshipType> relationshipTypes() {
-        return Stream
-            .of(intermediateRelationshipTypes(), contextRelationshipTypes())
-            .flatMap(Collection::stream)
-            .collect(
-                Collectors.toSet());
-    }
-
     @Value.Default
     default Collection<RelationshipType> intermediateRelationshipTypes() {
-        return List.of();
-    }
-
-    @Value.Default
-    default Collection<RelationshipType> contextRelationshipTypes() {
         return List.of();
     }
 }

@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline.MODEL_TYPE;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainPipelineExecutor.LinkPredictionTrainPipelineResult;
@@ -112,12 +111,8 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             configuration.username(),
             pipeline.nodePropertySteps(),
             configuration.nodeLabels(),
-            Stream.concat(
-                    configuration.contextRelationshipTypes().stream(),
-                    Stream.of(pipeline.splitConfig().featureInputRelationshipType().name)
-                )
-                .distinct()
-                .collect(Collectors.toList())
+            //TODO is it featureInputRelationshipType? Also fix steps.estimate()
+            List.of(pipeline.splitConfig().featureInputRelationshipType().name)
         );
 
         MemoryEstimation trainingEstimation = MemoryEstimations
@@ -144,9 +139,8 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
                 .intermediateRelationshipTypes(List.of(splitConfig.testRelationshipType()))
                 .build(),
             DatasetSplits.FEATURE_INPUT, ImmutablePipelineGraphFilter.builder()
-                .nodeLabels(config.featureInputLabels(graphStore))
+                .nodeLabels(config.nodeLabelIdentifiers(graphStore))
                 .intermediateRelationshipTypes(List.of(splitConfig.featureInputRelationshipType()))
-                .contextRelationshipTypes(config.internalContextRelationshipType(graphStore))
                 .build()
         );
     }
@@ -171,12 +165,12 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
 
         var trainGraph = graphStore.getGraph(
             trainDataSplit.nodeLabels(),
-            trainDataSplit.relationshipTypes(),
+            trainDataSplit.intermediateRelationshipTypes(),
             Optional.of("label")
         );
         var testGraph = graphStore.getGraph(
             testDataSplit.nodeLabels(),
-            testDataSplit.relationshipTypes(),
+            testDataSplit.intermediateRelationshipTypes(),
             Optional.of("label")
         );
 
