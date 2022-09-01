@@ -252,7 +252,10 @@ In order to achieve a higher test score, we may need to use better features, a l
 [[noderegression-pipelines-examples-train-filtering]]
 === Providing richer contexts to node property steps
 
-In the above example we projected a House subgraph without relationships and used it for training and testing. Much information in the original graph is not used. We might want to utilize more node and relationship types to generate node properties (and link features) and investigate whether it improves node regression. We can do that by passing in contextNodeLabels and contextRelationshipTypes when adding a node property step.
+In the above example we projected a House subgraph without relationships and used it for training and testing.
+Much information in the original graph is not used.
+We might want to utilize more node and relationship types to generate node properties (and link features) and investigate whether it improves node regression.
+We can do that by passing in contextNodeLabels and contextRelationshipTypes when adding a node property step.
 
 
 The following statement will project a graph containing the information about houses and their painters using a native projection and store it in the graph catalog under the name 'paintingGraph'.
@@ -272,12 +275,15 @@ CALL gds.graph.project(
 
 We still train a model to predict the price of each house, but use `Painter` and `PAINTED` as context in addition to `House` to generate features that leverage the full graph structure.
 After the feature generation however, it is only the `House` nodes that are considered as training and evaluation instances, so only the `House` nodes need to have the target property `price`.
-We will begin by creating a new pipeline for that purpose running the following queries.
+
+First, we create a new pipeline.
 
 [source, cypher, role=noplay setup-query,group=nc]
 ----
 CALL gds.alpha.pipeline.nodeRegression.create('pipe-with-context')
 ----
+
+Second, we add a node property step (in this case, a node embedding) with `Painter` as contextNodeLabels.
 
 [source, cypher, role=noplay setup-query,group=nc]
 ----
@@ -289,10 +295,14 @@ contextNodeLabels: ['Painter']
 })
 ----
 
+We add our embedding as a feature for the model:
+
 [source, cypher, role=noplay setup-query,group=nc]
 ----
 CALL gds.alpha.pipeline.nodeRegression.selectFeatures('pipe-with-context', ['embedding'])
 ----
+
+And we complete the pipeline setup by adding a random forest model candidate:
 
 [source, cypher, role=noplay setup-query,group=nc]
 ----
@@ -300,10 +310,11 @@ CALL gds.alpha.pipeline.nodeRegression.addRandomForest('pipe-with-context', {num
 ----
 
 We are now ready to invoke the training of the newly created pipeline.
+
 [[noderegression-pipelines-examples-filtered-train-query]]
 [role=query-example,group=nc]
 --
-.The following will train another model using the same pipeline, adding `contextNodeLabels`:
+.The following will train a model using the context-configured pipeline:
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.pipeline.nodeRegression.train('paintingGraph', {
@@ -332,5 +343,5 @@ RETURN
 
 As we can see, the results indicate a lower mean square error for the random forest model, compared to `nr-pipeline-model` in earlier section.
 The change is due to the embeddings taking into account more contextual information.
-While this is a toy example, contextual can sometimes provide more valuable information than node properties, and when used together, performance superior to using either alone can be achieved.
+While this is a toy example, additional context can sometimes provide valuable information to pipeline steps, resulting in better performance.
 
