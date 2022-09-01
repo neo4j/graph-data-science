@@ -309,7 +309,7 @@ We are now ready to invoke the training of the newly created pipeline.
 CALL gds.alpha.pipeline.nodeRegression.train('paintingGraph', {
   pipeline: 'pipe-with-context',
   targetNodeLabels: ['House'],
-  modelName: 'nc-pipeline-model-contextual',
+  modelName: 'nr-pipeline-model-contextual',
   targetProperty: 'price',
   randomSeed: 25,
   concurrency: 1,
