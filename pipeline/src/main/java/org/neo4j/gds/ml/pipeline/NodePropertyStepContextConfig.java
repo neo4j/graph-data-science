@@ -28,6 +28,10 @@ import java.util.Map;
 @Configuration
 public interface NodePropertyStepContextConfig {
 
+    String CONTEXT_NODE_LABELS = "contextNodeLabels";
+
+    String CONTEXT_RELATIONSHIP_TYPES = "contextRelationshipTypes";
+
     default List<String> contextNodeLabels() { return List.of(); }
 
     default List<String> contextRelationshipTypes() { return List.of(); }
@@ -35,6 +39,6 @@ public interface NodePropertyStepContextConfig {
     static NodePropertyStepContextConfig of(Map<String, Object> contextConfigMap) {
         var cypherMapWrapper = CypherMapWrapper.create(contextConfigMap);
         return new NodePropertyStepContextConfigImpl(cypherMapWrapper);
-    };
+    }
 
 }

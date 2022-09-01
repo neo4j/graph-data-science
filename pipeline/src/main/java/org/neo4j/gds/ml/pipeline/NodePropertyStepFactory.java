@@ -29,11 +29,13 @@ import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.utils.StringJoining;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+import static org.neo4j.gds.ml.pipeline.NodePropertyStepContextConfig.CONTEXT_NODE_LABELS;
+import static org.neo4j.gds.ml.pipeline.NodePropertyStepContextConfig.CONTEXT_RELATIONSHIP_TYPES;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class NodePropertyStepFactory {
@@ -65,17 +67,13 @@ public final class NodePropertyStepFactory {
             ));
         }
 
-        var algoConfigMap = configMap
-            .entrySet()
-            .stream()
-            .filter(kv -> !kv.getKey().equals("contextNodeLabels") && !kv.getKey().equals("contextRelationshipTypes"))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        var algoConfigMap = new HashMap<>(configMap);
+        var contextNodeLabels = algoConfigMap.remove(CONTEXT_NODE_LABELS);
+        var contextRelationshipTypes = algoConfigMap.remove(CONTEXT_RELATIONSHIP_TYPES);
 
-        var contextConfigMap = configMap
-            .entrySet()
-            .stream()
-            .filter(kv -> kv.getKey().equals("contextNodeLabels") || kv.getKey().equals("contextRelationshipTypes"))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        var contextConfigMap = new HashMap<String, Object>();
+        if (contextNodeLabels != null) contextConfigMap.put(CONTEXT_NODE_LABELS, contextNodeLabels);
+        if (contextRelationshipTypes != null) contextConfigMap.put(CONTEXT_RELATIONSHIP_TYPES, contextRelationshipTypes);
 
         var contextConfig = NodePropertyStepContextConfig.of(contextConfigMap);
 
