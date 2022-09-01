@@ -19,7 +19,13 @@
  */
 package org.neo4j.gds.similarity.filtering;
 
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
+
+import java.util.Collection;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class LabelNodeFilterSpec implements NodeFilterSpec {
 
@@ -37,5 +43,24 @@ public class LabelNodeFilterSpec implements NodeFilterSpec {
     @Override
     public String render() {
         return "NodeFilter[label=" + labelString + "]";
+    }
+
+    @Override
+    public void validate(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        String nodeFilterType
+    ) throws IllegalArgumentException {
+
+        var nodeLabelIsMissing = !graphStore.nodeLabels().contains(NodeLabel.of(labelString));
+
+        if (nodeLabelIsMissing) {
+            var errorMessage = formatWithLocale(
+                "Invalid configuration value '%s', the node label `%s` is missing from the graph.",
+                nodeFilterType,
+                labelString
+            );
+            throw new IllegalArgumentException(errorMessage);
+        }
     }
 }

@@ -19,7 +19,11 @@
  */
 package org.neo4j.gds.similarity.filtering;
 
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
+
+import java.util.Collection;
 
 /**
  * A {@code NodeFilterSpec} is a partially constructed {@link NodeFilter}. Because we cannot fully construct the
@@ -45,7 +49,12 @@ public interface NodeFilterSpec {
         public String render() {
             return "NodeFilter[NoOp]";
         }
+
+        @Override
+        public void validate(GraphStore graphStore, Collection<NodeLabel> selectedLabels, String nodeFilterType) {}
     };
 
     String render();
+
+    void validate(GraphStore graphStore, Collection<NodeLabel> selectedLabels, String nodeFilterType) throws IllegalArgumentException;
 }
