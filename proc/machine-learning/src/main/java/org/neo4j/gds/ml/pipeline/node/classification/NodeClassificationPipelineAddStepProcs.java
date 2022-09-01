@@ -37,26 +37,16 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class NodeClassificationPipelineAddStepProcs extends BaseProc {
 
+
     public static NodePipelineInfoResult addNodeProperty(
         String username,
         String pipelineName,
         String taskName,
         Map<String, Object> procedureConfig
     ) {
-        return addNodeProperty(username, pipelineName, taskName, procedureConfig, List.of(), List.of());
-    }
-
-    public static NodePipelineInfoResult addNodeProperty(
-        String username,
-        String pipelineName,
-        String taskName,
-        Map<String, Object> procedureConfig,
-        List<String> contextNodeLabels,
-        List<String> contextRelationshipTypes
-    ) {
         var pipeline = PipelineCatalog.getTyped(username, pipelineName, NodeClassificationTrainingPipeline.class);
 
-        pipeline.addNodePropertyStep(createNodePropertyStep(taskName, procedureConfig, contextNodeLabels, contextRelationshipTypes));
+        pipeline.addNodePropertyStep(createNodePropertyStep(taskName, procedureConfig));
 
         return new NodePipelineInfoResult(pipelineName, pipeline);
     }
@@ -91,17 +81,13 @@ public class NodeClassificationPipelineAddStepProcs extends BaseProc {
     public Stream<NodePipelineInfoResult> addNodeProperty(
         @Name("pipelineName") String pipelineName,
         @Name("procedureName") String taskName,
-        @Name("procedureConfiguration") Map<String, Object> procedureConfig,
-        @Name(value = "contextNodeLabels", defaultValue = "[]") List<String> contextNodeLabels,
-        @Name(value = "contextRelationshipTypes", defaultValue = "[]") List<String> contextRelationshipTypes
+        @Name("procedureConfiguration") Map<String, Object> procedureConfig
     ) {
         return Stream.of(addNodeProperty(
             username(),
             pipelineName,
             taskName,
-            procedureConfig,
-            contextNodeLabels,
-            contextRelationshipTypes
+            procedureConfig
         ));
     }
 

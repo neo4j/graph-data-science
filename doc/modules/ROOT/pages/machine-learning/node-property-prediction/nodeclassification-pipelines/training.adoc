@@ -312,15 +312,14 @@ Notice that this is just a toy example on a very small graph. In order to achiev
 
 
 [[nodeclassification-pipelines-examples-train-filtering]]
-=== Training with context filter
+=== Providing richer contexts to node property steps
 
 In the above example we projected a Person subgraph without relationships and used it for training and testing.
 Much information in the original graph is not used.
 We might want to utilize more node and relationship types to generate node properties (and link features) and investigate whether it improves node classification.
-We can do that by passing in `contextNodeLabels`.
-Doing so will make available additional nodes and relationships which are not subject to training or prediction during the creation of node properties, which in turn makes it possible to construct richer features.
+We can do that by passing in `contextNodeLabels` and `contextRelationshipTypes` when adding a node property step.
 
-The following statement will project a graph containing the information about houses and their paintors using a native projection and store it in the graph catalog under the name 'paintingGraph'.
+The following statement will project a graph containing the information about houses and their painters using a native projection and store it in the graph catalog under the name 'paintingGraph'.
 [source, cypher, role=noplay graph-project-query, group=nc]
 ----
 CALL gds.graph.project(
@@ -335,7 +334,8 @@ CALL gds.graph.project(
 )
 ----
 
-We still train a model to predict the class of each house, but use the Painter information instead of node properties to generate new node properties and features that the model uses in training.
+We still train a model to predict the class of each house, but use `Painter` and `PAINTED` as context in addition to `House` to generate features that leverage the full graph structure.
+After the feature generation however, it is only the `House` nodes that are considered as training and evaluation instances, so only the `House` nodes need to have the target property `class`.
 We will begin by creating a new pipeline for that purpose running the following queries.
 
 [source, cypher, role=noplay setup-query,group=nc]
@@ -348,8 +348,9 @@ CALL gds.beta.pipeline.nodeClassification.create('pipe-with-context')
 CALL gds.beta.pipeline.nodeClassification.addNodeProperty('pipe-with-context', 'fastRP', {
 embeddingDimension: 64,
 iterationWeights: [0, 1],
-mutateProperty:'embedding'
-}, ['Painter'])
+mutateProperty:'embedding',
+contextNodeLabels: ['Painter']
+})
 ----
 
 [source, cypher, role=noplay setup-query,group=nc]

@@ -29,10 +29,13 @@ import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.utils.StringJoining;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static org.neo4j.gds.ml.pipeline.NodePropertyStepContextConfig.CONTEXT_NODE_LABELS;
+import static org.neo4j.gds.ml.pipeline.NodePropertyStepContextConfig.CONTEXT_RELATIONSHIP_TYPES;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class NodePropertyStepFactory {
@@ -47,15 +50,6 @@ public final class NodePropertyStepFactory {
     public static NodePropertyStep createNodePropertyStep(
         String taskName,
         Map<String, Object> configMap
-    ) {
-        return createNodePropertyStep(taskName, configMap, List.of(), List.of());
-    }
-
-    public static NodePropertyStep createNodePropertyStep(
-        String taskName,
-        Map<String, Object> configMap,
-        List<String> contextNodeLabels,
-        List<String> contextRelationshipTypes
     ) {
         var normalizedName = normalizeName(taskName);
 
@@ -73,12 +67,22 @@ public final class NodePropertyStepFactory {
             ));
         }
 
-        validateReservedConfigKeys(configMap);
+        var algoConfigMap = new HashMap<>(configMap);
+        var contextNodeLabels = algoConfigMap.remove(CONTEXT_NODE_LABELS);
+        var contextRelationshipTypes = algoConfigMap.remove(CONTEXT_RELATIONSHIP_TYPES);
+
+        var contextConfigMap = new HashMap<String, Object>();
+        if (contextNodeLabels != null) contextConfigMap.put(CONTEXT_NODE_LABELS, contextNodeLabels);
+        if (contextRelationshipTypes != null) contextConfigMap.put(CONTEXT_RELATIONSHIP_TYPES, contextRelationshipTypes);
+
+        var contextConfig = NodePropertyStepContextConfig.of(contextConfigMap);
+
+        validateReservedConfigKeys(algoConfigMap);
 
         // validate user-input is valid
-        tryParsingConfig(gdsCallableDefinition, configMap);
+        tryParsingConfig(gdsCallableDefinition, algoConfigMap);
 
-        return new NodePropertyStep(gdsCallableDefinition, configMap, contextNodeLabels, contextRelationshipTypes);
+        return new NodePropertyStep(gdsCallableDefinition, algoConfigMap, contextConfig.contextNodeLabels(), contextConfig.contextRelationshipTypes());
     }
 
     private static AlgoBaseConfig tryParsingConfig(
