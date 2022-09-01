@@ -300,7 +300,7 @@ CALL gds.alpha.pipeline.nodeRegression.addRandomForest('pipe-with-context', {num
 ----
 
 We are now ready to invoke the training of the newly created pipeline.
-[[nodeclassification-pipelines-examples-filtered-train-query]]
+[[noderegression-pipelines-examples-filtered-train-query]]
 [role=query-example,group=nc]
 --
 .The following will train another model using the same pipeline, adding `contextNodeLabels`:
