@@ -57,6 +57,7 @@ class SysInfoProcTest extends BaseProcTest {
         "Neo4j 4.4",
         "Neo4j 4.4.8-drop01.0",
         "Neo4j 4.4.9-drop01.0",
+        "Neo4j 4.4.10-drop01.0",
         "Neo4j 5.0.0-drop06.0 (placeholder)",
         "Neo4j 5.0.0-drop08.0 (placeholder)",
         "Neo4j 5.0.0-drop06.0",
@@ -120,6 +121,9 @@ class SysInfoProcTest extends BaseProcTest {
                 break;
             case V_4_4_9_drop10:
                 expectedCompatibilities = Set.of("Neo4j 4.4.9-drop01.0", "Neo4j Settings 4.x");
+                break;
+            case V_4_4_10_drop10:
+                expectedCompatibilities = Set.of("Neo4j 4.4.10-drop01.0", "Neo4j Settings 4.x");
                 break;
             case V_5_0_drop60:
                 expectedCompatibilities = Set.of(
