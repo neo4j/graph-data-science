@@ -39,11 +39,11 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 public final class TrainingStatistics {
 
     private final List<ModelCandidateStats> modelCandidateStats;
-    private final List<Metric> metrics;
+    private final List<? extends Metric> metrics;
     private final Map<Metric, Double> testScores;
     private final Map<Metric, Double> outerTrainScores;
 
-    public TrainingStatistics(List<Metric> metrics) {
+    public TrainingStatistics(List<? extends Metric> metrics) {
         this.modelCandidateStats = new ArrayList<>();
         this.metrics = metrics;
         this.testScores = new HashMap<>();
