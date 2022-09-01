@@ -106,6 +106,11 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
             }
 
             @Override
+            public int maxNumberOfWorkerThreads() {
+                return exportConfig.writeConcurrency();
+            }
+
+            @Override
             public long pageCacheMemory() {
                 return exportConfig
                     .pageCacheMemory()
