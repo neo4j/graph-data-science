@@ -34,6 +34,7 @@ import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
+import org.neo4j.internal.batchimport.IndexConfig;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
@@ -77,6 +78,7 @@ import org.neo4j.ssl.config.SslPolicyLoader;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 public final class Neo4jProxy {
 
@@ -219,6 +221,21 @@ public final class Neo4jProxy {
 
     public static CompositeNodeCursor compositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
         return IMPL.compositeNodeCursor(cursors, labelIds);
+    }
+
+    public static Configuration batchImporterConfig(
+        int batchSize,
+        int writeConcurrency,
+        Optional<Long> pageCacheMemory,
+        boolean highIO,
+        IndexConfig indexConfig
+    ) {
+        return IMPL.batchImporterConfig(batchSize, writeConcurrency, pageCacheMemory, highIO, indexConfig);
+    }
+
+    @TestOnly
+    public static int writeConcurrency(Configuration batchImporterConfiguration) {
+        return IMPL.writeConcurrency(batchImporterConfiguration);
     }
 
     public static BatchImporter instantiateBatchImporter(

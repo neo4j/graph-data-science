@@ -51,6 +51,7 @@ import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.ImportLogic;
+import org.neo4j.internal.batchimport.IndexConfig;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.IdType;
@@ -120,6 +121,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -320,6 +322,47 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public CompositeNodeCursor compositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
         return new CompositeNodeCursorImpl(cursors, labelIds);
+    }
+
+    @Override
+    public Configuration batchImporterConfig(
+        int batchSize,
+        int writeConcurrency,
+        Optional<Long> pageCacheMemory,
+        boolean highIO,
+        IndexConfig indexConfig
+    ) {
+        return new org.neo4j.internal.batchimport.Configuration() {
+            @Override
+            public int batchSize() {
+                return batchSize;
+            }
+
+            @Override
+            public int maxNumberOfProcessors() {
+                return writeConcurrency;
+            }
+
+            @Override
+            public long pageCacheMemory() {
+                return pageCacheMemory.orElseGet(Configuration.super::pageCacheMemory);
+            }
+
+            @Override
+            public boolean highIO() {
+                return highIO;
+            }
+
+            @Override
+            public IndexConfig indexConfig() {
+                return indexConfig;
+            }
+        };
+    }
+
+    @Override
+    public int writeConcurrency(Configuration batchImportConfiguration) {
+        return batchImportConfiguration.maxNumberOfProcessors();
     }
 
     @Override
