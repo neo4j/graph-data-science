@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.pregel;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -28,13 +29,18 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.utils.CloseableThreadLocal;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
 import static org.neo4j.gds.pregel.SpeakerListenerLPA.LABELS_PROPERTY;
 
 @GdlExtension
@@ -146,6 +152,29 @@ class SpeakerListenerLPATest {
         );
 
         assertThat(communities).containsExactlyInAnyOrderEntriesOf(expected);
+    }
+
+    @Test
+    void closesThreadLocal() {
+        var config = SpeakerListenerLPAConfigImpl.builder().concurrency(1).maxIterations(30).build();
+
+        var computation = new SpeakerListenerLPA(42);
+        Pregel.create(
+            graph,
+            config,
+            computation,
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        ).run();
+
+        Field threadLocalField = FieldUtils.getField(SpeakerListenerLPA.class, "random", true);
+        try {
+            //noinspection unchecked
+            final var threadLocal = (CloseableThreadLocal<Random>) threadLocalField.get(computation);
+            assertThatThrownBy(threadLocal::get).isInstanceOf(NullPointerException.class);
+        } catch (IllegalAccessException e) {
+            fail("couldn't inspect the field");
+        }
     }
 
 }
