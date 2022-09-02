@@ -26,6 +26,7 @@ import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 @ValueClass
 public abstract class BuildInfoProperties {
@@ -81,18 +82,23 @@ public abstract class BuildInfoProperties {
         private static final Object INFO_PROPERTIES = loadProperties();
 
         private static Object loadProperties() {
-            var properties = new Properties();
-            var classLoader = Thread.currentThread().getContextClassLoader();
-            try (var infoStream = classLoader.getResourceAsStream(INFO_FILE)) {
-                if (infoStream != null) {
-                    try (var infoReader = new InputStreamReader(infoStream, StandardCharsets.UTF_8)) {
-                        properties.load(infoReader);
+            return Stream.of(
+                    Thread.currentThread().getContextClassLoader(),
+                    BuildInfoProperties.class.getClassLoader()
+                ).flatMap(cl -> Stream.ofNullable(cl.getResourceAsStream(INFO_FILE)))
+                .findFirst()
+                .map(infoStream -> {
+                    try (infoStream) {
+                        try (var infoReader = new InputStreamReader(infoStream, StandardCharsets.UTF_8)) {
+                            var properties = new Properties();
+                            properties.load(infoReader);
+                            return from(properties);
+                        }
+                    } catch (IOException exception) {
+                        return exception;
                     }
-                }
-            } catch (IOException exception) {
-                return exception;
-            }
-            return from(properties);
+                })
+                .orElseGet(() -> new IOException("Could not find " + INFO_FILE));
         }
     }
 }
