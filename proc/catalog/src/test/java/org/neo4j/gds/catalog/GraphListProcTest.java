@@ -22,6 +22,7 @@ package org.neo4j.gds.catalog;
 import org.assertj.core.api.AbstractBooleanAssert;
 import org.assertj.core.api.AbstractIterableAssert;
 import org.assertj.core.api.Condition;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -348,8 +349,8 @@ class GraphListProcTest extends BaseProcTest {
                             "readConcurrency",
                             intAssertConsumer(readConcurrency -> readConcurrency.isEqualTo(4))
                         )
-                        .hasEntrySatisfying("parameters", parameters -> assertThat(parameters).asInstanceOf(
-                            stringObjectMapAssertFactory()).isEmpty())
+                        .hasEntrySatisfying("parameters", parameters -> assertThat(parameters)
+                            .asInstanceOf(InstanceOfAssertFactories.list(String.class)).isEmpty())
                         .doesNotContainKeys(
                             "username",
                             GraphProjectConfig.NODE_COUNT_KEY,

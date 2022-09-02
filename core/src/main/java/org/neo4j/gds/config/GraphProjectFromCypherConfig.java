@@ -30,6 +30,7 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.CypherFactory;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,7 @@ public interface GraphProjectFromCypherConfig extends GraphProjectConfig {
     String relationshipQuery();
 
     @Value.Default
+    @Configuration.ToMapValue("org.neo4j.gds.config.GraphProjectFromCypherConfig#listParameterKeys")
     default Map<String, Object> parameters() {
         return Collections.emptyMap();
     }
@@ -146,5 +148,9 @@ public interface GraphProjectFromCypherConfig extends GraphProjectConfig {
                 throw new IllegalArgumentException(formatWithLocale("Invalid key: %s", forbiddenKey));
             }
         }
+    }
+
+    static Collection<String> listParameterKeys(Map<String, Object> parameters) {
+        return parameters.keySet();
     }
 }

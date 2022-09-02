@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.config;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -27,11 +28,13 @@ import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.core.CypherMapWrapper;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.NODE_QUERY_KEY;
@@ -48,12 +51,22 @@ class GraphProjectFromCypherConfigTest {
             .withString(RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY)
             .withEntry(invalidKey, projections);
 
-        IllegalArgumentException ex = assertThrows(
-            IllegalArgumentException.class,
-            () -> fromProcedureConfig("", config)
-        );
+        assertThatThrownBy(() -> fromProcedureConfig("", config))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Invalid key");
+    }
 
-        assertThat(ex.getMessage(), containsString("Invalid key"));
+    @Test
+    void omitCypherParametersFromToMap() {
+        var config = GraphProjectFromCypherConfigImpl.builder()
+            .graphName("g")
+            .username("myUser")
+            .parameters(Map.of("nodes", LongStream.range(0, 100).toArray()))
+            .nodeQuery("UNWIND $nodes AS nodeId CREATE ({id: nodeId}")
+            .relationshipQuery("some query")
+            .build();
+
+        assertThat(config.toMap()).contains(Map.entry("parameters", Set.of("nodes")));
     }
 
     static Stream<Arguments> invalidKeys() {
