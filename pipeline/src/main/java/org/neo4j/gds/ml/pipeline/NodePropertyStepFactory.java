@@ -51,6 +51,51 @@ public final class NodePropertyStepFactory {
         String taskName,
         Map<String, Object> configMap
     ) {
+        var gdsCallableDefinition = getGdsCallableDefinition(taskName);
+
+        var procConfigMap = new HashMap<>(configMap);
+        var contextNodeLabels = procConfigMap.remove(CONTEXT_NODE_LABELS);
+        var contextRelationshipTypes = procConfigMap.remove(CONTEXT_RELATIONSHIP_TYPES);
+
+        var contextConfigMap = new HashMap<String, Object>();
+        if (contextNodeLabels != null) contextConfigMap.put(CONTEXT_NODE_LABELS, contextNodeLabels);
+        if (contextRelationshipTypes != null)
+            contextConfigMap.put(CONTEXT_RELATIONSHIP_TYPES, contextRelationshipTypes);
+
+        var contextConfig = NodePropertyStepContextConfig.of(contextConfigMap);
+
+        return createNodePropertyStepFromCallableDefinition(procConfigMap, gdsCallableDefinition, contextConfig.contextNodeLabels(), contextConfig.contextRelationshipTypes());
+    }
+
+    public static NodePropertyStep createNodePropertyStep(
+        String taskName,
+        Map<String, Object> procConfigMap,
+        List<String> contextNodeLabels,
+        List<String> contextRelationshipTypes
+    ) {
+        return createNodePropertyStepFromCallableDefinition(procConfigMap, getGdsCallableDefinition(taskName), contextNodeLabels, contextRelationshipTypes);
+    }
+
+    private static NodePropertyStep createNodePropertyStepFromCallableDefinition(
+        Map<String, Object> procConfigMap,
+        GdsCallableFinder.GdsCallableDefinition gdsCallableDefinition,
+        List<String> contextNodeLabels,
+        List<String> contextRelationshipTypes
+    ) {
+        validateReservedConfigKeys(procConfigMap);
+
+        // validate user-input is valid
+        tryParsingConfig(gdsCallableDefinition, procConfigMap);
+
+        return new NodePropertyStep(
+            gdsCallableDefinition,
+            procConfigMap,
+            contextNodeLabels,
+            contextRelationshipTypes
+        );
+    }
+
+    public static GdsCallableFinder.GdsCallableDefinition getGdsCallableDefinition(String taskName) {
         var normalizedName = normalizeName(taskName);
 
         var gdsCallableDefinition = GdsCallableFinder
@@ -66,23 +111,7 @@ public final class NodePropertyStepFactory {
                 normalizedName
             ));
         }
-
-        var algoConfigMap = new HashMap<>(configMap);
-        var contextNodeLabels = algoConfigMap.remove(CONTEXT_NODE_LABELS);
-        var contextRelationshipTypes = algoConfigMap.remove(CONTEXT_RELATIONSHIP_TYPES);
-
-        var contextConfigMap = new HashMap<String, Object>();
-        if (contextNodeLabels != null) contextConfigMap.put(CONTEXT_NODE_LABELS, contextNodeLabels);
-        if (contextRelationshipTypes != null) contextConfigMap.put(CONTEXT_RELATIONSHIP_TYPES, contextRelationshipTypes);
-
-        var contextConfig = NodePropertyStepContextConfig.of(contextConfigMap);
-
-        validateReservedConfigKeys(algoConfigMap);
-
-        // validate user-input is valid
-        tryParsingConfig(gdsCallableDefinition, algoConfigMap);
-
-        return new NodePropertyStep(gdsCallableDefinition, algoConfigMap, contextConfig.contextNodeLabels(), contextConfig.contextRelationshipTypes());
+        return gdsCallableDefinition;
     }
 
     private static AlgoBaseConfig tryParsingConfig(
