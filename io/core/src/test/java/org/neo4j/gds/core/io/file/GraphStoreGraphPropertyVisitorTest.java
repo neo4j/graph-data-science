@@ -19,13 +19,17 @@
  */
 package org.neo4j.gds.core.io.file;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.io.GraphStoreGraphPropertyVisitor;
+import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
@@ -35,6 +39,8 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
 
 class GraphStoreGraphPropertyVisitorTest {
 
@@ -104,6 +110,23 @@ class GraphStoreGraphPropertyVisitorTest {
         var expected = LongStream.range(0, 10_000 * concurrency).boxed().toArray(Long[]::new);
 
         assertThat(actual).containsExactlyInAnyOrder(expected);
+    }
+
+    @Test
+    void closesThreadLocal() {
+        var graphPropertySchema = Map.of("prop1", PropertySchema.of("prop1", ValueType.LONG));
+        var graphPropertyVisitor = new GraphStoreGraphPropertyVisitor(graphPropertySchema);
+
+        graphPropertyVisitor.close();
+
+        Field threadLocalField = FieldUtils.getField(GraphStoreGraphPropertyVisitor.class, "streamBuilders", true);
+        try {
+            //noinspection unchecked
+            final var threadLocal = (CloseableThreadLocal<Random>) threadLocalField.get(graphPropertyVisitor);
+            assertThatThrownBy(threadLocal::get).isInstanceOf(NullPointerException.class);
+        } catch (IllegalAccessException e) {
+            fail("couldn't inspect the field");
+        }
     }
 
     static class VisitTask implements Runnable {

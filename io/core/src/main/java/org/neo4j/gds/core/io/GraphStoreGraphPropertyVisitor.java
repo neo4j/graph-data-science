@@ -22,6 +22,7 @@ package org.neo4j.gds.core.io;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.io.file.GraphPropertyVisitor;
+import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,13 +38,13 @@ import java.util.stream.Stream;
 public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
 
     private final Map<String, PropertySchema> graphPropertySchema;
-    private final ThreadLocal<Map<String, StreamBuilder<?>>> streamBuilders;
+    private final CloseableThreadLocal<Map<String, StreamBuilder<?>>> streamBuilders;
     private final ReentrantLock lock;
     private final Map<String, List<StreamBuilder<?>>> streamFractions;
 
     public GraphStoreGraphPropertyVisitor(Map<String, PropertySchema> graphPropertySchema) {
         this.graphPropertySchema = graphPropertySchema;
-        this.streamBuilders = ThreadLocal.withInitial(HashMap::new);
+        this.streamBuilders = CloseableThreadLocal.withInitial(HashMap::new);
         this.lock = new ReentrantLock();
         this.streamFractions = new HashMap<>();
     }
@@ -70,6 +71,11 @@ public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
 
     public Map<String, List<StreamBuilder<?>>> streamFractions() {
         return this.streamFractions;
+    }
+
+    @Override
+    public void close() {
+        streamBuilders.close();
     }
 
     private void appendToStream(String key, Object value, ValueType valueType) {
