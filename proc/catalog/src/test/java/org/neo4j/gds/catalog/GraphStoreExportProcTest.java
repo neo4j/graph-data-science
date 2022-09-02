@@ -92,7 +92,6 @@ class GraphStoreExportProcTest extends BaseProcTest {
     }
 
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_4_8_drop10)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_4_9_drop10)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_4_10_drop10)
     @Test
@@ -113,7 +112,6 @@ class GraphStoreExportProcTest extends BaseProcTest {
     }
 
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_4_8_drop10)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_4_9_drop10)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_4_10_drop10)
     @Test
@@ -142,7 +140,6 @@ class GraphStoreExportProcTest extends BaseProcTest {
     }
 
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_4_8_drop10)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_4_9_drop10)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_4_10_drop10)
     @Test
