@@ -38,7 +38,7 @@ import static org.neo4j.gds.config.GraphProjectFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.fromProcedureConfig;
 
-class GraphProjectConfigFromCypherTest {
+class GraphProjectFromCypherConfigTest {
 
     @ParameterizedTest
     @MethodSource("invalidKeys")
