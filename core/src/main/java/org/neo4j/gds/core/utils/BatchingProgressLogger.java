@@ -22,6 +22,7 @@ package org.neo4j.gds.core.utils;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.mem.BitUtil;
+import org.neo4j.gds.utils.CloseableThreadLocal;
 import org.neo4j.logging.Log;
 
 import java.util.Objects;
@@ -39,7 +40,7 @@ public class BatchingProgressLogger implements ProgressLogger {
     private long batchSize;
     private String taskName;
     private final LongAdder progressCounter;
-    private final ThreadLocal<MutableLong> callCounter;
+    private final CloseableThreadLocal<MutableLong> callCounter;
 
     private int globalPercentage;
 
@@ -67,7 +68,7 @@ public class BatchingProgressLogger implements ProgressLogger {
         this.taskName = task.description();
 
         this.progressCounter = new LongAdder();
-        this.callCounter = ThreadLocal.withInitial(MutableLong::new);
+        this.callCounter = CloseableThreadLocal.withInitial(MutableLong::new);
         this.concurrency = concurrency;
         this.globalPercentage = -1;
     }
@@ -116,6 +117,7 @@ public class BatchingProgressLogger implements ProgressLogger {
 
     @Override
     public void release() {
+        callCounter.close();
     }
 
     private synchronized void doLogPercentage(Supplier<String> msgFactory, long progress) {

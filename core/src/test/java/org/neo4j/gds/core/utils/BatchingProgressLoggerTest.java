@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.eclipse.collections.impl.utility.ListIterate;
 import org.junit.jupiter.api.Test;
@@ -28,14 +29,19 @@ import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.mem.BitUtil;
+import org.neo4j.gds.utils.CloseableThreadLocal;
 
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -172,6 +178,26 @@ class BatchingProgressLoggerTest {
             testProgressLogger.logProgress(1);
             testProgressLogger.logFinishPercentage();
             assertThat(log.getMessages(TestLog.INFO)).containsExactly("[test] Test 100%");
+        }
+    }
+
+    @Test
+    void closesThreadLocal() {
+        var logger = new BatchingProgressLogger(
+            Neo4jProxy.testLog(),
+            Tasks.leaf("foo", 42),
+            1
+        );
+
+        logger.release();
+
+        Field threadLocalField = FieldUtils.getField(BatchingProgressLogger.class, "callCounter", true);
+        try {
+            //noinspection unchecked
+            final var threadLocal = (CloseableThreadLocal<Random>) threadLocalField.get(logger);
+            assertThatThrownBy(threadLocal::get).isInstanceOf(NullPointerException.class);
+        } catch (IllegalAccessException e) {
+            fail("couldn't inspect the field");
         }
     }
 
