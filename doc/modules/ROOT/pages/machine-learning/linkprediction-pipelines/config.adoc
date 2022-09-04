@@ -115,8 +115,18 @@ YIELD
 | Name                      | Type    | Description
 | pipelineName              | String  | The name of the pipeline.
 | procedureName             | String  | The name of the procedure to be added to the pipeline.
-| procedureConfiguration    | Map     | The configuration of the procedure, excluding `graphName`, `nodeLabels` and `relationshipTypes`.
+| procedureConfiguration    | Map     | The map used to generate the configuration of the procedure. It includes procedure specific configurations except `nodeLabels` and `relationshipTypes`. It can optionally contain parameters in table below.
 |===
+
+.Node property step context configuration
+[opts="header",cols="1,1,4"]
+|===
+| Name                      | Type    | Description
+| contextNodeLabels         | List of String     | Additional node labels which are added as context.
+| contextRelationshipTypes  | List of String     | Additional relationship types which are added as context.
+|===
+
+During training, the context configuration is combined with the train configuration to produce the final node label and relationship type filter for each node property step.
 
 
 include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.adoc[]

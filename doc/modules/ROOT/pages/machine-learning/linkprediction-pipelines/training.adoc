@@ -56,8 +56,6 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 | targetRelationshipType                                        | String            | n/a                  | no       | The name of the relationship type to train the model on. The relationship type must be undirected.
 | sourceNodeLabel                                               | String            | '*'                  | yes      | The name of the node label relationships in the training and test sets should start from footnote:label-filter[This helps to train the model to predict links with a certain label combination.].
 | targetNodeLabel                                              | String             | '*'                  | yes      | The name of the node label relationships in the training and test sets should end at footnote:label-filter[].
-| contextNodeLabels                                            | List of String     | []                   | yes      | Additional node labels used to execute the xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[nodePropertySteps] over. This is in addition to the `sourceNodeLabel` and `targetNodeLabel`.
-| contextRelationshipTypes                                      | List of String    | []                   | yes      | Additional relationship types used to execute the xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[nodePropertySteps] over. This is in addition to the `feature-input` set produced from the `targetRelationshipType` (see xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[Configuring the relationship splits])
 | negativeClassWeight                                           | Float             | 1.0                  | yes      | Weight of negative examples in model evaluation. Positive examples have weight 1. More details xref:machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-classimbalance[here].
 | metrics                                                       | List of String    | [`AUCPR`]            | no       | xref:machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-metrics[Metrics] used to evaluate the models.
 | randomSeed                                                    | Integer           | n/a                  | yes      | Seed for the random number generator used during training.
@@ -332,21 +330,62 @@ The full graph contains 2 node labels and 3 relationship types.
 We still train a Person-KNOWS-Person model, but use context information Person-LIVES-City, Person-BORN-City to generate node properties that the model uses in training.
 Note that we do not require the UNDIRECTED orientation for the context relationship types, as these are excluded from the LinkPrediction training.
 
+First we'll create a new pipeline.
+[source, cypher, role=noplay setup-query,group=lp]
+----
+CALL gds.beta.pipeline.linkPrediction.create('pipe-with-context')
+----
+
+Next we add the nodePropertyStep with context configurations.
+[source, cypher, role=noplay setup-query,group=lp]
+----
+CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe-with-context', 'fastRP', {
+  mutateProperty: 'embedding',
+  embeddingDimension: 256,
+  randomSeed: 42,
+  contextNodeLabels: ['City'],
+  contextRelationshipTypes: ['LIVES', 'BORN']
+})
+----
+
+Then we add the link feature.
+[source, cypher, role=noplay setup-query,group=lp]
+----
+CALL gds.beta.pipeline.linkPrediction.addFeature('pipe-with-context', 'hadamard', {
+  nodeProperties: ['embedding', 'age']
+})
+----
+
+And then similarly configure the data splits.
+[source, cypher, role=noplay setup-query,group=lp]
+----
+CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe-with-context', {
+  testFraction: 0.25,
+  trainFraction: 0.6,
+  validationFolds: 3
+})
+----
+
+Then we add an MLP model candidate.
+[source, cypher, role=noplay setup-query,group=lp]
+--
+CALL gds.alpha.pipeline.linkPrediction.addMLP('pipe-with-context',
+{hiddenLayerSizes: [4, 2], penalty: 1, patience: 2})
+--
+
 [[linkprediction-pipeline-examples-filtered-train-query]]
 [role=query-example,group=lp]
 --
-.The following will train another model using the same pipeline, adding `contextNodeLabels` and `contextRelationshipTypes`:
+.The following will train another model using the pipeline with additional context information used in node property step:
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.train('fullGraph', {
-  pipeline: 'pipe',
+  pipeline: 'pipe-with-context',
   modelName: 'lp-pipeline-model-filtered',
   metrics: ['AUCPR', 'OUT_OF_BAG_ERROR'],
   sourceNodeLabel: 'Person',
   targetNodeLabel: 'Person',
   targetRelationshipType: 'KNOWS',
-  contextNodeLabels: ['City'],
-  contextRelationshipTypes: ['LIVES', 'BORN'],
   randomSeed: 73
 }) YIELD modelInfo, modelSelectionStats
 RETURN
@@ -361,7 +400,7 @@ RETURN
 [opts="header", cols="6, 2, 2, 2, 6"]
 |===
 | winningModel                                                                                                                                | avgTrainScore      | outerTrainScore     | testScore | validationScores
-| {maxEpochs=100, minEpochs=1, penalty=1.0, patience=2, methodName=MultilayerPerceptron, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001} | 0.799603174603175 |  0.8 | 0.75 | [0.5555555555555555, 0.38888888888888884, 0.75, 0.5555555555555555, 0.5555555555555555]
+| {maxEpochs=100, minEpochs=1, penalty=1.0, patience=2, methodName=MultilayerPerceptron, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001} | 0.799603174603175 |  0.8 | 0.75 | [0.75]
 |===
 --
 
