@@ -306,7 +306,10 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
 
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe')");
         runQuery("CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe', {validationFolds: 2})");
-        runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty(" +
+                 "'pipe', 'pageRank', " +
+                 "{mutateProperty: 'pr', contextNodeLabels: ['Z'], contextRelationshipTypes: ['CONTEXT']})"
+        );
         runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'COSINE', {nodeProperties: ['pr']})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe', {penalty: 1})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe', {penalty: 2})");
@@ -321,9 +324,7 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
             "   randomSeed: 1337," +
             "   targetRelationshipType: 'REL_2'," +
             "   sourceNodeLabel: 'N'," +
-            "   targetNodeLabel: 'X', " +
-            "   contextNodeLabels: ['Z'], " +
-            "   contextRelationshipTypes: ['CONTEXT'] " +
+            "   targetNodeLabel: 'X'" +
             "})" +
             " YIELD modelInfo" +
             " RETURN modelInfo.modelType AS modelType",

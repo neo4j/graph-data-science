@@ -123,7 +123,7 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
         return GraphDimensions
             .builder()
             .from(graphDimensions)
-            .nodeCount(graphStore.getGraph(lpNodeLabelFilter.nodePropertyStepsLabels()).nodeCount())
+            .nodeCount(graphStore.getGraph(lpNodeLabelFilter.nodePropertyStepsBaseLabels()).nodeCount())
             .build();
     }
 

@@ -190,14 +190,12 @@ class LinkPredictionPredictPipelineBaseConfigTest {
             .targetNodeLabel("INV_TARGET")
             .graphName("dummy")
             .topN(5)
-            .contextNodeLabels(List.of("INV_C1", "C2"))
             .build();
         assertThatThrownBy(() -> config.graphStoreValidation(graphStore, List.of(), List.of())
         )
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Could not find the specified `sourceNodeLabel` of ['INV_SOURCE'].")
-            .hasMessageContaining("Could not find the specified `targetNodeLabel` of ['INV_TARGET'].")
-            .hasMessageContaining("Could not find the specified `contextNodeLabels` of ['INV_C1'].");
+            .hasMessageContaining("Could not find the specified `targetNodeLabel` of ['INV_TARGET'].");
     }
 
 }

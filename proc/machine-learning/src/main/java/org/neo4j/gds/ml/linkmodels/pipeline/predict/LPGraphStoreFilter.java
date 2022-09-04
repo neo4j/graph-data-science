@@ -36,10 +36,7 @@ public interface LPGraphStoreFilter {
 
     Collection<RelationshipType> predictRelationshipTypes();
 
-    Collection<NodeLabel> nodePropertyStepsLabels();
-
-    Collection<RelationshipType> nodePropertyStepRelationshipTypes();
-
+    Collection<NodeLabel> nodePropertyStepsBaseLabels();
 
     @Value.Derived
     default Collection<NodeLabel> predictNodeLabels() {

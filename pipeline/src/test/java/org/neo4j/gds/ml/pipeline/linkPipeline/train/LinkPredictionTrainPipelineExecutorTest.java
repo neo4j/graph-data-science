@@ -708,16 +708,16 @@ final class LinkPredictionTrainPipelineExecutorTest {
             "(p4:P {height: 789})," +
             "(p5:P {height: 123})," +
 
-            "(q1:Q)," +
-            "(q2:Q)," +
-            "(q3:Q)," +
-            "(q4:Q)," +
-            "(q5:Q)," +
+            "(q1:Q {height: 5})," +
+            "(q2:Q {height: 8})," +
+            "(q3:Q {height: 334})," +
+            "(q4:Q {height: 12})," +
+            "(q5:Q {height: 50})," +
 
             "(x1:X {height: 50})," +
             "(x2:X {height: 50})," +
 
-            "(y1:Y {height: 123})," +
+            "(y1:Y)," +
 
             "(p1)-[:REL2]->(q1)," +
             "(p1)-[:REL2]->(q3)," +
@@ -867,7 +867,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .graphName(G_BI)
                 .targetRelationshipType("REL2")
                 .sourceNodeLabel("P")
-                .targetNodeLabel("Q")
+                .targetNodeLabel("Y")
                 .metrics(List.of(LinkMetric.AUCPR.name()))
                 .pipeline("DUMMY")
                 .negativeClassWeight(1)
@@ -880,7 +880,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     .intermediateRelationshipTypes(List.of(RelationshipType.of("_FEATURE_INPUT_")))
                     .build(),
                 NodePropertyStepContextConfigImpl.builder()
-                    .contextNodeLabels(List.of("X", "Y"))
+                    .contextNodeLabels(List.of("X"))
                     .contextRelationshipTypes(List.of("CONTEXT"))
                     .build())
             );

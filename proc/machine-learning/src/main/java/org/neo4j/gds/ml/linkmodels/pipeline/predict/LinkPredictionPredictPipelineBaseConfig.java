@@ -66,15 +66,10 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
 
     Optional<String> targetNodeLabel();
 
-    default List<String> contextNodeLabels() {return List.of();}
-
-
     @Override
     default List<String> relationshipTypes() {
         return List.of();
     }
-
-    default List<String> contextRelationshipTypes() {return List.of();}
 
     @Override
     @Configuration.Ignore
@@ -103,21 +98,12 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
     }
 
     @Configuration.GraphStoreValidationCheck
-    default void validateContextNodeLabels(
+    default void validateRelationshipTypes(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        ElementTypeValidator.resolveAndValidate(graphStore, contextNodeLabels(), "`contextNodeLabels`");
-    }
-
-    @Configuration.GraphStoreValidationCheck
-    default void validateContextRelationshipTypes(
-        GraphStore graphStore,
-        Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
-    ) {
-        ElementTypeValidator.resolveAndValidateTypes(graphStore, contextRelationshipTypes(), "`contextRelationshipTypes`");
+        ElementTypeValidator.resolveAndValidateTypes(graphStore, relationshipTypes(), "`relationshipTypes`");
     }
 
     //Exhaustive strategy fields

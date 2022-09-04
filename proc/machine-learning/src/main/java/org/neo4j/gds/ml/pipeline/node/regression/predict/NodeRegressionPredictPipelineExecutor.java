@@ -70,7 +70,7 @@ public class NodeRegressionPredictPipelineExecutor extends PredictPipelineExecut
     protected PipelineGraphFilter nodePropertyStepFilter() {
         return ImmutablePipelineGraphFilter.builder()
             .nodeLabels(config.nodeLabelIdentifiers(graphStore))
-            .contextRelationshipTypes(config.internalRelationshipTypes(graphStore)).build();
+            .intermediateRelationshipTypes(config.internalRelationshipTypes(graphStore)).build();
     }
 
     @Override
