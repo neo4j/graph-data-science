@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.modularity;
 
-import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.jetbrains.annotations.Nullable;
@@ -75,8 +74,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private boolean didConverge = false;
     private double totalNodeWeight = 0.0;
     private double modularity = -1.0;
-    private BitSet colorsUsed;
-    private HugeLongArray colors;
+
     private HugeLongArray currentCommunities;
     private HugeLongArray nextCommunities;
     private HugeLongArray reverseSeedCommunityMapping;
@@ -123,21 +121,22 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         computeColoring();
         initSeeding();
         init();
-        modularityColorArray = ModularityColorArray.createModularityColorArray(colors, nodeCount);
         progressTracker.endSubTask();
 
 
         progressTracker.beginSubTask();
+
+        long numberOfColors = modularityColorArray.getNumberOfColors();
+
         for (iterationCounter = 0; iterationCounter < maxIterations; iterationCounter++) {
             progressTracker.beginSubTask();
 
             boolean hasConverged;
 
-            long currentColor = colorsUsed.nextSetBit(0);
-            while (currentColor != -1) {
+            long currentStartingPosition = 0;
+            for (long colorId = 0; colorId < numberOfColors; ++colorId) {
                 terminationFlag.assertRunning();
-                optimizeForColor(currentColor);
-                currentColor = colorsUsed.nextSetBit(currentColor + 1);
+                currentStartingPosition = optimizeColor(currentStartingPosition);
             }
 
             hasConverged = !updateModularity();
@@ -166,9 +165,13 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         K1Coloring coloring = new K1ColoringFactory<>().build(graph, k1Config, progressTracker);
         coloring.setTerminationFlag(terminationFlag);
+        modularityColorArray = ModularityColorArray.createModularityColorArray(
+            coloring.compute(),
+            nodeCount,
+            coloring.usedColors()
+        );
 
-        this.colors = coloring.compute();
-        this.colorsUsed = coloring.usedColors();
+
     }
 
     private void initSeeding() {
@@ -294,21 +297,24 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         }
     }
 
-    private void optimizeForColor(long currentColor) {
+    private long optimizeColor(long currentStandingPosition) {
         // run optimization tasks for every node
+
+        long nextStartingCoordinate = modularityColorArray.getNextStartingCoordinate(currentStandingPosition);
+        long colorCount = nextStartingCoordinate - currentStandingPosition;
+
         RunWithConcurrency.builder()
             .concurrency(concurrency)
-            .tasks(createModularityOptimizationTasks(currentColor))
+            .tasks(createModularityOptimizationTasks(currentStandingPosition, colorCount))
             .executor(executor)
             .run();
-        long colorCount = modularityColorArray.getCount(currentColor);
-        long start = modularityColorArray.getStartingCoordinate(currentColor);
-        
+
+
         ParallelUtil.parallelStreamConsume(
             LongStream.range(0, colorCount),
             concurrency,
             stream -> stream.forEach(indexId -> {
-                long actualIndexId = start + indexId;
+                long actualIndexId = currentStandingPosition + indexId;
                 long nodeId = modularityColorArray.get(actualIndexId);
                 currentCommunities.set(nodeId, nextCommunities.get(nodeId));
             })
@@ -325,19 +331,22 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         // reset communityWeightUpdates
         communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount);
+        return nextStartingCoordinate;
     }
 
-    private Collection<ModularityOptimizationTask> createModularityOptimizationTasks(long currentColor) {
+    private Collection<ModularityOptimizationTask> createModularityOptimizationTasks(
+        long currentStandingPosition,
+        long colorCount
+    ) {
 
         return PartitionUtils.rangePartition(
             concurrency,
-            modularityColorArray.getCount(currentColor),
+            colorCount,
             partition -> new ModularityOptimizationTask(
                 graph,
                 partition,
-                currentColor,
+                currentStandingPosition,
                 totalNodeWeight,
-                colors,
                 currentCommunities,
                 nextCommunities,
                 cumulativeNodeWeights,
@@ -372,8 +381,8 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.nextCommunities.release();
         this.communityWeightUpdates.release();
         this.cumulativeNodeWeights.release();
-        this.colors.release();
-        this.colorsUsed = null;
+        modularityColorArray.release();
+
     }
 
     public long getCommunityId(long nodeId) {

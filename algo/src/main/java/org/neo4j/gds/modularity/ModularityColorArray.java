@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.modularity;
 
+import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongLongHashMap;
 import com.carrotsearch.hppc.LongLongMap;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -26,59 +27,79 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 class ModularityColorArray {
 
     private final HugeLongArray sortedNodesByColor;
-    private final HugeLongArray colorCoordinates;
-    private LongLongMap colorToId;
+    private BitSet colorCoordinates;
 
-    ModularityColorArray(
+    private final long numberOfColors;
+
+    private ModularityColorArray(
         HugeLongArray sortedNodesByColor,
-        HugeLongArray colorCoordinates,
-        LongLongMap colorToId
+        BitSet colorCoordinates
     ) {
         this.colorCoordinates = colorCoordinates;
-        this.colorToId = colorToId;
         this.sortedNodesByColor = sortedNodesByColor;
+        this.numberOfColors = colorCoordinates.cardinality() - 1;
     }
 
-    long getStartingCoordinate(long color) {
-        return colorCoordinates.get(colorToId.get(color));
+    long getNumberOfColors() {
+        return numberOfColors;
     }
 
-    long getEndingCoordinate(long color) {
-        return colorCoordinates.get(colorToId.get(color) + 1);
+    long getNextStartingCoordinate(long current) {
+        return colorCoordinates.nextSetBit(current + 1);
     }
+
 
     long get(long indexId) {
         return sortedNodesByColor.get(indexId);
     }
 
-    long getCount(long color) {
-        return getEndingCoordinate(color) - getStartingCoordinate(color);
+    long getCount(long current) {
+        return (getNextStartingCoordinate(current) - current);
     }
 
-    static ModularityColorArray createModularityColorArray(HugeLongArray colors, long nodeCount) {
+    void release() {
+        sortedNodesByColor.release();
+        colorCoordinates = null;
+    }
+
+    static ModularityColorArray createModularityColorArray(HugeLongArray colors, long nodeCount, BitSet usedColors) {
         var sortedNodesByColor = HugeLongArray.newArray(nodeCount);
         LongLongMap colorCount = new LongLongHashMap();
         LongLongMap colorToId = new LongLongHashMap();
         long encounteredColors = 0;
+
+        BitSet setColorCoordinates = new BitSet(nodeCount + 1);
+
+        for (long colorId = 0; colorId < nodeCount; ++colorId) {
+            if (usedColors.get(colorId)) {
+                if (!colorToId.containsKey(colorId)) {
+                    colorToId.put(colorId, encounteredColors++);
+                }
+            }
+        }
         for (long nodeId = 0; nodeId < nodeCount; ++nodeId) {
             long color = colors.get(nodeId);
-            if (!colorToId.containsKey(color)) {
-                colorToId.put(color, encounteredColors++);
-            }
             long colorId = colorToId.get(color);
             colorCount.addTo(colorId, 1);
         }
 
         var colorCoordinates = HugeLongArray.newArray(encounteredColors + 1);
+
         colorCoordinates.set(0, 0);
+        setColorCoordinates.set(0);
+
         long nodeSum = 0;
         for (long colorId = 0; colorId <= encounteredColors; ++colorId) {
             if (colorId == encounteredColors) {
                 colorCoordinates.set(colorId, nodeCount);
+                setColorCoordinates.set(nodeCount);
             } else {
                 nodeSum += colorCount.get(colorId);
                 colorCoordinates.set(colorId, nodeSum);
+                setColorCoordinates.set(nodeSum);
+
             }
+
         }
         for (long nodeId = nodeCount - 1; nodeId >= 0; --nodeId) {
             long color = colors.get(nodeId);
@@ -87,6 +108,6 @@ class ModularityColorArray {
             sortedNodesByColor.set(coordinate, nodeId);
             colorCoordinates.set(colorId, coordinate);
         }
-        return new ModularityColorArray(sortedNodesByColor, colorCoordinates, colorToId);
+        return new ModularityColorArray(sortedNodesByColor, setColorCoordinates);
     }
 }

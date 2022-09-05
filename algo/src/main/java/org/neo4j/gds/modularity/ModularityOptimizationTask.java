@@ -35,9 +35,8 @@ final class ModularityOptimizationTask implements Runnable {
 
     private final Graph localGraph;
     private final Partition partition;
-    private final long color;
+    private final long currentStartingPosition;
     private final double totalNodeWeight;
-    private final HugeLongArray colors;
     private final ProgressTracker progressTracker;
     private final HugeLongArray currentCommunities;
     private final HugeLongArray nextCommunities;
@@ -50,9 +49,8 @@ final class ModularityOptimizationTask implements Runnable {
     ModularityOptimizationTask(
         Graph graph,
         Partition partition,
-        long color,
+        long currentStartingPosition,
         double totalNodeWeight,
-        HugeLongArray colors,
         HugeLongArray currentCommunities,
         HugeLongArray nextCommunities,
         HugeDoubleArray cumulativeNodeWeights,
@@ -63,7 +61,7 @@ final class ModularityOptimizationTask implements Runnable {
     ) {
         this.modularityColorArray = modularityColorArray;
         this.partition = partition;
-        this.color = color;
+        this.currentStartingPosition = currentStartingPosition;
         this.localGraph = graph.concurrentCopy();
         this.currentCommunities = currentCommunities;
         this.nextCommunities = nextCommunities;
@@ -71,7 +69,6 @@ final class ModularityOptimizationTask implements Runnable {
         this.communityWeightUpdates = communityWeightUpdates;
         this.totalNodeWeight = totalNodeWeight;
         this.cumulativeNodeWeights = cumulativeNodeWeights;
-        this.colors = colors;
         this.progressTracker = progressTracker;
     }
 
@@ -79,15 +76,10 @@ final class ModularityOptimizationTask implements Runnable {
     public void run() {
         LongDoubleMap reuseCommunityInfluences = new LongDoubleHashMap(50);
         var relationshipsProcessed = new MutableLong();
-        final long start = modularityColorArray.getStartingCoordinate(color);
-        partition.consume(indexId -> {
-            long actualIndexId = start + indexId;
-            long nodeId = modularityColorArray.get(actualIndexId);
-            if (colors.get(nodeId) != color) {
-                throw new RuntimeException(
-                    "this is one of those things that are really really not supposed to happen");
-            }
 
+        partition.consume(indexId -> {
+            long actualIndexId = currentStartingPosition + indexId;
+            long nodeId = modularityColorArray.get(actualIndexId);
             long currentCommunity = currentCommunities.get(nodeId);
             final int degree = localGraph.degree(nodeId);
 
