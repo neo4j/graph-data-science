@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.pipeline.node.classification.predict;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -87,7 +86,8 @@ public class NodeClassificationPipelineStreamProc
             > computationResult
     ) {
         return runWithExceptionLogging("Graph streaming failed", () -> {
-            Graph graph = computationResult.graph();
+            var pipelineGraphFilter = computationResult.algorithm().nodePropertyStepFilter();
+            var graph = computationResult.graphStore().getGraph(pipelineGraphFilter.nodeLabels());
 
             var result = computationResult.result();
             var predictedClasses = result.predictedClasses();

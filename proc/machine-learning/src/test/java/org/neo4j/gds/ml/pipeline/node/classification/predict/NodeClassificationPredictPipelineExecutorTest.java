@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.InspectableTestProgressTracker;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProcedureRunner;
@@ -49,6 +50,7 @@ import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.randomforest.ImmutableRandomForestClassifierData;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
+import org.neo4j.gds.ml.pipeline.ImmutablePipelineGraphFilter;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
@@ -84,6 +86,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                         ", (n2:N {a: 3.0, b: 1.5, c: 1})" +
                         ", (n3:N {a: 0.0, b: 2.8, c: 1})" +
                         ", (n4:N {a: 1.0, b: 0.9, c: 1})" +
+                        ", (ignore:FILTER_OUT {})" +
                         ", (n1)-[:T]->(n2)" +
                         ", (n3)-[:T]->(n4)" +
                         ", (n1)-[:T]->(n3)" +
@@ -99,7 +102,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
         );
         String createQuery = GdsCypher.call(GRAPH_NAME)
             .graphProject()
-            .withNodeLabel("N")
+            .withNodeLabels("N", "FILTER_OUT")
             .withRelationshipType("T", Orientation.UNDIRECTED)
             .withNodeProperties(List.of("a", "b", "c"), DefaultValue.DEFAULT)
             .yields();
@@ -148,18 +151,19 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 graphStore,
                 ProgressTracker.NULL_TRACKER,
                 modelData,
-                LocalIdMap.of(42, 1337)
+                LocalIdMap.of(42, 1337),
+                ImmutablePipelineGraphFilter.builder().nodeLabels(List.of(NodeLabel.of("N"))).intermediateRelationshipTypes(List.of(RelationshipType.of("T"))).build()
             );
 
             var predictionResult = pipelineExecutor.compute();
 
-            assertThat(predictionResult.predictedClasses().size()).isEqualTo(graphStore.nodeCount());
+            assertThat(predictionResult.predictedClasses().size()).isEqualTo(graphStore.getGraph(NodeLabel.of("N")).nodeCount());
             assertThat(predictionResult.predictedClasses().toArray()).containsOnly(42, 1337);
             assertThat(predictionResult.predictedProbabilities()).isPresent();
             assertThat(predictionResult
                 .predictedProbabilities()
                 .orElseThrow()
-                .size()).isEqualTo(graphStore.nodeCount());
+                .size()).isEqualTo(graphStore.getGraph(NodeLabel.of("N")).nodeCount());
 
             assertThat(graphStore.relationshipTypes()).containsExactlyElementsOf(RelationshipType.listOf("T"));
             assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "degree")).isFalse();
@@ -201,17 +205,18 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 graphStore,
                 ProgressTracker.NULL_TRACKER,
                 modelData,
-                LocalIdMap.of(0, 1)
+                LocalIdMap.of(0, 1),
+                ImmutablePipelineGraphFilter.builder().nodeLabels(List.of(NodeLabel.of("N"))).intermediateRelationshipTypes(List.of(RelationshipType.of("T"))).build()
             );
 
             var predictionResult = pipelineExecutor.compute();
 
-            assertThat(predictionResult.predictedClasses().size()).isEqualTo(graphStore.nodeCount());
+            assertThat(predictionResult.predictedClasses().size()).isEqualTo(graphStore.getGraph(NodeLabel.of("N")).nodeCount());
             assertThat(predictionResult.predictedProbabilities()).isPresent();
             assertThat(predictionResult
                 .predictedProbabilities()
                 .orElseThrow()
-                .size()).isEqualTo(graphStore.nodeCount());
+                .size()).isEqualTo(graphStore.getGraph(NodeLabel.of("N")).nodeCount());
 
             assertThat(graphStore.relationshipTypes()).containsExactlyElementsOf(RelationshipType.listOf("T"));
             assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "degree")).isFalse();
@@ -256,16 +261,17 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 graphStore,
                 ProgressTracker.NULL_TRACKER,
                 modelData,
-                LocalIdMap.of(0, 1)
+                LocalIdMap.of(0, 1),
+                ImmutablePipelineGraphFilter.builder().nodeLabels(List.of(NodeLabel.of("N"))).intermediateRelationshipTypes(List.of(RelationshipType.of("T"))).build()
             );
 
             var predictionResult = pipelineExecutor.compute();
-            assertThat(predictionResult.predictedClasses().size()).isEqualTo(graphStore.nodeCount());
+            assertThat(predictionResult.predictedClasses().size()).isEqualTo(graphStore.getGraph(NodeLabel.of("N")).nodeCount());
             assertThat(predictionResult.predictedProbabilities()).isPresent();
             assertThat(predictionResult
                 .predictedProbabilities()
                 .orElseThrow()
-                .size()).isEqualTo(graphStore.nodeCount());
+                .size()).isEqualTo(graphStore.getGraph(NodeLabel.of("N")).nodeCount());
 
             assertThat(graphStore.relationshipTypes()).containsExactlyElementsOf(RelationshipType.listOf("T"));
             assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "degree")).isFalse();
@@ -320,7 +326,8 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 graphStore,
                 progressTracker,
                 modelData,
-                LocalIdMap.of(0, 1)
+                LocalIdMap.of(0, 1),
+                ImmutablePipelineGraphFilter.builder().nodeLabels(List.of(NodeLabel.of("N"))).intermediateRelationshipTypes(List.of(RelationshipType.of("T"))).build()
             );
 
             pipelineExecutor.compute();
@@ -364,7 +371,8 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 graphStore,
                 ProgressTracker.NULL_TRACKER,
                 model.data(),
-                LocalIdMap.of(0, 1)
+                LocalIdMap.of(0, 1),
+                ImmutablePipelineGraphFilter.builder().nodeLabels(List.of(NodeLabel.of("N"))).intermediateRelationshipTypes(List.of(RelationshipType.of("T"))).build()
             );
 
             assertThatThrownBy(algo::compute)
@@ -388,7 +396,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
         var memoryEstimation = NodeClassificationPredictPipelineExecutor.estimate(model, config, new OpenModelCatalog());
         assertMemoryEstimation(
             () -> memoryEstimation,
-            graphStore.nodeCount(),
+            graphStore.getGraph(NodeLabel.of("N")).nodeCount(),
             graphStore.relationshipCount(),
             config.concurrency(),
             MemoryRange.of(824)
@@ -438,7 +446,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
         assertMemoryEstimation(
             () -> NodeClassificationPredictPipelineExecutor.estimate(model, config, new OpenModelCatalog()),
-            graphStore.nodeCount(),
+            graphStore.getGraph(NodeLabel.of("N")).nodeCount(),
             graphStore.relationshipCount(),
             config.concurrency(),
             MemoryRange.of(352)
@@ -471,7 +479,8 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 graphStore,
                 ProgressTracker.NULL_TRACKER,
                 NodeClassificationPipelinePredictProcTestUtil.createClassifierData(manyWeights, bias),
-                LocalIdMap.of(0, 1)
+                LocalIdMap.of(0, 1),
+                ImmutablePipelineGraphFilter.builder().nodeLabels(List.of(NodeLabel.of("N"))).intermediateRelationshipTypes(List.of(RelationshipType.of("T"))).build()
             );
 
             assertThatThrownBy(pipelineExecutor::compute)

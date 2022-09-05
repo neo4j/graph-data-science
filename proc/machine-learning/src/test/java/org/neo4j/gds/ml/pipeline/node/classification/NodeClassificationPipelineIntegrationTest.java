@@ -159,7 +159,7 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.beta.pipeline.nodeClassification.predict.stream('g', {" +
-            "  nodeLabels: ['Hidden']," +
+            "  targetNodeLabels: ['Hidden']," +
             "  modelName: 'model'," +
             "  includePredictedProbabilities: true" +
             "}) YIELD nodeId, predictedClass, predictedProbabilities " +
@@ -258,7 +258,7 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.beta.pipeline.nodeClassification.predict.stream('g', {" +
-            "  nodeLabels: ['Hidden']," +
+            "  targetNodeLabels: ['Hidden']," +
             "  modelName: 'model'," +
             "  includePredictedProbabilities: true" +
             "}) YIELD nodeId, predictedClass, predictedProbabilities " +

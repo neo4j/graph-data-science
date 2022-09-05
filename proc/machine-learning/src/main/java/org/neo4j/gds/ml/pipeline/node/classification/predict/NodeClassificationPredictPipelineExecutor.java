@@ -37,7 +37,6 @@ import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.nodeClassification.NodeClassificationPredict;
-import org.neo4j.gds.ml.pipeline.ImmutablePipelineGraphFilter;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineGraphFilter;
 import org.neo4j.gds.ml.pipeline.PredictPipelineExecutor;
@@ -59,6 +58,7 @@ public class NodeClassificationPredictPipelineExecutor extends PredictPipelineEx
     private static final int MIN_BATCH_SIZE = 100;
     private final Classifier.ClassifierData modelData;
     private final LocalIdMap classIdMap;
+    private final PipelineGraphFilter predictGraphFilter;
 
     public NodeClassificationPredictPipelineExecutor(
         NodePropertyPredictPipeline pipeline,
@@ -67,11 +67,13 @@ public class NodeClassificationPredictPipelineExecutor extends PredictPipelineEx
         GraphStore graphStore,
         ProgressTracker progressTracker,
         Classifier.ClassifierData modelData,
-        LocalIdMap classIdMap
+        LocalIdMap classIdMap,
+        PipelineGraphFilter predictGraphFilter
     ) {
         super(pipeline, config, executionContext, graphStore, progressTracker);
         this.modelData = modelData;
         this.classIdMap = classIdMap;
+        this.predictGraphFilter = predictGraphFilter;
     }
 
     public static Task progressTask(String taskName, NodePropertyPredictPipeline pipeline, GraphStore graphStore) {
@@ -116,14 +118,12 @@ public class NodeClassificationPredictPipelineExecutor extends PredictPipelineEx
 
     @Override
     protected PipelineGraphFilter nodePropertyStepFilter() {
-        return ImmutablePipelineGraphFilter.builder()
-            .nodeLabels(config.nodeLabelIdentifiers(graphStore))
-            .relationshipTypes(config.internalRelationshipTypes(graphStore)).build();
+        return predictGraphFilter;
     }
 
     @Override
     protected NodeClassificationPipelineResult execute() {
-        var nodesGraph = graphStore.getGraph(config.nodeLabelIdentifiers(graphStore));
+        var nodesGraph = graphStore.getGraph(predictGraphFilter.nodeLabels());
         var features = FeaturesFactory.extractLazyFeatures(nodesGraph, pipeline.featureProperties());
 
         if (features.featureDimension() != modelData.featureDimension()) {
