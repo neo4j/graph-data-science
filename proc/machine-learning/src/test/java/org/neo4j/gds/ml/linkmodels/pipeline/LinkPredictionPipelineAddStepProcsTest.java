@@ -27,6 +27,7 @@ import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -60,22 +61,25 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
 
     @Test
     void shouldAddNodePropertyStep() {
+        var orderedConfigs = new LinkedHashMap<>();
+        orderedConfigs.put("mutateProperty", "pr");
+        orderedConfigs.put("contextNodeLabels", List.of());
+        orderedConfigs.put("contextRelationshipTypes", List.of());
+
         assertCypherResult("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr'})",
             List.of(Map.of("name", "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
                 "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap(),
-                "nodePropertySteps", List.of(
-                    Map.of(
-                        "name", "gds.pageRank.mutate",
-                        "config", Map.of("mutateProperty", "pr")
-                    )),
+                "nodePropertySteps", List.of(Map.of(
+                    "name", "gds.pageRank.mutate",
+                    "config", Map.of("mutateProperty", "pr", "contextNodeLabels", List.of(), "contextRelationshipTypes", List.of())
+                )),
                 "featureSteps", List.of(),
                 "parameterSpace", DEFAULT_PARAM_SPACE
             ))
         );
     }
 
-    //TODO addNodeProertyWithContextTest
 
     @Test
     void shouldAddFeatureStep() {
@@ -152,7 +156,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
                 "nodePropertySteps", List.of(
                     Map.of(
                         "name", "gds.pageRank.mutate",
-                        "config", Map.of("mutateProperty", "pr")
+                        "config", Map.of("mutateProperty", "pr", "contextNodeLabels", List.of(), "contextRelationshipTypes", List.of())
                     )),
                 "featureSteps", List.of(
                     Map.of(
@@ -172,18 +176,23 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
     @Test
     void shouldAddTwoNodePropertyStep() {
         runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr'})");
-        assertCypherResult("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr2'})",
+        assertCypherResult("CALL gds.beta.pipeline.linkPrediction.addNodeProperty(" +
+                           "'myPipeline', 'pageRank', " +
+                           "{mutateProperty: 'pr2', contextNodeLabels: ['N1', 'N2'], contextRelationshipTypes: ['T1', 'T2']})",
             List.of(Map.of("name", "myPipeline",
                 "splitConfig",DEFAULT_SPLIT_CONFIG,
                 "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap(),
                 "nodePropertySteps", List.of(
                     Map.of(
                         "name", "gds.pageRank.mutate",
-                        "config", Map.of("mutateProperty", "pr")
+                        "config", Map.of("mutateProperty", "pr", "contextNodeLabels", List.of(), "contextRelationshipTypes", List.of())
                     ),
                     Map.of(
                         "name", "gds.pageRank.mutate",
-                        "config", Map.of("mutateProperty", "pr2")
+                        "config", Map.of(
+                            "mutateProperty", "pr2",
+                            "contextNodeLabels", List.of("N1", "N2"),
+                            "contextRelationshipTypes", List.of("T1", "T2"))
                     )),
                 "featureSteps", List.of(),
                 "parameterSpace", DEFAULT_PARAM_SPACE

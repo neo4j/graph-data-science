@@ -404,8 +404,6 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         );
     }
 
-    //TODO Add/Modify test for different contexts for nodePropertySteps and union with targetRelType.
-
     private void runQueryWithUser(String query) {
         QueryRunner.runQuery(db, getUsername(), query, Map.of());
     }

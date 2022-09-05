@@ -41,12 +41,15 @@ import org.neo4j.gds.executor.ProcedureExecutorSpec;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
+import static org.neo4j.gds.ml.pipeline.NodePropertyStepContextConfig.CONTEXT_NODE_LABELS;
+import static org.neo4j.gds.ml.pipeline.NodePropertyStepContextConfig.CONTEXT_RELATIONSHIP_TYPES;
 
 public final class NodePropertyStep implements ExecutableNodePropertyStep {
     private final GdsCallableFinder.GdsCallableDefinition callableDefinition;
@@ -158,7 +161,11 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
 
     @Override
     public Map<String, Object> toMap() {
-        return Map.of("name", procName(), "config", config);
+        var configWithContext = new LinkedHashMap<>(config);
+        configWithContext.put(CONTEXT_NODE_LABELS, contextNodeLabels);
+        configWithContext.put(CONTEXT_RELATIONSHIP_TYPES, contextRelationshipTypes);
+
+        return Map.of("name", procName(), "config", configWithContext);
     }
 
     @Override
