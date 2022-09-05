@@ -71,12 +71,10 @@ class ModularityColorArray {
 
         BitSet setColorCoordinates = new BitSet(nodeCount + 1);
 
-        for (long colorId = 0; colorId < nodeCount; ++colorId) {
-            if (usedColors.get(colorId)) {
-                if (!colorToId.containsKey(colorId)) {
-                    colorToId.put(colorId, encounteredColors++);
-                }
-            }
+        long nextColorId = usedColors.nextSetBit(0);
+        while (nextColorId != -1) {
+            colorToId.put(nextColorId, encounteredColors++);
+            nextColorId = usedColors.nextSetBit(nextColorId + 1);
         }
         for (long nodeId = 0; nodeId < nodeCount; ++nodeId) {
             long color = colors.get(nodeId);
@@ -85,7 +83,7 @@ class ModularityColorArray {
         }
 
         setColorCoordinates.set(0);
-        
+
         long nodeSum = 0;
         for (long colorId = 0; colorId <= encounteredColors; ++colorId) {
             if (colorId == encounteredColors) {
