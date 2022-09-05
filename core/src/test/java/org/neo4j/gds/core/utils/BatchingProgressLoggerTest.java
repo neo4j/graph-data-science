@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.utils;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.eclipse.collections.impl.utility.ListIterate;
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
-import java.lang.reflect.Field;
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -191,14 +190,17 @@ class BatchingProgressLoggerTest {
 
         logger.release();
 
-        Field threadLocalField = FieldUtils.getField(BatchingProgressLogger.class, "callCounter", true);
+        CloseableThreadLocal<Random> threadLocal = null;
         try {
             //noinspection unchecked
-            final var threadLocal = (CloseableThreadLocal<Random>) threadLocalField.get(logger);
-            assertThatThrownBy(threadLocal::get).isInstanceOf(NullPointerException.class);
-        } catch (IllegalAccessException e) {
-            fail("couldn't inspect the field");
+            threadLocal = (CloseableThreadLocal<Random>) MethodHandles
+                .privateLookupIn(BatchingProgressLogger.class, MethodHandles.lookup())
+                .findGetter(BatchingProgressLogger.class, "callCounter", CloseableThreadLocal.class)
+                .invoke(logger);
+        } catch (Throwable e) {
+            fail("couldn't inspect the field", e);
         }
+        assertThatThrownBy(threadLocal::get).isInstanceOf(NullPointerException.class);
     }
 
     private static List<Integer> performLogging(long taskVolume, int concurrency) {

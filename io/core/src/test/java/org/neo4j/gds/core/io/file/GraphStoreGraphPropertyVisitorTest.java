@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.io.file;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.PropertySchema;
@@ -27,7 +26,7 @@ import org.neo4j.gds.core.io.GraphStoreGraphPropertyVisitor;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
+import java.lang.invoke.MethodHandles;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Executors;
@@ -119,14 +118,17 @@ class GraphStoreGraphPropertyVisitorTest {
 
         graphPropertyVisitor.close();
 
-        Field threadLocalField = FieldUtils.getField(GraphStoreGraphPropertyVisitor.class, "streamBuilders", true);
+        CloseableThreadLocal<Random> threadLocal = null;
         try {
             //noinspection unchecked
-            final var threadLocal = (CloseableThreadLocal<Random>) threadLocalField.get(graphPropertyVisitor);
-            assertThatThrownBy(threadLocal::get).isInstanceOf(NullPointerException.class);
-        } catch (IllegalAccessException e) {
-            fail("couldn't inspect the field");
+            threadLocal = (CloseableThreadLocal<Random>) MethodHandles
+                .privateLookupIn(GraphStoreGraphPropertyVisitor.class, MethodHandles.lookup())
+                .findGetter(GraphStoreGraphPropertyVisitor.class, "streamBuilders", CloseableThreadLocal.class)
+                .invoke(graphPropertyVisitor);
+        } catch (Throwable e) {
+            fail("couldn't inspect the field", e);
         }
+        assertThatThrownBy(threadLocal::get).isInstanceOf(NullPointerException.class);
     }
 
     static class VisitTask implements Runnable {

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.pregel;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -31,7 +30,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
-import java.lang.reflect.Field;
+import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -167,14 +166,17 @@ class SpeakerListenerLPATest {
             ProgressTracker.NULL_TRACKER
         ).run();
 
-        Field threadLocalField = FieldUtils.getField(SpeakerListenerLPA.class, "random", true);
+        CloseableThreadLocal<Random> threadLocal = null;
         try {
             //noinspection unchecked
-            final var threadLocal = (CloseableThreadLocal<Random>) threadLocalField.get(computation);
-            assertThatThrownBy(threadLocal::get).isInstanceOf(NullPointerException.class);
-        } catch (IllegalAccessException e) {
-            fail("couldn't inspect the field");
+            threadLocal = (CloseableThreadLocal<Random>) MethodHandles
+                .privateLookupIn(SpeakerListenerLPA.class, MethodHandles.lookup())
+                .findGetter(SpeakerListenerLPA.class, "random", CloseableThreadLocal.class)
+                .invoke(computation);
+        } catch (Throwable e) {
+            fail("couldn't inspect the field", e);
         }
+        assertThatThrownBy(threadLocal::get).isInstanceOf(NullPointerException.class);
     }
 
 }
