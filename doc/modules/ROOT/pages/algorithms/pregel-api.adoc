@@ -59,6 +59,8 @@ public interface PregelComputation<C extends PregelConfig> {
     }
     // Used to apply a relationship weight on a message.
     default double applyRelationshipWeight(double message, double relationshipWeight);
+    // Used to close any opened resources, such as ThreadLocals
+    default void close() {}
 }
 ----
 
@@ -91,6 +93,9 @@ Check the xref:algorithms/pregel-api.adoc#algorithms-pregel-api-reducer[dedicate
 
 The `applyRelationshipWeight` method can be used to modify the message based on a relationship property.
 If the input graph has no relationship properties, i.e. is unweighted, the method is skipped.
+
+The `close` method can be used to close any resources opened as part of the implementation.
+This includes ThreadLocals, file handles, network connections, or anything else that should not be kept alive after the algorithm has finished computing.
 
 
 [[algorithms-pregel-api-schema]]
