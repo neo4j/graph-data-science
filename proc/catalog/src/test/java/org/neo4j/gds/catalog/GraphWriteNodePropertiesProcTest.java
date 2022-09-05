@@ -158,7 +158,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     @Test
     void writeLoadedNodePropertiesForLabel() {
         assertCypherResult(
-            "CALL gds.graph.writeNodeProperties($graph, ['newNodeProp1', 'newNodeProp2'], ['A'])",
+            "CALL gds.graph.writeNodeProperties($graph, ['newNodeProp1', 'newNodeProp2'], 'A')",
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             List.of(Map.of(
                 "writeMillis", Matchers.greaterThan(-1L),
@@ -218,15 +218,37 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     }
 
     @Test
+    void writeShouldComplainWithInvalidInput() {
+
+        assertError(
+            "CALL gds.graph.writeNodeProperties($graph, [['newNodeProp3']])",
+            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
+            "Type mismatch"
+        );
+    }
+
+    @Test
+    void writeShouldComplainWithInvalidInputForNodeLabels() {
+
+        assertError(
+            "CALL gds.graph.writeNodeProperties($graph, 'newNodeProp1', [['A']])",
+            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
+            "Type mismatch for nodeLabels"
+        );
+    }
+
+    @Test
     void writeMutatedNodeProperties() {
         long expectedPropertyCount = 6;
 
-        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
+        GraphStore graphStore = GraphStoreCatalog
+            .get(getUsername(), db.databaseId(), TEST_GRAPH_SAME_PROPERTIES)
+            .graphStore();
         NodePropertyValues identityProperties = new IdentityPropertyValues(expectedPropertyCount);
         graphStore.addNodeProperty(Set.of(NodeLabel.of("A"), NodeLabel.of("B")), "newNodeProp3", identityProperties);
 
         assertCypherResult(
-            "CALL gds.graph.writeNodeProperties($graph, ['newNodeProp3'])",
+            "CALL gds.graph.writeNodeProperties($graph, 'newNodeProp3')",
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             List.of(Map.of(
                 "writeMillis", Matchers.greaterThan(-1L),
