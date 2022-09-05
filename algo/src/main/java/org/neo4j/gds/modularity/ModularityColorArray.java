@@ -64,8 +64,9 @@ class ModularityColorArray {
 
     static ModularityColorArray createModularityColorArray(HugeLongArray colors, long nodeCount, BitSet usedColors) {
         var sortedNodesByColor = HugeLongArray.newArray(nodeCount);
-        LongLongMap colorCount = new LongLongHashMap();
+        HugeLongArray colorCoordinateArray = HugeLongArray.newArray(usedColors.cardinality());
         LongLongMap colorToId = new LongLongHashMap();
+
         long encounteredColors = 0;
 
         BitSet setColorCoordinates = new BitSet(nodeCount + 1);
@@ -80,33 +81,28 @@ class ModularityColorArray {
         for (long nodeId = 0; nodeId < nodeCount; ++nodeId) {
             long color = colors.get(nodeId);
             long colorId = colorToId.get(color);
-            colorCount.addTo(colorId, 1);
+            colorCoordinateArray.addTo(colorId, 1);
         }
 
-        var colorCoordinates = HugeLongArray.newArray(encounteredColors + 1);
-
-        colorCoordinates.set(0, 0);
         setColorCoordinates.set(0);
-
+        
         long nodeSum = 0;
         for (long colorId = 0; colorId <= encounteredColors; ++colorId) {
             if (colorId == encounteredColors) {
-                colorCoordinates.set(colorId, nodeCount);
                 setColorCoordinates.set(nodeCount);
             } else {
-                nodeSum += colorCount.get(colorId);
-                colorCoordinates.set(colorId, nodeSum);
+                nodeSum += colorCoordinateArray.get(colorId);
+                colorCoordinateArray.set(colorId, nodeSum);
                 setColorCoordinates.set(nodeSum);
-
             }
 
         }
         for (long nodeId = nodeCount - 1; nodeId >= 0; --nodeId) {
             long color = colors.get(nodeId);
             long colorId = colorToId.get(color);
-            long coordinate = colorCoordinates.get(colorId) - 1;
+            long coordinate = colorCoordinateArray.get(colorId) - 1;
             sortedNodesByColor.set(coordinate, nodeId);
-            colorCoordinates.set(colorId, coordinate);
+            colorCoordinateArray.set(colorId, coordinate);
         }
         return new ModularityColorArray(sortedNodesByColor, setColorCoordinates);
     }
