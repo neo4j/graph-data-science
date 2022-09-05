@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.huge.FilteredNodePropertyValues;
@@ -32,7 +33,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
-public final class MutatePropertyComputationResultConsumer<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig, RESULT>
+public class MutatePropertyComputationResultConsumer<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig, RESULT>
     extends MutateComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, RESULT> {
 
     public interface MutateNodePropertyListFunction<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig>
@@ -54,7 +55,7 @@ public final class MutatePropertyComputationResultConsumer<ALGO extends Algorith
         ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
         ExecutionContext executionContext
     ) {
-        var graph = computationResult.graph();
+        var graph = graphFromComputationResult(computationResult);
         MutatePropertyConfig mutatePropertyConfig = computationResult.config();
 
         final var nodeProperties = this.nodePropertyListFunction.apply(computationResult);
@@ -85,5 +86,9 @@ public final class MutatePropertyComputationResultConsumer<ALGO extends Algorith
 
             resultBuilder.withNodePropertiesWritten(maybeTranslatedProperties.size() * computationResult.graph().nodeCount());
         }
+    }
+
+    protected Graph graphFromComputationResult(ComputationResult<ALGO,ALGO_RESULT,CONFIG> computationResult) {
+        return computationResult.graph();
     }
 }

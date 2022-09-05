@@ -26,12 +26,15 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineMutateProc;
 import org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineStreamProc;
 import org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineTrainProc;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -72,7 +75,9 @@ public class NodeClassificationPipelineFilteredTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(
             GraphProjectProc.class,
+            GraphStreamNodePropertiesProc.class,
             NodeClassificationPipelineStreamProc.class,
+            NodeClassificationPipelineMutateProc.class,
             NodeClassificationPipelineCreateProc.class,
             NodeClassificationPipelineAddStepProcs.class,
             NodeClassificationPipelineAddTrainerMethodProcs.class,
@@ -151,6 +156,39 @@ public class NodeClassificationPipelineFilteredTest extends BaseProcTest {
                 Map.of("nodeId", 7L, "predictedClass", 1L),
                 Map.of("nodeId", 8L, "predictedClass", 0L),
                 Map.of("nodeId", 9L, "predictedClass", 1L)
+            )
+        );
+        // this test identified a bug in the mutation path.
+        // generic code was doing computationResult.getGraph which gives incorrect graph during the updating of the graphStore
+        runQuery(
+            "CALL gds.beta.pipeline.nodeClassification.predict.mutate('g', {" +
+            " modelName: 'model'," +
+            " mutateProperty: 'predictedClass'" +
+            " })");
+        assertCypherResult(
+            "CALL gds.graph.nodeProperties.stream(" +
+            "   'g', " +
+            "   ['predictedClass']" +
+            ") YIELD nodeId, propertyValue",
+            List.of(
+                Map.of("nodeId", 0L, "propertyValue", 0L),
+                Map.of("nodeId", 1L, "propertyValue", 1L),
+                Map.of("nodeId", 2L, "propertyValue", 0L),
+                Map.of("nodeId", 3L, "propertyValue", 1L),
+                Map.of("nodeId", 4L, "propertyValue", 0L),
+                Map.of("nodeId", 5L, "propertyValue", 1L),
+                Map.of("nodeId", 6L, "propertyValue", 0L),
+                Map.of("nodeId", 7L, "propertyValue", 1L),
+                Map.of("nodeId", 8L, "propertyValue", 0L),
+                Map.of("nodeId", 9L, "propertyValue", 1L),
+                new HashMap<>() {{
+                    put("nodeId", 10L);
+                    put("propertyValue", null);
+                }},
+                new HashMap<>() {{
+                    put("nodeId", 11L);
+                    put("propertyValue", null);
+                }}
             )
         );
     }
