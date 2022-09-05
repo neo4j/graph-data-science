@@ -29,6 +29,7 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -38,21 +39,43 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphRemoveNodePropertiesProc extends CatalogProc {
 
+    private List<String> nodePropertiesParser(Object nodeProperties) {
+
+        if (nodeProperties instanceof Iterable) {
+            var nodePropertiesList = new ArrayList<String>();
+            for (Object item : (Iterable) nodeProperties) {
+                if (item instanceof String) {
+                    nodePropertiesList.add((String) item);
+                } else {
+                    throw new IllegalArgumentException(
+                        "Type mismatch for nodeProperties: expected List<String> or String");
+                }
+            }
+            return nodePropertiesList;
+        } else if (nodeProperties instanceof String) {
+            return List.of((String) nodeProperties);
+        } else {
+            throw new IllegalArgumentException(
+                "Type mismatch for nodeProperties: expected List<String> or String");
+        }
+    }
+
     @Procedure(name = "gds.graph.removeNodeProperties", mode = READ)
     @Description("Removes node properties from a projected graph.")
     public Stream<Result> run(
         @Name(value = "graphName") String graphName,
-        @Name(value = "nodeProperties") List<String> nodeProperties,
+        @Name(value = "nodeProperties") @NotNull Object nodeProperties,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ProcPreconditions.check();
         validateGraphName(graphName);
+        var parsedNodeProperties = nodePropertiesParser(nodeProperties);
 
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphRemoveNodePropertiesConfig config = GraphRemoveNodePropertiesConfig.of(
             graphName,
-            nodeProperties,
+            parsedNodeProperties,
             cypherConfig
         );
         // validation
@@ -65,7 +88,7 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
             () -> removeNodeProperties(graphStore, config)
         );
         // result
-        return Stream.of(new Result(graphName, nodeProperties, propertiesRemoved));
+        return Stream.of(new Result(graphName, parsedNodeProperties, propertiesRemoved));
     }
 
     @NotNull

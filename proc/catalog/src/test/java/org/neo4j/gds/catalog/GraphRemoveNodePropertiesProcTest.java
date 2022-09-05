@@ -110,6 +110,28 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
     }
 
     @Test
+    void removeNodePropertyShouldComplainWithInvalidInput() {
+        assertError(
+            "CALL gds.graph.removeNodeProperties($graphName, [['nodeProp1']])",
+            Map.of("graphName", TEST_GRAPH_SAME_PROPERTIES),
+            "Type mismatch"
+        );
+    }
+
+    @Test
+    void removeNodePropertyAsString() {
+        assertCypherResult(
+            "CALL gds.graph.removeNodeProperties($graphName, 'nodeProp1')",
+            Map.of("graphName", TEST_GRAPH_SAME_PROPERTIES),
+            List.of(Map.of(
+                "graphName", TEST_GRAPH_SAME_PROPERTIES,
+                "nodeProperties", List.of("nodeProp1"),
+                "propertiesRemoved", 6L
+            ))
+        );
+    }
+
+    @Test
     void shouldFailOnNonExistingNodeProperty() {
         assertError(
             "CALL gds.graph.removeNodeProperties($graphName, ['nodeProp1', 'nodeProp2', 'nodeProp3'])",
