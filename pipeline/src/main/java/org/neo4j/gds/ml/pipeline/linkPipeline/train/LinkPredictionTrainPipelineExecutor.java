@@ -111,7 +111,6 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             configuration.username(),
             pipeline.nodePropertySteps(),
             configuration.nodeLabels(),
-            //TODO is it featureInputRelationshipType? Also fix steps.estimate()
             List.of(pipeline.splitConfig().featureInputRelationshipType().name)
         );
 
