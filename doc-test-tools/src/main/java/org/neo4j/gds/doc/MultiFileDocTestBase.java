@@ -141,8 +141,6 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
     }
 
     private void runDocQuery(DocQuery docQuery) {
-        if (docQuery.skipTest()) return;
-
         if (docQuery.runAsOperator()) {
             String operatorHandle = docQuery.operator();
             super.runQuery(operatorHandle, docQuery.query());
@@ -166,8 +164,6 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
     }
 
     private void runQueryExampleWithResultConsumer(QueryExample queryExample, Consumer<Result> check) {
-        if (queryExample.skipTest()) return;
-
         if (!queryExample.runAsOperator()) {
             super.runQueryWithResultConsumer(queryExample.query(), check);
         } else {
@@ -177,8 +173,6 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
     }
 
     private void runQueryExampleAndAssertResults(QueryExample queryExample) {
-        if (queryExample.skipTest()) return;
-
         runQueryExampleWithResultConsumer(queryExample, result -> {
             assertThat(queryExample.resultColumns()).containsExactlyElementsOf(result.columns());
 
@@ -199,8 +193,6 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
     }
 
     private void runQueryExample(QueryExample queryExample) {
-        if (queryExample.skipTest()) return;
-
         if (queryExample.assertResults()) {
             runQueryExampleAndAssertResults(queryExample);
         } else {

@@ -39,9 +39,4 @@ public interface DocQuery {
     static ImmutableDocQuery.Builder builder() {
         return ImmutableDocQuery.builder();
     }
-
-    @Value.Default
-    default boolean skipTest() {
-        return false;
-    }
 }

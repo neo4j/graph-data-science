@@ -156,8 +156,6 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
             queryExampleBuilder.operator(queryExampleNode.getAttribute(TEST_OPERATOR_ATTRIBUTE).toString());
         }
 
-        queryExampleBuilder.skipTest(parseSkipTest(queryExampleNode));
-
         if (Boolean.parseBoolean(queryExampleNode.getAttribute(TEST_TYPE_NO_RESULT, false).toString())) {
             queryExampleBuilder.assertResults(false);
         } else {
@@ -225,9 +223,5 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
         return content
             .replace("&gt;", ">")
             .replace("&lt;", "<");
-    }
-
-    private static boolean parseSkipTest(StructuralNode node) {
-        return Boolean.parseBoolean(node.getAttribute(SKIP_TEST, false).toString());
     }
 }
