@@ -57,7 +57,7 @@ class NodeRegressionPipelineAddStepProcsTest extends NodeRegressionPipelineBaseP
 
         assertThat(pipeline.nodePropertySteps()).isEmpty();
 
-        Map<String, Object> expectedConfig = Map.of("mutateProperty", "pr");
+        Map<String, Object> expectedConfig = Map.of("mutateProperty", "pr", "contextNodeLabels", List.of(), "contextRelationshipTypes", List.of());
         String expectedTaskName = "gds.pageRank.mutate";
         assertCypherResult(
             "CALL gds.alpha.pipeline.nodeRegression.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr'})",
@@ -149,7 +149,7 @@ class NodeRegressionPipelineAddStepProcsTest extends NodeRegressionPipelineBaseP
                 "splitConfig", DEFAULT_CONFIG.toMap(),
                 "nodePropertySteps", List.of(Map.of(
                     "name", "gds.pageRank.mutate",
-                    "config", Map.of("mutateProperty", "pr")
+                    "config", Map.of("mutateProperty", "pr", "contextNodeLabels", List.of(), "contextRelationshipTypes", List.of())
                 )),
                 "featureProperties", List.of("pr", "pr2"),
                 "parameterSpace", DEFAULT_PARAMETERSPACE

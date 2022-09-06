@@ -192,7 +192,7 @@ class NodeRegressionPipelineTrainProcTest extends BaseProcTest {
                 .hasSize(1)
                 .element(0, stringObjectMapType)
                 .containsEntry("name", "gds.pageRank.mutate")
-                .containsEntry("config", Map.of("mutateProperty", "pr"));
+                .containsEntry("config", Map.of("mutateProperty", "pr", "contextNodeLabels", List.of(), "contextRelationshipTypes", List.of()));
 
             featurePipeline
                 .extractingByKey("featureProperties", InstanceOfAssertFactories.list(Map.class))
