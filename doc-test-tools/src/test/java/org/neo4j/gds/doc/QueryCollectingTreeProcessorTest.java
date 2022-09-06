@@ -50,7 +50,7 @@ class QueryCollectingTreeProcessorTest {
 
     @Test
     void loadsBeforeAllQueriesCorrectly() {
-        var beforeAllQueries = processor.beforeAllQueries();
+        var beforeAllQueries = processor.getBeforeAllQueries();
         assertThat(beforeAllQueries).containsExactly(
             DocQuery.builder().query("CREATE (alice:Person {name: 'Alice'})").build(),
             DocQuery.builder().query(
@@ -60,7 +60,7 @@ class QueryCollectingTreeProcessorTest {
 
     @Test
     void loadsBeforeEachQueriesCorrectly() {
-        var beforeEachQueries = processor.beforeEachQueries();
+        var beforeEachQueries = processor.getBeforeEachQueries();
 
         assertThat(beforeEachQueries).containsExactly(
             DocQuery.builder().query(
@@ -74,7 +74,7 @@ class QueryCollectingTreeProcessorTest {
 
     @Test
     void loadsQueryExamplesCorrectly() {
-        var queryExampleGroups = processor.queryExamples();
+        var queryExampleGroups = processor.getQueryExampleGroups();
 
         assertThat(queryExampleGroups)
             .containsExactlyInAnyOrder(
@@ -126,13 +126,13 @@ class QueryCollectingTreeProcessorTest {
     }
 
     @Test
-    void parseMultipleDocument() {
+    void parseMultipleDocuments() {
         var file = ResourceUtil.path("query-collecting-tree-processor-test_part2.adoc").toFile();
         assertThat(file).exists().canRead();
 
         asciidoctor.loadFile(file, Collections.emptyMap());
 
-        assertThat(processor.queryExamples())
+        assertThat(processor.getQueryExampleGroups())
             .containsExactlyInAnyOrder(
                 QueryExampleGroup.builder()
                     .displayName("This is a test code block")
