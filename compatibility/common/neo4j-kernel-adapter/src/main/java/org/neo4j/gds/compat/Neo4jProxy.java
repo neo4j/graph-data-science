@@ -423,9 +423,10 @@ public final class Neo4jProxy {
         List<FieldSignature> inputSignature,
         Neo4jTypes.AnyType type,
         String description,
-        boolean internal
+        boolean internal,
+        boolean threadSafe
     ) {
-        return IMPL.userFunctionSignature(name, inputSignature, type, description, internal);
+        return IMPL.userFunctionSignature(name, inputSignature, type, description, internal, threadSafe);
     }
 
     public static long transactionId(KernelTransactionHandle kernelTransactionHandle) {

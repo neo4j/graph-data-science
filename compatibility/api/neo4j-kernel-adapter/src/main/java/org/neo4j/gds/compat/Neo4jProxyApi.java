@@ -284,7 +284,8 @@ public interface Neo4jProxyApi {
         List<FieldSignature> inputSignature,
         Neo4jTypes.AnyType type,
         String description,
-        boolean internal
+        boolean internal,
+        boolean threadSafe
     );
 
     long transactionId(KernelTransactionHandle kernelTransactionHandle);
