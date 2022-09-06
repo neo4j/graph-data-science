@@ -34,6 +34,7 @@ import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -46,7 +47,7 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
 
     public static final String LABELS_PROPERTY = "communityIds";
 
-    private final ThreadLocal<Random> random;
+    private final CloseableThreadLocal<Random> random;
 
     @SuppressWarnings("unused") // Needed for the @PregelProcedure annotation
     public SpeakerListenerLPA() {
@@ -54,7 +55,7 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
     }
 
     public SpeakerListenerLPA(long seed) {
-        random = ThreadLocal.withInitial(() -> new Random(seed));
+        random = CloseableThreadLocal.withInitial(() -> new Random(seed));
     }
 
     @Override
@@ -70,6 +71,11 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
         // when nodes do not have incoming rels, it should vote for itself always
         Arrays.fill(initialLabels, context.nodeId());
         context.setNodeValue(LABELS_PROPERTY, initialLabels);
+    }
+
+    @Override
+    public void close() {
+        random.close();
     }
 
     @Override

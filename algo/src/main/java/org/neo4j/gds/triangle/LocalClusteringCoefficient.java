@@ -27,6 +27,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.DoubleAdder;
@@ -84,19 +85,21 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         long nodeCount = graph.nodeCount();
         localClusteringCoefficients = HugeDoubleArray.newArray(nodeCount);
 
-        ThreadLocal<Graph> concurrentGraphCopy = ThreadLocal.withInitial(() -> graph.concurrentCopy());
         DoubleAdder localClusteringCoefficientSum = new DoubleAdder();
-        ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
-            double localClusteringCoefficient = calculateCoefficient(
-                propertyValueFunction.applyAsDouble(nodeId),
-                graph.isMultiGraph() ?
-                    concurrentGraphCopy.get().degreeWithoutParallelRelationships(nodeId) :
-                    graph.degree(nodeId)
-            );
-            localClusteringCoefficients.set(nodeId, localClusteringCoefficient);
-            localClusteringCoefficientSum.add(localClusteringCoefficient);
-            progressTracker.logProgress();
-        });
+
+        try (var concurrentGraphCopy = CloseableThreadLocal.withInitial(() -> graph.concurrentCopy())) {
+            ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
+                double localClusteringCoefficient = calculateCoefficient(
+                    propertyValueFunction.applyAsDouble(nodeId),
+                    graph.isMultiGraph() ?
+                        concurrentGraphCopy.get().degreeWithoutParallelRelationships(nodeId) :
+                        graph.degree(nodeId)
+                );
+                localClusteringCoefficients.set(nodeId, localClusteringCoefficient);
+                localClusteringCoefficientSum.add(localClusteringCoefficient);
+                progressTracker.logProgress();
+            });
+        }
 
         // compute average clustering coefficient
         averageClusteringCoefficient = localClusteringCoefficientSum.doubleValue() / nodeCount;

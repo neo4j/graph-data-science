@@ -23,11 +23,10 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 
-import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
 
-public final class ElementImportRunner<T extends InputEntityVisitor.Adapter & Flushable & Closeable> implements Runnable {
+public final class ElementImportRunner<T extends InputEntityVisitor.Adapter & Flushable> implements Runnable {
     private final T visitor;
     private final InputIterator inputIterator;
     private final ProgressTracker progressTracker;
@@ -54,7 +53,5 @@ public final class ElementImportRunner<T extends InputEntityVisitor.Adapter & Fl
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        visitor.close();
     }
 }

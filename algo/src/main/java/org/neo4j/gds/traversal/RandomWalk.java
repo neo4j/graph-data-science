@@ -153,10 +153,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
                 terminationFlag
             ),
             executorService
-        ).whenComplete((__, ___) -> {
-            progressTracker.release();
-            release();
-        });
+        ).whenComplete((__, ___) -> release());
     }
 
     private void tasksRunner(

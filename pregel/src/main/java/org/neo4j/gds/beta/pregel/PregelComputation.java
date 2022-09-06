@@ -114,4 +114,14 @@ public interface PregelComputation<C extends PregelConfig> {
     default double applyRelationshipWeight(double nodeValue, double relationshipWeight) {
         return nodeValue;
     }
+
+    /**
+     * The close method is called at the very end of the computation,
+     * after the end result has been produced and no more work is being
+     * done.
+     * <br>
+     * Implement this method to close any resources that the computation opened,
+     * for example (Closable)ThreadLocals.
+     */
+    default void close() {}
 }

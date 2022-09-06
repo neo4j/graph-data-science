@@ -242,6 +242,7 @@ public abstract class FileToGraphStoreImporter {
                 )
             );
             ParallelUtil.run(tasks, Pools.DEFAULT);
+            graphStoreGraphPropertyVisitor.close();
 
             var graphPropertyStreams = mergeStreamFractions(graphStoreGraphPropertyVisitor.streamFractions());
             buildGraphPropertiesFromStreams(graphPropertyBuilder, graphPropertyStreams);

@@ -91,6 +91,7 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
     void release() {
         // Unlike in the sibling ForkJoinComputer, we will not shut down the
         // executor service (thread pool), since we use the shared global thread pool.
+        computation.close();
     }
 
     @NotNull

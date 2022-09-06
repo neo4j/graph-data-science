@@ -28,14 +28,19 @@ import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.mem.BitUtil;
+import org.neo4j.gds.utils.CloseableThreadLocal;
 
+import java.lang.invoke.MethodHandles;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -173,6 +178,29 @@ class BatchingProgressLoggerTest {
             testProgressLogger.logFinishPercentage();
             assertThat(log.getMessages(TestLog.INFO)).containsExactly("[test] Test 100%");
         }
+    }
+
+    @Test
+    void closesThreadLocal() {
+        var logger = new BatchingProgressLogger(
+            Neo4jProxy.testLog(),
+            Tasks.leaf("foo", 42),
+            1
+        );
+
+        logger.release();
+
+        CloseableThreadLocal<Random> threadLocal = null;
+        try {
+            //noinspection unchecked
+            threadLocal = (CloseableThreadLocal<Random>) MethodHandles
+                .privateLookupIn(BatchingProgressLogger.class, MethodHandles.lookup())
+                .findGetter(BatchingProgressLogger.class, "callCounter", CloseableThreadLocal.class)
+                .invoke(logger);
+        } catch (Throwable e) {
+            fail("couldn't inspect the field", e);
+        }
+        assertThatThrownBy(threadLocal::get).isInstanceOf(NullPointerException.class);
     }
 
     private static List<Integer> performLogging(long taskVolume, int concurrency) {

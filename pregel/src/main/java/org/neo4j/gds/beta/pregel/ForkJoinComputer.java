@@ -84,5 +84,6 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
     @Override
     void release() {
         forkJoinPool.shutdown();
+        computation.close();
     }
 }
