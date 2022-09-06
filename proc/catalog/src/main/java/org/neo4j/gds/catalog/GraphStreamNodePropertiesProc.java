@@ -32,6 +32,7 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -44,15 +45,40 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStreamNodePropertiesProc extends CatalogProc {
 
+    private List<String> nodeLabelParser(Object nodeLabels) {
+
+        if (nodeLabels instanceof Iterable) {
+            var nodeLabelsList = new ArrayList<String>();
+            for (Object item : (Iterable) nodeLabels) {
+                if (item instanceof String) {
+                    nodeLabelsList.add((String) item);
+                } else {
+                    throw new IllegalArgumentException("Type mismatch for nodeLabels: expected List<String> or String");
+                }
+            }
+            return nodeLabelsList;
+        } else if (nodeLabels instanceof String) {
+            return List.of((String) nodeLabels);
+        } else {
+            throw new IllegalArgumentException("Type mismatch for nodeLabels: expected List<String> or String");
+        }
+    }
+
     @Procedure(name = "gds.graph.nodeProperties.stream", mode = READ)
     @Description("Streams the given node properties.")
     public Stream<PropertiesResult> streamNodeProperties(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") List<String> nodeProperties,
-        @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
+        @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return streamNodeProperties(graphName, configuration, nodeProperties, nodeLabels, PropertiesResult::new);
+        return streamNodeProperties(
+            graphName,
+            configuration,
+            nodeProperties,
+            nodeLabelParser(nodeLabels),
+            PropertiesResult::new
+        );
     }
 
     @Procedure(name = "gds.graph.streamNodeProperties", mode = READ, deprecatedBy = "gds.graph.nodeProperties.stream")
@@ -60,7 +86,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
     public Stream<PropertiesResult> streamProperties(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") List<String> nodeProperties,
-        @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
+        @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.nodeProperties.stream`";
@@ -68,7 +94,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
             graphName,
             configuration,
             nodeProperties,
-            nodeLabels,
+            nodeLabelParser(nodeLabels),
             PropertiesResult::new,
             Optional.of(deprecationWarning)
         );
@@ -79,10 +105,16 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
     public Stream<PropertyResult> streamNodeProperty(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") String nodeProperty,
-        @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
+        @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return streamNodeProperties(graphName, configuration, List.of(nodeProperty), nodeLabels, (nodeId, propertyName, propertyValue) -> new PropertyResult(nodeId,propertyValue));
+        return streamNodeProperties(
+            graphName,
+            configuration,
+            List.of(nodeProperty),
+            nodeLabelParser(nodeLabels),
+            (nodeId, propertyName, propertyValue) -> new PropertyResult(nodeId, propertyValue)
+        );
     }
 
     @Procedure(name = "gds.graph.streamNodeProperty", mode = READ, deprecatedBy = "gds.graph.nodeProperty.stream")
@@ -90,7 +122,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
     public Stream<PropertyResult> streamProperty(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") String nodeProperty,
-        @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
+        @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.nodeProperty.stream`";
@@ -98,7 +130,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
             graphName,
             configuration,
             List.of(nodeProperty),
-            nodeLabels,
+            nodeLabelParser(nodeLabels),
             (nodeId, propertyName, propertyValue) -> new PropertyResult(nodeId, propertyValue),
             Optional.of(deprecationWarning)
         );

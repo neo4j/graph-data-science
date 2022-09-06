@@ -178,6 +178,25 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     }
 
     @Test
+    void streamLoadedNodePropertiesForLabelAsString() {
+        String graphWriteQuery = formatWithLocale(
+            "CALL gds.graph.nodeProperties.stream('%s', ['newNodeProp1', 'newNodeProp2'], 'A')" +
+            " YIELD nodeId, nodeProperty, propertyValue" +
+            " RETURN nodeId AS id, nodeProperty, propertyValue",
+            TEST_GRAPH_SAME_PROPERTIES
+        );
+
+        assertCypherResult(graphWriteQuery, asList(
+            map("id", idFunction.of("a"), "nodeProperty", "newNodeProp1", "propertyValue", 0D),
+            map("id", idFunction.of("a"), "nodeProperty", "newNodeProp2", "propertyValue", 42L),
+            map("id", idFunction.of("b"), "nodeProperty", "newNodeProp1", "propertyValue", 1D),
+            map("id", idFunction.of("b"), "nodeProperty", "newNodeProp2", "propertyValue", 43L),
+            map("id", idFunction.of("c"), "nodeProperty", "newNodeProp1", "propertyValue", 2D),
+            map("id", idFunction.of("c"), "nodeProperty", "newNodeProp2", "propertyValue", 44L)
+        ));
+    }
+
+    @Test
     void streamLoadedNodePropertiesForLabelSubset() {
         assertCypherResult(
             "CALL gds.graph.nodeProperties.stream($graph, ['newNodeProp1', 'newNodeProp2']) " +
@@ -325,10 +344,28 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
         );
     }
 
+    @Test
+    void shouldFailForBadNodeLabels() {
+        assertError(
+            "CALL gds.graph.nodeProperty.stream($graph, 'newNodeProp3', [['A']])",
+            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
+            "mismatch"
+        );
+        assertError(
+            "CALL gds.graph.nodeProperties.stream($graph, ['newNodeProp3'], [['A']])",
+            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
+            "mismatch"
+        );
+    }
+
     static Stream<Arguments> proceduresAndArguments() {
         return Stream.of(
             Arguments.of("gds.graph.streamNodeProperty", "gds.graph.nodeProperty.stream", "'newNodeProp1'"),
-            Arguments.of("gds.graph.streamNodeProperties", "gds.graph.nodeProperties.stream", "['newNodeProp1', 'newNodeProp2']")
+            Arguments.of(
+                "gds.graph.streamNodeProperties",
+                "gds.graph.nodeProperties.stream",
+                "['newNodeProp1', 'newNodeProp2']"
+            )
         );
     }
 
