@@ -48,7 +48,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
-include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/machine-learning/node-property-prediction/node-property-prediction-stream-config.adoc[]
 include::partial$/machine-learning/node-property-prediction/nodeclassification-pipeline/specific-stream-configuration.adoc[]
 |===
 
@@ -85,7 +85,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
-include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+include::partial$/machine-learning/node-property-prediction/node-property-prediction-mutate-config.adoc[]
 include::partial$/machine-learning/node-property-prediction/nodeclassification-pipeline/specific-write-mutate-configuration.adoc[]
 |===
 
@@ -126,7 +126,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
-include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+include::partial$/machine-learning/node-property-prediction/node-property-prediction-write-config.adoc[]
 include::partial$/machine-learning/node-property-prediction/nodeclassification-pipeline/specific-write-mutate-configuration.adoc[]
 |===
 
@@ -167,7 +167,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 CALL gds.beta.pipeline.nodeClassification.predict.stream.estimate('myGraph', {
   modelName: 'nc-pipeline-model',
   includePredictedProbabilities: true,
-  nodeLabels: ['UnknownHouse']
+  targetNodeLabels: ['UnknownHouse']
 })
 YIELD requiredMemory
 ----

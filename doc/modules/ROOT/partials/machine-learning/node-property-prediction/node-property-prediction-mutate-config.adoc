@@ -1,0 +1,26 @@
+ifeval::["{modelType}" != ""]
+| modelName                                                     | String      | n/a                    | no       | The name of a {modelType} model in the model catalog.
+endif::[]
+
+ifeval::["{entity}" == "node"]
+| mutateProperty                                                | String      | n/a                    | no       | The {entity} property in the GDS graph to which the {result} is written.
+endif::[]
+
+ifeval::["{entity}" == "relationship"]
+| mutateRelationshipType                                        | String      | n/a                    | no       | The relationship type used for the new relationships written to the projected graph.
+| mutateProperty                                                | String      | n/a                    | no       | The {entity} property in the GDS graph to which the {result} is written.
+endif::[]
+
+ifeval::["{entity}" == "source-target-pair"]
+| mutateRelationshipType                                        | String      | n/a                    | no       | The relationship type used for the new relationships written to the projected graph.
+endif::[]
+
+include::partial$/machine-learning/node-property-prediction/node-property-prediction-filtering.adoc[]
+
+| xref:common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer     | 4                      | yes      | The number of concurrent threads used for running the algorithm.
+
+ifeval::["{entity}" == "pregel"]
+| mutateProperty                                                | String      | ""                     | yes      | The prefix used for all public properties in the PregelSchema.
+endif::[]
+
+| xref:common-usage/running-algos.adoc#common-configuration-jobid[jobId]                         | String      | Generated internally   | yes      | An ID that can be provided to more easily track the algorithm's progress.
