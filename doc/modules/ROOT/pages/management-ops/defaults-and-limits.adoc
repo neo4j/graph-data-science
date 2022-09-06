@@ -113,7 +113,7 @@ You can set limits by invoking the `gds.alpha.config.limits.set` procedure. You 
 Here we set a limit on the `concurrency` parameter of 6 for user Kristian; that means Kristian will never be able to specify a value for the concurrency parameter higher than 6:
 
 .Setting a limit
-[source, cypher, role=noplay setup-query, skip-test=true]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.config.limits.set('concurrency', 6, 'Kristian')
 ----
@@ -121,7 +121,7 @@ CALL gds.alpha.config.limits.set('concurrency', 6, 'Kristian')
 We also disallow Kristian from running in `sudo` mode:
 
 .Setting a limit
-[source, cypher, role=noplay setup-query, skip-test=true]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.config.limits.set('sudo', false, 'Kristian')
 ----
@@ -139,7 +139,7 @@ You can inspect limit settings by invoking the `gds.alpha.config.limits.list` pr
 
 Here is an example where we list the `concurrency` limit setting for Kristian:
 
-[role=query-example, skip-test=true]
+[role=no-play]
 --
 .Querying for personal limits and filtering by key:
 [source, cypher, role=noplay]
