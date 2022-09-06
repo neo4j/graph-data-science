@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -139,6 +140,12 @@ public class NodeClassificationPipelineStreamProc
         this.setModelCatalog(modelCatalog);
         return this;
     }
+
+    @Override
+    public NewConfigFunction<NodeClassificationPredictPipelineStreamConfig> newConfigFunction() {
+        return new NodeClassificationPredictNewStreamConfigFn(modelCatalog());
+    }
+
 
     @SuppressWarnings("unused")
     public static final class NodeClassificationStreamResult {

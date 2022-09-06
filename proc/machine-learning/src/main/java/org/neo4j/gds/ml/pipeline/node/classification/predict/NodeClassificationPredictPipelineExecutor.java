@@ -93,12 +93,15 @@ public class NodeClassificationPredictPipelineExecutor extends PredictPipelineEx
         var classCount = model.customInfo().classes().size();
         var featureCount = model.data().featureDimension();
 
+        var combinedNodeLabels = configuration.targetNodeLabels().isEmpty() ? model.trainConfig().targetNodeLabels() : configuration.targetNodeLabels();
+        var combinedRelationshipTypes = configuration.relationshipTypes().isEmpty() ? model.trainConfig().relationshipTypes() : configuration.relationshipTypes();
+
         MemoryEstimation nodePropertyStepEstimation = NodePropertyStepExecutor.estimateNodePropertySteps(
             modelCatalog,
             configuration.username(),
             pipeline.nodePropertySteps(),
-            configuration.nodeLabels(),
-            configuration.relationshipTypes()
+            combinedNodeLabels,
+            combinedRelationshipTypes
         );
 
         var predictionEstimation = MemoryEstimations.builder().add(

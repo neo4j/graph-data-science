@@ -191,7 +191,7 @@ NOTE: If a node property step does not have an estimation implemented, the step 
 CALL gds.beta.pipeline.nodeClassification.predict.stream('myGraph', {
   modelName: 'nc-pipeline-model',
   includePredictedProbabilities: true,
-  nodeLabels: ['UnknownHouse']
+  targetNodeLabels: ['UnknownHouse']
 })
  YIELD nodeId, predictedClass, predictedProbabilities
 WITH gds.util.asNode(nodeId) AS houseNode, predictedClass, predictedProbabilities
@@ -233,7 +233,7 @@ For more details on the `mutate` mode in general, see xref:common-usage/running-
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.predict.mutate('myGraph', {
-  nodeLabels: ['UnknownHouse'],
+  targetNodeLabels: ['UnknownHouse'],
   modelName: 'nc-pipeline-model',
   mutateProperty: 'predictedClass',
   predictedProbabilityProperty: 'predictedProbabilities'
@@ -266,7 +266,7 @@ For more details on the `write` mode in general, see xref:common-usage/running-a
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.predict.write('myGraph', {
-  nodeLabels: ['UnknownHouse'],
+  targetNodeLabels: ['UnknownHouse'],
   modelName: 'nc-pipeline-model',
   writeProperty: 'predictedClass',
   predictedProbabilityProperty: 'predictedProbabilities'
