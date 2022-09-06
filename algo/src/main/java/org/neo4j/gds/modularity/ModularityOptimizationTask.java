@@ -35,9 +35,8 @@ final class ModularityOptimizationTask implements Runnable {
 
     private final Graph localGraph;
     private final Partition partition;
-    private final long color;
+    private final long currentStartingPosition;
     private final double totalNodeWeight;
-    private final HugeLongArray colors;
     private final ProgressTracker progressTracker;
     private final HugeLongArray currentCommunities;
     private final HugeLongArray nextCommunities;
@@ -45,21 +44,24 @@ final class ModularityOptimizationTask implements Runnable {
     private final ModularityManager modularityManager;
     private final HugeAtomicDoubleArray communityWeightUpdates;
 
+    private final ModularityColorArray modularityColorArray;
+
     ModularityOptimizationTask(
         Graph graph,
         Partition partition,
-        long color,
+        long currentStartingPosition,
         double totalNodeWeight,
-        HugeLongArray colors,
         HugeLongArray currentCommunities,
         HugeLongArray nextCommunities,
         HugeDoubleArray cumulativeNodeWeights,
         HugeAtomicDoubleArray communityWeightUpdates,
         ModularityManager modularityManager,
+        ModularityColorArray modularityColorArray,
         ProgressTracker progressTracker
     ) {
+        this.modularityColorArray = modularityColorArray;
         this.partition = partition;
-        this.color = color;
+        this.currentStartingPosition = currentStartingPosition;
         this.localGraph = graph.concurrentCopy();
         this.currentCommunities = currentCommunities;
         this.nextCommunities = nextCommunities;
@@ -67,7 +69,6 @@ final class ModularityOptimizationTask implements Runnable {
         this.communityWeightUpdates = communityWeightUpdates;
         this.totalNodeWeight = totalNodeWeight;
         this.cumulativeNodeWeights = cumulativeNodeWeights;
-        this.colors = colors;
         this.progressTracker = progressTracker;
     }
 
@@ -76,11 +77,9 @@ final class ModularityOptimizationTask implements Runnable {
         LongDoubleMap reuseCommunityInfluences = new LongDoubleHashMap(50);
         var relationshipsProcessed = new MutableLong();
 
-        partition.consume(nodeId -> {
-            if (colors.get(nodeId) != color) {
-                return;
-            }
-
+        partition.consume(indexId -> {
+            long actualIndexId = currentStartingPosition + indexId;
+            long nodeId = modularityColorArray.nodeAtPosition(actualIndexId);
             long currentCommunity = currentCommunities.get(nodeId);
             final int degree = localGraph.degree(nodeId);
 
