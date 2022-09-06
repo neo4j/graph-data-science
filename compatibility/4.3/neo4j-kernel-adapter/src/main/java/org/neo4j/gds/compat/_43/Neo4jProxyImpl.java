@@ -657,7 +657,8 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         List<FieldSignature> inputSignature,
         Neo4jTypes.AnyType type,
         String description,
-        boolean internal
+        boolean internal,
+        boolean threadSafe
     ) {
         String deprecated = null;    // no depracation
         String category = null;      // No predefined categpry (like temporal or math)
