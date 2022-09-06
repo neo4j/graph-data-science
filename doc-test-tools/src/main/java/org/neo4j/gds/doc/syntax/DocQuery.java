@@ -22,8 +22,13 @@ package org.neo4j.gds.doc.syntax;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 
+/**
+ * A doc query has query text and an optional operator
+ */
 @ValueClass
 public interface DocQuery {
+    String DEFAULT_OPERATOR = "";
+
     String query();
 
     @Value.Derived
@@ -33,7 +38,7 @@ public interface DocQuery {
 
     @Value.Default
     default String operator() {
-        return "";
+        return DEFAULT_OPERATOR;
     }
 
     static ImmutableDocQuery.Builder builder() {

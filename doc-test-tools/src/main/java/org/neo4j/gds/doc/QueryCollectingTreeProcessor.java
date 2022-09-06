@@ -124,9 +124,8 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
             builder.operator(structuralNode.getAttribute(TEST_OPERATOR_ATTRIBUTE).toString());
         }
 
-        builder.skipTest(parseSkipTest(structuralNode));
-
-        return builder.build();
+    private static String parseOperator(StructuralNode structuralNode) {
+        return structuralNode.getAttribute(TEST_OPERATOR_ATTRIBUTE, DocQuery.DEFAULT_OPERATOR).toString();
     }
 
     private void collectQueryExamples(StructuralNode node) {
