@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
+import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.OptionsBuilder;
 import org.asciidoctor.SafeMode;
 import org.assertj.core.api.Assertions;
@@ -33,88 +34,65 @@ import org.neo4j.graphdb.Result;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static org.asciidoctor.Asciidoctor.Factory.create;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
-
 public abstract class MultiFileDocTestBase extends BaseProcTest {
-
-    @TempDir
-    File workDir;
-
-    private static final Path ASCIIDOC_PATH = Paths.get("build/doc-sources/modules/ROOT");
-
     private List<DocQuery> beforeEachQueries;
+
     private List<DocQuery> beforeAllQueries;
+
     private List<QueryExampleGroup> queryExampleGroups;
-
-    private static final NumberFormat FLOAT_FORMAT = DecimalFormat.getInstance(Locale.ENGLISH);
-
-    static {
-        FLOAT_FORMAT.setMaximumFractionDigits(15);
-        FLOAT_FORMAT.setGroupingUsed(false);
-    }
 
     protected abstract List<String> adocPaths();
 
-    private List<File> adocFiles() {
-        return adocPaths()
-            .stream()
-            .map(ASCIIDOC_PATH::resolve)
-            .map(Path::toFile)
-            .collect(Collectors.toList());
-    }
-
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp(@TempDir File workingDirectory) throws Exception {
         Class<?>[] clazzArray = new Class<?>[0];
         registerProcedures(procedures().toArray(clazzArray));
         registerFunctions(functions().toArray(clazzArray));
         registerAggregationFunctions(aggregationFunctions().toArray(clazzArray));
 
-        QueryCollectingTreeProcessor treeProcessor;
-        try (var asciidoctor = create()) {
-            treeProcessor = new QueryCollectingTreeProcessor();
+        var treeProcessor = new QueryCollectingTreeProcessor();
+        var includeProcessor = new PartialsIncludeProcessor();
 
+        try (var asciidoctor = Asciidoctor.Factory.create()) {
             asciidoctor.javaExtensionRegistry()
-                .includeProcessor(new PartialsIncludeProcessor())
+                .includeProcessor(includeProcessor)
                 .treeprocessor(treeProcessor);
 
             var options = OptionsBuilder.options()
-                .baseDir(ASCIIDOC_PATH.toFile()) // Make sure to set the `baseDir` it is read in `PartialsIncludeProcessor`
-                .toDir(workDir) // Make sure we don't write anything in the project.
+                .toDir(workingDirectory) // Make sure we don't write anything in the project.
                 .safe(SafeMode.UNSAFE); // By default, we are forced to use relative path which we don't want.
 
             for (var docFile : adocFiles()) {
-                assertThat(docFile)
-                    .exists()
-                    .canRead();
-
                 asciidoctor.convertFile(docFile, options);
             }
         }
 
-        beforeEachQueries = treeProcessor.beforeEachQueries();
-
-        queryExampleGroups = treeProcessor.queryExamples();
-
-        beforeAllQueries = treeProcessor.beforeAllQueries();
+        // now that the asciidoc has been processed we can extract the queries we need
+        beforeEachQueries = treeProcessor.getBeforeEachQueries();
+        queryExampleGroups = treeProcessor.getQueryExampleGroups();
+        beforeAllQueries = treeProcessor.getBeforeAllQueries();
 
         if (!setupNeo4jGraphPerTest()) {
             beforeAllQueries.forEach(this::runDocQuery);
         }
+    }
+
+    private List<File> adocFiles() {
+        return adocPaths()
+            .stream()
+            .map(DocumentationTestToolsConstants.ASCIIDOC_PATH::resolve)
+            .map(Path::toFile)
+            .collect(Collectors.toList());
     }
 
     @TestFactory
@@ -220,7 +198,7 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
             .stream()
             .map(list -> list.stream().map(string -> {
                     try {
-                        return FLOAT_FORMAT.format(Double.parseDouble(string));
+                        return DocumentationTestToolsConstants.FLOAT_FORMAT.format(Double.parseDouble(string));
                     } catch (NumberFormatException e) {
                         return string;
                     }
@@ -236,7 +214,7 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
         } else if (value instanceof String) {
             return "\"" + value + "\"";
         } else if (value instanceof Double) {
-            return FLOAT_FORMAT.format(value);
+            return DocumentationTestToolsConstants.FLOAT_FORMAT.format(value);
         } else {
             return value.toString();
         }
