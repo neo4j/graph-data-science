@@ -22,12 +22,7 @@ ext {
     ]
     ver = [
         doc                    : [
-            'asciidoctorj'        : '2.4.3',
-            'asciidoctorjPdf'     : '1.5.4',
-            'asciidoctorjDiagram' : '2.1.0',
-            'asciidoctorGroovyDsl': '1.0.0.Alpha2',
-            'dom4j'               : '2.1.1',
-            'jaxen'               : '1.1.6',
+            'asciidoctorj'        : '2.5.5'
             'reflections'         : '0.10.2'
         ],
         'assertj'              : '3.20.2',
