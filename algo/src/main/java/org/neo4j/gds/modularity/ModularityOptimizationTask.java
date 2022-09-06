@@ -79,7 +79,7 @@ final class ModularityOptimizationTask implements Runnable {
 
         partition.consume(indexId -> {
             long actualIndexId = currentStartingPosition + indexId;
-            long nodeId = modularityColorArray.get(actualIndexId);
+            long nodeId = modularityColorArray.nodeAtPosition(actualIndexId);
             long currentCommunity = currentCommunities.get(nodeId);
             final int degree = localGraph.degree(nodeId);
 

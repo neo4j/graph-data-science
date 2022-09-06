@@ -126,7 +126,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         progressTracker.beginSubTask();
 
-        long numberOfColors = modularityColorArray.getNumberOfColors();
+        long numberOfColors = modularityColorArray.numberOfColors();
 
         for (iterationCounter = 0; iterationCounter < maxIterations; iterationCounter++) {
             progressTracker.beginSubTask();
@@ -165,9 +165,8 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         K1Coloring coloring = new K1ColoringFactory<>().build(graph, k1Config, progressTracker);
         coloring.setTerminationFlag(terminationFlag);
-        modularityColorArray = ModularityColorArray.createModularityColorArray(
+        modularityColorArray = ModularityColorArray.create(
             coloring.compute(),
-            nodeCount,
             coloring.usedColors()
         );
 
@@ -300,7 +299,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private long optimizeColor(long currentStandingPosition) {
         // run optimization tasks for every node
 
-        long nextStartingCoordinate = modularityColorArray.getNextStartingCoordinate(currentStandingPosition);
+        long nextStartingCoordinate = modularityColorArray.nextStartingCoordinate(currentStandingPosition);
         long colorCount = nextStartingCoordinate - currentStandingPosition;
 
         RunWithConcurrency.builder()
@@ -315,7 +314,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             concurrency,
             stream -> stream.forEach(indexId -> {
                 long actualIndexId = currentStandingPosition + indexId;
-                long nodeId = modularityColorArray.get(actualIndexId);
+                long nodeId = modularityColorArray.nodeAtPosition(actualIndexId);
                 currentCommunities.set(nodeId, nextCommunities.get(nodeId));
             })
         );

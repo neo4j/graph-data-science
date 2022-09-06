@@ -30,29 +30,35 @@ class ModularityColorArrayTest {
 
     @Test
     void shouldComputeCorrectly() {
-        HugeLongArray colors = HugeLongArray.of(0, 1, 2, 2, 1, 0);
-        BitSet usedColors = new BitSet(6);
-        usedColors.set(0, 3);
+        HugeLongArray colors = HugeLongArray.of(0, 1, 3, 3, 3, 1, 0, 0, 0);
+        BitSet usedColors = new BitSet(colors.size());
+        usedColors.set(0);
+        usedColors.set(1);
+        usedColors.set(3);
 
 
-        ModularityColorArray modularityColorArray = ModularityColorArray.createModularityColorArray(
+        ModularityColorArray modularityColorArray = ModularityColorArray.create(
             colors,
-            6,
             usedColors
         );
 
-        assertThat(modularityColorArray.getNumberOfColors()).isEqualTo(3);
-        assertThat(modularityColorArray.getCount(0)).isEqualTo(2);
-        assertThat(modularityColorArray.getCount(2)).isEqualTo(2);
-        assertThat(modularityColorArray.getCount(4)).isEqualTo(2);
+        assertThat(modularityColorArray.numberOfColors()).isEqualTo(3);
 
-        assertThat(colors.get(modularityColorArray.get(0))).isEqualTo(colors.get(modularityColorArray.get(1)));
-        assertThat(colors.get(modularityColorArray.get(2))).isEqualTo(colors.get(modularityColorArray.get(3)));
-        assertThat(colors.get(modularityColorArray.get(4))).isEqualTo(colors.get(modularityColorArray.get(5)));
+        assertThat(modularityColorArray.nodeAtPosition(0)).isEqualTo(0);
+        assertThat(modularityColorArray.nodeAtPosition(1)).isEqualTo(6);
+        assertThat(modularityColorArray.nodeAtPosition(2)).isEqualTo(7);
+        assertThat(modularityColorArray.nodeAtPosition(3)).isEqualTo(8);
 
-        assertThat(modularityColorArray.getNextStartingCoordinate(0)).isEqualTo(2);
-        assertThat(modularityColorArray.getNextStartingCoordinate(2)).isEqualTo(4);
-        assertThat(modularityColorArray.getNextStartingCoordinate(4)).isEqualTo(6);
+        assertThat(modularityColorArray.nodeAtPosition(4)).isEqualTo(1);
+        assertThat(modularityColorArray.nodeAtPosition(5)).isEqualTo(5);
+
+        assertThat(modularityColorArray.nodeAtPosition(6)).isEqualTo(2);
+        assertThat(modularityColorArray.nodeAtPosition(7)).isEqualTo(3);
+        assertThat(modularityColorArray.nodeAtPosition(8)).isEqualTo(4);
+
+        assertThat(modularityColorArray.nextStartingCoordinate(0)).isEqualTo(4);
+        assertThat(modularityColorArray.nextStartingCoordinate(4)).isEqualTo(6);
+        assertThat(modularityColorArray.nextStartingCoordinate(6)).isEqualTo(9);
 
 
     }

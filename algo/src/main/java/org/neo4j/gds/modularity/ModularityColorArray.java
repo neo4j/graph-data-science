@@ -24,7 +24,7 @@ import com.carrotsearch.hppc.LongLongHashMap;
 import com.carrotsearch.hppc.LongLongMap;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
-class ModularityColorArray {
+final class ModularityColorArray {
 
     private final HugeLongArray sortedNodesByColor;
     private BitSet colorCoordinates;
@@ -40,21 +40,17 @@ class ModularityColorArray {
         this.numberOfColors = colorCoordinates.cardinality() - 1;
     }
 
-    long getNumberOfColors() {
+    long numberOfColors() {
         return numberOfColors;
     }
 
-    long getNextStartingCoordinate(long current) {
-        return colorCoordinates.nextSetBit(current + 1);
+    long nextStartingCoordinate(long currentStartingPosition) {
+        return colorCoordinates.nextSetBit(currentStartingPosition + 1);
     }
 
 
-    long get(long indexId) {
+    long nodeAtPosition(long indexId) {
         return sortedNodesByColor.get(indexId);
-    }
-
-    long getCount(long current) {
-        return (getNextStartingCoordinate(current) - current);
     }
 
     void release() {
@@ -62,7 +58,8 @@ class ModularityColorArray {
         colorCoordinates = null;
     }
 
-    static ModularityColorArray createModularityColorArray(HugeLongArray colors, long nodeCount, BitSet usedColors) {
+    static ModularityColorArray create(HugeLongArray colors, BitSet usedColors) {
+        long nodeCount = colors.size();
         var sortedNodesByColor = HugeLongArray.newArray(nodeCount);
         HugeLongArray colorCoordinateArray = HugeLongArray.newArray(usedColors.cardinality());
         LongLongMap colorToId = new LongLongHashMap();
