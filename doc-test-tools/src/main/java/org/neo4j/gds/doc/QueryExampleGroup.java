@@ -23,9 +23,32 @@ import org.neo4j.gds.annotation.ValueClass;
 
 import java.util.List;
 
+/**
+ * Query examples are grouped by displayName like so ('myGroup' becomes the displayName):
+ *
+ * <pre>
+ * [role=query-example, group=myGroup]
+ * --
+ * [...]
+ * --
+ *
+ * [role=query-example, group=myGroup]
+ * --
+ * [...]
+ * --
+ * </pre>
+ *
+ * When it comes to executing tests, the query examples in a group are executed in document order with a single for-each
+ * query. This ensures the effects from one query are visible to other queries. Think mutate followed by stream, or
+ * write followed by arbitrary Cypher.
+ *
+ * If you do not specify the group attribute, your query is assigned a dummy displayName and executed in isolation.
+ */
 @ValueClass
 public interface QueryExampleGroup {
-
+    /**
+     * Only used for test names in JUnit
+     */
     String displayName();
 
     List<QueryExample> queryExamples();

@@ -25,6 +25,30 @@ import org.neo4j.gds.doc.syntax.DocQuery;
 
 import java.util.List;
 
+/**
+ * Query examples are specified in two sections:
+ *
+ * <pre>
+ * [role=query-example]
+ * --
+ * .Header text goes here:
+ * [source, cypher]
+ * ----
+ * MATCH (n) RETURN n.a AS a, n.b AS b
+ * ----
+ * .Results
+ * [opts="header"]
+ * |===
+ * | a        | b
+ * | "Alice"  | 7
+ * | "Bob"    | 11
+ * |===
+ * --
+ * </pre>
+ *
+ * The sections are turned into the query and assertions about the query result, respectively, and they then get turned
+ * into a single test case.
+ */
 @ValueClass
 public interface QueryExample extends DocQuery {
 
