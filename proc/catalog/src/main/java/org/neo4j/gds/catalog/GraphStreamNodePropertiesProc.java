@@ -30,7 +30,6 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -43,30 +42,11 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStreamNodePropertiesProc extends CatalogProc {
 
-    private List<String> nodeLabelParser(Object nodeLabels) {
-
-        if (nodeLabels instanceof Iterable) {
-            var nodeLabelsList = new ArrayList<String>();
-            for (Object item : (Iterable) nodeLabels) {
-                if (item instanceof String) {
-                    nodeLabelsList.add((String) item);
-                } else {
-                    throw new IllegalArgumentException("Type mismatch for nodeLabels: expected List<String> or String");
-                }
-            }
-            return nodeLabelsList;
-        } else if (nodeLabels instanceof String) {
-            return List.of((String) nodeLabels);
-        } else {
-            throw new IllegalArgumentException("Type mismatch for nodeLabels: expected List<String> or String");
-        }
-    }
-
     @Procedure(name = "gds.graph.streamNodeProperties", mode = READ)
     @Description("Streams the given node properties.")
     public Stream<PropertiesResult> streamProperties(
         @Name(value = "graphName") String graphName,
-        @Name(value = "nodeProperties") List<String> nodeProperties,
+        @Name(value = "nodeProperties") Object nodeProperties,
         @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -78,7 +58,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         GraphStreamNodePropertiesConfig config = GraphStreamNodePropertiesConfig.of(
             graphName,
             nodeProperties,
-            nodeLabelParser(nodeLabels),
+            nodeLabels,
             cypherConfig
         );
         // validation
@@ -105,7 +85,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         GraphStreamNodePropertiesConfig config = GraphStreamNodePropertiesConfig.of(
             graphName,
             List.of(nodeProperty),
-            nodeLabelParser(nodeLabels),
+            nodeLabels,
             cypherConfig
         );
         // validation

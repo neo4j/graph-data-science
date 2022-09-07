@@ -37,7 +37,6 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -48,25 +47,6 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class GraphWriteNodePropertiesProc extends CatalogProc {
-
-    private List<String> nodeObjectParser(Object nodeObject, String parameter) {
-
-        if (nodeObject instanceof Iterable) {
-            var nodeObjectList = new ArrayList<String>();
-            for (Object item : (Iterable) nodeObject) {
-                if (item instanceof String) {
-                    nodeObjectList.add((String) item);
-                } else {
-                    throw new IllegalArgumentException("Type mismatch for " + parameter + " : expected List<String> or String");
-                }
-            }
-            return nodeObjectList;
-        } else if (nodeObject instanceof String) {
-            return List.of((String) nodeObject);
-        } else {
-            throw new IllegalArgumentException("Type mismatch for " + parameter + " : expected List<String> or String");
-        }
-    }
 
     @Context
     public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
@@ -79,9 +59,6 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var parsedNodeProperties =  nodeObjectParser(nodeProperties, "nodeProperties");
-        var parsedNodeLabels = nodeObjectParser(nodeLabels, "nodeLabels");
-
         ProcPreconditions.check();
         validateGraphName(graphName);
 
@@ -89,8 +66,8 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         GraphWriteNodePropertiesConfig config = GraphWriteNodePropertiesConfig.of(
             graphName,
-            parsedNodeProperties,
-            parsedNodeLabels,
+            nodeProperties,
+            nodeLabels,
             cypherConfig
         );
         // validation
@@ -99,7 +76,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         config.validate(graphStore);
 
         // writing
-        Result.Builder builder = new Result.Builder(graphName, parsedNodeProperties);
+        Result.Builder builder = new Result.Builder(graphName, config.nodeProperties());
         try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
             long propertiesWritten = runWithExceptionLogging(
                 "Node property writing failed",

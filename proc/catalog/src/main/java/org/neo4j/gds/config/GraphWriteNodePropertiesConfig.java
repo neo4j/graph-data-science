@@ -23,7 +23,6 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.List;
 import java.util.Optional;
 
 @ValueClass
@@ -33,8 +32,8 @@ public interface GraphWriteNodePropertiesConfig extends GraphExportNodePropertie
 
     static GraphWriteNodePropertiesConfig of(
         String graphName,
-        List<String> nodeProperties,
-        List<String> nodeLabels,
+        Object nodeProperties,
+        Object nodeLabels,
         CypherMapWrapper config
     ) {
         return new GraphWriteNodePropertiesConfigImpl(
