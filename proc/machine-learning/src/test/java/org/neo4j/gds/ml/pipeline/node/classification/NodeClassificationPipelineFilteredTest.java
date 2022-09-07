@@ -34,7 +34,6 @@ import org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationP
 import org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineStreamProc;
 import org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineTrainProc;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -180,15 +179,7 @@ public class NodeClassificationPipelineFilteredTest extends BaseProcTest {
                 Map.of("nodeId", 6L, "propertyValue", 0L),
                 Map.of("nodeId", 7L, "propertyValue", 1L),
                 Map.of("nodeId", 8L, "propertyValue", 0L),
-                Map.of("nodeId", 9L, "propertyValue", 1L),
-                new HashMap<>() {{
-                    put("nodeId", 10L);
-                    put("propertyValue", null);
-                }},
-                new HashMap<>() {{
-                    put("nodeId", 11L);
-                    put("propertyValue", null);
-                }}
+                Map.of("nodeId", 9L, "propertyValue", 1L)
             )
         );
     }

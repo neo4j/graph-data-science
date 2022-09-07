@@ -60,7 +60,7 @@ public class NodeClassificationPipelineStreamProc
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.stream", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
-    public Stream<NodeClassificationStreamResult> mutate(
+    public Stream<NodeClassificationStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -125,7 +125,7 @@ public class NodeClassificationPipelineStreamProc
 
     @Override
     protected NodeClassificationPredictPipelineStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return NodeClassificationPredictPipelineStreamConfig.of(username, config);
+        return newConfigFunction().apply(username, config);
     }
 
     @Override

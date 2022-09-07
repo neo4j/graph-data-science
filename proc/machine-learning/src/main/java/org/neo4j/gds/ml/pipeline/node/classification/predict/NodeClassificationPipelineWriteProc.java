@@ -128,7 +128,7 @@ public class NodeClassificationPipelineWriteProc
 
     @Override
     protected NodeClassificationPredictPipelineWriteConfig newConfig(String username, CypherMapWrapper config) {
-        return NodeClassificationPredictPipelineWriteConfig.of(username, config);
+        return newConfigFunction().apply(username, config);
     }
 
     @Override

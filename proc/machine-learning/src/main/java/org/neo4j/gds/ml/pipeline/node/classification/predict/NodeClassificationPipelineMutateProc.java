@@ -139,7 +139,7 @@ public class NodeClassificationPipelineMutateProc
 
     @Override
     protected NodeClassificationPredictPipelineMutateConfig newConfig(String username, CypherMapWrapper config) {
-        return NodeClassificationPredictPipelineMutateConfig.of(username, config);
+        return newConfigFunction().apply(username, config);
     }
 
     @Override
