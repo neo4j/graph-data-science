@@ -72,7 +72,7 @@ public class GraphStoreExportProc extends BaseProc {
             "Graph creation failed", () -> {
                 var graphStore = graphStoreFromCatalog(graphName, exportConfig).graphStore();
 
-                validateAdditionalNodeProperties(graphStore, exportConfig.additionalNodeProperties());
+                validateGraphStore(graphStore, exportConfig);
 
                 var progressTracker = new TaskProgressTracker(
                     ProgressTrackerExecutionMonitor.progressTask(
@@ -128,7 +128,7 @@ public class GraphStoreExportProc extends BaseProc {
         validateConfig(cypherConfig, exportConfig);
 
         var graphStore = graphStoreFromCatalog(graphName, exportConfig).graphStore();
-        validateAdditionalNodeProperties(graphStore, exportConfig.additionalNodeProperties());
+        validateGraphStore(graphStore, exportConfig);
 
         var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(databaseService, Config.class);
 
@@ -191,6 +191,17 @@ public class GraphStoreExportProc extends BaseProc {
             exportConfig.additionalNodeProperties(),
             log
         );
+    }
+
+    private void validateGraphStore(GraphStore graphStore, GraphStoreExporterBaseConfig exportConfig) {
+        validateReadAccess(graphStore, !exportConfig.additionalNodeProperties().mappings().isEmpty());
+        validateAdditionalNodeProperties(graphStore, exportConfig.additionalNodeProperties());
+    }
+
+    private void validateReadAccess(GraphStore graphStore, boolean exportAdditionalNodeProperties) {
+        if (exportAdditionalNodeProperties && !graphStore.capabilities().canWriteToDatabase()) {
+            throw new IllegalArgumentException("Exporting additional node properties is not allowed for this graph.");
+        }
     }
 
     private void validateAdditionalNodeProperties(GraphStore graphStore, PropertyMappings additionalNodeProperties) {
