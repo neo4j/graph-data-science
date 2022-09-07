@@ -123,7 +123,7 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
         }
         var predictGraphFilter = ImmutablePipelineGraphFilter.builder()
             .nodeLabels(targetNodeLabels)
-            .intermediateRelationshipTypes(predictRelTypes)
+            .relationshipTypes(predictRelTypes)
             .build();
         return predictGraphFilter;
     }
