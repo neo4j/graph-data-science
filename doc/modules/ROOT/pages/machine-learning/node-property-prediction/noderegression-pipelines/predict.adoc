@@ -112,7 +112,7 @@ We will use the model which we trained in the xref:machine-learning/node-propert
 ----
 CALL gds.alpha.pipeline.nodeRegression.predict.stream('myGraph', {
   modelName: 'nr-pipeline-model',
-  nodeLabels: ['UnknownHouse']
+  targetNodeLabels: ['UnknownHouse']
 }) YIELD nodeId, predictedValue
 WITH gds.util.asNode(nodeId) AS houseNode, predictedValue AS predictedPrice
 RETURN
@@ -150,7 +150,7 @@ For more details on the `mutate` mode in general, see xref:common-usage/running-
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.pipeline.nodeRegression.predict.mutate('myGraph', {
-  nodeLabels: ['UnknownHouse'],
+  targetNodeLabels: ['UnknownHouse'],
   modelName: 'nr-pipeline-model',
   mutateProperty: 'predictedPrice'
 }) YIELD nodePropertiesWritten
