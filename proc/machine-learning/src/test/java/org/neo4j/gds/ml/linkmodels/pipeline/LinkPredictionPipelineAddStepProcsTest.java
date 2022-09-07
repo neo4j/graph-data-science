@@ -129,6 +129,13 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
     }
 
     @Test
+    void failOnStarAsContextRelationshipTypes() {
+        assertThatThrownBy(() -> runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr', contextRelationshipTypes: ['*']})"))
+            .hasRootCauseInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("contextRelationshipTypes cannot be '*' since it will cause test data leakage. Please specify a list of contextRelationshipTypes explicitly.");
+    }
+
+    @Test
     void failOnUnexpectedConfigKeysInNodePropertyStepConfig() {
         assertError(
             "CALL gds.beta.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr', destroyEverything: true})",

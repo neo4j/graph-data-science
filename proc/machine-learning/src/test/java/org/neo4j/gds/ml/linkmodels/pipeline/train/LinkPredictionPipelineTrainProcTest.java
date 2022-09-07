@@ -149,7 +149,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
     void trainAModel() {
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe1')");
         runQuery("CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe1', {validationFolds: 2})");
-        runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe1', 'pageRank', {mutateProperty: 'pr', contextRelationshipTypes: ['*']})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe1', 'pageRank', {mutateProperty: 'pr'})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe1', 'L2', {nodeProperties: ['pr']})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe1', {penalty: 1})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe1', {penalty: 2})");

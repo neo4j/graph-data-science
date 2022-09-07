@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
@@ -63,6 +64,9 @@ public final class NodePropertyStepFactory {
             contextConfigMap.put(CONTEXT_RELATIONSHIP_TYPES, contextRelationshipTypes);
 
         var contextConfig = NodePropertyStepContextConfig.of(contextConfigMap);
+        if (contextConfig.contextRelationshipTypes().contains(ElementProjection.PROJECT_ALL)) {
+            throw new IllegalArgumentException("contextRelationshipTypes cannot be '*' since it will cause test data leakage. Please specify a list of contextRelationshipTypes explicitly.");
+        }
 
         return createNodePropertyStepFromCallableDefinition(procConfigMap, gdsCallableDefinition, contextConfig.contextNodeLabels(), contextConfig.contextRelationshipTypes());
     }
