@@ -23,6 +23,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -35,6 +36,8 @@ import org.neo4j.gds.executor.ExecutionContext;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & GraphNameConfig> {
 
@@ -88,6 +91,20 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
                 .map(taskName -> Tasks.leaf(taskName, volumeEstimation))
                 .collect(Collectors.toList())
         );
+    }
+
+    public void validNodePropertyStepsContextConfigs(List<ExecutableNodePropertyStep> steps) {
+        for (ExecutableNodePropertyStep step : steps) {
+            ElementTypeValidator.validate(
+                graphStore,
+                ElementTypeValidator.resolve(graphStore, step.contextNodeLabels()),
+                formatWithLocale("contextNodeLabels for step `%s`", step.procName()));
+
+            ElementTypeValidator.validateTypes(
+                graphStore,
+                ElementTypeValidator.resolveTypes(graphStore, step.contextRelationshipTypes()),
+                formatWithLocale("contextRelationshipTypes for step `%s`", step.procName()));
+        }
     }
 
     public void executeNodePropertySteps(List<ExecutableNodePropertyStep> steps) {

@@ -610,6 +610,69 @@ final class LinkPredictionTrainPipelineExecutorTest {
             ))
                 .hasMessage("Need at least one model candidate for training.");
         }
+
+        @Test
+        void shouldValidNodePropertyStepsContextConfigs() {
+            var nodePropertyStepGrapFilter = ImmutablePipelineGraphFilter.builder()
+                .nodeLabels(List.of(NodeLabel.of("N")))
+                .relationshipTypes(List.of(RelationshipType.of("REL")))
+                .build();
+            var nodePropertyStepInvalidContextNodeLabel = NodePropertyStepContextConfigImpl.builder()
+                .contextNodeLabels(List.of("INVALID"))
+                .build();
+            var nodePropertyStepInvalidContextRel = NodePropertyStepContextConfigImpl.builder()
+                .contextRelationshipTypes(List.of("INVALID"))
+                .build();
+
+
+            LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
+            pipeline.addNodePropertyStep(new TestFilteredNodePropertyStep(nodePropertyStepGrapFilter, nodePropertyStepInvalidContextNodeLabel));
+            pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
+
+            LinkPredictionTrainingPipeline pipeline2 = new LinkPredictionTrainingPipeline();
+            pipeline2.addNodePropertyStep(new TestFilteredNodePropertyStep(nodePropertyStepGrapFilter, nodePropertyStepInvalidContextRel));
+            pipeline2.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
+
+
+            var config = LinkPredictionTrainConfigImpl.builder()
+                .modelUser(getUsername())
+                .modelName("model")
+                .graphName(GRAPH_NAME)
+                .targetRelationshipType("REL")
+                .sourceNodeLabel("N")
+                .targetNodeLabel("N")
+                .pipeline("DUMMY")
+                .negativeClassWeight(1)
+                .randomSeed(1337L)
+                .build();
+
+            assertThatThrownBy(() -> TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+                var result = new LinkPredictionTrainPipelineExecutor(
+                    pipeline,
+                    config,
+                    caller.executionContext(),
+                    graphStore,
+                    ProgressTracker.NULL_TRACKER
+                ).compute();
+            }))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Could not find the specified contextNodeLabels for step `assert step filter` of ['INVALID']. Available labels are ['N'].");
+
+
+            assertThatThrownBy(() -> TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+                var result = new LinkPredictionTrainPipelineExecutor(
+                    pipeline2,
+                    config,
+                    caller.executionContext(),
+                    graphStore,
+                    ProgressTracker.NULL_TRACKER
+                ).compute();
+            }))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Could not find the specified contextRelationshipTypes for step `assert step filter` of ['INVALID']. Available relationship types are ['REL'].");
+
+        }
+
     }
 
     @Nested
@@ -769,7 +832,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
             pipeline.addNodePropertyStep(new TestFilteredNodePropertyStep(
                 ImmutablePipelineGraphFilter.builder()
                     .nodeLabels(List.of(NodeLabel.of("P"), NodeLabel.of("Q"), NodeLabel.of("X")))
-                    .intermediateRelationshipTypes(List.of(RelationshipType.of("_FEATURE_INPUT_")))
+                    .relationshipTypes(List.of(RelationshipType.of("_FEATURE_INPUT_")))
                     .build(),
                 NodePropertyStepContextConfigImpl.builder()
                     .contextNodeLabels(List.of("X"))
@@ -877,7 +940,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
             pipeline.addNodePropertyStep(new TestFilteredNodePropertyStep(
                 ImmutablePipelineGraphFilter.builder()
                     .nodeLabels(trainConfig.nodeLabelIdentifiers(graphStore))
-                    .intermediateRelationshipTypes(List.of(RelationshipType.of("_FEATURE_INPUT_")))
+                    .relationshipTypes(List.of(RelationshipType.of("_FEATURE_INPUT_")))
                     .build(),
                 NodePropertyStepContextConfigImpl.builder()
                     .contextNodeLabels(List.of("X"))
@@ -935,7 +998,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 Stream.concat(graphFilter.nodeLabels().stream(), contextNodeLabels().stream().map(NodeLabel::of)).distinct().collect(Collectors.toList())
             );
             assertThat(relTypes).containsExactlyInAnyOrderElementsOf(
-                Stream.concat(graphFilter.intermediateRelationshipTypes().stream(), contextRelationshipTypes().stream().map(RelationshipType::of)).distinct().collect(Collectors.toList())
+                Stream.concat(graphFilter.relationshipTypes().stream(), contextRelationshipTypes().stream().map(RelationshipType::of)).distinct().collect(Collectors.toList())
             );
         }
 

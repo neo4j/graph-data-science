@@ -131,15 +131,15 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         return Map.of(
             DatasetSplits.TRAIN, ImmutablePipelineGraphFilter.builder()
                 .nodeLabels(config.nodeLabelIdentifiers(graphStore))
-                .intermediateRelationshipTypes(List.of(splitConfig.trainRelationshipType()))
+                .relationshipTypes(List.of(splitConfig.trainRelationshipType()))
                 .build(),
             DatasetSplits.TEST, ImmutablePipelineGraphFilter.builder()
                 .nodeLabels(config.nodeLabelIdentifiers(graphStore))
-                .intermediateRelationshipTypes(List.of(splitConfig.testRelationshipType()))
+                .relationshipTypes(List.of(splitConfig.testRelationshipType()))
                 .build(),
             DatasetSplits.FEATURE_INPUT, ImmutablePipelineGraphFilter.builder()
                 .nodeLabels(config.nodeLabelIdentifiers(graphStore))
-                .intermediateRelationshipTypes(List.of(splitConfig.featureInputRelationshipType()))
+                .relationshipTypes(List.of(splitConfig.featureInputRelationshipType()))
                 .build()
         );
     }
@@ -164,12 +164,12 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
 
         var trainGraph = graphStore.getGraph(
             trainDataSplit.nodeLabels(),
-            trainDataSplit.intermediateRelationshipTypes(),
+            trainDataSplit.relationshipTypes(),
             Optional.of("label")
         );
         var testGraph = graphStore.getGraph(
             testDataSplit.nodeLabels(),
-            testDataSplit.intermediateRelationshipTypes(),
+            testDataSplit.relationshipTypes(),
             Optional.of("label")
         );
 
@@ -209,7 +209,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     private void removeDataSplitRelationships(Map<DatasetSplits, PipelineGraphFilter> datasets) {
         datasets.values()
             .stream()
-            .flatMap(graphFilter -> graphFilter.intermediateRelationshipTypes().stream())
+            .flatMap(graphFilter -> graphFilter.relationshipTypes().stream())
             .distinct()
             .collect(Collectors.toList())
             .forEach(graphStore::deleteRelationships);

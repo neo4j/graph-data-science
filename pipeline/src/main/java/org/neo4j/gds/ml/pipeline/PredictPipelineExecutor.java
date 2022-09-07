@@ -69,7 +69,7 @@ public abstract class PredictPipelineExecutor<
             graphStore,
             config,
             nodePropertyStepFilter.nodeLabels(),
-            nodePropertyStepFilter.intermediateRelationshipTypes(),
+            nodePropertyStepFilter.relationshipTypes(),
             progressTracker
         );
 

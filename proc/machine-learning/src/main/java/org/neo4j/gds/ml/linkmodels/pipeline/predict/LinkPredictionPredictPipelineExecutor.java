@@ -93,7 +93,7 @@ public class LinkPredictionPredictPipelineExecutor extends PredictPipelineExecut
     protected PipelineGraphFilter nodePropertyStepFilter() {
         return ImmutablePipelineGraphFilter.builder()
             .nodeLabels(graphStoreFilter.nodePropertyStepsBaseLabels())
-            .intermediateRelationshipTypes(graphStoreFilter.predictRelationshipTypes())
+            .relationshipTypes(graphStoreFilter.predictRelationshipTypes())
             .build();
     }
 

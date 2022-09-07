@@ -62,6 +62,8 @@ public class NodeRegressionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
 
         var nodeFeatureProducer = NodeFeatureProducer.create(graphStore, configuration, executionContext, progressTracker);
 
+        nodeFeatureProducer.validateNodePropertyStepsContextConfigs(pipeline.nodePropertySteps());
+
         return new NodeRegressionTrainAlgorithm(
             NodeRegressionTrain.create(
                 graphStore,

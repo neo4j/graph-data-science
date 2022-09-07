@@ -83,16 +83,18 @@ public abstract class PipelineExecutor<
         //featureInput nodeLabels contain source&target nodeLabel used in training/testing plus contextNodeLabels
         pipeline.validateBeforeExecution(graphStore, featureInputGraphFilter.nodeLabels());
 
-        splitDatasets();
-
         var nodePropertyStepExecutor = NodePropertyStepExecutor.of(
             executionContext,
             graphStore,
             config,
             featureInputGraphFilter.nodeLabels(),
-            featureInputGraphFilter.intermediateRelationshipTypes(),
+            featureInputGraphFilter.relationshipTypes(),
             progressTracker
         );
+
+        nodePropertyStepExecutor.validNodePropertyStepsContextConfigs(pipeline.nodePropertySteps());
+
+        splitDatasets();
 
         try {
             // we are not validating the size of the feature-input graph as not every nodePropertyStep needs relationships

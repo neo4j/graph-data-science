@@ -32,7 +32,7 @@ public interface PipelineGraphFilter {
     Collection<NodeLabel> nodeLabels();
 
     @Value.Default
-    default Collection<RelationshipType> intermediateRelationshipTypes() {
+    default Collection<RelationshipType> relationshipTypes() {
         return List.of();
     }
 }
