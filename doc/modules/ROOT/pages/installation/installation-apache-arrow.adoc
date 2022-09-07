@@ -29,10 +29,11 @@ The following additional settings are available:
 [[table-arrow-settings]]
 [opts=header,cols="2m,1m,1,1"]
 |===
-| Name                          | Default           | Optional  | Description
-| gds.arrow.listen_address      | localhost:8491    | Yes       | Address the GDS Arrow Flight Server should bind to.
-| gds.arrow.abortion_timeout    | 10                | Yes       | The maximum time in minutes to wait for the next command before aborting the import process.
-| gds.arrow.batch_size          | 10000             | Yes       | The batch size used for arrow property export.
+| Name                                  | Default           | Optional  | Description
+| gds.arrow.listen_address              | localhost:8491    | Yes       | This setting specifies how the Arrow Flight Server listens for incoming connections. It consists of two parts; an IP address (e.g. 127.0.0.1 or 0.0.0.0) and a port number (e.g. 7687), and is expressed in the format <ip-address>:<port-number>.
+| gds.arrow.advertised_listen_address   | localhost:8491    | Yes       | This setting specifies the address that clients should use for connecting to the Arrow Flight Server. This is useful if the server runs behind a proxy that forwards the advertised address to an internal address. The advertised address consists of two parts; an address (fully qualified domain name, hostname, or IP address) and a port number (e.g. 8491), and is expressed in the format <address>:<port-number>.
+| gds.arrow.abortion_timeout            | 10                | Yes       | The maximum time in minutes to wait for the next command before aborting the import process.
+| gds.arrow.batch_size                  | 10000             | Yes       | The batch size used for arrow property export.
 |===
 
 Note, that any change to the configuration requires a database restart.
