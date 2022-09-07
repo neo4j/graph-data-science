@@ -495,8 +495,7 @@ The other community is assigned a new community ID, which is guaranteed to be la
 Note that the `consecutiveIds` configuration option cannot be used in combination with seeding in order to retain the seeding values.
 
 
-[[algorithms-louvain-examples-stream-intermediate]]
-=== Stream intermediate communities
+=== Using intermediate communities
 
 As described before, Louvain is a hierarchical clustering algorithm.
 That means that after every clustering step all nodes that belong to the same cluster are reduced to a single node.
@@ -569,6 +568,10 @@ CALL gds.graph.project(
 )
 ----
 
+
+[[algorithms-louvain-examples-stream-intermediate]]
+==== Stream intermediate communities
+
 [role=query-example]
 --
 .The following run the algorithm and stream results including the intermediate communities:
@@ -603,3 +606,117 @@ ORDER BY name ASC
 --
 
 In this example graph, after the first iteration we see 4 clusters, which in the second iteration are reduced to three.
+
+
+[[algorithms-louvain-examples-mutate-intermediate]]
+==== Mutate intermediate communities
+
+[role=query-example, group=mutateIntermediateCommunities]
+--
+.The following run the algorithm and mutate the in-memory graph:
+[source, cypher, role=noplay]
+----
+CALL gds.louvain.mutate('myGraph2', {
+  mutateProperty: 'intermediateCommunities',
+  includeIntermediateCommunities: true
+})
+YIELD communityCount, modularity, modularities
+----
+
+.Results
+[opts="header"]
+|===
+| communityCount | modularity         | modularities
+| 3              | 0.3816             | [0.37599999999999995, 0.3816]
+|===
+--
+
+[role=query-example, group=mutateIntermediateCommunities]
+--
+.The following stream the mutated property from the in-memory graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamNodeProperty('myGraph2', 'intermediateCommunities')
+YIELD nodeId, propertyValue
+RETURN
+  gds.util.asNode(nodeId).name AS name,
+  toIntegerList(propertyValue) AS intermediateCommunities
+ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name  | intermediateCommunities
+| "a"   | [3, 14]
+| "b"   | [3, 14]
+| "c"   | [14, 14]
+| "d"   | [3, 14]
+| "e"   | [14, 14]
+| "f"   | [14, 14]
+| "g"   | [7, 7]
+| "h"   | [7, 7]
+| "i"   | [7, 7]
+| "j"   | [12, 12]
+| "k"   | [12, 12]
+| "l"   | [12, 12]
+| "m"   | [12, 12]
+| "n"   | [12, 12]
+| "x"   | [14, 14]
+|===
+--
+
+
+[[algorithms-louvain-examples-write-intermediate]]
+==== Write intermediate communities
+
+[role=query-example, group=writeIntermediateCommunities]
+--
+.The following run the algorithm and write to the Neo4j database:
+[source, cypher, role=noplay]
+----
+CALL gds.louvain.write('myGraph2', {
+  writeProperty: 'intermediateCommunities',
+  includeIntermediateCommunities: true
+})
+YIELD communityCount, modularity, modularities
+----
+
+.Results
+[opts="header"]
+|===
+| communityCount | modularity         | modularities
+| 3              | 0.3816             | [0.37599999999999995, 0.3816]
+|===
+--
+
+[role=query-example, group=writeIntermediateCommunities]
+--
+.The following stream the written property from the Neo4j database:
+[source, cypher, role=noplay]
+----
+MATCH (n:Node) RETURN n.name AS name, toIntegerList(n.intermediateCommunities) AS intermediateCommunities
+ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name  | intermediateCommunities
+| "a"   | [3, 14]
+| "b"   | [3, 14]
+| "c"   | [14, 14]
+| "d"   | [3, 14]
+| "e"   | [14, 14]
+| "f"   | [14, 14]
+| "g"   | [7, 7]
+| "h"   | [7, 7]
+| "i"   | [7, 7]
+| "j"   | [12, 12]
+| "k"   | [12, 12]
+| "l"   | [12, 12]
+| "m"   | [12, 12]
+| "n"   | [12, 12]
+| "x"   | [14, 14]
+|===
+--
