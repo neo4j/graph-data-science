@@ -33,7 +33,7 @@ public final class UserInputAsStringOrListOfString {
 
     private UserInputAsStringOrListOfString() {}
 
-    static List<String> parse(Object userInput) {
+    public static List<String> parse(Object userInput) {
         if (userInput instanceof Iterable) {
             var result = new ArrayList<String>();
             for (Object item : (Iterable) userInput) {

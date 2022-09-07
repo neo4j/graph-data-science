@@ -41,12 +41,13 @@ public interface GraphDropNodePropertiesConfig extends BaseConfig, ConcurrencyCo
     Optional<String> graphName();
 
     @Configuration.Parameter
+    @Configuration.ConvertWith("org.neo4j.gds.catalog.UserInputAsStringOrListOfString#parse")
     List<String> nodeProperties();
 
 
     static GraphDropNodePropertiesConfig of(
         String graphName,
-        List<String> nodeProperties,
+        Object nodeProperties,
         CypherMapWrapper config
     ) {
         return new GraphDropNodePropertiesConfigImpl(
