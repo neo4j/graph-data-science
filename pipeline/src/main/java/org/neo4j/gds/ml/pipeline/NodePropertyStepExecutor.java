@@ -35,6 +35,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -46,6 +47,8 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
     private final GraphStore graphStore;
     private final Collection<NodeLabel> nodeLabels;
     private final Collection<RelationshipType> relTypes;
+
+    private final Set<RelationshipType> availableRelationshipTypesForNodeProperties;
     private final ProgressTracker progressTracker;
 
     NodePropertyStepExecutor(
@@ -54,6 +57,7 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
         GraphStore graphStore,
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes,
+        Set<RelationshipType> availableRelationshipTypesForNodeProperties,
         ProgressTracker progressTracker
     ) {
         this.executionContext = executionContext;
@@ -61,6 +65,7 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
         this.graphStore = graphStore;
         this.nodeLabels = nodeLabels;
         this.relTypes = relationshipTypes;
+        this.availableRelationshipTypesForNodeProperties = availableRelationshipTypesForNodeProperties;
         this.progressTracker = progressTracker;
     }
 
@@ -112,7 +117,7 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
         for (ExecutableNodePropertyStep step : steps) {
             progressTracker.beginSubTask();
             var featureInputNodeLabels = step.featureInputNodeLabels(graphStore, nodeLabels);
-            var featureInputRelationshipTypes = step.featureInputRelationshipTypes(graphStore, relTypes);
+            var featureInputRelationshipTypes = step.featureInputRelationshipTypes(graphStore, relTypes, availableRelationshipTypesForNodeProperties);
             step.execute(executionContext, config.graphName(), featureInputNodeLabels, featureInputRelationshipTypes);
             progressTracker.endSubTask();
         }
@@ -129,6 +134,7 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
         CONFIG config,
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes,
+        Set<RelationshipType> availableRelationshipTypesForNodeProperty,
         ProgressTracker progressTracker
     ) {
         return new NodePropertyStepExecutor<>(
@@ -137,6 +143,7 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
             graphStore,
             nodeLabels,
             relationshipTypes,
+            availableRelationshipTypesForNodeProperty,
             progressTracker
         );
     }

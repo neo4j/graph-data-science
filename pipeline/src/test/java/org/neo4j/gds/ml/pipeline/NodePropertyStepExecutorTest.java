@@ -47,6 +47,7 @@ import org.neo4j.gds.test.SumNodePropertyStepConfigImpl;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -81,6 +82,7 @@ class NodePropertyStepExecutorTest {
             graphStore,
             graphStore.nodeLabels(),
             graphStore.relationshipTypes(),
+            Set.of(),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -108,6 +110,7 @@ class NodePropertyStepExecutorTest {
             graphStore,
             List.of(NodeLabel.of("A")),
             List.of(),
+            graphStore.relationshipTypes(),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -172,6 +175,7 @@ class NodePropertyStepExecutorTest {
             graphStore,
             List.of(NodeLabel.of("A")),
             List.of(),
+            graphStore.relationshipTypes(),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -227,6 +231,7 @@ class NodePropertyStepExecutorTest {
             graphStore,
             graphStore.nodeLabels(),
             graphStore.relationshipTypes(),
+            Set.of(),
             progressTracker
         ).executeNodePropertySteps(steps);
 

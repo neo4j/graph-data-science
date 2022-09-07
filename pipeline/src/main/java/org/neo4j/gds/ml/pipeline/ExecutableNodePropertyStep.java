@@ -60,9 +60,12 @@ public interface ExecutableNodePropertyStep extends ToMapConvertible {
         return List.of();
     }
 
-    default Set<RelationshipType> featureInputRelationshipTypes(GraphStore graphStore, Collection<RelationshipType> relationshipTypes) {
+    default Set<RelationshipType> featureInputRelationshipTypes(GraphStore graphStore, Collection<RelationshipType> relationshipTypes, Set<RelationshipType> availableRelationshipTypesForNodeProperties) {
+        //In link prediction, when contextRelType is *, we want to expand it to availableRelationshipTypesForNodeProperty.
+        //Instead of all relTypes on graphStore, since it has targetRelType, __TRAIN__, __TEST__ that we don't want.
         return Stream
-            .concat(relationshipTypes.stream(), ElementTypeValidator.resolveTypes(graphStore, contextRelationshipTypes()).stream())
+            .concat(relationshipTypes.stream(), ElementTypeValidator.resolveTypes(graphStore, contextRelationshipTypes()).stream().filter(
+                availableRelationshipTypesForNodeProperties::contains))
             .collect(Collectors.toSet());
     }
 

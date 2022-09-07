@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -89,6 +90,7 @@ public abstract class PipelineExecutor<
             config,
             featureInputGraphFilter.nodeLabels(),
             featureInputGraphFilter.relationshipTypes(),
+            getAvailableRelTypesForNodePropertySteps(),
             progressTracker
         );
 
@@ -109,6 +111,8 @@ public abstract class PipelineExecutor<
             additionalGraphStoreCleanup(dataSplitGraphFilters);
         }
     }
+
+    protected abstract Set<RelationshipType> getAvailableRelTypesForNodePropertySteps();
 
     @Override
     public void release() {

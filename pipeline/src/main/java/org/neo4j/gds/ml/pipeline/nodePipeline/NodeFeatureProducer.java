@@ -61,6 +61,7 @@ public final class NodeFeatureProducer<PIPELINE_CONFIG extends NodePropertyPipel
                 config,
                 config.nodeLabelIdentifiers(graphStore),
                 config.internalRelationshipTypes(graphStore),
+                graphStore.relationshipTypes(),
                 progressTracker
             ),
             graphStore,

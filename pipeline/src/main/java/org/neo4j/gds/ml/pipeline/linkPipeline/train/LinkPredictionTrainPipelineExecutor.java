@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.CatalogModelContainer;
@@ -43,6 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline.MODEL_TYPE;
@@ -55,11 +57,14 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
 
     private final RelationshipSplitter relationshipSplitter;
 
+    private final Set<RelationshipType> availableRelationshipTypesForNodeProperty;
+
     public LinkPredictionTrainPipelineExecutor(
         LinkPredictionTrainingPipeline pipeline,
         LinkPredictionTrainConfig config,
         ExecutionContext executionContext,
         GraphStore graphStore,
+
         ProgressTracker progressTracker
     ) {
         super(
@@ -69,6 +74,11 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             graphStore,
             progressTracker
         );
+
+        this.availableRelationshipTypesForNodeProperty = graphStore.relationshipTypes()
+            .stream()
+            .filter(relType -> !relType.name.equals(config.targetRelationshipType()))
+            .collect(Collectors.toSet());
 
         this.relationshipSplitter = new RelationshipSplitter(
             graphStore,
@@ -204,6 +214,11 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
 
 
         return ImmutableLinkPredictionTrainPipelineResult.of(model, trainResult.trainingStatistics());
+    }
+
+    @Override
+    protected Set<RelationshipType> getAvailableRelTypesForNodePropertySteps() {
+        return availableRelationshipTypesForNodeProperty;
     }
 
     private void removeDataSplitRelationships(Map<DatasetSplits, PipelineGraphFilter> datasets) {
