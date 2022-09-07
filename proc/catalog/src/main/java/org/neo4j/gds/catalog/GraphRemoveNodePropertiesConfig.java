@@ -41,12 +41,13 @@ public interface GraphRemoveNodePropertiesConfig extends BaseConfig, Concurrency
     Optional<String> graphName();
 
     @Configuration.Parameter
+    @Configuration.ConvertWith("org.neo4j.gds.catalog.UserInputAsStringOrListOfString#parse")
     List<String> nodeProperties();
 
 
     static GraphRemoveNodePropertiesConfig of(
         String graphName,
-        List<String> nodeProperties,
+        Object nodeProperties,
         CypherMapWrapper config
     ) {
         return new GraphRemoveNodePropertiesConfigImpl(
