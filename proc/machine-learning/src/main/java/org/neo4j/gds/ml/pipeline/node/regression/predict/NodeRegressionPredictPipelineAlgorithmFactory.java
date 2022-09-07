@@ -34,6 +34,8 @@ import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorData;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineTrainConfig;
 
+import static org.neo4j.gds.ml.pipeline.node.NodePipelinePredictGraphFilterutil.generatePredictGraphFilter;
+
 public class NodeRegressionPredictPipelineAlgorithmFactory
     <CONFIG extends NodeRegressionPredictPipelineBaseConfig>
     extends GraphStoreAlgorithmFactory<NodeRegressionPredictPipelineExecutor, CONFIG>
@@ -77,13 +79,19 @@ public class NodeRegressionPredictPipelineAlgorithmFactory
             configuration.username()
         );
         var nodeClassificationPipeline = model.customInfo().pipeline();
+        var predictGraphFilter = generatePredictGraphFilter(
+            graphStore,
+            configuration,
+            model.trainConfig()
+        );
         return new NodeRegressionPredictPipelineExecutor(
             nodeClassificationPipeline,
             configuration,
             executionContext,
             graphStore,
             progressTracker,
-            regressorFrom(model.data())
+            regressorFrom(model.data()),
+            predictGraphFilter
         );
     }
 

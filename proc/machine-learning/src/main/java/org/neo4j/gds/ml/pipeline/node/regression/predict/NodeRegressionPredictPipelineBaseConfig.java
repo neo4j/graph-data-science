@@ -20,13 +20,14 @@
 package org.neo4j.gds.ml.pipeline.node.regression.predict;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphNameConfig;
-import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.ml.pipeline.node.NodePropertyPredictPipelineBaseConfig;
 
 @Configuration
-public interface NodeRegressionPredictPipelineBaseConfig extends
-    AlgoBaseConfig,
-    GraphNameConfig,
-    ModelConfig {
+public interface NodeRegressionPredictPipelineBaseConfig extends NodePropertyPredictPipelineBaseConfig {
+
+    static NodeRegressionPredictPipelineBaseConfig of(String username, CypherMapWrapper config) {
+        return new NodeRegressionPredictPipelineBaseConfigImpl(username, config);
+    }
+
 }

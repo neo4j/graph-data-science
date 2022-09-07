@@ -30,7 +30,6 @@ import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.models.Regressor;
 import org.neo4j.gds.ml.nodePropertyPrediction.regression.NodeRegressionPredict;
-import org.neo4j.gds.ml.pipeline.ImmutablePipelineGraphFilter;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineGraphFilter;
 import org.neo4j.gds.ml.pipeline.PredictPipelineExecutor;
@@ -46,16 +45,20 @@ public class NodeRegressionPredictPipelineExecutor extends PredictPipelineExecut
     > {
     private final Regressor regressor;
 
+    private final PipelineGraphFilter predictGraphFilter;
+
     public NodeRegressionPredictPipelineExecutor(
         NodePropertyPredictPipeline pipeline,
         NodeRegressionPredictPipelineBaseConfig config,
         ExecutionContext executionContext,
         GraphStore graphStore,
         ProgressTracker progressTracker,
-        Regressor regressor
+        Regressor regressor,
+        PipelineGraphFilter predictGraphFilter
     ) {
         super(pipeline, config, executionContext, graphStore, progressTracker);
         this.regressor = regressor;
+        this.predictGraphFilter = predictGraphFilter;
     }
 
     public static Task progressTask(String taskName, NodePropertyPredictPipeline pipeline, GraphStore graphStore) {
@@ -68,14 +71,12 @@ public class NodeRegressionPredictPipelineExecutor extends PredictPipelineExecut
 
     @Override
     protected PipelineGraphFilter nodePropertyStepFilter() {
-        return ImmutablePipelineGraphFilter.builder()
-            .nodeLabels(config.nodeLabelIdentifiers(graphStore))
-            .relationshipTypes(config.internalRelationshipTypes(graphStore)).build();
+        return predictGraphFilter;
     }
 
     @Override
     protected HugeDoubleArray execute() {
-        var nodesGraph = graphStore.getGraph(config.nodeLabelIdentifiers(graphStore));
+        var nodesGraph = graphStore.getGraph(predictGraphFilter.nodeLabels());
         Features features = FeaturesFactory.extractLazyFeatures(nodesGraph, pipeline.featureProperties());
 
         if (features.featureDimension() != regressor.data().featureDimension()) {

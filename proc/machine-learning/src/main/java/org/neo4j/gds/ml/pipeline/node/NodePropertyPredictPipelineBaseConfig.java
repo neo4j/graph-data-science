@@ -17,22 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.node.classification.predict;
+package org.neo4j.gds.ml.pipeline.node;
 
 import org.neo4j.gds.ElementProjection;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.ml.pipeline.node.NodePropertyPredictPipelineBaseConfig;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ElementTypeValidator;
+import org.neo4j.gds.config.GraphNameConfig;
+import org.neo4j.gds.model.ModelConfig;
 
+import java.util.Collection;
 import java.util.List;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
-public interface NodeClassificationPredictPipelineBaseConfig extends NodePropertyPredictPipelineBaseConfig {
+public interface NodePropertyPredictPipelineBaseConfig extends
+    AlgoBaseConfig,
+    GraphNameConfig,
+    ModelConfig {
 
-    @Configuration.Key("includePredictedProbabilities")
-    boolean includePredictedProbabilities();
 
     default List<String> targetNodeLabels() {return List.of();}
 
@@ -44,6 +48,14 @@ public interface NodeClassificationPredictPipelineBaseConfig extends NodePropert
     @Override
     @Configuration.Ignore
     default List<String> nodeLabels() {
+        // The graph is derived manually in the algo factory.
         return List.of(ElementProjection.PROJECT_ALL);
     }
+
+    @Override
+    @Configuration.Ignore
+    default Collection<NodeLabel> nodeLabelIdentifiers(GraphStore graphStore) {
+        return ElementTypeValidator.resolve(graphStore, targetNodeLabels());
+    }
+
 }
