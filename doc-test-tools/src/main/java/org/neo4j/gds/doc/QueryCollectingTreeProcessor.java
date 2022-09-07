@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.asciidoctor.ast.Cell;
 import org.asciidoctor.ast.Document;
 import org.asciidoctor.ast.Row;
@@ -207,6 +208,7 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
      * But for the queries, imagine a case where we want to run two identical queries... Far fetched, but we
      * disambiguate just because that is easy.
      */
+    @SuppressFBWarnings(value = "ITU_INAPPROPRIATE_TOSTRING_USE")
     private String extractDisplayName(StructuralNode queryExample) {
         var groupAttribute = queryExample.getAttribute(TEST_GROUP_ATTRIBUTE);
         if (groupAttribute != null) return groupAttribute.toString();

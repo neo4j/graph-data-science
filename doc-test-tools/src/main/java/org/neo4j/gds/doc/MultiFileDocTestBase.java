@@ -20,7 +20,7 @@
 package org.neo4j.gds.doc;
 
 import org.asciidoctor.Asciidoctor;
-import org.asciidoctor.OptionsBuilder;
+import org.asciidoctor.Options;
 import org.asciidoctor.SafeMode;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,12 +68,12 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
                 .includeProcessor(includeProcessor)
                 .treeprocessor(treeProcessor);
 
-            var options = OptionsBuilder.options()
+            var options = Options.builder()
                 .toDir(workingDirectory) // Make sure we don't write anything in the project.
                 .safe(SafeMode.UNSAFE); // By default, we are forced to use relative path which we don't want.
 
             for (var docFile : adocFiles()) {
-                asciidoctor.convertFile(docFile, options);
+                asciidoctor.convertFile(docFile, options.build());
             }
         }
 
@@ -191,7 +191,6 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
     Runnable cleanup() {
         return GraphStoreCatalog::removeAllLoadedGraphs;
     }
-
 
     private List<List<String>> reducePrecisionOfDoubles(Collection<List<String>> resultsFromDoc) {
         return resultsFromDoc
