@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
@@ -30,11 +31,13 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
+import static org.neo4j.gds.ml.pipeline.NodePropertyStepContextConfig.CONTEXT_RELATIONSHIP_TYPES;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
@@ -49,6 +52,8 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
     ) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionTrainingPipeline.class);
         validateRelationshipProperty(pipeline, procedureConfig);
+
+        validateContextRelationshipTypesStar(procedureConfig);
 
         pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(taskName, procedureConfig));
 
@@ -96,4 +101,12 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
             relationshipProperty
         ));
     }
+
+    private void validateContextRelationshipTypesStar(Map<String, Object> procedureConfig) {
+        var contextRelTypes = (List<String>) procedureConfig.get(CONTEXT_RELATIONSHIP_TYPES);
+        if (contextRelTypes != null && contextRelTypes.contains(ElementProjection.PROJECT_ALL)) {
+            throw new IllegalArgumentException("contextRelationshipTypes cannot be '*' since it will cause test data leakage. Please specify a list of contextRelationshipTypes explicitly.");
+        }
+    }
+
 }
