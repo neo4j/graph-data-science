@@ -30,6 +30,7 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
+import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -41,6 +42,10 @@ public final class GraphDatabaseApiProxy {
 
     public static Neo4jVersion neo4jVersion() {
         return Neo4jVersion.findNeo4jVersion();
+    }
+
+    public static NamedDatabaseId databaseId(GraphDatabaseService db) {
+        return ((GraphDatabaseAPI) db).databaseId();
     }
 
     public static boolean containsDependency(GraphDatabaseService db, Class<?> dependency) {
