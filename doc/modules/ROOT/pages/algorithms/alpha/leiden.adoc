@@ -441,9 +441,7 @@ ORDER BY name ASC
 
 Using the weighted relationships, we see that `Alice` and `Doug` have formed their own community, as their link is much stronger than all the others.
 
-
-[[algorithms-leiden-examples-stream-intermediate]]
-=== Stream intermediate communities
+=== Using `includeIntermediateCommunities` configuration parameter
 
 As described before, Leiden is a hierarchical clustering algorithm.
 That means that after every clustering step all nodes that belong to the same cluster are reduced to a single node.
@@ -514,6 +512,9 @@ CALL gds.graph.project(
 ----
 
 
+[[algorithms-leiden-examples-stream-intermediate]]
+==== Stream intermediate communities
+
 [role=query-example]
 --
 .The following will run the algorithm and stream results including intermediate communities:
@@ -548,5 +549,123 @@ ORDER BY name ASC
 | "m"   | 0           | [12, 0]
 | "n"   | 0           | [12, 0]
 | "x"   | 3           | [14, 3]
+|===
+--
+
+
+[[algorithms-leiden-examples-mutate-intermediate]]
+==== Mutate intermediate communities
+
+[role=query-example, group=mutateIntermediateCommunities]
+--
+.The following will run the algorithm and mutate the in-memory-graph using the intermediate communities:
+[source,cypher,role=noplay]
+----
+CALL gds.alpha.leiden.mutate('myGraph2', {
+  mutateProperty: 'intermediateCommunities',
+  randomSeed: 19,
+  includeIntermediateCommunities: true,
+  concurrency: 1
+})
+YIELD communityCount, modularity, modularities
+----
+
+.Results
+[opts="header"]
+|===
+| communityCount  | modularity | modularities
+| 3               | 0.3816     | [0.37599999999999995, 0.3816]
+|===
+--
+
+[role=query-example, group=mutateIntermediateCommunities]
+--
+.The following stream the mutated property from the in-memory graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.nodeProperty.stream('myGraph2', 'intermediateCommunities')
+YIELD nodeId, propertyValue
+RETURN
+  gds.util.asNode(nodeId).name AS name,
+  toIntegerList(propertyValue) AS intermediateCommunities
+ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name  | intermediateCommunities
+| "a"   | [3, 3]
+| "b"   | [3, 3]
+| "c"   | [14, 3]
+| "d"   | [3, 3]
+| "e"   | [14, 3]
+| "f"   | [14, 3]
+| "g"   | [8, 2]
+| "h"   | [8, 2]
+| "i"   | [8, 2]
+| "j"   | [12, 0]
+| "k"   | [12, 0]
+| "l"   | [12, 0]
+| "m"   | [12, 0]
+| "n"   | [12, 0]
+| "x"   | [14, 3]
+|===
+--
+
+
+[[algorithms-leiden-examples-write-intermediate]]
+==== Write intermediate communities
+
+[role=query-example, group=writeIntermediateCommunities]
+--
+.The following will run the algorithm and write the intermediate communities to the Neo4j database:
+[source,cypher,role=noplay]
+----
+CALL gds.alpha.leiden.write('myGraph2', {
+  writeProperty: 'intermediateCommunities',
+  randomSeed: 19,
+  includeIntermediateCommunities: true,
+  concurrency: 1
+})
+YIELD communityCount, modularity, modularities
+----
+
+.Results
+[opts="header"]
+|===
+| communityCount  | modularity | modularities
+| 3               | 0.3816     | [0.37599999999999995, 0.3816]
+|===
+--
+
+[role=query-example, group=writeIntermediateCommunities]
+--
+.The following stream the written property from the Neo4j database:
+[source, cypher, role=noplay]
+----
+MATCH (n:Node) RETURN n.name AS name, toIntegerList(n.intermediateCommunities) AS intermediateCommunities
+ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name  | intermediateCommunities
+| "a"   | [3, 3]
+| "b"   | [3, 3]
+| "c"   | [14, 3]
+| "d"   | [3, 3]
+| "e"   | [14, 3]
+| "f"   | [14, 3]
+| "g"   | [8, 2]
+| "h"   | [8, 2]
+| "i"   | [8, 2]
+| "j"   | [12, 0]
+| "k"   | [12, 0]
+| "l"   | [12, 0]
+| "m"   | [12, 0]
+| "n"   | [12, 0]
+| "x"   | [14, 3]
 |===
 --

@@ -20,6 +20,7 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.leiden.LeidenMutateProc;
 import org.neo4j.gds.leiden.LeidenStatsProc;
@@ -42,6 +43,7 @@ class LeidenDocTest extends SingleFileDocTestBase {
             LeidenStatsProc.class,
             LeidenMutateProc.class,
             LeidenWriteProc.class,
+            GraphStreamNodePropertiesProc.class,
             GraphProjectProc.class
         );
     }
