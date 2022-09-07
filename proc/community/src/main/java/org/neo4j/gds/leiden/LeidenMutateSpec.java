@@ -40,7 +40,7 @@ import static org.neo4j.gds.leiden.LeidenStreamProc.DESCRIPTION;
 
 
 @GdsCallable(name = "gds.alpha.leiden.mutate", description = DESCRIPTION, executionMode = ExecutionMode.MUTATE_NODE_PROPERTY)
-public class LeidenMutateSpec  implements AlgorithmSpec<Leiden, LeidenResult, LeidenMutateConfig, Stream<MutateResult>, LeidenAlgorithmFactory<LeidenMutateConfig>> {
+public class LeidenMutateSpec implements AlgorithmSpec<Leiden, LeidenResult, LeidenMutateConfig, Stream<MutateResult>, LeidenAlgorithmFactory<LeidenMutateConfig>> {
     @Override
     public String name() {
         return "LeidenMutate";
@@ -61,7 +61,7 @@ public class LeidenMutateSpec  implements AlgorithmSpec<Leiden, LeidenResult, Le
         MutatePropertyComputationResultConsumer.MutateNodePropertyListFunction<Leiden, LeidenResult, LeidenMutateConfig> mutateConfigNodePropertyListFunction =
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
-                computationResult.result().communities().asNodeProperties()
+                LeidenCompanion.leidenNodeProperties(computationResult.config(), computationResult.result())
             ));
         return new MutatePropertyComputationResultConsumer<>(
             mutateConfigNodePropertyListFunction,

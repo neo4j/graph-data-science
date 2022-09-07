@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,7 +63,8 @@ class LeidenMutateProcTest  extends BaseProcTest {
     void setUp() throws Exception {
         registerProcedures(
             GraphProjectProc.class,
-            LeidenMutateProc.class
+            LeidenMutateProc.class,
+            GraphStreamNodePropertiesProc.class
         );
 
         runQuery("CALL gds.graph.project('leiden', '*', '*')");
@@ -136,6 +138,24 @@ class LeidenMutateProcTest  extends BaseProcTest {
             }
 
             return true;
+        });
+
+        runQueryWithRowConsumer("CALL gds.graph.nodeProperties.stream('leiden', ['communityId']) YIELD propertyValue", row -> {
+            assertThat(row.get("propertyValue")).isInstanceOf(Long.class);
+        });
+    }
+
+    @Test
+    void mutateWithIntermediateCommunities() {
+        var query = "CALL gds.alpha.leiden.mutate('leiden', {" +
+                    "   mutateProperty: 'intermediateCommunities'," +
+                    "   includeIntermediateCommunities: true" +
+                    "})";
+
+        runQuery(query);
+
+        runQueryWithRowConsumer("CALL gds.graph.nodeProperties.stream('leiden', ['intermediateCommunities']) YIELD propertyValue", row -> {
+            assertThat(row.get("propertyValue")).isInstanceOf(long[].class);
         });
     }
 
