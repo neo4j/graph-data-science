@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.randomwalk;
+package org.neo4j.gds.paths.randomwalk;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
@@ -38,7 +38,7 @@ public class RandomWalkStreamProc extends BaseProc {
         "Random Walk is an algorithm that provides random paths in a graph. " +
         "It’s similar to how a drunk person traverses a city.";
 
-    @Procedure(name = "gds.beta.randomWalk.stream", mode = READ)
+    @Procedure(name = "gds.randomWalk.stream", mode = READ)
     @Description(DESCRIPTION)
 
     public Stream<StreamResult> stream(
@@ -52,7 +52,7 @@ public class RandomWalkStreamProc extends BaseProc {
     }
 
 
-    @Procedure(value = "gds.beta.randomWalk.stream.estimate", mode = READ)
+    @Procedure(value = "gds.randomWalk.stream.estimate", mode = READ)
     @Description(BaseProc.ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,

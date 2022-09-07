@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.randomwalk;
+package org.neo4j.gds.paths.randomwalk;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,7 +65,7 @@ class RandomWalkStatsProcTest extends BaseProcTest {
     @Test
     void shouldRun() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds", "beta", "randomWalk")
+            .algo("gds", "randomWalk")
             .statsMode()
             .addParameter("walksPerNode", 3)
             .addParameter("walkLength", 10)
@@ -94,7 +94,7 @@ class RandomWalkStatsProcTest extends BaseProcTest {
 
     @Test
     void shouldRunMemoryEstimation() {
-        String query = "CALL gds.beta.randomWalk.stats.estimate($graphName, {})";
+        String query = "CALL gds.randomWalk.stats.estimate($graphName, {})";
 
         runQuery(
             query,

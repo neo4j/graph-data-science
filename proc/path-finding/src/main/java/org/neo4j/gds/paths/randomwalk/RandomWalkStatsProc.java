@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.randomwalk;
+package org.neo4j.gds.paths.randomwalk;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
@@ -31,13 +31,13 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.beta.randomwalk.RandomWalkStreamProc.DESCRIPTION;
+import static org.neo4j.gds.paths.randomwalk.RandomWalkStreamProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class RandomWalkStatsProc extends BaseProc {
 
     @Description(DESCRIPTION)
-    @Procedure(name = "gds.beta.randomWalk.stats", mode = READ)
+    @Procedure(name = "gds.randomWalk.stats", mode = READ)
     public Stream<StandardModeResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -48,7 +48,7 @@ public class RandomWalkStatsProc extends BaseProc {
         ).compute(graphName, configuration, false, true);
     }
 
-    @Procedure(value = "gds.beta.randomWalk.stats.estimate", mode = READ)
+    @Procedure(value = "gds.randomWalk.stats.estimate", mode = READ)
     @Description(BaseProc.ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,

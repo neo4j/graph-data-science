@@ -55,7 +55,6 @@ class KnnStreamProcTest extends KnnProcTest<KnnStreamConfig> {
                        " YIELD node1, node2, similarity" +
                        " RETURN node1, node2, similarity" +
                        " ORDER BY node1";
-
         assertCypherResult(query, Map.of("graph", GRAPH_NAME), List.of(
             Map.of("node1", 0L, "node2", 1L, "similarity", 0.5),
             Map.of("node1", 1L, "node2", 0L, "similarity", 0.5),

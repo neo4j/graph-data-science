@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.randomwalk;
+package org.neo4j.gds.paths.randomwalk;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -80,7 +80,7 @@ class RandomWalkStreamProcTest extends BaseProcTest {
     @Test
     void shouldRunSimpleConfig() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds", "beta", "randomWalk")
+            .algo("gds", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 3)
             .addParameter("walkLength", 10)
@@ -104,7 +104,7 @@ class RandomWalkStreamProcTest extends BaseProcTest {
     @Test
     void shouldReturnPath() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds", "beta", "randomWalk")
+            .algo("gds", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 3)
             .addParameter("walkLength", 10)
@@ -147,7 +147,7 @@ class RandomWalkStreamProcTest extends BaseProcTest {
         // walkBufferSize must be small to get threads to block on flushBuffer steps
         var concurrency = 4;
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds", "beta", "randomWalk")
+            .algo("gds", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 10)
             .addParameter("walkLength", 10)
@@ -197,7 +197,7 @@ class RandomWalkStreamProcTest extends BaseProcTest {
     @Test
     void shouldThrowOnUnknownStartNode() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds", "beta", "randomWalk")
+            .algo("gds", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 3)
             .addParameter("walkLength", 10)
@@ -210,7 +210,7 @@ class RandomWalkStreamProcTest extends BaseProcTest {
     @Test
     void shouldThrowOnUnselectedStartNode() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds", "beta", "randomWalk")
+            .algo("gds", "randomWalk")
             .streamMode()
             .addParameter("walksPerNode", 3)
             .addParameter("walkLength", 10)
@@ -224,12 +224,11 @@ class RandomWalkStreamProcTest extends BaseProcTest {
     @Test
     void shouldRunMemoryEstimation() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds", "beta", "randomWalk")
+            .algo("gds", "randomWalk")
             .estimationMode(GdsCypher.ExecutionModes.STREAM)
             .addParameter("walksPerNode", 3)
             .addParameter("walkLength", 10)
             .yields("bytesMin", "bytesMax", "nodeCount", "relationshipCount");
-
         assertCypherMemoryEstimation(db, query, MemoryRange.of(4_016, 100_032), 5, 12);
     }
 
