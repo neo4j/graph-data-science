@@ -440,3 +440,113 @@ ORDER BY name ASC
 --
 
 Using the weighted relationships, we see that `Alice` and `Doug` have formed their own community, as their link is much stronger than all the others.
+
+
+[[algorithms-leiden-examples-stream-intermediate]]
+=== Stream intermediate communities
+
+As described before, Leiden is a hierarchical clustering algorithm.
+That means that after every clustering step all nodes that belong to the same cluster are reduced to a single node.
+Relationships between nodes of the same cluster become self-relationships, relationships to nodes of other clusters connect to the clusters representative.
+This condensed graph is then used to run the next level of clustering.
+The process is repeated until the clusters are stable.
+
+In order to demonstrate this iterative behavior, we need to construct a more complex graph.
+
+[source, cypher, role=noplay setup-query]
+----
+CREATE (a:Node {name: 'a'})
+CREATE (b:Node {name: 'b'})
+CREATE (c:Node {name: 'c'})
+CREATE (d:Node {name: 'd'})
+CREATE (e:Node {name: 'e'})
+CREATE (f:Node {name: 'f'})
+CREATE (g:Node {name: 'g'})
+CREATE (h:Node {name: 'h'})
+CREATE (i:Node {name: 'i'})
+CREATE (j:Node {name: 'j'})
+CREATE (k:Node {name: 'k'})
+CREATE (l:Node {name: 'l'})
+CREATE (m:Node {name: 'm'})
+CREATE (n:Node {name: 'n'})
+CREATE (x:Node {name: 'x'})
+
+CREATE (a)-[:TYPE]->(b)
+CREATE (a)-[:TYPE]->(d)
+CREATE (a)-[:TYPE]->(f)
+CREATE (b)-[:TYPE]->(d)
+CREATE (b)-[:TYPE]->(x)
+CREATE (b)-[:TYPE]->(g)
+CREATE (b)-[:TYPE]->(e)
+CREATE (c)-[:TYPE]->(x)
+CREATE (c)-[:TYPE]->(f)
+CREATE (d)-[:TYPE]->(k)
+CREATE (e)-[:TYPE]->(x)
+CREATE (e)-[:TYPE]->(f)
+CREATE (e)-[:TYPE]->(h)
+CREATE (f)-[:TYPE]->(g)
+CREATE (g)-[:TYPE]->(h)
+CREATE (h)-[:TYPE]->(i)
+CREATE (h)-[:TYPE]->(j)
+CREATE (i)-[:TYPE]->(k)
+CREATE (j)-[:TYPE]->(k)
+CREATE (j)-[:TYPE]->(m)
+CREATE (j)-[:TYPE]->(n)
+CREATE (k)-[:TYPE]->(m)
+CREATE (k)-[:TYPE]->(l)
+CREATE (l)-[:TYPE]->(n)
+CREATE (m)-[:TYPE]->(n);
+----
+
+.The following statement will project the graph and store it in the graph catalog.
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+    'myGraph2',
+    'Node',
+    {
+        TYPE: {
+            orientation: 'undirected',
+            aggregation: 'NONE'
+        }
+    }
+)
+----
+
+
+[role=query-example]
+--
+.The following will run the algorithm and stream results including intermediate communities:
+[source,cypher,role=noplay]
+----
+CALL gds.alpha.leiden.stream('myGraph2', {
+  randomSeed: 19,
+  includeIntermediateCommunities: true,
+  concurrency: 1
+})
+YIELD nodeId, communityId, intermediateCommunityIds
+RETURN gds.util.asNode(nodeId).name AS name, communityId, intermediateCommunityIds
+ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name  | communityId | intermediateCommunityIds
+| "a"   | 3           | [3, 3]
+| "b"   | 3           | [3, 3]
+| "c"   | 3           | [14, 3]
+| "d"   | 3           | [3, 3]
+| "e"   | 3           | [14, 3]
+| "f"   | 3           | [14, 3]
+| "g"   | 2           | [8, 2]
+| "h"   | 2           | [8, 2]
+| "i"   | 2           | [8, 2]
+| "j"   | 0           | [12, 0]
+| "k"   | 0           | [12, 0]
+| "l"   | 0           | [12, 0]
+| "m"   | 0           | [12, 0]
+| "n"   | 0           | [12, 0]
+| "x"   | 3           | [14, 3]
+|===
+--
