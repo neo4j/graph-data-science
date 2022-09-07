@@ -150,6 +150,23 @@ class LeidenWriteProcTest extends BaseProcTest {
             softAssertions.assertAll();
             return true;
         });
+
+        runQueryWithRowConsumer("MATCH (n:Node) RETURN n.communityId as propertyValue", row -> {
+            assertThat(row.get("propertyValue")).isInstanceOf(Long.class);
+        });
     }
 
+    @Test
+    void writeWithIntermediateCommunities() {
+        var query = "CALL gds.alpha.leiden.write('leiden', {" +
+                    "   writeProperty: 'intermediateCommunities'," +
+                    "   includeIntermediateCommunities: true" +
+                    "})";
+
+        runQuery(query);
+
+        runQueryWithRowConsumer("MATCH (n:Node) RETURN n.intermediateCommunities as propertyValue", row -> {
+            assertThat(row.get("propertyValue")).isInstanceOf(long[].class);
+        });
+    }
 }

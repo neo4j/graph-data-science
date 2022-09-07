@@ -20,7 +20,6 @@
 package org.neo4j.gds.leiden;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.write.NodePropertyExporter;
@@ -86,17 +85,10 @@ public class LeidenWriteSpec implements AlgorithmSpec<Leiden, LeidenResult, Leid
                     .parallel(Pools.DEFAULT, writeConcurrency)
                     .build();
 
-                var properties = new LongNodePropertyValues() {
-                    @Override
-                    public long size() {
-                        return graph.nodeCount();
-                    }
-
-                    @Override
-                    public long longValue(long nodeId) {
-                        return computationResult.result().communities().get(nodeId);
-                    }
-                };
+                var properties = LeidenCompanion.leidenNodeProperties(
+                    config,
+                    computationResult.result()
+                );
 
                 exporter.write(
                     config.writeProperty(),
