@@ -34,7 +34,7 @@ public interface GraphStreamNodePropertiesConfig extends GraphExportNodeProperti
     static GraphStreamNodePropertiesConfig of(
         String graphName,
         List<String> nodeProperties,
-        List<String> nodeLabels,
+        Object nodeLabels,
         CypherMapWrapper config
     ) {
         return new GraphStreamNodePropertiesConfigImpl(

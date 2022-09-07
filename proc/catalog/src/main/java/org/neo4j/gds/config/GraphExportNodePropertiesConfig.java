@@ -40,10 +40,12 @@ public interface GraphExportNodePropertiesConfig extends BaseConfig, Concurrency
     Optional<String> graphName();
 
     @Configuration.Parameter
+    @Configuration.ConvertWith("org.neo4j.gds.catalog.UserInputAsStringOrListOfString#parse")
     List<String> nodeProperties();
 
     @Configuration.Parameter
     @Value.Default
+    @Configuration.ConvertWith("org.neo4j.gds.catalog.UserInputAsStringOrListOfString#parse")
     default List<String> nodeLabels() {
         return Collections.singletonList(ElementProjection.PROJECT_ALL);
     }

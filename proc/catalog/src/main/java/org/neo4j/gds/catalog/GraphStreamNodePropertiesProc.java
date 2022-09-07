@@ -32,7 +32,6 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -44,25 +43,6 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStreamNodePropertiesProc extends CatalogProc {
-
-    private List<String> nodeLabelParser(Object nodeLabels) {
-
-        if (nodeLabels instanceof Iterable) {
-            var nodeLabelsList = new ArrayList<String>();
-            for (Object item : (Iterable) nodeLabels) {
-                if (item instanceof String) {
-                    nodeLabelsList.add((String) item);
-                } else {
-                    throw new IllegalArgumentException("Type mismatch for nodeLabels: expected List<String> or String");
-                }
-            }
-            return nodeLabelsList;
-        } else if (nodeLabels instanceof String) {
-            return List.of((String) nodeLabels);
-        } else {
-            throw new IllegalArgumentException("Type mismatch for nodeLabels: expected List<String> or String");
-        }
-    }
 
     @Procedure(name = "gds.graph.nodeProperties.stream", mode = READ)
     @Description("Streams the given node properties.")
@@ -76,7 +56,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
             graphName,
             configuration,
             nodeProperties,
-            nodeLabelParser(nodeLabels),
+            nodeLabels,
             PropertiesResult::new
         );
     }
@@ -94,7 +74,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
             graphName,
             configuration,
             nodeProperties,
-            nodeLabelParser(nodeLabels),
+            nodeLabels,
             PropertiesResult::new,
             Optional.of(deprecationWarning)
         );
@@ -112,7 +92,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
             graphName,
             configuration,
             List.of(nodeProperty),
-            nodeLabelParser(nodeLabels),
+            nodeLabels,
             (nodeId, propertyName, propertyValue) -> new PropertyResult(nodeId, propertyValue)
         );
     }
@@ -130,7 +110,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
             graphName,
             configuration,
             List.of(nodeProperty),
-            nodeLabelParser(nodeLabels),
+            nodeLabels,
             (nodeId, propertyName, propertyValue) -> new PropertyResult(nodeId, propertyValue),
             Optional.of(deprecationWarning)
         );
@@ -140,7 +120,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         String graphName,
         Map<String, Object> configuration,
         List<String> nodeProperties,
-        List<String> nodeLabels,
+        Object nodeLabels,
         ResultProducer<R> producer
     ) {
         return streamNodeProperties(graphName, configuration, nodeProperties, nodeLabels, producer,Optional.empty());
@@ -150,7 +130,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         String graphName,
         Map<String, Object> configuration,
         List<String> nodeProperties,
-        List<String> nodeLabels,
+        Object nodeLabels,
         ResultProducer<R> producer,
         Optional<String> deprecationWarning
     ) {
