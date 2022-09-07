@@ -34,7 +34,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface GraphRemoveNodePropertiesConfig extends BaseConfig, ConcurrencyConfig {
+public interface GraphDropNodePropertiesConfig extends BaseConfig, ConcurrencyConfig {
     @Configuration.Parameter
     Optional<String> graphName();
 
@@ -42,12 +42,12 @@ public interface GraphRemoveNodePropertiesConfig extends BaseConfig, Concurrency
     List<String> nodeProperties();
 
 
-    static GraphRemoveNodePropertiesConfig of(
+    static GraphDropNodePropertiesConfig of(
         String graphName,
         List<String> nodeProperties,
         CypherMapWrapper config
     ) {
-        return new GraphRemoveNodePropertiesConfigImpl(
+        return new GraphDropNodePropertiesConfigImpl(
             Optional.of(graphName),
             nodeProperties,
             config

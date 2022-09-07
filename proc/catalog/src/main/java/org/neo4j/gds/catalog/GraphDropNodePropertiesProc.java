@@ -23,7 +23,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphRemoveNodePropertiesConfig;
+import org.neo4j.gds.config.GraphDropNodePropertiesConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -101,7 +101,7 @@ public class GraphDropNodePropertiesProc extends CatalogProc {
 
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        GraphRemoveNodePropertiesConfig config = GraphRemoveNodePropertiesConfig.of(
+        GraphDropNodePropertiesConfig config = GraphDropNodePropertiesConfig.of(
             graphName,
             nodeProperties,
             cypherConfig
@@ -136,7 +136,7 @@ public class GraphDropNodePropertiesProc extends CatalogProc {
     @NotNull
     private Long dropNodeProperties(
         GraphStore graphStore,
-        GraphRemoveNodePropertiesConfig config,
+        GraphDropNodePropertiesConfig config,
         TaskProgressTracker progressTracker
     ) {
         var removedPropertiesCount = new MutableLong(0);
