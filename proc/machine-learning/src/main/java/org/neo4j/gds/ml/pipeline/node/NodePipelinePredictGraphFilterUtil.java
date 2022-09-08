@@ -30,9 +30,9 @@ import java.util.Collection;
 
 import static org.neo4j.gds.config.ElementTypeValidator.resolveAndValidateTypes;
 
-public class NodePipelinePredictGraphFilterutil {
+public class NodePipelinePredictGraphFilterUtil {
 
-    public static PipelineGraphFilter generatePredictGraphFilter (
+    public static PipelineGraphFilter generatePredictGraphFilter(
         GraphStore graphStore,
         NodePropertyPredictPipelineBaseConfig configuration,
         NodePropertyPipelineBaseTrainConfig trainConfig
