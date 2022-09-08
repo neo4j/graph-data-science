@@ -24,6 +24,7 @@ import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.catalog.UserInputAsStringOrListOfString;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
@@ -40,14 +41,22 @@ public interface GraphExportNodePropertiesConfig extends BaseConfig, Concurrency
     Optional<String> graphName();
 
     @Configuration.Parameter
-    @Configuration.ConvertWith("org.neo4j.gds.catalog.UserInputAsStringOrListOfString#parse")
+    @Configuration.ConvertWith("org.neo4j.gds.config.GraphExportNodePropertiesConfig#parseNodeProperties")
     List<String> nodeProperties();
+
+    static List<String> parseNodeProperties(Object userInput) {
+        return UserInputAsStringOrListOfString.parse(userInput, "nodeProperties");
+    }
 
     @Configuration.Parameter
     @Value.Default
-    @Configuration.ConvertWith("org.neo4j.gds.catalog.UserInputAsStringOrListOfString#parse")
+    @Configuration.ConvertWith("org.neo4j.gds.config.GraphExportNodePropertiesConfig#parseNodeLabels")
     default List<String> nodeLabels() {
         return Collections.singletonList(ElementProjection.PROJECT_ALL);
+    }
+
+    static List<String> parseNodeLabels(Object userInput) {
+        return UserInputAsStringOrListOfString.parse(userInput, "nodeLabels");
     }
 
     @Configuration.Ignore

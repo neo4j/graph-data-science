@@ -48,7 +48,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
     @Description("Streams the given node properties.")
     public Stream<PropertiesResult> streamNodeProperties(
         @Name(value = "graphName") String graphName,
-        @Name(value = "nodeProperties") List<String> nodeProperties,
+        @Name(value = "nodeProperties") Object nodeProperties,
         @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -65,7 +65,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
     @Description("Streams the given node properties.")
     public Stream<PropertiesResult> streamProperties(
         @Name(value = "graphName") String graphName,
-        @Name(value = "nodeProperties") List<String> nodeProperties,
+        @Name(value = "nodeProperties") Object nodeProperties,
         @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -119,7 +119,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
     private <R> Stream<R> streamNodeProperties(
         String graphName,
         Map<String, Object> configuration,
-        List<String> nodeProperties,
+        Object nodeProperties,
         Object nodeLabels,
         ResultProducer<R> producer
     ) {
@@ -129,7 +129,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
     private <R> Stream<R> streamNodeProperties(
         String graphName,
         Map<String, Object> configuration,
-        List<String> nodeProperties,
+        Object nodeProperties,
         Object nodeLabels,
         ResultProducer<R> producer,
         Optional<String> deprecationWarning

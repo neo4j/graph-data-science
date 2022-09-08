@@ -41,9 +41,12 @@ public interface GraphDropNodePropertiesConfig extends BaseConfig, ConcurrencyCo
     Optional<String> graphName();
 
     @Configuration.Parameter
-    @Configuration.ConvertWith("org.neo4j.gds.catalog.UserInputAsStringOrListOfString#parse")
+    @Configuration.ConvertWith("org.neo4j.gds.catalog.GraphDropNodePropertiesConfig#parseNodeProperties")
     List<String> nodeProperties();
 
+    static List<String> parseNodeProperties(Object userInput) {
+        return UserInputAsStringOrListOfString.parse(userInput, "nodeProperties");
+    }
 
     static GraphDropNodePropertiesConfig of(
         String graphName,

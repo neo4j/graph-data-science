@@ -33,27 +33,27 @@ public final class UserInputAsStringOrListOfString {
 
     private UserInputAsStringOrListOfString() {}
 
-    public static List<String> parse(Object userInput) {
+    public static List<String> parse(Object userInput, String configurationKey) {
         if (userInput instanceof Iterable) {
             var result = new ArrayList<String>();
             for (Object item : (Iterable) userInput) {
-                result.add(parseOne(item));
+                result.add(parseOne(item, configurationKey));
             }
             return result;
         }
-        return List.of(parseOne(userInput));
+        return List.of(parseOne(userInput, configurationKey));
     }
 
-    private static String parseOne(Object userInput) {
+    private static String parseOne(Object userInput, String configurationKey) {
         if (userInput instanceof String) {
             return (String) userInput;
         }
-        throw illegalArgumentException(userInput);
+        throw illegalArgumentException(userInput, configurationKey);
     }
 
-    private static IllegalArgumentException illegalArgumentException(Object userInput) {
+    private static IllegalArgumentException illegalArgumentException(Object userInput, String configurationKey) {
         var type = typeOf(userInput);
-        var message = formatWithLocale("Type mismatch for nodeProperties: expected List<String> or String, but found %s", type);
+        var message = formatWithLocale("Type mismatch for %s: expected List<String> or String, but found %s", configurationKey, type);
         return new IllegalArgumentException(message);
     }
 

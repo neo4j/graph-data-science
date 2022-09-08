@@ -35,33 +35,33 @@ class UserInputAsStringOrListOfStringTest {
 
     @Test
     void shouldParseSingleString() {
-        assertThat(UserInputAsStringOrListOfString.parse("string"))
+        assertThat(UserInputAsStringOrListOfString.parse("string", "nodeProperties"))
             .isEqualTo(List.of("string"));
     }
 
     @Test
     void shouldParseListOfString() {
-        assertThat(UserInputAsStringOrListOfString.parse(List.of("foo", "bar")))
+        assertThat(UserInputAsStringOrListOfString.parse(List.of("foo", "bar"), "nodeProperties"))
             .isEqualTo(List.of("foo", "bar"));
     }
 
     @Test
     void shouldNotParseNumber() {
-        assertThatThrownBy(() -> UserInputAsStringOrListOfString.parse(1))
+        assertThatThrownBy(() -> UserInputAsStringOrListOfString.parse(1, "nodeProperties"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Type mismatch for nodeProperties: expected List<String> or String, but found number");
     }
 
     @Test
     void shouldNotParseBoolean() {
-        assertThatThrownBy(() -> UserInputAsStringOrListOfString.parse(Boolean.TRUE))
+        assertThatThrownBy(() -> UserInputAsStringOrListOfString.parse(Boolean.TRUE, "nodeProperties"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Type mismatch for nodeProperties: expected List<String> or String, but found boolean");
     }
 
     @Test
     void shouldNotParseNode() {
-        assertThatThrownBy(() -> UserInputAsStringOrListOfString.parse(new NodeEntity(null, 1)))
+        assertThatThrownBy(() -> UserInputAsStringOrListOfString.parse(new NodeEntity(null, 1), "nodeProperties"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Type mismatch for nodeProperties: expected List<String> or String, but found node");
     }
@@ -71,7 +71,7 @@ class UserInputAsStringOrListOfStringTest {
         var node1 = new NodeEntity(null, 0);
         var node2 = new NodeEntity(null, 1);
         var relationship = Neo4jProxy.virtualRelationship(0, node1, node2, RelationshipType.withName("FOO"));
-        assertThatThrownBy(() -> UserInputAsStringOrListOfString.parse(relationship))
+        assertThatThrownBy(() -> UserInputAsStringOrListOfString.parse(relationship, "nodeProperties"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Type mismatch for nodeProperties: expected List<String> or String, but found relationship");
     }
@@ -80,28 +80,28 @@ class UserInputAsStringOrListOfStringTest {
     void shouldNotParsePath() {
         var node = new NodeEntity(null, 0);
         var path = PathImpl.singular(node);
-        assertThatThrownBy(() -> UserInputAsStringOrListOfString.parse(path))
+        assertThatThrownBy(() -> UserInputAsStringOrListOfString.parse(path, "nodeProperties"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Type mismatch for nodeProperties: expected List<String> or String, but found node");
     }
 
     @Test
     void shouldNotParseMap() {
-        assertThatThrownBy(() -> UserInputAsStringOrListOfString.parse(Map.of("string", 1)))
+        assertThatThrownBy(() -> UserInputAsStringOrListOfString.parse(Map.of("string", 1), "nodeProperties"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Type mismatch for nodeProperties: expected List<String> or String, but found map");
     }
 
     @Test
     void shouldNotParseList() {
-        assertThatThrownBy(() -> UserInputAsStringOrListOfString.parse(List.of(List.of(0))))
+        assertThatThrownBy(() -> UserInputAsStringOrListOfString.parse(List.of(List.of(0)), "nodeProperties"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Type mismatch for nodeProperties: expected List<String> or String, but found list");
     }
 
     @Test
     void shouldNotParseListWithNonStrings() {
-        assertThatThrownBy(() -> UserInputAsStringOrListOfString.parse(List.of("string", 1)))
+        assertThatThrownBy(() -> UserInputAsStringOrListOfString.parse(List.of("string", 1), "nodeProperties"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Type mismatch for nodeProperties: expected List<String> or String, but found number");
     }
