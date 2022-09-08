@@ -23,6 +23,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -34,7 +35,10 @@ import org.neo4j.gds.executor.ExecutionContext;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & GraphNameConfig> {
 
@@ -43,6 +47,8 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
     private final GraphStore graphStore;
     private final Collection<NodeLabel> nodeLabels;
     private final Collection<RelationshipType> relTypes;
+
+    private final Set<RelationshipType> availableRelationshipTypesForNodeProperties;
     private final ProgressTracker progressTracker;
 
     NodePropertyStepExecutor(
@@ -51,6 +57,7 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
         GraphStore graphStore,
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes,
+        Set<RelationshipType> availableRelationshipTypesForNodeProperties,
         ProgressTracker progressTracker
     ) {
         this.executionContext = executionContext;
@@ -58,6 +65,7 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
         this.graphStore = graphStore;
         this.nodeLabels = nodeLabels;
         this.relTypes = relationshipTypes;
+        this.availableRelationshipTypesForNodeProperties = availableRelationshipTypesForNodeProperties;
         this.progressTracker = progressTracker;
     }
 
@@ -90,12 +98,26 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
         );
     }
 
+    public void validNodePropertyStepsContextConfigs(List<ExecutableNodePropertyStep> steps) {
+        for (ExecutableNodePropertyStep step : steps) {
+            ElementTypeValidator.validate(
+                graphStore,
+                ElementTypeValidator.resolve(graphStore, step.contextNodeLabels()),
+                formatWithLocale("contextNodeLabels for step `%s`", step.procName()));
+
+            ElementTypeValidator.validateTypes(
+                graphStore,
+                ElementTypeValidator.resolveTypes(graphStore, step.contextRelationshipTypes()),
+                formatWithLocale("contextRelationshipTypes for step `%s`", step.procName()));
+        }
+    }
+
     public void executeNodePropertySteps(List<ExecutableNodePropertyStep> steps) {
         progressTracker.beginSubTask("Execute node property steps");
         for (ExecutableNodePropertyStep step : steps) {
             progressTracker.beginSubTask();
             var featureInputNodeLabels = step.featureInputNodeLabels(graphStore, nodeLabels);
-            var featureInputRelationshipTypes = step.featureInputRelationshipTypes(graphStore, relTypes);
+            var featureInputRelationshipTypes = step.featureInputRelationshipTypes(graphStore, relTypes, availableRelationshipTypesForNodeProperties);
             step.execute(executionContext, config.graphName(), featureInputNodeLabels, featureInputRelationshipTypes);
             progressTracker.endSubTask();
         }
@@ -112,6 +134,7 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
         CONFIG config,
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes,
+        Set<RelationshipType> availableRelationshipTypesForNodeProperty,
         ProgressTracker progressTracker
     ) {
         return new NodePropertyStepExecutor<>(
@@ -120,6 +143,7 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
             graphStore,
             nodeLabels,
             relationshipTypes,
+            availableRelationshipTypesForNodeProperty,
             progressTracker
         );
     }

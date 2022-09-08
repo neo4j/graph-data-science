@@ -62,6 +62,8 @@ import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep;
 import org.neo4j.gds.ml.pipeline.ImmutablePipelineGraphFilter;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepContextConfig;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepContextConfigImpl;
 import org.neo4j.gds.ml.pipeline.PipelineGraphFilter;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
@@ -74,6 +76,7 @@ import org.neo4j.gds.test.TestProc;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -411,7 +414,6 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .graphName(graphName)
                 .pipeline("bar")
                 .targetRelationshipType("_TEST_")
-                .contextRelationshipTypes(List.of("*"))
                 .build();
 
             TestProcedureRunner.applyOnProcedure(db, TestMutateProc.class, caller -> {
@@ -608,6 +610,69 @@ final class LinkPredictionTrainPipelineExecutorTest {
             ))
                 .hasMessage("Need at least one model candidate for training.");
         }
+
+        @Test
+        void shouldValidNodePropertyStepsContextConfigs() {
+            var nodePropertyStepGrapFilter = ImmutablePipelineGraphFilter.builder()
+                .nodeLabels(List.of(NodeLabel.of("N")))
+                .relationshipTypes(List.of(RelationshipType.of("REL")))
+                .build();
+            var nodePropertyStepInvalidContextNodeLabel = NodePropertyStepContextConfigImpl.builder()
+                .contextNodeLabels(List.of("INVALID"))
+                .build();
+            var nodePropertyStepInvalidContextRel = NodePropertyStepContextConfigImpl.builder()
+                .contextRelationshipTypes(List.of("INVALID"))
+                .build();
+
+
+            LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
+            pipeline.addNodePropertyStep(new TestFilteredNodePropertyStep(nodePropertyStepGrapFilter, nodePropertyStepInvalidContextNodeLabel));
+            pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
+
+            LinkPredictionTrainingPipeline pipeline2 = new LinkPredictionTrainingPipeline();
+            pipeline2.addNodePropertyStep(new TestFilteredNodePropertyStep(nodePropertyStepGrapFilter, nodePropertyStepInvalidContextRel));
+            pipeline2.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
+
+
+            var config = LinkPredictionTrainConfigImpl.builder()
+                .modelUser(getUsername())
+                .modelName("model")
+                .graphName(GRAPH_NAME)
+                .targetRelationshipType("REL")
+                .sourceNodeLabel("N")
+                .targetNodeLabel("N")
+                .pipeline("DUMMY")
+                .negativeClassWeight(1)
+                .randomSeed(1337L)
+                .build();
+
+            assertThatThrownBy(() -> TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+                var result = new LinkPredictionTrainPipelineExecutor(
+                    pipeline,
+                    config,
+                    caller.executionContext(),
+                    graphStore,
+                    ProgressTracker.NULL_TRACKER
+                ).compute();
+            }))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Could not find the specified contextNodeLabels for step `assert step filter` of ['INVALID']. Available labels are ['N'].");
+
+
+            assertThatThrownBy(() -> TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+                var result = new LinkPredictionTrainPipelineExecutor(
+                    pipeline2,
+                    config,
+                    caller.executionContext(),
+                    graphStore,
+                    ProgressTracker.NULL_TRACKER
+                ).compute();
+            }))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Could not find the specified contextRelationshipTypes for step `assert step filter` of ['INVALID']. Available relationship types are ['REL'].");
+
+        }
+
     }
 
     @Nested
@@ -767,9 +832,11 @@ final class LinkPredictionTrainPipelineExecutorTest {
             pipeline.addNodePropertyStep(new TestFilteredNodePropertyStep(
                 ImmutablePipelineGraphFilter.builder()
                     .nodeLabels(List.of(NodeLabel.of("P"), NodeLabel.of("Q"), NodeLabel.of("X")))
-                    .intermediateRelationshipTypes(List.of(RelationshipType.of("_FEATURE_INPUT_")))
-                    .contextRelationshipTypes(List.of(RelationshipType.of("CONTEXT")))
-                    .build()));
+                    .relationshipTypes(List.of(RelationshipType.of("_FEATURE_INPUT_")))
+                    .build(),
+                NodePropertyStepContextConfigImpl.builder()
+                    .contextNodeLabels(List.of("X"))
+                    .contextRelationshipTypes(List.of("CONTEXT")).build()));
 
             pipeline.addTrainerConfig(RandomForestClassifierTrainerConfig.DEFAULT);
 
@@ -782,8 +849,6 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .targetRelationshipType("REL2")
                 .sourceNodeLabel("P")
                 .targetNodeLabel("Q")
-                .contextRelationshipTypes(List.of("CONTEXT"))
-                .contextNodeLabels(List.of("X"))
                 .metrics(List.of(LinkMetric.AUCPR.name()))
                 .pipeline("DUMMY")
                 .negativeClassWeight(1)
@@ -806,7 +871,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
         }
 
         @Test
-        void nodePropertyStepsIncludeContextNodes() {
+        void splitsRespectTrainConfigFiltering() {
             var pipeline = new LinkPredictionTrainingPipeline();
 
             pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder()
@@ -825,8 +890,6 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .targetRelationshipType("REL2")
                 .sourceNodeLabel("P")
                 .targetNodeLabel("Q")
-                .contextRelationshipTypes(List.of("CONTEXT"))
-                .contextNodeLabels(List.of("X"))
                 .metrics(List.of(LinkMetric.AUCPR.name()))
                 .pipeline("DUMMY")
                 .negativeClassWeight(1)
@@ -843,8 +906,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
 
             assertThat(splits.get(FEATURE_INPUT).nodeLabels()).containsExactlyInAnyOrder(
                 NodeLabel.of("P"),
-                NodeLabel.of("Q"),
-                NodeLabel.of("X")
+                NodeLabel.of("Q")
             );
             assertThat(splits.get(TEST).nodeLabels()).containsExactlyInAnyOrder(NodeLabel.of("P"), NodeLabel.of("Q"));
             assertThat(splits.get(TRAIN).nodeLabels()).containsExactlyInAnyOrder(NodeLabel.of("P"), NodeLabel.of("Q"));
@@ -868,9 +930,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .graphName(G_BI)
                 .targetRelationshipType("REL2")
                 .sourceNodeLabel("P")
-                .targetNodeLabel("Q")
-                .contextRelationshipTypes(List.of("CONTEXT"))
-                .contextNodeLabels(List.of("X", "Y"))
+                .targetNodeLabel("Y")
                 .metrics(List.of(LinkMetric.AUCPR.name()))
                 .pipeline("DUMMY")
                 .negativeClassWeight(1)
@@ -879,10 +939,14 @@ final class LinkPredictionTrainPipelineExecutorTest {
 
             pipeline.addNodePropertyStep(new TestFilteredNodePropertyStep(
                 ImmutablePipelineGraphFilter.builder()
-                    .nodeLabels(trainConfig.featureInputLabels(graphStore))
-                    .intermediateRelationshipTypes(List.of(RelationshipType.of("_FEATURE_INPUT_")))
-                    .contextRelationshipTypes(List.of(RelationshipType.of("CONTEXT")))
-                    .build()));
+                    .nodeLabels(trainConfig.nodeLabelIdentifiers(graphStore))
+                    .relationshipTypes(List.of(RelationshipType.of("_FEATURE_INPUT_")))
+                    .build(),
+                NodePropertyStepContextConfigImpl.builder()
+                    .contextNodeLabels(List.of("X"))
+                    .contextRelationshipTypes(List.of("CONTEXT"))
+                    .build())
+            );
 
             pipeline.addTrainerConfig(RandomForestClassifierTrainerConfig.DEFAULT);
 
@@ -906,8 +970,21 @@ final class LinkPredictionTrainPipelineExecutorTest {
     static class TestFilteredNodePropertyStep implements ExecutableNodePropertyStep {
         private final PipelineGraphFilter graphFilter;
 
-        TestFilteredNodePropertyStep(PipelineGraphFilter graphFilter) {
+        private final NodePropertyStepContextConfig nodePropertyStepContextConfig;
+
+        TestFilteredNodePropertyStep(PipelineGraphFilter graphFilter, NodePropertyStepContextConfig nodePropertyStepContextConfig) {
             this.graphFilter = graphFilter;
+            this.nodePropertyStepContextConfig = nodePropertyStepContextConfig;
+        }
+
+        @Override
+        public List<String> contextNodeLabels() {
+            return nodePropertyStepContextConfig.contextNodeLabels();
+        }
+
+        @Override
+        public List<String> contextRelationshipTypes() {
+            return nodePropertyStepContextConfig.contextRelationshipTypes();
         }
 
         @Override
@@ -917,8 +994,12 @@ final class LinkPredictionTrainPipelineExecutorTest {
             Collection<NodeLabel> nodeLabels,
             Collection<RelationshipType> relTypes
         ) {
-            assertThat(nodeLabels).containsExactlyInAnyOrderElementsOf(graphFilter.nodeLabels());
-            assertThat(relTypes).containsExactlyInAnyOrderElementsOf(graphFilter.relationshipTypes());
+            assertThat(nodeLabels).containsExactlyInAnyOrderElementsOf(
+                Stream.concat(graphFilter.nodeLabels().stream(), contextNodeLabels().stream().map(NodeLabel::of)).distinct().collect(Collectors.toList())
+            );
+            assertThat(relTypes).containsExactlyInAnyOrderElementsOf(
+                Stream.concat(graphFilter.relationshipTypes().stream(), contextRelationshipTypes().stream().map(RelationshipType::of)).distinct().collect(Collectors.toList())
+            );
         }
 
         @Override

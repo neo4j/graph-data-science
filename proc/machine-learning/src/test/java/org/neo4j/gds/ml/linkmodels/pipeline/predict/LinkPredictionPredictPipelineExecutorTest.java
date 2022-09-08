@@ -156,8 +156,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             ImmutableLPGraphStoreFilter.builder()
                 .sourceNodeLabels(NodeLabel.listOf("N"))
                 .targetNodeLabels(NodeLabel.listOf("N"))
-                .nodePropertyStepsLabels(List.of(NodeLabel.of("N")))
-                .nodePropertyStepRelationshipTypes(List.of())
+                .nodePropertyStepsBaseLabels(List.of(NodeLabel.of("N")))
                 .predictRelationshipTypes(RelationshipType.listOf("T"))
                 .build(),
             config,
@@ -205,8 +204,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             ImmutableLPGraphStoreFilter.builder()
                 .sourceNodeLabels(NodeLabel.listOf("N"))
                 .targetNodeLabels(NodeLabel.listOf("N"))
-                .nodePropertyStepsLabels(List.of(NodeLabel.of("N")))
-                .nodePropertyStepRelationshipTypes(List.of())
+                .nodePropertyStepsBaseLabels(List.of(NodeLabel.of("N")))
                 .predictRelationshipTypes(RelationshipType.listOf("T"))
                 .build(),
             config,
@@ -256,8 +254,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             ImmutableLPGraphStoreFilter.builder()
                 .sourceNodeLabels(NodeLabel.listOf("N"))
                 .targetNodeLabels(NodeLabel.listOf("N"))
-                .nodePropertyStepsLabels(List.of(NodeLabel.of("N")))
-                .nodePropertyStepRelationshipTypes(List.of())
+                .nodePropertyStepsBaseLabels(List.of(NodeLabel.of("N")))
                 .predictRelationshipTypes(RelationshipType.listOf("T"))
                 .build(),
             config,
@@ -287,8 +284,7 @@ class LinkPredictionPredictPipelineExecutorTest {
         LPGraphStoreFilter graphStoreFilter = ImmutableLPGraphStoreFilter.builder()
             .sourceNodeLabels(NodeLabel.listOf("A"))
             .targetNodeLabels(NodeLabel.listOf("B"))
-            .nodePropertyStepsLabels(NodeLabel.listOf("A", "B", "C"))
-            .nodePropertyStepRelationshipTypes(RelationshipType.listOf("CONTEXT", "T"))
+            .nodePropertyStepsBaseLabels(NodeLabel.listOf("A", "B", "C"))
             .predictRelationshipTypes(RelationshipType.listOf("T"))
             .build();
 
@@ -395,8 +391,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             ImmutableLPGraphStoreFilter.builder()
                 .sourceNodeLabels(NodeLabel.listOf("N"))
                 .targetNodeLabels(NodeLabel.listOf("N"))
-                .nodePropertyStepsLabels(List.of(NodeLabel.of("N")))
-                .nodePropertyStepRelationshipTypes(List.of())
+                .nodePropertyStepsBaseLabels(List.of(NodeLabel.of("N")))
                 .predictRelationshipTypes(RelationshipType.listOf("T"))
                 .build(),
             config,
@@ -512,8 +507,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             ImmutableLPGraphStoreFilter.builder()
                 .sourceNodeLabels(NodeLabel.listOf("N"))
                 .targetNodeLabels(NodeLabel.listOf("N"))
-                .nodePropertyStepsLabels(NodeLabel.listOf("N"))
-                .nodePropertyStepRelationshipTypes(List.of())
+                .nodePropertyStepsBaseLabels(NodeLabel.listOf("N"))
                 .predictRelationshipTypes(RelationshipType.listOf("T"))
                 .build(),
             LinkPredictionPredictPipelineBaseConfigImpl.builder()
@@ -547,8 +541,8 @@ class LinkPredictionPredictPipelineExecutorTest {
             Collection<NodeLabel> nodeLabels,
             Collection<RelationshipType> relTypes
         ) {
-            assertThat(nodeLabels).containsExactlyInAnyOrderElementsOf(graphStoreFilter.nodePropertyStepsLabels());
-            assertThat(relTypes).containsExactlyInAnyOrderElementsOf(graphStoreFilter.nodePropertyStepRelationshipTypes());
+            assertThat(nodeLabels).containsExactlyInAnyOrderElementsOf(graphStoreFilter.nodePropertyStepsBaseLabels());
+            assertThat(relTypes).containsExactlyInAnyOrderElementsOf(graphStoreFilter.predictRelationshipTypes());
         }
 
         @Override

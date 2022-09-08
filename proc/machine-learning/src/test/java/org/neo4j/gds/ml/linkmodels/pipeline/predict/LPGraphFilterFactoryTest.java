@@ -67,8 +67,6 @@ class LPGraphFilterFactoryTest {
         .targetRelationshipType("T")
         .sourceNodeLabel("A")
         .targetNodeLabel("B")
-        .contextNodeLabels(List.of("C"))
-        .contextRelationshipTypes(List.of("CONTEXT"))
         .build();
 
     @Test
@@ -84,14 +82,12 @@ class LPGraphFilterFactoryTest {
 
         assertThat(labelFilter.sourceNodeLabels()).containsExactly(NodeLabel.of("A"));
         assertThat(labelFilter.targetNodeLabels()).containsExactly(NodeLabel.of("B"));
-        assertThat(labelFilter.nodePropertyStepsLabels()).containsExactlyInAnyOrder(
+        assertThat(labelFilter.nodePropertyStepsBaseLabels()).containsExactlyInAnyOrder(
             NodeLabel.of("A"),
-            NodeLabel.of("B"),
-            NodeLabel.of("C")
+            NodeLabel.of("B")
         );
-        assertThat(labelFilter.nodePropertyStepRelationshipTypes()).containsExactlyInAnyOrder(
-            RelationshipType.of("T"),
-            RelationshipType.of("CONTEXT")
+        assertThat(labelFilter.predictRelationshipTypes()).containsExactlyInAnyOrder(
+            RelationshipType.of("T")
         );
     }
 
@@ -103,8 +99,6 @@ class LPGraphFilterFactoryTest {
             .modelUser("dummy")
             .sourceNodeLabel("B")
             .targetNodeLabel("A")
-            .contextNodeLabels(List.of("A"))
-            .contextRelationshipTypes(List.of("CONTEXT_NEW"))
             .relationshipTypes(List.of("OTHER"))
             .topN(42)
             .build();
@@ -113,10 +107,9 @@ class LPGraphFilterFactoryTest {
 
         assertThat(filter.sourceNodeLabels()).containsExactly(NodeLabel.of("B"));
         assertThat(filter.targetNodeLabels()).containsExactly(NodeLabel.of("A"));
-        assertThat(filter.nodePropertyStepsLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"));
-        assertThat(filter.nodePropertyStepRelationshipTypes()).containsExactlyInAnyOrder(
-            RelationshipType.of("OTHER"),
-            RelationshipType.of("CONTEXT_NEW")
+        assertThat(filter.nodePropertyStepsBaseLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"));
+        assertThat(filter.predictRelationshipTypes()).containsExactlyInAnyOrder(
+            RelationshipType.of("OTHER")
         );
     }
 
@@ -140,7 +133,6 @@ class LPGraphFilterFactoryTest {
             .modelName(modelName)
             .graphName("dummy")
             .modelUser(username)
-            .contextNodeLabels(List.of("INVALID"))
             .topN(42)
             .build();
 
@@ -169,14 +161,13 @@ class LPGraphFilterFactoryTest {
             .sourceNodeLabel("A")
             .targetNodeLabel("B")
             .targetRelationshipType("T")
-            .contextRelationshipTypes(List.of("INVALID"))
             .build();
 
         var predictConfig = LinkPredictionPredictPipelineBaseConfigImpl.builder()
             .modelName(modelName)
             .graphName("dummy")
             .modelUser(username)
-            .relationshipTypes(List.of("T"))
+            .relationshipTypes(List.of("INVALID"))
             .topN(42)
             .build();
 
@@ -187,7 +178,7 @@ class LPGraphFilterFactoryTest {
             multiLabelGraphStore,
             ProgressTracker.NULL_TRACKER
         ))
-            .hasMessage("Could not find the specified `contextRelationshipTypes` from the model's train config of ['INVALID']. " +
+            .hasMessage("Could not find the specified `relationshipTypes` from the model's predict config of ['INVALID']. " +
                         "Available relationship types are ['CONTEXT', 'CONTEXT_NEW', 'OTHER', 'T'].");
     }
 

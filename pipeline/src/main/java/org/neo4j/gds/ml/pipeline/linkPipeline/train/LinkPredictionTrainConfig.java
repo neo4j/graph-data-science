@@ -64,22 +64,10 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, GraphNameConf
         return ElementProjection.PROJECT_ALL;
     }
 
-    default List<String> contextRelationshipTypes() {
-        return List.of();
-    }
-
-    default List<String> contextNodeLabels() {
-        return List.of();
-    }
-
     @Override
     @Configuration.Ignore
     default List<String> relationshipTypes() {
-        return Stream.concat(
-                contextRelationshipTypes().stream(),
-                Stream.of(targetRelationshipType())
-            )
-            .collect(Collectors.toList());
+        return List.of(targetRelationshipType());
     }
 
     @Value.Check
@@ -92,21 +80,6 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, GraphNameConf
     @Configuration.Ignore
     default RelationshipType internalTargetRelationshipType() {
         return RelationshipType.of(targetRelationshipType());
-    }
-
-    @Configuration.Ignore
-    default Collection<RelationshipType> internalContextRelationshipType(GraphStore graphStore) {
-        var relTypes =  ElementTypeValidator.resolveTypes(graphStore, contextRelationshipTypes());
-
-        return relTypes.stream().filter(type -> !type.equals(internalTargetRelationshipType())).collect(Collectors.toList());
-    }
-
-    @Configuration.Ignore
-    default Collection<NodeLabel> featureInputLabels(GraphStore graphStore) {
-        return contextNodeLabels().contains(ElementProjection.PROJECT_ALL)
-            ? graphStore.nodeLabels()
-            : Stream.concat(contextNodeLabels().stream().map(NodeLabel::of), nodeLabelIdentifiers(graphStore).stream())
-                .collect(Collectors.toSet());
     }
 
     @Override
@@ -153,16 +126,6 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, GraphNameConf
     ) {
         ElementTypeValidator.resolveAndValidate(graphStore, List.of(targetNodeLabel()), "sourceNodeLabel");
     }
-
-    @Configuration.GraphStoreValidationCheck
-    default void validateContextNodeLabels(
-        GraphStore graphStore,
-        Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
-    ) {
-        ElementTypeValidator.resolveAndValidate(graphStore, contextNodeLabels(), "sourceNodeLabel");
-    }
-
 
     @Configuration.GraphStoreValidationCheck
     default void validateTargetRelIsUndirected(

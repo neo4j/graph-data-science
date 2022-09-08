@@ -1,0 +1,9 @@
+.Node property step context configuration
+[opts="header",cols="1,1,1m,4"]
+|===
+| Name                      | Type    | Default | Description
+| contextNodeLabels         | List of String     | [] |Additional node labels which are added as context.
+| contextRelationshipTypes  | List of String     | [] |Additional relationship types which are added as context.
+|===
+
+During training, the context configuration is combined with the train configuration to produce the final node label and relationship type filter for each node property step.

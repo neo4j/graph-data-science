@@ -118,7 +118,7 @@ public class NodeClassificationPredictPipelineExecutor extends PredictPipelineEx
     protected PipelineGraphFilter nodePropertyStepFilter() {
         return ImmutablePipelineGraphFilter.builder()
             .nodeLabels(config.nodeLabelIdentifiers(graphStore))
-            .contextRelationshipTypes(config.internalRelationshipTypes(graphStore)).build();
+            .relationshipTypes(config.internalRelationshipTypes(graphStore)).build();
     }
 
     @Override

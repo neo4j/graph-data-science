@@ -159,7 +159,6 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             "   $graphName, " +
             "   { " +
             "     targetRelationshipType: 'REL', " +
-            "     contextRelationshipTypes: ['*'], " +
             "     sourceNodeLabel: 'N', " +
             "     targetNodeLabel: 'N'," +
             "     pipeline: 'pipe1'," +
@@ -183,7 +182,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
                         Matchers.hasKey("bestParameters")
                     ),
                     "trainMillis", greaterThan(-1L),
-                    "configuration", aMapWithSize(14)
+                    "configuration", aMapWithSize(12)
                 ))
         );
 
@@ -256,45 +255,13 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
                         Matchers.hasKey("bestParameters")
                     ),
                     "trainMillis", greaterThan(-1L),
-                    "configuration", aMapWithSize(14)
+                    "configuration", aMapWithSize(12)
                 ))
         );
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), GRAPH_NAME).graphStore();
 
         assertThat(graphStore.nodePropertyKeys(NodeLabel.of("N"))).doesNotContain("pr");
         assertThat(graphStore.nodePropertyKeys(NodeLabel.of("Ignore"))).doesNotContain("pr");
-    }
-
-    @Test
-    void trainOnRelationshipFilteredGraph() {
-        runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe5')");
-        runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe5', 'pageRank', {mutateProperty: 'pr'})");
-        runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe5', 'L2', {nodeProperties: ['pr']})");
-        runQuery("CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe5', {trainFraction: 0.45, testFraction: 0.45})");
-        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe5', {penalty: 1})");
-        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe5', {penalty: 2})");
-
-        String trainQuery =
-            "CALL gds.beta.pipeline.linkPrediction.train(" +
-            "   $graphName, " +
-            "   { pipeline: 'pipe5', modelName: 'trainedModel5', negativeClassWeight: 1.0, randomSeed: 1337, targetRelationshipType: 'REL', contextRelationshipTypes: $relFilter, sourceNodeLabel: 'N', targetNodeLabel: 'N' }" +
-            ")";
-
-        Map<String, Object> firstModelInfo = runQuery(
-            trainQuery,
-            Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")),
-            row -> (Map<String, Object>) row.next().get("modelInfo")
-        );
-
-        runQuery("CALL gds.beta.model.drop('trainedModel5')");
-
-        Map<String, Object> secondModelInfo = runQuery(
-            trainQuery,
-            Map.of("graphName", GRAPH_NAME, "relFilter", List.of("REL")),
-            row -> (Map<String, Object>) row.next().get("modelInfo")
-        );
-
-        assertThat(firstModelInfo).usingRecursiveComparison().isNotEqualTo(secondModelInfo);
     }
 
     @Test
@@ -349,12 +316,12 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
     @Test
     void estimate() {
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe')");
-        runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr', relationshipWeightProperty: 'weight'})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr', relationshipWeightProperty: 'weight', contextRelationshipTypes: ['*']})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe')");
 
         var query = "CALL gds.beta.pipeline.linkPrediction.train.estimate(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, targetRelationshipType: 'REL', contextRelationshipTypes: ['*'], sourceNodeLabel: '*', targetNodeLabel: '*'}" +
+            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, targetRelationshipType: 'REL', sourceNodeLabel: '*', targetNodeLabel: '*'}" +
             ") YIELD bytesMin, bytesMax, nodeCount, relationshipCount";
         assertCypherMemoryEstimation(
             db,
@@ -362,7 +329,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             Map.of("graphName", GRAPH_NAME),
             MemoryRange.of(16_392, 502_472),
             16,
-            42
+            34
         );
     }
 

@@ -92,8 +92,8 @@ public class LinkPredictionPredictPipelineExecutor extends PredictPipelineExecut
     @Override
     protected PipelineGraphFilter nodePropertyStepFilter() {
         return ImmutablePipelineGraphFilter.builder()
-            .nodeLabels(graphStoreFilter.nodePropertyStepsLabels())
-            .contextRelationshipTypes(graphStoreFilter.nodePropertyStepRelationshipTypes())
+            .nodeLabels(graphStoreFilter.nodePropertyStepsBaseLabels())
+            .relationshipTypes(graphStoreFilter.predictRelationshipTypes())
             .build();
     }
 

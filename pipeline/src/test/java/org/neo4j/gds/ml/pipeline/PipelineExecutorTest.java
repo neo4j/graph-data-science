@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.pipeline;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -43,6 +44,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -224,6 +226,11 @@ class PipelineExecutorTest {
         @Override
         protected String execute(Map<DatasetSplits, PipelineGraphFilter> dataSplits) {
             return "I am not failing";
+        }
+
+        @Override
+        protected Set<RelationshipType> getAvailableRelTypesForNodePropertySteps() {
+            return graphStore.relationshipTypes();
         }
 
     }

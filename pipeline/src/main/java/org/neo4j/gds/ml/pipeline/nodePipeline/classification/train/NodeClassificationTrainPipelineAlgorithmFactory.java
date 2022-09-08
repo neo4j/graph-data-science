@@ -70,6 +70,8 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends
         var nodeFeatureProducer = NodeFeatureProducer
             .create(graphStore, configuration, executionContext, progressTracker);
 
+        nodeFeatureProducer.validateNodePropertyStepsContextConfigs(pipeline.nodePropertySteps());
+
         return new NodeClassificationTrainAlgorithm(
             NodeClassificationTrain.create(
                 graphStore,

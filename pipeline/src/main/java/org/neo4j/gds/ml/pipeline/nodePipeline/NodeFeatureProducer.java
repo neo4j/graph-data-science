@@ -25,9 +25,11 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
+import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 
 import java.util.Collection;
+import java.util.List;
 
 public final class NodeFeatureProducer<PIPELINE_CONFIG extends NodePropertyPipelineBaseTrainConfig> {
 
@@ -59,6 +61,7 @@ public final class NodeFeatureProducer<PIPELINE_CONFIG extends NodePropertyPipel
                 config,
                 config.nodeLabelIdentifiers(graphStore),
                 config.internalRelationshipTypes(graphStore),
+                graphStore.relationshipTypes(),
                 progressTracker
             ),
             graphStore,
@@ -83,5 +86,9 @@ public final class NodeFeatureProducer<PIPELINE_CONFIG extends NodePropertyPipel
         } finally {
             stepExecutor.cleanupIntermediateProperties(pipeline.nodePropertySteps());
         }
+    }
+
+    public void validateNodePropertyStepsContextConfigs(List<ExecutableNodePropertyStep> steps) {
+        stepExecutor.validNodePropertyStepsContextConfigs(steps);
     }
 }

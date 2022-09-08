@@ -59,7 +59,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
         assertThat(result.nodePropertySteps).isEqualTo(List.of(
             Map.of(
                 "name", "gds.pageRank.mutate",
-                "config", Map.of("mutateProperty", "pr")
+                "config", Map.of("mutateProperty", "pr", "contextNodeLabels", List.of(), "contextRelationshipTypes", List.of())
             )));
         assertThat(result.featureProperties).isEqualTo(List.of());
         assertThat(result.parameterSpace).isEqualTo(NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG);
@@ -152,7 +152,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
         assertThat(result.nodePropertySteps).isEqualTo(List.of(
             Map.of(
                 "name", "gds.pageRank.mutate",
-                "config", Map.of("mutateProperty", "pr")
+                "config", Map.of("mutateProperty", "pr", "contextNodeLabels", List.of(), "contextRelationshipTypes", List.of())
             )));
         assertThat(result.featureProperties).isEqualTo(List.of("pr", "pr2"));
         assertThat(result.parameterSpace).isEqualTo(NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG);
@@ -170,18 +170,18 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
             getUsername(),
             "myPipeline",
             "pageRank",
-            Map.of("mutateProperty", "pr2")
+            Map.of("mutateProperty", "pr2", "contextNodeLabels", List.of("A"), "contextRelationshipTypes", List.of("T"))
         );
         assertThat(result.name).isEqualTo("myPipeline");
         assertThat(result.splitConfig).isEqualTo(DEFAULT_CONFIG.toMap());
         assertThat(result.nodePropertySteps).isEqualTo(List.of(
                 Map.of(
                     "name", "gds.pageRank.mutate",
-                    "config", Map.of("mutateProperty", "pr")
+                    "config", Map.of("mutateProperty", "pr", "contextNodeLabels", List.of(), "contextRelationshipTypes", List.of())
                 ),
                 Map.of(
                     "name", "gds.pageRank.mutate",
-                    "config", Map.of("mutateProperty", "pr2")
+                    "config", Map.of("mutateProperty", "pr2", "contextNodeLabels", List.of("A"), "contextRelationshipTypes", List.of("T"))
                 )
             )
         );

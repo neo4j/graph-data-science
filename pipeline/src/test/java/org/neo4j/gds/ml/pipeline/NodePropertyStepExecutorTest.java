@@ -47,8 +47,10 @@ import org.neo4j.gds.test.SumNodePropertyStepConfigImpl;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.graphStoreFromGDL;
 
@@ -80,6 +82,7 @@ class NodePropertyStepExecutorTest {
             graphStore,
             graphStore.nodeLabels(),
             graphStore.relationshipTypes(),
+            Set.of(),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -107,6 +110,7 @@ class NodePropertyStepExecutorTest {
             graphStore,
             List.of(NodeLabel.of("A")),
             List.of(),
+            graphStore.relationshipTypes(),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -164,6 +168,53 @@ class NodePropertyStepExecutorTest {
     }
 
     @Test
+    void failWithInvalidContextConfigs() {
+        var executor = new NodePropertyStepExecutor<>(
+            ExecutionContext.EMPTY,
+            new NodePropertyStepExecutorTestConfig(),
+            graphStore,
+            List.of(NodeLabel.of("A")),
+            List.of(),
+            graphStore.relationshipTypes(),
+            ProgressTracker.NULL_TRACKER
+        );
+
+        List<ExecutableNodePropertyStep> stepsWithInvalidContextRel = List.of(
+            new SumNodePropertyStep(graphStore,
+                SumNodePropertyStepConfigImpl
+                    .builder()
+                    .mutateProperty("r1_degree")
+                    .contextRelationshipTypes(List.of("INVALID"))
+                    .contextNodeLabels(List.of("B1", "B2"))
+                    .procName("r1_degree")
+                    .build()
+            )
+        );
+
+        List<ExecutableNodePropertyStep> stepsWithInvalidContextNodeLabels = List.of(
+            new SumNodePropertyStep(graphStore,
+                SumNodePropertyStepConfigImpl
+                    .builder()
+                    .mutateProperty("r1_degree")
+                    .contextRelationshipTypes(List.of("R1"))
+                    .contextNodeLabels(List.of("INVALID"))
+                    .procName("r1_degree")
+                    .build()
+            )
+        );
+
+        assertThatThrownBy(() -> executor.validNodePropertyStepsContextConfigs(stepsWithInvalidContextRel))
+            .isExactlyInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Could not find the specified contextRelationshipTypes for step `r1_degree` of ['INVALID']. Available relationship types are ['R1', 'R2'].");
+
+
+        assertThatThrownBy(() -> executor.validNodePropertyStepsContextConfigs(stepsWithInvalidContextNodeLabels))
+            .isExactlyInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Could not find the specified contextNodeLabels for step `r1_degree` of ['INVALID']. Available labels are ['A', 'B1', 'B2'].");
+
+    }
+
+    @Test
     void progressLogging() {
         var graphStore = GdlFactory.of("(a {age: 12})-->(b {age: 42})").build();
 
@@ -180,6 +231,7 @@ class NodePropertyStepExecutorTest {
             graphStore,
             graphStore.nodeLabels(),
             graphStore.relationshipTypes(),
+            Set.of(),
             progressTracker
         ).executeNodePropertySteps(steps);
 

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.CatalogModelContainer;
@@ -43,8 +44,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline.MODEL_TYPE;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainPipelineExecutor.LinkPredictionTrainPipelineResult;
@@ -56,11 +57,14 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
 
     private final RelationshipSplitter relationshipSplitter;
 
+    private final Set<RelationshipType> availableRelationshipTypesForNodeProperty;
+
     public LinkPredictionTrainPipelineExecutor(
         LinkPredictionTrainingPipeline pipeline,
         LinkPredictionTrainConfig config,
         ExecutionContext executionContext,
         GraphStore graphStore,
+
         ProgressTracker progressTracker
     ) {
         super(
@@ -70,6 +74,11 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             graphStore,
             progressTracker
         );
+
+        this.availableRelationshipTypesForNodeProperty = graphStore.relationshipTypes()
+            .stream()
+            .filter(relType -> !relType.name.equals(config.targetRelationshipType()))
+            .collect(Collectors.toSet());
 
         this.relationshipSplitter = new RelationshipSplitter(
             graphStore,
@@ -112,12 +121,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             configuration.username(),
             pipeline.nodePropertySteps(),
             configuration.nodeLabels(),
-            Stream.concat(
-                    configuration.contextRelationshipTypes().stream(),
-                    Stream.of(pipeline.splitConfig().featureInputRelationshipType().name)
-                )
-                .distinct()
-                .collect(Collectors.toList())
+            List.of(pipeline.splitConfig().featureInputRelationshipType().name)
         );
 
         MemoryEstimation trainingEstimation = MemoryEstimations
@@ -137,16 +141,15 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         return Map.of(
             DatasetSplits.TRAIN, ImmutablePipelineGraphFilter.builder()
                 .nodeLabels(config.nodeLabelIdentifiers(graphStore))
-                .intermediateRelationshipTypes(List.of(splitConfig.trainRelationshipType()))
+                .relationshipTypes(List.of(splitConfig.trainRelationshipType()))
                 .build(),
             DatasetSplits.TEST, ImmutablePipelineGraphFilter.builder()
                 .nodeLabels(config.nodeLabelIdentifiers(graphStore))
-                .intermediateRelationshipTypes(List.of(splitConfig.testRelationshipType()))
+                .relationshipTypes(List.of(splitConfig.testRelationshipType()))
                 .build(),
             DatasetSplits.FEATURE_INPUT, ImmutablePipelineGraphFilter.builder()
-                .nodeLabels(config.featureInputLabels(graphStore))
-                .intermediateRelationshipTypes(List.of(splitConfig.featureInputRelationshipType()))
-                .contextRelationshipTypes(config.internalContextRelationshipType(graphStore))
+                .nodeLabels(config.nodeLabelIdentifiers(graphStore))
+                .relationshipTypes(List.of(splitConfig.featureInputRelationshipType()))
                 .build()
         );
     }
@@ -213,10 +216,15 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         return ImmutableLinkPredictionTrainPipelineResult.of(model, trainResult.trainingStatistics());
     }
 
+    @Override
+    protected Set<RelationshipType> getAvailableRelTypesForNodePropertySteps() {
+        return availableRelationshipTypesForNodeProperty;
+    }
+
     private void removeDataSplitRelationships(Map<DatasetSplits, PipelineGraphFilter> datasets) {
         datasets.values()
             .stream()
-            .flatMap(graphFilter -> graphFilter.intermediateRelationshipTypes().stream())
+            .flatMap(graphFilter -> graphFilter.relationshipTypes().stream())
             .distinct()
             .collect(Collectors.toList())
             .forEach(graphStore::deleteRelationships);

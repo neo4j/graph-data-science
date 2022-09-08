@@ -115,8 +115,10 @@ YIELD
 | Name                      | Type    | Description
 | pipelineName              | String  | The name of the pipeline.
 | procedureName             | String  | The name of the procedure to be added to the pipeline.
-| procedureConfiguration    | Map     | The configuration of the procedure, excluding `graphName`, `nodeLabels` and `relationshipTypes`.
+| procedureConfiguration    | Map     | The map used to generate the configuration of the procedure. It includes procedure specific configurations except `nodeLabels` and `relationshipTypes`. It can optionally contain parameters in table below.
 |===
+
+include::partial$/machine-learning/node-property-step-context-config.adoc[]
 
 
 include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.adoc[]
@@ -139,7 +141,7 @@ CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {
 [opts="header",cols="1,1,1,1,1,1"]
 |===
 | name     | nodePropertySteps | featureSteps | splitConfig | autoTuningConfig | parameterSpace
-| "pipe"   | [{name=gds.fastRP.mutate, config={randomSeed=42, embeddingDimension=256, mutateProperty=embedding}}]
+| "pipe"   | [{name=gds.fastRP.mutate, config={randomSeed=42, contextRelationshipTypes=[], embeddingDimension=256, contextNodeLabels=[], mutateProperty=embedding}}]
 | []
 | {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
 | {maxTrials={max-trials}}

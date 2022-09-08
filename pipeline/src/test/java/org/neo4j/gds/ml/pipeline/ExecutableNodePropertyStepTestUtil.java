@@ -79,7 +79,7 @@ public class ExecutableNodePropertyStepTestUtil {
             var featureInputNodeLabels = featureInputNodeLabels(graphStore, nodeLabels);
             var graph = graphStore.getGraph(
                 featureInputNodeLabels,
-                featureInputRelationshipTypes(graphStore, relTypes),
+                featureInputRelationshipTypes(graphStore, relTypes, graphStore.relationshipTypes()),
                 Optional.empty()
             );
             graphStore.addNodeProperty(

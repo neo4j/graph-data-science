@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.ElementTypeValidator;
@@ -34,7 +33,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.config.ElementTypeValidator.resolveAndValidateTypes;
-import static org.neo4j.gds.config.ElementTypeValidator.resolveTypes;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class LPGraphStoreFilterFactory {
@@ -58,27 +56,9 @@ public final class LPGraphStoreFilterFactory {
             .map(label -> ElementTypeValidator.resolve(graphStore, List.of(label)))
             .orElse(ElementTypeValidator.resolveAndValidate(graphStore, List.of(trainConfig.targetNodeLabel()), "`targetNodeLabel` from the model's train config"));
 
-        Collection<NodeLabel> contextNodeLabels;
-        if (!predictConfig.contextNodeLabels().isEmpty()) {
-            contextNodeLabels = ElementTypeValidator.resolve(graphStore, predictConfig.contextNodeLabels());
-        } else {
-            contextNodeLabels = ElementTypeValidator.resolveAndValidate(graphStore, trainConfig.contextNodeLabels(), "`contextNodeLabels` from the model's train config");
-        }
-
-        Collection<RelationshipType> contextRelTypes;
-        if (!predictConfig.contextRelationshipTypes().isEmpty()) {
-            contextRelTypes = resolveTypes(graphStore, predictConfig.contextRelationshipTypes());
-        } else {
-            contextRelTypes = resolveAndValidateTypes(
-                graphStore,
-                trainConfig.contextRelationshipTypes(),
-                "`contextRelationshipTypes` from the model's train config"
-            );
-        }
-
         Collection<RelationshipType> predictRelTypes;
         if (!predictConfig.relationshipTypes().isEmpty()) {
-            predictRelTypes = resolveTypes(graphStore, predictConfig.relationshipTypes());
+            predictRelTypes = resolveAndValidateTypes(graphStore, predictConfig.relationshipTypes(), "`relationshipTypes` from the model's predict config");
         } else {
             predictRelTypes = resolveAndValidateTypes(
                 graphStore,
@@ -87,21 +67,16 @@ public final class LPGraphStoreFilterFactory {
             );
         }
 
-        var nodePropertyStepRelTypes = Stream.of(contextRelTypes, predictRelTypes)
-            .flatMap(Collection::stream)
-            .collect(Collectors.toSet());
-
-        var nodePropertyStepsLabels = Stream
-            .of(contextNodeLabels, targetNodeLabels, sourceNodeLabels)
+        var nodePropertyStepsBaseLabels = Stream
+            .of(targetNodeLabels, sourceNodeLabels)
             .flatMap(Collection::stream)
             .collect(Collectors.toSet());
 
         LPGraphStoreFilter filter = ImmutableLPGraphStoreFilter.builder()
             .sourceNodeLabels(sourceNodeLabels)
             .targetNodeLabels(targetNodeLabels)
-            .nodePropertyStepsLabels(nodePropertyStepsLabels)
+            .nodePropertyStepsBaseLabels(nodePropertyStepsBaseLabels)
             .predictRelationshipTypes(predictRelTypes)
-            .nodePropertyStepRelationshipTypes(nodePropertyStepRelTypes)
             .build();
 
         progressTracker.logInfo(formatWithLocale("The graph filters used for filtering in prediction is %s", filter));

@@ -96,4 +96,5 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
             relationshipProperty
         ));
     }
+
 }

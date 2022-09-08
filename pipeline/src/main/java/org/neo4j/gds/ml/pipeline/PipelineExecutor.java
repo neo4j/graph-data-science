@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -83,16 +84,19 @@ public abstract class PipelineExecutor<
         //featureInput nodeLabels contain source&target nodeLabel used in training/testing plus contextNodeLabels
         pipeline.validateBeforeExecution(graphStore, featureInputGraphFilter.nodeLabels());
 
-        splitDatasets();
-
         var nodePropertyStepExecutor = NodePropertyStepExecutor.of(
             executionContext,
             graphStore,
             config,
             featureInputGraphFilter.nodeLabels(),
             featureInputGraphFilter.relationshipTypes(),
+            getAvailableRelTypesForNodePropertySteps(),
             progressTracker
         );
+
+        nodePropertyStepExecutor.validNodePropertyStepsContextConfigs(pipeline.nodePropertySteps());
+
+        splitDatasets();
 
         try {
             // we are not validating the size of the feature-input graph as not every nodePropertyStep needs relationships
@@ -107,6 +111,8 @@ public abstract class PipelineExecutor<
             additionalGraphStoreCleanup(dataSplitGraphFilters);
         }
     }
+
+    protected abstract Set<RelationshipType> getAvailableRelTypesForNodePropertySteps();
 
     @Override
     public void release() {
