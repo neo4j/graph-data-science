@@ -22,19 +22,15 @@ package org.neo4j.gds.doc;
 import org.asciidoctor.ast.Document;
 import org.asciidoctor.extension.IncludeProcessor;
 import org.asciidoctor.extension.PreprocessorReader;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public final class PartialsIncludeProcessor extends IncludeProcessor {
-
     @Override
     public boolean handles(String target) {
         return target.contains("partial$");
@@ -42,24 +38,23 @@ public final class PartialsIncludeProcessor extends IncludeProcessor {
 
     @Override
     public void process(Document document, PreprocessorReader reader, String target, Map<String, Object> attributes) {
-        var base_dir = document.getOptions().get("base_dir").toString();
+        Path partial = resolvePartial(target);
+        String partialText = readPartial(partial);
+
+        reader.push_include(partialText, target, null, Integer.MIN_VALUE, Collections.emptyMap());
+    }
+
+    @NotNull
+    private Path resolvePartial(String target) {
         var relativePathToPartialFile = target.replace("partial$", "partials");
-        var partialFile = Paths.get(base_dir, relativePathToPartialFile).toFile();
-        try(var partialFileReader = new BufferedReader(new FileReader(partialFile, StandardCharsets.UTF_8))) {
-            var partialFileContent = partialFileReader
-                .lines()
-                .collect(Collectors.joining(System.lineSeparator()));
+        return DocumentationTestToolsConstants.ASCIIDOC_PATH.resolve(relativePathToPartialFile);
+    }
 
-            reader.push_include(
-                partialFileContent,
-                target,
-                new File(".").getAbsolutePath(),
-                1,
-                attributes
-            );
-
+    private String readPartial(Path partial) {
+        try {
+            return Files.readString(partial);
         } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            throw new IllegalStateException("Error reading '" + partial + "'", e);
         }
     }
 }

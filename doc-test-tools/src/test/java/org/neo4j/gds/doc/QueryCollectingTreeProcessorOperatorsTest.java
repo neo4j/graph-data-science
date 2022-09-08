@@ -50,7 +50,7 @@ class QueryCollectingTreeProcessorOperatorsTest {
 
     @Test
     void loadsBeforeAllQueriesCorrectly() {
-        var beforeAllQueries = processor.beforeAllQueries();
+        var beforeAllQueries = processor.getBeforeAllQueries();
         assertThat(beforeAllQueries).containsExactly(
             DocQuery.builder().query("CALL my.other.dummy()").operator("ops").build()
         );
@@ -58,7 +58,7 @@ class QueryCollectingTreeProcessorOperatorsTest {
 
     @Test
     void loadsBeforeEachQueriesCorrectly() {
-        var beforeEachQueries = processor.beforeEachQueries();
+        var beforeEachQueries = processor.getBeforeEachQueries();
 
         assertThat(beforeEachQueries).containsExactly(
             DocQuery.builder().query("CALL my.other.other.dummy()").operator("ux").build()
@@ -67,7 +67,7 @@ class QueryCollectingTreeProcessorOperatorsTest {
 
     @Test
     void loadsQueryExamplesCorrectly() {
-        var queryExampleGroups = processor.queryExamples();
+        var queryExampleGroups = processor.getQueryExampleGroups();
 
         assertThat(queryExampleGroups)
             .containsExactlyInAnyOrder(

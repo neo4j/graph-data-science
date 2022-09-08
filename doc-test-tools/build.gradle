@@ -24,6 +24,8 @@ dependencies {
     implementation     group: 'org.asciidoctor', name: 'asciidoctorj', version: ver.doc.'asciidoctorj'
     implementation     group: 'org.reflections', name: 'reflections',  version: ver.doc.'reflections'
 
+    compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
+
     testImplementation project(':cypher-aggregation')
     testImplementation project(':proc')
     testImplementation project(':pregel-example')
