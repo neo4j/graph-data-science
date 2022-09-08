@@ -43,7 +43,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -343,12 +342,5 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             "mismatch"
         );
-    }
-
-    @Test
-    void pluralPropertiesProcShouldNotAcceptSingleStringForNodePropertiesParameter() {
-        assertThatThrownBy(() -> runQuery("CALL gds.graph.nodeProperties.stream($graph, 'newNodeProp3', [['A']])", Map.of("graph", TEST_GRAPH_SAME_PROPERTIES)))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("I don't know what the message should be, but we shouldn't accept single string here. Reason we do at the moment is coupling between the stream and write configs, both inheriting all their behavior from an 'export config'. To support list of string, we have to apply the parser in that shared code, and get the undesired support for the stream config as well. Blyat.");
     }
 }

@@ -41,9 +41,12 @@ public interface GraphRemoveNodePropertiesConfig extends BaseConfig, Concurrency
     Optional<String> graphName();
 
     @Configuration.Parameter
-    @Configuration.ConvertWith("org.neo4j.gds.catalog.UserInputAsStringOrListOfString#parse")
+    @Configuration.ConvertWith("org.neo4j.gds.catalog.GraphRemoveNodePropertiesConfig#parseNodeProperties")
     List<String> nodeProperties();
 
+    static List<String> parseNodeProperties(Object userInput) {
+        return UserInputAsStringOrListOfString.parse(userInput, "nodeProperties");
+    }
 
     static GraphRemoveNodePropertiesConfig of(
         String graphName,
