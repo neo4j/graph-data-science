@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline.node.regression.predict;
 
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.models.Regressor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineModelInfo;
@@ -28,7 +29,7 @@ import java.util.List;
 
 public class NodeRegressionPredictPipelineFilterUtil {
 
-    public static List<List<String>> generatePredictPipelineFilter(ModelCatalog modelCatalog, String modelName, String username, NodeRegressionPredictPipelineBaseConfig basePredictConfig) {
+    public static PredictGraphFilter generatePredictPipelineFilter(ModelCatalog modelCatalog, String modelName, String username, NodeRegressionPredictPipelineBaseConfig basePredictConfig) {
         var trainedModel = modelCatalog.get(
             username,
             modelName,
@@ -38,6 +39,15 @@ public class NodeRegressionPredictPipelineFilterUtil {
 
         var combinedTargetNodeLabels = basePredictConfig.targetNodeLabels().isEmpty() ? trainedModel.trainConfig().targetNodeLabels() : basePredictConfig.targetNodeLabels();
         var combinedRelationshipTypes = basePredictConfig.relationshipTypes().isEmpty() ? trainedModel.trainConfig().relationshipTypes() : basePredictConfig.relationshipTypes();
-        return List.of(combinedTargetNodeLabels, combinedRelationshipTypes);
+        return ImmutablePredictGraphFilter.builder()
+            .nodeLabels(combinedTargetNodeLabels)
+            .relationshipTypes(combinedRelationshipTypes)
+            .build();
+    }
+
+    @ValueClass
+    public interface PredictGraphFilter {
+        List<String> nodeLabels();
+        List<String> relationshipTypes();
     }
 }

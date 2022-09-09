@@ -26,9 +26,6 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import static org.neo4j.gds.ml.pipeline.node.regression.predict.NodeRegressionPredictPipelineFilterUtil.generatePredictPipelineFilter;
 
 
-//This class is used to inside #NodeClassificationPipelineStreamProc.newConfigFunction to create NodeClassificationPredictPipelineStreamConfig for *Memory estimation* only.
-//It is needed because the shared #MemoryEstimationExecutor.computeEstimate takes predictConfig, which is not enough for NC.
-//We need to resolve train+predict for the correct graph filtering for accurate estimation.
 class NodeRegressionPredictNewStreamConfigFn implements NewConfigFunction<NodeRegressionPredictPipelineBaseConfig> {
 
     private final ModelCatalog modelCatalog;
@@ -52,8 +49,8 @@ class NodeRegressionPredictNewStreamConfigFn implements NewConfigFunction<NodeRe
                 .concurrency(basePredictConfig.concurrency())
                 .jobId(basePredictConfig.jobId())
                 .modelUser(basePredictConfig.modelUser())
-                .targetNodeLabels(combinedFilter.get(0))
-                .relationshipTypes(combinedFilter.get(1))
+                .targetNodeLabels(combinedFilter.nodeLabels())
+                .relationshipTypes(combinedFilter.relationshipTypes())
                 .build();
         }
     }
