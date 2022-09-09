@@ -30,7 +30,7 @@ public final class PriorityServiceLoader {
     private PriorityServiceLoader() {}
 
     public static <T> T loadService(Class<T> serviceClass, Function<T, Integer> priorityFunction) {
-        return load(serviceClass)
+        return load(serviceClass, serviceClass.getClassLoader())
             .stream()
             .map(Provider::get)
             .max(Comparator.comparing(priorityFunction))

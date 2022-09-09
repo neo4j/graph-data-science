@@ -139,7 +139,7 @@ public final class ProxyUtil {
 
         try {
             var availableProxies = ServiceLoader
-                .load(factoryClass)
+                .load(factoryClass, factoryClass.getClassLoader())
                 .stream()
                 .map(ServiceLoader.Provider::get)
                 .filter(f -> {

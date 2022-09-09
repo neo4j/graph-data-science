@@ -32,7 +32,7 @@ public final class RelationshipIntersectFactoryLocator {
 
     static {
         FACTORIES = ServiceLoader
-            .load(RelationshipIntersectFactory.class)
+            .load(RelationshipIntersectFactory.class, RelationshipIntersectFactory.class.getClassLoader())
             .stream()
             .map(ServiceLoader.Provider::get)
             .collect(Collectors.toList());
