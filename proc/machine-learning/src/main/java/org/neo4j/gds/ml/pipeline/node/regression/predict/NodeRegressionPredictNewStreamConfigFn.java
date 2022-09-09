@@ -45,7 +45,8 @@ class NodeRegressionPredictNewStreamConfigFn implements NewConfigFunction<NodeRe
 
             return NodeRegressionPredictPipelineBaseConfigImpl.builder()
                 .graphName(basePredictConfig.graphName())
-                .modelName(modelName.get())
+                .modelName(basePredictConfig.modelName())
+                .usernameOverride(basePredictConfig.usernameOverride())
                 .concurrency(basePredictConfig.concurrency())
                 .jobId(basePredictConfig.jobId())
                 .modelUser(basePredictConfig.modelUser())

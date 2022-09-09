@@ -52,6 +52,7 @@ class NodeClassificationPredictNewStreamConfigFn implements NewConfigFunction<No
                 .concurrency(basePredictConfig.concurrency())
                 .jobId(basePredictConfig.jobId())
                 .modelUser(basePredictConfig.modelUser())
+                .usernameOverride(basePredictConfig.usernameOverride())
                 .includePredictedProbabilities(basePredictConfig.includePredictedProbabilities())
                 .targetNodeLabels(combinedFilter.nodeLabels())
                 .relationshipTypes(combinedFilter.relationshipTypes())
