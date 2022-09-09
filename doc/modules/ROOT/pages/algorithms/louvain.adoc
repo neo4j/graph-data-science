@@ -495,7 +495,7 @@ The other community is assigned a new community ID, which is guaranteed to be la
 Note that the `consecutiveIds` configuration option cannot be used in combination with seeding in order to retain the seeding values.
 
 
-=== Using `includeIntermediateCommunities` configuration parameter
+=== Using intermediate communities
 
 As described before, Louvain is a hierarchical clustering algorithm.
 That means that after every clustering step all nodes that belong to the same cluster are reduced to a single node.
