@@ -126,6 +126,15 @@ public final class NullableParametersConfig implements NullableParameters {
             this.config = new HashMap<>();
         }
 
+        public static NullableParametersConfig.Builder from(NullableParameters baseConfig) {
+            var builder = new NullableParametersConfig.Builder();
+            builder.referenceTypesDefaultToNotNull(baseConfig.referenceTypesDefaultToNotNull());
+            builder.referenceTypesCanBeMarkedAsNotNull(baseConfig.referenceTypesCanBeMarkedAsNotNull());
+            builder.referenceTypesCanBeMarkedAsNullable(baseConfig.referenceTypesCanBeMarkedAsNullable());
+            builder.extraValue(baseConfig.extraValue());
+            return builder;
+        }
+
         public NullableParametersConfig.Builder referenceTypesDefaultToNotNull(
             String referenceTypesDefaultToNotNull) {
             this.referenceTypesDefaultToNotNull = referenceTypesDefaultToNotNull;

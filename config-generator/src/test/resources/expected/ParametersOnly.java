@@ -73,6 +73,12 @@ public final class ParametersOnlyConfig implements ParametersOnly {
             this.config = new HashMap<>();
         }
 
+        public static ParametersOnlyConfig.Builder from(ParametersOnly baseConfig) {
+            var builder = new ParametersOnlyConfig.Builder();
+            builder.onlyAsParameter(baseConfig.onlyAsParameter());
+            return builder;
+        }
+
         public ParametersOnlyConfig.Builder onlyAsParameter(int onlyAsParameter) {
             this.onlyAsParameter = onlyAsParameter;
             return this;

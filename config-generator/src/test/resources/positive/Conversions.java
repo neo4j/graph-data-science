@@ -40,12 +40,15 @@ public interface Conversions {
     interface MyConversion extends BaseConversion {
 
         @Configuration.ConvertWith("toInt")
+        @Configuration.ToMapValue("String#valueOf")
         int directMethod();
 
         @Configuration.ConvertWith("toIntBase")
+        @Configuration.ToMapValue("String#valueOf")
         int inheritedMethod();
 
         @Configuration.ConvertWith("positive.Conversions.OtherConversion#toIntQual")
+        @Configuration.ToMapValue("String#valueOf")
         int qualifiedMethod();
 
         @Configuration.ConvertWith("add42")

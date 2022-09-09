@@ -32,11 +32,17 @@ public interface NullableFields {
     }
 
     @Configuration.ConvertWith("emptyToNull")
+    @Configuration.ToMapValue("positive.NullableFields.toInputString")
     default @Nullable String conversionCanReturnNull() {
         return null;
     }
 
     static String emptyToNull(String input) {
         return input == null || input.isEmpty() ? null : input;
+    }
+
+    // This is necessary as `@Nullable String` is seen as a different type as `String`
+    static String toInputString(@Nullable String parsedInput) {
+        return parsedInput;
     }
 }

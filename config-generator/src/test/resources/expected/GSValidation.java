@@ -80,6 +80,11 @@ public final class GSValidationConfig implements GSValidation {
             this.config = new HashMap<>();
         }
 
+        public static GSValidationConfig.Builder from(GSValidation baseConfig) {
+            var builder = new GSValidationConfig.Builder();
+            return builder;
+        }
+
         public GSValidation build() {
             CypherMapWrapper config = CypherMapWrapper.create(this.config);
             return new GSValidationConfig();

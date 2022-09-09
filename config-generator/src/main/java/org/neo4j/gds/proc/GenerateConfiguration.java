@@ -134,15 +134,17 @@ final class GenerateConfiguration {
         }
 
         ClassName builderClassName = ClassName.get(packageName, generatedClassName + ".Builder");
-        TypeSpec configBuilderClass = GenerateConfigurationBuilder.defineConfigBuilder(
-            TypeName.get(config.rootType()),
-            implMembers,
-            builderClassName,
-            generatedClassName,
-            constructor.parameters,
+        TypeSpec configBuilderClass = new GenerateConfigurationBuilder(
             configParameterName,
-            factory
-        );
+            (String error, Element member) -> messager.printMessage(Diagnostic.Kind.ERROR, error, member))
+            .defineConfigBuilder(
+                TypeName.get(config.rootType()),
+                implMembers,
+                builderClassName,
+                generatedClassName,
+                constructor.parameters,
+                factory
+            );
 
         MethodSpec builderFactoryMethod = MethodSpec.methodBuilder("builder")
             .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
@@ -173,6 +175,7 @@ final class GenerateConfiguration {
 
     private static FieldDefinitions defineFields(ConfigParser.Spec config) {
         NameAllocator names = new NameAllocator();
+
         ImmutableFieldDefinitions.Builder builder = ImmutableFieldDefinitions.builder().names(names);
         config.members().stream().filter(ConfigParser.Member::isConfigValue).map(member ->
             FieldSpec.builder(

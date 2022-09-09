@@ -62,6 +62,8 @@ public @interface Configuration {
      * This annotation can be used together with {@link org.neo4j.gds.annotation.Configuration.Key} or {@link org.neo4j.gds.annotation.Configuration.Parameter}.
      * The value must be a method reference of format `package.class#function` to a static and public method.
      * The input for the specific field will be transformed using the method-reference.
+     *
+     * In addition, the method is expected to also work with output generated from {@link org.neo4j.gds.annotation.Configuration.ToMapValue}.
      */
     @Documented
     @Target(ElementType.METHOD)
@@ -74,6 +76,8 @@ public @interface Configuration {
      * This annotation can be used together with {@link org.neo4j.gds.annotation.Configuration.Key} or {@link org.neo4j.gds.annotation.Configuration.Parameter}.
      * The value must be a method reference of format `package.class#function` to a static and public method.
      * The value of the specific field will be transformed using the method-reference and used for the implementation of the method annotated with {@link org.neo4j.gds.annotation.Configuration.ToMap}.
+     *
+     * For configuration keys and parameters, it is expected the transformed value can be used as an input again, i.e., can be processed by {@link org.neo4j.gds.annotation.Configuration.ConvertWith}.
      */
     @Documented
     @Target(ElementType.METHOD)

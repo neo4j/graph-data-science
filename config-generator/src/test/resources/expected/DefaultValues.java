@@ -88,6 +88,13 @@ public final class DefaultValuesConfig implements DefaultValues {
             this.config = new HashMap<>();
         }
 
+        public static DefaultValuesConfig.Builder from(DefaultValues baseConfig) {
+            var builder = new DefaultValuesConfig.Builder();
+            builder.defaultInt(baseConfig.defaultInt());
+            builder.defaultString(baseConfig.defaultString());
+            return builder;
+        }
+
         public DefaultValuesConfig.Builder defaultInt(int defaultInt) {
             this.config.put("defaultInt", defaultInt);
             return this;

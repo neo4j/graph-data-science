@@ -134,6 +134,16 @@ public final class ToMapConfig implements ToMap {
             this.config = new HashMap<>();
         }
 
+        public static ToMapConfig.Builder from(ToMap baseConfig) {
+            var builder = new ToMapConfig.Builder();
+            builder.foo(baseConfig.foo());
+            builder.bar(baseConfig.bar());
+            builder.baz(baseConfig.baz());
+            builder.maybeBar(baseConfig.maybeBar());
+            builder.maybeBaz(baseConfig.maybeBaz());
+            return builder;
+        }
+
         public ToMapConfig.Builder foo(int foo) {
             this.foo = foo;
             return this;

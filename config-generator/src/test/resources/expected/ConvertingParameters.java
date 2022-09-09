@@ -77,6 +77,12 @@ public final class ConvertingParametersConfig implements ConvertingParameters {
             this.config = new HashMap<>();
         }
 
+        public static ConvertingParametersConfig.Builder from(ConvertingParameters baseConfig) {
+            var builder = new ConvertingParametersConfig.Builder();
+            builder.parametersAreSubjectToConversion(String.valueOf(baseConfig.parametersAreSubjectToConversion()));
+            return builder;
+        }
+
         public ConvertingParametersConfig.Builder parametersAreSubjectToConversion(String parametersAreSubjectToConversion) {
             this.parametersAreSubjectToConversion = parametersAreSubjectToConversion;
             return this;

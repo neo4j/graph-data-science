@@ -170,6 +170,16 @@ public final class RangeValidationConfig implements RangeValidation {
             this.config = new HashMap<>();
         }
 
+        public static RangeValidationConfig.Builder from(RangeValidation baseConfig) {
+            var builder = new RangeValidationConfig.Builder();
+            builder.integerWithinRange(baseConfig.integerWithinRange());
+            builder.longWithinRange(baseConfig.longWithinRange());
+            builder.doubleWithinRange(baseConfig.doubleWithinRange());
+            builder.maybeDoubleWithinRange(baseConfig.maybeDoubleWithinRange());
+            builder.listDoubleWithinRange(baseConfig.listDoubleWithinRange());
+            return builder;
+        }
+
         public RangeValidationConfig.Builder integerWithinRange(int integerWithinRange) {
             this.config.put("integerWithinRange", integerWithinRange);
             return this;

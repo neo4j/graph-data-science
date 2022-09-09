@@ -22,19 +22,25 @@ package org.neo4j.gds.proc;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.NameAllocator;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,17 +49,26 @@ import static com.google.auto.common.MoreTypes.isTypeOf;
 
 final class GenerateConfigurationBuilder {
 
-    private GenerateConfigurationBuilder() {}
+    private final String configParameterName;
+    private final BiConsumer<String, Element> errorConsumer;
+    private final NameAllocator names;
 
-    static TypeSpec defineConfigBuilder(
+    GenerateConfigurationBuilder(String configParameterName, BiConsumer<String, Element> errorConsumer) {
+        this.configParameterName = configParameterName;
+        this.errorConsumer = errorConsumer;
+        this.names = new NameAllocator();
+    }
+
+    TypeSpec defineConfigBuilder(
         TypeName configInterfaceType,
         List<GenerateConfiguration.MemberDefinition> configImplMembers,
         ClassName builderClassName,
         String generatedClassName,
         List<ParameterSpec> constructorParameters,
-        String configMapParameterName,
         Optional<MethodSpec> maybeFactoryFunction
     ) {
+        var configMapParameterName = configParameterName;
+
         TypeSpec.Builder configBuilderClass = TypeSpec.classBuilder("Builder")
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL);
 
@@ -73,17 +88,100 @@ final class GenerateConfigurationBuilder {
             .filter(p -> !p.name.equals(configMapParameterName))
             .forEach(parameter -> configBuilderClass.addField(parameter.type, parameter.name, Modifier.PRIVATE));
 
+        List<MethodSpec> parameterSetters = defineConfigParameterSetters(configImplMembers, builderClassName);
+        List<MethodSpec> configMapEntrySetters = defineConfigMapEntrySetters(
+            configImplMembers,
+            configMapParameterName,
+            builderClassName
+        );
+
+        MethodSpec buildMethod = defineBuildMethod(
+            configInterfaceType,
+            generatedClassName,
+            constructorParameters,
+            configMapParameterName,
+            maybeFactoryFunction
+        );
+
+        configBuilderClass.addMethod(fromBaseConfigMethod(
+            configInterfaceType,
+            builderClassName,
+            configImplMembers
+        ));
         return configBuilderClass
-            .addMethods(defineConfigParameterSetters(configImplMembers, builderClassName))
-            .addMethods(defineConfigMapEntrySetters(configImplMembers, configMapParameterName, builderClassName))
-            .addMethod(defineBuildMethod(
-                configInterfaceType,
-                generatedClassName,
-                constructorParameters,
-                configMapParameterName,
-                maybeFactoryFunction
-            ))
+            .addMethods(parameterSetters)
+            .addMethods(configMapEntrySetters)
+            .addMethod(buildMethod)
             .build();
+    }
+
+    @NotNull
+    private MethodSpec fromBaseConfigMethod(
+        TypeName configInterfaceType,
+        ClassName builderClassName,
+        List<GenerateConfiguration.MemberDefinition> configImplMethods
+    ) {
+        var baseConfigVarName = names.newName("baseConfig");
+        var builderVarName = names.newName("builder");
+
+        MethodSpec.Builder builder = MethodSpec
+            .methodBuilder("from")
+            .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
+            .addParameter(configInterfaceType, baseConfigVarName)
+            .returns(builderClassName);
+
+        builder.addStatement("var $N = new $T()", builderVarName, builderClassName);
+
+        // this works with the assumption the builder has a setter method for each configValue method
+        configImplMethods.stream().filter(memberDefinition -> memberDefinition.member().isConfigValue()).forEach(configMember -> {
+            // This only catches class equivalence but not sub-classes or annotated classes
+            boolean typeDoesNotChange = configMember.fieldType().equals(configMember.parameterType());
+            if (typeDoesNotChange) {
+                builder.addStatement(
+                    "$N.$N($N.$N())",
+                    builderVarName,
+                    configMember.member().methodName(),
+                    baseConfigVarName,
+                    configMember.member().methodName()
+                );
+            } else {
+                // Configuration.toMap method transforms parsed input back into raw input
+                // this is necessary as the builder only accepts the raw user input
+                getToMapValueMethod(configMember.member()).ifPresentOrElse(
+                    toRawInputConverter -> {
+                        builder.addStatement(
+                            "$N.$N($N($N.$N()))",
+                            builderVarName,
+                            configMember.member().methodName(),
+                            toRawInputConverter,
+                            baseConfigVarName,
+                            configMember.member().methodName()
+                        );
+                    },
+                    () -> errorConsumer.accept(
+                        String.format(
+                            Locale.US,
+                            "Expected a ToMapValue method as field type '%s' differs from input type '%s' of the config value",
+                            configMember.fieldType(),
+                            configMember.parameterType()
+                        ),
+                        configMember.member().method()
+                    )
+                );
+            }
+            }
+        );
+
+        builder.addStatement("return $N", builderVarName);
+
+        return builder.build();
+    }
+
+    @NotNull
+    private static Optional<String> getToMapValueMethod(ConfigParser.Member configMember) {
+        return Optional
+            .ofNullable(configMember.method().getAnnotation(Configuration.ToMapValue.class))
+            .map(i -> i.value().replace('#', '.'));
     }
 
     private static List<MethodSpec> defineConfigParameterSetters(
@@ -93,15 +191,18 @@ final class GenerateConfigurationBuilder {
         // if member -> get actual type by checking whatever the convert with method has
         return implMembers.stream()
             .filter(implMember -> implMember.member().isConfigParameter())
-            .map(implMember -> MethodSpec.methodBuilder(implMember.member().methodName())
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(TypeName.get(implMember.parameterType()), implMember.member().methodName())
-                .returns(builderClassName)
-                .addCode(CodeBlock.builder()
-                    .addStatement("this.$1N = $1N", implMember.member().methodName())
-                    .addStatement("return this")
-                    .build()
-                ).build()
+            .map(implMember -> {
+                    String methodName = implMember.member().methodName();
+                    return MethodSpec.methodBuilder(methodName)
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(TypeName.get(implMember.parameterType()), methodName)
+                        .returns(builderClassName)
+                        .addCode(CodeBlock.builder()
+                            .addStatement("this.$1N = $1N", methodName)
+                            .addStatement("return this")
+                            .build()
+                        ).build();
+                }
             )
             .collect(Collectors.toList());
     }

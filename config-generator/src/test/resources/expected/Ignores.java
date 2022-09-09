@@ -72,6 +72,12 @@ public final class MyConfigImpl implements Ignores.MyConfig {
             this.config = new HashMap<>();
         }
 
+        public static MyConfigImpl.Builder from(Ignores.MyConfig baseConfig) {
+            var builder = new MyConfigImpl.Builder();
+            builder.notIgnored(baseConfig.notIgnored());
+            return builder;
+        }
+
         public MyConfigImpl.Builder notIgnored(long notIgnored) {
             this.config.put("notIgnored", notIgnored);
             return this;
