@@ -1,2 +1,2 @@
-| targetNodeLabels     | List of String | from trainConfig   | yes      | Filter the named graph using the given targetNodeLabels.
+| targetNodeLabels  | List of String | from trainConfig   | yes      | Filter the named graph using the given targetNodeLabels.
 | relationshipTypes | List of String | from trainConfig   | yes      | Filter the named graph using the given relationship types.

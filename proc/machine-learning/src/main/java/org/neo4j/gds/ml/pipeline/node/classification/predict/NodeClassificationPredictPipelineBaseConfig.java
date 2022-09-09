@@ -49,7 +49,6 @@ public interface NodeClassificationPredictPipelineBaseConfig extends
     @Override
     @Configuration.Ignore
     default List<String> nodeLabels() {
-        // The graph is derived manually in the algo factory.
         return List.of(ElementProjection.PROJECT_ALL);
     }
 }

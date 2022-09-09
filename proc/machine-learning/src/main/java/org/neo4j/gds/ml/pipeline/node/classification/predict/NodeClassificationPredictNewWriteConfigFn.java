@@ -25,6 +25,9 @@ import org.neo4j.gds.executor.NewConfigFunction;
 
 import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPredictPipelineFilterUtil.generatePredictPipelineFilter;
 
+//This class is used to inside #NodeClassificationPipelineWriteProc.newConfigFunction to create NodeClassificationPredictPipelineWriteConfig for *Memory estimation* only.
+//It is needed because the shared #MemoryEstimationExecutor.computeEstimate takes predictConfig, which is not enough for NC.
+//We need to resolve train+predict for the correct graph filtering for accurate estimation.
 public class NodeClassificationPredictNewWriteConfigFn implements NewConfigFunction<NodeClassificationPredictPipelineWriteConfig> {
 
     private final ModelCatalog modelCatalog;
@@ -48,8 +51,8 @@ public class NodeClassificationPredictNewWriteConfigFn implements NewConfigFunct
                 .concurrency(basePredictConfig.concurrency())
                 .jobId(basePredictConfig.jobId())
                 .modelUser(basePredictConfig.modelUser())
-                .targetNodeLabels(combinedFilter.get(0))
-                .relationshipTypes(combinedFilter.get(1))
+                .targetNodeLabels(combinedFilter.nodeLabels())
+                .relationshipTypes(combinedFilter.relationshipTypes())
                 .predictedProbabilityProperty(basePredictConfig.predictedProbabilityProperty())
                 .writeProperty(basePredictConfig.writeProperty())
                 .writeConcurrency(basePredictConfig.writeConcurrency())

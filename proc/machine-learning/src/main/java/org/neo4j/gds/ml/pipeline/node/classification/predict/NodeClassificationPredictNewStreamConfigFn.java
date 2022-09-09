@@ -53,8 +53,8 @@ class NodeClassificationPredictNewStreamConfigFn implements NewConfigFunction<No
                 .jobId(basePredictConfig.jobId())
                 .modelUser(basePredictConfig.modelUser())
                 .includePredictedProbabilities(basePredictConfig.includePredictedProbabilities())
-                .targetNodeLabels(combinedFilter.get(0))
-                .relationshipTypes(combinedFilter.get(1))
+                .targetNodeLabels(combinedFilter.nodeLabels())
+                .relationshipTypes(combinedFilter.relationshipTypes())
                 .build();
         }
     }

@@ -13,15 +13,4 @@ ifeval::["{entity}" == "node"]
 | xref:common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]         | String      | n/a                    | no       | The {entity} property in the Neo4j database to which the {result} is written.
 endif::[]
 
-ifeval::["{entity}" == "relationship"]
-| writeRelationshipType                                         | String      | n/a                    | no       | The relationship type used to persist the computed relationships in the Neo4j database.
-| xref:common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]         | String      | n/a                    | no       | The {entity} property in the Neo4j database to which the {result} is written.
-endif::[]
-
-ifeval::["{entity}" == "source-target-pair"]
-| writeRelationshipType                                         | String      | n/a                    | no       | The relationship type used to persist the computed relationships in the Neo4j database.
-endif::[]
-
-ifeval::["{entity}" == "pregel"]
-| writeProperty                                                | String      | ""                      | yes      | The prefix used for all public properties in the PregelSchema.
-endif::[]
+| xref:common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]         | String      | n/a                    | no       | The node property in the Neo4j database to which the predicted property is written.
