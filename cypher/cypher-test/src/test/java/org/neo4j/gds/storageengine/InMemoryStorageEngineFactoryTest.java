@@ -35,7 +35,9 @@ class InMemoryStorageEngineFactoryTest {
     @EnableForNeo4jVersion(Neo4jVersion.V_4_4)
     @Test
     void allStorageEnginesHaveUniqueNames() {
-        var storageEngines = ServiceLoader.load(StorageEngineFactory.class).stream();
+        var storageEngines = ServiceLoader
+            .load(StorageEngineFactory.class, StorageEngineFactory.class.getClassLoader())
+            .stream();
 
         var names = storageEngines
             .filter(factory -> !factory.type().equals(AbstractInMemoryStorageEngineFactory.class))
