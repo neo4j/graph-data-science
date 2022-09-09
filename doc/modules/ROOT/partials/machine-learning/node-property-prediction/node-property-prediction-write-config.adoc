@@ -1,0 +1,16 @@
+ifeval::["{modelType}" != ""]
+| modelName                                                     | String      | n/a                    | no       | The name of a {modelType} model in the model catalog.
+endif::[]
+
+include::partial$/machine-learning/node-property-prediction/node-property-prediction-filtering.adoc[]
+
+| xref:common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer  | 4       | yes      | The number of concurrent threads used for running the algorithm.
+| xref:common-usage/running-algos.adoc#common-configuration-jobid[jobId]                         | String   | Generated internally | yes      | An ID that can be provided to more easily track the algorithm's progress.
+
+| xref:common-usage/running-algos.adoc#common-configuration-write-concurrency[writeConcurrency]   | Integer     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result to Neo4j.
+
+ifeval::["{entity}" == "node"]
+| xref:common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]         | String      | n/a                    | no       | The {entity} property in the Neo4j database to which the {result} is written.
+endif::[]
+
+| xref:common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]         | String      | n/a                    | no       | The node property in the Neo4j database to which the predicted property is written.

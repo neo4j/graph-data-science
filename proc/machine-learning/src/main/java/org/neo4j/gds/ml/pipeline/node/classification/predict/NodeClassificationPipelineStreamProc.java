@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.pipeline.node.classification.predict;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -30,6 +29,7 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -60,7 +60,7 @@ public class NodeClassificationPipelineStreamProc
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.stream", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
-    public Stream<NodeClassificationStreamResult> mutate(
+    public Stream<NodeClassificationStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -87,7 +87,8 @@ public class NodeClassificationPipelineStreamProc
             > computationResult
     ) {
         return runWithExceptionLogging("Graph streaming failed", () -> {
-            Graph graph = computationResult.graph();
+            var pipelineGraphFilter = computationResult.algorithm().nodePropertyStepFilter();
+            var graph = computationResult.graphStore().getGraph(pipelineGraphFilter.nodeLabels());
 
             var result = computationResult.result();
             var predictedClasses = result.predictedClasses();
@@ -124,7 +125,7 @@ public class NodeClassificationPipelineStreamProc
 
     @Override
     protected NodeClassificationPredictPipelineStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return NodeClassificationPredictPipelineStreamConfig.of(username, config);
+        return newConfigFunction().apply(username, config);
     }
 
     @Override
@@ -139,6 +140,12 @@ public class NodeClassificationPipelineStreamProc
         this.setModelCatalog(modelCatalog);
         return this;
     }
+
+    @Override
+    public NewConfigFunction<NodeClassificationPredictPipelineStreamConfig> newConfigFunction() {
+        return new NodeClassificationPredictNewStreamConfigFn(modelCatalog());
+    }
+
 
     @SuppressWarnings("unused")
     public static final class NodeClassificationStreamResult {

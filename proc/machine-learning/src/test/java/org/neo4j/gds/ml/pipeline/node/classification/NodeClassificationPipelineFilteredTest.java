@@ -26,16 +26,19 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineMutateProc;
+import org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineStreamProc;
 import org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineTrainProc;
 
 import java.util.List;
 import java.util.Map;
 
 @Neo4jModelCatalogExtension
-public class NodeClassificationPipelineFilteredTrainTest extends BaseProcTest {
+public class NodeClassificationPipelineFilteredTest extends BaseProcTest {
 
     private static final String GRAPH_NAME = "g";
 
@@ -71,6 +74,9 @@ public class NodeClassificationPipelineFilteredTrainTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(
             GraphProjectProc.class,
+            GraphStreamNodePropertiesProc.class,
+            NodeClassificationPipelineStreamProc.class,
+            NodeClassificationPipelineMutateProc.class,
             NodeClassificationPipelineCreateProc.class,
             NodeClassificationPipelineAddStepProcs.class,
             NodeClassificationPipelineAddTrainerMethodProcs.class,
@@ -94,7 +100,7 @@ public class NodeClassificationPipelineFilteredTrainTest extends BaseProcTest {
     }
 
     @Test
-    void trainWithTargetAndContextNodeLabels() {
+    void trainAndPredictWithTargetAndContextNodeLabels() {
         runQuery("CALL gds.beta.pipeline.nodeClassification.create('p')");
 
         runQuery("CALL gds.beta.pipeline.nodeClassification.addNodeProperty('p', 'degree', {" +
@@ -129,5 +135,52 @@ public class NodeClassificationPipelineFilteredTrainTest extends BaseProcTest {
         );
         //Score = 1 means the model is able to recover the perfect correlation between degree-class.
         //This implies the correct contextNodes have been used (for degree to be correct)
+
+        // this test identified a bug in the stream path.
+        // we need to make sure that the graph consisting of the targetNodeLabels (taken from the train or predict config) is used to map the ids to the id space of the graph store
+        assertCypherResult(
+            "CALL gds.beta.pipeline.nodeClassification.predict.stream('g', {" +
+            " modelName: 'model'," +
+            " includePredictedProbabilities: true" +
+            " })" +
+            "  YIELD nodeId, predictedClass",
+            List.of(
+                Map.of("nodeId", 0L, "predictedClass", 0L),
+                Map.of("nodeId", 1L, "predictedClass", 1L),
+                Map.of("nodeId", 2L, "predictedClass", 0L),
+                Map.of("nodeId", 3L, "predictedClass", 1L),
+                Map.of("nodeId", 4L, "predictedClass", 0L),
+                Map.of("nodeId", 5L, "predictedClass", 1L),
+                Map.of("nodeId", 6L, "predictedClass", 0L),
+                Map.of("nodeId", 7L, "predictedClass", 1L),
+                Map.of("nodeId", 8L, "predictedClass", 0L),
+                Map.of("nodeId", 9L, "predictedClass", 1L)
+            )
+        );
+        // this test identified a bug in the mutation path.
+        // generic code was doing computationResult.getGraph which gives incorrect graph during the updating of the graphStore
+        runQuery(
+            "CALL gds.beta.pipeline.nodeClassification.predict.mutate('g', {" +
+            " modelName: 'model'," +
+            " mutateProperty: 'predictedClass'" +
+            " })");
+        assertCypherResult(
+            "CALL gds.graph.nodeProperties.stream(" +
+            "   'g', " +
+            "   ['predictedClass']" +
+            ") YIELD nodeId, propertyValue",
+            List.of(
+                Map.of("nodeId", 0L, "propertyValue", 0L),
+                Map.of("nodeId", 1L, "propertyValue", 1L),
+                Map.of("nodeId", 2L, "propertyValue", 0L),
+                Map.of("nodeId", 3L, "propertyValue", 1L),
+                Map.of("nodeId", 4L, "propertyValue", 0L),
+                Map.of("nodeId", 5L, "propertyValue", 1L),
+                Map.of("nodeId", 6L, "propertyValue", 0L),
+                Map.of("nodeId", 7L, "propertyValue", 1L),
+                Map.of("nodeId", 8L, "propertyValue", 0L),
+                Map.of("nodeId", 9L, "propertyValue", 1L)
+            )
+        );
     }
 }

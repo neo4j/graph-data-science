@@ -20,8 +20,13 @@
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.core.CypherMapWrapper;
+
+import java.util.Collection;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -32,6 +37,12 @@ public interface NodeClassificationPredictPipelineStreamConfig
     @Value.Default
     default boolean includePredictedProbabilities() {
         return false;
+    }
+
+    @Override
+    @Configuration.Ignore
+    default Collection<NodeLabel> nodeLabelIdentifiers(GraphStore graphStore) {
+        return ElementTypeValidator.resolve(graphStore, targetNodeLabels());
     }
 
     static NodeClassificationPredictPipelineStreamConfig of(String username, CypherMapWrapper config) {

@@ -21,7 +21,9 @@ package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
+import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.MutatePropertyProc;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -30,6 +32,7 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.ml.pipeline.node.PredictMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -85,6 +88,16 @@ public class NodeClassificationPipelineMutateProc
     }
 
     @Override
+    public MutatePropertyComputationResultConsumer<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult, NodeClassificationPredictPipelineMutateConfig, PredictMutateResult> computationResultConsumer() {
+        return new MutatePropertyComputationResultConsumer<>(this::nodePropertyList, this::resultBuilder) {
+            @Override
+            protected Graph graphFromComputationResult(ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult, NodeClassificationPredictPipelineMutateConfig> computationResult) {
+                return computationResult.graphStore().getGraph(computationResult.algorithm().nodePropertyStepFilter().nodeLabels());
+            }
+        };
+    }
+
+    @Override
     protected List<NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult, NodeClassificationPredictPipelineMutateConfig> computationResult) {
         var config = computationResult.config();
         var mutateProperty = config.mutateProperty();
@@ -126,7 +139,12 @@ public class NodeClassificationPipelineMutateProc
 
     @Override
     protected NodeClassificationPredictPipelineMutateConfig newConfig(String username, CypherMapWrapper config) {
-        return NodeClassificationPredictPipelineMutateConfig.of(username, config);
+        return newConfigFunction().apply(username, config);
+    }
+
+    @Override
+    public NewConfigFunction<NodeClassificationPredictPipelineMutateConfig> newConfigFunction() {
+        return new NodeClassificationPredictNewMutateConfigFn(modelCatalog());
     }
 
     @Override

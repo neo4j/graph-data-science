@@ -77,7 +77,7 @@ public abstract class PredictPipelineExecutor<
         try {
             // we are not validating the size of the feature-input graph as not every nodePropertyStep needs relationships
             nodePropertyStepExecutor.executeNodePropertySteps(pipeline.nodePropertySteps());
-            pipeline.validateFeatureProperties(graphStore, config.nodeLabelIdentifiers(graphStore));
+            pipeline.validateFeatureProperties(graphStore, nodePropertyStepFilter.nodeLabels());
 
             var result = execute();
             progressTracker.endSubTask();
