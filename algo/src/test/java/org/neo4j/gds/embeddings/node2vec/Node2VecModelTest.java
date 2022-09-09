@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.ml.core.helper.FloatVectorTestUtils;
 
 import java.util.Random;
 import java.util.stream.LongStream;
@@ -80,9 +81,15 @@ class Node2VecModelTest {
         var trainResult = node2VecModel.train();
 
         // as the order of the randomWalks is not deterministic, we also have non-fixed losses
-        assertThat(trainResult.lossPerIteration()).hasSize(config.iterations());
+        assertThat(trainResult.lossPerIteration())
+            .hasSize(config.iterations())
+            .allMatch(loss -> loss > 0 && Double.isFinite(loss));
 
         var embeddings = trainResult.embeddings();
+
+        for (long idx = 0; idx < embeddings.size(); idx++) {
+            assertThat(FloatVectorTestUtils.notContainsNaN(embeddings.get(idx))).isTrue();
+        }
 
         double innerClusterSum = LongStream.range(0, numberOfClusters)
             .boxed()
