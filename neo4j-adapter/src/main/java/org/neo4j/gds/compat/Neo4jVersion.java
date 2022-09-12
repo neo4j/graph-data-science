@@ -30,7 +30,6 @@ public enum Neo4jVersion {
     V_4_4,
     V_4_4_9_drop10,
     V_4_4_10_drop10,
-    V_5_0_drop60,
     V_5_0_drop80,
     V_5_0_drop90;
 
@@ -45,8 +44,6 @@ public enum Neo4jVersion {
                 return "4.4.9-drop01.0";
             case V_4_4_10_drop10:
                 return "4.4.10-drop01.0";
-            case V_5_0_drop60:
-                return "5.0.0-drop06.0";
             case V_5_0_drop80:
                 return "5.0.0-drop08.0";
             case V_5_0_drop90:
@@ -91,10 +88,6 @@ public enum Neo4jVersion {
 
         if ("4.4.10-drop01.0".equals(version)) {
             return Neo4jVersion.V_4_4_10_drop10;
-        }
-
-        if ("5.0.0-drop06.0".equals(version)) {
-            return Neo4jVersion.V_5_0_drop60;
         }
 
         if ("5.0.0-drop08.0".equals(version)) {
