@@ -135,7 +135,7 @@ final class GenerateConfigurationBuilder {
         // this works with the assumption the builder has a setter method for each configValue method
         configImplMethods.stream().filter(memberDefinition -> memberDefinition.member().isConfigValue()).forEach(configMember -> {
             // This only catches class equivalence but not sub-classes or annotated classes
-            boolean typeDoesNotChange = configMember.fieldType().equals(configMember.parameterType());
+            boolean typeDoesNotChange = typeWithoutAnnotations(configMember.fieldType()).equals(typeWithoutAnnotations(configMember.parameterType()));
             if (typeDoesNotChange) {
                 builder.addStatement(
                     "$N.$N($N.$N())",
@@ -175,6 +175,13 @@ final class GenerateConfigurationBuilder {
         builder.addStatement("return $N", builderVarName);
 
         return builder.build();
+    }
+
+    private static String typeWithoutAnnotations(TypeMirror type) {
+        String[] typeParts = type.toString().split(" ");
+
+        // assuming annotations come first
+        return typeParts[typeParts.length - 1];
     }
 
     @NotNull

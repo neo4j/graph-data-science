@@ -42,7 +42,7 @@ public interface NullableFields {
     }
 
     // This is necessary as `@Nullable String` is seen as a different type as `String`
-    static String toInputString(@Nullable String parsedInput) {
+    static String toInputString(final @Nullable String parsedInput) {
         return parsedInput;
     }
 }
