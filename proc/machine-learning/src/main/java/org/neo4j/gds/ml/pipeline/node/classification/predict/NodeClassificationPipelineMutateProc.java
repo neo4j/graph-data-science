@@ -21,9 +21,7 @@ package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.MutatePropertyProc;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -85,16 +83,6 @@ public class NodeClassificationPipelineMutateProc
     ) {
         this.setModelCatalog(modelCatalog);
         return this;
-    }
-
-    @Override
-    public MutatePropertyComputationResultConsumer<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult, NodeClassificationPredictPipelineMutateConfig, PredictMutateResult> computationResultConsumer() {
-        return new MutatePropertyComputationResultConsumer<>(this::nodePropertyList, this::resultBuilder) {
-            @Override
-            protected Graph graphFromComputationResult(ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult, NodeClassificationPredictPipelineMutateConfig> computationResult) {
-                return computationResult.graphStore().getGraph(computationResult.algorithm().nodePropertyStepFilter().nodeLabels());
-            }
-        };
     }
 
     @Override

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.huge.FilteredNodePropertyValues;
@@ -55,7 +54,7 @@ public class MutatePropertyComputationResultConsumer<ALGO extends Algorithm<ALGO
         ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
         ExecutionContext executionContext
     ) {
-        var graph = graphFromComputationResult(computationResult);
+        var graph = computationResult.graph();
         MutatePropertyConfig mutatePropertyConfig = computationResult.config();
 
         final var nodeProperties = this.nodePropertyListFunction.apply(computationResult);
@@ -86,9 +85,5 @@ public class MutatePropertyComputationResultConsumer<ALGO extends Algorithm<ALGO
 
             resultBuilder.withNodePropertiesWritten(maybeTranslatedProperties.size() * computationResult.graph().nodeCount());
         }
-    }
-
-    protected Graph graphFromComputationResult(ComputationResult<ALGO,ALGO_RESULT,CONFIG> computationResult) {
-        return computationResult.graph();
     }
 }
