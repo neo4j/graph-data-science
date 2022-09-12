@@ -106,3 +106,99 @@ include::partial$/algorithms/alpha/filtered-node-similarity/filtered-node-simila
 |===
 ======
 ====
+
+[[algorithms-filtered-node-similarity-examples]]
+== Examples
+
+:algorithm-name: {algorithm}
+:graph-description: knowledge
+:image-file: node-similarity.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (alice:Person:Singer {name: 'Alice'}),
+  (bob:Person {name: 'Bob'}),
+  (carol:Person:Singer {name: 'Carol'}),
+  (dave:Person {name: 'Dave'}),
+  (eve:Person:Singer {name: 'Eve'}),
+  (guitar:Instrument {name: 'Guitar'}),
+  (synth:Instrument {name: 'Synthesizer'}),
+  (bongos:Instrument {name: 'Bongos'}),
+  (trumpet:Instrument {name: 'Trumpet'}),
+
+  (alice)-[:LIKES]->(guitar),
+  (alice)-[:LIKES]->(synth),
+  (alice)-[:LIKES {strength: 0.5}]->(bongos),
+  (bob)-[:LIKES]->(guitar),
+  (bob)-[:LIKES]->(synth),
+  (carol)-[:LIKES]->(bongos),
+  (dave)-[:LIKES]->(guitar),
+  (dave)-[:LIKES]->(synth),
+  (dave)-[:LIKES]->(bongos);
+----
+
+This bipartite graph has two node sets, Person nodes and Instrument nodes.
+Some of the Person nodes are also singers.
+The two node sets are connected via LIKES relationships.
+Each relationship starts at a Person node and ends at an Instrument node.
+
+The Filtered Node Similarity algorithm will only compute similarity for nodes that have a degree of at least 1.
+As the Eve node has no relationships, this node will not be compared against the other nodes.
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+.The following statement will project the graph and store it in the graph catalog.
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+    'myGraph',
+    ['Person', 'Instrument','Singer'],
+    {
+        LIKES: {
+            properties: {
+                strength: {
+                    property: 'strength',
+                    defaultValue: 1.0
+                }
+            }
+        }
+    }
+);
+----
+
+In the following examples we will demonstrate the usage of the Filtered Node Similarity algorithm on this graph.
+
+[[algorithms-filtered-node-similarity-examples-stream]]
+=== Stream
+
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
+We will use the `sourceFilter` to find the all similarities where the source node
+is additionally a singer.
+[role=query-example]
+--
+.The following will run the algorithm, and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.nodeSimilarity.filtered.stream('myGraph', {sourceNodeFilter:'Singer' } )
+YIELD node1, node2, similarity
+RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
+ORDER BY similarity DESCENDING, Person1, Person2
+----
+
+.Results
+[opts="header"]
+|===
+| Person1 | Person2 | similarity
+| "Alice" | "Dave"  | 1.0
+| "Alice" | "Bob"   | 0.6666666666666666
+| "Alice" | "Carol" | 0.3333333333333333
+| "Carol" | "Alice" | 0.3333333333333333
+| "Carol" | "Dave"  | 0.3333333333333333
+|===
+--
+
+Because Dave is not a singer, his most similar neighbors have not been output.
