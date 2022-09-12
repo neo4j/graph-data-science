@@ -1,3 +1,6 @@
+[caption='',title='{table-caption} {counter:table-number}. {nodeSimilaritySpecificConfigurationTableTitle}']
+[opts="header",cols="1,1,1m,1,4"]
+|===
 | similarityCutoff                                                                 | Float   | 1E-42   | yes      | Lower limit for the similarity score to be present in the result.
 Values must be between 0 and 1.
 | degreeCutoff                                                                     | Integer | 1       | yes      | Lower limit on the node degree for a node to be considered in the comparisons.
@@ -19,3 +22,4 @@ If unspecified, the algorithm runs unweighted.
 | similarityMetric
 | String | JACCARD       | yes      |  The metric used to compute similarity.
 Can be either `JACCARD` or `OVERLAP`.
+|===

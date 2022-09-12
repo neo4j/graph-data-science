@@ -1,0 +1,16 @@
+
+.Algorithm specific configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                             | Type                                 | Default | Optional | Description
+| sourceNodeFilter                 | Integer or List of Integer or String | n/a     | no
+| The source node filter to apply.
+Accepts a single node id,
+a List of node ids,
+or a single label.
+| targetNodeFilter                 | Integer or List of Integer or String | n/a     | no
+| The target node filter to apply.
+Accepts a single node id,
+a List of node ids,
+or a single label.
+|===
