@@ -19,12 +19,9 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.ml.pipeline.node.NodePropertyPredictPipelineBaseConfig;
-
-import java.util.List;
 
 @ValueClass
 @Configuration
@@ -34,16 +31,4 @@ public interface NodeClassificationPredictPipelineBaseConfig extends NodePropert
     @Configuration.Key("includePredictedProbabilities")
     boolean includePredictedProbabilities();
 
-    default List<String> targetNodeLabels() {return List.of();}
-
-    @Override
-    default List<String> relationshipTypes() {
-        return List.of();
-    }
-
-    @Override
-    @Configuration.Ignore
-    default List<String> nodeLabels() {
-        return List.of(ElementProjection.PROJECT_ALL);
-    }
 }

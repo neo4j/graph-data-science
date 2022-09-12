@@ -17,25 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.node.classification.predict;
+package org.neo4j.gds.ml.pipeline.node;
 
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.ml.models.Classifier;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.ml.models.BaseModelData;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPipelineBaseTrainConfig;
 
 import java.util.List;
 
-public class NodeClassificationPredictPipelineFilterUtil {
+public class NodePropertyPredictPipelineFilterUtil {
 
-    public static PredictGraphFilter generatePredictPipelineFilter(ModelCatalog modelCatalog, String modelName, String username, NodeClassificationPredictPipelineBaseConfig basePredictConfig) {
+    public static PredictGraphFilter generatePredictPipelineFilter(ModelCatalog modelCatalog, String modelName, String username, NodePropertyPredictPipelineBaseConfig basePredictConfig) {
+
         var trainedModel = modelCatalog.get(
             username,
             modelName,
-            Classifier.ClassifierData.class,
-            NodeClassificationPipelineTrainConfig.class,
-            NodeClassificationPipelineModelInfo.class);
+            BaseModelData.class,
+            NodePropertyPipelineBaseTrainConfig.class,
+            ToMapConvertible.class);
 
         var combinedTargetNodeLabels = basePredictConfig.targetNodeLabels().isEmpty() ? trainedModel.trainConfig().targetNodeLabels() : basePredictConfig.targetNodeLabels();
         var combinedRelationshipTypes = basePredictConfig.relationshipTypes().isEmpty() ? trainedModel.trainConfig().relationshipTypes() : basePredictConfig.relationshipTypes();

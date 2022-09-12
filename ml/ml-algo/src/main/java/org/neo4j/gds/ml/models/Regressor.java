@@ -25,9 +25,5 @@ public interface Regressor {
 
     RegressorData data();
 
-    interface RegressorData {
-        TrainingMethod trainerMethod();
-
-        int featureDimension();
-    }
+    interface RegressorData extends BaseModelData {}
 }

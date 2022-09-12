@@ -23,7 +23,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.NewConfigFunction;
 
-import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPredictPipelineFilterUtil.generatePredictPipelineFilter;
+import static org.neo4j.gds.ml.pipeline.node.NodePropertyPredictPipelineFilterUtil.generatePredictPipelineFilter;
 
 
 //This class is used to inside #NodeClassificationPipelineStreamProc.newConfigFunction to create NodeClassificationPredictPipelineStreamConfig for *Memory estimation* only.
