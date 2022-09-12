@@ -56,6 +56,8 @@ For more information on this algorithm, see:
 * https://dl.acm.org/doi/abs/10.1145/1963405.1963487[Efficient k-nearest neighbor graph construction for generic similarity measures]
 * https://en.wikipedia.org/wiki/Nearest_neighbor_graph[Nearest neighbor graph (Wikipedia)]
 
+It is also possible to apply filtering on the source and/or target nodes in the produced similarity pairs. You can consider the xref:algorithms/alpha/filtered-knn.adoc[filtered K-Nearest Neighbors] algorithm for this purpose.
+
 [NOTE]
 ====
 Running this algorithm requires sufficient available memory.
