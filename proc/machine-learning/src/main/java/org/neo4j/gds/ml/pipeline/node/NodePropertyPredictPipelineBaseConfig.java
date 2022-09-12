@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.pipeline.node;
 
-import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
@@ -48,7 +47,7 @@ public interface NodePropertyPredictPipelineBaseConfig extends
     @Override
     @Configuration.Ignore
     default List<String> nodeLabels() {
-        return List.of(ElementProjection.PROJECT_ALL);
+        return targetNodeLabels();
     }
 
     @Override
