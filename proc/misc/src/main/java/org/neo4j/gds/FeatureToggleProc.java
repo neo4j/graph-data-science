@@ -153,6 +153,21 @@ public final class FeatureToggleProc {
     }
 
     @Internal
+    @Procedure("gds.features.enableArrowDatabaseImport")
+    @Description("Enables support for importing Neo4j databases via the GDS Arrow Flight Server.")
+    public void enableArrowDatabaseImport(@Name(value = "useReorderedAdjacencyList") boolean useReorderedAdjacencyList) {
+        GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT.toggle(useReorderedAdjacencyList);
+    }
+
+    @Internal
+    @Procedure("gds.features.enableArrowDatabaseImport.reset")
+    @Description("Sets the default behaviour for enabling Neo4j database import via the GDS Arrow Flight Server. That value is returned.")
+    public Stream<FeatureState> resetEnableArrowDatabaseImport() {
+        GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT.reset();
+        return Stream.of(new FeatureState(GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT.isEnabled()));
+    }
+
+    @Internal
     @Procedure("gds.features.maxArrayLengthShift.reset")
     @Description("Set the value of the max array size before paging to the default. That value is returned.")
     public Stream<FeatureValue> resetMaxArrayLengthShift() {
