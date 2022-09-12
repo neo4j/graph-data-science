@@ -58,3 +58,51 @@ The node filter parameters accept one of the following:
 | a single label
 | `sourceNodeFilter: 'Person'`
 |===
+
+[[algorithms-filtered-node-similarity-syntax]]
+== Syntax
+
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.Filtered Node Similarity syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+.Run Filtered Node Similarity  in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.nodeSimilarity.filtered.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+  node1: Integer,
+  node2: Integer,
+  similarity: Float
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.General configuration for algorithm execution on a named graph.
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+|===
+
+:knnSpecificConfigurationTableTitle: Node Similarity specific configuration
+include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
+
+include::partial$/algorithms/alpha/filtered-node-similarity/filtered-node-similarity-specific-algo-config.adoc[]
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name       | Type    | Description
+| node1      | Integer | Node ID of the first node.
+| node2      | Integer | Node ID of the second node.
+| similarity | Float   | Similarity score for the two nodes.
+|===
+======
+====
