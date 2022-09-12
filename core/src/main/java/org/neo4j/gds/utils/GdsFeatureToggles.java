@@ -34,7 +34,8 @@ public enum GdsFeatureToggles {
     USE_BIT_ID_MAP(true),
     USE_SHARDED_ID_MAP(false),
     USE_UNCOMPRESSED_ADJACENCY_LIST(false),
-    USE_REORDERED_ADJACENCY_LIST(false);
+    USE_REORDERED_ADJACENCY_LIST(false),
+    ENABLE_ARROW_DATABASE_IMPORT(true);
 
     public boolean isEnabled() {
         return current.get();
