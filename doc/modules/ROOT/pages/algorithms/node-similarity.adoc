@@ -59,6 +59,8 @@ For more information on this algorithm, see:
 * https://en.wikipedia.org/wiki/Overlap_coefficient[The Overlap Coefficient (Wikipedia)].
 * https://en.wikipedia.org/wiki/Bipartite_graph[Bipartite graphs (Wikipedia)]
 
+It is also possible to apply filtering on the source and/or target nodes in the produced similarity pairs. You can consider the xref:algorithms/alpha/filtered-node-similarity.adoc[filtered Node Similarity] algorithm for this purpose.
+
 [NOTE]
 ====
 Running this algorithm requires sufficient available memory.
