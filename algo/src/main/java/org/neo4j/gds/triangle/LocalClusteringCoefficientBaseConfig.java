@@ -55,7 +55,7 @@ public interface LocalClusteringCoefficientBaseConfig extends AlgoBaseConfig, Co
         return "triangleCountProperty";
     }
 
-    static String validateProperty(String input) {
+    static @Nullable String validateProperty(String input) {
         return StringIdentifierValidations.validateNoWhiteCharacter(input, "triangleCountProperty");
     }
 

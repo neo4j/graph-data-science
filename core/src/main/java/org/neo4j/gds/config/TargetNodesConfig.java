@@ -35,6 +35,7 @@ public interface TargetNodesConfig {
 
     @Value.Default
     @Configuration.ConvertWith("org.neo4j.gds.config.NodeIdsParser#parseNodeIds")
+    @Configuration.ToMapValue("org.neo4j.gds.config.NodeIdsParser#nodeIdsToObject")
     default List<Long> targetNodes() {
         return Collections.emptyList();
     }

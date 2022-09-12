@@ -34,6 +34,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public interface LinkFeatureStepConfiguration {
 
     @Configuration.ConvertWith("fromObject")
+    @Configuration.ToMapValue("LinkFeatureStepConfiguration#toObject")
     List<String> nodeProperties();
 
     static List<String> fromObject(Object nodeProperties) {
@@ -64,6 +65,11 @@ public interface LinkFeatureStepConfiguration {
         }
 
         return ((List<String>) nodeProperties);
+    }
+
+    // necessary as input of ConvertWith type has to match ToMapValue type
+    static Object toObject(List<String> nodeProperties) {
+        return nodeProperties;
     }
 
     @Configuration.CollectKeys

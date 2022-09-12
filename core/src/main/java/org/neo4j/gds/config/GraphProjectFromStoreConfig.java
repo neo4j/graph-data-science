@@ -64,6 +64,7 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
     @Value.Default
     @Value.Parameter(false)
     @Configuration.ConvertWith("org.neo4j.gds.AbstractPropertyMappings#fromObject")
+    @Configuration.ToMapValue("org.neo4j.gds.AbstractPropertyMappings#toObject")
     default PropertyMappings nodeProperties() {
         return PropertyMappings.of();
     }
@@ -71,6 +72,7 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
     @Value.Default
     @Value.Parameter(false)
     @Configuration.ConvertWith("org.neo4j.gds.AbstractPropertyMappings#fromObject")
+    @Configuration.ToMapValue("org.neo4j.gds.AbstractPropertyMappings#toObject")
     default PropertyMappings relationshipProperties() {
         return PropertyMappings.of();
     }

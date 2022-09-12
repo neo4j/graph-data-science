@@ -39,6 +39,11 @@ public interface NodeIdsParser {
         return nodeIds;
     }
 
+    // necessary as input of ConvertWith type has to match ToMapValue type
+    static Object nodeIdsToObject(List<Long> sourceNodes) {
+        return sourceNodes;
+    }
+
     static Long parseNodeId(Object input) {
         if (input instanceof Node) {
             return ((Node) input).getId();
@@ -50,5 +55,10 @@ public interface NodeIdsParser {
             "Expected List of Nodes or Numbers for `sourceNodes`. Got %s.",
             input.getClass().getSimpleName()
         ));
+    }
+
+    // necessary as input of ConvertWith type has to match ToMapValue type
+    static Object nodeIdToObject(Long sourceNode) {
+        return sourceNode;
     }
 }

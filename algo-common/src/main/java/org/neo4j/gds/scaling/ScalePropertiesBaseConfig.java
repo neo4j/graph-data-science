@@ -34,6 +34,7 @@ import static org.neo4j.gds.AbstractPropertyMappings.fromObject;
 public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
 
     @Configuration.ConvertWith("parsePropertyNames")
+    @Configuration.ToMapValue("org.neo4j.gds.scaling.ScalePropertiesBaseConfig#nodePropertiesToObject")
     List<String> nodeProperties();
 
     @Configuration.ConvertWith("org.neo4j.gds.scaling.ScalarScaler.Variant#lookup")
@@ -47,5 +48,10 @@ public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
             .stream()
             .map(PropertyMapping::propertyKey)
             .collect(Collectors.toList());
+    }
+
+    // necessary as input of ConvertWith type has to match ToMapValue type
+    static Object nodePropertiesToObject(List<String> nodeProperties) {
+        return nodeProperties;
     }
 }

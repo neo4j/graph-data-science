@@ -35,6 +35,7 @@ public interface SourceNodeConfig extends NodeConfig {
     String SOURCE_NODE_KEY = "sourceNode";
 
     @Configuration.ConvertWith("org.neo4j.gds.config.SourceNodeConfig#parseSourceNodeId")
+    @Configuration.ToMapValue("org.neo4j.gds.config.NodeIdsParser#nodeIdToObject")
     long sourceNode();
 
     static long parseSourceNodeId(Object input) {
