@@ -74,6 +74,6 @@ public class LeidenStreamSpec implements AlgorithmSpec<Leiden, LeidenResult, Lei
     }
 
     protected NodePropertyValues nodeProperties(ComputationResult<Leiden, LeidenResult, LeidenStreamConfig> computationResult) {
-        return LeidenProc.nodeProperties(computationResult, UUID.randomUUID().toString());
+        return LeidenCompanion.leidenNodeProperties(computationResult, UUID.randomUUID().toString());
     }
 }
