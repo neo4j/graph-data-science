@@ -95,7 +95,7 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
         }
     }
 
-    public static Object toObject(AbstractPropertyMappings propertyMappings) {
+    public static Map<String, Object> toObject(AbstractPropertyMappings propertyMappings) {
         return propertyMappings.toObject(true);
     }
 

@@ -20,7 +20,6 @@
 package org.neo4j.gds.catalog;
 
 import org.assertj.core.api.AbstractBooleanAssert;
-import org.assertj.core.api.AbstractIterableAssert;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +48,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.neo4j.gds.assertj.AssertionsHelper.booleanAssertConsumer;
 import static org.neo4j.gds.assertj.AssertionsHelper.creationTimeAssertConsumer;
 import static org.neo4j.gds.assertj.AssertionsHelper.intAssertConsumer;
-import static org.neo4j.gds.assertj.AssertionsHelper.listAssertConsumer;
 import static org.neo4j.gds.assertj.AssertionsHelper.stringObjectMapAssertFactory;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -115,11 +113,8 @@ class GraphDropProcTest extends BaseProcTest {
                                     )
                                 )
                             )
-                            .hasEntrySatisfying(
-                                "relationshipProperties",
-                                listAssertConsumer(AbstractIterableAssert::isEmpty)
-                            )
-                            .hasEntrySatisfying("nodeProperties", listAssertConsumer(AbstractIterableAssert::isEmpty))
+                            .containsEntry("relationshipProperties", emptyMap())
+                            .containsEntry("nodeProperties", emptyMap())
                             .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
                             .hasEntrySatisfying(
                                 "validateRelationships",
