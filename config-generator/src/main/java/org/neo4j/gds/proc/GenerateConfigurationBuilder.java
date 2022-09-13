@@ -123,6 +123,7 @@ final class GenerateConfigurationBuilder {
     ) {
         var baseConfigVarName = names.newName("baseConfig");
         var builderVarName = names.newName("builder");
+        var lambdaVarName = names.newName("v");
 
         MethodSpec.Builder builder = MethodSpec
             .methodBuilder("from")
@@ -133,44 +134,60 @@ final class GenerateConfigurationBuilder {
         builder.addStatement("var $N = new $T()", builderVarName, builderClassName);
 
         // this works with the assumption the builder has a setter method for each configValue method
-        configImplMethods.stream().filter(memberDefinition -> memberDefinition.member().isConfigValue()).forEach(configMember -> {
-            // This only catches class equivalence but not sub-classes or annotated classes
-            boolean typeDoesNotChange = typeWithoutAnnotations(configMember.fieldType()).equals(typeWithoutAnnotations(configMember.parameterType()));
-            if (typeDoesNotChange) {
-                builder.addStatement(
-                    "$N.$N($N.$N())",
-                    builderVarName,
-                    configMember.member().methodName(),
-                    baseConfigVarName,
-                    configMember.member().methodName()
-                );
-            } else {
-                // Configuration.toMap method transforms parsed input back into raw input
-                // this is necessary as the builder only accepts the raw user input
-                getToMapValueMethod(configMember.member()).ifPresentOrElse(
-                    toRawInputConverter -> {
-                        builder.addStatement(
-                            "$N.$N($N($N.$N()))",
-                            builderVarName,
-                            configMember.member().methodName(),
-                            toRawInputConverter,
-                            baseConfigVarName,
-                            configMember.member().methodName()
-                        );
-                    },
-                    () -> errorConsumer.accept(
-                        String.format(
-                            Locale.US,
-                            "Expected a ToMapValue method as field type '%s' differs from input type '%s' of the config value",
-                            configMember.fieldType(),
-                            configMember.parameterType()
-                        ),
-                        configMember.member().method()
-                    )
-                );
-            }
-            }
-        );
+        configImplMethods
+            .stream()
+            .filter(memberDefinition -> memberDefinition.member().isConfigValue())
+            .forEach(configMember -> {
+                // This only catches class equivalence but not subclasses or annotated classes
+                boolean typeDoesNotChange = typeWithoutAnnotations(configMember.fieldType()).equals(
+                    typeWithoutAnnotations(configMember.parameterType()));
+                boolean isConverted = configMember
+                                          .member()
+                                          .method()
+                                          .getAnnotation(Configuration.ConvertWith.class) != null;
+                if (typeDoesNotChange && !isConverted) {
+                    builder.addStatement(
+                        "$1N.$2N($3N.$2N())",
+                        builderVarName,
+                        configMember.member().methodName(),
+                        baseConfigVarName
+                    );
+                } else {
+                    getToMapValueMethod(configMember.member()).ifPresentOrElse(
+                        toRawInputConverter -> {
+                            // Configuration.toMap method transforms parsed input back into raw input
+                            // this is necessary as the builder only accepts the raw user input
+                            if (isTypeOf(Optional.class, configMember.fieldType())) {
+                                builder.addStatement(
+                                    "$1N.$2N($3N.$2N().map($4N -> $5N($4N)))",
+                                    builderVarName,
+                                    configMember.member().methodName(),
+                                    baseConfigVarName,
+                                    lambdaVarName,
+                                    toRawInputConverter
+                                );
+                            } else {
+                                builder.addStatement(
+                                    "$1N.$2N($3N($4N.$2N()))",
+                                    builderVarName,
+                                    configMember.member().methodName(),
+                                    toRawInputConverter,
+                                    baseConfigVarName
+                                );
+                            }
+                        },
+                        () -> errorConsumer.accept(
+                            String.format(
+                                Locale.US,
+                                "Expected a ToMapValue method as field type '%s' differs from input type '%s' of the config value",
+                                configMember.fieldType(),
+                                configMember.parameterType()
+                            ),
+                            configMember.member().method()
+                        )
+                    );
+                }
+            });
 
         builder.addStatement("return $N", builderVarName);
 

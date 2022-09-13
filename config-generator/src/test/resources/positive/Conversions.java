@@ -52,6 +52,7 @@ public interface Conversions {
         int qualifiedMethod();
 
         @Configuration.ConvertWith("add42")
+        @Configuration.ToMapValue("positive.Conversions.MyConversion#remove42")
         String referenceTypeAsResult();
 
         static int toInt(String input) {
@@ -60,6 +61,10 @@ public interface Conversions {
 
         static String add42(String input) {
             return input + "42";
+        }
+
+        static String remove42(String input) {
+            return input.substring(0, input.length() - 2);
         }
     }
 }

@@ -116,7 +116,7 @@ public final class ConversionsConfig implements Conversions.MyConversion {
             builder.directMethod(String.valueOf(baseConfig.directMethod()));
             builder.inheritedMethod(String.valueOf(baseConfig.inheritedMethod()));
             builder.qualifiedMethod(String.valueOf(baseConfig.qualifiedMethod()));
-            builder.referenceTypeAsResult(baseConfig.referenceTypeAsResult());
+            builder.referenceTypeAsResult(positive.Conversions.MyConversion.remove42(baseConfig.referenceTypeAsResult()));
             return builder;
         }
 
