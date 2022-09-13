@@ -21,7 +21,10 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateProc;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsProc;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStreamProc;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteProc;
 
 import java.util.List;
 
@@ -36,6 +39,9 @@ class FilteredKnnDocTest extends SingleFileDocTestBase {
     protected List<Class<?>> procedures() {
         return List.of(
             FilteredKnnStreamProc.class,
+            FilteredKnnStatsProc.class,
+            FilteredKnnMutateProc.class,
+            FilteredKnnWriteProc.class,
             GraphProjectProc.class
         );
     }
