@@ -3,7 +3,8 @@
 :description: This chapter provides a brief introduction of the main concepts in the Neo4j Graph Data Science library.
 
 
-This library provides efficiently implemented, parallel versions of common graph algorithms for Neo4j, exposed as Cypher procedures.
+The Neo4j Graph Data Science (GDS) library provides efficiently implemented, parallel versions of common graph algorithms, exposed as Cypher procedures.
+Additionally, GDS includes machine learning pipelines to train predictive supervised models to classify nodes or predict missing relationships.
 
 
 [[introduction-algorithms]]
@@ -58,7 +59,7 @@ The algorithm will by default consider each node and/or relationship as equally 
 [[introduction-catalog]]
 == Graph Catalog
 
-In order to run the algorithms as efficiently as possible, the Neo4j Graph Data Science library uses a specialized graph format to represent the graph data.
+In order to run the algorithms as efficiently as possible, GDS uses a specialized graph format to represent the graph data.
 It is therefore necessary to load the graph data from the Neo4j database into an in memory graph catalog.
 The amount of data loaded can be controlled by so called graph projections, which also allow, for example, filtering on node labels and relationship types, among other options.
 
