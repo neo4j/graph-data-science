@@ -21,10 +21,8 @@ package org.neo4j.gds.leiden;
 
 import com.carrotsearch.hppc.LongLongHashMap;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -33,7 +31,6 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.DoubleAdder;
 
 //TODO: take care of potential issues w. self-loops
@@ -41,6 +38,7 @@ import java.util.concurrent.atomic.DoubleAdder;
 public class Leiden extends Algorithm<LeidenResult> {
 
     private final Graph rootGraph;
+    private final Orientation orientation;
 
     private final int maxIterations;
     private final double initialGamma;
@@ -68,6 +66,7 @@ public class Leiden extends Algorithm<LeidenResult> {
     ) {
         super(progressTracker);
         this.rootGraph = graph;
+        this.orientation = rootGraph.schema().isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
         this.maxIterations = maxIterations;
         this.initialGamma = initialGamma;
         this.theta = theta;
@@ -76,8 +75,9 @@ public class Leiden extends Algorithm<LeidenResult> {
         this.executorService = Pools.DEFAULT;
         this.concurrency = concurrency;
         this.dendrogramManager = new LeidenDendrogramManager(
-            graph.nodeCount(),
+            rootGraph,
             maxIterations,
+            concurrency,
             includeIntermediateCommunities
         );
 
@@ -88,89 +88,78 @@ public class Leiden extends Algorithm<LeidenResult> {
     @Override
     public LeidenResult compute() {
         var workingGraph = rootGraph;
-        var orientation = rootGraph.schema().isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
+        var nodeCount = workingGraph.nodeCount();
 
-        var nodeVolumes = HugeDoubleArray.newArray(workingGraph.nodeCount());
-        var communityVolumes = HugeDoubleArray.newArray(workingGraph.nodeCount());
+        var localMoveCommunities = LeidenUtils.createSingleNodeCommunities(nodeCount);
 
-        HugeLongArray partition = HugeLongArray.newArray(workingGraph.nodeCount());
-        partition.setAll(nodeId -> nodeId);
+        // volume -> the sum of the weights of a nodes outgoing relationships
+        var localMoveNodeVolumes = HugeDoubleArray.newArray(nodeCount);
+        // the sum of the node volume for all nodes in a community
+        var localMoveCommunityVolumes = HugeDoubleArray.newArray(nodeCount);
+        double modularityScaleCoefficient = initVolumes(localMoveNodeVolumes, localMoveCommunityVolumes, localMoveCommunities);
 
-        var communityCount = workingGraph.nodeCount();
-
-        boolean didConverge = false;
-
-        int iteration;
-
-        // move on with refinement -> aggregation -> local move again
-        HugeLongArray seedCommunities = HugeLongArray.newArray(rootGraph.nodeCount());
-        seedCommunities.setAll(v -> v);
-
-        double modularityScaleCoefficient = initVolumes(nodeVolumes, communityVolumes, seedCommunities);
         double gamma = this.initialGamma * modularityScaleCoefficient;
 
-        HugeLongArray currentDendrogram = null;
+        var communityCount = nodeCount;
+        HugeLongArray currentCommunities = null;
 
+        boolean didConverge = false;
+        int iteration;
         for (iteration = 0; iteration < maxIterations; iteration++) {
-
-            // 1. LOCAL MOVE PHASE - over the singleton partition
+            // 1. LOCAL MOVE PHASE - over the singleton localMoveCommunities
             var localMovePhase = LocalMovePhase.create(
                 workingGraph,
-                partition,
-                nodeVolumes,
-                communityVolumes,
+                localMoveCommunities,
+                localMoveNodeVolumes,
+                localMoveCommunityVolumes,
                 gamma,
                 communityCount
             );
-            var localMovePhasePartition = localMovePhase.run();
+            var communitiesCount = localMovePhase.run();
 
-            partition = localMovePhasePartition.communities();
-            communityVolumes = localMovePhasePartition.communityVolumes();
-
-            var communitiesCount = localMovePhasePartition.communityCount();
-            didConverge = communitiesCount == workingGraph.nodeCount();
-
-            if (localMovePhase.swaps == 0 || didConverge) {
+            didConverge = communitiesCount == workingGraph.nodeCount() || localMovePhase.swaps == 0;
+            if (didConverge) {
                 break;
             }
 
-            modularities[iteration] = ModularityComputer.modularity(
+            modularities[iteration] = ModularityComputer.compute(
                 workingGraph,
-                partition,
-                communityVolumes,
+                localMoveCommunities,
+                localMoveCommunityVolumes,
                 gamma,
                 modularityScaleCoefficient,
                 concurrency,
                 executorService
             );
+
             // 2 REFINE
             var refinementPhase = RefinementPhase.create(
                 workingGraph,
-                partition,
-                nodeVolumes,
-                communityVolumes,
+                localMoveCommunities,
+                localMoveNodeVolumes,
+                localMoveCommunityVolumes,
                 gamma,
                 theta,
                 seed
             );
-            var refinedPhasePartition = refinementPhase.run();
-            var refinedPartition = refinedPhasePartition.communities();
+            var refinementPhaseResult = refinementPhase.run();
+            var refinedCommunities = refinementPhaseResult.communities();
+            var refinedCommunityVolumes = refinementPhaseResult.communityVolumes();
 
-            var refinedCommunityVolumes = refinedPhasePartition.communityVolumes();
-            var dendrogramResult = buildDendrogram(workingGraph, currentDendrogram, refinedPartition);
-            currentDendrogram = dendrogramResult.dendrogram();
-            dendrogramManager.prepareNextLevel(iteration);
-            for (long v = 0; v < rootGraph.nodeCount(); v++) {
-                var currentRefinedCommunityId = currentDendrogram.get(v);
-                var actualCommunityId = partition.get(currentRefinedCommunityId);
-                dendrogramManager.set(v, actualCommunityId);
-            }
+            var dendrogramResult = dendrogramManager.setNextLevel(
+                workingGraph,
+                currentCommunities,
+                refinedCommunities,
+                localMoveCommunities,
+                iteration
+            );
+            currentCommunities = dendrogramResult.dendrogram();
 
             // 3 CREATE NEW GRAPH
             var graphAggregationPhase = new GraphAggregationPhase(
                 workingGraph,
-                orientation,
-                refinedPartition,
+                this.orientation,
+                refinedCommunities,
                 dendrogramResult.maxCommunityId(),
                 this.executorService,
                 this.concurrency,
@@ -181,19 +170,18 @@ public class Leiden extends Algorithm<LeidenResult> {
             // Post-aggregate step: MAINTAIN PARTITION
             var communityData = maintainPartition(
                 workingGraph,
-                partition,
+                localMoveCommunities,
                 refinedCommunityVolumes
             );
-            partition = communityData.seededCommunitiesForNextIteration;
-            communityVolumes = communityData.communityVolumes;
-            nodeVolumes = communityData.aggregatedNodeSeedVolume;
+            localMoveCommunities = communityData.seededCommunitiesForNextIteration;
+            localMoveCommunityVolumes = communityData.communityVolumes;
+            localMoveNodeVolumes = communityData.aggregatedNodeSeedVolume;
             communityCount = communityData.communityCount;
 
-            seedCommunities = dendrogramManager.getCurrent();
             modularity = modularities[iteration];
         }
         return LeidenResult.of(
-            seedCommunities,
+            dendrogramManager.getCurrent(),
             iteration,
             didConverge,
             dendrogramManager,
@@ -202,11 +190,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         );
     }
 
-    private double initVolumes(
-        HugeDoubleArray nodeVolumes,
-        HugeDoubleArray communityVolumes,
-        HugeLongArray seedCommunities
-    ) {
+    private double initVolumes(HugeDoubleArray nodeVolumes, HugeDoubleArray communityVolumes, HugeLongArray seedCommunities) {
         if (rootGraph.hasRelationshipProperty()) {
             ParallelUtil.parallelForEachNode(
                 rootGraph.nodeCount(),
@@ -234,46 +218,6 @@ public class Leiden extends Algorithm<LeidenResult> {
             });
             return 1.0 / rootGraph.relationshipCount();
         }
-    }
-
-    private DendrogramResult buildDendrogram(
-        Graph workingGraph,
-        @Nullable HugeLongArray previousIterationDendrogram,
-        HugeLongArray currentCommunities
-    ) {
-
-        assert workingGraph.nodeCount() == currentCommunities.size() : "The sizes of the graph and communities should match";
-
-        var dendrogram = HugeLongArray.newArray(rootGraph.nodeCount());
-        AtomicLong maxCommunityId = new AtomicLong(0L);
-        ParallelUtil.parallelForEachNode(rootGraph, concurrency, (nodeId) -> {
-            long prevId = previousIterationDendrogram == null
-                ? nodeId
-                : workingGraph.toMappedNodeId(previousIterationDendrogram.get(nodeId));
-
-            long communityId = currentCommunities.get(prevId);
-
-            boolean updatedMaxCurrentId;
-            do {
-                var currentMaxId = maxCommunityId.get();
-                if (communityId > currentMaxId) {
-                    updatedMaxCurrentId = maxCommunityId.compareAndSet(currentMaxId, communityId);
-                } else {
-                    updatedMaxCurrentId = true;
-                }
-            } while (!updatedMaxCurrentId);
-
-            dendrogram.set(nodeId, communityId);
-        });
-
-        return ImmutableDendrogramResult.of(maxCommunityId.get(), dendrogram);
-    }
-
-    @ValueClass
-    interface DendrogramResult {
-        long maxCommunityId();
-
-        HugeLongArray dendrogram();
     }
 
     static @NotNull CommunityData maintainPartition(

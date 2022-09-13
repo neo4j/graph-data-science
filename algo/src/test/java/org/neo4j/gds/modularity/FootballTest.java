@@ -26,18 +26,16 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.leiden.ModularityComputer;
 import org.neo4j.logging.Log;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,19 +44,36 @@ import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
 @GdlExtension
 class FootballTest {
 
-    private static final String[][] EXPECTED_SEED_COMMUNITIES = {new String[]{"a", "b"}, new String[]{"c", "e"}, new String[]{"d", "f"}};
-
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     public static final String GRAPH = TestGraphs.FOOTBALL_GRAPH;
     @Inject
     private TestGraph graph;
 
-    @Inject
-    private GraphStore graphStore;
-
-    @Inject
-    private IdFunction idFunction;
-
+    private static double alternativeCompute(Graph graph, HugeLongArray finalCommunities, double gamma) {
+        double modularity = 0d;
+        HugeDoubleArray sumOfEdges = HugeDoubleArray.newArray(graph.nodeCount());
+        HugeDoubleArray insideEdges = HugeDoubleArray.newArray(graph.nodeCount());
+        double coefficient = 1.0 / graph.relationshipCount();
+        graph.forEachNode(
+            nodeId -> {
+                long communityId = finalCommunities.get(nodeId);
+                graph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
+                    long tCommunityId = finalCommunities.get(t);
+                    if (communityId == tCommunityId)
+                        insideEdges.addTo(communityId, w);
+                    sumOfEdges.addTo(communityId, w);
+                    return true;
+                });
+                return true;
+            }
+        );
+        for (long community = 0; community < graph.nodeCount(); ++community) {
+            double ec = insideEdges.get(community);
+            double Kc = sumOfEdges.get(community);
+            modularity += (ec - Kc * Kc * gamma);
+        }
+        return modularity * coefficient;
+    }
 
     @ParameterizedTest
     @ValueSource(ints = {1, 2, 3})
@@ -71,12 +86,9 @@ class FootballTest {
                 return true;
             }
         );
-        double modularity2 = ModularityComputer.modularity(graph, communities, 1.0 / graph.relationshipCount());
+        double modularity2 = alternativeCompute(graph, communities, 1.0 / graph.relationshipCount());
         assertThat(modularity2).isCloseTo(modularity1, Offset.offset(0.0001));
-
     }
-
-
 
     @NotNull
     private ModularityOptimization compute(

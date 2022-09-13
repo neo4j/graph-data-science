@@ -96,7 +96,11 @@ final class LocalMovePhase {
 
     }
 
-    public Partition run() {
+    /**
+     *
+     * @return The new community count.
+     */
+    public long run() {
         // Use HugeAtomicBitSet instead of queue - gives better runtime.
         var nodesToVisit = new NodesToVisit(graph.nodeCount());
         
@@ -133,7 +137,7 @@ final class LocalMovePhase {
             });
         }
 
-        return new Partition(currentCommunities, communityVolumes, communityCount, -1);
+        return communityCount;
     }
 
     private long findBestCommunity(

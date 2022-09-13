@@ -70,8 +70,6 @@ class LocalMovePhaseTest {
 
     @Test
     void testLocalMovePhase() {
-        var seed = HugeLongArray.newArray(graph.nodeCount());
-        seed.setAll(nodeId -> nodeId);
 
         var nodeVolumes = HugeDoubleArray.newArray(graph.nodeCount());
         nodeVolumes.setAll(graph::degree);
@@ -80,16 +78,16 @@ class LocalMovePhaseTest {
 
         double gamma = 1.0 / graph.relationshipCount();
 
-        var localMovePhase = LocalMovePhase.create(
+        HugeLongArray communities = LeidenUtils.createSingleNodeCommunities(graph.nodeCount());
+        LocalMovePhase.create(
             graph,
-            HugeLongArray.of(0, 1, 2, 3, 4, 5, 6, 7),
+            communities,
             nodeVolumes,
             communityVolumes,
             gamma,
             graph.nodeCount()
-        );
+        ).run();
 
-        var communities = localMovePhase.run().communities();
 
         var communitiesMap = LongStream
             .range(0, 8)

@@ -36,33 +36,7 @@ public final class ModularityComputer {
 
     private ModularityComputer() {}
 
-    public static double modularity(Graph graph, HugeLongArray finalCommunities, double gamma) {
-        double modularity = 0d;
-        HugeDoubleArray sumOfEdges = HugeDoubleArray.newArray(graph.nodeCount());
-        HugeDoubleArray insideEdges = HugeDoubleArray.newArray(graph.nodeCount());
-        double coefficient = 1.0 / graph.relationshipCount();
-        graph.forEachNode(
-            nodeId -> {
-                long communityId = finalCommunities.get(nodeId);
-                graph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
-                    long tCommunityId = finalCommunities.get(t);
-                    if (communityId == tCommunityId)
-                        insideEdges.addTo(communityId, w);
-                    sumOfEdges.addTo(communityId, w);
-                    return true;
-                });
-                return true;
-            }
-        );
-        for (long community = 0; community < graph.nodeCount(); ++community) {
-            double ec = insideEdges.get(community);
-            double Kc = sumOfEdges.get(community);
-            modularity += (ec - Kc * Kc * gamma);
-        }
-        return modularity * coefficient;
-    }
-
-    static double modularity(
+    static double compute(
         Graph workingGraph,
         HugeLongArray communities,
         HugeDoubleArray communityVolumes,
@@ -94,15 +68,15 @@ public final class ModularityComputer {
             nodeStream ->
                 nodeStream
                     .mapToDouble(communityId -> {
-                        double oc = relationshipsOutsideCommunity.get(communityId);
-                        double Kc = communityVolumes.get(communityId);
-                        double ec = Kc - oc;
-                        return ec - Kc * Kc * gamma;
+                        double outsideRelationships = relationshipsOutsideCommunity.get(communityId);
+                        double totalRelationships = communityVolumes.get(communityId);
+                        double insideRelationships = totalRelationships - outsideRelationships;
+                        return insideRelationships - totalRelationships * totalRelationships * gamma;
                     })
                     .reduce(Double::sum)
                     .orElseThrow(() -> new RuntimeException("Error while computing modularity"))
         );
-        //we do not have the self-loops from  previous merges so we settle from calculating the outside edges between relationships
+        //we do not have the self-loops from previous merges, so we settle from calculating the outside edges between relationships
         //from that and the total sum of weights in communityVolumes we can calculate all inside edges
 
         return modularity * coefficient;

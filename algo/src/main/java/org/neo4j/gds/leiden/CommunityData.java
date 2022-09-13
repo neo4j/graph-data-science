@@ -29,7 +29,8 @@ public class CommunityData {
     final int communityCount;
 
     CommunityData(
-        HugeLongArray seededCommunitiesForNextIteration, HugeDoubleArray communityVolumes,
+        HugeLongArray seededCommunitiesForNextIteration,
+        HugeDoubleArray communityVolumes,
         HugeDoubleArray aggregatedNodeSeedVolume,
         int communityCount
     ) {

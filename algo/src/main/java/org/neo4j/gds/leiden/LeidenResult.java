@@ -31,7 +31,6 @@ public interface LeidenResult {
 
     HugeLongArray communities();
 
-
     int ranLevels();
 
     boolean didConverge();

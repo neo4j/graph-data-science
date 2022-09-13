@@ -19,35 +19,13 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
-class Partition {
-    private final HugeLongArray communities;
-    private final HugeDoubleArray communityVolumes;
-    private final long communityCount;
-    private final double modularity;
+ class LeidenUtils {
 
-    Partition(HugeLongArray communities, HugeDoubleArray communityVolumes, long communityCount, double modularity) {
-        this.communities = communities;
-        this.communityVolumes = communityVolumes;
-        this.communityCount = communityCount;
-        this.modularity = modularity;
-    }
-
-    HugeLongArray communities() {
-        return communities;
-    }
-
-    HugeDoubleArray communityVolumes() {
-        return communityVolumes;
-    }
-
-    long communityCount() {
-        return communityCount;
-    }
-
-    double modularity() {
-        return modularity;
+     static HugeLongArray createSingleNodeCommunities(long nodeCount){
+        var array=HugeLongArray.newArray(nodeCount);
+        array.setAll(v -> v);
+        return array;
     }
 }
