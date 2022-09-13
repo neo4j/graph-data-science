@@ -13,7 +13,7 @@ Cypher projections are primarily recommended for the development phase (see xref
 
 [NOTE]
 --
-There is also a way to generate a random graph, see xref:alpha-algorithms/graph-generation.adoc[Graph Generation] documentation for more details.
+There is also a way to generate a random graph, see xref:management-ops/projections/graph-generation.adoc[Graph Generation] documentation for more details.
 --
 
 [NOTE]
