@@ -30,6 +30,7 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -42,12 +43,31 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStreamNodePropertiesProc extends CatalogProc {
 
+    private List<String> nodeLabelParser(Object nodeLabels) {
+
+        if (nodeLabels instanceof Iterable) {
+            var nodeLabelsList = new ArrayList<String>();
+            for (Object item : (Iterable) nodeLabels) {
+                if (item instanceof String) {
+                    nodeLabelsList.add((String) item);
+                } else {
+                    throw new IllegalArgumentException("Type mismatch for nodeLabels: expected List<String> or String");
+                }
+            }
+            return nodeLabelsList;
+        } else if (nodeLabels instanceof String) {
+            return List.of((String) nodeLabels);
+        } else {
+            throw new IllegalArgumentException("Type mismatch for nodeLabels: expected List<String> or String");
+        }
+    }
+
     @Procedure(name = "gds.graph.streamNodeProperties", mode = READ)
     @Description("Streams the given node properties.")
     public Stream<PropertiesResult> streamProperties(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") List<String> nodeProperties,
-        @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
+        @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ProcPreconditions.check();
@@ -58,7 +78,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         GraphStreamNodePropertiesConfig config = GraphStreamNodePropertiesConfig.of(
             graphName,
             nodeProperties,
-            nodeLabels,
+            nodeLabelParser(nodeLabels),
             cypherConfig
         );
         // validation
@@ -66,7 +86,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         GraphStore graphStore = graphStoreFromCatalog(graphName, config).graphStore();
         config.validate(graphStore);
 
-       return streamNodeProperties(graphStore, config, PropertiesResult::new);
+        return streamNodeProperties(graphStore, config, PropertiesResult::new);
     }
 
     @Procedure(name = "gds.graph.streamNodeProperty", mode = READ)
@@ -74,7 +94,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
     public Stream<PropertyResult> streamProperty(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") String nodeProperty,
-        @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
+        @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ProcPreconditions.check();
@@ -85,7 +105,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         GraphStreamNodePropertiesConfig config = GraphStreamNodePropertiesConfig.of(
             graphName,
             List.of(nodeProperty),
-            nodeLabels,
+            nodeLabelParser(nodeLabels),
             cypherConfig
         );
         // validation

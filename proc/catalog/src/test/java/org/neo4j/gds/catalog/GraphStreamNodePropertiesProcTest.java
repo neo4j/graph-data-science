@@ -34,6 +34,9 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.IdentityPropertyValues;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.functions.AsNodeFunc;
 
 import java.util.Map;
@@ -48,6 +51,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     private static final String TEST_GRAPH_SAME_PROPERTIES = "testGraph";
     private static final String TEST_GRAPH_DIFFERENT_PROPERTIES = "testGraph2";
 
+    @Neo4jGraph
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:A {id: 0, nodeProp1: 0.0, nodeProp2: 42})" +
@@ -57,11 +61,13 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
         ", (e:B {id: 4, nodeProp1: 4.0, nodeProp2: 46})" +
         ", (f:B {id: 5, nodeProp1: 5.0, nodeProp2: 47})";
 
+    @Inject
+    IdFunction idFunction;
+
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(GraphProjectProc.class, GraphStreamNodePropertiesProc.class);
         registerFunctions(AsNodeFunc.class);
-        runQuery(DB_CYPHER);
 
         runQuery(GdsCypher.call(TEST_GRAPH_SAME_PROPERTIES)
             .graphProject()
@@ -154,6 +160,25 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
             map("id", 1L, "nodeProperty", "newNodeProp2", "propertyValue", 43L),
             map("id", 2L, "nodeProperty", "newNodeProp1", "propertyValue", 2D),
             map("id", 2L, "nodeProperty", "newNodeProp2", "propertyValue", 44L)
+        ));
+    }
+
+    @Test
+    void streamLoadedNodePropertiesForLabelAsString() {
+        String graphWriteQuery = formatWithLocale(
+            "CALL gds.graph.streamNodeProperties('%s', ['newNodeProp1', 'newNodeProp2'], 'A')" +
+            " YIELD nodeId, nodeProperty, propertyValue" +
+            " RETURN nodeId AS id, nodeProperty, propertyValue",
+            TEST_GRAPH_SAME_PROPERTIES
+        );
+
+        assertCypherResult(graphWriteQuery, asList(
+            map("id", idFunction.of("a"), "nodeProperty", "newNodeProp1", "propertyValue", 0D),
+            map("id", idFunction.of("a"), "nodeProperty", "newNodeProp2", "propertyValue", 42L),
+            map("id", idFunction.of("b"), "nodeProperty", "newNodeProp1", "propertyValue", 1D),
+            map("id", idFunction.of("b"), "nodeProperty", "newNodeProp2", "propertyValue", 43L),
+            map("id", idFunction.of("c"), "nodeProperty", "newNodeProp1", "propertyValue", 2D),
+            map("id", idFunction.of("c"), "nodeProperty", "newNodeProp2", "propertyValue", 44L)
         ));
     }
 
@@ -297,11 +322,25 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     @Test
     void shouldFailOnNonExistingNodePropertyForSpecificLabel() {
         assertError(
-            "CALL gds.graph.streamNodeProperty($graph, 'newNodeProp3', ['A'])",
+            "CALL gds.graph.streamNodeProperty($graph, 'newNodeProp3', 'A')",
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             "Expecting all specified node projections to have all given properties defined. " +
             "Could not find property key(s) ['newNodeProp3'] for label A. " +
             "Defined keys: ['newNodeProp1', 'newNodeProp2']"
+        );
+    }
+
+    @Test
+    void shouldFailForBadNodeLabels() {
+        assertError(
+            "CALL gds.graph.streamNodeProperty($graph, 'newNodeProp3', [['A']])",
+            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
+            "mismatch"
+        );
+        assertError(
+            "CALL gds.graph.streamNodeProperties($graph, ['newNodeProp3'], [['A']])",
+            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
+            "mismatch"
         );
     }
 }
