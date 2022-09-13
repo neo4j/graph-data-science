@@ -1,9 +1,6 @@
 [[appendix-a-graph-algos]]
 = Graph Algorithms
 
-include::partial$/algorithms/algorithm-tiers.adoc[]
-
-
 [[production-quality-tier]]
 == Production-quality tier
 

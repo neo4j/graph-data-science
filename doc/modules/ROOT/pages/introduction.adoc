@@ -7,6 +7,23 @@ The Neo4j Graph Data Science (GDS) library provides efficiently implemented, par
 Additionally, GDS includes machine learning pipelines to train predictive supervised models to classify nodes or predict missing relationships.
 
 
+[[introduction-tiers]]
+== API tiers
+
+The GDS API is made up of Cypher procedures and functions.
+Each of these exist in one of three tiers of maturity:
+
+* Production-quality
+** Indicates that the feature has been tested with regards to stability and scalability.
+** Features in this tier are prefixed with `gds.<operation>`.
+* Beta
+** Indicates that the feature is a candidate for the production-quality tier.
+** Features in this tier are prefixed with `gds.beta.<operation>`.
+* Alpha
+** Indicates that the feature is experimental and might be changed or removed at any time.
+** Features in this tier are prefixed with `gds.alpha.<operation>`.
+
+
 [[introduction-algorithms]]
 == Algorithms
 
