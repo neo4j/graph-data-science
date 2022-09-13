@@ -29,7 +29,7 @@ This chapter explains the available graph catalog operations.
 | xref:graph-project-cypher.adoc[gds.graph.project.cypher]                       | Adds a graph to the catalog using Cypher projection.
 | xref:graph-project-cypher-aggregation.adoc[gds.alpha.graph.project]            | Adds a graph to the catalog using Cypher Aggregation.
 | xref:graph-project-subgraph.adoc[gds.beta.graph.project.subgraph]              | Adds a graph to the catalog by filtering an existing graph using node and relationship predicates.
-| xref:algorithms/alpha/rwr.adoc[gds.alpha.graph.sample.rwr]                     | Creates a new graph projection by sampling using random walk with restarts.
+| xref:management-ops/projections/rwr.adoc[gds.alpha.graph.sample.rwr]           | Creates a new graph projection by sampling using random walk with restarts.
 | xref:management-ops/projections/graph-generation.adoc[gds.beta.graph.generate] | Creates a new graph projection by sampling using random walk with restarts.
 |===
 

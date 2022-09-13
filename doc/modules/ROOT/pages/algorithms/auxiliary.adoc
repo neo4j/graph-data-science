@@ -11,4 +11,4 @@ The Neo4j GDS library includes the following auxiliary procedures, grouped by qu
 ** xref:alpha-algorithms/scale-properties.adoc[Scale Properties]
 ** xref:alpha-algorithms/one-hot-encoding.adoc#algorithms-one-hot-encoding-sample[One Hot Encoding]
 ** xref:alpha-algorithms/split-relationships.adoc[Split Relationships]
-** xref:algorithms/alpha/rwr.adoc[Random Walk With Restarts Sampling]
+** xref:management-ops/projections/rwr.adoc[Random Walk With Restarts Sampling]

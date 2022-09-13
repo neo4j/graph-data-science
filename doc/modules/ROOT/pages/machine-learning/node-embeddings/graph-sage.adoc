@@ -43,7 +43,7 @@ When doing memory estimation of the training, the feature dimension is computed 
 
 Since training a GraphSAGE model may take a lot of time and memory on large graphs, it can be helpful to sample a smaller subgraph prior to training, and then training on that subgraph.
 The trained model can still be applied to predict embeddings on the full graph (or other graphs) since GraphSAGE is inductive.
-To sample a structurally representative subgraph, see xref:algorithms/alpha/rwr.adoc[Random walk with restarts sampling].
+To sample a structurally representative subgraph, see xref:management-ops/projections/rwr.adoc[Random walk with restarts sampling].
 
 
 === Usage in machine learning pipelines
