@@ -58,26 +58,44 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
     @Description("Writes the given node properties to an online Neo4j database.")
     public Stream<Result> writeNodeProperties(
         @Name(value = "graphName") String graphName,
-        @Name(value = "nodeProperties") List<String> nodeProperties,
-        @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
+        @Name(value = "nodeProperties") Object nodeProperties,
+        @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return writeNodeProperties(graphName, nodeProperties, nodeLabels, configuration, Optional.empty());
+        return writeNodeProperties(
+            graphName,
+            nodeProperties,
+            nodeLabels,
+            configuration,
+            Optional.empty()
+        );
     }
 
     @Procedure(name = "gds.graph.writeNodeProperties", mode = WRITE, deprecatedBy = "gds.graph.nodeProperties.write")
     @Description("Writes the given node properties to an online Neo4j database.")
     public Stream<Result> run(
         @Name(value = "graphName") String graphName,
-        @Name(value = "nodeProperties") List<String> nodeProperties,
-        @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
+        @Name(value = "nodeProperties") Object nodeProperties,
+        @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.nodeProperties.write`";
-        return writeNodeProperties(graphName, nodeProperties, nodeLabels, configuration, Optional.of(deprecationWarning));
+        return writeNodeProperties(
+            graphName,
+            nodeProperties,
+            nodeLabels,
+            configuration,
+            Optional.of(deprecationWarning)
+        );
     }
 
-    private Stream<Result> writeNodeProperties(String graphName, List<String> nodeProperties, List<String> nodeLabels, Map<String, Object> configuration, Optional<String> deprecationWarning) {
+    private Stream<Result> writeNodeProperties(
+        String graphName,
+        Object nodeProperties,
+        Object nodeLabels,
+        Map<String, Object> configuration,
+        Optional<String> deprecationWarning
+    ) {
         ProcPreconditions.check();
         validateGraphName(graphName);
 
@@ -114,7 +132,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         deprecationWarning.ifPresent(progressTracker::logWarning);
 
         // writing
-        Result.Builder builder = new Result.Builder(graphName, nodeProperties);
+        Result.Builder builder = new Result.Builder(graphName, config.nodeProperties());
         try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
             long propertiesWritten = runWithExceptionLogging(
                 "Node property writing failed",

@@ -17,11 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -34,20 +36,24 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface GraphRemoveNodePropertiesConfig extends BaseConfig, ConcurrencyConfig {
+public interface GraphDropNodePropertiesConfig extends BaseConfig, ConcurrencyConfig {
     @Configuration.Parameter
     Optional<String> graphName();
 
     @Configuration.Parameter
+    @Configuration.ConvertWith("org.neo4j.gds.catalog.GraphDropNodePropertiesConfig#parseNodeProperties")
     List<String> nodeProperties();
 
+    static List<String> parseNodeProperties(Object userInput) {
+        return UserInputAsStringOrListOfString.parse(userInput, "nodeProperties");
+    }
 
-    static GraphRemoveNodePropertiesConfig of(
+    static GraphDropNodePropertiesConfig of(
         String graphName,
-        List<String> nodeProperties,
+        Object nodeProperties,
         CypherMapWrapper config
     ) {
-        return new GraphRemoveNodePropertiesConfigImpl(
+        return new GraphDropNodePropertiesConfigImpl(
             Optional.of(graphName),
             nodeProperties,
             config

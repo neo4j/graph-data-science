@@ -23,7 +23,6 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphRemoveNodePropertiesConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -46,7 +45,7 @@ public class GraphDropNodePropertiesProc extends CatalogProc {
     @Description("Removes node properties from a projected graph.")
     public Stream<Result> dropNodeProperties(
         @Name(value = "graphName") String graphName,
-        @Name(value = "nodeProperties") List<String> nodeProperties,
+        @Name(value = "nodeProperties") @NotNull Object nodeProperties,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return dropNodeProperties(graphName, nodeProperties, configuration, Optional.empty());
@@ -56,16 +55,21 @@ public class GraphDropNodePropertiesProc extends CatalogProc {
     @Description("Removes node properties from a projected graph.")
     public Stream<Result> run(
         @Name(value = "graphName") String graphName,
-        @Name(value = "nodeProperties") List<String> nodeProperties,
+        @Name(value = "nodeProperties") @NotNull Object nodeProperties,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.nodeProperties.drop`";
-        return dropNodeProperties(graphName, nodeProperties, configuration, Optional.of(deprecationWarning));
+        return dropNodeProperties(
+            graphName,
+            nodeProperties,
+            configuration,
+            Optional.of(deprecationWarning)
+        );
     }
 
     private Stream<Result> dropNodeProperties(
         String graphName,
-        List<String> nodeProperties,
+        Object nodeProperties,
         Map<String, Object> configuration,
         Optional<String> deprecationWarning
     ) {
@@ -74,7 +78,7 @@ public class GraphDropNodePropertiesProc extends CatalogProc {
 
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        GraphRemoveNodePropertiesConfig config = GraphRemoveNodePropertiesConfig.of(
+        GraphDropNodePropertiesConfig config = GraphDropNodePropertiesConfig.of(
             graphName,
             nodeProperties,
             cypherConfig
@@ -103,13 +107,13 @@ public class GraphDropNodePropertiesProc extends CatalogProc {
             () -> dropNodeProperties(graphStore, config, progressTracker)
         );
         // result
-        return Stream.of(new Result(graphName, nodeProperties, propertiesRemoved));
+        return Stream.of(new Result(graphName, config.nodeProperties(), propertiesRemoved));
     }
 
     @NotNull
     private Long dropNodeProperties(
         GraphStore graphStore,
-        GraphRemoveNodePropertiesConfig config,
+        GraphDropNodePropertiesConfig config,
         TaskProgressTracker progressTracker
     ) {
         var removedPropertiesCount = new MutableLong(0);
