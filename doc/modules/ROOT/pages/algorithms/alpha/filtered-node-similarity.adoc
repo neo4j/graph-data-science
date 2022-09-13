@@ -5,7 +5,7 @@
 
 :entity: relationship
 :result: similarity score
-:algorithm: Filtered K-Nearest Neighbors
+:algorithm: Filtered Node Similarity
 
 include::partial$/algorithms/alpha/alpha-note.adoc[]
 
@@ -266,7 +266,7 @@ include::partial$/algorithms/shared/examples-intro.adoc[]
 ----
 CREATE
   (alice:Person:Singer {name: 'Alice'}),
-  (bob:Person {name: 'Bob'}),
+  (bob:Person:Singer {name: 'Bob'}),
   (carol:Person:Singer {name: 'Carol'}),
   (dave:Person {name: 'Dave'}),
   (eve:Person:Singer {name: 'Eve'}),
@@ -291,8 +291,7 @@ Some of the Person nodes are also singers.
 The two node sets are connected via LIKES relationships.
 Each relationship starts at a Person node and ends at an Instrument node.
 
-The Filtered Node Similarity algorithm will only compute similarity for nodes that have a degree of at least 1.
-As the Eve node has no relationships, this node will not be compared against the other nodes.
+The Filtered Node Similarity algorithm will only compute similarity for nodes that have a degree of at least 1. Eve hence shall not be included from the results as her degree is zero.
 
 include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
@@ -315,21 +314,47 @@ CALL gds.graph.project(
 );
 ----
 
-In the following examples we will demonstrate the usage of the Filtered Node Similarity algorithm on this graph.
+In the following examples we will demonstrate the usage of the Filtered Node Similarity algorithm on this graph. In particular, we will apply the  `sourceNodeFilter`  and `targetNodeFilter`  filters to limit our similarity search to consider only Person nodes having the Singer label in addition.
 
+[[algorithms-filtered-node-similarity-examples-memory]]
+
+=== Memory Estimation
+
+:mode: write
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.nodeSimilarity.filtered.write.estimate('myGraph', {
+    writeRelationshipType: 'SIMILAR',
+    writeProperty: 'score',
+    sourceNodeFilter:'Singer' ,
+    targetNodeFilter:'Singer'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 9         | 9                 | 2528     | 2744     | "[2528 Bytes \... 2744 Bytes]"
+|===
+--
 [[algorithms-filtered-node-similarity-examples-stream]]
 === Stream
 
 include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
-We will use the `sourceFilter` to find the all similarities where the source node
-is additionally a singer.
 [role=query-example]
 --
-.The following will run the algorithm, and stream results:
+.The following will run the algorithm, and stream the results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.nodeSimilarity.filtered.stream('myGraph', {sourceNodeFilter:'Singer' } )
+CALL gds.alpha.nodeSimilarity.filtered.stream('myGraph', {sourceNodeFilter:'Singer' , targetNodeFilter:'Singer' } )
 YIELD node1, node2, similarity
 RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
 ORDER BY similarity DESCENDING, Person1, Person2
@@ -339,12 +364,109 @@ ORDER BY similarity DESCENDING, Person1, Person2
 [opts="header"]
 |===
 | Person1 | Person2 | similarity
-| "Alice" | "Dave"  | 1.0
 | "Alice" | "Bob"   | 0.6666666666666666
+| "Bob"   | "Alice" | 0.6666666666666666
 | "Alice" | "Carol" | 0.3333333333333333
 | "Carol" | "Alice" | 0.3333333333333333
-| "Carol" | "Dave"  | 0.3333333333333333
+|===
+--
+[[algorithms-filtered-node-similarity-examples-stats]]
+=== Stats
+
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the Node Similarity algorithm  with the specified filters sand return the result in form of statistical and measurement values
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.nodeSimilarity.filtered.stats('myGraph', {sourceNodeFilter:'Singer' , targetNodeFilter:'Singer' } )
+YIELD nodesCompared, similarityPairs
+----
+.Results
+[opts="header",cols="2"]
+|===
+| nodesCompared | similarityPairs
+| 3             | 4
 |===
 --
 
-Because Dave is not a singer, his most similar neighbors have not been output.
+[[algorithms-filtered-node-similarity-examples-mutate]]
+=== Mutate
+
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm, and write back results to the in-memory graph:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.nodeSimilarity.filtered.mutate('myGraph',{
+    mutateRelationshipType: 'SIMILAR',
+    mutateProperty: 'score',
+    sourceNodeFilter:'Singer',
+    targetNodeFilter:'Singer'
+})
+
+YIELD nodesCompared, relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodesCompared | relationshipsWritten
+| 3            | 4
+|===
+--
+
+As can be seen in the results, the number of created relationships is the same as the number of rows in the streaming example.
+
+[NOTE]
+====
+The relationships that are produced by the mutation are always directed, even if the input graph is undirected.
+If `a -> b` is topK for `a` and symmetrically `b -> a` is topK for `b` (or both `a -> b` and `b -> a` are topN), it appears as though an undirected relationship is produced.
+However, they are just two directed relationships that have been independently produced.
+====
+
+[[algorithms-node-similarity-examples-write]]
+=== Write
+
+The `write` execution mode for each pair of nodes creates a relationship with their similarity score as a property to the Neo4j database.
+The type of the new relationship is specified using the mandatory configuration parameter `writeRelationshipType`.
+The name of the new property is specified using the mandatory configuration parameter `writeProperty`.
+The result is a single summary row, similar to `stats`, but with some additional metrics.
+
+For more details on the `write` mode in general, see xref:common-usage/running-algos.adoc#running-algos-write[Write].
+
+[role=query-example]
+--
+.The following will run the algorithm, and write back results:
+[source,cypher,role=noplay]
+----
+CALL gds.alpha.nodeSimilarity.filtered.write('myGraph',{
+    writeRelationshipType: 'SIMILAR',
+    writeProperty: 'score',
+    sourceNodeFilter:'Singer',
+    targetNodeFilter:'Singer'
+})
+YIELD nodesCompared, relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodesCompared | relationshipsWritten
+| 3             | 4
+|===
+--
+
+As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
+
+[NOTE]
+====
+The relationships that are written are always directed, even if the input graph is undirected.
+If `a -> b` is topK for `a` and symmetrically `b -> a` is topK for `b` (or both `a -> b` and `b -> a` are topN), it appears as though an undirected relationship is written.
+However, they are just two directed relationships that have been independently written.
+====
+
+
