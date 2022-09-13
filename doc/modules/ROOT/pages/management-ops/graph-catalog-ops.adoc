@@ -20,7 +20,6 @@ When Neo4j is restarted, graphs stored in the catalog are lost.
 
 This chapter explains the available graph catalog operations.
 
-[[table-proc]]
 [opts=header,cols="1m,1"]
 |===
 | Name                                                                          | Description
