@@ -24,9 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.InspectableTestProgressTracker;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
@@ -37,7 +35,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.ml.pipeline.ImmutablePipelineGraphFilter;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
@@ -66,6 +63,7 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
                         ", (n2:N {a: 3.0, b: 1.5, c: 1})" +
                         ", (n3:N {a: 0.0, b: 2.8, c: 1})" +
                         ", (n4:N {a: 1.0, b: 0.9, c: 1})" +
+                        ", (m1:M {a: 1.0, b: 0.9, c: 1})" +
                         ", (n1)-[:T]->(n2)" +
                         ", (n3)-[:T]->(n4)" +
                         ", (n1)-[:T]->(n3)" +
@@ -81,7 +79,7 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
         );
         String createQuery = GdsCypher.call(GRAPH_NAME)
             .graphProject()
-            .withNodeLabel("N")
+            .withNodeLabels("N", "M")
             .withRelationshipType("T", Orientation.UNDIRECTED)
             .withNodeProperties(List.of("a", "b", "c"), DefaultValue.DEFAULT)
             .yields();
@@ -98,6 +96,8 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
             var config = NodeRegressionPredictPipelineBaseConfigImpl.builder()
                 .modelUser("")
                 .modelName("model")
+                .targetNodeLabels(List.of("N"))
+                .relationshipTypes(List.of("T"))
                 .graphName(GRAPH_NAME)
                 .build();
 
@@ -117,11 +117,7 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
                 caller.executionContext(),
                 graphStore,
                 ProgressTracker.NULL_TRACKER,
-                createModelData(weights, bias),
-                ImmutablePipelineGraphFilter.builder()
-                    .nodeLabels(List.of(NodeLabel.of("N")))
-                    .relationshipTypes(List.of(RelationshipType.of("T")))
-                    .build()
+                createModelData(weights, bias)
             ).compute();
 
             assertThat(graphStore.schema()).isEqualTo(expectedSchema);
@@ -135,6 +131,8 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
             .modelUser("")
             .modelName("model")
             .graphName(GRAPH_NAME)
+            .targetNodeLabels(List.of("N"))
+            .relationshipTypes(List.of("T"))
             .build();
 
         var pipeline = NodePropertyPredictPipeline.from(
@@ -167,11 +165,7 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
                 caller.executionContext(),
                 graphStore,
                 progressTracker,
-                modelData,
-                ImmutablePipelineGraphFilter.builder()
-                    .nodeLabels(List.of(NodeLabel.of("N")))
-                    .relationshipTypes(List.of(RelationshipType.of("T")))
-                    .build()
+                modelData
             );
 
             pipelineExecutor.compute();
@@ -204,6 +198,8 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
                 .modelUser("")
                 .modelName("model")
                 .graphName(GRAPH_NAME)
+                .targetNodeLabels(List.of("N"))
+                .relationshipTypes(List.of("T"))
                 .build();
 
             var pipeline = NodePropertyPredictPipeline.from(
@@ -221,11 +217,7 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
                 caller.executionContext(),
                 graphStore,
                 ProgressTracker.NULL_TRACKER,
-                createModelData(manyWeights, bias),
-                ImmutablePipelineGraphFilter.builder()
-                    .nodeLabels(List.of(NodeLabel.of("N")))
-                    .relationshipTypes(List.of(RelationshipType.of("T")))
-                    .build()
+                createModelData(manyWeights, bias)
             );
 
             assertThatThrownBy(() -> pipelineExecutor.compute().toArray())

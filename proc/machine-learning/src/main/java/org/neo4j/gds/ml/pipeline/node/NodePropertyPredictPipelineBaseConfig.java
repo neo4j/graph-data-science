@@ -19,15 +19,11 @@
  */
 package org.neo4j.gds.ml.pipeline.node;
 
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.model.ModelConfig;
 
-import java.util.Collection;
 import java.util.List;
 
 @Configuration
@@ -49,11 +45,4 @@ public interface NodePropertyPredictPipelineBaseConfig extends
     default List<String> nodeLabels() {
         return targetNodeLabels();
     }
-
-    @Override
-    @Configuration.Ignore
-    default Collection<NodeLabel> nodeLabelIdentifiers(GraphStore graphStore) {
-        return ElementTypeValidator.resolve(graphStore, targetNodeLabels());
-    }
-
 }

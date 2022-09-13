@@ -33,8 +33,6 @@ import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
 
-import static org.neo4j.gds.ml.pipeline.node.NodePipelinePredictGraphFilterUtil.generatePredictGraphFilter;
-
 public class NodeClassificationPredictPipelineAlgorithmFactory
     <CONFIG extends NodeClassificationPredictPipelineBaseConfig>
     extends GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, CONFIG>
@@ -78,11 +76,7 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
         );
         var nodeClassificationPipeline = model.customInfo().pipeline();
         var classIdMap = LocalIdMap.of(model.customInfo().classes());
-        var predictGraphFilter = generatePredictGraphFilter(
-            graphStore,
-            configuration,
-            model.trainConfig()
-        );
+
         return new NodeClassificationPredictPipelineExecutor(
             nodeClassificationPipeline,
             configuration,
@@ -90,8 +84,7 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
             graphStore,
             progressTracker,
             model.data(),
-            classIdMap,
-            predictGraphFilter
+            classIdMap
         );
     }
 

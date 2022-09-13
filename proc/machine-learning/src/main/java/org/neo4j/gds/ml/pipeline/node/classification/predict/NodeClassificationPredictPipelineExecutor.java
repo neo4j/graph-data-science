@@ -37,6 +37,7 @@ import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.nodeClassification.NodeClassificationPredict;
+import org.neo4j.gds.ml.pipeline.ImmutablePipelineGraphFilter;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineGraphFilter;
 import org.neo4j.gds.ml.pipeline.PredictPipelineExecutor;
@@ -67,13 +68,15 @@ public class NodeClassificationPredictPipelineExecutor extends PredictPipelineEx
         GraphStore graphStore,
         ProgressTracker progressTracker,
         Classifier.ClassifierData modelData,
-        LocalIdMap classIdMap,
-        PipelineGraphFilter predictGraphFilter
+        LocalIdMap classIdMap
     ) {
         super(pipeline, config, executionContext, graphStore, progressTracker);
         this.modelData = modelData;
         this.classIdMap = classIdMap;
-        this.predictGraphFilter = predictGraphFilter;
+        this.predictGraphFilter = ImmutablePipelineGraphFilter.builder()
+            .nodeLabels(config.nodeLabelIdentifiers(graphStore))
+            .relationshipTypes(config.internalRelationshipTypes(graphStore))
+            .build();
     }
 
     public static Task progressTask(String taskName, NodePropertyPredictPipeline pipeline, GraphStore graphStore) {

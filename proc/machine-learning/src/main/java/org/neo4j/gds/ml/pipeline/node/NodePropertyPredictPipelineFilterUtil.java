@@ -27,19 +27,30 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPipelineBaseTrainConfi
 
 import java.util.List;
 
-public class NodePropertyPredictPipelineFilterUtil {
+public final class NodePropertyPredictPipelineFilterUtil {
 
-    public static PredictGraphFilter generatePredictPipelineFilter(ModelCatalog modelCatalog, String modelName, String username, NodePropertyPredictPipelineBaseConfig basePredictConfig) {
+    private NodePropertyPredictPipelineFilterUtil() {}
 
+    public static PredictGraphFilter generatePredictPipelineFilter(
+        ModelCatalog modelCatalog,
+        String modelName,
+        String username,
+        NodePropertyPredictPipelineBaseConfig basePredictConfig
+    ) {
         var trainedModel = modelCatalog.get(
             username,
             modelName,
             BaseModelData.class,
             NodePropertyPipelineBaseTrainConfig.class,
-            ToMapConvertible.class);
+            ToMapConvertible.class
+        );
 
-        var combinedTargetNodeLabels = basePredictConfig.targetNodeLabels().isEmpty() ? trainedModel.trainConfig().targetNodeLabels() : basePredictConfig.targetNodeLabels();
-        var combinedRelationshipTypes = basePredictConfig.relationshipTypes().isEmpty() ? trainedModel.trainConfig().relationshipTypes() : basePredictConfig.relationshipTypes();
+        var combinedTargetNodeLabels = basePredictConfig.targetNodeLabels().isEmpty() ? trainedModel
+            .trainConfig()
+            .targetNodeLabels() : basePredictConfig.targetNodeLabels();
+        var combinedRelationshipTypes = basePredictConfig.relationshipTypes().isEmpty() ? trainedModel
+            .trainConfig()
+            .relationshipTypes() : basePredictConfig.relationshipTypes();
         return ImmutablePredictGraphFilter.builder()
             .nodeLabels(combinedTargetNodeLabels)
             .relationshipTypes(combinedRelationshipTypes)
@@ -49,6 +60,7 @@ public class NodePropertyPredictPipelineFilterUtil {
     @ValueClass
     public interface PredictGraphFilter {
         List<String> nodeLabels();
+
         List<String> relationshipTypes();
     }
 
