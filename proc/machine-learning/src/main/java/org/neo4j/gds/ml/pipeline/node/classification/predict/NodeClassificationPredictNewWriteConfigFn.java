@@ -45,17 +45,9 @@ public class NodeClassificationPredictNewWriteConfigFn implements NewConfigFunct
         } else {
             var combinedFilter = generatePredictPipelineFilter(modelCatalog, modelName.get(), username, basePredictConfig);
 
-            return NodeClassificationPredictPipelineWriteConfigImpl.builder()
-                .graphName(basePredictConfig.graphName())
-                .modelName(modelName.get())
-                .concurrency(basePredictConfig.concurrency())
-                .jobId(basePredictConfig.jobId())
-                .modelUser(basePredictConfig.modelUser())
+            return NodeClassificationPredictPipelineWriteConfigImpl.Builder.from(basePredictConfig)
                 .targetNodeLabels(combinedFilter.nodeLabels())
                 .relationshipTypes(combinedFilter.relationshipTypes())
-                .predictedProbabilityProperty(basePredictConfig.predictedProbabilityProperty())
-                .writeProperty(basePredictConfig.writeProperty())
-                .writeConcurrency(basePredictConfig.writeConcurrency())
                 .build();
         }
     }

@@ -43,18 +43,9 @@ class NodeRegressionPredictNewMutateConfigFn implements NewConfigFunction<NodeRe
         } else {
             var combinedFilter = generatePredictPipelineFilter(modelCatalog, modelName.get(), username, basePredictConfig);
 
-            // TODO generate a ConfigImpl.Builder.from(Config base)
-            return NodeRegressionPredictPipelineMutateConfigImpl.builder()
-                .graphName(basePredictConfig.graphName())
-                .modelName(basePredictConfig.modelName())
-                .concurrency(basePredictConfig.concurrency())
-                .jobId(basePredictConfig.jobId())
-                .modelUser(basePredictConfig.modelUser())
-                .sudo(basePredictConfig.sudo())
-                .usernameOverride(basePredictConfig.usernameOverride())
+            return NodeRegressionPredictPipelineMutateConfigImpl.Builder.from(basePredictConfig)
                 .targetNodeLabels(combinedFilter.nodeLabels())
                 .relationshipTypes(combinedFilter.relationshipTypes())
-                .mutateProperty(basePredictConfig.mutateProperty())
                 .build();
         }
     }
