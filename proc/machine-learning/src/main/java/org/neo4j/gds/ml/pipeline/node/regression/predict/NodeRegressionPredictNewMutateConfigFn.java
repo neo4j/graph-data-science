@@ -50,6 +50,7 @@ class NodeRegressionPredictNewMutateConfigFn implements NewConfigFunction<NodeRe
                 .concurrency(basePredictConfig.concurrency())
                 .jobId(basePredictConfig.jobId())
                 .modelUser(basePredictConfig.modelUser())
+                .sudo(basePredictConfig.sudo())
                 .usernameOverride(basePredictConfig.usernameOverride())
                 .targetNodeLabels(combinedFilter.nodeLabels())
                 .relationshipTypes(combinedFilter.relationshipTypes())

@@ -49,6 +49,7 @@ class NodeRegressionPredictNewStreamConfigFn implements NewConfigFunction<NodeRe
                 .usernameOverride(basePredictConfig.usernameOverride())
                 .concurrency(basePredictConfig.concurrency())
                 .jobId(basePredictConfig.jobId())
+                .sudo(basePredictConfig.sudo())
                 .modelUser(basePredictConfig.modelUser())
                 .targetNodeLabels(combinedFilter.nodeLabels())
                 .relationshipTypes(combinedFilter.relationshipTypes())
