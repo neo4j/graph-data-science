@@ -16,10 +16,12 @@ After usage, named graphs can be removed from the catalog to free up main memory
 ====
 The graph catalog exists as long as the Neo4j instance is running.
 When Neo4j is restarted, graphs stored in the catalog are lost.
+See xref:management-ops/backup-restore.adoc[] to learn how to persist your graph projections.
 ====
 
 This chapter explains the available graph catalog operations.
 
+.Graph projections, adding additional graphs to the catalog:
 [opts=header,cols="1m,1"]
 |===
 | Name                                                                          | Description
@@ -27,11 +29,22 @@ This chapter explains the available graph catalog operations.
 | xref:graph-project-cypher.adoc[gds.graph.project.cypher]                    | Adds a graph to the catalog using Cypher projection.
 | xref:graph-project-cypher-aggregation.adoc[gds.alpha.graph.project]         | Adds a graph to the catalog using Cypher Aggregation.
 | xref:graph-project-subgraph.adoc[gds.beta.graph.project.subgraph]           | Adds a graph to the catalog by filtering an existing graph using node and relationship predicates.
+| xref:algorithms/alpha/rwr.adoc[gds.alpha.graph.sample.rwr]                       | Creates a new graph projection by sampling using random walk with restarts.
+|===
+
+.Graph catalog inspection operations:
+[opts=header,cols="1m,1"]
+|===
+| Name                                                                          | Description
 | xref:graph-list.adoc[gds.graph.list]                                        | Prints information about graphs that are currently stored in the catalog.
 | xref:graph-exists.adoc[gds.graph.exists]                                    | Checks if a named graph is stored in the catalog.
-| xref:graph-catalog-node-ops.adoc[gds.graph.nodeProperties.drop]                    | Removes node properties from a named graph.
-| xref:graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[gds.graph.relationships.drop]              | Deletes relationships of a given relationship type from a named graph.
-| xref:graph-drop.adoc[gds.graph.drop]                                        | Drops a named graph from the catalog.
+|===
+
+
+.Graph catalog export operations:
+[opts=header,cols="1m,1"]
+|===
+| Name                                                                          | Description
 | xref:graph-catalog-node-ops.adoc[gds.graph.nodeProperty.stream]                      | Streams a single node property stored in a named graph.
 | xref:graph-catalog-node-ops.adoc[gds.graph.nodeProperties.stream]                    | Streams node properties stored in a named graph.
 | xref:graph-catalog-relationship-ops.adoc[gds.beta.graph.relationships.stream]       | Streams relationship topologies stored in a named graph.
@@ -41,8 +54,18 @@ This chapter explains the available graph catalog operations.
 | xref:graph-catalog-relationship-ops.adoc[gds.graph.relationship.write]               | Writes relationships stored in a named graph to Neo4j.
 | xref:graph-catalog-export-ops.adoc#catalog-graph-export-database[gds.graph.export]                           | Exports a named graph into a new offline Neo4j database.
 | xref:graph-catalog-export-ops.adoc#catalog-graph-export-csv[gds.beta.graph.export.csv]                       | Exports a named graph into CSV files.
-| xref:algorithms/alpha/rwr.adoc[gds.alpha.graph.sample.rwr]                       | Creates a new graph projection by sampling using random walk with restarts.
 |===
+
+
+.Graph catalog removal operations:
+[opts=header,cols="1m,1"]
+|===
+| Name                                                                          | Description
+| xref:graph-drop.adoc[gds.graph.drop]                                        | Drops a named graph from the catalog.
+| xref:graph-catalog-node-ops.adoc[gds.graph.nodeProperties.drop]                    | Removes node properties from a named graph.
+| xref:graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[gds.graph.relationships.drop]              | Deletes relationships of a given relationship type from a named graph.
+|===
+
 
 [NOTE]
 ====
