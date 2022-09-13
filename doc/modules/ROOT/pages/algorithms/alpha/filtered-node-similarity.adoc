@@ -91,7 +91,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
 |===
 
-:knnSpecificConfigurationTableTitle: Node Similarity specific configuration
+:nodeSimilaritySpecificConfigurationTableTitle: Node Similarity specific configuration
 include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
 
 include::partial$/algorithms/alpha/filtered-node-similarity/filtered-node-similarity-specific-algo-config.adoc[]
@@ -105,6 +105,152 @@ include::partial$/algorithms/alpha/filtered-node-similarity/filtered-node-simila
 | similarity | Float   | Similarity score for the two nodes.
 |===
 ======
+
+[.include-with-stats]
+======
+.Run Node Similarity in stats mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.nodeSimilarity.filtered.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  nodesCompared: Integer,
+  similarityPairs: Integer,
+  similarityDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.General configuration for algorithm execution on a named graph.
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+|===
+
+:nodeSimilaritySpecificConfigurationTableTitle: Node Similarity specific configuration
+include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
+
+include::partial$/algorithms/alpha/filtered-node-similarity/filtered-node-similarity-specific-algo-config.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                          | Type      | Description
+| preProcessingMillis           | Integer   | Milliseconds for preprocessing the data.
+| computeMillis                 | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis          | Integer   | Milliseconds for computing component count and distribution statistics.
+| nodesCompared                 | Integer   | The number of nodes for which similarity was computed.
+| similarityPairs               | Integer   | The number of similarities in the result.
+| similarityDistribution        | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of the computed similarity results.
+| configuration                 | Map       | The configuration used for running the algorithm.
+|===
+======
+
+[.include-with-mutate]
+======
+.Run Filtered Node Similarity  in mutate mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.nodeSimilarity.filtered.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  postProcessingMillis: Integer,
+  relationshipsWritten: Integer,
+  nodesCompared: Integer,
+  similarityDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.General configuration for algorithm execution on a named graph.
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+|===
+
+:nodeSimilaritySpecificConfigurationTableTitle: Node Similarity specific configuration
+include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
+
+include::partial$/algorithms/alpha/filtered-node-similarity/filtered-node-similarity-specific-algo-config.adoc[]
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name                   | Type    | Description
+| preProcessingMillis    | Integer | Milliseconds for preprocessing the data.
+| computeMillis          | Integer | Milliseconds for running the algorithm.
+| mutateMillis           | Integer | Milliseconds for adding properties to the projected graph.
+| postProcessingMillis   | Integer | Milliseconds for computing percentiles.
+| nodesCompared          | Integer | The number of nodes for which similarity was computed.
+| relationshipsWritten   | Integer | The number of relationships created.
+| similarityDistribution | Map     | Map containing min, max, mean, stdDev and p1, p5, p10, p25, p75, p90, p95, p99, p100 percentile values of the computed similarity results.
+| configuration          | Map     | The configuration used for running the algorithm.
+|===
+======
+
+[.include-with-write]
+======
+.Run Filtered Node Similarity  in write mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.nodeSimilarity.filtered.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+ preProcessingMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  postProcessingMillis: Integer,
+  nodesCompared: Integer,
+  relationshipsWritten: Integer,
+  similarityDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.General configuration for algorithm execution on a named graph.
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+|===
+
+:nodeSimilaritySpecificConfigurationTableTitle: Node Similarity specific configuration
+include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
+
+include::partial$/algorithms/alpha/filtered-node-similarity/filtered-node-similarity-specific-algo-config.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type    | Description
+| preProcessingMillis    | Integer | Milliseconds for preprocessing data.
+| computeMillis          | Integer | Milliseconds for running the algorithm.
+| writeMillis            | Integer | Milliseconds for writing result data back to Neo4j.
+| postProcessingMillis   | Integer | Milliseconds for computing percentiles.
+| nodesCompared          | Integer | The number of nodes for which similarity was computed.
+| relationshipsWritten   | Integer | The number of relationships created.
+| similarityDistribution | Map     | Map containing min, max, mean, stdDev and p1, p5, p10, p25, p75, p90, p95, p99, p100 percentile values of the computed similarity results.
+| configuration          | Map     | The configuration used for running the algorithm.
+|===
+======
+
 ====
 
 [[algorithms-filtered-node-similarity-examples]]
