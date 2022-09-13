@@ -6,6 +6,8 @@
 :entity: relationship
 :result: similarity score
 :algorithm: Filtered Node Similarity
+:nodeSimilaritySpecificConfigurationTableTitle: Node Similarity specific configuration
+
 
 include::partial$/operations-reference/alpha-note.adoc[]
 
@@ -134,7 +136,6 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
 |===
 
-:nodeSimilaritySpecificConfigurationTableTitle: Node Similarity specific configuration
 include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
 
 include::partial$/algorithms/alpha/filtered-node-similarity/filtered-node-similarity-specific-algo-config.adoc[]
@@ -291,7 +292,7 @@ Some of the Person nodes are also singers.
 The two node sets are connected via LIKES relationships.
 Each relationship starts at a Person node and ends at an Instrument node.
 
-The Filtered Node Similarity algorithm will only compute similarity for nodes that have a degree of at least 1. Eve hence shall not be included from the results as her degree is zero.
+The Filtered Node Similarity algorithm will only compute similarity for nodes that have a degree of at least 1. Eve hence shall not be included in the results as her degree is zero.
 
 include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
@@ -314,7 +315,7 @@ CALL gds.graph.project(
 );
 ----
 
-In the following examples we will demonstrate the usage of the Filtered Node Similarity algorithm on this graph. In particular, we will apply the  `sourceNodeFilter`  and `targetNodeFilter`  filters to limit our similarity search to consider only Person nodes having the Singer label in addition.
+In the following examples we will demonstrate the usage of the Filtered Node Similarity algorithm on this graph. In particular, we will apply the  `sourceNodeFilter`  and `targetNodeFilter`  filters to limit our similarity search to strictly Person nodes that also have the Singer label.
 
 [[algorithms-filtered-node-similarity-examples-memory]]
 
@@ -331,7 +332,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 CALL gds.alpha.nodeSimilarity.filtered.write.estimate('myGraph', {
     writeRelationshipType: 'SIMILAR',
     writeProperty: 'score',
-    sourceNodeFilter:'Singer' ,
+    sourceNodeFilter:'Singer',
     targetNodeFilter:'Singer'
 })
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
