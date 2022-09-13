@@ -31,6 +31,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.utils.GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT;
 import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PARTITIONED_SCAN;
@@ -163,6 +165,25 @@ class FeatureToggleProcTest extends BaseProcTest {
             List.of(Map.of("enabled", false))
         );
         assertFalse(USE_REORDERED_ADJACENCY_LIST.isEnabled());
+    }
+
+    @Test
+    void toggleEnableArrowDatabaseImport() {
+        var enableArrowDatabaseImport = ENABLE_ARROW_DATABASE_IMPORT.isEnabled();
+        runQuery("CALL gds.features.enableArrowDatabaseImport($value)", Map.of("value", !enableArrowDatabaseImport));
+        assertEquals(!enableArrowDatabaseImport, ENABLE_ARROW_DATABASE_IMPORT.isEnabled());
+        runQuery("CALL gds.features.enableArrowDatabaseImport($value)", Map.of("value", enableArrowDatabaseImport));
+        assertEquals(enableArrowDatabaseImport, ENABLE_ARROW_DATABASE_IMPORT.isEnabled());
+    }
+
+    @Test
+    void resetEnableArrowDatabaseImport() {
+        ENABLE_ARROW_DATABASE_IMPORT.reset();
+        assertCypherResult(
+            "CALL gds.features.enableArrowDatabaseImport.reset()",
+            List.of(Map.of("enabled", true))
+        );
+        assertTrue(ENABLE_ARROW_DATABASE_IMPORT.isEnabled());
     }
 
     @Test
