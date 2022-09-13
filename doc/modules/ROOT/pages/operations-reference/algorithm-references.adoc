@@ -317,7 +317,7 @@
 | `gds.alpha.leiden.stats`
 | `gds.alpha.leiden.stream`
 | `gds.alpha.leiden.write`
-.8+<.^| Filtered NodeSimilarity
+.8+<.^| xref:algorithms/alpha/filtered-node-similarity.adoc[Filtered NodeSimilarity]
 | `gds.alpha.nodeSimilarity.filtered.mutate`
 | `gds.alpha.nodeSimilarity.filtered.mutate.estimate`
 | `gds.alpha.nodeSimilarity.filtered.stats`
