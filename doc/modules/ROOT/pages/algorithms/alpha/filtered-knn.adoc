@@ -310,8 +310,6 @@ include::partial$/algorithms/alpha/filtered-knn/filtered-knn-specific-algo-confi
 ======
 ====
 
-====
-
 [[algorithms-filtered-knn-examples]]
 == Examples
 
@@ -354,7 +352,6 @@ CALL gds.graph.project(
     '*'
 );
 ----
-
 
 [[algorithms-filtered-knn-examples-stream]]
 === Filtering source nodes
@@ -440,3 +437,119 @@ Here we filter for target nodes with label Vegan, and set a similarity cutoff to
 But we also enable seeding, which is what you do when you want to guarantee that for every node we output _k_ neighbours.
 In this case seeding overrides similarity cutoff, and you see in the output that each source node has 1 result, even if they score rather poorly.
 We happen to know that Alice scores very highly with Carol on age similarity under normal circumstances. However, because Carol is not Vegan, she is not included in the result set - she was filtered out by the target node filter - and instead Alice is matched with Dave.
+
+[[algorithms-filtered-knn-examples-stats]]
+=== Stats
+
+:stats-syntax: algorithms-filtered-knn-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and return the result in form of statistical and measurement values:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.knn.filtered.stats('myGraph', {
+    topK: 1,
+    concurrency: 1,
+    randomSeed: 42,
+    nodeProperties: ['age'],
+    sourceNodeFilter: 'Vegan'
+})
+YIELD nodesCompared, similarityPairs
+----
+
+.Results
+[opts="header",cols="2"]
+|===
+| nodesCompared | similarityPairs
+| 5             | 4
+|===
+--
+
+
+[[algorithms-filtered-knn-examples-mutate]]
+=== Mutate
+
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm, and write back results to the in-memory graph:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.knn.filtered.mutate('myGraph', {
+    mutateRelationshipType: 'SIMILAR',
+    mutateProperty: 'score',
+    topK: 1,
+    randomSeed: 42,
+    concurrency: 1,
+    nodeProperties: ['age'],
+    sourceNodeFilter: 'Vegan'
+})
+YIELD nodesCompared, relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodesCompared | relationshipsWritten
+| 5             | 4
+|===
+--
+
+As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
+
+[NOTE]
+====
+The relationships that are produced by the mutation are always directed, even if the input graph is undirected.
+If for example `a -> b` is topK for `a` and symmetrically `b -> a` is topK for `b`, it appears as though an undirected relationship is produced.
+However, they are just two directed relationships that have been independently produced.
+====
+
+
+[[algorithms-filtered-knn-examples-write]]
+=== Write
+
+The `write` execution mode extends the `stats` mode with an important side effect: for each pair of nodes we create a relationship with the similarity score as a property to the Neo4j database.
+The type of the new relationship is specified using the mandatory configuration parameter `writeRelationshipType`.
+Each new relationship stores the similarity score between the two nodes it represents.
+The relationship property key is set using the mandatory configuration parameter `writeProperty`.
+The result is a single summary row, similar to `stats`, but with some additional metrics.
+
+For more details on the `write` mode in general, see xref:common-usage/running-algos.adoc#running-algos-write[Write].
+
+
+[role=query-example]
+--
+.The following will run the algorithm, and write back results:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.knn.filtered.write('myGraph', {
+    writeRelationshipType: 'SIMILAR',
+    writeProperty: 'score',
+    topK: 1,
+    randomSeed: 42,
+    concurrency: 1,
+    nodeProperties: ['age'],
+    sourceNodeFilter: 'Vegan'
+})
+YIELD nodesCompared, relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodesCompared | relationshipsWritten
+| 5             | 4
+|===
+--
+
+As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
+
+[NOTE]
+====
+The relationships that are written are always directed, even if the input graph is undirected.
+If for example `a -> b` is topK for `a` and symmetrically `b -> a` is topK for `b`, it appears as though an undirected relationship is written.
+However, they are just two directed relationships that have been independently written.
+====
