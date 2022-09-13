@@ -26,11 +26,11 @@ The feature estimates the memory consumption of all involved data structures usi
 
 The page cache is used to cache the Neo4j data and will help to avoid costly disk access.
 
-For purely analytical workloads including xref:graph-project.adoc[native projections], it is recommended to decrease https://neo4j.com/docs/operations-manual/{neo4j-docs-link-version}/reference/configuration-settings/#config_dbms.memory.pagecache.size[dbms.memory.pagecache.size] in favor of an increased heap size.
+For purely analytical workloads including xref:management-ops/projections/graph-project.adoc[native projections], it is recommended to decrease https://neo4j.com/docs/operations-manual/{neo4j-docs-link-version}/reference/configuration-settings/#config_dbms.memory.pagecache.size[dbms.memory.pagecache.size] in favor of an increased heap size.
 However, setting a minimum page cache size is still important when projecting graphs:
 
-* For xref:graph-project.adoc[native projections], the minimum page cache size for projecting a graph can be roughly estimated by `8KB * 100 * readConcurrency`.
-* For xref:graph-project-cypher.adoc[Cypher projections], a higher page cache is required depending on the query complexity.
+* For xref:management-ops/projections/graph-project.adoc[native projections], the minimum page cache size for projecting a graph can be roughly estimated by `8KB * 100 * readConcurrency`.
+* For xref:management-ops/projections/graph-project-cypher.adoc[Cypher projections], a higher page cache is required depending on the query complexity.
 
 However, if it is required to write algorithm results back to Neo4j, the write performance is highly depended on store fragmentation as well as the number of properties and relationships to write.
 We recommend starting with a page cache size of roughly `250MB * writeConcurrency` and evaluate write performance and adapt accordingly.

@@ -9,7 +9,7 @@ Graph projections are stored entirely in-memory using compressed data structures
 
 The graph catalog is a concept within the GDS library that allows managing multiple graph projections by name.
 Using its name, a graph projection can be used many times in the analytical workflow.
-Named graphs can be projected using either a xref:graph-project.adoc[Native projection] or a xref:graph-project-cypher.adoc[Cypher projection].
+Named graphs can be projected using either a xref:management-ops/projections/graph-project.adoc[Native projection] or a xref:management-ops/projections/graph-project-cypher.adoc[Cypher projection].
 After usage, named graphs can be removed from the catalog to free up main memory.
 
 [NOTE]
@@ -24,13 +24,13 @@ This chapter explains the available graph catalog operations.
 .Graph projections, adding additional graphs to the catalog:
 [opts=header,cols="1m,1"]
 |===
-| Name                                                                           | Description
-| xref:graph-project.adoc[gds.graph.project]                                     | Adds a graph to the catalog using Native projection.
-| xref:graph-project-cypher.adoc[gds.graph.project.cypher]                       | Adds a graph to the catalog using Cypher projection.
-| xref:graph-project-cypher-aggregation.adoc[gds.alpha.graph.project]            | Adds a graph to the catalog using Cypher Aggregation.
-| xref:graph-project-subgraph.adoc[gds.beta.graph.project.subgraph]              | Adds a graph to the catalog by filtering an existing graph using node and relationship predicates.
-| xref:management-ops/projections/rwr.adoc[gds.alpha.graph.sample.rwr]           | Creates a new graph projection by sampling using random walk with restarts.
-| xref:management-ops/projections/graph-generation.adoc[gds.beta.graph.generate] | Creates a new graph projection by sampling using random walk with restarts.
+| Name                                                                                           | Description
+| xref:management-ops/projections/graph-project.adoc[gds.graph.project]                          | Adds a graph to the catalog using Native projection.
+| xref:management-ops/projections/graph-project-cypher.adoc[gds.graph.project.cypher]            | Adds a graph to the catalog using Cypher projection.
+| xref:management-ops/projections/graph-project-cypher-aggregation.adoc[gds.alpha.graph.project] | Adds a graph to the catalog using Cypher Aggregation.
+| xref:management-ops/projections/graph-project-subgraph.adoc[gds.beta.graph.project.subgraph]   | Adds a graph to the catalog by filtering an existing graph using node and relationship predicates.
+| xref:management-ops/projections/rwr.adoc[gds.alpha.graph.sample.rwr]                           | Creates a new graph projection by sampling using random walk with restarts.
+| xref:management-ops/projections/graph-generation.adoc[gds.beta.graph.generate]                 | Creates a new graph projection by sampling using random walk with restarts.
 |===
 
 .Graph catalog inspection operations:

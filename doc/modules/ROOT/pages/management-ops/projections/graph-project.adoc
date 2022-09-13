@@ -58,8 +58,8 @@ NOTE: To get information about a stored graph, such as its schema, one can use x
 |===
 | Name                  | Type                | Optional | Description
 | graphName             | String              | no       | The name under which the graph is stored in the catalog.
-| nodeProjection        | String, List or Map | no       | One or more xref:graph-project.adoc#node-projection-syntax[node projections].
-| relationshipProjection| String, List or Map | no       | One or more xref:graph-project.adoc#relationship-projection-syntax[relationship projections].
+| nodeProjection        | String, List or Map | no       | One or more xref:management-ops/projections/graph-project.adoc#node-projection-syntax[node projections].
+| relationshipProjection| String, List or Map | no       | One or more xref:management-ops/projections/graph-project.adoc#relationship-projection-syntax[relationship projections].
 | configuration         | Map                 | yes      | Additional parameters to configure the native projection.
 |===
 
@@ -79,9 +79,9 @@ NOTE: To get information about a stored graph, such as its schema, one can use x
 |===
 | Name                   | Type     | Description
 | graphName              | String   | The name under which the graph is stored in the catalog.
-| nodeProjection         | Map      | The xref:graph-project.adoc#node-projection-syntax[node projections] used to project the graph.
+| nodeProjection         | Map      | The xref:management-ops/projections/graph-project.adoc#node-projection-syntax[node projections] used to project the graph.
 | nodeCount              | Integer  | The number of nodes stored in the projected graph.
-| relationshipProjection | Map      | The xref:graph-project.adoc#relationship-projection-syntax[relationship projections] used to project the graph.
+| relationshipProjection | Map      | The xref:management-ops/projections/graph-project.adoc#relationship-projection-syntax[relationship projections] used to project the graph.
 | relationshipCount      | Integer  | The number of relationships stored in the projected graph.
 | projectMillis          | Integer  | Milliseconds for projecting the graph.
 |===
@@ -345,7 +345,7 @@ YIELD
 
 To specify the orientation, we need to write the `relationshipProjection` with the extended Map-syntax.
 Projecting the `KNOWS` relationships `UNDIRECTED`, loads each relationship in both directions.
-Thus, the `undirectedKnows` graph contains four relationships, twice as many as the `persons` graph in xref:graph-project-cypher.adoc#graph-project-example-single-label-type[Simple graph].
+Thus, the `undirectedKnows` graph contains four relationships, twice as many as the `persons` graph in xref:management-ops/projections/graph-project-cypher.adoc#graph-project-example-single-label-type[Simple graph].
 
 
 [[node-properties-example]]
@@ -479,7 +479,7 @@ ORDER BY person ASC, numberOfPages DESC
 |===
 --
 
-We can see, that the `numberOfPages` property is loaded. The default property value is `Double.NaN` and could be changed using the Map-Syntax the same as for node properties in xref:graph-project-cypher-aggregation.adoc#node-properties-example[Node properties].
+We can see, that the `numberOfPages` property is loaded. The default property value is `Double.NaN` and could be changed using the Map-Syntax the same as for node properties in xref:management-ops/projections/graph-project-cypher-aggregation.adoc#node-properties-example[Node properties].
 
 
 === Parallel relationships
@@ -627,10 +627,10 @@ We can see, that the two READ relationships between Florentin and the Hobbit sum
 
 === Validate relationships flag
 
-As mentioned in the xref:graph-project.adoc#graph-project-native-syntax[syntax section], the `validateRelationships` flag controls whether an error will be raised when attempting to project a relationship where either the source or target node is not present in the xref:graph-project.adoc#node-projection-syntax[node projection].
+As mentioned in the xref:management-ops/projections/graph-project.adoc#graph-project-native-syntax[syntax section], the `validateRelationships` flag controls whether an error will be raised when attempting to project a relationship where either the source or target node is not present in the xref:management-ops/projections/graph-project.adoc#node-projection-syntax[node projection].
 Note that even if the flag is set to `false` such a relationship will still not be projected but the loading process will not be aborted.
 
-We can simulate such a case with the xref:graph-project-cypher.adoc#graph-project-examples[graph present in the Neo4j database]:
+We can simulate such a case with the xref:management-ops/projections/graph-project-cypher.adoc#graph-project-examples[graph present in the Neo4j database]:
 
 --
 .Project `READ` and `KNOWS` relationships but only `Person` nodes, with `validateRelationships` set to true:

@@ -8,7 +8,7 @@ A projected graph can be stored in the catalog under a user-defined name.
 Using that name, the graph can be referred to by any algorithm in the library.
 This allows multiple algorithms to use the same graph without having to project it on each algorithm run.
 
-Using Cypher projections is a more flexible and expressive approach with diminished focus on performance compared to the xref:graph-project.adoc[native projections].
+Using Cypher projections is a more flexible and expressive approach with diminished focus on performance compared to the xref:management-ops/projections/graph-project.adoc[native projections].
 Cypher projections are primarily recommended for the development phase (see xref:common-usage/index.adoc[Common usage]).
 
 [NOTE]
@@ -303,7 +303,7 @@ ORDER BY person ASC, numberOfPages DESC
 |===
 --
 
-We can see, that the `numberOfPages` are loaded. The default property value is `Double.Nan` and can be changed as in the previous example xref:graph-project-cypher-aggregation.adoc#node-properties-example[Node properties] by using the Cypher function https://neo4j.com/docs/cypher-manual/current/functions/scalar/#functions-coalesce[_coalesce()_].
+We can see, that the `numberOfPages` are loaded. The default property value is `Double.Nan` and can be changed as in the previous example xref:management-ops/projections/graph-project-cypher-aggregation.adoc#node-properties-example[Node properties] by using the Cypher function https://neo4j.com/docs/cypher-manual/current/functions/scalar/#functions-coalesce[_coalesce()_].
 
 
 === Parallel relationships
@@ -478,8 +478,8 @@ ORDER BY person ASC, numberOfPages DESC
 |===
 --
 
-If we compare the results to the ones from xref:graph-project-cypher.adoc#cypher-relationship-properties[Relationship properties], we can see that using `IS NOT NULL` is filtering out the relationship from Veselin to the book Frankenstein.
-This functionality is only expressible with xref:graph-project.adoc[native projections] by projecting a xref:graph-project-subgraph.adoc[subgraph].
+If we compare the results to the ones from xref:management-ops/projections/graph-project-cypher.adoc#cypher-relationship-properties[Relationship properties], we can see that using `IS NOT NULL` is filtering out the relationship from Veselin to the book Frankenstein.
+This functionality is only expressible with xref:management-ops/projections/graph-project.adoc[native projections] by projecting a xref:management-ops/projections/graph-project-subgraph.adoc[subgraph].
 
 [[cypher-projection-parameters]]
 === Using query parameters

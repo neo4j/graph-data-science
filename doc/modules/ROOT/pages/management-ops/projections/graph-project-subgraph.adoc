@@ -258,7 +258,7 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount
 === Using query parameters
 
 Similar to https://neo4j.com/docs/cypher-manual/current/syntax/parameters/[Cypher], it is also possible to set query parameters.
-As an example we can rewrite the xref:graph-project-subgraph.adoc#catalog-graph-project-subgraph-node-filter-example[node filter example] from above using parameters instead of integer literals:
+As an example we can rewrite the xref:management-ops/projections/graph-project-subgraph.adoc#catalog-graph-project-subgraph-node-filter-example[node filter example] from above using parameters instead of integer literals:
 
 [role=query-example]
 --

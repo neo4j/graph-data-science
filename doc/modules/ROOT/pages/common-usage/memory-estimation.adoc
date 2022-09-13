@@ -80,8 +80,8 @@ With this it is possible to measure the memory consumption of projecting a graph
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                                                        | Type                          | Default                | Optional | Description
-| xref:graph-project.adoc#node-projection-syntax[node projection]                 | String, List of String or Map | null                   | yes      | The node projection used for anonymous graph creation via a Native projection.
-| xref:graph-project.adoc#relationship-projection-syntax[relationship projection] | String, List of String or Map | null                   | yes      | The relationship projection used for anonymous graph creation a Native projection.
+| xref:management-ops/projections/graph-project.adoc#node-projection-syntax[node projection]                 | String, List of String or Map | null                   | yes      | The node projection used for anonymous graph creation via a Native projection.
+| xref:management-ops/projections/graph-project.adoc#relationship-projection-syntax[relationship projection] | String, List of String or Map | null                   | yes      | The relationship projection used for anonymous graph creation a Native projection.
 | nodeQuery                                                   | String                        | null                   | yes      | The Cypher query used to select the nodes for anonymous graph creation via a Cypher projection.
 | relationshipQuery                                           | String                        | null                   | yes      | The Cypher query used to select the relationships for anonymous graph creation via a Cypher projection.
 | nodeProperties                                              | String, List of String or Map | null                   | yes      | The node properties to project during anonymous graph creation.
@@ -93,7 +93,7 @@ With this it is possible to measure the memory consumption of projecting a graph
 [[estimate-procedure-graph]]
 == Estimating memory requirements for graphs
 
-The xref:graph-project.adoc[`gds.graph.project`] procedures also support `.estimate` to estimate memory usage for just the graph.
+The xref:management-ops/projections/graph-project.adoc[`gds.graph.project`] procedures also support `.estimate` to estimate memory usage for just the graph.
 Those procedures don't accept the graph name as the first argument, as they don't actually project the graph.
 
 .Syntax
@@ -103,7 +103,7 @@ CALL gds.graph.project.estimate(nodeProjection: String|List|Map, relationshipPro
 YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, heapPercentageMin, heapPercentageMax, nodeCount, relationshipCount
 ----
 
-The `nodeProjection` and `relationshipProjection` parameters follow the same syntax as in xref:graph-project.adoc[`gds.graph.project`].
+The `nodeProjection` and `relationshipProjection` parameters follow the same syntax as in xref:management-ops/projections/graph-project.adoc[`gds.graph.project`].
 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
@@ -153,7 +153,7 @@ YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relation
 | "593 KiB" | 607576   | 607576   | 100       | 1000
 |===
 
-The xref:graph-project-cypher.adoc[`gds.graph.project.cypher`] procedure has to execute both, the `nodeQuery` and `relationshipQuery`, in order to count the number of nodes and relationships of the graph.
+The xref:management-ops/projections/graph-project-cypher.adoc[`gds.graph.project.cypher`] procedure has to execute both, the `nodeQuery` and `relationshipQuery`, in order to count the number of nodes and relationships of the graph.
 
 .Syntax
 [source, cypher, role=noplay]

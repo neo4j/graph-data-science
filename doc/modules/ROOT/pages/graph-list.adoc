@@ -91,7 +91,7 @@ CREATE
   (florentin)-[:KNOWS { since: 2018 }]->(veselin)
 ----
 
-Additionally, we will project a few graphs to the graph catalog, for more details see xref:graph-project.adoc[native projections] and xref:graph-project-cypher.adoc[Cypher projections].
+Additionally, we will project a few graphs to the graph catalog, for more details see xref:management-ops/projections/graph-project.adoc[native projections] and xref:management-ops/projections/graph-project-cypher.adoc[Cypher projections].
 
 .Project `Person` nodes and `KNOWS` relationships using native projections:
 [source, cypher, role=noplay graph-project-query]
