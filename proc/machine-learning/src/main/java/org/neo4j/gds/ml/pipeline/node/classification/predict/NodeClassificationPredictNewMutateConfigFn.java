@@ -23,7 +23,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.NewConfigFunction;
 
-import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPredictPipelineFilterUtil.generatePredictPipelineFilter;
+import static org.neo4j.gds.ml.pipeline.node.NodePropertyPredictPipelineFilterUtil.generatePredictPipelineFilter;
 
 
 //This class is used to inside #NodeClassificationPipelineMutateProc.newConfigFunction to create NodeClassificationPredictPipelineMutateConfig for *Memory estimation* only.
@@ -48,7 +48,8 @@ public class NodeClassificationPredictNewMutateConfigFn implements NewConfigFunc
 
             return NodeClassificationPredictPipelineMutateConfigImpl.builder()
                 .graphName(basePredictConfig.graphName())
-                .modelName(modelName.get())
+                .modelName(basePredictConfig.modelName())
+                .usernameOverride(basePredictConfig.usernameOverride())
                 .concurrency(basePredictConfig.concurrency())
                 .jobId(basePredictConfig.jobId())
                 .modelUser(basePredictConfig.modelUser())

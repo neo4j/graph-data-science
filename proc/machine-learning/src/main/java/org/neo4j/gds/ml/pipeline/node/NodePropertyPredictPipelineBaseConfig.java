@@ -17,23 +17,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.models;
+package org.neo4j.gds.ml.pipeline.node;
 
-import org.neo4j.gds.ml.core.batch.Batch;
-import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.GraphNameConfig;
+import org.neo4j.gds.model.ModelConfig;
 
-public interface Classifier {
-    default int numberOfClasses() {
-        return data().numberOfClasses();
+import java.util.List;
+
+@Configuration
+public interface NodePropertyPredictPipelineBaseConfig extends
+    AlgoBaseConfig,
+    GraphNameConfig,
+    ModelConfig {
+
+
+    default List<String> targetNodeLabels() {return List.of();}
+
+    @Override
+    default List<String> relationshipTypes() {
+        return List.of();
     }
 
-    double[] predictProbabilities(double[] features);
-
-    Matrix predictProbabilities(Batch batch, Features features);
-
-    ClassifierData data();
-
-    interface ClassifierData extends BaseModelData{
-        int numberOfClasses();
+    @Override
+    @Configuration.Ignore
+    default List<String> nodeLabels() {
+        return targetNodeLabels();
     }
 }

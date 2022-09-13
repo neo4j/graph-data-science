@@ -63,6 +63,7 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
                         ", (n2:N {a: 3.0, b: 1.5, c: 1})" +
                         ", (n3:N {a: 0.0, b: 2.8, c: 1})" +
                         ", (n4:N {a: 1.0, b: 0.9, c: 1})" +
+                        ", (m1:M {a: 1.0, b: 0.9, c: 1})" +
                         ", (n1)-[:T]->(n2)" +
                         ", (n3)-[:T]->(n4)" +
                         ", (n1)-[:T]->(n3)" +
@@ -78,7 +79,7 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
         );
         String createQuery = GdsCypher.call(GRAPH_NAME)
             .graphProject()
-            .withNodeLabel("N")
+            .withNodeLabels("N", "M")
             .withRelationshipType("T", Orientation.UNDIRECTED)
             .withNodeProperties(List.of("a", "b", "c"), DefaultValue.DEFAULT)
             .yields();
@@ -95,6 +96,8 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
             var config = NodeRegressionPredictPipelineBaseConfigImpl.builder()
                 .modelUser("")
                 .modelName("model")
+                .targetNodeLabels(List.of("N"))
+                .relationshipTypes(List.of("T"))
                 .graphName(GRAPH_NAME)
                 .build();
 
@@ -128,6 +131,8 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
             .modelUser("")
             .modelName("model")
             .graphName(GRAPH_NAME)
+            .targetNodeLabels(List.of("N"))
+            .relationshipTypes(List.of("T"))
             .build();
 
         var pipeline = NodePropertyPredictPipeline.from(
@@ -193,6 +198,8 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
                 .modelUser("")
                 .modelName("model")
                 .graphName(GRAPH_NAME)
+                .targetNodeLabels(List.of("N"))
+                .relationshipTypes(List.of("T"))
                 .build();
 
             var pipeline = NodePropertyPredictPipeline.from(

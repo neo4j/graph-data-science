@@ -19,21 +19,10 @@
  */
 package org.neo4j.gds.ml.models;
 
-import org.neo4j.gds.ml.core.batch.Batch;
-import org.neo4j.gds.ml.core.tensor.Matrix;
+public interface BaseModelData {
 
-public interface Classifier {
-    default int numberOfClasses() {
-        return data().numberOfClasses();
-    }
+    TrainingMethod trainerMethod();
 
-    double[] predictProbabilities(double[] features);
+    int featureDimension();
 
-    Matrix predictProbabilities(Batch batch, Features features);
-
-    ClassifierData data();
-
-    interface ClassifierData extends BaseModelData{
-        int numberOfClasses();
-    }
 }

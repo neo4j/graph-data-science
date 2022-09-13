@@ -20,9 +20,7 @@
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -32,14 +30,8 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.Classifier;
-import org.neo4j.gds.ml.pipeline.ImmutablePipelineGraphFilter;
-import org.neo4j.gds.ml.pipeline.PipelineGraphFilter;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
-
-import java.util.Collection;
-
-import static org.neo4j.gds.config.ElementTypeValidator.resolveAndValidateTypes;
 
 public class NodeClassificationPredictPipelineAlgorithmFactory
     <CONFIG extends NodeClassificationPredictPipelineBaseConfig>
@@ -84,11 +76,7 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
         );
         var nodeClassificationPipeline = model.customInfo().pipeline();
         var classIdMap = LocalIdMap.of(model.customInfo().classes());
-        var predictGraphFilter = generatePredictGraphFilter(
-            graphStore,
-            configuration,
-            model
-        );
+
         return new NodeClassificationPredictPipelineExecutor(
             nodeClassificationPipeline,
             configuration,
@@ -96,36 +84,8 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
             graphStore,
             progressTracker,
             model.data(),
-            classIdMap,
-            predictGraphFilter
+            classIdMap
         );
-    }
-
-    private PipelineGraphFilter generatePredictGraphFilter(
-        GraphStore graphStore,
-        CONFIG configuration,
-        Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model
-    ) {
-        var trainConfig = model.trainConfig();
-        var targetNodeLabels = configuration.targetNodeLabels().isEmpty()
-            ? ElementTypeValidator.resolveAndValidate(graphStore, trainConfig.targetNodeLabels(), "`targetNodeLabels` from the model's train config")
-            : ElementTypeValidator.resolve(graphStore, configuration.targetNodeLabels());
-
-        Collection<RelationshipType> predictRelTypes;
-        if (!configuration.relationshipTypes().isEmpty()) {
-            predictRelTypes = resolveAndValidateTypes(graphStore, configuration.relationshipTypes(), "`relationshipTypes` from the model's predict config");
-        } else {
-            predictRelTypes = resolveAndValidateTypes(
-                graphStore,
-                trainConfig.relationshipTypes(),
-                "`relationshipTypes` from the model's train config"
-            );
-        }
-        var predictGraphFilter = ImmutablePipelineGraphFilter.builder()
-            .nodeLabels(targetNodeLabels)
-            .relationshipTypes(predictRelTypes)
-            .build();
-        return predictGraphFilter;
     }
 
     @Override

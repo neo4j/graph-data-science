@@ -168,7 +168,7 @@ final class NodeRegressionPipelineIntegrationTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.alpha.pipeline.nodeRegression.predict.stream('g', {" +
-            "  nodeLabels: ['Hidden']," +
+            "  targetNodeLabels: ['Hidden']," +
             "  modelName: 'model'" +
             "}) YIELD nodeId, predictedValue " +
             "RETURN gds.util.asNode(nodeId).name AS name, predictedValue AS predictedCost " +
@@ -223,7 +223,7 @@ final class NodeRegressionPipelineIntegrationTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.alpha.pipeline.nodeRegression.predict.stream('g', {" +
-            "  nodeLabels: ['Hidden']," +
+            "  targetNodeLabels: ['Hidden']," +
             "  modelName: 'model'" +
             "}) YIELD nodeId, predictedValue " +
             "RETURN gds.util.asNode(nodeId).name AS name, predictedValue AS predictedCost " +

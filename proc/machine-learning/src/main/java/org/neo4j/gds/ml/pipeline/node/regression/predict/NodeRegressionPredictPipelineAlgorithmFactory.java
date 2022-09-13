@@ -76,9 +76,9 @@ public class NodeRegressionPredictPipelineAlgorithmFactory
             configuration.modelName(),
             configuration.username()
         );
-        var nodeClassificationPipeline = model.customInfo().pipeline();
+
         return new NodeRegressionPredictPipelineExecutor(
-            nodeClassificationPipeline,
+            model.customInfo().pipeline(),
             configuration,
             executionContext,
             graphStore,

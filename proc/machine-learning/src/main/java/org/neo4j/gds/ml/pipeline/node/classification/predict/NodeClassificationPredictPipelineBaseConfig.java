@@ -19,36 +19,16 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphNameConfig;
-import org.neo4j.gds.model.ModelConfig;
-
-import java.util.List;
+import org.neo4j.gds.ml.pipeline.node.NodePropertyPredictPipelineBaseConfig;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface NodeClassificationPredictPipelineBaseConfig extends
-    AlgoBaseConfig,
-    GraphNameConfig,
-    ModelConfig {
+public interface NodeClassificationPredictPipelineBaseConfig extends NodePropertyPredictPipelineBaseConfig {
 
     @Configuration.Key("includePredictedProbabilities")
     boolean includePredictedProbabilities();
 
-    default List<String> targetNodeLabels() {return List.of();}
-
-    @Override
-    default List<String> relationshipTypes() {
-        return List.of();
-    }
-
-    @Override
-    @Configuration.Ignore
-    default List<String> nodeLabels() {
-        return List.of(ElementProjection.PROJECT_ALL);
-    }
 }

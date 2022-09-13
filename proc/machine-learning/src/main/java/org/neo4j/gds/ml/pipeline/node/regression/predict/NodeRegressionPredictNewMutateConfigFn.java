@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.node.classification.predict;
+package org.neo4j.gds.ml.pipeline.node.regression.predict;
 
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -26,36 +26,35 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import static org.neo4j.gds.ml.pipeline.node.NodePropertyPredictPipelineFilterUtil.generatePredictPipelineFilter;
 
 
-//This class is used to inside #NodeClassificationPipelineStreamProc.newConfigFunction to create NodeClassificationPredictPipelineStreamConfig for *Memory estimation* only.
-//It is needed because the shared #MemoryEstimationExecutor.computeEstimate takes predictConfig, which is not enough for NC.
-//We need to resolve train+predict for the correct graph filtering for accurate estimation.
-class NodeClassificationPredictNewStreamConfigFn implements NewConfigFunction<NodeClassificationPredictPipelineStreamConfig> {
+class NodeRegressionPredictNewMutateConfigFn implements NewConfigFunction<NodeRegressionPredictPipelineMutateConfig> {
 
     private final ModelCatalog modelCatalog;
 
-    NodeClassificationPredictNewStreamConfigFn(ModelCatalog modelCatalog) {
+    NodeRegressionPredictNewMutateConfigFn(ModelCatalog modelCatalog) {
         this.modelCatalog = modelCatalog;
     }
 
     @Override
-    public NodeClassificationPredictPipelineStreamConfig apply(String username, CypherMapWrapper config) {
-        var basePredictConfig = NodeClassificationPredictPipelineStreamConfig.of(username, config);
+    public NodeRegressionPredictPipelineMutateConfig apply(String username, CypherMapWrapper config) {
+        var basePredictConfig = NodeRegressionPredictPipelineMutateConfig.of(username, config);
         var modelName = config.getString("modelName");
         if (modelName.isEmpty()) {
             return basePredictConfig;
         } else {
             var combinedFilter = generatePredictPipelineFilter(modelCatalog, modelName.get(), username, basePredictConfig);
 
-            return NodeClassificationPredictPipelineStreamConfigImpl.builder()
+            // TODO generate a ConfigImpl.Builder.from(Config base)
+            return NodeRegressionPredictPipelineMutateConfigImpl.builder()
                 .graphName(basePredictConfig.graphName())
-                .modelName(modelName.get())
+                .modelName(basePredictConfig.modelName())
                 .concurrency(basePredictConfig.concurrency())
                 .jobId(basePredictConfig.jobId())
                 .modelUser(basePredictConfig.modelUser())
+                .sudo(basePredictConfig.sudo())
                 .usernameOverride(basePredictConfig.usernameOverride())
-                .includePredictedProbabilities(basePredictConfig.includePredictedProbabilities())
                 .targetNodeLabels(combinedFilter.nodeLabels())
                 .relationshipTypes(combinedFilter.relationshipTypes())
+                .mutateProperty(basePredictConfig.mutateProperty())
                 .build();
         }
     }

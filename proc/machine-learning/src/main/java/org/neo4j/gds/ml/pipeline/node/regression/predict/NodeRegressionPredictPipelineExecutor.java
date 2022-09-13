@@ -45,6 +45,7 @@ public class NodeRegressionPredictPipelineExecutor extends PredictPipelineExecut
     HugeDoubleArray
     > {
     private final Regressor regressor;
+    private final PipelineGraphFilter predictGraphFilter;
 
     public NodeRegressionPredictPipelineExecutor(
         NodePropertyPredictPipeline pipeline,
@@ -56,6 +57,10 @@ public class NodeRegressionPredictPipelineExecutor extends PredictPipelineExecut
     ) {
         super(pipeline, config, executionContext, graphStore, progressTracker);
         this.regressor = regressor;
+        this.predictGraphFilter = ImmutablePipelineGraphFilter.builder()
+            .nodeLabels(config.nodeLabelIdentifiers(graphStore))
+            .relationshipTypes(config.internalRelationshipTypes(graphStore))
+            .build();
     }
 
     public static Task progressTask(String taskName, NodePropertyPredictPipeline pipeline, GraphStore graphStore) {
@@ -68,14 +73,12 @@ public class NodeRegressionPredictPipelineExecutor extends PredictPipelineExecut
 
     @Override
     protected PipelineGraphFilter nodePropertyStepFilter() {
-        return ImmutablePipelineGraphFilter.builder()
-            .nodeLabels(config.nodeLabelIdentifiers(graphStore))
-            .relationshipTypes(config.internalRelationshipTypes(graphStore)).build();
+        return predictGraphFilter;
     }
 
     @Override
     protected HugeDoubleArray execute() {
-        var nodesGraph = graphStore.getGraph(config.nodeLabelIdentifiers(graphStore));
+        var nodesGraph = graphStore.getGraph(predictGraphFilter.nodeLabels());
         Features features = FeaturesFactory.extractLazyFeatures(nodesGraph, pipeline.featureProperties());
 
         if (features.featureDimension() != regressor.data().featureDimension()) {
