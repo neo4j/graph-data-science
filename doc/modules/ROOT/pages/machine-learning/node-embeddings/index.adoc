@@ -15,6 +15,7 @@ The Neo4j Graph Data Science library contains the following node embedding algor
 ** xref:machine-learning/node-embeddings/node2vec.adoc[Node2Vec]
 
 
+[[node-embeddings-generalization]]
 == Generalization across graphs
 
 Node embeddings are typically used as input to downstream machine learning tasks such as node classification, link prediction and kNN similarity graph construction.
