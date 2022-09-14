@@ -30,4 +30,3 @@ In the GDS library the algorithms xref:machine-learning/node-embeddings/graph-sa
 Embedding algorithms that are not inductive we call _transductive_.
 Their usage should be limited to the case where the test graph and predict graph are the same.
 An example of such an algorithm is xref:machine-learning/node-embeddings/node2vec.adoc[Node2Vec].
->>>>>>> 41c5832fe7... Add explanation of induction and transduction to embedding docs-transductive-embeddings-in-pipelines
