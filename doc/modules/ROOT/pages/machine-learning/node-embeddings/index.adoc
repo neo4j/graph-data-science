@@ -13,3 +13,20 @@ The Neo4j Graph Data Science library contains the following node embedding algor
 * Beta
 ** xref::machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE]
 ** xref::machine-learning/node-embeddings/node2vec.adoc[Node2Vec]
+
+
+== Generalization across graphs
+
+Node embeddings are typically used as input to downstream machine learning tasks such as node classification, link prediction and kNN similarity graph construction.
+
+Often the graph used for constructing the embeddings and training the downstream model differs from the graph on which predictions are made.
+Compared to normal machine learning where we just have a stream of independent examples from some distribution, we now have graphs that are used to generate a set of labeled examples.
+Therefore, we must ensure that the set of training examples is representative of the set of labeled examples derived from the prediction graph.
+For this to work, certain things are required of the embedding algorithm, and we denote such algorithms as _inductive_ footnote:definition[This practical definition of induction may not agree completely with definitions elsewhere].
+
+In the GDS library the algorithms xref:machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE] and xref:machine-learning/node-embeddings/fastrp.adoc[FastRP] with `propertyRatio=1.0` and `randomSeed` is set are inductive.
+
+Embedding algorithms that are not inductive we call _transductive_.
+Their usage should be limited to the case where the test graph and predict graph are the same.
+An example of such an algorithm is xref:machine-learning/node-embeddings/node2vec.adoc[Node2Vec].
+>>>>>>> 41c5832fe7... Add explanation of induction and transduction to embedding docs-transductive-embeddings-in-pipelines
