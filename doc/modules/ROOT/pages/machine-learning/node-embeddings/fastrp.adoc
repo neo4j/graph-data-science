@@ -90,17 +90,21 @@ The last `propertyDimension` coordinates in the embedding captures information a
 === Usage in machine learning pipelines
 
 It may be useful to generate node embeddings with FastRP as a node property step in a machine learning pipeline (like xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[] and xref:machine-learning/node-property-prediction/index.adoc[]).
-Since FastRP is a random and https://en.wikipedia.org/wiki/Transduction_(machine_learning)[transductive] algorithm there are some things to have in mind.
+Since FastRP is a random algorithm and xref:machine-learning/node-embeddings/index.adoc#node-embeddings-generalization[inductive] only for `propertyRatio=1.0`, there are some things to have in mind.
 
-Firstly, it is good to know that node property steps (whether FastRP or not) are run both by the training pipeline, and by the prediction models that are created from training a pipeline.
-If a pipeline is trained with some node embeddings as features, it is important that the node embeddings produced during prediction by models are of a similar distribution to those node embeddings produced during training by the pipeline that created the models.
-Otherwise, the machine learning algorithm trained in the pipeline will not be able to make useful predictions.
+In order for a machine learning model to be able to make useful predictions, it is important that features produced during prediction are of a similar distribution to the features produced during training of the model.
+Moreover, node property steps (whether FastRP or not) added to a pipeline are executed both during training, and during the prediction by the trained model.
+It is therefore problematic when a pipeline contains an embedding step which yields all too dissimilar embeddings during training and prediction.
 
 This has some implications on how to use FastRP as a node property step.
 In general, if a pipeline is trained using FastRP as a node property step on some graph "g", then the resulting trained model should only be applied to graphs that are not too dissimilar to "g".
-In particular, most of the nodes in the graph that a prediction is being run on, must be the same nodes (in the database sense) as in the original graph "g" that was used during training.
-The reason for this is that FastRP is a random algorithm, and is seeded based on the nodes' ids in the Neo4j database from whence the nodes came.
-And in order for this seeding to be consistent between runs (training and prediction calls), a value for the `randomSeed` configuration parameter must be provided when adding the FastRP node property step to the training pipeline.
+
+If `propertyRatio<1.0`, most of the nodes in the graph that a prediction is being run on, must be the same nodes (in the database sense) as in the original graph "g" that was used during training.
+The reason for this is that FastRP is a random algorithm, and in this case is seeded based on the nodes' ids in the Neo4j database from whence the nodes came.
+
+If `propertyRatio=1.0` however, the random initial node embeddings are derived from node property vectors only, so there is no random seeding based on node ids.
+
+Additionally, in order for the initial random vectors (independent of `propertyRatio` used) to be consistent between runs (training and prediction calls), a value for the `randomSeed` configuration parameter must be provided when adding the FastRP node property step to the training pipeline.
 
 
 [[algorithms-embeddings-fastrp-parameter-tuning]]
