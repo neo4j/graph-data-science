@@ -12,6 +12,7 @@ More precisely, the procedure will in order:
 . Create a relationship split of the graph into `test`, `train` and `feature-input` graphs as described in xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[Configuring the relationship splits].
 These graphs are internally managed and exist only for the duration of the training.
 . Apply the node property steps, added according to xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[Adding node properties].
+The graph filter on each step consists of  `contextNodeLabels + targetNodeLabel + sourceNodeLabel` and `contextRelationships + feature-input relationships`.
 . Apply the feature steps, added according to xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-features[Adding link features], to the `train` graph, which yields for each `train` relationship an _instance_, that is, a feature vector and a binary label.
 . Split the training instances using stratified k-fold cross-validation.
 The number of folds `k` can be configured using `validationFolds` in `gds.beta.pipeline.linkPrediction.configureSplit`.
