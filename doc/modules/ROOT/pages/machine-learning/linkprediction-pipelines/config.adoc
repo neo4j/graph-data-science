@@ -245,7 +245,7 @@ CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'hadamard', {
 |===
 
 When executing the pipeline, the `nodeProperties` must be either present in the input graph, or created by a previous node property step.
-For example, the `embedding` property could be created by the previous example, and we expect `numberOfPosts` to already be present in the in-memory graph used as input, at train and predict time.
+For example, the `embedding` property could be created by the previous example, and we expect `age` to already be present in the in-memory graph used as input, at train and predict time.
 --
 
 
