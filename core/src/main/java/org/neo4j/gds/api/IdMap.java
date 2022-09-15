@@ -53,7 +53,12 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
     };
 
     /**
-     * Map mapped nodeId back to neo4j nodeId
+     * Returns the original node id for the given mapped node id.
+     * The original node id is typically the Neo4j node id.
+     *
+     * This method is guaranteed to always return the Neo4j id,
+     * regardless of the given mapped node id refers to a filtered
+     * node id space or a regular / unfiltered node id space.
      */
     long toOriginalNodeId(long mappedNodeId);
 
@@ -69,7 +74,7 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
     long toRootNodeId(long mappedNodeId);
 
     /**
-     * Returns true iff the neo4jNodeId is mapped, otherwise false.
+     * Returns true iff the Neo4j id is mapped, otherwise false.
      */
     boolean contains(long originalNodeId);
 

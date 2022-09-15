@@ -44,7 +44,7 @@ public interface FilteredIdMap extends IdMap {
      * For the root mapping this method returns the given
      * node id.
      */
-    long rootToMappedNodeId(long rootNodeId);
+    long toFilteredNodeId(long rootNodeId);
 
     /**
      * Checks if the rootNodeId (mappedNodeId) is

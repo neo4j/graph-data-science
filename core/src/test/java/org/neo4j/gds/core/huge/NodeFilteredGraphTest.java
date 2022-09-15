@@ -76,7 +76,7 @@ class NodeFilteredGraphTest {
 
 
         unfilteredGraph.forEachNode(nodeId -> {
-            long filteredNodeId = filteredGraph.rootToMappedNodeId(nodeId);
+            long filteredNodeId = filteredGraph.toFilteredNodeId(nodeId);
             if (unfilteredGraph.hasLabel(nodeId, filterLabel)) {
                 assertThat(filteredGraph.toOriginalNodeId(filteredNodeId)).isEqualTo(unfilteredGraph.toOriginalNodeId(nodeId));
             } else {

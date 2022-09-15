@@ -156,7 +156,7 @@ public abstract class FilteredNodePropertyValues implements NodePropertyValues {
 
         @Override
         protected long translateId(long nodeId) {
-            return graph.getIntermediateOriginalNodeId(nodeId);
+            return graph.toRootNodeId(nodeId);
         }
     }
 
@@ -244,7 +244,7 @@ public abstract class FilteredNodePropertyValues implements NodePropertyValues {
 
         @Override
         protected long translateId(long nodeId) {
-            return graph.getFilteredMappedNodeId(nodeId);
+            return graph.toFilteredNodeId(nodeId);
         }
     }
 }

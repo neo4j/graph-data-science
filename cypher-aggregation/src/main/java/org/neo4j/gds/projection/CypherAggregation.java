@@ -784,8 +784,8 @@ final class FilteredHighLimitIdMap extends HighLimitIdMap implements FilteredIdM
     }
 
     @Override
-    public long rootToMappedNodeId(long rootNodeId) {
-        return filteredIdMap.rootToMappedNodeId(rootNodeId);
+    public long toFilteredNodeId(long rootNodeId) {
+        return filteredIdMap.toFilteredNodeId(rootNodeId);
     }
 
     @Override
