@@ -60,14 +60,14 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
     long averageDegree();
 
     @Value.Default
-    @Configuration.ConvertWith("org.neo4j.gds.core.Aggregation#parse")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.core.Aggregation#parse")
     @Configuration.ToMapValue("org.neo4j.gds.core.Aggregation#toString")
     default Aggregation aggregation() {
         return Aggregation.NONE;
     }
 
     @Value.Default
-    @Configuration.ConvertWith("org.neo4j.gds.Orientation#parse")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.Orientation#parse")
     @Configuration.ToMapValue("org.neo4j.gds.Orientation#toString")
     default Orientation orientation() {
         return Orientation.NATURAL;
@@ -79,7 +79,7 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
     }
 
     @Value.Default
-    @Configuration.ConvertWith("org.neo4j.gds.beta.generator.RelationshipDistribution#parse")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.beta.generator.RelationshipDistribution#parse")
     @Configuration.ToMapValue("org.neo4j.gds.beta.generator.RelationshipDistribution#toString")
     default RelationshipDistribution relationshipDistribution() {
         return RelationshipDistribution.UNIFORM;

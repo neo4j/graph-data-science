@@ -60,11 +60,11 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
         return Stream.of(sourceNodeLabels(), targetNodeLabels()).flatMap(List::stream).distinct().collect(Collectors.toList());
     }
 
-    @Configuration.ConvertWith("org.neo4j.gds.RelationshipType#of")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.RelationshipType#of", inverse = Configuration.ConvertWith.INVERSE_IS_TO_MAP)
     @Configuration.ToMapValue("org.neo4j.gds.RelationshipType#toString")
     RelationshipType holdoutRelationshipType();
 
-    @Configuration.ConvertWith("org.neo4j.gds.RelationshipType#of")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.RelationshipType#of", inverse = Configuration.ConvertWith.INVERSE_IS_TO_MAP)
     @Configuration.ToMapValue("org.neo4j.gds.RelationshipType#toString")
     RelationshipType remainingRelationshipType();
 

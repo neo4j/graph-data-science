@@ -35,7 +35,7 @@ public interface MutatePropertyConfig extends MutateConfig {
 
     String MUTATE_PROPERTY_KEY = "mutateProperty";
 
-    @Configuration.ConvertWith("validateProperty")
+    @Configuration.ConvertWith(method = "validateProperty")
     @Configuration.Key(MUTATE_PROPERTY_KEY)
     String mutateProperty();
 

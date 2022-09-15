@@ -37,7 +37,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @Configuration
 public interface ModularityBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
-    @Configuration.ConvertWith("validatePropertyName")
+    @Configuration.ConvertWith(method = "validatePropertyName")
     String communityProperty();
 
     static @Nullable String validatePropertyName(String input) {

@@ -41,7 +41,7 @@ public interface GraphExportNodePropertiesConfig extends BaseConfig, Concurrency
     Optional<String> graphName();
 
     @Configuration.Parameter
-    @Configuration.ConvertWith("org.neo4j.gds.config.GraphExportNodePropertiesConfig#parseNodeProperties")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.config.GraphExportNodePropertiesConfig#parseNodeProperties")
     List<String> nodeProperties();
 
     static List<String> parseNodeProperties(Object userInput) {
@@ -50,7 +50,7 @@ public interface GraphExportNodePropertiesConfig extends BaseConfig, Concurrency
 
     @Configuration.Parameter
     @Value.Default
-    @Configuration.ConvertWith("org.neo4j.gds.config.GraphExportNodePropertiesConfig#parseNodeLabels")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.config.GraphExportNodePropertiesConfig#parseNodeLabels")
     default List<String> nodeLabels() {
         return Collections.singletonList(ElementProjection.PROJECT_ALL);
     }
@@ -105,10 +105,10 @@ public interface GraphExportNodePropertiesConfig extends BaseConfig, Concurrency
 
     /**
      * Returns the node labels that are to be considered for writing properties.
-     *
+     * <p>
      * If nodeLabels contains '*`, this returns all node labels in the graph store
      * that have the specified nodeProperties.
-     *
+     * <p>
      * Otherwise, it just returns all the labels in the graph store since validation
      * made sure that all node labels have the specified properties.
      */

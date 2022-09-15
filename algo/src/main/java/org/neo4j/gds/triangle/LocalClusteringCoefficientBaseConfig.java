@@ -44,7 +44,7 @@ public interface LocalClusteringCoefficientBaseConfig extends AlgoBaseConfig, Co
     @Override
     @Value.Default
     @Configuration.Key("triangleCountProperty")
-    @Configuration.ConvertWith("validateProperty")
+    @Configuration.ConvertWith(method = "validateProperty")
     default @Nullable String seedProperty() {
         return null;
     }
@@ -55,7 +55,7 @@ public interface LocalClusteringCoefficientBaseConfig extends AlgoBaseConfig, Co
         return "triangleCountProperty";
     }
 
-    static String validateProperty(String input) {
+    static @Nullable String validateProperty(String input) {
         return StringIdentifierValidations.validateNoWhiteCharacter(input, "triangleCountProperty");
     }
 

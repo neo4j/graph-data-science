@@ -36,7 +36,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public interface ConfigurableSeedConfig {
 
     @Value.Default
-    @Configuration.ConvertWith("validateProperty")
+    @Configuration.ConvertWith(method = "validateProperty")
     default @Nullable String seedProperty() {
         return null;
     }

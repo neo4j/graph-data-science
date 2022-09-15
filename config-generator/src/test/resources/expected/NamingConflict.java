@@ -98,6 +98,14 @@ public final class NamingConflictConfig implements NamingConflict {
             this.config__ = new HashMap<>();
         }
 
+        public static NamingConflictConfig.Builder from(NamingConflict baseConfig) {
+            var builder = new NamingConflictConfig.Builder();
+            builder.config(baseConfig.config());
+            builder.anotherConfig(baseConfig.anotherConfig());
+            builder.config_(baseConfig.config_());
+            return builder;
+        }
+
         public NamingConflictConfig.Builder config_(int config_) {
             this.config_ = config_;
             return this;

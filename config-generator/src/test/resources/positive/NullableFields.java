@@ -31,7 +31,7 @@ public interface NullableFields {
         return null;
     }
 
-    @Configuration.ConvertWith("emptyToNull")
+    @Configuration.ConvertWith(method = "emptyToNull")
     default @Nullable String conversionCanReturnNull() {
         return null;
     }

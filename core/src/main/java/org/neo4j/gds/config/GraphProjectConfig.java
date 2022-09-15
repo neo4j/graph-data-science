@@ -51,7 +51,7 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
     }
 
     @Configuration.Parameter
-    @Configuration.ConvertWith("validateName")
+    @Configuration.ConvertWith(method = "validateName")
     String graphName();
 
     @Value.Default

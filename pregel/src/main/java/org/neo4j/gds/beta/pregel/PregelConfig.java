@@ -43,7 +43,7 @@ public interface PregelConfig extends
     }
 
     @Value.Default
-    @Configuration.ConvertWith("org.neo4j.gds.beta.pregel.Partitioning#parse")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.beta.pregel.Partitioning#parse")
     @Configuration.ToMapValue("org.neo4j.gds.beta.pregel.Partitioning#toString")
     default Partitioning partitioning() {
         return Partitioning.RANGE;

@@ -27,8 +27,8 @@ import java.util.Optional;
 @Configuration("ToMapConfig")
 public interface ToMap {
 
-    public static String add42(double d) {
-        return String.format("%d42", d);
+    public static double add42(double d) {
+        return d + 42;
     }
 
     @Configuration.Parameter

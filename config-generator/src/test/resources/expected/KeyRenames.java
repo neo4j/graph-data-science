@@ -84,6 +84,13 @@ public final class KeyRenamesConfig implements KeyRenames {
             this.config = new HashMap<>();
         }
 
+        public static KeyRenamesConfig.Builder from(KeyRenames baseConfig) {
+            var builder = new KeyRenamesConfig.Builder();
+            builder.lookupUnderAnotherKey(baseConfig.lookupUnderAnotherKey());
+            builder.whitespaceWillBeTrimmed(baseConfig.whitespaceWillBeTrimmed());
+            return builder;
+        }
+
         public KeyRenamesConfig.Builder lookupUnderAnotherKey(int lookupUnderAnotherKey) {
             this.config.put("key could also be an invalid identifier", lookupUnderAnotherKey);
             return this;

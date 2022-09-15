@@ -105,6 +105,14 @@ public final class CollectingKeysConfig implements CollectingKeys {
             this.config = new HashMap<>();
         }
 
+        public static CollectingKeysConfig.Builder from(CollectingKeys baseConfig) {
+            var builder = new CollectingKeysConfig.Builder();
+            builder.foo(baseConfig.foo());
+            builder.bar(baseConfig.bar());
+            builder.baz(baseConfig.baz());
+            return builder;
+        }
+
         public CollectingKeysConfig.Builder foo(int foo) {
             this.foo = foo;
             return this;

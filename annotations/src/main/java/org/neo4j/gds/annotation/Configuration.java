@@ -32,7 +32,7 @@ public @interface Configuration {
 
     /**
      * Name of the generated class.
-     *
+     * <p>
      * If not manually set, the value is set to the
      * annotation class name with an "Impl" suffix:
      *
@@ -49,7 +49,7 @@ public @interface Configuration {
 
     /**
      * By default, a configuration field is resolved in the {@link org.neo4j.gds.core.CypherMapWrapper} parameter with the method name as the expected key.
-     * This annotation changes the key to lookup to use {@link org.neo4j.gds.annotation.Configuration.Key#value()} instead.
+     * This annotation changes the key to look up to use {@link org.neo4j.gds.annotation.Configuration.Key#value()} instead.
      */
     @Documented
     @Target(ElementType.METHOD)
@@ -67,7 +67,12 @@ public @interface Configuration {
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.CLASS)
     @interface ConvertWith {
-        String value();
+        String method();
+
+        String INVERSE_IS_TO_MAP = "__USE_TO_MAP_METHOD__";
+
+        // necessary if the ConvertWithMethod does not accept an already parsed value
+        String inverse() default "";
     }
 
     /**
@@ -127,7 +132,7 @@ public @interface Configuration {
     /**
      * The annotated method will be used to insert the implementation of validating a given graphStore.
      * The implementation calls each method annotated with {@link GraphStoreValidationCheck}.
-     *
+     * <p>
      * The method cannot be abstract but should have an empty body, and have exactly three parameter graphStore, selectedLabels, selectedRelationshipTypes.
      */
     @Documented
@@ -138,7 +143,7 @@ public @interface Configuration {
 
     /**
      * The annotated method will be used to insert the implementation of {@link org.neo4j.gds.annotation.Configuration.GraphStoreValidation} to verify the configuration is valid for the given graphStore.
-     *
+     * <p>
      * The method cannot be abstract and must have exactly three parameters (graphStore, selectedLabels, selectedRelationshipTypes).
      * The method is expected to throw an exception if the check failed.
      */

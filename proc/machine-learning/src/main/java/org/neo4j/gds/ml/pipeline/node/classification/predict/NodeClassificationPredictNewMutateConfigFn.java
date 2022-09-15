@@ -46,17 +46,9 @@ public class NodeClassificationPredictNewMutateConfigFn implements NewConfigFunc
         } else {
             var combinedFilter = generatePredictPipelineFilter(modelCatalog, modelName.get(), username, basePredictConfig);
 
-            return NodeClassificationPredictPipelineMutateConfigImpl.builder()
-                .graphName(basePredictConfig.graphName())
-                .modelName(basePredictConfig.modelName())
-                .usernameOverride(basePredictConfig.usernameOverride())
-                .concurrency(basePredictConfig.concurrency())
-                .jobId(basePredictConfig.jobId())
-                .modelUser(basePredictConfig.modelUser())
+            return NodeClassificationPredictPipelineMutateConfigImpl.Builder.from(basePredictConfig)
                 .targetNodeLabels(combinedFilter.nodeLabels())
                 .relationshipTypes(combinedFilter.relationshipTypes())
-                .predictedProbabilityProperty(basePredictConfig.predictedProbabilityProperty())
-                .mutateProperty(basePredictConfig.mutateProperty())
                 .build();
         }
     }

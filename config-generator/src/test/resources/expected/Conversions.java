@@ -111,6 +111,15 @@ public final class ConversionsConfig implements Conversions.MyConversion {
             this.config = new HashMap<>();
         }
 
+        public static ConversionsConfig.Builder from(Conversions.MyConversion baseConfig) {
+            var builder = new ConversionsConfig.Builder();
+            builder.directMethod(String.valueOf(baseConfig.directMethod()));
+            builder.inheritedMethod(String.valueOf(baseConfig.inheritedMethod()));
+            builder.qualifiedMethod(String.valueOf(baseConfig.qualifiedMethod()));
+            builder.referenceTypeAsResult(positive.Conversions.MyConversion.remove42(baseConfig.referenceTypeAsResult()));
+            return builder;
+        }
+
         public ConversionsConfig.Builder directMethod(String directMethod) {
             this.config.put("directMethod", directMethod);
             return this;

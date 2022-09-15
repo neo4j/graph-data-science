@@ -103,6 +103,14 @@ public final class NullableFieldsConfig implements NullableFields {
             this.config = new HashMap<>();
         }
 
+        public static NullableFieldsConfig.Builder from(NullableFields baseConfig) {
+            var builder = new NullableFieldsConfig.Builder();
+            builder.nullableRequiredField(baseConfig.nullableRequiredField());
+            builder.nullableDefaultField(baseConfig.nullableDefaultField());
+            builder.conversionCanReturnNull(baseConfig.conversionCanReturnNull());
+            return builder;
+        }
+
         public NullableFieldsConfig.Builder nullableRequiredField(String nullableRequiredField) {
             this.config.put("nullableRequiredField", nullableRequiredField);
             return this;

@@ -103,6 +103,14 @@ public final class ParametersConfig implements Parameters {
             this.config = new HashMap<>();
         }
 
+        public static ParametersConfig.Builder from(Parameters baseConfig) {
+            var builder = new ParametersConfig.Builder();
+            builder.keyFromParameter(baseConfig.keyFromParameter());
+            builder.keyFromMap(baseConfig.keyFromMap());
+            builder.parametersAreAddedFirst(baseConfig.parametersAreAddedFirst());
+            return builder;
+        }
+
         public ParametersConfig.Builder keyFromParameter(int keyFromParameter) {
             this.keyFromParameter = keyFromParameter;
             return this;

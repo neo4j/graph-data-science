@@ -33,7 +33,7 @@ import java.util.List;
 @SuppressWarnings("immutables:subtype")
 public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleThreadedRandomSeedConfig {
 
-    @Configuration.ConvertWith("org.neo4j.gds.similarity.knn.KnnNodePropertySpecParser#parse")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.similarity.knn.KnnNodePropertySpecParser#parse")
     @Configuration.ToMapValue("org.neo4j.gds.similarity.knn.KnnNodePropertySpecParser#render")
     List<KnnNodePropertySpec> nodeProperties();
 
@@ -101,7 +101,7 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleT
     }
 
     @Value.Default
-    @Configuration.ConvertWith("org.neo4j.gds.similarity.knn.KnnSampler.SamplerType#parse")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.similarity.knn.KnnSampler.SamplerType#parse")
     @Configuration.ToMapValue("org.neo4j.gds.similarity.knn.KnnSampler.SamplerType#toString")
     default KnnSampler.SamplerType initialSampler() {
         return KnnSampler.SamplerType.UNIFORM;

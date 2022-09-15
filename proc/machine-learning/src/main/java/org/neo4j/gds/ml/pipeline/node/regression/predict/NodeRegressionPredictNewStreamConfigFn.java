@@ -43,14 +43,7 @@ class NodeRegressionPredictNewStreamConfigFn implements NewConfigFunction<NodeRe
         } else {
             var combinedFilter = generatePredictPipelineFilter(modelCatalog, modelName.get(), username, basePredictConfig);
 
-            return NodeRegressionPredictPipelineBaseConfigImpl.builder()
-                .graphName(basePredictConfig.graphName())
-                .modelName(basePredictConfig.modelName())
-                .usernameOverride(basePredictConfig.usernameOverride())
-                .concurrency(basePredictConfig.concurrency())
-                .jobId(basePredictConfig.jobId())
-                .sudo(basePredictConfig.sudo())
-                .modelUser(basePredictConfig.modelUser())
+            return NodeRegressionPredictPipelineBaseConfigImpl.Builder.from(basePredictConfig)
                 .targetNodeLabels(combinedFilter.nodeLabels())
                 .relationshipTypes(combinedFilter.relationshipTypes())
                 .build();

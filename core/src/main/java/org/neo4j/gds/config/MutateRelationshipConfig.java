@@ -35,7 +35,7 @@ public interface MutateRelationshipConfig extends MutateConfig {
 
     String MUTATE_RELATIONSHIP_TYPE_KEY = "mutateRelationshipType";
 
-    @Configuration.ConvertWith("validateTypeIdentifier")
+    @Configuration.ConvertWith(method = "validateTypeIdentifier")
     String mutateRelationshipType();
 
     static @Nullable String validateTypeIdentifier(String input) {

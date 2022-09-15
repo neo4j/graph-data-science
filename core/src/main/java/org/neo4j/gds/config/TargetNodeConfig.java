@@ -34,7 +34,7 @@ public interface TargetNodeConfig extends NodeConfig {
 
     String TARGET_NODE_KEY = "targetNode";
 
-    @Configuration.ConvertWith("org.neo4j.gds.config.TargetNodeConfig#parseTargetNodeId")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.config.TargetNodeConfig#parseTargetNodeId")
     long targetNode();
 
     static long parseTargetNodeId(Object input) {

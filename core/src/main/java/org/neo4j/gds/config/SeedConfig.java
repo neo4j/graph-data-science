@@ -37,7 +37,7 @@ public interface SeedConfig {
     String SEED_PROPERTY_KEY = "seedProperty";
 
     @Value.Default
-    @Configuration.ConvertWith("validatePropertyName")
+    @Configuration.ConvertWith(method = "validatePropertyName")
     @Configuration.Key(SEED_PROPERTY_KEY)
     default @Nullable String seedProperty() {
         return null;

@@ -135,6 +135,17 @@ public final class MyConfigImpl implements Inheritance.MyConfig {
             this.config = new HashMap<>();
         }
 
+        public static MyConfigImpl.Builder from(Inheritance.MyConfig baseConfig) {
+            var builder = new MyConfigImpl.Builder();
+            builder.baseValue(baseConfig.baseValue());
+            builder.overriddenValue(baseConfig.overriddenValue());
+            builder.overwrittenValue(baseConfig.overwrittenValue());
+            builder.ignoredInBaseValue(baseConfig.ignoredInBaseValue());
+            builder.inheritedValue(baseConfig.inheritedValue());
+            builder.inheritedDefaultValue(baseConfig.inheritedDefaultValue());
+            return builder;
+        }
+
         public MyConfigImpl.Builder baseValue(String baseValue) {
             this.config.put("baseValue", baseValue);
             return this;

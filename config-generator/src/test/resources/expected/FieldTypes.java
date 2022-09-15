@@ -206,6 +206,23 @@ public final class FieldTypesConfig implements FieldTypes {
             this.config = new HashMap<>();
         }
 
+        public static FieldTypesConfig.Builder from(FieldTypes baseConfig) {
+            var builder = new FieldTypesConfig.Builder();
+            builder.aBoolean(baseConfig.aBoolean());
+            builder.aByte(baseConfig.aByte());
+            builder.aShort(baseConfig.aShort());
+            builder.anInt(baseConfig.anInt());
+            builder.aLong(baseConfig.aLong());
+            builder.aFloat(baseConfig.aFloat());
+            builder.aDouble(baseConfig.aDouble());
+            builder.aNumber(baseConfig.aNumber());
+            builder.aString(baseConfig.aString());
+            builder.aMap(baseConfig.aMap());
+            builder.aList(baseConfig.aList());
+            builder.anOptional(baseConfig.anOptional());
+            return builder;
+        }
+
         public FieldTypesConfig.Builder aBoolean(boolean aBoolean) {
             this.config.put("aBoolean", aBoolean);
             return this;

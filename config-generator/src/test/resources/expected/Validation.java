@@ -84,6 +84,12 @@ public final class ValidationConfig implements Validation {
             this.config = new HashMap<>();
         }
 
+        public static ValidationConfig.Builder from(Validation baseConfig) {
+            var builder = new ValidationConfig.Builder();
+            builder.foo(baseConfig.foo());
+            return builder;
+        }
+
         public ValidationConfig.Builder foo(int foo) {
             this.config.put("foo", foo);
             return this;

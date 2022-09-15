@@ -33,10 +33,10 @@ import static org.neo4j.gds.AbstractPropertyMappings.fromObject;
 @SuppressWarnings("immutables:subtype")
 public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
 
-    @Configuration.ConvertWith("parsePropertyNames")
+    @Configuration.ConvertWith(method = "parsePropertyNames")
     List<String> nodeProperties();
 
-    @Configuration.ConvertWith("org.neo4j.gds.scaling.ScalarScaler.Variant#lookup")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.scaling.ScalarScaler.Variant#lookup")
     @Configuration.ToMapValue("org.neo4j.gds.scaling.ScalarScaler.Variant#toString")
     ScalarScaler.Variant scaler();
 

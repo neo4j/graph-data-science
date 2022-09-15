@@ -134,15 +134,15 @@ final class GenerateConfiguration {
         }
 
         ClassName builderClassName = ClassName.get(packageName, generatedClassName + ".Builder");
-        TypeSpec configBuilderClass = GenerateConfigurationBuilder.defineConfigBuilder(
-            TypeName.get(config.rootType()),
-            implMembers,
-            builderClassName,
-            generatedClassName,
-            constructor.parameters,
-            configParameterName,
-            factory
-        );
+        TypeSpec configBuilderClass = new GenerateConfigurationBuilder(configParameterName)
+            .defineConfigBuilder(
+                TypeName.get(config.rootType()),
+                implMembers,
+                builderClassName,
+                generatedClassName,
+                constructor.parameters,
+                factory
+            );
 
         MethodSpec builderFactoryMethod = MethodSpec.methodBuilder("builder")
             .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
@@ -173,6 +173,7 @@ final class GenerateConfiguration {
 
     private static FieldDefinitions defineFields(ConfigParser.Spec config) {
         NameAllocator names = new NameAllocator();
+
         ImmutableFieldDefinitions.Builder builder = ImmutableFieldDefinitions.builder().names(names);
         config.members().stream().filter(ConfigParser.Member::isConfigValue).map(member ->
             FieldSpec.builder(
@@ -456,7 +457,7 @@ final class GenerateConfiguration {
             return memberDefinition(names, member, targetType);
         }
 
-        String converter = convertWith.value().trim();
+        String converter = convertWith.method().trim();
         if (converter.isEmpty()) {
             return converterError(method, "Empty conversion method is not allowed.");
         }
@@ -514,7 +515,7 @@ final class GenerateConfiguration {
         CharSequence methodName,
         boolean scanInheritance
     ) {
-        String converter = member.method().getAnnotation(ConvertWith.class).value();
+        String converter = member.method().getAnnotation(ConvertWith.class).method();
         List<ExecutableElement> validCandidates = new ArrayList<>();
         Collection<InvalidCandidate> invalidCandidates = new ArrayList<>();
         Deque<TypeElement> classesToSearch = new ArrayDeque<>();

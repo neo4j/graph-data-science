@@ -95,6 +95,10 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
         }
     }
 
+    public static Map<String, Object> toObject(AbstractPropertyMappings propertyMappings) {
+        return propertyMappings.toObject(true);
+    }
+
     public Set<String> propertyKeys() {
         return stream().map(PropertyMapping::propertyKey).collect(Collectors.toSet());
     }

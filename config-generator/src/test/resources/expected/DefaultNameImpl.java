@@ -40,6 +40,11 @@ public final class DefaultNameImpl implements DefaultName {
             this.config = new HashMap<>();
         }
 
+        public static DefaultNameImpl.Builder from(DefaultName baseConfig) {
+            var builder = new DefaultNameImpl.Builder();
+            return builder;
+        }
+
         public DefaultName build() {
             CypherMapWrapper config = CypherMapWrapper.create(this.config);
             return new DefaultNameImpl();

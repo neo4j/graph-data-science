@@ -46,14 +46,7 @@ class NodeClassificationPredictNewStreamConfigFn implements NewConfigFunction<No
         } else {
             var combinedFilter = generatePredictPipelineFilter(modelCatalog, modelName.get(), username, basePredictConfig);
 
-            return NodeClassificationPredictPipelineStreamConfigImpl.builder()
-                .graphName(basePredictConfig.graphName())
-                .modelName(modelName.get())
-                .concurrency(basePredictConfig.concurrency())
-                .jobId(basePredictConfig.jobId())
-                .modelUser(basePredictConfig.modelUser())
-                .usernameOverride(basePredictConfig.usernameOverride())
-                .includePredictedProbabilities(basePredictConfig.includePredictedProbabilities())
+            return NodeClassificationPredictPipelineStreamConfigImpl.Builder.from(basePredictConfig)
                 .targetNodeLabels(combinedFilter.nodeLabels())
                 .relationshipTypes(combinedFilter.relationshipTypes())
                 .build();

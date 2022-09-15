@@ -37,7 +37,7 @@ public interface NodeClassificationPipelineTrainConfig extends NodePropertyPipel
 
     long serialVersionUID = 0x42L;
 
-    @Configuration.ConvertWith("org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification.Parser#parse")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification.Parser#parse")
     @Configuration.ToMapValue("org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification#specificationsToString")
     List<ClassificationMetricSpecification> metrics();
 

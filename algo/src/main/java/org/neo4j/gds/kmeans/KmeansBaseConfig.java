@@ -90,7 +90,7 @@ public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, Rand
     }
 
     @Value.Default
-    @Configuration.ConvertWith("org.neo4j.gds.kmeans.KmeansSampler.SamplerType#parse")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.kmeans.KmeansSampler.SamplerType#parse")
     @Configuration.ToMapValue("org.neo4j.gds.kmeans.KmeansSampler.SamplerType#toString")
     default KmeansSampler.SamplerType initialSampler() {
         return KmeansSampler.SamplerType.UNIFORM;

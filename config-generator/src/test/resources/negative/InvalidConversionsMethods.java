@@ -24,7 +24,7 @@ import org.neo4j.gds.annotation.Configuration;
 @Configuration("InvalidConversionsMethodsConfig")
 public interface InvalidConversionsMethods {
 
-    @Configuration.ConvertWith("nonStatic")
+    @Configuration.ConvertWith(method = "nonStatic")
     int foo1();
 
     @Configuration.Ignore // so that it isn't picked up as a config value
@@ -33,7 +33,7 @@ public interface InvalidConversionsMethods {
     }
 
 
-    @Configuration.ConvertWith("generic")
+    @Configuration.ConvertWith(method = "generic")
     int foo2();
 
     static <A> A generic(String input) {
@@ -41,7 +41,7 @@ public interface InvalidConversionsMethods {
     }
 
 
-    @Configuration.ConvertWith("declaresThrows")
+    @Configuration.ConvertWith(method = "declaresThrows")
     int foo3();
 
     static int declaresThrows(String input) throws IllegalArgumentException {
@@ -49,7 +49,7 @@ public interface InvalidConversionsMethods {
     }
 
 
-    @Configuration.ConvertWith("noParameters")
+    @Configuration.ConvertWith(method = "noParameters")
     int foo4();
 
     static int noParameters() {
@@ -57,7 +57,7 @@ public interface InvalidConversionsMethods {
     }
 
 
-    @Configuration.ConvertWith("multipleParameters")
+    @Configuration.ConvertWith(method = "multipleParameters")
     int foo5();
 
     static int multipleParameters(String input, String input2) {
@@ -65,7 +65,7 @@ public interface InvalidConversionsMethods {
     }
 
 
-    @Configuration.ConvertWith("invalidReturnType1")
+    @Configuration.ConvertWith(method = "invalidReturnType1")
     int foo6();
 
     static String invalidReturnType1(String input) {
@@ -73,7 +73,7 @@ public interface InvalidConversionsMethods {
     }
 
 
-    @Configuration.ConvertWith("invalidReturnType2")
+    @Configuration.ConvertWith(method = "invalidReturnType2")
     int foo7();
 
     static long invalidReturnType2(String input) {
@@ -81,7 +81,7 @@ public interface InvalidConversionsMethods {
     }
 
 
-    @Configuration.ConvertWith("invalidReturnType3")
+    @Configuration.ConvertWith(method = "invalidReturnType3")
     int foo8();
 
     static double invalidReturnType3(String input) {
@@ -89,17 +89,17 @@ public interface InvalidConversionsMethods {
     }
 
 
-    @Configuration.ConvertWith("invalidReturnType4")
+    @Configuration.ConvertWith(method = "invalidReturnType4")
     int foo9();
 
     static void invalidReturnType4(String input) {
     }
 
 
-    @Configuration.ConvertWith("negative.InvalidConversionsMethods.Inner#privateMethod")
+    @Configuration.ConvertWith(method = "negative.InvalidConversionsMethods.Inner#privateMethod")
     int foo10();
 
-    @Configuration.ConvertWith("negative.InvalidConversionsMethods.Inner#packagePrivateMethod")
+    @Configuration.ConvertWith(method = "negative.InvalidConversionsMethods.Inner#packagePrivateMethod")
     int foo11();
 
     abstract class Inner {

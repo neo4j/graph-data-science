@@ -60,7 +60,10 @@ public final class KnnNodePropertySpecParser {
                     data.put((String) item, null);
                 } else if (item instanceof Map) {
                     data.putAll(parseMap((Map<?, ?>) item));
-                } else {
+                } else if (item instanceof KnnNodePropertySpec) {
+                    var spec = ((KnnNodePropertySpec) item);
+                    data.put(spec.name(), spec.metric().name());
+                }else {
                     throw new IllegalArgumentException(
                         formatWithLocale(
                             "Cannot construct KnnNodePropertySpec out of %s",

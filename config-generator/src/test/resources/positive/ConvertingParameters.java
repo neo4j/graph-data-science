@@ -24,7 +24,7 @@ import org.neo4j.gds.annotation.Configuration;
 @Configuration("ConvertingParametersConfig")
 public interface ConvertingParameters {
 
-    @Configuration.ConvertWith("toInt")
+    @Configuration.ConvertWith(method = "toInt", inverse = "String#valueOf")
     @Configuration.Parameter
     int parametersAreSubjectToConversion();
 

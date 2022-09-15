@@ -39,16 +39,16 @@ public interface Conversions {
     @Configuration("ConversionsConfig")
     interface MyConversion extends BaseConversion {
 
-        @Configuration.ConvertWith("toInt")
+        @Configuration.ConvertWith(method = "toInt", inverse = "String#valueOf")
         int directMethod();
 
-        @Configuration.ConvertWith("toIntBase")
+        @Configuration.ConvertWith(method = "toIntBase", inverse = "String#valueOf")
         int inheritedMethod();
 
-        @Configuration.ConvertWith("positive.Conversions.OtherConversion#toIntQual")
+        @Configuration.ConvertWith(method = "positive.Conversions.OtherConversion#toIntQual", inverse = "String#valueOf")
         int qualifiedMethod();
 
-        @Configuration.ConvertWith("add42")
+        @Configuration.ConvertWith(method = "add42", inverse = "positive.Conversions.MyConversion#remove42")
         String referenceTypeAsResult();
 
         static int toInt(String input) {
@@ -57,6 +57,10 @@ public interface Conversions {
 
         static String add42(String input) {
             return input + "42";
+        }
+
+        static String remove42(String input) {
+            return input.substring(0, input.length() - 2);
         }
     }
 }

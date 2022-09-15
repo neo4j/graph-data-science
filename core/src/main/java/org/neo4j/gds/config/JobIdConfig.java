@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 public interface JobIdConfig {
     @Value.Default
     @Value.Parameter(false)
-    @Configuration.ConvertWith("org.neo4j.gds.core.utils.progress.JobId#parse")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.core.utils.progress.JobId#parse")
     @Configuration.ToMapValue("org.neo4j.gds.core.utils.progress.JobId#asString")
     default JobId jobId() {
         return new JobId();

@@ -35,7 +35,7 @@ public interface BaseConfig extends ToMapConvertible {
 
     @Value.Parameter(false)
     @Configuration.Key("username")
-    @Configuration.ConvertWith("trim")
+    @Configuration.ConvertWith(method = "trim")
     Optional<String> usernameOverride();
 
     @Value.Default
