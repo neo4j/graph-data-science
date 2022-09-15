@@ -9,7 +9,7 @@ Additionally, GDS includes machine learning pipelines to train predictive superv
 [[introduction-tiers]]
 == API tiers
 
-The GDS API is made up from Cypher procedures and functions.
+The GDS API comprises Cypher procedures and functions.
 Each of these exist in one of three tiers of maturity:
 
 * Production-quality
