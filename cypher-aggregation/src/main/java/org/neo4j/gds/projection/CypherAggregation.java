@@ -81,7 +81,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
 import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.config.ConcurrencyConfig.DEFAULT_CONCURRENCY;
@@ -116,6 +120,8 @@ public final class CypherAggregation extends BaseProc {
         private @Nullable LazyIdMapBuilder idMapBuilder;
         private @Nullable List<RelationshipPropertySchema> relationshipPropertySchemas;
         private final Map<RelationshipType, RelationshipsBuilder> relImporters;
+        // Used for initializing builders
+        private final Lock lock;
 
         GraphAggregator(
             ProgressTimer progressTimer,
@@ -125,8 +131,9 @@ public final class CypherAggregation extends BaseProc {
             this.progressTimer = progressTimer;
             this.databaseId = databaseId;
             this.username = username;
-            this.relImporters = new HashMap<>();
+            this.relImporters = new ConcurrentHashMap<>();
             this.graphSchemaBuilder = ImmutableGraphSchema.builder();
+            this.lock = new ReentrantLock();
         }
 
         @UserAggregationUpdate
@@ -137,11 +144,7 @@ public final class CypherAggregation extends BaseProc {
             @Nullable @Name(value = "nodesConfig", defaultValue = "null") Map<String, Object> nodesConfig,
             @Nullable @Name(value = "relationshipConfig", defaultValue = "null") Map<String, Object> relationshipConfig
         ) {
-
-            if (this.graphName == null) {
-                validateGraphName(graphName);
-                this.graphName = graphName;
-            }
+            initGraphName(graphName);
 
             Map<String, Value> sourceNodePropertyValues = null;
             Map<String, Value> targetNodePropertyValues = null;
@@ -167,35 +170,13 @@ public final class CypherAggregation extends BaseProc {
                 }
             }
 
-            if (this.idMapBuilder == null) {
-                this.idMapBuilder = newIdMapBuilder(
-                    sourceNodeLabels,
-                    sourceNodePropertyValues,
-                    targetNodeLabels,
-                    targetNodePropertyValues
-                );
-            }
+            initIdMapBuilder(sourceNodePropertyValues, targetNodePropertyValues, sourceNodeLabels, targetNodeLabels);
 
             Map<String, Value> relationshipProperties = null;
             RelationshipType relationshipType = null;
 
             if (relationshipConfig != null) {
-                if (this.relationshipPropertySchemas == null) {
-                    this.relationshipPropertySchemas = new ArrayList<>();
-
-                    // We need to do this before extracting the `relationshipProperties`, because
-                    // we remove the original entry from the map during converting; also we remove null keys
-                    // so we could not create a schema entry for properties that are absent on the current relationship
-                    var relationshipPropertyKeys = relationshipConfig.get("properties");
-                    if (relationshipPropertyKeys instanceof Map) {
-                        for (var propertyKey : ((Map<?, ?>) relationshipPropertyKeys).keySet()) {
-                            this.relationshipPropertySchemas.add(RelationshipPropertySchema.of(
-                                String.valueOf(propertyKey),
-                                ValueType.DOUBLE
-                            ));
-                        }
-                    }
-                }
+                initRelationshipPropertySchemas(relationshipConfig);
 
                 relationshipProperties = propertiesConfig("properties", relationshipConfig);
                 relationshipType = typeConfig("relationshipType", relationshipConfig);
@@ -233,6 +214,65 @@ public final class CypherAggregation extends BaseProc {
                     }
                 } else {
                     relImporter.addFromInternal(intermediateSourceId, intermediateTargetId);
+                }
+            }
+        }
+
+        private void initRelationshipPropertySchemas(@NotNull Map<String, Object> relationshipConfig) {
+            initObjectUnderLock(() -> this.relationshipPropertySchemas, () -> {
+                this.relationshipPropertySchemas = new ArrayList<>();
+
+                // We need to do this before extracting the `relationshipProperties`, because
+                // we remove the original entry from the map during converting; also we remove null keys
+                // so we could not create a schema entry for properties that are absent on the current relationship
+                var relationshipPropertyKeys = relationshipConfig.get("properties");
+                if (relationshipPropertyKeys instanceof Map) {
+                    for (var propertyKey : ((Map<?, ?>) relationshipPropertyKeys).keySet()) {
+                        this.relationshipPropertySchemas.add(RelationshipPropertySchema.of(
+                            String.valueOf(propertyKey),
+                            ValueType.DOUBLE
+                        ));
+                    }
+                }
+            });
+        }
+
+        private void initGraphName(String graphName) {
+            initObjectUnderLock(() -> this.graphName, () -> {
+                validateGraphName(graphName);
+                this.graphName = graphName;
+            });
+        }
+
+        private void initIdMapBuilder(
+            Map<String, Value> sourceNodePropertyValues,
+            Map<String, Value> targetNodePropertyValues,
+            @Nullable NodeLabelToken sourceNodeLabels,
+            @Nullable NodeLabelToken targetNodeLabels
+        ) {
+            initObjectUnderLock(() -> this.idMapBuilder, () -> {
+                this.idMapBuilder = newIdMapBuilder(
+                    sourceNodeLabels,
+                    sourceNodePropertyValues,
+                    targetNodeLabels,
+                    targetNodePropertyValues
+                );
+            });
+        }
+
+        /**
+         * Performs double-checked locking and executes the
+         * given code which initializes the object.
+         */
+        private void initObjectUnderLock(Supplier<Object> s, Runnable code) {
+            if (s.get() == null) {
+                this.lock.lock();
+                try {
+                    if (s.get() == null) {
+                        code.run();
+                    }
+                } finally {
+                    this.lock.unlock();
                 }
             }
         }
