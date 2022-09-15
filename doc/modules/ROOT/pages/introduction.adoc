@@ -4,8 +4,7 @@
 
 
 The Neo4j Graph Data Science (GDS) library provides efficiently implemented, parallel versions of common graph algorithms, exposed as Cypher procedures.
-Additionally, GDS includes machine learning pipelines to train predictive supervised models to classify nodes or predict missing relationships.
-
+Additionally, GDS includes machine learning pipelines to train predictive supervised models to solve graph problems, such as predicting missing relationships.
 
 [[introduction-tiers]]
 == API tiers
