@@ -201,9 +201,11 @@ CREATE
   (pink:UnknownHouse {color: 'Pink', sizePerStory: [23.2, 55.1, 56.1]}),
   (tan:UnknownHouse {color: 'Tan', sizePerStory: [22.32, 102.0, 0.0]}),
   (yellow:UnknownHouse {color: 'Yellow', sizePerStory: [39.0, 0.0, 0.0]}),
-  (schiele:Painter {name: 'Schiele', surrealist: 0, expressionist: 1}),
-  (picasso:Painter {name: 'Picasso', surrealist: 1, expressionist: 0}),
-  (kahlo:Painter {name: 'Kahlo', surrealist: 1, expressionist: 0}),
+
+  // richer context
+  (schiele:Painter {name: 'Schiele'}),
+  (picasso:Painter {name: 'Picasso'}),
+  (kahlo:Painter {name: 'Kahlo'}),
 
   (schiele)-[:PAINTED]->(gold),
   (schiele)-[:PAINTED]->(red),
