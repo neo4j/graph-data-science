@@ -40,6 +40,10 @@ public abstract class LabeledIdMap implements IdMap {
         this.nodeCount = nodeCount;
     }
 
+    public LabelInformation labelInformation() {
+        return this.labelInformation;
+    }
+
     @Override
     public long nodeCount() {
         return nodeCount;

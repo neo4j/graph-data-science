@@ -169,7 +169,7 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public Optional<? extends FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    public Optional<FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         return graph.withFilteredLabels(nodeLabels, concurrency);
     }
 

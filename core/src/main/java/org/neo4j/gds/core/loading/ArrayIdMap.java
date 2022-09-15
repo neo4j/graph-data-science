@@ -33,7 +33,6 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 
@@ -121,7 +120,7 @@ public class ArrayIdMap extends LabeledIdMap {
     }
 
     @Override
-    public Optional<FilteredArrayIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    public Optional<FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         labelInformation.validateNodeLabelFilter(nodeLabels);
 
         if (labelInformation.isEmpty()) {
@@ -149,85 +148,14 @@ public class ArrayIdMap extends LabeledIdMap {
 
         LabelInformation newLabelInformation = labelInformation.filter(nodeLabels);
 
-        return Optional.of(new FilteredArrayIdMap(
-            this,
+        var rootToFilteredIdMap = new ArrayIdMap(
             newGraphIds,
             newNodeToGraphIds,
             newLabelInformation,
             newNodeCount,
             highestNeoId
-        ));
-    }
+        );
 
-    private static class FilteredArrayIdMap extends ArrayIdMap implements FilteredIdMap {
-
-        private final IdMap rootIdMap;
-
-        FilteredArrayIdMap(
-            IdMap rootIdMap,
-            HugeLongArray graphIds,
-            HugeSparseLongArray nodeToGraphIds,
-            LabelInformation filteredLabelInformation,
-            long nodeCount,
-            long highestNeoId
-        ) {
-            super(graphIds, nodeToGraphIds, filteredLabelInformation, nodeCount, highestNeoId);
-            this.rootIdMap = rootIdMap;
-        }
-
-        @Override
-        public List<NodeLabel> nodeLabels(long mappedNodeId) {
-            return super.nodeLabels(super.toOriginalNodeId(mappedNodeId));
-        }
-
-        @Override
-        public void forEachNodeLabel(long mappedNodeId, NodeLabelConsumer consumer) {
-            super.forEachNodeLabel(super.toOriginalNodeId(mappedNodeId), consumer);
-        }
-
-        @Override
-        public OptionalLong rootNodeCount() {
-            return rootIdMap.rootNodeCount();
-        }
-
-        @Override
-        public long toRootNodeId(long mappedNodeId) {
-            return super.toOriginalNodeId(mappedNodeId);
-        }
-
-        @Override
-        public long toFilteredNodeId(long rootNodeId) {
-            return super.toMappedNodeId(rootNodeId);
-        }
-
-        @Override
-        public long toOriginalNodeId(long mappedNodeId) {
-            return rootIdMap.toOriginalNodeId(super.toOriginalNodeId(mappedNodeId));
-        }
-
-        @Override
-        public long toMappedNodeId(long originalNodeId) {
-            return super.toMappedNodeId(rootIdMap.toMappedNodeId(originalNodeId));
-        }
-
-        @Override
-        public boolean contains(long originalNodeId) {
-            return super.contains(rootIdMap.toMappedNodeId(originalNodeId));
-        }
-
-        @Override
-        public boolean containsRootNodeId(long rootNodeId) {
-            return super.contains(rootNodeId);
-        }
-
-        @Override
-        public IdMap rootIdMap() {
-            return rootIdMap.rootIdMap();
-        }
-
-        @Override
-        public boolean hasLabel(long mappedNodeId, NodeLabel label) {
-            return super.hasLabel(super.toOriginalNodeId(mappedNodeId), label);
-        }
+        return Optional.of(new FilteredLabeledIdMap(this, rootToFilteredIdMap));
     }
 }

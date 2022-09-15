@@ -541,7 +541,7 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
-    public Optional<? extends FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    public Optional<FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         return idMap.withFilteredLabels(nodeLabels, concurrency);
     }
 

@@ -104,7 +104,7 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
      */
     IdMap rootIdMap();
 
-    default Optional<? extends FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    default Optional<FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         throw new UnsupportedOperationException("This node mapping does not support label filtering");
     }
 

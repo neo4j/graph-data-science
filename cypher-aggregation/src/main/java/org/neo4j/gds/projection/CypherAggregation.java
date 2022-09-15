@@ -768,7 +768,7 @@ class HighLimitIdMap extends IdMapAdapter {
     }
 
     @Override
-    public Optional<FilteredHighLimitIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    public Optional<FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         return super.withFilteredLabels(nodeLabels, concurrency)
             .map(filteredIdMap -> new FilteredHighLimitIdMap(this.highToLowIdSpace, filteredIdMap));
     }
