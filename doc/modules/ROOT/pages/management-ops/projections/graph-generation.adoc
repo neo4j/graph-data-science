@@ -1,6 +1,6 @@
 [[graph-generation]]
 [.beta]
-= Graph Generation
+= Random graph generation
 :description: This section describes how random graphs can be generated in the Neo4j Graph Data Science library.
 
 
