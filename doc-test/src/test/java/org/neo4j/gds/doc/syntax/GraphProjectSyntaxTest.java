@@ -32,6 +32,6 @@ class GraphProjectSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/graph-project.adoc";
+        return "pages/management-ops/projections/graph-project.adoc";
     }
 }

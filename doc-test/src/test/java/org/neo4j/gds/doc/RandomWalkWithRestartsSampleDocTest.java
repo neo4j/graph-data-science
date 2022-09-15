@@ -36,7 +36,7 @@ final class RandomWalkWithRestartsSampleDocTest extends SingleFileDocTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/algorithms/alpha/rwr.adoc";
+        return "pages/management-ops/projections/rwr.adoc";
     }
 
 }

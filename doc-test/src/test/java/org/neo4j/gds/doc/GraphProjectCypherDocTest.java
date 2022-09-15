@@ -39,6 +39,6 @@ class GraphProjectCypherDocTest extends SingleFileDocTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/graph-project-cypher.adoc";
+        return "pages/management-ops/projections/graph-project-cypher.adoc";
     }
 }
