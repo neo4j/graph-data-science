@@ -39,6 +39,6 @@ class GraphProjectDocTest extends SingleFileDocTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/graph-project.adoc";
+        return "pages/management-ops/projections/graph-project.adoc";
     }
 }

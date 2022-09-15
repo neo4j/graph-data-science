@@ -82,7 +82,7 @@ CREATE
   (alice)-[:KNOWS]->(carl)
 ----
 
-We will now load a graph projection of the created graph via the xref:graph-project.adoc[graph project] procedure:
+We will now load a graph projection of the created graph via the xref:management-ops/projections/graph-project.adoc[graph project] procedure:
 
 .Project `Person` nodes and `KNOWS` relationships:
 [source, cypher, role=noplay]

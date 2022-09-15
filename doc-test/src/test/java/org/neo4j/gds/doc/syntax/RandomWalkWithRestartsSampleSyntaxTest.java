@@ -32,6 +32,6 @@ class RandomWalkWithRestartsSampleSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/algorithms/alpha/rwr.adoc";
+        return "pages/management-ops/projections/rwr.adoc";
     }
 }

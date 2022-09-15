@@ -18,10 +18,10 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 Sometimes it may be useful to have a smaller but structurally representative sample of a given graph.
 For instance, such a sample could be used to train an inductive embedding algorithm (such as a graph neural network, like xref:machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE]). The training would then be faster than when training on the entire graph, and then the trained model could still be used to predict embeddings on the entire graph.
 
-Random walk with restarts (RWR) samples the graph by taking random walks from a set of start nodes (see the xref:algorithms/alpha/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`startNodes`] parameter below).
-On each step of a random walk, there is some probability (see the xref:algorithms/alpha/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`restartProbability`] parameter below) that the walk stops, and a new walk from one of the start nodes starts instead (i.e. the walk restarts).
+Random walk with restarts (RWR) samples the graph by taking random walks from a set of start nodes (see the xref:management-ops/projections/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`startNodes`] parameter below).
+On each step of a random walk, there is some probability (see the xref:management-ops/projections/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`restartProbability`] parameter below) that the walk stops, and a new walk from one of the start nodes starts instead (i.e. the walk restarts).
 Each node visited on these walks will be part of the sampled subgraph.
-The algorithm stops walking when the requested number of nodes have been visited (see the xref:algorithms/alpha/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`samplingRatio`] parameter below).
+The algorithm stops walking when the requested number of nodes have been visited (see the xref:management-ops/projections/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`samplingRatio`] parameter below).
 The relationships of the sampled subgraph are those induced by the sampled nodes (i.e. the relationships of the original graph that connect nodes that have been sampled).
 
 If at some point it's very unlikely to visit new nodes by random walking from the current set of start nodes (possibly due to the original graph being disconnected), the algorithm will lazily expand the pool of start nodes one at a time by picking nodes uniformly at random from the original graph.
@@ -36,14 +36,14 @@ Random walk with restarts is sometimes also referred to as _rooted_ or _personal
 
 === Relationship weights
 
-If the graph is weighted and xref:algorithms/alpha/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`relationshipWeightProperty`]  is specified, the random walks are weighted.
+If the graph is weighted and xref:management-ops/projections/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`relationshipWeightProperty`]  is specified, the random walks are weighted.
 This means that the probability of walking along a relationship is the weight of that relationship divided by the sum of weights of outgoing relationships from the current node.
 
 
 === Node label stratification
 
 In some cases it may be desirable for the sampled graph to preserve the distribution of node labels of the original graph.
-To enable such stratification, one can set xref:algorithms/alpha/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`nodeLabelStratification`] to `true` in the algorithm configuration.
+To enable such stratification, one can set xref:management-ops/projections/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`nodeLabelStratification`] to `true` in the algorithm configuration.
 The stratified sampling is performed by only adding a node to the sampled graph if more nodes of that node's particular set of labels are needed to uphold the node label distribution of the original graph.
 
 By default, the algorithm treats all nodes in the same way no matter how they are labeled and makes no special effort to preserve the node label distribution of the original graph.

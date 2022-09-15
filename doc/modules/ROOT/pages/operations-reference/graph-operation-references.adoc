@@ -8,7 +8,7 @@
 [opts=header,cols="1, 1"]
 |===
 |Description | Operation
-.5+<.^|xref:graph-project.adoc[Project Graph]
+.5+<.^|xref:management-ops/projections/graph-project.adoc[Project Graph]
 | `gds.graph.project`
 | `gds.graph.project.estimate`
 | `gds.graph.project.cypher`
@@ -53,8 +53,8 @@
 [opts=header,cols="1, 1"]
 |===
 |Description                                | Operation
-|xref:graph-project-subgraph.adoc[Project a graph from a graph in the catalog] | `gds.beta.graph.project.subgraph`
-|xref:alpha-algorithms/graph-generation.adoc[Generate Random Graph]| `gds.beta.graph.generate`
+|xref:management-ops/projections/graph-project-subgraph.adoc[Project a graph from a graph in the catalog] | `gds.beta.graph.project.subgraph`
+|xref:management-ops/projections/graph-generation.adoc[Generate Random Graph]| `gds.beta.graph.generate`
 .2+<.^|xref:graph-catalog-export-ops.adoc#catalog-graph-export-csv[CSV Export]
 | `gds.beta.graph.export.csv`
 | `gds.beta.graph.export.csv.estimate`
