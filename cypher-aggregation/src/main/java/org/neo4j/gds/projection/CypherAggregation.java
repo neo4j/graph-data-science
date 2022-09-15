@@ -173,7 +173,7 @@ public final class CypherAggregation extends BaseProc {
             initIdMapBuilder(sourceNodePropertyValues, targetNodePropertyValues, sourceNodeLabels, targetNodeLabels);
 
             Map<String, Value> relationshipProperties = null;
-            RelationshipType relationshipType = null;
+            RelationshipType relationshipType = RelationshipType.ALL_RELATIONSHIPS;
 
             if (relationshipConfig != null) {
                 initRelationshipPropertySchemas(relationshipConfig);
@@ -353,7 +353,7 @@ public final class CypherAggregation extends BaseProc {
             return nodeLabelToken;
         }
 
-        private @Nullable RelationshipType typeConfig(
+        private RelationshipType typeConfig(
             @SuppressWarnings("SameParameterValue") String relationshipTypeKey,
             @NotNull Map<String, Object> relationshipConfig
         ) {
@@ -362,7 +362,7 @@ public final class CypherAggregation extends BaseProc {
                 return RelationshipType.of((String) relationshipTypeEntry);
             }
             if (relationshipTypeEntry == null) {
-                return null;
+                return RelationshipType.ALL_RELATIONSHIPS;
             }
             throw new IllegalArgumentException(formatWithLocale(
                 "The value of `%s` must be `String`, but was `%s`.",
@@ -604,11 +604,9 @@ public final class CypherAggregation extends BaseProc {
                     Objects.requireNonNullElse(this.relationshipPropertySchemas, List.of())
                 );
 
-                var relType = relationshipType == null ? RelationshipType.ALL_RELATIONSHIPS : relationshipType;
-
                 propertyStore.relationshipProperties().forEach((propertyKey, relationshipProperties) -> {
                     relationshipSchemaBuilder.addProperty(
-                        relType,
+                        relationshipType,
                         // We do not analyze the cypher query for its orientation
                         NATURAL,
                         propertyKey,
@@ -616,8 +614,8 @@ public final class CypherAggregation extends BaseProc {
                     );
                 });
 
-                graphStoreBuilder.putRelationships(relType, allRelationships.get(0).topology());
-                graphStoreBuilder.putRelationshipPropertyStores(relType, propertyStore);
+                graphStoreBuilder.putRelationships(relationshipType, allRelationships.get(0).topology());
+                graphStoreBuilder.putRelationshipPropertyStores(relationshipType, propertyStore);
             });
             graphSchemaBuilder.relationshipSchema(relationshipSchemaBuilder.build());
 
