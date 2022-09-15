@@ -33,7 +33,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface TargetNodePropertyConfig {
 
-    @Configuration.ConvertWith("validateProperty")
+    @Configuration.ConvertWith(method = "validateProperty")
     String targetProperty();
 
     static @Nullable String validateProperty(String input) {

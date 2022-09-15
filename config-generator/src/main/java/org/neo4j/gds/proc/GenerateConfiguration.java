@@ -134,9 +134,7 @@ final class GenerateConfiguration {
         }
 
         ClassName builderClassName = ClassName.get(packageName, generatedClassName + ".Builder");
-        TypeSpec configBuilderClass = new GenerateConfigurationBuilder(
-            configParameterName,
-            (String error, Element member) -> messager.printMessage(Diagnostic.Kind.ERROR, error, member))
+        TypeSpec configBuilderClass = new GenerateConfigurationBuilder(configParameterName)
             .defineConfigBuilder(
                 TypeName.get(config.rootType()),
                 implMembers,
@@ -459,7 +457,7 @@ final class GenerateConfiguration {
             return memberDefinition(names, member, targetType);
         }
 
-        String converter = convertWith.value().trim();
+        String converter = convertWith.method().trim();
         if (converter.isEmpty()) {
             return converterError(method, "Empty conversion method is not allowed.");
         }
@@ -517,7 +515,7 @@ final class GenerateConfiguration {
         CharSequence methodName,
         boolean scanInheritance
     ) {
-        String converter = member.method().getAnnotation(ConvertWith.class).value();
+        String converter = member.method().getAnnotation(ConvertWith.class).method();
         List<ExecutableElement> validCandidates = new ArrayList<>();
         Collection<InvalidCandidate> invalidCandidates = new ArrayList<>();
         Deque<TypeElement> classesToSearch = new ArrayDeque<>();

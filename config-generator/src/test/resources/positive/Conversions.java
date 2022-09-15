@@ -39,20 +39,16 @@ public interface Conversions {
     @Configuration("ConversionsConfig")
     interface MyConversion extends BaseConversion {
 
-        @Configuration.ConvertWith("toInt")
-        @Configuration.ToMapValue("String#valueOf")
+        @Configuration.ConvertWith(method = "toInt", inverse = "String#valueOf")
         int directMethod();
 
-        @Configuration.ConvertWith("toIntBase")
-        @Configuration.ToMapValue("String#valueOf")
+        @Configuration.ConvertWith(method = "toIntBase", inverse = "String#valueOf")
         int inheritedMethod();
 
-        @Configuration.ConvertWith("positive.Conversions.OtherConversion#toIntQual")
-        @Configuration.ToMapValue("String#valueOf")
+        @Configuration.ConvertWith(method = "positive.Conversions.OtherConversion#toIntQual", inverse = "String#valueOf")
         int qualifiedMethod();
 
-        @Configuration.ConvertWith("add42")
-        @Configuration.ToMapValue("positive.Conversions.MyConversion#remove42")
+        @Configuration.ConvertWith(method = "add42", inverse = "positive.Conversions.MyConversion#remove42")
         String referenceTypeAsResult();
 
         static int toInt(String input) {

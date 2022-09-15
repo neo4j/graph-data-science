@@ -31,16 +31,13 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -50,12 +47,10 @@ import static com.google.auto.common.MoreTypes.isTypeOf;
 final class GenerateConfigurationBuilder {
 
     private final String configParameterName;
-    private final BiConsumer<String, Element> errorConsumer;
     private final NameAllocator names;
 
-    GenerateConfigurationBuilder(String configParameterName, BiConsumer<String, Element> errorConsumer) {
+    GenerateConfigurationBuilder(String configParameterName) {
         this.configParameterName = configParameterName;
-        this.errorConsumer = errorConsumer;
         this.names = new NameAllocator();
     }
 
@@ -137,75 +132,51 @@ final class GenerateConfigurationBuilder {
         configImplMethods
             .stream()
             .filter(memberDefinition -> memberDefinition.member().isConfigValue())
-            .forEach(configMember -> {
-                // This only catches class equivalence but not subclasses or annotated classes
-                boolean typeDoesNotChange = typeWithoutAnnotations(configMember.fieldType()).equals(
-                    typeWithoutAnnotations(configMember.parameterType()));
-                boolean isConverted = configMember
-                                          .member()
-                                          .method()
-                                          .getAnnotation(Configuration.ConvertWith.class) != null;
-                if (typeDoesNotChange && !isConverted) {
-                    builder.addStatement(
-                        "$1N.$2N($3N.$2N())",
-                        builderVarName,
-                        configMember.member().methodName(),
-                        baseConfigVarName
-                    );
-                } else {
-                    getToMapValueMethod(configMember.member()).ifPresentOrElse(
-                        toRawInputConverter -> {
-                            // Configuration.toMap method transforms parsed input back into raw input
-                            // this is necessary as the builder only accepts the raw user input
-                            if (isTypeOf(Optional.class, configMember.fieldType())) {
-                                builder.addStatement(
-                                    "$1N.$2N($3N.$2N().map($4N -> $5N($4N)))",
-                                    builderVarName,
-                                    configMember.member().methodName(),
-                                    baseConfigVarName,
-                                    lambdaVarName,
-                                    toRawInputConverter
-                                );
-                            } else {
-                                builder.addStatement(
-                                    "$1N.$2N($3N($4N.$2N()))",
-                                    builderVarName,
-                                    configMember.member().methodName(),
-                                    toRawInputConverter,
-                                    baseConfigVarName
-                                );
-                            }
-                        },
-                        () -> errorConsumer.accept(
-                            String.format(
-                                Locale.US,
-                                "Expected a ToMapValue method as field type '%s' differs from input type '%s' of the config value",
-                                configMember.fieldType(),
-                                configMember.parameterType()
-                            ),
-                            configMember.member().method()
-                        )
-                    );
-                }
-            });
+            .forEach(configMember -> getInverseMethod(configMember.member()).ifPresentOrElse(
+                toRawConverter -> {
+                    if (isTypeOf(Optional.class, configMember.fieldType())) {
+                        builder.addStatement(
+                            "$1N.$2N($3N.$2N().map($4N -> $5N($4N)))",
+                            builderVarName,
+                            configMember.member().methodName(),
+                            baseConfigVarName,
+                            lambdaVarName,
+                            toRawConverter
+                        );
+                    } else {
+                        builder.addStatement(
+                            "$1N.$2N($3N($4N.$2N()))",
+                            builderVarName,
+                            configMember.member().methodName(),
+                            toRawConverter,
+                            baseConfigVarName
+                        );
+                    }
+
+                },
+                () -> builder.addStatement(
+                    "$1N.$2N($3N.$2N())",
+                    builderVarName,
+                    configMember.member().methodName(),
+                    baseConfigVarName
+                )
+            ));
 
         builder.addStatement("return $N", builderVarName);
 
         return builder.build();
     }
 
-    private static String typeWithoutAnnotations(TypeMirror type) {
-        String[] typeParts = type.toString().split(" ");
-
-        // assuming annotations come first
-        return typeParts[typeParts.length - 1];
-    }
-
     @NotNull
-    private static Optional<String> getToMapValueMethod(ConfigParser.Member configMember) {
+    private static Optional<String> getInverseMethod(ConfigParser.Member configMember) {
         return Optional
-            .ofNullable(configMember.method().getAnnotation(Configuration.ToMapValue.class))
-            .map(i -> i.value().replace('#', '.'));
+            .ofNullable(configMember.method().getAnnotation(Configuration.ConvertWith.class))
+            .map(i -> i.inverse().equals(Configuration.ConvertWith.INVERSE_IS_TO_MAP)
+                ? configMember.method().getAnnotation(Configuration.ToMapValue.class).value()
+                : i.inverse()
+            )
+            .map(i -> i.replace('#', '.'))
+            .filter(i -> !i.isBlank());
     }
 
     private static List<MethodSpec> defineConfigParameterSetters(

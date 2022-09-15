@@ -107,7 +107,7 @@ public final class NullableFieldsConfig implements NullableFields {
             var builder = new NullableFieldsConfig.Builder();
             builder.nullableRequiredField(baseConfig.nullableRequiredField());
             builder.nullableDefaultField(baseConfig.nullableDefaultField());
-            builder.conversionCanReturnNull(positive.NullableFields.toInputString(baseConfig.conversionCanReturnNull()));
+            builder.conversionCanReturnNull(baseConfig.conversionCanReturnNull());
             return builder;
         }
 

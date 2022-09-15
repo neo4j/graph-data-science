@@ -175,13 +175,13 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
         }
 
         @Value.Default
-        @Configuration.ConvertWith("validateHubProperty")
+        @Configuration.ConvertWith(method = "validateHubProperty")
         default String hubProperty() {
             return "hub";
         }
 
         @Value.Default
-        @Configuration.ConvertWith("validateAuthProperty")
+        @Configuration.ConvertWith(method = "validateAuthProperty")
         default String authProperty() {
             return "auth";
         }

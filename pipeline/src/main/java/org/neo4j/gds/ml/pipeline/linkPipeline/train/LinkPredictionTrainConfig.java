@@ -88,7 +88,7 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, GraphNameConf
         return Stream.of(sourceNodeLabel(), targetNodeLabel()).distinct().collect(Collectors.toList());
     }
 
-    @Configuration.ConvertWith("org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig#namesToMetrics")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig#namesToMetrics")
     @Configuration.ToMapValue("org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig#metricsToNames")
     default List<Metric> metrics() {
         return List.of(LinkMetric.AUCPR);

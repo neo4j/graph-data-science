@@ -34,8 +34,7 @@ import static org.neo4j.gds.config.ConfigNodesValidations.validateNodes;
 public interface SourceNodesConfig {
 
     @Value.Default
-    @Configuration.ConvertWith("org.neo4j.gds.config.NodeIdsParser#parseNodeIds")
-    @Configuration.ToMapValue("org.neo4j.gds.config.NodeIdsParser#nodeIdsToObject")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.config.NodeIdsParser#parseNodeIds")
     default List<Long> sourceNodes() {
         return Collections.emptyList();
     }

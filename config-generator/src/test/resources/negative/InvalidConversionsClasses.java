@@ -24,10 +24,10 @@ import org.neo4j.gds.annotation.Configuration;
 @Configuration("InvalidConversionsClassesConfig")
 public interface InvalidConversionsClasses {
 
-    @Configuration.ConvertWith("")
+    @Configuration.ConvertWith(method = "")
     int emptyConverter();
 
-    @Configuration.ConvertWith("multipleOverloads")
+    @Configuration.ConvertWith(method = "multipleOverloads")
     int multi();
 
     static int multipleOverloads(String input) {
@@ -38,21 +38,21 @@ public interface InvalidConversionsClasses {
         return 42;
     }
 
-    @Configuration.ConvertWith("negative.class.does.not.exist#foo")
+    @Configuration.ConvertWith(method = "negative.class.does.not.exist#foo")
     int classDoesNotExist();
 
-    @Configuration.ConvertWith("methodDoesNotExist")
+    @Configuration.ConvertWith(method = "methodDoesNotExist")
     int converterMethodDoesNotExist();
 
-    @Configuration.ConvertWith("negative.InvalidConversionsClasses#methodDoesNotExist")
+    @Configuration.ConvertWith(method = "negative.InvalidConversionsClasses#methodDoesNotExist")
     int fullQualifiedConverterMethodDoesNotExist();
 
-    @Configuration.ConvertWith("negative.InvalidConversionsClasses#")
+    @Configuration.ConvertWith(method = "negative.InvalidConversionsClasses#")
     int missingMethodName();
 
-    @Configuration.ConvertWith("negative.InvalidConversionsClasses.invalidIdentifier")
+    @Configuration.ConvertWith(method = "negative.InvalidConversionsClasses.invalidIdentifier")
     int dotMakesIdentifierInvalid();
 
-    @Configuration.ConvertWith("negative.invalid identifier")
+    @Configuration.ConvertWith(method = "negative.invalid identifier")
     int spaceMakesIdentifierInvalid();
 }

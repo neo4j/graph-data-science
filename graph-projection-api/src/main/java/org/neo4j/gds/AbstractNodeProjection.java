@@ -68,6 +68,10 @@ public abstract class AbstractNodeProjection extends ElementProjection {
 
             return fromMap(caseInsensitiveMap, nodeLabel);
         }
+        if (object instanceof NodeProjection) {
+            return ((NodeProjection) object);
+        }
+
         throw new IllegalArgumentException(StringFormatting.formatWithLocale(
             "Cannot construct a node filter out of a %s",
             object.getClass().getName()
@@ -130,9 +134,7 @@ public abstract class AbstractNodeProjection extends ElementProjection {
             if (propertiesBuilder == null) {
                 propertiesBuilder = new InlinePropertiesBuilder(
                     () -> this.properties,
-                    newProperties -> {
-                        this.properties = newProperties;
-                    }
+                    newProperties -> this.properties = newProperties
                 );
             }
             return propertiesBuilder;

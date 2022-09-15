@@ -33,11 +33,10 @@ import static org.neo4j.gds.AbstractPropertyMappings.fromObject;
 @SuppressWarnings("immutables:subtype")
 public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
 
-    @Configuration.ConvertWith("parsePropertyNames")
-    @Configuration.ToMapValue("org.neo4j.gds.scaling.ScalePropertiesBaseConfig#nodePropertiesToObject")
+    @Configuration.ConvertWith(method = "parsePropertyNames")
     List<String> nodeProperties();
 
-    @Configuration.ConvertWith("org.neo4j.gds.scaling.ScalarScaler.Variant#lookup")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.scaling.ScalarScaler.Variant#lookup")
     @Configuration.ToMapValue("org.neo4j.gds.scaling.ScalarScaler.Variant#toString")
     ScalarScaler.Variant scaler();
 
@@ -48,10 +47,5 @@ public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
             .stream()
             .map(PropertyMapping::propertyKey)
             .collect(Collectors.toList());
-    }
-
-    // necessary as input of ConvertWith type has to match ToMapValue type
-    static Object nodePropertiesToObject(List<String> nodeProperties) {
-        return nodeProperties;
     }
 }

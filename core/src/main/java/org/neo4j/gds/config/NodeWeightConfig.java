@@ -30,15 +30,14 @@ import org.neo4j.gds.utils.StringJoining;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
 import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface NodeWeightConfig {
 
     @Value.Default
-    @Configuration.ConvertWith("validatePropertyName")
+    @Configuration.ConvertWith(method = "validatePropertyName")
     default @Nullable String nodeWeightProperty() {
         return null;
     }

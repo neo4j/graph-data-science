@@ -29,7 +29,7 @@ public interface WritePropertyConfig extends WriteConfig {
 
     String WRITE_PROPERTY_KEY = "writeProperty";
 
-    @Configuration.ConvertWith("validatePropertyName")
+    @Configuration.ConvertWith(method = "validatePropertyName")
     @Configuration.Key(WRITE_PROPERTY_KEY)
     String writeProperty();
 

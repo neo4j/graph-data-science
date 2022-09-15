@@ -55,10 +55,10 @@ public interface GraphProjectFromCypherConfig extends GraphProjectConfig {
     String ALL_NODES_QUERY = "MATCH (n) RETURN id(n) AS id";
     String ALL_RELATIONSHIPS_QUERY = "MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target";
 
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    @Configuration.ConvertWith(method = "org.apache.commons.lang3.StringUtils#trimToNull")
     String nodeQuery();
 
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    @Configuration.ConvertWith(method = "org.apache.commons.lang3.StringUtils#trimToNull")
     String relationshipQuery();
 
     @Value.Default

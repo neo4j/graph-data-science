@@ -36,7 +36,7 @@ public interface ModelConfig extends Serializable, BaseConfig {
     String MODEL_NAME_KEY = "modelName";
     String MODEL_TYPE_KEY = "modelType";
 
-    @Configuration.ConvertWith("validateName")
+    @Configuration.ConvertWith(method = "validateName")
     String modelName();
 
     @Configuration.Parameter

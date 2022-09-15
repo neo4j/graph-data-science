@@ -32,7 +32,7 @@ import java.util.Map;
 public interface RandomForestClassifierTrainerConfig extends RandomForestTrainerConfig, TrainerConfig {
     RandomForestClassifierTrainerConfig DEFAULT = of(Map.of());
 
-    @Configuration.ConvertWith("org.neo4j.gds.ml.decisiontree.ClassifierImpurityCriterionType#parse")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.ml.decisiontree.ClassifierImpurityCriterionType#parse")
     @Configuration.ToMapValue("org.neo4j.gds.ml.decisiontree.ClassifierImpurityCriterionType#toString")
     default ClassifierImpurityCriterionType criterion() {
         return ClassifierImpurityCriterionType.GINI;

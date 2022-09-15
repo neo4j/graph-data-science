@@ -27,7 +27,7 @@ public interface WriteRelationshipConfig extends WriteConfig {
 
     String WRITE_RELATIONSHIP_TYPE_KEY = "writeRelationshipType";
 
-    @Configuration.ConvertWith("validateRelationshipTypeName")
+    @Configuration.ConvertWith(method = "validateRelationshipTypeName")
     String writeRelationshipType();
 
     static @Nullable String validateRelationshipTypeName(String input) {

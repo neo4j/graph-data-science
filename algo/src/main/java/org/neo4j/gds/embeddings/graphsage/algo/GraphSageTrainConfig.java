@@ -70,17 +70,12 @@ public interface GraphSageTrainConfig extends
 
     @Value.Default
     @Configuration.IntegerRange(min = 1)
-    @Configuration.ConvertWith("convertToIntSamples")
-    @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig#convertSamplesToNumbers")
+    @Configuration.ConvertWith(method = "convertToIntSamples")
     default List<Integer> sampleSizes() {
         return List.of(25, 10);
     }
 
-    // necessary as input of ConvertWith type has to match ToMapValue type
-    static List<Number> convertSamplesToNumbers(List<Integer> sampleSizes) {
-        return sampleSizes.stream().map(i -> (Number) i).collect(Collectors.toList());
-    }
-    static List<Integer> convertToIntSamples(List<Number> input) {
+    static List<Integer> convertToIntSamples(List<? extends Number> input) {
         try {
             return input.stream()
                 .map(Number::longValue)
@@ -92,14 +87,14 @@ public interface GraphSageTrainConfig extends
     }
 
     @Value.Default
-    @Configuration.ConvertWith("org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType#parse")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType#parse")
     @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType#toString")
     default Aggregator.AggregatorType aggregator() {
         return Aggregator.AggregatorType.MEAN;
     }
 
     @Value.Default
-    @Configuration.ConvertWith("org.neo4j.gds.embeddings.graphsage.ActivationFunction#parse")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.graphsage.ActivationFunction#parse")
     @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.ActivationFunction#toString")
     default ActivationFunction activationFunction() {
         return ActivationFunction.SIGMOID;
