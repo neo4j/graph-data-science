@@ -20,12 +20,13 @@
 package org.neo4j.gds.compat;
 
 import org.immutables.value.Value;
-import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.logging.Log;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -33,12 +34,14 @@ import java.util.ServiceLoader;
 import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public final class ProxyUtil {
 
     private static final AtomicBoolean LOG_ENVIRONMENT = new AtomicBoolean(true);
+    private static final AtomicReference<ProxyLog> LOG_MESSAGES = new AtomicReference<>(new BufferingLog());
 
     private static final Map<Class<?>, ProxyInfo<?, ?>> PROXY_INFO_CACHE = new ConcurrentHashMap<>();
 
@@ -58,9 +61,13 @@ public final class ProxyUtil {
         );
     }
 
-    @SuppressForbidden(reason = "This is the best we can do at the moment")
+    public static void dumpLogMessages(Log log) {
+        var buffer = LOG_MESSAGES.getAndSet(NullLog.INSTANCE);
+        buffer.replayInto(log);
+    }
+
     private static <PROXY, FACTORY extends ProxyFactory<PROXY>> ProxyInfo<FACTORY, PROXY> loadAndValidateProxyInfo(Class<FACTORY> factoryClass) {
-        var log = new OutputStreamLogBuilder(System.out).build();
+        var log = LOG_MESSAGES.get();
         var availabilityLog = new StringJoiner(", ", "GDS compatibility: ", "");
         availabilityLog.setEmptyValue("");
 
@@ -113,7 +120,8 @@ public final class ProxyUtil {
 
         } finally {
             if (LOG_ENVIRONMENT.getAndSet(false)) {
-                log.debug(
+                log.log(
+                    LogLevel.DEBUG,
                     "Java vendor: [%s] Java version: [%s] Java home: [%s] GDS version: [%s] Detected Neo4j version: [%s]",
                     proxyInfo.javaInfo().javaVendor(),
                     proxyInfo.javaInfo().javaVersion(),
@@ -124,7 +132,7 @@ public final class ProxyUtil {
             }
             var availability = availabilityLog.toString();
             if (!availability.isEmpty()) {
-                log.info(availability);
+                log.log(LogLevel.INFO, availability);
             }
         }
     }
@@ -313,21 +321,8 @@ public final class ProxyUtil {
 
         Throwable reason();
 
-        default void log(Log log) {
-            switch (logLevel()) {
-                case DEBUG:
-                    log.debug(message(), reason());
-                    break;
-                case INFO:
-                    log.info(message(), reason());
-                    break;
-                case WARN:
-                    log.warn(message(), reason());
-                    break;
-                case ERROR:
-                    log.error(message(), reason());
-                    break;
-            }
+        default void log(ProxyLog log) {
+            log.log(logLevel(), message(), reason());
         }
     }
 
@@ -345,6 +340,98 @@ public final class ProxyUtil {
         String javaVersion();
 
         String javaHome();
+    }
+
+    interface ProxyLog {
+        void log(LogLevel logLevel, String message, Throwable reason);
+
+        void log(LogLevel logLevel, String format, Object... args);
+
+        void replayInto(Log log);
+    }
+
+    @ValueClass
+    interface LogMessage {
+        LogLevel logLevel();
+
+        String message();
+
+        Optional<Throwable> reason();
+
+        Optional<Object[]> args();
+    }
+
+    private static final class BufferingLog implements ProxyLog {
+        private final Collection<LogMessage> messages = new ArrayList<>();
+
+        @Override
+        public void log(LogLevel logLevel, String message, Throwable reason) {
+            messages.add(ImmutableLogMessage.of(logLevel, message, Optional.ofNullable(reason), Optional.empty()));
+        }
+
+        @Override
+        public void log(LogLevel logLevel, String format, Object... args) {
+            messages.add(ImmutableLogMessage.of(logLevel, format, Optional.empty(), Optional.of(args)));
+        }
+
+        @Override
+        public void replayInto(Log log) {
+            messages.forEach(message -> {
+                message.reason().ifPresent(reason -> {
+                    switch (message.logLevel()) {
+                        case DEBUG:
+                            log.debug(message.message(), reason);
+                            break;
+                        case INFO:
+                            log.info(message.message(), reason);
+                            break;
+                        case WARN:
+                            log.warn(message.message(), reason);
+                            break;
+                        case ERROR:
+                            log.error(message.message(), reason);
+                            break;
+                    }
+                });
+                message.args().ifPresent(args -> {
+                    switch (message.logLevel()) {
+                        case DEBUG:
+                            log.debug(message.message(), args);
+                            break;
+                        case INFO:
+                            log.info(message.message(), args);
+                            break;
+                        case WARN:
+                            log.warn(message.message(), args);
+                            break;
+                        case ERROR:
+                            log.error(message.message(), args);
+                            break;
+                    }
+                });
+            });
+            // drop messages from memory
+            messages.clear();
+        }
+    }
+
+    private enum NullLog implements ProxyLog {
+        INSTANCE;
+
+        @Override
+        public void log(LogLevel logLevel, String message, Throwable reason) {
+            // do nothing
+        }
+
+        @Override
+        public void log(LogLevel logLevel, String format, Object... args) {
+            // do nothing
+        }
+
+        @Override
+        public void replayInto(Log log) {
+            // do nothing
+        }
     }
 
     private ProxyUtil() {}
