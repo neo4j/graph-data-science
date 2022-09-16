@@ -23,6 +23,7 @@ import org.assertj.core.data.Offset;
 import org.assertj.core.data.Percentage;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -37,7 +38,10 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.embeddings.node2vec.ImmutableNode2VecStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 import org.neo4j.gds.extension.GdlExtension;
@@ -46,10 +50,14 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -480,5 +488,40 @@ class RandomWalkTest {
                 );
         }
 
+        @RepeatedTest(1000)
+        void shouldLeaveNoTasksBehind() {
+            var config = ImmutableRandomWalkStreamConfig.builder().build();
+            var factory = new RandomWalkAlgorithmFactory<RandomWalkStreamConfig>();
+            var taskStore = new GlobalTaskStore();
+            var progressTracker = new TaskProgressTracker(
+                factory.progressTask(
+                    graph,
+                    config
+                ),
+                Neo4jProxy.testLog(),
+                config.concurrency(),
+                TaskRegistryFactory.local("rw", taskStore)
+            );
+
+            // run the algorithm and consume the result stream
+            factory.build(graph, config, progressTracker).compute().count();
+
+            // there is a race condition between the thread consuming the result,
+            // and the thread scheduled to end the last subtask
+            long timeoutInSeconds = 5 * (TestSupport.CI ? 5 : 1);
+            var deadline = Instant.now().plus(timeoutInSeconds, ChronoUnit.SECONDS);
+
+            // On my machine (TM) with 1000 iterations this never fails and each run is 10ish or 100ish ms
+            while (Instant.now().isBefore(deadline)) {
+                if (taskStore.isEmpty()) {
+                    break;
+                }
+
+                LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(100));
+            }
+
+            // the task store should now be empty
+            assertThat(taskStore.isEmpty()).isTrue();
+        }
     }
 }

@@ -154,7 +154,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
             ),
             Pools.DEFAULT_SINGLE_THREAD_POOL
         ).whenComplete((__, ___) -> {
-            progressTracker.release();
+            progressTracker.endSubTask("RandomWalk");
             release();
         });
     }
@@ -176,7 +176,6 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
             .run();
 
         progressTracker.endSubTask("create walks");
-        progressTracker.endSubTask("RandomWalk");
 
         try {
             walks.put(tombstone);
