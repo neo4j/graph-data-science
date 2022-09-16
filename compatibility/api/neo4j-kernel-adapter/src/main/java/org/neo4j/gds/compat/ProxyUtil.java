@@ -20,6 +20,7 @@
 package org.neo4j.gds.compat;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.logging.Log;
 
@@ -284,8 +285,13 @@ public final class ProxyUtil {
         Optional<ErrorInfo> error();
 
         @Value.Default
+        @SuppressForbidden(reason = "We need to log to stdout here")
         default Supplier<U> proxy() {
             return () -> {
+                // since we are throwing and potentially aborting the database startup, we might as well
+                // log all messages we have accumulated so far to provide more debugging context
+                ProxyUtil.dumpLogMessages(new OutputStreamLogBuilder(System.out).build());
+
                 throw new LinkageError(String.format(
                     Locale.ENGLISH,
                     "GDS %s is not compatible with Neo4j version: %s",
