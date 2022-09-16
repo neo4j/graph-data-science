@@ -6,6 +6,7 @@
 :entity: relationship
 :result: similarity score
 :algorithm: Filtered K-Nearest Neighbors
+:knnSpecificConfigurationTableTitle: KNN specific configuration
 
 include::partial$/operations-reference/alpha-note.adoc[]
 
@@ -135,7 +136,6 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
 |===
 
-:knnSpecificConfigurationTableTitle: KNN specific configuration
 include::partial$/algorithms/knn/knn-specific-algo-config.adoc[]
 
 include::partial$/algorithms/alpha/filtered-knn/filtered-knn-specific-algo-config.adoc[]
@@ -147,6 +147,165 @@ include::partial$/algorithms/alpha/filtered-knn/filtered-knn-specific-algo-confi
 | node1      | Integer | Node ID of the first node.
 | node2      | Integer | Node ID of the second node.
 | similarity | Float   | Similarity score for the two nodes.
+|===
+======
+
+[.include-with-stats]
+======
+.Run K-Nearest Neighbors in stats mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.knn.filtered.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  nodesCompared: Integer,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  nodePairsConsidered: Integer,
+  similarityPairs: Integer,
+  similarityDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.General configuration for algorithm execution on a named graph.
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+|===
+
+include::partial$/algorithms/knn/knn-specific-algo-config.adoc[]
+include::partial$/algorithms/alpha/filtered-knn/filtered-knn-specific-algo-config.adoc[]
+
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                          | Type      | Description
+| ranIterations                 | Integer   | Number of iterations run.
+| didConverge                   | Boolean   | Indicates if the algorithm converged.
+| nodePairsConsidered           | Integer   | The number of similarity computations.
+| preProcessingMillis           | Integer   | Milliseconds for preprocessing the data.
+| computeMillis                 | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis          | Integer   | Milliseconds for computing similarity value distribution statistics.
+| nodesCompared                 | Integer   | The number of nodes for which similarity was computed.
+| similarityPairs               | Integer   | The number of similarities in the result.
+| similarityDistribution        | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of the computed similarity results.
+| configuration                 | Map       | The configuration used for running the algorithm.
+|===
+======
+
+[.include-with-mutate]
+======
+.Run K-Nearest Neighbors in mutate mode on a graph stored in the catalog.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.knn.filtered.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  postProcessingMillis: Integer,
+  relationshipsWritten: Integer,
+  nodesCompared: Integer,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  nodePairsConsidered: Integer,
+  similarityDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.General configuration for algorithm execution on a named graph.
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+|===
+
+include::partial$/algorithms/knn/knn-specific-algo-config.adoc[]
+include::partial$/algorithms/alpha/filtered-knn/filtered-knn-specific-algo-config.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type    | Description
+| ranIterations          | Integer | Number of iterations run.
+| didConverge            | Boolean | Indicates if the algorithm converged.
+| nodePairsConsidered    | Integer | The number of similarity computations.
+| preProcessingMillis    | Integer | Milliseconds for preprocessing the data.
+| computeMillis          | Integer | Milliseconds for running the algorithm.
+| mutateMillis           | Integer | Milliseconds for adding properties to the projected graph.
+| postProcessingMillis   | Integer | Milliseconds for computing similarity value distribution statistics.
+| nodesCompared          | Integer | The number of nodes for which similarity was computed.
+| relationshipsWritten   | Integer | The number of relationships created.
+| similarityDistribution | Map     | Map containing min, max, mean, stdDev and p1, p5, p10, p25, p75, p90, p95, p99, p100 percentile values of the computed similarity results.
+| configuration          | Map     | The configuration used for running the algorithm.
+|===
+======
+
+[.include-with-write]
+======
+.Run K-Nearest Neighbors in write mode on a graph stored in the catalog.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.knn.filtered.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  postProcessingMillis: Integer,
+  nodesCompared: Integer,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  nodePairsConsidered: Integer,
+  relationshipsWritten: Integer,
+  similarityDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.General configuration for algorithm execution on a named graph.
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+|===
+
+include::partial$/algorithms/knn/knn-specific-algo-config.adoc[]
+include::partial$/algorithms/alpha/filtered-knn/filtered-knn-specific-algo-config.adoc[]
+
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type    | Description
+| ranIterations          | Integer | Number of iterations run.
+| didConverge            | Boolean | Indicates if the algorithm converged.
+| nodePairsConsidered    | Integer | The number of similarity computations.
+| preProcessingMillis    | Integer | Milliseconds for preprocessing the data.
+| computeMillis          | Integer | Milliseconds for running the algorithm.
+| writeMillis            | Integer | Milliseconds for writing result data back to Neo4j.
+| postProcessingMillis   | Integer | Milliseconds for computing similarity value distribution statistics.
+| nodesCompared          | Integer | The number of nodes for which similarity was computed.
+| relationshipsWritten   | Integer | The number of relationships created.
+| similarityDistribution | Map     | Map containing min, max, mean, stdDev and p1, p5, p10, p25, p75, p90, p95, p99, p100 percentile values of the computed similarity results.
+| configuration          | Map     | The configuration used for running the algorithm.
 |===
 ======
 ====
@@ -191,7 +350,6 @@ CALL gds.graph.project(
     '*'
 );
 ----
-
 
 [[algorithms-filtered-knn-examples-stream]]
 === Filtering source nodes
@@ -277,3 +435,119 @@ Here we filter for target nodes with label Vegan, and set a similarity cutoff to
 But we also enable seeding, which is what you do when you want to guarantee that for every node we output _k_ neighbours.
 In this case seeding overrides similarity cutoff, and you see in the output that each source node has 1 result, even if they score rather poorly.
 We happen to know that Alice scores very highly with Carol on age similarity under normal circumstances. However, because Carol is not Vegan, she is not included in the result set - she was filtered out by the target node filter - and instead Alice is matched with Dave.
+
+[[algorithms-filtered-knn-examples-stats]]
+=== Stats
+
+:stats-syntax: algorithms-filtered-knn-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and return the result in form of statistical and measurement values:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.knn.filtered.stats('myGraph', {
+    topK: 1,
+    concurrency: 1,
+    randomSeed: 42,
+    nodeProperties: ['age'],
+    sourceNodeFilter: 'Vegan'
+})
+YIELD nodesCompared, similarityPairs
+----
+
+.Results
+[opts="header",cols="2"]
+|===
+| nodesCompared | similarityPairs
+| 5             | 4
+|===
+--
+
+
+[[algorithms-filtered-knn-examples-mutate]]
+=== Mutate
+
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm, and write back results to the in-memory graph:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.knn.filtered.mutate('myGraph', {
+    mutateRelationshipType: 'SIMILAR',
+    mutateProperty: 'score',
+    topK: 1,
+    randomSeed: 42,
+    concurrency: 1,
+    nodeProperties: ['age'],
+    sourceNodeFilter: 'Vegan'
+})
+YIELD nodesCompared, relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodesCompared | relationshipsWritten
+| 5             | 4
+|===
+--
+
+As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
+
+[NOTE]
+====
+The relationships that are produced by the mutation are always directed, even if the input graph is undirected.
+If for example `a -> b` is topK for `a` and symmetrically `b -> a` is topK for `b`, it appears as though an undirected relationship is produced.
+However, they are just two directed relationships that have been independently produced.
+====
+
+
+[[algorithms-filtered-knn-examples-write]]
+=== Write
+
+The `write` execution mode extends the `stats` mode with an important side effect: for each pair of nodes we create a relationship with the similarity score as a property to the Neo4j database.
+The type of the new relationship is specified using the mandatory configuration parameter `writeRelationshipType`.
+Each new relationship stores the similarity score between the two nodes it represents.
+The relationship property key is set using the mandatory configuration parameter `writeProperty`.
+The result is a single summary row, similar to `stats`, but with some additional metrics.
+
+For more details on the `write` mode in general, see xref:common-usage/running-algos.adoc#running-algos-write[Write].
+
+
+[role=query-example]
+--
+.The following will run the algorithm, and write back results:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.knn.filtered.write('myGraph', {
+    writeRelationshipType: 'SIMILAR',
+    writeProperty: 'score',
+    topK: 1,
+    randomSeed: 42,
+    concurrency: 1,
+    nodeProperties: ['age'],
+    sourceNodeFilter: 'Vegan'
+})
+YIELD nodesCompared, relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodesCompared | relationshipsWritten
+| 5             | 4
+|===
+--
+
+As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
+
+[NOTE]
+====
+The relationships that are written are always directed, even if the input graph is undirected.
+If for example `a -> b` is topK for `a` and symmetrically `b -> a` is topK for `b`, it appears as though an undirected relationship is written.
+However, they are just two directed relationships that have been independently written.
+====

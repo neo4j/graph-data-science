@@ -4,6 +4,7 @@
 :entity: relationship
 :result: similarity score
 :algorithm: Node Similarity
+:nodeSimilaritySpecificConfigurationTableTitle: Algorithm specific configuration
 
 [abstract]
 --
@@ -59,6 +60,8 @@ For more information on this algorithm, see:
 * https://en.wikipedia.org/wiki/Overlap_coefficient[The Overlap Coefficient (Wikipedia)].
 * https://en.wikipedia.org/wiki/Bipartite_graph[Bipartite graphs (Wikipedia)]
 
+It is also possible to apply filtering on the source and/or target nodes in the produced similarity pairs. You can consider the xref:algorithms/alpha/filtered-node-similarity.adoc[filtered Node Similarity] algorithm for this purpose.
+
 [NOTE]
 ====
 Running this algorithm requires sufficient available memory.
@@ -96,8 +99,8 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
 |===
+include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
 
 .Results
 [opts="header",cols="1m,1,6"]
@@ -135,8 +138,8 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
 |===
+include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -179,8 +182,8 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
-include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
 |===
+include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -224,8 +227,8 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
-include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
 |===
+include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -389,7 +392,7 @@ include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
 [role=query-example]
 --
-.The following will run the algorithm and returns the result in form of statistical and measurement values
+.The following will run the algorithm and return the result in form of statistical and measurement values
 [source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.stats('myGraph')

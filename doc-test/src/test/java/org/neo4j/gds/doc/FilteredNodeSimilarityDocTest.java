@@ -21,14 +21,14 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateProc;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsProc;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnStreamProc;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteProc;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateProc;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsProc;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityWriteProc;
 
 import java.util.List;
 
-class FilteredKnnDocTest extends SingleFileDocTestBase {
+class FilteredNodeSimilarityDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> functions() {
@@ -38,16 +38,16 @@ class FilteredKnnDocTest extends SingleFileDocTestBase {
     @Override
     protected List<Class<?>> procedures() {
         return List.of(
-            FilteredKnnStreamProc.class,
-            FilteredKnnStatsProc.class,
-            FilteredKnnMutateProc.class,
-            FilteredKnnWriteProc.class,
+            FilteredNodeSimilarityStreamProc.class,
+            FilteredNodeSimilarityStatsProc.class,
+            FilteredNodeSimilarityMutateProc.class,
+            FilteredNodeSimilarityWriteProc.class,
             GraphProjectProc.class
         );
     }
 
     @Override
     protected String adocFile() {
-        return "pages/algorithms/alpha/filtered-knn.adoc";
+        return "pages/algorithms/alpha/filtered-node-similarity.adoc";
     }
 }
