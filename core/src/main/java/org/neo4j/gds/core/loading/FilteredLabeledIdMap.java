@@ -39,14 +39,14 @@ public class FilteredLabeledIdMap extends LabeledIdMap implements FilteredIdMap 
     }
 
     @Override
-    public List<NodeLabel> nodeLabels(long mappedNodeId) {
-        return rootToFilteredIdMap.nodeLabels(rootToFilteredIdMap.toOriginalNodeId(mappedNodeId));
+    public List<NodeLabel> nodeLabels(long filteredNodeId) {
+        return rootToFilteredIdMap.nodeLabels(rootToFilteredIdMap.toOriginalNodeId(filteredNodeId));
     }
 
     @Override
-    public void forEachNodeLabel(long mappedNodeId, NodeLabelConsumer consumer) {
+    public void forEachNodeLabel(long filteredNodeId, NodeLabelConsumer consumer) {
         this.rootToFilteredIdMap.forEachNodeLabel(
-            this.rootToFilteredIdMap.toOriginalNodeId(mappedNodeId),
+            this.rootToFilteredIdMap.toOriginalNodeId(filteredNodeId),
             consumer
         );
     }
@@ -57,8 +57,8 @@ public class FilteredLabeledIdMap extends LabeledIdMap implements FilteredIdMap 
     }
 
     @Override
-    public long toRootNodeId(long mappedNodeId) {
-        return rootToFilteredIdMap.toOriginalNodeId(mappedNodeId);
+    public long toRootNodeId(long filteredNodeId) {
+        return rootToFilteredIdMap.toOriginalNodeId(filteredNodeId);
     }
 
     @Override
@@ -67,8 +67,8 @@ public class FilteredLabeledIdMap extends LabeledIdMap implements FilteredIdMap 
     }
 
     @Override
-    public long toOriginalNodeId(long mappedNodeId) {
-        return originalToRootIdMap.toOriginalNodeId(rootToFilteredIdMap.toOriginalNodeId(mappedNodeId));
+    public long toOriginalNodeId(long filteredNodeId) {
+        return originalToRootIdMap.toOriginalNodeId(rootToFilteredIdMap.toOriginalNodeId(filteredNodeId));
     }
 
     @Override
@@ -97,7 +97,7 @@ public class FilteredLabeledIdMap extends LabeledIdMap implements FilteredIdMap 
     }
 
     @Override
-    public boolean hasLabel(long mappedNodeId, NodeLabel label) {
-        return rootToFilteredIdMap.hasLabel(rootToFilteredIdMap.toOriginalNodeId(mappedNodeId), label);
+    public boolean hasLabel(long filteredNodeId, NodeLabel label) {
+        return rootToFilteredIdMap.hasLabel(rootToFilteredIdMap.toOriginalNodeId(filteredNodeId), label);
     }
 }
