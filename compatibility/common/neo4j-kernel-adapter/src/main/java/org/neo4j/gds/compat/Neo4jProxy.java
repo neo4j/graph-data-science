@@ -82,7 +82,10 @@ import java.util.Optional;
 
 public final class Neo4jProxy {
 
-    private static final Neo4jProxyApi IMPL = ProxyUtil.findProxy(Neo4jProxyFactory.class);
+    private static final Neo4jProxyApi IMPL = ProxyUtil.findProxy(
+        Neo4jProxyFactory.class,
+        ProxyUtil.MayLogToStdout.YES
+    );
 
     public static GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
         return IMPL.newDb(dbms);

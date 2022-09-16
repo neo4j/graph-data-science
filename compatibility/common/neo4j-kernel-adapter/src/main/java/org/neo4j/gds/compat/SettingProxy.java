@@ -27,7 +27,10 @@ import org.neo4j.graphdb.GraphDatabaseService;
 
 public final class SettingProxy {
 
-    private static final SettingProxyApi IMPL = ProxyUtil.findProxy(SettingProxyFactory.class);
+    private static final SettingProxyApi IMPL = ProxyUtil.findProxy(
+        SettingProxyFactory.class,
+        ProxyUtil.MayLogToStdout.NO
+    );
 
     public static <T> Setting.Builder<T> newBuilder(
         String name,

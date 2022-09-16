@@ -20,6 +20,7 @@
 package org.neo4j.gds.compat;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.logging.Log;
@@ -36,7 +37,7 @@ import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public final class ProxyUtil {
@@ -46,10 +47,13 @@ public final class ProxyUtil {
 
     private static final Map<Class<?>, ProxyInfo<?, ?>> PROXY_INFO_CACHE = new ConcurrentHashMap<>();
 
-    public static <PROXY, FACTORY extends ProxyFactory<PROXY>> PROXY findProxy(Class<FACTORY> factoryClass) {
+    public static <PROXY, FACTORY extends ProxyFactory<PROXY>> PROXY findProxy(
+        Class<FACTORY> factoryClass,
+        MayLogToStdout mayLogToStdout
+    ) {
         return findProxyInfo(factoryClass)
             .proxy()
-            .get();
+            .apply(mayLogToStdout);
     }
 
     public static <PROXY, FACTORY extends ProxyFactory<PROXY>> ProxyInfo<FACTORY, PROXY> findProxyInfo(Class<FACTORY> factoryClass) {
@@ -116,7 +120,7 @@ public final class ProxyUtil {
 
             var builder = ImmutableProxyInfo.<FACTORY, PROXY>builder().from(proxyInfo);
             var proxy = factory.get().load();
-            builder.proxy(() -> proxy);
+            builder.proxy(__ -> proxy);
             return builder.build();
 
         } finally {
@@ -268,6 +272,27 @@ public final class ProxyUtil {
             .build();
     }
 
+    /**
+     * We want to test this class as if we just started the JVM,
+     * i.e. the state of whether we have already logged is not shared.
+     * <p>
+     * This is not tied to the lifecycle of the test instance but to the
+     * lifecycle of the JVM.
+     * <p>
+     * We allow tests to reset the ProxyUtil with a test-only method to
+     * avoid having to fork a new JVM fer every test.
+     */
+    @TestOnly
+    static void resetState() {
+        LOG_ENVIRONMENT.set(true);
+        LOG_MESSAGES.set(new BufferingLog());
+        PROXY_INFO_CACHE.clear();
+    }
+
+    public enum MayLogToStdout {
+        YES, NO
+    }
+
     @ValueClass
     public interface ProxyInfo<T, U> {
         Class<T> factoryType();
@@ -286,11 +311,13 @@ public final class ProxyUtil {
 
         @Value.Default
         @SuppressForbidden(reason = "We need to log to stdout here")
-        default Supplier<U> proxy() {
-            return () -> {
-                // since we are throwing and potentially aborting the database startup, we might as well
-                // log all messages we have accumulated so far to provide more debugging context
-                ProxyUtil.dumpLogMessages(new OutputStreamLogBuilder(System.out).build());
+        default Function<MayLogToStdout, U> proxy() {
+            return (mayLogToStdout) -> {
+                if (mayLogToStdout == MayLogToStdout.YES) {
+                    // since we are throwing and potentially aborting the database startup, we might as well
+                    // log all messages we have accumulated so far to provide more debugging context
+                    ProxyUtil.dumpLogMessages(new OutputStreamLogBuilder(System.out).build());
+                }
 
                 throw new LinkageError(String.format(
                     Locale.ENGLISH,

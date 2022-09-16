@@ -39,7 +39,10 @@ import org.neo4j.token.TokenHolders;
 
 public final class StorageEngineProxy {
 
-    private static final StorageEngineProxyApi IMPL = ProxyUtil.findProxy(StorageEngineProxyFactory.class);
+    private static final StorageEngineProxyApi IMPL = ProxyUtil.findProxy(
+        StorageEngineProxyFactory.class,
+        ProxyUtil.MayLogToStdout.YES
+    );
 
     private StorageEngineProxy() {}
 
