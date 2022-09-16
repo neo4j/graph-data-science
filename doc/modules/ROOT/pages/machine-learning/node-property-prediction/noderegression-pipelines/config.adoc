@@ -151,7 +151,6 @@ The `scaledSizes` property can be later used as a feature.
 
 A Node Regression Pipeline allows you to select a subset of the available node properties to be used as features for the machine learning model.
 When executing the pipeline, the selected `nodeProperties` must be either present in the input graph, or created by a previous node property step.
-For example, the `scaledSizes` property could be created by the previous example, and we expect `sizePerStory` to already be present in the in-memory graph used as input, at train and predict time.
 
 
 === Syntax
@@ -203,6 +202,8 @@ YIELD name, featureProperties
 | name     | featureProperties
 | "pipe"   | [scaledSizes, sizePerStory]
 |===
+
+Here we assume that the input graph contains a property `sizePerStory` and `scaledSizes` was created in a `nodePropertyStep`.
 --
 
 
