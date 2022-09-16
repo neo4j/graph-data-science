@@ -40,15 +40,12 @@ public class FilteredLabeledIdMap extends LabeledIdMap implements FilteredIdMap 
 
     @Override
     public List<NodeLabel> nodeLabels(long filteredNodeId) {
-        return rootToFilteredIdMap.nodeLabels(rootToFilteredIdMap.toOriginalNodeId(filteredNodeId));
+        return originalToRootIdMap.nodeLabels(rootToFilteredIdMap.toOriginalNodeId(filteredNodeId));
     }
 
     @Override
     public void forEachNodeLabel(long filteredNodeId, NodeLabelConsumer consumer) {
-        this.rootToFilteredIdMap.forEachNodeLabel(
-            this.rootToFilteredIdMap.toOriginalNodeId(filteredNodeId),
-            consumer
-        );
+        originalToRootIdMap.forEachNodeLabel(rootToFilteredIdMap.toOriginalNodeId(filteredNodeId), consumer);
     }
 
     @Override
@@ -98,6 +95,6 @@ public class FilteredLabeledIdMap extends LabeledIdMap implements FilteredIdMap 
 
     @Override
     public boolean hasLabel(long filteredNodeId, NodeLabel label) {
-        return rootToFilteredIdMap.hasLabel(rootToFilteredIdMap.toOriginalNodeId(filteredNodeId), label);
+        return originalToRootIdMap.hasLabel(rootToFilteredIdMap.toOriginalNodeId(filteredNodeId), label);
     }
 }
