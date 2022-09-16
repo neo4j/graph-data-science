@@ -215,8 +215,8 @@ public class Node2VecModel {
             var centerEmbedding = centerEmbeddings.get(center);
             var contextEmbedding = contextEmbeddings.get(context);
 
-            // L+ = -log sigmoid(center * context)  ; gradient: -sigmoid (-center * context)
-            // L- = -log sigmoid(-center * context) ; gradient: sigmoid (center * context)
+            // L_pos = -log sigmoid(center * context)  ; gradient: -sigmoid (-center * context)
+            // L_neg = -log sigmoid(-center * context) ; gradient: sigmoid (center * context)
             float affinity = centerEmbedding.innerProduct(contextEmbedding);
 
             float positiveSigmoid = (float) Sigmoid.sigmoid(affinity);
@@ -225,8 +225,9 @@ public class Node2VecModel {
 
             lossSum -= positive ? Math.log(positiveSigmoid) : Math.log(negativeSigmoid);
 
-            float gradient = positive ? negativeSigmoid : -positiveSigmoid;
-            float scaledGradient = gradient * learningRate;
+            float gradient = positive ? -negativeSigmoid : positiveSigmoid;
+            // we are doing gradient descent, so we go in the negative direction of the gradient here
+            float scaledGradient = -gradient * learningRate;
 
             scale(contextEmbedding.data(), scaledGradient, centerGradientBuffer.data());
             scale(centerEmbedding.data(), scaledGradient, contextGradientBuffer.data());
