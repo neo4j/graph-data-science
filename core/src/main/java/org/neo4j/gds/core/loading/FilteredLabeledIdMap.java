@@ -39,16 +39,6 @@ public class FilteredLabeledIdMap extends LabeledIdMap implements FilteredIdMap 
     }
 
     @Override
-    public List<NodeLabel> nodeLabels(long filteredNodeId) {
-        return originalToRootIdMap.nodeLabels(rootToFilteredIdMap.toOriginalNodeId(filteredNodeId));
-    }
-
-    @Override
-    public void forEachNodeLabel(long filteredNodeId, NodeLabelConsumer consumer) {
-        originalToRootIdMap.forEachNodeLabel(rootToFilteredIdMap.toOriginalNodeId(filteredNodeId), consumer);
-    }
-
-    @Override
     public OptionalLong rootNodeCount() {
         return originalToRootIdMap.rootNodeCount();
     }
@@ -91,6 +81,16 @@ public class FilteredLabeledIdMap extends LabeledIdMap implements FilteredIdMap 
     @Override
     public IdMap rootIdMap() {
         return originalToRootIdMap;
+    }
+
+    @Override
+    public List<NodeLabel> nodeLabels(long filteredNodeId) {
+        return originalToRootIdMap.nodeLabels(rootToFilteredIdMap.toOriginalNodeId(filteredNodeId));
+    }
+
+    @Override
+    public void forEachNodeLabel(long filteredNodeId, NodeLabelConsumer consumer) {
+        originalToRootIdMap.forEachNodeLabel(rootToFilteredIdMap.toOriginalNodeId(filteredNodeId), consumer);
     }
 
     @Override
