@@ -61,6 +61,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
+import org.neo4j.procedure.ThreadSafe;
 import org.neo4j.procedure.UserAggregationFunction;
 import org.neo4j.procedure.UserAggregationResult;
 import org.neo4j.procedure.UserAggregationUpdate;
@@ -97,6 +98,7 @@ public final class CypherAggregation {
     @Context
     public Username username = Username.EMPTY_USERNAME;
 
+    @ThreadSafe
     @UserAggregationFunction(name = "gds.alpha.graph.project")
     @Description("Creates a named graph in the catalog for use by algorithms.")
     public GraphAggregator projectFromCypherAggregation() {
