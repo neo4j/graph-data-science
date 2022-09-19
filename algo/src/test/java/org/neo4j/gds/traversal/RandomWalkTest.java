@@ -23,7 +23,6 @@ import org.assertj.core.data.Offset;
 import org.assertj.core.data.Percentage;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -488,7 +487,7 @@ class RandomWalkTest {
                 );
         }
 
-        @RepeatedTest(1000)
+        @Test
         void shouldLeaveNoTasksBehind() {
             var config = ImmutableRandomWalkStreamConfig.builder().build();
             var factory = new RandomWalkAlgorithmFactory<RandomWalkStreamConfig>();
