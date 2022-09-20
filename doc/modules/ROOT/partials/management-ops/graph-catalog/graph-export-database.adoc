@@ -47,7 +47,7 @@ YIELD
 | Name                     | Type                | Default   | Optional | Description
 | dbName                   | String              | none      | No       | The name of the exported Neo4j database.
 | writeConcurrency         | Boolean             | 4         | yes      | The number of concurrent threads used for writing the database.
-| enableDebugLog           | Boolean             | false     | yes      | Prints debug information to Neo4j log files.
+| enableDebugLog           | Boolean             | false     | yes      | Prints debug information to Neo4j log files (deprecated).
 | batchSize                | Integer             | 10000     | yes      | Number of entities processed by one single thread at a time.
 | defaultRelationshipType  | String              | +__ALL__+ | yes      | Relationship type used for `*` relationship projections.
 | additionalNodeProperties | String, List or Map | {}        | yes      | Allows for exporting additional node properties from the original graph backing the in-memory graph.

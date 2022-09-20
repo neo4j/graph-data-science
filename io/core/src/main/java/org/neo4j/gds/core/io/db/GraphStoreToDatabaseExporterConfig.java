@@ -41,6 +41,7 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
     String dbName();
 
     @Value.Default
+    @Deprecated(forRemoval = true, since = "2.2")
     default boolean enableDebugLog() {
         return false;
     }
