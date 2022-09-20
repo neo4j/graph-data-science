@@ -60,6 +60,14 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionCo
         return 128;
     }
 
+    default boolean gaussianInitialization() {
+        return false;
+    }
+
+    default String initializationBound() {
+        return "default";
+    }
+
     @Value.Default
     @Configuration.DoubleRange(min = 0.0, minInclusive = false)
     default double initialLearningRate() {
