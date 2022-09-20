@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodeVLongs;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.gds.core.loading.VarLongEncoding.zigZag;
@@ -108,28 +109,31 @@ public final class ChunkedAdjacencyLists {
     /**
      * For memory efficiency, we reuse the {@code values}. They cannot be reused after calling this method.
      *
-     * @param values values to write
-     * @param start  start index in values
-     * @param end    end index in values
+     * @param targets values to write
+     * @param start   start index in values
+     * @param end     end index in values
      */
-    public void add(long index, long[] values, int start, int end, int valuesToAdd) {
+    public void add(long index, long[] targets, int start, int end, int valuesToAdd) {
         // not inlined to avoid field access
         long currentLastValue = this.lastValues.get(index);
         long delta;
         long compressedValue;
         int requiredBytes = 0;
         for (int i = start; i < end; i++) {
-            delta = values[i] - currentLastValue;
+            if (targets[i] == IGNORE_VALUE) {
+                continue;
+            }
+            delta = targets[i] - currentLastValue;
             compressedValue = zigZag(delta);
-            currentLastValue = values[i];
-            values[i] = compressedValue;
+            currentLastValue = targets[i];
+            targets[i] = compressedValue;
             requiredBytes += encodedVLongSize(compressedValue);
         }
         var position = positions.get(index);
 
         var compressedTargets = ensureCompressedTargetsCapacity(index, position, requiredBytes);
 
-        var newPosition = encodeVLongs(values, start, end, compressedTargets, position);
+        var newPosition = encodeVLongs(targets, start, end, compressedTargets, position);
 
         positions.set(index, newPosition);
 
@@ -140,24 +144,25 @@ public final class ChunkedAdjacencyLists {
     /**
      * For memory efficiency, we reuse the {@code values}. They cannot be reused after calling this method.
      *
-     * @param values      values to write
-     * @param allProperties  properties to write
-     * @param start       start index in values and properties
-     * @param end         end index in values and properties
-     * @param valuesToAdd the actual number of targets to import from this range
+     * @param targets       values to write
+     * @param allProperties properties to write
+     * @param start         start index in values and properties
+     * @param end           end index in values and properties
+     * @param targetsToAdd  the actual number of targets to import from this range
      */
-    public void add(long index, long[] values, long[][] allProperties, int start, int end, int valuesToAdd) {
+    public void add(long index, long[] targets, long[][] allProperties, int start, int end, int targetsToAdd) {
         // write properties
         for (int i = 0; i < allProperties.length; i++) {
-            addProperties(index, allProperties[i], start, end, i, valuesToAdd);
+            addProperties(index, targets, allProperties[i], start, end, i, targetsToAdd);
         }
 
         // write values
-        add(index, values, start, end, valuesToAdd);
+        add(index, targets, start, end, targetsToAdd);
     }
 
     private void addProperties(
         long index,
+        long[] targets,
         long[] properties,
         int start,
         int end,
@@ -173,7 +178,9 @@ public final class ChunkedAdjacencyLists {
         } else {
             var writePos = length;
             for (int i = 0; i < (end - start); i++) {
-                currentProperties[writePos++] = properties[start + i];
+                if (targets[start + i] != IGNORE_VALUE) {
+                    currentProperties[writePos++] = properties[start + i];
+                }
             }
         }
     }

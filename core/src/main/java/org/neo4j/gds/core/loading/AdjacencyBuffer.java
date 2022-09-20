@@ -38,6 +38,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongConsumer;
 
+import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.preAggregate;
 import static org.neo4j.gds.mem.BitUtil.ceilDiv;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
@@ -67,6 +68,7 @@ public final class AdjacencyBuffer {
     private final double[] defaultValues;
     private final Aggregation[] aggregations;
     private final boolean atLeastOnePropertyToLoad;
+    private final boolean preAggregate;
 
     public static MemoryEstimation memoryEstimation(
         RelationshipType relationshipType,
@@ -109,7 +111,8 @@ public final class AdjacencyBuffer {
     public static AdjacencyBuffer of(
         SingleTypeRelationshipImporter.ImportMetaData importMetaData,
         AdjacencyCompressorFactory adjacencyCompressorFactory,
-        ImportSizing importSizing
+        ImportSizing importSizing,
+        boolean preAggregate
     ) {
         var numPages = importSizing.numberOfPages();
         var pageSize = importSizing.pageSize();
@@ -138,7 +141,8 @@ public final class AdjacencyBuffer {
             adjacencyCompressorFactory, localBuilders,
             compressedAdjacencyLists,
             paging,
-            atLeastOnePropertyToLoad
+            atLeastOnePropertyToLoad,
+            preAggregate
         );
     }
 
@@ -148,7 +152,8 @@ public final class AdjacencyBuffer {
         ThreadLocalRelationshipsBuilder[] localBuilders,
         ChunkedAdjacencyLists[] chunkedAdjacencyLists,
         AdjacencyBufferPaging paging,
-        boolean atLeastOnePropertyToLoad
+        boolean atLeastOnePropertyToLoad,
+        boolean preAggregate
     ) {
         this.adjacencyCompressorFactory = adjacencyCompressorFactory;
         this.localBuilders = localBuilders;
@@ -159,6 +164,7 @@ public final class AdjacencyBuffer {
         this.defaultValues = importMetaData.defaultValues();
         this.aggregations = importMetaData.aggregations();
         this.atLeastOnePropertyToLoad = atLeastOnePropertyToLoad;
+        this.preAggregate = preAggregate;
     }
 
     /**
@@ -211,6 +217,9 @@ public final class AdjacencyBuffer {
                 if (propertyValues == null) {
                     compressedTargets.add(localId, targets, startOffset, endOffset, targetsToImport);
                 } else {
+                    if (preAggregate && aggregations[0] != Aggregation.NONE) {
+                        targetsToImport = preAggregate(targets, propertyValues, startOffset, endOffset, aggregations);
+                    }
                     compressedTargets.add(localId, targets, propertyValues, startOffset, endOffset, targetsToImport);
                 }
 

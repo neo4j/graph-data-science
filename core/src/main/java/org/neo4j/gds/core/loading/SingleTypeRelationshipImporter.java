@@ -55,7 +55,8 @@ public final class SingleTypeRelationshipImporter {
         ImportMetaData importMetaData,
         LongSupplier nodeCountSupplier,
         boolean validateRelationships,
-        ImportSizing importSizing
+        ImportSizing importSizing,
+        Optional<Boolean> preAggregate
     ) {
         var adjacencyCompressorFactory = AdjacencyListBehavior.asConfigured(
             nodeCountSupplier,
@@ -67,6 +68,7 @@ public final class SingleTypeRelationshipImporter {
             .importMetaData(importMetaData)
             .importSizing(importSizing)
             .adjacencyCompressorFactory(adjacencyCompressorFactory)
+            .preAggregate(preAggregate.orElse(false))
             .build();
 
         return new SingleTypeRelationshipImporter(
