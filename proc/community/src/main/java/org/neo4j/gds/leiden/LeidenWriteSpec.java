@@ -24,6 +24,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.executor.AlgorithmSpec;
+import org.neo4j.gds.executor.AlgorithmSpecProgressTrackerProvider;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -82,6 +83,12 @@ public class LeidenWriteSpec implements AlgorithmSpec<Leiden, LeidenResult, Leid
                 NodePropertyExporter exporter =  executionContext.nodePropertyExporterBuilder()
                     .withIdMap(graph)
                     .withTerminationFlag(algorithm.getTerminationFlag())
+                    .withProgressTracker(AlgorithmSpecProgressTrackerProvider.createProgressTracker(
+                        name(),
+                        graph.nodeCount(),
+                        writeConcurrency,
+                        executionContext
+                    ))
                     .parallel(Pools.DEFAULT, writeConcurrency)
                     .build();
 
