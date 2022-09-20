@@ -206,7 +206,8 @@ public final class GraphFactory {
         Optional<Aggregation> aggregation,
         Optional<Boolean> validateRelationships,
         Optional<Integer> concurrency,
-        Optional<ExecutorService> executorService
+        Optional<ExecutorService> executorService,
+        Optional<Boolean> preAggregate
     ) {
         var loadRelationshipProperties = !propertyConfigs.isEmpty();
 
@@ -266,6 +267,7 @@ public final class GraphFactory {
             .nodeCountSupplier(() -> nodes.rootNodeCount().orElse(0L))
             .importSizing(importSizing)
             .validateRelationships(validateRelationships.orElse(false))
+            .preAggregate(preAggregate.orElse(false))
             .build();
 
         return new RelationshipsBuilder(
