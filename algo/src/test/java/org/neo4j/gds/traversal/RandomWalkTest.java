@@ -36,7 +36,6 @@ import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -455,11 +454,13 @@ class RandomWalkTest {
 
             var fact = new RandomWalkAlgorithmFactory<RandomWalkStreamConfig>();
             var log = Neo4jProxy.testLog();
+            var taskStore = new GlobalTaskStore();
+
             var pt = new TestProgressTracker(
                 fact.progressTask(graph, config),
                 log,
                 config.concurrency(),
-                EmptyTaskRegistryFactory.INSTANCE
+                TaskRegistryFactory.local("rw", taskStore)
             );
 
             RandomWalk randomWalk = fact.build(graph, config, pt);
@@ -470,8 +471,7 @@ class RandomWalkTest {
                 assertThat(randomWalksStream).hasSize(5000);
             });
 
-            long timeoutInMilliSeconds = TestSupport.CI ? 5000 : 200;
-            Pools.DEFAULT_SINGLE_THREAD_POOL.awaitTermination(timeoutInMilliSeconds, TimeUnit.MILLISECONDS);
+            awaitEmptyTaskStore(taskStore);
 
             assertThat(log.getMessages(TestLog.INFO))
                 .extracting(removingThreadId())
@@ -508,6 +508,13 @@ class RandomWalkTest {
             // run the algorithm and consume the result stream
             factory.build(graph, config, progressTracker).compute().count();
 
+            awaitEmptyTaskStore(taskStore);
+
+            // the task store should now be empty
+            assertThat(taskStore.isEmpty()).isTrue();
+        }
+
+        private void awaitEmptyTaskStore(GlobalTaskStore taskStore) {
             // there is a race condition between the thread consuming the result,
             // and the thread scheduled to end the last subtask
             long timeoutInSeconds = 5 * (TestSupport.CI ? 5 : 1);
@@ -521,9 +528,6 @@ class RandomWalkTest {
 
                 LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(100));
             }
-
-            // the task store should now be empty
-            assertThat(taskStore.isEmpty()).isTrue();
         }
     }
 }
