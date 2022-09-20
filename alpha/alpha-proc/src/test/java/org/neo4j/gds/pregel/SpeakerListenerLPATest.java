@@ -34,8 +34,8 @@ import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
+import java.util.SplittableRandom;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -100,7 +100,7 @@ class SpeakerListenerLPATest {
         var expected = Map.of(
             0L, Set.of(0L),
             1L, Set.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L),
-            2L, Set.of(2L, 4L, 5L, 6L, 7L, 8L, 9L),
+            2L, Set.of(2L, 4L, 5L),
             3L, Set.of(3L),
             4L, Set.of(4L),
             5L, Set.of(5L, 6L, 7L, 8L, 9L),
@@ -147,7 +147,8 @@ class SpeakerListenerLPATest {
         var expected = Map.of(
             0L, Set.of(0L),
             1L, Set.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L),
-            2L, Set.of(8L, 9L)
+            5L, Set.of(8L),
+            6L, Set.of(7L)
         );
 
         assertThat(communities).containsExactlyInAnyOrderEntriesOf(expected);
@@ -166,10 +167,10 @@ class SpeakerListenerLPATest {
             ProgressTracker.NULL_TRACKER
         ).run();
 
-        CloseableThreadLocal<Random> threadLocal = null;
+        CloseableThreadLocal<SplittableRandom> threadLocal = null;
         try {
             //noinspection unchecked
-            threadLocal = (CloseableThreadLocal<Random>) MethodHandles
+            threadLocal = (CloseableThreadLocal<SplittableRandom>) MethodHandles
                 .privateLookupIn(SpeakerListenerLPA.class, MethodHandles.lookup())
                 .findGetter(SpeakerListenerLPA.class, "random", CloseableThreadLocal.class)
                 .invoke(computation);
