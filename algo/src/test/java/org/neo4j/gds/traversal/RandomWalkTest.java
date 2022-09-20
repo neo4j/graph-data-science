@@ -441,7 +441,7 @@ class RandomWalkTest {
         TestGraph graph;
 
         @Test
-        void progressLogging() {
+        void progressLogging() throws InterruptedException {
 
             var config = ImmutableRandomWalkStreamConfig.builder()
                 .walkLength(10)
@@ -469,6 +469,9 @@ class RandomWalkTest {
                 // Make sure to consume the stream...
                 assertThat(randomWalksStream).hasSize(5000);
             });
+
+            long timeoutInMilliSeconds = TestSupport.CI ? 5000 : 200;
+            Pools.DEFAULT_SINGLE_THREAD_POOL.awaitTermination(timeoutInMilliSeconds, TimeUnit.MILLISECONDS);
 
             assertThat(log.getMessages(TestLog.INFO))
                 .extracting(removingThreadId())
