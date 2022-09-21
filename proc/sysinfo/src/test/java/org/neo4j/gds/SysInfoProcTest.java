@@ -48,23 +48,32 @@ import static org.neo4j.gds.GdsEditionTestCondition.GDS_EDITION;
 class SysInfoProcTest extends BaseProcTest {
 
     private static final Collection<String> ALL_COMPATIBILITIES = List.of(
-        "Neo4j Settings 4.x",
-        "Neo4j Settings 5.0.0-drop08.0 (placeholder)",
-        "Neo4j Settings 5.0.0-drop09.0 (placeholder)",
-        "Neo4j Settings 5.1.0-dev (placeholder)",
-        "Neo4j Settings 5.0.0-drop08.0",
-        "Neo4j Settings 5.0.0-drop09.0",
-        "Neo4j Settings 5.1.0-dev",
         "Neo4j 4.3",
         "Neo4j 4.4",
+        "Neo4j Settings 4.x",
+
         "Neo4j 4.4.9-drop01.0",
         "Neo4j 4.4.10-drop01.0",
-        "Neo4j 5.0.0-drop08.0 (placeholder)",
-        "Neo4j 5.0.0-drop09.0 (placeholder)",
-        "Neo4j 5.1.0-dev (placeholder)",
+
+        "Neo4j 5.0",
+        "Neo4j 5.0 (placeholder)",
+        "Neo4j Settings 5.0",
+        "Neo4j Settings 5.0 (placeholder)",
+
         "Neo4j 5.0.0-drop08.0",
+        "Neo4j 5.0.0-drop08.0 (placeholder)",
+        "Neo4j Settings 5.0.0-drop08.0",
+        "Neo4j Settings 5.0.0-drop08.0 (placeholder)",
+
         "Neo4j 5.0.0-drop09.0",
-        "Neo4j 5.1.0-dev"
+        "Neo4j 5.0.0-drop09.0 (placeholder)",
+        "Neo4j Settings 5.0.0-drop09.0 (placeholder)",
+        "Neo4j Settings 5.0.0-drop09.0",
+
+        "Neo4j 5.1.0-dev",
+        "Neo4j 5.1.0-dev (placeholder)",
+        "Neo4j Settings 5.1.0-dev",
+        "Neo4j Settings 5.1.0-dev (placeholder)"
     );
 
     @BeforeEach
