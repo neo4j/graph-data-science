@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.SplittableRandom;
 import java.util.function.LongUnaryOperator;
-import java.util.stream.IntStream;
 
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addInPlace;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scale;
@@ -151,26 +150,20 @@ public class Node2VecModel {
             nodeCount
         );
         double bound;
-        switch (config.initializationBound()) {
-            case "default":
+        switch (config.embeddingInitializer()) {
+            case UNIFORM:
                 bound = 1.0;
                 break;
-            case "xavier":
-                bound = Math.sqrt(6.0 / embeddingDimensions);
-                break;
-            case "gensim":
+            case NORMALIZED:
                 bound = 0.5 / embeddingDimensions;
                 break;
             default:
-                throw new IllegalArgumentException("Unexpected value: " + config.initializationBound());
+                throw new IllegalStateException("Missing implementation for: " + config.embeddingInitializer());
         }
 
         for (var i = 0L; i < nodeCount; i++) {
             random.setSeed(toOriginalNodeId.applyAsLong(i) + randomSeed);
-            var dataStream = config.gaussianInitialization()
-                ? IntStream.range(0, embeddingDimensions).mapToDouble(ignore -> bound * random.nextGaussian())
-                : random.doubles(embeddingDimensions, -bound, bound);
-            var data = dataStream
+            var data = random.doubles(embeddingDimensions, -bound, bound)
                 .collect(
                     () -> new FloatConsumer(embeddingDimensions),
                     FloatConsumer::add,
