@@ -229,7 +229,6 @@ The following table contains all settings for the database import.
 | name              | String            | No        | None                  | The name of the import process and the resulting database.
 | id_type           | String            | Yes       | INTEGER               | Sets the node id type used in the input data. Can be either `INTEGER` or `STRING`.
 | concurrency       | Integer           | Yes       | Available cores       | Number of threads to use for the database creation process.
-| debug_log         | Boolean           | Yes       | False                 | Write the database creation process into the log.
 | id_property       | String            | Yes       | `__originalId__`      | The node property key which stores the node id of the input data.
 | record_format     | String            | Yes       | `dbms.record_format`  | Database record format. Valid values are blank (no value, default), `standard`, `aligned`, or `high_limit`.
 | force             | Boolean           | Yes       | False                 | Force deletes any existing database files prior to the import.
