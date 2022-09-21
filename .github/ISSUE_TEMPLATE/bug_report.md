@@ -8,7 +8,9 @@ assignees: ''
 ---
 
 **Describe the bug**
-<!-- A clear and concise description of what the bug is. -->
+<!-- A clear and concise description of what the bug is. 
+    If it is a security issue, please contact us as described in https://neo4j.com/trust-center/responsible-disclosure/.
+-->
 
 **To Reproduce**
 <!-- Running `CALL gds.debug.sysInfo` helps to provide vital details -->
