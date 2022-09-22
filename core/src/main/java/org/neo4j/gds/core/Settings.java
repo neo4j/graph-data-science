@@ -43,6 +43,10 @@ public final class Settings {
         return GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
     }
 
+    public static String systemDatabaseName() {
+        return GraphDatabaseSettings.SYSTEM_DATABASE_NAME;
+    }
+
     public static Setting<Boolean> boltEnabled() {
         return BoltConnector.enabled;
     }
