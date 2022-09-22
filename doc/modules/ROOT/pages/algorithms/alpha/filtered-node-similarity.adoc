@@ -371,9 +371,12 @@ ORDER BY similarity DESCENDING, Person1, Person2
 | "Carol" | "Alice" | 0.3333333333333333
 |===
 --
+
+
 [[algorithms-filtered-node-similarity-examples-stats]]
 === Stats
 
+:stats-syntax: algorithms-filtered-node-similarity-syntax
 include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
 [role=query-example]
@@ -469,5 +472,3 @@ The relationships that are written are always directed, even if the input graph 
 If `a -> b` is topK for `a` and symmetrically `b -> a` is topK for `b` (or both `a -> b` and `b -> a` are topN), it appears as though an undirected relationship is written.
 However, they are just two directed relationships that have been independently written.
 ====
-
-
