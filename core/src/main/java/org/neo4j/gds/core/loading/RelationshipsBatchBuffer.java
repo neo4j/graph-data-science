@@ -29,6 +29,11 @@ import static org.neo4j.token.api.TokenConstants.ANY_RELATIONSHIP_TYPE;
 
 public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
 
+    // For relationships, the buffer is divided into 2-long blocks
+    // for each relationship: source, target. Relationship and
+    // property references are stored individually.
+    public static final int ENTRIES_PER_RELATIONSHIP = 2;
+
     private final PartialIdMap idMap;
     private final int type;
     private final boolean throwOnUnMappedNodeIds;
@@ -55,9 +60,7 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
         int capacity,
         boolean throwOnUnMappedNodeIds
     ) {
-        // For relationships: the buffer is divided into 4-long blocks
-        // for each rel: source, target, rel-id, prop-id
-        super(Math.multiplyExact(2, capacity));
+        super(Math.multiplyExact(ENTRIES_PER_RELATIONSHIP, capacity));
         this.idMap = idMap;
         this.type = type;
         this.throwOnUnMappedNodeIds = throwOnUnMappedNodeIds;

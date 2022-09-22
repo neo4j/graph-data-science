@@ -183,7 +183,7 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
             long[][] outProperties = propertyReader.readProperty(
                 sourceBuffer().relationshipReferences(),
                 sourceBuffer().propertyReferences(),
-                batchLength / 2,
+                batchLength / RelationshipsBatchBuffer.ENTRIES_PER_RELATIONSHIP,
                 targetBuffer().getPropertyKeyIds(),
                 targetBuffer().getDefaultValues(),
                 targetBuffer().getAggregations(),
@@ -195,7 +195,7 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
             long[][] inProperties = propertyReader.readProperty(
                 sourceBuffer().relationshipReferences(),
                 sourceBuffer().propertyReferences(),
-                batchLength / 2,
+                batchLength / RelationshipsBatchBuffer.ENTRIES_PER_RELATIONSHIP,
                 targetBuffer().getPropertyKeyIds(),
                 targetBuffer().getDefaultValues(),
                 targetBuffer().getAggregations(),
