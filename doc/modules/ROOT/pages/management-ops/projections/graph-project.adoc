@@ -3,7 +3,7 @@
 :description: This section details projecting GDS graphs using `native` projections.
 
 
-A projected graph can be stored in the xref:management-ops/graph-catalog-ops.adoc[catalog] under a user-defined name.
+A projected graph can be stored in the xref:management-ops/graph-catalog-ops.adoc[Graph Catalog] under a user-defined name.
 Using that name, the graph can be referred to by any algorithm in the library.
 This allows multiple algorithms to use the same graph without having to project it on each algorithm run.
 
@@ -21,7 +21,7 @@ There is also a way to generate a random graph, see xref:management-ops/projecti
 The projected graphs will reside in the catalog until:
 
 - the graph is dropped using xref:graph-drop.adoc[gds.graph.drop]
-- the Neo4j database from which to graph was projected is stopped or dropped
+- the Neo4j database from which the graph was projected is stopped or dropped
 - the Neo4j database management system is stopped.
 --
 
@@ -32,17 +32,18 @@ The projected graphs will reside in the catalog until:
 A native projection takes three mandatory arguments: `graphName`, `nodeProjection` and `relationshipProjection`.
 In addition, the optional `configuration` parameter allows us to further configure the graph creation.
 
+NOTE: To get information about a previously projected graph, such as its schema, one can use xref:graph-list.adoc[gds.graph.list].
+
 [.graph-project-syntax]
 --
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.project(
-    graphName: String,
-    nodeProjection: String or List or Map,
-    relationshipProjection: String or List or Map,
-    configuration: Map
-)
-YIELD
+  graphName: String,
+  nodeProjection: String or List or Map,
+  relationshipProjection: String or List or Map,
+  configuration: Map
+) YIELD
   graphName: String,
   nodeProjection: Map,
   nodeCount: Integer,
@@ -50,8 +51,6 @@ YIELD
   relationshipCount: Integer,
   projectMillis: Integer
 ----
-
-NOTE: To get information about a stored graph, such as its schema, one can use xref:graph-list.adoc[gds.graph.list].
 
 .Parameters
 [opts="header",cols="1,1,1, 4"]
