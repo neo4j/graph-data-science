@@ -37,7 +37,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.Arrays;
-import java.util.Random;
+import java.util.SplittableRandom;
 
 @PregelProcedure(
     name = "gds.alpha.sllpa",
@@ -47,7 +47,7 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
 
     public static final String LABELS_PROPERTY = "communityIds";
 
-    private final CloseableThreadLocal<Random> random;
+    private final CloseableThreadLocal<SplittableRandom> random;
 
     @SuppressWarnings("unused") // Needed for the @PregelProcedure annotation
     public SpeakerListenerLPA() {
@@ -55,7 +55,8 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
     }
 
     public SpeakerListenerLPA(long seed) {
-        random = CloseableThreadLocal.withInitial(() -> new Random(seed));
+        var splittableRandom = new SplittableRandom(seed);
+        random = CloseableThreadLocal.withInitial(splittableRandom::split);
     }
 
     @Override
