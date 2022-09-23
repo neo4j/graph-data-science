@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.core;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ml.core.functions.SingleParentVariable;
 import org.neo4j.gds.ml.core.tensor.Tensor;
@@ -28,18 +29,20 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+/**
+ * The computation context is used for forward and backward propagation over a computation graphs consiting of {@link org.neo4j.gds.ml.core.Variable}s.
+ * This implementation is not thread-safe!
+ */
 public class ComputationContext {
     private final Map<Variable<?>, Tensor<?>> data;
     private final Map<Variable<?>, Tensor<?>> gradients;
 
     public ComputationContext() {
-        this.data = new ConcurrentHashMap<>();
-        this.gradients = new ConcurrentHashMap<>();
+        this.data = new HashMap<>();
+        this.gradients = new HashMap<>();
     }
 
     // Only one forward call is expected for the caching strategy
@@ -70,14 +73,14 @@ public class ComputationContext {
 
         gradients.clear();
         Queue<BackPropTask> executionQueue = new LinkedBlockingQueue<>();
-        var dummy = new PassthroughVariable<>(function);
+        var dummy = new PassThroughVariable<>(function);
         executionQueue.add(new BackPropTask(function, dummy));
-        Map<Variable<?>, AtomicInteger> upstreamCounters = new HashMap<>();
+        Map<Variable<?>, MutableInt> upstreamCounters = new HashMap<>();
         initUpstream(dummy, upstreamCounters);
         backward(executionQueue, upstreamCounters);
     }
 
-    private void backward(Queue<BackPropTask> executionQueue, Map<Variable<?>, AtomicInteger> upstreamCounters) {
+    private void backward(Queue<BackPropTask> executionQueue, Map<Variable<?>, MutableInt> upstreamCounters) {
         while (!executionQueue.isEmpty()) {
             BackPropTask task = executionQueue.poll();
             var variable = task.variable;
@@ -95,15 +98,15 @@ public class ComputationContext {
         }
     }
 
-    private void initUpstream(Variable<?> function, Map<Variable<?>, AtomicInteger> upstreamCounters) {
+    private void initUpstream(Variable<?> function, Map<Variable<?>, MutableInt> upstreamCounters) {
         for (Variable<?> parent : function.parents()) {
             if (parent.requireGradient()) {
                 boolean firstToSeeParent = !upstreamCounters.containsKey(parent);
                 if (firstToSeeParent) {
                     initUpstream(parent, upstreamCounters);
-                    upstreamCounters.put(parent, new AtomicInteger(0));
+                    upstreamCounters.put(parent, new MutableInt(0));
                 }
-                upstreamCounters.get(parent).incrementAndGet();
+                upstreamCounters.get(parent).increment();
             }
         }
     }
@@ -127,7 +130,7 @@ public class ComputationContext {
                 .append(System.lineSeparator());
 
             var gradient = Optional.ofNullable(gradients.get(variable)).map(Tensor::toString);
-            result.append("\t gradient: " + gradient.orElse("None") + System.lineSeparator());
+            result.append("\t gradient: ").append(gradient.orElse("None")).append(System.lineSeparator());
         });
 
         renderOrphanGradients(result);
@@ -169,12 +172,12 @@ public class ComputationContext {
         }
     }
 
-    private static class PassthroughVariable<T extends Tensor<T>> extends SingleParentVariable<T, T> {
+    private static final class PassThroughVariable<T extends Tensor<T>> extends SingleParentVariable<T, T> {
 
-        public PassthroughVariable(Variable<T> parent) {
+        private PassThroughVariable(Variable<T> parent) {
             super(parent, parent.dimensions());
 
-            if (parent instanceof PassthroughVariable) {
+            if (parent instanceof PassThroughVariable) {
                 throw new IllegalArgumentException("Redundant use of PassthroughVariables. Chaining does not make sense.");
             }
         }
