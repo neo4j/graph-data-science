@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ImmutableRelationshipProjections;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
@@ -67,7 +68,7 @@ class NativeFactoryTest {
             .build();
 
         NodeProjections nodeProjections = NodeProjections.all();
-        RelationshipProjections relationshipProjections = RelationshipProjections
+        RelationshipProjections relationshipProjections = ImmutableRelationshipProjections
             .builder()
             .putProjection(RelationshipType.of("TYPE1"), RelationshipProjection.of("TYPE1", Orientation.NATURAL))
             .putProjection(RelationshipType.of("TYPE2"), RelationshipProjection.of("TYPE2", Orientation.NATURAL))

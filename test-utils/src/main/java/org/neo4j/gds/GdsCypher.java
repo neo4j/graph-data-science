@@ -660,7 +660,7 @@ public abstract class GdsCypher {
         return ImmutableGraphProjectFromStoreConfig.builder()
             .graphName(graphName.orElse(""))
             .nodeProjections(NodeProjections.create(nodeProjections))
-            .relationshipProjections(RelationshipProjections.builder().putAllProjections(relProjections).build())
+            .relationshipProjections(ImmutableRelationshipProjections.builder().putAllProjections(relProjections).build())
             .nodeProperties(PropertyMappings.of(nodeProperties))
             .relationshipProperties(PropertyMappings.of(relProperties))
             .build();

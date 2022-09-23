@@ -20,6 +20,7 @@
 package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.ImmutableRelationshipProjections;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
@@ -27,7 +28,6 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
@@ -40,6 +40,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
 
 import java.util.List;
 
@@ -81,7 +82,7 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends GraphAlgor
                 GraphDimensions sparseDimensions = dimensionsBuilder.build();
 
                 // Louvain creates a new graph every iteration, this graph has one relationship property
-                RelationshipProjections relationshipProjections = RelationshipProjections.builder()
+                RelationshipProjections relationshipProjections = ImmutableRelationshipProjections.builder()
                     .putProjection(
                         RelationshipType.of("AGGREGATE"),
                         RelationshipProjection.builder()

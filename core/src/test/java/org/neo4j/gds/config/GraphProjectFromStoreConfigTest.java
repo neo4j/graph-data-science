@@ -20,7 +20,7 @@
 package org.neo4j.gds.config;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AbstractRelationshipProjections;
+import org.neo4j.gds.ImmutableRelationshipProjections;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
@@ -57,7 +57,7 @@ class GraphProjectFromStoreConfigTest {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
             ImmutableGraphProjectFromStoreConfig.builder()
                 .graphName("graph")
-                .relationshipProjections(RelationshipProjections.of())
+                .relationshipProjections(ImmutableRelationshipProjections.of())
                 .nodeProperties(propertyMappings)
                 .nodeProjections(nodeProjections)
                 .build()
@@ -72,7 +72,7 @@ class GraphProjectFromStoreConfigTest {
             .addMapping("duplicate", "foo", DefaultValue.of(0.0), Aggregation.NONE)
             .build();
 
-        RelationshipProjections relProjections = RelationshipProjections.single(
+        RelationshipProjections relProjections = ImmutableRelationshipProjections.single(
             RelationshipType.of("A"),
             RelationshipProjection.builder()
                 .type("A")
@@ -109,7 +109,7 @@ class GraphProjectFromStoreConfigTest {
 
         GraphProjectFromStoreConfig graphProjectConfig = ImmutableGraphProjectFromStoreConfig.builder()
             .graphName("graph")
-            .relationshipProjections(AbstractRelationshipProjections.ALL)
+            .relationshipProjections(RelationshipProjections.ALL)
             .nodeProperties(propertyMappings1)
             .nodeProjections(nodeProjections)
             .build();
@@ -130,7 +130,7 @@ class GraphProjectFromStoreConfigTest {
             .addMapping("bar", "foo", DefaultValue.of(0.0), Aggregation.NONE)
             .build();
 
-        RelationshipProjections relProjections = RelationshipProjections.single(
+        RelationshipProjections relProjections = ImmutableRelationshipProjections.single(
             RelationshipType.of("A"),
             RelationshipProjection.builder()
                 .type("A")

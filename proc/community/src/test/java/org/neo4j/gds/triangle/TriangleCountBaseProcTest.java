@@ -21,7 +21,6 @@ package org.neo4j.gds.triangle;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AbstractRelationshipProjections;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GraphFactoryTestSupport;
@@ -81,7 +80,7 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
 
     @Override
     public RelationshipProjections relationshipProjections() {
-        return AbstractRelationshipProjections.ALL_UNDIRECTED;
+        return RelationshipProjections.ALL_UNDIRECTED;
     }
 
     @Override

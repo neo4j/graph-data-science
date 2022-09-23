@@ -26,12 +26,12 @@ import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.ImmutableRelationshipProjections;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
-import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.MapUtil;
@@ -140,7 +140,7 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
                 .graphName("")
                 .nodeProjections(NodeProjections.fromObject(MapUtil.map("A", "A", "B", "B")))
                 .nodeProperties(PropertyMappings.fromObject(Arrays.asList("seed", "weight")))
-                .relationshipProjections(RelationshipProjections.builder()
+                .relationshipProjections(ImmutableRelationshipProjections.builder()
                     .putProjection(
                         ALL_RELATIONSHIPS,
                         RelationshipProjection.builder()

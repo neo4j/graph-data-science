@@ -476,7 +476,7 @@ class GdsCypherTest {
                 .propertyKey("GlobalNodeProp")
                 .build()
             ))
-            .relationshipProjections(RelationshipProjections
+            .relationshipProjections(ImmutableRelationshipProjections
                 .builder()
                 .putProjection(
                     new RelationshipType("Rel"),

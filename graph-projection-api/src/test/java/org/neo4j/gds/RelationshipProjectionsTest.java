@@ -93,7 +93,7 @@ class RelationshipProjectionsTest {
     void syntacticSugars(Object argument) {
         RelationshipProjections actual = RelationshipProjections.fromObject(argument);
 
-        RelationshipProjections expected = RelationshipProjections.builder().projections(singletonMap(
+        RelationshipProjections expected = ImmutableRelationshipProjections.builder().projections(singletonMap(
             RelationshipType.of("T"),
             RelationshipProjection
                 .builder()
@@ -112,7 +112,7 @@ class RelationshipProjectionsTest {
     void shouldSupportStar() {
         RelationshipProjections actual = RelationshipProjections.fromObject("*");
 
-        RelationshipProjections expected = RelationshipProjections.builder()
+        RelationshipProjections expected = ImmutableRelationshipProjections.builder()
             .projections(singletonMap(ALL_RELATIONSHIPS, RelationshipProjection.ALL))
             .build();
 
@@ -124,7 +124,7 @@ class RelationshipProjectionsTest {
     void shouldParseMultipleRelationshipTypes() {
         RelationshipProjections actual = RelationshipProjections.fromObject(Arrays.asList("A", "B"));
 
-        RelationshipProjections expected = RelationshipProjections.builder()
+        RelationshipProjections expected = ImmutableRelationshipProjections.builder()
             .putProjection(RelationshipType.of("A"), RelationshipProjection.builder().type("A").build())
             .putProjection(RelationshipType.of("B"), RelationshipProjection.builder().type("B").build())
             .build();
@@ -149,7 +149,7 @@ class RelationshipProjectionsTest {
 
         RelationshipProjections actual = RelationshipProjections.fromObject(projection);
 
-        RelationshipProjections expected = RelationshipProjections.builder().projections(
+        RelationshipProjections expected = ImmutableRelationshipProjections.builder().projections(
             singletonMap(
                 RelationshipType.of("MY_TYPE"),
                 RelationshipProjection
