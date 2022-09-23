@@ -3,7 +3,7 @@
 :description: This section details projecting GDS graphs using `native` projections.
 
 
-A projected graph can be stored in the xref:management-ops/graph-catalog-ops.adoc[catalog] under a user-defined name.
+A projected graph can be stored in the xref:management-ops/graph-catalog-ops.adoc[Graph Catalog] under a user-defined name.
 Using that name, the graph can be referred to by any algorithm in the library.
 This allows multiple algorithms to use the same graph without having to project it on each algorithm run.
 
@@ -21,7 +21,7 @@ There is also a way to generate a random graph, see xref:management-ops/projecti
 The projected graphs will reside in the catalog until:
 
 - the graph is dropped using xref:graph-drop.adoc[gds.graph.drop]
-- the Neo4j database from which to graph was projected is stopped or dropped
+- the Neo4j database from which the graph was projected is stopped or dropped
 - the Neo4j database management system is stopped.
 --
 
@@ -32,17 +32,18 @@ The projected graphs will reside in the catalog until:
 A native projection takes three mandatory arguments: `graphName`, `nodeProjection` and `relationshipProjection`.
 In addition, the optional `configuration` parameter allows us to further configure the graph creation.
 
+NOTE: To get information about a previously projected graph, such as its schema, one can use xref:graph-list.adoc[gds.graph.list].
+
 [.graph-project-syntax]
 --
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.project(
-    graphName: String,
-    nodeProjection: String or List or Map,
-    relationshipProjection: String or List or Map,
-    configuration: Map
-)
-YIELD
+  graphName: String,
+  nodeProjection: String or List or Map,
+  relationshipProjection: String or List or Map,
+  configuration: Map
+) YIELD
   graphName: String,
   nodeProjection: Map,
   nodeCount: Integer,
@@ -50,8 +51,6 @@ YIELD
   relationshipCount: Integer,
   projectMillis: Integer
 ----
-
-NOTE: To get information about a stored graph, such as its schema, one can use xref:graph-list.adoc[gds.graph.list].
 
 .Parameters
 [opts="header",cols="1,1,1, 4"]
@@ -91,15 +90,77 @@ NOTE: To get information about a stored graph, such as its schema, one can use x
 [[node-projection-syntax]]
 === Node Projection
 
+The node projection specifies which nodes from the database should be projected into the in-memory GDS graph.
+The projection is based around node labels, and offers three different syntaxes that can be used based on how detailed the projection needs to be.
+
+All specified node labels and properties must exist in the database.
+To project using a non-existing label, it is possible to create a label without any nodes using https://neo4j.com/docs/operations-manual/current/reference/procedures/#procedure_db_createlabel[the db.createLabel() procedure].
+Similarly, to project a non-existing property, it is possible to create a node property without modifying the database, using https://neo4j.com/docs/operations-manual/current/reference/procedures/#procedure_db_createproperty[the db.createProperty() procedure].
+
+
+==== Projecting a single label
+
+The simplest syntax is to specify a single node label as a string value.
+
 .Short-hand String-syntax for `nodeProjection`. The projected graph will contain the given `neo4j-label`.
 ----
 <neo4j-label>
 ----
 
+.Example outline:
+----
+CALL gds.graph.project(
+  /* graph name */,
+  'MyLabel',
+  /* relationship projection */
+)
+----
+
+
+==== Projecting multiple labels
+
+To project more than one label, the list syntax is available.
+Specify all labels to be projected as a list of strings.
+
 .Short-hand List-syntax for `nodeProjection`. The projected graph will contain the given `neo4j-label`s.
 ----
 [<neo4j-label>, ..., <neo4j-label>]
 ----
+
+.Example outline:
+----
+CALL gds.graph.project(
+  /* graph name */,
+  ['MyLabel', 'MySecondLabel', 'AnotherLabel']
+  /* relationship projection */
+)
+----
+
+
+==== Projecting labels with uniform node properties
+
+In order to project properties in conjunction with the node labels, the `nodeProperties` configuration parameter can be used.
+This is a shorthand syntax to the full map-based syntax described below.
+The node properties specified with the `nodeProperties` parameter will be applied to all node labels specified in the node projection.
+
+.Example outline:
+----
+CALL gds.graph.project(
+  /* graph name */,
+  ['MyLabel', 'MySecondLabel', 'AnotherLabel']
+  /* relationship projection */,
+  { nodeProperties: ['prop1', 'prop2] }
+)
+----
+
+
+==== Projecting multiple labels with name mapping and label-specific properties
+
+The full node projection syntax uses a map.
+The keys in the map are the projected labels.
+Each value specifies the projection for that node label.
+
+The `properties` key can take a similar set of syntax variants as the node projection itself: a single string for a single property, a list of strings for multiple properties, or a map for the full syntax expressiveness.
 
 .Extended Map-syntax for `nodeProjection`.
 ----
