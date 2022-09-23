@@ -93,6 +93,12 @@ CALL gds.graph.project(
 The node projection specifies which nodes from the database should be projected into the in-memory GDS graph.
 The projection is based around node labels, and offers three different syntaxes that can be used based on how detailed the projection needs to be.
 
+All nodes with any of the specified node labels will be projected to the GDS graph.
+If a node has several labels, it will be projected several times.
+If the nodes have values for the specified properties, these will be projected as well.
+If a node does not have a value for a specified property, a default value will be used.
+Read more about default values <<node-projection-syntax-configuration, below>>.
+
 All specified node labels and properties must exist in the database.
 To project using a non-existing label, it is possible to create a label without any nodes using https://neo4j.com/docs/operations-manual/current/reference/procedures/#procedure_db_createlabel[the db.createLabel() procedure].
 Similarly, to project a non-existing property, it is possible to create a node property without modifying the database, using https://neo4j.com/docs/operations-manual/current/reference/procedures/#procedure_db_createproperty[the db.createProperty() procedure].
@@ -159,6 +165,8 @@ CALL gds.graph.project(
 The full node projection syntax uses a map.
 The keys in the map are the projected labels.
 Each value specifies the projection for that node label.
+The following syntax description and table details the format and expected values.
+Note that it is possible to project node labels to a label in the GDS graph with a different name.
 
 The `properties` key can take a similar set of syntax variants as the node projection itself: a single string for a single property, a list of strings for multiple properties, or a map for the full syntax expressiveness.
 
@@ -191,6 +199,7 @@ The `properties` key can take a similar set of syntax variants as the node proje
 }
 ----
 
+[[node-projection-syntax-configuration]]
 .Node Projection fields
 [opts="header",cols="1,1,1,2,4"]
 |===
