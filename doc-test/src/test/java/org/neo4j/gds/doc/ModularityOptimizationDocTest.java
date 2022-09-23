@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.modularity.ModularityOptimizationMutateProc;
-import org.neo4j.gds.modularity.ModularityOptimizationStreamProc;
-import org.neo4j.gds.modularity.ModularityOptimizationWriteProc;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateProc;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamProc;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteProc;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 

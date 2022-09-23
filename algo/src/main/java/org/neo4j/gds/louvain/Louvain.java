@@ -35,10 +35,10 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.modularity.ImmutableModularityOptimizationStreamConfig;
-import org.neo4j.gds.modularity.ModularityOptimization;
-import org.neo4j.gds.modularity.ModularityOptimizationFactory;
-import org.neo4j.gds.modularity.ModularityOptimizationStreamConfig;
+import org.neo4j.gds.modularityoptimization.ImmutableModularityOptimizationStreamConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimization;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 
 import java.util.Optional;
 import java.util.OptionalLong;
