@@ -22,10 +22,10 @@ package org.neo4j.gds.executor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.AbstractRelationshipProjections;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjections;
-import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -112,7 +112,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
     void testMemoryEstimateOnExplicitDimensions() {
         Map<String, Object> graphProjectConfig = CypherMapWrapper.empty()
             .withEntry(GraphProjectFromStoreConfig.NODE_PROJECTION_KEY, NodeProjections.all())
-            .withEntry(GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY, RelationshipProjections.all())
+            .withEntry(GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY, AbstractRelationshipProjections.ALL)
             .withNumber("nodeCount", 100_000_000L)
             .withNumber("relationshipCount", 20_000_000_000L)
             .withoutEntry("nodeProperties")

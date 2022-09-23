@@ -49,7 +49,7 @@ class GraphProjectConfigBuildersTest {
                 new StoreConfigBuilder().userName("foo").graphName("bar").jobId(jobId).build(),
                 ImmutableGraphProjectFromStoreConfig.builder().username("foo").graphName("bar")
                     .nodeProjections(NodeProjections.all())
-                    .relationshipProjections(RelationshipProjections.all())
+                    .relationshipProjections(AbstractRelationshipProjections.ALL)
                     .nodeProperties(PropertyMappings.of())
                     .relationshipProperties(PropertyMappings.of())
                     .jobId(jobId)

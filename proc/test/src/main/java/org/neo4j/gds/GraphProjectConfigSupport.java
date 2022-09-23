@@ -33,7 +33,7 @@ public interface GraphProjectConfigSupport {
         return withNameAndRelationshipProjections(
             userName,
             graphName,
-            RelationshipProjections.all()
+            AbstractRelationshipProjections.ALL
         );
     }
 
@@ -59,7 +59,7 @@ public interface GraphProjectConfigSupport {
             userName,
             graphName,
             nodes,
-            RelationshipProjections.all()
+            AbstractRelationshipProjections.ALL
         );
     }
 

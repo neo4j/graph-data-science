@@ -20,6 +20,7 @@
 package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.AbstractRelationshipProjections;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
@@ -179,7 +180,7 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
 
     static GraphProjectFromStoreConfig emptyWithName(String userName, String graphName) {
         NodeProjections nodeProjections = NodeProjections.all();
-        RelationshipProjections relationshipProjections = RelationshipProjections.all();
+        RelationshipProjections relationshipProjections = AbstractRelationshipProjections.ALL;
         return ImmutableGraphProjectFromStoreConfig.of(
             userName,
             graphName,
@@ -214,7 +215,7 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
             .username(userName)
             .graphName(graphName)
             .nodeProjections(NodeProjections.all())
-            .relationshipProjections(RelationshipProjections.all())
+            .relationshipProjections(AbstractRelationshipProjections.ALL)
             .build();
     }
 
@@ -223,7 +224,7 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
             config = config.withEntry(NODE_PROJECTION_KEY, NodeProjections.all());
         }
         if (!config.containsKey(RELATIONSHIP_PROJECTION_KEY)) {
-            config = config.withEntry(RELATIONSHIP_PROJECTION_KEY, RelationshipProjections.all());
+            config = config.withEntry(RELATIONSHIP_PROJECTION_KEY, AbstractRelationshipProjections.ALL);
         }
 
         return GraphProjectFromStoreConfigImpl.of(

@@ -21,11 +21,11 @@ package org.neo4j.gds.wcc;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.AbstractRelationshipProjections;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjections;
-import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -81,7 +81,7 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
             .builder()
             .graphName("testGraph")
             .nodeProjections(NodeProjections.all())
-            .relationshipProjections(RelationshipProjections.all())
+            .relationshipProjections(AbstractRelationshipProjections.ALL)
             .build();
 
         GraphStoreCatalog.set(

@@ -20,6 +20,7 @@
 package org.neo4j.gds.config;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.AbstractRelationshipProjections;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
@@ -108,7 +109,7 @@ class GraphProjectFromStoreConfigTest {
 
         GraphProjectFromStoreConfig graphProjectConfig = ImmutableGraphProjectFromStoreConfig.builder()
             .graphName("graph")
-            .relationshipProjections(RelationshipProjections.all())
+            .relationshipProjections(AbstractRelationshipProjections.ALL)
             .nodeProperties(propertyMappings1)
             .nodeProjections(nodeProjections)
             .build();

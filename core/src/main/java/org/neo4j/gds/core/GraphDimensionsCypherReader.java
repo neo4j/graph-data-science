@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core;
 
+import org.neo4j.gds.AbstractRelationshipProjections;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
@@ -58,6 +59,6 @@ public class GraphDimensionsCypherReader extends GraphDimensionsReader<GraphProj
 
     @Override
     protected RelationshipProjections getRelationshipProjections() {
-        return RelationshipProjections.all();
+        return AbstractRelationshipProjections.ALL;
     }
 }
