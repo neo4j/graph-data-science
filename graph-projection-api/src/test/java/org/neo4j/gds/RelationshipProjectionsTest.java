@@ -39,9 +39,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.AbstractRelationshipProjection.ORIENTATION_KEY;
-import static org.neo4j.gds.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.gds.ElementProjection.PROPERTIES_KEY;
+import static org.neo4j.gds.RelationshipProjection.ORIENTATION_KEY;
+import static org.neo4j.gds.RelationshipProjection.TYPE_KEY;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.core.Aggregation.SINGLE;
 
@@ -113,7 +113,7 @@ class RelationshipProjectionsTest {
         RelationshipProjections actual = RelationshipProjections.fromObject("*");
 
         RelationshipProjections expected = RelationshipProjections.builder()
-            .projections(singletonMap(ALL_RELATIONSHIPS, RelationshipProjection.all()))
+            .projections(singletonMap(ALL_RELATIONSHIPS, RelationshipProjection.ALL))
             .build();
 
         assertThat(actual, equalTo(expected));

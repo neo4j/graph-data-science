@@ -23,7 +23,6 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
 import org.immutables.value.Value;
-import org.neo4j.gds.AbstractRelationshipProjection;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
@@ -59,7 +58,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipsAndProper
     private ObjectDoubleHashMap<String> propertyDefaultValueByName;
     private boolean initializedFromResult;
     private List<GraphFactory.PropertyConfig> propertyConfigs;
-    private AbstractRelationshipProjection.Builder projectionBuilder;
+    private RelationshipProjection.Builder projectionBuilder;
 
     CypherRelationshipLoader(
         String relationshipQuery,

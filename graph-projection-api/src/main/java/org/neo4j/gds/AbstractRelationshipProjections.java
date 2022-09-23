@@ -146,7 +146,7 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
         if (newProjections.isEmpty()) {
             newProjections.put(
                 ALL_RELATIONSHIPS,
-                operator.apply(RelationshipProjection.all())
+                operator.apply(RelationshipProjection.ALL)
             );
         }
         return create(newProjections);

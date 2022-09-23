@@ -50,15 +50,15 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.AbstractRelationshipProjection.AGGREGATION_KEY;
-import static org.neo4j.gds.AbstractRelationshipProjection.ORIENTATION_KEY;
-import static org.neo4j.gds.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 import static org.neo4j.gds.ElementProjection.PROPERTIES_KEY;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.PropertyMapping.DEFAULT_VALUE_KEY;
 import static org.neo4j.gds.PropertyMapping.PROPERTY_KEY;
+import static org.neo4j.gds.RelationshipProjection.AGGREGATION_KEY;
+import static org.neo4j.gds.RelationshipProjection.ORIENTATION_KEY;
+import static org.neo4j.gds.RelationshipProjection.TYPE_KEY;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.core.Aggregation.DEFAULT;
 
@@ -362,7 +362,7 @@ public abstract class GdsCypher {
                 .withNodeLabel(ALL_NODES.name, NodeProjection.all())
                 .withRelationshipType(
                     ALL_RELATIONSHIPS.name(),
-                    RelationshipProjection.all().withOrientation(orientation)
+                    RelationshipProjection.builder().from(RelationshipProjection.ALL).orientation(orientation).build()
                 );
         }
 
@@ -394,7 +394,7 @@ public abstract class GdsCypher {
         }
 
         public GraphProjectBuilder withAnyRelationshipType() {
-            return withRelationshipType(ALL_RELATIONSHIPS.name(), RelationshipProjection.all());
+            return withRelationshipType(ALL_RELATIONSHIPS.name(), RelationshipProjection.ALL);
         }
 
         public GraphProjectBuilder withRelationshipType(String type) {
@@ -654,7 +654,7 @@ public abstract class GdsCypher {
 
         if (relProjections.isEmpty()) {
             relProjections = new HashMap<>();
-            relProjections.put(ALL_RELATIONSHIPS, RelationshipProjection.all());
+            relProjections.put(ALL_RELATIONSHIPS, RelationshipProjection.ALL);
         }
 
         return ImmutableGraphProjectFromStoreConfig.builder()
@@ -803,8 +803,8 @@ public abstract class GdsCypher {
     }
 
     private static boolean isAllDefault(ElementProjection projection) {
-        if (projection instanceof AbstractRelationshipProjection) {
-            AbstractRelationshipProjection rel = (AbstractRelationshipProjection) projection;
+        if (projection instanceof RelationshipProjection) {
+            RelationshipProjection rel = (RelationshipProjection) projection;
             if (rel.orientation() != NATURAL || rel.aggregation() != DEFAULT) {
                 return false;
             }
@@ -819,8 +819,8 @@ public abstract class GdsCypher {
         if (projection instanceof AbstractNodeProjection) {
             return toMinimalObject(((AbstractNodeProjection) projection), identifier);
         }
-        if (projection instanceof AbstractRelationshipProjection) {
-            return toMinimalObject(((AbstractRelationshipProjection) projection), identifier);
+        if (projection instanceof RelationshipProjection) {
+            return toMinimalObject(((RelationshipProjection) projection), identifier);
         }
         throw new IllegalArgumentException("Unexpected projection type: " + projection.getClass().getName());
     }
@@ -845,7 +845,7 @@ public abstract class GdsCypher {
     }
 
     private static MinimalObject toMinimalObject(
-        AbstractRelationshipProjection projection,
+        RelationshipProjection projection,
         ElementIdentifier identifier
     ) {
         MinimalObject properties = toMinimalObject(projection.properties(), true);
@@ -865,7 +865,7 @@ public abstract class GdsCypher {
         return MinimalObject.map(value);
     }
 
-    private static boolean matchesType(String type, AbstractRelationshipProjection projection) {
+    private static boolean matchesType(String type, RelationshipProjection projection) {
         return projection.orientation() == NATURAL
                && projection.aggregation() == DEFAULT
                && projection.type().equals(type);

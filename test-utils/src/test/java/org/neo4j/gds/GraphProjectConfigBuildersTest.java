@@ -41,7 +41,7 @@ import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIP
 
 class GraphProjectConfigBuildersTest {
 
-    static private JobId jobId = new JobId();
+    private static final JobId jobId = new JobId();
 
     static Stream<Arguments> storeConfigs() {
         return Stream.of(
@@ -62,7 +62,7 @@ class GraphProjectConfigBuildersTest {
                         .putProjection(ALL_NODES, NodeProjection.all())
                         .build())
                     .relationshipProjections(RelationshipProjections.builder()
-                        .putProjection(ALL_RELATIONSHIPS, RelationshipProjection.all())
+                        .putProjection(ALL_RELATIONSHIPS, RelationshipProjection.ALL)
                         .build())
                     .nodeProperties(PropertyMappings.of())
                     .relationshipProperties(PropertyMappings.of())

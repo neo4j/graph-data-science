@@ -26,7 +26,6 @@ import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
@@ -416,23 +415,32 @@ class GraphStoreExportProcTest extends BaseProcTest {
     }
 
     private void projectGraph() {
-        runQuery(GdsCypher.call("test-graph")
+        runQuery(GdsCypher
+            .call("test-graph")
             .graphProject()
             .withAnyLabel()
             .withNodeProperty("prop1")
             .withNodeProperty("prop2")
-            .withRelationshipType("REL1", RelationshipProjection
-                .of("REL1", Orientation.NATURAL)
-                .withProperties(PropertyMappings.of(PropertyMapping.of("weight1")))
+            .withRelationshipType("REL1",
+                RelationshipProjection
+                    .builder()
+                    .type("REL1")
+                    .properties(PropertyMappings.of(PropertyMapping.of("weight1")))
+                    .build()
             )
-            .withRelationshipType("REL2", RelationshipProjection
-                .of("REL2", Orientation.NATURAL)
-                .withProperties(PropertyMappings.of(PropertyMapping.of("weight2")))
+            .withRelationshipType("REL2",
+                RelationshipProjection
+                    .builder()
+                    .type("REL2")
+                    .properties(PropertyMappings.of(PropertyMapping.of("weight2")))
+                    .build()
             )
-            .withRelationshipType("REL3", RelationshipProjection
-                .of("REL3", Orientation.NATURAL)
-                .withProperties(PropertyMappings.of(PropertyMapping.of("weight3")))
-            )
+            .withRelationshipType("REL3",
+                RelationshipProjection
+                    .builder()
+                    .type("REL3")
+                    .properties(PropertyMappings.of(PropertyMapping.of("weight3")))
+                    .build())
             .yields());
     }
 }
