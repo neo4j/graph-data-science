@@ -62,6 +62,7 @@ CALL gds.graph.project(
 | configuration         | Map                 | yes      | Additional parameters to configure the native projection.
 |===
 
+[[graph-project-native-syntax-configuration]]
 .Configuration
 [opts="header",cols="1,1,1,4"]
 |===
@@ -219,15 +220,85 @@ The `properties` key can take a similar set of syntax variants as the node proje
 [[relationship-projection-syntax]]
 === Relationship Projection
 
+The relationship projection specifies which relationships from the database should be projected into the in-memory GDS graph.
+The projection is based around relationship types, and offers three different syntaxes that can be used based on how detailed the projection needs to be.
+
+All relationships with any of the specified relationship types and with endpoint nodes projected in the <<node-projection-syntax, node projection>> will be projected to the GDS graph.
+The `validateRelationships` <<graph-project-native-syntax-configuration, configuration parameter>> controls whether to fail or silently discard relationships with endpoint nodes not projected by the node projection.
+If the relationships have values for the specified properties, these will be projected as well.
+If a relationship does not have a value for a specified property, a default value will be used.
+Read more about default values <<relationship-projection-syntax-configuration, below>>.
+
+All specified relationship types and properties must exist in the database.
+To project using a non-existing relationship type, it is possible to create a relationship without any relationships using https://neo4j.com/docs/operations-manual/current/reference/procedures/#procedure_db_createrelationshiptype[the db.createRelationshipType() procedure].
+Similarly, to project a non-existing property, it is possible to create a relationship property without modifying the database, using https://neo4j.com/docs/operations-manual/current/reference/procedures/#procedure_db_createproperty[the db.createProperty() procedure].
+
+
+==== Projecting a single relationship type
+
+The simplest syntax is to specify a single relationship type as a string value.
+
 .Short-hand String-syntax for `relationshipProjection`. The projected graph will contain the given `neo4j-type`.
 ----
 <neo4j-type>
 ----
 
+.Example outline:
+----
+CALL gds.graph.project(
+  /* graph name */,
+  /* node projection */,
+  'MY_TYPE'
+)
+----
+
+
+==== Projecting multiple relationship types
+
+To project more than one relationship type, the list syntax is available.
+Specify all relationship types to be projected as a list of strings.
+
 .Short-hand List-syntax for `relationshipProjection`. The projected graph will contain the given `neo4j-type`s.
 ----
 [<neo4j-type>, ..., <neo4j-type>]
 ----
+
+.Example outline:
+----
+CALL gds.graph.project(
+  /* graph name */,
+  /* node projection */,
+  ['MY_TYPE', 'MY_SECOND_TYPE', 'ANOTHER_TYPE']
+)
+----
+
+
+==== Projecting relationship types with uniform relationship properties
+
+In order to project properties in conjunction with the relationship types, the `relationshipProperties` configuration parameter can be used.
+This is a shorthand syntax to the full map-based syntax described below.
+The relationship properties specified with the `relationshipProperties` parameter will be applied to all relationship types specified in the relationship projection.
+
+.Example outline:
+----
+CALL gds.graph.project(
+  /* graph name */,
+  /* node projection */,
+  ['MY_TYPE', 'MY_SECOND_TYPE', 'ANOTHER_TYPE'],
+  { relationshipProperties: ['prop1', 'prop2] }
+)
+----
+
+
+==== Projecting multiple relationship types with name mapping and type-specific properties
+
+The full relationship projection syntax uses a map.
+The keys in the map are the projected relationship types.
+Each value specifies the projection for that relationship type.
+The following syntax description and table details the format and expected values.
+Note that it is possible to project relationship types to a type in the GDS graph with a different name.
+
+The `properties` key can take a similar set of syntax variants as the relationship projection itself: a single string for a single property, a list of strings for multiple properties, or a map for the full syntax expressiveness.
 
 .Extended Map-syntax for `relationshipProjection`.
 ----
@@ -266,6 +337,7 @@ The `properties` key can take a similar set of syntax variants as the node proje
 }
 ----
 
+[[relationship-projection-syntax-configuration]]
 .Relationship Projection fields
 [opts="header",cols="2,1,1,3,4"]
 |===
