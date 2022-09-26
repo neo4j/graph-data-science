@@ -17,26 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._44;
+package org.neo4j.gds.compat._43;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
-import org.neo4j.dbms.database.readonly.DatabaseReadOnlyChecker;
+import org.neo4j.configuration.helpers.DatabaseReadOnlyChecker;
 import org.neo4j.gds.storageengine.InMemoryTransactionStateVisitor;
 import org.neo4j.index.internal.gbptree.RecoveryCleanupWorkCollector;
 import org.neo4j.internal.id.IdController;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.recordstorage.AbstractInMemoryMetaDataProvider;
 import org.neo4j.internal.recordstorage.AbstractInMemoryStorageEngineFactory;
-import org.neo4j.internal.recordstorage.InMemoryStorageCommandReaderFactory44;
-import org.neo4j.internal.recordstorage.InMemoryStorageReader44;
+import org.neo4j.internal.recordstorage.InMemoryStorageCommandReaderFactory43;
+import org.neo4j.internal.recordstorage.InMemoryStorageReader43;
 import org.neo4j.internal.schema.IndexConfigCompleter;
 import org.neo4j.internal.schema.SchemaRule;
 import org.neo4j.internal.schema.SchemaState;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.io.layout.Neo4jLayout;
-import org.neo4j.io.layout.recordstorage.RecordDatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
@@ -70,11 +68,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 @ServiceProvider
-public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineFactory {
+public class InMemoryStorageEngineFactory43 extends AbstractInMemoryStorageEngineFactory {
 
-    static final String IN_MEMORY_STORAGE_ENGINE_NAME = "in-memory-44";
+    public static final String IN_MEMORY_STORAGE_ENGINE_NAME_43 = "in-memory-43";
 
-    private final AbstractInMemoryMetaDataProvider metadataProvider = new InMemoryMetaDataProviderImpl();
+    private final InMemoryMetaDataProviderImpl metadataProvider = new InMemoryMetaDataProviderImpl();
 
     @Override
     public boolean storageExists(
@@ -102,8 +100,7 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         IdGeneratorFactory idGeneratorFactory,
         IdController idController,
         DatabaseHealth databaseHealth,
-        LogProvider internalLogProvider,
-        LogProvider userLogProvider,
+        LogProvider logProvider,
         RecoveryCleanupWorkCollector recoveryCleanupWorkCollector,
         PageCacheTracer cacheTracer,
         boolean createStoreIfNotExists,
@@ -116,7 +113,7 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
             idGeneratorFactory,
             pageCache,
             fs,
-            internalLogProvider,
+            logProvider,
             cacheTracer,
             readOnlyChecker
         );
@@ -125,7 +122,7 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
 
         return new InMemoryStorageEngineImpl.Builder(databaseLayout, tokenHolders, metadataProvider)
             .withCommandCreationContextSupplier(InMemoryCommandCreationContextImpl::new)
-            .withStorageReaderFn(InMemoryStorageReader44::new)
+            .withStorageReaderFn(InMemoryStorageReader43::new)
             .withTxStateVisitorFn(InMemoryTransactionStateVisitor::new)
             .withCountsStoreFn(InMemoryCountsStoreImpl::new)
             .withCommandCreationContextSupplier(InMemoryCommandCreationContextImpl::new)
@@ -133,19 +130,8 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
     }
 
     @Override
-    public void setExternalStoreUUID(
-        FileSystemAbstraction fileSystemAbstraction,
-        DatabaseLayout databaseLayout,
-        PageCache pageCache,
-        CursorContext cursorContext,
-        UUID uuid
-    ) {
-        MetaDataStore.getDatabaseIdUuid(
-            pageCache,
-            RecordDatabaseLayout.convert(databaseLayout).metadataStore(),
-            databaseLayout.getDatabaseName(),
-            cursorContext
-        );
+    public String name() {
+        return IN_MEMORY_STORAGE_ENGINE_NAME_43;
     }
 
     @Override
@@ -161,18 +147,6 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
             databaseLayout.getDatabaseName(),
             cursorContext
         );
-    }
-
-    @Override
-    public DatabaseLayout databaseLayout(
-        Neo4jLayout neo4jLayout, String databaseName
-    ) {
-        return RecordDatabaseLayout.of(neo4jLayout, databaseName);
-    }
-
-    @Override
-    public String name() {
-        return IN_MEMORY_STORAGE_ENGINE_NAME;
     }
 
     @Override
@@ -194,8 +168,7 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         DatabaseLayout databaseLayout,
         Config config,
         PageCache pageCache,
-        PageCacheTracer cacheTracer,
-        DatabaseReadOnlyChecker readOnlyChecker
+        PageCacheTracer cacheTracer
     ) {
         return metadataProvider();
     }
@@ -214,11 +187,6 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
 
     @Override
     public StoreVersion versionInformation(String storeVersion) {
-        return new InMemoryStoreVersion();
-    }
-
-    @Override
-    public StoreVersion versionInformation(StoreId storeId) {
         return new InMemoryStoreVersion();
     }
 
@@ -248,6 +216,23 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
     }
 
     @Override
+    public void setExternalStoreUUID(
+        FileSystemAbstraction fs,
+        DatabaseLayout databaseLayout,
+        PageCache pageCache,
+        CursorContext cursorContext,
+        UUID externalStoreId
+    ) throws IOException {
+        MetaDataStore.setExternalStoreUUID(
+            pageCache,
+            databaseLayout.metadataStore(),
+            externalStoreId,
+            databaseLayout.getDatabaseName(),
+            cursorContext
+        );
+    }
+
+    @Override
     public List<SchemaRule> loadSchemaRules(
         FileSystemAbstraction fs,
         PageCache pageCache,
@@ -260,7 +245,7 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
 
     @Override
     public CommandReaderFactory commandReaderFactory() {
-        return InMemoryStorageCommandReaderFactory44.INSTANCE;
+        return InMemoryStorageCommandReaderFactory43.INSTANCE;
     }
 
     @Override

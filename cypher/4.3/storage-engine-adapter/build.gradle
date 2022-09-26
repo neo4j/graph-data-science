@@ -1,0 +1,18 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Storage Engine Adapter 4.3'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    implementation project(':core')
+    implementation project(':storage-engine-adapter-api')
+
+    annotationProcessor project(':annotations')
+    annotationProcessor group: 'org.immutables', name: 'value',              version: ver.'immutables'
+    annotationProcessor group: 'org.neo4j',      name: 'annotations',        version: neos.'4.3'
+
+    compileOnly project(':annotations')
+    compileOnly         group: 'org.immutables', name: 'value-annotations',  version: ver.'immutables'
+    compileOnly         group: 'org.neo4j',      name: 'neo4j',              version: neos.'4.3'
+}

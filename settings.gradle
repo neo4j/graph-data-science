@@ -196,11 +196,8 @@ project(':proc-pipeline-catalog').projectDir = file('proc/pipeline-catalog')
 include('storage-engine-adapter')
 project(':storage-engine-adapter').projectDir = file('cypher/common/storage-engine-adapter')
 
-include('storage-engine-adapter-4.3.3')
-project(':storage-engine-adapter-4.3.3').projectDir = file('cypher/4.3.3/storage-engine-adapter')
-
-include('storage-engine-adapter-4.3.4plus')
-project(':storage-engine-adapter-4.3.4plus').projectDir = file('cypher/4.3.4plus/storage-engine-adapter')
+include('storage-engine-adapter-4.3')
+project(':storage-engine-adapter-4.3').projectDir = file('cypher/4.3/storage-engine-adapter')
 
 include('storage-engine-adapter-4.4')
 project(':storage-engine-adapter-4.4').projectDir = file('cypher/4.4/storage-engine-adapter')
