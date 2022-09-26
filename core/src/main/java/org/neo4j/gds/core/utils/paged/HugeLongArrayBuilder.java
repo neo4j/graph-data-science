@@ -102,7 +102,6 @@ public class HugeLongArrayBuilder {
     public static final class Allocator implements IdMapAllocator, AutoCloseable {
         private long[] buffer;
         private int allocationSize;
-        private long start;
         private int offset;
         private int length;
 
@@ -117,7 +116,6 @@ public class HugeLongArrayBuilder {
             this.cursor.setRange(start, end);
             this.buffer = null;
             this.allocationSize = (int) (end - start);
-            this.start = start;
             this.offset = 0;
             this.length = 0;
         }
@@ -126,16 +124,10 @@ public class HugeLongArrayBuilder {
             if (!cursor.next()) {
                 return false;
             }
-            start += length;
             buffer = cursor.array;
             offset = cursor.offset;
             length = cursor.limit - cursor.offset;
             return true;
-        }
-
-        @Override
-        public long startId() {
-            return start;
         }
 
         @Override

@@ -83,9 +83,8 @@ public class NodeImporter {
             setNodeLabelInformation(
                 batch,
                 batchLength,
-                idMapAllocator.startId(),
                 labelIds,
-                (nodeIds, startIndex, pos) -> nodeIds[pos]
+                (nodeIds, pos) -> nodeIds[pos]
             );
         }
 
@@ -97,10 +96,10 @@ public class NodeImporter {
         return RawValues.combineIntInt(batchLength, importedProperties);
     }
 
-    private void setNodeLabelInformation(long[] batch, int batchLength, long startIndex, long[][] labelIds, IdFunction idFunction) {
+    private void setNodeLabelInformation(long[] batch, int batchLength, long[][] labelIds, IdFunction idFunction) {
         int cappedBatchLength = Math.min(labelIds.length, batchLength);
         for (int i = 0; i < cappedBatchLength; i++) {
-            long nodeId = idFunction.apply(batch, startIndex, i);
+            long nodeId = idFunction.apply(batch, i);
             long[] labelIdsForNode = labelIds[i];
 
             for (long labelId : labelIdsForNode) {
@@ -135,6 +134,6 @@ public class NodeImporter {
 
     @FunctionalInterface
     interface IdFunction {
-        long apply(long[] batch, long startIndex, int pos);
+        long apply(long[] batch, int pos);
     }
 }
