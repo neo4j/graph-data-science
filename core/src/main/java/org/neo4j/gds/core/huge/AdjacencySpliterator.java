@@ -59,6 +59,8 @@ abstract class AdjacencySpliterator implements Spliterator<RelationshipCursor> {
     public boolean tryAdvance(Consumer<? super RelationshipCursor> action) {
         if (adjacencyCursor.hasNextVLong()) {
             modifyCursor(modifiableRelationshipCursor.setTargetId(adjacencyCursor.nextVLong()));
+            // We need to pass a modifiable cursor. This is important for downstream
+            // dependencies, such as NodeFilteredGraph#streamRelationships.
             action.accept(modifiableRelationshipCursor);
             return true;
         }
