@@ -24,8 +24,8 @@ import org.neo4j.gds.core.idmap.IdMapBuilderTest;
 public class ArrayIdMapBuilderTest extends IdMapBuilderTest {
 
     @Override
-    protected IdMapBuilder builder(long highestOriginalId, int concurrency) {
-        return ArrayIdMapBuilder.of(highestOriginalId);
+    protected IdMapBuilder builder(long capacity, int concurrency) {
+        return ArrayIdMapBuilder.of(capacity);
 
     }
 }
