@@ -26,7 +26,7 @@ import org.neo4j.gds.api.CSRGraphAdapter;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.ImmutableRelationshipCursor;
+import org.neo4j.gds.api.ModifiableRelationshipCursor;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.RelationshipCursor;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
@@ -222,11 +222,10 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
     public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
         return super.streamRelationships(filteredIdMap.toRootNodeId(nodeId), fallbackValue)
             .filter(rel -> filteredIdMap.containsRootNodeId(rel.sourceId()) && filteredIdMap.containsRootNodeId(rel.targetId()))
-            .map(rel -> ImmutableRelationshipCursor.of(
-                filteredIdMap.toFilteredNodeId(rel.sourceId()),
-                filteredIdMap.toFilteredNodeId(rel.targetId()),
-                rel.property()
-            ));
+            .map(rel -> ((ModifiableRelationshipCursor) rel)
+                .setSourceId(filteredIdMap.toFilteredNodeId(rel.sourceId()))
+                .setTargetId(filteredIdMap.toFilteredNodeId(rel.targetId()))
+            );
     }
 
     @Override
