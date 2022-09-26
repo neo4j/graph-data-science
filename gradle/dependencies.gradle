@@ -1,19 +1,11 @@
 ext {
-    releasedNeos = [
+    neos = [
         '4.3'           : properties.getOrDefault('neo4jVersion43', '4.3.18'),
         '4.4'           : properties.getOrDefault('neo4jVersion44', '4.4.11')
     ]
 
-    neos = releasedNeos +
-    [
-        // This separation is required for the Cypher compatibility layer
-        '4.3.3'         : properties.getOrDefault('neo4jVersion433', '4.3.3'),
-        '4.3.4plus'     : properties.getOrDefault('neo4jVersion434', '4.3.18'),
-    ]
-
     neo4jDefault = neos.'4.4'
-
-    neo4j_minor = properties.getOrDefault('neo4jVersion', neos.'4.3').toString().split('\\.')[0..1].join('.')
+    neo4j_minor = properties.getOrDefault('neo4jVersion', neo4jDefault).toString().split('\\.')[0..1].join('.')
 
     scalas = [
         '4.3': '2.12.13',

@@ -17,13 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._44;
+package org.neo4j.gds.compat._43;
 
 import org.neo4j.internal.recordstorage.AbstractInMemoryMetaDataProvider;
 import org.neo4j.internal.recordstorage.AbstractTransactionIdStore;
-import org.neo4j.internal.recordstorage.InMemoryLogVersionRepository44;
+import org.neo4j.internal.recordstorage.InMemoryLogVersionRepository43;
 import org.neo4j.io.pagecache.context.CursorContext;
-import org.neo4j.storageengine.api.ClosedTransactionMetadata;
 import org.neo4j.storageengine.api.ExternalStoreId;
 import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.TransactionId;
@@ -34,7 +33,7 @@ public class InMemoryMetaDataProviderImpl extends AbstractInMemoryMetaDataProvid
     private final InMemoryTransactionIdStoreImpl transactionIdStore;
 
     InMemoryMetaDataProviderImpl() {
-        super(new InMemoryLogVersionRepository44());
+        super(new InMemoryLogVersionRepository43());
         this.transactionIdStore = new InMemoryTransactionIdStoreImpl();
     }
 
@@ -44,7 +43,7 @@ public class InMemoryMetaDataProviderImpl extends AbstractInMemoryMetaDataProvid
     }
 
     @Override
-    public ClosedTransactionMetadata getLastClosedTransaction() {
+    public long[] getLastClosedTransaction() {
         return this.transactionIdStore.getLastClosedTransaction();
     }
 
