@@ -149,11 +149,21 @@ public class Node2VecModel {
             FloatVector.class,
             nodeCount
         );
+        double bound;
+        switch (config.embeddingInitializer()) {
+            case UNIFORM:
+                bound = 1.0;
+                break;
+            case NORMALIZED:
+                bound = 0.5 / embeddingDimensions;
+                break;
+            default:
+                throw new IllegalStateException("Missing implementation for: " + config.embeddingInitializer());
+        }
 
         for (var i = 0L; i < nodeCount; i++) {
             random.setSeed(toOriginalNodeId.applyAsLong(i) + randomSeed);
-            var data = random
-                .doubles(embeddingDimensions, -1, 1)
+            var data = random.doubles(embeddingDimensions, -bound, bound)
                 .collect(
                     () -> new FloatConsumer(embeddingDimensions),
                     FloatConsumer::add,
