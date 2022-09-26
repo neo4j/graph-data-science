@@ -68,7 +68,7 @@ public final class TestIdMap extends LabeledIdMap {
     }
 
     @Override
-    public long highestNeoId() {
+    public long highestOriginalId() {
         return this.highestOriginalId;
     }
 

@@ -141,7 +141,7 @@ public class GraphSampleConstructor {
         boolean hasLabelInformation = !inputGraphStore.nodeLabels().isEmpty();
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .concurrency(config.concurrency())
-            .maxOriginalId(inputGraph.highestNeoId())
+            .maxOriginalId(inputGraph.highestOriginalId())
             .hasProperties(false)
             .hasLabelInformation(hasLabelInformation)
             .deduplicateIds(false)

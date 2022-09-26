@@ -37,7 +37,7 @@ class TestIdMapTest {
         assertThat(idMap.nodeCount()).isEqualTo(0);
         assertThat(idMap.toMappedNodeId(42)).isEqualTo(NOT_FOUND);
         assertThat(idMap.toOriginalNodeId(42)).isEqualTo(NOT_FOUND);
-        assertThat(idMap.highestNeoId()).isEqualTo(Long.MIN_VALUE);
+        assertThat(idMap.highestOriginalId()).isEqualTo(Long.MIN_VALUE);
     }
 
     @Test
@@ -91,7 +91,7 @@ class TestIdMapTest {
             .add(53, 3)
             .build();
 
-        assertThat(idMap.highestNeoId()).isEqualTo(53);
+        assertThat(idMap.highestOriginalId()).isEqualTo(53);
     }
 
     @Test

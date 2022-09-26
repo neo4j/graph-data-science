@@ -86,8 +86,8 @@ public abstract class IdMapAdapter implements IdMap {
     }
 
     @Override
-    public long highestNeoId() {
-        return idMap.highestNeoId();
+    public long highestOriginalId() {
+        return idMap.highestOriginalId();
     }
 
     @Override

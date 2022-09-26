@@ -55,7 +55,7 @@ public class DirectIdMap implements IdMap {
     }
 
     @Override
-    public long highestNeoId() {
+    public long highestOriginalId() {
         return nodeCount;
     }
 

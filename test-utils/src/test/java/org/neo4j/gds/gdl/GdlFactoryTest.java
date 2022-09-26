@@ -271,7 +271,7 @@ class GdlFactoryTest {
         var importResult = factory.build();
 
         assertThat(factory.dimensions().highestPossibleNodeCount()).isEqualTo(45L);
-        assertThat(importResult.nodes().highestNeoId()).isEqualTo(44L);
+        assertThat(importResult.nodes().highestOriginalId()).isEqualTo(44L);
     }
 
     private void assertRelationshipProperty(

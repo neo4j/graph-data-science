@@ -115,7 +115,7 @@ public class ArrayIdMap extends LabeledIdMap {
     }
 
     @Override
-    public long highestNeoId() {
+    public long highestOriginalId() {
         return highestNeoId;
     }
 

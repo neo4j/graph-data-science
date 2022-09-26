@@ -33,7 +33,7 @@ public interface PartialIdMap {
      * In case of nested id maps, the mapped node id
      * is always in the space of the innermost mapping.
      *
-     * @param originalNodeId must be smaller or equal to the id returned by {@link IdMap#highestNeoId}
+     * @param originalNodeId must be smaller or equal to the id returned by {@link IdMap#highestOriginalId}
      */
     long toMappedNodeId(long originalNodeId);
 

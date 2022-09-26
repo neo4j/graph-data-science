@@ -124,8 +124,8 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public long highestNeoId() {
-        return graph.highestNeoId();
+    public long highestOriginalId() {
+        return graph.highestOriginalId();
     }
 
     @Override

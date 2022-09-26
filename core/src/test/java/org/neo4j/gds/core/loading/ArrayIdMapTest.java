@@ -111,6 +111,6 @@ class ArrayIdMapTest {
             1
         );
 
-        assertThat(hugeIdMap.highestNeoId()).isEqualTo(highestNeoId);
+        assertThat(hugeIdMap.highestOriginalId()).isEqualTo(highestNeoId);
     }
 }

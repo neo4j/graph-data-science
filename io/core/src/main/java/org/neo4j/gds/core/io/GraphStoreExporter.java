@@ -65,7 +65,7 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
 
             @Override
             public long highestId(IdMap idMap) {
-                return idMap.highestNeoId();
+                return idMap.highestOriginalId();
             }
 
             @Override

@@ -38,7 +38,7 @@ public class OriginalIdNodePropertyValues implements LongNodePropertyValues {
 
     @Override
     public OptionalLong getMaxLongPropertyValue() {
-        return OptionalLong.of(idMap.highestNeoId());
+        return OptionalLong.of(idMap.highestOriginalId());
     }
 
     @Override

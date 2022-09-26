@@ -763,7 +763,7 @@ class HighLimitIdMap extends IdMapAdapter {
     }
 
     @Override
-    public long highestNeoId() {
+    public long highestOriginalId() {
         return highToLowIdSpace.maxOriginalId();
     }
 

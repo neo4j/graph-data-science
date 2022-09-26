@@ -179,8 +179,8 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
-    public long highestNeoId() {
-        return idMap.highestNeoId();
+    public long highestOriginalId() {
+        return idMap.highestOriginalId();
     }
 
     public IdMap idMap() {

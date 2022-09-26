@@ -69,8 +69,8 @@ public class FilteredLabeledIdMap extends LabeledIdMap implements FilteredIdMap 
     }
 
     @Override
-    public long highestNeoId() {
-        return originalToRootIdMap.highestNeoId();
+    public long highestOriginalId() {
+        return originalToRootIdMap.highestOriginalId();
     }
 
     @Override

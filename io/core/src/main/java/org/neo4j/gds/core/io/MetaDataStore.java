@@ -46,7 +46,7 @@ public interface MetaDataStore {
         GraphInfo graphInfo = ImmutableGraphInfo.of(
             graphStore.databaseId(),
             graphStore.nodeCount(),
-            graphStore.nodes().highestNeoId(),
+            graphStore.nodes().highestOriginalId(),
             relTypeCounts
         );
         var schema = graphStore.schema();

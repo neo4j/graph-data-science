@@ -49,7 +49,7 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
      * Returns org.neo4j.gds.api.IdMap#NOT_FOUND if the nodeId is not mapped.
      */
     default long safeToMappedNodeId(long originalNodeId) {
-        return highestNeoId() < originalNodeId ? NOT_FOUND : toMappedNodeId(originalNodeId);
+        return highestOriginalId() < originalNodeId ? NOT_FOUND : toMappedNodeId(originalNodeId);
     };
 
     /**
@@ -84,11 +84,16 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
     long nodeCount();
 
     /**
-     * Number of mapped nodeIds for a specific node label
+     * Number of mapped nodeIds for a specific node label.
      */
     long nodeCount(NodeLabel nodeLabel);
 
-    long highestNeoId();
+    /**
+     * The highest id that is mapped in this id mapping.
+     * <p>
+     * The value is the upper bound of the original node id space.
+     */
+    long highestOriginalId();
 
     List<NodeLabel> nodeLabels(long mappedNodeId);
 

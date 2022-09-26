@@ -116,7 +116,7 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
             while (drainingIterator.next(batch)) {
                 var page = batch.page;
                 var offset = batch.offset;
-                var end = Math.min(offset + page.length, idMap.highestNeoId() + 1) - offset;
+                var end = Math.min(offset + page.length, idMap.highestOriginalId() + 1) - offset;
 
                 for (int pageIndex = 0; pageIndex < end; pageIndex++) {
                     var neoId = offset + pageIndex;

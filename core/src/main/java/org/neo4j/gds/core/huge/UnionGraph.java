@@ -87,8 +87,8 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public long highestNeoId() {
-        return first.highestNeoId();
+    public long highestOriginalId() {
+        return first.highestOriginalId();
     }
 
     @Override

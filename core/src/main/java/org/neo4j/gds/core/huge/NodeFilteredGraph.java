@@ -169,8 +169,8 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
     }
 
     @Override
-    public long highestNeoId() {
-        return filteredIdMap.highestNeoId();
+    public long highestOriginalId() {
+        return filteredIdMap.highestOriginalId();
     }
 
     @Override
