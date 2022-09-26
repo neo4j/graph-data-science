@@ -21,8 +21,6 @@ package org.neo4j.gds.core.loading;
 
 public interface IdMapAllocator {
 
-    long startId();
-
     int allocatedSize();
 
     void insert(long[] nodeIds);

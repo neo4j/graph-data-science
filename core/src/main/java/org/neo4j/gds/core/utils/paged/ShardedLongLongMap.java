@@ -332,11 +332,6 @@ public final class ShardedLongLongMap {
             }
 
             @Override
-            public long startId() {
-                return this.startId;
-            }
-
-            @Override
             public int allocatedSize() {
                 return this.length;
             }

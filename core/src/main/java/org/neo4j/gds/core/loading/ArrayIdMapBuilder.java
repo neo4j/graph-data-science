@@ -84,7 +84,6 @@ public final class ArrayIdMapBuilder implements IdMapBuilder {
     public static final class BulkAdder implements IdMapAllocator {
         private long[] buffer;
         private int allocationSize;
-        private long start;
         private int offset;
         private int length;
         private final HugeLongArray array;
@@ -99,7 +98,6 @@ public final class ArrayIdMapBuilder implements IdMapBuilder {
             array.initCursor(this.cursor, start, end);
             this.buffer = null;
             this.allocationSize = (int) (end - start);
-            this.start = start;
             this.offset = 0;
             this.length = 0;
         }
@@ -108,16 +106,10 @@ public final class ArrayIdMapBuilder implements IdMapBuilder {
             if (!cursor.next()) {
                 return false;
             }
-            start += length;
             buffer = cursor.array;
             offset = cursor.offset;
             length = cursor.limit - cursor.offset;
             return true;
-        }
-
-        @Override
-        public long startId() {
-            return start;
         }
 
         @Override
