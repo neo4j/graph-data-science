@@ -208,18 +208,22 @@ class GraphStoreTest extends BaseTest {
 
         GraphStore graphStore = new StoreLoaderBuilder()
             .databaseService(db)
-            .addRelationshipProjection(RelationshipProjection.of("REL", Orientation.NATURAL)
-                .withProperties(
-                    PropertyMappings.of(PropertyMapping.of("p", 3.14))
-                )
+            .addRelationshipProjection(RelationshipProjection
+                .builder()
+                .type("REL")
+                .properties(PropertyMappings.of(PropertyMapping.of("p", 3.14)))
+                .build()
             )
-            .addRelationshipProjection(RelationshipProjection.of("LER", Orientation.NATURAL)
-                .withProperties(
-                    PropertyMappings.of(
-                        PropertyMapping.of("p", 3.14),
-                        PropertyMapping.of("q", 3.15)
-                    )
-                )
+            .addRelationshipProjection(
+                RelationshipProjection
+                    .builder()
+                    .type("LER")
+                    .properties(
+                        PropertyMappings.of(
+                            PropertyMapping.of("p", 3.14),
+                            PropertyMapping.of("q", 3.15)
+                        )
+                    ).build()
             )
             .build()
             .graphStore();

@@ -23,13 +23,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.ImmutableRelationshipProjections;
 import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
-import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
@@ -211,7 +211,7 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
             .graphName("")
             .nodeProjections(NodeProjections.of())
             .nodeProperties(PropertyMappings.fromObject(Arrays.asList("seed1", "seed2")))
-            .relationshipProjections(RelationshipProjections.builder()
+            .relationshipProjections(ImmutableRelationshipProjections.builder()
                 .putProjection(
                     ALL_RELATIONSHIPS,
                     RelationshipProjection.builder()

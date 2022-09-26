@@ -112,7 +112,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
     void testMemoryEstimateOnExplicitDimensions() {
         Map<String, Object> graphProjectConfig = CypherMapWrapper.empty()
             .withEntry(GraphProjectFromStoreConfig.NODE_PROJECTION_KEY, NodeProjections.all())
-            .withEntry(GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY, RelationshipProjections.all())
+            .withEntry(GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY, RelationshipProjections.ALL)
             .withNumber("nodeCount", 100_000_000L)
             .withNumber("relationshipCount", 20_000_000_000L)
             .withoutEntry("nodeProperties")

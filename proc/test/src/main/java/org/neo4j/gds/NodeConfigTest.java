@@ -40,7 +40,7 @@ public interface NodeConfigTest<ALGORITHM extends Algorithm<RESULT>, CONFIG exte
             "",
             "loadedGraph",
             NodeProjections.all(),
-            RelationshipProjections.all()
+            RelationshipProjections.ALL
         );
 
         long nodeId = TestSupport.fullAccessTransaction(graphDb()).apply((tx, ktx) -> {

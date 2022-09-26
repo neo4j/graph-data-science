@@ -107,7 +107,7 @@ public final class GraphProjectConfigBuilders {
             Map.Entry::getValue
         )));
 
-        RelationshipProjections rp = RelationshipProjections.of(tempRP.entrySet().stream().collect(Collectors.toMap(
+        RelationshipProjections rp = ImmutableRelationshipProjections.of(tempRP.entrySet().stream().collect(Collectors.toMap(
             e -> RelationshipType.of(e.getKey()),
             Map.Entry::getValue
         )));

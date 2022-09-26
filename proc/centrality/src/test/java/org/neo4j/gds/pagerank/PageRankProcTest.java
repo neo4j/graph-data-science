@@ -38,7 +38,6 @@ import org.neo4j.gds.SourceNodesConfigTest;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -174,12 +173,14 @@ abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcT
                 .call("graphLabel3")
                 .graphProject()
                 .withNodeLabel("Label3")
-                .withRelationshipType("TYPE3", RelationshipProjection.of(
-                    "TYPE3",
-                    Orientation.UNDIRECTED,
-                    Aggregation.DEFAULT
-                ).withProperties(PropertyMappings.of(PropertyMapping.of("equalWeight"))))
-                .yields(),
+                .withRelationshipType("TYPE3",
+                    RelationshipProjection
+                        .builder()
+                        .type("TYPE3")
+                        .orientation(Orientation.UNDIRECTED)
+                        .properties(PropertyMappings.of(PropertyMapping.of("equalWeight")))
+                        .build()
+                ).yields(),
             GdsCypher.call("graphLabel1")
                 .graphProject()
                 .withNodeLabel("Label1")

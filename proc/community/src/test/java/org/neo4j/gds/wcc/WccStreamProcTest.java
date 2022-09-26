@@ -81,7 +81,7 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
             .builder()
             .graphName("testGraph")
             .nodeProjections(NodeProjections.all())
-            .relationshipProjections(RelationshipProjections.all())
+            .relationshipProjections(RelationshipProjections.ALL)
             .build();
 
         GraphStoreCatalog.set(

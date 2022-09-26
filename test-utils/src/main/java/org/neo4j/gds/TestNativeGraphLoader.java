@@ -121,7 +121,12 @@ public final class TestNativeGraphLoader implements TestGraphLoader {
         if (relTypes.isEmpty()) {
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(
                 ALL_RELATIONSHIPS.name,
-                RelationshipProjection.all().withAggregation(aggregation).withOrientation(orientation)
+                RelationshipProjection
+                    .builder()
+                    .from(RelationshipProjection.ALL)
+                    .aggregation(aggregation)
+                    .orientation(orientation)
+                    .build()
             );
         } else {
             relTypes.forEach(relType -> {

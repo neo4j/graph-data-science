@@ -57,8 +57,8 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
     NodeProjections nodeProjections();
 
     @Key(RELATIONSHIP_PROJECTION_KEY)
-    @ConvertWith(method = "org.neo4j.gds.AbstractRelationshipProjections#fromObject")
-    @Configuration.ToMapValue("org.neo4j.gds.AbstractRelationshipProjections#toObject")
+    @ConvertWith(method = "org.neo4j.gds.RelationshipProjections#fromObject")
+    @Configuration.ToMapValue("org.neo4j.gds.RelationshipProjections#toObject")
     RelationshipProjections relationshipProjections();
 
     @Value.Default
@@ -179,7 +179,7 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
 
     static GraphProjectFromStoreConfig emptyWithName(String userName, String graphName) {
         NodeProjections nodeProjections = NodeProjections.all();
-        RelationshipProjections relationshipProjections = RelationshipProjections.all();
+        RelationshipProjections relationshipProjections = RelationshipProjections.ALL;
         return ImmutableGraphProjectFromStoreConfig.of(
             userName,
             graphName,
@@ -214,7 +214,7 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
             .username(userName)
             .graphName(graphName)
             .nodeProjections(NodeProjections.all())
-            .relationshipProjections(RelationshipProjections.all())
+            .relationshipProjections(RelationshipProjections.ALL)
             .build();
     }
 
@@ -223,7 +223,7 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
             config = config.withEntry(NODE_PROJECTION_KEY, NodeProjections.all());
         }
         if (!config.containsKey(RELATIONSHIP_PROJECTION_KEY)) {
-            config = config.withEntry(RELATIONSHIP_PROJECTION_KEY, RelationshipProjections.all());
+            config = config.withEntry(RELATIONSHIP_PROJECTION_KEY, RelationshipProjections.ALL);
         }
 
         return GraphProjectFromStoreConfigImpl.of(

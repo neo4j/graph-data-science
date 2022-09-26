@@ -78,9 +78,8 @@ class CypherNodeLoader extends CypherRecordLoader<IdMapAndProperties> {
         } catch (RuntimeException e) {
             nodesBuilder.close(e);
         }
-        if (nodeSubscriber.error().isPresent()) {
-            nodesBuilder.close(nodeSubscriber.error().get());
-        }
+
+        nodeSubscriber.error().ifPresent(error -> nodesBuilder.close(error));
 
         long rows = nodeSubscriber.rows();
         if (rows == 0) {

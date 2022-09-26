@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.annotation.DataClass;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.ConfigKeyValidation;
 
@@ -33,8 +33,8 @@ import java.util.function.Function;
 import static java.util.Collections.emptyMap;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@DataClass
-public abstract class AbstractRelationshipProjection extends ElementProjection {
+@ValueClass
+public abstract class RelationshipProjection extends ElementProjection {
 
     public static final RelationshipProjection ALL = of(PROJECT_ALL, Orientation.NATURAL);
     public static final RelationshipProjection ALL_UNDIRECTED = of(PROJECT_ALL, Orientation.UNDIRECTED);
@@ -91,7 +91,7 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
 
     public static RelationshipProjection fromObject(Object object, RelationshipType relationshipType) {
         if (object == null) {
-            return all();
+            return ALL;
         }
         if (object instanceof String) {
             return fromString((String) object);
@@ -114,6 +114,10 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
 
     public static RelationshipProjection of(String type, Aggregation aggregation) {
         return RelationshipProjection.builder().type(type).aggregation(aggregation).build();
+    }
+
+    public static RelationshipProjection of(String type, Orientation orientation, Aggregation aggregation) {
+        return RelationshipProjection.builder().type(type).aggregation(aggregation).orientation(orientation).build();
     }
 
     public boolean isMultiGraph() {
@@ -147,12 +151,8 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
         PropertyMappings newMappings = properties().mergeWith(withSameAggregation);
 
         return newMappings.equals(properties())
-            ? RelationshipProjection.copyOf(this)
-            : RelationshipProjection.copyOf(this).withProperties(newMappings);
-    }
-
-    public static RelationshipProjection all() {
-        return ALL;
+            ? ImmutableRelationshipProjection.copyOf(this)
+            : ImmutableRelationshipProjection.builder().from(this).properties(newMappings).build();
     }
 
     public static Builder builder() {
@@ -174,7 +174,7 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
     }
 
     @org.immutables.builder.Builder.AccessibleFields
-    public static final class Builder extends RelationshipProjection.Builder implements InlineProperties<Builder> {
+    public static final class Builder extends ImmutableRelationshipProjection.Builder implements InlineProperties<Builder> {
 
         private InlinePropertiesBuilder propertiesBuilder;
 

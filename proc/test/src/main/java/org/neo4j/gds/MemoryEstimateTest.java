@@ -81,7 +81,7 @@ public interface MemoryEstimateTest<ALGORITHM extends Algorithm<RESULT>, CONFIG 
 
     @Test
     default void testMemoryEstimateOnExplicitDimensions() {
-        boolean isAllUndirected = relationshipProjections().equals(AbstractRelationshipProjections.ALL_UNDIRECTED);
+        boolean isAllUndirected = relationshipProjections().equals(RelationshipProjections.ALL_UNDIRECTED);
 
         applyOnProcedure(proc -> {
             getProcedureMethods(proc)

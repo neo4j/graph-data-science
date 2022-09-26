@@ -39,9 +39,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.AbstractRelationshipProjection.ORIENTATION_KEY;
-import static org.neo4j.gds.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.gds.ElementProjection.PROPERTIES_KEY;
+import static org.neo4j.gds.RelationshipProjection.ORIENTATION_KEY;
+import static org.neo4j.gds.RelationshipProjection.TYPE_KEY;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.core.Aggregation.SINGLE;
 
@@ -93,7 +93,7 @@ class RelationshipProjectionsTest {
     void syntacticSugars(Object argument) {
         RelationshipProjections actual = RelationshipProjections.fromObject(argument);
 
-        RelationshipProjections expected = RelationshipProjections.builder().projections(singletonMap(
+        RelationshipProjections expected = ImmutableRelationshipProjections.builder().projections(singletonMap(
             RelationshipType.of("T"),
             RelationshipProjection
                 .builder()
@@ -112,8 +112,8 @@ class RelationshipProjectionsTest {
     void shouldSupportStar() {
         RelationshipProjections actual = RelationshipProjections.fromObject("*");
 
-        RelationshipProjections expected = RelationshipProjections.builder()
-            .projections(singletonMap(ALL_RELATIONSHIPS, RelationshipProjection.all()))
+        RelationshipProjections expected = ImmutableRelationshipProjections.builder()
+            .projections(singletonMap(ALL_RELATIONSHIPS, RelationshipProjection.ALL))
             .build();
 
         assertThat(actual, equalTo(expected));
@@ -124,7 +124,7 @@ class RelationshipProjectionsTest {
     void shouldParseMultipleRelationshipTypes() {
         RelationshipProjections actual = RelationshipProjections.fromObject(Arrays.asList("A", "B"));
 
-        RelationshipProjections expected = RelationshipProjections.builder()
+        RelationshipProjections expected = ImmutableRelationshipProjections.builder()
             .putProjection(RelationshipType.of("A"), RelationshipProjection.builder().type("A").build())
             .putProjection(RelationshipType.of("B"), RelationshipProjection.builder().type("B").build())
             .build();
@@ -149,7 +149,7 @@ class RelationshipProjectionsTest {
 
         RelationshipProjections actual = RelationshipProjections.fromObject(projection);
 
-        RelationshipProjections expected = RelationshipProjections.builder().projections(
+        RelationshipProjections expected = ImmutableRelationshipProjections.builder().projections(
             singletonMap(
                 RelationshipType.of("MY_TYPE"),
                 RelationshipProjection

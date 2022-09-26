@@ -58,6 +58,6 @@ public class GraphDimensionsCypherReader extends GraphDimensionsReader<GraphProj
 
     @Override
     protected RelationshipProjections getRelationshipProjections() {
-        return RelationshipProjections.all();
+        return RelationshipProjections.ALL;
     }
 }
