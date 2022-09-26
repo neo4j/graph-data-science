@@ -30,6 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeLabel;
@@ -52,6 +53,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig.EmbeddingInitializer;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.gds.ml.util.ShuffleUtil;
@@ -251,8 +253,9 @@ class Node2VecTest extends BaseTest {
 
     // Run the algorithm with the exact same configuration on two graphs that are exactly the same, except their node id map
     // has been shuffled. The results should still be similar.
-    @Test
-    void shouldBeFairlyConsistentUnderOriginalIds() {
+    @ParameterizedTest
+    @EnumSource(value = EmbeddingInitializer.class)
+    void shouldBeFairlyConsistentUnderOriginalIds(EmbeddingInitializer embeddingInitializer) {
         long nodeCount = 1000;
         int embeddingDimension = 32;
         long degree = 4;
@@ -315,6 +318,7 @@ class Node2VecTest extends BaseTest {
 
         var config = ImmutableNode2VecStreamConfig
             .builder()
+            .embeddingInitializer(embeddingInitializer)
             .embeddingDimension(embeddingDimension)
             .randomSeed(1337L)
             .concurrency(1)
@@ -339,6 +343,8 @@ class Node2VecTest extends BaseTest {
             double cosine = Intersections.cosine(firstVector.data(), secondVector.data(), secondVector.data().length);
             cosineSum += cosine;
         }
-        assertThat(cosineSum / nodeCount).isCloseTo(1, Offset.offset(0.5));
+        //There's no hard cutoff on the average cosineSim.
+        //We just want to assert different randomly initialized embeddings produce 'relatively similar' embeddings.
+        assertThat(cosineSum / nodeCount).isCloseTo(1, Offset.offset(0.6));
     }
 }

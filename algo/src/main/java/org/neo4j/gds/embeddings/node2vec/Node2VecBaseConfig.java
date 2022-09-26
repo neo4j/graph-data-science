@@ -102,6 +102,7 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionCo
         return 128;
     }
 
+    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig.EmbeddingInitializer#parse", inverse = Configuration.ConvertWith.INVERSE_IS_TO_MAP)
     @Configuration.ToMapValue("org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig.EmbeddingInitializer#toString")
     default EmbeddingInitializer embeddingInitializer() {
