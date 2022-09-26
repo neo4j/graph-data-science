@@ -67,7 +67,7 @@ public final class ShardedLongLongMap {
 
     public long toMappedNodeId(long nodeId) {
         var shard = findShard(nodeId, this.originalNodeMappingShards, this.shardShift, this.shardMask);
-        return shard.getIfAbsent(nodeId, -1L);
+        return shard.getIfAbsent(nodeId, IdMap.NOT_FOUND);
     }
 
     public boolean contains(long originalId) {
