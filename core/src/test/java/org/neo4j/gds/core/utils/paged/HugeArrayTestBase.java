@@ -249,7 +249,7 @@ abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array, Box, 
         assertTrue(cursor.next());
         assertEquals(0, cursor.offset);
         assertEquals(pageEnd, cursor.base);
-        assertEquals(size & (PS - 1), cursor.limit);
+        assertEquals(size - pageEnd, cursor.limit);
 
         assertFalse(cursor.next());
     }
