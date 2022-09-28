@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.api.IdMap.NOT_FOUND;
 
 public abstract class IdMapBuilderTest {
 
@@ -152,21 +153,20 @@ public abstract class IdMapBuilderTest {
     ) {
         var originalIds = shuffle(generate(idOffset, nodeCount, seed), seed);
         var idMap = buildFrom(originalIds, concurrency).idMap();
-        var mappedIds = new long[originalIds.length];
+        var mappedNodeIds = new long[originalIds.length];
         var actualNodeCount = idMap.nodeCount();
-        Arrays.fill(mappedIds, -1);
+
+        Arrays.fill(mappedNodeIds, NOT_FOUND);
 
         for (int i = 0; i < originalIds.length; i++) {
-            mappedIds[i] = idMap.toMappedNodeId(originalIds[i]);
+            var mappedNodeId = idMap.toMappedNodeId(originalIds[i]);
+            assertThat(mappedNodeId).isNotEqualTo(NOT_FOUND);
+            mappedNodeIds[i] = mappedNodeId;
         }
 
-        Arrays.sort(mappedIds);
-
-        assertThat(mappedIds[mappedIds.length - 1]).isEqualTo(actualNodeCount - 1);
-
-        for (long mappedId : mappedIds) {
-            assertThat(mappedId).isGreaterThan(-1);
-        }
+        Arrays.sort(mappedNodeIds);
+        assertThat(mappedNodeIds).doesNotHaveDuplicates();
+        assertThat(mappedNodeIds[mappedNodeIds.length - 1]).isEqualTo(actualNodeCount - 1);
     }
 
     @Property(tries = TRIES)
@@ -181,19 +181,17 @@ public abstract class IdMapBuilderTest {
         var rootNodeIds = new long[originalIds.length];
         var actualNodeCount = idMap.nodeCount();
 
-        Arrays.fill(rootNodeIds, -1);
+        Arrays.fill(rootNodeIds, NOT_FOUND);
 
         for (int mappedId = 0; mappedId < originalIds.length; mappedId++) {
-            rootNodeIds[mappedId] = idMap.toRootNodeId(mappedId);
+            var rootNodeId = idMap.toRootNodeId(mappedId);
+            assertThat(rootNodeId).isNotEqualTo(NOT_FOUND);
+            rootNodeIds[mappedId] = rootNodeId;
         }
 
         Arrays.sort(rootNodeIds);
-
+        assertThat(rootNodeIds).doesNotHaveDuplicates();
         assertThat(rootNodeIds[rootNodeIds.length - 1]).isEqualTo(actualNodeCount - 1);
-
-        for (long rootNodeId : rootNodeIds) {
-            assertThat(rootNodeId).isGreaterThan(-1);
-        }
     }
 
     @Property(tries = TRIES)
