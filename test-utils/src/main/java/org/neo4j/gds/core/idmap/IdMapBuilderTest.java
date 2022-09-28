@@ -24,13 +24,17 @@ import net.jqwik.api.Arbitrary;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.Provide;
+import net.jqwik.api.constraints.IntRange;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.LabelInformation;
 import org.neo4j.gds.core.utils.paged.HugeArrays;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -51,8 +55,20 @@ public abstract class IdMapBuilderTest {
 
     protected abstract IdMapBuilder builder(long capacity, int concurrency);
 
-    private IdMapBuilder builderFromHighestOriginalId(long highestOriginalId, int concurrency) {
-        return builder(highestOriginalId + 1, concurrency);
+    @Provide
+    Arbitrary<Integer> concurrencies() {
+        return Arbitraries.of(1, 2, 4, 8);
+    }
+
+    @Provide
+    Arbitrary<long[]> sparseIds() {
+        return Arbitraries
+            .longs()
+            .between(0, 10 * HugeArrays.PAGE_SIZE)
+            .array(long[].class)
+            .ofMinSize(1)
+            .ofMaxSize(HugeArrays.PAGE_SIZE)
+            .uniqueElements();
     }
 
     @Test
@@ -74,17 +90,6 @@ public abstract class IdMapBuilderTest {
         assertThat(idMap.toMappedNodeId(42)).isEqualTo(0);
         assertThat(idMap.toOriginalNodeId(0)).isEqualTo(42);
         assertThat(idMap.highestOriginalId()).isEqualTo(42);
-    }
-
-    @Provide
-    Arbitrary<long[]> sparseIds() {
-        return Arbitraries
-            .longs()
-            .between(0, 10 * HugeArrays.PAGE_SIZE)
-            .array(long[].class)
-            .ofMinSize(1)
-            .ofMaxSize(HugeArrays.PAGE_SIZE)
-            .uniqueElements();
     }
 
     @Property(tries = 5)
@@ -179,6 +184,43 @@ public abstract class IdMapBuilderTest {
     }
 
     @Property(tries = 5)
+    void testBuildParallel(
+        @ForAll long seed,
+        @ForAll @IntRange(min = HugeArrays.PAGE_SIZE, max = 10 * HugeArrays.PAGE_SIZE) int nodeCount,
+        @ForAll("concurrencies") int concurrency
+    ) {
+        var originalIds = generateOriginalIds(nodeCount, seed);
+        var bufferSize = 1000;
+        var highestOriginalId = highestOriginalId(originalIds);
+        var idMapBuilder = builderFromHighestOriginalId(highestOriginalId, concurrency);
+
+        var tasks = PartitionUtils.rangePartition(concurrency, nodeCount, partition -> (Runnable) () -> {
+            long nodesProcessed = 0;
+            long[] buffer = new long[bufferSize];
+            int offset = (int) partition.startNode();
+            while (nodesProcessed < partition.nodeCount()) {
+                int batchLength = Math.min(bufferSize, (int) (partition.nodeCount() - nodesProcessed));
+                System.arraycopy(originalIds, offset, buffer, 0, batchLength);
+                var allocator = idMapBuilder.allocate(batchLength);
+                allocator.insert(Arrays.copyOfRange(buffer, 0, batchLength));
+                nodesProcessed += batchLength;
+                offset += batchLength;
+            }
+        }, Optional.empty());
+
+        ParallelUtil.run(tasks, Pools.DEFAULT);
+
+        var idMap = idMapBuilder.build(LabelInformation.single(NodeLabel.ALL_NODES), highestOriginalId, concurrency);
+
+        assertThat(idMap.nodeCount()).as("node count").isEqualTo(nodeCount);
+        assertThat(idMap.highestOriginalId()).as("highest original id").isEqualTo(highestOriginalId);
+
+        for (long originalId : originalIds) {
+            assertThat(idMap.contains(originalId)).as("contains original id " + originalId).isTrue();
+        }
+    }
+
+    @Property(tries = 5)
     void testLabels(@ForAll("sparseIds") long[] originalIds) {
         var allLabels = new NodeLabel[]{NodeLabel.of("A"), NodeLabel.of("B"), NodeLabel.of("C")};
         var rng = new Random();
@@ -195,6 +237,10 @@ public abstract class IdMapBuilderTest {
             var originalNodeId = idMap.toOriginalNodeId(mappedNodeId);
             assertThat(idMap.nodeLabels(mappedNodeId)).isEqualTo(expectedLabels.get(originalNodeId));
         }
+    }
+
+    private IdMapBuilder builderFromHighestOriginalId(long highestOriginalId, int concurrency) {
+        return builder(highestOriginalId + 1, concurrency);
     }
 
     @ValueClass
@@ -235,5 +281,26 @@ public abstract class IdMapBuilderTest {
             .idMap(builder.build(labelInformationBuilder, highestOriginalId, concurrency))
             .highestOriginalId(highestOriginalId)
             .build();
+    }
+
+    static long[] generateOriginalIds(int size, long seed) {
+        var rng = new Random(seed);
+        var ids = new long[size];
+
+        long nextId = 0;
+        int count = 0;
+
+        while (count < size) {
+            if (rng.nextBoolean()) {
+                ids[count++] = nextId;
+            }
+            nextId++;
+        }
+
+        return ids;
+    }
+
+    static long highestOriginalId(long[] ids) {
+        return Arrays.stream(ids).max().orElse(-1);
     }
 }
