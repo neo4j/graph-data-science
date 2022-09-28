@@ -19,25 +19,13 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.idmap.IdMapBuilderTest;
 
-public interface IdMapBuilder {
+public class ArrayIdMapBuilderTest extends IdMapBuilderTest {
 
-    /**
-     * Instantiate an allocator that accepts exactly {@code batchLength} many original ids.
-     * <p>
-     * Calling {@link org.neo4j.gds.core.loading.IdMapAllocator#insert(long[])} on the
-     * returned allocator requires an array of length {@code batchLength}.
-     * <p>
-     * This method is thread-safe and intended to be called by multiple node importer threads.
-     *
-     * @return a non-thread-safe allocator for writing ids to the IdMap
-     */
-    IdMapAllocator allocate(int batchLength);
+    @Override
+    protected IdMapBuilder builder(long capacity, int concurrency) {
+        return ArrayIdMapBuilder.of(capacity);
 
-    IdMap build(
-        LabelInformation.Builder labelInformationBuilder,
-        long highestNodeId,
-        int concurrency
-    );
+    }
 }

@@ -45,7 +45,7 @@ ext {
         'jetbrains-annotations': '23.0.0',
         'jjwt'                 : '0.11.5',
         'jol'                  : '0.16',
-        'jqwik'                : '1.6.2',
+        'jqwik'                : '1.6.5',
         'junit4'               : '4.13.2',
         'junit5bom'            : '5.8.1',
         'lucene'               : '8.8.0',
