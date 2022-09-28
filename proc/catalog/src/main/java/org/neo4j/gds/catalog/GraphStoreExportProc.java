@@ -121,8 +121,6 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ClusterRestrictions.disallowRunningOnCluster(databaseService, "Export a graph to CSV");
-
         var cypherConfig = CypherMapWrapper.create(configuration);
         var exportConfig = GraphStoreToFileExporterConfig.of(username(), cypherConfig);
         validateConfig(cypherConfig, exportConfig);
@@ -159,8 +157,6 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ClusterRestrictions.disallowRunningOnCluster(databaseService, "Estimation for exporting a graph to CSV");
-
         var cypherConfig = CypherMapWrapper.create(configuration);
         var exportConfig = GraphStoreToCsvEstimationConfig.of(username(), cypherConfig);
         validateConfig(cypherConfig, exportConfig);
