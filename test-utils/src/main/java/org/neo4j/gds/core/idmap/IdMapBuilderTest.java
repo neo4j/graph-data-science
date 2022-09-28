@@ -365,7 +365,7 @@ public abstract class IdMapBuilderTest {
 
     // Fisher and Yates
     private static long[] shuffle(long[] array, long seed) {
-        var rng = new Random(seed);
+        var rng = new SplittableRandom(seed);
         var len = array.length;
         for (int i = 0; i < len - 2; i++) {
             int j = rng.nextInt(i, len);
