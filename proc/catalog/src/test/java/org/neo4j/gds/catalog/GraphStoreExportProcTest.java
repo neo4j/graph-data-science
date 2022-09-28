@@ -48,6 +48,7 @@ import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.core.io.file.GraphStoreExporterUtil.EXPORT_DIR;
@@ -323,28 +324,16 @@ class GraphStoreExportProcTest extends BaseProcTest {
     }
 
     @Test
-    void failsCsvExportWhenRunningOnCluster() {
-        var exportName = "export";
+    void shouldNotFailCsvExportWhenRunningOnCluster() {
         var config = GraphDatabaseApiProxy.resolveDependency(db, Config.class);
         SettingProxy.setDatabaseMode(config, DatabaseMode.READ_REPLICA, db);
 
         projectGraph();
 
-        var exportQuery = formatWithLocale(
-            "CALL gds.beta.graph.export.csv('test-graph', {" +
-            "  exportName: '%s'" +
-            "})",
-            exportName
-        );
-
-        var exception = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery(exportQuery)
-        );
-        assertThat(rootCause(exception))
-            .hasMessageContaining("The requested operation")
-            .hasMessageContaining("(Export a graph to CSV)")
-            .hasMessageContaining("is not available while running Neo4j Graph Data Science library on a Neo4j Causal Cluster."
+        assertThatNoException().isThrownBy(
+            () -> runQuery(
+                "CALL gds.beta.graph.export.csv('test-graph', { exportName: 'export' })"
+            )
         );
     }
 
@@ -392,27 +381,17 @@ class GraphStoreExportProcTest extends BaseProcTest {
     }
 
     @Test
-    void failCsvEstimationWhenRunningOnCluster() {
+    void shouldNotFailCsvEstimationWhenRunningOnCluster() {
         var config = GraphDatabaseApiProxy.resolveDependency(db, Config.class);
         SettingProxy.setDatabaseMode(config, DatabaseMode.READ_REPLICA, db);
 
         projectGraph();
 
-        var exportQuery =
-            "CALL gds.beta.graph.export.csv.estimate('test-graph', {" +
-            "  exportName: 'export'" +
-            "})";
-
-        var exception = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery(exportQuery)
+        assertThatNoException().isThrownBy(
+            () -> runQuery(
+                "CALL gds.beta.graph.export.csv.estimate('test-graph', { exportName: 'export' })"
+            )
         );
-        assertThat(rootCause(exception))
-            .hasMessageContaining("The requested operation")
-            .hasMessageContaining("(Estimation for exporting a graph to CSV)")
-            .hasMessageContaining(
-                "is not available while running Neo4j Graph Data Science library on a Neo4j Causal Cluster."
-            );
     }
 
     private void projectGraph() {
