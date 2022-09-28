@@ -266,20 +266,28 @@ public abstract class IdMapBuilderTest {
         @ForAll long seed
     ) {
         var originalIds = shuffle(generate(idOffset, nodeCount, seed), seed);
-        var allLabels = new NodeLabel[]{NodeLabel.of("A"), NodeLabel.of("B"), NodeLabel.of("C")};
-        var rng = new Random();
+        var allLabels = new NodeLabel[]{
+            NodeLabel.of("R"),
+            NodeLabel.of("U"),
+            NodeLabel.of("S"),
+            NodeLabel.of("T"),
+        };
+        var rng = new Random(seed);
         var expectedLabels = new HashMap<Long, List<NodeLabel>>();
+        var noLabel = List.of(NodeLabel.ALL_NODES);
 
         var idMap = buildFromOriginalIds(originalIds, concurrency, Optional.of(originalId -> {
-            var labelCount = rng.nextInt(1, allLabels.length);
-            var labels = Arrays.stream(allLabels).limit(labelCount).collect(Collectors.toList());
+            var labelCount = rng.nextInt(allLabels.length);
+            var labels = labelCount > 0
+                ? Arrays.stream(allLabels).limit(labelCount).collect(Collectors.toList())
+                : noLabel;
             expectedLabels.put(originalId, labels);
             return labels;
         })).idMap();
 
         for (int mappedNodeId = 0; mappedNodeId < idMap.nodeCount(); mappedNodeId++) {
             var originalNodeId = idMap.toOriginalNodeId(mappedNodeId);
-            assertThat(idMap.nodeLabels(mappedNodeId)).isEqualTo(expectedLabels.get(originalNodeId));
+            assertThat(idMap.nodeLabels(mappedNodeId)).containsAll(expectedLabels.get(originalNodeId));
         }
     }
 
