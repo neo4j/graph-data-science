@@ -83,7 +83,7 @@ public abstract class IdMapBuilderTest {
 
     @Test
     void testSingleElement() {
-        var idMap = buildFrom(new long[]{42L}, 1).idMap();
+        var idMap = buildIdMapFrom(new long[]{42L}, 1);
 
         assertThat(idMap.nodeCount()).isEqualTo(1);
         assertThat(idMap.toMappedNodeId(42)).isEqualTo(0);
@@ -98,8 +98,8 @@ public abstract class IdMapBuilderTest {
         @ForAll("concurrencies") int concurrency,
         @ForAll long seed
     ) {
-        var originalIds = shuffle(generate(idOffset, nodeCount, seed), seed);
-        var idMap = buildFrom(originalIds, concurrency).idMap();
+        var originalIds = generateShuffledIds(idOffset, nodeCount, seed);
+        var idMap = buildIdMapFrom(originalIds, concurrency);
         assertThat(idMap.nodeCount()).as("node count").isEqualTo(originalIds.length);
     }
 
@@ -110,7 +110,7 @@ public abstract class IdMapBuilderTest {
         @ForAll("concurrencies") int concurrency,
         @ForAll long seed
     ) {
-        var originalIds = shuffle(generate(idOffset, nodeCount, seed), seed);
+        var originalIds = generateShuffledIds(idOffset, nodeCount, seed);
         var idMapAndHighestId = buildFrom(originalIds, concurrency);
         var idMap = idMapAndHighestId.idMap();
         var highestOriginalId = idMapAndHighestId.highestOriginalId();
@@ -138,7 +138,7 @@ public abstract class IdMapBuilderTest {
         @ForAll("concurrencies") int concurrency,
         @ForAll long seed
     ) {
-        var originalIds = shuffle(generate(idOffset, nodeCount, seed), seed);
+        var originalIds = generateShuffledIds(idOffset, nodeCount, seed);
         var idMapAndHighestId = buildFrom(originalIds, concurrency);
 
         assertThat(idMapAndHighestId.idMap().highestOriginalId()).isEqualTo(idMapAndHighestId.highestOriginalId());
@@ -151,8 +151,8 @@ public abstract class IdMapBuilderTest {
         @ForAll("concurrencies") int concurrency,
         @ForAll long seed
     ) {
-        var originalIds = shuffle(generate(idOffset, nodeCount, seed), seed);
-        var idMap = buildFrom(originalIds, concurrency).idMap();
+        var originalIds = generateShuffledIds(idOffset, nodeCount, seed);
+        var idMap = buildIdMapFrom(originalIds, concurrency);
         var mappedNodeIds = new long[originalIds.length];
         var actualNodeCount = idMap.nodeCount();
 
@@ -176,8 +176,8 @@ public abstract class IdMapBuilderTest {
         @ForAll("concurrencies") int concurrency,
         @ForAll long seed
     ) {
-        var originalIds = shuffle(generate(idOffset, nodeCount, seed), seed);
-        var idMap = buildFrom(originalIds, concurrency).idMap();
+        var originalIds = generateShuffledIds(idOffset, nodeCount, seed);
+        var idMap = buildIdMapFrom(originalIds, concurrency);
         var rootNodeIds = new long[originalIds.length];
         var actualNodeCount = idMap.nodeCount();
 
@@ -201,8 +201,8 @@ public abstract class IdMapBuilderTest {
         @ForAll("concurrencies") int concurrency,
         @ForAll long seed
     ) {
-        var originalIds = shuffle(generate(idOffset, nodeCount, seed), seed);
-        var idMap = buildFrom(originalIds, concurrency).idMap();
+        var originalIds = generateShuffledIds(idOffset, nodeCount, seed);
+        var idMap = buildIdMapFrom(originalIds, concurrency);
         var actualOriginalIds = new long[originalIds.length];
         Arrays.fill(actualOriginalIds, -1);
 
@@ -222,7 +222,7 @@ public abstract class IdMapBuilderTest {
         @ForAll("concurrencies") int concurrency,
         @ForAll long seed
     ) {
-        var originalIds = shuffle(generate(idOffset, nodeCount, seed), seed);
+        var originalIds = generateShuffledIds(idOffset, nodeCount, seed);
         var bufferSize = 1000;
         var highestOriginalId = max(originalIds);
         var idMapBuilder = builderFromHighestOriginalId(highestOriginalId, concurrency);
@@ -260,7 +260,7 @@ public abstract class IdMapBuilderTest {
         @ForAll("concurrencies") int concurrency,
         @ForAll long seed
     ) {
-        var originalIds = shuffle(generate(idOffset, nodeCount, seed), seed);
+        var originalIds = generateShuffledIds(idOffset, nodeCount, seed);
         var allLabels = new NodeLabel[]{
             NodeLabel.of("R"),
             NodeLabel.of("U"),
@@ -271,14 +271,14 @@ public abstract class IdMapBuilderTest {
         var expectedLabels = new HashMap<Long, List<NodeLabel>>();
         var noLabel = List.of(NodeLabel.ALL_NODES);
 
-        var idMap = buildFrom(originalIds, concurrency, Optional.of(originalId -> {
+        var idMap = buildFromWithLabels(originalIds, concurrency, originalId -> {
             var labelCount = rng.nextInt(allLabels.length);
             var labels = labelCount > 0
                 ? Arrays.stream(allLabels).limit(labelCount).collect(Collectors.toList())
                 : noLabel;
             expectedLabels.put(originalId, labels);
             return labels;
-        })).idMap();
+        }).idMap();
 
         for (int mappedNodeId = 0; mappedNodeId < idMap.nodeCount(); mappedNodeId++) {
             var originalNodeId = idMap.toOriginalNodeId(mappedNodeId);
@@ -297,11 +297,23 @@ public abstract class IdMapBuilderTest {
         long highestOriginalId();
     }
 
-    private IdMapAndHighestId buildFrom(long[] originalIds, int concurrency) {
-        return buildFrom(originalIds, concurrency, Optional.empty());
+    private IdMap buildIdMapFrom(long[] originalIds, int concurrency) {
+        return buildFrom(originalIds, concurrency).idMap();
     }
 
-    private IdMapAndHighestId buildFrom(
+    private IdMapAndHighestId buildFrom(long[] originalIds, int concurrency) {
+        return buildFromWithLabels(originalIds, concurrency, Optional.empty());
+    }
+
+    private IdMapAndHighestId buildFromWithLabels(
+        long[] originalIds,
+        int concurrency,
+        LongFunction<List<NodeLabel>> labelFn
+    ) {
+        return buildFromWithLabels(originalIds, concurrency, Optional.ofNullable(labelFn));
+    }
+
+    private IdMapAndHighestId buildFromWithLabels(
         long[] originalIds,
         int concurrency,
         Optional<LongFunction<List<NodeLabel>>> labelFn
@@ -309,7 +321,7 @@ public abstract class IdMapBuilderTest {
         // number of ids we want to insert at once
         int batchLength = originalIds.length;
         // the highest original id defines the size of the specific IdMap data structures
-        long highestOriginalId = Arrays.stream(originalIds).max().getAsLong();
+        long highestOriginalId = max(originalIds);
 
         var builder = builderFromHighestOriginalId(highestOriginalId, 1);
         var idMapAllocator = builder.allocate(batchLength);
@@ -330,7 +342,11 @@ public abstract class IdMapBuilderTest {
             .build();
     }
 
-    static long[] generate(int offset, int size, long seed) {
+    private static long[] generateShuffledIds(int offset, int size, long seed) {
+        return shuffle(generate(offset, size, seed), seed);
+    }
+
+    private static long[] generate(int offset, int size, long seed) {
         var rng = new Random(seed);
         var ids = new long[size];
 
@@ -348,7 +364,7 @@ public abstract class IdMapBuilderTest {
     }
 
     // Fisher and Yates
-    static long[] shuffle(long[] array, long seed) {
+    private static long[] shuffle(long[] array, long seed) {
         var rng = new Random(seed);
         var len = array.length;
         for (int i = 0; i < len - 2; i++) {
@@ -360,7 +376,7 @@ public abstract class IdMapBuilderTest {
         return array;
     }
 
-    static long max(long[] ids) {
-        return Arrays.stream(ids).max().orElse(-1);
+    private static long max(long[] ids) {
+        return Arrays.stream(ids).max().orElseThrow();
     }
 }
