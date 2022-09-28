@@ -63,7 +63,6 @@ public abstract class AdjacencyListBuilderBaseTest {
             .adjacencyCompressorFactory(adjacencyCompressorFactory)
             .importMetaData(importMetaData)
             .importSizing(ImportSizing.of(1, nodeCount))
-            .preAggregate(false)
             .build();
 
         DirectIdMap idMap = new DirectIdMap(nodeCount);
