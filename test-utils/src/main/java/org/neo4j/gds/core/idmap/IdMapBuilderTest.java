@@ -24,7 +24,6 @@ import net.jqwik.api.Arbitrary;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.Provide;
-import net.jqwik.api.constraints.IntRange;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
@@ -50,8 +49,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public abstract class IdMapBuilderTest {
 
+    // Runs per property test
+    private static final int TRIES = 42;
+
     // The highest original id that is support in _all_ IdMap implementations
-    public static final long HIGHEST_SUPPORTED_ORIGINAL_ID = (1L << 36) - 1;
+    private static final long HIGHEST_SUPPORTED_ORIGINAL_ID = (1L << 36) - 1;
 
     protected abstract IdMapBuilder builder(long capacity, int concurrency);
 
@@ -61,14 +63,13 @@ public abstract class IdMapBuilderTest {
     }
 
     @Provide
-    Arbitrary<long[]> sparseIds() {
-        return Arbitraries
-            .longs()
-            .between(0, 10 * HugeArrays.PAGE_SIZE)
-            .array(long[].class)
-            .ofMinSize(1)
-            .ofMaxSize(HugeArrays.PAGE_SIZE)
-            .uniqueElements();
+    Arbitrary<Integer> nodeCounts() {
+        return Arbitraries.of(1, 100, 1000, HugeArrays.PAGE_SIZE, 2 * HugeArrays.PAGE_SIZE, 10 * HugeArrays.PAGE_SIZE);
+    }
+
+    @Provide
+    Arbitrary<Integer> idOffsets() {
+        return Arbitraries.of(0, HugeArrays.PAGE_SIZE, 10 * HugeArrays.PAGE_SIZE, 100 * HugeArrays.PAGE_SIZE);
     }
 
     @Test
@@ -92,15 +93,27 @@ public abstract class IdMapBuilderTest {
         assertThat(idMap.highestOriginalId()).isEqualTo(42);
     }
 
-    @Property(tries = 5)
-    void testNodeCount(@ForAll("sparseIds") long[] originalIds) {
-        var idMap = buildFromOriginalIds(originalIds, 1).idMap();
+    @Property(tries = TRIES)
+    void testNodeCount(
+        @ForAll("nodeCounts") int nodeCount,
+        @ForAll("idOffsets") int idOffset,
+        @ForAll("concurrencies") int concurrency,
+        @ForAll long seed
+    ) {
+        var originalIds = shuffle(generate(idOffset, nodeCount, seed), seed);
+        var idMap = buildFromOriginalIds(originalIds, concurrency).idMap();
         assertThat(idMap.nodeCount()).isEqualTo(originalIds.length);
     }
 
-    @Property(tries = 5)
-    void testContains(@ForAll("sparseIds") long[] originalIds) {
-        var idMapAndHighestId = buildFromOriginalIds(originalIds, 1);
+    @Property(tries = TRIES)
+    void testContains(
+        @ForAll("nodeCounts") int nodeCount,
+        @ForAll("idOffsets") int idOffset,
+        @ForAll("concurrencies") int concurrency,
+        @ForAll long seed
+    ) {
+        var originalIds = shuffle(generate(idOffset, nodeCount, seed), seed);
+        var idMapAndHighestId = buildFromOriginalIds(originalIds, concurrency);
         var idMap = idMapAndHighestId.idMap();
         var highestOriginalId = idMapAndHighestId.highestOriginalId();
 
@@ -120,18 +133,30 @@ public abstract class IdMapBuilderTest {
             .forEach(id -> assertThat(idMap.contains(id)).isFalse());
     }
 
-    @Property(tries = 5)
-    void testHighestOriginalId(@ForAll("sparseIds") long[] originalIds) {
-        var idMapAndHighestId = buildFromOriginalIds(originalIds, 1);
+    @Property(tries = TRIES)
+    void testHighestOriginalId(
+        @ForAll("nodeCounts") int nodeCount,
+        @ForAll("idOffsets") int idOffset,
+        @ForAll("concurrencies") int concurrency,
+        @ForAll long seed
+    ) {
+        var originalIds = shuffle(generate(idOffset, nodeCount, seed), seed);
+        var idMapAndHighestId = buildFromOriginalIds(originalIds, concurrency);
 
         assertThat(idMapAndHighestId.idMap().highestOriginalId()).isEqualTo(idMapAndHighestId.highestOriginalId());
     }
 
-    @Property(tries = 5)
-    void testToMappedNodeId(@ForAll("sparseIds") long[] originalIds) {
-        var idMap = buildFromOriginalIds(originalIds, 1).idMap();
+    @Property(tries = TRIES)
+    void testToMappedNodeId(
+        @ForAll("nodeCounts") int nodeCount,
+        @ForAll("idOffsets") int idOffset,
+        @ForAll("concurrencies") int concurrency,
+        @ForAll long seed
+    ) {
+        var originalIds = shuffle(generate(idOffset, nodeCount, seed), seed);
+        var idMap = buildFromOriginalIds(originalIds, concurrency).idMap();
         var mappedIds = new long[originalIds.length];
-        var nodeCount = idMap.nodeCount();
+        var actualNodeCount = idMap.nodeCount();
         Arrays.fill(mappedIds, -1);
 
         for (int i = 0; i < originalIds.length; i++) {
@@ -140,18 +165,24 @@ public abstract class IdMapBuilderTest {
 
         Arrays.sort(mappedIds);
 
-        assertThat(mappedIds[mappedIds.length - 1]).isEqualTo(nodeCount - 1);
+        assertThat(mappedIds[mappedIds.length - 1]).isEqualTo(actualNodeCount - 1);
 
         for (long mappedId : mappedIds) {
             assertThat(mappedId).isGreaterThan(-1);
         }
     }
 
-    @Property(tries = 5)
-    void testToRootNodeId(@ForAll("sparseIds") long[] originalIds) {
-        var idMap = buildFromOriginalIds(originalIds, 1).idMap();
+    @Property(tries = TRIES)
+    void testToRootNodeId(
+        @ForAll("nodeCounts") int nodeCount,
+        @ForAll("idOffsets") int idOffset,
+        @ForAll("concurrencies") int concurrency,
+        @ForAll long seed
+    ) {
+        var originalIds = shuffle(generate(idOffset, nodeCount, seed), seed);
+        var idMap = buildFromOriginalIds(originalIds, concurrency).idMap();
         var rootNodeIds = new long[originalIds.length];
-        var nodeCount = idMap.nodeCount();
+        var actualNodeCount = idMap.nodeCount();
 
         Arrays.fill(rootNodeIds, -1);
 
@@ -161,35 +192,42 @@ public abstract class IdMapBuilderTest {
 
         Arrays.sort(rootNodeIds);
 
-        assertThat(rootNodeIds[rootNodeIds.length - 1]).isEqualTo(nodeCount - 1);
+        assertThat(rootNodeIds[rootNodeIds.length - 1]).isEqualTo(actualNodeCount - 1);
 
         for (long rootNodeId : rootNodeIds) {
             assertThat(rootNodeId).isGreaterThan(-1);
         }
     }
 
-    @Property(tries = 5)
-    void testToOriginalNodeId(@ForAll("sparseIds") long[] expectedOriginalIds) {
-        var idMap = buildFromOriginalIds(expectedOriginalIds, 1).idMap();
-        var actualOriginalIds = new long[expectedOriginalIds.length];
+    @Property(tries = TRIES)
+    void testToOriginalNodeId(
+        @ForAll("nodeCounts") int nodeCount,
+        @ForAll("idOffsets") int idOffset,
+        @ForAll("concurrencies") int concurrency,
+        @ForAll long seed
+    ) {
+        var originalIds = shuffle(generate(idOffset, nodeCount, seed), seed);
+        var idMap = buildFromOriginalIds(originalIds, concurrency).idMap();
+        var actualOriginalIds = new long[originalIds.length];
         Arrays.fill(actualOriginalIds, -1);
 
         for (int mappedId = 0; mappedId < idMap.nodeCount(); mappedId++) {
             actualOriginalIds[mappedId] = idMap.toOriginalNodeId(mappedId);
         }
 
-        Arrays.sort(expectedOriginalIds);
+        Arrays.sort(originalIds);
         Arrays.sort(actualOriginalIds);
-        assertThat(actualOriginalIds).isEqualTo(expectedOriginalIds);
+        assertThat(actualOriginalIds).isEqualTo(originalIds);
     }
 
-    @Property(tries = 5)
+    @Property(tries = TRIES)
     void testBuildParallel(
-        @ForAll long seed,
-        @ForAll @IntRange(min = HugeArrays.PAGE_SIZE, max = 10 * HugeArrays.PAGE_SIZE) int nodeCount,
-        @ForAll("concurrencies") int concurrency
+        @ForAll("nodeCounts") int nodeCount,
+        @ForAll("idOffsets") int idOffset,
+        @ForAll("concurrencies") int concurrency,
+        @ForAll long seed
     ) {
-        var originalIds = shuffle(generateOriginalIds(nodeCount, seed), seed);
+        var originalIds = shuffle(generate(idOffset, nodeCount, seed), seed);
         var bufferSize = 1000;
         var highestOriginalId = highestOriginalId(originalIds);
         var idMapBuilder = builderFromHighestOriginalId(highestOriginalId, concurrency);
@@ -220,13 +258,19 @@ public abstract class IdMapBuilderTest {
         }
     }
 
-    @Property(tries = 5)
-    void testLabels(@ForAll("sparseIds") long[] originalIds) {
+    @Property(tries = TRIES)
+    void testLabels(
+        @ForAll("nodeCounts") int nodeCount,
+        @ForAll("idOffsets") int idOffset,
+        @ForAll("concurrencies") int concurrency,
+        @ForAll long seed
+    ) {
+        var originalIds = shuffle(generate(idOffset, nodeCount, seed), seed);
         var allLabels = new NodeLabel[]{NodeLabel.of("A"), NodeLabel.of("B"), NodeLabel.of("C")};
         var rng = new Random();
         var expectedLabels = new HashMap<Long, List<NodeLabel>>();
 
-        var idMap = buildFromOriginalIds(originalIds, 1, Optional.of(originalId -> {
+        var idMap = buildFromOriginalIds(originalIds, concurrency, Optional.of(originalId -> {
             var labelCount = rng.nextInt(1, allLabels.length);
             var labels = Arrays.stream(allLabels).limit(labelCount).collect(Collectors.toList());
             expectedLabels.put(originalId, labels);
@@ -283,11 +327,11 @@ public abstract class IdMapBuilderTest {
             .build();
     }
 
-    static long[] generateOriginalIds(int size, long seed) {
+    static long[] generate(int offset, int size, long seed) {
         var rng = new Random(seed);
         var ids = new long[size];
 
-        long nextId = 0;
+        long nextId = offset;
         int count = 0;
 
         while (count < size) {
