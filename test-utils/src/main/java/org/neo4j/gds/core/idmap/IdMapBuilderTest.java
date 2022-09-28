@@ -189,7 +189,7 @@ public abstract class IdMapBuilderTest {
         @ForAll @IntRange(min = HugeArrays.PAGE_SIZE, max = 10 * HugeArrays.PAGE_SIZE) int nodeCount,
         @ForAll("concurrencies") int concurrency
     ) {
-        var originalIds = generateOriginalIds(nodeCount, seed);
+        var originalIds = shuffle(generateOriginalIds(nodeCount, seed), seed);
         var bufferSize = 1000;
         var highestOriginalId = highestOriginalId(originalIds);
         var idMapBuilder = builderFromHighestOriginalId(highestOriginalId, concurrency);
@@ -298,6 +298,19 @@ public abstract class IdMapBuilderTest {
         }
 
         return ids;
+    }
+
+    // Fisher and Yates
+    static long[] shuffle(long[] array, long seed) {
+        var rng = new Random(seed);
+        var len = array.length;
+        for (int i = 0; i < len - 2; i++) {
+            int j = rng.nextInt(i, len);
+            long tmp = array[i];
+            array[i] = array[j];
+            array[j] = tmp;
+        }
+        return array;
     }
 
     static long highestOriginalId(long[] ids) {
