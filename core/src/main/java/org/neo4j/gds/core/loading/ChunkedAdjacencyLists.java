@@ -25,10 +25,10 @@ import org.neo4j.gds.collections.HugeSparseCollections;
 import org.neo4j.gds.collections.HugeSparseIntList;
 import org.neo4j.gds.collections.HugeSparseLongArrayList;
 import org.neo4j.gds.collections.HugeSparseLongList;
+import org.neo4j.gds.core.utils.ArrayUtil;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Arrays;
@@ -196,7 +196,7 @@ public final class ChunkedAdjacencyLists {
                 required
             ));
         } else if (compressedTargets.length <= targetLength) {
-            int newLength = BitUtil.nextHighestPowerOfTwo(targetLength);
+            int newLength = ArrayUtil.oversize(pos + required, Byte.BYTES);
             compressedTargets = Arrays.copyOf(compressedTargets, newLength);
             this.targetLists.set(index, compressedTargets);
         }
@@ -216,7 +216,7 @@ public final class ChunkedAdjacencyLists {
                 required
             ));
         } else if (currentProperties.length <= pos + required) {
-            int newLength = BitUtil.nextHighestPowerOfTwo(pos + required);
+            int newLength = ArrayUtil.oversize(pos + required, Long.BYTES);
             currentProperties = Arrays.copyOf(currentProperties, newLength);
             properties.get(propertyIndex).set(index, currentProperties);
         }
