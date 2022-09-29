@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 public enum Neo4jVersion {
     V_4_3,
     V_4_4,
-    V_4_4_9_drop10,
     V_4_4_10_drop10,
     V_5_0,
     V_5_0_drop80,
@@ -42,8 +41,6 @@ public enum Neo4jVersion {
                 return "4.3";
             case V_4_4:
                 return "4.4";
-            case V_4_4_9_drop10:
-                return "4.4.9-drop01.0";
             case V_4_4_10_drop10:
                 return "4.4.10-drop01.0";
             case V_5_0:
@@ -88,10 +85,6 @@ public enum Neo4jVersion {
     }
 
     static Neo4jVersion parse(String version) {
-        if ("4.4.9-drop01.0".equals(version)) {
-            return Neo4jVersion.V_4_4_9_drop10;
-        }
-
         if ("4.4.10-drop01.0".equals(version)) {
             return Neo4jVersion.V_4_4_10_drop10;
         }
