@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils;
+package org.neo4j.gds;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -25,13 +25,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ArrayUtilTest {
 
@@ -50,8 +50,14 @@ class ArrayUtilTest {
     void testBinarySearch(int size) {
         int[] testData = setup(size);
         for (int i = 0; i < testData.length; i++) {
-            Assertions.assertTrue(ArrayUtil.binarySearch(testData, testData.length, (i + 1) * 2), formatWithLocale("False negative at %d value %d%n", i, testData[i]));
-            assertFalse(ArrayUtil.binarySearch(testData, testData.length, (i * 2) + 1), formatWithLocale("False positive at %d value %d%n", i, testData[i]));
+            Assertions.assertTrue(
+                ArrayUtil.binarySearch(testData, testData.length, (i + 1) * 2),
+                String.format(Locale.US, "False negative at %d value %d%n", i, testData[i])
+            );
+            assertFalse(
+                ArrayUtil.binarySearch(testData, testData.length, (i * 2) + 1),
+                String.format(Locale.US, "False positive at %d value %d%n", i, testData[i])
+            );
         }
     }
 
@@ -60,8 +66,14 @@ class ArrayUtilTest {
     void testLinearSearch(int size) {
         int[] testData = setup(size);
         for (int i = 0; i < testData.length; i++) {
-            assertTrue(ArrayUtil.linearSearch(testData, testData.length, (i + 1) * 2), formatWithLocale("False negative at %d value %d%n", i, testData[i]));
-            assertFalse(ArrayUtil.linearSearch(testData, testData.length, (i * 2) + 1), formatWithLocale("False positive at %d value %d%n", i, testData[i]));
+            assertTrue(
+                ArrayUtil.linearSearch(testData, testData.length, (i + 1) * 2),
+                String.format(Locale.US, "False negative at %d value %d%n", i, testData[i])
+            );
+            assertFalse(
+                ArrayUtil.linearSearch(testData, testData.length, (i * 2) + 1),
+                String.format(Locale.US, "False positive at %d value %d%n", i, testData[i])
+            );
         }
     }
 
@@ -78,17 +90,17 @@ class ArrayUtilTest {
         int[] testData = setup(size);
         for (int i = 0; i < testData.length; i++) {
             assertThat(ArrayUtil.linearSearchIndex(testData, testData.length, (i + 1) * 2))
-                .as(formatWithLocale("False negative at %d value %d%n", i, testData[i]))
+                .as(String.format(Locale.US, "False negative at %d value %d%n", i, testData[i]))
                 .isEqualTo(i);
             assertThat(ArrayUtil.linearSearchIndex(testData, testData.length, (i * 2) + 1))
-                .as(formatWithLocale("False positive at %d value %d%n", i, testData[i]))
+                .as(String.format(Locale.US, "False positive at %d value %d%n", i, testData[i]))
                 .isEqualTo(-testData.length - 1);
         }
     }
 
     @Test
     void testBinarySearch() {
-        var a = new long[] { 0, 2, 2, 2, 2, 2, 2, 5, 6, 6, 6, 6, 7 };
+        var a = new long[]{0, 2, 2, 2, 2, 2, 2, 5, 6, 6, 6, 6, 7};
 
         assertThat(Arrays.binarySearch(a, 0, a.length, 0)).isEqualTo(0);
         assertThat(Arrays.binarySearch(a, 0, a.length, 1)).isEqualTo(-2);
@@ -103,7 +115,7 @@ class ArrayUtilTest {
 
     @Test
     void testBinarySearchFirst() {
-        var a = new long[] { 0, 2, 2, 2, 2, 2, 2, 5, 6, 6, 6, 6, 7 };
+        var a = new long[]{0, 2, 2, 2, 2, 2, 2, 5, 6, 6, 6, 6, 7};
 
         assertThat(ArrayUtil.binarySearchFirst(a, 0, a.length, 0)).isEqualTo(0);
         assertThat(ArrayUtil.binarySearchFirst(a, 0, a.length, 1)).isEqualTo(-2);
@@ -118,7 +130,7 @@ class ArrayUtilTest {
 
     @Test
     void testBinarySearchLast() {
-        var a = new long[] { 0, 2, 2, 2, 2, 2, 2, 5, 6, 6, 6, 6, 7 };
+        var a = new long[]{0, 2, 2, 2, 2, 2, 2, 5, 6, 6, 6, 6, 7};
 
         assertThat(ArrayUtil.binarySearchLast(a, 0, a.length, 0)).isEqualTo(0);
         assertThat(ArrayUtil.binarySearchLast(a, 0, a.length, 1)).isEqualTo(-2);

@@ -23,11 +23,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.neo4j.gds.ArrayUtil.oversizeHuge;
 import static org.neo4j.gds.mem.HugeArrays.PAGE_SIZE;
 import static org.neo4j.gds.mem.HugeArrays.exclusiveIndexOfPage;
 import static org.neo4j.gds.mem.HugeArrays.indexInPage;
 import static org.neo4j.gds.mem.HugeArrays.numberOfPages;
-import static org.neo4j.gds.mem.HugeArrays.oversize;
 import static org.neo4j.gds.mem.HugeArrays.pageIndex;
 
 final class HugeArraysTest {
@@ -139,31 +139,31 @@ final class HugeArraysTest {
 
     @Test
     void oversizeIncreasesBy1over8() {
-        var actual = oversize(8 * 42, Integer.BYTES);
+        var actual = oversizeHuge(8 * 42, Integer.BYTES);
         assertEquals(9 * 42, actual);
     }
 
     @Test
     void oversizeDoesWorkWithHugeArraySizes() {
-        var actual = oversize(1L << 42L, Integer.BYTES);
+        var actual = oversizeHuge(1L << 42L, Integer.BYTES);
         assertEquals((1L << 42L) + (1L << 39L), actual);
     }
 
     @Test
     void oversizeHasMinGrowthForSmallSizes() {
-        var actual = oversize(1, Integer.BYTES);
+        var actual = oversizeHuge(1, Integer.BYTES);
         assertEquals(4, actual);
     }
 
     @Test
     void oversizeDoesntGrowForEmptyArrays() {
-        var actual = oversize(0, Integer.BYTES);
+        var actual = oversizeHuge(0, Integer.BYTES);
         assertEquals(0, actual);
     }
 
     @Test
     void oversizeAlignsToPointerSize() {
-        var actual = oversize(42, Byte.BYTES);
+        var actual = oversizeHuge(42, Byte.BYTES);
         // 42 + (42/8) == 47, which gets aligned to 48
         assertEquals(48, actual);
     }
