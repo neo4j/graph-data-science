@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.ArrayUtil;
 import org.neo4j.gds.collections.DrainingIterator;
 import org.neo4j.gds.collections.HugeSparseByteArrayList;
 import org.neo4j.gds.collections.HugeSparseCollections;
 import org.neo4j.gds.collections.HugeSparseIntList;
 import org.neo4j.gds.collections.HugeSparseLongArrayList;
 import org.neo4j.gds.collections.HugeSparseLongList;
-import org.neo4j.gds.core.utils.ArrayUtil;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
