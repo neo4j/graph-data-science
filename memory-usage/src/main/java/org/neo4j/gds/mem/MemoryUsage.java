@@ -60,14 +60,14 @@ public final class MemoryUsage {
     public static final int BYTES_OBJECT_REF;
 
     /**
+     * Number of bytes to represent an array header (no content, but with alignments).
+     */
+    public static final int BYTES_ARRAY_HEADER;
+
+    /**
      * Number of bytes to represent an object header (no fields, no alignments).
      */
     private static final int BYTES_OBJECT_HEADER;
-
-    /**
-     * Number of bytes to represent an array header (no content, but with alignments).
-     */
-    private static final int BYTES_ARRAY_HEADER;
 
     private static final int MASK1_OBJECT_ALIGNMENT;
     private static final int MASK2_OBJECT_ALIGNMENT;
