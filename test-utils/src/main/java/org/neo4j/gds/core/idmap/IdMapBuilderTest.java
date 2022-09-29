@@ -32,7 +32,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.LabelInformation;
-import org.neo4j.gds.core.utils.paged.HugeArrays;
+import org.neo4j.gds.mem.HugeArrays;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.Arrays;

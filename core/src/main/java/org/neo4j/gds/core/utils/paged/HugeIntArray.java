@@ -20,18 +20,18 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
-import org.neo4j.gds.core.utils.ArrayUtil;
+import org.neo4j.gds.mem.HugeArrays;
 
 import java.util.Arrays;
 import java.util.function.LongFunction;
 import java.util.function.LongToIntFunction;
 
-import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SHIFT;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SIZE;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.exclusiveIndexOfPage;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.indexInPage;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.numberOfPages;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.pageIndex;
+import static org.neo4j.gds.mem.HugeArrays.PAGE_SHIFT;
+import static org.neo4j.gds.mem.HugeArrays.PAGE_SIZE;
+import static org.neo4j.gds.mem.HugeArrays.exclusiveIndexOfPage;
+import static org.neo4j.gds.mem.HugeArrays.indexInPage;
+import static org.neo4j.gds.mem.HugeArrays.numberOfPages;
+import static org.neo4j.gds.mem.HugeArrays.pageIndex;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
@@ -215,7 +215,7 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
      * Creates a new array of the given size.
      */
     public static HugeIntArray newArray(long size) {
-        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
+        if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
             return SingleHugeIntArray.of(size);
         }
         return PagedHugeIntArray.of(size);
@@ -228,7 +228,7 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
     public static long memoryEstimation(long size) {
         assert size >= 0;
 
-        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
+        if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
             return sizeOfInstance(SingleHugeIntArray.class) + sizeOfIntArray((int) size);
         }
         long sizeOfInstance = sizeOfInstance(PagedHugeIntArray.class);
@@ -256,7 +256,7 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
     private static final class SingleHugeIntArray extends HugeIntArray {
 
         private static HugeIntArray of(long size) {
-            assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
+            assert size <= HugeArrays.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             int[] page = new int[intSize];
 

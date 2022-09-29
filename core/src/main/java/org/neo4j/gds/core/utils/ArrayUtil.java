@@ -19,15 +19,10 @@
  */
 package org.neo4j.gds.core.utils;
 
-import org.neo4j.gds.utils.GdsFeatureToggles;
-
 import java.util.Arrays;
 
 
 public final class ArrayUtil {
-
-    // Arrays larger than this have a higher risk of triggering a full GC
-    public static final int MAX_ARRAY_LENGTH = 1 << GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get();
 
     public static final int LINEAR_SEARCH_LIMIT = 64;
 

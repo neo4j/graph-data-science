@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.mem.HugeArrays;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import static io.qala.datagen.RandomShortApi.integer;

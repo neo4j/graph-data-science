@@ -21,17 +21,17 @@ package org.neo4j.gds.core.utils.paged;
 
 import org.eclipse.collections.api.block.function.primitive.LongToByteFunction;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
-import org.neo4j.gds.core.utils.ArrayUtil;
+import org.neo4j.gds.mem.HugeArrays;
 
 import java.util.Arrays;
 import java.util.function.LongFunction;
 
-import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SHIFT;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SIZE;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.exclusiveIndexOfPage;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.indexInPage;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.numberOfPages;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.pageIndex;
+import static org.neo4j.gds.mem.HugeArrays.PAGE_SHIFT;
+import static org.neo4j.gds.mem.HugeArrays.PAGE_SIZE;
+import static org.neo4j.gds.mem.HugeArrays.exclusiveIndexOfPage;
+import static org.neo4j.gds.mem.HugeArrays.indexInPage;
+import static org.neo4j.gds.mem.HugeArrays.numberOfPages;
+import static org.neo4j.gds.mem.HugeArrays.pageIndex;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfByteArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
@@ -215,7 +215,7 @@ public abstract class HugeByteArray extends HugeArray<byte[], Byte, HugeByteArra
      * Creates a new array of the given size.
      */
     public static HugeByteArray newArray(long size) {
-        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
+        if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
             return SingleHugeByteArray.of(size);
         }
         return PagedHugeByteArray.of(size);
@@ -228,7 +228,7 @@ public abstract class HugeByteArray extends HugeArray<byte[], Byte, HugeByteArra
     public static long memoryEstimation(long size) {
         assert size >= 0;
 
-        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
+        if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
             return sizeOfInstance(SingleHugeByteArray.class) + sizeOfByteArray((int) size);
         }
         long sizeOfInstance = sizeOfInstance(PagedHugeByteArray.class);
@@ -256,7 +256,7 @@ public abstract class HugeByteArray extends HugeArray<byte[], Byte, HugeByteArra
     private static final class SingleHugeByteArray extends HugeByteArray {
 
         private static HugeByteArray of(long size) {
-            assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
+            assert size <= HugeArrays.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             byte[] page = new byte[intSize];
 

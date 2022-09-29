@@ -20,18 +20,18 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.core.utils.ArrayUtil;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 
-import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SIZE;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.exclusiveIndexOfPage;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.indexInPage;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.numberOfPages;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.pageIndex;
+import static org.neo4j.gds.mem.HugeArrays.PAGE_SIZE;
+import static org.neo4j.gds.mem.HugeArrays.exclusiveIndexOfPage;
+import static org.neo4j.gds.mem.HugeArrays.indexInPage;
+import static org.neo4j.gds.mem.HugeArrays.numberOfPages;
+import static org.neo4j.gds.mem.HugeArrays.pageIndex;
+import static org.neo4j.gds.mem.HugeArrays.MAX_ARRAY_LENGTH;
 
 /**
  * A long-indexable array of atomic bytes that can contain more than 2 bn. elements.
@@ -186,7 +186,7 @@ public abstract class HugeAtomicByteArray implements HugeCursorSupport<byte[]> {
      * Creates a new array of the given size.
      */
     public static HugeAtomicByteArray newArray(long size) {
-        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
+        if (size <= MAX_ARRAY_LENGTH) {
             return SingleHugeAtomicByteArray.of(size);
         }
         return PagedHugeAtomicByteArray.of(size, BytePageCreator.of(1));
@@ -196,7 +196,7 @@ public abstract class HugeAtomicByteArray implements HugeCursorSupport<byte[]> {
         assert size >= 0;
         long instanceSize;
         long dataSize;
-        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
+        if (size <= MAX_ARRAY_LENGTH) {
             instanceSize = MemoryUsage.sizeOfInstance(SingleHugeAtomicByteArray.class);
             dataSize = MemoryUsage.sizeOfByteArray((int) size);
         } else {
@@ -224,7 +224,7 @@ public abstract class HugeAtomicByteArray implements HugeCursorSupport<byte[]> {
         private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(byte[].class);
 
         private static HugeAtomicByteArray of(long size) {
-            assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
+            assert size <= MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             byte[] page = new byte[intSize];
 

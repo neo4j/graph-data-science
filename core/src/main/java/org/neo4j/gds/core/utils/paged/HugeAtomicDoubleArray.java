@@ -21,18 +21,18 @@ package org.neo4j.gds.core.utils.paged;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
-import org.neo4j.gds.core.utils.ArrayUtil;
+import org.neo4j.gds.mem.HugeArrays;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
 
-import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SIZE;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.exclusiveIndexOfPage;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.indexInPage;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.numberOfPages;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.pageIndex;
+import static org.neo4j.gds.mem.HugeArrays.PAGE_SIZE;
+import static org.neo4j.gds.mem.HugeArrays.exclusiveIndexOfPage;
+import static org.neo4j.gds.mem.HugeArrays.indexInPage;
+import static org.neo4j.gds.mem.HugeArrays.numberOfPages;
+import static org.neo4j.gds.mem.HugeArrays.pageIndex;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
@@ -196,7 +196,7 @@ public abstract class HugeAtomicDoubleArray {
         long size,
         DoublePageCreator pageFiller
     ) {
-        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
+        if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
             return HugeAtomicDoubleArray.SingleHugeAtomicDoubleArray.of(size, pageFiller);
         }
         return HugeAtomicDoubleArray.PagedHugeAtomicDoubleArray.of(size, pageFiller);
@@ -206,7 +206,7 @@ public abstract class HugeAtomicDoubleArray {
         assert size >= 0;
         long instanceSize;
         long dataSize;
-        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
+        if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
             instanceSize = sizeOfInstance(HugeAtomicDoubleArray.SingleHugeAtomicDoubleArray.class);
             dataSize = sizeOfLongArray((int) size);
         } else {
@@ -240,7 +240,7 @@ public abstract class HugeAtomicDoubleArray {
             long size,
             DoublePageCreator pageCreator
         ) {
-            assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
+            assert size <= HugeArrays.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             double[] page = new double[intSize];
             pageCreator.fillPage(page, 0);

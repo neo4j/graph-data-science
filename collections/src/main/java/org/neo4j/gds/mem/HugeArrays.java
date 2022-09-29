@@ -21,6 +21,37 @@ package org.neo4j.gds.mem;
 
 public final class HugeArrays {
 
+    // Arrays larger than this have a higher risk of triggering a full GC
+    // Prevents full GC more often as not so much consecutive memory is allocated in one go as
+    // compared to a page shift of 30 or 32. See https://github.com/neo4j-contrib/neo4j-graph-algorithms/pull/859#discussion_r272262734.
+    public static final int MAX_ARRAY_LENGTH = 1 << 28;
+
+    public static final int PAGE_SHIFT = 14;
+    public static final int PAGE_SIZE = 1 << PAGE_SHIFT;
+    private static final long PAGE_MASK = PAGE_SIZE - 1;
+
+    public static int pageIndex(long index) {
+        return (int) (index >>> PAGE_SHIFT);
+    }
+
+    public static int indexInPage(long index) {
+        return (int) (index & PAGE_MASK);
+    }
+
+    public static int exclusiveIndexOfPage(long index) {
+        return 1 + (int) ((index - 1L) & PAGE_MASK);
+    }
+
+    public static long indexFromPageIndexAndIndexInPage(int pageIndex, int indexInPage) {
+        return (pageIndex << PAGE_SHIFT) | indexInPage;
+    }
+
+    public static int numberOfPages(long capacity) {
+        final long numPages = (capacity + PAGE_MASK) >>> PAGE_SHIFT;
+        assert numPages <= Integer.MAX_VALUE : "pageSize=" + (PAGE_SIZE) + " is too small for capacity: " + capacity;
+        return (int) numPages;
+    }
+
     public static int oversizeInt(int minTargetSize, int bytesPerElement) {
         return Math.toIntExact(oversize(minTargetSize, bytesPerElement));
     }

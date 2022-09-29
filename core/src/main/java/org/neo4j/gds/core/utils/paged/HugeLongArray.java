@@ -22,6 +22,7 @@ package org.neo4j.gds.core.utils.paged;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.core.utils.ArrayUtil;
+import org.neo4j.gds.mem.HugeArrays;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Arrays;
@@ -216,7 +217,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
      * Creates a new array of the given size.
      */
     public static HugeLongArray newArray(long size) {
-        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
+        if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
             return SingleHugeLongArray.of(size);
         }
         return PagedHugeLongArray.of(size);
@@ -225,8 +226,8 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
     public static long memoryEstimation(long size) {
         assert size >= 0;
 
-        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
-            return MemoryUsage.sizeOfInstance(SingleHugeLongArray.class) + MemoryUsage.sizeOfLongArray((int)size);
+        if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
+            return MemoryUsage.sizeOfInstance(SingleHugeLongArray.class) + MemoryUsage.sizeOfLongArray((int) size);
         }
         long sizeOfInstance = MemoryUsage.sizeOfInstance(PagedHugeLongArray.class);
 
@@ -265,7 +266,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
     private static final class SingleHugeLongArray extends HugeLongArray {
 
         private static HugeLongArray of(long size) {
-            assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
+            assert size <= HugeArrays.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             long[] page = new long[intSize];
 

@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.paged.HugeArrays;
+import org.neo4j.gds.mem.HugeArrays;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.ArrayList;

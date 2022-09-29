@@ -46,6 +46,8 @@ import static java.lang.Integer.numberOfTrailingZeros;
 
 public final class MemoryUsage {
 
+    public static final boolean JRE_IS_64BIT;
+
     private static final int SHIFT_BYTE = numberOfTrailingZeros(Byte.BYTES);
     private static final int SHIFT_CHAR = numberOfTrailingZeros(Character.BYTES);
     private static final int SHIFT_SHORT = numberOfTrailingZeros(Short.BYTES);
@@ -95,13 +97,13 @@ public final class MemoryUsage {
     static {
         final String osArch = System.getProperty("os.arch");
         final String x = System.getProperty("sun.arch.data.model");
-        final boolean is64Bit;
         if (x != null) {
-            is64Bit = x.contains("64");
+            JRE_IS_64BIT = x.contains("64");
         } else {
-            is64Bit = osArch != null && osArch.contains("64");
+            JRE_IS_64BIT = osArch != null && osArch.contains("64");
         }
-        if (is64Bit) {
+
+        if (JRE_IS_64BIT) {
             // Try to get compressed oops and object alignment (the default seems to be 8 on Hotspot);
             // (this only works on 64 bit, on 32 bits the alignment and reference size is fixed):
             boolean compressedOops = false;
@@ -111,7 +113,7 @@ public final class MemoryUsage {
                 // we use reflection for this, because the management factory is not part
                 // of Java 8's compact profile:
                 final Object hotSpotBean = Class
-                        .forName(MANAGEMENT_FACTORY_CLASS)
+                    .forName(MANAGEMENT_FACTORY_CLASS)
                         .getMethod("getPlatformMXBean", Class.class)
                         .invoke(null, beanClazz);
                 if (hotSpotBean != null) {

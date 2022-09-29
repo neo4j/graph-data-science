@@ -23,22 +23,22 @@ import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.utils.ArrayUtil;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.HugeArrays;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
-import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SHIFT;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SIZE;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.exclusiveIndexOfPage;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.indexInPage;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.numberOfPages;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.pageIndex;
+import static org.neo4j.gds.mem.HugeArrays.PAGE_SHIFT;
+import static org.neo4j.gds.mem.HugeArrays.PAGE_SIZE;
+import static org.neo4j.gds.mem.HugeArrays.exclusiveIndexOfPage;
+import static org.neo4j.gds.mem.HugeArrays.indexInPage;
+import static org.neo4j.gds.mem.HugeArrays.numberOfPages;
+import static org.neo4j.gds.mem.HugeArrays.pageIndex;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
 
@@ -233,7 +233,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
         Class<T> componentClass,
         long size
     ) {
-        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
+        if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
             return SingleHugeObjectArray.of(componentClass, size);
         }
         return PagedHugeObjectArray.of(componentClass, size);
@@ -261,7 +261,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
     }
 
     public static long memoryEstimation(long arraySize, long objectSize) {
-        var sizeOfInstance = arraySize <= ArrayUtil.MAX_ARRAY_LENGTH
+        var sizeOfInstance = arraySize <= HugeArrays.MAX_ARRAY_LENGTH
             ? sizeOfInstance(SingleHugeObjectArray.class)
             : sizeOfInstance(PagedHugeObjectArray.class);
 
@@ -283,7 +283,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
         var builder = MemoryEstimations.builder();
 
         builder.perNode("instance", nodeCount -> {
-            if (nodeCount <= ArrayUtil.MAX_ARRAY_LENGTH) {
+            if (nodeCount <= HugeArrays.MAX_ARRAY_LENGTH) {
                 return sizeOfInstance(SingleHugeObjectArray.class);
             } else {
                 return sizeOfInstance(PagedHugeObjectArray.class);
@@ -293,7 +293,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
         builder.perNode("data", objectEstimation);
 
         builder.perNode("pages", nodeCount -> {
-            if (nodeCount <= ArrayUtil.MAX_ARRAY_LENGTH) {
+            if (nodeCount <= HugeArrays.MAX_ARRAY_LENGTH) {
                 return sizeOfObjectArray(nodeCount);
             } else {
                 int numPages = numberOfPages(nodeCount);
@@ -316,7 +316,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
             Class<T> componentClass,
             long size
         ) {
-            assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
+            assert size <= HugeArrays.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             //noinspection unchecked
             T[] page = (T[]) Array.newInstance(componentClass, intSize);

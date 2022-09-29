@@ -20,18 +20,18 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
-import org.neo4j.gds.core.utils.ArrayUtil;
+import org.neo4j.gds.mem.HugeArrays;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 import java.util.function.LongUnaryOperator;
 
-import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SIZE;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.exclusiveIndexOfPage;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.indexInPage;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.numberOfPages;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.pageIndex;
+import static org.neo4j.gds.mem.HugeArrays.PAGE_SIZE;
+import static org.neo4j.gds.mem.HugeArrays.exclusiveIndexOfPage;
+import static org.neo4j.gds.mem.HugeArrays.indexInPage;
+import static org.neo4j.gds.mem.HugeArrays.numberOfPages;
+import static org.neo4j.gds.mem.HugeArrays.pageIndex;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
@@ -227,7 +227,7 @@ public abstract class HugeAtomicLongArray implements HugeCursorSupport<long[]> {
         long size,
         LongPageCreator pageFiller
     ) {
-        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
+        if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
             return SingleHugeAtomicLongArray.of(size, pageFiller);
         }
         return PagedHugeAtomicLongArray.of(size, pageFiller);
@@ -237,7 +237,7 @@ public abstract class HugeAtomicLongArray implements HugeCursorSupport<long[]> {
         assert size >= 0;
         long instanceSize;
         long dataSize;
-        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
+        if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
             instanceSize = sizeOfInstance(SingleHugeAtomicLongArray.class);
             dataSize = sizeOfLongArray((int) size);
         } else {
@@ -271,7 +271,7 @@ public abstract class HugeAtomicLongArray implements HugeCursorSupport<long[]> {
             long size,
             LongPageCreator pageCreator
         ) {
-            assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
+            assert size <= HugeArrays.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             long[] page = new long[intSize];
             pageCreator.fillPage(page, 0);
