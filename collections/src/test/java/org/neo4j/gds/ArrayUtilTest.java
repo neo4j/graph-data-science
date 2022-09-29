@@ -30,8 +30,10 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.ArrayUtil.oversizeHuge;
 
 class ArrayUtilTest {
 
@@ -156,5 +158,36 @@ class ArrayUtilTest {
 
         assertFalse(ArrayUtil.contains(new long[]{}, -420L));
         assertFalse(ArrayUtil.contains(new long[]{}, 0L));
+    }
+
+    @Test
+    void oversizeIncreasesBy1over8() {
+        var actual = oversizeHuge(8 * 42, Integer.BYTES);
+        assertEquals(9 * 42, actual);
+    }
+
+    @Test
+    void oversizeDoesWorkWithHugeArraySizes() {
+        var actual = oversizeHuge(1L << 42L, Integer.BYTES);
+        assertEquals((1L << 42L) + (1L << 39L), actual);
+    }
+
+    @Test
+    void oversizeHasMinGrowthForSmallSizes() {
+        var actual = oversizeHuge(1, Integer.BYTES);
+        assertEquals(4, actual);
+    }
+
+    @Test
+    void oversizeDoesntGrowForEmptyArrays() {
+        var actual = oversizeHuge(0, Integer.BYTES);
+        assertEquals(0, actual);
+    }
+
+    @Test
+    void oversizeAlignsToPointerSize() {
+        var actual = oversizeHuge(42, Byte.BYTES);
+        // 42 + (42/8) == 47, which gets aligned to 48
+        assertEquals(48, actual);
     }
 }
