@@ -88,11 +88,6 @@
         <Bug pattern="DM_DEFAULT_ENCODING" />
     </Match>
 
-    <!-- Result of integer multiplication cast to long -->
-    <Match>
-        <Bug pattern="ICAST_INTEGER_MULTIPLY_CAST_TO_LONG" />
-    </Match>
-
     <!-- Explicit garbage collection; extremely dubious except in benchmarking code -->
     <Match>
         <Bug pattern="DM_GC" />

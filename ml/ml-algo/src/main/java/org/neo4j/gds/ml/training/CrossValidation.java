@@ -58,7 +58,7 @@ public class CrossValidation<MODEL_TYPE> {
             Tasks.leaf("Create validation folds", Math.max((long) (0.5 * trainSetSize), 1)),
             Tasks.iterativeFixed(
                 "Select best model",
-                () -> List.of(Tasks.leaf("Trial", 5 * validationFolds * trainSetSize)),
+                () -> List.of(Tasks.leaf("Trial", 5L * validationFolds * trainSetSize)),
                 numberOfModelSelectionTrials
             )
         );
