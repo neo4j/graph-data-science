@@ -23,8 +23,8 @@ import java.util.function.LongUnaryOperator;
 import java.util.stream.IntStream;
 
 import static org.neo4j.gds.core.concurrency.ParallelUtil.parallelStreamConsume;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SHIFT;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SIZE;
+import static org.neo4j.gds.mem.HugeArrays.PAGE_SHIFT;
+import static org.neo4j.gds.mem.HugeArrays.PAGE_SIZE;
 
 public final class LongPageCreator {
 

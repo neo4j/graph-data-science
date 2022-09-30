@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SIZE;
+import static org.neo4j.gds.mem.HugeArrays.PAGE_SIZE;
 
 /**
  * Many of the following tests were taken from the AtomicLongArray test from the OpenJDK sources.

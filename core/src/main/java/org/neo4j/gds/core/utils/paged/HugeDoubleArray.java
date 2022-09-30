@@ -20,19 +20,19 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
-import org.neo4j.gds.core.utils.ArrayUtil;
+import org.neo4j.gds.mem.HugeArrays;
 
 import java.util.Arrays;
 import java.util.function.LongFunction;
 import java.util.function.LongToDoubleFunction;
 import java.util.stream.DoubleStream;
 
-import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SHIFT;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.PAGE_SIZE;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.exclusiveIndexOfPage;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.indexInPage;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.numberOfPages;
-import static org.neo4j.gds.core.utils.paged.HugeArrays.pageIndex;
+import static org.neo4j.gds.mem.HugeArrays.PAGE_SHIFT;
+import static org.neo4j.gds.mem.HugeArrays.PAGE_SIZE;
+import static org.neo4j.gds.mem.HugeArrays.exclusiveIndexOfPage;
+import static org.neo4j.gds.mem.HugeArrays.indexInPage;
+import static org.neo4j.gds.mem.HugeArrays.numberOfPages;
+import static org.neo4j.gds.mem.HugeArrays.pageIndex;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
@@ -199,7 +199,7 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
      * Creates a new array of the given size.
      */
     public static HugeDoubleArray newArray(long size) {
-        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
+        if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
             return SingleHugeDoubleArray.of(size);
         }
         return PagedHugeDoubleArray.of(size);
@@ -208,8 +208,8 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
     public static long memoryEstimation(long size) {
         assert size >= 0;
 
-        if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
-            return sizeOfInstance(SingleHugeDoubleArray.class) + sizeOfDoubleArray((int)size);
+        if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
+            return sizeOfInstance(SingleHugeDoubleArray.class) + sizeOfDoubleArray((int) size);
         }
         long sizeOfInstance = sizeOfInstance(PagedHugeDoubleArray.class);
 
@@ -240,7 +240,7 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
     private static final class SingleHugeDoubleArray extends HugeDoubleArray {
 
         private static HugeDoubleArray of(long size) {
-            assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
+            assert size <= HugeArrays.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             double[] page = new double[intSize];
 

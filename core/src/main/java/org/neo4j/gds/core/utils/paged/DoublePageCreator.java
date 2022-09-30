@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
+import org.neo4j.gds.mem.HugeArrays;
+
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.IntStream;
 
