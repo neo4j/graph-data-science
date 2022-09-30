@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.mem;
 
-import static org.neo4j.gds.ArrayUtil.oversizeHuge;
-
 public final class HugeArrays {
 
     // Arrays larger than this have a higher risk of triggering a full GC
@@ -53,11 +51,6 @@ public final class HugeArrays {
         assert numPages <= Integer.MAX_VALUE : "pageSize=" + (PAGE_SIZE) + " is too small for capacity: " + capacity;
         return (int) numPages;
     }
-
-    public static int oversizeInt(int minTargetSize, int bytesPerElement) {
-        return Math.toIntExact(oversizeHuge(minTargetSize, bytesPerElement));
-    }
-
 
     private HugeArrays() {
         throw new UnsupportedOperationException("No instances");
