@@ -78,9 +78,9 @@ class ChunkedAdjacencyListsTest {
         adjacencyLists.add(0, input, properties, 0, 4, 4);
 
         adjacencyLists.consume((nodeId, targets, actualProperties, position, length) -> assertThat(actualProperties)
-            .hasDimensions(2, 4)
-            .contains(new long[]{42L, 1337L, 5L, 6L}, Index.atIndex(0))
-            .contains(new long[]{8L, 8L, 8L, 8L}, Index.atIndex(1)));
+            .hasDimensions(2, 7)
+            .contains(new long[]{42L, 1337L, 5L, 6L, 0L, 0L, 0L}, Index.atIndex(0))
+            .contains(new long[]{8L, 8L, 8L, 8L, 0L, 0L, 0L}, Index.atIndex(1)));
     }
 
     @Test
@@ -160,9 +160,9 @@ class ChunkedAdjacencyListsTest {
             assertThat(actualTargets).containsExactly(expectedTargets);
 
             assertThat(actualProperties)
-                // there is an additional entry, because we double the buffers in size
-                .hasDimensions(1, 4)
-                .contains(new long[]{3L, 3L, 4L, 0L}, Index.atIndex(0));
+                // there is an additional entry, because we increase the buffers in size
+                .hasDimensions(1, 6)
+                .contains(new long[]{3L, 3L, 4L, 0L, 0L, 0L}, Index.atIndex(0));
         });
     }
 }
