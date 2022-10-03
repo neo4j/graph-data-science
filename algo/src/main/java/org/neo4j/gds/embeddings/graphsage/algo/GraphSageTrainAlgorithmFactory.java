@@ -98,16 +98,16 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
             var weightsMemory = sizeOfDoubleArray(weightDimensions);
             if (layerConfig.aggregatorType() == Aggregator.AggregatorType.POOL) {
                 // selfWeights
-                weightsMemory += sizeOfDoubleArray(layerConfig.rows() * layerConfig.rows());
+                weightsMemory += sizeOfDoubleArray((long) layerConfig.rows() * layerConfig.rows());
                 // neighborsWeights
-                weightsMemory += sizeOfDoubleArray(layerConfig.rows() * layerConfig.rows());
+                weightsMemory += sizeOfDoubleArray((long) layerConfig.rows() * layerConfig.rows());
                 // bias
                 weightsMemory += sizeOfDoubleArray(layerConfig.rows());
             }
             layerBuilder.fixed("layer " + (i + 1), weightsMemory);
 
             initialAdamOptimizer += 2 * sizeOfDoubleArray(weightDimensions);
-            updateAdamOptimizer += 5 * weightDimensions;
+            updateAdamOptimizer += 5L * weightDimensions;
         }
 
         var isMultiLabel = config.isMultiLabel();
@@ -129,7 +129,7 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
             var maxNumProperties = config.featureProperties().size();
             maxNumProperties++; // Add one for the label
             var minWeightsMemory = sizeOfDoubleArray(config.estimationFeatureDimension() * minNumProperties);
-            var maxWeightsMemory = sizeOfDoubleArray(config.estimationFeatureDimension() * maxNumProperties);
+            var maxWeightsMemory = sizeOfDoubleArray((long) config.estimationFeatureDimension() * maxNumProperties);
             var weightByLabelMemory = MemoryRange.of(minWeightsMemory, maxWeightsMemory).times(labelCount);
 
             estimationsBuilder.fixed("weightsByLabel", weightByLabelMemory);
@@ -142,7 +142,7 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
             .perThread("concurrentBatches", MemoryEstimations
                 .builder()
                 .startField("trainOnBatch")
-                .add(GraphSageHelper.embeddingsEstimation(config, 3 * config.batchSize(), nodeCount, labelCount, true))
+                .add(GraphSageHelper.embeddingsEstimation(config, 3L * config.batchSize(), nodeCount, labelCount, true))
                 .fixed("updateAdamOptimizer", updateAdamOptimizer)
                 .endField()
                 .build())

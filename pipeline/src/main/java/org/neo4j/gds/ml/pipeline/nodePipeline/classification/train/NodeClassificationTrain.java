@@ -151,7 +151,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         // Training memory is independent of node set size so we can skip that last estimation.
         var builder = MemoryEstimations.builder()
             .perNode("global targets", HugeIntArray::memoryEstimation)
-            .rangePerNode("global class counts", __ -> MemoryRange.of(2 * Long.BYTES, fudgedClassCount * Long.BYTES))
+            .rangePerNode("global class counts", __ -> MemoryRange.of(2L * Long.BYTES, (long) fudgedClassCount * Long.BYTES))
             .add("metrics", ClassificationMetricSpecification.memoryEstimation(fudgedClassCount))
             .perNode("node IDs", HugeLongArray::memoryEstimation)
             .add("outer split", FractionSplitter.estimate(1 - testFraction))

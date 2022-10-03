@@ -83,19 +83,9 @@
         <Bug pattern="MS_SHOULD_BE_FINAL" />
     </Match>
 
-    <!-- Class defines equals() and uses Object.hashCode() -->
-    <Match>
-        <Bug pattern="HE_EQUALS_USE_HASHCODE" />
-    </Match>
-
     <!-- Reliance on default encoding -->
     <Match>
         <Bug pattern="DM_DEFAULT_ENCODING" />
-    </Match>
-
-    <!-- Result of integer multiplication cast to long -->
-    <Match>
-        <Bug pattern="ICAST_INTEGER_MULTIPLY_CAST_TO_LONG" />
     </Match>
 
     <!-- Explicit garbage collection; extremely dubious except in benchmarking code -->
@@ -297,10 +287,6 @@
     <!-- /Medium priority report -->
 
     <!-- Low priority report -->
-    <!-- Class defines hashCode() and uses Object.equals() -->
-    <Match>
-        <Bug pattern="HE_HASHCODE_USE_OBJECT_EQUALS"/>
-    </Match>
 
     <!-- Method may fail to close stream on exception -->
     <Match>
