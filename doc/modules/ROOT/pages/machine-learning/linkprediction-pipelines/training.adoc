@@ -140,7 +140,7 @@ The `OUT_OF_BAG_ERROR` is only reported in (7) as validation metric and only if 
 
 include::partial$/machine-learning/pipeline-training-logging-note.adoc[]
 
-
+[[linkprediction-pipelines-train-example]]
 == Example
 
 In this example we will create a small graph and use the training pipeline we have built up thus far.
