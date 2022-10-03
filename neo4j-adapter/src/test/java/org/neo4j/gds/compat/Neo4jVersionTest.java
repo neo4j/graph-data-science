@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.kernel.internal.CustomVersionSetting;
 import org.neo4j.kernel.internal.Version;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -45,6 +46,14 @@ class Neo4jVersionTest {
     })
     void testParse(String input, Neo4jVersion expected) {
         assertEquals(expected.name(), Neo4jVersion.parse(input).name());
+    }
+
+    @Test
+    void failOnNeo4jDev() {
+        // as this is a release branch, we dont support dev
+        assertThatThrownBy(() -> Neo4jVersion.parse("dev"))
+            .hasMessage("Cannot run on Neo4j Version dev")
+            .isInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test
