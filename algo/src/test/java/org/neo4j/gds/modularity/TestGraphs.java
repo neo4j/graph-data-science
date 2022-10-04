@@ -23,41 +23,41 @@ public final class TestGraphs {
 
     public static final String KARATE_CLUB_GRAPH =
         "CREATE " +
-        "(a0: Node)," +
-        "(a1: Node)," +
-        "(a2: Node)," +
-        "(a3: Node)," +
-        "(a4: Node)," +
-        "(a5: Node)," +
-        "(a6: Node)," +
-        "(a7: Node)," +
-        "(a8: Node)," +
-        "(a9: Node)," +
-        "(a10: Node)," +
-        "(a11: Node)," +
-        "(a12: Node)," +
-        "(a13: Node)," +
-        "(a14: Node)," +
-        "(a15: Node)," +
-        "(a16: Node)," +
-        "(a17: Node)," +
-        "(a18: Node)," +
-        "(a19: Node)," +
-        "(a20: Node)," +
-        "(a21: Node)," +
-        "(a22: Node)," +
-        "(a23: Node)," +
-        "(a24: Node)," +
-        "(a25: Node)," +
-        "(a26: Node)," +
-        "(a27: Node)," +
-        "(a28: Node)," +
-        "(a29: Node)," +
-        "(a30: Node)," +
-        "(a31: Node)," +
-        "(a32: Node)," +
-        "(a33: Node)," +
-        "(a34: Node)," +
+        "(a0: Node{single:100})," +
+        "(a1: Node{single:101})," +
+        "(a2: Node{single:102})," +
+        "(a3: Node{single:103})," +
+        "(a4: Node{single:104})," +
+        "(a5: Node{single:105})," +
+        "(a6: Node{single:106})," +
+        "(a7: Node{single:107})," +
+        "(a8: Node{single:108})," +
+        "(a9: Node{single:109})," +
+        "(a10: Node{single:110})," +
+        "(a11: Node{single:111})," +
+        "(a12: Node{single:112})," +
+        "(a13: Node{single:113})," +
+        "(a14: Node{single:114})," +
+        "(a15: Node{single:115})," +
+        "(a16: Node{single:116})," +
+        "(a17: Node{single:117})," +
+        "(a18: Node{single:118})," +
+        "(a19: Node{single:119})," +
+        "(a20: Node{single:120})," +
+        "(a21: Node{single:121})," +
+        "(a22: Node{single:122})," +
+        "(a23: Node{single:123})," +
+        "(a24: Node{single:124})," +
+        "(a25: Node{single:125})," +
+        "(a26: Node{single:126})," +
+        "(a27: Node{single:127})," +
+        "(a28: Node{single:128})," +
+        "(a29: Node{single:129})," +
+        "(a30: Node{single:130})," +
+        "(a31: Node{single:131})," +
+        "(a32: Node{single:132})," +
+        "(a33: Node{single:133})," +
+        "(a34: Node{single:134})," +
         "(a1)-[:R]->(a2)," +
         "(a1)-[:R]->(a3)," +
         "(a2)-[:R]->(a3)," +

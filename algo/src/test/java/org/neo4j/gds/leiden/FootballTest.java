@@ -61,7 +61,8 @@ class FootballTest {
             0.01,
             false,
             randomSeed,
-            null, 1,
+            null,
+            1,
             ProgressTracker.NULL_TRACKER
         );
         var leidenResult = leiden.compute();

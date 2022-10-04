@@ -44,14 +44,14 @@ class LeidenTest {
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String DB_CYPHER =
         "CREATE " +
-        "  (a0:Node)," +
-        "  (a1:Node)," +
-        "  (a2:Node)," +
-        "  (a3:Node)," +
-        "  (a4:Node)," +
-        "  (a5:Node)," +
-        "  (a6:Node)," +
-        "  (a7:Node)," +
+        "  (a0:Node {optimal: 5000})," +
+        "  (a1:Node {optimal: 4000})," +
+        "  (a2:Node {optimal: 5000})," +
+        "  (a3:Node {optimal: 5000})," +
+        "  (a4:Node {optimal: 5000})," +
+        "  (a5:Node {optimal: 4000})," +
+        "  (a6:Node {optimal: 4000})," +
+        "  (a7:Node {optimal: 4000})," +
         "  (a0)-[:R {weight: 1.0}]->(a1)," +
         "  (a0)-[:R {weight: 1.0}]->(a2)," +
         "  (a0)-[:R {weight: 1.0}]->(a3)," +
@@ -82,7 +82,8 @@ class LeidenTest {
             0.01,
             false,
             19L,
-            null, 1,
+            null,
+            1,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -106,7 +107,42 @@ class LeidenTest {
     }
 
     @Test
-    void maintainPartition() {
+    void shouldWorkWithBestSeed() {
+        int maxLevels = 3;
+        Leiden leiden = new Leiden(
+            graph,
+            maxLevels,
+            1.0,
+            0.01,
+            false,
+            19L,
+            graph.nodeProperties("optimal"),
+            1,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        var leidenResult = leiden.compute();
+
+        assertThat(leidenResult.ranLevels()).isEqualTo(1);
+        assertThat(leidenResult.didConverge()).isTrue();
+
+        var communities = leidenResult.communities();
+        var communitiesMap = LongStream
+            .range(0, graph.nodeCount())
+            .mapToObj(v -> "a" + v)
+            .collect(Collectors.groupingBy(v -> communities.get(idFunction.of(v))));
+
+        assertThat(communitiesMap.values())
+            .hasSize(2)
+            .satisfiesExactlyInAnyOrder(
+                community -> assertThat(community).containsExactlyInAnyOrder("a0", "a2", "a3", "a4"),
+                community -> assertThat(community).containsExactlyInAnyOrder("a1", "a5", "a6", "a7")
+            );
+        assertThat(communitiesMap.keySet()).containsExactly(4000L, 5000L);
+    }
+
+    @Test
+    void shouldMaintainPartition() {
         var localCommunities = HugeLongArray.of(1, 1, 1, 3, 3, 3, 1, 3);
         var refinedCommunities = HugeLongArray.of(1, 1, 2, 3, 4, 3, 1, 3);
         var aggregationPhase = new GraphAggregationPhase(
