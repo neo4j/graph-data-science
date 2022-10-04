@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.ArrayUtil;
+import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.mem.BitUtil;
 
 import java.util.concurrent.locks.Lock;

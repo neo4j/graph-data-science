@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.core.tensor;
 
-import org.neo4j.gds.ArrayUtil;
+import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.ml.core.Dimensions;
 
 import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;

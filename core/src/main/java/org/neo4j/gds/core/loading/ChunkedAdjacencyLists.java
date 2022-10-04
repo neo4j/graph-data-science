@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.ArrayUtil;
+import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.collections.DrainingIterator;
 import org.neo4j.gds.collections.HugeSparseByteArrayList;
 import org.neo4j.gds.collections.HugeSparseCollections;
