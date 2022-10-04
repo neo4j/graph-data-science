@@ -75,7 +75,15 @@ class LeidenTest {
     @Test
     void leiden() {
         int maxLevels = 3;
-        Leiden leiden = new Leiden(graph, maxLevels, 1.0, 0.01, false, 19L, 1, ProgressTracker.NULL_TRACKER
+        Leiden leiden = new Leiden(
+            graph,
+            maxLevels,
+            1.0,
+            0.01,
+            false,
+            19L,
+            null, 1,
+            ProgressTracker.NULL_TRACKER
         );
 
         var leidenResult = leiden.compute();

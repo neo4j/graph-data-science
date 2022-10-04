@@ -21,9 +21,11 @@ package org.neo4j.gds.leiden;
 
 import com.carrotsearch.hppc.LongLongHashMap;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -49,9 +51,10 @@ public class Leiden extends Algorithm<LeidenResult> {
     private double modularity;
     private final LeidenDendrogramManager dendrogramManager;
 
+    private final NodePropertyValues seedValues;
     private final ExecutorService executorService;
     private final int concurrency;
-    private final long seed;
+    private final long randomSeed;
 
 
     public Leiden(
@@ -60,7 +63,8 @@ public class Leiden extends Algorithm<LeidenResult> {
         double initialGamma,
         double theta,
         boolean includeIntermediateCommunities,
-        long seed,
+        long randomSeed,
+        @Nullable NodePropertyValues seedValues,
         int concurrency,
         ProgressTracker progressTracker
     ) {
@@ -70,7 +74,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         this.maxIterations = maxIterations;
         this.initialGamma = initialGamma;
         this.theta = theta;
-        this.seed = seed;
+        this.randomSeed = randomSeed;
         // TODO: Pass these two as parameters
         this.executorService = Pools.DEFAULT;
         this.concurrency = concurrency;
@@ -80,7 +84,7 @@ public class Leiden extends Algorithm<LeidenResult> {
             concurrency,
             includeIntermediateCommunities
         );
-
+        this.seedValues = seedValues;
         this.modularities = new double[maxIterations];
         this.modularity = 0d;
     }
@@ -140,7 +144,7 @@ public class Leiden extends Algorithm<LeidenResult> {
                 localMoveCommunityVolumes,
                 gamma,
                 theta,
-                seed
+                randomSeed
             );
             var refinementPhaseResult = refinementPhase.run();
             var refinedCommunities = refinementPhaseResult.communities();
