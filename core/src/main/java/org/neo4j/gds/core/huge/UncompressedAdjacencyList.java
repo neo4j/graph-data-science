@@ -22,7 +22,7 @@ package org.neo4j.gds.core.huge;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.ArrayUtil;
+import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;

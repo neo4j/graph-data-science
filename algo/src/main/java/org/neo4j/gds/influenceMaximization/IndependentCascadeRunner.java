@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.influenceMaximization;
 
-import org.neo4j.gds.ArrayUtil;
+import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 

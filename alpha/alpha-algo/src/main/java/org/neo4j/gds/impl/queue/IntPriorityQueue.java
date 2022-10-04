@@ -17,7 +17,7 @@
 package org.neo4j.gds.impl.queue;
 
 import com.carrotsearch.hppc.IntDoubleScatterMap;
-import org.neo4j.gds.ArrayUtil;
+import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 

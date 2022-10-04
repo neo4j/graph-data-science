@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.core.tensor;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ArrayUtil;
+import org.neo4j.gds.collections.ArrayUtil;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

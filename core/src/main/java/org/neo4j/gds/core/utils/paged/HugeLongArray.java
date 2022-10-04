@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.ArrayUtil;
+import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.mem.HugeArrays;

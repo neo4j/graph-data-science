@@ -47,7 +47,7 @@ import static org.neo4j.gds.collections.EqualityUtils.isNotEqual;
 final class HugeSparseArrayGenerator implements CollectionStep.Generator<HugeSparseArrayValidation.Spec> {
 
     private static final ClassName PAGE_UTIL = ClassName.get("org.neo4j.gds.collections", "PageUtil");
-    private static final ClassName ARRAY_UTIL = ClassName.get("org.neo4j.gds", "ArrayUtil");
+    private static final ClassName ARRAY_UTIL = ClassName.get("org.neo4j.gds.collections", "ArrayUtil");
     private static final ClassName DRAINING_ITERATOR = ClassName.get("org.neo4j.gds.collections", "DrainingIterator");
 
     @Override
