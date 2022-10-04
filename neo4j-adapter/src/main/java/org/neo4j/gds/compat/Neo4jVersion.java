@@ -30,8 +30,7 @@ public enum Neo4jVersion {
     V_4_4,
     V_5_0,
     V_5_0_drop80,
-    V_5_0_drop90,
-    V_Dev;
+    V_5_0_drop90;
 
     @Override
     public String toString() {
