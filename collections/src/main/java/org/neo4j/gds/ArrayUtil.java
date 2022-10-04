@@ -297,7 +297,7 @@ public final class ArrayUtil {
             return MAX_ARRAY_LENGTH;
         }
 
-        if (MemoryUsage.JRE_IS_64BIT) {
+        if (MemoryUsage.BYTES_OBJECT_REF == 8) {
             // round up to 8 byte alignment in 64bit env
             switch (bytesPerElement) {
                 case 4:
