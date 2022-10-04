@@ -57,9 +57,6 @@ public interface LeidenBaseConfig extends
             throw new IllegalArgumentException(
                 "`includeIntermediateResults` and the `consecutiveIds` option cannot be used at the same time.");
         }
-        if (seedProperty() != null) {
-            throw new IllegalArgumentException(("seedProperty is not supported for Leiden."));
-        }
     }
 
 }
