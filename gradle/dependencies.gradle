@@ -16,10 +16,10 @@ ext {
 
     ver = [
         doc                    : [
-            'asciidoctorj'        : '2.5.5',
+            'asciidoctorj'        : '2.5.6',
             'reflections'         : '0.10.2'
         ],
-        'assertj'              : '3.20.2',
+        'assertj'              : '3.23.1',
         'auto-common'          : '1.1.2',
         'auto-service'         : '1.0',
         'bouncycastle-prov'     : '1.71',
@@ -30,13 +30,15 @@ ext {
         'commons-text'         : '1.9',
         'compile-testing'      : '0.19',
         'cypher-dsl'           : '2021.2.0',
-        'deeplearning4j'       : '1.0.0-beta7',
+        // TODO try 11.1.0
         'eclipse-collections'  : '10.4.0',
         'ejml'                 : '0.41',
         'fastcsv'              : '1.0.4',
         'gdl'                  : '0.3.8',
-        'hamcrest'             : '2.1',
+        'hamcrest'             : '2.2',
+        // TODO try upgrading to 2.1.12
         'HdrHistogram'         : '2.1.9',
+        // TODO try upgrading to 0.9.1
         'hppc'                 : '0.7.3',
         'immutables'           : '2.8.8',
         'ipaddress'            : '5.3.3',
