@@ -42,8 +42,8 @@ import static org.neo4j.gds.collections.EqualityUtils.isNotEqual;
 
 final class HugeSparseListGenerator implements CollectionStep.Generator<HugeSparseListValidation.Spec> {
 
+    private static final ClassName ARRAY_UTIL = ClassName.get("org.neo4j.gds.collections", "ArrayUtil");
     private static final ClassName PAGE_UTIL = ClassName.get("org.neo4j.gds.collections", "PageUtil");
-    private static final ClassName HUGE_ARRAYS = ClassName.get("org.neo4j.gds.mem", "HugeArrays");
     private static final ClassName DRAINING_ITERATOR = ClassName.get("org.neo4j.gds.collections", "DrainingIterator");
 
     @Override
@@ -334,8 +334,8 @@ final class HugeSparseListGenerator implements CollectionStep.Generator<HugeSpar
                 .addStatement("return")
                 .endControlFlow()
                 .addStatement(
-                    "int newSize = $T.oversizeInt(minNewSize, $T.BYTES_OBJECT_REF)",
-                    HUGE_ARRAYS,
+                    "int newSize = $T.oversize(minNewSize, $T.BYTES_OBJECT_REF)",
+                    ARRAY_UTIL,
                     MemoryUsage.class
                 )
                 .addStatement("this.$N = $T.copyOf(this.$N, newSize)", pages, Arrays.class, pages)

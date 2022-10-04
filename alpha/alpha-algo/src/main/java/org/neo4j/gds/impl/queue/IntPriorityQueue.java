@@ -17,7 +17,7 @@
 package org.neo4j.gds.impl.queue;
 
 import com.carrotsearch.hppc.IntDoubleScatterMap;
-import org.neo4j.gds.mem.HugeArrays;
+import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 
@@ -55,7 +55,7 @@ public abstract class IntPriorityQueue {
             // 1-based not 0-based.  heap[0] is unused.
             heapSize = initialCapacity + 1;
         }
-        this.heap = HugeIntArray.newArray(HugeArrays.oversize(heapSize, Integer.BYTES));
+        this.heap = HugeIntArray.newArray(ArrayUtil.oversizeHuge(heapSize, Integer.BYTES));
     }
 
     /**
@@ -240,7 +240,7 @@ public abstract class IntPriorityQueue {
 
     private void ensureCapacityForInsert() {
         if (size >= heap.size()) {
-            long oversize = HugeArrays.oversize(size + 1, Integer.BYTES);
+            long oversize = ArrayUtil.oversizeHuge(size + 1, Integer.BYTES);
             heap = heap.copyOf(oversize);
         }
     }

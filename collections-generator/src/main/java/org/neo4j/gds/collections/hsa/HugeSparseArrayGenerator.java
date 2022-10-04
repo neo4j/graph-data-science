@@ -47,6 +47,7 @@ import static org.neo4j.gds.collections.EqualityUtils.isNotEqual;
 final class HugeSparseArrayGenerator implements CollectionStep.Generator<HugeSparseArrayValidation.Spec> {
 
     private static final ClassName PAGE_UTIL = ClassName.get("org.neo4j.gds.collections", "PageUtil");
+    private static final ClassName ARRAY_UTIL = ClassName.get("org.neo4j.gds.collections", "ArrayUtil");
     private static final ClassName DRAINING_ITERATOR = ClassName.get("org.neo4j.gds.collections", "DrainingIterator");
 
     @Override
@@ -531,9 +532,10 @@ final class HugeSparseArrayGenerator implements CollectionStep.Generator<HugeSpa
                     .endControlFlow() // eo if (newSize <= pages.length())
                     // TODO avoid using FQN literal for HugeArrays (e.g. by introducing collections-util module)
                     .addStatement(
-                        "$T newPages = new $T(org.neo4j.gds.mem.HugeArrays.oversizeInt(newSize, $T.BYTES_OBJECT_REF))",
+                        "$T newPages = new $T($T.oversize(newSize, $T.BYTES_OBJECT_REF))",
                         pages.type,
                         pages.type,
+                        ARRAY_UTIL,
                         MemoryUsage.class
                     )
                     .beginControlFlow("for (int pageIndex = 0; pageIndex < $N.length(); pageIndex++)", pages)

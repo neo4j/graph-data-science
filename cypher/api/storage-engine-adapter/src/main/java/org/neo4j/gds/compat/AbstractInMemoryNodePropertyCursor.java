@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.compat;
 
+import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
-import org.neo4j.gds.core.utils.ArrayUtil;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.ValueGroup;

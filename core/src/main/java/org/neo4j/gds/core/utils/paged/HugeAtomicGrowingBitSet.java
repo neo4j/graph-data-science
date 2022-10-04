@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
+import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.mem.BitUtil;
-import org.neo4j.gds.mem.HugeArrays;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -170,7 +170,7 @@ public final class HugeAtomicGrowingBitSet {
                 return;
             }
 
-            var newNumBits = HugeArrays.oversize(minNumBits, Long.BYTES);
+            var newNumBits = ArrayUtil.oversizeHuge(minNumBits, Long.BYTES);
             var wordsSize = BitUtil.ceilDiv(newNumBits, NUM_BITS);
             int remainder = (int) (newNumBits % NUM_BITS);
             var newBits = HugeAtomicLongArray.newArray(wordsSize);

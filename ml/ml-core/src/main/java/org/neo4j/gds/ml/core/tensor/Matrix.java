@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.core.tensor;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.mult.MatrixMatrixMult_DDRM;
-import org.neo4j.gds.core.utils.ArrayUtil;
+import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.Dimensions;
 

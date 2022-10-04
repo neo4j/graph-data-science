@@ -76,7 +76,7 @@ final class HugeGraphLoadingTest extends BaseTest {
 
     private void testPropertyLoading(int maxArrayLengthShift) {
         System.setProperty(
-            "org.neo4j.gds.core.utils.ArrayUtil.maxArrayLengthShift",
+            "org.neo4j.gds.collections.ArrayUtil.maxArrayLengthShift",
             String.valueOf(maxArrayLengthShift)
         );
         // something larger than one batch
