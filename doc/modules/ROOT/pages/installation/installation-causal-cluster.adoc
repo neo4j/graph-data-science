@@ -3,7 +3,7 @@
 
 include::partial$/common-usage/not-on-aurads-note.adoc[]
 
-In a Neo4j Causal Cluster, GDS should only be installed on a server that is not essential for handling transactional load.
+In a Neo4j Causal Cluster, GDS should only be installed on a server that is not essential for handling transactional load. This is because the compute-intensive OLAP workloads in GDS might interfere with the smooth operation of the OLTP system that is Neo4j Causal Cluster.
 
 In order to install the GDS library you can follow the steps from xref:installation/neo4j-server.adoc[Neo4j Server].
 Additionally, the Neo4j Causal Cluster must be configured to use https://neo4j.com/docs/operations-manual/current/clustering/internals/#clustering-routing[server-side routing].
