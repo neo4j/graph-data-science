@@ -54,11 +54,11 @@ class ArrayUtilTest {
         for (int i = 0; i < testData.length; i++) {
             Assertions.assertTrue(
                 ArrayUtil.binarySearch(testData, testData.length, (i + 1) * 2),
-                String.format(Locale.US, "False negative at %d value %d%n", i, testData[i])
+                String.format(Locale.ENGLISH, "False negative at %d value %d%n", i, testData[i])
             );
             assertFalse(
                 ArrayUtil.binarySearch(testData, testData.length, (i * 2) + 1),
-                String.format(Locale.US, "False positive at %d value %d%n", i, testData[i])
+                String.format(Locale.ENGLISH, "False positive at %d value %d%n", i, testData[i])
             );
         }
     }
@@ -70,11 +70,11 @@ class ArrayUtilTest {
         for (int i = 0; i < testData.length; i++) {
             assertTrue(
                 ArrayUtil.linearSearch(testData, testData.length, (i + 1) * 2),
-                String.format(Locale.US, "False negative at %d value %d%n", i, testData[i])
+                String.format(Locale.ENGLISH, "False negative at %d value %d%n", i, testData[i])
             );
             assertFalse(
                 ArrayUtil.linearSearch(testData, testData.length, (i * 2) + 1),
-                String.format(Locale.US, "False positive at %d value %d%n", i, testData[i])
+                String.format(Locale.ENGLISH, "False positive at %d value %d%n", i, testData[i])
             );
         }
     }
@@ -92,10 +92,10 @@ class ArrayUtilTest {
         int[] testData = setup(size);
         for (int i = 0; i < testData.length; i++) {
             assertThat(ArrayUtil.linearSearchIndex(testData, testData.length, (i + 1) * 2))
-                .as(String.format(Locale.US, "False negative at %d value %d%n", i, testData[i]))
+                .as(String.format(Locale.ENGLISH, "False negative at %d value %d%n", i, testData[i]))
                 .isEqualTo(i);
             assertThat(ArrayUtil.linearSearchIndex(testData, testData.length, (i * 2) + 1))
-                .as(String.format(Locale.US, "False positive at %d value %d%n", i, testData[i]))
+                .as(String.format(Locale.ENGLISH, "False positive at %d value %d%n", i, testData[i]))
                 .isEqualTo(-testData.length - 1);
         }
     }
