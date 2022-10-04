@@ -30,7 +30,7 @@ Note that the link points to the latest Neo4j 4.x version documentation and the 
 * The cluster must contain at least one _Read Replica_ instance
 ** single _Core member_ and a _Read Replica_ is a valid scenario.
 ** GDS workloads are not load-balanced if there are more than one _Read Replica_ instances.
-* Cluster should be configured to use _server-side routing_.
+* Cluster should be configured to use https://neo4j.com/docs/operations-manual/4.4/clustering/internals/#causal-clustering-routing[server-side routing].
 * GDS plugin deployed on the _Read Replica_.
 ** A valid GDS Enterprise Edition license must be installed and configured on the _Read Replica_.
 ** The driver connection to operated GDS should be made using the `bolt://` protocol, or _server-policy routed_ to the _Read Replica_ instance.
@@ -56,7 +56,7 @@ Note that the link points to the latest Neo4j version documentation and the conf
 * The cluster must contain at least one _Secondary_ machine
 ** single _Primary_ and a _Secondary_ is a valid scenario.
 ** GDS workloads are not load-balanced if there are more than one _Secondary_ instances.
-* Cluster should be configured to use _server-side routing_.
+* Cluster should be configured to use https://neo4j.com/docs/operations-manual/current/clustering/internals/#causal-clustering-routing[server-side routing].
 * GDS plugin deployed on the _Secondary_.
 ** A valid GDS Enterprise Edition license must be installed and configured on the _Secondary_.
 ** The driver connection to operated GDS should be made using the `bolt://` protocol to the _Secondary_ instance.
