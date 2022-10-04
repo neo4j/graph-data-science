@@ -41,22 +41,18 @@ public class Leiden extends Algorithm<LeidenResult> {
 
     private final Graph rootGraph;
     private final Orientation orientation;
-
     private final int maxIterations;
     private final double initialGamma;
     private final double theta;
-
     private double[] modularities;
-
     private double modularity;
     private final LeidenDendrogramManager dendrogramManager;
-
     private final NodePropertyValues seedValues;
     private final ExecutorService executorService;
     private final int concurrency;
     private final long randomSeed;
     private SeedCommunityManager seedCommunityManager;
-
+    private final boolean isSeeded;
 
     public Leiden(
         Graph graph,
@@ -86,6 +82,7 @@ public class Leiden extends Algorithm<LeidenResult> {
             includeIntermediateCommunities
         );
         this.seedValues = seedValues;
+        this.isSeeded = (seedValues != null);
         this.modularities = new double[maxIterations];
         this.modularity = 0d;
     }
@@ -97,7 +94,7 @@ public class Leiden extends Algorithm<LeidenResult> {
 
         var localMoveCommunities = LeidenUtils.createStartingCommunities(nodeCount, seedValues);
 
-        seedCommunityManager = SeedCommunityManager.create(seedValues != null, localMoveCommunities);
+        seedCommunityManager = SeedCommunityManager.create(isSeeded, localMoveCommunities);
         // volume -> the sum of the weights of a nodes outgoing relationships
         var localMoveNodeVolumes = HugeDoubleArray.newArray(nodeCount);
         // the sum of the node volume for all nodes in a community
@@ -110,6 +107,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         HugeLongArray currentCommunities = null;
 
         boolean didConverge = false;
+        boolean seedIsOptimal = false;
         int iteration;
         for (iteration = 0; iteration < maxIterations; iteration++) {
             // 1. LOCAL MOVE PHASE - over the singleton localMoveCommunities
@@ -124,19 +122,23 @@ public class Leiden extends Algorithm<LeidenResult> {
             var communitiesCount = localMovePhase.run();
 
             didConverge = communitiesCount == workingGraph.nodeCount() || localMovePhase.swaps == 0;
+            seedIsOptimal = didConverge & isSeeded && iteration == 0;
+            boolean shouldCalculateModularity = !didConverge || seedIsOptimal;
+
+            if (shouldCalculateModularity) {
+                modularities[iteration] = ModularityComputer.compute(
+                    workingGraph,
+                    localMoveCommunities,
+                    localMoveCommunityVolumes,
+                    gamma,
+                    modularityScaleCoefficient,
+                    concurrency,
+                    executorService
+                );
+            }
             if (didConverge) {
                 break;
             }
-
-            modularities[iteration] = ModularityComputer.compute(
-                workingGraph,
-                localMoveCommunities,
-                localMoveCommunityVolumes,
-                gamma,
-                modularityScaleCoefficient,
-                concurrency,
-                executorService
-            );
 
             // 2 REFINE
             var refinementPhase = RefinementPhase.create(
@@ -187,14 +189,27 @@ public class Leiden extends Algorithm<LeidenResult> {
 
             modularity = modularities[iteration];
         }
-        return LeidenResult.of(
-            dendrogramManager.getCurrent(),
-            iteration,
-            didConverge,
-            dendrogramManager,
-            resizeModularitiesArray(iteration),
-            modularity
-        );
+
+        if (seedIsOptimal) {
+            var modularity = modularities[0];
+            return LeidenResult.of(
+                LeidenUtils.createSeedCommunities(seedValues),
+                1,
+                didConverge,
+                null,
+                new double[]{modularity},
+                modularity
+            );
+        } else {
+            return LeidenResult.of(
+                dendrogramManager.getCurrent(),
+                iteration,
+                didConverge,
+                dendrogramManager,
+                resizeModularitiesArray(iteration),
+                modularity
+            );
+        }
     }
 
     private double initVolumes(
