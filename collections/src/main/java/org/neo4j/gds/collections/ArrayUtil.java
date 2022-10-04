@@ -340,7 +340,8 @@ public final class ArrayUtil {
 
     /**
      * Huge version of Lucene oversize for arrays.
-     * see org.apache.lucene.util.ArrayUtil#oversize(int, int)
+     *
+     * @see org.neo4j.gds.collections.ArrayUtil#oversize(int, int)
      */
     public static long oversizeHuge(long minTargetSize, int bytesPerElement) {
 
