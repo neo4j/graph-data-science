@@ -19,13 +19,25 @@
  */
 package org.neo4j.gds.leiden;
 
+import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
- class LeidenUtils {
+class LeidenUtils {
 
-     static HugeLongArray createSingleNodeCommunities(long nodeCount){
-        var array=HugeLongArray.newArray(nodeCount);
+    static HugeLongArray createSingleNodeCommunities(long nodeCount) {
+        var array = HugeLongArray.newArray(nodeCount);
         array.setAll(v -> v);
         return array;
+    }
+
+    static HugeLongArray createSeedCommunities(NodePropertyValues seedValues) {
+        var array = HugeLongArray.newArray(seedValues.size());
+        array.setAll(v -> seedValues.longValue(v));
+        return array;
+    }
+
+    static HugeLongArray createStartingCommunities(long nodeCount, @Nullable NodePropertyValues seedValues) {
+        return (seedValues == null) ? createSingleNodeCommunities(nodeCount) : createSeedCommunities(seedValues);
     }
 }

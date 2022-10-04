@@ -94,7 +94,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         var workingGraph = rootGraph;
         var nodeCount = workingGraph.nodeCount();
 
-        var localMoveCommunities = LeidenUtils.createSingleNodeCommunities(nodeCount);
+        var localMoveCommunities = LeidenUtils.createStartingCommunities(nodeCount, seedValues);
 
         // volume -> the sum of the weights of a nodes outgoing relationships
         var localMoveNodeVolumes = HugeDoubleArray.newArray(nodeCount);
@@ -194,15 +194,20 @@ public class Leiden extends Algorithm<LeidenResult> {
         );
     }
 
-    private double initVolumes(HugeDoubleArray nodeVolumes, HugeDoubleArray communityVolumes, HugeLongArray seedCommunities) {
+    private double initVolumes(
+        HugeDoubleArray nodeVolumes,
+        HugeDoubleArray communityVolumes,
+        HugeLongArray initialCommunities
+    ) {
         if (rootGraph.hasRelationshipProperty()) {
             ParallelUtil.parallelForEachNode(
                 rootGraph.nodeCount(),
                 concurrency,
                 nodeId -> {
+                    var communityId = initialCommunities.get(nodeId);
                     rootGraph.concurrentCopy().forEachRelationship(nodeId, 1.0, (s, t, w) -> {
                         nodeVolumes.addTo(nodeId, w);
-                        communityVolumes.addTo(seedCommunities.get(nodeId), w);
+                        communityVolumes.addTo(communityId, w);
                         return true;
                     });
                 }
@@ -216,7 +221,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         } else {
             nodeVolumes.setAll(rootGraph::degree);
             rootGraph.forEachNode(nodeId -> {
-                long communityId = seedCommunities.get(nodeId);
+                long communityId = initialCommunities.get(nodeId);
                 communityVolumes.addTo(communityId, rootGraph.degree(nodeId));
                 return true;
             });
