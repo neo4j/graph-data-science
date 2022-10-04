@@ -23,6 +23,8 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 class LeidenUtils {
 
     static HugeLongArray createSingleNodeCommunities(long nodeCount) {
@@ -31,13 +33,24 @@ class LeidenUtils {
         return array;
     }
 
-    static HugeLongArray createSeedCommunities(NodePropertyValues seedValues) {
-        var array = HugeLongArray.newArray(seedValues.size());
-        array.setAll(v -> seedValues.longValue(v));
+    static HugeLongArray createSeedCommunities(long nodeCount, NodePropertyValues seedValues) {
+        var array = HugeLongArray.newArray(nodeCount);
+        long longMaxId = seedValues.getMaxLongPropertyValue().getAsLong();
+        if (longMaxId < 0) {
+            longMaxId = 0;
+        }
+        var maxId = new AtomicLong(longMaxId);
+        array.setAll(v -> {
+            long seedValue = seedValues.longValue(v);
+            return (seedValue >= 0) ? seedValue : maxId.incrementAndGet();
+        });
         return array;
     }
 
     static HugeLongArray createStartingCommunities(long nodeCount, @Nullable NodePropertyValues seedValues) {
-        return (seedValues == null) ? createSingleNodeCommunities(nodeCount) : createSeedCommunities(seedValues);
+        return (seedValues == null) ? createSingleNodeCommunities(nodeCount) : createSeedCommunities(
+            nodeCount,
+            seedValues
+        );
     }
 }

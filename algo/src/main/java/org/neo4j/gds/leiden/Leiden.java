@@ -193,7 +193,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         if (seedIsOptimal) {
             var modularity = modularities[0];
             return LeidenResult.of(
-                LeidenUtils.createSeedCommunities(seedValues),
+                LeidenUtils.createSeedCommunities(rootGraph.nodeCount(), seedValues),
                 1,
                 didConverge,
                 null,
