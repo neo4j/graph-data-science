@@ -552,6 +552,41 @@ ORDER BY name ASC
 |===
 --
 
+[[algorithms-leiden-examples-stream-seeded]]
+=== Seeded
+
+It is possible to run the  Louvain algorithm incrementally, by providing a seed property.
+If specified, the seed property provides an initial community mapping for a subset of the loaded nodes.
+The algorithm will try to keep the seeded community IDs.
+
+[role=query-example]
+--
+.The following will run the algorithm and stream results for a seeded graph:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.leiden.stream('myGraph', { seedProperty: 'seed' })
+YIELD nodeId, communityId, intermediateCommunityIds
+RETURN gds.util.asNode(nodeId).name AS name, communityId, intermediateCommunityIds
+ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name      | communityId | intermediateCommunityIds
+| "Alice"   | 42          | null
+| "Bridget" | 42          | null
+| "Charles" | 42          | null
+| "Doug"    | 45          | null
+| "Mark"    | 45          | null
+| "Michael" | 45          | null
+|===
+--
+
+As can be seen, using the seeded graph, node `Alice` keeps its initial community ID of `42`.
+The other community has been assigned a new community ID which is guaranteed to be larger than the largest seeded community ID.
+Note that the `consecutiveIds` configuration option cannot be used in combination with seeding in order to retain the seeding values
+
 
 [[algorithms-leiden-examples-mutate-intermediate]]
 ==== Mutate intermediate communities
