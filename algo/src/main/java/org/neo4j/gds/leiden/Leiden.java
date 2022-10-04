@@ -55,6 +55,7 @@ public class Leiden extends Algorithm<LeidenResult> {
     private final ExecutorService executorService;
     private final int concurrency;
     private final long randomSeed;
+    private SeedCommunityManager seedCommunityManager;
 
 
     public Leiden(
@@ -96,6 +97,7 @@ public class Leiden extends Algorithm<LeidenResult> {
 
         var localMoveCommunities = LeidenUtils.createStartingCommunities(nodeCount, seedValues);
 
+        seedCommunityManager = SeedCommunityManager.create(seedValues != null, localMoveCommunities);
         // volume -> the sum of the weights of a nodes outgoing relationships
         var localMoveNodeVolumes = HugeDoubleArray.newArray(nodeCount);
         // the sum of the node volume for all nodes in a community
@@ -155,6 +157,7 @@ public class Leiden extends Algorithm<LeidenResult> {
                 currentCommunities,
                 refinedCommunities,
                 localMoveCommunities,
+                seedCommunityManager,
                 iteration
             );
             currentCommunities = dendrogramResult.dendrogram();

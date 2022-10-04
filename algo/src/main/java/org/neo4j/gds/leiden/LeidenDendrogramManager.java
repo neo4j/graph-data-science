@@ -33,7 +33,6 @@ public class LeidenDendrogramManager {
     private final int concurrency;
     private final boolean trackIntermediateCommunities;
     private final HugeLongArray[] dendrograms;
-
     private int currentIndex;
 
     LeidenDendrogramManager(
@@ -64,6 +63,7 @@ public class LeidenDendrogramManager {
         HugeLongArray previousIterationDendrogram,
         HugeLongArray refinedCommunities,
         HugeLongArray localMoveCommunities,
+        SeedCommunityManager seedCommunityManager,
         int iteration
     ) {
         assert workingGraph.nodeCount() == refinedCommunities.size() : "The sizes of the graph and communities should match";
@@ -91,7 +91,9 @@ public class LeidenDendrogramManager {
             } while (!updatedMaxCurrentId);
 
             dendrogram.set(nodeId, communityId);
-            set(nodeId, localMoveCommunities.get(communityId));
+
+            var reverseId = seedCommunityManager.mapToSeed(localMoveCommunities.get(communityId));
+            set(nodeId, reverseId);
         });
 
         return ImmutableDendrogramResult.of(maxCommunityId.get(), dendrogram);
