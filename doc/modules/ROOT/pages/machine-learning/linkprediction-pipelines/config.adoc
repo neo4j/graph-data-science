@@ -377,7 +377,7 @@ The `train` set are highlighted in red with the negative relationships having da
 
 The remaining `12 * (1 - 0.25) * (1 - 0.6) = 3.6 ≈ 4` relationships in yellow is the `feature-input` set.
 
-.Positive and negative relationships for each set according to the split
+.Positive and negative relationships for each set according to the split. The `test` set is in blue, `train` set in red and `feature-input` set in yellow.
 image::example-graphs/lp-split-1.png[example graph for LP split,align="center"]
 
 Suppose for example a node property step is added with `contextNodeLabel` `City` and `contextRelationshipType` `BORN`.
