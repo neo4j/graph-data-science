@@ -1,7 +1,8 @@
 [[alpha-algorithms-single-source-shortest-path]]
 [.alpha]
 = Single Source Shortest Path
-:description: This section describes the Single Source Shortest Path algorithm in the Neo4j Graph Data Science library. 
+:description: This section describes the Single Source Shortest Path algorithm in the Neo4j Graph Data Science library.
+:algorithm: Single Source Shortest Path
 
 The Single Source Shortest Path (SSSP) algorithm calculates the shortest (weighted) path from a node to all other nodes in the graph.
 
@@ -89,7 +90,10 @@ YIELD nodeId, distance
 [[algorithms-single-source-shortest-path-sample]]
 == Single Source Shortest Path algorithm sample
 
-image::sssp.png[]
+:algorithm-name: {algorithm}
+:graph-description: transport network
+:image-file: dijkstra.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
 
 .The following will create a sample graph:
 [source, cypher, role=noplay setup-query]
