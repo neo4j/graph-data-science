@@ -7,64 +7,31 @@
 include::partial$/common-usage/not-on-aurads-note.adoc[]
 
 It is possible to run GDS as part of Neo4j Causal Cluster deployment.
-Since GDS performs large computations with the full resources of the system it is not suitable to run on instances that serve the transactional workload of the cluster.
+Since GDS performs large computations with the full resources of the system it is not suitable to run as part of the cluster's core.
+We make use of a _Read Replica_ instance to deploy the GDS library and process analytical workloads.
+Calls to GDS `write` procedures are internally directed to the cluster `LEADER` instance via _server-side routing_.
 
 
 == Deployment
 
-[.tabbed-example, caption = ]
-====
-
-[.include-with-neo4j-4x]
-=====
-
-We make use of a _Read Replica_ instance to deploy the GDS library and process analytical workloads.
-Calls to GDS `write` procedures are internally directed to the cluster `LEADER` instance via _server-side routing_.
-
 [NOTE]
-======
-Please refer to the https://neo4j.com/docs/operations-manual/4.4/clustering/[official Neo4j documentation] for details on how to setup Neo4j Causal Cluster.
-Note that the link points to the latest Neo4j 4.x version documentation and the configuration settings may differ from earlier versions.
-======
+====
+Please refer to the https://neo4j.com/docs/operations-manual/current/clustering/[official Neo4j documentation] for details on how to setup Neo4j Causal Cluster.
+Note that the link points to the latest Neo4j version documentation and the configuration settings may differ from earlier versions.
+====
 
 * The cluster must contain at least one _Read Replica_ instance
 ** single _Core member_ and a _Read Replica_ is a valid scenario.
 ** GDS workloads are not load-balanced if there are more than one _Read Replica_ instances.
-* Cluster should be configured to use https://neo4j.com/docs/operations-manual/4.4/clustering/internals/#causal-clustering-routing[server-side routing].
+* Cluster should be configured to use _server-side routing_.
 * GDS plugin deployed on the _Read Replica_.
 ** A valid GDS Enterprise Edition license must be installed and configured on the _Read Replica_.
 ** The driver connection to operated GDS should be made using the `bolt://` protocol, or _server-policy routed_ to the _Read Replica_ instance.
 
-For more information on setting up, configuring and managing a Neo4j Causal Clustering, please refer to https://neo4j.com/docs/operations-manual/4.4/clustering/[the documentation].
-=====
-
-[.include-with-neo4j-5x]
-=====
-
-We make use of a _Secondary_ instance to deploy the GDS library and process analytical workloads.
-Calls to GDS `write` procedures are internally directed via _server-side routing_ to the cluster instance that is a `Writer` for the database we work on.
-
-Neo4j 5.x supports different databases on the same machine to act as `Primary` or `Secondary` members of the cluster, we *do not* recommend mixed setup.
-GDS should be installed on a machine that is not serving transactional load and does not participate in `Leader` elections.
-
-[NOTE]
-======
-Please refer to the https://neo4j.com/docs/operations-manual/current/clustering/[official Neo4j documentation] for details on how to setup Neo4j Causal Cluster.
-Note that the link points to the latest Neo4j version documentation and the configuration settings may differ from earlier versions.
-======
-
-* The cluster must contain at least one _Secondary_ machine
-** single _Primary_ and a _Secondary_ is a valid scenario.
-** GDS workloads are not load-balanced if there are more than one _Secondary_ instances.
-* Cluster should be configured to use https://neo4j.com/docs/operations-manual/current/clustering/internals/#causal-clustering-routing[server-side routing].
-* GDS plugin deployed on the _Secondary_.
-** A valid GDS Enterprise Edition license must be installed and configured on the _Secondary_.
-** The driver connection to operated GDS should be made using the `bolt://` protocol to the _Secondary_ instance.
-
 For more information on setting up, configuring and managing a Neo4j Causal Clustering, please refer to https://neo4j.com/docs/operations-manual/current/clustering/[the documentation].
 
 [NOTE]
-======
+====
 When working with cluster configuration you should beware https://neo4j.com/docs/operations-manual/current/reference/configuration-settings/#config_dbms.config.strict_validation[strict config validation] in Neo4j.
 
 When configuring GDS for a Read Replica you will introduce GDS-specific configuration into `neo4j.conf` - and that is fine because with the GDS plugin installed, Neo4j will happily validate those configuration items.
@@ -72,8 +39,6 @@ When configuring GDS for a Read Replica you will introduce GDS-specific configur
 However, you might not be able to reuse that same configuration file verbatim on the core cluster members, because there you will _not_ install GDS plugin, and thus Neo4j will _not_ be able to validate the GDS-specific configuration items. And validation failure would mean Neo4j would refuse to start.
 
 It is of course also possible to turn strict validation off.
-======
-=====
 ====
 
 == GDS Configuration
