@@ -355,6 +355,35 @@ YIELD splitConfig
 We now reconfigured the splitting of the pipeline, which will be applied during xref:machine-learning/linkprediction-pipelines/training.adoc[training].
 --
 
+
+As an example, consider a graph with nodes 'Person' and 'City' and relationships 'KNOWS', 'BORN' and 'LIVES'.
+Please note that this is the same example as in xref:machine-learning/linkprediction-pipelines/training.adoc#linkprediction-pipelines-train-example[Training the pipeline].
+
+.Full example graph
+image::example-graphs/link-prediction.svg[Visualization of the example graph,align="center"]
+
+Suppose we filter by `sourceNodeLabel` and `targetNodeLabel` being `Person` and `targetRelationshipType` being `KNOWS`.
+The filtered graph looks like the following:
+
+.Filtered graph
+image::example-graphs/lp-split.png[example graph for LP split,align="center"]
+
+The filtered graph has 12 relationships.
+If we configure split with `testFraction` 0.25 and `negativeSamplingRatio` 1, it randomly picks `12 * 0.25 = 3` positive relationships plus `1 * 3 = 3` negative relationship as the `test` set.
+
+Then if `trainFraction` is 0.6 and `negativeSamplingRatio` 1, it randomly picks `9 * 0.6 = 5.4 ≈ 5` positive relationships plus `1 * 5 = 5` negative relationship as the `train` set.
+
+The remaining `12 * (1 - 0.25) * (1 - 0.6) = 3.6 ≈ 4` relationships in yellow is the `feature-input` set.
+
+.Positive and negative relationships for each set according to the split. The `test` set is in blue, `train` set in red and `feature-input` set in yellow. Dashed lines represent negative relationships.
+image::example-graphs/lp-split-1.png[example graph for LP split,align="center"]
+
+Suppose for example a node property step is added with `contextNodeLabel` `City` and `contextRelationshipType` `BORN`.
+Then the `feature-input` graph for that step would be:
+
+.Feature-input graph. The `feature-input` set is in yellow.
+image::example-graphs/lp-split-2.png[example graph for LP split,align="center"]
+
 [[linkprediction-adding-model-candidates]]
 == Adding model candidates
 
