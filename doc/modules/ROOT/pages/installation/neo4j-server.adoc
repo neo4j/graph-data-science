@@ -36,7 +36,7 @@ NOTE: Before `Neo4j 4.2`, the configuration setting is called `dbms.security.pro
 
 
 [[neo4j-server-verify]]
-=== Verifying installation
+== Verifying installation
 
 To verify your installation, the library version can be printed by entering into the browser in Neo4j Desktop and calling the `gds.version()` function:
 

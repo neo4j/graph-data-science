@@ -1,9 +1,9 @@
 [[algorithms-eigenvector-centrality]]
 = Eigenvector Centrality
-:description: This section describes the {algorithm} algorithm in the Neo4j Graph Data Science library. 
+:algorithm: Eigenvector Centrality
+:description: This section describes the {algorithm} algorithm in the Neo4j Graph Data Science library.
 :entity: node
 :result: score
-:algorithm: Eigenvector Centrality
 
 :directed:
 :undirected:

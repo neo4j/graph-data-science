@@ -2,7 +2,7 @@
 [.alpha]
 = Scale Properties
 :description: This section describes the Scale Properties algorithm in the Neo4j Graph Data Science library. 
-
+:result: scaled properties
 :algorithm: Scale Properties
 :entity: node
 

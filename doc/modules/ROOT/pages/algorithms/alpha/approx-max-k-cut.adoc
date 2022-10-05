@@ -11,7 +11,7 @@
 == Introduction
 
 A k-cut of a graph is an assignment of its nodes into k disjoint communities.
-So for example a 2-cut of a graph with nodes `a,b,c,d` could be the communities `{a,b,c}` and `{d}`.
+So for example a 2-cut of a graph with nodes `a,b,c,d` could be the communities `{a,b,c}` and `\{d\}`.
 
 A Maximum k-cut is a k-cut such that the total weight of relationships between nodes from different communities in the k-cut is maximized.
 That is, a k-cut that maximizes the sum of weights of relationships whose source and target nodes are assigned to different communities in the k-cut.

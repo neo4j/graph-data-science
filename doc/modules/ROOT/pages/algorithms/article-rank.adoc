@@ -1,9 +1,9 @@
 [[algorithms-article-rank]]
 = Article Rank
-:description: This section describes the {algorithm} algorithm in the Neo4j Graph Data Science library. 
+:algorithm: Article Rank
+:description: This section describes the {algorithm} algorithm in the Neo4j Graph Data Science library.
 :entity: node
 :result: score
-:algorithm: Article Rank
 
 :directed:
 :undirected:
