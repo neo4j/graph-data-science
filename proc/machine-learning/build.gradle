@@ -37,7 +37,6 @@ dependencies {
     implementation project(':string-formatting')
 
 
-    implementation group: 'org.roaringbitmap',  name: 'RoaringBitmap', version: ver.'RoaringBitmap'
     implementation group: 'org.hdrhistogram',   name: 'HdrHistogram',  version: ver.'HdrHistogram'
 
     testAnnotationProcessor project(':annotations')
