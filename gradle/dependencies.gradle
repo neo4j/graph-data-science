@@ -59,7 +59,6 @@ ext {
         'scala'                : scalas[neo4j_minor],
         'spotbugsToolVersion'  : '4.7.1',
         'protobuf'             : '3.21.7',
-        'kryo'                 : '5.3.0',
     ]
     dep = [
         junit5bom:          "org.junit:junit-bom:${ver.junit5bom}",
