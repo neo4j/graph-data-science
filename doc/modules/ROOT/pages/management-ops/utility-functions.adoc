@@ -27,7 +27,7 @@ RETURN gds.version() AS version
 [opts="header"]
 |===
 | version
-| "2.2.0-alpha06"
+| "2.2.0"
 |===
 --
 
