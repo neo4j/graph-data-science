@@ -77,9 +77,11 @@ If you are using Neo4j Desktop you can simply add the Graph Data Science library
 
 .2+<.^|GDS 2.2.x
 |Neo4j 4.3.15 - 4.3.18
-.2+.^|Java 11 & Java 17
+.4+.^|Java 11 & Java 17
 |Neo4j 4.4.9 - 4.4.11
-
+.2+<.^|GDS 2.3.x
+|Neo4j 4.3.15 - 4.3.18
+|Neo4j 4.4.9 - 4.4.11
 |===
 
 NOTE: Preview releases are not automatically made available in Neo4j Desktop. They need to be installed manually.
@@ -230,7 +232,7 @@ To use the bundled JAR in Neo4j, place the JAR file in the `plugins` directory o
 For further instructions, see our https://neo4j.com/docs/graph-data-science/current/installation/[documentation].
 
 Preview of the documentation::
-A preview of the latest documentation can be found at https://neo4j.com/docs/graph-data-science/2.2-preview/.
+A preview of the latest documentation can be found at https://neo4j.com/docs/graph-data-science/2.3-preview/.
 
 
 == Contributing

@@ -7,7 +7,7 @@ content:
   sources:
   - url: ../../
     start_path: public/doc
-    branches: ['1.8', '2.1', 'master']
+    branches: ['1.8', '2.1', '2.2', 'master']
     include: public/doc/
     exclude:
     - '!**/_includes/*'
@@ -25,7 +25,7 @@ urls:
 antora:
   extensions:
   - require: "@neo4j-antora/antora-modify-sitemaps"
-    sitemap_version: '2.1'
+    sitemap_version: '2.2'
     sitemap_loc_version: current
     move_sitemaps_to_components: 'true'
 
