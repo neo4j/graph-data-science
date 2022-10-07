@@ -77,6 +77,7 @@ public class LeidenDendrogramManager {
             long prevId = previousIterationDendrogram == null
                 ? nodeId
                 : workingGraph.toMappedNodeId(previousIterationDendrogram.get(nodeId));
+                //find which node corresponds to the community this node was matched before
 
             long communityId = refinedCommunities.get(prevId);
 
@@ -90,10 +91,19 @@ public class LeidenDendrogramManager {
                 }
             } while (!updatedMaxCurrentId);
 
-            dendrogram.set(nodeId, communityId);
+            dendrogram.set(
+                nodeId,
+                communityId
+            );
+            //recall: this array marks a node
+            //but disregards the numbering implied by any seeds.
 
             var reverseId = seedCommunityManager.mapToSeed(localMoveCommunities.get(communityId));
-            set(nodeId, reverseId);
+            set(
+                nodeId,
+                reverseId
+            ); //whereas here because this is final output, we need to take seeds into account
+            //and translate the community to be on par with the values of seeding.
         });
 
         return ImmutableDendrogramResult.of(maxCommunityId.get(), dendrogram);

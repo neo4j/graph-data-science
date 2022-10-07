@@ -99,12 +99,19 @@ public class Leiden extends Algorithm<LeidenResult> {
         var localMoveNodeVolumes = HugeDoubleArray.newArray(nodeCount);
         // the sum of the node volume for all nodes in a community
         var localMoveCommunityVolumes = HugeDoubleArray.newArray(nodeCount);
-        double modularityScaleCoefficient = initVolumes(localMoveNodeVolumes, localMoveCommunityVolumes, localMoveCommunities);
+        double modularityScaleCoefficient = initVolumes(
+            localMoveNodeVolumes,
+            localMoveCommunityVolumes,
+            localMoveCommunities
+        );
 
         double gamma = this.initialGamma * modularityScaleCoefficient;
 
         var communityCount = nodeCount;
-        HugeLongArray currentCommunities = null;
+        HugeLongArray currentCommunities = null; //this keeps a mapping of nodes to the community they currently belong to
+        //if no seeding is involved, these values can be considered correct output. Otherwise, they depict the current state
+        //and do not consider seeding (i.e., let's say seed:42 is mapped to community 0
+        // then  currentCommunities.get(x)=0 not 42
 
         boolean didConverge = false;
         boolean seedIsOptimal = false;
