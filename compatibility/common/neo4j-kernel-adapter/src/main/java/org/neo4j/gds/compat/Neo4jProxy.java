@@ -36,6 +36,7 @@ import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.IndexConfig;
 import org.neo4j.internal.batchimport.input.Collector;
+import org.neo4j.internal.batchimport.input.IdType;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.internal.helpers.HostnamePort;
@@ -269,6 +270,14 @@ public final class Neo4jProxy {
             jobScheduler,
             badCollector
         );
+    }
+
+    public static InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType) {
+        return IMPL.inputEntityLongIdVisitor(idType);
+    }
+
+    public static InputEntityIdVisitor.String inputEntityStringIdVisitor() {
+        return IMPL.inputEntityStringIdVisitor();
     }
 
     public static Input batchInputFrom(CompatInput compatInput) {
