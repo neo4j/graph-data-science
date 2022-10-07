@@ -105,11 +105,11 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
                     "min", 1L,
                     "max", 7L,
                     "mean", 3.3333333333333335D,
-                    "p90", 7L,
-                    "p50", 2L,
                     "p999", 7L,
                     "p95", 7L,
-                    "p75", 2L
+                    "p90", 7L,
+                    "p75", 7L,
+                    "p50", 2L
                 ), row.get("componentDistribution"));
             }
         );

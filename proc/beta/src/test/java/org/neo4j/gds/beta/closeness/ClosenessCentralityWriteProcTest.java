@@ -81,7 +81,7 @@ class ClosenessCentralityWriteProcTest extends ClosenessCentralityProcTest<Close
                 "p50", 0.5882339477539062,
                 "p75", 0.5882339477539062,
                 "p90", 0.5882339477539062,
-                "p95", 0.5882339477539062,
+                "p95", 1.0000038146972656,
                 "p99", 1.0000038146972656,
                 "p999", 1.0000038146972656
             ));

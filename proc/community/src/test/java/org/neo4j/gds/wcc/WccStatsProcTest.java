@@ -75,7 +75,7 @@ class WccStatsProcTest extends WccProcTest<WccStatsConfig> {
                 "max", 7L,
                 "mean", 3.3333333333333335D,
                 "p50", 2L,
-                "p75", 2L,
+                "p75", 7L,
                 "p90", 7L,
                 "p95", 7L,
                 "p99", 7L,

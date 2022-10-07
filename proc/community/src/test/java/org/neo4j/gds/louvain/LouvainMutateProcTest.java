@@ -118,7 +118,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
     @Test
     void testMutateAndWriteWithSeeding() throws Exception {
         registerProcedures(LouvainWriteProc.class);
-        var testGraphName = mutateGraphName().get();
+        var testGraphName = mutateGraphName().orElseThrow();
 
         var mutateQuery = GdsCypher
             .call(testGraphName)
@@ -154,7 +154,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
     @Test
     void testMutateYields() {
         String query = GdsCypher
-            .call(mutateGraphName().get())
+            .call(mutateGraphName().orElseThrow())
             .algo("louvain")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
@@ -189,11 +189,11 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
                     "min", 3L,
                     "max", 7L,
                     "mean", 5.0D,
-                    "p90", 7L,
                     "p50", 5L,
-                    "p999", 7L,
+                    "p75", 7L,
+                    "p90", 7L,
                     "p95", 7L,
-                    "p75", 5L
+                    "p999", 7L
                 ), row.get("communityDistribution"));
             }
         );
