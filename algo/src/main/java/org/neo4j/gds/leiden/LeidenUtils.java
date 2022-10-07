@@ -20,6 +20,7 @@
 package org.neo4j.gds.leiden;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
@@ -42,6 +43,10 @@ class LeidenUtils {
         var maxId = new AtomicLong(longMaxId);
         array.setAll(v -> {
             long seedValue = seedValues.longValue(v);
+
+            if (seedValue < 0 && seedValue != DefaultValue.LONG_DEFAULT_FALLBACK) {
+                throw new IllegalArgumentException("Seed values should be non-negative");
+            }
             return (seedValue >= 0) ? seedValue : maxId.incrementAndGet();
         });
         return array;

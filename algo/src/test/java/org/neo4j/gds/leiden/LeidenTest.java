@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @GdlExtension
 class LeidenTest {
@@ -44,7 +45,7 @@ class LeidenTest {
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String DB_CYPHER =
         "CREATE " +
-        "  (a0:Node {optimal: 5000, seed: 1})," +
+        "  (a0:Node {optimal: 5000, seed: 1, seed2:-1})," +
         "  (a1:Node {optimal: 4000,seed: 2})," +
         "  (a2:Node {optimal: 5000,seed: 3})," +
         "  (a3:Node {optimal: 5000})," +
@@ -176,6 +177,25 @@ class LeidenTest {
     }
 
     @Test
+    void shouldThrowForNegativeSeed() {
+        int maxLevels = 3;
+        Leiden leiden = new Leiden(
+            graph,
+            maxLevels,
+            1.0,
+            0.01,
+            false,
+            19L,
+            graph.nodeProperties("seed2"),
+            1,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        assertThatThrownBy(leiden::compute).hasMessageContaining("non-negative");
+
+    }
+
+    @Test
     void shouldMaintainPartition() {
         var localCommunities = HugeLongArray.of(1, 1, 1, 3, 3, 3, 1, 3);
         var refinedCommunities = HugeLongArray.of(1, 1, 2, 3, 4, 3, 1, 3);
@@ -198,4 +218,6 @@ class LeidenTest {
         assertThat(nextCommunities.toArray()).containsExactly(0, 0, 2, 2);
 
     }
+
+
 }
