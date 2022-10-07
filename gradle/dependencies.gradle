@@ -40,7 +40,7 @@ ext {
         'immutables'           : '2.8.8',
         'ipaddress'            : '5.3.3',
         'jackson'              : '2.13.3',
-        'javapoet'             : '1.11.1',
+        'javapoet'             : '1.13.0',
         'jetbrains-annotations': '23.0.0',
         'jjwt'                 : '0.11.5',
         'jol'                  : '0.16',
