@@ -22,9 +22,4 @@ Time to upgrade!
 .2+<.^|`2.1`
 | `4.4`
 | `4.3`
-.4+<.^|`1.8` footnote:soonDeprecated[This version series will go out of support on 29 September 2022]
-| `4.4`
-| `4.3`
-| `4.2`
-| `4.1` footnote:neo411bug[There is a bug in Neo4j 4.1.1 that can lead to an exception when using Cypher projection. If possible, use the latest patch version.]
 |===
