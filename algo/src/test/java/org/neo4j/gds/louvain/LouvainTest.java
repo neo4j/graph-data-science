@@ -50,6 +50,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -76,8 +77,8 @@ class LouvainTest {
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a:Node {seed: 1})" +        // 0
-        ", (b:Node {seed: 1})" +        // 1
+        "  (a:Node {seed: 1,seed2: -1})" +        // 0
+        ", (b:Node {seed: 1,seed2: 10})" +        // 1
         ", (c:Node {seed: 1})" +        // 2
         ", (d:Node {seed: 1})" +        // 3
         ", (e:Node {seed: 1})" +        // 4
@@ -488,5 +489,33 @@ class LouvainTest {
 
         assertTrue(log.containsMessage(INFO, ":: Start"));
         assertTrue(log.containsMessage(INFO, ":: Finished"));
+    }
+
+    @Test
+    void shouldThrowOnNegativeSeed() {
+        var graph = graphStore.getGraph(
+            NodeLabel.listOf("Node"),
+            RelationshipType.listOf("TYPE_OUT"),
+            Optional.of("weight")
+        );
+
+        var config = defaultConfigBuilder().seedProperty("seed2").build();
+        Louvain algorithm = new Louvain(
+            graph,
+            config,
+            config.includeIntermediateCommunities(),
+            config.maxLevels(),
+            config.maxIterations(),
+            config.tolerance(),
+            config.concurrency(),
+            ProgressTracker.NULL_TRACKER,
+            Pools.DEFAULT
+
+        );
+        algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
+
+        assertThatThrownBy(algorithm::compute).hasMessageContaining("non-negative");
+
+
     }
 }

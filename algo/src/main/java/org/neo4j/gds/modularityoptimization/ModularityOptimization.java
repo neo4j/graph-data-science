@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
@@ -187,7 +188,11 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
             long seedCommunity = seedProperty.longValue(nodeId);
-            if (seedCommunity < 0) {
+            boolean seededValueIsDefault = seedCommunity == DefaultValue.LONG_DEFAULT_FALLBACK;
+            if (seedCommunity < 0 && !seededValueIsDefault) {
+                throw new IllegalArgumentException("Seeded values should be non-negative");
+            }
+            if (seededValueIsDefault) {
                 seedCommunity = -1;
             }
 
