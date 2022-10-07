@@ -242,6 +242,6 @@ YIELD graphName, degreeDistribution;
 |===
 | graphName       | degreeDistribution
 | "personsNative"
-| {p99=2, min=0, max=2, mean=0.6666666666666666, p90=2, p50=0, p999=2, p95=2, p75=0}
+| {p99=2, min=0, max=2, mean=0.6666666666666666, p90=2, p50=0, p999=2, p95=2, p75=2}
 |===
 --

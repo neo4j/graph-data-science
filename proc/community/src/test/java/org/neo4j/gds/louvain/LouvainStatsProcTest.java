@@ -70,7 +70,7 @@ class LouvainStatsProcTest extends LouvainProcTest<LouvainStatsConfig> {
                 "max", 11L,
                 "mean", 5.0,
                 "p50", 3L,
-                "p75", 3L,
+                "p75", 11L,
                 "p90", 11L,
                 "p95", 11L,
                 "p99", 11L,

@@ -29,7 +29,6 @@ dependencies {
 
     api group: 'org.eclipse.collections', name: 'eclipse-collections',  version: ver.'eclipse-collections'
 
-    implementation group: 'org.roaringbitmap',  name: 'RoaringBitmap', version: ver.'RoaringBitmap'
     implementation group: 'org.hdrhistogram',   name: 'HdrHistogram',  version: ver.'HdrHistogram'
 
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: ver.'jackson'

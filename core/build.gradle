@@ -46,9 +46,6 @@ dependencies {
             [group: 'com.carrotsearch',        name: 'hppc',                     version: ver.'hppc'],
     )
 
-    implementation(
-        [group: 'org.roaringbitmap', name: 'RoaringBitmap', version: ver.'RoaringBitmap'],
-    )
 
     // TEST DEPENDENCIES
 
@@ -64,6 +61,7 @@ dependencies {
 
     testImplementation group: 'net.jqwik',       name: 'jqwik',               version: ver.'jqwik'
     testImplementation group: 'io.qala.datagen', name: 'qala-datagen-junit5', version: ver.'qala-datagen'
+    testImplementation group: 'org.roaringbitmap', name: 'RoaringBitmap', version: ver.'RoaringBitmap'
 }
 
 afterEvaluate {
