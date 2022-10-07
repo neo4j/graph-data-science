@@ -188,11 +188,11 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
             long seedCommunity = seedProperty.longValue(nodeId);
-            boolean seededValueIsDefault = seedCommunity == DefaultValue.LONG_DEFAULT_FALLBACK;
-            if (seedCommunity < 0 && !seededValueIsDefault) {
+            boolean seededValueIsMissing = seedCommunity == DefaultValue.LONG_DEFAULT_FALLBACK;
+            if (seedCommunity < 0 && !seededValueIsMissing) {
                 throw new IllegalArgumentException("Seeded values should be non-negative");
             }
-            if (seededValueIsDefault) {
+            if (seededValueIsMissing) {
                 seedCommunity = -1;
             }
 
