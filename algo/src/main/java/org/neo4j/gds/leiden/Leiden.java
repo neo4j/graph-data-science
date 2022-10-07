@@ -108,7 +108,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         double gamma = this.initialGamma * modularityScaleCoefficient;
 
         var communityCount = nodeCount;
-        HugeLongArray currentCommunities = null; //this keeps a mapping of nodes to the community they currently belong to
+        HugeLongArray currentActualCommunities = null; //this keeps a mapping of nodes to the community they currently belong to
         //if no seeding is involved, these values can be considered correct output. Otherwise, they depict the current state
         //and do not consider seeding (i.e., let's say seed:42 is mapped to community 0
         // then  currentCommunities.get(x)=0 not 42
@@ -163,13 +163,13 @@ public class Leiden extends Algorithm<LeidenResult> {
 
             var dendrogramResult = dendrogramManager.setNextLevel(
                 workingGraph,
-                currentCommunities,
+                currentActualCommunities,
                 refinedCommunities,
                 localMoveCommunities,
                 seedCommunityManager,
                 iteration
             );
-            currentCommunities = dendrogramResult.dendrogram();
+            currentActualCommunities = dendrogramResult.dendrogram();
 
             // 3 CREATE NEW GRAPH
             var graphAggregationPhase = new GraphAggregationPhase(
