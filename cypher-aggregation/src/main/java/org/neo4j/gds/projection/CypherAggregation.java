@@ -380,13 +380,28 @@ public final class CypherAggregation extends BaseProc {
                 .aggregation(Aggregation.NONE)
                 .concurrency(DEFAULT_CONCURRENCY);
 
-            if (this.relationshipPropertySchemas != null) {
-                for (var ignored : this.relationshipPropertySchemas) {
-                    relationshipsBuilderBuilder.addPropertyConfig(
-                        Aggregation.NONE,
-                        DefaultValue.forDouble()
-                    );
+            // There is a potential race between initializing the relationships builder and the
+            // relationship property schemas. Both happen under lock, but under different ones.
+            // Relationship builders are initialized as part of computeIfAbsent which uses the
+            // lock inside ConcurrentHashMap, while `this.relationshipPropertySchemas` is initialized
+            // using the lock in this class.
+            //
+            // We have to ensure that the property schemas field is fully initialized, before we
+            // create the relationships builder. This can only be achieved by using the same lock
+            // for both actions. This should not affect performance, as we are doing this inside of
+            // computeIfAbsent which is only called once.
+            this.lock.lock();
+            try {
+                if (this.relationshipPropertySchemas != null) {
+                    for (var ignored : this.relationshipPropertySchemas) {
+                        relationshipsBuilderBuilder.addPropertyConfig(
+                            Aggregation.NONE,
+                            DefaultValue.forDouble()
+                        );
+                    }
                 }
+            } finally {
+                this.lock.unlock();
             }
 
             return relationshipsBuilderBuilder.build();
