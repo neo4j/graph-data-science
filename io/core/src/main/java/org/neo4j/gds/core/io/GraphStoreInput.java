@@ -26,13 +26,14 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.graph.GraphProperty;
 import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.compat.CompatPropertySizeCalculator;
+import org.neo4j.gds.compat.InputEntityIdVisitor;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.io.GraphStoreExporter.IdMapFunction;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.cache.idmapping.string.LongEncoder;
 import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.internal.batchimport.input.Group;
 import org.neo4j.internal.batchimport.input.Groups;
 import org.neo4j.internal.batchimport.input.IdType;
 import org.neo4j.internal.batchimport.input.Input;
@@ -52,6 +53,7 @@ import java.util.Set;
 import java.util.Spliterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.LongFunction;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public final class GraphStoreInput implements CompatInput {
@@ -67,37 +69,17 @@ public final class GraphStoreInput implements CompatInput {
     private final IdMode idMode;
     private final Capabilities capabilities;
 
-    enum IdMode implements IdVisitor {
+    enum IdMode implements Supplier<InputEntityIdVisitor.Long> {
         MAPPING(IdType.INTEGER, new Groups()) {
             @Override
-            public void visitNodeId(InputEntityVisitor visitor, long id) {
-                visitor.id(id, Group.GLOBAL);
-            }
-
-            @Override
-            public void visitSourceId(InputEntityVisitor visitor, long id) {
-                visitor.startId(id, Group.GLOBAL);
-            }
-
-            @Override
-            public void visitTargetId(InputEntityVisitor visitor, long id) {
-                visitor.endId(id, Group.GLOBAL);
+            public InputEntityIdVisitor.Long get() {
+                return Neo4jProxy.inputEntityLongIdVisitor(IdType.INTEGER);
             }
         },
         ACTUAL(IdType.ACTUAL, Groups.EMPTY) {
             @Override
-            public void visitNodeId(InputEntityVisitor visitor, long id) {
-                visitor.id(id);
-            }
-
-            @Override
-            public void visitSourceId(InputEntityVisitor visitor, long id) {
-                visitor.startId(id);
-            }
-
-            @Override
-            public void visitTargetId(InputEntityVisitor visitor, long id) {
-                visitor.endId(id);
+            public InputEntityIdVisitor.Long get() {
+                return Neo4jProxy.inputEntityLongIdVisitor(IdType.ACTUAL);
             }
         };
 
@@ -108,12 +90,6 @@ public final class GraphStoreInput implements CompatInput {
             this.idType = idType;
             this.readableGroups = readableGroups;
         }
-    }
-
-    interface IdVisitor {
-        void visitNodeId(InputEntityVisitor visitor, long id);
-        void visitSourceId(InputEntityVisitor visitor, long id);
-        void visitTargetId(InputEntityVisitor visitor, long id);
     }
 
     public static GraphStoreInput of(
@@ -197,12 +173,12 @@ public final class GraphStoreInput implements CompatInput {
 
     @Override
     public InputIterable nodes(Collector badCollector) {
-        return () -> new NodeImporter(nodeStore, batchSize, idMode, idMapFunction);
+        return () -> new NodeImporter(nodeStore, batchSize, idMode.get(), idMapFunction);
     }
 
     @Override
     public InputIterable relationships(Collector badCollector) {
-        return () -> new RelationshipImporter(relationshipStore, batchSize, idMode, idMapFunction);
+        return () -> new RelationshipImporter(relationshipStore, batchSize, idMode.get(), idMapFunction);
     }
 
     @Override
@@ -356,7 +332,7 @@ public final class GraphStoreInput implements CompatInput {
 
         private final long nodeCount;
         private final int batchSize;
-        final IdVisitor idVisitor;
+        final InputEntityIdVisitor.Long inputEntityIdVisitor;
         final IdMapFunction idMapFunction;
 
         private long id;
@@ -364,12 +340,12 @@ public final class GraphStoreInput implements CompatInput {
         GraphImporter(
             long nodeCount,
             int batchSize,
-            IdVisitor idVisitor,
+            InputEntityIdVisitor.Long inputEntityIdVisitor,
             IdMapFunction idMapFunction
         ) {
             this.nodeCount = nodeCount;
             this.batchSize = batchSize;
-            this.idVisitor = idVisitor;
+            this.inputEntityIdVisitor = inputEntityIdVisitor;
             this.idMapFunction = idMapFunction;
         }
 
@@ -398,16 +374,16 @@ public final class GraphStoreInput implements CompatInput {
         NodeImporter(
             NodeStore nodeStore,
             int batchSize,
-            IdVisitor idVisitor,
+            InputEntityIdVisitor.Long inputEntityIdVisitor,
             IdMapFunction idMapFunction
         ) {
-            super(nodeStore.nodeCount, batchSize, idVisitor, idMapFunction);
+            super(nodeStore.nodeCount, batchSize, inputEntityIdVisitor, idMapFunction);
             this.nodeStore = nodeStore;
         }
 
         @Override
         public InputChunk newChunk() {
-            return new NodeChunk(nodeStore, idVisitor, idMapFunction);
+            return new NodeChunk(nodeStore, inputEntityIdVisitor, idMapFunction);
         }
     }
 
@@ -418,28 +394,28 @@ public final class GraphStoreInput implements CompatInput {
         RelationshipImporter(
             RelationshipStore relationshipStore,
             int batchSize,
-            IdVisitor idVisitor,
+            InputEntityIdVisitor.Long inputEntityIdVisitor,
             IdMapFunction idMapFunction
         ) {
-            super(relationshipStore.nodeCount, batchSize, idVisitor, idMapFunction);
+            super(relationshipStore.nodeCount, batchSize, inputEntityIdVisitor, idMapFunction);
             this.relationshipStore = relationshipStore;
         }
 
         @Override
         public InputChunk newChunk() {
-            return new RelationshipChunk(relationshipStore.concurrentCopy(), idVisitor, idMapFunction);
+            return new RelationshipChunk(relationshipStore.concurrentCopy(), inputEntityIdVisitor, idMapFunction);
         }
     }
 
     abstract static class EntityChunk implements InputChunk {
 
-        final IdVisitor idVisitor;
+        final InputEntityIdVisitor.Long inputEntityIdVisitor;
 
         long id;
         long endId;
 
-        EntityChunk(IdVisitor idVisitor) {
-            this.idVisitor = idVisitor;
+        EntityChunk(InputEntityIdVisitor.Long inputEntityIdVisitor) {
+            this.inputEntityIdVisitor = inputEntityIdVisitor;
         }
 
         void initialize(long startId, long endId) {
@@ -462,10 +438,10 @@ public final class GraphStoreInput implements CompatInput {
 
         NodeChunk(
             NodeStore nodeStore,
-            IdVisitor idVisitor,
+            InputEntityIdVisitor.Long inputEntityIdVisitor,
             IdMapFunction idMapFunction
         ) {
-            super(idVisitor);
+            super(inputEntityIdVisitor);
             this.nodeStore = nodeStore;
             this.hasLabels = nodeStore.hasLabels();
             this.hasProperties = nodeStore.hasProperties();
@@ -475,7 +451,7 @@ public final class GraphStoreInput implements CompatInput {
         @Override
         public boolean next(InputEntityVisitor visitor) throws IOException {
             if (id < endId) {
-                idVisitor.visitNodeId(visitor, idMapFunction.getId(nodeStore.idMap, id));
+                inputEntityIdVisitor.visitNodeId(visitor, idMapFunction.getId(nodeStore.idMap, id));
 
                 if (hasLabels) {
                     String[] labels = nodeStore.labels(id);
@@ -526,10 +502,10 @@ public final class GraphStoreInput implements CompatInput {
 
         RelationshipChunk(
             RelationshipStore relationshipStore,
-            IdVisitor idVisitor,
+            InputEntityIdVisitor.Long inputEntityIdVisitor,
             IdMapFunction idMapFunction
         ) {
-            super(idVisitor);
+            super(inputEntityIdVisitor);
             this.relationshipStore = relationshipStore;
 
             this.relationshipConsumers = relationshipStore
@@ -542,7 +518,7 @@ public final class GraphStoreInput implements CompatInput {
                         relationshipStore.idMap(),
                         e.getKey().name,
                         e.getValue().propertyKeys(),
-                        idVisitor,
+                        inputEntityIdVisitor,
                         idMapFunction
                     )
                 ));
@@ -569,7 +545,7 @@ public final class GraphStoreInput implements CompatInput {
             private final IdMap idMap;
             private final String relationshipType;
             private final String[] propertyKeys;
-            private final IdVisitor idVisitor;
+            private final InputEntityIdVisitor.Long inputEntityIdVisitor;
             private final IdMapFunction idMapFunction;
             private InputEntityVisitor visitor;
 
@@ -577,13 +553,13 @@ public final class GraphStoreInput implements CompatInput {
                 IdMap idMap,
                 String relationshipType,
                 String[] propertyKeys,
-                IdVisitor idVisitor,
+                InputEntityIdVisitor.Long inputEntityIdVisitor,
                 IdMapFunction idMapFunction
             ) {
                 this.idMap = idMap;
                 this.relationshipType = relationshipType;
                 this.propertyKeys = propertyKeys;
-                this.idVisitor = idVisitor;
+                this.inputEntityIdVisitor = inputEntityIdVisitor;
                 this.idMapFunction = idMapFunction;
             }
 
@@ -593,8 +569,8 @@ public final class GraphStoreInput implements CompatInput {
 
             @Override
             public boolean consume(long source, long target, double[] properties) {
-                idVisitor.visitSourceId(visitor, idMapFunction.getId(idMap, source));
-                idVisitor.visitTargetId(visitor, idMapFunction.getId(idMap, target));
+                inputEntityIdVisitor.visitSourceId(visitor, idMapFunction.getId(idMap, source));
+                inputEntityIdVisitor.visitTargetId(visitor, idMapFunction.getId(idMap, target));
                 visitor.type(relationshipType);
 
                 for (int propertyIdx = 0; propertyIdx < propertyKeys.length; propertyIdx++) {

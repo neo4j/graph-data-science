@@ -37,6 +37,7 @@ import org.neo4j.gds.compat.CompositeNodeCursor;
 import org.neo4j.gds.compat.CustomAccessMode;
 import org.neo4j.gds.compat.GdsDatabaseManagementServiceBuilder;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
+import org.neo4j.gds.compat.InputEntityIdVisitor;
 import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.compat.StoreScan;
@@ -54,8 +55,10 @@ import org.neo4j.internal.batchimport.ImportLogic;
 import org.neo4j.internal.batchimport.IndexConfig;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.input.Collector;
+import org.neo4j.internal.batchimport.input.Group;
 import org.neo4j.internal.batchimport.input.IdType;
 import org.neo4j.internal.batchimport.input.Input;
+import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
@@ -402,6 +405,68 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public Input batchInputFrom(CompatInput compatInput) {
         return new InputFromCompatInput(compatInput);
+    }
+
+    @Override
+    public InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType) {
+        switch (idType) {
+            case INTEGER:
+                return new InputEntityIdVisitor.Long() {
+                    @Override
+                    public void visitNodeId(InputEntityVisitor visitor, long id) {
+                        visitor.id(id);
+                    }
+
+                    @Override
+                    public void visitSourceId(InputEntityVisitor visitor, long id) {
+                        visitor.startId(id);
+                    }
+
+                    @Override
+                    public void visitTargetId(InputEntityVisitor visitor, long id) {
+                        visitor.endId(id);
+                    }
+                };
+            case ACTUAL:
+                return new InputEntityIdVisitor.Long() {
+                    @Override
+                    public void visitNodeId(InputEntityVisitor visitor, long id) {
+                        visitor.id(id, Group.GLOBAL);
+                    }
+
+                    @Override
+                    public void visitSourceId(InputEntityVisitor visitor, long id) {
+                        visitor.startId(id, Group.GLOBAL);
+                    }
+
+                    @Override
+                    public void visitTargetId(InputEntityVisitor visitor, long id) {
+                        visitor.endId(id, Group.GLOBAL);
+                    }
+                };
+            default:
+                throw new IllegalStateException("Unexpected value: " + idType);
+        }
+    }
+
+    @Override
+    public InputEntityIdVisitor.String inputEntityStringIdVisitor() {
+        return new InputEntityIdVisitor.String() {
+            @Override
+            public void visitNodeId(InputEntityVisitor visitor, String id) {
+                visitor.id(id, Group.GLOBAL);
+            }
+
+            @Override
+            public void visitSourceId(InputEntityVisitor visitor, String id) {
+                visitor.startId(id, Group.GLOBAL);
+            }
+
+            @Override
+            public void visitTargetId(InputEntityVisitor visitor, String id) {
+                visitor.endId(id, Group.GLOBAL);
+            }
+        };
     }
 
     @Override
