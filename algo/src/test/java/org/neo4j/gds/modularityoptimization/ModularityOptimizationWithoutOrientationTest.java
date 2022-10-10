@@ -66,7 +66,7 @@ class ModularityOptimizationWithoutOrientationTest {
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Node {seed1:  1,  seed2: 21})" +
-        ", (b:Node {seed1: -1,  seed2: -1})" +
+        ", (b:Node {seed1: 5})" +
         ", (c:Node {seed1:  2,  seed2: 42})" +
         ", (d:Node {seed1:  3,  seed2: 33})" +
         ", (e:Node {seed1:  2,  seed2: 42})" +
@@ -79,7 +79,7 @@ class ModularityOptimizationWithoutOrientationTest {
         ", (b)-[:TYPE_OUT {weight: 5.0}]->(d)" +
         ", (c)-[:TYPE_OUT {weight: 0.01}]->(e)" +
         ", (f)-[:TYPE_OUT {weight: 0.01}]->(d)" +
-        
+
         ", (a)<-[:TYPE_OUT {weight: 0.01}]-(b)" +
         ", (a)<-[:TYPE_OUT {weight: 5.0}]-(e)" +
         ", (a)<-[:TYPE_OUT {weight: 5.0}]-(f)" +
