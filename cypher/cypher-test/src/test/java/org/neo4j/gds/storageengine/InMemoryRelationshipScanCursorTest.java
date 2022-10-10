@@ -40,7 +40,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DisableForNeo4jVersion(Neo4jVersion.V_5_0_drop80)
 @DisableForNeo4jVersion(Neo4jVersion.V_5_0_drop90)
 public class InMemoryRelationshipScanCursorTest extends CypherTest {
 
