@@ -18,4 +18,4 @@ For example, which algorithm solves your problem? -->
 <!-- A clear and concise description of any alternative solutions or features you've considered. -->
 
 **Additional context**
-<!-- Add any other context, papers, links or screenshots about the feature request here. -->
+<!-- Add any other context, papers, links, previous posts in the community forum or screenshots about the feature request here. -->

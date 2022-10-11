@@ -28,6 +28,6 @@ Steps to reproduce the behavior:
 <!-- A clear and concise description of what you expected to happen. -->
 
 **Additional context**
-<!-- Add any other context about the problem here. 
+<!-- Add any other context about the problem here, such as a previous post in the community forum. 
 Especially helpful are log-files, stacktraces, and other debug output (as appropriate). -->
 
