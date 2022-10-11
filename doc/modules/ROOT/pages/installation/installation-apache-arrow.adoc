@@ -105,11 +105,13 @@ YIELD
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name             | Type      | Description
-| running          | Boolean   | True, if the Arrow Flight Server is currently running.
-| enabled          | Boolean   | True, if the corresponding setting is enabled.
-| listenAddress    | String    | The address (host and port) the Arrow Flight Client should connect to.
-| batchSize        | Integer   | The batch size used for arrow property export.
-| abortionTimeout  | Duration  | The maximum time to wait for the next command before aborting the import process.
+| Name                     | Type      | Description
+| running                  | Boolean   | True, if the Arrow Flight Server is currently running.
+| enabled                  | Boolean   | True, if the corresponding setting is enabled.
+| listenAddress            | String    | The address (host and port) the Arrow Flight Client should connect to.
+| batchSize                | Integer   | The batch size used for arrow property export.
+| abortionTimeout          | Duration  | The maximum time to wait for the next command before aborting the import process.
+| advertisedListenAddress  | String    | DEPRECATED: Same as `listenAddress`.
+| serverLocation           | String    | DEPRECATED: Always `NULL`.
 |===
 ======
