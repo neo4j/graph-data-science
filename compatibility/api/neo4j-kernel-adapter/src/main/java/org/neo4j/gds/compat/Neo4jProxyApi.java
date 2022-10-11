@@ -36,6 +36,7 @@ import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.IndexConfig;
 import org.neo4j.internal.batchimport.input.Collector;
+import org.neo4j.internal.batchimport.input.IdType;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.internal.helpers.HostnamePort;
@@ -198,6 +199,10 @@ public interface Neo4jProxyApi {
     );
 
     Input batchInputFrom(CompatInput compatInput);
+
+    InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType);
+
+    InputEntityIdVisitor.String inputEntityStringIdVisitor();
 
     Setting<String> additionalJvm();
 
