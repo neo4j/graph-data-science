@@ -21,15 +21,18 @@ package org.neo4j.gds.leiden;
 
 import com.carrotsearch.hppc.LongLongHashMap;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.DoubleAdder;
 
@@ -39,20 +42,17 @@ public class Leiden extends Algorithm<LeidenResult> {
 
     private final Graph rootGraph;
     private final Orientation orientation;
-
     private final int maxIterations;
     private final double initialGamma;
     private final double theta;
-
     private double[] modularities;
-
     private double modularity;
     private final LeidenDendrogramManager dendrogramManager;
-
+    private final Optional<NodePropertyValues> seedValues;
     private final ExecutorService executorService;
     private final int concurrency;
-    private final long seed;
-
+    private final long randomSeed;
+    private SeedCommunityManager seedCommunityManager;
 
     public Leiden(
         Graph graph,
@@ -60,7 +60,8 @@ public class Leiden extends Algorithm<LeidenResult> {
         double initialGamma,
         double theta,
         boolean includeIntermediateCommunities,
-        long seed,
+        long randomSeed,
+        @Nullable NodePropertyValues seedValues,
         int concurrency,
         ProgressTracker progressTracker
     ) {
@@ -70,7 +71,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         this.maxIterations = maxIterations;
         this.initialGamma = initialGamma;
         this.theta = theta;
-        this.seed = seed;
+        this.randomSeed = randomSeed;
         // TODO: Pass these two as parameters
         this.executorService = Pools.DEFAULT;
         this.concurrency = concurrency;
@@ -80,7 +81,7 @@ public class Leiden extends Algorithm<LeidenResult> {
             concurrency,
             includeIntermediateCommunities
         );
-
+        this.seedValues = Optional.ofNullable(seedValues);
         this.modularities = new double[maxIterations];
         this.modularity = 0d;
     }
@@ -90,18 +91,26 @@ public class Leiden extends Algorithm<LeidenResult> {
         var workingGraph = rootGraph;
         var nodeCount = workingGraph.nodeCount();
 
-        var localMoveCommunities = LeidenUtils.createSingleNodeCommunities(nodeCount);
+        var localMoveCommunities = LeidenUtils.createStartingCommunities(nodeCount, seedValues.orElse(null));
 
+        seedCommunityManager = SeedCommunityManager.create(seedValues.isPresent(), localMoveCommunities);
         // volume -> the sum of the weights of a nodes outgoing relationships
         var localMoveNodeVolumes = HugeDoubleArray.newArray(nodeCount);
         // the sum of the node volume for all nodes in a community
         var localMoveCommunityVolumes = HugeDoubleArray.newArray(nodeCount);
-        double modularityScaleCoefficient = initVolumes(localMoveNodeVolumes, localMoveCommunityVolumes, localMoveCommunities);
+        double modularityScaleCoefficient = initVolumes(
+            localMoveNodeVolumes,
+            localMoveCommunityVolumes,
+            localMoveCommunities
+        );
 
         double gamma = this.initialGamma * modularityScaleCoefficient;
 
         var communityCount = nodeCount;
-        HugeLongArray currentCommunities = null;
+        HugeLongArray currentActualCommunities = null; //this keeps a mapping of nodes to the community they currently belong to
+        //if no seeding is involved, these values can be considered correct output. Otherwise, they depict the current state
+        //and do not consider seeding (i.e., let's say seed:42 is mapped to community 0
+        // then  currentCommunities.get(x)=0 not 42
 
         boolean didConverge = false;
         int iteration;
@@ -118,19 +127,19 @@ public class Leiden extends Algorithm<LeidenResult> {
             var communitiesCount = localMovePhase.run();
 
             didConverge = communitiesCount == workingGraph.nodeCount() || localMovePhase.swaps == 0;
-            if (didConverge) {
-                break;
-            }
 
-            modularities[iteration] = ModularityComputer.compute(
+            updateModularity(
                 workingGraph,
                 localMoveCommunities,
                 localMoveCommunityVolumes,
-                gamma,
                 modularityScaleCoefficient,
-                concurrency,
-                executorService
+                gamma,
+                didConverge,
+                iteration
             );
+            if (didConverge) {
+                break;
+            }
 
             // 2 REFINE
             var refinementPhase = RefinementPhase.create(
@@ -140,7 +149,7 @@ public class Leiden extends Algorithm<LeidenResult> {
                 localMoveCommunityVolumes,
                 gamma,
                 theta,
-                seed
+                randomSeed
             );
             var refinementPhaseResult = refinementPhase.run();
             var refinedCommunities = refinementPhaseResult.communities();
@@ -148,12 +157,13 @@ public class Leiden extends Algorithm<LeidenResult> {
 
             var dendrogramResult = dendrogramManager.setNextLevel(
                 workingGraph,
-                currentCommunities,
+                currentActualCommunities,
                 refinedCommunities,
                 localMoveCommunities,
+                seedCommunityManager,
                 iteration
             );
-            currentCommunities = dendrogramResult.dendrogram();
+            currentActualCommunities = dendrogramResult.dendrogram();
 
             // 3 CREATE NEW GRAPH
             var graphAggregationPhase = new GraphAggregationPhase(
@@ -180,25 +190,75 @@ public class Leiden extends Algorithm<LeidenResult> {
 
             modularity = modularities[iteration];
         }
-        return LeidenResult.of(
-            dendrogramManager.getCurrent(),
-            iteration,
-            didConverge,
-            dendrogramManager,
-            resizeModularitiesArray(iteration),
-            modularity
-        );
+
+        return getLeidenResult(didConverge, iteration);
     }
 
-    private double initVolumes(HugeDoubleArray nodeVolumes, HugeDoubleArray communityVolumes, HugeLongArray seedCommunities) {
+    @NotNull
+    private LeidenResult getLeidenResult(boolean didConverge, int iteration) {
+        boolean seedIsOptimal = didConverge && seedValues.isPresent() && iteration == 0;
+        if (seedIsOptimal) {
+            var modularity = modularities[0];
+            return LeidenResult.of(
+                LeidenUtils.createSeedCommunities(rootGraph.nodeCount(), seedValues.orElse(null)),
+                1,
+                didConverge,
+                null,
+                new double[]{modularity},
+                modularity
+            );
+        } else {
+            return LeidenResult.of(
+                dendrogramManager.getCurrent(),
+                iteration,
+                didConverge,
+                dendrogramManager,
+                resizeModularitiesArray(iteration),
+                modularity
+            );
+        }
+    }
+
+    private boolean updateModularity(
+        Graph workingGraph,
+        HugeLongArray localMoveCommunities,
+        HugeDoubleArray localMoveCommunityVolumes,
+        double modularityScaleCoefficient,
+        double gamma,
+        boolean didConverge,
+        int iteration
+    ) {
+        boolean seedIsOptimal = didConverge && seedValues.isPresent() && iteration == 0;
+        boolean shouldCalculateModularity = !didConverge || seedIsOptimal;
+
+        if (shouldCalculateModularity) {
+            modularities[iteration] = ModularityComputer.compute(
+                workingGraph,
+                localMoveCommunities,
+                localMoveCommunityVolumes,
+                gamma,
+                modularityScaleCoefficient,
+                concurrency,
+                executorService
+            );
+        }
+        return seedIsOptimal;
+    }
+
+    private double initVolumes(
+        HugeDoubleArray nodeVolumes,
+        HugeDoubleArray communityVolumes,
+        HugeLongArray initialCommunities
+    ) {
         if (rootGraph.hasRelationshipProperty()) {
             ParallelUtil.parallelForEachNode(
                 rootGraph.nodeCount(),
                 concurrency,
                 nodeId -> {
+                    var communityId = initialCommunities.get(nodeId);
                     rootGraph.concurrentCopy().forEachRelationship(nodeId, 1.0, (s, t, w) -> {
                         nodeVolumes.addTo(nodeId, w);
-                        communityVolumes.addTo(seedCommunities.get(nodeId), w);
+                        communityVolumes.addTo(communityId, w);
                         return true;
                     });
                 }
@@ -212,7 +272,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         } else {
             nodeVolumes.setAll(rootGraph::degree);
             rootGraph.forEachNode(nodeId -> {
-                long communityId = seedCommunities.get(nodeId);
+                long communityId = initialCommunities.get(nodeId);
                 communityVolumes.addTo(communityId, rootGraph.degree(nodeId));
                 return true;
             });

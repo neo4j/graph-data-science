@@ -20,16 +20,17 @@
 package org.neo4j.gds.leiden;
 
 import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.modularity.TestGraphs;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.modularity.TestGraphs;
 
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -49,9 +50,18 @@ class KarateTest {
 
     @ParameterizedTest
     @ValueSource(longs = {99999, 25, 323, 405, 58, 61, 7, 8123, 94, 19})
-    void leiden(long seed) {
+    void leiden(long randomSeed) {
         var gamma = 1.0;
-        Leiden leiden = new Leiden(graph, 5, gamma, 0.01, false, seed, 4, ProgressTracker.NULL_TRACKER);
+        Leiden leiden = new Leiden(
+            graph,
+            5,
+            gamma,
+            0.01,
+            false,
+            randomSeed,
+            null, 4,
+            ProgressTracker.NULL_TRACKER
+        );
         var leidenResult = leiden.compute();
         var communities = leidenResult.communities();
         var communitiesMap = LongStream
@@ -74,4 +84,44 @@ class KarateTest {
         assertThat(leidenResult.modularity()).isCloseTo(0.41880, Offset.offset(1e-3));
 
     }
+
+    @Test
+    void shouldWorkWithSeed() {
+        var gamma = 1.0;
+        Leiden leiden = new Leiden(
+            graph,
+            5,
+            gamma,
+            0.01,
+            true,
+            99,
+            graph.nodeProperties("single"),
+            4,
+            ProgressTracker.NULL_TRACKER
+        );
+        var leidenResult = leiden.compute();
+        var communities = leidenResult.communities();
+        var communitiesMap = LongStream
+            .range(0, graph.nodeCount())
+            .mapToObj(v -> "a" + v)
+            .collect(Collectors.groupingBy(v -> communities.get(idFunction.of(v))));
+
+        assertThat(communitiesMap.values())
+            .satisfiesExactlyInAnyOrder(
+                community -> assertThat(community).containsExactlyInAnyOrder(
+                    "a1", "a2", "a3", "a4", "a8", "a10", "a12", "a13", "a14", "a18", "a20", "a22"
+                ),
+                community -> assertThat(community).containsExactlyInAnyOrder(
+                    "a9", "a15", "a16", "a19", "a21", "a23", "a27", "a30", "a31", "a33", "a34"
+                ),
+                community -> assertThat(community).containsExactlyInAnyOrder("a24", "a25", "a26", "a28", "a29", "a32"),
+                community -> assertThat(community).containsExactlyInAnyOrder("a5", "a6", "a7", "a11", "a17"),
+                community -> assertThat(community).containsExactlyInAnyOrder("a0")
+            );
+        assertThat(leidenResult.modularity()).isCloseTo(0.41880, Offset.offset(1e-3));
+        communitiesMap
+            .keySet()
+            .forEach(keyId -> assertThat(keyId).isGreaterThanOrEqualTo(100).isLessThanOrEqualTo(134));
+    }
+
 }

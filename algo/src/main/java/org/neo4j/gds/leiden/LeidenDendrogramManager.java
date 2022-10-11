@@ -33,7 +33,6 @@ public class LeidenDendrogramManager {
     private final int concurrency;
     private final boolean trackIntermediateCommunities;
     private final HugeLongArray[] dendrograms;
-
     private int currentIndex;
 
     LeidenDendrogramManager(
@@ -64,6 +63,7 @@ public class LeidenDendrogramManager {
         HugeLongArray previousIterationDendrogram,
         HugeLongArray refinedCommunities,
         HugeLongArray localMoveCommunities,
+        SeedCommunityManager seedCommunityManager,
         int iteration
     ) {
         assert workingGraph.nodeCount() == refinedCommunities.size() : "The sizes of the graph and communities should match";
@@ -77,6 +77,7 @@ public class LeidenDendrogramManager {
             long prevId = previousIterationDendrogram == null
                 ? nodeId
                 : workingGraph.toMappedNodeId(previousIterationDendrogram.get(nodeId));
+                //find which node corresponds to the community this node was matched before
 
             long communityId = refinedCommunities.get(prevId);
 
@@ -90,11 +91,27 @@ public class LeidenDendrogramManager {
                 }
             } while (!updatedMaxCurrentId);
 
-            dendrogram.set(nodeId, communityId);
-            set(nodeId, localMoveCommunities.get(communityId));
+            setToAlgorithmDendrogram(dendrogram, nodeId, communityId);
+            //recall: this array marks the community of node
+            //but disregards the numbering implied by any seeds (works on the algorithm level).
+
+            var reverseId = seedCommunityManager.mapToSeed(localMoveCommunities.get(communityId));
+
+            setToOutputDendrogram(
+                nodeId,
+                reverseId
+            ); //whereas here because this is final output, we need to take seeds into account
+            //and translate the community to output format; for this we need to take the initial seeding values into acount
         });
 
         return ImmutableDendrogramResult.of(maxCommunityId.get(), dendrogram);
+    }
+
+    private static void setToAlgorithmDendrogram(HugeLongArray dendrogram, long nodeId, long communityId) {
+        dendrogram.set(
+            nodeId,
+            communityId
+        );
     }
 
     private void prepareNextLevel(int iteration) {
@@ -104,7 +121,7 @@ public class LeidenDendrogramManager {
         }
     }
 
-    private void set(long nodeId, long communityId) {
+    private void setToOutputDendrogram(long nodeId, long communityId) {
         dendrograms[currentIndex].set(nodeId, communityId);
     }
 

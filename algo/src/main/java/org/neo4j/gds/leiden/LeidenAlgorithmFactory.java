@@ -23,9 +23,14 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.Optional;
+
 public class LeidenAlgorithmFactory<CONFIG extends LeidenBaseConfig> extends GraphAlgorithmFactory<Leiden, CONFIG> {
     @Override
     public Leiden build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
+
+        var seedValues = Optional
+            .ofNullable(configuration.seedProperty()).map(graph::nodeProperties).orElse(null);
 
         return new Leiden(
             graph,
@@ -34,6 +39,7 @@ public class LeidenAlgorithmFactory<CONFIG extends LeidenBaseConfig> extends Gra
             configuration.theta(),
             configuration.includeIntermediateCommunities(),
             configuration.randomSeed().orElse(0L),
+            seedValues,
             configuration.concurrency(),
             progressTracker
         );

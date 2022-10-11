@@ -24,13 +24,13 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.modularity.TestGraphs;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.modularity.TestGraphs;
 
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -52,9 +52,19 @@ class FootballTest {
 
     @ParameterizedTest
     @ValueSource(longs = {99999, 25, 323, 405, 58, 61, 7, 8123, 94, 19})
-    void leiden(long seed) {
+    void leiden(long randomSeed) {
         var gamma = 1.0;
-        Leiden leiden = new Leiden(graph, 5, gamma, 0.01, false, seed, 1, ProgressTracker.NULL_TRACKER);
+        Leiden leiden = new Leiden(
+            graph,
+            5,
+            gamma,
+            0.01,
+            false,
+            randomSeed,
+            null,
+            1,
+            ProgressTracker.NULL_TRACKER
+        );
         var leidenResult = leiden.compute();
         var communities = leidenResult.communities();
         var communitiesMap = LongStream

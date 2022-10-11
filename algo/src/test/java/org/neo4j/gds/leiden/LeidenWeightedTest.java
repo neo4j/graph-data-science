@@ -72,6 +72,7 @@ class LeidenWeightedTest {
             0.01,
             true,
             19L,
+            null,
             4,
             ProgressTracker.NULL_TRACKER
         );
