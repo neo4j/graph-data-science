@@ -93,8 +93,8 @@ public class LeidenWriteSpec implements AlgorithmSpec<Leiden, LeidenResult, Leid
                     .build();
 
                 var properties = LeidenCompanion.leidenNodeProperties(
-                    config,
-                    computationResult.result()
+                    computationResult,
+                    computationResult.config().writeProperty()
                 );
 
                 exporter.write(
@@ -123,4 +123,5 @@ public class LeidenWriteSpec implements AlgorithmSpec<Leiden, LeidenResult, Leid
             .withCommunityFunction(leidenResult.communitiesFunction())
             .withConfig(computationResult.config());
     }
+
 }

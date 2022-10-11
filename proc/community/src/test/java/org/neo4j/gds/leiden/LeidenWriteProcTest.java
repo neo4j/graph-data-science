@@ -23,8 +23,13 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
+
+import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
@@ -71,8 +76,55 @@ class LeidenWriteProcTest extends BaseProcTest {
 
     @Test
     void write() {
-        var query = "CALL gds.alpha.leiden.write('leiden', { writeProperty: 'communityId' })";
+        var query = "CALL gds.alpha.leiden.write('leiden', { writeProperty: 'communityId', concurrency: 1 })";
+        assertLeidenQuery(query);
 
+        String loadQuery = GdsCypher.call("writeGraph")
+            .graphProject()
+            .withAnyLabel()
+            .withNodeProperty("communityId")
+            .yields();
+
+        runQuery(loadQuery);
+
+
+        var writeGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "writeGraph").graphStore().getUnion();
+        var communities = writeGraph.nodeProperties("communityId");
+        var communitySet = new HashSet<Long>();
+        writeGraph.forEachNode(nodeId -> {
+            communitySet.add(communities.longValue(nodeId));
+            return true;
+        });
+        assertThat(communitySet).containsExactly(2L, 3L);
+
+    }
+
+    @Test
+    void shouldWriteWithConsecutiveIds() {
+        var query = "CALL gds.alpha.leiden.write('leiden', { writeProperty: 'communityId', consecutiveIds: true })";
+        assertLeidenQuery(query);
+
+        String loadQuery = GdsCypher.call("writeGraph")
+            .graphProject()
+            .withAnyLabel()
+            .withNodeProperty("communityId")
+            .yields();
+
+        runQuery(loadQuery);
+
+
+        var writeGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "writeGraph").graphStore().getUnion();
+        var communities = writeGraph.nodeProperties("communityId");
+        var communitySet = new HashSet<Long>();
+        writeGraph.forEachNode(nodeId -> {
+            communitySet.add(communities.longValue(nodeId));
+            return true;
+        });
+        assertThat(communitySet).containsExactly(0L, 1L);
+
+    }
+
+    void assertLeidenQuery(String query) {
         runQuery(query, result -> {
             assertThat(result.columns())
                 .containsExactlyInAnyOrder(

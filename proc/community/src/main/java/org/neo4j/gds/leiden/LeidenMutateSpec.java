@@ -61,7 +61,7 @@ public class LeidenMutateSpec implements AlgorithmSpec<Leiden, LeidenResult, Lei
         MutatePropertyComputationResultConsumer.MutateNodePropertyListFunction<Leiden, LeidenResult, LeidenMutateConfig> mutateConfigNodePropertyListFunction =
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
-                LeidenCompanion.leidenNodeProperties(computationResult.config(), computationResult.result())
+                LeidenCompanion.leidenNodeProperties(computationResult, computationResult.config().mutateProperty())
             ));
         return new MutatePropertyComputationResultConsumer<>(
             mutateConfigNodePropertyListFunction,

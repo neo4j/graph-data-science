@@ -21,11 +21,13 @@ package org.neo4j.gds.leiden;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ConsecutiveIdsConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 
 public interface LeidenBaseConfig extends
     AlgoBaseConfig,
+    ConsecutiveIdsConfig,
     RelationshipWeightConfig,
     RandomSeedConfig {
 
@@ -48,4 +50,16 @@ public interface LeidenBaseConfig extends
     default boolean includeIntermediateCommunities() {
         return false;
     }
+
+    @Value.Check
+    default void validate() {
+        if (includeIntermediateCommunities() && consecutiveIds()) {
+            throw new IllegalArgumentException(
+                "`includeIntermediateResults` and the `consecutiveIds` option cannot be used at the same time.");
+        }
+        if (seedProperty() != null) {
+            throw new IllegalArgumentException(("seedProperty is not supported for Leiden."));
+        }
+    }
+
 }

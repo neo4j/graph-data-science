@@ -22,9 +22,14 @@ package org.neo4j.gds.leiden;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
+
+import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
@@ -72,8 +77,37 @@ class LeidenMutateProcTest  extends BaseProcTest {
 
     @Test
     void mutate() {
-        var query = "CALL gds.alpha.leiden.mutate('leiden', {mutateProperty: 'communityId'})";
+        var query = "CALL gds.alpha.leiden.mutate('leiden', {mutateProperty: 'communityId', concurrency: 1})";
+        assertLeidenMutateQuery(query);
+        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "leiden").graphStore().getUnion();
+        var communities = mutatedGraph.nodeProperties("communityId");
+        var communitySet = new HashSet<Long>();
+        mutatedGraph.forEachNode(nodeId -> {
+            communitySet.add(communities.longValue(nodeId));
+            return true;
+        });
+        assertThat(communitySet).containsExactly(2L, 3L);
 
+    }
+
+    @Test
+    void shoudMutateCorrectlyConsecutiveIds() {
+        var query = "CALL gds.alpha.leiden.mutate('leiden', {mutateProperty: 'communityId',  consecutiveIds: true})";
+
+        assertLeidenMutateQuery(query);
+        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "leiden").graphStore().getUnion();
+        var communities = mutatedGraph.nodeProperties("communityId");
+        var communitySet = new HashSet<Long>();
+        mutatedGraph.forEachNode(nodeId -> {
+            communitySet.add(communities.longValue(nodeId));
+            return true;
+        });
+        assertThat(communitySet).containsExactly(0L, 1L);
+
+    }
+
+
+    private void assertLeidenMutateQuery(String query) {
         runQuery(query, result -> {
             assertThat(result.columns())
                 .containsExactlyInAnyOrder(
