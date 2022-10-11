@@ -90,6 +90,10 @@ public enum Neo4jVersion {
             return Neo4jVersion.V_5_0_drop90;
         }
 
+        if (version.endsWith("-dev")) {
+            return Neo4jVersion.V_Dev;
+        }
+
         var majorVersion = Pattern.compile("[.-]")
             .splitAsStream(version)
             .limit(2)
@@ -101,7 +105,6 @@ public enum Neo4jVersion {
                 return Neo4jVersion.V_4_4;
             case "5.0":
                 return Neo4jVersion.V_5_0;
-            case "5.1":
             case "dev":
                 return Neo4jVersion.V_Dev;
             default:

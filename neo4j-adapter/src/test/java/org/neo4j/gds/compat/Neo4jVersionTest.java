@@ -40,7 +40,9 @@ class Neo4jVersionTest {
         "5.0.0, V_5_0",
         "5.0.0-drop08.0, V_5_0_drop80",
         "5.0.0-drop09.0, V_5_0_drop90",
+        "5.0.0-dev, V_Dev",
         "5.1.0-dev, V_Dev",
+        "5.2.0-dev, V_Dev",
         "dev, V_Dev",
     })
     void testParse(String input, Neo4jVersion expected) {
