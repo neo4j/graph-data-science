@@ -91,22 +91,27 @@ public class LeidenDendrogramManager {
                 }
             } while (!updatedMaxCurrentId);
 
-            dendrogram.set(
-                nodeId,
-                communityId
-            );
-            //recall: this array marks a node
-            //but disregards the numbering implied by any seeds.
+            setToAlgorithmDendrogram(dendrogram, nodeId, communityId);
+            //recall: this array marks the community of node
+            //but disregards the numbering implied by any seeds (works on the algorithm level).
 
             var reverseId = seedCommunityManager.mapToSeed(localMoveCommunities.get(communityId));
-            set(
+
+            setToOutputDendrogram(
                 nodeId,
                 reverseId
             ); //whereas here because this is final output, we need to take seeds into account
-            //and translate the community to be on par with the values of seeding.
+            //and translate the community to output format; for this we need to take the initial seeding values into acount
         });
 
         return ImmutableDendrogramResult.of(maxCommunityId.get(), dendrogram);
+    }
+
+    private static void setToAlgorithmDendrogram(HugeLongArray dendrogram, long nodeId, long communityId) {
+        dendrogram.set(
+            nodeId,
+            communityId
+        );
     }
 
     private void prepareNextLevel(int iteration) {
@@ -116,7 +121,7 @@ public class LeidenDendrogramManager {
         }
     }
 
-    private void set(long nodeId, long communityId) {
+    private void setToOutputDendrogram(long nodeId, long communityId) {
         dendrograms[currentIndex].set(nodeId, communityId);
     }
 
