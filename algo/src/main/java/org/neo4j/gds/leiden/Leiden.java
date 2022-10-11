@@ -196,7 +196,7 @@ public class Leiden extends Algorithm<LeidenResult> {
 
     @NotNull
     private LeidenResult getLeidenResult(boolean didConverge, int iteration) {
-        boolean seedIsOptimal = didConverge & seedValues.isPresent() && iteration == 0;
+        boolean seedIsOptimal = didConverge && seedValues.isPresent() && iteration == 0;
         if (seedIsOptimal) {
             var modularity = modularities[0];
             return LeidenResult.of(
@@ -228,7 +228,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         boolean didConverge,
         int iteration
     ) {
-        boolean seedIsOptimal = didConverge & seedValues.isPresent() && iteration == 0;
+        boolean seedIsOptimal = didConverge && seedValues.isPresent() && iteration == 0;
         boolean shouldCalculateModularity = !didConverge || seedIsOptimal;
 
         if (shouldCalculateModularity) {
