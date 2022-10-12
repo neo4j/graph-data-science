@@ -277,7 +277,7 @@ public final class CypherAggregation extends BaseProc {
         ) {
             boolean hasLabelInformation = !(sourceNodeLabels == null && targetNodeLabels == null);
             boolean hasProperties = !(sourceNodeProperties == null && targetNodeProperties == null);
-            return new LazyIdMapBuilder(hasLabelInformation, hasProperties);
+            return new LazyIdMapBuilder(DEFAULT_CONCURRENCY, hasLabelInformation, hasProperties);
         }
 
         private void validateGraphName(String graphName) {
