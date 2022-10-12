@@ -82,37 +82,39 @@ class NodeSimilarityTerminationTest extends BaseTest {
     ) {
         assert sleepMillis >= 100 && sleepMillis <= 10_000;
 
-        var timeoutTx = db.beginTx(10, TimeUnit.SECONDS);
-        KernelTransaction kernelTx = ((InternalTransaction) timeoutTx).kernelTransaction();
-        algorithm.setTerminationFlag(new TestTerminationFlag(kernelTx, sleepMillis));
+        try (var timeoutTx = db.beginTx(10, TimeUnit.SECONDS)) {
+            var kernelTx = ((InternalTransaction) timeoutTx).kernelTransaction();
 
-        Runnable algorithmThread = () -> {
-            try {
-                algoConsumer.accept(algorithm);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        };
+            algorithm.setTerminationFlag(new TestTerminationFlag(kernelTx, sleepMillis));
 
-        Runnable interruptingThread = () -> {
-            try {
-                Thread.sleep(sleepMillis / 2);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            kernelTx.markForTermination(Status.Transaction.TransactionMarkedAsFailed);
-        };
-
-        assertThrows(
-            TransactionTerminatedException.class,
-            () -> {
+            Runnable algorithmThread = () -> {
                 try {
-                    ParallelUtil.run(Arrays.asList(algorithmThread, interruptingThread), Pools.DEFAULT);
-                } catch (RuntimeException e) {
-                    throw e.getCause();
+                    algoConsumer.accept(algorithm);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
-            }
-        );
+            };
+
+            Runnable interruptingThread = () -> {
+                try {
+                    Thread.sleep(sleepMillis / 2);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                kernelTx.markForTermination(Status.Transaction.TransactionMarkedAsFailed);
+            };
+
+            assertThrows(
+                TransactionTerminatedException.class,
+                () -> {
+                    try {
+                        ParallelUtil.run(Arrays.asList(algorithmThread, interruptingThread), Pools.DEFAULT);
+                    } catch (RuntimeException e) {
+                        throw e.getCause();
+                    }
+                }
+            );
+        }
     }
 
     static class TestTerminationFlag implements TerminationFlag {

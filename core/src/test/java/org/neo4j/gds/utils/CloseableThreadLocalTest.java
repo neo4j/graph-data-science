@@ -29,17 +29,19 @@ class CloseableThreadLocalTest {
 
     @Test
     void testInitValue() {
-        CloseableThreadLocal<String> tl = new CloseableThreadLocal<>(() -> TEST_VALUE);
-        String str = tl.get();
-        assertEquals(TEST_VALUE, str);
+        try (CloseableThreadLocal<String> tl = new CloseableThreadLocal<>(() -> TEST_VALUE)) {
+            var str = tl.get();
+            assertEquals(TEST_VALUE, str);
+        }
     }
 
     @Test
     void testNullValue() {
         // Tests that null can be set as a valid value (LUCENE-1805). This
         // previously failed in get().
-        CloseableThreadLocal<Object> ctl = new CloseableThreadLocal<>(() -> null);
-        ctl.set(null);
-        assertNull(ctl.get());
+        try (CloseableThreadLocal<Object> ctl = new CloseableThreadLocal<>(() -> null)) {
+            ctl.set(null);
+            assertNull(ctl.get());
+        }
     }
 }
