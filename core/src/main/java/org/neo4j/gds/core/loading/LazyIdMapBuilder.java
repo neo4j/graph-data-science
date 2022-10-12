@@ -42,9 +42,10 @@ public final class LazyIdMapBuilder implements PartialIdMap {
 
     private final NodesBuilder nodesBuilder;
 
-    public LazyIdMapBuilder(boolean hasLabelInformation, boolean hasProperties) {
-        this.intermediateIdMapBuilder = ShardedLongLongMap.builder(DEFAULT_CONCURRENCY);
+    public LazyIdMapBuilder(int concurrency, boolean hasLabelInformation, boolean hasProperties) {
+        this.intermediateIdMapBuilder = ShardedLongLongMap.builder(concurrency);
         this.nodesBuilder = GraphFactory.initNodesBuilder()
+            .concurrency(concurrency)
             .maxOriginalId(NodesBuilder.UNKNOWN_MAX_ID)
             .hasLabelInformation(hasLabelInformation)
             .hasProperties(hasProperties)
