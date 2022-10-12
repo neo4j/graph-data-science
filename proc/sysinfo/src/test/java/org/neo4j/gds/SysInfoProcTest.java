@@ -146,9 +146,7 @@ class SysInfoProcTest extends BaseProcTest {
                     "Neo4j Settings 5.1 (placeholder)",
                     "Neo4j Settings 5.1",
                     "Neo4j 5.1 (placeholder)",
-                    "Neo4j 5.1",
-                    "Neo4j 5.1.0",
-                    "Neo4j Settings 5.1.0"
+                    "Neo4j 5.1"
                 );
                 break;
             case V_Dev:
