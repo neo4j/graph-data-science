@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.HugeSparseDoubleArrayArray;
@@ -70,7 +71,7 @@ public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder
     }
 
     @Override
-    public DoubleArrayNodePropertyValues build(long size, IdMap idMap) {
+    public DoubleArrayNodePropertyValues build(long size, PartialIdMap idMap, long highestOriginalId) {
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseDoubleArrayArray.builder(
@@ -85,7 +86,7 @@ public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder
             while (drainingIterator.next(batch)) {
                 var page = batch.page;
                 var offset = batch.offset;
-                var end = Math.min(offset + page.length, idMap.highestOriginalId() + 1) - offset;
+                var end = Math.min(offset + page.length, highestOriginalId + 1) - offset;
 
                 for (int pageIndex = 0; pageIndex < end; pageIndex++) {
                     var neoId = offset + pageIndex;
