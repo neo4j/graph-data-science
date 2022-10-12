@@ -20,10 +20,11 @@
 package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PartialIdMap;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.loading.construction.ImmutableIdMapAndProperties;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
@@ -31,10 +32,9 @@ import org.neo4j.gds.core.utils.paged.ShardedLongLongMap;
 import org.neo4j.values.storable.Value;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.neo4j.gds.config.ConcurrencyConfig.DEFAULT_CONCURRENCY;
 
 public final class LazyIdMapBuilder implements PartialIdMap {
     private final AtomicBoolean isEmpty = new AtomicBoolean(true);
@@ -103,6 +103,10 @@ public final class LazyIdMapBuilder implements PartialIdMap {
         return originalNodeId;
     }
 
+    public long toIntermediateId(long originalId) {
+        return this.intermediateIdMapBuilder.toMappedNodeId(originalId);
+    }
+
     @Override
     public OptionalLong rootNodeCount() {
         return isEmpty.getAcquire()
@@ -110,16 +114,43 @@ public final class LazyIdMapBuilder implements PartialIdMap {
             : OptionalLong.of(this.nodesBuilder.importedNodes());
     }
 
-    public NodesBuilder.IdMapAndProperties build() {
+    @ValueClass
+    public interface HighLimitIdMapAndProperties {
+        HighLimitIdMap idMap();
+
+        PartialIdMap intermediateIdMap();
+
+        Optional<Map<String, NodePropertyValues>> nodeProperties();
+    }
+
+    public HighLimitIdMapAndProperties build() {
         var idMapAndProperties = this.nodesBuilder.build();
         var intermediateIdMap = this.intermediateIdMapBuilder.build();
+        // The implementation of this map depends on either CE/EE or a feature toggle.
         var internalIdMap = idMapAndProperties.idMap();
 
         var idMap = new HighLimitIdMap(intermediateIdMap, internalIdMap);
 
-        return ImmutableIdMapAndProperties
+        var partialIdMap = new PartialIdMap() {
+            @Override
+            public long toMappedNodeId(long intermediateId) {
+                // This partial id map is used to construct the final node properties.
+                // During import, the node properties are indexed by the intermediate id
+                // produced by the LazyIdMap. To get the correct mapped id, we have to
+                // go through the actual high limit id map.
+                return idMap.toMappedNodeId(intermediateIdMap.toOriginalNodeId(intermediateId));
+            }
+
+            @Override
+            public OptionalLong rootNodeCount() {
+                return OptionalLong.of(intermediateIdMap.size());
+            }
+        };
+
+        return ImmutableHighLimitIdMapAndProperties
             .builder()
             .idMap(idMap)
+            .intermediateIdMap(partialIdMap)
             .nodeProperties(idMapAndProperties.nodeProperties())
             .build();
     }

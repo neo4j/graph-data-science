@@ -94,7 +94,7 @@ public final class NodePropertiesFromStoreBuilder {
             }
         }
 
-        return innerBuilder.get().build(this.size.sum(), idMap);
+        return innerBuilder.get().build(this.size.sum(), idMap, idMap.highestOriginalId());
     }
 
     // This is synchronized as we want to prevent the creation of multiple InnerNodePropertiesBuilders of which only once survives.
