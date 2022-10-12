@@ -31,11 +31,7 @@ import org.neo4j.gds.annotation.ReturnType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.GraphStoreFactory;
-import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.IdMapAdapter;
-import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.ImmutableGraphSchema;
@@ -50,16 +46,14 @@ import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
+import org.neo4j.gds.core.loading.LazyIdMapBuilder;
 import org.neo4j.gds.core.loading.ReadHelper;
 import org.neo4j.gds.core.loading.ValueConverter;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.loading.construction.ImmutableIdMapAndProperties;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
-import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.paged.ShardedLongLongMap;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
@@ -73,16 +67,13 @@ import org.neo4j.values.storable.Values;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.OptionalLong;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
@@ -745,154 +736,5 @@ public final class CypherAggregation extends BaseProc {
 
         @Configuration.ToMap
         Map<String, Object> toMap();
-    }
-}
-
-class HighLimitIdMap extends IdMapAdapter {
-
-    private final ShardedLongLongMap highToLowIdSpace;
-
-    HighLimitIdMap(ShardedLongLongMap intermediateIdMap, IdMap internalIdMap) {
-        super(internalIdMap);
-        this.highToLowIdSpace = intermediateIdMap;
-    }
-
-    @Override
-    public long toOriginalNodeId(long mappedNodeId) {
-        return highToLowIdSpace.toOriginalNodeId(super.toOriginalNodeId(mappedNodeId));
-    }
-
-    @Override
-    public long toMappedNodeId(long originalNodeId) {
-        return super.toMappedNodeId(this.highToLowIdSpace.toMappedNodeId(originalNodeId));
-    }
-
-    @Override
-    public long toRootNodeId(long mappedNodeId) {
-        return highToLowIdSpace.toOriginalNodeId(super.toRootNodeId(mappedNodeId));
-    }
-
-    @Override
-    public boolean contains(long originalNodeId) {
-        return super.contains(highToLowIdSpace.toMappedNodeId(originalNodeId));
-    }
-
-    @Override
-    public long highestOriginalId() {
-        return highToLowIdSpace.maxOriginalId();
-    }
-
-    @Override
-    public Optional<FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
-        return super.withFilteredLabels(nodeLabels, concurrency)
-            .map(filteredIdMap -> new FilteredHighLimitIdMap(this.highToLowIdSpace, filteredIdMap));
-    }
-}
-
-final class FilteredHighLimitIdMap extends HighLimitIdMap implements FilteredIdMap {
-
-    private final FilteredIdMap filteredIdMap;
-
-    FilteredHighLimitIdMap(ShardedLongLongMap intermediateIdMap, FilteredIdMap filteredIdMap) {
-        super(intermediateIdMap, filteredIdMap);
-        this.filteredIdMap = filteredIdMap;
-    }
-
-    @Override
-    public long toFilteredNodeId(long rootNodeId) {
-        return filteredIdMap.toFilteredNodeId(rootNodeId);
-    }
-
-    @Override
-    public boolean containsRootNodeId(long rootNodeId) {
-        return filteredIdMap.containsRootNodeId(rootNodeId);
-    }
-}
-
-final class LazyIdMapBuilder implements PartialIdMap {
-    private final AtomicBoolean isEmpty = new AtomicBoolean(true);
-    private final ShardedLongLongMap.Builder intermediateIdMapBuilder;
-
-    private final NodesBuilder nodesBuilder;
-
-    LazyIdMapBuilder(boolean hasLabelInformation, boolean hasProperties) {
-        this.intermediateIdMapBuilder = ShardedLongLongMap.builder(DEFAULT_CONCURRENCY);
-        this.nodesBuilder = GraphFactory.initNodesBuilder()
-            .maxOriginalId(NodesBuilder.UNKNOWN_MAX_ID)
-            .hasLabelInformation(hasLabelInformation)
-            .hasProperties(hasProperties)
-            .deduplicateIds(false)
-            .build();
-    }
-
-    long addNode(long nodeId, @Nullable NodeLabelToken nodeLabels) {
-        var intermediateId = this.intermediateIdMapBuilder.toMappedNodeId(nodeId);
-
-        // deduplication
-        if (intermediateId != IdMap.NOT_FOUND) {
-            return intermediateId;
-        }
-
-        intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
-
-        isEmpty.lazySet(false);
-        if (nodeLabels == null) {
-            nodeLabels = NodeLabelTokens.empty();
-        }
-        this.nodesBuilder.addNode(intermediateId, nodeLabels);
-
-        return intermediateId;
-    }
-
-    long addNodeWithProperties(
-        long nodeId,
-        Map<String, Value> properties,
-        @Nullable NodeLabelToken nodeLabels
-    ) {
-        var intermediateId = this.intermediateIdMapBuilder.toMappedNodeId(nodeId);
-
-        // deduplication
-        if (intermediateId != IdMap.NOT_FOUND) {
-            return intermediateId;
-        }
-
-        intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
-        isEmpty.lazySet(false);
-        if (nodeLabels == null) {
-            nodeLabels = NodeLabelTokens.empty();
-        }
-        if (properties.isEmpty()) {
-            this.nodesBuilder.addNode(intermediateId, nodeLabels);
-        } else {
-            this.nodesBuilder.addNode(intermediateId, properties, nodeLabels);
-        }
-
-        return intermediateId;
-    }
-
-    @Override
-    public long toMappedNodeId(long originalNodeId) {
-        return originalNodeId;
-    }
-
-    @Override
-    public OptionalLong rootNodeCount() {
-        return isEmpty.getAcquire()
-            ? OptionalLong.empty()
-            : OptionalLong.of(this.nodesBuilder.importedNodes());
-    }
-
-    NodesBuilder.IdMapAndProperties build() {
-        var idMapAndProperties = this.nodesBuilder.build();
-        var intermediateIdMap = this.intermediateIdMapBuilder.build();
-        var internalIdMap = idMapAndProperties.idMap();
-
-        var idMap = new HighLimitIdMap(intermediateIdMap, internalIdMap);
-
-        return ImmutableIdMapAndProperties
-            .builder()
-            .idMap(idMap)
-            .nodeProperties(idMapAndProperties.nodeProperties())
-            .build();
     }
 }
