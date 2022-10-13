@@ -16,10 +16,10 @@ Time to upgrade!
 .2+<.^|`2.2`
 | `4.4`, at least `4.4.9`
 | `4.3`, at least `4.3.15`
-.2+<.^|`2.1`
+.2+<.^|`2.1` footnote:eol[This version series is end-of-life and will not receive further patches. Please use a later version.]
 | `4.4`
 | `4.3`
-.4+<.^|`1.8` footnote:eol[This version series is end-of-life and will not receive further patches. Please use a later version.]
+.4+<.^|`1.8` footnote:eol[]
 | `4.4`
 | `4.3`
 | `4.2`
