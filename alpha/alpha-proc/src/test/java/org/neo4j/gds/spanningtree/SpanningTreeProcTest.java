@@ -17,11 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.spanningtree;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.SettingImpl;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.NonReleasingTaskRegistry;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.Settings;
@@ -30,8 +35,6 @@ import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.write.NativeRelationshipExporterBuilder;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.spanningtree.SpanningTreeProcMax;
-import org.neo4j.gds.spanningtree.SpanningTreeProcMin;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
