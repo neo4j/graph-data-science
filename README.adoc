@@ -123,7 +123,7 @@ For the most basic set of features, like graph loading and the graph representat
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>core</artifactId>
-  <version>2.2.0</version>
+  <version>2.2.1</version>
 </dependency>
 ----
 
@@ -135,21 +135,21 @@ The algorithms are located in the `algo-common`, `algo` and `alpha-algo` modules
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>algo-common</artifactId>
-  <version>2.2.0</version>
+  <version>2.2.1</version>
 </dependency>
 
 <!-- Contains the productized algorithms -->
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>algo</artifactId>
-  <version>2.2.0</version>
+  <version>2.2.1</version>
 </dependency>
 
 <!-- Contains some alpha algorithms -->
 <dependency>
     <groupId>org.neo4j.gds</groupId>
     <artifactId>alpha-algo</artifactId>
-    <version>2.2.0</version>
+    <version>2.2.1</version>
 </dependency>
 ----
 
@@ -161,28 +161,28 @@ The procedures are located in the `proc-common`, `proc` and `alpha-proc` modules
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>proc-common</artifactId>
-  <version>2.2.0</version>
+  <version>2.2.1</version>
 </dependency>
 
 <!-- Contains the productized algorithm procedures -->
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>proc</artifactId>
-  <version>2.2.0</version>
+  <version>2.2.1</version>
 </dependency>
 
 <!-- Contains some alpha algorithm procedures-->
 <dependency>
     <groupId>org.neo4j.gds</groupId>
     <artifactId>alpha-proc</artifactId>
-    <version>2.2.0</version>
+    <version>2.2.1</version>
 </dependency>
 
 <!-- Required by the write execution modes, this artifact is responsible for providing the various exporters -->
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>write-services</artifactId>
-  <version>2.2.0</version>
+  <version>2.2.1</version>
 </dependency>
 ----
 
