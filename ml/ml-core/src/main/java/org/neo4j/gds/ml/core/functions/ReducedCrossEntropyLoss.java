@@ -43,13 +43,15 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
     private final Weights<Vector> bias;
     private final Variable<Matrix> features;
     private final Variable<Vector> labels;
+    private final double focusWeight;
 
     public ReducedCrossEntropyLoss(
         Variable<Matrix> predictions,
         Variable<Matrix> weights,
         Weights<Vector> bias,
         Variable<Matrix> features,
-        Variable<Vector> labels
+        Variable<Vector> labels,
+        double focusWeight
     ) {
         super(
             List.of(weights, features, labels, bias),
@@ -61,6 +63,7 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
         this.features = features;
         this.labels = labels;
         this.bias = bias;
+        this.focusWeight = focusWeight;
     }
 
     public static long sizeInBytes() {
@@ -78,7 +81,8 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
             var trueClass = (int) labelsVector.dataAt(row);
             var predictedProbabilityForTrueClass = predictionsMatrix.dataAt(row, trueClass);
             if (predictedProbabilityForTrueClass > 0) {
-                result += Math.log(predictedProbabilityForTrueClass);
+                double focalFactor = Math.pow(1 - predictedProbabilityForTrueClass, focusWeight);
+                result += focalFactor * Math.log(predictedProbabilityForTrueClass);
             }
         }
         return new Scalar(-result / predictionsMatrix.rows());

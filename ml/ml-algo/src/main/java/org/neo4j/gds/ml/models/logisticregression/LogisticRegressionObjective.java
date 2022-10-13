@@ -133,7 +133,8 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
             classifier.data().weights(),
             classifier.data().bias(),
             batchFeatures,
-            batchLabels
+            batchLabels,
+            0
         );
     }
 
