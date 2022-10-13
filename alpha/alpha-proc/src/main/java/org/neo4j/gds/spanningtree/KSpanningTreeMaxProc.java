@@ -21,6 +21,7 @@ package org.neo4j.gds.spanningtree;
 
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.impl.spanningTrees.KSpanningTreeConfig;
 import org.neo4j.gds.impl.spanningTrees.Prim;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
