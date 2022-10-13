@@ -17,28 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.spanningtree;
+package org.neo4j.gds.impl.spanningtree;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.function.DoubleUnaryOperator;
 
 @Configuration
-public interface SpanningTreeConfig extends SpanningTreeBaseConfig
-{
-    String WRITE_RELATIONSHIP_TYPE = "MST";
+public interface KSpanningTreeConfig extends SpanningTreeBaseConfig {
 
-    String weightWriteProperty();
+    long k();
 
-    @Value.Default
-    @Value.Derived
+    @Override
     default String writeProperty() {
-        return WRITE_RELATIONSHIP_TYPE;
+        return "partition";
     }
 
-    static SpanningTreeConfig of(DoubleUnaryOperator minMax, CypherMapWrapper userInput) {
-        return new SpanningTreeConfigImpl(minMax, userInput);
+    static KSpanningTreeConfig of(DoubleUnaryOperator minMax, CypherMapWrapper userInput) {
+        return new KSpanningTreeConfigImpl(minMax, userInput);
     }
 }

@@ -17,24 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.spanningtree;
+package org.neo4j.gds.impl.spanningtree;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.config.WritePropertyConfig;
 
 import java.util.function.DoubleUnaryOperator;
 
-@Configuration
-public interface KSpanningTreeConfig extends SpanningTreeBaseConfig {
+public interface SpanningTreeBaseConfig extends
+    AlgoBaseConfig,
+    WritePropertyConfig,
+    RelationshipWeightConfig
+{
+    long startNodeId();
 
-    long k();
-
-    @Override
-    default String writeProperty() {
-        return KSpanningTreeProc.DEFAULT_CLUSTER_PROPERTY;
-    }
-
-    static KSpanningTreeConfig of(DoubleUnaryOperator minMax, CypherMapWrapper userInput) {
-        return new KSpanningTreeConfigImpl(minMax, userInput);
-    }
+    @Configuration.Parameter
+    DoubleUnaryOperator minMax();
 }
