@@ -32,10 +32,10 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.executor.ComputationResultConsumer;
-import org.neo4j.gds.impl.spanningTree.KSpanningTree;
-import org.neo4j.gds.impl.spanningTree.KSpanningTreeConfig;
-import org.neo4j.gds.impl.spanningTree.Prim;
-import org.neo4j.gds.impl.spanningTree.SpanningTree;
+import org.neo4j.gds.impl.spanningtree.KSpanningTree;
+import org.neo4j.gds.impl.spanningtree.KSpanningTreeConfig;
+import org.neo4j.gds.impl.spanningtree.Prim;
+import org.neo4j.gds.impl.spanningtree.SpanningTree;
 import org.neo4j.gds.utils.InputNodeValidator;
 
 import java.util.stream.Stream;
