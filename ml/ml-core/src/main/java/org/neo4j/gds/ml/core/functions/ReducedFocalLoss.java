@@ -32,24 +32,26 @@ import java.util.List;
 import static org.neo4j.gds.ml.core.Dimensions.scalar;
 
 /**
- * Computes cross entropy loss given weights, bias, predictions, features and labels,
+ * Computes focal loss given weights, bias, predictions, features and labels,
  * where it is assumed that predictions contain only values for all classes but the last one,
  * in practice, the output of ReducedSoftmax.
  */
-public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
+public class ReducedFocalLoss extends AbstractVariable<Scalar> {
 
     private final Variable<Matrix> predictions;
     private final Variable<Matrix> weights;
     private final Weights<Vector> bias;
     private final Variable<Matrix> features;
     private final Variable<Vector> labels;
+    private final double focusWeight;
 
-    public ReducedCrossEntropyLoss(
+    public ReducedFocalLoss(
         Variable<Matrix> predictions,
         Variable<Matrix> weights,
         Weights<Vector> bias,
         Variable<Matrix> features,
-        Variable<Vector> labels
+        Variable<Vector> labels,
+        double focusWeight
     ) {
         super(
             List.of(weights, features, labels, bias),
@@ -61,6 +63,7 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
         this.features = features;
         this.labels = labels;
         this.bias = bias;
+        this.focusWeight = focusWeight;
     }
 
     public static long sizeInBytes() {
@@ -78,7 +81,8 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
             var trueClass = (int) labelsVector.dataAt(row);
             var predictedProbabilityForTrueClass = predictionsMatrix.dataAt(row, trueClass);
             if (predictedProbabilityForTrueClass > 0) {
-                result += Math.log(predictedProbabilityForTrueClass);
+                double focalFactor = Math.pow(1 - predictedProbabilityForTrueClass, focusWeight);
+                result += focalFactor * Math.log(predictedProbabilityForTrueClass);
             }
         }
         return new Scalar(-result / predictionsMatrix.rows());
@@ -133,3 +137,4 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
         }
     }
 }
+
