@@ -110,8 +110,21 @@ public class ReducedFocalLoss extends AbstractVariable<Scalar> {
                     double predictedClassProbability = predMatrix.dataAt(row, classIdx);
                     var indicatorIsTrueClass = trueClass == classIdx ? 1.0 : 0.0;
                     var errorPerExample = (predictedClassProbability - indicatorIsTrueClass) / numberOfExamples;
+
+                    var predictedProbabilityForTrueClass = 0.0;
+                    if (trueClass == classIdx) {
+                        predictedProbabilityForTrueClass = predictedClassProbability;
+                    }  else {
+                        //TODO modify for non-binary
+                        predictedProbabilityForTrueClass = 1.0 - predictedClassProbability;
+                    }
+
+                    var focalLossPerExample = (focusWeight * Math.pow(1.0-predictedProbabilityForTrueClass, focusWeight-1.0) * Math.log(predictedProbabilityForTrueClass)
+                                               - Math.pow(1.0-predictedProbabilityForTrueClass,focusWeight)/predictedProbabilityForTrueClass)
+                                              * (predictedProbabilityForTrueClass * (indicatorIsTrueClass - predictedClassProbability)) / numberOfExamples;
+
                     for (int feature = 0; feature < featureCount; feature++) {
-                        gradient.addDataAt(classIdx, feature, selfGradient * errorPerExample * featureMatrix.dataAt(row, feature));
+                        gradient.addDataAt(classIdx, feature, selfGradient * focalLossPerExample * featureMatrix.dataAt(row, feature));
                     }
                 }
             }
@@ -127,7 +140,20 @@ public class ReducedFocalLoss extends AbstractVariable<Scalar> {
                     double predictedClassProbability = predMatrix.dataAt(row, classIdx);
                     var indicatorIsTrueClass = trueClass == classIdx ? 1.0 : 0.0;
                     var errorPerExample = (predictedClassProbability - indicatorIsTrueClass) / numberOfExamples;
-                    gradient.addDataAt(classIdx, selfGradient * errorPerExample);
+
+                    var predictedProbabilityForTrueClass = 0.0;
+                    if (trueClass == classIdx) {
+                        predictedProbabilityForTrueClass = predictedClassProbability;
+                    }  else {
+                        //TODO modify for non-binary
+                        predictedProbabilityForTrueClass = 1.0 - predictedClassProbability;
+                    }
+
+                    var focalLossPerExample = (focusWeight * Math.pow(1.0-predictedProbabilityForTrueClass, focusWeight-1.0) * Math.log(predictedProbabilityForTrueClass)
+                                               - Math.pow(1.0-predictedProbabilityForTrueClass,focusWeight)/predictedProbabilityForTrueClass)
+                                              * (predictedProbabilityForTrueClass * (indicatorIsTrueClass - predictedClassProbability)) / numberOfExamples;
+
+                    gradient.addDataAt(classIdx, selfGradient * focalLossPerExample);
                 }
             }
             return gradient;

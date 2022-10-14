@@ -120,7 +120,7 @@ class ReducedFocalLossTest implements FiniteDifferenceTest {
 
     @Test
     void shouldComputeGradientCorrectlyReduced() {
-        var weights = new Weights<>(new Matrix(new double[]{0.35, 0.41, 1.0, 0.1, 0.54, 0.12, 0.81, 0.7}, 2, 4));
+        var weights = new Weights<>(new Matrix(new double[]{0.35, 0.41, 1.0, 0.1}, 1, 4));
         var features = Constant.matrix(
             new double[]{0.23, 0.52, 0.62, 0.32, 0.64, 0.71, 0.29, -0.52, 0.12, -0.92, 0.6, -0.11},
             3,
@@ -128,11 +128,11 @@ class ReducedFocalLossTest implements FiniteDifferenceTest {
         );
 
         var weightedFeatures = new MatrixMultiplyWithTransposedSecondOperand(features, weights);
-        var bias = Weights.ofVector(0.37, 0.37);
+        var bias = Weights.ofVector(0.37);
         var affineVariable = new MatrixVectorSum(weightedFeatures, bias);
 
         var predictions = new ReducedSoftmax(affineVariable);
-        var labels = Constant.vector(new double[]{1.0, 0.0, 2.0});
+        var labels = Constant.vector(new double[]{1.0, 0.0, 0.0});
 
         var loss = new ReducedFocalLoss(
             predictions,
@@ -140,7 +140,7 @@ class ReducedFocalLossTest implements FiniteDifferenceTest {
             bias,
             features,
             labels,
-            0
+            50
         );
 
         finiteDifferenceShouldApproximateGradient(List.of(bias, weights), loss);
