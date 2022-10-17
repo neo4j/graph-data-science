@@ -6,8 +6,6 @@
 
 include::partial$/operations-reference/alpha-note.adoc[]
 
-include::partial$/common-usage/not-on-aurads-note.adoc[]
-
 Projecting graphs via https://arrow.apache.org/[Apache Arrow] allows importing graph data which is stored outside of Neo4j.
 Apache Arrow is a language-agnostic in-memory, columnar data structure specification.
 With Arrow Flight, it also contains a protocol for serialization and generic data transport.
