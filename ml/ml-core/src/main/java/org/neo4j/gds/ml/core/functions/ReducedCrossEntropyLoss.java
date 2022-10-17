@@ -68,7 +68,7 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
     }
 
     @Override
-    public Scalar apply(ComputationContext ctx) {
+    public final Scalar apply(ComputationContext ctx) {
         // manually call forward as `predictions` is not registered as a parent
         var predictionsMatrix = ctx.forward(predictions);
         var labelsVector = ctx.data(labels);
@@ -78,14 +78,18 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
             var trueClass = (int) labelsVector.dataAt(row);
             var predictedProbabilityForTrueClass = predictionsMatrix.dataAt(row, trueClass);
             if (predictedProbabilityForTrueClass > 0) {
-                result += Math.log(predictedProbabilityForTrueClass);
+                result += computeIndividualLoss(predictedProbabilityForTrueClass);
             }
         }
         return new Scalar(-result / predictionsMatrix.rows());
     }
 
+    double computeIndividualLoss(double predictedProbabilityForTrueClass) {
+        return Math.log(predictedProbabilityForTrueClass);
+    }
+
     @Override
-    public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
+    public final Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
         // manually call forward as `predictions` is not registered as a parent
         var predMatrix = ctx.forward(predictions);
         var labelsVector = ctx.data(labels);
@@ -105,7 +109,11 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
                 for (int classIdx = 0; classIdx < reducedClassCount; classIdx++) {
                     double predictedClassProbability = predMatrix.dataAt(row, classIdx);
                     var indicatorIsTrueClass = trueClass == classIdx ? 1.0 : 0.0;
-                    var errorPerExample = (predictedClassProbability - indicatorIsTrueClass) / numberOfExamples;
+                    double errorPerExample = computeErrorPerExample(
+                        numberOfExamples,
+                        predictedClassProbability,
+                        indicatorIsTrueClass
+                    );
                     for (int feature = 0; feature < featureCount; feature++) {
                         gradient.addDataAt(classIdx, feature, selfGradient * errorPerExample * featureMatrix.dataAt(row, feature));
                     }
@@ -122,7 +130,11 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
                 for (int classIdx = 0; classIdx < reducedClassCount; classIdx++) {
                     double predictedClassProbability = predMatrix.dataAt(row, classIdx);
                     var indicatorIsTrueClass = trueClass == classIdx ? 1.0 : 0.0;
-                    var errorPerExample = (predictedClassProbability - indicatorIsTrueClass) / numberOfExamples;
+                    double errorPerExample = computeErrorPerExample(
+                        numberOfExamples,
+                        predictedClassProbability,
+                        indicatorIsTrueClass
+                    );
                     gradient.addDataAt(classIdx, selfGradient * errorPerExample);
                 }
             }
@@ -131,5 +143,13 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
             throw new IllegalStateException(
                 "The gradient should only be computed for the bias and the weights parents, but got " + parent.render());
         }
+    }
+
+    double computeErrorPerExample(
+        int numberOfExamples,
+        double predictedClassProbability,
+        double indicatorIsTrueClass
+    ) {
+        return (predictedClassProbability - indicatorIsTrueClass) / numberOfExamples;
     }
 }

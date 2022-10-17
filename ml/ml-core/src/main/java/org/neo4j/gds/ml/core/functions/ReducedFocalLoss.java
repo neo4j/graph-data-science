@@ -19,30 +19,18 @@
  */
 package org.neo4j.gds.ml.core.functions;
 
-import org.neo4j.gds.ml.core.AbstractVariable;
-import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
-import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
-
-import java.util.List;
-
-import static org.neo4j.gds.ml.core.Dimensions.scalar;
 
 /**
  * Computes focal loss given weights, bias, predictions, features and labels,
  * where it is assumed that predictions contain only values for all classes but the last one,
  * in practice, the output of ReducedSoftmax.
  */
-public class ReducedFocalLoss extends AbstractVariable<Scalar> {
+public class ReducedFocalLoss extends ReducedCrossEntropyLoss {
 
-    private final Variable<Matrix> predictions;
-    private final Variable<Matrix> weights;
-    private final Weights<Vector> bias;
-    private final Variable<Matrix> features;
-    private final Variable<Vector> labels;
     private final double focusWeight;
 
     public ReducedFocalLoss(
@@ -53,16 +41,7 @@ public class ReducedFocalLoss extends AbstractVariable<Scalar> {
         Variable<Vector> labels,
         double focusWeight
     ) {
-        super(
-            List.of(weights, features, labels, bias),
-            scalar()
-        );
-
-        this.weights = weights;
-        this.predictions = predictions;
-        this.features = features;
-        this.labels = labels;
-        this.bias = bias;
+        super(predictions,weights,bias,features,labels);
         this.focusWeight = focusWeight;
     }
 
@@ -71,96 +50,28 @@ public class ReducedFocalLoss extends AbstractVariable<Scalar> {
     }
 
     @Override
-    public Scalar apply(ComputationContext ctx) {
-        // manually call forward as `predictions` is not registered as a parent
-        var predictionsMatrix = ctx.forward(predictions);
-        var labelsVector = ctx.data(labels);
-
-        double result = 0;
-        for (int row = 0; row < labelsVector.totalSize(); row++) {
-            var trueClass = (int) labelsVector.dataAt(row);
-            var predictedProbabilityForTrueClass = predictionsMatrix.dataAt(row, trueClass);
-            if (predictedProbabilityForTrueClass > 0) {
-                double focalFactor = Math.pow(1 - predictedProbabilityForTrueClass, focusWeight);
-                result += focalFactor * Math.log(predictedProbabilityForTrueClass);
-            }
-        }
-        return new Scalar(-result / predictionsMatrix.rows());
+    double computeIndividualLoss(double predictedProbabilityForTrueClass) {
+        double focalFactor = Math.pow(1 - predictedProbabilityForTrueClass, focusWeight);
+        return focalFactor * Math.log(predictedProbabilityForTrueClass);
     }
 
     @Override
-    public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
-        // manually call forward as `predictions` is not registered as a parent
-        var predMatrix = ctx.forward(predictions);
-        var labelsVector = ctx.data(labels);
-        int numberOfExamples = labelsVector.length();
-
-        var selfGradient = ctx.gradient(this).value();
-
-        if (parent == weights) {
-            var weightsMatrix = ctx.data(weights);
-            var featureMatrix = ctx.data(features);
-            var gradient = weightsMatrix.createWithSameDimensions();
-            int featureCount = weightsMatrix.cols();
-            int reducedClassCount = weightsMatrix.rows();
-
-            for (int row = 0; row < numberOfExamples; row++) {
-                int trueClass = (int) labelsVector.dataAt(row);
-                for (int classIdx = 0; classIdx < reducedClassCount; classIdx++) {
-                    double predictedClassProbability = predMatrix.dataAt(row, classIdx);
-                    var indicatorIsTrueClass = trueClass == classIdx ? 1.0 : 0.0;
-                    var errorPerExample = (predictedClassProbability - indicatorIsTrueClass) / numberOfExamples;
-
-                    var predictedProbabilityForTrueClass = 0.0;
-                    if (trueClass == classIdx) {
-                        predictedProbabilityForTrueClass = predictedClassProbability;
-                    }  else {
-                        //TODO modify for non-binary
-                        predictedProbabilityForTrueClass = 1.0 - predictedClassProbability;
-                    }
-
-                    var focalLossPerExample = (focusWeight * Math.pow(1.0-predictedProbabilityForTrueClass, focusWeight-1.0) * Math.log(predictedProbabilityForTrueClass)
-                                               - Math.pow(1.0-predictedProbabilityForTrueClass,focusWeight)/predictedProbabilityForTrueClass)
-                                              * (predictedProbabilityForTrueClass * (indicatorIsTrueClass - predictedClassProbability)) / numberOfExamples;
-
-                    for (int feature = 0; feature < featureCount; feature++) {
-                        gradient.addDataAt(classIdx, feature, selfGradient * focalLossPerExample * featureMatrix.dataAt(row, feature));
-                    }
-                }
-            }
-            return gradient;
-        } else if (parent == bias) {
-            var biasVector = ctx.data(parent);
-            var gradient = biasVector.createWithSameDimensions();
-            int reducedClassCount = biasVector.totalSize();
-
-            for (int row = 0; row < numberOfExamples; row++) {
-                int trueClass = (int) labelsVector.dataAt(row);
-                for (int classIdx = 0; classIdx < reducedClassCount; classIdx++) {
-                    double predictedClassProbability = predMatrix.dataAt(row, classIdx);
-                    var indicatorIsTrueClass = trueClass == classIdx ? 1.0 : 0.0;
-                    var errorPerExample = (predictedClassProbability - indicatorIsTrueClass) / numberOfExamples;
-
-                    var predictedProbabilityForTrueClass = 0.0;
-                    if (trueClass == classIdx) {
-                        predictedProbabilityForTrueClass = predictedClassProbability;
-                    }  else {
-                        //TODO modify for non-binary
-                        predictedProbabilityForTrueClass = 1.0 - predictedClassProbability;
-                    }
-
-                    var focalLossPerExample = (focusWeight * Math.pow(1.0-predictedProbabilityForTrueClass, focusWeight-1.0) * Math.log(predictedProbabilityForTrueClass)
-                                               - Math.pow(1.0-predictedProbabilityForTrueClass,focusWeight)/predictedProbabilityForTrueClass)
-                                              * (predictedProbabilityForTrueClass * (indicatorIsTrueClass - predictedClassProbability)) / numberOfExamples;
-
-                    gradient.addDataAt(classIdx, selfGradient * focalLossPerExample);
-                }
-            }
-            return gradient;
-        } else {
-            throw new IllegalStateException(
-                "The gradient should only be computed for the bias and the weights parents, but got " + parent.render());
+    double computeErrorPerExample(int numberOfExamples, double predictedClassProbability, double indicatorIsTrueClass) {
+        var predictedProbabilityForTrueClass = 0.0;
+        if (indicatorIsTrueClass == 1.0) {
+            predictedProbabilityForTrueClass = predictedClassProbability;
+        }  else {
+            //TODO modify for non-binary
+            predictedProbabilityForTrueClass = 1.0 - predictedClassProbability;
         }
+
+        var predictedProbabilityForFalseClass = 1.0-predictedProbabilityForTrueClass;
+        var chainRuleGradient = Math.pow(predictedProbabilityForFalseClass, focusWeight-1.0);
+
+        var focalLossPerExample = (focusWeight * chainRuleGradient * Math.log(predictedProbabilityForTrueClass)
+                                   - chainRuleGradient * predictedProbabilityForFalseClass/predictedProbabilityForTrueClass)
+                                  * (predictedProbabilityForTrueClass * (indicatorIsTrueClass - predictedClassProbability)) / numberOfExamples;
+        return focalLossPerExample;
     }
 }
 
