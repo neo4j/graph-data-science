@@ -6,8 +6,6 @@
 
 include::partial$/operations-reference/alpha-note.adoc[]
 
-include::partial$/common-usage/not-on-aurads-note.adoc[]
-
 The graphs in the Neo4j Graph Data Science Library support properties for nodes and relationships.
 One way to export those properties is using Cypher procedures.
 Those are documented in xref:graph-catalog-node-ops.adoc[Node operations] and xref:graph-catalog-relationship-ops.adoc[Relationship operations].
