@@ -28,6 +28,7 @@ import org.neo4j.gds.ml.core.functions.ElementSum;
 import org.neo4j.gds.ml.core.functions.L2NormSquared;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.ml.core.functions.ReducedCrossEntropyLoss;
+import org.neo4j.gds.ml.core.functions.ReducedFocalLoss;
 import org.neo4j.gds.ml.core.functions.Softmax;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -46,6 +47,8 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
     private final double penalty;
     private final Features features;
     private final HugeIntArray labels;
+
+    private final double focusWeight;
 
     @SuppressWarnings({"PointlessArithmeticExpression", "UnnecessaryLocalVariable"})
     public static long sizeOfBatchInBytes(boolean isReduced, int batchSize, int numberOfFeatures, int numberOfClasses) {
@@ -98,12 +101,14 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
         LogisticRegressionClassifier classifier,
         double penalty,
         Features features,
-        HugeIntArray labels
+        HugeIntArray labels,
+        double focusWeight
     ) {
         this.classifier = classifier;
         this.penalty = penalty;
         this.features = features;
         this.labels = labels;
+        this.focusWeight = focusWeight;
 
         assert features.size() > 0;
     }
@@ -128,13 +133,25 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
         var batchLabels = batchLabelVector(batch);
         var batchFeatures = Objective.batchFeatureMatrix(batch, features);
         var predictions = classifier.predictionsVariable(batchFeatures);
-        return new ReducedCrossEntropyLoss(
-            predictions,
-            classifier.data().weights(),
-            classifier.data().bias(),
-            batchFeatures,
-            batchLabels
-        );
+        if (focusWeight == 0.0) {
+            return new ReducedCrossEntropyLoss(
+                predictions,
+                classifier.data().weights(),
+                classifier.data().bias(),
+                batchFeatures,
+                batchLabels
+            );
+        } else {
+            return new ReducedFocalLoss(
+                predictions,
+                classifier.data().weights(),
+                classifier.data().bias(),
+                batchFeatures,
+                batchLabels,
+                focusWeight
+            );
+        }
+
     }
 
     @Override

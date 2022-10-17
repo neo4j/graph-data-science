@@ -106,7 +106,7 @@ public final class LogisticRegressionTrainer implements ClassifierTrainer {
             : standard(features.featureDimension(), numberOfClasses);
         var classifier = LogisticRegressionClassifier.from(data);
 
-        var objective = new LogisticRegressionObjective(classifier, trainConfig.penalty(), features, labels);
+        var objective = new LogisticRegressionObjective(classifier, trainConfig.penalty(), features, labels, 0);
         var training = new Training(trainConfig, progressTracker, messageLogLevel, trainSet.size(), terminationFlag);
         Supplier<BatchQueue> queueSupplier = () -> BatchQueue.fromArray(trainSet, trainConfig.batchSize());
 

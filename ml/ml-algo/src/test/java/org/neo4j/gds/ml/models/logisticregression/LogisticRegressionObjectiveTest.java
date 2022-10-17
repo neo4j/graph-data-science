@@ -26,13 +26,16 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.TestFeatures;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.RangeBatch;
+import org.neo4j.gds.ml.core.batch.SingletonBatch;
 import org.neo4j.gds.ml.core.functions.Constant;
+import org.neo4j.gds.ml.core.functions.ReducedFocalLoss;
 import org.neo4j.gds.ml.core.functions.ReducedSoftmax;
 import org.neo4j.gds.ml.core.functions.Softmax;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -95,25 +98,29 @@ class LogisticRegressionObjectiveTest {
             standardClassifier,
             1.0,
             features,
-            labels
+            labels,
+            0
         );
         this.reducedObjective = new LogisticRegressionObjective(
             reducedClassifier,
             1.0,
             features,
-            labels
+            labels,
+            0
         );
         this.trainedStandardObjective = new LogisticRegressionObjective(
             trainedStandardClassifier,
             1.0,
             features,
-            labels
+            labels,
+            0
         );
         this.trainedReducedObjective = new LogisticRegressionObjective(
             trainedReducedClassifier,
             1.0,
             features,
-            labels
+            labels,
+            0
         );
     }
 
@@ -263,5 +270,20 @@ class LogisticRegressionObjectiveTest {
         var expected = max(trainEpoch + weightGradient, evaluateLoss);
         assertThat(makeTargets).isEqualTo(Matrix.sizeInBytes(100, 1));
         assertThat(memoryUsageInBytes).isEqualTo(expected);
+    }
+
+    @Test
+    void shouldParseFocusWeight() {
+        var LRObjective = new LogisticRegressionObjective(LogisticRegressionClassifier.from(
+            LogisticRegressionData.standard(1, 1)
+        ), 0.0, new TestFeatures(new double[1][1]), HugeIntArray.newArray(1), 0);
+        var reducedCrossEntropyLoss = LRObjective.crossEntropyLoss(new SingletonBatch(0));
+        assertThat(reducedCrossEntropyLoss).isNotInstanceOf(ReducedFocalLoss.class);
+
+        var LRObjectiveWithFocus = new LogisticRegressionObjective(LogisticRegressionClassifier.from(
+            LogisticRegressionData.standard(1, 1)
+        ), 0.0, new TestFeatures(new double[1][1]), HugeIntArray.newArray(1), 5);
+        var reducedFocalLoss = LRObjectiveWithFocus.crossEntropyLoss(new SingletonBatch(0));
+        assertThat(reducedFocalLoss).isInstanceOf(ReducedFocalLoss.class);
     }
 }
