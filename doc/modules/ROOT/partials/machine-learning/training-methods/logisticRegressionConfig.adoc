@@ -1,5 +1,5 @@
 .Logistic regression configuration
-[opts="header",cols="4,5,2m,2,8"]
+[opts="header",cols="4m,5,2m,2,8"]
 |===
 | Name                | Type                            | Default         | Optional | Description
 
