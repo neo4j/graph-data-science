@@ -44,36 +44,36 @@ class NodeClassificationClassImbalanceTrainTest {
 
     @GdlGraph
     private static final String GRAPH =
-        "  (a1:N  {arrayProperty: [1.2, 0.0, 0.0],  moreOnes: 0, perfectBalance: 0})" +
-        ", (a2:N  {arrayProperty: [2.8, 0.0, 0.0],  moreOnes: 0, perfectBalance: 0})" +
-        ", (a3:N  {arrayProperty: [3.3, 0.0, 0.0],  moreOnes: 0, perfectBalance: 0})" +
-        ", (a4:N  {arrayProperty: [1.0, 0.0, 0.0],  moreOnes: 0, perfectBalance: 0})" +
-        ", (a5:N  {arrayProperty: [1.32, 0.0, 0.0], moreOnes: 0, perfectBalance: 0})" +
-        ", (a6:N  {arrayProperty: [1.3, 1.5, 0.0],  moreOnes: 0, perfectBalance: 1})" +
-        ", (a7:N  {arrayProperty: [5.3, 10.5, 0.0], moreOnes: 1, perfectBalance: 1})" +
-        ", (a8:N  {arrayProperty: [1.3, 2.5, 0.0],  moreOnes: 1, perfectBalance: 1})" +
-        ", (a9:N  {arrayProperty: [0.0, 66.8, 0.0], moreOnes: 1, perfectBalance: 1})" +
-        ", (a10:N {arrayProperty: [0.1, 2.8, 0.0],  moreOnes: 1, perfectBalance: 1})" +
-        ", (a11:N {arrayProperty: [0.66, 2.8, 9.92], moreOnes: 1, perfectBalance: 2})" +
-        ", (a12:N {arrayProperty: [2.0, 10.8, 2.22], moreOnes: 1, perfectBalance: 2})" +
-        ", (a13:N {arrayProperty: [5.0, 7.8, 19.92],  moreOnes: 1, perfectBalance: 2})" +
-        ", (a14:N {arrayProperty: [4.0, 5.8, 8.2],  moreOnes: 1, perfectBalance: 2})" +
-        ", (a15:N {arrayProperty: [1.0, 0.9, 1.0],  moreOnes: 1, perfectBalance: 2})";
+        "  (a1:N  {arrayProperty: [1.2, 0.0, 0.0],  moreOnes: 0, multiClass: 0})" +
+        ", (a2:N  {arrayProperty: [2.8, 0.0, 0.0],  moreOnes: 0, multiClass: 0})" +
+        ", (a3:N  {arrayProperty: [3.3, 0.0, 0.0],  moreOnes: 0, multiClass: 0})" +
+        ", (a4:N  {arrayProperty: [1.0, 0.0, 0.0],  moreOnes: 0, multiClass: 0})" +
+        ", (a5:N  {arrayProperty: [1.32, 0.0, 0.0], moreOnes: 0, multiClass: 0})" +
+        ", (a6:N  {arrayProperty: [1.3, 1.5, 0.0],  moreOnes: 0, multiClass: 2})" +
+        ", (a7:N  {arrayProperty: [5.3, 10.5, 0.0], moreOnes: 1, multiClass: 1})" +
+        ", (a8:N  {arrayProperty: [1.3, 2.5, 0.0],  moreOnes: 1, multiClass: 2})" +
+        ", (a9:N  {arrayProperty: [0.0, 66.8, 0.0], moreOnes: 1, multiClass: 2})" +
+        ", (a10:N {arrayProperty: [0.1, 2.8, 0.0],  moreOnes: 1, multiClass: 2})" +
+        ", (a11:N {arrayProperty: [0.66, 2.8, 9.92], moreOnes: 1, multiClass: 2})" +
+        ", (a12:N {arrayProperty: [2.0, 10.8, 2.22], moreOnes: 1, multiClass: 2})" +
+        ", (a13:N {arrayProperty: [5.0, 7.8, 19.92],  moreOnes: 1, multiClass: 2})" +
+        ", (a14:N {arrayProperty: [4.0, 5.8, 8.2],  moreOnes: 1, multiClass: 2})" +
+        ", (a15:N {arrayProperty: [1.0, 0.9, 1.0],  moreOnes: 1, multiClass: 2})";
 
     @Inject
     private GraphStore graphStore;
 
     @Test
     void focalLossImprovesDifficultClassPredictions() {
-        var resultNoFocus = trainWithFocus(0, "perfectBalance");
-        var resultFocus = trainWithFocus(5, "perfectBalance");
+        var resultNoFocus = trainWithFocus(0, "multiClass");
+        var resultFocus = trainWithFocus(5, "multiClass");
 
-        double[] hardPredictionNoFocus = resultNoFocus.classifier().predictProbabilities(new double[]{1.0, 0.1, 0.1});
-        double[] hardPredictionFocus = resultFocus.classifier().predictProbabilities(new double[]{1.0, 0.1, 0.1});
+        double[] hardPredictionNoFocus = resultNoFocus.classifier().predictProbabilities(new double[]{5.3, 10.5, 0.0});
+        double[] hardPredictionFocus = resultFocus.classifier().predictProbabilities(new double[]{5.3, 10.5, 0.0});
 
-        // the example data point (1, 0.1, 0.1) is very similar to classes 0 and 1 in the train set
+        // the example data point (5.3, 10.5, 0.0) (a7 from train set above) is hard to classify (the only 1-class example)
         // applying focus makes the model more probable to predict the correct class (harder)
-        assertThat(hardPredictionFocus[2]).isGreaterThan(hardPredictionNoFocus[2]);
+        assertThat(hardPredictionFocus[1]).isGreaterThan(hardPredictionNoFocus[1]);
     }
 
     @Test

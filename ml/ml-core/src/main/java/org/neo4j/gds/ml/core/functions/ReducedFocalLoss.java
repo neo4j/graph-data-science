@@ -56,22 +56,18 @@ public class ReducedFocalLoss extends ReducedCrossEntropyLoss {
     }
 
     @Override
-    double computeErrorPerExample(int numberOfExamples, double predictedClassProbability, double indicatorIsTrueClass) {
-        var predictedProbabilityForTrueClass = 0.0;
-        if (indicatorIsTrueClass == 1.0) {
-            predictedProbabilityForTrueClass = predictedClassProbability;
-        }  else {
-            //TODO modify for non-binary
-            predictedProbabilityForTrueClass = 1.0 - predictedClassProbability;
-        }
-
-        var predictedProbabilityForFalseClass = 1.0-predictedProbabilityForTrueClass;
-        var chainRuleGradient = Math.pow(predictedProbabilityForFalseClass, focusWeight-1.0);
+    double computeErrorPerExample(
+        int numberOfExamples,
+        double predictedClassProbability,
+        double indicatorIsTrueClass,
+        double predictedProbabilityForTrueClass
+    ) {
+        var predictedProbabilityForWrongClasses = 1.0 - predictedProbabilityForTrueClass;
+        var chainRuleGradient = Math.pow(predictedProbabilityForWrongClasses, focusWeight - 1.0);
 
         var focalLossPerExample = (focusWeight * chainRuleGradient * Math.log(predictedProbabilityForTrueClass)
-                                   - chainRuleGradient * predictedProbabilityForFalseClass/predictedProbabilityForTrueClass)
+                                   - chainRuleGradient * predictedProbabilityForWrongClasses / predictedProbabilityForTrueClass)
                                   * (predictedProbabilityForTrueClass * (indicatorIsTrueClass - predictedClassProbability)) / numberOfExamples;
         return focalLossPerExample;
     }
 }
-

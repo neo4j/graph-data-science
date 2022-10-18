@@ -108,11 +108,13 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
                 int trueClass = (int) labelsVector.dataAt(row);
                 for (int classIdx = 0; classIdx < reducedClassCount; classIdx++) {
                     double predictedClassProbability = predMatrix.dataAt(row, classIdx);
+                    double predictedProbabilityForTrueClass = predMatrix.dataAt(row, trueClass);
                     var indicatorIsTrueClass = trueClass == classIdx ? 1.0 : 0.0;
                     double errorPerExample = computeErrorPerExample(
                         numberOfExamples,
                         predictedClassProbability,
-                        indicatorIsTrueClass
+                        indicatorIsTrueClass,
+                        predictedProbabilityForTrueClass
                     );
                     for (int feature = 0; feature < featureCount; feature++) {
                         gradient.addDataAt(classIdx, feature, selfGradient * errorPerExample * featureMatrix.dataAt(row, feature));
@@ -129,11 +131,13 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
                 int trueClass = (int) labelsVector.dataAt(row);
                 for (int classIdx = 0; classIdx < reducedClassCount; classIdx++) {
                     double predictedClassProbability = predMatrix.dataAt(row, classIdx);
+                    double predictedProbabilityForTrueClass = predMatrix.dataAt(row, trueClass);
                     var indicatorIsTrueClass = trueClass == classIdx ? 1.0 : 0.0;
                     double errorPerExample = computeErrorPerExample(
                         numberOfExamples,
                         predictedClassProbability,
-                        indicatorIsTrueClass
+                        indicatorIsTrueClass,
+                        predictedProbabilityForTrueClass
                     );
                     gradient.addDataAt(classIdx, selfGradient * errorPerExample);
                 }
@@ -148,7 +152,8 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
     double computeErrorPerExample(
         int numberOfExamples,
         double predictedClassProbability,
-        double indicatorIsTrueClass
+        double indicatorIsTrueClass,
+        double predictedProbabilityForTrueClass
     ) {
         return (predictedClassProbability - indicatorIsTrueClass) / numberOfExamples;
     }
