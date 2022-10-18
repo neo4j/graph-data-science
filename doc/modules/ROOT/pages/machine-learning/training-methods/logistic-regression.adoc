@@ -23,3 +23,15 @@ Neo4j Graph Data Science supports the option of `l2` regularization which can be
 include::partial$/machine-learning/training-methods/gradient-descent-config-tuning.adoc[leveloffset =+ 1]
 
 include::partial$/machine-learning/training-methods/penalty-config-tuning.adoc[leveloffset =+ 1]
+
+=== Focus weight
+
+This parameter introduces the concept of _focal loss_, studied in https://arxiv.org/pdf/1708.02002v2.pdf[Focal Loss for Dense Object Detection], to the loss function of the logistic regression model.
+When `focusWeight` is a value greater than zero, the loss function changes from standard Cross-Entropy Loss to Focal Loss, defined as:
+
+image:equations/focal-loss.svg[align="center"]
+
+The `focusWeight` parameter is the exponent noted as Greek letter gamma.
+Increasing `focusWeight` will guide the model towards trying to fit "hard" examples.
+A "hard" example is an example for which the model has a low predicted probability.
+In the above equation, the loss will be exponentially higher for low-probability examples, thus tuning the model towards trying to fit them, at the expense of potentially losing some "easy" examples.
