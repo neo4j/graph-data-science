@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
@@ -38,23 +39,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.metrics.LinkMetric.AUCPR;
 
 @GdlExtension
-public class LinkPredictionClassImbalanceTrainTest {
-
-    static String NODES = "(a:N {array: [0.9,1.0]}), " +
-                          "(b:N {array: [0.8,1.1]}), " +
-                          "(c:N {array: [1.5,1.0]}), " +
-
-                          "(e:N {array: [1.0,4.5]}), " +
-                          "(f:N {array: [2.0,5.1]}), " +
-                          "(g:N {array: [1.0,4.19]}), " +
-                          "(h:N {array: [1.4,5.5]}), " +
-                          "(i:N {array: [4.8,0.3]}), ";
-
+class LinkPredictionClassImbalanceTrainTest {
 
     @GdlGraph(graphNamePrefix = "train", idOffset = 42, orientation = Orientation.UNDIRECTED)
     static String GRAPH =
-        "CREATE " +
-        NODES +
+        "(a:N {array: [0.9,1.0]}), " +
+        "(b:N {array: [0.8,1.1]}), " +
+        "(c:N {array: [1.5,1.0]}), " +
+        "(e:N {array: [1.0,4.5]}), " +
+        "(f:N {array: [2.0,5.1]}), " +
+        "(g:N {array: [1.0,4.19]}), " +
+        "(h:N {array: [1.4,5.5]}), " +
+        "(i:N {array: [4.8,0.3]}), " +
+
         "(a)-[:REL {label: 1.0}]->(b), " +
         "(a)-[:REL {label: 1.0}]->(c), " +
         "(b)-[:REL {label: 1.0}]->(c), " +
@@ -95,39 +92,9 @@ public class LinkPredictionClassImbalanceTrainTest {
     Graph trainGraph;
 
     @Test
-    void trainsAModel() {
-        String modelName = "model";
-
-        var trainConfig = LinkPredictionTrainConfigImpl.builder()
-            .modelUser("DUMMY")
-            .modelName(modelName)
-            .graphName("g")
-            .targetRelationshipType("REL")
-            .sourceNodeLabel("N")
-            .targetNodeLabel("N")
-            .pipeline("DUMMY")
-            .metrics(List.of(AUCPR))
-            .negativeClassWeight(1)
-            .randomSeed(1337L)
-            .build();
-
-        var linkABWithNoFocus = new LinkPredictionTrain(
-            trainGraph,
-            trainGraph,
-            linkPredictionPipeline(0),
-            trainConfig,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
-        ).compute().classifier().predictProbabilities(new double[]{0.72, 1.1});
-
-        var linkABWithFocus = new LinkPredictionTrain(
-            trainGraph,
-            trainGraph,
-            linkPredictionPipeline(5),
-            trainConfig,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
-        ).compute().classifier().predictProbabilities(new double[]{0.72, 1.1});
+    void focalLossImprovesMinorityClassPredictions() {
+        var linkABWithNoFocus = train(0).predictProbabilities(new double[]{0.72, 1.1});
+        var linkABWithFocus = train(5).predictProbabilities(new double[]{0.72, 1.1});
 
         //(0.72, 1.1) is the feature vector for link [a,b].
         //[a,b] is a positive link with features x<y, but all other positive links have features with x>y. All negative links have features with x<y. Hence (a,b) is a hard-to-classify positive(minority) example.
@@ -135,19 +102,34 @@ public class LinkPredictionClassImbalanceTrainTest {
         assertThat(linkABWithFocus[1]).isGreaterThan(linkABWithNoFocus[1]);
     }
 
-
-    private LinkPredictionTrainingPipeline linkPredictionPipeline(double focusWeight) {
+    private Classifier train(int focusWeight) {
         LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
-
         pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of(
             "penalty", 0.1,
             "patience", 5,
             "tolerance", 0.001,
             "focusWeight", focusWeight
         )));
-
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("array")));
-        return pipeline;
-    }
 
+        return new LinkPredictionTrain(
+            trainGraph,
+            trainGraph,
+            pipeline,
+            LinkPredictionTrainConfigImpl.builder()
+                .modelUser("DUMMY")
+                .modelName("model")
+                .graphName("g")
+                .targetRelationshipType("REL")
+                .sourceNodeLabel("N")
+                .targetNodeLabel("N")
+                .pipeline("DUMMY")
+                .metrics(List.of(AUCPR))
+                .negativeClassWeight(1)
+                .randomSeed(1337L)
+                .build(),
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        ).compute().classifier();
+    }
 }
