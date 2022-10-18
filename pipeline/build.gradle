@@ -55,6 +55,9 @@ dependencies {
         }
     }
 
+    testAnnotationProcessor project(':annotations')
+    testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+
     testImplementation project(':open-model-catalog')
     testImplementation project(':test-utils')
     testImplementation project(':algo-test')
