@@ -8,7 +8,7 @@ Node Classification Train Pipeline :: Create validation folds 100%
 Node Classification Train Pipeline :: Create validation folds :: Finished
 Node Classification Train Pipeline :: Select best model :: Start
 Node Classification Train Pipeline :: Select best model :: Trial 1 of 2 :: Start
-Node Classification Train Pipeline :: Select best model :: Trial 1 of 2 :: Method: LogisticRegression, Parameters: {batchSize=100, minEpochs=1, patience=1, maxEpochs=100, tolerance=0.001, learningRate=0.001, penalty=0.0019}
+Node Classification Train Pipeline :: Select best model :: Trial 1 of 2 :: Method: LogisticRegression, Parameters: {focusWeight=0.0, batchSize=100, minEpochs=1, patience=1, maxEpochs=100, tolerance=0.001, learningRate=0.001, penalty=0.0019}
 Node Classification Train Pipeline :: Select best model :: Trial 1 of 2 50%
 Node Classification Train Pipeline :: Select best model :: Trial 1 of 2 100%
 Node Classification Train Pipeline :: Select best model :: Trial 1 of 2 :: Main validation metric (F1_class_1): 0.8194
@@ -16,7 +16,7 @@ Node Classification Train Pipeline :: Select best model :: Trial 1 of 2 :: Valid
 Node Classification Train Pipeline :: Select best model :: Trial 1 of 2 :: Training metrics: {F1_class_1=0.8194}
 Node Classification Train Pipeline :: Select best model :: Trial 1 of 2 :: Finished
 Node Classification Train Pipeline :: Select best model :: Trial 2 of 2 :: Start
-Node Classification Train Pipeline :: Select best model :: Trial 2 of 2 :: Method: LogisticRegression, Parameters: {batchSize=100, minEpochs=1, patience=1, maxEpochs=100, tolerance=0.001, learningRate=0.001, penalty=0.0566}
+Node Classification Train Pipeline :: Select best model :: Trial 2 of 2 :: Method: LogisticRegression, Parameters: {focusWeight=0.0, batchSize=100, minEpochs=1, patience=1, maxEpochs=100, tolerance=0.001, learningRate=0.001, penalty=0.0566}
 Node Classification Train Pipeline :: Select best model :: Trial 2 of 2 50%
 Node Classification Train Pipeline :: Select best model :: Trial 2 of 2 100%
 Node Classification Train Pipeline :: Select best model :: Trial 2 of 2 :: Main validation metric (F1_class_1): 0.8194

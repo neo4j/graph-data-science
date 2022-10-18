@@ -55,4 +55,8 @@ public interface LogisticRegressionTrainConfig extends GradientDescentConfig, Pe
     default TrainingMethod method() {
         return TrainingMethod.LogisticRegression;
     }
+
+    default double focusWeight() {
+        return 0;
+    }
 }

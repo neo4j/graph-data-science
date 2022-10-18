@@ -304,7 +304,7 @@ RETURN
 [opts="header", cols="8, 2, 2, 2, 8"]
 |===
 | winningModel                                                                                                                                | avgTrainScore  | outerTrainScore    | testScore   | validationScores
-| {maxEpochs=500, minEpochs=1, penalty=5.881039653970664, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001} | 1 | 1 | 1 | [0.8, 0.0, 0.5, 0.9, 0.8]
+| {maxEpochs=500, minEpochs=1, penalty=5.881039653970664, patience=1, methodName=LogisticRegression, focusWeight=0.0, batchSize=100, tolerance=0.001, learningRate=0.001} | 1 | 1 | 1 | [0.8, 0.0, 0.5, 0.9, 0.8]
 |===
 
 Here we can observe that the model candidate with penalty `5.881` performed the best in the training phase, with an `ACCURACY` score of 1 over the train graph as well as on the test graph.
@@ -401,7 +401,7 @@ RETURN
 [opts="header", cols="8, 2, 2, 2, 8"]
 |===
 | winningModel                                                                                                                                | avgTrainScore  | outerTrainScore    | testScore   | validationScores
-| {maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001} | 1 | 1 | 1 | [1.0]
+| {maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, focusWeight=0.0, batchSize=100, tolerance=0.001, learningRate=0.001} | 1 | 1 | 1 | [1.0]
 |===
 --
 

@@ -49,7 +49,8 @@ class TunableTrainerConfigTest {
             "minEpochs", 1,
             "patience", 1,
             "penalty", 0.1,
-            "tolerance", 0.001
+            "tolerance", 0.001,
+            "focusWeight", 0.0
         ));
     }
 
@@ -69,7 +70,8 @@ class TunableTrainerConfigTest {
             "minEpochs", 1,
             "patience", Map.of("range", List.of(42, 1337)),
             "penalty", Map.of("range", List.of(0.1, 0.2)),
-            "tolerance", 0.001
+            "tolerance", 0.001,
+            "focusWeight", 0.0
         ));
     }
 

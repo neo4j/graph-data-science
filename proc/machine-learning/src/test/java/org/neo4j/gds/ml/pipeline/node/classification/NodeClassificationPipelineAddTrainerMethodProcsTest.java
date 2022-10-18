@@ -64,15 +64,16 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                     TrainingMethod.RandomForestClassification.toString(), List.of(),
                     TrainingMethod.MLPClassification.toString(), List.of(),
                     TrainingMethod.LogisticRegression.toString(), List.of(Map.of(
-                            "maxEpochs", 100,
-                            "minEpochs", 42,
-                            "methodName", TrainingMethod.LogisticRegression.toString(),
-                            "penalty", 0.0,
-                            "patience", 1,
-                            "batchSize", 100,
+                        "maxEpochs", 100,
+                        "minEpochs", 42,
+                        "methodName", TrainingMethod.LogisticRegression.toString(),
+                        "penalty", 0.0,
+                        "patience", 1,
+                        "batchSize", 100,
                         "learningRate", 0.001,
-                            "tolerance", 0.001
-                        ))
+                        "tolerance", 0.001,
+                        "focusWeight", 0.0
+                    ))
                 )
             ))
         );
@@ -157,7 +158,8 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                             "methodName", TrainingMethod.LogisticRegression.toString(),
                             "batchSize", 100,
                             "learningRate", 0.001,
-                            "tolerance", 0.001
+                            "tolerance", 0.001,
+                            "focusWeight", 0.0
                         ),
                         Map.of(
                             "maxEpochs", 100,
@@ -167,7 +169,8 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                             "methodName", TrainingMethod.LogisticRegression.toString(),
                             "batchSize", 100,
                             "learningRate", 0.001,
-                            "tolerance", 0.001
+                            "tolerance", 0.001,
+                            "focusWeight", 0.0
                         )
                     ))
             ))
