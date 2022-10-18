@@ -35,6 +35,11 @@ import java.util.Map;
 public interface LogisticRegressionTrainConfig extends GradientDescentConfig, PenaltyConfig, TrainerConfig {
     LogisticRegressionTrainConfig DEFAULT = of(Map.of());
 
+    @Configuration.DoubleRange(min = 0.0)
+    default double focusWeight() {
+        return 0;
+    }
+
     @Configuration.ToMap
     Map<String, Object> toMap();
 
@@ -54,9 +59,5 @@ public interface LogisticRegressionTrainConfig extends GradientDescentConfig, Pe
     @Configuration.Ignore
     default TrainingMethod method() {
         return TrainingMethod.LogisticRegression;
-    }
-
-    default double focusWeight() {
-        return 0;
     }
 }
