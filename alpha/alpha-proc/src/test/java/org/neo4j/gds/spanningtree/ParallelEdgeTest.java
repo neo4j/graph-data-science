@@ -72,7 +72,7 @@ public class ParallelEdgeTest extends BaseProcTest {
         var validationQuery = "MATCH ()-[r:MINST]->() RETURN r.writeCost AS cost";
         runQueryWithRowConsumer(validationQuery, row -> {
             var cost = (double) row.get("cost");
-            assertThat(cost).isEqualTo(1231);
+            assertThat(cost).isEqualTo(1);
         });
     }
 

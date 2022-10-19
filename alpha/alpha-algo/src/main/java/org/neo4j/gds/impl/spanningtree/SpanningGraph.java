@@ -57,7 +57,7 @@ public class SpanningGraph extends GraphAdapter {
     public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
         long parent = spanningTree.parent.get(nodeId);
         if (parent != -1) {
-            consumer.accept(parent, nodeId, relationshipProperty(parent, nodeId, fallbackValue));
+            consumer.accept(parent, nodeId, spanningTree.costToParent(nodeId));
         }
     }
 
