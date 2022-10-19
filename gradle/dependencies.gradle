@@ -24,6 +24,7 @@ ext {
         'auto-common'          : '1.1.2',
         'auto-service'         : '1.0',
         'bouncycastle-prov'     : '1.71',
+        'checkStyle'            : '10.3.4',
         'commons-compress'     : '1.21',
         'commons-io'           : '2.11.0',
         'commons-lang3'        : '3.12.0',
@@ -58,7 +59,7 @@ ext {
         'RoaringBitmap'        : '0.9.32',
         'sb-contrib'           : '7.4.7',
         'scala'                : scalas[neo4j_minor],
-        'spotbugsToolVersion'  : '4.7.1',
+        'spotbugsToolVersion'  : '4.7.2',
         'protobuf'             : '3.21.7',
     ]
     dep = [
