@@ -24,11 +24,11 @@ import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.RelationshipsAndSchema;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -67,7 +67,7 @@ public class ShortestPathMutateResultConsumer<ALGO extends Algorithm<DijkstraRes
             .orientation(Orientation.NATURAL)
             .build();
 
-        Relationships relationships;
+        RelationshipsAndSchema relationshipsAndSchema;
 
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
             result.forEachPath(pathResult -> {
@@ -76,8 +76,8 @@ public class ShortestPathMutateResultConsumer<ALGO extends Algorithm<DijkstraRes
                     pathResult.totalCost()
                 );
             });
-            relationships = relationshipsBuilder.build();
-            resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
+            relationshipsAndSchema = relationshipsBuilder.build();
+            resultBuilder.withRelationshipsWritten(relationshipsAndSchema.relationships().topology().elementCount());
         }
 
         computationResult
@@ -85,8 +85,7 @@ public class ShortestPathMutateResultConsumer<ALGO extends Algorithm<DijkstraRes
             .addRelationshipType(mutateRelationshipType,
                 Optional.of(TOTAL_COST_KEY),
                 Optional.of(NumberType.FLOATING_POINT),
-                Orientation.NATURAL,
-                relationships
+                relationshipsAndSchema
             );
     }
 }

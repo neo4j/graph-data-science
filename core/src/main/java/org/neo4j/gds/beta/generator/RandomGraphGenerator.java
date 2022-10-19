@@ -134,12 +134,12 @@ public final class RandomGraphGenerator {
 
         generateRelationships(relationshipsBuilder);
 
-        var relationships = relationshipsBuilder.build();
+        var relationshipsAndSchema = relationshipsBuilder.build();
         var relationshipSchema = relationshipSchema();
 
         var graphSchema = GraphSchema.of(nodePropertiesAndSchema.nodeSchema(), relationshipSchema, Map.of());
 
-        return GraphFactory.create(graphSchema, idMap, nodePropertiesAndSchema.nodeProperties(), relationships);
+        return GraphFactory.create(graphSchema, idMap, nodePropertiesAndSchema.nodeProperties(), relationshipsAndSchema.relationships());
     }
 
     private RelationshipSchema relationshipSchema() {

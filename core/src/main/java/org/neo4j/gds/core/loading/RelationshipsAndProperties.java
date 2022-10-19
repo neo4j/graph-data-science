@@ -32,6 +32,7 @@ import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.ValueTypes;
+import org.neo4j.gds.core.loading.construction.RelationshipsAndSchema;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.Collection;
@@ -50,17 +51,18 @@ public interface RelationshipsAndProperties {
 
     Map<RelationshipType, Orientation> orientations();
 
-    static RelationshipsAndProperties of(Map<RelationshipTypeAndProjection, List<Relationships>> relationshipsByType) {
+    static RelationshipsAndProperties of(Map<RelationshipTypeAndProjection, List<RelationshipsAndSchema>> relationshipsByType) {
         var relTypeCount = relationshipsByType.size();
         Map<RelationshipType, Relationships.Topology> topologies = new HashMap<>(relTypeCount);
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>(relTypeCount);
         Map<RelationshipType, Orientation> orientations = new HashMap<>(relTypeCount);
 
         relationshipsByType.forEach((relationshipTypeAndProjection, relationships) -> {
-            var topology = relationships.get(0).topology();
+            var topology = relationships.get(0).relationships().topology();
 
             var properties = relationships
                 .stream()
+                .map(RelationshipsAndSchema::relationships)
                 .map(Relationships::properties)
                 .map(props -> props.map(Relationships.Properties::propertiesList))
                 .filter(Optional::isPresent)

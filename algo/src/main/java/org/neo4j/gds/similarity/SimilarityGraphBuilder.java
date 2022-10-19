@@ -104,8 +104,7 @@ public class SimilarityGraphBuilder {
 
         return GraphFactory.create(
             idMap.rootIdMap(),
-            relationshipsBuilder.build(),
-            Orientation.NATURAL
+            relationshipsBuilder.build()
         );
     }
 }

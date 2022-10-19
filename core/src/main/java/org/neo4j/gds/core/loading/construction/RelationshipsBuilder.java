@@ -136,12 +136,11 @@ public class RelationshipsBuilder {
         );
     }
 
-    // TODO this should return RelationshipsAndProperties instead to also contain the schema
-    public Relationships build() {
+    public RelationshipsAndSchema build() {
         return buildAll().get(0);
     }
 
-    public List<Relationships> buildAll() {
+    public List<RelationshipsAndSchema> buildAll() {
         return buildAll(Optional.empty(), Optional.empty());
     }
 
@@ -151,7 +150,7 @@ public class RelationshipsBuilder {
      *                           has been drained and its contents are written to the adjacency list. The consumer receives the number
      *                           of relationships that have been written. Implementations must be thread-safe.
      */
-    public List<Relationships> buildAll(
+    public List<RelationshipsAndSchema> buildAll(
         Optional<AdjacencyCompressor.ValueMapper> mapper,
         Optional<LongConsumer> drainCountConsumer
     ) {
@@ -174,20 +173,25 @@ public class RelationshipsBuilder {
 
         if (loadRelationshipProperty) {
             return adjacencyListsWithProperties.properties().stream().map(compressedProperties ->
-                Relationships.of(
-                    relationshipCount,
-                    isMultiGraph,
-                    adjacencyList,
-                    compressedProperties,
-                    DefaultValue.DOUBLE_DEFAULT_FALLBACK
-                )
+                {
+                    var relationships = Relationships.of(
+                        relationshipCount,
+                        isMultiGraph,
+                        adjacencyList,
+                        compressedProperties,
+                        DefaultValue.DOUBLE_DEFAULT_FALLBACK
+                    );
+                    return RelationshipsAndSchema.of(relationships, orientation);
+                }
             ).collect(Collectors.toList());
         } else {
-            return List.of(Relationships.of(
+            var relationships = Relationships.of(
                 relationshipCount,
                 isMultiGraph,
                 adjacencyList
-            ));
+            );
+
+            return List.of(RelationshipsAndSchema.of(relationships, orientation));
         }
     }
 

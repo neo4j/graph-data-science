@@ -217,7 +217,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
         relImporter.addFromInternal(0, 1, 23D);
 
-        graphStore.addRelationshipType(RelationshipType.of("NEW_REL"), Optional.of("newRelProp3"), Optional.of(NumberType.FLOATING_POINT), Orientation.NATURAL, relImporter.build());
+        graphStore.addRelationshipType(RelationshipType.of("NEW_REL"), Optional.of("newRelProp3"), Optional.of(NumberType.FLOATING_POINT), relImporter.build());
 
         String graphStreamQuery = formatWithLocale(
             "CALL gds.graph.relationshipProperties.stream(" +
@@ -297,7 +297,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
         relImporter.addFromInternal(0, 1, 23D);
 
-        graphStore.addRelationshipType(RelationshipType.of("NEW_REL"), Optional.of("newRelProp3"), Optional.of(NumberType.FLOATING_POINT), Orientation.NATURAL, relImporter.build());
+        graphStore.addRelationshipType(RelationshipType.of("NEW_REL"), Optional.of("newRelProp3"), Optional.of(NumberType.FLOATING_POINT), relImporter.build());
 
         String graphStreamQuery = formatWithLocale(
             "CALL gds.graph.relationshipProperty.stream(" +

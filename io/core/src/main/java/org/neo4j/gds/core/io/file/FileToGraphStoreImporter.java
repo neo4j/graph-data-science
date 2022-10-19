@@ -48,6 +48,7 @@ import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
+import org.neo4j.gds.core.loading.construction.RelationshipsAndSchema;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -329,13 +330,13 @@ public abstract class FileToGraphStoreImporter {
 
     private static Relationships.Topology relationshipTopologyFrom(
         RelationshipType relationshipType,
-        List<Relationships> relationships,
+        List<RelationshipsAndSchema> relationships,
         List<RelationshipPropertySchema> propertySchemas,
         Map<RelationshipType, RelationshipPropertyStore> propertyStores
     ) {
         var propertyStore = CSRGraphStoreUtil.buildRelationshipPropertyStore(relationships, propertySchemas);
         propertyStores.put(relationshipType, propertyStore);
-        return relationships.get(0).topology();
+        return relationships.get(0).relationships().topology();
     }
 
     @ValueClass

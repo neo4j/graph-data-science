@@ -313,8 +313,8 @@ class Node2VecTest extends BaseTest {
         var firstRelationships = firstRelationshipsBuilder.build();
         var secondRelationships = secondRelationshipsBuilder.build();
 
-        var firstGraph = GraphFactory.create(firstIdMap, firstRelationships, Orientation.UNDIRECTED);
-        var secondGraph = GraphFactory.create(secondIdMap, secondRelationships, Orientation.UNDIRECTED);
+        var firstGraph = GraphFactory.create(firstIdMap, firstRelationships);
+        var secondGraph = GraphFactory.create(secondIdMap, secondRelationships);
 
         var config = ImmutableNode2VecStreamConfig
             .builder()

@@ -23,8 +23,8 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.RelationshipsAndSchema;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -50,7 +50,7 @@ final class TraverseMutateResultConsumer {
             .orientation(Orientation.NATURAL)
             .build();
 
-        Relationships relationships;
+        RelationshipsAndSchema relationshipsAndSchema;
 
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
             var source = result.get(0);
@@ -60,8 +60,8 @@ final class TraverseMutateResultConsumer {
                 source = target;
             }
 
-            relationships = relationshipsBuilder.build();
-            resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
+            relationshipsAndSchema = relationshipsBuilder.build();
+            resultBuilder.withRelationshipsWritten(relationshipsAndSchema.relationships().topology().elementCount());
         }
 
         graphStore
@@ -69,8 +69,7 @@ final class TraverseMutateResultConsumer {
                 mutateRelationshipType,
                 Optional.empty(),
                 Optional.empty(),
-                Orientation.NATURAL,
-                relationships
+                relationshipsAndSchema
             );
     }
 }

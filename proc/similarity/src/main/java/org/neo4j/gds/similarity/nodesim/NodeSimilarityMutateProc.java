@@ -26,13 +26,13 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.RelationshipsAndSchema;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResult;
@@ -125,7 +125,7 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
                 SimilarityProc.withGraphsizeAndTimings(new SimilarityMutateResult.Builder(), computationResult, NodeSimilarityResult::graphResult);
 
             try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-                Relationships resultRelationships = getRelationships(
+                RelationshipsAndSchema resultRelationships = getRelationships(
                     computationResult,
                     computationResult.result().graphResult(),
                     resultBuilder
@@ -137,7 +137,6 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
                         RelationshipType.of(config.mutateRelationshipType()),
                         Optional.of(config.mutateProperty()),
                         Optional.of(NumberType.FLOATING_POINT),
-                        Orientation.NATURAL,
                         resultRelationships
                     );
             }
@@ -145,12 +144,12 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
         });
     }
 
-    private Relationships getRelationships(
+    private RelationshipsAndSchema getRelationships(
         ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computationResult,
         SimilarityGraphResult similarityGraphResult,
         SimilarityProc.SimilarityResultBuilder<SimilarityMutateResult> resultBuilder
     ) {
-        Relationships resultRelationships;
+        RelationshipsAndSchema resultRelationshipsAndSchema;
 
         if (similarityGraphResult.isTopKGraph()) {
             TopKGraph topKGraph = (TopKGraph) similarityGraphResult.similarityGraph();
@@ -185,14 +184,19 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
                     return true;
                 });
             }
-            resultRelationships = relationshipsBuilder.build();
+            resultRelationshipsAndSchema = relationshipsBuilder.build();
         } else {
             HugeGraph similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
-            resultRelationships = similarityGraph.relationships();
+            var or = similarityGraph
+                .schema()
+                .relationshipSchema()
+                .isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
+
+            resultRelationshipsAndSchema = RelationshipsAndSchema.of(similarityGraph.relationships(), or);
             if (shouldComputeHistogram(callContext)) {
                 resultBuilder.withHistogram(computeHistogram(similarityGraph));
             }
         }
-        return resultRelationships;
+        return resultRelationshipsAndSchema;
     }
 }

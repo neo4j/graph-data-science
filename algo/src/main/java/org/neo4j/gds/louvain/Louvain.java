@@ -261,7 +261,7 @@ public final class Louvain extends Algorithm<Louvain> {
 
         ParallelUtil.run(relationshipCreators, executorService);
 
-        return GraphFactory.create(idMap, relationshipsBuilder.build(), orientation);
+        return GraphFactory.create(idMap, relationshipsBuilder.build());
     }
 
     private boolean hasConverged() {
