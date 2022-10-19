@@ -1,0 +1,63 @@
+apply plugin: 'java-library'
+apply plugin: 'me.champeau.mrjar'
+
+description = 'Neo4j Graph Data Science :: Neo4j Kernel Adapter 5.1'
+
+group = 'org.neo4j.gds'
+
+// for 5.2.0-dev and all 5.x drops
+if (ver.'neo4j'.startsWith('5.')) {
+    sourceSets {
+        main {
+            java {
+                srcDirs = ['src/main/java17']
+            }
+        }
+    }
+
+    dependencies {
+        annotationProcessor project(':annotations')
+        annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+        annotationProcessor group: 'org.neo4j', name: 'annotations', version: neos.'5.1'
+
+        compileOnly project(':annotations')
+        compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
+        compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
+        compileOnly group: 'org.neo4j', name: 'annotations', version: neos.'5.1'
+        compileOnly group: 'org.neo4j', name: 'neo4j', version: neos.'5.1'
+        compileOnly group: 'org.neo4j', name: 'neo4j-record-storage-engine', version: neos.'5.1'
+        compileOnly group: 'org.neo4j.community', name: 'it-test-support', version: neos.'5.1'
+
+        implementation project(':neo4j-kernel-adapter-api')
+    }
+} else {
+    multiRelease {
+        targetVersions 11, 17
+    }
+
+    if (!project.hasProperty('no-forbidden-apis')) {
+        forbiddenApisJava17 {
+            exclude('**')
+        }
+    }
+
+    dependencies {
+        annotationProcessor group: 'org.neo4j', name: 'annotations', version: ver.'neo4j'
+        compileOnly group: 'org.neo4j', name: 'annotations', version: ver.'neo4j'
+
+        implementation project(':neo4j-kernel-adapter-api')
+
+        java17AnnotationProcessor project(':annotations')
+        java17AnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+        java17AnnotationProcessor group: 'org.neo4j', name: 'annotations', version: neos.'5.1'
+
+        java17CompileOnly project(':annotations')
+        java17CompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
+        java17CompileOnly group: 'org.neo4j', name: 'neo4j', version: neos.'5.1'
+        java17CompileOnly group: 'org.neo4j', name: 'neo4j-record-storage-engine', version: neos.'5.1'
+        java17CompileOnly group: 'org.neo4j.community', name: 'it-test-support', version: neos.'5.1'
+        java17CompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
+
+        java17Implementation project(':neo4j-kernel-adapter-api')
+    }
+}
