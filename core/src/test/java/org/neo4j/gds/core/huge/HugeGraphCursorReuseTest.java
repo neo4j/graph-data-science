@@ -53,7 +53,6 @@ class HugeGraphCursorReuseTest {
             .builder()
             .adjacencyList(adjacencyList)
             .elementCount(baseGraph.relationshipTopology().elementCount())
-            .orientation(Orientation.NATURAL)
             .isMultiGraph(false)
             .build();
 

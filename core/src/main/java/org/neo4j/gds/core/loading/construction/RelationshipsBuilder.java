@@ -136,6 +136,7 @@ public class RelationshipsBuilder {
         );
     }
 
+    // TODO this should return RelationshipsAndProperties instead to also contain the schema
     public Relationships build() {
         return buildAll().get(0);
     }
@@ -175,7 +176,6 @@ public class RelationshipsBuilder {
             return adjacencyListsWithProperties.properties().stream().map(compressedProperties ->
                 Relationships.of(
                     relationshipCount,
-                    orientation,
                     isMultiGraph,
                     adjacencyList,
                     compressedProperties,
@@ -185,7 +185,6 @@ public class RelationshipsBuilder {
         } else {
             return List.of(Relationships.of(
                 relationshipCount,
-                orientation,
                 isMultiGraph,
                 adjacencyList
             ));

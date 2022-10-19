@@ -137,6 +137,7 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
                         RelationshipType.of(config.mutateRelationshipType()),
                         Optional.of(config.mutateProperty()),
                         Optional.of(NumberType.FLOATING_POINT),
+                        Orientation.NATURAL,
                         resultRelationships
                     );
             }

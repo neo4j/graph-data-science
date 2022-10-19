@@ -196,7 +196,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                 .relationshipProperties()
                 .forEach((propertyKey, propertyValues) -> relationshipSchemaBuilder.addProperty(
                     relType,
-                    relationshipsAndProperties.relationships().get(relType).orientation(),
+                    relationshipsAndProperties.orientations().get(relType),
                     propertyKey,
                     RelationshipPropertySchema.of(
                         propertyKey,
@@ -211,7 +211,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             .keySet()
             .forEach(type -> {
                 relationshipSchemaBuilder.addRelationshipType(type,
-                    relationshipsAndProperties.relationships().get(type).orientation());
+                    relationshipsAndProperties.orientations().get(type));
             });
 
         return GraphSchema.of(
@@ -228,6 +228,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
         var topologies = new HashMap<RelationshipType, Relationships.Topology>();
         var properties = new HashMap<RelationshipType, RelationshipPropertyStore>();
+        var orientations = new HashMap<RelationshipType, Orientation>();
 
         relationships.forEach(loadResult -> {
             var builder = RelationshipPropertyStore.builder();
@@ -247,9 +248,13 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
             topologies.put(loadResult.relationshipType(), loadResult.topology());
             properties.put(loadResult.relationshipType(), builder.build());
+            orientations.put(loadResult.relationshipType(), graphProjectConfig().orientation());
         });
 
-        var schema = computeGraphSchema(nodes, ImmutableRelationshipsAndProperties.of(topologies, properties));
+        var schema = computeGraphSchema(
+            nodes,
+            ImmutableRelationshipsAndProperties.of(topologies, properties, orientations)
+        );
 
         return new GraphStoreBuilder()
             .databaseId(databaseId)

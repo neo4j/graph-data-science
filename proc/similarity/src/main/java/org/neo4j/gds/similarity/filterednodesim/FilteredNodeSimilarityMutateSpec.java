@@ -111,12 +111,22 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
                         executionContext.callContext()
                     );
 
+                    var relationshipType = RelationshipType.of(config.mutateRelationshipType());
+                    var orientation = computationResult
+                        .result()
+                        .graphResult()
+                        .similarityGraph()
+                        .schema()
+                        .relationshipSchema()
+                        .orientation(relationshipType);
+
                     computationResult
                         .graphStore()
                         .addRelationshipType(
-                            RelationshipType.of(config.mutateRelationshipType()),
+                            relationshipType,
                             Optional.of(config.mutateProperty()),
                             Optional.of(NumberType.FLOATING_POINT),
+                            orientation,
                             resultRelationships
                         );
                     resultBuilder.withRelationshipsWritten(resultRelationships.topology().elementCount());

@@ -293,12 +293,11 @@ public final class GraphFactory {
      * If a relationship property is present, the default relationship property key {@code "property"}
      * will be used.
      */
-    public static HugeGraph create(IdMap idMap, Relationships relationships) {
+    public static HugeGraph create(IdMap idMap, Relationships relationships, Orientation orientation) {
         var nodeSchemaBuilder = NodeSchema.builder();
         idMap.availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
         var nodeSchema = nodeSchemaBuilder.build();
 
-        Orientation orientation = relationships.topology().orientation();
         var relationshipSchemaBuilder = RelationshipSchema.builder();
         if (relationships.properties().isPresent()) {
             relationshipSchemaBuilder.addProperty(

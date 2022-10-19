@@ -22,7 +22,6 @@ package org.neo4j.gds.core.huge;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
@@ -98,8 +97,6 @@ public class HugeGraph implements CSRGraph {
 
     protected final Map<String, NodePropertyValues> nodeProperties;
 
-    protected final Orientation orientation;
-
     protected final long relationshipCount;
 
     protected AdjacencyList adjacency;
@@ -132,7 +129,6 @@ public class HugeGraph implements CSRGraph {
             maybeRelationshipProperty.isPresent(),
             maybeRelationshipProperty.map(Relationships.Properties::defaultPropertyValue).orElse(Double.NaN),
             maybeRelationshipProperty.map(Relationships.Properties::propertiesList).orElse(null),
-            topology.orientation(),
             topology.isMultiGraph()
         );
     }
@@ -146,7 +142,6 @@ public class HugeGraph implements CSRGraph {
         boolean hasRelationshipProperty,
         double defaultRelationshipPropertyValue,
         @Nullable AdjacencyProperties relationshipProperty,
-        Orientation orientation,
         boolean isMultiGraph
     ) {
         this.idMap = idMap;
@@ -157,7 +152,6 @@ public class HugeGraph implements CSRGraph {
         this.adjacency = adjacency;
         this.defaultPropertyValue = defaultRelationshipPropertyValue;
         this.properties = relationshipProperty;
-        this.orientation = orientation;
         this.hasRelationshipProperty = hasRelationshipProperty;
         this.adjacencyCursorCache = adjacency.rawAdjacencyCursor();
         this.propertyCursorCache = relationshipProperty != null ? relationshipProperty.rawPropertyCursor() : null;
@@ -374,7 +368,6 @@ public class HugeGraph implements CSRGraph {
             hasRelationshipProperty,
             defaultPropertyValue,
             properties,
-            orientation,
             isMultiGraph
         );
     }
@@ -476,7 +469,6 @@ public class HugeGraph implements CSRGraph {
     public Relationships relationships() {
         return Relationships.of(
             relationshipCount,
-            orientation,
             isMultiGraph(),
             adjacency,
             properties,

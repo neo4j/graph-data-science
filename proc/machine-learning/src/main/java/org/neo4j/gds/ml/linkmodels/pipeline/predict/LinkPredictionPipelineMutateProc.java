@@ -144,6 +144,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
                         RelationshipType.of(config.mutateRelationshipType()),
                         Optional.of(config.mutateProperty()),
                         Optional.of(NumberType.FLOATING_POINT),
+                        Orientation.UNDIRECTED,
                         relationships
                     );
                 }

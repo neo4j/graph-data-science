@@ -204,11 +204,12 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var splitResult = splitter.splitPositiveExamples(huuuuugeDenseGraph, 0.9);
         var graph = GraphFactory.create(
             huuuuugeDenseGraph.idMap(),
-            splitResult.remainingRels().build()
+            splitResult.remainingRels().build(),
+            Orientation.NATURAL
         );
         var nestedSplit = splitter.splitPositiveExamples(graph, 0.9);
         Relationships nestedHoldout = nestedSplit.selectedRels().build();
-        HugeGraph nestedHoldoutGraph = GraphFactory.create(graph, nestedHoldout);
+        HugeGraph nestedHoldoutGraph = GraphFactory.create(graph, nestedHoldout, Orientation.NATURAL);
         nestedHoldoutGraph.forEachNode(nodeId -> {
             nestedHoldoutGraph.forEachRelationship(nodeId, Double.NaN, (src, trg, val) -> {
                 if (Double.compare(val, NEGATIVE) == 0) {
@@ -253,7 +254,6 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var remainingRels = result.remainingRels().build();
         // 1 positive selected reduces remaining & 2 invalid
         assertEquals(1L, remainingRels.topology().elementCount());
-        assertEquals(Orientation.NATURAL, remainingRels.topology().orientation());
         assertFalse(remainingRels.topology().isMultiGraph());
         assertThat(remainingRels.properties()).isNotEmpty();
         assertRelInGraph(remainingRels, multiLabelGraph);
@@ -262,7 +262,6 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertThat(selectedRels.topology()).satisfies(topology -> {
             assertRelSamplingProperties(selectedRels, multiLabelGraph);
             assertThat(topology.elementCount()).isEqualTo(1);
-            assertEquals(Orientation.NATURAL, topology.orientation());
             assertFalse(topology.isMultiGraph());
         });
 

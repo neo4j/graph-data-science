@@ -76,6 +76,7 @@ class CSRGraphStoreTest {
             RelationshipType.of("NEW"),
             Optional.empty(),
             Optional.empty(),
+            Orientation.UNDIRECTED,
             relBuilder.build()
         );
 
@@ -108,6 +109,7 @@ class CSRGraphStoreTest {
             RelationshipType.of("NEW"),
             Optional.empty(),
             Optional.empty(),
+            Orientation.NATURAL,
             relBuilder.build()
         );
 
@@ -148,6 +150,7 @@ class CSRGraphStoreTest {
             RelationshipType.of("NEW"),
             Optional.empty(),
             Optional.empty(),
+            addedOrientation,
             relBuilder.build()
         );
 

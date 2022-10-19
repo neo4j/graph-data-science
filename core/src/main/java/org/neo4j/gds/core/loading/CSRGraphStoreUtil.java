@@ -63,7 +63,8 @@ public final class CSRGraphStoreUtil {
     ) {
         var relationshipType = RelationshipType.of(relationshipTypeString);
         var relationships = graph.relationships();
-        Orientation orientation = graph.relationshipTopology().orientation();
+        Orientation orientation = graph.schema().isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
+
         var relationshipSchemaBuilder = RelationshipSchema
             .builder()
             .addRelationshipType(relationshipType, orientation);
@@ -254,7 +255,7 @@ public final class CSRGraphStoreUtil {
                 .relationshipProperties()
                 .forEach((propertyKey, propertyValues) -> relationshipSchemaBuilder.addProperty(
                     relType,
-                    relationshipsAndProperties.relationships().get(relType).orientation(),
+                    relationshipsAndProperties.orientations().get(relType),
                     propertyKey,
                     propertyValues.propertySchema()
                 )));
@@ -263,7 +264,7 @@ public final class CSRGraphStoreUtil {
             .keySet()
             .forEach(type -> {
                 relationshipSchemaBuilder.addRelationshipType(type,
-                    relationshipsAndProperties.relationships().get(type).orientation());
+                    relationshipsAndProperties.orientations().get(type));
             });
 
         return GraphSchema.of(

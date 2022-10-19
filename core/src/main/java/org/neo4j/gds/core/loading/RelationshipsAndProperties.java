@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
@@ -47,10 +48,13 @@ public interface RelationshipsAndProperties {
 
     Map<RelationshipType, RelationshipPropertyStore> properties();
 
+    Map<RelationshipType, Orientation> orientations();
+
     static RelationshipsAndProperties of(Map<RelationshipTypeAndProjection, List<Relationships>> relationshipsByType) {
         var relTypeCount = relationshipsByType.size();
         Map<RelationshipType, Relationships.Topology> topologies = new HashMap<>(relTypeCount);
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>(relTypeCount);
+        Map<RelationshipType, Orientation> orientations = new HashMap<>(relTypeCount);
 
         relationshipsByType.forEach((relationshipTypeAndProjection, relationships) -> {
             var topology = relationships.get(0).topology();
@@ -71,11 +75,13 @@ public interface RelationshipsAndProperties {
 
             topologies.put(relationshipTypeAndProjection.relationshipType(), topology);
             relationshipPropertyStores.put(relationshipTypeAndProjection.relationshipType(), propertyStore);
+            orientations.put(relationshipTypeAndProjection.relationshipType(), relationshipTypeAndProjection.relationshipProjection().orientation());
         });
 
         return ImmutableRelationshipsAndProperties.builder()
             .relationships(topologies)
             .properties(relationshipPropertyStores)
+            .orientations(orientations)
             .build();
     }
 
@@ -98,7 +104,6 @@ public interface RelationshipsAndProperties {
                 ImmutableTopology.of(
                     adjacency,
                     relationshipCount,
-                    projection.orientation(),
                     projection.isMultiGraph()
                 )
             );
@@ -141,8 +146,6 @@ public interface RelationshipsAndProperties {
                     ImmutableProperties.of(
                         propertiesList,
                         relationshipCount,
-                        projection.orientation(),
-                        projection.isMultiGraph(),
                         // This is fine because relationships currently only support doubles
                         propertyMapping.defaultValue().doubleValue()
                     ),

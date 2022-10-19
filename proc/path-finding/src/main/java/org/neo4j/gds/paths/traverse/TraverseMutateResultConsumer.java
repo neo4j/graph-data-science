@@ -69,6 +69,7 @@ final class TraverseMutateResultConsumer {
                 mutateRelationshipType,
                 Optional.empty(),
                 Optional.empty(),
+                Orientation.NATURAL,
                 relationships
             );
     }

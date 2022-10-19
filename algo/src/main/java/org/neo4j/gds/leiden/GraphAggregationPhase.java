@@ -178,7 +178,7 @@ class GraphAggregationPhase {
 
         ParallelUtil.run(relationshipCreators, executorService);
 
-        return GraphFactory.create(idMap, relationshipsBuilder.build());
+        return GraphFactory.create(idMap, relationshipsBuilder.build(), orientation);
     }
 
     static HugeLongArray getNodesSortedByCommunity(HugeLongArray communities, int concurrency) {

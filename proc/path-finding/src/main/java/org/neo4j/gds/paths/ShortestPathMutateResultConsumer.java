@@ -85,6 +85,7 @@ public class ShortestPathMutateResultConsumer<ALGO extends Algorithm<DijkstraRes
             .addRelationshipType(mutateRelationshipType,
                 Optional.of(TOTAL_COST_KEY),
                 Optional.of(NumberType.FLOATING_POINT),
+                Orientation.NATURAL,
                 relationships
             );
     }
