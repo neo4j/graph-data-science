@@ -103,10 +103,6 @@ public final class LazyIdMapBuilder implements PartialIdMap {
         return originalNodeId;
     }
 
-    public long toIntermediateId(long originalId) {
-        return this.intermediateIdMapBuilder.toMappedNodeId(originalId);
-    }
-
     @Override
     public OptionalLong rootNodeCount() {
         return isEmpty.getAcquire()
