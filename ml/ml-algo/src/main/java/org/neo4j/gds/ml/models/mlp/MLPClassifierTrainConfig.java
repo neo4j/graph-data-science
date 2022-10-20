@@ -40,6 +40,11 @@ public interface MLPClassifierTrainConfig extends GradientDescentConfig, Penalty
         return List.of(100);
     }
 
+    @Configuration.DoubleRange(min = 0.0)
+    default double focusWeight() {
+        return 0;
+    }
+
     @Configuration.ToMap
     Map<String, Object> toMap();
 

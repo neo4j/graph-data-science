@@ -57,11 +57,15 @@ public class CrossEntropyLoss extends AbstractVariable<Scalar> {
             var trueClass = (int) targetsVector.dataAt(row);
             var predictedProbabilityForTrueClass = predictionsMatrix.dataAt(row, trueClass);
             if (predictedProbabilityForTrueClass > 0) {
-                result += Math.log(predictedProbabilityForTrueClass);
+                result += computeIndividualLoss(predictedProbabilityForTrueClass);
             }
         }
 
         return new Scalar(-result / predictionsMatrix.rows());
+    }
+
+    double computeIndividualLoss(double predictedProbabilityForTrueClass) {
+        return Math.log(predictedProbabilityForTrueClass);
     }
 
     @Override
@@ -71,19 +75,26 @@ public class CrossEntropyLoss extends AbstractVariable<Scalar> {
             Matrix gradient = predictionsMatrix.createWithSameDimensions();
             var targetsVector = ctx.data(targets);
 
-            var multiplier = - ctx.gradient(this).value() / gradient.rows();
+            var selfGradient = ctx.gradient(this).value();
             for (int row = 0; row < gradient.rows(); row++) {
                 var trueClass = (int) targetsVector.dataAt(row);
                 var predictedProbabilityForTrueClass = predictionsMatrix.dataAt(row * predictionsMatrix.cols() + trueClass);
 
                 // Compare to a threshold value rather than `0`, very small probability can result in setting infinite gradient values.
                 if (predictedProbabilityForTrueClass > PREDICTED_PROBABILITY_THRESHOLD) {
-                    gradient.setDataAt(row, trueClass, multiplier / predictedProbabilityForTrueClass);
+                    gradient.setDataAt(row, trueClass, selfGradient * computeErrorPerExample(gradient.rows(), predictedProbabilityForTrueClass));
                 }
             }
             return gradient;
         } else {
             throw new IllegalStateException("The gradient should not be necessary for the targets. But got: " + targets.render());
         }
+    }
+
+    double computeErrorPerExample(
+        int numberOfExamples,
+        double predictedProbabilityForTrueClass
+    ) {
+        return -1 / (predictedProbabilityForTrueClass * numberOfExamples);
     }
 }

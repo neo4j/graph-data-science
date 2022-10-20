@@ -29,7 +29,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.Classifier;
-import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
@@ -98,11 +98,19 @@ class NodeClassificationClassImbalanceTrainTest {
         var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.addFeatureStep(NodeFeatureStep.of("arrayProperty"));
 
-        pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of(
+//        pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of(
+//            "penalty", 0.1,
+//            "patience", 10,
+//            "tolerance", 0.0001,
+//            "focusWeight", focusWeight
+//        )));
+
+        pipeline.addTrainerConfig(MLPClassifierTrainConfig.of(Map.of(
             "penalty", 0.1,
             "patience", 10,
             "tolerance", 0.0001,
-            "focusWeight", focusWeight
+            "focusWeight", focusWeight,
+            "hiddenLayerSizes", List.of(12,4)
         )));
 
         var trainConfig = NodeClassificationPipelineTrainConfigImpl
