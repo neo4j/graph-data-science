@@ -81,9 +81,9 @@ allprojects {
                 includeEngines 'jqwik'
             }
             // enable verbose test logging
-            // testLogging {
-            //     events "passed", "skipped", "failed", "standardOut", "standardError"
-            // }
+             testLogging {
+                 events "passed", "skipped", "failed", "standardOut", "standardError"
+             }
             testLogging {
                 afterSuite { desc, result ->
                     if (!desc.parent) { // will match the outermost suite
