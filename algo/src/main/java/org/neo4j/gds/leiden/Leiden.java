@@ -132,7 +132,7 @@ public class Leiden extends Algorithm<LeidenResult> {
             );
             var communitiesCount = localMovePhase.run();
 
-            didConverge = communitiesCount == workingGraph.nodeCount() || localMovePhase.swaps == 0;
+            boolean localPhaseConverged = communitiesCount == workingGraph.nodeCount() || localMovePhase.swaps == 0;
 
             updateModularity(
                 workingGraph,
@@ -140,10 +140,17 @@ public class Leiden extends Algorithm<LeidenResult> {
                 localMoveCommunityVolumes,
                 modularityScaleCoefficient,
                 gamma,
-                didConverge,
+                localPhaseConverged,
                 iteration
             );
-            if (didConverge) {
+
+            if (localPhaseConverged) {
+                didConverge = true;
+                break;
+            }
+            var toleranceStatus = getToleranceStatus(iteration);
+
+            if (toleranceStatus == ToleranceStatus.DECREASED) {
                 break;
             }
 
@@ -195,6 +202,10 @@ public class Leiden extends Algorithm<LeidenResult> {
             communityCount = communityData.communityCount;
 
             modularity = modularities[iteration];
+            if (toleranceStatus == ToleranceStatus.CONVERGED) {
+                didConverge = true;
+                break;
+            }
         }
 
         return getLeidenResult(didConverge, iteration);
@@ -224,18 +235,18 @@ public class Leiden extends Algorithm<LeidenResult> {
             );
         }
     }
-
+    
     private boolean updateModularity(
         Graph workingGraph,
         HugeLongArray localMoveCommunities,
         HugeDoubleArray localMoveCommunityVolumes,
         double modularityScaleCoefficient,
         double gamma,
-        boolean didConverge,
+        boolean localPhaseConverged,
         int iteration
     ) {
-        boolean seedIsOptimal = didConverge && seedValues.isPresent() && iteration == 0;
-        boolean shouldCalculateModularity = !didConverge || seedIsOptimal;
+        boolean seedIsOptimal = localPhaseConverged && seedValues.isPresent() && iteration == 0;
+        boolean shouldCalculateModularity = !localPhaseConverged || seedIsOptimal;
 
         if (shouldCalculateModularity) {
             modularities[iteration] = ModularityComputer.compute(
@@ -347,5 +358,21 @@ public class Leiden extends Algorithm<LeidenResult> {
             return modularities;
         }
         return resizedModularities;
+    }
+
+    private ToleranceStatus getToleranceStatus(int iteration) {
+        if (iteration == 0) {
+            return ToleranceStatus.CONTINUE;
+        } else {
+            var difference = modularities[iteration] - modularities[iteration - 1];
+            if (difference < 0) {
+                return ToleranceStatus.DECREASED;
+            }
+            return (difference < tolerance) ? ToleranceStatus.CONVERGED : ToleranceStatus.CONTINUE;
+        }
+    }
+
+    private enum ToleranceStatus {
+        CONVERGED, DECREASED, CONTINUE
     }
 }
