@@ -78,7 +78,7 @@ public abstract class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, 
                 return Stream.of(builder.build());
             }
 
-            builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount);
+            builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount());
             try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
 
                 var spanningGraph = new SpanningGraph(graph, spanningTree);

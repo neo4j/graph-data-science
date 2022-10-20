@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
@@ -70,7 +71,7 @@ public class Prim extends Algorithm<SpanningTree> {
     public SpanningTree compute() {
         progressTracker.beginSubTask(graph.nodeCount());
         HugeLongArray parent = HugeLongArray.newArray(graph.nodeCount());
-
+        HugeDoubleArray costToParent = HugeDoubleArray.newArray(graph.nodeCount());
         HugeLongPriorityQueue queue = HugeLongPriorityQueue.min(nodeCount);
         BitSet visited = new BitSet(nodeCount);
         parent.fill(-1);
@@ -78,7 +79,11 @@ public class Prim extends Algorithm<SpanningTree> {
         queue.add(startNodeId, 0.0);
         long effectiveNodeCount = 0;
         while (!queue.isEmpty() && terminationFlag.running()) {
-            long node = queue.pop();
+            long node = queue.top();
+            double cost = queue.cost(node);
+            queue.pop();
+
+            costToParent.set(node, minMax.applyAsDouble(cost));
             if (visited.get(node)) {
                 continue;
             }
@@ -104,7 +109,7 @@ public class Prim extends Algorithm<SpanningTree> {
             });
             progressTracker.logProgress();
         }
-        this.spanningTree = new SpanningTree(startNodeId, nodeCount, effectiveNodeCount, parent);
+        this.spanningTree = new SpanningTree(startNodeId, nodeCount, effectiveNodeCount, parent, costToParent);
         progressTracker.endSubTask();
         return this.spanningTree;
     }

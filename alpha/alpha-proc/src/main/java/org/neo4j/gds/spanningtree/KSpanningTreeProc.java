@@ -97,7 +97,7 @@ public abstract class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTr
                 return Stream.of(builder.build());
             }
 
-            builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount);
+            builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount());
             try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
                 var progressTracker = new TaskProgressTracker(
                     NodePropertyExporter.baseTask("KSpanningTree", graph.nodeCount()),

@@ -21,6 +21,7 @@ package org.neo4j.gds.impl.spanningtree;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.neo4j.gds.api.RelationshipConsumer;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.Objects;
@@ -30,16 +31,34 @@ import java.util.Objects;
  */
 public class SpanningTree {
 
-    public final long head;
-    public final long nodeCount;
-    public final long effectiveNodeCount;
-    public final HugeLongArray parent;
+    final long head;
+    final long nodeCount;
+    final long effectiveNodeCount;
 
-    public SpanningTree(long head, long nodeCount, long effectiveNodeCount, HugeLongArray parent) {
+    final HugeDoubleArray costToParent;
+    final HugeLongArray parent;
+
+    SpanningTree(
+        long head,
+        long nodeCount,
+        long effectiveNodeCount,
+        HugeLongArray parent,
+        HugeDoubleArray costToParent
+    ) {
         this.head = head;
         this.nodeCount = nodeCount;
         this.effectiveNodeCount = effectiveNodeCount;
         this.parent = parent;
+        this.costToParent = costToParent;
+    }
+
+
+    public long effectiveNodeCount() {
+        return effectiveNodeCount;
+    }
+
+    double costToParent(long nodeId) {
+        return costToParent.get(nodeId);
     }
 
     public void forEach(RelationshipConsumer consumer) {
