@@ -37,6 +37,7 @@ import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
 
 @GdlExtension
 class LeidenTest {
@@ -84,6 +85,7 @@ class LeidenTest {
             false,
             19L,
             null,
+            TOLERANCE_DEFAULT,
             1,
             ProgressTracker.NULL_TRACKER
         );
@@ -118,6 +120,7 @@ class LeidenTest {
             false,
             19L,
             graph.nodeProperties("optimal"),
+            TOLERANCE_DEFAULT,
             1,
             ProgressTracker.NULL_TRACKER
         );
@@ -153,6 +156,7 @@ class LeidenTest {
             false,
             19L,
             graph.nodeProperties("seed"),
+            TOLERANCE_DEFAULT,
             1,
             ProgressTracker.NULL_TRACKER
         );
@@ -187,6 +191,7 @@ class LeidenTest {
             false,
             19L,
             graph.nodeProperties("seed2"),
+            TOLERANCE_DEFAULT,
             1,
             ProgressTracker.NULL_TRACKER
         );

@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
 
 @GdlExtension
 class KarateTest {
@@ -59,7 +60,9 @@ class KarateTest {
             0.01,
             false,
             randomSeed,
-            null, 4,
+            null,
+            TOLERANCE_DEFAULT,
+            4,
             ProgressTracker.NULL_TRACKER
         );
         var leidenResult = leiden.compute();
@@ -96,6 +99,7 @@ class KarateTest {
             true,
             99,
             graph.nodeProperties("single"),
+            TOLERANCE_DEFAULT,
             4,
             ProgressTracker.NULL_TRACKER
         );

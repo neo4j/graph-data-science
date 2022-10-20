@@ -54,6 +54,8 @@ public class Leiden extends Algorithm<LeidenResult> {
     private final long randomSeed;
     private SeedCommunityManager seedCommunityManager;
 
+    private final double tolerance;
+
     public Leiden(
         Graph graph,
         int maxIterations,
@@ -62,6 +64,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         boolean includeIntermediateCommunities,
         long randomSeed,
         @Nullable NodePropertyValues seedValues,
+        double tolerance,
         int concurrency,
         ProgressTracker progressTracker
     ) {
@@ -84,6 +87,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         this.seedValues = Optional.ofNullable(seedValues);
         this.modularities = new double[maxIterations];
         this.modularity = 0d;
+        this.tolerance = tolerance;
     }
 
     @Override

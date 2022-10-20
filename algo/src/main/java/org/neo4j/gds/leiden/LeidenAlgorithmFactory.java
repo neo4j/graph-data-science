@@ -40,6 +40,7 @@ public class LeidenAlgorithmFactory<CONFIG extends LeidenBaseConfig> extends Gra
             configuration.includeIntermediateCommunities(),
             configuration.randomSeed().orElse(0L),
             seedValues,
+            configuration.tolerance(),
             configuration.concurrency(),
             progressTracker
         );
