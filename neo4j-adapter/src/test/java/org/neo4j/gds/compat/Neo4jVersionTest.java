@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.kernel.internal.CustomVersionSetting;
 import org.neo4j.kernel.internal.Version;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -53,5 +54,20 @@ class Neo4jVersionTest {
     void shouldNotRespectVersionOverride() {
         System.setProperty(Neo4jVersionTest.CUSTOM_VERSION_SETTING, "foobidoobie");
         assertNotEquals(Version.getNeo4jVersion(), Neo4jVersion.neo4jVersion());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "4.3.0-drop04, 4, 3",
+        "4.3.0, 4, 3",
+        "4.4.12, 4, 4",
+        "5.0.0-drop09.0, 5, 0",
+        "5.1.0, 5, 1",
+        "dev, 5, 2",
+    })
+    void semanticVersion(String input, int expectedMajor, int expectedMinor) {
+        Neo4jVersion version = Neo4jVersion.parse(input);
+
+        assertThat(version.semanticVersion()).isEqualTo(ImmutableMajorMinorVersion.of(expectedMajor, expectedMinor));
     }
 }
