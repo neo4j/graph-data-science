@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.core.cypher;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.CSRGraph;
@@ -100,6 +98,10 @@ public final class RelationshipIds extends CypherGraphStore.StateVisitor.Adapter
         relationshipIdContexts.forEach(updateListener::onRelationshipIdsAdded);
     }
 
+    public void removeUpdateListener(UpdateListener updateListener) {
+        this.updateListeners.remove(updateListener);
+    }
+
     @Override
     public void relationshipTypeAdded(String relationshipType) {
         var relationshipIdContext = relationshipIdContextFromRelType(graphStore, tokenHolders, RelationshipType.of(relationshipType));
@@ -135,7 +137,7 @@ public final class RelationshipIds extends CypherGraphStore.StateVisitor.Adapter
             .map(relationshipProperty -> relationshipProperty.values().propertiesList())
             .toArray(AdjacencyProperties[]::new);
 
-        return ImmutableRelationshipIdContext.of(
+        return new RelationshipIdContext(
             relType,
             relTypeId,
             relCount,
@@ -161,19 +163,65 @@ public final class RelationshipIds extends CypherGraphStore.StateVisitor.Adapter
         T accept(long nodeId, long offsetInAdjacency, RelationshipIdContext relationshipIdContext);
     }
 
-    @ValueClass
-    public interface RelationshipIdContext {
-        RelationshipType relationshipType();
-        int relationshipTypeId();
-        long relationshipCount();
-        CSRGraph graph();
-        HugeLongArray offsets();
-        int[] propertyIds();
-        AdjacencyProperties[] adjacencyProperties();
+    public static class RelationshipIdContext {
+        private final RelationshipType relationshipType;
+        private final int relationshipTypeId;
+        private final long relationshipCount;
+        private final CSRGraph graph;
+        private final HugeLongArray offsets;
+        private final int[] propertyIds;
+        private final AdjacencyProperties[] adjacencyProperties;
+        private final AdjacencyList adjacencyList;
 
-        @Value.Derived
-        default AdjacencyList adjacencyList() {
-            return graph().relationshipTopologies().get(relationshipType()).adjacencyList();
+        RelationshipIdContext(
+            RelationshipType relationshipType,
+            int relationshipTypeId,
+            long relationshipCount,
+            CSRGraph graph,
+            HugeLongArray offsets,
+            int[] propertyIds,
+            AdjacencyProperties[] adjacencyProperties
+        ) {
+            this.relationshipType = relationshipType;
+            this.relationshipTypeId = relationshipTypeId;
+            this.relationshipCount = relationshipCount;
+            this.graph = graph;
+            this.offsets = offsets;
+            this.propertyIds = propertyIds;
+            this.adjacencyProperties = adjacencyProperties;
+            this.adjacencyList = graph().relationshipTopologies().get(relationshipType()).adjacencyList();
+        }
+
+        public RelationshipType relationshipType() {
+            return relationshipType;
+        }
+
+        public int relationshipTypeId() {
+            return relationshipTypeId;
+        }
+
+        public long relationshipCount() {
+            return relationshipCount;
+        }
+
+        public CSRGraph graph() {
+            return graph;
+        }
+
+        public HugeLongArray offsets() {
+            return offsets;
+        }
+
+        public int[] propertyIds() {
+            return propertyIds;
+        }
+
+        public AdjacencyProperties[] adjacencyProperties() {
+            return adjacencyProperties;
+        }
+
+        public AdjacencyList adjacencyList() {
+            return adjacencyList;
         }
     }
 }
