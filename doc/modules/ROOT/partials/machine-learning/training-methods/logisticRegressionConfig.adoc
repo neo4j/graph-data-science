@@ -7,5 +7,5 @@ include::partial$/machine-learning/training-methods/gradient-descent-common-conf
 
 include::partial$/machine-learning/training-methods/penalty-common-config.adoc[]
 
-| focusWeight | Float | 0.0     | yes      | Exponent for the focal loss factor, to make the model focus more on hard, misclassified examples in the train set. By default, no focus is applied. Must be positive.
+| focusWeight | Float | 0.0     | yes      | Exponent for the focal loss factor, to make the model focus more on hard, misclassified examples in the train set. The default of `0.0` implies that focus is not applied and cross entropy is used. Must be positive.
 |===

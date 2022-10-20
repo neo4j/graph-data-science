@@ -31,10 +31,11 @@ When `focusWeight` is a value greater than zero, the loss function changes from 
 
 image::equations/focal-loss.svg[align="center"]
 
-The `focusWeight` parameter is the exponent noted as Greek letter gamma.
-Increasing `focusWeight` will guide the model towards trying to fit "hard" examples.
-A "hard" example is an example for which the model has a low predicted probability for the true class.
-In the above equation, the loss will be exponentially higher for low-probability examples, thus tuning the model towards trying to fit them, at the expense of potentially losing some "easy" examples.
+where `p~t~` denotes the probability of the true class.The `focusWeight` parameter is the exponent noted as Greek letter gamma.
+
+Increasing `focusWeight` will guide the model towards trying to fit "hard" misclassified examples.
+A hard misclassified example is an example for which the model has a low predicted probability for the true class.
+In the above equation, the loss will be exponentially higher for low-true-class-probability examples, thus tuning the model towards trying to fit them, at the expense of potentially being less confident on "easy" examples.
 
 In class-imbalanced datasets, the minority class(es) are typically harder to classify correctly.
 Read more about class imbalance for Link Prediction in xref:machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-classimbalance[Class Imbalance].
