@@ -75,7 +75,8 @@ class RefinementPhaseTest {
         var refinement = RefinementPhase.create(graph, localPhaseCommunities,
             nodeVolumes, communityVolumes, 1.0, 0.01, 19L
         );
-        var communities = refinement.run().communities();
+        var refinementResult = refinement.run();
+        var communities = refinementResult.communities();
 
         var communitiesMap = LongStream
             .range(0, 8)
@@ -89,5 +90,7 @@ class RefinementPhaseTest {
                 community -> assertThat(community).containsExactlyInAnyOrder("a2", "a3", "a4"),
                 community -> assertThat(community).containsExactlyInAnyOrder("a5", "a6", "a7")
             );
+
+        assertThat(refinementResult.maximumRefinedCommunityId()).isEqualTo(6);
     }
 }

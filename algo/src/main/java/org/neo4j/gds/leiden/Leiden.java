@@ -167,8 +167,8 @@ public class Leiden extends Algorithm<LeidenResult> {
             var refinementPhaseResult = refinementPhase.run();
             var refinedCommunities = refinementPhaseResult.communities();
             var refinedCommunityVolumes = refinementPhaseResult.communityVolumes();
-
-            var dendrogramResult = dendrogramManager.setNextLevel(
+            var maximumRefinedCommunityId = refinementPhaseResult.maximumRefinedCommunityId();
+            currentActualCommunities = dendrogramManager.setNextLevel(
                 workingGraph,
                 currentActualCommunities,
                 refinedCommunities,
@@ -176,14 +176,13 @@ public class Leiden extends Algorithm<LeidenResult> {
                 seedCommunityManager,
                 iteration
             );
-            currentActualCommunities = dendrogramResult.dendrogram();
 
             // 3 CREATE NEW GRAPH
             var graphAggregationPhase = new GraphAggregationPhase(
                 workingGraph,
                 this.orientation,
                 refinedCommunities,
-                dendrogramResult.maxCommunityId(),
+                maximumRefinedCommunityId,
                 this.executorService,
                 this.concurrency,
                 this.terminationFlag

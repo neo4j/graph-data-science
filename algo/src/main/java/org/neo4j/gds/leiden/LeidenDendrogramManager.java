@@ -19,12 +19,9 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-
-import java.util.concurrent.atomic.AtomicLong;
 
 public class LeidenDendrogramManager {
 
@@ -58,7 +55,7 @@ public class LeidenDendrogramManager {
 
     public HugeLongArray getCurrent() {return dendrograms[currentIndex];}
 
-    DendrogramResult setNextLevel(
+    HugeLongArray setNextLevel(
         Graph workingGraph,
         HugeLongArray previousIterationDendrogram,
         HugeLongArray refinedCommunities,
@@ -72,7 +69,6 @@ public class LeidenDendrogramManager {
 
         prepareNextLevel(iteration);
 
-        AtomicLong maxCommunityId = new AtomicLong(0L);
         ParallelUtil.parallelForEachNode(rootGraph, concurrency, (nodeId) -> {
             long prevId = previousIterationDendrogram == null
                 ? nodeId
@@ -80,16 +76,6 @@ public class LeidenDendrogramManager {
                 //find which node corresponds to the community this node was matched before
 
             long communityId = refinedCommunities.get(prevId);
-
-            boolean updatedMaxCurrentId;
-            do {
-                var currentMaxId = maxCommunityId.get();
-                if (communityId > currentMaxId) {
-                    updatedMaxCurrentId = maxCommunityId.compareAndSet(currentMaxId, communityId);
-                } else {
-                    updatedMaxCurrentId = true;
-                }
-            } while (!updatedMaxCurrentId);
 
             setToAlgorithmDendrogram(dendrogram, nodeId, communityId);
             //recall: this array marks the community of node
@@ -104,7 +90,7 @@ public class LeidenDendrogramManager {
             //and translate the community to output format; for this we need to take the initial seeding values into acount
         });
 
-        return ImmutableDendrogramResult.of(maxCommunityId.get(), dendrogram);
+        return dendrogram;
     }
 
     private static void setToAlgorithmDendrogram(HugeLongArray dendrogram, long nodeId, long communityId) {
@@ -124,11 +110,5 @@ public class LeidenDendrogramManager {
     private void setToOutputDendrogram(long nodeId, long communityId) {
         dendrograms[currentIndex].set(nodeId, communityId);
     }
-
-    @ValueClass
-    interface DendrogramResult {
-        long maxCommunityId();
-
-        HugeLongArray dendrogram();
-    }
+    
 }
