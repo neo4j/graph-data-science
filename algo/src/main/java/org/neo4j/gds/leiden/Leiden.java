@@ -377,7 +377,7 @@ public class Leiden extends Algorithm<LeidenResult> {
             if (difference < 0) {
                 return ToleranceStatus.DECREASED;
             }
-            return (difference < tolerance) ? ToleranceStatus.CONVERGED : ToleranceStatus.CONTINUE;
+            return (Double.compare(difference, tolerance) < 0) ? ToleranceStatus.CONVERGED : ToleranceStatus.CONTINUE;
         }
     }
 
