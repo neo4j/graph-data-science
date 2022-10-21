@@ -25,7 +25,6 @@ import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.impl.spanningtree.Prim;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -48,7 +47,7 @@ public class SpanningTreeProcMin extends BaseProc {
 
     @Procedure(value = "gds.alpha.spanningTree.write", mode = WRITE)
     @Description(MIN_DESCRIPTION)
-    public Stream<Prim.Result> spanningTree(
+    public Stream<WriteResult> spanningTree(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

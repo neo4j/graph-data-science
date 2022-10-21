@@ -32,10 +32,10 @@ import org.neo4j.gds.impl.spanningtree.SpanningTreeWriteConfig;
 
 import java.util.stream.Stream;
 
-abstract class SpanningTreeWriteSpec implements AlgorithmSpec<Prim, SpanningTree, SpanningTreeWriteConfig, Stream<Prim.Result>, SpanningTreeAlgorithmFactory<SpanningTreeWriteConfig>> {
+abstract class SpanningTreeWriteSpec implements AlgorithmSpec<Prim, SpanningTree, SpanningTreeWriteConfig, Stream<WriteResult>, SpanningTreeAlgorithmFactory<SpanningTreeWriteConfig>> {
 
 
-    public ComputationResultConsumer<Prim, SpanningTree, SpanningTreeWriteConfig, Stream<Prim.Result>> computationResultConsumer() {
+    public ComputationResultConsumer<Prim, SpanningTree, SpanningTreeWriteConfig, Stream<WriteResult>> computationResultConsumer() {
 
         return (computationResult, executionContext) -> {
             Graph graph = computationResult.graph();
@@ -43,7 +43,7 @@ abstract class SpanningTreeWriteSpec implements AlgorithmSpec<Prim, SpanningTree
             SpanningTree spanningTree = computationResult.result();
             SpanningTreeWriteConfig config = computationResult.config();
 
-            Prim.Builder builder = new Prim.Builder();
+            WriteResult.Builder builder = new WriteResult.Builder();
 
             if (graph.isEmpty()) {
                 graph.release();

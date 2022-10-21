@@ -25,7 +25,6 @@ import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.impl.spanningtree.Prim;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -45,11 +44,11 @@ public class SpanningTreeProcMax extends BaseProc {
 
     @Context
     public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
-    
+
 
     @Procedure(value = "gds.alpha.spanningTree.maximum.write", mode = WRITE)
     @Description(MAX_DESCRIPTION)
-    public Stream<Prim.Result> write(
+    public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
