@@ -94,45 +94,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
     private long getSourceNode() {
         return idFunction.of("a");
     }
-
-    @Test
-    void github8_testOutOfBounds() {
-        String importQuery = "LOAD CSV WITH HEADERS FROM 'file:///transport-nodes.csv' AS row\n" +
-                             "MERGE (place:Place {id:row.id})";
-        String importRelsQuery =
-                             "// Import relationships\n" +
-                             "LOAD CSV WITH HEADERS FROM 'file:///transport-relationships.csv' AS row\n" +
-                             "MATCH (origin:Place {id: row.src})\n" +
-                             "MATCH (destination:Place {id: row.dst})\n" +
-                             "MERGE (origin)-[:EROAD {distance: toInteger(row.cost)}]->(destination);";
-        String insert1024NodesQuery = "";
-        for (int i = 0; i < 1024; i++) {
-            insert1024NodesQuery = insert1024NodesQuery + "CREATE(x" + i + ":Node) ";
-        }
-        String createQuery = "CALL gds.graph.project('spanningtree_example', 'Place', {" +
-                             "  EROAD: {" +
-                             "      type: 'EROAD'," +
-                             "      orientation: 'Undirected'," +
-                             "      properties: 'distance'" +
-                             "  }" +
-                             "})";
-        String algoQuery = "MATCH (n:Place {id:'Amsterdam'})\n" +
-
-                           "CALL gds.alpha.spanningTree.minimum.write('spanningtree_example', {" +
-                           "    weightWriteProperty:'cost'," +
-                           "    sourceNode: id(n)," +
-                           "    writeProperty:'MNIST'," +
-                           "    relationshipWeightProperty:'distance'" +
-                           "})\n" +
-                           "YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount\n" +
-                           "RETURN preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount";
-        runQuery(insert1024NodesQuery);
-        runQuery(importQuery);
-        runQuery(importRelsQuery);
-        runQuery(createQuery);
-        runQuery(algoQuery);
-    }
-
+    
     @Test
     void testMinimum() {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
