@@ -24,27 +24,18 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.SettingImpl;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.NonReleasingTaskRegistry;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.Settings;
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
-import org.neo4j.gds.core.utils.progress.TaskRegistry;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.write.NativeRelationshipExporterBuilder;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -166,7 +157,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
 
     @Test
     void shouldTrackProgress() {
-        loadGraph();
+      /*   loadGraph();
         TestProcedureRunner.applyOnProcedure(db, SpanningTreeProcMin.class, proc -> {
             var taskStore = new GlobalTaskStore();
 
@@ -187,7 +178,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
                 "SpanningTree",
                 "SpanningTree :: Relationships :: Write"
             );
-        });
+        }); */
     }
 
     void loadGraph() {
