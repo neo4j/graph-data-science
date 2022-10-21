@@ -32,9 +32,9 @@ class ChunkedAdjacencyListsTest {
 
     @Test
     void shouldWriteSingleTargetList() {
-       var adjacencyLists = ChunkedAdjacencyLists.of(0, 0);
+        var adjacencyLists = ChunkedAdjacencyLists.of(0, 0);
 
-        var input = new long[]{ 42L, 1337L, 5L};
+        var input = new long[]{42L, 1337L, 5L};
         adjacencyLists.add(0, input, 0, 3, 3);
 
         var expectedTargets = new long[]{42L, 1337L, 5L};
@@ -73,26 +73,26 @@ class ChunkedAdjacencyListsTest {
     void shouldWriteWithProperties() {
         var adjacencyLists = ChunkedAdjacencyLists.of(2, 0);
 
-        var input = new long[]{ 42L, 1337L, 5L, 6L};
-        var properties = new long[][]{ {42L, 1337L, 5L, 6L}, {8L, 8L, 8L, 8L}};
+        var input = new long[]{42L, 1337L, 5L, 6L};
+        var properties = new long[][]{{42L, 1337L, 5L, 6L}, {8L, 8L, 8L, 8L}};
         adjacencyLists.add(0, input, properties, 0, 4, 4);
 
         adjacencyLists.consume((nodeId, targets, actualProperties, position, length) -> assertThat(actualProperties)
-            .hasDimensions(2, 7)
-            .contains(new long[]{42L, 1337L, 5L, 6L, 0L, 0L, 0L}, Index.atIndex(0))
-            .contains(new long[]{8L, 8L, 8L, 8L, 0L, 0L, 0L}, Index.atIndex(1)));
+            .hasDimensions(2, 4)
+            .contains(new long[]{42L, 1337L, 5L, 6L}, Index.atIndex(0))
+            .contains(new long[]{8L, 8L, 8L, 8L}, Index.atIndex(1)));
     }
 
     @Test
     void shouldAllowConsumptionOfAllElements() {
         var adjacencyLists = ChunkedAdjacencyLists.of(0, 0);
 
-        adjacencyLists.add(1, new long[]{ 42L, 1337L, 5L}, 0, 3, 3);
-        adjacencyLists.add(8, new long[]{ 1L, 2L}, 0, 2, 2);
+        adjacencyLists.add(1, new long[]{42L, 1337L, 5L}, 0, 3, 3);
+        adjacencyLists.add(8, new long[]{1L, 2L}, 0, 2, 2);
 
         // Skip 2 pages
         var largeIndex = 3 * 4096 + 1;
-        adjacencyLists.add(largeIndex, new long[]{ 42L, 42L}, 0, 2, 2);
+        adjacencyLists.add(largeIndex, new long[]{42L, 42L}, 0, 2, 2);
 
         adjacencyLists.consume((id, targets, properties, compressedBytesSize, compressedTargets) -> {
             assertThat(properties).isNull();
@@ -160,9 +160,8 @@ class ChunkedAdjacencyListsTest {
             assertThat(actualTargets).containsExactly(expectedTargets);
 
             assertThat(actualProperties)
-                // there is an additional entry, because we increase the buffers in size
-                .hasDimensions(1, 6)
-                .contains(new long[]{3L, 3L, 4L, 0L, 0L, 0L}, Index.atIndex(0));
+                // there is an additional entry, because we double the buffers in size
+                .hasDimensions(1, 4).contains(new long[]{3L, 3L, 4L, 0L}, Index.atIndex(0));
         });
     }
 }
