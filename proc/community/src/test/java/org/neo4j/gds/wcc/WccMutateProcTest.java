@@ -98,7 +98,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
             .build()
             .graphStore();
 
-        GraphStoreCatalog.set(emptyWithNameNative(getUsername(), testGraphName), initialGraphStore);
+        GraphStoreCatalog.set(emptyWithNameNative(getUsername(), testGraphName, nodeProperties()), initialGraphStore);
 
         var mutateQuery = GdsCypher
             .call(testGraphName)
@@ -134,7 +134,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
             .build()
             .graphStore();
 
-        GraphStoreCatalog.set(emptyWithNameNative(getUsername(), testGraphName), initialGraphStore);
+        GraphStoreCatalog.set(emptyWithNameNative(getUsername(), testGraphName, nodeProperties()), initialGraphStore);
 
         String query = GdsCypher
             .call(testGraphName)

@@ -108,7 +108,8 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG exte
             GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
                 TEST_USERNAME,
                 loadedGraphName,
-                relationshipProjections()
+                relationshipProjections(),
+                nodeProperties()
             );
             GraphStoreCatalog.set(
                 graphProjectConfig,

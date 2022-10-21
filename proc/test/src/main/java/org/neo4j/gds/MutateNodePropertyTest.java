@@ -30,6 +30,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -51,12 +52,22 @@ public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<RESULT>, CON
         GraphStoreCatalog.removeAllLoadedGraphs();
 
         runQuery(graphDb(), "CREATE (a1: A), (a2: A), (b: B), (:B), (a1)-[:REL1]->(a2), (a2)-[:REL2]->(b)");
+        nodeProperties().forEach(p -> {
+            runQuery(graphDb(), "MATCH (n) SET n." + p + "=0.0");
+        });
         String graphName = "myGraph";
 
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
             .databaseService(graphDb())
             .graphName(graphName)
-            .addNodeLabels("A", "B");
+            .addNodeProjection(NodeProjection.of(
+                "A", PropertyMappings.of(nodeProperties().stream().map(PropertyMapping::of).collect(Collectors.toList()))
+            ))
+            .addNodeProjection(NodeProjection.of(
+                "B", PropertyMappings.of(nodeProperties().stream().map(PropertyMapping::of).collect(Collectors.toList()))
+            ))
+            ;
+
 
         if (!requiresUndirected()) {
             storeLoaderBuilder.addRelationshipTypes("REL1", "REL2");

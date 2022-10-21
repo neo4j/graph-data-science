@@ -114,7 +114,8 @@ public interface ConfigurableSeedConfigTest<ALGORITHM extends Algorithm<RESULT>,
         GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
             "",
             loadedGraphName,
-            allRelationshipsProjection()
+            allRelationshipsProjection(),
+            nodeProperties()
         );
 
         applyOnProcedure((proc) -> {

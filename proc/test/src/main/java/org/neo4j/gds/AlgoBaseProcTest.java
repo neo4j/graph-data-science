@@ -54,6 +54,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -196,7 +197,8 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
             "",
             loadedGraphName,
-            relationshipProjections()
+            relationshipProjections(),
+            nodeProperties()
         );
         applyOnProcedure(proc -> {
             proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
@@ -241,7 +243,8 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
             "",
             loadedGraphName,
-            relationshipProjections()
+            relationshipProjections(),
+            nodeProperties()
         );
         applyOnProcedure(proc -> {
             proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
@@ -279,12 +282,17 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         return true;
     }
 
+    default List<String> nodeProperties() {
+        return List.of();
+    }
+
     @AllGraphStoreFactoryTypesTest
     default void testRunMultipleTimesOnLoadedGraph(GraphFactoryTestSupport.FactoryType factoryType) {
         String loadedGraphName = "loadedGraph";
         GraphProjectConfig graphProjectConfig = factoryType == CYPHER
-            ? emptyWithNameCypher(TEST_USERNAME, loadedGraphName)
-            : withNameAndRelationshipProjections(TEST_USERNAME, loadedGraphName, relationshipProjections());
+            ? emptyWithNameCypher(TEST_USERNAME, loadedGraphName, nodeProperties())
+            : withNameAndRelationshipProjections(TEST_USERNAME, loadedGraphName, relationshipProjections(),
+                nodeProperties());
 
         applyOnProcedure((proc) -> {
             GraphStoreCatalog.set(
@@ -319,7 +327,8 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
                 "",
                 loadedGraphName,
-                relationshipProjections()
+                relationshipProjections(),
+                List.of()
             );
             GraphStore graphStore = graphLoader(graphProjectConfig).graphStore();
             GraphStoreCatalog.set(graphProjectConfig, graphStore);

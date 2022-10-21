@@ -54,6 +54,6 @@ public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithm
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.empty();
+        return Tasks.leaf(taskName());
     }
 }

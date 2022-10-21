@@ -55,6 +55,7 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
 
     @Override
     public HashGNNResult compute() {
+        progressTracker.beginSubTask();
         var degreePartition = PartitionUtils.degreePartition(
             graph,
             // Since degree only very approximately reflect the min hash task workload per node we decrease the partition sizes.
@@ -150,6 +151,7 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
             outputVectors.setAll(nodeId -> bitSetToArray(binaryOutputVectors.get(nodeId), embeddingDimension));
         }
 
+        progressTracker.endSubTask();
         return new HashGNNResult(outputVectors);
     }
 

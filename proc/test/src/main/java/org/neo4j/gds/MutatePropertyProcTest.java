@@ -32,8 +32,11 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -87,6 +90,9 @@ public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<RESULT>, CON
         GraphStoreCatalog.removeAllLoadedGraphs();
 
         runQuery(graphDb(), "CREATE (a1: A), (a2: A), (b: B), (a1)-[:REL]->(a2)");
+        nodeProperties().forEach(p -> {
+            runQuery(graphDb(), "MATCH (n) SET n." + p + "=0.0");
+        });
         var relationshipProjections = relationshipProjections();
         var orientation = relationshipProjections
             .projections()
@@ -97,11 +103,20 @@ public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<RESULT>, CON
             .orElse(Orientation.NATURAL);
         GraphStore graphStore = new TestNativeGraphLoader(graphDb())
             .withLabels("A", "B")
+            .withNodeProperties(PropertyMappings.of(nodeProperties()
+                .stream()
+                .map(PropertyMapping::of)
+                .collect(Collectors.toList())))
             .withDefaultOrientation(orientation)
             .graphStore();
 
         String graphName = "myGraph";
-        var graphProjectConfig = withNameAndRelationshipProjections("", graphName, relationshipProjections);
+        var graphProjectConfig = withNameAndRelationshipProjections(
+            "",
+            graphName,
+            relationshipProjections,
+            nodeProperties()
+        );
         GraphStoreCatalog.set(graphProjectConfig, graphStore);
 
         CypherMapWrapper filterConfig = CypherMapWrapper.empty().withEntry(
@@ -112,13 +127,17 @@ public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<RESULT>, CON
         runMutation(graphName, filterConfig);
 
         GraphStore mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, databaseId(), graphName).graphStore();
+
+        var expectedProperties = new ArrayList<String>();
+        expectedProperties.add(mutateProperty());
+        expectedProperties.addAll(nodeProperties());
         Assertions.assertEquals(
-            Collections.singleton(mutateProperty()),
+            new HashSet<>(expectedProperties),
             mutatedGraph.nodePropertyKeys(NodeLabel.of("A"))
         );
 
         assertEquals(
-            Collections.emptySet(),
+            new HashSet<>(nodeProperties()),
             mutatedGraph.nodePropertyKeys(NodeLabel.of("B"))
         );
     }
