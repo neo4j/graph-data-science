@@ -113,7 +113,8 @@ public class Leiden extends Algorithm<LeidenResult> {
 
         double gamma = this.initialGamma * modularityScaleCoefficient;
 
-        HugeLongArray currentActualCommunities = null; //this keeps a mapping of nodes to the community they currently belong to
+        HugeLongArray currentActualCommunities = HugeLongArray.newArray(rootGraph.nodeCount());
+        //this keeps a mapping of nodes to the community they currently belong to
         //if no seeding is involved, these values can be considered correct output. Otherwise, they depict the current state
         //and do not consider seeding (i.e., let's say seed:42 is mapped to community 0
         // then  currentCommunities.get(x)=0 not 42
@@ -149,62 +150,71 @@ public class Leiden extends Algorithm<LeidenResult> {
                 break;
             }
             var toleranceStatus = getToleranceStatus(iteration);
-
             if (toleranceStatus == ToleranceStatus.DECREASED) {
                 break;
             }
-
-            // 2 REFINE
-            var refinementPhase = RefinementPhase.create(
-                workingGraph,
-                localMoveCommunities,
-                localMoveNodeVolumes,
-                localMoveCommunityVolumes,
-                gamma,
-                theta,
-                randomSeed
-            );
-            var refinementPhaseResult = refinementPhase.run();
-            var refinedCommunities = refinementPhaseResult.communities();
-            var refinedCommunityVolumes = refinementPhaseResult.communityVolumes();
-            var maximumRefinedCommunityId = refinementPhaseResult.maximumRefinedCommunityId();
-            currentActualCommunities = dendrogramManager.setNextLevel(
+            dendrogramManager.updateOutputDendrogram(
                 workingGraph,
                 currentActualCommunities,
-                refinedCommunities,
                 localMoveCommunities,
                 seedCommunityManager,
                 iteration
             );
 
-            // 3 CREATE NEW GRAPH
-            var graphAggregationPhase = new GraphAggregationPhase(
-                workingGraph,
-                this.orientation,
-                refinedCommunities,
-                maximumRefinedCommunityId,
-                this.executorService,
-                this.concurrency,
-                this.terminationFlag
-            );
-            workingGraph = graphAggregationPhase.run();
-
-            // Post-aggregate step: MAINTAIN PARTITION
-            var communityData = maintainPartition(
-                workingGraph,
-                localMoveCommunities,
-                refinedCommunityVolumes
-            );
-            localMoveCommunities = communityData.seededCommunitiesForNextIteration;
-            localMoveCommunityVolumes = communityData.communityVolumes;
-            localMoveNodeVolumes = communityData.aggregatedNodeSeedVolume;
-            communityCount = communityData.communityCount;
-
-            modularity = modularities[iteration];
             if (toleranceStatus == ToleranceStatus.CONVERGED) {
                 didConverge = true;
+                modularity = modularities[iteration];
+                iteration++;
                 break;
             }
+            if (iteration < maxIterations - 1) { //if no next iteration, avoid refinement and graph aggregation etc
+
+                // 2 REFINE
+                var refinementPhase = RefinementPhase.create(
+                    workingGraph,
+                    localMoveCommunities,
+                    localMoveNodeVolumes,
+                    localMoveCommunityVolumes,
+                    gamma,
+                    theta,
+                    randomSeed
+                );
+                var refinementPhaseResult = refinementPhase.run();
+                var refinedCommunities = refinementPhaseResult.communities();
+                var refinedCommunityVolumes = refinementPhaseResult.communityVolumes();
+                var maximumRefinedCommunityId = refinementPhaseResult.maximumRefinedCommunityId();
+
+                dendrogramManager.updateAlgorithmDendrogram(
+                    workingGraph,
+                    currentActualCommunities,
+                    refinedCommunities,
+                    iteration
+                );
+                // 3 CREATE NEW GRAPH
+                var graphAggregationPhase = new GraphAggregationPhase(
+                    workingGraph,
+                    this.orientation,
+                    refinedCommunities,
+                    maximumRefinedCommunityId,
+                    this.executorService,
+                    this.concurrency,
+                    this.terminationFlag
+                );
+                workingGraph = graphAggregationPhase.run();
+
+                // Post-aggregate step: MAINTAIN PARTITION
+                var communityData = maintainPartition(
+                    workingGraph,
+                    localMoveCommunities,
+                    refinedCommunityVolumes
+                );
+                localMoveCommunities = communityData.seededCommunitiesForNextIteration;
+                localMoveCommunityVolumes = communityData.communityVolumes;
+                localMoveNodeVolumes = communityData.aggregatedNodeSeedVolume;
+                communityCount = communityData.communityCount;
+            }
+            modularity = modularities[iteration];
+
         }
 
         return getLeidenResult(didConverge, iteration);
