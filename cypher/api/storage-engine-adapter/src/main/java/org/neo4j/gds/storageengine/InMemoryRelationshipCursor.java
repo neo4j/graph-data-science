@@ -166,7 +166,7 @@ public abstract class InMemoryRelationshipCursor
 
     @Override
     public void close() {
-
+        this.graphStore.relationshipIds().removeUpdateListener(this);
     }
 
     public void properties(StoragePropertyCursor propertyCursor, InMemoryPropertySelection selection) {
