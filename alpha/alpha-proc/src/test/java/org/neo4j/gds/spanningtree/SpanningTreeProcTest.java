@@ -91,7 +91,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
         builder.setConfig(setting, fileRoot);
     }
 
-    private long getStartNodeId() {
+    private long getSourceNode() {
         return idFunction.of("a");
     }
 
@@ -116,10 +116,11 @@ public class SpanningTreeProcTest extends BaseProcTest {
                              "      properties: 'distance'" +
                              "  }" +
                              "})";
-        String algoQuery = "MATCH (n:Place {id:\"Amsterdam\"})\n" +
+        String algoQuery = "MATCH (n:Place {id:'Amsterdam'})\n" +
+
                            "CALL gds.alpha.spanningTree.minimum.write('spanningtree_example', {" +
                            "    weightWriteProperty:'cost'," +
-                           "    startNodeId: id(n)," +
+                           "    sourceNode: id(n)," +
                            "    writeProperty:'MNIST'," +
                            "    relationshipWeightProperty:'distance'" +
                            "})\n" +
@@ -144,7 +145,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.spanningTree")
             .writeMode()
-            .addParameter("startNodeId", getStartNodeId())
+            .addParameter("sourceNode", getSourceNode())
             .addParameter("relationshipWeightProperty", "cost")
             .addParameter("weightWriteProperty", "cost")
             .yields("preProcessingMillis", "computeMillis", "writeMillis", "effectiveNodeCount");
@@ -177,7 +178,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.spanningTree.maximum")
             .writeMode()
-            .addParameter("startNodeId", getStartNodeId())
+            .addParameter("sourceNode", getSourceNode())
             .addParameter("writeProperty", "MAX")
             .addParameter("relationshipWeightProperty", "cost")
             .addParameter("weightWriteProperty", "cost")
@@ -199,18 +200,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
         assertEquals(relCount, 4);
     }
 
-    @Test
-    void failOnInvalidStartNode() {
-        loadGraph();
-        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.spanningTree.maximum")
-            .writeMode()
-            .addParameter("weightWriteProperty", "cost")
-            .addParameter("startNodeId", 42)
-            .yields();
 
-        assertError(query, "startNode with id 42 was not loaded");
-    }
 
     @Test
     void shouldTrackProgress() {
@@ -227,7 +217,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
                 DEFAULT_GRAPH_NAME,
                 Map.of(
                     "weightWriteProperty", "myProp",
-                    "startNodeId", 0L
+                    "sourceNode", 0L
                 )
             );
 

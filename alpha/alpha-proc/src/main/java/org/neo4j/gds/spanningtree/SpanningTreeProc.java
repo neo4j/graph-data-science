@@ -23,7 +23,6 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
@@ -31,8 +30,8 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.impl.spanningtree.Prim;
 import org.neo4j.gds.impl.spanningtree.SpanningGraph;
 import org.neo4j.gds.impl.spanningtree.SpanningTree;
+import org.neo4j.gds.impl.spanningtree.SpanningTreeAlgorithmFactory;
 import org.neo4j.gds.impl.spanningtree.SpanningTreeConfig;
-import org.neo4j.gds.utils.InputNodeValidator;
 import org.neo4j.procedure.Context;
 
 import java.util.stream.Stream;
@@ -45,22 +44,7 @@ public abstract class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, 
 
     @Override
     public GraphAlgorithmFactory<Prim, SpanningTreeConfig> algorithmFactory() {
-        return new GraphAlgorithmFactory<>() {
-            @Override
-            public String taskName() {
-                return "SpanningTree";
-            }
-
-            @Override
-            public Prim build(
-                Graph graph,
-                SpanningTreeConfig configuration,
-                ProgressTracker progressTracker
-            ) {
-                InputNodeValidator.validateStartNode(configuration.startNodeId(), graph);
-                return new Prim(graph, graph, configuration.minMax(), configuration.startNodeId(), progressTracker);
-            }
-        };
+        return new SpanningTreeAlgorithmFactory<>();
     }
 
     @Override
