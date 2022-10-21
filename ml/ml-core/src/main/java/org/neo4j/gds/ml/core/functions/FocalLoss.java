@@ -51,8 +51,7 @@ public class FocalLoss extends CrossEntropyLoss {
         var chainRuleGradient = Math.pow(predictedProbabilityForWrongClasses, focusWeight - 1.0);
 
         var focalLossPerExample = (focusWeight * chainRuleGradient * Math.log(predictedProbabilityForTrueClass)
-                                   - chainRuleGradient * predictedProbabilityForWrongClasses / predictedProbabilityForTrueClass)
-                                  * (predictedProbabilityForTrueClass * predictedProbabilityForWrongClasses) / numberOfExamples;
+                                   - chainRuleGradient * predictedProbabilityForWrongClasses / predictedProbabilityForTrueClass) / numberOfExamples;
         return focalLossPerExample;
     }
 }

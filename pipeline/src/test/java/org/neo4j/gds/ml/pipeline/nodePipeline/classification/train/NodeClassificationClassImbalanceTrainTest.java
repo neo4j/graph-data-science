@@ -29,6 +29,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.Classifier;
+import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
@@ -65,45 +66,104 @@ class NodeClassificationClassImbalanceTrainTest {
 
     @Test
     void focalLossImprovesDifficultClassPredictions() {
-        var resultNoFocus = trainWithFocus(0, "multiClass");
-        var resultFocus = trainWithFocus(5, "multiClass");
+        var LRResultNoFocus = trainLRWithFocus(0, "multiClass");
+        var LRResultFocus = trainLRWithFocus(5, "multiClass");
+        var MLPResultNoFocus = trainMLPWithFocus(0, "multiClass");
+        var MLPResultFocus = trainMLPWithFocus(5, "multiClass");
 
-        double[] hardPredictionNoFocus = resultNoFocus.classifier().predictProbabilities(new double[]{5.3, 10.5, 0.0});
-        double[] hardPredictionFocus = resultFocus.classifier().predictProbabilities(new double[]{5.3, 10.5, 0.0});
+        double[] LPHardPredictionNoFocus = LRResultNoFocus.classifier().predictProbabilities(new double[]{5.3, 10.5, 0.0});
+        double[] LRHardPredictionFocus = LRResultFocus.classifier().predictProbabilities(new double[]{5.3, 10.5, 0.0});
+        double[] MLPHardPredictionNoFocus = MLPResultNoFocus.classifier().predictProbabilities(new double[]{5.3, 10.5, 0.0});
+        double[] MLPHardPredictionFocus = MLPResultFocus.classifier().predictProbabilities(new double[]{5.3, 10.5, 0.0});
 
         // the example data point (5.3, 10.5, 0.0) (a7 from train set above) is hard to classify (the only 1-class example)
         // applying focus makes the model more probable to predict the correct class (harder)
-        assertThat(hardPredictionFocus[1]).isGreaterThan(hardPredictionNoFocus[1]);
+        assertThat(LRHardPredictionFocus[1]).isGreaterThan(LPHardPredictionNoFocus[1]);
+        assertThat(MLPHardPredictionFocus[1]).isGreaterThan(MLPHardPredictionNoFocus[1]);
     }
 
     @Test
     void focalLossImprovesMinorityClassPredictions() {
-        var resultNoFocus = trainWithFocus(0, "moreOnes");
-        var resultFocus = trainWithFocus(5, "moreOnes");
+        var LRResultNoFocus = trainLRWithFocus(0, "moreOnes");
+        var LRResultFocus = trainLRWithFocus(5, "moreOnes");
+        var MLPResultNoFocus = trainMLPWithFocus(0, "moreOnes");
+        var MLPResultFocus = trainMLPWithFocus(5, "moreOnes");
 
-        double[] hardPredictionNoFocus = resultNoFocus.classifier().predictProbabilities(new double[]{1.3, 1.5, 0.0});
-        double[] hardPredictionFocus = resultFocus.classifier().predictProbabilities(new double[]{1.3, 1.5, 0.0});
+        double[] LRHardPredictionNoFocus = LRResultNoFocus.classifier().predictProbabilities(new double[]{1.3, 1.5, 0.0});
+        double[] LRHardPredictionFocus = LRResultFocus.classifier().predictProbabilities(new double[]{1.3, 1.5, 0.0});
+        double[] MLPHardPredictionNoFocus = MLPResultNoFocus.classifier().predictProbabilities(new double[]{1.3, 1.5, 0.0});
+        double[] MLPHardPredictionFocus = MLPResultFocus.classifier().predictProbabilities(new double[]{1.3, 1.5, 0.0});
 
         // the example data point (1.3, 1.5, 0.0) (a6 from train set above) is hard to classify
         // applying focus makes the model more probable to predict the correct class (harder)
-        assertThat(hardPredictionFocus[0]).isGreaterThan(hardPredictionNoFocus[0]);
+        assertThat(LRHardPredictionFocus[0]).isGreaterThan(LRHardPredictionNoFocus[0]);
+        //however for MLP, it is powerful enough to classify a6, and it is not a hard result
+        assertThat(MLPHardPredictionNoFocus[0]).isGreaterThan(0.5);
 
         // applying focus
-        assertThat(resultFocus.zeroClassPrecision()).isGreaterThanOrEqualTo(resultNoFocus.zeroClassPrecision());
+        assertThat(LRResultFocus.zeroClassPrecision()).isGreaterThanOrEqualTo(LRResultNoFocus.zeroClassPrecision());
+        assertThat(MLPResultFocus.zeroClassPrecision()).isGreaterThanOrEqualTo(MLPResultNoFocus.zeroClassPrecision());
+
     }
 
-    private ClassifierAndTestMetric trainWithFocus(
+    private ClassifierAndTestMetric trainLRWithFocus(
         double focusWeight, String targetProperty
     ) {
         var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.addFeatureStep(NodeFeatureStep.of("arrayProperty"));
 
-//        pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of(
-//            "penalty", 0.1,
-//            "patience", 10,
-//            "tolerance", 0.0001,
-//            "focusWeight", focusWeight
-//        )));
+        pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of(
+            "penalty", 0.1,
+            "patience", 10,
+            "tolerance", 0.0001,
+            "focusWeight", focusWeight
+        )));
+
+        var trainConfig = NodeClassificationPipelineTrainConfigImpl
+            .builder()
+            .pipeline("PIPELINE")
+            .graphName("GRAPH")
+            .modelUser("DUMMY")
+            .modelName("model")
+            .concurrency(1)
+            .randomSeed(-1L)
+            .targetProperty(targetProperty)
+            .metrics(List.of(
+                ClassificationMetricSpecification.Parser.parse("PRECISION(class=0)")
+            ))
+            .build();
+
+        var result = NodeClassificationTrain.create(
+            graphStore,
+            pipeline,
+            trainConfig,
+            NodeFeatureProducer.create(
+                graphStore,
+                trainConfig,
+                ExecutionContext.EMPTY,
+                ProgressTracker.NULL_TRACKER
+            ),
+            ProgressTracker.NULL_TRACKER
+        ).run();
+
+        return ImmutableClassifierAndTestMetric
+            .builder()
+            .classifier(result.classifier())
+            .zeroClassPrecision(result
+                .trainingStatistics()
+                .winningModelTestMetrics()
+                .values()
+                .stream()
+                .findFirst()
+                .orElseThrow())
+            .build();
+    }
+
+    private ClassifierAndTestMetric trainMLPWithFocus(
+        double focusWeight, String targetProperty
+    ) {
+        var pipeline = new NodeClassificationTrainingPipeline();
+        pipeline.addFeatureStep(NodeFeatureStep.of("arrayProperty"));
 
         pipeline.addTrainerConfig(MLPClassifierTrainConfig.of(Map.of(
             "penalty", 0.1,

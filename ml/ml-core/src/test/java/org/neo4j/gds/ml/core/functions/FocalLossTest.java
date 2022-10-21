@@ -29,14 +29,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 class FocalLossTest implements FiniteDifferenceTest {
 
     @Test
-    void focalLossShouldDiscourageLowConfidencePrediction() {
-        var weights = new Weights<>(new Matrix(new double[]{0.9, 0.8}, 2, 1));
-        var bias = Weights.ofVector(0.9, 0.8);
-        var features = Constant.matrix(
-            new double[]{0.23, 0.52},
-            2,
-            1
+    void shouldComputeGradientCorrectly2() {
+        var targets = Constant.vector(new double[]{1.0, 2.0, 0.0});
+        var predictions = new Weights<>(
+            new Matrix(
+                new double[]{
+                    0.35, 0.65, 0.0,
+                    0.45, 0.45, 0.1,
+                    0.14, 0.66, 0.2
+                },
+                3, 3
+            )
         );
+
+        var loss = new FocalLoss(predictions, targets, 5);
+
+        finiteDifferenceShouldApproximateGradient(predictions, loss);
+    }
+
+    @Test
+    void focalLossShouldDiscourageLowConfidencePrediction() {
         var labels = Constant.vector(new double[]{1.0, 0.0});
 
         var predictions = Constant.matrix(new double[]{

@@ -29,6 +29,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 
@@ -109,6 +110,13 @@ class LinkPredictionClassImbalanceTrainTest {
             "patience", 5,
             "tolerance", 0.001,
             "focusWeight", focusWeight
+        )));
+        pipeline.addTrainerConfig(MLPClassifierTrainConfig.of(Map.of(
+            "penalty", 0.1,
+            "patience", 5,
+            "tolerance", 0.001,
+            "focusWeight", focusWeight,
+            "hiddenLayerSizes", List.of(12,6)
         )));
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("array")));
 
