@@ -47,7 +47,7 @@ class LeidenTest {
         "CREATE " +
         "  (a0:Node {optimal: 5000, seed: 1, seed2:-1})," +
         "  (a1:Node {optimal: 4000,seed: 2})," +
-        "  (a2:Node {optimal: 5000,seed: 3})," +
+        "  (a2:Node {optimal: 5000,seed: 2})," +
         "  (a3:Node {optimal: 5000})," +
         "  (a4:Node {optimal: 5000,seed: 5})," +
         "  (a5:Node {optimal: 4000,seed: 6})," +
@@ -216,6 +216,28 @@ class LeidenTest {
 
         ).seededCommunitiesForNextIteration;
         assertThat(nextCommunities.toArray()).containsExactly(0, 0, 2, 2);
+
+    }
+
+    @Test
+    void seedManagerShouldWork() {
+        var noSeed = SeedCommunityManager.create(false, HugeLongArray.of(0, 1, 2, 3, 4));
+        var seededStart = HugeLongArray.of(200, 201, 201, 203, 203);
+        var seed = SeedCommunityManager.create(true, seededStart);
+
+        assertThat(noSeed.communitiesCount()).isEqualTo(5);
+        assertThat(seed.communitiesCount()).isEqualTo(3);
+        graph.forEachNode(nodeId -> {
+            assertThat(noSeed.mapToSeed(nodeId)).isEqualTo(nodeId);
+            return true;
+        });
+
+        assertThat(seededStart.toArray()).isEqualTo(new long[]{0, 1, 1, 3, 3});
+
+        assertThat(seed.mapToSeed(3)).isEqualTo(203);
+        assertThat(seed.mapToSeed(1)).isEqualTo(201);
+        assertThat(seed.mapToSeed(0)).isEqualTo(200);
+
 
     }
 
