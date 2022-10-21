@@ -31,7 +31,8 @@ When `focusWeight` is a value greater than zero, the loss function changes from 
 
 image::equations/focal-loss.svg[align="center"]
 
-where `p~t~` denotes the probability of the true class.The `focusWeight` parameter is the exponent noted as Greek letter gamma.
+where `p~t~` denotes the probability of the true class.
+The `focusWeight` parameter is the exponent noted as Greek letter gamma.
 
 Increasing `focusWeight` will guide the model towards trying to fit "hard" misclassified examples.
 A hard misclassified example is an example for which the model has a low predicted probability for the true class.
