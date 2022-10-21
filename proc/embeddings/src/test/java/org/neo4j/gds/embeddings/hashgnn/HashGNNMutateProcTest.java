@@ -23,7 +23,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.ImmutableRelationshipProjections;
 import org.neo4j.gds.MutateNodePropertyTest;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.RelationshipProjections;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -31,6 +36,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -42,8 +48,8 @@ class HashGNNMutateProcTest extends BaseProcTest implements AlgoBaseProcTest<Has
         "  (a:N {f1: 1, f2: [0.0, 0.0]})" +
         ", (b:N {f1: 0, f2: [1.0, 0.0]})" +
         ", (c:N {f1: 0, f2: [0.0, 1.0]})" +
-        ", (b)-[:R]->(a)" +
-        ", (b)-[:R]->(c)";
+        ", (b)-[:R1]->(a)" +
+        ", (b)-[:R2]->(c)";
 
     @BeforeEach
     void setupWritePropertiesProc() throws Exception {
@@ -66,8 +72,17 @@ class HashGNNMutateProcTest extends BaseProcTest implements AlgoBaseProcTest<Has
     }
 
     @Override
+    public RelationshipProjections relationshipProjections() {
+        return ImmutableRelationshipProjections.of(Map.of(
+            RelationshipType.of("R1"), RelationshipProjection.of("R1", Orientation.NATURAL),
+            RelationshipType.of("R2"), RelationshipProjection.of("R2", Orientation.NATURAL)
+        ));
+    }
+
+    @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper userInput) {
         var minimalConfig = userInput
+            .withBoolean("heterogeneous", true)
             .withNumber("iterations", 2)
             .withNumber("embeddingDensity", 2)
             .withNumber("randomSeed", 42L)
@@ -108,7 +123,7 @@ class HashGNNMutateProcTest extends BaseProcTest implements AlgoBaseProcTest<Has
         "  (a {f1: 1, f2: [0.0, 0.0], embedding: [1.0, 0.0, 0.0]})" +
         ", (b {f1: 0, f2: [1.0, 0.0], embedding: [1.0, 0.0, 0.0]})" +
         ", (c {f1: 0, f2: [0.0, 1.0], embedding: [0.0, 0.0, 1.0]})" +
-        ", (b)-[]->(a)" +
-        ", (b)-[]->(c)";
+        ", (b)-[:R1]->(a)" +
+        ", (b)-[:R2]->(c)";
     }
 }
