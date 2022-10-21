@@ -152,22 +152,24 @@ public class Leiden extends Algorithm<LeidenResult> {
             var toleranceStatus = getToleranceStatus(iteration);
             if (toleranceStatus == ToleranceStatus.DECREASED) {
                 break;
-            }
+            }//if you deteriotate performance, go back to previous iteration!
+
             dendrogramManager.updateOutputDendrogram(
                 workingGraph,
                 currentActualCommunities,
                 localMoveCommunities,
                 seedCommunityManager,
                 iteration
-            );
+            ); //write user's output
 
             if (toleranceStatus == ToleranceStatus.CONVERGED) {
                 didConverge = true;
                 modularity = modularities[iteration];
                 iteration++;
                 break;
-            }
-            if (iteration < maxIterations - 1) { //if no next iteration, avoid refinement and graph aggregation etc
+            } //if little difference from previous iteration, keep and break
+
+            if (iteration < maxIterations - 1) { //if there's no next iteration, skip refinement/graph aggregation
 
                 // 2 REFINE
                 var refinementPhase = RefinementPhase.create(
@@ -189,7 +191,8 @@ public class Leiden extends Algorithm<LeidenResult> {
                     currentActualCommunities,
                     refinedCommunities,
                     iteration
-                );
+                );  //update the actual communities with the refined ones
+
                 // 3 CREATE NEW GRAPH
                 var graphAggregationPhase = new GraphAggregationPhase(
                     workingGraph,

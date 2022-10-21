@@ -106,7 +106,6 @@ public class LeidenDendrogramManager {
             long communityId = communitiesToWrite.get(prevId);
             finalAlgorithmDendrogram.set(nodeId, communityId);
         });
-        algorithmDendrogram = finalAlgorithmDendrogram;
         //recall: this array marks the community of node
         //but disregards the numbering implied by any seeds (works on the algorithm level).
     }
