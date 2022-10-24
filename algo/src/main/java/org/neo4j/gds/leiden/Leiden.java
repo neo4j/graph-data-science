@@ -130,7 +130,8 @@ public class Leiden extends Algorithm<LeidenResult> {
                 localMoveNodeVolumes,
                 localMoveCommunityVolumes,
                 gamma,
-                communityCount
+                communityCount,
+                concurrency
             );
             var communitiesCount = localMovePhase.run();
 
@@ -217,7 +218,7 @@ public class Leiden extends Algorithm<LeidenResult> {
             modularity = modularities[iteration];
 
         }
-
+       
         return getLeidenResult(didConverge, iteration);
     }
 

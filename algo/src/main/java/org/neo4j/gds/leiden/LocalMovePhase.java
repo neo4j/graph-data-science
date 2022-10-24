@@ -19,9 +19,16 @@
  */
 package org.neo4j.gds.leiden;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 
 final class LocalMovePhase {
 
@@ -44,6 +51,7 @@ final class LocalMovePhase {
     private final HugeLongArray encounteredCommunities;
     private final HugeDoubleArray encounteredCommunitiesWeights;
     private long encounteredCommunityCounter = 0;
+    private final int concurrency;
 
     long swaps;
 
@@ -55,7 +63,8 @@ final class LocalMovePhase {
         HugeDoubleArray nodeVolumes,
         HugeDoubleArray communityVolumes,
         double gamma,
-        long communityCount
+        long communityCount,
+        int concurrency
     ) {
 
         var encounteredCommunities = HugeLongArray.newArray(graph.nodeCount());
@@ -70,7 +79,8 @@ final class LocalMovePhase {
             communityVolumes,
             encounteredCommunities,
             encounteredCommunitiesWeights,
-            gamma
+            gamma,
+            concurrency
         );
     }
 
@@ -82,7 +92,8 @@ final class LocalMovePhase {
         HugeDoubleArray communityVolumes,
         HugeLongArray encounteredCommunities,
         HugeDoubleArray encounteredCommunitiesWeights,
-        double gamma
+        double gamma,
+        int concurrency
     ) {
         this.graph = graph;
         this.communityCount = communityCount;
@@ -93,6 +104,7 @@ final class LocalMovePhase {
         this.encounteredCommunities = encounteredCommunities;
         this.encounteredCommunitiesWeights = encounteredCommunitiesWeights;
         this.swaps = 0;
+        this.concurrency = concurrency;
 
     }
 
@@ -101,140 +113,55 @@ final class LocalMovePhase {
      * @return The new community count.
      */
     public long run() {
-        // Use HugeAtomicBitSet instead of queue - gives better runtime.
-        var nodesToVisit = new NodesToVisit(graph.nodeCount());
-        
-        while (nodesToVisit.hasMoreNodes()) {
-            nodesToVisit.visitRemainingNodes(nodeId -> {
-                nodesToVisit.markAsVisited(nodeId);
-                long currentNodeCommunityId = currentCommunities.get(nodeId);
-                double currentNodeVolume = nodeVolumes.get(nodeId);
-
-                // Remove the current node volume from its community volume
-                communityVolumes.addTo(currentNodeCommunityId, -currentNodeVolume);
-
-                communityRelationshipWeights(nodeId);
-
-                // Compute the "modularity" for the current node and current community
-                double currentBestGain =
-                    Math.max(0, encounteredCommunitiesWeights.get(currentNodeCommunityId)) -
-                    currentNodeVolume * communityVolumes.get(currentNodeCommunityId) * gamma;
-
-                long bestCommunityId = findBestCommunity(
-                    currentBestGain,
-                    currentNodeVolume,
-                    currentNodeCommunityId
-                );
-
-                tryToMoveNode(
-                    nodesToVisit,
-                    nodeId,
-                    currentNodeCommunityId,
-                    currentNodeVolume,
-                    bestCommunityId
-                );
-
-            });
-        }
-
-        return communityCount;
-    }
-
-    private long findBestCommunity(
-        double currentBestGain,
-        double currentNodeVolume,
-        long bestCommunityId
-    ) {
-
-        for (long i = 0; i < encounteredCommunityCounter; ++i) {
-            long candidateCommunityId = encounteredCommunities.get(i);
-            double candidateCommunityRelationshipsWeight = encounteredCommunitiesWeights.get(candidateCommunityId);
-            encounteredCommunitiesWeights.set(candidateCommunityId, -1);
-            // Compute the modularity gain for the candidate community
-            double modularityGain =
-                candidateCommunityRelationshipsWeight - currentNodeVolume * communityVolumes.get(candidateCommunityId) * gamma;
-
-            boolean improves = modularityGain > currentBestGain // gradually better modularity gain
-                               // tie-breaking case; consider only positive modularity gains
-                               || (modularityGain > 0
-                                   // when the current gain is equal to the best gain
-                                   && Double.compare(modularityGain, currentBestGain) == 0
-                                   // consider it as improvement only if the candidate community ID is lower than the best community ID
-                                   // similarly to the Louvain implementation
-                                   && candidateCommunityId < bestCommunityId);
-
-            if (improves) {
-                bestCommunityId = candidateCommunityId;
-                currentBestGain = modularityGain;
-            }
-        }
-        return bestCommunityId;
-    }
-
-    private void tryToMoveNode(
-        NodesToVisit nodesToProcess,
-        long nodeId,
-        long currentNodeCommunityId,
-        double currentNodeVolume,
-        long bestCommunityId
-    ) {
-        boolean shouldChangeCommunity = bestCommunityId != currentNodeCommunityId;
-        if (shouldChangeCommunity) {
-            moveNodeToNewCommunity(
-                nodeId,
-                currentNodeCommunityId,
-                bestCommunityId,
-                currentNodeVolume
-            );
-
-            visitNeighboursAfterMove(nodeId, nodesToProcess, bestCommunityId);
-        } else {
-            // We didn't move the node => re-add its degree to its current community sum of degrees
-            communityVolumes.addTo(currentNodeCommunityId, currentNodeVolume);
-        }
-    }
-
-    private void moveNodeToNewCommunity(
-        long nodeId,
-        long currentNodeCommunityId,
-        long newCommunityId,
-        double currentNodeVolume
-    ) {
-        currentCommunities.set(nodeId, newCommunityId);
-        communityVolumes.addTo(newCommunityId, currentNodeVolume);
-        swaps++;
-        if (Double.compare(communityVolumes.get(currentNodeCommunityId), 0.0) == 0) {
-            communityCount--;
-        }
-    }
-
-    private void communityRelationshipWeights(long nodeId) {
-        encounteredCommunityCounter = 0;
-        graph.forEachRelationship(nodeId, 1.0, (s, t, relationshipWeight) -> {
-            long tCommunity = currentCommunities.get(t);
-            if (encounteredCommunitiesWeights.get(tCommunity) < 0) {
-                encounteredCommunities.set(encounteredCommunityCounter, tCommunity);
-                encounteredCommunityCounter++;
-                encounteredCommunitiesWeights.set(tCommunity, relationshipWeight);
-            } else {
-                encounteredCommunitiesWeights.addTo(tCommunity, relationshipWeight);
-            }
-
+        HugeAtomicDoubleArray atomicCommunityVolumes = HugeAtomicDoubleArray.newArray(graph.nodeCount());
+        graph.forEachNode(v -> {
+            atomicCommunityVolumes.set(v, communityVolumes.get(v));
             return true;
         });
-    }
+        HugeLongArray globalQueue = HugeLongArray.newArray(graph.nodeCount());
+        AtomicLong globalQueueIndex = new AtomicLong();
+        AtomicLong globalQueueSize = new AtomicLong(graph.nodeCount());
 
-    // all neighbours of the node that do not belong to the node’s new community
-    // "and that are not yet in the queue are added to the rear of the queue"
-    //   -> this is from the paper, we use a HugeAtomicBitSet which is faster but visit the nodes in different order, doesn't affect the end result.
-    private void visitNeighboursAfterMove(long nodeId, NodesToVisit nodesToProcess, long movedToCommunityId) {
-        graph.forEachRelationship(nodeId, (s, t) -> {
-            long tCommunity = currentCommunities.get(t);
-            boolean shouldAddInQueue = nodesToProcess.visited(t) && tCommunity != movedToCommunityId;
-            if (shouldAddInQueue) {
-                nodesToProcess.markForVisiting(t);
+        HugeAtomicBitSet nodeInQueue = HugeAtomicBitSet.create(graph.nodeCount());
+        nodeInQueue.set(0, graph.nodeCount());
+        graph.forEachNode(v -> {
+            globalQueue.set(v, v);
+            return true;
+        });
+        var tasks = new ArrayList<LocalMoveTask>();
+        for (int i = 0; i < concurrency; ++i) {
+            tasks.add(new LocalMoveTask(
+                graph.concurrentCopy(),
+                currentCommunities,
+                atomicCommunityVolumes,
+                nodeVolumes,
+                globalQueue,
+                globalQueueIndex,
+                globalQueueSize,
+                nodeInQueue,
+                gamma
+            ));
+        }
+
+        while (globalQueueSize.get() > 0) {
+            globalQueueIndex.set(0); //exhaust global queue
+            RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
+            globalQueueSize.set(0); //fill global queue again
+            RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
+        }
+        for (var task : tasks) {
+            swaps += task.swaps;
+        }
+
+        MutableDouble aliveCommunities = new MutableDouble(graph.nodeCount());
+        graph.forEachNode(v -> {
+            communityVolumes.set(v, atomicCommunityVolumes.get(v));
+            if (Double.compare(communityVolumes.get(v), 0.0) == 0) {
+                aliveCommunities.decrement();
             }
             return true;
         });
+        return aliveCommunities.longValue();
     }
+    
 }
