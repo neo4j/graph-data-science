@@ -36,7 +36,7 @@ import static org.neo4j.gds.embeddings.hashgnn.HashGNN.hashArgMin;
 import static org.neo4j.gds.embeddings.hashgnn.HashGNN.hashArgMinWithRepeats;
 
 class MinHashTask implements Runnable {
-    private static List<HashTask.Hashes> hashes;
+    private final List<HashTask.Hashes> hashes;
     private final Partition partition;
     private final HashGNNConfig config;
     private final int ambientDimension;

@@ -57,7 +57,7 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         var degreePartition = PartitionUtils.degreePartition(
             graph,
             // Since degree only very approximately reflect the min hash task workload per node we decrease the partition sizes.
-            (int) Math.min(config.concurrency() * 8, graph.nodeCount()),
+            Math.toIntExact(Math.min(config.concurrency() * 8L, graph.nodeCount())),
             Function.identity(),
             Optional.of(1)
         );
