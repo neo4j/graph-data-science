@@ -404,7 +404,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType) {
         switch (idType) {
-            case INTEGER:
+            case ACTUAL:
                 return new InputEntityIdVisitor.Long() {
                     @Override
                     public void visitNodeId(InputEntityVisitor visitor, long id) {
@@ -421,7 +421,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
                         visitor.endId(id);
                     }
                 };
-            case ACTUAL:
+            case INTEGER:
                 return new InputEntityIdVisitor.Long() {
                     @Override
                     public void visitNodeId(InputEntityVisitor visitor, long id) {
