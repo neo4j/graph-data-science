@@ -61,19 +61,20 @@ public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<RESULT>, CON
             .databaseService(graphDb())
             .graphName(graphName)
             .addNodeProjection(NodeProjection.of(
-                "A", PropertyMappings.of(nodeProperties().stream().map(PropertyMapping::of).collect(Collectors.toList()))
+                "A",
+                PropertyMappings.of(nodeProperties().stream().map(PropertyMapping::of).collect(Collectors.toList()))
             ))
             .addNodeProjection(NodeProjection.of(
-                "B", PropertyMappings.of(nodeProperties().stream().map(PropertyMapping::of).collect(Collectors.toList()))
-            ))
-            ;
+                "B",
+                PropertyMappings.of(nodeProperties().stream().map(PropertyMapping::of).collect(Collectors.toList()))
+            ));
 
 
         if (!requiresUndirected()) {
             storeLoaderBuilder.addRelationshipTypes("REL1", "REL2");
         }
 
-        relationshipProjections().projections().forEach((relationshipType, projection)->
+        relationshipProjections().projections().forEach((relationshipType, projection) ->
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(relationshipType.name(), projection));
 
         GraphLoader loader = storeLoaderBuilder.build();
