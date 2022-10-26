@@ -75,7 +75,7 @@ class BinarizeTask implements Runnable {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        progressTracker.logInfo("Starting binarization");
+        progressTracker.beginSubTask("Binarize node property features");
 
         var hashesList = new ArrayList<int[]>(config.embeddingDensity());
         for (int i = 0; i < config.embeddingDensity(); i++) {
@@ -111,7 +111,7 @@ class BinarizeTask implements Runnable {
             .terminationFlag(terminationFlag)
             .run();
 
-        progressTracker.logInfo("Finished binarization");
+        progressTracker.endSubTask("Binarize node property features");
 
         return truncatedFeatures;
     }

@@ -30,6 +30,9 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.mem.MemoryUsage;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithmFactory<HashGNN, CONFIG> {
 
     @Override
@@ -52,7 +55,30 @@ public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithm
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.leaf(taskName());
+        var tasks = new ArrayList<Task>();
+
+        if (config.binarizeFeatures().isPresent()) {
+            tasks.add(Tasks.leaf("Binarize node property features"));
+        } else {
+            tasks.add(Tasks.leaf("Extract raw node property features"));
+        }
+
+        tasks.add(Tasks.leaf("Precompute hashes"));
+
+        tasks.add(Tasks.iterativeFixed(
+            "Propagate embeddings",
+            () -> List.of(Tasks.leaf("Propagate embeddings iteration")),
+            config.iterations()
+        ));
+
+        if (config.outputDimension().isPresent()) {
+            tasks.add(Tasks.leaf("Densify output embeddings"));
+        }
+
+        return Tasks.task(
+            taskName(),
+            tasks
+        );
     }
 
     @Override

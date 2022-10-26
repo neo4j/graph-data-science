@@ -55,7 +55,8 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
 
     @Override
     public HashGNNResult compute() {
-        progressTracker.beginSubTask();
+        progressTracker.beginSubTask("HashGNN");
+
         var degreePartition = PartitionUtils.degreePartition(
             graph,
             // Since degree only very approximately reflect the min hash task workload per node we decrease the partition sizes.
@@ -104,13 +105,14 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
             graphs.size(),
             config,
             randomSeed,
-            terminationFlag
+            terminationFlag,
+            progressTracker
         );
+
+        progressTracker.beginSubTask("Propagate embeddings");
 
         for (int iteration = 0; iteration < config.iterations(); iteration++) {
             terminationFlag.assertRunning();
-
-            progressTracker.logInfo("Starting iteration " + iteration);
 
             var currentEmbeddings = iteration % 2 == 0 ? embeddingsA : embeddingsB;
             var previousEmbeddings = iteration % 2 == 0 ? embeddingsB : embeddingsA;
@@ -130,15 +132,15 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
                 progressTracker,
                 terminationFlag
             );
-
-            progressTracker.logInfo("Finished iteration " + iteration);
         }
+
+        progressTracker.endSubTask("Propagate embeddings");
 
         var binaryOutputVectors = (config.iterations() - 1) % 2 == 0 ? embeddingsA : embeddingsB;
 
         HugeObjectArray<double[]> outputVectors;
         if (config.outputDimension().isPresent()) {
-            outputVectors = DensifyTask.densify(
+            outputVectors = DensifyTask.compute(
                 graph,
                 rangePartition,
                 config,
@@ -152,7 +154,8 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
             outputVectors.setAll(nodeId -> bitSetToArray(binaryOutputVectors.get(nodeId), embeddingDimension));
         }
 
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("HashGNN");
+
         return new HashGNNResult(outputVectors);
     }
 

@@ -79,7 +79,7 @@ class MinHashTask implements Runnable {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        progressTracker.logInfo("Starting min hashing");
+        progressTracker.beginSubTask("Propagate embeddings iteration");
 
         var tasks = partition.stream()
             .map(p -> new MinHashTask(
@@ -100,7 +100,7 @@ class MinHashTask implements Runnable {
             .terminationFlag(terminationFlag)
             .run();
 
-        progressTracker.logInfo("Finished min hashing");
+        progressTracker.endSubTask("Propagate embeddings iteration");
     }
 
     @Override

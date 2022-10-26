@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.hashgnn;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
 
@@ -41,7 +42,16 @@ class HashTaskTest {
             .iterations(ITERATIONS)
             .embeddingDensity(EMBEDDING_DENSITY)
             .build();
-        var hashes = HashTask.compute(EMBEDDING_DIMENSION, NEIGHBOR_HASH_REPEATS, NUMBER_OF_RELATIONSHIPS, config, 42, TerminationFlag.RUNNING_TRUE);
+
+        var hashes = HashTask.compute(
+            EMBEDDING_DIMENSION,
+            NEIGHBOR_HASH_REPEATS,
+            NUMBER_OF_RELATIONSHIPS,
+            config,
+            42,
+            TerminationFlag.RUNNING_TRUE,
+            ProgressTracker.NULL_TRACKER
+        );
 
         assertThat(hashes.size()).isEqualTo(ITERATIONS * EMBEDDING_DENSITY);
         assertThat(hashes.get(0).neighborsAggregationHashes().length).isEqualTo(EMBEDDING_DIMENSION);

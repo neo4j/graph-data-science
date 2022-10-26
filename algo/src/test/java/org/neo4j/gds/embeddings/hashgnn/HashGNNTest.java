@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -26,8 +27,12 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -39,6 +44,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 @GdlExtension
 class HashGNNTest {
@@ -194,7 +200,10 @@ class HashGNNTest {
 
         var bHasUniqueFeature = false;
         for (int component = 0; component < binarizationDimension; component++) {
-            assertThat(embeddingB[component]).isGreaterThanOrEqualTo(Math.max(embeddingABefore[component], embeddingCBefore[component]));
+            assertThat(embeddingB[component]).isGreaterThanOrEqualTo(Math.max(
+                embeddingABefore[component],
+                embeddingCBefore[component]
+            ));
             if (embeddingB[component] > Math.max(embeddingABefore[component], embeddingCBefore[component])) {
                 bHasUniqueFeature = true;
             }
@@ -230,7 +239,10 @@ class HashGNNTest {
         double[] embeddingABefore = resultBefore.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("a")));
         double[] embeddingCBefore = resultBefore.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("c")));
         for (int component = 0; component < binarizationDimension; component++) {
-            assertThat(embeddingB[component]).isEqualTo(Math.max(embeddingABefore[component], embeddingCBefore[component]));
+            assertThat(embeddingB[component]).isEqualTo(Math.max(
+                embeddingABefore[component],
+                embeddingCBefore[component]
+            ));
         }
 
         assertThat(result.get(0).length).isEqualTo(binarizationDimension);
@@ -276,7 +288,7 @@ class HashGNNTest {
         // Should be unaffected by concurrency
         "    10,  4,  10_000, 20_000, 8,  86_055_752",
     })
-    void shouldEstimateMemory(
+        void shouldEstimateMemory(
         int embeddingDensity,
         int iterations,
         long nodeCount,
@@ -298,5 +310,57 @@ class HashGNNTest {
             concurrency,
             MemoryRange.of(expectedMemory)
         );
+    }
+
+    @Test
+    void shouldLogProgress() {
+        int embeddingDensity = 200;
+        double avgDegree = binaryGraph.relationshipCount() / (double) binaryGraph.nodeCount();
+
+        var config = HashGNNConfigImpl
+            .builder()
+            .featureProperties(List.of("f1", "f2"))
+            .embeddingDensity(embeddingDensity)
+
+            .neighborInfluence(avgDegree / embeddingDensity)
+            .iterations(2)
+            .randomSeed(42L)
+            .outputDimension(2)
+            .build();
+
+        var factory = new HashGNNFactory<>();
+
+        var progressTask = factory.progressTask(binaryGraph, config);
+        var log = Neo4jProxy.testLog();
+        ;
+        var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
+
+        factory
+            .build(binaryGraph, config, progressTracker)
+            .compute();
+
+        Assertions.assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .contains(
+                "HashGNN :: Start",
+                "HashGNN :: Extract raw node property features :: Start",
+                "HashGNN :: Extract raw node property features 100%",
+                "HashGNN :: Extract raw node property features :: Finished",
+                "HashGNN :: Precompute hashes :: Start",
+                "HashGNN :: Precompute hashes 100%",
+                "HashGNN :: Precompute hashes :: Finished",
+                "HashGNN :: Propagate embeddings :: Start",
+                "HashGNN :: Propagate embeddings :: Propagate embeddings iteration 1 of 2 :: Start",
+                "HashGNN :: Propagate embeddings :: Propagate embeddings iteration 1 of 2 100%",
+                "HashGNN :: Propagate embeddings :: Propagate embeddings iteration 1 of 2 :: Finished",
+                "HashGNN :: Propagate embeddings :: Propagate embeddings iteration 2 of 2 :: Start",
+                "HashGNN :: Propagate embeddings :: Propagate embeddings iteration 2 of 2 100%",
+                "HashGNN :: Propagate embeddings :: Propagate embeddings iteration 2 of 2 :: Finished",
+                "HashGNN :: Propagate embeddings :: Finished",
+                "HashGNN :: Densify output embeddings :: Start",
+                "HashGNN :: Densify output embeddings 100%",
+                "HashGNN :: Densify output embeddings :: Finished",
+                "HashGNN :: Finished"
+            );
     }
 }

@@ -73,7 +73,7 @@ class RawFeaturesTask implements Runnable {
         List<Partition> partitions,
         TerminationFlag terminationFlag
     ) {
-        progressTracker.logInfo("Computing raw features");
+        progressTracker.beginSubTask("Extract raw node property features");
 
         var featureExtractors = FeatureExtraction.propertyExtractors(
             graph,
@@ -104,7 +104,8 @@ class RawFeaturesTask implements Runnable {
             .terminationFlag(terminationFlag)
             .run();
 
-        progressTracker.logInfo("Finished computing raw features");
+        progressTracker.endSubTask("Extract raw node property features");
+
         return features;
     }
 

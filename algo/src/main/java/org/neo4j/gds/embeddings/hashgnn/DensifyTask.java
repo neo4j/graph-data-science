@@ -55,7 +55,7 @@ class DensifyTask implements Runnable {
         this.projectionMatrix = projectionMatrix;
     }
 
-    static HugeObjectArray<double[]> densify(
+    static HugeObjectArray<double[]> compute(
         Graph graph,
         List<Partition> partition,
         HashGNNConfig config,
@@ -64,9 +64,9 @@ class DensifyTask implements Runnable {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        var denseFeatures = HugeObjectArray.newArray(double[].class, graph.nodeCount());
+        progressTracker.beginSubTask("Densify output embeddings");
 
-        progressTracker.logInfo("Starting densification");
+        var denseFeatures = HugeObjectArray.newArray(double[].class, graph.nodeCount());
 
         var projectionMatrix = projectionMatrix(rng, config.outputDimension().orElseThrow(), (int) binaryFeatures.get(0).capacity());
         var tasks = partition.stream()
@@ -84,7 +84,7 @@ class DensifyTask implements Runnable {
             .terminationFlag(terminationFlag)
             .run();
 
-        progressTracker.logInfo("Finished densification");
+        progressTracker.endSubTask("Densify output embeddings");
 
         return denseFeatures;
     }

@@ -24,6 +24,7 @@ import org.apache.commons.math3.primes.Primes;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
@@ -60,8 +61,11 @@ class HashTask implements Runnable {
         int numberOfRelationshipTypes,
         HashGNNConfig config,
         long randomSeed,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        ProgressTracker progressTracker
     ) {
+        progressTracker.beginSubTask("Precompute hashes");
+
         var hashTasks = IntStream.range(0, config.iterations() * config.embeddingDensity()).mapToObj(seedOffset ->
             new HashTask(
                 embeddingDimension,
@@ -74,6 +78,8 @@ class HashTask implements Runnable {
             .tasks(hashTasks)
             .terminationFlag(terminationFlag)
             .run();
+
+        progressTracker.endSubTask("Precompute hashes");
 
         return hashTasks.stream().map(HashTask::hashes).collect(Collectors.toList());
     }
