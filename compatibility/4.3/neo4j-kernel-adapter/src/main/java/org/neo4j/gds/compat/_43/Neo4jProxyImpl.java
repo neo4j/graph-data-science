@@ -36,6 +36,7 @@ import org.neo4j.gds.compat.CompatIndexQuery;
 import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.compat.CompositeNodeCursor;
 import org.neo4j.gds.compat.CustomAccessMode;
+import org.neo4j.gds.compat.GdsDatabaseLayout;
 import org.neo4j.gds.compat.GdsDatabaseManagementServiceBuilder;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
 import org.neo4j.gds.compat.InputEntityIdVisitor;
@@ -365,7 +366,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public BatchImporter instantiateBatchImporter(
         BatchImporterFactory factory,
-        DatabaseLayout directoryStructure,
+        GdsDatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
         PageCacheTracer pageCacheTracer,
         Configuration configuration,
@@ -377,8 +378,9 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         JobScheduler jobScheduler,
         Collector badCollector
     ) {
+        DatabaseLayout databaseLayout = ((GdsDatabaseLayoutImpl) directoryStructure).databaseLayout();
         return factory.instantiate(
-            directoryStructure,
+            databaseLayout,
             fileSystem,
             pageCacheTracer,
             configuration,
@@ -642,8 +644,8 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public DatabaseLayout databaseLayout(Config config, String databaseName) {
-        return Neo4jLayout.of(config).databaseLayout(databaseName);
+    public GdsDatabaseLayout databaseLayout(Config config, String databaseName) {
+        return new GdsDatabaseLayoutImpl(Neo4jLayout.of(config).databaseLayout(databaseName));
     }
 
     @Override

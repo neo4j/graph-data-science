@@ -27,12 +27,10 @@ import org.neo4j.consistency.checking.ConsistencyFlags;
 import org.neo4j.consistency.report.ConsistencySummaryStatistics;
 import org.neo4j.dbms.database.readonly.DatabaseReadOnlyChecker;
 import org.neo4j.gds.annotation.SuppressForbidden;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.storageengine.InMemoryTransactionStateVisitor;
 import org.neo4j.index.internal.gbptree.RecoveryCleanupWorkCollector;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
-import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.IncrementalBatchImporter;
 import org.neo4j.internal.batchimport.IndexImporterFactory;
@@ -67,7 +65,6 @@ import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.StoreFactory;
 import org.neo4j.kernel.impl.store.StoreType;
 import org.neo4j.kernel.impl.store.cursor.CachedStoreCursors;
-import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
 import org.neo4j.kernel.impl.transaction.log.LogTailMetadata;
 import org.neo4j.lock.LockService;
 import org.neo4j.logging.InternalLog;
@@ -240,28 +237,7 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         MemoryTracker memoryTracker,
         CursorContextFactory cursorContextFactory
     ) {
-        var recordFormats = RecordFormatSelector.selectForStoreOrConfigForNewDbs(
-            config,
-            RecordDatabaseLayout.of(config),
-            fileSystemAbstraction,
-            pageCache,
-            logService.getInternalLogProvider(),
-            cursorContextFactory
-        );
-        return Neo4jProxy.instantiateBatchImporter(
-            BatchImporterFactory.withHighestPriority(),
-            databaseLayout,
-            fileSystemAbstraction,
-            pageCacheTracer,
-            configuration,
-            logService,
-            Neo4jProxy.invisibleExecutionMonitor(),
-            AdditionalInitialIds.EMPTY,
-            config,
-            recordFormats,
-            jobScheduler,
-            Collector.EMPTY
-        );
+        throw new UnsupportedOperationException("Batch Import into GDS is not supported");
     }
 
     @Override
