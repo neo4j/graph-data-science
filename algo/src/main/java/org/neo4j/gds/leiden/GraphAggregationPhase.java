@@ -89,13 +89,12 @@ class GraphAggregationPhase {
             .executorService(executorService)
             .build();
         // when the graph is undirected the weight of the relationship is being doubled hence we need to scale it
-        double propertyScale = (orientation == Orientation.UNDIRECTED) ? 0.5 : 1;
         var relationshipCreators = PartitionUtils.degreePartition(
             workingGraph,
             concurrency,
             partition ->
                 new RelationshipCreator(
-                    communities, partition, relationshipsBuilder, workingGraph.concurrentCopy(), propertyScale
+                    communities, partition, relationshipsBuilder, workingGraph.concurrentCopy(), orientation
                 ),
             Optional.empty()
         );

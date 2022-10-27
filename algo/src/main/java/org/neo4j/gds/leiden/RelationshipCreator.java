@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.leiden;
 
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -26,7 +27,7 @@ import org.neo4j.gds.core.utils.partition.Partition;
 
 final class RelationshipCreator implements Runnable {
 
-    private final double propertyScale;
+    private final Orientation orientation;
     private final RelationshipsBuilder relationshipsBuilder;
 
     private final HugeLongArray communities;
@@ -41,9 +42,9 @@ final class RelationshipCreator implements Runnable {
         Partition partition,
         RelationshipsBuilder relationshipsBuilder,
         RelationshipIterator relationshipIterator,
-        double propertyScale
+        Orientation orientation
     ) {
-        this.propertyScale = propertyScale;
+        this.orientation = orientation;
         this.relationshipsBuilder = relationshipsBuilder;
         this.communities = communities;
         this.relationshipIterator = relationshipIterator;
@@ -56,8 +57,15 @@ final class RelationshipCreator implements Runnable {
             long communityId = communities.get(nodeId);
             relationshipIterator.forEachRelationship(nodeId, 1.0, (source, target, property) -> {
                 // do not allow self-loops
-                if (communityId != communities.get(target)) {
-                    relationshipsBuilder.add(communityId, communities.get(target), property * propertyScale);
+                long targetCommunityId = communities.get(target);
+                if (communityId != targetCommunityId) { //we do not include  self-edges in next graph
+                    //if orientation is natural it means a-[weight]->b will be examined only from a
+                    // hence we should add it as we encounter it from a
+                    //otherwise  a<-[weight]->b will be visited from both a and b.
+                    // To not include it twice we break a tie based on id.
+                    if (orientation == Orientation.NATURAL || communityId > targetCommunityId) {
+                        relationshipsBuilder.add(communityId, targetCommunityId, property);
+                    }
                 }
                 return true;
             });
