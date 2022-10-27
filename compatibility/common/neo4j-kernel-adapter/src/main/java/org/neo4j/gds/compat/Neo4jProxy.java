@@ -244,7 +244,7 @@ public final class Neo4jProxy {
 
     public static BatchImporter instantiateBatchImporter(
         BatchImporterFactory factory,
-        DatabaseLayout directoryStructure,
+        GdsDatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
         PageCacheTracer pageCacheTracer,
         Configuration configuration,
@@ -392,7 +392,7 @@ public final class Neo4jProxy {
         IMPL.configureRecordFormat(configBuilder, recordFormat);
     }
 
-    public static DatabaseLayout databaseLayout(Config config, String databaseName) {
+    public static GdsDatabaseLayout databaseLayout(Config config, String databaseName) {
         return IMPL.databaseLayout(config, databaseName);
     }
 
