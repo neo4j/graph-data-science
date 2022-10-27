@@ -1,0 +1,123 @@
+HashGNN :: Start
+HashGNN :: Binarize node property features :: Start
+HashGNN :: Binarize node property features 100%
+HashGNN :: Binarize node property features :: Finished
+HashGNN :: Precompute hashes :: Start
+HashGNN :: Precompute hashes 0%
+HashGNN :: Precompute hashes 1%
+HashGNN :: Precompute hashes 2%
+HashGNN :: Precompute hashes 3%
+HashGNN :: Precompute hashes 4%
+HashGNN :: Precompute hashes 5%
+HashGNN :: Precompute hashes 6%
+HashGNN :: Precompute hashes 7%
+HashGNN :: Precompute hashes 8%
+HashGNN :: Precompute hashes 9%
+HashGNN :: Precompute hashes 10%
+HashGNN :: Precompute hashes 11%
+HashGNN :: Precompute hashes 12%
+HashGNN :: Precompute hashes 13%
+HashGNN :: Precompute hashes 14%
+HashGNN :: Precompute hashes 15%
+HashGNN :: Precompute hashes 16%
+HashGNN :: Precompute hashes 17%
+HashGNN :: Precompute hashes 18%
+HashGNN :: Precompute hashes 19%
+HashGNN :: Precompute hashes 20%
+HashGNN :: Precompute hashes 21%
+HashGNN :: Precompute hashes 22%
+HashGNN :: Precompute hashes 23%
+HashGNN :: Precompute hashes 24%
+HashGNN :: Precompute hashes 25%
+HashGNN :: Precompute hashes 26%
+HashGNN :: Precompute hashes 27%
+HashGNN :: Precompute hashes 28%
+HashGNN :: Precompute hashes 29%
+HashGNN :: Precompute hashes 30%
+HashGNN :: Precompute hashes 31%
+HashGNN :: Precompute hashes 32%
+HashGNN :: Precompute hashes 33%
+HashGNN :: Precompute hashes 34%
+HashGNN :: Precompute hashes 35%
+HashGNN :: Precompute hashes 36%
+HashGNN :: Precompute hashes 37%
+HashGNN :: Precompute hashes 38%
+HashGNN :: Precompute hashes 39%
+HashGNN :: Precompute hashes 40%
+HashGNN :: Precompute hashes 41%
+HashGNN :: Precompute hashes 42%
+HashGNN :: Precompute hashes 43%
+HashGNN :: Precompute hashes 44%
+HashGNN :: Precompute hashes 45%
+HashGNN :: Precompute hashes 46%
+HashGNN :: Precompute hashes 47%
+HashGNN :: Precompute hashes 48%
+HashGNN :: Precompute hashes 49%
+HashGNN :: Precompute hashes 50%
+HashGNN :: Precompute hashes 51%
+HashGNN :: Precompute hashes 52%
+HashGNN :: Precompute hashes 53%
+HashGNN :: Precompute hashes 54%
+HashGNN :: Precompute hashes 55%
+HashGNN :: Precompute hashes 56%
+HashGNN :: Precompute hashes 57%
+HashGNN :: Precompute hashes 58%
+HashGNN :: Precompute hashes 59%
+HashGNN :: Precompute hashes 60%
+HashGNN :: Precompute hashes 61%
+HashGNN :: Precompute hashes 62%
+HashGNN :: Precompute hashes 63%
+HashGNN :: Precompute hashes 64%
+HashGNN :: Precompute hashes 65%
+HashGNN :: Precompute hashes 66%
+HashGNN :: Precompute hashes 67%
+HashGNN :: Precompute hashes 68%
+HashGNN :: Precompute hashes 69%
+HashGNN :: Precompute hashes 70%
+HashGNN :: Precompute hashes 71%
+HashGNN :: Precompute hashes 72%
+HashGNN :: Precompute hashes 73%
+HashGNN :: Precompute hashes 74%
+HashGNN :: Precompute hashes 75%
+HashGNN :: Precompute hashes 76%
+HashGNN :: Precompute hashes 77%
+HashGNN :: Precompute hashes 78%
+HashGNN :: Precompute hashes 79%
+HashGNN :: Precompute hashes 80%
+HashGNN :: Precompute hashes 81%
+HashGNN :: Precompute hashes 82%
+HashGNN :: Precompute hashes 83%
+HashGNN :: Precompute hashes 84%
+HashGNN :: Precompute hashes 85%
+HashGNN :: Precompute hashes 86%
+HashGNN :: Precompute hashes 87%
+HashGNN :: Precompute hashes 88%
+HashGNN :: Precompute hashes 89%
+HashGNN :: Precompute hashes 90%
+HashGNN :: Precompute hashes 91%
+HashGNN :: Precompute hashes 92%
+HashGNN :: Precompute hashes 93%
+HashGNN :: Precompute hashes 94%
+HashGNN :: Precompute hashes 95%
+HashGNN :: Precompute hashes 96%
+HashGNN :: Precompute hashes 97%
+HashGNN :: Precompute hashes 98%
+HashGNN :: Precompute hashes 99%
+HashGNN :: Precompute hashes 100%
+HashGNN :: Precompute hashes :: Finished
+HashGNN :: Propagate embeddings :: Start
+HashGNN :: Propagate embeddings :: Propagate embeddings iteration 1 of 2 :: Start
+HashGNN :: Propagate embeddings :: Propagate embeddings iteration 1 of 2 62%
+HashGNN :: Propagate embeddings :: Propagate embeddings iteration 1 of 2 87%
+HashGNN :: Propagate embeddings :: Propagate embeddings iteration 1 of 2 100%
+HashGNN :: Propagate embeddings :: Propagate embeddings iteration 1 of 2 :: Finished
+HashGNN :: Propagate embeddings :: Propagate embeddings iteration 2 of 2 :: Start
+HashGNN :: Propagate embeddings :: Propagate embeddings iteration 2 of 2 62%
+HashGNN :: Propagate embeddings :: Propagate embeddings iteration 2 of 2 87%
+HashGNN :: Propagate embeddings :: Propagate embeddings iteration 2 of 2 100%
+HashGNN :: Propagate embeddings :: Propagate embeddings iteration 2 of 2 :: Finished
+HashGNN :: Propagate embeddings :: Finished
+HashGNN :: Densify output embeddings :: Start
+HashGNN :: Densify output embeddings 100%
+HashGNN :: Densify output embeddings :: Finished
+HashGNN :: Finished

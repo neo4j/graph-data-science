@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
 import java.util.Map;
@@ -45,16 +46,33 @@ class DensifyTaskTest {
             .build();
         var denseFeatures = HugeObjectArray.newArray(double[].class, nodeCount);
         var binaryFeatures = HugeObjectArray.newArray(BitSet.class, nodeCount);
-        binaryFeatures.set(0, new BitSet() {{ set(0); set(1); set(2); }});
-        binaryFeatures.set(1, new BitSet() {{ set(0); set(1); }});
-        binaryFeatures.set(2, new BitSet() {{ set(0); set(2); }});
-        var projectionMatrix = new float[][] {
+        binaryFeatures.set(0, new BitSet() {{
+            set(0);
+            set(1);
+            set(2);
+        }});
+        binaryFeatures.set(1, new BitSet() {{
+            set(0);
+            set(1);
+        }});
+        binaryFeatures.set(2, new BitSet() {{
+            set(0);
+            set(2);
+        }});
+        var projectionMatrix = new float[][]{
             {1.1f, 1.0f, -1.0f, 0.0f, 0.0f},
             {0.0f, -0.9f, 1.0f, 0.0f, 1.0f},
             {0.0f, 0.0f, 1.0f, -1.0f, -1.0f}
         };
 
-        new DensifyTask(partition, config, denseFeatures, binaryFeatures, projectionMatrix).run();
+        new DensifyTask(
+            partition,
+            config,
+            denseFeatures,
+            binaryFeatures,
+            projectionMatrix,
+            ProgressTracker.NULL_TRACKER
+        ).run();
 
         assertThat(denseFeatures.get(0)).usingComparatorWithPrecision(1e-7).containsExactly(1.1, 0.1, 1.0, -1.0, 0.0);
         assertThat(denseFeatures.get(1)).usingComparatorWithPrecision(1e-7).containsExactly(1.1, 0.1, 0.0, 0.0, 1.0);

@@ -47,6 +47,7 @@ class RawFeaturesTask implements Runnable {
     private final HugeObjectArray<BitSet> features;
     private final List<int[]> hashesList;
     private final MinAndArgmin minAndArgMin;
+    private final ProgressTracker progressTracker;
 
     RawFeaturesTask(
         Partition partition,
@@ -54,7 +55,8 @@ class RawFeaturesTask implements Runnable {
         List<FeatureExtractor> featureExtractors,
         int inputDimension,
         HugeObjectArray<BitSet> features,
-        List<int[]> hashesList
+        List<int[]> hashesList,
+        ProgressTracker progressTracker
     ) {
         this.partition = partition;
         this.config = config;
@@ -63,6 +65,7 @@ class RawFeaturesTask implements Runnable {
         this.features = features;
         this.hashesList = hashesList;
         this.minAndArgMin = new MinAndArgmin();
+        this.progressTracker = progressTracker;
     }
 
     static HugeObjectArray<BitSet> compute(
@@ -95,7 +98,8 @@ class RawFeaturesTask implements Runnable {
                 featureExtractors,
                 inputDimension,
                 features,
-                hashesList
+                hashesList,
+                progressTracker
             ))
             .collect(Collectors.toList());
         RunWithConcurrency.builder()
@@ -144,5 +148,6 @@ class RawFeaturesTask implements Runnable {
             features.set(nodeId, sampledBitset);
         });
 
+        progressTracker.logProgress(partition.nodeCount());
     }
 }

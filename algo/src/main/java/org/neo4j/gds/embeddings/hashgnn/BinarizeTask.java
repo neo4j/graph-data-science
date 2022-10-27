@@ -48,6 +48,7 @@ class BinarizeTask implements Runnable {
     private final List<int[]> hashesList;
     private final HashGNN.MinAndArgmin minAndArgMin;
     private final FeatureBinarizationConfig binarizationConfig;
+    private final ProgressTracker progressTracker;
 
     BinarizeTask(
         Partition partition,
@@ -55,7 +56,8 @@ class BinarizeTask implements Runnable {
         HugeObjectArray<BitSet> truncatedFeatures,
         List<FeatureExtractor> featureExtractors,
         int[][] propertyEmbeddings,
-        List<int[]> hashesList
+        List<int[]> hashesList,
+        ProgressTracker progressTracker
     ) {
         this.partition = partition;
         this.config = config;
@@ -65,6 +67,7 @@ class BinarizeTask implements Runnable {
         this.propertyEmbeddings = propertyEmbeddings;
         this.hashesList = hashesList;
         this.minAndArgMin = new HashGNN.MinAndArgmin();
+        this.progressTracker = progressTracker;
     }
 
     static HugeObjectArray<BitSet> compute(
@@ -102,7 +105,8 @@ class BinarizeTask implements Runnable {
                 truncatedFeatures,
                 featureExtractors,
                 propertyEmbeddings,
-                hashesList
+                hashesList,
+                progressTracker
             ))
             .collect(Collectors.toList());
         RunWithConcurrency.builder()
@@ -174,6 +178,8 @@ class BinarizeTask implements Runnable {
 
             truncatedFeatures.set(nodeId, roundAndSample(featureVector));
         });
+
+        progressTracker.logProgress(partition.nodeCount());
     }
 
     private BitSet roundAndSample(float[] floatVector) {

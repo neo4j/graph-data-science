@@ -44,6 +44,7 @@ class MinHashTask implements Runnable {
     private final HugeObjectArray<BitSet> previousEmbeddings;
     private final int iteration;
     private final TerminationFlag terminationFlag;
+    private final ProgressTracker progressTracker;
 
     MinHashTask(
         Partition partition,
@@ -54,7 +55,8 @@ class MinHashTask implements Runnable {
         HugeObjectArray<BitSet> previousEmbeddings,
         int iteration,
         List<HashTask.Hashes> hashes,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        ProgressTracker progressTracker
     ) {
         this.partition = partition;
         this.concurrentGraphs = graphs.stream().map(Graph::concurrentCopy).collect(Collectors.toList());
@@ -65,6 +67,7 @@ class MinHashTask implements Runnable {
         this.iteration = iteration;
         this.hashes = hashes;
         this.terminationFlag = terminationFlag;
+        this.progressTracker = progressTracker;
     }
 
     static void compute(
@@ -81,6 +84,8 @@ class MinHashTask implements Runnable {
     ) {
         progressTracker.beginSubTask("Propagate embeddings iteration");
 
+        progressTracker.setSteps(graphs.get(0).nodeCount());
+
         var tasks = partition.stream()
             .map(p -> new MinHashTask(
                 p,
@@ -91,7 +96,8 @@ class MinHashTask implements Runnable {
                 previousEmbeddings,
                 iteration,
                 hashes,
-                terminationFlag
+                terminationFlag,
+                progressTracker
             ))
             .collect(Collectors.toList());
         RunWithConcurrency.builder()
@@ -150,5 +156,7 @@ class MinHashTask implements Runnable {
                 }
             });
         }
+
+        progressTracker.logSteps(partition.nodeCount());
     }
 }

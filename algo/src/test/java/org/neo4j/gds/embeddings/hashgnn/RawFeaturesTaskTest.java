@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -53,13 +54,26 @@ class RawFeaturesTaskTest {
     @Test
     void shouldPickCorrectFeatures() {
         var partition = new Partition(0, graph.nodeCount());
-        var config = HashGNNConfigImpl.builder().featureProperties(List.of("f1", "f2")).embeddingDensity(2).iterations(100).build();
+        var config = HashGNNConfigImpl
+            .builder()
+            .featureProperties(List.of("f1", "f2"))
+            .embeddingDensity(2)
+            .iterations(100)
+            .build();
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, List.of("f1", "f2"));
         var features = HugeObjectArray.newArray(BitSet.class, graph.nodeCount());
         var inputDimension = FeatureExtraction.featureCount(featureExtractors);
-        var hashes = List.of(new int[] {4, 2, 9}, new int[] {6, 2, 1});
+        var hashes = List.of(new int[]{4, 2, 9}, new int[]{6, 2, 1});
 
-        new RawFeaturesTask(partition, config, featureExtractors, inputDimension, features, hashes).run();
+        new RawFeaturesTask(
+            partition,
+            config,
+            featureExtractors,
+            inputDimension,
+            features,
+            hashes,
+            ProgressTracker.NULL_TRACKER
+        ).run();
 
         var idA = graph.toMappedNodeId(idFunction.of("a"));
         var idB = graph.toMappedNodeId(idFunction.of("b"));

@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.ResourceUtil;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -312,55 +313,43 @@ class HashGNNTest {
         );
     }
 
-    @Test
-    void shouldLogProgress() {
-        int embeddingDensity = 200;
-        double avgDegree = binaryGraph.relationshipCount() / (double) binaryGraph.nodeCount();
+    @ParameterizedTest
+    @CsvSource(value = {"true", "false"})
+    void shouldLogProgress(boolean dense) {
+        var g = dense ? doubleGraph : binaryGraph;
 
-        var config = HashGNNConfigImpl
+        int embeddingDensity = 200;
+        double avgDegree = g.relationshipCount() / (double) g.nodeCount();
+        var configBuilder = HashGNNConfigImpl
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(embeddingDensity)
-
             .neighborInfluence(avgDegree / embeddingDensity)
+            .concurrency(1)
             .iterations(2)
-            .randomSeed(42L)
-            .outputDimension(2)
-            .build();
+            .randomSeed(42L);
+        if (dense) {
+            configBuilder.binarizeFeatures(Map.of("dimension", 16, "densityLevel", 2));
+            configBuilder.outputDimension(10);
+        }
+        var config = configBuilder.build();
 
         var factory = new HashGNNFactory<>();
-
-        var progressTask = factory.progressTask(binaryGraph, config);
+        var progressTask = factory.progressTask(g, config);
         var log = Neo4jProxy.testLog();
-        ;
         var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
 
-        factory
-            .build(binaryGraph, config, progressTracker)
-            .compute();
+        factory.build(g, config, progressTracker).compute();
+
+        String logResource;
+        if (dense) {
+            logResource = "expected-test-logs/hashgnn-dense";
+        } else {
+            logResource = "expected-test-logs/hashgnn-binary";
+        }
 
         Assertions.assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
-            .contains(
-                "HashGNN :: Start",
-                "HashGNN :: Extract raw node property features :: Start",
-                "HashGNN :: Extract raw node property features 100%",
-                "HashGNN :: Extract raw node property features :: Finished",
-                "HashGNN :: Precompute hashes :: Start",
-                "HashGNN :: Precompute hashes 100%",
-                "HashGNN :: Precompute hashes :: Finished",
-                "HashGNN :: Propagate embeddings :: Start",
-                "HashGNN :: Propagate embeddings :: Propagate embeddings iteration 1 of 2 :: Start",
-                "HashGNN :: Propagate embeddings :: Propagate embeddings iteration 1 of 2 100%",
-                "HashGNN :: Propagate embeddings :: Propagate embeddings iteration 1 of 2 :: Finished",
-                "HashGNN :: Propagate embeddings :: Propagate embeddings iteration 2 of 2 :: Start",
-                "HashGNN :: Propagate embeddings :: Propagate embeddings iteration 2 of 2 100%",
-                "HashGNN :: Propagate embeddings :: Propagate embeddings iteration 2 of 2 :: Finished",
-                "HashGNN :: Propagate embeddings :: Finished",
-                "HashGNN :: Densify output embeddings :: Start",
-                "HashGNN :: Densify output embeddings 100%",
-                "HashGNN :: Densify output embeddings :: Finished",
-                "HashGNN :: Finished"
-            );
+            .containsExactlyElementsOf(ResourceUtil.lines(logResource));
     }
 }

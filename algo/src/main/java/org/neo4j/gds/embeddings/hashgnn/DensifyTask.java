@@ -40,19 +40,22 @@ class DensifyTask implements Runnable {
     private final HugeObjectArray<double[]> denseFeatures;
     private final HugeObjectArray<BitSet> binaryFeatures;
     private final float[][] projectionMatrix;
+    private final ProgressTracker progressTracker;
 
     DensifyTask(
         Partition partition,
         HashGNNConfig config,
         HugeObjectArray<double[]> denseFeatures,
         HugeObjectArray<BitSet> binaryFeatures,
-        float[][] projectionMatrix
+        float[][] projectionMatrix,
+        ProgressTracker progressTracker
     ) {
         this.partition = partition;
         this.config = config;
         this.denseFeatures = denseFeatures;
         this.binaryFeatures = binaryFeatures;
         this.projectionMatrix = projectionMatrix;
+        this.progressTracker = progressTracker;
     }
 
     static HugeObjectArray<double[]> compute(
@@ -68,14 +71,20 @@ class DensifyTask implements Runnable {
 
         var denseFeatures = HugeObjectArray.newArray(double[].class, graph.nodeCount());
 
-        var projectionMatrix = projectionMatrix(rng, config.outputDimension().orElseThrow(), (int) binaryFeatures.get(0).capacity());
+        var projectionMatrix = projectionMatrix(
+            rng,
+            config.outputDimension().orElseThrow(),
+            (int) binaryFeatures.get(0).capacity()
+        );
+
         var tasks = partition.stream()
             .map(p -> new DensifyTask(
                 p,
                 config,
                 denseFeatures,
                 binaryFeatures,
-                projectionMatrix
+                projectionMatrix,
+                progressTracker
             ))
             .collect(Collectors.toList());
         RunWithConcurrency.builder()
@@ -134,5 +143,7 @@ class DensifyTask implements Runnable {
 
             denseFeatures.set(nodeId, denseVector);
         });
+
+        progressTracker.logProgress(partition.nodeCount());
     }
 }

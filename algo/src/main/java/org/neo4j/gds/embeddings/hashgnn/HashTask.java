@@ -42,17 +42,20 @@ class HashTask implements Runnable {
     private int[] neighborsAggregationHashes;
     private int[] selfAggregationHashes;
     private List<int[]> preAggregationHashes;
+    private final ProgressTracker progressTracker;
 
     HashTask(
         int embeddingDimension,
         double scaledNeighborInfluence,
         int numberOfRelationshipTypes,
-        SplittableRandom rng
+        SplittableRandom rng,
+        ProgressTracker progressTracker
     ) {
         this.embeddingDimension = embeddingDimension;
         this.scaledNeighborInfluence = scaledNeighborInfluence;
         this.numberOfRelationshipTypes = numberOfRelationshipTypes;
         this.rng = rng;
+        this.progressTracker = progressTracker;
     }
 
     public static List<Hashes> compute(
@@ -66,12 +69,15 @@ class HashTask implements Runnable {
     ) {
         progressTracker.beginSubTask("Precompute hashes");
 
+        progressTracker.setSteps(config.iterations() * config.embeddingDensity());
+
         var hashTasks = IntStream.range(0, config.iterations() * config.embeddingDensity()).mapToObj(seedOffset ->
             new HashTask(
                 embeddingDimension,
                 scaledNeighborInfluence,
                 numberOfRelationshipTypes,
-                new SplittableRandom(randomSeed + seedOffset)
+                new SplittableRandom(randomSeed + seedOffset),
+                progressTracker
             )).collect(Collectors.toList());
         RunWithConcurrency.builder()
             .concurrency(config.concurrency())
@@ -105,7 +111,10 @@ class HashTask implements Runnable {
         double finalInfluence = Math.max(1e-5, Math.min(1e5, scaledNeighborInfluence));
 
         // Multiply scaling by 1.001 to make sure we can find a prime >= primeSeed * scaleFactor
-        int primeSeed = rng.nextInt(1_000_000, (int) Math.round(Integer.MAX_VALUE / (Math.max(1, finalInfluence) * 1.001)));
+        int primeSeed = rng.nextInt(
+            1_000_000,
+            (int) Math.round(Integer.MAX_VALUE / (Math.max(1, finalInfluence) * 1.001))
+        );
 
         int neighborPrime = Primes.nextPrime(primeSeed);
 
@@ -120,11 +129,16 @@ class HashTask implements Runnable {
             embeddingDimension,
             HashGNNCompanion.HashTriple.generate(rng, neighborPrime)
         );
-        this.selfAggregationHashes = computeHashesFromTriple(embeddingDimension, HashGNNCompanion.HashTriple.generate(rng, selfPrime));
+        this.selfAggregationHashes = computeHashesFromTriple(
+            embeddingDimension,
+            HashGNNCompanion.HashTriple.generate(rng, selfPrime)
+        );
         this.preAggregationHashes = IntStream
             .range(0, numberOfRelationshipTypes)
             .mapToObj(unused -> computeHashesFromTriple(embeddingDimension, HashGNNCompanion.HashTriple.generate(rng)))
             .collect(Collectors.toList());
+
+        progressTracker.logSteps(1);
     }
 
     Hashes hashes() {

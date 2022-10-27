@@ -58,21 +58,28 @@ public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithm
         var tasks = new ArrayList<Task>();
 
         if (config.binarizeFeatures().isPresent()) {
-            tasks.add(Tasks.leaf("Binarize node property features"));
+            tasks.add(Tasks.leaf("Binarize node property features", graph.nodeCount()));
         } else {
-            tasks.add(Tasks.leaf("Extract raw node property features"));
+            tasks.add(Tasks.leaf("Extract raw node property features", graph.nodeCount()));
         }
 
-        tasks.add(Tasks.leaf("Precompute hashes"));
+        int numRelTypes = config.heterogeneous() ? config.relationshipTypes().size() : 1;
+        tasks.add(Tasks.leaf(
+            "Precompute hashes",
+            config.iterations() * config.embeddingDensity() * (1 + 1 + numRelTypes)
+        ));
 
         tasks.add(Tasks.iterativeFixed(
             "Propagate embeddings",
-            () -> List.of(Tasks.leaf("Propagate embeddings iteration")),
+            () -> List.of(Tasks.leaf(
+                "Propagate embeddings iteration",
+                2 * graph.nodeCount() + graph.relationshipCount()
+            )),
             config.iterations()
         ));
 
         if (config.outputDimension().isPresent()) {
-            tasks.add(Tasks.leaf("Densify output embeddings"));
+            tasks.add(Tasks.leaf("Densify output embeddings", graph.nodeCount()));
         }
 
         return Tasks.task(
