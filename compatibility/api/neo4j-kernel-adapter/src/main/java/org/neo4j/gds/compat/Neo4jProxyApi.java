@@ -185,7 +185,7 @@ public interface Neo4jProxyApi {
 
     BatchImporter instantiateBatchImporter(
         BatchImporterFactory factory,
-        DatabaseLayout directoryStructure,
+        GdsDatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
         PageCacheTracer pageCacheTracer,
         Configuration configuration,
@@ -260,7 +260,7 @@ public interface Neo4jProxyApi {
 
     void configureRecordFormat(Config.Builder configBuilder, String recordFormat);
 
-    DatabaseLayout databaseLayout(Config config, String databaseName);
+    GdsDatabaseLayout databaseLayout(Config config, String databaseName);
 
     BoltTransactionRunner<?, ?> boltTransactionRunner();
 

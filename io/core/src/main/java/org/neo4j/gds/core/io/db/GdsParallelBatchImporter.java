@@ -23,6 +23,7 @@ import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.compat.CompatInput;
+import org.neo4j.gds.compat.GdsDatabaseLayout;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Settings;
@@ -35,7 +36,6 @@ import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Collectors;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.io.fs.FileSystemAbstraction;
-import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.impl.scheduler.JobSchedulerFactory;
 import org.neo4j.kernel.lifecycle.LifeSupport;
@@ -192,12 +192,12 @@ public final class GdsParallelBatchImporter {
         }
     }
 
-    private void validateWritableDirectories(DatabaseLayout databaseLayout) {
+    private void validateWritableDirectories(GdsDatabaseLayout databaseLayout) {
         DIRECTORY_IS_WRITABLE.validate(databaseLayout.databaseDirectory());
         DIRECTORY_IS_WRITABLE.validate(databaseLayout.getTransactionLogsDirectory());
     }
 
-    private void validateDatabaseDoesNotExist(DatabaseLayout databaseLayout) {
+    private void validateDatabaseDoesNotExist(GdsDatabaseLayout databaseLayout) {
         var metaDataPath = databaseLayout.metadataStore();
         var dbExists = Files.exists(metaDataPath) && Files.isReadable(metaDataPath);
         if (dbExists && !config.force()) {
@@ -221,7 +221,7 @@ public final class GdsParallelBatchImporter {
     }
 
     private BatchImporter instantiateBatchImporter(
-        DatabaseLayout databaseLayout,
+        GdsDatabaseLayout databaseLayout,
         LogService logService,
         Collector collector,
         JobScheduler jobScheduler,
