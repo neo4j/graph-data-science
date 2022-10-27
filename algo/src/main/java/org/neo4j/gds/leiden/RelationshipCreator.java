@@ -29,14 +29,10 @@ final class RelationshipCreator implements Runnable {
 
     private final Orientation orientation;
     private final RelationshipsBuilder relationshipsBuilder;
-
     private final HugeLongArray communities;
-
     private final RelationshipIterator relationshipIterator;
-
     private final Partition partition;
-
-
+    
     RelationshipCreator(
         HugeLongArray communities,
         Partition partition,
