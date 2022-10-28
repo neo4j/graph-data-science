@@ -120,7 +120,7 @@ class HashGNNTest {
         var result = new HashGNN(binaryGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
         //dimension should be equal to dimension of feature input which is 3
         assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("a")))).containsExactly(1.0, 0.0, 0.0);
-        assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("b")))).containsExactly(1.0, 0.0, 0.0);
+        assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("b")))).containsExactly(0.0, 0.0, 1.0);
         assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("c")))).containsExactly(0.0, 0.0, 1.0);
     }
 
@@ -173,15 +173,16 @@ class HashGNNTest {
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(embeddingDensity)
             .binarizeFeatures(Map.of("dimension", binarizationDimension, "densityLevel", 2))
-            .iterations(10)
-            .randomSeed(42L)
+            .iterations(1)
+            .neighborInfluence(4)
+            .randomSeed(43L)
             .build();
         var result = new HashGNN(doubleGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
         // because of high neighbor influence and high embeddingDensity, we expect the node `b` to have the union of features of its neighbors
         // the neighbors are expected to have the same features as their initial projection
-        assertThat(result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("a")))).containsExactly(1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
-        assertThat(result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("b")))).containsExactly(1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0);
-        assertThat(result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("c")))).containsExactly(1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+        assertThat(result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("a")))).containsExactly(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0);
+        assertThat(result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("b")))).containsExactly(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0);
+        assertThat(result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("c")))).containsExactly(0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
 
         assertThat(result.get(0).length).isEqualTo(binarizationDimension);
     }
@@ -196,16 +197,16 @@ class HashGNNTest {
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(embeddingDensity)
             .binarizeFeatures(Map.of("dimension", binarizationDimension, "densityLevel", 2))
-            .neighborInfluence(avgDegree / embeddingDensity)
+            .neighborInfluence(0.01)
             .iterations(1)
             .randomSeed(1L)
             .build();
         var result = new HashGNN(doubleGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
         // because of equal neighbor and self influence and high embeddingDensity, we expect the node `b` to have the union of features of its neighbors plus some of its own features
         // the neighbors are expected to have the same features as their initial projection
-        assertThat(result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("a")))).containsExactly(0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+        assertThat(result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("a")))).containsExactly(0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+        assertThat(result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("b")))).containsExactly(0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0);
         assertThat(result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("c")))).containsExactly(1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0);
-        assertThat(result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("b")))).containsExactly(0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0);
 
         assertThat(result.get(0).length).isEqualTo(binarizationDimension);
     }

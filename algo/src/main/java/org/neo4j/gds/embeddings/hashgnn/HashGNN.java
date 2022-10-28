@@ -91,11 +91,11 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         embeddingsA.setAll(unused -> new BitSet(ambientDimension));
 
         double avgDegree = (graph.relationshipCount() / (double) graph.nodeCount());
-        int neighborHashRepeats = (int) (config.embeddingDensity() * config.neighborInfluence() / avgDegree);
+        double scaledNeighborInfluence = graph.relationshipCount() == 0 ? 1.0 : config.embeddingDensity() * config.neighborInfluence() / avgDegree;
 
         var hashes = HashTask.compute(
             ambientDimension,
-            neighborHashRepeats,
+            scaledNeighborInfluence,
             graphs.size(),
             config,
             randomSeed,
@@ -191,28 +191,6 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
             if (hash < minHash) {
                 minHash = hash;
                 argMin = bit;
-            }
-
-            bit = iterator.nextSetBit();
-        }
-
-        minAndArgmin.min = minHash;
-        minAndArgmin.argMin = argMin;
-    }
-
-    static void hashArgMinWithRepeats(BitSet bitSet, List<int[]> hashesList, MinAndArgmin minAndArgmin) {
-        int argMin = -1;
-        int minHash = Integer.MAX_VALUE;
-        var iterator = bitSet.iterator();
-        var bit = iterator.nextSetBit();
-        while (bit != BitSetIterator.NO_MORE) {
-            for (var hashes : hashesList) {
-                int hash = hashes[bit];
-
-                if (hash < minHash) {
-                    minHash = hash;
-                    argMin = bit;
-                }
             }
 
             bit = iterator.nextSetBit();

@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.embeddings.hashgnn.HashGNN.hashArgMin;
-import static org.neo4j.gds.embeddings.hashgnn.HashGNN.hashArgMinWithRepeats;
 
 class MinHashTask implements Runnable {
     private final List<HashTask.Hashes> hashes;
@@ -143,7 +142,7 @@ class MinHashTask implements Runnable {
                     });
                 }
 
-                hashArgMinWithRepeats(neighborsVector, neighborsAggregationHashes, neighborsMinAndArgMin);
+                hashArgMin(neighborsVector, neighborsAggregationHashes, neighborsMinAndArgMin);
                 int argMin = (neighborsMinAndArgMin.min < selfMinAndArgMin.min) ? neighborsMinAndArgMin.argMin : selfMinAndArgMin.argMin;
                 if (argMin != -1) {
                     currentEmbedding.set(argMin);

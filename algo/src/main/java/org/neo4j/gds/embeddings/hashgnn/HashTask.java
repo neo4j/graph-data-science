@@ -35,28 +35,28 @@ import static org.neo4j.gds.embeddings.hashgnn.HashGNN.computeHashesFromTriple;
 
 class HashTask implements Runnable {
     private final int ambientDimension;
-    private final int neighborHashRepeats;
+    private final double scaledNeighborInfluence;
     private final int numberOfRelationships;
     private final SplittableRandom rng;
-    private List<int[]> neighborsAggregationHashes;
+    private int[] neighborsAggregationHashes;
     private int[] selfAggregationHashes;
     private List<int[]> preAggregationHashes;
 
     HashTask(
         int ambientDimension,
-        int neighborHashRepeats,
+        double scaledNeighborInfluence,
         int numberOfRelationships,
         SplittableRandom rng
     ) {
         this.ambientDimension = ambientDimension;
-        this.neighborHashRepeats = neighborHashRepeats;
+        this.scaledNeighborInfluence = scaledNeighborInfluence;
         this.numberOfRelationships = numberOfRelationships;
         this.rng = rng;
     }
 
     public static List<Hashes> compute(
         int ambientDimension,
-        int neighborHashRepeats,
+        double scaledNeighborInfluence,
         int numberOfRelationships,
         HashGNNConfig config,
         long randomSeed,
@@ -65,7 +65,7 @@ class HashTask implements Runnable {
         var hashTasks = IntStream.range(0, config.iterations() * config.embeddingDensity()).mapToObj(seedOffset ->
             new HashTask(
                 ambientDimension,
-                neighborHashRepeats,
+                scaledNeighborInfluence,
                 numberOfRelationships,
                 new SplittableRandom(randomSeed + seedOffset)
             )).collect(Collectors.toList());
@@ -83,7 +83,7 @@ class HashTask implements Runnable {
 
     @ValueClass
     interface Hashes {
-        List<int[]> neighborsAggregationHashes();
+        int[] neighborsAggregationHashes();
 
         int[] selfAggregationHashes();
 
@@ -92,15 +92,26 @@ class HashTask implements Runnable {
 
     @Override
     public void run() {
-        int c = Primes.nextPrime(rng.nextInt(1, Integer.MAX_VALUE));
-        this.neighborsAggregationHashes = IntStream
-            .range(0, neighborHashRepeats)
-            .mapToObj(unused -> computeHashesFromTriple(ambientDimension, HashGNN.HashTriple.generate(rng, c)))
-            .collect(Collectors.toList());
-        this.selfAggregationHashes = computeHashesFromTriple(ambientDimension, HashGNN.HashTriple.generate(rng, c));
+        // Multiply scaling by 1.02 to make sure we can find a prime >= primeSeed * scaledNeighborInfluence
+        int primeSeed = rng.nextInt(1, (int) Math.round(Integer.MAX_VALUE / Math.max(1, scaledNeighborInfluence * 1.02)));
+
+        int c = Primes.nextPrime(primeSeed);
+
+        int d;
+        if (Double.compare(scaledNeighborInfluence, 1.0D) == 0) {
+            d = c;
+        } else {
+            d = Primes.nextPrime((int) Math.round(primeSeed * scaledNeighborInfluence));
+        }
+
+        this.neighborsAggregationHashes = computeHashesFromTriple(
+            ambientDimension,
+            HashGNN.HashTriple.generate(rng, c)
+        );
+        this.selfAggregationHashes = computeHashesFromTriple(ambientDimension, HashGNN.HashTriple.generate(rng, d));
         this.preAggregationHashes = IntStream
             .range(0, numberOfRelationships)
-            .mapToObj(unused -> computeHashesFromTriple(ambientDimension, HashGNN.HashTriple.generate(rng, c)))
+            .mapToObj(unused -> computeHashesFromTriple(ambientDimension, HashGNN.HashTriple.generate(rng)))
             .collect(Collectors.toList());
     }
 

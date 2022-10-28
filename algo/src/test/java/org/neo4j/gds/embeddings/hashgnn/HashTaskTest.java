@@ -44,7 +44,7 @@ class HashTaskTest {
         var hashes = HashTask.compute(AMBIENT_DIMENSION, NEIGHBOR_HASH_REPEATS, NUMBER_OF_RELATIONSHIPS, config, 42, TerminationFlag.RUNNING_TRUE);
 
         assertThat(hashes.size()).isEqualTo(ITERATIONS * EMBEDDING_DENSITY);
-        assertThat(hashes.get(0).neighborsAggregationHashes().size()).isEqualTo(NEIGHBOR_HASH_REPEATS);
+        assertThat(hashes.get(0).neighborsAggregationHashes().length).isEqualTo(AMBIENT_DIMENSION);
         assertThat(hashes.get(0).preAggregationHashes().size()).isEqualTo(NUMBER_OF_RELATIONSHIPS);
         assertThat(hashes.get(0).selfAggregationHashes().length).isEqualTo(AMBIENT_DIMENSION);
     }
