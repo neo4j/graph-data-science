@@ -22,9 +22,11 @@ package org.neo4j.gds.embeddings.hashgnn;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -36,6 +38,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 
 @GdlExtension
 class HashGNNTest {
@@ -251,5 +254,49 @@ class HashGNNTest {
         assertThat(result.get(0).length).isEqualTo(42);
         assertThat(result.get(1).length).isEqualTo(42);
         assertThat(result.get(2).length).isEqualTo(42);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        // BASE
+        "    10,  4,  10_000, 20_000, 1,  86_055_752",
+
+        // Should increase fairly little with higher density
+        "   100,  4,  10_000, 20_000, 1,  90_515_432",
+
+        // Should increase fairly little with more iterations
+        "    10, 16,  10_000, 20_000, 1,  87_542_312",
+
+        // Should increase almost linearly with node count
+        "    10,  4, 100_000, 20_000, 1, 856_096_112",
+
+        // Should be unaffected by relationship count
+        "    10,  4,  10_000, 80_000, 1,  86_055_752",
+
+        // Should be unaffected by concurrency
+        "    10,  4,  10_000, 20_000, 8,  86_055_752",
+    })
+    void shouldEstimateMemory(
+        int embeddingDensity,
+        int iterations,
+        long nodeCount,
+        long relationshipCount,
+        int concurrency,
+        long expectedMemory
+    ) {
+        var config = HashGNNConfigImpl
+            .builder()
+            .featureProperties(List.of("f1", "f2"))
+            .embeddingDensity(embeddingDensity)
+            .iterations(iterations)
+            .build();
+
+        assertMemoryEstimation(
+            () -> new HashGNNFactory<>().memoryEstimation(config),
+            nodeCount,
+            relationshipCount,
+            concurrency,
+            MemoryRange.of(expectedMemory)
+        );
     }
 }

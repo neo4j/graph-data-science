@@ -21,9 +21,14 @@ package org.neo4j.gds.embeddings.hashgnn;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.mem.MemoryUsage;
 
 public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithmFactory<HashGNN, CONFIG> {
 
@@ -48,5 +53,35 @@ public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithm
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
         return Tasks.leaf(taskName());
+    }
+
+    @Override
+    public MemoryEstimation memoryEstimation(CONFIG config) {
+        int FUDGED_BINARY_DIMENSION = 1024;
+
+        MemoryEstimations.Builder builder = MemoryEstimations.builder(HashGNN.class);
+
+        builder.perNode(
+            "Embeddings cache 1",
+            n -> HugeObjectArray.memoryEstimation(n, MemoryUsage.sizeOfBitset(FUDGED_BINARY_DIMENSION))
+        );
+        builder.perNode(
+            "Embeddings cache 2",
+            n -> HugeObjectArray.memoryEstimation(n, MemoryUsage.sizeOfBitset(FUDGED_BINARY_DIMENSION))
+        );
+
+        builder.perGraphDimension("Hashes cache", (dims, concurrency) -> MemoryRange.of(
+            config.embeddingDensity() * config.iterations() * HashTask.Hashes.memoryEstimation(
+                FUDGED_BINARY_DIMENSION,
+                config.heterogeneous() ? dims.relationshipCounts().size() : 1
+            )));
+
+        int outputDimension = config.outputDimension().orElse(FUDGED_BINARY_DIMENSION);
+        builder.perNode(
+            "Embeddings output",
+            n -> HugeObjectArray.memoryEstimation(n, MemoryUsage.sizeOfDoubleArray(outputDimension))
+        );
+
+        return builder.build();
     }
 }

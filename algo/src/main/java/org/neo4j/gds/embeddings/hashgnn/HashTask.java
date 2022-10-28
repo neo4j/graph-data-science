@@ -24,6 +24,7 @@ import org.apache.commons.math3.primes.Primes;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
 import java.util.SplittableRandom;
@@ -84,6 +85,13 @@ class HashTask implements Runnable {
         int[] selfAggregationHashes();
 
         List<int[]> preAggregationHashes();
+
+        static long memoryEstimation(int ambientDimension, int numRelTypes) {
+            long neighborAggregation = MemoryUsage.sizeOfIntArrayList(ambientDimension);
+            long selfAggregation = MemoryUsage.sizeOfIntArray(ambientDimension);
+            long preAggregation = MemoryUsage.sizeOfIntArrayList(numRelTypes) + MemoryUsage.sizeOfIntArray(ambientDimension) * numRelTypes;
+            return neighborAggregation + selfAggregation + preAggregation + MemoryUsage.sizeOfInstance(Hashes.class);
+        }
     }
 
     @Override
