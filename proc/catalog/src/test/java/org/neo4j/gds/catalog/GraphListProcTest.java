@@ -142,7 +142,7 @@ class GraphListProcTest extends BaseProcTest {
                 }, "Assert native `configuration` map"),
                 "schema", map(
                     "nodes", map("A", map()),
-                    "relationships", map("REL", map()),
+                    "relationships", map("REL", map("orientation", "NATURAL", "properties", map())),
                     "graphProperties", map()
                 ),
                 "nodeCount", 2L,
@@ -260,7 +260,7 @@ class GraphListProcTest extends BaseProcTest {
                 }, "Assert generated `configuration` map"),
                 "schema", map(
                     "nodes", map("__ALL__", map()),
-                    "relationships", map("REL", map()),
+                    "relationships", map("REL", map("orientation", "NATURAL", "properties", map())),
                     "graphProperties", map()
                 ),
                 "nodeCount", 10L,
@@ -297,7 +297,10 @@ class GraphListProcTest extends BaseProcTest {
             map(
                 "schema", map(
                     "nodes", map("A", map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
-                    "relationships", map("REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)")),
+                    "relationships", map("REL", map(
+                        "orientation", "NATURAL",
+                        "properties", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)"))
+                    ),
                     "graphProperties", map()
                 )
             )
@@ -318,7 +321,7 @@ class GraphListProcTest extends BaseProcTest {
                 "database", "neo4j",
                 "schema", map(
                     "nodes", map(ALL_NODES.name, map()),
-                    "relationships", map(ALL_RELATIONSHIPS.name, map()),
+                    "relationships", map(ALL_RELATIONSHIPS.name, map("orientation", "NATURAL", "properties", map())),
                     "graphProperties", map()
                 ),
                 "configuration", new Condition<>(config -> {
@@ -439,7 +442,7 @@ class GraphListProcTest extends BaseProcTest {
             map(
                 "schema", map(
                     "nodes", map("A", map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
-                    "relationships", map("REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)")),
+                    "relationships", map("REL", map("orientation", "NATURAL", "properties", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)"))),
                     "graphProperties", map()
                 )
             )
@@ -462,7 +465,7 @@ class GraphListProcTest extends BaseProcTest {
             map(
                 "schema", map(
                     "nodes", map(ALL_NODES.name, map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
-                    "relationships", map(ALL_RELATIONSHIPS.name, map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)")),
+                    "relationships", map(ALL_RELATIONSHIPS.name, map("orientation", "NATURAL", "properties", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)"))),
                     "graphProperties", map()
                 )
             )
@@ -667,7 +670,7 @@ class GraphListProcTest extends BaseProcTest {
             Collections.singletonList(map(
                 "schema", map(
                     "nodes", map(ALL_NODES.name, map()),
-                    "relationships", map(ALL_RELATIONSHIPS.name, map()),
+                    "relationships", map(ALL_RELATIONSHIPS.name, map("orientation", "NATURAL", "properties", map())),
                     "graphProperties", map()
             )))
         );
@@ -684,17 +687,27 @@ class GraphListProcTest extends BaseProcTest {
 
         runQuery(loadQuery);
 
-        assertCypherResult("CALL gds.graph.list() YIELD schema",
+        assertCypherResult(
+            "CALL gds.graph.list() YIELD schema",
             Collections.singletonList(map(
                 "schema", map(
                     "nodes", map(
                         "all", map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)"),
-                        "B", map("age", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
-                    "relationships",  map(
-                        "all", map("since", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)"),
-                        "REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)")),
+                        "B", map("age", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")
+                    ),
+                    "relationships", map(
+                        "all", map(
+                            "orientation", "NATURAL",
+                            "properties", map("since", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)")
+                        ),
+                        "REL", map(
+                            "orientation", "NATURAL",
+                            "properties", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)")
+                        )
+                    ),
                     "graphProperties", map()
-                )))
+                ))
+            )
         );
     }
 
@@ -714,8 +727,8 @@ class GraphListProcTest extends BaseProcTest {
                 "schema", map(
                     "nodes", map("all", map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)"), "B", map("age", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
                     "relationships",  map(
-                        "all", map("since", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)"),
-                        "REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)")),
+                        "all", map("orientation", "NATURAL", "properties", map("since", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)")),
+                        "REL", map("orientation", "NATURAL", "properties", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)"))),
                     "graphProperties", map()
                 )))
         );
@@ -736,7 +749,10 @@ class GraphListProcTest extends BaseProcTest {
             Collections.singletonList(map(
                 "schema", map(
                     "nodes", map("A", map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)"), "B", map("age", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
-                    "relationships",  map("LIKES", map("since", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)"), "REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)")),
+                    "relationships",  map(
+                        "LIKES", map("orientation", "NATURAL", "properties", map("since", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)")),
+                        "REL", map("orientation", "NATURAL", "properties", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)"))
+                    ),
                     "graphProperties", map()
                 )))
         );

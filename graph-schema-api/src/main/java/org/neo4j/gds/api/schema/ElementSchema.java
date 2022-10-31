@@ -72,21 +72,6 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, ELEMENT_IDENTIFI
     }
 
     @Value.Derived
-    default Map<String, Object> toMap() {
-        return properties().entrySet().stream().collect(Collectors.toMap(
-            entry -> entry.getKey().name,
-            entry -> entry
-                .getValue()
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue()))
-                )
-        ));
-    }
-
-    @Value.Derived
     default Map<ELEMENT_IDENTIFIER, Map<String, PROPERTY_SCHEMA>> filterProperties(Set<ELEMENT_IDENTIFIER> identifiersToKeep) {
         return properties()
             .entrySet()

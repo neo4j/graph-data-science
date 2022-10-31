@@ -203,7 +203,7 @@ YIELD graphName, schema
 |===
 | graphName | schema
 | "personsCypher"
-| {graphProperties={}, relationships={KNOWS={}}, nodes={Person={}}}
+| {graphProperties={}, relationships={KNOWS={orientation=NATURAL, properties={}}}, nodes={Person={}}}
 |===
 --
 
@@ -221,7 +221,7 @@ YIELD graphName, schema
 |===
 | graphName       | schema
 | "personsNative"
-| {graphProperties={}, relationships={KNOWS={}}, nodes={Person={}}}
+| {graphProperties={}, relationships={KNOWS={orientation=NATURAL, properties={}}}, nodes={Person={}}}
 |===
 --
 

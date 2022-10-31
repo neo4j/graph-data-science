@@ -20,6 +20,7 @@
 package org.neo4j.gds.api.schema;
 
 import org.immutables.builder.Builder.AccessibleFields;
+import org.immutables.value.Value;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
@@ -91,6 +92,24 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
         // this is because algorithms such as TriangleCount are still well-defined
         // so it is the least restrictive decision
         return relTypeOrientationMap().values().stream().allMatch(b -> b == UNDIRECTED);
+    }
+
+    @Value.Derived
+    default Map<String, Object> toMap() {
+        return properties().entrySet().stream().collect(Collectors.toMap(
+            entry -> entry.getKey().name,
+            entry -> Map.of(
+                "orientation", relTypeOrientationMap().get(entry.getKey()).toString(),
+                "properties", entry
+                .getValue()
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue()))
+                )
+            )
+        ));
     }
 
     static RelationshipSchema empty() {

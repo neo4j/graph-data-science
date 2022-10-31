@@ -29,6 +29,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @ValueClass
 public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel, PropertySchema> {
@@ -49,6 +50,22 @@ public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel, Propert
     @Override
     default NodeSchema union(NodeSchema other) {
         return of(unionSchema(other.properties()));
+    }
+
+    @Value.Derived
+    default Map<String, Object> toMap() {
+        return properties().entrySet().stream().collect(Collectors.toMap(
+            entry -> entry.getKey().name,
+            entry -> entry
+                .getValue()
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue())
+                    )
+                )
+        ));
     }
 
     static NodeSchema of(Map<NodeLabel, Map<String, PropertySchema>> properties) {
