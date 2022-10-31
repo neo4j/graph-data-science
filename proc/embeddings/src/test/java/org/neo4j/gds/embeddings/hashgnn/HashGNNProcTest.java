@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.hashgnn;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ImmutableRelationshipProjections;
@@ -40,9 +39,9 @@ import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-class HashGNNProcTest extends BaseProcTest implements
-    AlgoBaseProcTest<HashGNN, HashGNNMutateConfig, HashGNN.HashGNNResult>,
-    MemoryEstimateTest<HashGNN, HashGNNMutateConfig, HashGNN.HashGNNResult> {
+abstract class HashGNNProcTest<CONFIG extends HashGNNConfig> extends BaseProcTest implements
+    AlgoBaseProcTest<HashGNN, CONFIG, HashGNN.HashGNNResult>,
+    MemoryEstimateTest<HashGNN, CONFIG, HashGNN.HashGNNResult> {
 
     @Neo4jGraph
     private static final String DB_CYPHER =
@@ -57,23 +56,14 @@ class HashGNNProcTest extends BaseProcTest implements
     void setupWritePropertiesProc() throws Exception {
         registerProcedures(
             GraphProjectProc.class,
-            GraphWriteNodePropertiesProc.class
+            GraphWriteNodePropertiesProc.class,
+            getProcedureClazz()
         );
-    }
-
-    @Override
-    public Class<? extends AlgoBaseProc<HashGNN, HashGNN.HashGNNResult, HashGNNMutateConfig, ?>> getProcedureClazz() {
-        return HashGNNMutateProc.class;
     }
 
     @Override
     public GraphDatabaseService graphDb() {
         return db;
-    }
-
-    @Override
-    public HashGNNMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return HashGNNMutateConfig.of(mapWrapper);
     }
 
     @Override

@@ -59,6 +59,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -319,16 +320,22 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
 
     @Test
     default void testRunOnEmptyGraph() {
+        // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
+        runQuery(graphDb(), "CREATE (n: X)");
         runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
 
         applyOnProcedure((proc) -> {
             GraphStoreCatalog.removeAllLoadedGraphs();
             var loadedGraphName = "graph";
-            GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
+            var propertyMappings = nodeProperties().stream().map(prop -> PropertyMapping.of(prop, 1.0)).collect(Collectors.toList());
+            GraphProjectConfig graphProjectConfig = withNameAndNodeProjections(
                 "",
                 loadedGraphName,
-                relationshipProjections(),
-                List.of()
+                NodeProjections.of(
+                    Map.of(
+                        NodeLabel.of("X"), NodeProjection.of("X", PropertyMappings.of(propertyMappings))
+                    )
+                )
             );
             GraphStore graphStore = graphLoader(graphProjectConfig).graphStore();
             GraphStoreCatalog.set(graphProjectConfig, graphStore);

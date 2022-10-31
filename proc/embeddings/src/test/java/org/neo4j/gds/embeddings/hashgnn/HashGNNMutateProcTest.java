@@ -19,11 +19,12 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-class HashGNNMutateProcTest extends HashGNNProcTest implements
+class HashGNNMutateProcTest extends HashGNNProcTest<HashGNNMutateConfig> implements
     MutateNodePropertyTest<HashGNN, HashGNNMutateConfig, HashGNN.HashGNNResult> {
 
     @Override
@@ -34,6 +35,16 @@ class HashGNNMutateProcTest extends HashGNNProcTest implements
             return minimalConfig.withString("mutateProperty", "embedding");
         }
         return minimalConfig;
+    }
+
+    @Override
+    public Class<? extends AlgoBaseProc<HashGNN, HashGNN.HashGNNResult, HashGNNMutateConfig, ?>> getProcedureClazz() {
+        return HashGNNMutateProc.class;
+    }
+
+    @Override
+    public HashGNNMutateConfig createConfig(CypherMapWrapper mapWrapper) {
+        return HashGNNMutateConfig.of(mapWrapper);
     }
 
     @Override

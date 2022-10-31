@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.hashgnn.HashGNNCompanion.DESCRIPTION;
+import static org.neo4j.gds.embeddings.hashgnn.HashGNNProcCompanion.DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
@@ -86,7 +86,7 @@ public class HashGNNStreamProc extends StreamProc<HashGNN, HashGNN.HashGNNResult
 
     @Override
     protected NodePropertyValues nodeProperties(ComputationResult<HashGNN, HashGNN.HashGNNResult, HashGNNStreamConfig> computationResult) {
-        return HashGNNCompanion.getNodeProperties(computationResult);
+        return HashGNNProcCompanion.getNodeProperties(computationResult);
     }
 
     @Override

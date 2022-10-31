@@ -35,7 +35,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.hashgnn.HashGNNCompanion.DESCRIPTION;
+import static org.neo4j.gds.embeddings.hashgnn.HashGNNProcCompanion.DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
@@ -66,7 +66,7 @@ public class HashGNNMutateProc extends MutatePropertyProc<HashGNN, HashGNN.HashG
 
     @Override
     protected NodePropertyValues nodeProperties(ComputationResult<HashGNN, HashGNN.HashGNNResult, HashGNNMutateConfig> computationResult) {
-        return HashGNNCompanion.getNodeProperties(computationResult);
+        return HashGNNProcCompanion.getNodeProperties(computationResult);
     }
 
     @Override

@@ -23,11 +23,11 @@ import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
 
-final class HashGNNCompanion {
+final class HashGNNProcCompanion {
 
     public static final String DESCRIPTION = "HashGNN creates node embeddings by hashing and message passing.";
 
-    private HashGNNCompanion() {}
+    private HashGNNProcCompanion() {}
 
     static <CONFIG extends HashGNNConfig> NodePropertyValues getNodeProperties(ComputationResult<HashGNN, HashGNN.HashGNNResult, CONFIG> computationResult) {
         var nodeCount = computationResult.graph().nodeCount();
