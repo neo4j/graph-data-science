@@ -24,11 +24,13 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 public class LocalMoveTask implements Runnable {
 
+    private static final long LOCALQUEUEBOUND = 1000;
     private final Graph graph;
     private final AtomicLong globalQueueIndex;
     private final HugeLongArray encounteredCommunities;
@@ -38,12 +40,11 @@ public class LocalMoveTask implements Runnable {
 
     private final AtomicLong globalQueueSize;
     private final HugeAtomicBitSet nodeInQueue;
-    private final HugeLongArray localQueue;
+    private final HugeLongArrayQueue localQueue;
     private final HugeLongArray currentCommunities;
     private final HugeAtomicDoubleArray communityVolumes;
     private long encounteredCommunityCounter = 0;
     private LocalMoveTaskPhase phase;
-    private long localQueueIndex;
 
     private final double gamma;
 
@@ -72,7 +73,7 @@ public class LocalMoveTask implements Runnable {
         this.communityVolumes = communityVolumes;
         this.currentCommunities = currentCommunities;
         this.nodeInQueue = nodeInQueue;
-        this.localQueue = HugeLongArray.newArray(graph.nodeCount());
+        this.localQueue = HugeLongArrayQueue.newQueue(graph.nodeCount());
         this.gamma = gamma;
         this.phase = LocalMoveTaskPhase.RUN;
 
@@ -81,7 +82,6 @@ public class LocalMoveTask implements Runnable {
     @Override
     public void run() {
         if (phase == LocalMoveTaskPhase.RUN) {
-            localQueueIndex = 0;
             long offset;
             while ((offset = globalQueueIndex.getAndAdd(64)) < globalQueueSize.get()) {
                 var chunkSize = Math.min(offset + 64, globalQueueSize.get());
@@ -91,8 +91,8 @@ public class LocalMoveTask implements Runnable {
                 }
             }
             //do some local processing if the localQueue is small enough
-            while (localQueueIndex > 0 && localQueueIndex < 1000) {
-                long nodeId = localQueue.get(--localQueueIndex);
+            while (localQueue.size() > 0 && localQueue.size() < LOCALQUEUEBOUND) {
+                long nodeId = localQueue.remove();
                 processNode(nodeId);
             }
             phase = LocalMoveTaskPhase.SYNC;
@@ -103,11 +103,11 @@ public class LocalMoveTask implements Runnable {
     }
 
     private void sync() {
-        long currentIndex = globalQueueSize.getAndAdd(localQueueIndex);
-        for (long indexId = 0; indexId < localQueueIndex; ++indexId) {
-            globalQueue.set(currentIndex++, localQueue.get(indexId));
+        long currentIndex = globalQueueSize.getAndAdd(localQueue.size());
+
+        while (!localQueue.isEmpty()) {
+            globalQueue.set(currentIndex++, localQueue.remove());
         }
-        localQueueIndex = 0;
     }
     private void moveNodeToNewCommunity(
         long nodeId,
@@ -148,7 +148,7 @@ public class LocalMoveTask implements Runnable {
             long tCommunity = currentCommunities.get(t);
             boolean shouldAddInQueue = !nodeInQueue.get(t) && tCommunity != movedToCommunityId;
             if (shouldAddInQueue && !nodeInQueue.getAndSet(t)) {
-                localQueue.set(localQueueIndex++, t);
+                localQueue.add(t);
             }
             return true;
         });

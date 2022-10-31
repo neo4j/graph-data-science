@@ -112,8 +112,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         );
 
         double gamma = this.initialGamma * modularityScaleCoefficient;
-
-
+        
         //currentActualCommunities keeps a mapping of nodes to the community they currently belong to
         //if no seeding is involved, these values can be considered correct output.
         //Otherwise, they depict the current state without caring consider seeding (i.e., let's say seed:42 is mapped to community 0

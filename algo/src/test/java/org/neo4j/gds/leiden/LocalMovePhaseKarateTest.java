@@ -77,11 +77,23 @@ class LocalMovePhaseKarateTest {
         assertThat(communitiesMap.values())
             .satisfiesExactlyInAnyOrder(
                 community -> assertThat(community).containsExactlyInAnyOrder("a0"),
-                community -> assertThat(community).containsExactlyInAnyOrder("a9", "a15", "a16", "a19", "a21", "a23", "a27", "a30", "a31", "a33", "a34"),
-                community -> assertThat(community).containsExactlyInAnyOrder("a6", "a7", "a17"),
                 community -> assertThat(community).containsExactlyInAnyOrder("a5", "a11"),
+                community -> assertThat(community).containsExactlyInAnyOrder("a3", "a4", "a8", "a10", "a13", "a14"),
+                community -> assertThat(community).containsExactlyInAnyOrder("a6", "a7", "a17"),
+                community -> assertThat(community).containsExactlyInAnyOrder("a1", "a2", "a12", "a18", "a20", "a22"),
                 community -> assertThat(community).containsExactlyInAnyOrder("a24", "a25", "a26", "a28", "a29", "a32"),
-                community -> assertThat(community).containsExactlyInAnyOrder("a1", "a2", "a3", "a4", "a8", "a10", "a12", "a13", "a14", "a18", "a20", "a22")
+                community -> assertThat(community).containsExactlyInAnyOrder("a9",
+                    "a15",
+                    "a16",
+                    "a19",
+                    "a21",
+                    "a23",
+                    "a27",
+                    "a30",
+                    "a31",
+                    "a33",
+                    "a34"
+                )
             );
     }
 
