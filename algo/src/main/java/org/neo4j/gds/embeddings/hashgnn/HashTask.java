@@ -31,7 +31,7 @@ import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.neo4j.gds.embeddings.hashgnn.HashGNN.computeHashesFromTriple;
+import static org.neo4j.gds.embeddings.hashgnn.HashGNNCompanion.HashTriple.computeHashesFromTriple;
 
 class HashTask implements Runnable {
     private final int ambientDimension;
@@ -106,12 +106,12 @@ class HashTask implements Runnable {
 
         this.neighborsAggregationHashes = computeHashesFromTriple(
             ambientDimension,
-            HashGNN.HashTriple.generate(rng, c)
+            HashGNNCompanion.HashTriple.generate(rng, c)
         );
-        this.selfAggregationHashes = computeHashesFromTriple(ambientDimension, HashGNN.HashTriple.generate(rng, d));
+        this.selfAggregationHashes = computeHashesFromTriple(ambientDimension, HashGNNCompanion.HashTriple.generate(rng, d));
         this.preAggregationHashes = IntStream
             .range(0, numberOfRelationships)
-            .mapToObj(unused -> computeHashesFromTriple(ambientDimension, HashGNN.HashTriple.generate(rng)))
+            .mapToObj(unused -> computeHashesFromTriple(ambientDimension, HashGNNCompanion.HashTriple.generate(rng)))
             .collect(Collectors.toList());
     }
 

@@ -32,7 +32,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.embeddings.hashgnn.HashGNN.hashArgMin;
+import static org.neo4j.gds.embeddings.hashgnn.HashGNNCompanion.hashArgMin;
 
 class MinHashTask implements Runnable {
     private final List<HashTask.Hashes> hashes;

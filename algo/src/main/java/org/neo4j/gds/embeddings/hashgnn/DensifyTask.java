@@ -66,7 +66,7 @@ class DensifyTask implements Runnable {
 
         progressTracker.logInfo("Starting densification");
 
-        var projectionMatrix = projectionMatrix(rng, config.outputDimension().get(), (int) binaryFeatures.get(0).capacity());
+        var projectionMatrix = projectionMatrix(rng, config.outputDimension().orElseThrow(), (int) binaryFeatures.get(0).capacity());
         var tasks = partition.stream()
             .map(p -> new DensifyTask(
                 p,
@@ -117,7 +117,7 @@ class DensifyTask implements Runnable {
 
         partition.consume(nodeId -> {
             var binaryVector = binaryFeatures.get(nodeId);
-            var denseVector = new double[config.outputDimension().get()];
+            var denseVector = new double[config.outputDimension().orElseThrow()];
 
             var iterator = binaryVector.iterator();
             var bit = iterator.nextSetBit();

@@ -36,7 +36,7 @@ import java.util.Random;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.embeddings.hashgnn.HashGNN.hashArgMin;
+import static org.neo4j.gds.embeddings.hashgnn.HashGNNCompanion.hashArgMin;
 
 class BinarizeTask implements Runnable {
     private final Partition partition;
@@ -58,7 +58,7 @@ class BinarizeTask implements Runnable {
     ) {
         this.partition = partition;
         this.config = config;
-        this.binarizationConfig = config.binarizeFeatures().get();
+        this.binarizationConfig = config.binarizeFeatures().orElseThrow();
         this.truncatedFeatures = truncatedFeatures;
         this.featureExtractors = featureExtractors;
         this.propertyEmbeddings = propertyEmbeddings;
@@ -78,9 +78,9 @@ class BinarizeTask implements Runnable {
 
         var hashesList = new ArrayList<int[]>(config.embeddingDensity());
         for (int i = 0; i < config.embeddingDensity(); i++) {
-            hashesList.add(HashGNN.computeHashesFromTriple(
+            hashesList.add(HashGNNCompanion.HashTriple.computeHashesFromTriple(
                 config.binarizeFeatures().get().dimension(),
-                HashGNN.HashTriple.generate(rng)
+                HashGNNCompanion.HashTriple.generate(rng)
             ));
         }
 
@@ -115,7 +115,7 @@ class BinarizeTask implements Runnable {
     }
 
     private static int[][] embedProperties(HashGNNConfig config, long randomSeed, int inputDimension) {
-        var binarizationConfig = config.binarizeFeatures().get();
+        var binarizationConfig = config.binarizeFeatures().orElseThrow();
         var rng = new Random(randomSeed);
         var permutation = new ArrayList<Integer>(binarizationConfig.dimension());
         for (int offset = 0; offset < binarizationConfig.dimension(); offset++) {

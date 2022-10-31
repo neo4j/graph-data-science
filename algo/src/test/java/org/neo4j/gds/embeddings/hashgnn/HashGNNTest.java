@@ -241,7 +241,7 @@ class HashGNNTest {
         int b = rng.nextInt(c - 1) + 1;
 
         var hashTriple = ImmutableHashTriple.of(a, b, c);
-        var hashes = HashGNN.computeHashesFromTriple(AMBIENT_DIMENSION, hashTriple);
+        var hashes = HashGNNCompanion.HashTriple.computeHashesFromTriple(AMBIENT_DIMENSION, hashTriple);
 
         assertThat(hashes.length).isEqualTo(AMBIENT_DIMENSION);
         assertThat(hashes).containsAnyOf(IntStream.range(0, c).toArray());
@@ -258,7 +258,7 @@ class HashGNNTest {
         var hashes = IntStream.generate(() -> rng.nextInt(0, Integer.MAX_VALUE)).limit(10).toArray();
         var minArgMin = new HashGNN.MinAndArgmin(Integer.MAX_VALUE, -1);
 
-        HashGNN.hashArgMin(bitSet, hashes, minArgMin);
+        HashGNNCompanion.hashArgMin(bitSet, hashes, minArgMin);
 
         assertThat(minArgMin.min).isEqualTo(Math.min(hashes[3], hashes[9]));
         assertThat(minArgMin.argMin).isEqualTo(hashes[3] <= hashes[9] ? 3 : 9);

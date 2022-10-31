@@ -25,7 +25,6 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.embeddings.hashgnn.HashGNN.HashTriple;
 import org.neo4j.gds.embeddings.hashgnn.HashGNN.MinAndArgmin;
 import org.neo4j.gds.ml.core.features.FeatureConsumer;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
@@ -36,8 +35,8 @@ import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.embeddings.hashgnn.HashGNN.computeHashesFromTriple;
-import static org.neo4j.gds.embeddings.hashgnn.HashGNN.hashArgMin;
+import static org.neo4j.gds.embeddings.hashgnn.HashGNNCompanion.HashTriple.computeHashesFromTriple;
+import static org.neo4j.gds.embeddings.hashgnn.HashGNNCompanion.hashArgMin;
 
 class RawFeaturesTask implements Runnable {
     private final Partition partition;
@@ -82,7 +81,7 @@ class RawFeaturesTask implements Runnable {
 
         var hashesList = new ArrayList<int[]>(config.embeddingDensity());
         for (int i = 0; i < config.embeddingDensity(); i++) {
-            hashesList.add(computeHashesFromTriple(inputDimension, HashTriple.generate(rng)));
+            hashesList.add(computeHashesFromTriple(inputDimension, HashGNNCompanion.HashTriple.generate(rng)));
         }
 
         var features = HugeObjectArray.newArray(BitSet.class, graph.nodeCount());

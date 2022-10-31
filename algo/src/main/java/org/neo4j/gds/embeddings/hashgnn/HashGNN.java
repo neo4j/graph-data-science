@@ -21,10 +21,8 @@ package org.neo4j.gds.embeddings.hashgnn;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.BitSetIterator;
-import org.apache.commons.math3.primes.Primes;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -149,16 +147,6 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         return new HashGNNResult(outputVectors);
     }
 
-    static int[] computeHashesFromTriple(int ambientDimension, HashTriple hashTriple) {
-        var output = new int[ambientDimension];
-        for (int i = 0; i < ambientDimension; i++) {
-            // without cast to long, we can easily overflow Integer.MAX_VALUE which can to negative hash values
-            output[i] = Math.toIntExact(((long) i * hashTriple.a() + hashTriple.b()) % hashTriple.c());
-        }
-
-        return output;
-    }
-
     private double[] bitSetToArray(BitSet bitSet, int dimension) {
         var array = new double[dimension];
         var iterator = bitSet.iterator();
@@ -180,26 +168,6 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         }
     }
 
-    static void hashArgMin(BitSet bitSet, int[] hashes, MinAndArgmin minAndArgmin) {
-        int argMin = -1;
-        int minHash = Integer.MAX_VALUE;
-        var iterator = bitSet.iterator();
-        var bit = iterator.nextSetBit();
-        while (bit != BitSetIterator.NO_MORE) {
-            int hash = hashes[bit];
-
-            if (hash < minHash) {
-                minHash = hash;
-                argMin = bit;
-            }
-
-            bit = iterator.nextSetBit();
-        }
-
-        minAndArgmin.min = minHash;
-        minAndArgmin.argMin = argMin;
-    }
-
     @Override
     public void release() {
 
@@ -214,26 +182,6 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
 
         public HugeObjectArray<double[]> embeddings() {
             return embeddings;
-        }
-    }
-
-    @ValueClass
-    interface HashTriple {
-        int a();
-
-        int b();
-
-        int c();
-
-        static HashTriple generate(SplittableRandom rng) {
-            int c = Primes.nextPrime(rng.nextInt(1, Integer.MAX_VALUE));
-            return generate(rng, c);
-        }
-
-        static HashTriple generate(SplittableRandom rng, int c) {
-            int a = rng.nextInt(c - 1) + 1;
-            int b = rng.nextInt(c - 1) + 1;
-            return ImmutableHashTriple.of(a, b, c);
         }
     }
 
