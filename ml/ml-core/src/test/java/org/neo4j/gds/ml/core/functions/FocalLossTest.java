@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class FocalLossTest implements FiniteDifferenceTest {
 
     @Test
-    void shouldComputeGradientCorrectly2() {
+    void shouldComputeGradientCorrectly() {
         var targets = Constant.vector(new double[]{1.0, 2.0, 0.0});
         var predictions = new Weights<>(
             new Matrix(

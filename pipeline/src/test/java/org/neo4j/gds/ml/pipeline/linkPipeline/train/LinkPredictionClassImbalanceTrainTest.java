@@ -93,9 +93,9 @@ class LinkPredictionClassImbalanceTrainTest {
     Graph trainGraph;
 
     @Test
-    void focalLossImprovesMinorityClassPredictions() {
-        var linkABWithNoFocus = train(0).predictProbabilities(new double[]{0.72, 1.1});
-        var linkABWithFocus = train(5).predictProbabilities(new double[]{0.72, 1.1});
+    void focalLossImprovesMinorityClassPredictionsLR() {
+        var linkABWithNoFocus = trainLR(0).predictProbabilities(new double[]{0.72, 1.1});
+        var linkABWithFocus = trainLR(5).predictProbabilities(new double[]{0.72, 1.1});
 
         //(0.72, 1.1) is the feature vector for link [a,b].
         //[a,b] is a positive link with features x<y, but all other positive links have features with x>y. All negative links have features with x<y. Hence (a,b) is a hard-to-classify positive(minority) example.
@@ -103,7 +103,15 @@ class LinkPredictionClassImbalanceTrainTest {
         assertThat(linkABWithFocus[1]).isGreaterThan(linkABWithNoFocus[1]);
     }
 
-    private Classifier train(int focusWeight) {
+    @Test
+    void focalLossImprovesMinorityClassPredictionsMLP() {
+        var linkABWithNoFocus = trainMLP(0).predictProbabilities(new double[]{0.72, 1.1});
+        var linkABWithFocus = trainMLP(5).predictProbabilities(new double[]{0.72, 1.1});
+
+        assertThat(linkABWithFocus[1]).isGreaterThan(linkABWithNoFocus[1]);
+    }
+
+    private Classifier trainLR(int focusWeight) {
         LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
         pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of(
             "penalty", 0.1,
@@ -111,6 +119,31 @@ class LinkPredictionClassImbalanceTrainTest {
             "tolerance", 0.001,
             "focusWeight", focusWeight
         )));
+        pipeline.addFeatureStep(new HadamardFeatureStep(List.of("array")));
+
+        return new LinkPredictionTrain(
+            trainGraph,
+            trainGraph,
+            pipeline,
+            LinkPredictionTrainConfigImpl.builder()
+                .modelUser("DUMMY")
+                .modelName("model")
+                .graphName("g")
+                .targetRelationshipType("REL")
+                .sourceNodeLabel("N")
+                .targetNodeLabel("N")
+                .pipeline("DUMMY")
+                .metrics(List.of(AUCPR))
+                .negativeClassWeight(1)
+                .randomSeed(1337L)
+                .build(),
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        ).compute().classifier();
+    }
+
+    private Classifier trainMLP(int focusWeight) {
+        LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
         pipeline.addTrainerConfig(MLPClassifierTrainConfig.of(Map.of(
             "penalty", 0.1,
             "patience", 5,

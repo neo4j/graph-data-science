@@ -65,45 +65,56 @@ class NodeClassificationClassImbalanceTrainTest {
     private GraphStore graphStore;
 
     @Test
-    void focalLossImprovesDifficultClassPredictions() {
+    void focalLossImprovesDifficultClassPredictionsLR() {
         var LRResultNoFocus = trainLRWithFocus(0, "multiClass");
         var LRResultFocus = trainLRWithFocus(5, "multiClass");
-        var MLPResultNoFocus = trainMLPWithFocus(0, "multiClass");
-        var MLPResultFocus = trainMLPWithFocus(5, "multiClass");
 
         double[] LPHardPredictionNoFocus = LRResultNoFocus.classifier().predictProbabilities(new double[]{5.3, 10.5, 0.0});
         double[] LRHardPredictionFocus = LRResultFocus.classifier().predictProbabilities(new double[]{5.3, 10.5, 0.0});
-        double[] MLPHardPredictionNoFocus = MLPResultNoFocus.classifier().predictProbabilities(new double[]{5.3, 10.5, 0.0});
-        double[] MLPHardPredictionFocus = MLPResultFocus.classifier().predictProbabilities(new double[]{5.3, 10.5, 0.0});
 
         // the example data point (5.3, 10.5, 0.0) (a7 from train set above) is hard to classify (the only 1-class example)
         // applying focus makes the model more probable to predict the correct class (harder)
         assertThat(LRHardPredictionFocus[1]).isGreaterThan(LPHardPredictionNoFocus[1]);
+    }
+
+    @Test
+    void focalLossImprovesDifficultClassPredictionsMLP() {
+        var MLPResultNoFocus = trainMLPWithFocus(0, "multiClass");
+        var MLPResultFocus = trainMLPWithFocus(5, "multiClass");
+
+        double[] MLPHardPredictionNoFocus = MLPResultNoFocus.classifier().predictProbabilities(new double[]{5.3, 10.5, 0.0});
+        double[] MLPHardPredictionFocus = MLPResultFocus.classifier().predictProbabilities(new double[]{5.3, 10.5, 0.0});
+
         assertThat(MLPHardPredictionFocus[1]).isGreaterThan(MLPHardPredictionNoFocus[1]);
     }
 
     @Test
-    void focalLossImprovesMinorityClassPredictions() {
+    void focalLossImprovesMinorityClassPredictionsLR() {
         var LRResultNoFocus = trainLRWithFocus(0, "moreOnes");
         var LRResultFocus = trainLRWithFocus(5, "moreOnes");
-        var MLPResultNoFocus = trainMLPWithFocus(0, "moreOnes");
-        var MLPResultFocus = trainMLPWithFocus(5, "moreOnes");
 
         double[] LRHardPredictionNoFocus = LRResultNoFocus.classifier().predictProbabilities(new double[]{1.3, 1.5, 0.0});
         double[] LRHardPredictionFocus = LRResultFocus.classifier().predictProbabilities(new double[]{1.3, 1.5, 0.0});
-        double[] MLPHardPredictionNoFocus = MLPResultNoFocus.classifier().predictProbabilities(new double[]{1.3, 1.5, 0.0});
-        double[] MLPHardPredictionFocus = MLPResultFocus.classifier().predictProbabilities(new double[]{1.3, 1.5, 0.0});
 
         // the example data point (1.3, 1.5, 0.0) (a6 from train set above) is hard to classify
         // applying focus makes the model more probable to predict the correct class (harder)
         assertThat(LRHardPredictionFocus[0]).isGreaterThan(LRHardPredictionNoFocus[0]);
+
+        // applying focus
+        assertThat(LRResultFocus.zeroClassPrecision()).isGreaterThanOrEqualTo(LRResultNoFocus.zeroClassPrecision());
+    }
+
+    @Test
+    void focalLossImprovesMinorityClassPredictionsMLP() {
+        var MLPResultNoFocus = trainMLPWithFocus(0, "moreOnes");
+        var MLPResultFocus = trainMLPWithFocus(5, "moreOnes");
+
+        double[] MLPHardPredictionNoFocus = MLPResultNoFocus.classifier().predictProbabilities(new double[]{1.3, 1.5, 0.0});
         //however for MLP, it is powerful enough to classify a6, and it is not a hard result
         assertThat(MLPHardPredictionNoFocus[0]).isGreaterThan(0.5);
 
         // applying focus
-        assertThat(LRResultFocus.zeroClassPrecision()).isGreaterThanOrEqualTo(LRResultNoFocus.zeroClassPrecision());
         assertThat(MLPResultFocus.zeroClassPrecision()).isGreaterThanOrEqualTo(MLPResultNoFocus.zeroClassPrecision());
-
     }
 
     private ClassifierAndTestMetric trainLRWithFocus(
@@ -119,44 +130,7 @@ class NodeClassificationClassImbalanceTrainTest {
             "focusWeight", focusWeight
         )));
 
-        var trainConfig = NodeClassificationPipelineTrainConfigImpl
-            .builder()
-            .pipeline("PIPELINE")
-            .graphName("GRAPH")
-            .modelUser("DUMMY")
-            .modelName("model")
-            .concurrency(1)
-            .randomSeed(-1L)
-            .targetProperty(targetProperty)
-            .metrics(List.of(
-                ClassificationMetricSpecification.Parser.parse("PRECISION(class=0)")
-            ))
-            .build();
-
-        var result = NodeClassificationTrain.create(
-            graphStore,
-            pipeline,
-            trainConfig,
-            NodeFeatureProducer.create(
-                graphStore,
-                trainConfig,
-                ExecutionContext.EMPTY,
-                ProgressTracker.NULL_TRACKER
-            ),
-            ProgressTracker.NULL_TRACKER
-        ).run();
-
-        return ImmutableClassifierAndTestMetric
-            .builder()
-            .classifier(result.classifier())
-            .zeroClassPrecision(result
-                .trainingStatistics()
-                .winningModelTestMetrics()
-                .values()
-                .stream()
-                .findFirst()
-                .orElseThrow())
-            .build();
+        return buildClassifierAndTestMetric(pipeline, targetProperty);
     }
 
     private ClassifierAndTestMetric trainMLPWithFocus(
@@ -173,6 +147,10 @@ class NodeClassificationClassImbalanceTrainTest {
             "hiddenLayerSizes", List.of(12,4)
         )));
 
+        return buildClassifierAndTestMetric(pipeline, targetProperty);
+    }
+
+    private ClassifierAndTestMetric buildClassifierAndTestMetric(NodeClassificationTrainingPipeline pipeline, String targetProperty) {
         var trainConfig = NodeClassificationPipelineTrainConfigImpl
             .builder()
             .pipeline("PIPELINE")
