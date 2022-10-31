@@ -152,7 +152,11 @@ public class Leiden extends Algorithm<LeidenResult> {
                 break;
             }
             var toleranceStatus = getToleranceStatus(iteration);
-            
+
+            //if you deteriotate performance, exit and return previous itreation
+            if (toleranceStatus == ToleranceStatus.DECREASE) {
+                break;
+            }
             dendrogramManager.updateOutputDendrogram(
                 workingGraph,
                 currentActualCommunities,
@@ -376,11 +380,14 @@ public class Leiden extends Algorithm<LeidenResult> {
             return ToleranceStatus.CONTINUE;
         } else {
             var difference = modularities[iteration] - modularities[iteration - 1];
+            if (difference < 0) {
+                return ToleranceStatus.DECREASE;
+            }
             return (Double.compare(difference, tolerance) < 0) ? ToleranceStatus.CONVERGED : ToleranceStatus.CONTINUE;
         }
     }
 
     private enum ToleranceStatus {
-        CONVERGED, CONTINUE
+        CONVERGED, DECREASE, CONTINUE
     }
 }
