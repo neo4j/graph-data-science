@@ -20,16 +20,19 @@
 package org.neo4j.gds.leiden;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.config.ToleranceConfig;
 
 public interface LeidenBaseConfig extends
     AlgoBaseConfig,
     ConsecutiveIdsConfig,
     RelationshipWeightConfig,
-    RandomSeedConfig {
+    RandomSeedConfig,
+    ToleranceConfig {
 
     @Value.Default
     default double gamma() {
@@ -49,6 +52,13 @@ public interface LeidenBaseConfig extends
     @Value.Default
     default boolean includeIntermediateCommunities() {
         return false;
+    }
+
+    @Value.Default
+    @Override
+    @Configuration.DoubleRange(min = 0D)
+    default double tolerance() {
+        return 0.0001;
     }
 
     @Value.Check

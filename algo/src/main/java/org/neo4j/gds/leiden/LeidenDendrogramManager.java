@@ -19,12 +19,9 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-
-import java.util.concurrent.atomic.AtomicLong;
 
 public class LeidenDendrogramManager {
 
@@ -58,60 +55,59 @@ public class LeidenDendrogramManager {
 
     public HugeLongArray getCurrent() {return dendrograms[currentIndex];}
 
-    DendrogramResult setNextLevel(
+
+    //find which node corresponds to the community this node was merged to before
+    private long translateNode(
         Graph workingGraph,
-        HugeLongArray previousIterationDendrogram,
-        HugeLongArray refinedCommunities,
-        HugeLongArray localMoveCommunities,
+        HugeLongArray previousAlgorithmDendrogram,
+        long nodeId,
+        int iteration
+    ) {
+        return (iteration == 0)
+            ? nodeId
+            : workingGraph.toMappedNodeId(previousAlgorithmDendrogram.get(nodeId));
+    }
+
+    void updateOutputDendrogram(
+        Graph workingGraph,
+        HugeLongArray previousAlgorithmDendrogram,
+        HugeLongArray communitiesToOuput,
         SeedCommunityManager seedCommunityManager,
         int iteration
     ) {
-        assert workingGraph.nodeCount() == refinedCommunities.size() : "The sizes of the graph and communities should match";
-
-        var dendrogram = HugeLongArray.newArray(rootGraph.nodeCount());
+        assert workingGraph.nodeCount() == communitiesToOuput.size() : "The sizes of the graph and communities should match";
 
         prepareNextLevel(iteration);
 
-        AtomicLong maxCommunityId = new AtomicLong(0L);
         ParallelUtil.parallelForEachNode(rootGraph, concurrency, (nodeId) -> {
-            long prevId = previousIterationDendrogram == null
-                ? nodeId
-                : workingGraph.toMappedNodeId(previousIterationDendrogram.get(nodeId));
-                //find which node corresponds to the community this node was matched before
-
-            long communityId = refinedCommunities.get(prevId);
-
-            boolean updatedMaxCurrentId;
-            do {
-                var currentMaxId = maxCommunityId.get();
-                if (communityId > currentMaxId) {
-                    updatedMaxCurrentId = maxCommunityId.compareAndSet(currentMaxId, communityId);
-                } else {
-                    updatedMaxCurrentId = true;
-                }
-            } while (!updatedMaxCurrentId);
-
-            setToAlgorithmDendrogram(dendrogram, nodeId, communityId);
-            //recall: this array marks the community of node
-            //but disregards the numbering implied by any seeds (works on the algorithm level).
-
-            var reverseId = seedCommunityManager.mapToSeed(localMoveCommunities.get(communityId));
-
+            long prevId = translateNode(workingGraph, previousAlgorithmDendrogram, nodeId, iteration);
+            long communityId = communitiesToOuput.get(prevId);
+            var reverseId = seedCommunityManager.mapToSeed(communityId);
             setToOutputDendrogram(
                 nodeId,
                 reverseId
-            ); //whereas here because this is final output, we need to take seeds into account
+            ); //This is final output, we need to take seeds into account
             //and translate the community to output format; for this we need to take the initial seeding values into acount
         });
 
-        return ImmutableDendrogramResult.of(maxCommunityId.get(), dendrogram);
+
     }
 
-    private static void setToAlgorithmDendrogram(HugeLongArray dendrogram, long nodeId, long communityId) {
-        dendrogram.set(
-            nodeId,
-            communityId
-        );
+    void updateAlgorithmDendrogram(
+        Graph workingGraph,
+        HugeLongArray algorithmDendrogram,
+        HugeLongArray communitiesToWrite,
+        int iteration
+    ) {
+
+        HugeLongArray finalAlgorithmDendrogram = algorithmDendrogram;
+        ParallelUtil.parallelForEachNode(rootGraph, concurrency, (nodeId) -> {
+            long prevId = translateNode(workingGraph, finalAlgorithmDendrogram, nodeId, iteration);
+            long communityId = communitiesToWrite.get(prevId);
+            finalAlgorithmDendrogram.set(nodeId, communityId);
+        });
+        //recall: this array marks the community of node
+        //but disregards the numbering implied by any seeds (works on the algorithm level).
     }
 
     private void prepareNextLevel(int iteration) {
@@ -125,10 +121,5 @@ public class LeidenDendrogramManager {
         dendrograms[currentIndex].set(nodeId, communityId);
     }
 
-    @ValueClass
-    interface DendrogramResult {
-        long maxCommunityId();
 
-        HugeLongArray dendrogram();
-    }
 }

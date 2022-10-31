@@ -20,6 +20,7 @@
 package org.neo4j.gds.leiden;
 
 import com.carrotsearch.hppc.BitSet;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -114,16 +115,25 @@ final class RefinementPhase {
 
         var random = new Random(seed);
 
+        MutableLong maximumCommunityId = new MutableLong(-1);
         workingGraph.forEachNode(nodeId -> {
             boolean isSingleton = singleton.get(nodeId);
             if (isSingleton && isWellConnected(nodeId)) {
                 mergeNodeSubset(nodeId, refinedCommunities, singleton, random);
             }
+            var refinedId = refinedCommunities.get(nodeId);
+            if (maximumCommunityId.longValue() < refinedId) {
+                maximumCommunityId.setValue(refinedId);
+            }
             return true;
         });
 
         // We don't use the `communityCount` from the RefinementPhase => set it to `-1` in case we try to read it by mistake.
-        return new RefinementPhaseResult(refinedCommunities, communityVolumesAfterMerge);
+        return new RefinementPhaseResult(
+            refinedCommunities,
+            communityVolumesAfterMerge,
+            maximumCommunityId.longValue()
+        );
     }
 
     private void mergeNodeSubset(
@@ -262,9 +272,16 @@ final class RefinementPhase {
         private final HugeLongArray communities;
         private final HugeDoubleArray communityVolumes;
 
-        RefinementPhaseResult(HugeLongArray communities, HugeDoubleArray communityVolumes) {
+        private final long maximumRefinementCommunityId;
+
+        RefinementPhaseResult(
+            HugeLongArray communities,
+            HugeDoubleArray communityVolumes,
+            long maximumRefinedCommunityId
+        ) {
             this.communities = communities;
             this.communityVolumes = communityVolumes;
+            this.maximumRefinementCommunityId = maximumRefinedCommunityId;
         }
 
         HugeLongArray communities() {
@@ -274,6 +291,8 @@ final class RefinementPhase {
         HugeDoubleArray communityVolumes() {
             return communityVolumes;
         }
+
+        long maximumRefinedCommunityId() {return maximumRefinementCommunityId;}
 
     }
 }

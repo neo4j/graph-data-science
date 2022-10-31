@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
 
 @GdlExtension
 class FootballTest {
@@ -62,6 +63,7 @@ class FootballTest {
             false,
             randomSeed,
             null,
+            TOLERANCE_DEFAULT,
             1,
             ProgressTracker.NULL_TRACKER
         );

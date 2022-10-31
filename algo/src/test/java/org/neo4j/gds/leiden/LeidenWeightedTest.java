@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
 
 @GdlExtension
 class LeidenWeightedTest {
@@ -73,6 +74,7 @@ class LeidenWeightedTest {
             true,
             19L,
             null,
+            TOLERANCE_DEFAULT,
             4,
             ProgressTracker.NULL_TRACKER
         );

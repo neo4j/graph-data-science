@@ -19,8 +19,13 @@
  */
 package org.neo4j.gds.leiden;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.beta.generator.RandomGraphGenerator;
+import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.config.RandomGraphGeneratorConfig;
+import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -37,6 +42,7 @@ import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
 
 @GdlExtension
 class LeidenTest {
@@ -84,6 +90,7 @@ class LeidenTest {
             false,
             19L,
             null,
+            TOLERANCE_DEFAULT,
             1,
             ProgressTracker.NULL_TRACKER
         );
@@ -118,6 +125,7 @@ class LeidenTest {
             false,
             19L,
             graph.nodeProperties("optimal"),
+            TOLERANCE_DEFAULT,
             1,
             ProgressTracker.NULL_TRACKER
         );
@@ -153,6 +161,7 @@ class LeidenTest {
             false,
             19L,
             graph.nodeProperties("seed"),
+            TOLERANCE_DEFAULT,
             1,
             ProgressTracker.NULL_TRACKER
         );
@@ -187,6 +196,7 @@ class LeidenTest {
             false,
             19L,
             graph.nodeProperties("seed2"),
+            TOLERANCE_DEFAULT,
             1,
             ProgressTracker.NULL_TRACKER
         );
@@ -238,8 +248,41 @@ class LeidenTest {
         assertThat(seed.mapToSeed(1)).isEqualTo(201);
         assertThat(seed.mapToSeed(0)).isEqualTo(200);
 
-
     }
 
+    @Test
+    void shouldComplyWithTolerance() {
 
+        var myGraph = RandomGraphGenerator
+            .builder()
+            .nodeCount(200)
+            .averageDegree(10)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .orientation(Orientation.UNDIRECTED)
+            .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
+            .aggregation(Aggregation.SINGLE)
+            .seed(42)
+            .build()
+            .generate();
+
+        // modularities default tolerance:
+        // [0.17639682834921225, 0.18452049792988476, 0.18780843339464454, 0.18851413258382074, 0.0]
+
+        var gamma = 1.0;
+        Leiden leiden = new Leiden(
+            myGraph,
+            5,
+            gamma,
+            0.01,
+            false,
+            42,
+            null,
+            0.1,
+            1,
+            ProgressTracker.NULL_TRACKER
+        );
+        var leidenResult = leiden.compute();
+        assertThat(leidenResult.ranLevels()).isEqualTo(2);
+        assertThat(leidenResult.modularity()).isCloseTo(0.18452, Offset.offset(1e-6));
+    }
 }
