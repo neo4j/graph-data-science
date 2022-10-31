@@ -113,11 +113,12 @@ public class Leiden extends Algorithm<LeidenResult> {
 
         double gamma = this.initialGamma * modularityScaleCoefficient;
 
+
+        //currentActualCommunities keeps a mapping of nodes to the community they currently belong to
+        //if no seeding is involved, these values can be considered correct output.
+        //Otherwise, they depict the current state without caring consider seeding (i.e., let's say seed:42 is mapped to community 0
+        // then  currentCommunities.get(x)=0 not 42 whereas final output should be 42.
         HugeLongArray currentActualCommunities = HugeLongArray.newArray(rootGraph.nodeCount());
-        //this keeps a mapping of nodes to the community they currently belong to
-        //if no seeding is involved, these values can be considered correct output. Otherwise, they depict the current state
-        //and do not consider seeding (i.e., let's say seed:42 is mapped to community 0
-        // then  currentCommunities.get(x)=0 not 42
 
         boolean didConverge = false;
         int iteration;
@@ -150,10 +151,7 @@ public class Leiden extends Algorithm<LeidenResult> {
                 break;
             }
             var toleranceStatus = getToleranceStatus(iteration);
-            if (toleranceStatus == ToleranceStatus.DECREASED) {
-                break;
-            }//if you deteriotate performance, go back to previous iteration!
-
+            
             dendrogramManager.updateOutputDendrogram(
                 workingGraph,
                 currentActualCommunities,
@@ -377,14 +375,11 @@ public class Leiden extends Algorithm<LeidenResult> {
             return ToleranceStatus.CONTINUE;
         } else {
             var difference = modularities[iteration] - modularities[iteration - 1];
-            if (difference < 0) {
-                return ToleranceStatus.DECREASED;
-            }
             return (Double.compare(difference, tolerance) < 0) ? ToleranceStatus.CONVERGED : ToleranceStatus.CONTINUE;
         }
     }
 
     private enum ToleranceStatus {
-        CONVERGED, DECREASED, CONTINUE
+        CONVERGED, CONTINUE
     }
 }

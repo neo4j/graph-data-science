@@ -248,7 +248,6 @@ class LeidenTest {
         assertThat(seed.mapToSeed(1)).isEqualTo(201);
         assertThat(seed.mapToSeed(0)).isEqualTo(200);
 
-
     }
 
     @Test
@@ -262,11 +261,12 @@ class LeidenTest {
             .orientation(Orientation.UNDIRECTED)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
             .aggregation(Aggregation.SINGLE)
+            .seed(42)
             .build()
             .generate();
 
-        // modularities for there iterations with default tolerance:
-        // [0.1804351043280101, 0.1819193249390233, 0.18630341580765192]
+        // modularities default tolerance:
+        // [0.17639682834921225, 0.18452049792988476, 0.18780843339464454, 0.18851413258382074, 0.0]
 
         var gamma = 1.0;
         Leiden leiden = new Leiden(
@@ -277,15 +277,12 @@ class LeidenTest {
             false,
             42,
             null,
-            0.4,
+            0.1,
             1,
             ProgressTracker.NULL_TRACKER
         );
         var leidenResult = leiden.compute();
         assertThat(leidenResult.ranLevels()).isEqualTo(2);
-        assertThat(leidenResult.modularity()).isCloseTo(0.1819193249390233, Offset.offset(1e-6));
-
+        assertThat(leidenResult.modularity()).isCloseTo(0.18452, Offset.offset(1e-6));
     }
-
-
 }
