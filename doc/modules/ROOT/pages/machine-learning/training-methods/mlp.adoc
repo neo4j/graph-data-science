@@ -15,3 +15,6 @@ include::partial$/machine-learning/training-methods/penalty-config-tuning.adoc[l
 
 === HiddenLayerSizes
 This parameter defines the shape of the neural network. Each entry represents the number of neurons in a layer. The length of the list defines the number of hidden layers. Deeper and larger networks can theoretically approximate high degree surfaces better, at the expense of having more weights (and biases) that need to be trained.
+
+
+include::partial$/machine-learning/training-methods/focus-weight-config.adoc[leveloffset =+ 1]

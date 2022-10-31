@@ -286,7 +286,7 @@ RETURN
 [opts="header", cols="6, 2, 2, 2, 6"]
 |===
 | winningModel                                                                                                                                | avgTrainScore      | outerTrainScore     | testScore | validationScores
-| {maxEpochs=100, minEpochs=1, penalty=1.0, patience=2, methodName=MultilayerPerceptron, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001} | 0.799603174603175 |  0.8 | 0.75 | [0.5555555555555555, 0.7083333333333334, 0.75, 0.5555555555555555, 0.5555555555555555]
+| {maxEpochs=100, minEpochs=1, penalty=1.0, patience=2, methodName=MultilayerPerceptron, focusWeight=0.0, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001} | 0.799603174603175 |  0.8 | 0.75 | [0.5555555555555555, 0.7083333333333334, 0.75, 0.5555555555555555, 0.5555555555555555]
 |===
 --
 We can see the MLP model configuration won, and has a score of `0.8` on the test set.
@@ -401,7 +401,7 @@ RETURN
 [opts="header", cols="6, 2, 2, 2, 6"]
 |===
 | winningModel                                                                                                                                | avgTrainScore      | outerTrainScore     | testScore | validationScores
-| {maxEpochs=100, minEpochs=1, penalty=1.0, patience=2, methodName=MultilayerPerceptron, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001} | 0.799603174603175 |  0.8 | 0.75 | [0.75]
+| {maxEpochs=100, minEpochs=1, penalty=1.0, patience=2, methodName=MultilayerPerceptron, focusWeight=0.0, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001} | 0.799603174603175 |  0.8 | 0.75 | [0.75]
 |===
 --
 

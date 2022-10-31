@@ -26,6 +26,7 @@ import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.ConstantScale;
 import org.neo4j.gds.ml.core.functions.CrossEntropyLoss;
 import org.neo4j.gds.ml.core.functions.ElementSum;
+import org.neo4j.gds.ml.core.functions.FocalLoss;
 import org.neo4j.gds.ml.core.functions.L2NormSquared;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Scalar;
@@ -46,12 +47,16 @@ public class MLPClassifierObjective implements Objective<MLPClassifierData> {
 
     private final double penalty;
 
+    private final double focusWeight;
 
-    public MLPClassifierObjective(MLPClassifier classifier, Features features, HugeIntArray labels, double penalty) {
+
+    public MLPClassifierObjective(MLPClassifier classifier, Features features, HugeIntArray labels, double penalty, double focusWeight
+    ) {
         this.classifier = classifier;
         this.features = features;
         this.labels = labels;
         this.penalty = penalty;
+        this.focusWeight = focusWeight;
     }
 
     @Override
@@ -73,10 +78,14 @@ public class MLPClassifierObjective implements Objective<MLPClassifierData> {
         var batchLabels = batchLabelVector(batch);
         var batchFeatures = Objective.batchFeatureMatrix(batch, features);
         var predictions = classifier.predictionsVariable(batchFeatures);
-        return new CrossEntropyLoss(
-            predictions,
-            batchLabels
-        );
+        if (focusWeight == 0) {
+            return new CrossEntropyLoss(
+                predictions,
+                batchLabels
+            );
+        } else {
+            return new FocalLoss(predictions, batchLabels, focusWeight);
+        }
     }
 
     ConstantScale<Scalar> penaltyForBatch(Batch batch, long trainSize) {

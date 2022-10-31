@@ -24,19 +24,4 @@ include::partial$/machine-learning/training-methods/gradient-descent-config-tuni
 
 include::partial$/machine-learning/training-methods/penalty-config-tuning.adoc[leveloffset =+ 1]
 
-=== Focus weight
-
-This parameter introduces the concept of _focal loss_, studied in https://arxiv.org/pdf/1708.02002v2.pdf[Focal Loss for Dense Object Detection], to the loss function of the logistic regression model.
-When `focusWeight` is a value greater than zero, the loss function changes from standard Cross-Entropy Loss to Focal Loss, defined as:
-
-image::equations/focal-loss.svg[align="center"]
-
-where `p~t~` denotes the probability of the true class.
-The `focusWeight` parameter is the exponent noted as Greek letter gamma.
-
-Increasing `focusWeight` will guide the model towards trying to fit "hard" misclassified examples.
-A hard misclassified example is an example for which the model has a low predicted probability for the true class.
-In the above equation, the loss will be exponentially higher for low-true-class-probability examples, thus tuning the model towards trying to fit them, at the expense of potentially being less confident on "easy" examples.
-
-In class-imbalanced datasets, the minority class(es) are typically harder to classify correctly.
-Read more about class imbalance for Link Prediction in xref:machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-classimbalance[Class Imbalance].
+include::partial$/machine-learning/training-methods/focus-weight-config.adoc[leveloffset =+ 1]
