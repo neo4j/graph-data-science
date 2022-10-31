@@ -19,95 +19,21 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgoBaseProcTest;
-import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.ImmutableRelationshipProjections;
-import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.RelationshipProjection;
-import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.graphdb.GraphDatabaseService;
 
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
-class HashGNNMutateProcTest extends BaseProcTest implements
-    AlgoBaseProcTest<HashGNN, HashGNNMutateConfig, HashGNN.HashGNNResult>,
-    MutateNodePropertyTest<HashGNN, HashGNNMutateConfig, HashGNN.HashGNNResult>,
-    MemoryEstimateTest<HashGNN, HashGNNMutateConfig, HashGNN.HashGNNResult> {
-
-    @Neo4jGraph
-    private static final String DB_CYPHER =
-        "CREATE" +
-        "  (a:N {f1: 1, f2: [0.0, 0.0]})" +
-        ", (b:N {f1: 0, f2: [1.0, 0.0]})" +
-        ", (c:N {f1: 0, f2: [0.0, 1.0]})" +
-        ", (b)-[:R1]->(a)" +
-        ", (b)-[:R2]->(c)";
-
-    @BeforeEach
-    void setupWritePropertiesProc() throws Exception {
-        registerProcedures(
-            GraphProjectProc.class,
-            GraphWriteNodePropertiesProc.class
-        );
-    }
-
-    @Override
-    public Class<? extends AlgoBaseProc<HashGNN, HashGNN.HashGNNResult, HashGNNMutateConfig, ?>> getProcedureClazz() {
-        return HashGNNMutateProc.class;
-    }
-
-    @Override
-    public GraphDatabaseService graphDb() {
-        return db;
-    }
-
-    @Override
-    public HashGNNMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return HashGNNMutateConfig.of(mapWrapper);
-    }
-
-    @Override
-    public RelationshipProjections relationshipProjections() {
-        return ImmutableRelationshipProjections.of(Map.of(
-            RelationshipType.of("R1"), RelationshipProjection.of("R1", Orientation.NATURAL),
-            RelationshipType.of("R2"), RelationshipProjection.of("R2", Orientation.NATURAL)
-        ));
-    }
+class HashGNNMutateProcTest extends HashGNNProcTest implements
+    MutateNodePropertyTest<HashGNN, HashGNNMutateConfig, HashGNN.HashGNNResult> {
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper userInput) {
-        var minimalConfig = userInput
-            .withBoolean("heterogeneous", true)
-            .withNumber("iterations", 2)
-            .withNumber("embeddingDensity", 2)
-            .withNumber("randomSeed", 42L)
-            .withEntry("featureProperties", List.of("f1", "f2"));
+        var minimalConfig = super.createMinimalConfig(userInput);
 
         if (!minimalConfig.containsKey("mutateProperty")) {
             return minimalConfig.withString("mutateProperty", "embedding");
         }
         return minimalConfig;
-    }
-
-    @Override
-    public void assertResultEquals(HashGNN.HashGNNResult result1, HashGNN.HashGNNResult result2) {
-        assertThat(result1.embeddings().size()).isEqualTo(result2.embeddings().size());
-        for (int i = 0; i < result1.embeddings().size(); i++) {
-            assertThat(result1.embeddings().get(i)).containsExactly(result2.embeddings().get(i));
-        }
     }
 
     @Override
@@ -118,11 +44,6 @@ class HashGNNMutateProcTest extends BaseProcTest implements
     @Override
     public ValueType mutatePropertyType() {
         return ValueType.DOUBLE_ARRAY;
-    }
-
-    @Override
-    public List<String> nodeProperties() {
-        return List.of("f1", "f2");
     }
 
     @Override
