@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.compat;
 
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.kernel.internal.Version;
 
 import java.util.Objects;
@@ -51,6 +52,21 @@ public enum Neo4jVersion {
             default:
                 throw new IllegalArgumentException("Unexpected value: " + this.name() + " (sad java 😞)");
         }
+    }
+
+    public MajorMinorVersion semanticVersion() {
+        if (this == V_Dev) {
+            return ImmutableMajorMinorVersion.of(5, 2);
+        }
+
+        String version = toString();
+        var subVersions = version.split("\\.");
+
+        if (subVersions.length < 2) {
+            throw new IllegalStateException("Cannot derive version from " + version);
+        }
+
+        return ImmutableMajorMinorVersion.of(Integer.parseInt(subVersions[0]), Integer.parseInt(subVersions[1]));
     }
 
     public static Neo4jVersion findNeo4jVersion() {
@@ -108,5 +124,11 @@ public enum Neo4jVersion {
             default:
                 throw new UnsupportedOperationException("Cannot run on Neo4j Version " + version);
         }
+    }
+
+    @ValueClass
+    public interface MajorMinorVersion {
+        int major();
+        int minor();
     }
 }
