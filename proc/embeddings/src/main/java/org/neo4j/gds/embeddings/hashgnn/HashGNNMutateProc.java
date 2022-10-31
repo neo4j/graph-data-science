@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.hashgnn;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
-import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
@@ -36,13 +35,12 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.embeddings.hashgnn.HashGNNCompanion.DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.alpha.hashgnn.mutate", description = HashGNNMutateProc.DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.alpha.hashgnn.mutate", description = DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class HashGNNMutateProc extends MutatePropertyProc<HashGNN, HashGNN.HashGNNResult, HashGNNMutateProc.MutateResult, HashGNNMutateConfig> {
-
-    public static final String DESCRIPTION = "HashGNN creates node embeddings by hashing and message passing.";
 
     @Procedure(value = "gds.alpha.hashgnn.mutate", mode = READ)
     @Description(DESCRIPTION)
@@ -68,20 +66,7 @@ public class HashGNNMutateProc extends MutatePropertyProc<HashGNN, HashGNN.HashG
 
     @Override
     protected NodePropertyValues nodeProperties(ComputationResult<HashGNN, HashGNN.HashGNNResult, HashGNNMutateConfig> computationResult) {
-        var nodeCount = computationResult.graph().nodeCount();
-        var embeddings = computationResult.result().embeddings();
-
-        return new DoubleArrayNodePropertyValues() {
-            @Override
-            public double[] doubleArrayValue(long nodeId) {
-                return embeddings.get(nodeId);
-            }
-
-            @Override
-            public long size() {
-                return nodeCount;
-            }
-        };
+        return HashGNNCompanion.getNodeProperties(computationResult);
     }
 
     @Override
