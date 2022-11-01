@@ -23,14 +23,15 @@ import org.neo4j.kernel.internal.Version;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public enum Neo4jVersion {
     V_4_3,
     V_4_4,
     V_5_0,
     V_5_0_drop90,
-    V_5_1;
+    V_5_1,
+    V_5_2;
 
     @Override
     public String toString() {
@@ -45,6 +46,8 @@ public enum Neo4jVersion {
                 return "5.0.0-drop09.0";
             case V_5_1:
                 return "5.1";
+            case V_5_2:
+                return "5.2";
             default:
                 throw new IllegalArgumentException("Unexpected value: " + this.name() + " (sad java 😞)");
         }
@@ -83,21 +86,40 @@ public enum Neo4jVersion {
             return Neo4jVersion.V_5_0_drop90;
         }
 
-        var majorVersion = Pattern.compile("[.-]")
+        var versionSegments = Pattern.compile("[.-]")
             .splitAsStream(version)
             .limit(2)
-            .collect(Collectors.joining("."));
-        switch (majorVersion) {
-            case "4.3":
+            .mapToInt(v -> {
+                try {
+                    return Integer.parseInt(v);
+                } catch (NumberFormatException notANumber) {
+                    return -1;
+                }
+            });
+
+        var majorMinorVersion = IntStream.concat(versionSegments, IntStream.of(-1, -1))
+            .limit(2)
+            .toArray();
+
+        var majorVersion = majorMinorVersion[0];
+        var minorVersion = majorMinorVersion[1];
+
+        if (majorVersion == 4) {
+            if (minorVersion == 3) {
                 return Neo4jVersion.V_4_3;
-            case "4.4":
+            } else if (minorVersion == 4) {
                 return Neo4jVersion.V_4_4;
-            case "5.0":
+            }
+        } else if (majorVersion == 5) {
+            if (minorVersion == 0) {
                 return Neo4jVersion.V_5_0;
-            case "5.1":
+            } else if (minorVersion == 1) {
                 return Neo4jVersion.V_5_1;
-            default:
-                throw new UnsupportedOperationException("Cannot run on Neo4j Version " + version);
+            } else if (minorVersion == 2) {
+                return Neo4jVersion.V_5_2;
+            }
         }
+
+        throw new UnsupportedOperationException("Cannot run on Neo4j Version " + version);
     }
 }
