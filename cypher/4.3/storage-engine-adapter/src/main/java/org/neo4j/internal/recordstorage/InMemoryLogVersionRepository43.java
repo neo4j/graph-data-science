@@ -20,8 +20,25 @@
 package org.neo4j.internal.recordstorage;
 
 import org.neo4j.io.pagecache.context.CursorContext;
+import org.neo4j.storageengine.api.LogVersionRepository;
 
-public class InMemoryLogVersionRepository43 extends AbstractInMemoryLogVersionRepository {
+import java.util.concurrent.atomic.AtomicLong;
+
+public class InMemoryLogVersionRepository43 implements LogVersionRepository {
+
+    private final AtomicLong logVersion;
+    private final AtomicLong checkpointLogVersion;
+
+    public InMemoryLogVersionRepository43() {
+        this(0,0);
+    }
+
+    private InMemoryLogVersionRepository43(long initialLogVersion, long initialCheckpointLogVersion) {
+        this.logVersion = new AtomicLong();
+        this.checkpointLogVersion = new AtomicLong();
+        this.logVersion.set(initialLogVersion);
+        this.checkpointLogVersion.set(initialCheckpointLogVersion);
+    }
 
     @Override
     public void setCurrentLogVersion(long version, CursorContext cursorContext) {
@@ -41,5 +58,15 @@ public class InMemoryLogVersionRepository43 extends AbstractInMemoryLogVersionRe
     @Override
     public long incrementAndGetCheckpointLogVersion(CursorContext cursorContext) {
         return this.checkpointLogVersion.incrementAndGet();
+    }
+
+    @Override
+    public long getCurrentLogVersion() {
+        return this.logVersion.get();
+    }
+
+    @Override
+    public long getCheckpointLogVersion() {
+        return this.checkpointLogVersion.get();
     }
 }

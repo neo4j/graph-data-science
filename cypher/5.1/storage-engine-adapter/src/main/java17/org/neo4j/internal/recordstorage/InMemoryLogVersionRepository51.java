@@ -19,7 +19,25 @@
  */
 package org.neo4j.internal.recordstorage;
 
-public class InMemoryLogVersionRepository51 extends AbstractInMemoryLogVersionRepository {
+import org.neo4j.storageengine.api.LogVersionRepository;
+
+import java.util.concurrent.atomic.AtomicLong;
+
+public final class InMemoryLogVersionRepository51 implements LogVersionRepository {
+
+    private final AtomicLong logVersion;
+    private final AtomicLong checkpointLogVersion;
+
+    public InMemoryLogVersionRepository51() {
+        this(0, 0);
+    }
+
+    private InMemoryLogVersionRepository51(long initialLogVersion, long initialCheckpointLogVersion) {
+        this.logVersion = new AtomicLong();
+        this.checkpointLogVersion = new AtomicLong();
+        this.logVersion.set(initialLogVersion);
+        this.checkpointLogVersion.set(initialCheckpointLogVersion);
+    }
 
     @Override
     public void setCurrentLogVersion(long version) {
@@ -39,5 +57,15 @@ public class InMemoryLogVersionRepository51 extends AbstractInMemoryLogVersionRe
     @Override
     public long incrementAndGetCheckpointLogVersion() {
         return this.checkpointLogVersion.incrementAndGet();
+    }
+
+    @Override
+    public long getCurrentLogVersion() {
+        return this.logVersion.get();
+    }
+
+    @Override
+    public long getCheckpointLogVersion() {
+        return this.checkpointLogVersion.get();
     }
 }

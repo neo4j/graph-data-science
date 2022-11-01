@@ -28,14 +28,14 @@ import org.neo4j.token.api.NamedToken;
 
 import java.util.HashSet;
 
-class TokenManager implements CypherGraphStore.StateVisitor {
+public class TokenManager implements CypherGraphStore.StateVisitor {
 
     private final TokenHolders tokenHolders;
     private final InMemoryTransactionStateVisitor transactionStateVisitor;
     private final CypherGraphStore graphStore;
     private final CommandCreationContext commandCreationContext;
 
-    TokenManager(
+    public TokenManager(
         TokenHolders tokenHolders,
         InMemoryTransactionStateVisitor transactionStateVisitor,
         CypherGraphStore graphStore,

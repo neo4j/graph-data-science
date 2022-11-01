@@ -22,7 +22,6 @@ package org.neo4j.gds.storageengine;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.junit.annotation.EnableForNeo4jVersion;
-import org.neo4j.internal.recordstorage.AbstractInMemoryStorageEngineFactory;
 import org.neo4j.storageengine.api.StorageEngineFactory;
 
 import java.util.ServiceLoader;
@@ -40,7 +39,6 @@ class InMemoryStorageEngineFactoryTest {
             .stream();
 
         var names = storageEngines
-            .filter(factory -> !factory.type().equals(AbstractInMemoryStorageEngineFactory.class))
             .map(factory -> factory.get().name())
             .collect(Collectors.toList());
 

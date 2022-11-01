@@ -22,14 +22,13 @@ package org.neo4j.gds.compat;
 import org.neo4j.common.Edition;
 import org.neo4j.configuration.Config;
 import org.neo4j.counts.CountsAccessor;
-import org.neo4j.counts.CountsStore;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.recordstorage.AbstractInMemoryRelationshipScanCursor;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.storageengine.api.CommandCreationContext;
+import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.storageengine.api.StorageEntityCursor;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.storageengine.api.StorageReader;
@@ -38,12 +37,12 @@ import org.neo4j.token.TokenHolders;
 
 public interface StorageEngineProxyApi {
 
-    InMemoryStorageEngineBuilder<? extends AbstractInMemoryStorageEngine> inMemoryStorageEngineBuilder(
-        DatabaseLayout databaseLayout,
-        TokenHolders tokenHolders
-    );
-
-    CountsStore inMemoryCountsStore(GraphStore graphStore, TokenHolders tokenHolders);
+//    InMemoryStorageEngineBuilder<? extends org.neo4j.gds.compat._51.InMemoryStorageEngineImpl> inMemoryStorageEngineBuilder(
+//        DatabaseLayout databaseLayout,
+//        TokenHolders tokenHolders
+//    );
+//
+//    CountsStore inMemoryCountsStore(GraphStore graphStore, TokenHolders tokenHolders);
 
     CommandCreationContext inMemoryCommandCreationContext();
 
@@ -64,6 +63,8 @@ public interface StorageEngineProxyApi {
         String dbName,
         Config config
     );
+
+    StorageEngine createInMemoryStorageEngine(DatabaseLayout databaseLayout, TokenHolders tokenHolders);
 
     GraphDatabaseService startAndGetInMemoryDatabase(DatabaseManagementService dbms, String dbName);
 

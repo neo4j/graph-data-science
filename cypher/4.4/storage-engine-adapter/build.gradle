@@ -7,6 +7,8 @@ group = 'org.neo4j.gds'
 dependencies {
     implementation project(':core')
     implementation project(':storage-engine-adapter-api')
+    implementation project(':config-api')
+    implementation project(':string-formatting')
 
     annotationProcessor project(':annotations')
     annotationProcessor group: 'org.immutables', name: 'value',              version: ver.'immutables'

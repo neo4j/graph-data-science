@@ -19,31 +19,44 @@
  */
 package org.neo4j.gds.compat._51;
 
+import org.neo4j.counts.CountsAccessor;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.exceptions.KernelException;
-import org.neo4j.function.TriFunction;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.compat.AbstractInMemoryStorageEngine;
-import org.neo4j.gds.compat.InMemoryStorageEngineBuilder;
+import org.neo4j.gds.compat.TokenManager;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.storageengine.InMemoryDatabaseCreationCatalog;
 import org.neo4j.gds.storageengine.InMemoryTransactionStateVisitor;
 import org.neo4j.internal.diagnostics.DiagnosticsLogger;
+import org.neo4j.internal.recordstorage.InMemoryStorageReader51;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.tracing.DatabaseFlushEvent;
 import org.neo4j.kernel.KernelVersion;
 import org.neo4j.kernel.impl.store.stats.StoreEntityCounters;
+import org.neo4j.kernel.lifecycle.Lifecycle;
+import org.neo4j.kernel.lifecycle.LifecycleAdapter;
+import org.neo4j.lock.LockGroup;
+import org.neo4j.lock.LockService;
 import org.neo4j.lock.LockTracer;
 import org.neo4j.lock.ResourceLocker;
 import org.neo4j.logging.InternalLog;
+import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.storageengine.api.CommandCreationContext;
+import org.neo4j.storageengine.api.CommandStream;
+import org.neo4j.storageengine.api.CommandsToApply;
+import org.neo4j.storageengine.api.IndexUpdateListener;
 import org.neo4j.storageengine.api.MetadataProvider;
 import org.neo4j.storageengine.api.StorageCommand;
+import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.storageengine.api.StorageEngineIndexingBehaviour;
 import org.neo4j.storageengine.api.StorageLocks;
 import org.neo4j.storageengine.api.StorageReader;
+import org.neo4j.storageengine.api.StoreFileMetadata;
 import org.neo4j.storageengine.api.StoreId;
+import org.neo4j.storageengine.api.TransactionApplicationMode;
 import org.neo4j.storageengine.api.cursor.StoreCursors;
 import org.neo4j.storageengine.api.txstate.ReadableTransactionState;
 import org.neo4j.storageengine.api.txstate.TxStateVisitor;
@@ -51,29 +64,57 @@ import org.neo4j.token.TokenHolders;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
-public final class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-    private InMemoryStorageEngineImpl(
+public final class InMemoryStorageEngineImpl implements StorageEngine {
+
+    private final MetadataProvider metadataProvider;
+    private final CypherGraphStore graphStore;
+    private final DatabaseLayout databaseLayout;
+    private final InMemoryTransactionStateVisitor txStateVisitor;
+    private final CommandCreationContext commandCreationContext;
+    private final TokenManager tokenManager;
+    private final CountsStore countsStore;
+
+    InMemoryStorageEngineImpl(
         DatabaseLayout databaseLayout,
-        TokenHolders tokenHolders,
-        BiFunction<GraphStore, TokenHolders, CountsStore> countsStoreFn,
-        BiFunction<CypherGraphStore, TokenHolders, InMemoryTransactionStateVisitor> txStateVisitorFn,
-        MetadataProvider metadataProvider,
-        Supplier<CommandCreationContext> commandCreationContextSupplier,
-        TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn
+        TokenHolders tokenHolders
     ) {
-        super(
-            databaseLayout,
+        this.databaseLayout = databaseLayout;
+        this.graphStore = getGraphStoreFromCatalog(databaseLayout.getDatabaseName());
+        this.txStateVisitor = new InMemoryTransactionStateVisitor(graphStore, tokenHolders);
+        this.commandCreationContext = new InMemoryCommandCreationContextImpl();
+        this.tokenManager = new TokenManager(
             tokenHolders,
-            countsStoreFn,
-            txStateVisitorFn,
-            metadataProvider,
-            commandCreationContextSupplier,
-            storageReaderFn
+            InMemoryStorageEngineImpl.this.txStateVisitor,
+            InMemoryStorageEngineImpl.this.graphStore,
+            newCommandCreationContext(EmptyMemoryTracker.INSTANCE)
         );
+        InMemoryStorageEngineImpl.this.graphStore.initialize(tokenHolders);
+
+        this.countsStore = new InMemoryCountsStoreImpl(graphStore, tokenHolders);
+        this.metadataProvider = new InMemoryMetaDataProviderImpl();
+    }
+
+    private static CypherGraphStore getGraphStoreFromCatalog(String databaseName) {
+        var graphName = InMemoryDatabaseCreationCatalog.getRegisteredDbCreationGraphName(databaseName);
+        return (CypherGraphStore) GraphStoreCatalog.getAllGraphStores()
+            .filter(graphStoreWithUserNameAndConfig -> graphStoreWithUserNameAndConfig
+                .config()
+                .graphName()
+                .equals(graphName))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException(formatWithLocale(
+                "No graph with name `%s` was found in GraphStoreCatalog. Available graph names are %s",
+                graphName,
+                GraphStoreCatalog.getAllGraphStores()
+                    .map(GraphStoreCatalog.GraphStoreWithUserNameAndConfig::config)
+                    .map(GraphProjectConfig::graphName)
+                    .collect(Collectors.toList())
+            )))
+            .graphStore();
     }
 
     @Override
@@ -134,7 +175,7 @@ public final class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngi
         StoreCursors storeCursors,
         MemoryTracker memoryTracker
     ) throws KernelException {
-        super.createCommands(state);
+        state.accept(txStateVisitor);
     }
 
     @Override
@@ -156,27 +197,76 @@ public final class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngi
         return null;
     }
 
-    public static final class Builder extends InMemoryStorageEngineBuilder<InMemoryStorageEngineImpl> {
-        public Builder(
-            DatabaseLayout databaseLayout,
-            TokenHolders tokenHolders,
-            MetadataProvider metadataProvider
-        ) {
-            super(databaseLayout, tokenHolders, metadataProvider);
-        }
+    @Override
+    public StorageReader newReader() {
+        return new InMemoryStorageReader51(graphStore, tokenManager.tokenHolders(), countsStore);
+    }
 
-        @Override
-        public InMemoryStorageEngineImpl build() {
-            return new InMemoryStorageEngineImpl(
-                databaseLayout,
-                tokenHolders,
-                countsStoreFn,
-                txStateVisitorFn,
-                metadataProvider,
-                commandCreationContextSupplier,
-                storageReaderFn
-            );
-        }
+    @Override
+    public void addIndexUpdateListener(IndexUpdateListener listener) {
+
+    }
+
+    @Override
+    public void apply(CommandsToApply batch, TransactionApplicationMode mode) {
+    }
+
+    @Override
+    public void init() {
+    }
+
+    @Override
+    public void start() {
+
+    }
+
+    @Override
+    public void stop() {
+        shutdown();
+    }
+
+    @Override
+    public void shutdown() {
+        InMemoryDatabaseCreationCatalog.removeDatabaseEntry(databaseLayout.getDatabaseName());
+    }
+
+    @Override
+    public void listStorageFiles(
+        Collection<StoreFileMetadata> atomic, Collection<StoreFileMetadata> replayable
+    ) {
+
+    }
+
+    @Override
+    public Lifecycle schemaAndTokensLifecycle() {
+        return new LifecycleAdapter() {
+            @Override
+            public void init() {
+
+            }
+        };
+    }
+
+    @Override
+    public CountsAccessor countsAccessor() {
+        return countsStore;
+    }
+
+    @Override
+    public MetadataProvider metadataProvider() {
+        return metadataProvider;
+    }
+
+    @Override
+    public CommandCreationContext newCommandCreationContext(MemoryTracker memoryTracker) {
+        return commandCreationContext;
+    }
+
+    @Override
+    public void lockRecoveryCommands(
+        CommandStream commands, LockService lockService, LockGroup lockGroup, TransactionApplicationMode mode
+    ) {
+
     }
 
     @Override

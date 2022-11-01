@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat;
+package org.neo4j.gds.compat._43;
 
 import org.neo4j.annotations.documented.ReporterFactory;
 import org.neo4j.counts.CountsStore;
@@ -25,17 +25,33 @@ import org.neo4j.counts.CountsVisitor;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.io.pagecache.context.CursorContext;
+import org.neo4j.memory.MemoryTracker;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.token.api.TokenNotFoundException;
 
-public abstract class AbstractInMemoryCountStore implements CountsStore {
+public class InMemoryCountsStore implements CountsStore {
 
     private final GraphStore graphStore;
     private final TokenHolders tokenHolders;
 
-    public AbstractInMemoryCountStore(GraphStore graphStore, TokenHolders tokenHolders) {
+    InMemoryCountsStore(
+        GraphStore graphStore,
+        TokenHolders tokenHolders
+    ) {
         this.graphStore = graphStore;
         this.tokenHolders = tokenHolders;
+    }
+
+    @Override
+    public void start(
+        CursorContext cursorContext, MemoryTracker memoryTracker
+    ) {
+
+    }
+
+    @Override
+    public void checkpoint(CursorContext cursorContext) {
+
     }
 
     @Override
