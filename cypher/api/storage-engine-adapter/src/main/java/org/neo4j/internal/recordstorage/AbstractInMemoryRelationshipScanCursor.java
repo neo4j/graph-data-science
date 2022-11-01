@@ -21,7 +21,6 @@ package org.neo4j.internal.recordstorage;
 
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.storageengine.InMemoryRelationshipCursor;
-import org.neo4j.internal.recordstorage.AbstractInMemoryStorageReader.AbstractAllRelationshipScan;
 import org.neo4j.storageengine.api.AllRelationshipsScan;
 import org.neo4j.storageengine.api.RelationshipSelection;
 import org.neo4j.storageengine.api.StorageRelationshipScanCursor;
@@ -76,7 +75,7 @@ public abstract class AbstractInMemoryRelationshipScanCursor extends InMemoryRel
         }
 
         highMark = maxRelationshipId;
-        return ((AbstractAllRelationshipScan) scan).scanBatch(sizeHint, this);
+        return ((AbstractInMemoryAllRelationshipScan) scan).scanBatch(sizeHint, this);
     }
 
     public boolean scanRange(long start, long stop) {

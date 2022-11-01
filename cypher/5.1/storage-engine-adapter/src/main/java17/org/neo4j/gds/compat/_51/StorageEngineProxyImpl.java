@@ -23,9 +23,7 @@ import org.neo4j.common.Edition;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseInternalSettings;
 import org.neo4j.counts.CountsAccessor;
-import org.neo4j.counts.CountsStore;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryNodeCursor;
 import org.neo4j.gds.compat.AbstractInMemoryNodePropertyCursor;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipPropertyCursor;
@@ -42,6 +40,7 @@ import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.RelationshipSelection;
+import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.storageengine.api.StorageEntityCursor;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.storageengine.api.StorageReader;
@@ -51,25 +50,6 @@ import org.neo4j.token.TokenHolders;
 import static org.neo4j.configuration.GraphDatabaseSettings.db_format;
 
 public class StorageEngineProxyImpl implements StorageEngineProxyApi {
-
-    @Override
-    public InMemoryStorageEngineImpl.Builder inMemoryStorageEngineBuilder(
-        DatabaseLayout databaseLayout,
-        TokenHolders tokenHolders
-    ) {
-        return new InMemoryStorageEngineImpl.Builder(
-            databaseLayout,
-            tokenHolders,
-            new InMemoryMetaDataProviderImpl()
-        );
-    }
-
-    @Override
-    public CountsStore inMemoryCountsStore(
-        GraphStore graphStore, TokenHolders tokenHolders
-    ) {
-        return new InMemoryCountsStoreImpl(graphStore, tokenHolders);
-    }
 
     @Override
     public CommandCreationContext inMemoryCommandCreationContext() {
@@ -94,6 +74,11 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
         CypherGraphStore graphStore, TokenHolders tokenHolders, CountsAccessor counts
     ) {
         return new InMemoryStorageReader51(graphStore, tokenHolders, counts);
+    }
+
+    @Override
+    public StorageEngine createInMemoryStorageEngine(DatabaseLayout databaseLayout, TokenHolders tokenHolders) {
+        return new InMemoryStorageEngineImpl(databaseLayout, tokenHolders);
     }
 
     @Override

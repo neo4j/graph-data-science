@@ -19,13 +19,28 @@
  */
 package org.neo4j.gds.compat._43;
 
-import org.neo4j.gds.compat.AbstractInMemoryCommandCreationContext;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.lock.LockTracer;
 import org.neo4j.lock.ResourceLocker;
+import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.storageengine.api.txstate.ReadableTransactionState;
 
-public class InMemoryCommandCreationContextImpl extends AbstractInMemoryCommandCreationContext {
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+
+public class InMemoryCommandCreationContextImpl implements CommandCreationContext {
+
+    private final AtomicLong schemaTokens;
+    private final AtomicInteger propertyTokens;
+    private final AtomicInteger labelTokens;
+    private final AtomicInteger typeTokens;
+
+    InMemoryCommandCreationContextImpl() {
+        this.schemaTokens = new AtomicLong(0);
+        this.propertyTokens = new AtomicInteger(0);
+        this.labelTokens = new AtomicInteger(0);
+        this.typeTokens = new AtomicInteger(0);
+    }
 
     @Override
     public void acquireRelationshipCreationLock(
@@ -60,6 +75,36 @@ public class InMemoryCommandCreationContextImpl extends AbstractInMemoryCommandC
 
     @Override
     public void initialize(CursorContext cursorContext) {
+
+    }
+
+    @Override
+    public long reserveNode() {
+        throw new UnsupportedOperationException("Creating nodes is not supported");
+    }
+
+    @Override
+    public long reserveSchema() {
+        return schemaTokens.getAndIncrement();
+    }
+
+    @Override
+    public int reserveLabelTokenId() {
+        return labelTokens.getAndIncrement();
+    }
+
+    @Override
+    public int reservePropertyKeyTokenId() {
+        return propertyTokens.getAndIncrement();
+    }
+
+    @Override
+    public int reserveRelationshipTypeTokenId() {
+        return typeTokens.getAndIncrement();
+    }
+
+    @Override
+    public void close() {
 
     }
 }

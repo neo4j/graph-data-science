@@ -22,15 +22,14 @@ package org.neo4j.gds.compat;
 import org.neo4j.common.Edition;
 import org.neo4j.configuration.Config;
 import org.neo4j.counts.CountsAccessor;
-import org.neo4j.counts.CountsStore;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.storageengine.InMemoryDatabaseCreationCatalog;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.recordstorage.AbstractInMemoryRelationshipScanCursor;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.storageengine.api.CommandCreationContext;
+import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.storageengine.api.StorageEntityCursor;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.storageengine.api.StorageReader;
@@ -45,17 +44,6 @@ public final class StorageEngineProxy {
     );
 
     private StorageEngineProxy() {}
-
-    public static InMemoryStorageEngineBuilder<? extends AbstractInMemoryStorageEngine> inMemoryStorageEngineBuilder(
-        DatabaseLayout databaseLayout,
-        TokenHolders tokenHolders
-    ) {
-        return IMPL.inMemoryStorageEngineBuilder(databaseLayout, tokenHolders);
-    }
-
-    public static CountsStore inMemoryCountsStore(GraphStore graphStore, TokenHolders tokenHolders) {
-        return IMPL.inMemoryCountsStore(graphStore, tokenHolders);
-    }
 
     public static CommandCreationContext inMemoryCommandCreationContext() {
         return IMPL.inMemoryCommandCreationContext();
@@ -73,6 +61,13 @@ public final class StorageEngineProxy {
         CypherGraphStore graphStore, TokenHolders tokenHolders, CountsAccessor counts
     ) {
         return IMPL.inMemoryStorageReader(graphStore, tokenHolders, counts);
+    }
+
+    public static StorageEngine createInMemoryStorageEngine(
+        DatabaseLayout databaseLayout,
+        TokenHolders tokenHolders
+    ) {
+        return IMPL.createInMemoryStorageEngine(databaseLayout, tokenHolders);
     }
 
     public static void createInMemoryDatabase(

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._51;
+package org.neo4j.gds.compat._44;
 
 import org.neo4j.annotations.documented.ReporterFactory;
 import org.neo4j.counts.CountsStore;
@@ -25,20 +25,17 @@ import org.neo4j.counts.CountsVisitor;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.io.pagecache.context.CursorContext;
-import org.neo4j.io.pagecache.tracing.FileFlushEvent;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.storageengine.api.cursor.StoreCursors;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.token.api.TokenNotFoundException;
 
-import java.io.IOException;
-
-public class InMemoryCountsStoreImpl implements CountsStore {
+public class InMemoryCountsStore implements CountsStore {
 
     private final GraphStore graphStore;
     private final TokenHolders tokenHolders;
 
-    InMemoryCountsStoreImpl(
+    InMemoryCountsStore(
         GraphStore graphStore,
         TokenHolders tokenHolders
     ) {
@@ -54,7 +51,7 @@ public class InMemoryCountsStoreImpl implements CountsStore {
     }
 
     @Override
-    public void checkpoint(FileFlushEvent fileFlushEvent, CursorContext cursorContext) throws IOException {
+    public void checkpoint(CursorContext cursorContext) {
 
     }
 

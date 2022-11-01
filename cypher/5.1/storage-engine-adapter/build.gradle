@@ -27,6 +27,8 @@ if (ver.'neo4j'.startsWith('5.')) {
 
         implementation project(':core')
         implementation project(':storage-engine-adapter-api')
+        implementation project(':config-api')
+        implementation project(':string-formatting')
     }
 } else {
     multiRelease {
