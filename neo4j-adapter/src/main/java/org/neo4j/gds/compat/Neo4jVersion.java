@@ -29,8 +29,6 @@ import java.util.stream.IntStream;
 public enum Neo4jVersion {
     V_4_3,
     V_4_4,
-    V_5_0,
-    V_5_0_drop90,
     V_5_1,
     V_5_2,
     V_Dev;
@@ -42,10 +40,6 @@ public enum Neo4jVersion {
                 return "4.3";
             case V_4_4:
                 return "4.4";
-            case V_5_0:
-                return "5.0";
-            case V_5_0_drop90:
-                return "5.0.0-drop09.0";
             case V_5_1:
                 return "5.1";
             case V_5_2:
@@ -101,10 +95,6 @@ public enum Neo4jVersion {
     }
 
     static Neo4jVersion parse(String version) {
-        if ("5.0.0-drop09.0".equals(version)) {
-            return Neo4jVersion.V_5_0_drop90;
-        }
-
         var versionSegments = Pattern.compile("[.-]")
             .splitAsStream(version)
             .limit(2)
@@ -130,9 +120,7 @@ public enum Neo4jVersion {
                 return Neo4jVersion.V_4_4;
             }
         } else if (majorVersion == 5) {
-            if (minorVersion == 0) {
-                return Neo4jVersion.V_5_0;
-            } else if (minorVersion == 1) {
+            if (minorVersion == 1) {
                 return Neo4jVersion.V_5_1;
             } else if (minorVersion == 2) {
                 return Neo4jVersion.V_5_2;

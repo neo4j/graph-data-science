@@ -27,15 +27,12 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.gds.storageengine.CypherTest;
 import org.neo4j.token.api.NamedToken;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DisableForNeo4jVersion(Neo4jVersion.V_5_0_drop90)
 class InMemoryStorageEngineTest extends CypherTest {
 
     @Neo4jGraph

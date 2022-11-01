@@ -24,19 +24,12 @@ import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.gds.compat.StorageEngineProxyFactory;
 
-import java.util.Collection;
-import java.util.EnumSet;
-
 @ServiceProvider
 public class StorageEngineProxyFactoryImpl implements StorageEngineProxyFactory {
 
-    private static final Collection<Neo4jVersion> incompatibleVersions = EnumSet.of(
-        Neo4jVersion.V_5_0_drop90
-    );
-
     @Override
     public boolean canLoad(Neo4jVersion version) {
-        return incompatibleVersions.contains(version);
+        return false;
     }
 
     @Override
