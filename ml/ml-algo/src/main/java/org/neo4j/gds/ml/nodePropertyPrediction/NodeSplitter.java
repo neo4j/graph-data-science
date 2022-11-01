@@ -64,7 +64,7 @@ public final class NodeSplitter {
         HugeMergeSort.sort(allTrainingExamples, concurrency);
         allTrainingExamples.setAll(i -> toMappedId.applyAsLong(allTrainingExamples.get(i)));
 
-        ShuffleUtil.shuffleHugeLongArray(allTrainingExamples, createRandomDataGenerator(randomSeed));
+        ShuffleUtil.shuffleArray(allTrainingExamples, createRandomDataGenerator(randomSeed));
         var outerSplit = new FractionSplitter().split(ReadOnlyHugeLongArray.of(allTrainingExamples), 1 - testFraction);
 
         warnForSmallNodeSets(

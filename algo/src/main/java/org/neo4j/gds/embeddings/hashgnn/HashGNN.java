@@ -75,7 +75,7 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
             : List.of(graphCopy);
 
         var embeddingsB = config.binarizeFeatures().isPresent()
-            ? BinarizeTask.compute(graph, rangePartition, config, rng, randomSeed, progressTracker)
+            ? BinarizeTask.compute(graph, rangePartition, config, rng, progressTracker)
             : RawFeaturesTask.compute(config, rng, progressTracker, graph, rangePartition);
         int ambientDimension = config.binarizeFeatures().map(FeatureBinarizationConfig::dimension).orElseGet(() -> {
             var featureExtractors = FeatureExtraction.propertyExtractors(

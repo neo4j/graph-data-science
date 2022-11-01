@@ -26,12 +26,21 @@ import java.util.SplittableRandom;
 
 public final class ShuffleUtil {
 
-    public static void shuffleHugeLongArray(HugeLongArray data, SplittableRandom random) {
+    public static void shuffleArray(HugeLongArray data, SplittableRandom random) {
         for (long offset = 0; offset < data.size() - 1; offset++) {
             long swapWith = random.nextLong(offset, data.size());
             long tempValue = data.get(swapWith);
             data.set(swapWith, data.get(offset));
             data.set(offset, tempValue);
+        }
+    }
+
+    public static void shuffleArray(int[] data, SplittableRandom random) {
+        for (int offset = 0; offset < data.length - 1; offset++) {
+            int swapWith = random.nextInt(offset, data.length);
+            int tempValue = data[swapWith];
+            data[swapWith] = data[offset];
+            data[offset] = tempValue;
         }
     }
 

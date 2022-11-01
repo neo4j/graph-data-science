@@ -649,7 +649,7 @@ class FastRPTest extends BaseTest {
         secondMappedToOriginal.setAll(nodeId -> nodeId);
 
         var gen = ShuffleUtil.createRandomDataGenerator(Optional.of(42L));
-        ShuffleUtil.shuffleHugeLongArray(secondMappedToOriginal, gen);
+        ShuffleUtil.shuffleArray(secondMappedToOriginal, gen);
         var secondOriginalToMappedBuilder = HugeSparseLongArray.builder(nodeCount);
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
             secondOriginalToMappedBuilder.set(secondMappedToOriginal.get(nodeId), nodeId);

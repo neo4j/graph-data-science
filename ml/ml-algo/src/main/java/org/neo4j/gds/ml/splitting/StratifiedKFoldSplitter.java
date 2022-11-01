@@ -117,8 +117,8 @@ public class StratifiedKFoldSplitter {
         });
         return IntStream.range(0, k)
             .mapToObj(fold -> {
-                ShuffleUtil.shuffleHugeLongArray(trainSets[fold], random);
-                ShuffleUtil.shuffleHugeLongArray(testSets[fold], random);
+                ShuffleUtil.shuffleArray(trainSets[fold], random);
+                ShuffleUtil.shuffleArray(testSets[fold], random);
                 return TrainingExamplesSplit.of(
                     ReadOnlyHugeLongArray.of(trainSets[fold]),
                     ReadOnlyHugeLongArray.of(testSets[fold])

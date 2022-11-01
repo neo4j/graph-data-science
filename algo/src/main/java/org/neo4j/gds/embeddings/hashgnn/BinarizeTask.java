@@ -28,11 +28,11 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.features.FeatureConsumer;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.features.FeatureExtractor;
+import org.neo4j.gds.ml.util.ShuffleUtil;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
@@ -71,7 +71,6 @@ class BinarizeTask implements Runnable {
         List<Partition> partition,
         HashGNNConfig config,
         SplittableRandom rng,
-        long randomSeed,
         ProgressTracker progressTracker
     ) {
         progressTracker.logInfo("Starting binarization");
@@ -90,7 +89,7 @@ class BinarizeTask implements Runnable {
         );
 
         var inputDimension = FeatureExtraction.featureCount(featureExtractors);
-        var propertyEmbeddings = embedProperties(config, randomSeed, inputDimension);
+        var propertyEmbeddings = embedProperties(config, rng, inputDimension);
 
         var truncatedFeatures = HugeObjectArray.newArray(BitSet.class, graph.nodeCount());
 
@@ -114,21 +113,18 @@ class BinarizeTask implements Runnable {
         return truncatedFeatures;
     }
 
-    private static int[][] embedProperties(HashGNNConfig config, long randomSeed, int inputDimension) {
+    private static int[][] embedProperties(HashGNNConfig config, SplittableRandom rng, int inputDimension) {
         var binarizationConfig = config.binarizeFeatures().orElseThrow();
-        var rng = new Random(randomSeed);
-        var permutation = new ArrayList<Integer>(binarizationConfig.dimension());
-        for (int offset = 0; offset < binarizationConfig.dimension(); offset++) {
-            permutation.add(offset);
-        }
+        var permutation = new int[binarizationConfig.dimension()];
+        Arrays.setAll(permutation, i -> i);
 
         var propertyEmbeddings = new int[inputDimension][];
 
         for (int inputFeature = 0; inputFeature < inputDimension; inputFeature++) {
-            Collections.shuffle(permutation, rng);
+            ShuffleUtil.shuffleArray(permutation, rng);
             propertyEmbeddings[inputFeature] = new int[2 * binarizationConfig.densityLevel()];
             for (int ambientOffset = 0; ambientOffset < 2 * binarizationConfig.densityLevel(); ambientOffset++) {
-                propertyEmbeddings[inputFeature][ambientOffset] = permutation.get(ambientOffset);
+                propertyEmbeddings[inputFeature][ambientOffset] = permutation[ambientOffset];
             }
         }
         return propertyEmbeddings;
