@@ -26,6 +26,7 @@ import org.neo4j.kernel.internal.CustomVersionSetting;
 import org.neo4j.kernel.internal.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -41,13 +42,29 @@ class Neo4jVersionTest {
         "5.0.0, V_5_0",
         "5.0.0-drop09.0, V_5_0_drop90",
         "5.1.0, V_5_1",
-        "5.0.0-dev, V_Dev",
-        "5.1.0-dev, V_Dev",
-        "5.2.0-dev, V_Dev",
-        "dev, V_Dev",
+        "5.2.0, V_5_2",
+        "5.3.0, V_Dev",
+        "5.0.0-dev, V_5_0",
+        "5.1.0-dev, V_5_1",
+        "5.2.0-dev, V_5_2",
     })
     void testParse(String input, Neo4jVersion expected) {
         assertEquals(expected.name(), Neo4jVersion.parse(input).name());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "dev",
+        "5.dev",
+        "dev.5",
+        "dev.5.dev.1",
+        "5",
+        "6.0.0",
+    })
+    void testParseInvalid(String input) {
+        assertThatThrownBy(() -> Neo4jVersion.parse(input))
+            .isInstanceOf(UnsupportedOperationException.class)
+            .hasMessage("Cannot run on Neo4j Version " + input);
     }
 
     @Test
@@ -63,7 +80,7 @@ class Neo4jVersionTest {
         "4.4.12, 4, 4",
         "5.0.0-drop09.0, 5, 0",
         "5.1.0, 5, 1",
-        "dev, 5, 2",
+        "5.2.0, 5, 2",
     })
     void semanticVersion(String input, int expectedMajor, int expectedMinor) {
         Neo4jVersion version = Neo4jVersion.parse(input);
