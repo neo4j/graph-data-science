@@ -21,6 +21,7 @@ package org.neo4j.gds.leiden;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.extension.GdlExtension;
@@ -73,7 +74,7 @@ class RefinementPhaseTest {
         var nodeVolumes = HugeDoubleArray.of(1, 1, 1, 1, 1, 1, 1, 1);
         var communityVolumes = HugeDoubleArray.of(2, 0, 3, 0, 0, 0, 0, 3);
         var refinement = RefinementPhase.create(graph, localPhaseCommunities,
-            nodeVolumes, communityVolumes, 1.0, 0.01, 19L
+            nodeVolumes, communityVolumes, 1.0, 0.01, 19L, 1, Pools.DEFAULT
         );
         var refinementResult = refinement.run();
         var communities = refinementResult.communities();

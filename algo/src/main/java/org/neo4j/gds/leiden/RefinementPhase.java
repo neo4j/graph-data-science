@@ -22,26 +22,32 @@ package org.neo4j.gds.leiden;
 import com.carrotsearch.hppc.BitSet;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
 
 final class RefinementPhase {
 
     private final Graph workingGraph;
     private final HugeLongArray originalCommunities;
-
     private final HugeDoubleArray nodeVolumes;
     private final HugeDoubleArray communityVolumes;
     private final HugeDoubleArray communityVolumesAfterMerge;
     private final double gamma;
     private final double theta; // randomness
-    private final HugeDoubleArray relationShipsBetweenCommunities;
+    private final HugeDoubleArray relationshipsBetweenCommunities;
     private final HugeLongArray encounteredCommunities;
     private final HugeDoubleArray encounteredCommunitiesWeights;
     private final long seed;
     private long communityCounter = 0L;
+    private final int concurrency;
+    private final ExecutorService executorService;
 
     static RefinementPhase create(
         Graph workingGraph,
@@ -50,7 +56,9 @@ final class RefinementPhase {
         HugeDoubleArray communityVolumes,
         double gamma,
         double theta,
-        long seed
+        long seed,
+        int concurrency,
+        ExecutorService executorService
     ) {
         var encounteredCommunities = HugeLongArray.newArray(workingGraph.nodeCount());
         var encounteredCommunitiesWeights = HugeDoubleArray.newArray(workingGraph.nodeCount());
@@ -64,7 +72,9 @@ final class RefinementPhase {
             encounteredCommunitiesWeights,
             gamma,
             theta,
-            seed
+            seed,
+            concurrency,
+            executorService
         );
     }
 
@@ -77,7 +87,9 @@ final class RefinementPhase {
         HugeDoubleArray encounteredCommunitiesWeights,
         double gamma,
         double theta,
-        long seed
+        long seed,
+        int concurrency,
+        ExecutorService executorService
     ) {
         this.workingGraph = workingGraph;
         this.originalCommunities = originalCommunities;
@@ -90,7 +102,9 @@ final class RefinementPhase {
         this.theta = theta;
         this.seed = seed;
         encounteredCommunitiesWeights.setAll(c -> -1L);
-        this.relationShipsBetweenCommunities = HugeDoubleArray.newArray(workingGraph.nodeCount());
+        this.relationshipsBetweenCommunities = HugeDoubleArray.newArray(workingGraph.nodeCount());
+        this.concurrency = concurrency;
+        this.executorService = executorService;
     }
 
     RefinementPhaseResult run() {
@@ -126,17 +140,23 @@ final class RefinementPhase {
     }
 
     private void computeRelationshipsBetweenCommunities() {
-        workingGraph.forEachNode(nodeId -> {
-            long originalCommunityId = originalCommunities.get(nodeId);
-            workingGraph.forEachRelationship(nodeId, 1.0, (s, t, relationshipWeight) -> {
-                var tOriginalCommunityId = originalCommunities.get(t);
-                if (originalCommunityId == tOriginalCommunityId) {
-                    relationShipsBetweenCommunities.addTo(nodeId, relationshipWeight);
-                }
-                return true;
-            });
-            return true;
-        });
+        List<RefinementBetweenRelationshipCounter> tasks = PartitionUtils.degreePartition(
+            workingGraph,
+            concurrency,
+            degreePartition -> new RefinementBetweenRelationshipCounter(
+                workingGraph.concurrentCopy(),
+                relationshipsBetweenCommunities,
+                originalCommunities,
+                degreePartition
+            ),
+            Optional.empty()
+        );
+
+        RunWithConcurrency.builder().
+            concurrency(concurrency)
+            .tasks(tasks)
+            .executor(executorService).
+            run();
     }
 
     private void mergeNodeSubset(
@@ -258,7 +278,7 @@ final class RefinementPhase {
 
         final long updatedCommunityId = nextCommunityId;
         double externalEdgesWithNewCommunity = Math.abs(encounteredCommunitiesWeights.get(updatedCommunityId));
-        relationShipsBetweenCommunities.addTo(
+        relationshipsBetweenCommunities.addTo(
             updatedCommunityId,
             totalSumOfRelationships - externalEdgesWithNewCommunity
         );
@@ -299,7 +319,7 @@ final class RefinementPhase {
         double updatedCommunityVolume = communityVolumesAfterMerge.get(nodeOrCommunityId);
         double rightSide = gamma * updatedCommunityVolume * (originalCommunityVolume - updatedCommunityVolume);
 
-        return relationShipsBetweenCommunities.get(nodeOrCommunityId) >= rightSide;
+        return relationshipsBetweenCommunities.get(nodeOrCommunityId) >= rightSide;
     }
 
     static class RefinementPhaseResult {

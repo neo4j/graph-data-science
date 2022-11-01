@@ -182,7 +182,9 @@ public class Leiden extends Algorithm<LeidenResult> {
                     localMoveCommunityVolumes,
                     gamma,
                     theta,
-                    randomSeed
+                    randomSeed,
+                    concurrency,
+                    executorService
                 );
                 var refinementPhaseResult = refinementPhase.run();
                 var refinedCommunities = refinementPhaseResult.communities();
