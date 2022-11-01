@@ -88,7 +88,6 @@ class GraphAggregationPhase {
             .addPropertyConfig(Aggregation.SUM, DefaultValue.forDouble())
             .executorService(executorService)
             .build();
-        // when the graph is undirected the weight of the relationship is being doubled hence we need to scale it
         var relationshipCreators = PartitionUtils.degreePartition(
             workingGraph,
             concurrency,
