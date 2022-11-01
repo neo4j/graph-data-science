@@ -266,8 +266,7 @@ class LeidenTest {
             .generate();
 
         // modularities default tolerance:
-        // [0.17639682834921225, 0.18452049792988476, 0.18780843339464454, 0.18851413258382074, 0.0]
-
+//[0.17948140340725127, 0.18614779451781124, 0.19087468397159016, 0.0, 0.0]
         var gamma = 1.0;
         Leiden leiden = new Leiden(
             myGraph,
@@ -283,6 +282,6 @@ class LeidenTest {
         );
         var leidenResult = leiden.compute();
         assertThat(leidenResult.ranLevels()).isEqualTo(2);
-        assertThat(leidenResult.modularity()).isCloseTo(0.18452, Offset.offset(1e-6));
+        assertThat(leidenResult.modularity()).isCloseTo(0.186147, Offset.offset(1e-6));
     }
 }

@@ -85,7 +85,8 @@ class LocalMovePhaseTest {
             nodeVolumes,
             communityVolumes,
             gamma,
-            graph.nodeCount()
+            graph.nodeCount(),
+            1
         ).run();
 
 

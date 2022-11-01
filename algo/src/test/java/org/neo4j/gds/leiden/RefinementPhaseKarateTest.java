@@ -59,7 +59,7 @@ class RefinementPhaseKarateTest {
         double gamma = 1.0 / graph.relationshipCount();
 
         var localMovePhase = LocalMovePhase.create(graph,
-            originalCommunities, nodeVolumes, communityVolumes, gamma, graph.nodeCount()
+            originalCommunities, nodeVolumes, communityVolumes, gamma, graph.nodeCount(), 1
         );
 
         var localMovePhaseResult = localMovePhase.run();
@@ -85,20 +85,20 @@ class RefinementPhaseKarateTest {
 
         assertThat(communitiesMap.values())
             .satisfiesExactlyInAnyOrder(
-                community -> assertThat(community).containsExactlyInAnyOrder("a29", "a32"),
                 community -> assertThat(community).containsExactlyInAnyOrder("a0"),
-                community -> assertThat(community).containsExactlyInAnyOrder("a15", "a16", "a19", "a23", "a33"),
-                community -> assertThat(community).containsExactlyInAnyOrder("a21", "a34"),
-                community -> assertThat(community).containsExactlyInAnyOrder("a3", "a10"),
                 community -> assertThat(community).containsExactlyInAnyOrder("a5", "a11"),
-                community -> assertThat(community).containsExactlyInAnyOrder("a1", "a12", "a22"),
+                community -> assertThat(community).containsExactlyInAnyOrder("a3", "a10", "a14"),
                 community -> assertThat(community).containsExactlyInAnyOrder("a4", "a8", "a13"),
                 community -> assertThat(community).containsExactlyInAnyOrder("a6", "a7", "a17"),
-                community -> assertThat(community).containsExactlyInAnyOrder("a2", "a14", "a18", "a20"),
+                community -> assertThat(community).containsExactlyInAnyOrder("a1", "a12"),
+                community -> assertThat(community).containsExactlyInAnyOrder("a2", "a18", "a20", "a22"),
                 community -> assertThat(community).containsExactlyInAnyOrder("a24", "a26"),
                 community -> assertThat(community).containsExactlyInAnyOrder("a25", "a28"),
+                community -> assertThat(community).containsExactlyInAnyOrder("a29", "a32"),
                 community -> assertThat(community).containsExactlyInAnyOrder("a27", "a30"),
-                community -> assertThat(community).containsExactlyInAnyOrder("a9", "a31")
+                community -> assertThat(community).containsExactlyInAnyOrder("a9", "a31"),
+                community -> assertThat(community).containsExactlyInAnyOrder("a15", "a16", "a19", "a23", "a33"),
+                community -> assertThat(community).containsExactlyInAnyOrder("a21", "a34")
             );
     }
 }
