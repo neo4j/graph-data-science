@@ -37,9 +37,7 @@ final class RefinementPhase {
     private final HugeDoubleArray communityVolumesAfterMerge;
     private final double gamma;
     private final double theta; // randomness
-
-    private final HugeDoubleArray relationShipsBetweenCommunties;
-
+    private final HugeDoubleArray relationShipsBetweenCommunities;
     private final HugeLongArray encounteredCommunities;
     private final HugeDoubleArray encounteredCommunitiesWeights;
     private final long seed;
@@ -92,24 +90,15 @@ final class RefinementPhase {
         this.theta = theta;
         this.seed = seed;
         encounteredCommunitiesWeights.setAll(c -> -1L);
-        this.relationShipsBetweenCommunties = HugeDoubleArray.newArray(workingGraph.nodeCount());
+        this.relationShipsBetweenCommunities = HugeDoubleArray.newArray(workingGraph.nodeCount());
     }
 
     RefinementPhaseResult run() {
         var refinedCommunities = HugeLongArray.newArray(workingGraph.nodeCount());
         refinedCommunities.setAll(nodeId -> nodeId); //singleton partition
 
-        workingGraph.forEachNode(nodeId -> {
-            long originalCommunityId = originalCommunities.get(nodeId);
-            workingGraph.forEachRelationship(nodeId, 1.0, (s, t, relationshipWeight) -> {
-                var tOriginalCommunityId = originalCommunities.get(t);
-                if (originalCommunityId == tOriginalCommunityId) {
-                    relationShipsBetweenCommunties.addTo(nodeId, relationshipWeight);
-                }
-                return true;
-            });
-            return true;
-        });
+        computeRelationshipsBetweenCommunities();
+
         BitSet singleton = new BitSet(workingGraph.nodeCount());
         singleton.set(0, workingGraph.nodeCount());
 
@@ -134,6 +123,20 @@ final class RefinementPhase {
             communityVolumesAfterMerge,
             maximumCommunityId.longValue()
         );
+    }
+
+    private void computeRelationshipsBetweenCommunities() {
+        workingGraph.forEachNode(nodeId -> {
+            long originalCommunityId = originalCommunities.get(nodeId);
+            workingGraph.forEachRelationship(nodeId, 1.0, (s, t, relationshipWeight) -> {
+                var tOriginalCommunityId = originalCommunities.get(t);
+                if (originalCommunityId == tOriginalCommunityId) {
+                    relationShipsBetweenCommunities.addTo(nodeId, relationshipWeight);
+                }
+                return true;
+            });
+            return true;
+        });
     }
 
     private void mergeNodeSubset(
@@ -188,46 +191,77 @@ final class RefinementPhase {
                 nextCommunityId = bestCommunityId;
             }
         } else {
-            var x = probabilitiesSum * random.nextDouble();
-
-            assert x >= 0;
-
-            long j = 0;
-            double curr = 0d;
-            for (long c = 0; c < communityCounter; c++) {
-                var candidateCommunityId = encounteredCommunities.get(c);
-
-                var candidateCommunityProbability = nextCommunityProbabilities.get(j);
-                curr += candidateCommunityProbability;
-
-                if (x <= curr) {
-                    nextCommunityId = candidateCommunityId;
-                    break;
-                }
-
-                j++;
-            }
+            nextCommunityId = selectRandomCommunity(
+                nextCommunityProbabilities,
+                probabilitiesSum,
+                random,
+                nextCommunityId
+            );
         }
 
         if (nextCommunityId != currentNodeCommunityId) {
-
-            refinedCommunities.set(nodeId, nextCommunityId);
-            if (singleton.get(nextCommunityId)) {
-                singleton.flip(nextCommunityId);
-            }
-
-            var nodeVolume = nodeVolumes.get(nodeId);
-
-            communityVolumesAfterMerge.addTo(nextCommunityId, nodeVolume);
-            communityVolumesAfterMerge.addTo(currentNodeCommunityId, -nodeVolume);
-
-            final long updatedCommunityId = nextCommunityId;
-            double externalEdgesWithNewCommunity = Math.abs(encounteredCommunitiesWeights.get(updatedCommunityId));
-            relationShipsBetweenCommunties.addTo(
-                updatedCommunityId,
-                totalSumOfRelationships - externalEdgesWithNewCommunity
+            addToCommunity(
+                nodeId,
+                refinedCommunities,
+                singleton,
+                currentNodeCommunityId,
+                totalSumOfRelationships,
+                nextCommunityId
             );
         }
+    }
+
+    private long selectRandomCommunity(
+        HugeDoubleArray nextCommunityProbabilities,
+        double probabilitiesSum,
+        Random random,
+        long defaultCommunity
+    ) {
+        var x = probabilitiesSum * random.nextDouble();
+
+        assert x >= 0;
+        long nextCommunityId = defaultCommunity;
+        long j = 0;
+        double curr = 0d;
+
+        for (long c = 0; c < communityCounter; c++) {
+            var candidateCommunityId = encounteredCommunities.get(c);
+
+            var candidateCommunityProbability = nextCommunityProbabilities.get(j);
+            curr += candidateCommunityProbability;
+            if (x <= curr) {
+                nextCommunityId = candidateCommunityId;
+                break;
+            }
+            j++;
+        }
+        return nextCommunityId;
+    }
+
+    private void addToCommunity(
+        long nodeId,
+        HugeLongArray refinedCommunities,
+        BitSet singleton,
+        long currentNodeCommunityId,
+        double totalSumOfRelationships,
+        long nextCommunityId
+    ) {
+        refinedCommunities.set(nodeId, nextCommunityId);
+        if (singleton.get(nextCommunityId)) {
+            singleton.flip(nextCommunityId);
+        }
+
+        var nodeVolume = nodeVolumes.get(nodeId);
+
+        communityVolumesAfterMerge.addTo(nextCommunityId, nodeVolume);
+        communityVolumesAfterMerge.addTo(currentNodeCommunityId, -nodeVolume);
+
+        final long updatedCommunityId = nextCommunityId;
+        double externalEdgesWithNewCommunity = Math.abs(encounteredCommunitiesWeights.get(updatedCommunityId));
+        relationShipsBetweenCommunities.addTo(
+            updatedCommunityId,
+            totalSumOfRelationships - externalEdgesWithNewCommunity
+        );
     }
 
     private void computeCommunityInformation(
@@ -265,13 +299,12 @@ final class RefinementPhase {
         double updatedCommunityVolume = communityVolumesAfterMerge.get(nodeOrCommunityId);
         double rightSide = gamma * updatedCommunityVolume * (originalCommunityVolume - updatedCommunityVolume);
 
-        return relationShipsBetweenCommunties.get(nodeOrCommunityId) >= rightSide;
+        return relationShipsBetweenCommunities.get(nodeOrCommunityId) >= rightSide;
     }
 
     static class RefinementPhaseResult {
         private final HugeLongArray communities;
         private final HugeDoubleArray communityVolumes;
-
         private final long maximumRefinementCommunityId;
 
         RefinementPhaseResult(
@@ -287,11 +320,9 @@ final class RefinementPhase {
         HugeLongArray communities() {
             return communities;
         }
-
         HugeDoubleArray communityVolumes() {
             return communityVolumes;
         }
-
         long maximumRefinedCommunityId() {return maximumRefinementCommunityId;}
 
     }
