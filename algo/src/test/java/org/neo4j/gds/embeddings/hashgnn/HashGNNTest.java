@@ -165,48 +165,72 @@ class HashGNNTest {
     }
 
     @Test
-    void shouldRunOnDoublesAndBeDeterministicHighNeighborInfluence() {
-        int embeddingDensity = 20;
+    void shouldRunOnDoublesAndBeDeterministicEqualScaledNeighborInfluence() {
+        int embeddingDensity = 200;
         int binarizationDimension = 16;
-        var config = HashGNNConfigImpl
+
+        var configBuilder = HashGNNConfigImpl
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(embeddingDensity)
             .binarizeFeatures(Map.of("dimension", binarizationDimension, "densityLevel", 2))
             .iterations(1)
-            .neighborInfluence(4)
-            .randomSeed(43L)
-            .build();
+            .randomSeed(43L);
+        var configBefore = configBuilder.neighborInfluence(0).build();
+        var resultBefore = new HashGNN(doubleGraph, configBefore, ProgressTracker.NULL_TRACKER).compute().embeddings();
+
+
+        var avgDegree = doubleGraph.relationshipCount() / (double) doubleGraph.nodeCount();
+        var config = configBuilder.neighborInfluence(avgDegree / embeddingDensity).build();
         var result = new HashGNN(doubleGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
         // because of high neighbor influence and high embeddingDensity, we expect the node `b` to have the union of features of its neighbors
         // the neighbors are expected to have the same features as their initial projection
-        assertThat(result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("a")))).containsExactly(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0);
-        assertThat(result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("b")))).containsExactly(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0);
-        assertThat(result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("c")))).containsExactly(0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+
+
+        double[] embeddingB = result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("b")));
+        double[] embeddingABefore = resultBefore.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("a")));
+        double[] embeddingCBefore = resultBefore.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("c")));
+
+        var bHasUniqueFeature = false;
+        for (int component = 0; component < binarizationDimension; component++) {
+            assertThat(embeddingB[component]).isGreaterThanOrEqualTo(Math.max(embeddingABefore[component], embeddingCBefore[component]));
+            if (embeddingB[component] > Math.max(embeddingABefore[component], embeddingCBefore[component])) {
+                bHasUniqueFeature = true;
+            }
+        }
 
         assertThat(result.get(0).length).isEqualTo(binarizationDimension);
+        assertThat(bHasUniqueFeature).isTrue();
     }
 
     @Test
-    void shouldRunOnDoublesAndBeDeterministicLowNeighborInfluence() {
-        int embeddingDensity = 20;
+    void shouldRunOnDoublesAndBeDeterministicHighNeighborInfluence() {
+        int embeddingDensity = 50;
         int binarizationDimension = 16;
-        double avgDegree = binaryGraph.relationshipCount() / (double) binaryGraph.nodeCount();
-        var config = HashGNNConfigImpl
+
+        var configBuilder = HashGNNConfigImpl
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(embeddingDensity)
             .binarizeFeatures(Map.of("dimension", binarizationDimension, "densityLevel", 2))
-            .neighborInfluence(0.01)
             .iterations(1)
-            .randomSeed(1L)
+            .randomSeed(3L);
+        var configBefore = configBuilder.neighborInfluence(0).build();
+        var resultBefore = new HashGNN(doubleGraph, configBefore, ProgressTracker.NULL_TRACKER).compute().embeddings();
+
+
+        var config = configBuilder
+            .neighborInfluence(4)
             .build();
         var result = new HashGNN(doubleGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
         // because of equal neighbor and self influence and high embeddingDensity, we expect the node `b` to have the union of features of its neighbors plus some of its own features
         // the neighbors are expected to have the same features as their initial projection
-        assertThat(result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("a")))).containsExactly(0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-        assertThat(result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("b")))).containsExactly(0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0);
-        assertThat(result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("c")))).containsExactly(1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0);
+        double[] embeddingB = result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("b")));
+        double[] embeddingABefore = resultBefore.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("a")));
+        double[] embeddingCBefore = resultBefore.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("c")));
+        for (int component = 0; component < binarizationDimension; component++) {
+            assertThat(embeddingB[component]).isEqualTo(Math.max(embeddingABefore[component], embeddingCBefore[component]));
+        }
 
         assertThat(result.get(0).length).isEqualTo(binarizationDimension);
     }

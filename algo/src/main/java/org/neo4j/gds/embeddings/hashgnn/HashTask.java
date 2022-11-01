@@ -92,8 +92,10 @@ class HashTask implements Runnable {
 
     @Override
     public void run() {
-        // Multiply scaling by 1.02 to make sure we can find a prime >= primeSeed * scaledNeighborInfluence
-        int primeSeed = rng.nextInt(1, (int) Math.round(Integer.MAX_VALUE / Math.max(1, scaledNeighborInfluence * 1.02)));
+        double finalInfluence = Math.max(1e-5, Math.min(1e5, scaledNeighborInfluence));
+
+        // Multiply scaling by 1.001 to make sure we can find a prime >= primeSeed * scaleFactor
+        int primeSeed = rng.nextInt(1_000_000, (int) Math.round(Integer.MAX_VALUE / (Math.max(1, finalInfluence) * 1.001)));
 
         int c = Primes.nextPrime(primeSeed);
 
@@ -101,7 +103,7 @@ class HashTask implements Runnable {
         if (Double.compare(scaledNeighborInfluence, 1.0D) == 0) {
             d = c;
         } else {
-            d = Primes.nextPrime((int) Math.round(primeSeed * scaledNeighborInfluence));
+            d = Primes.nextPrime((int) Math.round(c * finalInfluence));
         }
 
         this.neighborsAggregationHashes = computeHashesFromTriple(
