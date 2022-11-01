@@ -33,11 +33,15 @@ import org.hamcrest.collection.IsMapContaining;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 public final class AssertionsHelper {
+
+    private static final Pattern PROGRESS_PATTERN = Pattern.compile("(\\d+)(%)$");
 
 
     private AssertionsHelper() {}
@@ -91,5 +95,12 @@ public final class AssertionsHelper {
 
     public static Matcher<Map<? extends String, ?>> hasEntry(String key, Object value) {
         return IsMapContaining.hasEntry(equalTo(key), equalTo(value));
+    }
+
+    public static Predicate<String> progressExceeding100Predicate() {
+        return message -> {
+                java.util.regex.Matcher matcher = PROGRESS_PATTERN.matcher(message);
+                return matcher.find() && Integer.parseInt(matcher.group(1)) > 100;
+        };
     }
 }
