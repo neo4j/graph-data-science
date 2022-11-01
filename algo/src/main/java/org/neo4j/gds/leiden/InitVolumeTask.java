@@ -21,29 +21,30 @@ package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
+
+import java.util.concurrent.atomic.DoubleAdder;
 
 class InitVolumeTask implements Runnable {
 
     private final Partition partition;
     private final Graph graph;
     private final HugeDoubleArray nodeVolumes;
-    private final HugeDoubleArray communityVolumes;
-    private final HugeLongArray initialCommunities;
+    private final DoubleAdder volumeAdder;
 
     InitVolumeTask(
         Graph graph,
         HugeDoubleArray nodeVolumes,
-        HugeDoubleArray communityVolumes,
-        HugeLongArray initialCommunities,
         Partition partition
     ) {
         this.graph = graph;
         this.nodeVolumes = nodeVolumes;
-        this.communityVolumes = communityVolumes;
-        this.initialCommunities = initialCommunities;
         this.partition = partition;
+        this.volumeAdder = new DoubleAdder();
+    }
+
+    double sumOfVolumes() {
+        return volumeAdder.doubleValue();
     }
 
     @Override
@@ -51,11 +52,10 @@ class InitVolumeTask implements Runnable {
         long startId = partition.startNode();
         long endId = startId + partition.nodeCount();
         for (long nodeId = startId; nodeId < endId; ++nodeId) {
-            var communityId = initialCommunities.get(nodeId);
             final long finalNodeId = nodeId;
             graph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
                 nodeVolumes.addTo(finalNodeId, w);
-                communityVolumes.addTo(communityId, w);
+                volumeAdder.add(w);
                 return true;
             });
         }

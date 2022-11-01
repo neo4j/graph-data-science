@@ -36,7 +36,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.DoubleAdder;
 
 //TODO: take care of potential issues w. self-loops
 
@@ -283,16 +282,15 @@ public class Leiden extends Algorithm<LeidenResult> {
         HugeDoubleArray communityVolumes,
         HugeLongArray initialCommunities
     ) {
-        if (rootGraph.hasRelationshipProperty()) {
 
+        double totalVolume = 0;
+        if (rootGraph.hasRelationshipProperty()) {
             List<InitVolumeTask> tasks = PartitionUtils.rangePartition(
                 concurrency,
                 rootGraph.nodeCount(),
                 partition -> new InitVolumeTask(
                     rootGraph.concurrentCopy(),
                     nodeVolumes,
-                    communityVolumes,
-                    initialCommunities,
                     partition
                 ),
                 Optional.empty()
@@ -302,22 +300,19 @@ public class Leiden extends Algorithm<LeidenResult> {
                 tasks(tasks).
                 executor(executorService)
                 .run();
-
-            DoubleAdder weightToDivide = new DoubleAdder();
-            rootGraph.forEachNode(nodeId -> {
-                weightToDivide.add(nodeVolumes.get(nodeId));
-                return true;
-            });
-            return 1.0 / weightToDivide.doubleValue();
+            for (var task : tasks) {
+                totalVolume += task.sumOfVolumes();
+            }
         } else {
             nodeVolumes.setAll(rootGraph::degree);
-            rootGraph.forEachNode(nodeId -> {
-                long communityId = initialCommunities.get(nodeId);
-                communityVolumes.addTo(communityId, rootGraph.degree(nodeId));
-                return true;
-            });
-            return 1.0 / rootGraph.relationshipCount();
+            totalVolume = rootGraph.relationshipCount();
         }
+        rootGraph.forEachNode(nodeId -> {
+            long communityId = initialCommunities.get(nodeId);
+            communityVolumes.addTo(communityId, rootGraph.degree(nodeId));
+            return true;
+        });
+        return 1 / totalVolume;
     }
 
     static @NotNull CommunityData maintainPartition(
