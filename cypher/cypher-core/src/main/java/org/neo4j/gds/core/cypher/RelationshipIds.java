@@ -32,6 +32,8 @@ import org.neo4j.token.TokenHolders;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -42,6 +44,7 @@ public final class RelationshipIds extends CypherGraphStore.StateVisitor.Adapter
     private final TokenHolders tokenHolders;
     private final List<RelationshipIdContext> relationshipIdContexts;
     private final List<UpdateListener> updateListeners;
+    private final Lock lock;
 
     public interface UpdateListener {
         void onRelationshipIdsAdded(RelationshipIdContext relationshipIdContext);
@@ -62,6 +65,7 @@ public final class RelationshipIds extends CypherGraphStore.StateVisitor.Adapter
         this.tokenHolders = tokenHolders;
         this.relationshipIdContexts = relationshipIdContexts;
         this.updateListeners = new ArrayList<>();
+        this.lock = new ReentrantLock();
     }
 
     public <T> T resolveRelationshipId(long relationshipId, ResolvedRelationshipIdFunction<T> relationshipIdConsumer) {
@@ -93,20 +97,41 @@ public final class RelationshipIds extends CypherGraphStore.StateVisitor.Adapter
     }
 
     public void registerUpdateListener(UpdateListener updateListener) {
-        this.updateListeners.add(updateListener);
+        try {
+            lock.lock();
+            this.updateListeners.add(updateListener);
+        } finally {
+            lock.unlock();
+        }
         // replay added relationship id contexts
         relationshipIdContexts.forEach(updateListener::onRelationshipIdsAdded);
     }
 
     public void removeUpdateListener(UpdateListener updateListener) {
-        this.updateListeners.remove(updateListener);
+        // This is potentially called in parallel by the Cypher runtime
+        // and while we are adding new relationship types.
+        try {
+            lock.lock();
+            this.updateListeners.remove(updateListener);
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
     public void relationshipTypeAdded(String relationshipType) {
-        var relationshipIdContext = relationshipIdContextFromRelType(graphStore, tokenHolders, RelationshipType.of(relationshipType));
+        var relationshipIdContext = relationshipIdContextFromRelType(
+            graphStore,
+            tokenHolders,
+            RelationshipType.of(relationshipType)
+        );
         relationshipIdContexts.add(relationshipIdContext);
-        updateListeners.forEach(updateListener -> updateListener.onRelationshipIdsAdded(relationshipIdContext));
+        try {
+            lock.lock();
+            updateListeners.forEach(updateListener -> updateListener.onRelationshipIdsAdded(relationshipIdContext));
+        } finally {
+            lock.unlock();
+        }
     }
 
     @NotNull
