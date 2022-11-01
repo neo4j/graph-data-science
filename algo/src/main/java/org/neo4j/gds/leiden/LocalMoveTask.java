@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class LocalMoveTask implements Runnable {
 
-    private static final long LOCALQUEUEBOUND = 1000;
+    private static final long LOCAL_QUEUE_BOUND = 1000;
     private final Graph graph;
     private final AtomicLong globalQueueIndex;
     private final HugeLongArray encounteredCommunities;
@@ -91,7 +91,7 @@ public class LocalMoveTask implements Runnable {
                 }
             }
             //do some local processing if the localQueue is small enough
-            while (localQueue.size() > 0 && localQueue.size() < LOCALQUEUEBOUND) {
+            while (localQueue.size() > 0 && localQueue.size() < LOCAL_QUEUE_BOUND) {
                 long nodeId = localQueue.remove();
                 processNode(nodeId);
             }
