@@ -40,7 +40,7 @@ public final class NodeScannerFactory {
         var hasNodeLabelIndex = hasNodeLabelIndex(transactionContext);
 
         if (!hasNodeLabelIndex && labelIds.length > 0) {
-            log.info("Attempted to use node label index, but no index was found. Falling back to node store scan.");
+            log.info("[gds] Attempted to use node label index, but no index was found. Falling back to node store scan.");
         }
 
         if (Arrays.stream(labelIds).anyMatch(labelId -> labelId == ANY_LABEL) || !hasNodeLabelIndex) {

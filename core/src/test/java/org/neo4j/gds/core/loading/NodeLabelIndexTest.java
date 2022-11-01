@@ -62,6 +62,6 @@ public class NodeLabelIndexTest extends BaseTest {
         assertGraphEquals(fromGdl("(:Foo),(:Bar)"), graph);
 
         assertThat(log.getMessages(TestLog.INFO))
-            .contains("Attempted to use node label index, but no index was found. Falling back to node store scan.");
+            .contains("[gds] Attempted to use node label index, but no index was found. Falling back to node store scan.");
     }
 }
