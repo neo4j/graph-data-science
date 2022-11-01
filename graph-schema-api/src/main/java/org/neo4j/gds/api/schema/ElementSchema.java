@@ -49,6 +49,18 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, ELEMENT_IDENTIFI
     }
 
     @Value.Derived
+    default Map<String, Object> properties(ELEMENT_IDENTIFIER type) {
+        return properties().get(type)
+            .entrySet()
+            .stream()
+            .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue())
+                )
+            );
+    }
+
+    @Value.Derived
     default boolean hasProperties() {
         return !allProperties().isEmpty();
     }

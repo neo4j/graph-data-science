@@ -96,18 +96,12 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
 
     @Value.Derived
     default Map<String, Object> toMap() {
+
         return properties().entrySet().stream().collect(Collectors.toMap(
             entry -> entry.getKey().name,
             entry -> Map.of(
                 "orientation", relTypeOrientationMap().get(entry.getKey()).toString(),
-                "properties", entry
-                .getValue()
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue()))
-                )
+                "properties", properties(entry.getKey())
             )
         ));
     }

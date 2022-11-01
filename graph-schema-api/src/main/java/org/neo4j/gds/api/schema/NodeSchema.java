@@ -56,15 +56,7 @@ public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel, Propert
     default Map<String, Object> toMap() {
         return properties().entrySet().stream().collect(Collectors.toMap(
             entry -> entry.getKey().name,
-            entry -> entry
-                .getValue()
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue())
-                    )
-                )
+            entry -> properties(entry.getKey())
         ));
     }
 
