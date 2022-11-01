@@ -48,6 +48,7 @@ final class RefinementPhase {
     private long communityCounter = 0L;
     private final int concurrency;
     private final ExecutorService executorService;
+    private final HugeDoubleArray nextCommunityProbabilities;
 
     static RefinementPhase create(
         Graph workingGraph,
@@ -63,6 +64,8 @@ final class RefinementPhase {
         var encounteredCommunities = HugeLongArray.newArray(workingGraph.nodeCount());
         var encounteredCommunitiesWeights = HugeDoubleArray.newArray(workingGraph.nodeCount());
         encounteredCommunitiesWeights.setAll(c -> -1L);
+        HugeDoubleArray nextCommunityProbabilities = HugeDoubleArray.newArray(workingGraph.nodeCount());
+
         return new RefinementPhase(
             workingGraph,
             originalCommunities,
@@ -70,6 +73,7 @@ final class RefinementPhase {
             communityVolumes,
             encounteredCommunities,
             encounteredCommunitiesWeights,
+            nextCommunityProbabilities,
             gamma,
             theta,
             seed,
@@ -85,6 +89,7 @@ final class RefinementPhase {
         HugeDoubleArray communityVolumes,
         HugeLongArray encounteredCommunities,
         HugeDoubleArray encounteredCommunitiesWeights,
+        HugeDoubleArray nextCommunityProbabilities,
         double gamma,
         double theta,
         long seed,
@@ -98,6 +103,7 @@ final class RefinementPhase {
         this.communityVolumes = communityVolumes;
         this.encounteredCommunities = encounteredCommunities;
         this.encounteredCommunitiesWeights = encounteredCommunitiesWeights;
+        this.nextCommunityProbabilities = nextCommunityProbabilities;
         this.gamma = gamma;
         this.theta = theta;
         this.seed = seed;
@@ -174,7 +180,6 @@ final class RefinementPhase {
         var currentNodeCommunityId = refinedCommunities.get(nodeId);
         var currentNodeVolume = nodeVolumes.get(nodeId);
 
-        HugeDoubleArray nextCommunityProbabilities = HugeDoubleArray.newArray(communityCounter);
         long i = 0;
         double probabilitiesSum = 0d;
         if (communityCounter == 0)
