@@ -98,7 +98,7 @@ class BinarizeTask implements Runnable {
                 p,
                 config,
                 truncatedFeatures,
-                FeatureExtraction.propertyExtractors(graph, config.featureProperties()),
+                featureExtractors,
                 propertyEmbeddings,
                 hashesList
             ))
