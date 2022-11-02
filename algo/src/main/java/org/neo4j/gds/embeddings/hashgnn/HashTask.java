@@ -25,7 +25,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.TerminationFlag;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
@@ -36,7 +35,7 @@ import static org.neo4j.gds.embeddings.hashgnn.HashGNNCompanion.HashTriple.compu
 class HashTask implements Runnable {
     private final int embeddingDimension;
     private final double scaledNeighborInfluence;
-    private final int numberOfRelationships;
+    private final int numberOfRelationshipTypes;
     private final SplittableRandom rng;
     private int[] neighborsAggregationHashes;
     private int[] selfAggregationHashes;
@@ -45,19 +44,19 @@ class HashTask implements Runnable {
     HashTask(
         int embeddingDimension,
         double scaledNeighborInfluence,
-        int numberOfRelationships,
+        int numberOfRelationshipTypes,
         SplittableRandom rng
     ) {
         this.embeddingDimension = embeddingDimension;
         this.scaledNeighborInfluence = scaledNeighborInfluence;
-        this.numberOfRelationships = numberOfRelationships;
+        this.numberOfRelationshipTypes = numberOfRelationshipTypes;
         this.rng = rng;
     }
 
     public static List<Hashes> compute(
         int embeddingDimension,
         double scaledNeighborInfluence,
-        int numberOfRelationships,
+        int numberOfRelationshipTypes,
         HashGNNConfig config,
         long randomSeed,
         TerminationFlag terminationFlag
@@ -66,7 +65,7 @@ class HashTask implements Runnable {
             new HashTask(
                 embeddingDimension,
                 scaledNeighborInfluence,
-                numberOfRelationships,
+                numberOfRelationshipTypes,
                 new SplittableRandom(randomSeed + seedOffset)
             )).collect(Collectors.toList());
         RunWithConcurrency.builder()
@@ -75,10 +74,7 @@ class HashTask implements Runnable {
             .terminationFlag(terminationFlag)
             .run();
 
-        var hashes = new ArrayList<Hashes>(config.iterations() * config.embeddingDensity());
-        hashTasks.forEach(hashTask -> hashes.add(hashTask.hashes()));
-
-        return hashes;
+        return hashTasks.stream().map(HashTask::hashes).collect(Collectors.toList());
     }
 
     @ValueClass
@@ -97,22 +93,22 @@ class HashTask implements Runnable {
         // Multiply scaling by 1.001 to make sure we can find a prime >= primeSeed * scaleFactor
         int primeSeed = rng.nextInt(1_000_000, (int) Math.round(Integer.MAX_VALUE / (Math.max(1, finalInfluence) * 1.001)));
 
-        int c = Primes.nextPrime(primeSeed);
+        int neighborPrime = Primes.nextPrime(primeSeed);
 
-        int d;
+        int selfPrime;
         if (Double.compare(scaledNeighborInfluence, 1.0D) == 0) {
-            d = c;
+            selfPrime = neighborPrime;
         } else {
-            d = Primes.nextPrime((int) Math.round(c * finalInfluence));
+            selfPrime = Primes.nextPrime((int) Math.round(neighborPrime * finalInfluence));
         }
 
         this.neighborsAggregationHashes = computeHashesFromTriple(
             embeddingDimension,
-            HashGNNCompanion.HashTriple.generate(rng, c)
+            HashGNNCompanion.HashTriple.generate(rng, neighborPrime)
         );
-        this.selfAggregationHashes = computeHashesFromTriple(embeddingDimension, HashGNNCompanion.HashTriple.generate(rng, d));
+        this.selfAggregationHashes = computeHashesFromTriple(embeddingDimension, HashGNNCompanion.HashTriple.generate(rng, selfPrime));
         this.preAggregationHashes = IntStream
-            .range(0, numberOfRelationships)
+            .range(0, numberOfRelationshipTypes)
             .mapToObj(unused -> computeHashesFromTriple(embeddingDimension, HashGNNCompanion.HashTriple.generate(rng)))
             .collect(Collectors.toList());
     }

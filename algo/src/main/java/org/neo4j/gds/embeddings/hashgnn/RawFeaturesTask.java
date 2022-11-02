@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.hashgnn;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -69,7 +70,8 @@ class RawFeaturesTask implements Runnable {
         SplittableRandom rng,
         ProgressTracker progressTracker,
         Graph graph,
-        List<Partition> partition
+        List<Partition> partitions,
+        TerminationFlag terminationFlag
     ) {
         progressTracker.logInfo("Computing raw features");
 
@@ -86,7 +88,7 @@ class RawFeaturesTask implements Runnable {
 
         var features = HugeObjectArray.newArray(BitSet.class, graph.nodeCount());
 
-        var tasks = partition.stream()
+        var tasks = partitions.stream()
             .map(p -> new RawFeaturesTask(
                 p,
                 config,
@@ -99,6 +101,7 @@ class RawFeaturesTask implements Runnable {
         RunWithConcurrency.builder()
             .concurrency(config.concurrency())
             .tasks(tasks)
+            .terminationFlag(terminationFlag)
             .run();
 
         progressTracker.logInfo("Finished computing raw features");
@@ -109,8 +112,7 @@ class RawFeaturesTask implements Runnable {
     public void run() {
         partition.consume(nodeId -> {
             var nodeFeatures = new BitSet(inputDimension);
-            // should the second nodeId be replaced by 0 ? nodeOffset doesn't matter I guess.
-            FeatureExtraction.extract(nodeId, nodeId, featureExtractors, new FeatureConsumer() {
+            FeatureExtraction.extract(nodeId, -1, featureExtractors, new FeatureConsumer() {
                 @Override
                 public void acceptScalar(long nodeOffset, int offset, double value) {
                     if (value != 0.0) {

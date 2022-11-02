@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.hashgnn;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -71,7 +72,8 @@ class BinarizeTask implements Runnable {
         List<Partition> partition,
         HashGNNConfig config,
         SplittableRandom rng,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         progressTracker.logInfo("Starting binarization");
 
@@ -106,6 +108,7 @@ class BinarizeTask implements Runnable {
         RunWithConcurrency.builder()
             .concurrency(config.concurrency())
             .tasks(tasks)
+            .terminationFlag(terminationFlag)
             .run();
 
         progressTracker.logInfo("Finished binarization");
@@ -139,8 +142,7 @@ class BinarizeTask implements Runnable {
     public void run() {
         partition.consume(nodeId -> {
             var featureVector = new float[binarizationConfig.dimension()];
-            // should the second nodeId be replaced by 0 ? nodeOffset doesn't matter I guess.
-            FeatureExtraction.extract(nodeId, nodeId, featureExtractors, new FeatureConsumer() {
+            FeatureExtraction.extract(nodeId, -1, featureExtractors, new FeatureConsumer() {
                 @Override
                 public void acceptScalar(long nodeOffset, int offset, double value) {
                     for (int feature = 0; feature < binarizationConfig.densityLevel(); feature++) {

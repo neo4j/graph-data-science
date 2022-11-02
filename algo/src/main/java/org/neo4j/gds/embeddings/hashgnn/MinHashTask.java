@@ -97,6 +97,7 @@ class MinHashTask implements Runnable {
         RunWithConcurrency.builder()
             .concurrency(config.concurrency())
             .tasks(tasks)
+            .terminationFlag(terminationFlag)
             .run();
 
         progressTracker.logInfo("Finished min hashing");

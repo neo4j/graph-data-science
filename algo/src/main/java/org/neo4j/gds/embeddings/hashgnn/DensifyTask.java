@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.BitSetIterator;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -60,7 +61,8 @@ class DensifyTask implements Runnable {
         HashGNNConfig config,
         SplittableRandom rng,
         HugeObjectArray<BitSet> binaryFeatures,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         var denseFeatures = HugeObjectArray.newArray(double[].class, graph.nodeCount());
 
@@ -79,6 +81,7 @@ class DensifyTask implements Runnable {
         RunWithConcurrency.builder()
             .concurrency(config.concurrency())
             .tasks(tasks)
+            .terminationFlag(terminationFlag)
             .run();
 
         progressTracker.logInfo("Finished densification");
