@@ -63,6 +63,7 @@ public abstract class EdgeSplitter {
     public abstract SplitResult split(
         Graph graph,
         Graph masterGraph,
+        Graph negativeSamplingGraph,
         double holdoutFraction
     );
 
@@ -149,6 +150,25 @@ public abstract class EdgeSplitter {
                 i--;
             }
         }
+    }
+
+    void negativeSampleFromGivenGraph(
+        Graph negativeSamplingGraph,
+        RelationshipsBuilder selectedRelsBuilder,
+        MutableLong negativeSamplesRemaining,
+        long nodeId,
+        LongPredicate isValidSourceNode,
+        LongPredicate isValidTargetNode,
+        MutableLong validSourceNodeCount
+    ) {
+        if (!isValidSourceNode.apply(nodeId)) {
+            return;
+        }
+        negativeSamplingGraph.forEachRelationship(nodeId, (s, t) -> {
+            negativeSamplesRemaining.decrementAndGet();
+            selectedRelsBuilder.addFromInternal(negativeSamplingGraph.toRootNodeId(s), negativeSamplingGraph.toRootNodeId(t), NEGATIVE);
+            return true;
+        });
     }
 
 

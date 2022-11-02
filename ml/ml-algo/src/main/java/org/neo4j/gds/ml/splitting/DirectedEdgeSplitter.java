@@ -76,13 +76,14 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
 
     @TestOnly
     public SplitResult split(Graph graph, double holdoutFraction) {
-        return split(graph, graph, holdoutFraction);
+        return split(graph, graph, null, holdoutFraction);
     }
 
     @Override
     public SplitResult split(
         Graph graph,
         Graph masterGraph,
+        Graph negativeSamplingGraph,
         double holdoutFraction
     ) {
         LongPredicate isValidSourceNode = node -> sourceNodes.contains(graph.toOriginalNodeId(node));
@@ -112,7 +113,7 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
 
         int positiveSamples = (int) (validRelationshipCount * holdoutFraction);
         var positiveSamplesRemaining = new MutableLong(positiveSamples);
-        var negativeSamples = (long) (negativeSamplingRatio * validRelationshipCount * holdoutFraction);
+        var negativeSamples = (long) (negativeSamplingRatio * positiveSamples);
         var negativeSamplesRemaining = new MutableLong(negativeSamples);
 
         var validPositiveSourceNodeCount = new MutableLong(sourceNodes.nodeCount());
@@ -131,16 +132,20 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
                 isValidTargetNode
             );
 
-            negativeSampling(
-                graph,
-                masterGraph,
-                selectedRelsBuilder,
-                negativeSamplesRemaining,
-                nodeId,
-                isValidSourceNode,
-                isValidTargetNode,
-                validNegativeSourceNodeCount
-            );
+            if (negativeSamplingGraph == null) {
+                negativeSampling(
+                    graph,
+                    masterGraph,
+                    selectedRelsBuilder,
+                    negativeSamplesRemaining,
+                    nodeId,
+                    isValidSourceNode,
+                    isValidTargetNode,
+                    validNegativeSourceNodeCount
+                );
+            } else {
+                negativeSampleFromGivenGraph(negativeSamplingGraph, selectedRelsBuilder, negativeSamplesRemaining, nodeId, isValidSourceNode, isValidTargetNode, validNegativeSourceNodeCount);
+            }
             return true;
         });
 

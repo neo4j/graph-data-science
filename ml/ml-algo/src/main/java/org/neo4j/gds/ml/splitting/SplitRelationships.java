@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.splitting;
 
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
@@ -35,16 +36,20 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
 
     private final Graph graph;
     private final Graph masterGraph;
+
+    private final Graph negativeSamplingGraph;
+
     private final SplitRelationshipsBaseConfig config;
 
     private final IdMap sourceNodes;
 
     private final IdMap targetNodes;
 
-    private SplitRelationships(Graph graph, Graph masterGraph, IdMap sourceNodes, IdMap targetNodes, SplitRelationshipsBaseConfig config) {
+    private SplitRelationships(Graph graph, Graph masterGraph, Graph negativeSamplingGraph, IdMap sourceNodes, IdMap targetNodes, SplitRelationshipsBaseConfig config) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
         this.masterGraph = masterGraph;
+        this.negativeSamplingGraph = negativeSamplingGraph;
         this.config = config;
         this.sourceNodes = sourceNodes;
         this.targetNodes = targetNodes;
@@ -59,11 +64,17 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
 
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, config.relationshipWeightProperty());
         var masterGraph = graphStore.getGraph(nodeLabels, superRelationshipTypes, Optional.empty());
+        Graph negativeSamplingGraph;
+        if (config.negativeRelationshipType().isEmpty()) {
+            negativeSamplingGraph = null;
+        } else {
+            negativeSamplingGraph = graphStore.getGraph(RelationshipType.of(config.negativeRelationshipType().get()));
+        }
 
         IdMap sourceNodes = graphStore.getGraph(sourceLabels);
         IdMap targetNodes = graphStore.getGraph(targetLabels);
 
-        return new SplitRelationships(graph, masterGraph, sourceNodes, targetNodes, config);
+        return new SplitRelationships(graph, masterGraph, negativeSamplingGraph, sourceNodes, targetNodes, config);
     }
 
     public static MemoryEstimation estimate(SplitRelationshipsBaseConfig configuration) {
@@ -107,7 +118,7 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
                 config.concurrency()
             );
 
-        return splitter.split(graph, masterGraph, config.holdoutFraction());
+        return splitter.split(graph, masterGraph, negativeSamplingGraph, config.holdoutFraction());
     }
 
     @Override

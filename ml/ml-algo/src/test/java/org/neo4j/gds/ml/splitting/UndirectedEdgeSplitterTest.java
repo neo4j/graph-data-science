@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.splitting;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyCursor;
@@ -159,6 +160,49 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         });
     }
 
+
+    @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "negative")
+    static String gdlNegative = "(n1 :A)-[:T {foo: 5} ]->(n2 :A)-[:T {foo: 5} ]->(n3 :A)-[:T {foo: 5} ]->(n4 :A)-[:T {foo: 5} ]->(n5 :B)-[:T {foo: 5} ]->(n6 :A), (n1)-[:NEGATIVE]->(n3), (n3)-[:NEGATIVE]->(n5), (n5)-[:NEGATIVE]->(n7 :A)";
+
+    @Inject
+    TestGraph negativeGraph;
+
+    @Inject
+    GraphStore negativeGraphStore;
+
+    @Test
+    void splitWithNegativeRelationshipType() {
+        var splitter = new UndirectedEdgeSplitter(
+            Optional.of(1337L),
+            //negativeSamplingRatio no longer used when negativeSamplingGraph is passed into splitter
+            99.0,
+            negativeGraphStore.nodes(),
+            negativeGraphStore.nodes(),
+            4
+        );
+
+        //7 (directed) edges, 14 (undirected) overall
+        var baseGraph = negativeGraphStore.getGraph(RelationshipType.of("T"), Optional.of("foo"));
+        var negativeSamplingGraph = negativeGraphStore.getGraph(RelationshipType.of("NEGATIVE"));
+        var result = splitter.split(baseGraph, baseGraph, negativeSamplingGraph, .2);
+
+        var remainingRels = result.remainingRels();
+        // 1 positive selected reduces remaining
+        assertEquals(8L, remainingRels.topology().elementCount());
+        assertEquals(Orientation.UNDIRECTED, remainingRels.topology().orientation());
+        assertFalse(remainingRels.topology().isMultiGraph());
+        assertThat(remainingRels.properties()).isNotEmpty();
+
+        var selectedRels = result.selectedRels();
+        assertThat(selectedRels.topology()).satisfies(topology -> {
+            //assertRelSamplingProperties(selectedRels, graph, 3.0);
+            //1 positive relationship, and 6 negative.
+            assertThat(topology.elementCount()).isEqualTo(7);
+            assertEquals(Orientation.NATURAL, topology.orientation());
+            assertFalse(topology.isMultiGraph());
+        });
+    }
+
     @Test
     void negativeEdgesShouldNotOverlapMasterGraph() {
         var huuuuugeDenseGraph = RandomGraphGenerator.builder()
@@ -184,7 +228,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             huuuuugeDenseGraph.idMap(),
             splitResult.remainingRels()
         );
-        var nestedSplit = splitter.split(graph, huuuuugeDenseGraph, 0.9);
+        var nestedSplit = splitter.split(graph, huuuuugeDenseGraph, null, 0.9);
         Relationships nestedHoldout = nestedSplit.selectedRels();
         HugeGraph nestedHoldoutGraph = GraphFactory.create(graph, nestedHoldout);
         nestedHoldoutGraph.forEachNode(nodeId -> {

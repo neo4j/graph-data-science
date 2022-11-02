@@ -83,13 +83,14 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
 
     @TestOnly
     public SplitResult split(Graph graph, double holdoutFraction) {
-        return split(graph, graph, holdoutFraction);
+        return split(graph, graph, null, holdoutFraction);
     }
 
     @Override
     public SplitResult split(
         Graph graph,
         Graph masterGraph,
+        Graph negativeSamplingGraph,
         double holdoutFraction
     ) {
         // TODO: move this validation higher into the hierarchy
@@ -126,7 +127,7 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
 
         var positiveSamples = (long) (validRelationshipCount * holdoutFraction) / 2;
         var positiveSamplesRemaining = new MutableLong(positiveSamples);
-        var negativeSamples = (long) (negativeSamplingRatio * validRelationshipCount * holdoutFraction) / 2;
+        var negativeSamples = (long) negativeSamplingRatio * positiveSamples;
         var negativeSamplesRemaining = new MutableLong(negativeSamples);
         var candidateEdgesRemaining = new MutableLong(validRelationshipCount);
 
@@ -143,16 +144,20 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
                 isValidNodePair
             );
 
-            negativeSampling(
-                graph,
-                masterGraph,
-                selectedRelsBuilder,
-                negativeSamplesRemaining,
-                nodeId,
-                isValidSourceNode,
-                isValidTargetNode,
-                validSourceNodeCount
-            );
+            if (negativeSamplingGraph == null) {
+                negativeSampling(
+                    graph,
+                    masterGraph,
+                    selectedRelsBuilder,
+                    negativeSamplesRemaining,
+                    nodeId,
+                    isValidSourceNode,
+                    isValidTargetNode,
+                    validSourceNodeCount
+                );
+            } else {
+                negativeSampleFromGivenGraph(negativeSamplingGraph, selectedRelsBuilder, negativeSamplesRemaining, nodeId, isValidSourceNode, isValidTargetNode, validSourceNodeCount);
+            }
             return true;
         });
 

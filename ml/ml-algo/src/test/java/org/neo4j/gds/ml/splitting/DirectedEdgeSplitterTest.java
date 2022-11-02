@@ -174,7 +174,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             huuuuugeDenseGraph.idMap(),
             splitResult.remainingRels()
         );
-        var nestedSplit = splitter.split(graph, huuuuugeDenseGraph, 0.9);
+        var nestedSplit = splitter.split(graph, huuuuugeDenseGraph, null, 0.9);
         Relationships nestedHoldout = nestedSplit.selectedRels();
         HugeGraph nestedHoldoutGraph = GraphFactory.create(graph, nestedHoldout);
         nestedHoldoutGraph.forEachNode(nodeId -> {

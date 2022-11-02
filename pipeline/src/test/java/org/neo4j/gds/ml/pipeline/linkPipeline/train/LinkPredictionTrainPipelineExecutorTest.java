@@ -622,8 +622,6 @@ final class LinkPredictionTrainPipelineExecutorTest {
             "(p4)-[:REL2]->(q5)," +
             "(p3)-[:REL2]->(q4)," +
 
-            "(p2)-[:NE]->(q2)," +
-
             "(p1)-[:CONTEXT]->(x1)," +
             "(p3)-[:CONTEXT]->(x2)," +
 

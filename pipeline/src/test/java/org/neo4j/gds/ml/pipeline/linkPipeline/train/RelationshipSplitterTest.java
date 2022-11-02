@@ -84,7 +84,10 @@ class RelationshipSplitterTest {
         "(b)-[:REL {weight: 2.0}]->(d), " +
         "(e)-[:REL {weight: 0.5}]->(g), " +
         "(j)-[:REL {weight: 2.0}]->(l), " +
-        "(m)-[:REL {weight: 2.0}]->(o)";
+        "(m)-[:REL {weight: 2.0}]->(o), " +
+        "(a)-[:NEGATIVE]->(k), " +
+        "(b)-[:NEGATIVE]->(k), " +
+        "(c)-[:NEGATIVE]->(k)";
 
     @Inject
     GraphStore graphStore;
@@ -139,7 +142,8 @@ class RelationshipSplitterTest {
                 splitConfig.trainRelationshipType(),
                 splitConfig.testRelationshipType(),
                 splitConfig.featureInputRelationshipType(),
-                RelationshipType.of("REL")
+                RelationshipType.of("REL"),
+                RelationshipType.of("NEGATIVE")
             )
             .collect(Collectors.toList());
 
@@ -149,7 +153,8 @@ class RelationshipSplitterTest {
             splitConfig.featureInputRelationshipType(), Set.of("weight"),
             splitConfig.trainRelationshipType(), Set.of("label"),
             splitConfig.testRelationshipType(), Set.of("label"),
-            RelationshipType.of("REL"), Set.of("weight")
+            RelationshipType.of("REL"), Set.of("weight"),
+            RelationshipType.of("NEGATIVE"), Set.of()
         );
 
         Map<RelationshipType, Set<String>> actualRelProperties = graphStore
@@ -284,5 +289,39 @@ class RelationshipSplitterTest {
         // due to the label filter most of the relationships are not valid
         assertThatThrownBy(() -> relationshipSplitter.splitRelationships(RelationshipType.of("T"), "N", "M", Optional.of(42L), Optional.empty()))
             .hasMessageContaining("The specified `testFraction` is too low for the current graph. The test set would have 0 relationship(s) but it must have at least 1.");
+    }
+
+    @Test
+    void splitWithSpecifiedNegativeRelationships() {
+        var splitConfig = LinkPredictionSplitConfigImpl.builder()
+            .trainFraction(0.5)
+            .testFraction(0.5)
+            .validationFolds(2)
+            .negativeSamplingRatio(99.0)
+            .negativeRelationshipType("NEGATIVE")
+            .build();
+
+        var relationshipSplitter = new RelationshipSplitter(
+            graphStore,
+            splitConfig,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        relationshipSplitter.splitRelationships(RelationshipType.of("REL"), "*", "N", Optional.of(42L), Optional.of("weight"));
+
+        //16 [REL], 3[NEGATIVE] relationships
+        var wholegraph = graphStore.relationshipCount();
+        //16*0.5 = 8 positive, 2 negative
+        var testGraphSize = graphStore.relationshipCount(splitConfig.testRelationshipType());
+        //var testComplementGraph = graphStore.relationshipCount(splitConfig.testComplementRelationshipType());
+        //(16*0.5)*0.5 = 4 positive, 1 negative
+        var trainGraphSize = graphStore.relationshipCount(splitConfig.trainRelationshipType());
+        var featureInputGraphSize = graphStore.relationshipCount(splitConfig.featureInputRelationshipType());
+
+        assertThat(testGraphSize).isEqualTo(10);
+        assertThat(trainGraphSize).isEqualTo(5);
+        assertThat(featureInputGraphSize).isEqualTo(7);
+
     }
 }

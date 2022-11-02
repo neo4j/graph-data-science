@@ -78,6 +78,8 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
         return 1.0;
     }
 
+    Optional<String> negativeRelationshipType();
+
     @Value.Default
     @Configuration.Ignore
     default RelationshipType testRelationshipType() {
@@ -126,6 +128,7 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
             .remainingRelationshipType(testComplementRelationshipType().name)
             .holdoutFraction(testFraction())
             .negativeSamplingRatio(negativeSamplingRatio())
+            .negativeRelationshipType(negativeRelationshipType())
             .relationshipWeightProperty(relationshipWeightProperty.orElse(null))
             .relationshipTypes(List.of(targetRelationshipType.name))
             .randomSeed(randomSeed)
@@ -150,6 +153,7 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
             .relationshipWeightProperty(relationshipWeightProperty.orElse(null))
             .relationshipTypes(List.of(testComplementRelationshipType().name))
             .nonNegativeRelationshipTypes(List.of(targetRelationshipType.name))
+            .negativeRelationshipType(negativeRelationshipType())
             .randomSeed(randomSeed)
             .build();
     }
