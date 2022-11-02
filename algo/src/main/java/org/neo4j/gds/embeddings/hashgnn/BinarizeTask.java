@@ -113,6 +113,11 @@ class BinarizeTask implements Runnable {
         return truncatedFeatures;
     }
 
+    // creates a sparse projection array with one row per input feature
+    // (input features vector for each node is the concatenation of the node's properties)
+    // the first half of each row contains indices of positive output features in the projected space
+    // the second half of each row contains indices of negative output features in the projected space
+    // this array is used embed the properties themselves from inputDimension to ambientDimension dimensions.
     private static int[][] embedProperties(HashGNNConfig config, SplittableRandom rng, int inputDimension) {
         var binarizationConfig = config.binarizeFeatures().orElseThrow();
         var permutation = new int[binarizationConfig.dimension()];
