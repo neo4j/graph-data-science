@@ -143,28 +143,28 @@ class BinarizeTask implements Runnable {
             FeatureExtraction.extract(nodeId, nodeId, featureExtractors, new FeatureConsumer() {
                 @Override
                 public void acceptScalar(long nodeOffset, int offset, double value) {
-                    for (int ambientOffset = 0; ambientOffset < 2 * binarizationConfig.densityLevel(); ambientOffset++) {
-                        if (ambientOffset < binarizationConfig.densityLevel()) {
-                            int positiveAmbientFeature = propertyEmbeddings[offset][ambientOffset];
-                            featureVector[positiveAmbientFeature] += value;
-                        } else {
-                            int negativeAmbientFeature = propertyEmbeddings[offset][ambientOffset];
-                            featureVector[negativeAmbientFeature] -= value;
-                        }
+                    for (int ambientOffset = 0; ambientOffset < binarizationConfig.densityLevel(); ambientOffset++) {
+                        int positiveAmbientFeature = propertyEmbeddings[offset][ambientOffset];
+                        featureVector[positiveAmbientFeature] += value;
+                    }
+
+                    for (int ambientOffset = binarizationConfig.densityLevel(); ambientOffset < 2 * binarizationConfig.densityLevel(); ambientOffset++) {
+                        int negativeAmbientFeature = propertyEmbeddings[offset][ambientOffset];
+                        featureVector[negativeAmbientFeature] -= value;
+
                     }
                 }
 
                 @Override
                 public void acceptArray(long nodeOffset, int offset, double[] values) {
                     for (int inputFeatureOffset = 0; inputFeatureOffset < values.length; inputFeatureOffset++) {
-                        for (int ambientOffset = 0; ambientOffset < 2 * binarizationConfig.densityLevel(); ambientOffset++) {
-                            if (ambientOffset < binarizationConfig.densityLevel()) {
-                                int positiveAmbientFeature = propertyEmbeddings[offset + inputFeatureOffset][ambientOffset];
-                                featureVector[positiveAmbientFeature] += values[inputFeatureOffset];
-                            } else {
-                                int negativeAmbientFeature = propertyEmbeddings[offset + inputFeatureOffset][ambientOffset];
-                                featureVector[negativeAmbientFeature] -= values[inputFeatureOffset];
-                            }
+                        for (int ambientOffset = 0; ambientOffset < binarizationConfig.densityLevel(); ambientOffset++) {
+                            int positiveAmbientFeature = propertyEmbeddings[offset + inputFeatureOffset][ambientOffset];
+                            featureVector[positiveAmbientFeature] += values[inputFeatureOffset];
+                        }
+                        for (int ambientOffset = binarizationConfig.densityLevel(); ambientOffset < 2 * binarizationConfig.densityLevel(); ambientOffset++) {
+                            int negativeAmbientFeature = propertyEmbeddings[offset + inputFeatureOffset][ambientOffset];
+                            featureVector[negativeAmbientFeature] -= values[inputFeatureOffset];
                         }
                     }
                 }
