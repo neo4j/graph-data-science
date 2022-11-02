@@ -170,11 +170,11 @@ class BinarizeTask implements Runnable {
                 }
             });
 
-            truncatedFeatures.set(nodeId, truncate(featureVector));
+            truncatedFeatures.set(nodeId, roundAndSample(featureVector));
         });
     }
 
-    private BitSet truncate(float[] floatVector) {
+    private BitSet roundAndSample(float[] floatVector) {
         var bitset = new BitSet(floatVector.length);
         for (int feature = 0; feature < floatVector.length; feature++) {
             if (floatVector[feature] > 0) {
