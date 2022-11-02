@@ -30,7 +30,7 @@ public class HashGNNCompanion {
     private HashGNNCompanion() {}
 
 
-   static void hashArgMin(BitSet bitSet, int[] hashes, HashGNN.MinAndArgmin minAndArgmin) {
+   static void hashArgMin(BitSet bitSet, int[] hashes, HashGNN.MinAndArgmin result) {
        int argMin = -1;
        int minHash = Integer.MAX_VALUE;
        var iterator = bitSet.iterator();
@@ -46,8 +46,8 @@ public class HashGNNCompanion {
            bit = iterator.nextSetBit();
        }
 
-       minAndArgmin.min = minHash;
-       minAndArgmin.argMin = argMin;
+       result.min = minHash;
+       result.argMin = argMin;
    }
 
     @ValueClass

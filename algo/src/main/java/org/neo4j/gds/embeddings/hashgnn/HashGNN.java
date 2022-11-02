@@ -36,6 +36,9 @@ import java.util.SplittableRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Based on the paper "Hashing-Accelerated Graph Neural Networks for Link Prediction"
+ */
 public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
     private final long randomSeed;
     private final Graph graph;

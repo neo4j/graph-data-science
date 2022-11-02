@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -34,8 +33,6 @@ import org.neo4j.gds.extension.Inject;
 
 import java.util.List;
 import java.util.Map;
-import java.util.SplittableRandom;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -254,38 +251,5 @@ class HashGNNTest {
         assertThat(result.get(0).length).isEqualTo(42);
         assertThat(result.get(1).length).isEqualTo(42);
         assertThat(result.get(2).length).isEqualTo(42);
-    }
-
-    @Test
-    void shouldComputeHashesFromTriple() {
-        int EMBEDDING_DIMENSION = 10;
-
-        var rng = new SplittableRandom();
-        int c = rng.nextInt(2, 100);
-        int a = rng.nextInt(c - 1) + 1;
-        int b = rng.nextInt(c - 1) + 1;
-
-        var hashTriple = ImmutableHashTriple.of(a, b, c);
-        var hashes = HashGNNCompanion.HashTriple.computeHashesFromTriple(EMBEDDING_DIMENSION, hashTriple);
-
-        assertThat(hashes.length).isEqualTo(EMBEDDING_DIMENSION);
-        assertThat(hashes).containsAnyOf(IntStream.range(0, c).toArray());
-    }
-
-    @Test
-    void shouldHashArgMin() {
-        var rng = new SplittableRandom();
-
-        var bitSet = new BitSet(10);
-        bitSet.set(3);
-        bitSet.set(9);
-
-        var hashes = IntStream.generate(() -> rng.nextInt(0, Integer.MAX_VALUE)).limit(10).toArray();
-        var minArgMin = new HashGNN.MinAndArgmin();
-
-        HashGNNCompanion.hashArgMin(bitSet, hashes, minArgMin);
-
-        assertThat(minArgMin.min).isEqualTo(Math.min(hashes[3], hashes[9]));
-        assertThat(minArgMin.argMin).isEqualTo(hashes[3] <= hashes[9] ? 3 : 9);
     }
 }

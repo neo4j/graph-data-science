@@ -102,7 +102,7 @@ class DensifyTask implements Runnable {
         return matrix;
     }
 
-    static float computeRandomEntry(SplittableRandom random, float entryValue) {
+    private static float computeRandomEntry(SplittableRandom random, float entryValue) {
         double randomValue = random.nextDouble();
 
         if (randomValue < ENTRY_PROBABILITY) {
@@ -125,8 +125,9 @@ class DensifyTask implements Runnable {
             var iterator = binaryVector.iterator();
             var bit = iterator.nextSetBit();
             while (bit != BitSetIterator.NO_MORE) {
+                final float[] row = projectionMatrix[bit];
                 for (int i = 0; i < denseLength; i++) {
-                    denseVector[i] += projectionMatrix[bit][i];
+                    denseVector[i] += row[i];
                 }
                 bit = iterator.nextSetBit();
             }
