@@ -59,5 +59,7 @@ if (ver.'neo4j'.startsWith('5.')) {
 
         java17Implementation project(':core')
         java17Implementation project(':storage-engine-adapter-api')
+        java17Implementation project(':config-api')
+        java17Implementation project(':string-formatting')
     }
 }
