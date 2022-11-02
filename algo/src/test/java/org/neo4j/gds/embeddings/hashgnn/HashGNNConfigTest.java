@@ -19,20 +19,27 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
+import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@Configuration
-public interface FeatureBinarizationConfig {
-    int dimension();
-    int densityLevel();
-
-    @Value.Check
-    default void validate() {
-        if (2 * densityLevel() > dimension()) {
-            throw new IllegalArgumentException(formatWithLocale("The value %d of `densityLevel` may not exceed half of the value %d of `dimension`.", densityLevel(), dimension()));
-        }
+class HashGNNConfigTest {
+    @Test
+    void failsWithTooHighDensityLevel() {
+        assertThatThrownBy(() -> {
+            HashGNNConfigImpl
+                .builder()
+                .featureProperties(List.of("x"))
+                .embeddingDensity(4)
+                .binarizeFeatures(Map.of("dimension", 4, "densityLevel", 3))
+                .iterations(100)
+                .build();
+        }).isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining(formatWithLocale("The value %d of `densityLevel` may not exceed half of the value %d of `dimension`.", 3, 4));
     }
+
 }
