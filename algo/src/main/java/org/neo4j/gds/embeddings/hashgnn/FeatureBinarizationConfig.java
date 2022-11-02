@@ -26,7 +26,9 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
 public interface FeatureBinarizationConfig {
+    @Configuration.IntegerRange(min = 1)
     int dimension();
+    @Configuration.IntegerRange(min = 1)
     int densityLevel();
 
     @Value.Check

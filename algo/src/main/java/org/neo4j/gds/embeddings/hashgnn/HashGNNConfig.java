@@ -39,13 +39,16 @@ import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 @Configuration
 interface HashGNNConfig extends AlgoBaseConfig, FeaturePropertiesConfig, RandomSeedConfig {
 
+    @Configuration.IntegerRange(min = 1)
     int iterations();
 
     @Configuration.IntegerRange(min = 1)
     int embeddingDensity();
 
+    @Configuration.IntegerRange(min = 1)
     Optional<Integer> outputDimension();
 
+    @Configuration.DoubleRange(min = 0)
     default double neighborInfluence() {
         return 1;
     }
