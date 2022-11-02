@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -63,7 +64,6 @@ class RefinementPhaseKarateTest {
             originalCommunities, nodeVolumes, communityVolumes, gamma, graph.nodeCount(), 1
         );
 
-        var localMovePhaseResult = localMovePhase.run();
         var communityVolumesForRefinement = communityVolumes;
 
         var refinementPhase = RefinementPhase.create(
@@ -73,7 +73,10 @@ class RefinementPhaseKarateTest {
             communityVolumesForRefinement,
             gamma,
             0.01,
-            19L, 1, Pools.DEFAULT
+            19L,
+            1,
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
         );
 
         var refinementPhaseResult = refinementPhase.run();

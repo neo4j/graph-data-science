@@ -48,9 +48,9 @@ class LeidenAlgorithmFactoryTest {
                     Tasks.leaf("Modularity Computation", 2),
                     Tasks.leaf("Refinement", 2),
                     Tasks.leaf("Aggregation", 2)
-                )
-            ,
-            3);
+                ),
+            3
+        );
         var expectedTask = Tasks.task("Leiden", initialization, iteration);
 
         assertThat(task.render()).isEqualTo(expectedTask.render());

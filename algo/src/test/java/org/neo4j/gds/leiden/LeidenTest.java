@@ -22,14 +22,18 @@ package org.neo4j.gds.leiden;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -42,6 +46,8 @@ import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
 
 @GdlExtension
@@ -283,5 +289,42 @@ class LeidenTest {
         var leidenResult = leiden.compute();
         assertThat(leidenResult.ranLevels()).isEqualTo(2);
         assertThat(leidenResult.modularity()).isCloseTo(0.186147, Offset.offset(1e-6));
+    }
+
+    @Test
+    void shouldLogProgress() {
+
+        var config = LeidenStatsConfigImpl.builder().maxLevels(3).gamma(1.0).theta(0.01).randomSeed(19L).build();
+        var factory = new LeidenAlgorithmFactory<>();
+        var log = Neo4jProxy.testLog();
+        var progressTracker = new TestProgressTracker(
+            factory.progressTask(graph, config),
+            log,
+            4,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+        var leiden = factory.build(graph, config, progressTracker);
+
+        leiden.compute();
+
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "Leiden :: Start",
+                "Leiden :: Initialization :: Start",
+                "Leiden :: Initialization 12%",
+                "Leiden :: Initialization 25%",
+                "Leiden :: Initialization 37%",
+                "Leiden :: Initialization 50%",
+                "Leiden :: Initialization 62%",
+                "Leiden :: Initialization 75%",
+                "Leiden :: Initialization 87%",
+                "Leiden :: Initialization 100%",
+                "Leiden :: Initialization :: Finished",
+                "Leiden :: Finished"
+            );
+
     }
 }

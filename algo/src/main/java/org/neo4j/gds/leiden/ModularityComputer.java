@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -43,7 +44,8 @@ public final class ModularityComputer {
         double gamma,
         double coefficient,
         int concurrency,
-        ExecutorService executorService
+        ExecutorService executorService,
+        ProgressTracker progressTracker
     ) {
         HugeAtomicDoubleArray relationshipsOutsideCommunity = HugeAtomicDoubleArray.newArray(workingGraph.nodeCount());
         var tasks = PartitionUtils.rangePartition(
@@ -53,7 +55,8 @@ public final class ModularityComputer {
                 partition,
                 workingGraph,
                 relationshipsOutsideCommunity,
-                communities
+                communities,
+                progressTracker
             ), Optional.empty()
         );
         RunWithConcurrency.builder()
@@ -87,17 +90,20 @@ public final class ModularityComputer {
         private final Graph localGraph;
         private final HugeAtomicDoubleArray relationshipsOutsideCommunity;
         private final HugeLongArray communities;
+        private final ProgressTracker progressTracker;
 
         OutsideRelationshipCalculator(
             Partition partition,
             Graph graph,
             HugeAtomicDoubleArray relationshipsOutsideCommunity,
-            HugeLongArray communities
+            HugeLongArray communities,
+            ProgressTracker progressTracker
         ) {
             this.partition = partition;
             this.localGraph = graph.concurrentCopy();
             this.relationshipsOutsideCommunity = relationshipsOutsideCommunity;
             this.communities = communities;
+            this.progressTracker = progressTracker;
         }
 
         @Override
@@ -113,6 +119,7 @@ public final class ModularityComputer {
                     }
                     return true;
                 });
+                progressTracker.logProgress();
             }
         }
     }

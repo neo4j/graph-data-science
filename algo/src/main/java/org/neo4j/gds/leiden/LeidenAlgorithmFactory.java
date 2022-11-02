@@ -68,8 +68,7 @@ public class LeidenAlgorithmFactory<CONFIG extends LeidenBaseConfig> extends Gra
                     Tasks.leaf("Modularity Computation", graph.nodeCount()),
                     Tasks.leaf("Refinement", graph.nodeCount()),
                     Tasks.leaf("Aggregation", graph.nodeCount())
-                )
-            ,
+                ),
             iterations
         );
         var initilizationTask = Tasks.leaf("Initialization", graph.nodeCount());

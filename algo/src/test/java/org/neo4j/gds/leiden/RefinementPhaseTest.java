@@ -24,6 +24,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -73,8 +74,17 @@ class RefinementPhaseTest {
         var localPhaseCommunities = HugeLongArray.of(0, 0, 2, 2, 2, 7, 7, 7);
         var nodeVolumes = HugeDoubleArray.of(1, 1, 1, 1, 1, 1, 1, 1);
         var communityVolumes = HugeDoubleArray.of(2, 0, 3, 0, 0, 0, 0, 3);
-        var refinement = RefinementPhase.create(graph, localPhaseCommunities,
-            nodeVolumes, communityVolumes, 1.0, 0.01, 19L, 1, Pools.DEFAULT
+        var refinement = RefinementPhase.create(
+            graph,
+            localPhaseCommunities,
+            nodeVolumes,
+            communityVolumes,
+            1.0,
+            0.01,
+            19L,
+            1,
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
         );
         var refinementResult = refinement.run();
         var communities = refinementResult.communities();
