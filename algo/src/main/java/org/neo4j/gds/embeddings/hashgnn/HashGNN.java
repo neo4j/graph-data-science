@@ -89,7 +89,9 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         embeddingsA.setAll(unused -> new BitSet(ambientDimension));
 
         double avgDegree = (graph.relationshipCount() / (double) graph.nodeCount());
-        double scaledNeighborInfluence = graph.relationshipCount() == 0 ? 1.0 : config.embeddingDensity() * config.neighborInfluence() / avgDegree;
+        int upperBoundBits = Math.min(ambientDimension, config.embeddingDensity());
+        int upperBoundExpectedBits = (int) Math.round(upperBoundBits * (1 - Math.pow(1 - (1.0 / upperBoundBits), config.embeddingDensity())));
+        double scaledNeighborInfluence = graph.relationshipCount() == 0 ? 1.0 : upperBoundExpectedBits * config.neighborInfluence() / avgDegree;
 
         var hashes = HashTask.compute(
             ambientDimension,

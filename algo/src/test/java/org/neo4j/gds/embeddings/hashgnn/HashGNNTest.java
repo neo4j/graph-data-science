@@ -98,6 +98,7 @@ class HashGNNTest {
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(200)
+            .neighborInfluence(100)
             .iterations(10)
             .randomSeed(42L)
             .build();
