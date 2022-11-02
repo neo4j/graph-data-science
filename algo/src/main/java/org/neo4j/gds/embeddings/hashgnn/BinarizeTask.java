@@ -117,7 +117,7 @@ class BinarizeTask implements Runnable {
     // (input features vector for each node is the concatenation of the node's properties)
     // the first half of each row contains indices of positive output features in the projected space
     // the second half of each row contains indices of negative output features in the projected space
-    // this array is used embed the properties themselves from inputDimension to ambientDimension dimensions.
+    // this array is used embed the properties themselves from inputDimension to embeddingDimension dimensions.
     public static int[][] embedProperties(HashGNNConfig config, SplittableRandom rng, int inputDimension) {
         var binarizationConfig = config.binarizeFeatures().orElseThrow();
         var permutation = new int[binarizationConfig.dimension()];
@@ -128,8 +128,8 @@ class BinarizeTask implements Runnable {
         for (int inputFeature = 0; inputFeature < inputDimension; inputFeature++) {
             ShuffleUtil.shuffleArray(permutation, rng);
             propertyEmbeddings[inputFeature] = new int[2 * binarizationConfig.densityLevel()];
-            for (int ambientOffset = 0; ambientOffset < 2 * binarizationConfig.densityLevel(); ambientOffset++) {
-                propertyEmbeddings[inputFeature][ambientOffset] = permutation[ambientOffset];
+            for (int feature = 0; feature < 2 * binarizationConfig.densityLevel(); feature++) {
+                propertyEmbeddings[inputFeature][feature] = permutation[feature];
             }
         }
         return propertyEmbeddings;
@@ -143,14 +143,14 @@ class BinarizeTask implements Runnable {
             FeatureExtraction.extract(nodeId, nodeId, featureExtractors, new FeatureConsumer() {
                 @Override
                 public void acceptScalar(long nodeOffset, int offset, double value) {
-                    for (int ambientOffset = 0; ambientOffset < binarizationConfig.densityLevel(); ambientOffset++) {
-                        int positiveAmbientFeature = propertyEmbeddings[offset][ambientOffset];
-                        featureVector[positiveAmbientFeature] += value;
+                    for (int feature = 0; feature < binarizationConfig.densityLevel(); feature++) {
+                        int positiveFeature = propertyEmbeddings[offset][feature];
+                        featureVector[positiveFeature] += value;
                     }
 
-                    for (int ambientOffset = binarizationConfig.densityLevel(); ambientOffset < 2 * binarizationConfig.densityLevel(); ambientOffset++) {
-                        int negativeAmbientFeature = propertyEmbeddings[offset][ambientOffset];
-                        featureVector[negativeAmbientFeature] -= value;
+                    for (int feature = binarizationConfig.densityLevel(); feature < 2 * binarizationConfig.densityLevel(); feature++) {
+                        int negativeFeature = propertyEmbeddings[offset][feature];
+                        featureVector[negativeFeature] -= value;
 
                     }
                 }
@@ -158,13 +158,13 @@ class BinarizeTask implements Runnable {
                 @Override
                 public void acceptArray(long nodeOffset, int offset, double[] values) {
                     for (int inputFeatureOffset = 0; inputFeatureOffset < values.length; inputFeatureOffset++) {
-                        for (int ambientOffset = 0; ambientOffset < binarizationConfig.densityLevel(); ambientOffset++) {
-                            int positiveAmbientFeature = propertyEmbeddings[offset + inputFeatureOffset][ambientOffset];
-                            featureVector[positiveAmbientFeature] += values[inputFeatureOffset];
+                        for (int feature = 0; feature < binarizationConfig.densityLevel(); feature++) {
+                            int positiveFeature = propertyEmbeddings[offset + inputFeatureOffset][feature];
+                            featureVector[positiveFeature] += values[inputFeatureOffset];
                         }
-                        for (int ambientOffset = binarizationConfig.densityLevel(); ambientOffset < 2 * binarizationConfig.densityLevel(); ambientOffset++) {
-                            int negativeAmbientFeature = propertyEmbeddings[offset + inputFeatureOffset][ambientOffset];
-                            featureVector[negativeAmbientFeature] -= values[inputFeatureOffset];
+                        for (int feature = binarizationConfig.densityLevel(); feature < 2 * binarizationConfig.densityLevel(); feature++) {
+                            int negativeFeature = propertyEmbeddings[offset + inputFeatureOffset][feature];
+                            featureVector[negativeFeature] -= values[inputFeatureOffset];
                         }
                     }
                 }
@@ -176,9 +176,9 @@ class BinarizeTask implements Runnable {
 
     private BitSet truncate(float[] floatVector) {
         var bitset = new BitSet(floatVector.length);
-        for (int ambientOffset = 0; ambientOffset < floatVector.length; ambientOffset++) {
-            if (floatVector[ambientOffset] > 0) {
-                bitset.set(ambientOffset);
+        for (int feature = 0; feature < floatVector.length; feature++) {
+            if (floatVector[feature] > 0) {
+                bitset.set(feature);
             }
         }
         var sampledBitset = new BitSet(binarizationConfig.dimension());

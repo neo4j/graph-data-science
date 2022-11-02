@@ -33,7 +33,7 @@ class HashTaskTest {
         int EMBEDDING_DENSITY = 10;
         int NEIGHBOR_HASH_REPEATS = 3;
         int NUMBER_OF_RELATIONSHIPS = 3;
-        int AMBIENT_DIMENSION = 10;
+        int EMBEDDING_DIMENSION = 10;
 
         var config = HashGNNConfigImpl
             .builder()
@@ -41,11 +41,11 @@ class HashTaskTest {
             .iterations(ITERATIONS)
             .embeddingDensity(EMBEDDING_DENSITY)
             .build();
-        var hashes = HashTask.compute(AMBIENT_DIMENSION, NEIGHBOR_HASH_REPEATS, NUMBER_OF_RELATIONSHIPS, config, 42, TerminationFlag.RUNNING_TRUE);
+        var hashes = HashTask.compute(EMBEDDING_DIMENSION, NEIGHBOR_HASH_REPEATS, NUMBER_OF_RELATIONSHIPS, config, 42, TerminationFlag.RUNNING_TRUE);
 
         assertThat(hashes.size()).isEqualTo(ITERATIONS * EMBEDDING_DENSITY);
-        assertThat(hashes.get(0).neighborsAggregationHashes().length).isEqualTo(AMBIENT_DIMENSION);
+        assertThat(hashes.get(0).neighborsAggregationHashes().length).isEqualTo(EMBEDDING_DIMENSION);
         assertThat(hashes.get(0).preAggregationHashes().size()).isEqualTo(NUMBER_OF_RELATIONSHIPS);
-        assertThat(hashes.get(0).selfAggregationHashes().length).isEqualTo(AMBIENT_DIMENSION);
+        assertThat(hashes.get(0).selfAggregationHashes().length).isEqualTo(EMBEDDING_DIMENSION);
     }
 }

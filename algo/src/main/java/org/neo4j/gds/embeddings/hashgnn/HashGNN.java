@@ -77,7 +77,7 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         var embeddingsB = config.binarizeFeatures().isPresent()
             ? BinarizeTask.compute(graph, rangePartition, config, rng, progressTracker)
             : RawFeaturesTask.compute(config, rng, progressTracker, graph, rangePartition);
-        int ambientDimension = config.binarizeFeatures().map(FeatureBinarizationConfig::dimension).orElseGet(() -> {
+        int embeddingDimension = config.binarizeFeatures().map(FeatureBinarizationConfig::dimension).orElseGet(() -> {
             var featureExtractors = FeatureExtraction.propertyExtractors(
                 graph,
                 config.featureProperties()
@@ -86,15 +86,15 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         });
 
         var embeddingsA = HugeObjectArray.newArray(BitSet.class, graph.nodeCount());
-        embeddingsA.setAll(unused -> new BitSet(ambientDimension));
+        embeddingsA.setAll(unused -> new BitSet(embeddingDimension));
 
         double avgDegree = (graph.relationshipCount() / (double) graph.nodeCount());
-        int upperBoundBits = Math.min(ambientDimension, config.embeddingDensity());
+        int upperBoundBits = Math.min(embeddingDimension, config.embeddingDensity());
         int upperBoundExpectedBits = (int) Math.round(upperBoundBits * (1 - Math.pow(1 - (1.0 / upperBoundBits), config.embeddingDensity())));
         double scaledNeighborInfluence = graph.relationshipCount() == 0 ? 1.0 : upperBoundExpectedBits * config.neighborInfluence() / avgDegree;
 
         var hashes = HashTask.compute(
-            ambientDimension,
+            embeddingDimension,
             scaledNeighborInfluence,
             graphs.size(),
             config,
@@ -117,7 +117,7 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
                 degreePartition,
                 graphs,
                 config,
-                ambientDimension,
+                embeddingDimension,
                 currentEmbeddings,
                 previousEmbeddings,
                 iteration,
@@ -143,7 +143,7 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
             );
         } else {
             outputVectors = HugeObjectArray.newArray(double[].class, graph.nodeCount());
-            outputVectors.setAll(nodeId -> bitSetToArray(binaryOutputVectors.get(nodeId), ambientDimension));
+            outputVectors.setAll(nodeId -> bitSetToArray(binaryOutputVectors.get(nodeId), embeddingDimension));
         }
 
         return new HashGNNResult(outputVectors);

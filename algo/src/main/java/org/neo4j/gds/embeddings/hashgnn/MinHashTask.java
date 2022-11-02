@@ -38,7 +38,7 @@ class MinHashTask implements Runnable {
     private final List<HashTask.Hashes> hashes;
     private final Partition partition;
     private final HashGNNConfig config;
-    private final int ambientDimension;
+    private final int embeddingDimension;
     private final List<Graph> concurrentGraphs;
     private final HugeObjectArray<BitSet> currentEmbeddings;
     private final HugeObjectArray<BitSet> previousEmbeddings;
@@ -49,7 +49,7 @@ class MinHashTask implements Runnable {
         Partition partition,
         List<Graph> graphs,
         HashGNNConfig config,
-        int ambientDimension,
+        int embeddingDimension,
         HugeObjectArray<BitSet> currentEmbeddings,
         HugeObjectArray<BitSet> previousEmbeddings,
         int iteration,
@@ -59,7 +59,7 @@ class MinHashTask implements Runnable {
         this.partition = partition;
         this.concurrentGraphs = graphs.stream().map(Graph::concurrentCopy).collect(Collectors.toList());
         this.config = config;
-        this.ambientDimension = ambientDimension;
+        this.embeddingDimension = embeddingDimension;
         this.currentEmbeddings = currentEmbeddings;
         this.previousEmbeddings = previousEmbeddings;
         this.iteration = iteration;
@@ -71,7 +71,7 @@ class MinHashTask implements Runnable {
         List<DegreePartition> partition,
         List<Graph> graphs,
         HashGNNConfig config,
-        int ambientDimension,
+        int embeddingDimension,
         HugeObjectArray<BitSet> currentEmbeddings,
         HugeObjectArray<BitSet> previousEmbeddings,
         int iteration,
@@ -86,7 +86,7 @@ class MinHashTask implements Runnable {
                 p,
                 graphs,
                 config,
-                ambientDimension,
+                embeddingDimension,
                 currentEmbeddings,
                 previousEmbeddings,
                 iteration,
@@ -104,7 +104,7 @@ class MinHashTask implements Runnable {
 
     @Override
     public void run() {
-        var neighborsVector = new BitSet(ambientDimension);
+        var neighborsVector = new BitSet(embeddingDimension);
         var selfMinAndArgMin = new HashGNN.MinAndArgmin(Integer.MAX_VALUE, -1);
         var neighborsMinAndArgMin = new HashGNN.MinAndArgmin(Integer.MAX_VALUE, -1);
 

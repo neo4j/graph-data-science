@@ -34,7 +34,7 @@ import java.util.stream.IntStream;
 import static org.neo4j.gds.embeddings.hashgnn.HashGNNCompanion.HashTriple.computeHashesFromTriple;
 
 class HashTask implements Runnable {
-    private final int ambientDimension;
+    private final int embeddingDimension;
     private final double scaledNeighborInfluence;
     private final int numberOfRelationships;
     private final SplittableRandom rng;
@@ -43,19 +43,19 @@ class HashTask implements Runnable {
     private List<int[]> preAggregationHashes;
 
     HashTask(
-        int ambientDimension,
+        int embeddingDimension,
         double scaledNeighborInfluence,
         int numberOfRelationships,
         SplittableRandom rng
     ) {
-        this.ambientDimension = ambientDimension;
+        this.embeddingDimension = embeddingDimension;
         this.scaledNeighborInfluence = scaledNeighborInfluence;
         this.numberOfRelationships = numberOfRelationships;
         this.rng = rng;
     }
 
     public static List<Hashes> compute(
-        int ambientDimension,
+        int embeddingDimension,
         double scaledNeighborInfluence,
         int numberOfRelationships,
         HashGNNConfig config,
@@ -64,7 +64,7 @@ class HashTask implements Runnable {
     ) {
         var hashTasks = IntStream.range(0, config.iterations() * config.embeddingDensity()).mapToObj(seedOffset ->
             new HashTask(
-                ambientDimension,
+                embeddingDimension,
                 scaledNeighborInfluence,
                 numberOfRelationships,
                 new SplittableRandom(randomSeed + seedOffset)
@@ -107,13 +107,13 @@ class HashTask implements Runnable {
         }
 
         this.neighborsAggregationHashes = computeHashesFromTriple(
-            ambientDimension,
+            embeddingDimension,
             HashGNNCompanion.HashTriple.generate(rng, c)
         );
-        this.selfAggregationHashes = computeHashesFromTriple(ambientDimension, HashGNNCompanion.HashTriple.generate(rng, d));
+        this.selfAggregationHashes = computeHashesFromTriple(embeddingDimension, HashGNNCompanion.HashTriple.generate(rng, d));
         this.preAggregationHashes = IntStream
             .range(0, numberOfRelationships)
-            .mapToObj(unused -> computeHashesFromTriple(ambientDimension, HashGNNCompanion.HashTriple.generate(rng)))
+            .mapToObj(unused -> computeHashesFromTriple(embeddingDimension, HashGNNCompanion.HashTriple.generate(rng)))
             .collect(Collectors.toList());
     }
 

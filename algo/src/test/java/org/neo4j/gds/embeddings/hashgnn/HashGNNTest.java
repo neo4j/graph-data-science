@@ -258,7 +258,7 @@ class HashGNNTest {
 
     @Test
     void shouldComputeHashesFromTriple() {
-        int AMBIENT_DIMENSION = 10;
+        int EMBEDDING_DIMENSION = 10;
 
         var rng = new SplittableRandom();
         int c = rng.nextInt(2, 100);
@@ -266,9 +266,9 @@ class HashGNNTest {
         int b = rng.nextInt(c - 1) + 1;
 
         var hashTriple = ImmutableHashTriple.of(a, b, c);
-        var hashes = HashGNNCompanion.HashTriple.computeHashesFromTriple(AMBIENT_DIMENSION, hashTriple);
+        var hashes = HashGNNCompanion.HashTriple.computeHashesFromTriple(EMBEDDING_DIMENSION, hashTriple);
 
-        assertThat(hashes.length).isEqualTo(AMBIENT_DIMENSION);
+        assertThat(hashes.length).isEqualTo(EMBEDDING_DIMENSION);
         assertThat(hashes).containsAnyOf(IntStream.range(0, c).toArray());
     }
 

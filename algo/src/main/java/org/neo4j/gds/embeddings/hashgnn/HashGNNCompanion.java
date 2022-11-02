@@ -74,9 +74,9 @@ public class HashGNNCompanion {
            return ImmutableHashTriple.of(a, b, c);
        }
 
-        static int[] computeHashesFromTriple(int ambientDimension, HashTriple hashTriple) {
-            var output = new int[ambientDimension];
-            for (int i = 0; i < ambientDimension; i++) {
+        static int[] computeHashesFromTriple(int embeddingDimension, HashTriple hashTriple) {
+            var output = new int[embeddingDimension];
+            for (int i = 0; i < embeddingDimension; i++) {
                 // without cast to long, we can easily overflow Integer.MAX_VALUE which can to negative hash values
                 output[i] = Math.toIntExact(((long) i * hashTriple.a() + hashTriple.b()) % hashTriple.c());
             }
