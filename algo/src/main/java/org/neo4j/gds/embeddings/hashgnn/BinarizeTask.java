@@ -63,7 +63,7 @@ class BinarizeTask implements Runnable {
         this.featureExtractors = featureExtractors;
         this.propertyEmbeddings = propertyEmbeddings;
         this.hashesList = hashesList;
-        this.minAndArgMin = new HashGNN.MinAndArgmin(Integer.MAX_VALUE, -1);
+        this.minAndArgMin = new HashGNN.MinAndArgmin();
     }
 
     static HugeObjectArray<BitSet> compute(

@@ -61,7 +61,7 @@ class RawFeaturesTask implements Runnable {
         this.inputDimension = inputDimension;
         this.features = features;
         this.hashesList = hashesList;
-        this.minAndArgMin = new MinAndArgmin(Integer.MAX_VALUE, -1);
+        this.minAndArgMin = new MinAndArgmin();
     }
 
     static HugeObjectArray<BitSet> compute(

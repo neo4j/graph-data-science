@@ -164,9 +164,9 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         public int min;
         public int argMin;
 
-        MinAndArgmin(int min, int argMin) {
-            this.min = min;
-            this.argMin = argMin;
+        MinAndArgmin() {
+            this.min = -1;
+            this.argMin = Integer.MAX_VALUE;
         }
     }
 

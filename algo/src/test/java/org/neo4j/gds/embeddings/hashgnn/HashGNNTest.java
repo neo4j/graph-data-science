@@ -281,7 +281,7 @@ class HashGNNTest {
         bitSet.set(9);
 
         var hashes = IntStream.generate(() -> rng.nextInt(0, Integer.MAX_VALUE)).limit(10).toArray();
-        var minArgMin = new HashGNN.MinAndArgmin(Integer.MAX_VALUE, -1);
+        var minArgMin = new HashGNN.MinAndArgmin();
 
         HashGNNCompanion.hashArgMin(bitSet, hashes, minArgMin);
 

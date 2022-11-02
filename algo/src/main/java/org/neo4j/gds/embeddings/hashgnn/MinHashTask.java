@@ -105,8 +105,8 @@ class MinHashTask implements Runnable {
     @Override
     public void run() {
         var neighborsVector = new BitSet(embeddingDimension);
-        var selfMinAndArgMin = new HashGNN.MinAndArgmin(Integer.MAX_VALUE, -1);
-        var neighborsMinAndArgMin = new HashGNN.MinAndArgmin(Integer.MAX_VALUE, -1);
+        var selfMinAndArgMin = new HashGNN.MinAndArgmin();
+        var neighborsMinAndArgMin = new HashGNN.MinAndArgmin();
 
         // letting each task handle all k's and a partition of nodes gives generallly a decent size chunk of work
         // which leads to low overhead and high cpu utilisation.
