@@ -118,7 +118,7 @@ class BinarizeTask implements Runnable {
     // the first half of each row contains indices of positive output features in the projected space
     // the second half of each row contains indices of negative output features in the projected space
     // this array is used embed the properties themselves from inputDimension to ambientDimension dimensions.
-    private static int[][] embedProperties(HashGNNConfig config, SplittableRandom rng, int inputDimension) {
+    public static int[][] embedProperties(HashGNNConfig config, SplittableRandom rng, int inputDimension) {
         var binarizationConfig = config.binarizeFeatures().orElseThrow();
         var permutation = new int[binarizationConfig.dimension()];
         Arrays.setAll(permutation, i -> i);

@@ -32,6 +32,7 @@ import org.neo4j.gds.ml.core.features.FeatureExtraction;
 
 import java.util.List;
 import java.util.Map;
+import java.util.SplittableRandom;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -93,4 +94,28 @@ class BinarizeTaskTest {
 
     }
 
+    @Test
+    void embedsPropertiesToTheRightDimension() {
+        var rng = new SplittableRandom();
+
+        int densityLevel = 3;
+        int binarizedDimension = 8;
+        var config = HashGNNConfigImpl
+            .builder()
+            .featureProperties(List.of("f1", "f2"))
+            .embeddingDensity(4)
+            .binarizeFeatures(Map.of("dimension", binarizedDimension, "densityLevel", densityLevel))
+            .iterations(100)
+            .build();
+        int inputDimension = 12;
+        int[][] projectionArray = BinarizeTask.embedProperties(config, rng, inputDimension);
+        assertThat(projectionArray.length).isEqualTo(inputDimension);
+        for (int i = 0; i < inputDimension; i++) {
+            assertThat(projectionArray[i].length).isEqualTo(2 * densityLevel);
+            for (int j = 0; j < 2 * densityLevel; j++) {
+                assertThat(projectionArray[i][j]).isBetween(0, binarizedDimension - 1);
+            }
+
+        }
+    }
 }
