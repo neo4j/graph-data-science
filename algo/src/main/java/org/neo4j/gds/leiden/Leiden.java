@@ -26,15 +26,16 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.DoubleAdder;
 
 //TODO: take care of potential issues w. self-loops
 
@@ -281,34 +282,37 @@ public class Leiden extends Algorithm<LeidenResult> {
         HugeDoubleArray communityVolumes,
         HugeLongArray initialCommunities
     ) {
+
+        double totalVolume = 0;
         if (rootGraph.hasRelationshipProperty()) {
-            ParallelUtil.parallelForEachNode(
-                rootGraph.nodeCount(),
+            List<InitVolumeTask> tasks = PartitionUtils.rangePartition(
                 concurrency,
-                nodeId -> {
-                    var communityId = initialCommunities.get(nodeId);
-                    rootGraph.concurrentCopy().forEachRelationship(nodeId, 1.0, (s, t, w) -> {
-                        nodeVolumes.addTo(nodeId, w);
-                        communityVolumes.addTo(communityId, w);
-                        return true;
-                    });
-                }
+                rootGraph.nodeCount(),
+                partition -> new InitVolumeTask(
+                    rootGraph.concurrentCopy(),
+                    nodeVolumes,
+                    partition
+                ),
+                Optional.empty()
             );
-            DoubleAdder weightToDivide = new DoubleAdder();
-            rootGraph.forEachNode(nodeId -> {
-                weightToDivide.add(nodeVolumes.get(nodeId));
-                return true;
-            });
-            return 1.0 / weightToDivide.doubleValue();
+            RunWithConcurrency.builder().
+                concurrency(concurrency).
+                tasks(tasks).
+                executor(executorService)
+                .run();
+            for (var task : tasks) {
+                totalVolume += task.sumOfVolumes();
+            }
         } else {
             nodeVolumes.setAll(rootGraph::degree);
-            rootGraph.forEachNode(nodeId -> {
-                long communityId = initialCommunities.get(nodeId);
-                communityVolumes.addTo(communityId, rootGraph.degree(nodeId));
-                return true;
-            });
-            return 1.0 / rootGraph.relationshipCount();
+            totalVolume = rootGraph.relationshipCount();
         }
+        rootGraph.forEachNode(nodeId -> {
+            long communityId = initialCommunities.get(nodeId);
+            communityVolumes.addTo(communityId, rootGraph.degree(nodeId));
+            return true;
+        });
+        return 1 / totalVolume;
     }
 
     static @NotNull CommunityData maintainPartition(
