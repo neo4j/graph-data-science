@@ -310,12 +310,7 @@ class RelationshipSplitterTest {
 
         relationshipSplitter.splitRelationships(RelationshipType.of("REL"), "*", "N", Optional.of(42L), Optional.of("weight"));
 
-        //16 [REL], 3[NEGATIVE] relationships
-        var wholegraph = graphStore.relationshipCount();
-        //16*0.5 = 8 positive, 2 negative
         var testGraphSize = graphStore.relationshipCount(splitConfig.testRelationshipType());
-        //var testComplementGraph = graphStore.relationshipCount(splitConfig.testComplementRelationshipType());
-        //(16*0.5)*0.5 = 4 positive, 1 negative
         var trainGraphSize = graphStore.relationshipCount(splitConfig.trainRelationshipType());
         var featureInputGraphSize = graphStore.relationshipCount(splitConfig.featureInputRelationshipType());
 

@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.splitting;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyCursor;
 import org.neo4j.gds.api.Relationships;
@@ -75,6 +76,15 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Inject
     GraphStore multiGraphStore;
+
+    @GdlGraph(orientation = Orientation.NATURAL, graphNamePrefix = "negative")
+    static String gdlNegative = "(n1 :A)-[:T {foo: 5} ]->(n2 :A)-[:T {foo: 5} ]->(n3 :A)-[:T {foo: 5} ]->(n4 :A)-[:T {foo: 5} ]->(n5 :B)-[:T {foo: 5} ]->(n6 :A), (n1)-[:NEGATIVE]->(n3), (n3)-[:NEGATIVE]->(n5), (n5)-[:NEGATIVE]->(n7 :A)";
+
+    @Inject
+    TestGraph negativeGraph;
+
+    @Inject
+    GraphStore negativeGraphStore;
 
     @Test
     void splitMultiGraph() {
@@ -153,6 +163,38 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertRelSamplingProperties(selectedRels, graph, negativeSamplingRatio);
         assertThat(selectedRels.topology().elementCount()).isEqualTo(6);
         assertFalse(selectedRels.topology().isMultiGraph());
+    }
+
+    @Test
+    void splitWithNegativeRelationshipType() {
+        var splitter = new DirectedEdgeSplitter(
+            Optional.of(1337L),
+            //negativeSamplingRatio no longer used when negativeSamplingGraph is passed into splitter
+            99.0,
+            negativeGraphStore.nodes(),
+            negativeGraphStore.nodes(),
+            4
+        );
+
+        //5 positive, 3 negative
+        var baseGraph = negativeGraphStore.getGraph(RelationshipType.of("T"), Optional.of("foo"));
+        var negativeSamplingGraph = negativeGraphStore.getGraph(RelationshipType.of("NEGATIVE"));
+        var result = splitter.split(baseGraph, baseGraph, negativeSamplingGraph, .2);
+
+        var remainingRels = result.remainingRels();
+        // 5*0.2 = 1 positive selected. 4 positive remaining.
+        assertEquals(4L, remainingRels.topology().elementCount());
+        assertEquals(Orientation.NATURAL, remainingRels.topology().orientation());
+        assertFalse(remainingRels.topology().isMultiGraph());
+        assertThat(remainingRels.properties()).isNotEmpty();
+
+        var selectedRels = result.selectedRels();
+        assertThat(selectedRels.topology()).satisfies(topology -> {
+            //1 positive, and 3 negative.
+            assertThat(topology.elementCount()).isEqualTo(4);
+            assertEquals(Orientation.NATURAL, topology.orientation());
+            assertFalse(topology.isMultiGraph());
+        });
     }
 
     @Test

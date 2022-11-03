@@ -80,6 +80,15 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
     @Inject
     GraphStore multiGraphStore;
 
+    @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "negative")
+    static String gdlNegative = "(n1 :A)-[:T {foo: 5} ]->(n2 :A)-[:T {foo: 5} ]->(n3 :A)-[:T {foo: 5} ]->(n4 :A)-[:T {foo: 5} ]->(n5 :B)-[:T {foo: 5} ]->(n6 :A), (n1)-[:NEGATIVE]->(n3), (n3)-[:NEGATIVE]->(n5), (n5)-[:NEGATIVE]->(n7 :A)";
+
+    @Inject
+    TestGraph negativeGraph;
+
+    @Inject
+    GraphStore negativeGraphStore;
+
     @Test
     void split() {
         double negativeSamplingRatio = 1.0;
@@ -160,16 +169,6 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         });
     }
 
-
-    @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "negative")
-    static String gdlNegative = "(n1 :A)-[:T {foo: 5} ]->(n2 :A)-[:T {foo: 5} ]->(n3 :A)-[:T {foo: 5} ]->(n4 :A)-[:T {foo: 5} ]->(n5 :B)-[:T {foo: 5} ]->(n6 :A), (n1)-[:NEGATIVE]->(n3), (n3)-[:NEGATIVE]->(n5), (n5)-[:NEGATIVE]->(n7 :A)";
-
-    @Inject
-    TestGraph negativeGraph;
-
-    @Inject
-    GraphStore negativeGraphStore;
-
     @Test
     void splitWithNegativeRelationshipType() {
         var splitter = new UndirectedEdgeSplitter(
@@ -181,13 +180,13 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             4
         );
 
-        //7 (directed) edges, 14 (undirected) overall
+        //5 positive, 3 negative, 8 (directed) edges. 16 undirected.
         var baseGraph = negativeGraphStore.getGraph(RelationshipType.of("T"), Optional.of("foo"));
         var negativeSamplingGraph = negativeGraphStore.getGraph(RelationshipType.of("NEGATIVE"));
         var result = splitter.split(baseGraph, baseGraph, negativeSamplingGraph, .2);
 
         var remainingRels = result.remainingRels();
-        // 1 positive selected reduces remaining
+        //5*0.2 = 1 positive selected, remaining = 4 directed = 8 undirected.
         assertEquals(8L, remainingRels.topology().elementCount());
         assertEquals(Orientation.UNDIRECTED, remainingRels.topology().orientation());
         assertFalse(remainingRels.topology().isMultiGraph());
@@ -195,7 +194,6 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         var selectedRels = result.selectedRels();
         assertThat(selectedRels.topology()).satisfies(topology -> {
-            //assertRelSamplingProperties(selectedRels, graph, 3.0);
             //1 positive relationship, and 6 negative.
             assertThat(topology.elementCount()).isEqualTo(7);
             assertEquals(Orientation.NATURAL, topology.orientation());
