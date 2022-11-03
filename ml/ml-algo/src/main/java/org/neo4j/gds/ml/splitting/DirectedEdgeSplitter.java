@@ -144,7 +144,7 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
                     validNegativeSourceNodeCount
                 );
             } else {
-                negativeSampleFromGivenGraph(negativeSamplingGraph, selectedRelsBuilder, negativeSamplesRemaining, nodeId, isValidSourceNode, isValidTargetNode, validNegativeSourceNodeCount);
+                negativeSampleFromGivenGraph(negativeSamplingGraph, selectedRelsBuilder, nodeId);
             }
             return true;
         });

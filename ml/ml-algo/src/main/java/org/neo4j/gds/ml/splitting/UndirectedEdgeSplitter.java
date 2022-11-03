@@ -127,7 +127,7 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
 
         var positiveSamples = (long) (validRelationshipCount * holdoutFraction) / 2;
         var positiveSamplesRemaining = new MutableLong(positiveSamples);
-        var negativeSamples = (long) negativeSamplingRatio * positiveSamples;
+        var negativeSamples = (long) (negativeSamplingRatio * positiveSamples);
         var negativeSamplesRemaining = new MutableLong(negativeSamples);
         var candidateEdgesRemaining = new MutableLong(validRelationshipCount);
 
@@ -156,7 +156,7 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
                     validSourceNodeCount
                 );
             } else {
-                negativeSampleFromGivenGraph(negativeSamplingGraph, selectedRelsBuilder, negativeSamplesRemaining, nodeId, isValidSourceNode, isValidTargetNode, validSourceNodeCount);
+                negativeSampleFromGivenGraph(negativeSamplingGraph, selectedRelsBuilder, nodeId);
             }
             return true;
         });
@@ -177,10 +177,10 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
             if (source < target) {
                 // we handle also reverse edge here
                 // the effect of self-loops are disregarded
-                if ((isValidNodePair.apply(source, target) || isValidNodePair.apply(target, source))) {
+                if (isValidNodePair.apply(source, target) || isValidNodePair.apply(target, source)) {
                     if (sample(2 * positiveSamplesRemaining.doubleValue() / candidateEdgesRemaining.doubleValue())) {
                         positiveSamplesRemaining.decrementAndGet();
-                        if ((isValidNodePair.apply(source, target))) {
+                        if (isValidNodePair.apply(source, target)) {
                             selectedRelsBuilder.addFromInternal(graph.toRootNodeId(source), graph.toRootNodeId(target), POSITIVE);
                         } else {
                             selectedRelsBuilder.addFromInternal(graph.toRootNodeId(target), graph.toRootNodeId(source), POSITIVE);

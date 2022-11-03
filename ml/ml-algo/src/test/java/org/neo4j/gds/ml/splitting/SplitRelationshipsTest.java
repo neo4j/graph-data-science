@@ -97,7 +97,7 @@ class SplitRelationshipsTest {
     void splitWithNegativeRelationshipType() {
         var config = SplitRelationshipsBaseConfigImpl.builder()
             .holdoutFraction(0.2)
-            .negativeSamplingRatio(99.0)
+            .negativeSamplingRatio(99)
             .relationshipTypes(List.of("REL"))
             .negativeRelationshipType("REL2")
             .holdoutRelationshipType("TEST")
@@ -109,7 +109,9 @@ class SplitRelationshipsTest {
 
         EdgeSplitter.SplitResult result = splitter.compute();
 
-        assertThat(result.selectedRels().topology().elementCount()).isEqualTo(12);
+        //0.2*10 = 2 positive, 5 negative
+        assertThat(result.selectedRels().topology().elementCount()).isEqualTo(7);
+        //0.8*10 = 8 (so 16 undirected)
         assertThat(result.remainingRels().topology().elementCount()).isEqualTo(16);
     }
 

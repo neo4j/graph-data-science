@@ -194,8 +194,8 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         var selectedRels = result.selectedRels();
         assertThat(selectedRels.topology()).satisfies(topology -> {
-            //1 positive relationship, and 6 negative.
-            assertThat(topology.elementCount()).isEqualTo(7);
+            //1 positive relationship, and 3 negative
+            assertThat(topology.elementCount()).isEqualTo(4);
             assertEquals(Orientation.NATURAL, topology.orientation());
             assertFalse(topology.isMultiGraph());
         });
