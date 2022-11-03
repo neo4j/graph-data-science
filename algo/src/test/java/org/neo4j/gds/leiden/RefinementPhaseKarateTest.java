@@ -21,6 +21,7 @@ package org.neo4j.gds.leiden;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -72,7 +73,7 @@ class RefinementPhaseKarateTest {
             communityVolumesForRefinement,
             gamma,
             0.01,
-            19L
+            19L, 1, Pools.DEFAULT
         );
 
         var refinementPhaseResult = refinementPhase.run();

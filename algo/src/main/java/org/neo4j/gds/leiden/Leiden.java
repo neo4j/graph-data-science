@@ -36,6 +36,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.DoubleAdder;
 
 //TODO: take care of potential issues w. self-loops
 
@@ -182,7 +183,9 @@ public class Leiden extends Algorithm<LeidenResult> {
                     localMoveCommunityVolumes,
                     gamma,
                     theta,
-                    randomSeed
+                    randomSeed,
+                    concurrency,
+                    executorService
                 );
                 var refinementPhaseResult = refinementPhase.run();
                 var refinedCommunities = refinementPhaseResult.communities();
@@ -283,7 +286,8 @@ public class Leiden extends Algorithm<LeidenResult> {
         HugeLongArray initialCommunities
     ) {
 
-        double totalVolume = 0;
+        double totalVolume;
+        var volumeAdder = new DoubleAdder();
         if (rootGraph.hasRelationshipProperty()) {
             List<InitVolumeTask> tasks = PartitionUtils.rangePartition(
                 concurrency,
@@ -291,7 +295,8 @@ public class Leiden extends Algorithm<LeidenResult> {
                 partition -> new InitVolumeTask(
                     rootGraph.concurrentCopy(),
                     nodeVolumes,
-                    partition
+                    partition,
+                    volumeAdder
                 ),
                 Optional.empty()
             );
@@ -300,9 +305,7 @@ public class Leiden extends Algorithm<LeidenResult> {
                 tasks(tasks).
                 executor(executorService)
                 .run();
-            for (var task : tasks) {
-                totalVolume += task.sumOfVolumes();
-            }
+            totalVolume = volumeAdder.sum();
         } else {
             nodeVolumes.setAll(rootGraph::degree);
             totalVolume = rootGraph.relationshipCount();

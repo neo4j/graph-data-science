@@ -30,21 +30,18 @@ class InitVolumeTask implements Runnable {
     private final Partition partition;
     private final Graph graph;
     private final HugeDoubleArray nodeVolumes;
-    private final DoubleAdder volumeAdder;
+    private final DoubleAdder totalVolume;
 
     InitVolumeTask(
         Graph graph,
         HugeDoubleArray nodeVolumes,
-        Partition partition
+        Partition partition,
+        DoubleAdder totalVolume
     ) {
         this.graph = graph;
         this.nodeVolumes = nodeVolumes;
         this.partition = partition;
-        this.volumeAdder = new DoubleAdder();
-    }
-
-    double sumOfVolumes() {
-        return volumeAdder.doubleValue();
+        this.totalVolume = totalVolume;
     }
 
     @Override
@@ -55,9 +52,10 @@ class InitVolumeTask implements Runnable {
             final long finalNodeId = nodeId;
             graph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
                 nodeVolumes.addTo(finalNodeId, w);
-                volumeAdder.add(w);
+                totalVolume.add(w);
                 return true;
             });
         }
+
     }
 }
