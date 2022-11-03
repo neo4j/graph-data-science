@@ -38,20 +38,29 @@ class Neo4jVersionTest {
         "4.3.0, V_4_3",
         "4.4.0, V_4_4",
         "4.4.12, V_4_4",
-        "5.0.0, V_5_0",
-        "5.0.0-drop09.0, V_5_0_drop90",
         "5.1.0, V_5_1",
+        "5.2.0, V_5_2",
+        "5.1.0-dev, V_5_1",
+        "5.2.0-dev, V_5_2",
     })
     void testParse(String input, Neo4jVersion expected) {
         assertEquals(expected.name(), Neo4jVersion.parse(input).name());
     }
 
-    @Test
-    void failOnNeo4jDev() {
-        // as this is a release branch, we dont support dev
-        assertThatThrownBy(() -> Neo4jVersion.parse("dev"))
-            .hasMessage("Cannot run on Neo4j Version dev")
-            .isInstanceOf(UnsupportedOperationException.class);
+    @ParameterizedTest
+    @CsvSource({
+        "dev",
+        "5.dev",
+        "dev.5",
+        "5.0", // 5.0 was never released to the public
+        "dev.5.dev.1",
+        "5",
+        "6.0.0",
+    })
+    void testParseInvalid(String input) {
+        assertThatThrownBy(() -> Neo4jVersion.parse(input))
+            .isInstanceOf(UnsupportedOperationException.class)
+            .hasMessage("Cannot run on Neo4j Version " + input);
     }
 
     @Test

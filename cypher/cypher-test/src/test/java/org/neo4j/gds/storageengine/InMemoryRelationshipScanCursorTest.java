@@ -25,12 +25,10 @@ import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.InMemoryPropertySelection;
-import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.internal.recordstorage.AbstractInMemoryRelationshipScanCursor;
 import org.neo4j.values.storable.ValueGroup;
 
@@ -40,7 +38,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DisableForNeo4jVersion(Neo4jVersion.V_5_0_drop90)
 public class InMemoryRelationshipScanCursorTest extends CypherTest {
 
     @Neo4jGraph
