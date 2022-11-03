@@ -67,9 +67,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 @ServiceProvider
-public class InMemoryStorageEngineFactory43 implements StorageEngineFactory {
+public class InMemoryStorageEngineFactory implements StorageEngineFactory {
 
-    public static final String IN_MEMORY_STORAGE_ENGINE_NAME_43 = "in-memory-43";
+    static final String IN_MEMORY_STORAGE_ENGINE_NAME_43 = "in-memory-43";
 
     private final InMemoryMetaDataProvider metadataProvider = new InMemoryMetaDataProvider();
 
