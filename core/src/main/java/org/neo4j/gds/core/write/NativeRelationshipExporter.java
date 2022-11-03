@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.write;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
@@ -35,6 +36,7 @@ import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StatementApi;
 import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
+import org.neo4j.internal.kernel.api.exceptions.schema.ConstraintValidationException;
 
 import java.util.concurrent.ExecutorService;
 import java.util.function.LongUnaryOperator;
@@ -176,7 +178,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
     private static class WriteConsumer implements RelationshipWithPropertyConsumer {
         @FunctionalInterface
         interface RelationshipWriteBehavior {
-            void apply(long sourceNodeId, long targetNodeId, double property) throws EntityNotFoundException;
+            void apply(long sourceNodeId, long targetNodeId, double property) throws EntityNotFoundException, ConstraintValidationException;
         }
 
         private final LongUnaryOperator toOriginalId;
@@ -224,7 +226,11 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
             progressTracker.logProgress();
         }
 
-        private void writeWithProperty(long sourceNodeId, long targetNodeId, double property) throws EntityNotFoundException {
+        private void writeWithProperty(
+            long sourceNodeId,
+            long targetNodeId,
+            double property
+        ) throws EntityNotFoundException, ConstraintValidationException {
             long relId = writeRelationship(sourceNodeId, targetNodeId);
             exportProperty(property, relId);
             progressTracker.logProgress();
@@ -238,7 +244,11 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
             );
         }
 
-        private void exportProperty(double property, long relId) throws EntityNotFoundException {
+        @SuppressFBWarnings(
+            value = "BED_BOGUS_EXCEPTION_DECLARATION",
+            justification = "`ConstraintValidationException` is actually thrown in 5.2.0"
+        )
+        private void exportProperty(double property, long relId) throws EntityNotFoundException, ConstraintValidationException {
             if (!Double.isNaN(property)) {
                 ops.relationshipSetProperty(
                     relId,
