@@ -118,7 +118,7 @@ public class InMemoryStorageReader43 implements StorageReader {
 
     @Override
     public AllRelationshipsScan allRelationshipScan() {
-        return new AbstractAllRelationshipScan() {
+        return new AbstractInMemoryAllRelationshipScan() {
             @Override
             boolean scanRange(AbstractInMemoryRelationshipScanCursor cursor, long start, long stopInclusive) {
                 return cursor.scanRange(start, stopInclusive);
@@ -139,10 +139,6 @@ public class InMemoryStorageReader43 implements StorageReader {
     @Override
     public Iterator<IndexDescriptor> indexesGetForLabel(int labelId) {
         return Collections.emptyIterator();
-    }
-
-    private IndexDescriptor getLabelIndexDescriptor() {
-        return IndexDescriptor.NO_INDEX;
     }
 
     @Override
@@ -308,9 +304,5 @@ public class InMemoryStorageReader43 implements StorageReader {
     protected boolean nodeExists(long id) {
         var originalId = graphStore.nodes().toOriginalNodeId(id);
         return graphStore.nodes().contains(originalId);
-    }
-
-    public abstract static class AbstractAllRelationshipScan extends BaseRecordScan<AbstractInMemoryRelationshipScanCursor> implements AllRelationshipsScan {
-
     }
 }
