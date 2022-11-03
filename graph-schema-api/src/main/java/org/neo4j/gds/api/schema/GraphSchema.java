@@ -49,6 +49,17 @@ public interface GraphSchema {
         );
     }
 
+    default Map<String, Object> toMapOld() {
+        return Map.of(
+            "nodes", nodeSchema().toMap(),
+            "relationships", relationshipSchema().toMapOld(),
+            "graphProperties", graphProperties().entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey,
+                schema -> GraphSchema.forPropertySchema(schema.getValue())
+            ))
+        );
+    }
+
     default GraphSchema filterNodeLabels(Set<NodeLabel> labelsToKeep) {
         return of(nodeSchema().filter(labelsToKeep), relationshipSchema(), graphProperties());
     }

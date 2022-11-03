@@ -22,6 +22,7 @@ CALL gds.graph.list(
   nodeCount: Integer,
   relationshipCount: Integer,
   schema: Map,
+  schemaWithOrientation: Map,
   degreeDistribution: Map,
   density: Float,
   creationTime: Datetime,
@@ -47,6 +48,7 @@ CALL gds.graph.list(
 | nodeCount              | Integer  | Number of nodes in the graph.
 | relationshipCount      | Integer  | Number of relationships in the graph.
 | schema                 | Map      | Node labels, relationship types and properties contained in the projected graph.
+| schemaWithOrientation  | Map      | Node labels, relationship types, relationship orientation and properties contained in the projected graph.
 | degreeDistribution     | Map      | Histogram of degrees in the graph.
 | density                | Float    | Density of the graph.
 | creationTime           | Datetime | Time when the graph was projected.
@@ -67,6 +69,8 @@ The `schema` consists of information about the nodes and relationships stored in
 For each node label, the schema maps the label to its property keys and their corresponding property types.
 Similarly, the schema maps the relationship types to their property keys and property types.
 The property type is either `Integer`, `Float`, `List of Integer` or `List of Float`.
+
+The `schemaWithOrientation` is an extended version of the `schema`, where for each relationship types it maps to their orientation and properties.
 
 The `degreeDistribution` field can be fairly time-consuming to compute for larger graphs.
 Its computation is cached per graph, so subsequent listing for the same graph will be fast.
@@ -195,13 +199,13 @@ Despite different result columns being present for the different projections tha
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.list('personsCypher')
-YIELD graphName, schema
+YIELD graphName, schemaWithOrientation
 ----
 
 .Results
 [opts="header",cols="2,8"]
 |===
-| graphName | schema
+| graphName | schemaWithOrientation
 | "personsCypher"
 | {graphProperties={}, relationships={KNOWS={orientation=NATURAL, properties={}}}, nodes={Person={}}}
 |===
@@ -213,13 +217,13 @@ YIELD graphName, schema
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.list('personsNative')
-YIELD graphName, schema
+YIELD graphName, schemaWithOrientation
 ----
 
 .Results
 [opts="header",cols="2,8"]
 |===
-| graphName       | schema
+| graphName       | schemaWithOrientation
 | "personsNative"
 | {graphProperties={}, relationships={KNOWS={orientation=NATURAL, properties={}}}, nodes={Person={}}}
 |===

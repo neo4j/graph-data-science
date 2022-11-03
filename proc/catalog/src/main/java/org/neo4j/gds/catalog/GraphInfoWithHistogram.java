@@ -46,7 +46,8 @@ public class GraphInfoWithHistogram extends GraphInfo {
             graphInfo.relationshipCount,
             graphInfo.creationTime,
             graphInfo.modificationTime,
-            graphInfo.schema
+            graphInfo.schema,
+            graphInfo.schemaWithOrientation
         );
         this.degreeDistribution = degreeDistribution;
     }

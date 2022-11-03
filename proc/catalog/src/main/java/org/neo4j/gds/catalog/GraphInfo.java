@@ -49,7 +49,10 @@ public class GraphInfo {
     public final double density;
     public final ZonedDateTime creationTime;
     public final ZonedDateTime modificationTime;
+
+    @Deprecated(forRemoval = true)
     public final Map<String, Object> schema;
+    public final Map<String, Object> schemaWithOrientation;
 
     GraphInfo(
         String graphName,
@@ -61,7 +64,8 @@ public class GraphInfo {
         long relationshipCount,
         ZonedDateTime creationTime,
         ZonedDateTime modificationTime,
-        Map<String, Object> schema
+        Map<String, Object> schema,
+        Map<String, Object> schemaWithOrientation
     ) {
         this.graphName = graphName;
         this.database = database;
@@ -73,6 +77,7 @@ public class GraphInfo {
         this.creationTime = creationTime;
         this.modificationTime = modificationTime;
         this.schema = schema;
+        this.schemaWithOrientation = schemaWithOrientation;
         this.configuration = configuration;
     }
 
@@ -122,6 +127,7 @@ public class GraphInfo {
             graphStore.relationshipCount(),
             graphProjectConfig.creationTime(),
             graphStore.modificationTime(),
+            graphStore.schema().toMapOld(),
             graphStore.schema().toMap()
         );
     }

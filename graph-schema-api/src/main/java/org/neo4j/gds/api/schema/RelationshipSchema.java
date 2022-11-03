@@ -43,7 +43,7 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
 
     default Orientation orientation(RelationshipType relationshipType) {
         return relTypeOrientationMap().get(relationshipType);
-    };
+    }
 
     @Override
     default RelationshipSchema filter(Set<RelationshipType> relationshipTypesToKeep) {
@@ -96,13 +96,20 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
 
     @Value.Derived
     default Map<String, Object> toMap() {
-
         return properties().entrySet().stream().collect(Collectors.toMap(
             entry -> entry.getKey().name,
             entry -> Map.of(
                 "orientation", relTypeOrientationMap().get(entry.getKey()).toString(),
                 "properties", properties(entry.getKey())
             )
+        ));
+    }
+
+    @Value.Derived
+    default Map<String, Object> toMapOld() {
+        return properties().entrySet().stream().collect(Collectors.toMap(
+            entry -> entry.getKey().name,
+            entry -> properties(entry.getKey())
         ));
     }
 
