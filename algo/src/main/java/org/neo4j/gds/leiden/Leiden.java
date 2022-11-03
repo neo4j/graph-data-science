@@ -94,9 +94,9 @@ public class Leiden extends Algorithm<LeidenResult> {
 
     @Override
     public LeidenResult compute() {
+        progressTracker.beginSubTask("Leiden");
         var workingGraph = rootGraph;
         var nodeCount = workingGraph.nodeCount();
-        progressTracker.beginSubTask("Leiden");
         var localMoveCommunities = LeidenUtils.createStartingCommunities(nodeCount, seedValues.orElse(null));
 
         seedCommunityManager = SeedCommunityManager.create(seedValues.isPresent(), localMoveCommunities);
@@ -127,7 +127,6 @@ public class Leiden extends Algorithm<LeidenResult> {
 
         for (iteration = 0; iteration < maxIterations; iteration++) {
             // 1. LOCAL MOVE PHASE - over the singleton localMoveCommunities
-
             progressTracker.beginSubTask("Local Move");
             var localMovePhase = LocalMovePhase.create(
                 workingGraph,
@@ -141,7 +140,6 @@ public class Leiden extends Algorithm<LeidenResult> {
 
             var communitiesCount = localMovePhase.run();
             boolean localPhaseConverged = communitiesCount == workingGraph.nodeCount() || localMovePhase.swaps == 0;
-
             progressTracker.endSubTask("Local Move");
 
             progressTracker.beginSubTask("Modularity Computation");
@@ -156,14 +154,13 @@ public class Leiden extends Algorithm<LeidenResult> {
             );
             progressTracker.endSubTask("Modularity Computation");
 
-
             if (localPhaseConverged) {
                 didConverge = true;
                 break;
             }
             var toleranceStatus = getToleranceStatus(iteration);
 
-            //if you deteriotate performance, exit and return previous itreation
+            //if you deteriotate performance, exit and return previous iteration
             if (toleranceStatus == ToleranceStatus.DECREASE) {
                 break;
             }
@@ -183,7 +180,6 @@ public class Leiden extends Algorithm<LeidenResult> {
             } //if little difference from previous iteration, keep and break
 
             if (iteration < maxIterations - 1) { //if there's no next iteration, skip refinement/graph aggregation
-
                 // 2 REFINE
                 progressTracker.beginSubTask("Refinement");
                 var refinementPhase = RefinementPhase.create(
@@ -220,7 +216,8 @@ public class Leiden extends Algorithm<LeidenResult> {
                     maximumRefinedCommunityId,
                     this.executorService,
                     this.concurrency,
-                    this.terminationFlag
+                    this.terminationFlag,
+                    this.progressTracker
                 );
                 workingGraph = graphAggregationPhase.run();
 

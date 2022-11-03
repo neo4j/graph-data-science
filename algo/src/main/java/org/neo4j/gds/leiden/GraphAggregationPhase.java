@@ -30,6 +30,7 @@ import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -43,6 +44,7 @@ class GraphAggregationPhase {
     private final ExecutorService executorService;
     private final int concurrency;
     private final TerminationFlag terminationFlag;
+    private final ProgressTracker progressTracker;
 
     GraphAggregationPhase(
         Graph workingGraph,
@@ -51,7 +53,8 @@ class GraphAggregationPhase {
         long maxCommunityId,
         ExecutorService executorService,
         int concurrency,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        ProgressTracker progressTracker
     ) {
         this.workingGraph = workingGraph;
         this.communities = communities;
@@ -61,6 +64,7 @@ class GraphAggregationPhase {
         this.concurrency = concurrency;
 
         this.terminationFlag = terminationFlag;
+        this.progressTracker = progressTracker;
     }
 
     Graph run() {
@@ -93,7 +97,7 @@ class GraphAggregationPhase {
             concurrency,
             partition ->
                 new RelationshipCreator(
-                    communities, partition, relationshipsBuilder, workingGraph.concurrentCopy(), orientation
+                    communities, partition, relationshipsBuilder, workingGraph.concurrentCopy(), orientation, progressTracker
                 ),
             Optional.empty()
         );

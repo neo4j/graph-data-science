@@ -106,7 +106,8 @@ class WeightedModularityComputerTest {
             1,
             Pools.DEFAULT,
             1,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            ProgressTracker.NULL_TRACKER
         ).run();
         var localCommunitiesCondensed = HugeLongArray.of(0, 1);
         var communityVolumes2 = HugeDoubleArray.of(communityVolumes.get(0), communityVolumes.get(1));
