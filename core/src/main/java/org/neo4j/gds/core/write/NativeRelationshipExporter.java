@@ -246,7 +246,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
 
         @SuppressFBWarnings(
             value = "BED_BOGUS_EXCEPTION_DECLARATION",
-            justification = "`ConstraintValidationException` is actually thrown in 5.2.0-dev"
+            justification = "`ConstraintValidationException` is actually thrown in 5.2.0"
         )
         private void exportProperty(double property, long relId) throws EntityNotFoundException, ConstraintValidationException {
             if (!Double.isNaN(property)) {

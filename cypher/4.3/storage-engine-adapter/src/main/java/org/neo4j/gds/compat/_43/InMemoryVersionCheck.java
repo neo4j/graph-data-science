@@ -26,7 +26,8 @@ import org.neo4j.storageengine.api.StoreVersionCheck;
 
 import java.util.Optional;
 
-import static org.neo4j.internal.recordstorage.AbstractInMemoryStoreVersion.STORE_VERSION;
+import static org.neo4j.gds.compat._43.InMemoryStoreVersion.STORE_VERSION;
+
 
 public class InMemoryVersionCheck implements StoreVersionCheck {
 

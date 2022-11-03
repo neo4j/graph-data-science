@@ -22,22 +22,19 @@ package org.neo4j.gds.compat.unsupported;
 import org.neo4j.common.Edition;
 import org.neo4j.configuration.Config;
 import org.neo4j.counts.CountsAccessor;
-import org.neo4j.counts.CountsStore;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryNodeCursor;
 import org.neo4j.gds.compat.AbstractInMemoryNodePropertyCursor;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipPropertyCursor;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipTraversalCursor;
-import org.neo4j.gds.compat.AbstractInMemoryStorageEngine;
 import org.neo4j.gds.compat.GdsDatabaseManagementServiceBuilder;
-import org.neo4j.gds.compat.InMemoryStorageEngineBuilder;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.recordstorage.AbstractInMemoryRelationshipScanCursor;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.storageengine.api.CommandCreationContext;
+import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.storageengine.api.StorageEntityCursor;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.storageengine.api.StorageReader;
@@ -45,21 +42,6 @@ import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
 
 public class StorageEngineProxyImpl implements StorageEngineProxyApi {
-
-    @Override
-    public InMemoryStorageEngineBuilder<? extends AbstractInMemoryStorageEngine> inMemoryStorageEngineBuilder(
-        DatabaseLayout databaseLayout,
-        TokenHolders tokenHolders
-    ) {
-        throw cypherUnsupportedException();
-    }
-
-    @Override
-    public CountsStore inMemoryCountsStore(
-        GraphStore graphStore, TokenHolders tokenHolders
-    ) {
-        throw cypherUnsupportedException();
-    }
 
     @Override
     public CommandCreationContext inMemoryCommandCreationContext() {
@@ -77,6 +59,11 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     public StorageReader inMemoryStorageReader(
         CypherGraphStore graphStore, TokenHolders tokenHolders, CountsAccessor counts
     ) {
+        throw cypherUnsupportedException();
+    }
+
+    @Override
+    public StorageEngine createInMemoryStorageEngine(DatabaseLayout databaseLayout, TokenHolders tokenHolders) {
         throw cypherUnsupportedException();
     }
 

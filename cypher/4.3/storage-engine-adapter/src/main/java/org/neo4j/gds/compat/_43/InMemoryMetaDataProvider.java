@@ -19,21 +19,27 @@
  */
 package org.neo4j.gds.compat._43;
 
-import org.neo4j.internal.recordstorage.AbstractInMemoryMetaDataProvider;
 import org.neo4j.internal.recordstorage.AbstractTransactionIdStore;
 import org.neo4j.internal.recordstorage.InMemoryLogVersionRepository43;
 import org.neo4j.io.pagecache.context.CursorContext;
+import org.neo4j.kernel.KernelVersion;
 import org.neo4j.storageengine.api.ExternalStoreId;
+import org.neo4j.storageengine.api.MetadataProvider;
 import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.TransactionId;
 
+import java.io.IOException;
 import java.util.Optional;
+import java.util.UUID;
 
-public class InMemoryMetaDataProviderImpl extends AbstractInMemoryMetaDataProvider {
+public class InMemoryMetaDataProvider implements MetadataProvider {
+    private final ExternalStoreId externalStoreId;
+    private final InMemoryLogVersionRepository43 logVersionRepository;
     private final InMemoryTransactionIdStoreImpl transactionIdStore;
 
-    InMemoryMetaDataProviderImpl() {
-        super(new InMemoryLogVersionRepository43());
+    InMemoryMetaDataProvider() {
+        this.logVersionRepository = new InMemoryLogVersionRepository43();
+        this.externalStoreId = new ExternalStoreId(UUID.randomUUID());
         this.transactionIdStore = new InMemoryTransactionIdStoreImpl();
     }
 
@@ -47,8 +53,7 @@ public class InMemoryMetaDataProviderImpl extends AbstractInMemoryMetaDataProvid
         return this.transactionIdStore.getLastClosedTransaction();
     }
 
-    @Override
-    public AbstractTransactionIdStore transactionIdStore() {
+    AbstractTransactionIdStore transactionIdStore() {
         return transactionIdStore;
     }
 
@@ -129,5 +134,63 @@ public class InMemoryMetaDataProviderImpl extends AbstractInMemoryMetaDataProvid
     @Override
     public StoreId getStoreId() {
         return StoreId.UNKNOWN;
+    }
+
+    public InMemoryLogVersionRepository43 logVersionRepository() {
+        return logVersionRepository;
+    }
+
+    @Override
+    public void close() throws IOException {
+    }
+
+    @Override
+    public long getCurrentLogVersion() {
+        return this.logVersionRepository.getCurrentLogVersion();
+    }
+
+    @Override
+    public long getCheckpointLogVersion() {
+        return this.logVersionRepository.getCheckpointLogVersion();
+    }
+
+    @Override
+    public long nextCommittingTransactionId() {
+        return this.transactionIdStore().nextCommittingTransactionId();
+    }
+
+    @Override
+    public long committingTransactionId() {
+        return this.transactionIdStore().committingTransactionId();
+    }
+
+    @Override
+    public long getLastCommittedTransactionId() {
+        return this.transactionIdStore().getLastCommittedTransactionId();
+    }
+
+    @Override
+    public TransactionId getLastCommittedTransaction() {
+        return this.transactionIdStore().getLastCommittedTransaction();
+    }
+
+    @Override
+    public long getLastClosedTransactionId() {
+        return this.transactionIdStore().getLastClosedTransactionId();
+    }
+
+    @Override
+    public KernelVersion kernelVersion() {
+        return KernelVersion.LATEST;
+    }
+
+    @Override
+    public Optional<UUID> getDatabaseIdUuid(CursorContext cursorTracer) {
+        throw new IllegalStateException("Not supported");
+    }
+
+    @Override
+    public void setDatabaseIdUuid(UUID uuid, CursorContext cursorContext) {
+        throw new IllegalStateException("Not supported");
     }
 }

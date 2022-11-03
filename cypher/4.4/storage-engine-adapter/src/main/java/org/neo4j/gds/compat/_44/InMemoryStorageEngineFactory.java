@@ -22,14 +22,10 @@ package org.neo4j.gds.compat._44;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
 import org.neo4j.dbms.database.readonly.DatabaseReadOnlyChecker;
-import org.neo4j.gds.storageengine.InMemoryTransactionStateVisitor;
 import org.neo4j.index.internal.gbptree.RecoveryCleanupWorkCollector;
 import org.neo4j.internal.id.IdController;
 import org.neo4j.internal.id.IdGeneratorFactory;
-import org.neo4j.internal.recordstorage.AbstractInMemoryMetaDataProvider;
-import org.neo4j.internal.recordstorage.AbstractInMemoryStorageEngineFactory;
 import org.neo4j.internal.recordstorage.InMemoryStorageCommandReaderFactory44;
-import org.neo4j.internal.recordstorage.InMemoryStorageReader44;
 import org.neo4j.internal.schema.IndexConfigCompleter;
 import org.neo4j.internal.schema.SchemaRule;
 import org.neo4j.internal.schema.SchemaState;
@@ -54,6 +50,8 @@ import org.neo4j.storageengine.api.ConstraintRuleAccessor;
 import org.neo4j.storageengine.api.LogVersionRepository;
 import org.neo4j.storageengine.api.MetadataProvider;
 import org.neo4j.storageengine.api.StorageEngine;
+import org.neo4j.storageengine.api.StorageEngineFactory;
+import org.neo4j.storageengine.api.StorageFilesState;
 import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.StoreVersion;
 import org.neo4j.storageengine.api.StoreVersionCheck;
@@ -64,17 +62,18 @@ import org.neo4j.storageengine.migration.StoreMigrationParticipant;
 import org.neo4j.token.TokenHolders;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @ServiceProvider
-public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineFactory {
+public class InMemoryStorageEngineFactory implements StorageEngineFactory {
 
     static final String IN_MEMORY_STORAGE_ENGINE_NAME = "in-memory-44";
 
-    private final AbstractInMemoryMetaDataProvider metadataProvider = new InMemoryMetaDataProviderImpl();
+    private final InMemoryMetaDataProviderImpl metadataProvider = new InMemoryMetaDataProviderImpl();
 
     @Override
     public boolean storageExists(
@@ -110,8 +109,7 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         DatabaseReadOnlyChecker readOnlyChecker,
         MemoryTracker memoryTracker
     ) {
-        StoreFactory factory = new StoreFactory(
-            databaseLayout,
+        StoreFactory factory = new StoreFactory(databaseLayout,
             config,
             idGeneratorFactory,
             pageCache,
@@ -123,13 +121,7 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
 
         factory.openNeoStores(createStoreIfNotExists, StoreType.LABEL_TOKEN).close();
 
-        return new InMemoryStorageEngineImpl.Builder(databaseLayout, tokenHolders, metadataProvider)
-            .withCommandCreationContextSupplier(InMemoryCommandCreationContextImpl::new)
-            .withStorageReaderFn(InMemoryStorageReader44::new)
-            .withTxStateVisitorFn(InMemoryTransactionStateVisitor::new)
-            .withCountsStoreFn(InMemoryCountsStoreImpl::new)
-            .withCommandCreationContextSupplier(InMemoryCommandCreationContextImpl::new)
-            .build();
+        return new InMemoryStorageEngineImpl(databaseLayout, tokenHolders);
     }
 
     @Override
@@ -140,8 +132,7 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         CursorContext cursorContext,
         UUID uuid
     ) {
-        MetaDataStore.getDatabaseIdUuid(
-            pageCache,
+        MetaDataStore.getDatabaseIdUuid(pageCache,
             RecordDatabaseLayout.convert(databaseLayout).metadataStore(),
             databaseLayout.getDatabaseName(),
             cursorContext
@@ -150,13 +141,9 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
 
     @Override
     public Optional<UUID> databaseIdUuid(
-        FileSystemAbstraction fs,
-        DatabaseLayout databaseLayout,
-        PageCache pageCache,
-        CursorContext cursorContext
+        FileSystemAbstraction fs, DatabaseLayout databaseLayout, PageCache pageCache, CursorContext cursorContext
     ) {
-        return MetaDataStore.getDatabaseIdUuid(
-            pageCache,
+        return MetaDataStore.getDatabaseIdUuid(pageCache,
             databaseLayout.metadataStore(),
             databaseLayout.getDatabaseName(),
             cursorContext
@@ -197,7 +184,7 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         PageCacheTracer cacheTracer,
         DatabaseReadOnlyChecker readOnlyChecker
     ) {
-        return metadataProvider();
+        return metadataProvider;
     }
 
     @Override
@@ -220,31 +207,6 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
     @Override
     public StoreVersion versionInformation(StoreId storeId) {
         return new InMemoryStoreVersion();
-    }
-
-    @Override
-    protected AbstractInMemoryMetaDataProvider metadataProvider() {
-        return metadataProvider;
-    }
-
-    @Override
-    protected SchemaRuleMigrationAccess schemaRuleMigrationAccess() {
-        return new SchemaRuleMigrationAccess() {
-            @Override
-            public Iterable<SchemaRule> getAll() {
-                return Collections.emptyList();
-            }
-
-            @Override
-            public void writeSchemaRule(SchemaRule rule) {
-
-            }
-
-            @Override
-            public void close() {
-
-            }
-        };
     }
 
     @Override
@@ -275,7 +237,22 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         CursorContext cursorContext,
         MemoryTracker memoryTracker
     ) {
-        return schemaRuleMigrationAccess();
+        return new SchemaRuleMigrationAccess() {
+            @Override
+            public Iterable<SchemaRule> getAll() {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public void writeSchemaRule(SchemaRule rule) {
+
+            }
+
+            @Override
+            public void close() {
+
+            }
+        };
     }
 
     @Override
@@ -285,7 +262,7 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         PageCache pageCache,
         CursorContext cursorContext
     ) {
-        return metadataProvider().transactionIdStore();
+        return metadataProvider.transactionIdStore();
     }
 
     @Override
@@ -317,11 +294,22 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
 
     @Override
     public StoreId storeId(
-        FileSystemAbstraction fs,
-        DatabaseLayout databaseLayout,
-        PageCache pageCache,
-        CursorContext cursorContext
+        FileSystemAbstraction fs, DatabaseLayout databaseLayout, PageCache pageCache, CursorContext cursorContext
     ) {
         return metadataProvider.getStoreId();
+    }
+
+    @Override
+    public List<Path> listStorageFiles(
+        FileSystemAbstraction fileSystem, DatabaseLayout databaseLayout
+    ) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public StorageFilesState checkStoreFileState(
+        FileSystemAbstraction fs, DatabaseLayout databaseLayout, PageCache pageCache
+    ) {
+        return StorageFilesState.recoveredState();
     }
 }

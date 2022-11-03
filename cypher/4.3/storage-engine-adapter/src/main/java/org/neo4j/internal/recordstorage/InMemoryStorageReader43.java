@@ -20,33 +20,54 @@
 package org.neo4j.internal.recordstorage;
 
 import org.neo4j.common.EntityType;
+import org.neo4j.common.TokenNameLookup;
 import org.neo4j.counts.CountsAccessor;
 import org.neo4j.gds.compat._43.InMemoryNodeCursor;
 import org.neo4j.gds.compat._43.InMemoryPropertyCursor;
 import org.neo4j.gds.compat._43.InMemoryRelationshipScanCursor;
 import org.neo4j.gds.compat._43.InMemoryRelationshipTraversalCursor;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
+import org.neo4j.internal.schema.ConstraintDescriptor;
+import org.neo4j.internal.schema.IndexDescriptor;
+import org.neo4j.internal.schema.SchemaDescriptor;
 import org.neo4j.internal.schema.constraints.IndexBackedConstraintDescriptor;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.memory.MemoryTracker;
+import org.neo4j.storageengine.api.AllNodeScan;
 import org.neo4j.storageengine.api.AllRelationshipsScan;
 import org.neo4j.storageengine.api.StorageNodeCursor;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
+import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.StorageRelationshipScanCursor;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
+import org.neo4j.storageengine.api.StorageSchemaReader;
 import org.neo4j.token.TokenHolders;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
-public class InMemoryStorageReader43 extends AbstractInMemoryStorageReader {
+public class InMemoryStorageReader43 implements StorageReader {
+
+    protected final CypherGraphStore graphStore;
+    protected final TokenHolders tokenHolders;
+    protected final CountsAccessor counts;
+    private final Map<Class<?>, Object> dependantState;
+    private boolean closed;
 
     public InMemoryStorageReader43(
         CypherGraphStore graphStore,
         TokenHolders tokenHolders,
         CountsAccessor counts
     ) {
-        super(graphStore, tokenHolders, counts);
+        this.graphStore = graphStore;
+
+        this.tokenHolders = tokenHolders;
+        this.counts = counts;
+        this.dependantState = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -65,7 +86,7 @@ public class InMemoryStorageReader43 extends AbstractInMemoryStorageReader {
 
     @Override
     public boolean nodeExists(long id, CursorContext cursorContext) {
-        return super.nodeExists(id);
+        return nodeExists(id);
     }
 
     @Override
@@ -97,7 +118,7 @@ public class InMemoryStorageReader43 extends AbstractInMemoryStorageReader {
 
     @Override
     public AllRelationshipsScan allRelationshipScan() {
-        return new AbstractAllRelationshipScan() {
+        return new AbstractInMemoryAllRelationshipScan() {
             @Override
             boolean scanRange(AbstractInMemoryRelationshipScanCursor cursor, long start, long stopInclusive) {
                 return cursor.scanRange(start, stopInclusive);
@@ -108,5 +129,180 @@ public class InMemoryStorageReader43 extends AbstractInMemoryStorageReader {
                 return super.scanBatch(sizeHint, cursor);
             }
         };
+    }
+
+    @Override
+    public Iterator<IndexDescriptor> indexGetForSchema(SchemaDescriptor descriptor) {
+        return Collections.emptyIterator();
+    }
+
+    @Override
+    public Iterator<IndexDescriptor> indexesGetForLabel(int labelId) {
+        return Collections.emptyIterator();
+    }
+
+    @Override
+    public Iterator<IndexDescriptor> indexesGetForRelationshipType(int relationshipType) {
+        return Collections.emptyIterator();
+    }
+
+    @Override
+    public IndexDescriptor indexGetForName(String name) {
+        return null;
+    }
+
+    @Override
+    public ConstraintDescriptor constraintGetForName(String name) {
+        return null;
+    }
+
+    @Override
+    public boolean indexExists(IndexDescriptor index) {
+        return false;
+    }
+
+    @Override
+    public Iterator<IndexDescriptor> indexesGetAll() {
+        return Collections.emptyIterator();
+    }
+
+    @Override
+    public Collection<IndexDescriptor> valueIndexesGetRelated(
+        long[] tokens, int propertyKeyId, EntityType entityType
+    ) {
+        return valueIndexesGetRelated(tokens, new int[]{propertyKeyId}, entityType);
+    }
+
+    @Override
+    public Collection<IndexDescriptor> valueIndexesGetRelated(
+        long[] tokens, int[] propertyKeyIds, EntityType entityType
+    ) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Collection<IndexBackedConstraintDescriptor> uniquenessConstraintsGetRelated(
+        long[] labels,
+        int propertyKeyId,
+        EntityType entityType
+    ) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public boolean hasRelatedSchema(long[] labels, int propertyKey, EntityType entityType) {
+        return false;
+    }
+
+    @Override
+    public boolean hasRelatedSchema(int label, EntityType entityType) {
+        return false;
+    }
+
+    @Override
+    public Iterator<ConstraintDescriptor> constraintsGetForSchema(SchemaDescriptor descriptor) {
+        return Collections.emptyIterator();
+    }
+
+    @Override
+    public boolean constraintExists(ConstraintDescriptor descriptor) {
+        return false;
+    }
+
+    @Override
+    public Iterator<ConstraintDescriptor> constraintsGetForLabel(int labelId) {
+        return Collections.emptyIterator();
+    }
+
+    @Override
+    public Iterator<ConstraintDescriptor> constraintsGetForRelationshipType(int typeId) {
+        return Collections.emptyIterator();
+    }
+
+    @Override
+    public Iterator<ConstraintDescriptor> constraintsGetAll() {
+        return Collections.emptyIterator();
+    }
+
+    @Override
+    public Long indexGetOwningUniquenessConstraintId(IndexDescriptor index) {
+        return null;
+    }
+
+    @Override
+    public long countsForNode(int labelId, CursorContext cursorContext) {
+        return counts.nodeCount(labelId, cursorContext);
+    }
+
+    @Override
+    public long countsForRelationship(int startLabelId, int typeId, int endLabelId, CursorContext cursorContext) {
+        return counts.relationshipCount(startLabelId, typeId, endLabelId, cursorContext);
+    }
+
+    @Override
+    public long nodesGetCount(CursorContext cursorContext) {
+        return graphStore.nodeCount();
+    }
+
+    @Override
+    public int labelCount() {
+        return graphStore.nodes().availableNodeLabels().size();
+    }
+
+    @Override
+    public int propertyKeyCount() {
+        int nodePropertyCount = graphStore
+            .schema()
+            .nodeSchema()
+            .properties()
+            .values()
+            .stream()
+            .mapToInt(map -> map.keySet().size())
+            .sum();
+        int relPropertyCount = graphStore
+            .schema()
+            .relationshipSchema()
+            .properties()
+            .values()
+            .stream()
+            .mapToInt(map -> map.keySet().size())
+            .sum();
+        return nodePropertyCount + relPropertyCount;
+    }
+
+    @Override
+    public int relationshipTypeCount() {
+        return graphStore.schema().relationshipSchema().properties().keySet().size();
+    }
+
+    @Override
+    public <T> T getOrCreateSchemaDependantState(Class<T> type, Function<StorageReader, T> factory) {
+        return type.cast(dependantState.computeIfAbsent(type, key -> factory.apply(this)));
+    }
+
+    @Override
+    public AllNodeScan allNodeScan() {
+        return new InMemoryNodeScan();
+    }
+
+    @Override
+    public void close() {
+        assert !closed;
+        closed = true;
+    }
+
+    @Override
+    public StorageSchemaReader schemaSnapshot() {
+        return this;
+    }
+
+    @Override
+    public TokenNameLookup tokenNameLookup() {
+        return tokenHolders;
+    }
+
+    protected boolean nodeExists(long id) {
+        var originalId = graphStore.nodes().toOriginalNodeId(id);
+        return graphStore.nodes().contains(originalId);
     }
 }

@@ -19,12 +19,15 @@
  */
 package org.neo4j.gds.compat._44;
 
-import org.neo4j.internal.recordstorage.AbstractInMemoryStoreVersion;
 import org.neo4j.storageengine.api.StoreVersion;
+import org.neo4j.storageengine.api.format.Capability;
+import org.neo4j.storageengine.api.format.CapabilityType;
 
 import java.util.Optional;
 
-public class InMemoryStoreVersion extends AbstractInMemoryStoreVersion {
+public class InMemoryStoreVersion implements StoreVersion {
+
+    public static final String STORE_VERSION = "gds-experimental";
 
     @Override
     public Optional<String> successorStoreVersion() {
@@ -44,5 +47,22 @@ public class InMemoryStoreVersion extends AbstractInMemoryStoreVersion {
     @Override
     public boolean isCompatibleWith(StoreVersion otherVersion) {
         return otherVersion.storeVersion().equals(storeVersion());
+    }
+
+    @Override
+    public boolean hasCapability(Capability capability) {
+        return false;
+    }
+
+    @Override
+    public boolean hasCompatibleCapabilities(
+        StoreVersion otherVersion, CapabilityType type
+    ) {
+        return false;
+    }
+
+    @Override
+    public String introductionNeo4jVersion() {
+        return "foo";
     }
 }

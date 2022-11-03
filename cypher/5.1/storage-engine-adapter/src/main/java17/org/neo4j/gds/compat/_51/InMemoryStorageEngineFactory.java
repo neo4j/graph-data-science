@@ -27,7 +27,6 @@ import org.neo4j.consistency.checking.ConsistencyFlags;
 import org.neo4j.consistency.report.ConsistencySummaryStatistics;
 import org.neo4j.dbms.database.readonly.DatabaseReadOnlyChecker;
 import org.neo4j.gds.annotation.SuppressForbidden;
-import org.neo4j.gds.storageengine.InMemoryTransactionStateVisitor;
 import org.neo4j.index.internal.gbptree.RecoveryCleanupWorkCollector;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
@@ -41,11 +40,8 @@ import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.LenientStoreInput;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.id.ScanOnOpenReadOnlyIdGeneratorFactory;
-import org.neo4j.internal.recordstorage.AbstractInMemoryMetaDataProvider;
-import org.neo4j.internal.recordstorage.AbstractInMemoryStorageEngineFactory;
 import org.neo4j.internal.recordstorage.InMemoryLogVersionRepository51;
 import org.neo4j.internal.recordstorage.InMemoryStorageCommandReaderFactory51;
-import org.neo4j.internal.recordstorage.InMemoryStorageReader51;
 import org.neo4j.internal.recordstorage.StoreTokens;
 import org.neo4j.internal.schema.IndexConfigCompleter;
 import org.neo4j.internal.schema.SchemaRule;
@@ -81,12 +77,13 @@ import org.neo4j.storageengine.api.LogVersionRepository;
 import org.neo4j.storageengine.api.MetadataProvider;
 import org.neo4j.storageengine.api.SchemaRule44;
 import org.neo4j.storageengine.api.StorageEngine;
+import org.neo4j.storageengine.api.StorageEngineFactory;
+import org.neo4j.storageengine.api.StorageFilesState;
 import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.StoreVersion;
 import org.neo4j.storageengine.api.StoreVersionCheck;
 import org.neo4j.storageengine.api.StoreVersionIdentifier;
 import org.neo4j.storageengine.api.TransactionIdStore;
-import org.neo4j.storageengine.migration.SchemaRuleMigrationAccess;
 import org.neo4j.storageengine.migration.StoreMigrationParticipant;
 import org.neo4j.token.DelegatingTokenHolder;
 import org.neo4j.token.ReadOnlyTokenCreator;
@@ -100,6 +97,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UncheckedIOException;
 import java.nio.file.OpenOption;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -111,13 +109,11 @@ import java.util.function.Function;
 import static org.neo4j.dbms.database.readonly.DatabaseReadOnlyChecker.readOnly;
 
 @ServiceProvider
-public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineFactory {
+public class InMemoryStorageEngineFactory implements StorageEngineFactory {
 
-    public static final String IN_MEMORY_STORAGE_ENGINE_NAME = "in-memory-51";
+    static final String IN_MEMORY_STORAGE_ENGINE_NAME = "in-memory-51";
 
-    private final AbstractInMemoryMetaDataProvider metadataProvider = new InMemoryMetaDataProviderImpl();
-
-    private PageCache pageCache;
+    private final InMemoryMetaDataProviderImpl metadataProvider = new InMemoryMetaDataProviderImpl();
 
     @Override
     public boolean storageExists(FileSystemAbstraction fileSystem, DatabaseLayout databaseLayout) {
@@ -147,7 +143,6 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         CursorContextFactory cursorContextFactory,
         PageCacheTracer pageCacheTracer
     ) {
-        this.pageCache = pageCache;
         StoreFactory factory = new StoreFactory(
             databaseLayout,
             config,
@@ -163,13 +158,7 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
 
         factory.openNeoStores(createStoreIfNotExists, StoreType.LABEL_TOKEN).close();
 
-        return new InMemoryStorageEngineImpl.Builder(databaseLayout, tokenHolders, metadataProvider)
-            .withCommandCreationContextSupplier(InMemoryCommandCreationContextImpl::new)
-            .withStorageReaderFn(InMemoryStorageReader51::new)
-            .withTxStateVisitorFn(InMemoryTransactionStateVisitor::new)
-            .withCountsStoreFn(InMemoryCountsStoreImpl::new)
-            .withCommandCreationContextSupplier(InMemoryCommandCreationContextImpl::new)
-            .build();
+        return new InMemoryStorageEngineImpl(databaseLayout, tokenHolders);
     }
 
     @Override
@@ -310,7 +299,7 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         LogTailMetadata logTailMetadata,
         PageCacheTracer pageCacheTracer
     ) {
-        return metadataProvider();
+        return metadataProvider;
     }
 
     @Override
@@ -323,43 +312,6 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         CursorContextFactory cursorContextFactory
     ) {
         return new InMemoryVersionCheck();
-    }
-
-
-
-    @Override
-    protected AbstractInMemoryMetaDataProvider metadataProvider() {
-        return metadataProvider;
-    }
-
-    @Override
-    protected SchemaRuleMigrationAccess schemaRuleMigrationAccess() {
-        return new SchemaRuleMigrationAccess() {
-            @Override
-            public Iterable<SchemaRule> getAll() {
-                return Collections.emptyList();
-            }
-
-            @Override
-            public void writeSchemaRule(SchemaRule rule) {
-
-            }
-
-            @Override
-            public void deleteSchemaRule(long id) {
-
-            }
-
-            @Override
-            public long nextId() {
-                return 0;
-            }
-
-            @Override
-            public void close() {
-
-            }
-        };
     }
 
     @Override
@@ -515,7 +467,7 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
 
     @Override
     public TransactionIdStore readOnlyTransactionIdStore(LogTailMetadata logTailMetadata) {
-        return metadataProvider().transactionIdStore();
+        return metadataProvider.transactionIdStore();
     }
 
     @Override
@@ -575,5 +527,19 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         IndexProvidersAccess indexProvidersAccess
     ) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<Path> listStorageFiles(
+        FileSystemAbstraction fileSystem, DatabaseLayout databaseLayout
+    ) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public StorageFilesState checkStoreFileState(
+        FileSystemAbstraction fs, DatabaseLayout databaseLayout, PageCache pageCache
+    ) {
+        return StorageFilesState.recoveredState();
     }
 }

@@ -19,28 +19,8 @@
  */
 package org.neo4j.internal.recordstorage;
 
-import org.neo4j.storageengine.api.StoreVersion;
-import org.neo4j.storageengine.api.format.Capability;
-import org.neo4j.storageengine.api.format.CapabilityType;
+import org.neo4j.storageengine.api.AllRelationshipsScan;
 
-public abstract class AbstractInMemoryStoreVersion implements StoreVersion {
+abstract class AbstractInMemoryAllRelationshipScan extends BaseRecordScan<AbstractInMemoryRelationshipScanCursor> implements AllRelationshipsScan {
 
-    public static final String STORE_VERSION = "gds-experimental";
-
-    @Override
-    public boolean hasCapability(Capability capability) {
-        return false;
-    }
-
-    @Override
-    public boolean hasCompatibleCapabilities(
-        StoreVersion otherVersion, CapabilityType type
-    ) {
-        return false;
-    }
-
-    @Override
-    public String introductionNeo4jVersion() {
-        return "foo";
-    }
 }
