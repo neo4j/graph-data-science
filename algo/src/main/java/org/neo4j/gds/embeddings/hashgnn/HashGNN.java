@@ -22,8 +22,8 @@ package org.neo4j.gds.embeddings.hashgnn;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.BitSetIterator;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -55,6 +55,7 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
 
     @Override
     public HashGNNResult compute() {
+        progressTracker.beginSubTask();
         var degreePartition = PartitionUtils.degreePartition(
             graph,
             // Since degree only very approximately reflect the min hash task workload per node we decrease the partition sizes.
@@ -70,10 +71,11 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         );
 
         Graph graphCopy = graph.concurrentCopy();
+        GraphSchema schema = graph.schema();
         List<Graph> graphs = config.heterogeneous()
-            ? config.relationshipTypes()
+            ? schema.relationshipSchema().availableTypes()
             .stream()
-            .map(rt -> graph.relationshipTypeFilteredGraph(Set.of(RelationshipType.of(rt))))
+            .map(rt -> graph.relationshipTypeFilteredGraph(Set.of(rt)))
             .collect(Collectors.toList())
             : List.of(graphCopy);
 
@@ -150,6 +152,7 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
             outputVectors.setAll(nodeId -> bitSetToArray(binaryOutputVectors.get(nodeId), embeddingDimension));
         }
 
+        progressTracker.endSubTask();
         return new HashGNNResult(outputVectors);
     }
 

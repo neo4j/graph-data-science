@@ -19,22 +19,14 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.FeaturePropertiesConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-
-import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
-import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 
 @Configuration
 interface HashGNNConfig extends AlgoBaseConfig, FeaturePropertiesConfig, RandomSeedConfig {
@@ -62,18 +54,6 @@ interface HashGNNConfig extends AlgoBaseConfig, FeaturePropertiesConfig, RandomS
         return Optional.empty();
     }
 
-    @Configuration.GraphStoreValidationCheck
-    @Value.Default
-    default void starRelationshipTypeRequiresNotHeterogeneous(
-        GraphStore graphStore,
-        Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
-    ) {
-        if (heterogeneous()) {
-            if (relationshipTypes().contains(ALL_RELATIONSHIPS.name()) || relationshipTypes().contains(PROJECT_ALL))
-                throw new IllegalArgumentException("Must not use `*` relationship projection with heterogeneous HashGNN");
-        }
-    }
     static Optional<FeatureBinarizationConfig> parseBinarizationConfig(Object o) {
         if (o instanceof Optional) {
             return (Optional<FeatureBinarizationConfig>) o;

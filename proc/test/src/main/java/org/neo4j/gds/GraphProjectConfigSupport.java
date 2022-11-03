@@ -24,28 +24,44 @@ import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.Collections.singletonMap;
+import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
+import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 
 public interface GraphProjectConfigSupport {
 
-    default GraphProjectFromStoreConfig emptyWithNameNative(String userName, String graphName) {
+    default GraphProjectFromStoreConfig emptyWithNameNative(String userName, String graphName, List<String> nodeProperties
+    ) {
         return withNameAndRelationshipProjections(
             userName,
             graphName,
-            RelationshipProjections.ALL
+            RelationshipProjections.ALL,
+            nodeProperties
         );
     }
 
     default GraphProjectFromStoreConfig withNameAndRelationshipProjections(
         String userName,
         String graphName,
-        RelationshipProjections rels
+        RelationshipProjections rels,
+        List<String> nodeProperties
     ) {
+        var propertyMappings = nodeProperties
+            .stream()
+            .map(PropertyMapping::of)
+            .collect(Collectors.toList());
         return ImmutableGraphProjectFromStoreConfig.of(
             userName,
             graphName,
-            NodeProjections.all(),
+            AbstractNodeProjections.create(singletonMap(
+                ALL_NODES,
+                NodeProjection.of(PROJECT_ALL, PropertyMappings.of(propertyMappings))
+            )),
             rels
         );
     }
@@ -63,23 +79,28 @@ public interface GraphProjectConfigSupport {
         );
     }
 
-    default GraphProjectFromCypherConfig emptyWithNameCypher(String userName, String graphName) {
+    default GraphProjectFromCypherConfig emptyWithNameCypher(String userName, String graphName, List<String> nodeProperties
+    ) {
         return withNameAndRelationshipQuery(
             userName,
             graphName,
-            ALL_RELATIONSHIPS_QUERY
+            ALL_RELATIONSHIPS_QUERY,
+            nodeProperties
         );
     }
 
     default GraphProjectFromCypherConfig withNameAndRelationshipQuery(
         String userName,
         String graphName,
-        String relationshipQuery
+        String relationshipQuery,
+        List<String> nodeProperties
     ) {
+        String propertyPart = nodeProperties.stream().map(p -> "n." + p + " AS " + p).collect(Collectors.joining(", "));
+        String nodesQuery = nodeProperties.isEmpty() ? ALL_NODES_QUERY : ALL_NODES_QUERY + ", " + propertyPart;
         return GraphProjectFromCypherConfig.of(
             userName,
             graphName,
-            ALL_NODES_QUERY,
+            nodesQuery,
             relationshipQuery,
             CypherMapWrapper.empty()
         );
