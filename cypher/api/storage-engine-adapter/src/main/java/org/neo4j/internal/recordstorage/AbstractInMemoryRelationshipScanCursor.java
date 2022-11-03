@@ -69,13 +69,14 @@ public abstract class AbstractInMemoryRelationshipScanCursor extends InMemoryRel
         }
     }
 
+    @SuppressWarnings("unchecked")
     public boolean scanBatch(AllRelationshipsScan scan, int sizeHint) {
         if (getId() != NO_ID) {
             reset();
         }
 
         highMark = maxRelationshipId;
-        return ((AbstractInMemoryAllRelationshipScan) scan).scanBatch(sizeHint, this);
+        return ((BaseRecordScan<AbstractInMemoryRelationshipScanCursor>) scan).scanBatch(sizeHint, this);
     }
 
     public boolean scanRange(long start, long stop) {
