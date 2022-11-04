@@ -204,6 +204,7 @@ public class Leiden extends Algorithm<LeidenResult> {
                     iteration
                 );  //update the actual communities with the refined ones
 
+                long aggregateStartsAt = System.currentTimeMillis();
                 // 3 CREATE NEW GRAPH
                 var graphAggregationPhase = new GraphAggregationPhase(
                     workingGraph,
@@ -217,6 +218,7 @@ public class Leiden extends Algorithm<LeidenResult> {
                 );
                 var previousNodeCount = workingGraph.nodeCount();
                 workingGraph = graphAggregationPhase.run();
+                System.out.println("Aggregation took: " + (System.currentTimeMillis() - aggregateStartsAt) / 1000.0 + " seconds");
 
                 // Post-aggregate step: MAINTAIN PARTITION
                 var communityData = maintainPartition(
