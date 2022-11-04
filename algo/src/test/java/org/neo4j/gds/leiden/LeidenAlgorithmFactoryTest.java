@@ -37,9 +37,7 @@ class LeidenAlgorithmFactoryTest {
         var graph = GdlFactory.of(" CREATE (a:NODE), (b:NODE) ").build().getUnion();
 
         var task = new LeidenAlgorithmFactory<>().progressTask(graph, config);
-
-        System.out.println(task.render());
-
+        
         var initialization = Tasks.leaf("Initialization", 2);
 
         var iteration = Tasks.iterativeDynamic("Iteration", () ->

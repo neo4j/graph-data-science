@@ -64,6 +64,7 @@ class RefinementPhaseKarateTest {
             originalCommunities, nodeVolumes, communityVolumes, gamma, graph.nodeCount(), 1
         );
 
+        localMovePhase.run();
         var communityVolumesForRefinement = communityVolumes;
 
         var refinementPhase = RefinementPhase.create(
