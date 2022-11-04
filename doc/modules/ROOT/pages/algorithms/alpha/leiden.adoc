@@ -301,6 +301,31 @@ CALL gds.graph.project(
 
 In the following examples we will demonstrate using the Leiden algorithm on this graph.
 
+
+[[algorithms-leiden-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in write mode:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.leiden.write.estimate('myGraph', {writeProperty: 'communityId', randomSeed: 19})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 6         | 14                | 561064   | 561176      | "[547 KiB \... 548 KiB]"
+|===
+--
+
+
 [[algorithms-leiden-examples-stream]]
 === Stream
 
