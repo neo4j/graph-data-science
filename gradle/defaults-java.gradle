@@ -80,11 +80,13 @@ allprojects {
                 includeEngines 'junit-jupiter'
                 includeEngines 'jqwik'
             }
+
             // enable verbose test logging
-             testLogging {
-                 events "passed", "skipped", "failed", "standardOut", "standardError"
-             }
             testLogging {
+                // `0` corresponds to the Gradle-generated test suite for the whole test run
+                maxGranularity = 0
+                events "passed", "skipped", "failed"
+
                 afterSuite { desc, result ->
                     if (!desc.parent) { // will match the outermost suite
                         println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
