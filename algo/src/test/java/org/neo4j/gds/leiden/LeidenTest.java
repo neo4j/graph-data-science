@@ -53,7 +53,6 @@ import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
 @GdlExtension
 class LeidenTest {
 
-
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String DB_CYPHER =
         "CREATE " +
@@ -242,8 +241,6 @@ class LeidenTest {
         var seededStart = HugeLongArray.of(200, 201, 201, 203, 203);
         var seed = SeedCommunityManager.create(true, seededStart);
 
-        assertThat(noSeed.communitiesCount()).isEqualTo(5);
-        assertThat(seed.communitiesCount()).isEqualTo(3);
         graph.forEachNode(nodeId -> {
             assertThat(noSeed.mapToSeed(nodeId)).isEqualTo(nodeId);
             return true;

@@ -25,43 +25,32 @@ import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 interface SeedCommunityManager {
-    default long mapToSeed(long communityId) {
-        return communityId;
-    }
 
-    long communitiesCount();
+    long mapToSeed(long communityId);
 
     static SeedCommunityManager create(boolean isSeeded, HugeLongArray startingNodeCommunities) {
         if (!isSeeded) {
-            return new EmptySeedCommunityManager(startingNodeCommunities.size());
+            return new EmptySeedCommunityManager();
         } else {
             return FullSeedCommunityManager.create(startingNodeCommunities);
         }
     }
 
     class EmptySeedCommunityManager implements SeedCommunityManager {
-        private long nodeCount;
+        EmptySeedCommunityManager() {}
 
         @Override
-        public long communitiesCount() {
-            return nodeCount;
+        public long mapToSeed(long communityId) {
+            return communityId;
         }
-
-        EmptySeedCommunityManager(long nodeCount) {
-            this.nodeCount = nodeCount;
-        }
-
     }
 
     class FullSeedCommunityManager implements SeedCommunityManager {
 
         private HugeLongArray reverseMap;
-        private long communitiesCount;
 
-        FullSeedCommunityManager(HugeLongArray reverseMap, long communitiesCount) {
-
+        FullSeedCommunityManager(HugeLongArray reverseMap) {
             this.reverseMap = reverseMap;
-            this.communitiesCount = communitiesCount;
         }
 
         static FullSeedCommunityManager create(HugeLongArray startingCommunities) {
@@ -77,21 +66,15 @@ interface SeedCommunityManager {
                 startingCommunities.set(nodeId, seedMap.get(communityId));
             }
             HugeLongArray reverseMap = HugeLongArray.newArray(maxId + 1);
-            long communitiesCount = seedMap.size();
             for (LongLongCursor cursor : seedMap) {
                 reverseMap.set(cursor.value, cursor.key);
             }
-            return new FullSeedCommunityManager(reverseMap, communitiesCount);
+            return new FullSeedCommunityManager(reverseMap);
         }
 
         @Override
         public long mapToSeed(long communityId) {
             return reverseMap.get(communityId);
-        }
-
-        @Override
-        public long communitiesCount() {
-            return communitiesCount;
         }
 
     }

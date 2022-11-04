@@ -101,8 +101,6 @@ public class Leiden extends Algorithm<LeidenResult> {
 
         seedCommunityManager = SeedCommunityManager.create(seedValues.isPresent(), localMoveCommunities);
 
-        var communityCount = seedCommunityManager.communitiesCount();
-
         // volume -> the sum of the weights of a nodes outgoing relationships
         var localMoveNodeVolumes = HugeDoubleArray.newArray(nodeCount);
         // the sum of the node volume for all nodes in a community
@@ -134,7 +132,6 @@ public class Leiden extends Algorithm<LeidenResult> {
                 localMoveNodeVolumes,
                 localMoveCommunityVolumes,
                 gamma,
-                communityCount,
                 concurrency
             );
 
@@ -230,7 +227,6 @@ public class Leiden extends Algorithm<LeidenResult> {
                 localMoveCommunities = communityData.seededCommunitiesForNextIteration;
                 localMoveCommunityVolumes = communityData.communityVolumes;
                 localMoveNodeVolumes = communityData.aggregatedNodeSeedVolume;
-                communityCount = communityData.communityCount;
                 progressTracker.endSubTask("Aggregation");
             }
             modularity = modularities[iteration];
@@ -379,8 +375,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         return new CommunityData(
             seededCommunitiesForNextIteration,
             aggregatedCommunitySeedVolume,
-            aggregatedNodeSeedVolume,
-            localPhaseCommunityToAggregatedNewId.size()
+            aggregatedNodeSeedVolume
         );
     }
 

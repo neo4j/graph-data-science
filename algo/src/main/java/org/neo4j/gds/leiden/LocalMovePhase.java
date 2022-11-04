@@ -48,14 +48,9 @@ final class LocalMovePhase {
     private final HugeDoubleArray communityVolumes;
     private final double gamma;
 
-    private final HugeLongArray encounteredCommunities;
-    private final HugeDoubleArray encounteredCommunitiesWeights;
-    private long encounteredCommunityCounter = 0;
     private final int concurrency;
 
     long swaps;
-
-    private long communityCount;
 
     static LocalMovePhase create(
         Graph graph,
@@ -63,22 +58,16 @@ final class LocalMovePhase {
         HugeDoubleArray nodeVolumes,
         HugeDoubleArray communityVolumes,
         double gamma,
-        long communityCount,
         int concurrency
     ) {
-
-        var encounteredCommunities = HugeLongArray.newArray(graph.nodeCount());
         var encounteredCommunitiesWeights = HugeDoubleArray.newArray(graph.nodeCount());
         encounteredCommunitiesWeights.setAll(c -> -1L);
 
         return new LocalMovePhase(
             graph,
-            communityCount,
             seedCommunities,
             nodeVolumes,
             communityVolumes,
-            encounteredCommunities,
-            encounteredCommunitiesWeights,
             gamma,
             concurrency
         );
@@ -86,26 +75,19 @@ final class LocalMovePhase {
 
     private LocalMovePhase(
         Graph graph,
-        long communityCount,
         HugeLongArray seedCommunities,
         HugeDoubleArray nodeVolumes,
         HugeDoubleArray communityVolumes,
-        HugeLongArray encounteredCommunities,
-        HugeDoubleArray encounteredCommunitiesWeights,
         double gamma,
         int concurrency
     ) {
         this.graph = graph;
-        this.communityCount = communityCount;
         this.currentCommunities = seedCommunities;
         this.gamma = gamma;
         this.nodeVolumes = nodeVolumes;
         this.communityVolumes = communityVolumes;
-        this.encounteredCommunities = encounteredCommunities;
-        this.encounteredCommunitiesWeights = encounteredCommunitiesWeights;
         this.swaps = 0;
         this.concurrency = concurrency;
-
     }
 
     /**

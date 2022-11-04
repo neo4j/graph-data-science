@@ -65,7 +65,7 @@ class LocalMovePhaseKarateTest {
             nodeVolumes,
             communityVolumes,
             gamma,
-            graph.nodeCount(), 1
+            1
         ).run();
 
 

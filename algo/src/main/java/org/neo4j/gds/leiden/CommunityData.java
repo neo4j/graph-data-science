@@ -26,17 +26,14 @@ public class CommunityData {
     final HugeDoubleArray communityVolumes;
     final HugeLongArray seededCommunitiesForNextIteration;
     final HugeDoubleArray aggregatedNodeSeedVolume;
-    final int communityCount;
 
     CommunityData(
         HugeLongArray seededCommunitiesForNextIteration,
         HugeDoubleArray communityVolumes,
-        HugeDoubleArray aggregatedNodeSeedVolume,
-        int communityCount
+        HugeDoubleArray aggregatedNodeSeedVolume
     ) {
         this.communityVolumes = communityVolumes;
         this.seededCommunitiesForNextIteration = seededCommunitiesForNextIteration;
         this.aggregatedNodeSeedVolume = aggregatedNodeSeedVolume;
-        this.communityCount = communityCount;
     }
 }
