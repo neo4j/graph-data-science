@@ -26,6 +26,7 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,7 +50,7 @@ final class RefinementPhase {
     private final int concurrency;
     private final ExecutorService executorService;
     private final HugeDoubleArray nextCommunityProbabilities;
-
+    private final ProgressTracker progressTracker;
     static RefinementPhase create(
         Graph workingGraph,
         HugeLongArray originalCommunities,
@@ -59,7 +60,8 @@ final class RefinementPhase {
         double theta,
         long seed,
         int concurrency,
-        ExecutorService executorService
+        ExecutorService executorService,
+        ProgressTracker progressTracker
     ) {
         var encounteredCommunities = HugeLongArray.newArray(workingGraph.nodeCount());
         var encounteredCommunitiesWeights = HugeDoubleArray.newArray(workingGraph.nodeCount());
@@ -78,7 +80,8 @@ final class RefinementPhase {
             theta,
             seed,
             concurrency,
-            executorService
+            executorService,
+            progressTracker
         );
     }
 
@@ -94,7 +97,8 @@ final class RefinementPhase {
         double theta,
         long seed,
         int concurrency,
-        ExecutorService executorService
+        ExecutorService executorService,
+        ProgressTracker progressTracker
     ) {
         this.workingGraph = workingGraph;
         this.originalCommunities = originalCommunities;
@@ -111,6 +115,7 @@ final class RefinementPhase {
         this.relationshipsBetweenCommunities = HugeDoubleArray.newArray(workingGraph.nodeCount());
         this.concurrency = concurrency;
         this.executorService = executorService;
+        this.progressTracker = progressTracker;
     }
 
     RefinementPhaseResult run() {
@@ -134,7 +139,9 @@ final class RefinementPhase {
             if (maximumCommunityId.longValue() < refinedId) {
                 maximumCommunityId.setValue(refinedId);
             }
+            progressTracker.logProgress();
             return true;
+
         });
 
         // We don't use the `communityCount` from the RefinementPhase => set it to `-1` in case we try to read it by mistake.

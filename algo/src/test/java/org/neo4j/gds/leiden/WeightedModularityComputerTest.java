@@ -26,6 +26,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -84,7 +85,8 @@ class WeightedModularityComputerTest {
             1.0 / (4.0 * graph.relationshipCount()),
             1.0 / (4.0 * graph.relationshipCount()),
             4,
-            Pools.DEFAULT
+            Pools.DEFAULT,
+            ProgressTracker.EmptyProgressTracker.NULL_TRACKER
         );
         assertThat(modularity).isCloseTo(0.4230, Offset.offset(1e-3));
     }
@@ -104,7 +106,8 @@ class WeightedModularityComputerTest {
             1,
             Pools.DEFAULT,
             1,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            ProgressTracker.NULL_TRACKER
         ).run();
         var localCommunitiesCondensed = HugeLongArray.of(0, 1);
         var communityVolumes2 = HugeDoubleArray.of(communityVolumes.get(0), communityVolumes.get(1));
@@ -115,7 +118,8 @@ class WeightedModularityComputerTest {
             1.0 / (4 * graph.relationshipCount()),
             1.0 / (4 * graph.relationshipCount()),
             4,
-            Pools.DEFAULT
+            Pools.DEFAULT,
+            ProgressTracker.EmptyProgressTracker.NULL_TRACKER
         );
         assertThat(modularity).isCloseTo(0.4230, Offset.offset(1e-3));
     }

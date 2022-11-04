@@ -24,6 +24,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -81,7 +82,8 @@ class GraphAggregationPhaseTest {
             1L,
             Pools.DEFAULT_SINGLE_THREAD_POOL,
             4,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            ProgressTracker.NULL_TRACKER
         );
 
         var aggregatedGraph = aggregationPhase.run();

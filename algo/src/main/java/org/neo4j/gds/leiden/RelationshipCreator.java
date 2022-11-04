@@ -24,6 +24,7 @@ import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 final class RelationshipCreator implements Runnable {
 
@@ -32,19 +33,22 @@ final class RelationshipCreator implements Runnable {
     private final HugeLongArray communities;
     private final RelationshipIterator relationshipIterator;
     private final Partition partition;
-    
+    private final ProgressTracker progressTracker;
+
     RelationshipCreator(
         HugeLongArray communities,
         Partition partition,
         RelationshipsBuilder relationshipsBuilder,
         RelationshipIterator relationshipIterator,
-        Orientation orientation
+        Orientation orientation,
+        ProgressTracker progressTracker
     ) {
         this.orientation = orientation;
         this.relationshipsBuilder = relationshipsBuilder;
         this.communities = communities;
         this.relationshipIterator = relationshipIterator;
         this.partition = partition;
+        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -65,6 +69,7 @@ final class RelationshipCreator implements Runnable {
                 }
                 return true;
             });
+            progressTracker.logProgress();
         });
     }
 }
