@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.leiden;
 
-import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -38,10 +37,11 @@ final class RelationshipCreator implements Runnable {
     private final ProgressTracker progressTracker;
     private final HugeDoubleArray encounteredCommunityWeights;
     private final HugeLongArray encounteredCommunities;
-
     private long encountereCommunitiesCounter;
+    private final HugeLongArray sortedByCommunity;
 
     RelationshipCreator(
+        HugeLongArray sortedByCommunity,
         HugeLongArray communities,
         Partition partition,
         RelationshipsBuilder relationshipsBuilder,
@@ -57,7 +57,8 @@ final class RelationshipCreator implements Runnable {
         this.progressTracker = progressTracker;
         this.encounteredCommunityWeights = HugeDoubleArray.newArray(communities.size());
         this.encounteredCommunities = HugeLongArray.newArray(communities.size());
-        encounteredCommunityWeights.setAll(v -> -1);
+        this.encounteredCommunityWeights.setAll(v -> -1);
+        this.sortedByCommunity = sortedByCommunity;
     }
 
 
@@ -72,14 +73,15 @@ final class RelationshipCreator implements Runnable {
 
     @Override
     public void run() {
-        HugeLongArray sortedByCommunity = getNodesSortedByCommunity(partition, communities);
-        long partitionCount = partition.nodeCount();
+        long startNode = partition.startNode();
+        long endNode = partition.startNode() + partition.nodeCount();
+
         long previousCommunity = -1;
-        for (long nodeIndexId = 0; nodeIndexId < partitionCount; ++nodeIndexId) {
+        for (long nodeIndexId = startNode; nodeIndexId < endNode; ++nodeIndexId) {
             long nodeId = sortedByCommunity.get(nodeIndexId);
             long currentCommunity = communities.get(nodeId);
 
-            boolean shouldUpdate = (nodeIndexId > 0 && previousCommunity != currentCommunity);
+            boolean shouldUpdate = (nodeIndexId > startNode && previousCommunity != currentCommunity);
 
             if (shouldUpdate) {
                 updateRelationships(previousCommunity, encountereCommunitiesCounter);
@@ -106,7 +108,7 @@ final class RelationshipCreator implements Runnable {
                 return true;
             });
 
-            shouldUpdate = (nodeIndexId == (partitionCount - 1));
+            shouldUpdate = (nodeIndexId == (endNode - 1));
             if (shouldUpdate) {
                 updateRelationships(currentCommunity, encountereCommunitiesCounter);
             }
@@ -116,43 +118,6 @@ final class RelationshipCreator implements Runnable {
 
     }
 
-    static HugeLongArray getNodesSortedByCommunity(Partition partition, HugeLongArray communities) {
-        long nodeCount = communities.size();
-        long partitionCount = partition.nodeCount();
-        var sortedNodesByCommunity = HugeLongArray.newArray(partitionCount);
-        HugeLongArray communityCoordinateArray = HugeLongArray.newArray(nodeCount);
 
-        HugeLongArray indexMap = HugeLongArray.newArray(nodeCount);
-        
-        BitSet setCommunityCoordinates = new BitSet(nodeCount + 1);
-
-        long endNode = partition.startNode() + partition.nodeCount();
-        for (long nodeId = partition.startNode(); nodeId < endNode; ++nodeId) {
-            long communityId = communities.get(nodeId);
-            setCommunityCoordinates.getAndSet(communityId);
-            communityCoordinateArray.addTo(communityId, 1);
-        }
-
-
-        long nodeSum = 0;
-        long bitIndex = setCommunityCoordinates.nextSetBit(0);
-        long currentId = 0;
-        while (bitIndex != -1) {
-            indexMap.set(bitIndex, currentId);
-            nodeSum += communityCoordinateArray.get(bitIndex);
-            communityCoordinateArray.set(currentId++, nodeSum);
-            bitIndex = setCommunityCoordinates.nextSetBit(bitIndex + 1);
-        }
-
-        for (long nodeId = endNode - 1; nodeId >= partition.startNode(); --nodeId) {
-            long community = communities.get(nodeId);
-            long communityId = indexMap.get(community);
-            long coordinate = communityCoordinateArray.get(communityId) - 1;
-            sortedNodesByCommunity.set(coordinate, nodeId);
-            communityCoordinateArray.set(communityId, coordinate);
-        }
-        return sortedNodesByCommunity;
-
-    }
 }
 

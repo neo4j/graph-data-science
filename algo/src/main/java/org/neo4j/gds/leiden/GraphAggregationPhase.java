@@ -37,13 +37,16 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 
 class GraphAggregationPhase {
 
@@ -146,12 +149,24 @@ class GraphAggregationPhase {
             .addPropertyConfig(Aggregation.SUM, DefaultValue.forDouble())
             .executorService(executorService)
             .build();
-        var relationshipCreators = PartitionUtils.degreePartition(
-            workingGraph,
+
+        var sortedNodesByCommunity = getNodesSortedByCommunity(
+            new Partition(0, workingGraph.nodeCount()),
+            communities,
+            concurrency
+        );
+        var relationshipCreators = PartitionUtils.rangePartition(
             concurrency,
+            workingGraph.nodeCount(),
             partition ->
                 new RelationshipCreator(
-                    communities, partition, relationshipsBuilder, workingGraph.concurrentCopy(), orientation, progressTracker
+                    sortedNodesByCommunity,
+                    communities,
+                    partition,
+                    relationshipsBuilder,
+                    workingGraph.concurrentCopy(),
+                    orientation,
+                    progressTracker
                 ),
             Optional.empty()
         );
@@ -159,6 +174,44 @@ class GraphAggregationPhase {
         ParallelUtil.run(relationshipCreators, executorService);
 
         return GraphFactory.create(idMap, relationshipsBuilder.build());
+    }
+
+    static HugeLongArray getNodesSortedByCommunity(Partition partition, HugeLongArray communities, int concurrency) {
+        long nodeCount = communities.size();
+        long partitionCount = partition.nodeCount();
+        var sortedNodesByCommunity = HugeLongArray.newArray(partitionCount);
+        HugeAtomicLongArray communityCoordinateArray = HugeAtomicLongArray.newArray(nodeCount);
+
+
+        long endNode = partition.startNode() + partition.nodeCount();
+        ParallelUtil.parallelForEachNode(partitionCount, concurrency, indexId -> {
+            {
+                long nodeId = partition.startNode() + indexId;
+                long communityId = communities.get(nodeId);
+                communityCoordinateArray.getAndAdd(communityId, 1);
+            }
+        });
+        AtomicLong atomicNodeSum = new AtomicLong();
+        ParallelUtil.parallelForEachNode(partitionCount, concurrency, indexId ->
+        {
+            if (communityCoordinateArray.get(indexId) > 0) {
+                var nodeSum = atomicNodeSum.addAndGet(communityCoordinateArray.get(indexId));
+                communityCoordinateArray.set(indexId, nodeSum);
+            }
+        });
+
+        ParallelUtil.parallelForEachNode(partitionCount, concurrency, indexId ->
+        {
+            long nodeId = endNode - indexId - 1;
+
+            long communityId = communities.get(nodeId);
+            long coordinate = communityCoordinateArray.getAndAdd(communityId, -1);
+            sortedNodesByCommunity.set(coordinate - 1, nodeId);
+
+        });
+
+        return sortedNodesByCommunity;
+
     }
 
 }
