@@ -345,6 +345,7 @@
 .2+<.^| xref:algorithms/alpha/modularity.adoc[Modularity Metric]
 | `gds.alpha.modularity.stats`
 | `gds.alpha.modularity.stream`
-.1+<.^| HashGNN
+.2+<.^| HashGNN
 | `gds.alpha.hashgnn.mutate`
+| `gds.alpha.hashgnn.mutate.estimate`
 |===

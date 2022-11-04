@@ -28,6 +28,7 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -54,6 +55,15 @@ public class HashGNNMutateProc extends MutatePropertyProc<HashGNN, HashGNN.HashG
             configuration
         );
         return mutate(computationResult);
+    }
+
+    @Procedure(value = "gds.alpha.hashgnn.mutate.estimate", mode = READ)
+    @Description(DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override
