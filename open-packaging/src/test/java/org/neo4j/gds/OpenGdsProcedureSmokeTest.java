@@ -97,6 +97,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
         "gds.alpha.hashgnn.mutate",
         "gds.alpha.hashgnn.mutate.estimate",
+        "gds.alpha.hashgnn.stream",
+        "gds.alpha.hashgnn.stream.estimate",
 
         "gds.alpha.hits.mutate",
         "gds.alpha.hits.mutate.estimate",
@@ -514,7 +516,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 364;
+        int expectedCount = 366;
         assertEquals(
             expectedCount,
             registeredProcedures.size(),
