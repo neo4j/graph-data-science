@@ -21,9 +21,18 @@ package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 public class LeidenDendrogramManager {
+
+    static MemoryEstimation memoryEstimation(int numberOfTrackedIterations) {
+        return MemoryEstimations.builder(LeidenDendrogramManager.class)
+            .perNode("dendograms", HugeLongArray::memoryEstimation)
+            .build()
+            .times(numberOfTrackedIterations);
+    }
 
     private final Graph rootGraph;
     private final long nodeCount;

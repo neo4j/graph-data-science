@@ -20,6 +20,8 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -30,20 +32,29 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class LocalMoveTask implements Runnable {
 
+    static MemoryEstimation estimation() {
+        return MemoryEstimations.builder()
+            .perNode("neighbor communities", HugeLongArray::memoryEstimation)
+            .perNode("neighbor weights", HugeDoubleArray::memoryEstimation)
+            .add("local queue", HugeLongArrayQueue.memoryEstimation())
+            .build();
+    }
+
     private static final long LOCAL_QUEUE_BOUND = 1000;
     private final Graph graph;
     private final AtomicLong globalQueueIndex;
     private final HugeLongArray encounteredCommunities;
     private final HugeDoubleArray encounteredCommunitiesWeights;
     private final HugeDoubleArray nodeVolumes;
-    private final HugeLongArray globalQueue;
 
+    private final HugeLongArray globalQueue;
     private final AtomicLong globalQueueSize;
     private final HugeAtomicBitSet nodeInQueue;
     private final HugeLongArrayQueue localQueue;
     private final HugeLongArray currentCommunities;
     private final HugeAtomicDoubleArray communityVolumes;
     private long encounteredCommunityCounter = 0;
+
     private LocalMoveTaskPhase phase;
 
     private final double gamma;

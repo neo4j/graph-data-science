@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.leiden;
 
-import com.carrotsearch.hppc.LongLongHashMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
@@ -216,13 +215,15 @@ public class Leiden extends Algorithm<LeidenResult> {
                     this.terminationFlag,
                     this.progressTracker
                 );
+                var previousNodeCount = workingGraph.nodeCount();
                 workingGraph = graphAggregationPhase.run();
 
                 // Post-aggregate step: MAINTAIN PARTITION
                 var communityData = maintainPartition(
                     workingGraph,
                     localMoveCommunities,
-                    refinedCommunityVolumes
+                    refinedCommunityVolumes,
+                    previousNodeCount
                 );
                 localMoveCommunities = communityData.seededCommunitiesForNextIteration;
                 localMoveCommunityVolumes = communityData.communityVolumes;
@@ -335,13 +336,13 @@ public class Leiden extends Algorithm<LeidenResult> {
     static @NotNull CommunityData maintainPartition(
         Graph workingGraph,
         @NotNull HugeLongArray localPhaseCommunities,
-        HugeDoubleArray refinedCommunityVolumes
+        HugeDoubleArray refinedCommunityVolumes,
+        long previousNodeCount
     ) {
+        HugeLongArray inputCommunities = HugeLongArray.newArray(workingGraph.nodeCount());
 
-        HugeLongArray seededCommunitiesForNextIteration = HugeLongArray.newArray(workingGraph.nodeCount());
-
-        var localPhaseCommunityToAggregatedNewId = new LongLongHashMap();
-        
+        var localPhaseCommunityToAggregatedNewId = HugeLongArray.newArray(previousNodeCount);
+        localPhaseCommunityToAggregatedNewId.setAll(l -> -1);
         //this works under the following constraint:
         //   for every  mapping community x
         //  nodeId  x from the previous graph (i.e., originalNode) is in same  community x
@@ -357,23 +358,23 @@ public class Leiden extends Algorithm<LeidenResult> {
             long localPhaseCommunityId = localPhaseCommunities.get(refinedCommunityId);
             long aggregatedSeedCommunityId;
             // cache the `aggregatedSeedCommunityId`
-            if (localPhaseCommunityToAggregatedNewId.containsKey(localPhaseCommunityId)) {
+            if (localPhaseCommunityToAggregatedNewId.get(localPhaseCommunityId) != -1) {
                 aggregatedSeedCommunityId = localPhaseCommunityToAggregatedNewId.get(localPhaseCommunityId);
             } else {
                 aggregatedSeedCommunityId = aggregatedCommunityId;
-                localPhaseCommunityToAggregatedNewId.put(localPhaseCommunityId, aggregatedSeedCommunityId);
+                localPhaseCommunityToAggregatedNewId.set(localPhaseCommunityId, aggregatedSeedCommunityId);
             }
 
             double volumeOfTheAggregatedCommunity = refinedCommunityVolumes.get(refinedCommunityId);
             aggregatedCommunitySeedVolume.addTo(aggregatedSeedCommunityId, volumeOfTheAggregatedCommunity);
 
-            seededCommunitiesForNextIteration.set(aggregatedCommunityId, aggregatedSeedCommunityId);
+            inputCommunities.set(aggregatedCommunityId, aggregatedSeedCommunityId);
             aggregatedNodeSeedVolume.set(aggregatedCommunityId, volumeOfTheAggregatedCommunity);
 
             return true;
         });
         return new CommunityData(
-            seededCommunitiesForNextIteration,
+            inputCommunities,
             aggregatedCommunitySeedVolume,
             aggregatedNodeSeedVolume
         );

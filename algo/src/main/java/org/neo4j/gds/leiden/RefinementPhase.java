@@ -23,10 +23,13 @@ import com.carrotsearch.hppc.BitSet;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +39,7 @@ import java.util.concurrent.ExecutorService;
 final class RefinementPhase {
 
     private final Graph workingGraph;
+
     private final HugeLongArray originalCommunities;
     private final HugeDoubleArray nodeVolumes;
     private final HugeDoubleArray communityVolumes;
@@ -84,7 +88,6 @@ final class RefinementPhase {
             progressTracker
         );
     }
-
     private RefinementPhase(
         Graph workingGraph,
         HugeLongArray originalCommunities,
@@ -116,6 +119,18 @@ final class RefinementPhase {
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.progressTracker = progressTracker;
+    }
+
+    static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder(RefinementPhase.class)
+            .perNode("encountered communities", HugeLongArray::memoryEstimation)
+            .perNode("encountered community weights", HugeDoubleArray::memoryEstimation)
+            .perNode("next community probabilities", HugeDoubleArray::memoryEstimation)
+            .perNode("merged community volumes", HugeDoubleArray::memoryEstimation)
+            .perNode("relationships between communities", HugeDoubleArray::memoryEstimation)
+            .perNode("refined communities", HugeLongArray::memoryEstimation)
+            .perNode("merge tracking bitset", MemoryUsage::sizeOfBitset)
+            .build();
     }
 
     RefinementPhaseResult run() {

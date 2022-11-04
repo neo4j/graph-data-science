@@ -22,6 +22,8 @@ package org.neo4j.gds.leiden;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -32,6 +34,16 @@ import java.util.concurrent.atomic.AtomicLong;
 
 final class LocalMovePhase {
 
+    static MemoryEstimation estimation() {
+        return MemoryEstimations.builder(LocalMovePhase.class)
+            .perNode("community weights", HugeDoubleArray::memoryEstimation)
+            .perNode("community volumes", HugeAtomicDoubleArray::memoryEstimation)
+            .perNode("global queue", HugeLongArray::memoryEstimation)
+            .perNode("global queue bitset", HugeAtomicBitSet::memoryEstimation)
+            .perThread("local move task", LocalMoveTask.estimation())
+            .build();
+    }
+
     private final Graph graph;
     private final HugeLongArray currentCommunities;
     //Idx   - nodeId
@@ -39,11 +51,11 @@ final class LocalMovePhase {
     //       - Unweighted : degree of node
     //       - Weighted   : sum of the relationships weights of the node
     private final HugeDoubleArray nodeVolumes;
-
     // Idx   - communityId
     // Value
     //       - Unweighted : sum of the degrees of the nodes in the community.
     //       - Weighted   : sum of the relationship weights of the nodes in the community.
+
     // Note: the values also count relationships to nodes outside the community.
     private final HugeDoubleArray communityVolumes;
     private final double gamma;

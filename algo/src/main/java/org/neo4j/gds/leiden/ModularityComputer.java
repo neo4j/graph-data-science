@@ -22,6 +22,8 @@ package org.neo4j.gds.leiden;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -34,6 +36,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
 public final class ModularityComputer {
+
+    static MemoryEstimation estimation() {
+        return MemoryEstimations.builder(ModularityComputer.class)
+            .perNode("relationships outside community", HugeAtomicDoubleArray::memoryEstimation)
+            .perThread("relationship calculator", MemoryEstimations.builder(OutsideRelationshipCalculator.class).build())
+            .build();
+    }
 
     private ModularityComputer() {}
 

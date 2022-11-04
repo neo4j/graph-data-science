@@ -224,12 +224,14 @@ class LeidenTest {
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
-        HugeDoubleArray refinedVolumes = HugeDoubleArray.newArray(graph.nodeCount());
+        var nodeCount = graph.nodeCount();
+        HugeDoubleArray refinedVolumes = HugeDoubleArray.newArray(nodeCount);
         var workingGraph = aggregationPhase.run();
         var nextCommunities = Leiden.maintainPartition(
             workingGraph,
-            localCommunities, refinedVolumes
-
+            localCommunities,
+            refinedVolumes,
+            nodeCount
         ).seededCommunitiesForNextIteration;
         assertThat(nextCommunities.toArray()).containsExactly(0, 0, 2, 2);
 

@@ -19,10 +19,11 @@
  */
 package org.neo4j.gds.leiden;
 
-import com.carrotsearch.hppc.LongLongHashMap;
-import com.carrotsearch.hppc.LongLongMap;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 
 interface SeedCommunityManager {
 
@@ -45,6 +46,13 @@ interface SeedCommunityManager {
         }
     }
 
+    static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder()
+            .perNode("seed map", HugeLongLongMap.memoryEstimation())
+            .perNode("reverse seed map", HugeLongArray::memoryEstimation)
+            .build();
+    }
+
     class FullSeedCommunityManager implements SeedCommunityManager {
 
         private HugeLongArray reverseMap;
@@ -55,7 +63,7 @@ interface SeedCommunityManager {
 
         static FullSeedCommunityManager create(HugeLongArray startingCommunities) {
             long nodeCount = startingCommunities.size();
-            LongLongMap seedMap = new LongLongHashMap();
+            var seedMap = new HugeLongLongMap(nodeCount);
             long maxId = 0;
             for (long nodeId = 0; nodeId < nodeCount; ++nodeId) {
                 long communityId = startingCommunities.get(nodeId);
@@ -63,7 +71,7 @@ interface SeedCommunityManager {
                     maxId = nodeId;
                     seedMap.put(communityId, nodeId);
                 }
-                startingCommunities.set(nodeId, seedMap.get(communityId));
+                startingCommunities.set(nodeId, seedMap.getOrDefault(communityId, -1));
             }
             HugeLongArray reverseMap = HugeLongArray.newArray(maxId + 1);
             for (LongLongCursor cursor : seedMap) {

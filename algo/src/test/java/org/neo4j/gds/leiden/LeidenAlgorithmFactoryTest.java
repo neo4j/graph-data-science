@@ -20,6 +20,7 @@
 package org.neo4j.gds.leiden;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.gdl.GdlFactory;
 
@@ -54,4 +55,58 @@ class LeidenAlgorithmFactoryTest {
         assertThat(task.render()).isEqualTo(expectedTask.render());
     }
 
+    @Test
+    void shouldEstimateMemory() {
+        var config = LeidenStatsConfigImpl.builder().maxLevels(3).build();
+        var estimate = new LeidenAlgorithmFactory<>().memoryEstimation(config)
+            .estimate(
+                GraphDimensions.of(10_000, 100_000),
+                4
+            );
+        var expected =
+"Leiden: [2970 KiB ... 5100 KiB]\n" +
+"|-- this.instance: 96 Bytes\n" +
+"|-- local move communities: 78 KiB\n" +
+"|-- local move node volumes: 78 KiB\n" +
+"|-- local move community volumes: 78 KiB\n" +
+"|-- current communities: 78 KiB\n" +
+"|-- local move phase: 1173 KiB\n" +
+"    |-- this.instance: 48 Bytes\n" +
+"    |-- community weights: 78 KiB\n" +
+"    |-- community volumes: 78 KiB\n" +
+"    |-- global queue: 78 KiB\n" +
+"    |-- global queue bitset: 1328 Bytes\n" +
+"    |-- local move task: 938 KiB\n" +
+"        |-- neighbor communities: 78 KiB\n" +
+"        |-- neighbor weights: 78 KiB\n" +
+"        |-- local queue: 78 KiB\n" +
+"            |-- this.instance: 40 Bytes\n" +
+"            |-- array: 78 KiB\n" +
+"|-- modularity computation: 78 KiB\n" +
+"    |-- this.instance: 16 Bytes\n" +
+"    |-- relationships outside community: 78 KiB\n" +
+"    |-- relationship calculator: 128 Bytes\n" +
+"        |-- this.instance: 32 Bytes\n" +
+"|-- dendogram manager: 78 KiB\n" +
+"    |-- this.instance: 40 Bytes\n" +
+"    |-- dendograms: 78 KiB\n" +
+"|-- refinement phase: 470 KiB\n" +
+"    |-- this.instance: 96 Bytes\n" +
+"    |-- encountered communities: 78 KiB\n" +
+"    |-- encountered community weights: 78 KiB\n" +
+"    |-- next community probabilities: 78 KiB\n" +
+"    |-- merged community volumes: 78 KiB\n" +
+"    |-- relationships between communities: 78 KiB\n" +
+"    |-- refined communities: 78 KiB\n" +
+"    |-- merge tracking bitset: 1296 Bytes\n" +
+"|-- aggregation phase: [544 KiB ... 2674 KiB]\n" +
+"    |-- this.instance: 48 Bytes\n" +
+"    |-- aggregated graph: [544 KiB ... 2674 KiB]\n" +
+"|-- post-aggregation phase: 312 KiB\n" +
+"    |-- next local move communities: 78 KiB\n" +
+"    |-- next local move node volumes: 78 KiB\n" +
+"    |-- next local move community volumes: 78 KiB\n" +
+"    |-- community to node map: 78 KiB\n";
+        assertThat(estimate.render()).isEqualTo(expected);
+    }
 }
