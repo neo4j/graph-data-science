@@ -26,6 +26,7 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
@@ -129,5 +130,13 @@ class LeidenStatsProcTest extends BaseProcTest {
 
             return true;
         });
+    }
+
+    @Test
+    void shouldEstimateMemory() {
+        var query = "CALL gds.alpha.leiden.stats.estimate('leiden', {" +
+                    "   includeIntermediateCommunities: true" +
+                    "})";
+        assertThatNoException().isThrownBy(() -> runQuery(query));
     }
 }

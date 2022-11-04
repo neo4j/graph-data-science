@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 class LeidenStreamProcTest extends BaseProcTest {
 
@@ -129,5 +130,13 @@ class LeidenStreamProcTest extends BaseProcTest {
             assertThat(communities).containsExactly(0L, 1L);
             return true;
         });
+    }
+
+    @Test
+    void shouldEstimateMemory() {
+        var query = "CALL gds.alpha.leiden.stream.estimate('leiden', {" +
+                    "   includeIntermediateCommunities: true" +
+                    "})";
+        assertThatNoException().isThrownBy(() -> runQuery(query));
     }
 }

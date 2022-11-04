@@ -32,6 +32,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
@@ -191,6 +192,15 @@ class LeidenMutateProcTest  extends BaseProcTest {
         runQueryWithRowConsumer("CALL gds.graph.nodeProperties.stream('leiden', ['intermediateCommunities']) YIELD propertyValue", row -> {
             assertThat(row.get("propertyValue")).isInstanceOf(long[].class);
         });
+    }
+
+    @Test
+    void shouldEstimateMemory() {
+        var query = "CALL gds.alpha.leiden.mutate.estimate('leiden', {" +
+                    "   mutateProperty: 'intermediateCommunities'," +
+                    "   includeIntermediateCommunities: true" +
+                    "})";
+        assertThatNoException().isThrownBy(() -> runQuery(query));
     }
 
 }

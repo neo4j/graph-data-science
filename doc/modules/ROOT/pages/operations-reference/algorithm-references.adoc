@@ -328,11 +328,15 @@
 | `gds.alpha.knn.filtered.stats`
 | `gds.alpha.knn.filtered.stream`
 | `gds.alpha.knn.filtered.write`
-.4+<.^| xref:algorithms/alpha/leiden.adoc[Leiden]
+.8+<.^| xref:algorithms/alpha/leiden.adoc[Leiden]
 | `gds.alpha.leiden.mutate`
+| `gds.alpha.leiden.mutate.estimate`
 | `gds.alpha.leiden.stats`
+| `gds.alpha.leiden.stats.estimate`
 | `gds.alpha.leiden.stream`
+| `gds.alpha.leiden.stream.estimate`
 | `gds.alpha.leiden.write`
+| `gds.alpha.leiden.write.estimate`
 .8+<.^| xref:algorithms/alpha/filtered-node-similarity.adoc[Filtered NodeSimilarity]
 | `gds.alpha.nodeSimilarity.filtered.mutate`
 | `gds.alpha.nodeSimilarity.filtered.mutate.estimate`

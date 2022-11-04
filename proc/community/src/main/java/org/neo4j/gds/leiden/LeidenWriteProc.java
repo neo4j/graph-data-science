@@ -24,7 +24,9 @@ import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -34,6 +36,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.leiden.LeidenStreamProc.DESCRIPTION;
+import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class LeidenWriteProc extends BaseProc {
@@ -51,6 +54,21 @@ public class LeidenWriteProc extends BaseProc {
             executionContext()
         ).compute(graphName, configuration, true, true);
     }
+
+    @Procedure(value = "gds.alpha.leiden.write.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphName,
+        @Name(value = "algoConfiguration") Map<String, Object> configuration
+    ) {
+        var spec = new LeidenWriteSpec();
+
+        return new MemoryEstimationExecutor<>(
+            spec,
+            executionContext()
+        ).computeEstimate(graphName, configuration);
+    }
+
 
     @Override
     public ExecutionContext executionContext() {

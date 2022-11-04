@@ -65,9 +65,13 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.closeness.harmonic.stream",
 
         "gds.alpha.leiden.mutate",
+        "gds.alpha.leiden.mutate.estimate",
         "gds.alpha.leiden.stats",
+        "gds.alpha.leiden.stats.estimate",
         "gds.alpha.leiden.stream",
+        "gds.alpha.leiden.stream.estimate",
         "gds.alpha.leiden.write",
+        "gds.alpha.leiden.write.estimate",
 
         "gds.alpha.kmeans.mutate",
         "gds.alpha.kmeans.mutate.estimate",
@@ -510,7 +514,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 360;
+        int expectedCount = 364;
         assertEquals(
             expectedCount,
             registeredProcedures.size(),
