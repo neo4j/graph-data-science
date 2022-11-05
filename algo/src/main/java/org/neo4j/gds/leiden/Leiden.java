@@ -125,6 +125,8 @@ public class Leiden extends Algorithm<LeidenResult> {
         for (iteration = 0; iteration < maxIterations; iteration++) {
             // 1. LOCAL MOVE PHASE - over the singleton localMoveCommunities
             progressTracker.beginSubTask("Local Move");
+            var localTime = System.currentTimeMillis();
+            System.out.println("Local Move started ");
             var localMovePhase = LocalMovePhase.create(
                 workingGraph,
                 localMoveCommunities,
@@ -133,12 +135,15 @@ public class Leiden extends Algorithm<LeidenResult> {
                 gamma,
                 concurrency
             );
-
             var communitiesCount = localMovePhase.run();
             boolean localPhaseConverged = communitiesCount == workingGraph.nodeCount() || localMovePhase.swaps == 0;
+            System.out.println("Local move took: " + ((System.currentTimeMillis() - localTime) / 1000.0) + " seconds");
+
             progressTracker.endSubTask("Local Move");
 
             progressTracker.beginSubTask("Modularity Computation");
+            var modularityTime = System.currentTimeMillis();
+            System.out.println("Modularity started ");
             updateModularity(
                 workingGraph,
                 localMoveCommunities,
@@ -148,6 +153,8 @@ public class Leiden extends Algorithm<LeidenResult> {
                 localPhaseConverged,
                 iteration
             );
+            System.out.println("Modularity took: " + ((System.currentTimeMillis() - modularityTime) / 1000.0) + " seconds");
+
             progressTracker.endSubTask("Modularity Computation");
 
             if (localPhaseConverged) {
@@ -178,6 +185,8 @@ public class Leiden extends Algorithm<LeidenResult> {
             if (iteration < maxIterations - 1) { //if there's no next iteration, skip refinement/graph aggregation
                 // 2 REFINE
                 progressTracker.beginSubTask("Refinement");
+                var refinementTime = System.currentTimeMillis();
+                System.out.println("Refinement started");
                 var refinementPhase = RefinementPhase.create(
                     workingGraph,
                     localMoveCommunities,
@@ -194,6 +203,8 @@ public class Leiden extends Algorithm<LeidenResult> {
                 var refinedCommunities = refinementPhaseResult.communities();
                 var refinedCommunityVolumes = refinementPhaseResult.communityVolumes();
                 var maximumRefinedCommunityId = refinementPhaseResult.maximumRefinedCommunityId();
+                System.out.println("Refinement took: " + ((System.currentTimeMillis() - refinementTime) / 1000.0) + " seconds");
+
                 progressTracker.endSubTask("Refinement");
 
                 progressTracker.beginSubTask("Aggregation");
@@ -204,6 +215,7 @@ public class Leiden extends Algorithm<LeidenResult> {
                     iteration
                 );  //update the actual communities with the refined ones
 
+                System.out.println("Aggregation started");
                 long aggregateStartsAt = System.currentTimeMillis();
                 // 3 CREATE NEW GRAPH
                 var graphAggregationPhase = new GraphAggregationPhase(
@@ -218,7 +230,7 @@ public class Leiden extends Algorithm<LeidenResult> {
                 );
                 var previousNodeCount = workingGraph.nodeCount();
                 workingGraph = graphAggregationPhase.run();
-                System.out.println("Aggregation took: " + (System.currentTimeMillis() - aggregateStartsAt) / 1000.0 + " seconds");
+                System.out.println("Aggregation took: " + ((System.currentTimeMillis() - aggregateStartsAt) / 1000.0) + " seconds");
 
                 // Post-aggregate step: MAINTAIN PARTITION
                 var communityData = maintainPartition(
