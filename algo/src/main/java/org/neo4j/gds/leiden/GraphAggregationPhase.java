@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 
 class GraphAggregationPhase {
 
@@ -155,9 +156,12 @@ class GraphAggregationPhase {
             communities,
             concurrency
         );
-        var relationshipCreators = PartitionUtils.rangePartition(
+
+        Function<Long, Integer> customDegree = x -> workingGraph.degree(sortedNodesByCommunity.get(x));
+        var relationshipCreators = PartitionUtils.customDegreePartitionWithBatchSize(
+            workingGraph,
             concurrency,
-            workingGraph.nodeCount(),
+            customDegree,
             partition ->
                 new RelationshipCreator(
                     sortedNodesByCommunity,
@@ -168,7 +172,8 @@ class GraphAggregationPhase {
                     orientation,
                     progressTracker
                 ),
-            Optional.empty()
+            Optional.empty(),
+            Optional.of(workingGraph.relationshipCount())
         );
 
         ParallelUtil.run(relationshipCreators, executorService);
