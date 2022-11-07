@@ -67,7 +67,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 | negativeSamplingRatio         | Float          | n/a             | no        | The desired ratio of negative to positive samples in holdout set.
 | holdoutRelationshipType       | String         | n/a             | no        | Relationship type used for the holdout set. Each relationship has a property `label` indicating whether it is a positive or negative sample.
 | remainingRelationshipType     | String         | n/a             | no        | Relationships where one node has none of the source or target labels will be omitted. All invalid relationship are added to the remaining set.
-| nonNegativeRelationshipTypes  | List of String | n/a             | yes       | Additional relationship types that are used for negative sampling.
+| nonNegativeRelationshipTypes  | List of String | n/a             | yes       | Additional relationship types that are not used for negative sampling.
 | xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty]
                                 | String         | null            | yes       | Name of the relationship property that is inherited by the `remainingRelationshipType`.
 | randomSeed                    | Integer        | n/a             | yes       | An optional seed value for the random selection of relationships.
