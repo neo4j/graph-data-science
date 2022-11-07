@@ -91,7 +91,9 @@ class GraphAggregationPhase {
                 var max = memoryEstimation.estimate(maxDimensions, concurrency).memoryUsage().max;
 
                 return MemoryRange.of(min, max);
-            }).build();
+            }).perNode("sorted communities", HugeLongArray::memoryEstimation)
+            .perNode("atomic coordination array", HugeAtomicLongArray::memoryEstimation).
+            build();
     }
 
     private final Graph workingGraph;
