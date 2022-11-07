@@ -328,14 +328,15 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             GraphStoreCatalog.removeAllLoadedGraphs();
             var loadedGraphName = "graph";
             var propertyMappings = nodeProperties().stream().map(prop -> PropertyMapping.of(prop, 1.0)).collect(Collectors.toList());
-            GraphProjectConfig graphProjectConfig = withNameAndNodeProjections(
+            GraphProjectConfig graphProjectConfig = withNameAndProjections(
                 "",
                 loadedGraphName,
                 NodeProjections.of(
                     Map.of(
                         NodeLabel.of("X"), NodeProjection.of("X", PropertyMappings.of(propertyMappings))
                     )
-                )
+                ),
+                relationshipProjections()
             );
             GraphStore graphStore = graphLoader(graphProjectConfig).graphStore();
             GraphStoreCatalog.set(graphProjectConfig, graphStore);
