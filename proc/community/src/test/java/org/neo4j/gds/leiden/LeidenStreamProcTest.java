@@ -70,11 +70,11 @@ class LeidenStreamProcTest extends BaseProcTest {
 
     @Test
     void stream() {
-        runQuery("CALL gds.alpha.leiden.stream('leiden')", result -> {
+        runQuery("CALL gds.beta.leiden.stream('leiden')", result -> {
             assertThat(result.columns()).containsExactlyInAnyOrder("nodeId", "communityId", "intermediateCommunityIds");
             long resultRowCount = 0;
             var communities = new HashSet<Long>();
-            while(result.hasNext()) {
+            while (result.hasNext()) {
                 var next = result.next();
                 assertThat(next.get("nodeId")).isInstanceOf(Long.class);
                 assertThat(next.get("communityId")).isInstanceOf(Long.class);
@@ -90,7 +90,7 @@ class LeidenStreamProcTest extends BaseProcTest {
 
     @Test
     void streamWithIntermediateCommunityIds() {
-        runQuery("CALL gds.alpha.leiden.stream('leiden', {includeIntermediateCommunities: true}) ", result -> {
+        runQuery("CALL gds.beta.leiden.stream('leiden', {includeIntermediateCommunities: true}) ", result -> {
             assertThat(result.columns()).containsExactlyInAnyOrder("nodeId", "communityId", "intermediateCommunityIds");
             long resultRowCount = 0;
             var communities = new HashSet<Long>();
@@ -113,7 +113,7 @@ class LeidenStreamProcTest extends BaseProcTest {
 
     @Test
     void shouldStreamWithConsecutiveIds() {
-        runQuery("CALL gds.alpha.leiden.stream('leiden', {consecutiveIds: true})", result -> {
+        runQuery("CALL gds.beta.leiden.stream('leiden', {consecutiveIds: true})", result -> {
             assertThat(result.columns()).containsExactlyInAnyOrder("nodeId", "communityId", "intermediateCommunityIds");
             long resultRowCount = 0;
             var communities = new HashSet<Long>();
@@ -134,7 +134,7 @@ class LeidenStreamProcTest extends BaseProcTest {
 
     @Test
     void shouldEstimateMemory() {
-        var query = "CALL gds.alpha.leiden.stream.estimate('leiden', {" +
+        var query = "CALL gds.beta.leiden.stream.estimate('leiden', {" +
                     "   includeIntermediateCommunities: true" +
                     "})";
         assertThatNoException().isThrownBy(() -> runQuery(query));

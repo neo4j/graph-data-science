@@ -36,7 +36,7 @@ public class LeidenStreamProc extends BaseProc {
     static final String DESCRIPTION =
         "Leiden is a community detection algorithm, which guarantees that communities are well connected";
 
-    @Procedure(name = "gds.alpha.leiden.stream", mode = READ)
+    @Procedure(name = "gds.beta.leiden.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
@@ -48,7 +48,7 @@ public class LeidenStreamProc extends BaseProc {
         ).compute(graphName, configuration, true, true);
     }
 
-    @Procedure(value = "gds.alpha.leiden.stream.estimate", mode = READ)
+    @Procedure(value = "gds.beta.leiden.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,

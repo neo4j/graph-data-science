@@ -43,7 +43,7 @@ public class LeidenWriteProc extends BaseProc {
     @Context
     public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
 
-    @Procedure(value = "gds.alpha.leiden.write", mode = WRITE)
+    @Procedure(value = "gds.beta.leiden.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
@@ -55,7 +55,7 @@ public class LeidenWriteProc extends BaseProc {
         ).compute(graphName, configuration, true, true);
     }
 
-    @Procedure(value = "gds.alpha.leiden.write.estimate", mode = READ)
+    @Procedure(value = "gds.beta.leiden.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,

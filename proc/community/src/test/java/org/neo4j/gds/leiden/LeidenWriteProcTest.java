@@ -77,7 +77,7 @@ class LeidenWriteProcTest extends BaseProcTest {
 
     @Test
     void write() {
-        var query = "CALL gds.alpha.leiden.write('leiden', { writeProperty: 'communityId', concurrency: 1 })";
+        var query = "CALL gds.beta.leiden.write('leiden', { writeProperty: 'communityId', concurrency: 1 })";
         assertLeidenQuery(query);
 
         String loadQuery = GdsCypher.call("writeGraph")
@@ -102,7 +102,7 @@ class LeidenWriteProcTest extends BaseProcTest {
 
     @Test
     void shouldWriteWithConsecutiveIds() {
-        var query = "CALL gds.alpha.leiden.write('leiden', { writeProperty: 'communityId', consecutiveIds: true })";
+        var query = "CALL gds.beta.leiden.write('leiden', { writeProperty: 'communityId', consecutiveIds: true })";
         assertLeidenQuery(query);
 
         String loadQuery = GdsCypher.call("writeGraph")
@@ -211,7 +211,7 @@ class LeidenWriteProcTest extends BaseProcTest {
 
     @Test
     void writeWithIntermediateCommunities() {
-        var query = "CALL gds.alpha.leiden.write('leiden', {" +
+        var query = "CALL gds.beta.leiden.write('leiden', {" +
                     "   writeProperty: 'intermediateCommunities'," +
                     "   includeIntermediateCommunities: true" +
                     "})";
@@ -225,7 +225,7 @@ class LeidenWriteProcTest extends BaseProcTest {
 
     @Test
     void shouldEstimateMemory() {
-        var query = "CALL gds.alpha.leiden.write.estimate('leiden', {" +
+        var query = "CALL gds.beta.leiden.write.estimate('leiden', {" +
                     "   writeProperty: 'intermediateCommunities'," +
                     "   includeIntermediateCommunities: true" +
                     "})";

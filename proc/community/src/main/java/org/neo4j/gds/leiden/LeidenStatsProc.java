@@ -35,7 +35,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class LeidenStatsProc extends BaseProc {
 
-    @Procedure(value = "gds.alpha.leiden.stats", mode = READ)
+    @Procedure(value = "gds.beta.leiden.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
     public Stream<StatsResult> stats(
         @Name(value = "graphName") String graphName,
@@ -47,7 +47,7 @@ public class LeidenStatsProc extends BaseProc {
         ).compute(graphName, configuration, true, true);
     }
 
-    @Procedure(value = "gds.alpha.leiden.stats.estimate", mode = READ)
+    @Procedure(value = "gds.beta.leiden.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,

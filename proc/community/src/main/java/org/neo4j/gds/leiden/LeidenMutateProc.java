@@ -35,7 +35,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class LeidenMutateProc extends BaseProc {
 
-    @Procedure(value = "gds.alpha.leiden.mutate", mode = READ)
+    @Procedure(value = "gds.beta.leiden.mutate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
@@ -47,7 +47,7 @@ public class LeidenMutateProc extends BaseProc {
         ).compute(graphName, configuration, true, true);
     }
 
-    @Procedure(value = "gds.alpha.leiden.mutate.estimate", mode = READ)
+    @Procedure(value = "gds.beta.leiden.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,
