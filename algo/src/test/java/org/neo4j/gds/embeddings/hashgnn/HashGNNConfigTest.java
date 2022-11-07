@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -42,4 +43,16 @@ class HashGNNConfigTest {
             .hasMessageContaining(formatWithLocale("The value %d of `densityLevel` may not exceed half of the value %d of `dimension`.", 3, 4));
     }
 
+    @Test
+    void binarizationConfigCorrectType() {
+        var config = HashGNNConfigImpl
+            .builder()
+            .featureProperties(List.of("x"))
+            .binarizeFeatures(Map.of("dimension", 100, "densityLevel", 3))
+            .embeddingDensity(4)
+            .iterations(100)
+            .build();
+        var map = config.toMap();
+        assertThat(map.get("binarizeFeatures")).isInstanceOf(Map.class);
+    }
 }
