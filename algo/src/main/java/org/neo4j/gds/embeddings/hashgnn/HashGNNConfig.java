@@ -49,7 +49,8 @@ interface HashGNNConfig extends AlgoBaseConfig, FeaturePropertiesConfig, RandomS
         return false;
     }
 
-    @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.hashgnn.HashGNNConfig#parseBinarizationConfig", inverse = "org.neo4j.gds.embeddings.hashgnn.HashGNNConfig#toMapBinarizationConfig")
+    @Configuration.ToMapValue("org.neo4j.gds.embeddings.hashgnn.HashGNNConfig#toMapBinarizationConfig")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.hashgnn.HashGNNConfig#parseBinarizationConfig", inverse = Configuration.ConvertWith.INVERSE_IS_TO_MAP)
     default Optional<FeatureBinarizationConfig> binarizeFeatures() {
         return Optional.empty();
     }
@@ -62,6 +63,6 @@ interface HashGNNConfig extends AlgoBaseConfig, FeaturePropertiesConfig, RandomS
     }
 
     static Map<String, Object> toMapBinarizationConfig(FeatureBinarizationConfig config) {
-        return Map.of("dimension", config.dimension(), "densityLevel", config.densityLevel());
+        return config.toMap();
     }
 }

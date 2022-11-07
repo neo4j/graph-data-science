@@ -22,6 +22,8 @@ package org.neo4j.gds.embeddings.hashgnn;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 
+import java.util.Map;
+
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
@@ -36,5 +38,12 @@ public interface FeatureBinarizationConfig {
         if (2 * densityLevel() > dimension()) {
             throw new IllegalArgumentException(formatWithLocale("The value %d of `densityLevel` may not exceed half of the value %d of `dimension`.", densityLevel(), dimension()));
         }
+    }
+
+    @Configuration.ToMap
+    @Value.Auxiliary
+    @Value.Derived
+    default Map<String, Object> toMap() {
+        return Map.of(); // Will be overwritten
     }
 }
