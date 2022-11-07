@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -45,20 +45,19 @@ class DensifyTaskTest {
             .iterations(100)
             .build();
         var denseFeatures = HugeObjectArray.newArray(double[].class, nodeCount);
-        var binaryFeatures = HugeObjectArray.newArray(BitSet.class, nodeCount);
-        binaryFeatures.set(0, new BitSet() {{
-            set(0);
-            set(1);
-            set(2);
-        }});
-        binaryFeatures.set(1, new BitSet() {{
-            set(0);
-            set(1);
-        }});
-        binaryFeatures.set(2, new BitSet() {{
-            set(0);
-            set(2);
-        }});
+        var binaryFeatures = HugeObjectArray.newArray(HugeAtomicBitSet.class, nodeCount);
+        binaryFeatures.set(0, HugeAtomicBitSet.create(3));
+        binaryFeatures.get(0).set(0);
+        binaryFeatures.get(0).set(1);
+        binaryFeatures.get(0).set(2);
+
+        binaryFeatures.set(1, HugeAtomicBitSet.create(3));
+        binaryFeatures.get(1).set(0);
+        binaryFeatures.get(1).set(1);
+
+        binaryFeatures.set(2, HugeAtomicBitSet.create(3));
+        binaryFeatures.get(2).set(0);
+        binaryFeatures.get(2).set(2);
         var projectionMatrix = new float[][]{
             {1.1f, 1.0f, -1.0f, 0.0f, 0.0f},
             {0.0f, -0.9f, 1.0f, 0.0f, 1.0f},

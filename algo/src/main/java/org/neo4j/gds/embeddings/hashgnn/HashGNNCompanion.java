@@ -23,56 +23,77 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.BitSetIterator;
 import org.apache.commons.math3.primes.Primes;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 
 import java.util.SplittableRandom;
 
 public class HashGNNCompanion {
     private HashGNNCompanion() {}
 
+    static void hashArgMin(
+        HugeAtomicBitSet bitSet,
+        int[] hashes,
+        HashGNN.MinAndArgmin result,
+        HashGNN.MinAndArgmin temp
+    ) {
+        temp.argMin = -1;
+        temp.min = Integer.MAX_VALUE;
+        bitSet.forEachSetBit(bit -> {
+            int hash = hashes[(int) bit];
 
-   static void hashArgMin(BitSet bitSet, int[] hashes, HashGNN.MinAndArgmin result) {
-       int argMin = -1;
-       int minHash = Integer.MAX_VALUE;
-       var iterator = bitSet.iterator();
-       var bit = iterator.nextSetBit();
-       while (bit != BitSetIterator.NO_MORE) {
-           int hash = hashes[bit];
+            if (hash < temp.min) {
+                temp.min = hash;
+                temp.argMin = (int) bit;
+            }
+        });
 
-           if (hash < minHash) {
-               minHash = hash;
-               argMin = bit;
-           }
+        result.min = temp.min;
+        result.argMin = temp.argMin;
+    }
 
-           bit = iterator.nextSetBit();
-       }
+    static void hashArgMin(BitSet bitSet, int[] hashes, HashGNN.MinAndArgmin result) {
+        int argMin = -1;
+        int minHash = Integer.MAX_VALUE;
+        var iterator = bitSet.iterator();
+        var bit = iterator.nextSetBit();
+        while (bit != BitSetIterator.NO_MORE) {
+            int hash = hashes[bit];
 
-       result.min = minHash;
-       result.argMin = argMin;
-   }
+            if (hash < minHash) {
+                minHash = hash;
+                argMin = bit;
+            }
+
+            bit = iterator.nextSetBit();
+        }
+
+        result.min = minHash;
+        result.argMin = argMin;
+    }
 
     @ValueClass
-   interface HashTriple {
+    interface HashTriple {
         /*
         The values a, b and c represent parameters of the hash function: h(x) = x * a + b mod c,
         where 0 < a, b < c and c is a prime number.
         */
 
-       int a();
+        int a();
 
-       int b();
+        int b();
 
-       int c();
+        int c();
 
-       static HashTriple generate(SplittableRandom rng) {
-           int c = Primes.nextPrime(rng.nextInt(1, Integer.MAX_VALUE));
-           return generate(rng, c);
-       }
+        static HashTriple generate(SplittableRandom rng) {
+            int c = Primes.nextPrime(rng.nextInt(1, Integer.MAX_VALUE));
+            return generate(rng, c);
+        }
 
-       static HashTriple generate(SplittableRandom rng, int c) {
-           int a = rng.nextInt(1, c);
-           int b = rng.nextInt(1, c);
-           return ImmutableHashTriple.of(a, b, c);
-       }
+        static HashTriple generate(SplittableRandom rng, int c) {
+            int a = rng.nextInt(1, c);
+            int b = rng.nextInt(1, c);
+            return ImmutableHashTriple.of(a, b, c);
+        }
 
         static int[] computeHashesFromTriple(int embeddingDimension, HashTriple hashTriple) {
             var output = new int[embeddingDimension];
@@ -83,5 +104,5 @@ public class HashGNNCompanion {
 
             return output;
         }
-   }
+    }
 }

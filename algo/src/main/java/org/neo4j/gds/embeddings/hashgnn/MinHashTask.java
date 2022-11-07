@@ -19,12 +19,14 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-
 import com.carrotsearch.hppc.BitSet;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
@@ -38,26 +40,29 @@ class MinHashTask implements Runnable {
     private final int k;
     private final HashGNNConfig config;
     private final int embeddingDimension;
+    private final DegreePartition partition;
     private final List<Graph> concurrentGraphs;
-    private final HugeObjectArray<BitSet> currentEmbeddings;
-    private final HugeObjectArray<BitSet> previousEmbeddings;
+    private final HugeObjectArray<HugeAtomicBitSet> currentEmbeddings;
+    private final HugeObjectArray<HugeAtomicBitSet> previousEmbeddings;
     private final int iteration;
     private final TerminationFlag terminationFlag;
     private final ProgressTracker progressTracker;
 
     MinHashTask(
         int k,
+        DegreePartition partition,
         List<Graph> graphs,
         HashGNNConfig config,
         int embeddingDimension,
-        HugeObjectArray<BitSet> currentEmbeddings,
-        HugeObjectArray<BitSet> previousEmbeddings,
+        HugeObjectArray<HugeAtomicBitSet> currentEmbeddings,
+        HugeObjectArray<HugeAtomicBitSet> previousEmbeddings,
         int iteration,
         List<HashTask.Hashes> hashes,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
         this.k = k;
+        this.partition = partition;
         this.concurrentGraphs = graphs.stream().map(Graph::concurrentCopy).collect(Collectors.toList());
         this.config = config;
         this.embeddingDimension = embeddingDimension;
@@ -70,11 +75,12 @@ class MinHashTask implements Runnable {
     }
 
     static void compute(
+        List<DegreePartition> degreePartition,
         List<Graph> graphs,
         HashGNNConfig config,
         int embeddingDimension,
-        HugeObjectArray<BitSet> currentEmbeddings,
-        HugeObjectArray<BitSet> previousEmbeddings,
+        HugeObjectArray<HugeAtomicBitSet> currentEmbeddings,
+        HugeObjectArray<HugeAtomicBitSet> previousEmbeddings,
         int iteration,
         List<HashTask.Hashes> hashes,
         ProgressTracker progressTracker,
@@ -82,11 +88,14 @@ class MinHashTask implements Runnable {
     ) {
         progressTracker.beginSubTask("Propagate embeddings iteration");
 
-        progressTracker.setSteps(graphs.get(0).nodeCount());
+        progressTracker.setSteps(config.embeddingDensity() * graphs.get(0).nodeCount());
 
         var tasks = IntStream.range(0, config.embeddingDensity())
-            .mapToObj(k -> new MinHashTask(
-                k,
+            .boxed()
+            .flatMap(k -> degreePartition.stream().map(p -> TaskPair.of(k, p)))
+            .map(pair -> new MinHashTask(
+                pair.k(),
+                pair.partition(),
                 graphs,
                 config,
                 embeddingDimension,
@@ -112,6 +121,7 @@ class MinHashTask implements Runnable {
         var neighborsVector = new BitSet(embeddingDimension);
         var selfMinAndArgMin = new HashGNN.MinAndArgmin();
         var neighborsMinAndArgMin = new HashGNN.MinAndArgmin();
+        var tempMinAndArgMin = new HashGNN.MinAndArgmin();
 
         terminationFlag.assertRunning();
 
@@ -120,10 +130,9 @@ class MinHashTask implements Runnable {
         var selfAggregationHashes = hashesForK.selfAggregationHashes();
         var preAggregationHashes = hashesForK.preAggregationHashes();
 
-
-        concurrentGraphs.get(0).forEachNode(nodeId -> {
+        partition.consume(nodeId -> {
             var currentEmbedding = currentEmbeddings.get(nodeId);
-            hashArgMin(previousEmbeddings.get(nodeId), selfAggregationHashes, selfMinAndArgMin);
+            hashArgMin(previousEmbeddings.get(nodeId), selfAggregationHashes, selfMinAndArgMin, tempMinAndArgMin);
 
             neighborsVector.clear();
 
@@ -132,7 +141,7 @@ class MinHashTask implements Runnable {
                 var currentGraph = concurrentGraphs.get(i);
                 currentGraph.forEachRelationship(nodeId, (src, trg) -> {
                     var prevTargetEmbedding = previousEmbeddings.get(trg);
-                    hashArgMin(prevTargetEmbedding, preAggregationHashesForRel, neighborsMinAndArgMin);
+                    hashArgMin(prevTargetEmbedding, preAggregationHashesForRel, neighborsMinAndArgMin, tempMinAndArgMin);
 
                     int argMin = neighborsMinAndArgMin.argMin;
                     if (argMin != -1) {
@@ -148,10 +157,19 @@ class MinHashTask implements Runnable {
             if (argMin != -1) {
                 currentEmbedding.set(argMin);
             }
-            return true;
-
         });
 
-        progressTracker.logSteps(1);
+        progressTracker.logSteps(partition.nodeCount());
+    }
+
+    @ValueClass
+    interface TaskPair {
+        int k();
+
+        DegreePartition partition();
+
+        static TaskPair of(int k, DegreePartition partition) {
+            return ImmutableTaskPair.of(k, partition);
+        }
     }
 }

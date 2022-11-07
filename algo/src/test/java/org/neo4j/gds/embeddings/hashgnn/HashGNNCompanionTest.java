@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 
 import java.util.SplittableRandom;
 import java.util.stream.IntStream;
@@ -49,17 +49,18 @@ class HashGNNCompanionTest {
     void shouldHashArgMin() {
         var rng = new SplittableRandom();
 
-        var bitSet = new BitSet(10);
+        var bitSet = HugeAtomicBitSet.create(10);
         bitSet.set(3);
         bitSet.set(9);
 
         var hashes = IntStream.generate(() -> rng.nextInt(0, Integer.MAX_VALUE)).limit(10).toArray();
-        var minArgMin = new HashGNN.MinAndArgmin();
+        var resMinArgMin = new HashGNN.MinAndArgmin();
+        var tempMinArgMin = new HashGNN.MinAndArgmin();
 
-        HashGNNCompanion.hashArgMin(bitSet, hashes, minArgMin);
+        HashGNNCompanion.hashArgMin(bitSet, hashes, resMinArgMin, tempMinArgMin);
 
-        assertThat(minArgMin.min).isEqualTo(Math.min(hashes[3], hashes[9]));
-        assertThat(minArgMin.argMin).isEqualTo(hashes[3] <= hashes[9] ? 3 : 9);
+        assertThat(resMinArgMin.min).isEqualTo(Math.min(hashes[3], hashes[9]));
+        assertThat(resMinArgMin.argMin).isEqualTo(hashes[3] <= hashes[9] ? 3 : 9);
     }
 
 }

@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -61,7 +61,7 @@ class RawFeaturesTaskTest {
             .iterations(100)
             .build();
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, List.of("f1", "f2"));
-        var features = HugeObjectArray.newArray(BitSet.class, graph.nodeCount());
+        var features = HugeObjectArray.newArray(HugeAtomicBitSet.class, graph.nodeCount());
         var inputDimension = FeatureExtraction.featureCount(featureExtractors);
         var hashes = List.of(new int[]{4, 2, 9}, new int[]{6, 2, 1});
 

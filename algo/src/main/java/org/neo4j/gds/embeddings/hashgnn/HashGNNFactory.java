@@ -24,6 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -73,7 +74,7 @@ public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithm
             "Propagate embeddings",
             () -> List.of(Tasks.leaf(
                 "Propagate embeddings iteration",
-                2 * graph.nodeCount() + graph.relationshipCount()
+                (2 * graph.nodeCount() + graph.relationshipCount()) * config.embeddingDensity()
             )),
             config.iterations()
         ));
@@ -96,11 +97,11 @@ public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithm
 
         builder.perNode(
             "Embeddings cache 1",
-            n -> HugeObjectArray.memoryEstimation(n, MemoryUsage.sizeOfBitset(FUDGED_BINARY_DIMENSION))
+            n -> HugeObjectArray.memoryEstimation(n, HugeAtomicBitSet.memoryEstimation(FUDGED_BINARY_DIMENSION))
         );
         builder.perNode(
             "Embeddings cache 2",
-            n -> HugeObjectArray.memoryEstimation(n, MemoryUsage.sizeOfBitset(FUDGED_BINARY_DIMENSION))
+            n -> HugeObjectArray.memoryEstimation(n, HugeAtomicBitSet.memoryEstimation(FUDGED_BINARY_DIMENSION))
         );
 
         builder.perGraphDimension("Hashes cache", (dims, concurrency) -> MemoryRange.of(

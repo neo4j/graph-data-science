@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -44,9 +44,8 @@ class RawFeaturesTask implements Runnable {
     private final HashGNNConfig config;
     private final List<FeatureExtractor> featureExtractors;
     private final int inputDimension;
-    private final HugeObjectArray<BitSet> features;
+    private final HugeObjectArray<HugeAtomicBitSet> features;
     private final List<int[]> hashesList;
-    private final MinAndArgmin minAndArgMin;
     private final ProgressTracker progressTracker;
 
     RawFeaturesTask(
@@ -54,7 +53,7 @@ class RawFeaturesTask implements Runnable {
         HashGNNConfig config,
         List<FeatureExtractor> featureExtractors,
         int inputDimension,
-        HugeObjectArray<BitSet> features,
+        HugeObjectArray<HugeAtomicBitSet> features,
         List<int[]> hashesList,
         ProgressTracker progressTracker
     ) {
@@ -64,11 +63,10 @@ class RawFeaturesTask implements Runnable {
         this.inputDimension = inputDimension;
         this.features = features;
         this.hashesList = hashesList;
-        this.minAndArgMin = new MinAndArgmin();
         this.progressTracker = progressTracker;
     }
 
-    static HugeObjectArray<BitSet> compute(
+    static HugeObjectArray<HugeAtomicBitSet> compute(
         HashGNNConfig config,
         SplittableRandom rng,
         ProgressTracker progressTracker,
@@ -89,7 +87,7 @@ class RawFeaturesTask implements Runnable {
             hashesList.add(computeHashesFromTriple(inputDimension, HashGNNCompanion.HashTriple.generate(rng)));
         }
 
-        var features = HugeObjectArray.newArray(BitSet.class, graph.nodeCount());
+        var features = HugeObjectArray.newArray(HugeAtomicBitSet.class, graph.nodeCount());
 
         var tasks = partitions.stream()
             .map(p -> new RawFeaturesTask(
@@ -115,8 +113,11 @@ class RawFeaturesTask implements Runnable {
 
     @Override
     public void run() {
+        var resMinAndArgMin = new MinAndArgmin();
+        var tempMinAndArgMin = new MinAndArgmin();
+
         partition.consume(nodeId -> {
-            var nodeFeatures = new BitSet(inputDimension);
+            var nodeFeatures = HugeAtomicBitSet.create(inputDimension);
             FeatureExtraction.extract(nodeId, -1, featureExtractors, new FeatureConsumer() {
                 @Override
                 public void acceptScalar(long nodeOffset, int offset, double value) {
@@ -138,11 +139,11 @@ class RawFeaturesTask implements Runnable {
                 features.set(nodeId, nodeFeatures);
                 return;
             }
-            var sampledBitset = new BitSet(inputDimension);
+            var sampledBitset = HugeAtomicBitSet.create(inputDimension);
             for (int i = 0; i < config.embeddingDensity(); i++) {
-                hashArgMin(nodeFeatures, hashesList.get(i), minAndArgMin);
-                if (minAndArgMin.argMin != -1) {
-                    sampledBitset.set(minAndArgMin.argMin);
+                hashArgMin(nodeFeatures, hashesList.get(i), resMinAndArgMin, tempMinAndArgMin);
+                if (resMinAndArgMin.argMin != -1) {
+                    sampledBitset.set(resMinAndArgMin.argMin);
                 }
             }
             features.set(nodeId, sampledBitset);

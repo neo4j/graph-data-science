@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -42,7 +43,7 @@ import static org.neo4j.gds.embeddings.hashgnn.HashGNNCompanion.hashArgMin;
 class BinarizeTask implements Runnable {
     private final Partition partition;
     private final HashGNNConfig config;
-    private final HugeObjectArray<BitSet> truncatedFeatures;
+    private final HugeObjectArray<HugeAtomicBitSet> truncatedFeatures;
     private final List<FeatureExtractor> featureExtractors;
     private final int[][] propertyEmbeddings;
     private final List<int[]> hashesList;
@@ -53,7 +54,7 @@ class BinarizeTask implements Runnable {
     BinarizeTask(
         Partition partition,
         HashGNNConfig config,
-        HugeObjectArray<BitSet> truncatedFeatures,
+        HugeObjectArray<HugeAtomicBitSet> truncatedFeatures,
         List<FeatureExtractor> featureExtractors,
         int[][] propertyEmbeddings,
         List<int[]> hashesList,
@@ -70,7 +71,7 @@ class BinarizeTask implements Runnable {
         this.progressTracker = progressTracker;
     }
 
-    static HugeObjectArray<BitSet> compute(
+    static HugeObjectArray<HugeAtomicBitSet> compute(
         Graph graph,
         List<Partition> partition,
         HashGNNConfig config,
@@ -96,7 +97,7 @@ class BinarizeTask implements Runnable {
         var inputDimension = FeatureExtraction.featureCount(featureExtractors);
         var propertyEmbeddings = embedProperties(config, rng, inputDimension);
 
-        var truncatedFeatures = HugeObjectArray.newArray(BitSet.class, graph.nodeCount());
+        var truncatedFeatures = HugeObjectArray.newArray(HugeAtomicBitSet.class, graph.nodeCount());
 
         var tasks = partition.stream()
             .map(p -> new BinarizeTask(
@@ -144,6 +145,8 @@ class BinarizeTask implements Runnable {
 
     @Override
     public void run() {
+        var tempBitSet = new BitSet(binarizationConfig.dimension());
+
         partition.consume(nodeId -> {
             var featureVector = new float[binarizationConfig.dimension()];
             FeatureExtraction.extract(nodeId, -1, featureExtractors, new FeatureConsumer() {
@@ -176,22 +179,22 @@ class BinarizeTask implements Runnable {
                 }
             });
 
-            truncatedFeatures.set(nodeId, roundAndSample(featureVector));
+            truncatedFeatures.set(nodeId, roundAndSample(tempBitSet, featureVector));
         });
 
         progressTracker.logProgress(partition.nodeCount());
     }
 
-    private BitSet roundAndSample(float[] floatVector) {
-        var bitset = new BitSet(floatVector.length);
+    private HugeAtomicBitSet roundAndSample(BitSet tempBitSet, float[] floatVector) {
+        tempBitSet.clear();
         for (int feature = 0; feature < floatVector.length; feature++) {
             if (floatVector[feature] > 0) {
-                bitset.set(feature);
+                tempBitSet.set(feature);
             }
         }
-        var sampledBitset = new BitSet(binarizationConfig.dimension());
+        var sampledBitset = HugeAtomicBitSet.create(binarizationConfig.dimension());
         for (int i = 0; i < config.embeddingDensity(); i++) {
-            hashArgMin(bitset, hashesList.get(i), minAndArgMin);
+            hashArgMin(tempBitSet, hashesList.get(i), minAndArgMin);
             if (minAndArgMin.argMin != -1) {
                 sampledBitset.set(minAndArgMin.argMin);
             }

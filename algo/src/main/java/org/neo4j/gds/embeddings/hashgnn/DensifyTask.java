@@ -19,11 +19,10 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.BitSetIterator;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -38,7 +37,7 @@ class DensifyTask implements Runnable {
     private final Partition partition;
     private final HashGNNConfig config;
     private final HugeObjectArray<double[]> denseFeatures;
-    private final HugeObjectArray<BitSet> binaryFeatures;
+    private final HugeObjectArray<HugeAtomicBitSet> binaryFeatures;
     private final float[][] projectionMatrix;
     private final ProgressTracker progressTracker;
 
@@ -46,7 +45,7 @@ class DensifyTask implements Runnable {
         Partition partition,
         HashGNNConfig config,
         HugeObjectArray<double[]> denseFeatures,
-        HugeObjectArray<BitSet> binaryFeatures,
+        HugeObjectArray<HugeAtomicBitSet> binaryFeatures,
         float[][] projectionMatrix,
         ProgressTracker progressTracker
     ) {
@@ -63,7 +62,7 @@ class DensifyTask implements Runnable {
         List<Partition> partition,
         HashGNNConfig config,
         SplittableRandom rng,
-        HugeObjectArray<BitSet> binaryFeatures,
+        HugeObjectArray<HugeAtomicBitSet> binaryFeatures,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
@@ -74,7 +73,7 @@ class DensifyTask implements Runnable {
         var projectionMatrix = projectionMatrix(
             rng,
             config.outputDimension().orElseThrow(),
-            (int) binaryFeatures.get(0).capacity()
+            (int) binaryFeatures.get(0).size()
         );
 
         var tasks = partition.stream()
@@ -131,15 +130,12 @@ class DensifyTask implements Runnable {
             var binaryVector = binaryFeatures.get(nodeId);
             var denseVector = new double[config.outputDimension().orElseThrow()];
 
-            var iterator = binaryVector.iterator();
-            var bit = iterator.nextSetBit();
-            while (bit != BitSetIterator.NO_MORE) {
-                final float[] row = projectionMatrix[bit];
+            binaryVector.forEachSetBit(bit -> {
+                final float[] row = projectionMatrix[(int) bit];
                 for (int i = 0; i < denseLength; i++) {
                     denseVector[i] += row[i];
                 }
-                bit = iterator.nextSetBit();
-            }
+            });
 
             denseFeatures.set(nodeId, denseVector);
         });

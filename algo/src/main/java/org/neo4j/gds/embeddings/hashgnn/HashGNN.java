@@ -19,11 +19,10 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.BitSetIterator;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -60,7 +59,7 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         var degreePartition = PartitionUtils.degreePartition(
             graph,
             // Since degree only very approximately reflect the min hash task workload per node we decrease the partition sizes.
-            Math.toIntExact(Math.min(config.concurrency() * 8L, graph.nodeCount())),
+            Math.toIntExact(Math.min(config.concurrency() * 4L, graph.nodeCount())),
             Function.identity(),
             Optional.of(1)
         );
@@ -91,12 +90,15 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
             return FeatureExtraction.featureCount(featureExtractors);
         });
 
-        var embeddingsA = HugeObjectArray.newArray(BitSet.class, graph.nodeCount());
-        embeddingsA.setAll(unused -> new BitSet(embeddingDimension));
+        var embeddingsA = HugeObjectArray.newArray(HugeAtomicBitSet.class, graph.nodeCount());
+        embeddingsA.setAll(unused -> HugeAtomicBitSet.create(embeddingDimension));
 
         double avgDegree = (graph.relationshipCount() / (double) graph.nodeCount());
         int upperBoundBits = Math.min(embeddingDimension, config.embeddingDensity());
-        int upperBoundExpectedBits = (int) Math.round(upperBoundBits * (1 - Math.pow(1 - (1.0 / upperBoundBits), config.embeddingDensity())));
+        int upperBoundExpectedBits = (int) Math.round(upperBoundBits * (1 - Math.pow(
+            1 - (1.0 / upperBoundBits),
+            config.embeddingDensity()
+        )));
         double scaledNeighborInfluence = graph.relationshipCount() == 0 ? 1.0 : upperBoundExpectedBits * config.neighborInfluence() / avgDegree;
 
         var hashes = HashTask.compute(
@@ -121,6 +123,7 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
             }
 
             MinHashTask.compute(
+                degreePartition,
                 graphs,
                 config,
                 embeddingDimension,
@@ -158,14 +161,11 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         return new HashGNNResult(outputVectors);
     }
 
-    private double[] bitSetToArray(BitSet bitSet, int dimension) {
+    private double[] bitSetToArray(HugeAtomicBitSet bitSet, int dimension) {
         var array = new double[dimension];
-        var iterator = bitSet.iterator();
-        var bit = iterator.nextSetBit();
-        while (bit != BitSetIterator.NO_MORE) {
-            array[bit] = 1.0;
-            bit = iterator.nextSetBit();
-        }
+        bitSet.forEachSetBit(bit -> {
+            array[(int) bit] = 1.0;
+        });
         return array;
     }
 

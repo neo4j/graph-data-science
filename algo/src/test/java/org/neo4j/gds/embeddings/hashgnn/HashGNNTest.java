@@ -152,7 +152,7 @@ class HashGNNTest {
             .embeddingDensity(2)
             .concurrency(concurrency)
             .iterations(1)
-            .randomSeed(42L);
+            .randomSeed(43L);
 
         if (binarize) {
             configBuilder.binarizeFeatures(Map.of("dimension", 12, "densityLevel", 6));
@@ -272,22 +272,22 @@ class HashGNNTest {
     @ParameterizedTest
     @CsvSource(value = {
         // BASE
-        "    10,  4,  10_000, 20_000, 1,  86_055_752",
+        "    10,  4,  10_000, 20_000, 1,  86_695_752",
 
         // Should increase fairly little with higher density
-        "   100,  4,  10_000, 20_000, 1,  90_515_432",
+        "   100,  4,  10_000, 20_000, 1,  91_155_432",
 
         // Should increase fairly little with more iterations
-        "    10, 16,  10_000, 20_000, 1,  87_542_312",
+        "    10, 16,  10_000, 20_000, 1,  88_182_312",
 
         // Should increase almost linearly with node count
-        "    10,  4, 100_000, 20_000, 1, 856_096_112",
+        "    10,  4, 100_000, 20_000, 1, 862_496_112",
 
         // Should be unaffected by relationship count
-        "    10,  4,  10_000, 80_000, 1,  86_055_752",
+        "    10,  4,  10_000, 80_000, 1,  86_695_752",
 
         // Should be unaffected by concurrency
-        "    10,  4,  10_000, 20_000, 8,  86_055_752",
+        "    10,  4,  10_000, 20_000, 8,  86_695_752",
     })
         void shouldEstimateMemory(
         int embeddingDensity,
