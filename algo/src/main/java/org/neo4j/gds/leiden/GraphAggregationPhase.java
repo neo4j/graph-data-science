@@ -39,7 +39,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -152,7 +151,6 @@ class GraphAggregationPhase {
             .build();
 
         var sortedNodesByCommunity = getNodesSortedByCommunity(
-            new Partition(0, workingGraph.nodeCount()),
             communities,
             concurrency
         );
@@ -181,23 +179,21 @@ class GraphAggregationPhase {
         return GraphFactory.create(idMap, relationshipsBuilder.build());
     }
 
-    static HugeLongArray getNodesSortedByCommunity(Partition partition, HugeLongArray communities, int concurrency) {
+    static HugeLongArray getNodesSortedByCommunity(HugeLongArray communities, int concurrency) {
         long nodeCount = communities.size();
-        long partitionCount = partition.nodeCount();
-        var sortedNodesByCommunity = HugeLongArray.newArray(partitionCount);
+
+        var sortedNodesByCommunity = HugeLongArray.newArray(nodeCount);
         HugeAtomicLongArray communityCoordinateArray = HugeAtomicLongArray.newArray(nodeCount);
 
 
-        long endNode = partition.startNode() + partition.nodeCount();
-        ParallelUtil.parallelForEachNode(partitionCount, concurrency, indexId -> {
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency, nodeId -> {
             {
-                long nodeId = partition.startNode() + indexId;
                 long communityId = communities.get(nodeId);
                 communityCoordinateArray.getAndAdd(communityId, 1);
             }
         });
         AtomicLong atomicNodeSum = new AtomicLong();
-        ParallelUtil.parallelForEachNode(partitionCount, concurrency, indexId ->
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency, indexId ->
         {
             if (communityCoordinateArray.get(indexId) > 0) {
                 var nodeSum = atomicNodeSum.addAndGet(communityCoordinateArray.get(indexId));
@@ -205,10 +201,10 @@ class GraphAggregationPhase {
             }
         });
 
-        ParallelUtil.parallelForEachNode(partitionCount, concurrency, indexId ->
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency, indexId ->
         {
-            long nodeId = endNode - indexId - 1;
 
+            long nodeId = nodeCount - indexId - 1;
             long communityId = communities.get(nodeId);
             long coordinate = communityCoordinateArray.getAndAdd(communityId, -1);
             sortedNodesByCommunity.set(coordinate - 1, nodeId);

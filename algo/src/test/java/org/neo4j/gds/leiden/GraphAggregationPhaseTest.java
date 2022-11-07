@@ -31,6 +31,8 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
+import java.util.HashSet;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
@@ -103,6 +105,38 @@ class GraphAggregationPhaseTest {
             ),
             aggregatedGraph
         );
+    }
+
+    @Test
+    void testNodesSortedByCommunity() {
+        //concurrency 1 examines  nodes with ordering  nodes 4,3,1,0,2,6,5,8,7
+        HugeLongArray communities = HugeLongArray.of(0, 1, 3, 3, 3, 1, 0, 0, 0);
+        var sortedNodeByCommunity = GraphAggregationPhase.getNodesSortedByCommunity(communities, 1);
+        var expected = new long[]{2, 3, 4, 7, 8, 6, 0, 5, 1};
+        assertThat(sortedNodeByCommunity.toArray()).isEqualTo(expected);
+
+    }
+
+    @Test
+    void testNodesSortedByCommunityWithConcurrency() {
+
+        HugeLongArray communities = HugeLongArray.of(0, 1, 3, 3, 3, 1, 0, 0, 0);
+        var sortedNodeByCommunity = GraphAggregationPhase.getNodesSortedByCommunity(communities, 4);
+        long[] actual = sortedNodeByCommunity.toArray();
+        assertThat(actual).containsExactlyInAnyOrder(0, 1, 2, 3, 4, 5, 6, 7, 8);
+        HashSet<Long> forbidden = new HashSet<>();
+        long current = -1;
+        for (int i = 0; i < 9; ++i) {
+            long nodeId = actual[i];
+            long community = communities.get(nodeId);
+
+            assertThat(community).isNotIn(forbidden); //true only if all nodes of community are consecutive
+            if (current != community) {
+                forbidden.add(current);
+                current = community;
+            }
+        }
+
     }
 
 }
