@@ -121,7 +121,6 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
             }
 
             MinHashTask.compute(
-                degreePartition,
                 graphs,
                 config,
                 embeddingDimension,

@@ -25,18 +25,17 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.core.utils.partition.DegreePartition;
-import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.neo4j.gds.embeddings.hashgnn.HashGNNCompanion.hashArgMin;
 
 class MinHashTask implements Runnable {
     private final List<HashTask.Hashes> hashes;
-    private final Partition partition;
+    private final int k;
     private final HashGNNConfig config;
     private final int embeddingDimension;
     private final List<Graph> concurrentGraphs;
@@ -47,7 +46,7 @@ class MinHashTask implements Runnable {
     private final ProgressTracker progressTracker;
 
     MinHashTask(
-        Partition partition,
+        int k,
         List<Graph> graphs,
         HashGNNConfig config,
         int embeddingDimension,
@@ -58,7 +57,7 @@ class MinHashTask implements Runnable {
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
-        this.partition = partition;
+        this.k = k;
         this.concurrentGraphs = graphs.stream().map(Graph::concurrentCopy).collect(Collectors.toList());
         this.config = config;
         this.embeddingDimension = embeddingDimension;
@@ -71,7 +70,6 @@ class MinHashTask implements Runnable {
     }
 
     static void compute(
-        List<DegreePartition> partition,
         List<Graph> graphs,
         HashGNNConfig config,
         int embeddingDimension,
@@ -86,9 +84,9 @@ class MinHashTask implements Runnable {
 
         progressTracker.setSteps(graphs.get(0).nodeCount());
 
-        var tasks = partition.stream()
-            .map(p -> new MinHashTask(
-                p,
+        var tasks = IntStream.range(0, config.embeddingDensity())
+            .mapToObj(k -> new MinHashTask(
+                k,
                 graphs,
                 config,
                 embeddingDimension,
@@ -115,48 +113,45 @@ class MinHashTask implements Runnable {
         var selfMinAndArgMin = new HashGNN.MinAndArgmin();
         var neighborsMinAndArgMin = new HashGNN.MinAndArgmin();
 
-        // letting each task handle all k's and a partition of nodes gives generallly a decent size chunk of work
-        // which leads to low overhead and high cpu utilisation.
-        // initially, a task used a single k which had much less utilisation.
-        // also, using a single k but all nodes leads to concurrent writes to BitSet which is not threadsafe.
-        for (int k = 0; k < config.embeddingDensity(); k++) {
-            terminationFlag.assertRunning();
+        terminationFlag.assertRunning();
 
-            var hashesForK = hashes.get(iteration * config.embeddingDensity() + k);
-            var neighborsAggregationHashes = hashesForK.neighborsAggregationHashes();
-            var selfAggregationHashes = hashesForK.selfAggregationHashes();
-            var preAggregationHashes = hashesForK.preAggregationHashes();
+        var hashesForK = hashes.get(iteration * config.embeddingDensity() + k);
+        var neighborsAggregationHashes = hashesForK.neighborsAggregationHashes();
+        var selfAggregationHashes = hashesForK.selfAggregationHashes();
+        var preAggregationHashes = hashesForK.preAggregationHashes();
 
-            partition.consume(nodeId -> {
-                var currentEmbedding = currentEmbeddings.get(nodeId);
-                hashArgMin(previousEmbeddings.get(nodeId), selfAggregationHashes, selfMinAndArgMin);
 
-                neighborsVector.clear();
+        concurrentGraphs.get(0).forEachNode(nodeId -> {
+            var currentEmbedding = currentEmbeddings.get(nodeId);
+            hashArgMin(previousEmbeddings.get(nodeId), selfAggregationHashes, selfMinAndArgMin);
 
-                for (int i = 0; i < concurrentGraphs.size(); i++) {
-                    var preAggregationHashesForRel = preAggregationHashes.get(i);
-                    var currentGraph = concurrentGraphs.get(i);
-                    currentGraph.forEachRelationship(nodeId, (src, trg) -> {
-                        var prevTargetEmbedding = previousEmbeddings.get(trg);
-                        hashArgMin(prevTargetEmbedding, preAggregationHashesForRel, neighborsMinAndArgMin);
+            neighborsVector.clear();
 
-                        int argMin = neighborsMinAndArgMin.argMin;
-                        if (argMin != -1) {
-                            neighborsVector.set(argMin);
-                        }
+            for (int i = 0; i < concurrentGraphs.size(); i++) {
+                var preAggregationHashesForRel = preAggregationHashes.get(i);
+                var currentGraph = concurrentGraphs.get(i);
+                currentGraph.forEachRelationship(nodeId, (src, trg) -> {
+                    var prevTargetEmbedding = previousEmbeddings.get(trg);
+                    hashArgMin(prevTargetEmbedding, preAggregationHashesForRel, neighborsMinAndArgMin);
 
-                        return true;
-                    });
-                }
+                    int argMin = neighborsMinAndArgMin.argMin;
+                    if (argMin != -1) {
+                        neighborsVector.set(argMin);
+                    }
 
-                hashArgMin(neighborsVector, neighborsAggregationHashes, neighborsMinAndArgMin);
-                int argMin = (neighborsMinAndArgMin.min < selfMinAndArgMin.min) ? neighborsMinAndArgMin.argMin : selfMinAndArgMin.argMin;
-                if (argMin != -1) {
-                    currentEmbedding.set(argMin);
-                }
-            });
-        }
+                    return true;
+                });
+            }
 
-        progressTracker.logSteps(partition.nodeCount());
+            hashArgMin(neighborsVector, neighborsAggregationHashes, neighborsMinAndArgMin);
+            int argMin = (neighborsMinAndArgMin.min < selfMinAndArgMin.min) ? neighborsMinAndArgMin.argMin : selfMinAndArgMin.argMin;
+            if (argMin != -1) {
+                currentEmbedding.set(argMin);
+            }
+            return true;
+
+        });
+
+        progressTracker.logSteps(1);
     }
 }
