@@ -26,12 +26,16 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
 import java.util.Map;
 
 class FilteredNodeSimilarityStreamProcTest extends BaseProcTest {
 
+    @Neo4jGraph(offsetIds = true)
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Person)" +
@@ -52,13 +56,16 @@ class FilteredNodeSimilarityStreamProcTest extends BaseProcTest {
         ", (d)-[:LIKES]->(i2)" +
         ", (d)-[:LIKES]->(i3)";
 
+    @Inject
+    IdFunction idFunction;
+
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
             FilteredNodeSimilarityStreamProc.class,
             GraphProjectProc.class
         );
-        runQuery(DB_CYPHER);
+
         var createQuery = GdsCypher.call("graph")
             .graphProject()
             .withNodeLabels("Person", "Item")
@@ -78,48 +85,59 @@ class FilteredNodeSimilarityStreamProcTest extends BaseProcTest {
             .algo("gds.alpha.nodeSimilarity.filtered")
             .streamMode()
             .yields();
+
+        var a = idFunction.of("a");
+        var b = idFunction.of("b");
+        var c = idFunction.of("c");
+        var d = idFunction.of("d");
+
         assertCypherResult(algoQuery, List.of(
-            Map.of("node1", 0L, "node2", 3L, "similarity", 1.0),
-            Map.of("node1", 0L, "node2", 1L, "similarity", 0.6666666666666666),
-            Map.of("node1", 0L, "node2", 2L, "similarity", 0.3333333333333333),
-            Map.of("node1", 1L, "node2", 3L, "similarity", 0.6666666666666666),
-            Map.of("node1", 1L, "node2", 0L, "similarity", 0.6666666666666666),
-            Map.of("node1", 2L, "node2", 3L, "similarity", 0.3333333333333333),
-            Map.of("node1", 2L, "node2", 0L, "similarity", 0.3333333333333333),
-            Map.of("node1", 3L, "node2", 0L, "similarity", 1.0),
-            Map.of("node1", 3L, "node2", 1L, "similarity", 0.6666666666666666),
-            Map.of("node1", 3L, "node2", 2L, "similarity", 0.3333333333333333)
+            Map.of("node1", a, "node2", d, "similarity", 1.0),
+            Map.of("node1", a, "node2", b, "similarity", 0.6666666666666666),
+            Map.of("node1", a, "node2", c, "similarity", 0.3333333333333333),
+            Map.of("node1", b, "node2", d, "similarity", 0.6666666666666666),
+            Map.of("node1", b, "node2", a, "similarity", 0.6666666666666666),
+            Map.of("node1", c, "node2", d, "similarity", 0.3333333333333333),
+            Map.of("node1", c, "node2", a, "similarity", 0.3333333333333333),
+            Map.of("node1", d, "node2", a, "similarity", 1.0),
+            Map.of("node1", d, "node2", b, "similarity", 0.6666666666666666),
+            Map.of("node1", d, "node2", c, "similarity", 0.3333333333333333)
         ));
     }
 
     @Test
     void shouldWorkWithFiltering() {
+        var a = idFunction.of("a");
+        var b = idFunction.of("b");
+        var c = idFunction.of("c");
+        var d = idFunction.of("d");
+
         var sourceFilteredAlgoQuery = GdsCypher.call("graph")
             .algo("gds.alpha.nodeSimilarity.filtered")
             .streamMode()
-            .addParameter("sourceNodeFilter", List.of(0, 3))
+            .addParameter("sourceNodeFilter", List.of(a, d))
             .yields();
         assertCypherResult(sourceFilteredAlgoQuery, List.of(
-            Map.of("node1", 0L, "node2", 3L, "similarity", 1.0),
-            Map.of("node1", 0L, "node2", 1L, "similarity", 0.6666666666666666),
-            Map.of("node1", 0L, "node2", 2L, "similarity", 0.3333333333333333),
-            Map.of("node1", 3L, "node2", 0L, "similarity", 1.0),
-            Map.of("node1", 3L, "node2", 1L, "similarity", 0.6666666666666666),
-            Map.of("node1", 3L, "node2", 2L, "similarity", 0.3333333333333333)
+            Map.of("node1", a, "node2", d, "similarity", 1.0),
+            Map.of("node1", a, "node2", b, "similarity", 0.6666666666666666),
+            Map.of("node1", a, "node2", c, "similarity", 0.3333333333333333),
+            Map.of("node1", d, "node2", a, "similarity", 1.0),
+            Map.of("node1", d, "node2", b, "similarity", 0.6666666666666666),
+            Map.of("node1", d, "node2", c, "similarity", 0.3333333333333333)
         ));
 
         var targetFilteredAlgoQuery = GdsCypher.call("graph")
             .algo("gds.alpha.nodeSimilarity.filtered")
             .streamMode()
-            .addParameter("targetNodeFilter", List.of(0, 3))
+            .addParameter("targetNodeFilter", List.of(a, d))
             .yields();
         assertCypherResult(targetFilteredAlgoQuery, List.of(
-            Map.of("node1", 0L, "node2", 3L, "similarity", 1.0),
-            Map.of("node1", 1L, "node2", 3L, "similarity", 0.6666666666666666),
-            Map.of("node1", 1L, "node2", 0L, "similarity", 0.6666666666666666),
-            Map.of("node1", 2L, "node2", 3L, "similarity", 0.3333333333333333),
-            Map.of("node1", 2L, "node2", 0L, "similarity", 0.3333333333333333),
-            Map.of("node1", 3L, "node2", 0L, "similarity", 1.0)
+            Map.of("node1", a, "node2", d, "similarity", 1.0),
+            Map.of("node1", b, "node2", d, "similarity", 0.6666666666666666),
+            Map.of("node1", b, "node2", a, "similarity", 0.6666666666666666),
+            Map.of("node1", c, "node2", d, "similarity", 0.3333333333333333),
+            Map.of("node1", c, "node2", a, "similarity", 0.3333333333333333),
+            Map.of("node1", d, "node2", a, "similarity", 1.0)
         ));
     }
 }
