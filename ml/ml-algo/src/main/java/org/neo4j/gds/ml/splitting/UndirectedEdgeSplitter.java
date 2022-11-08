@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.splitting;
 import com.carrotsearch.hppc.predicates.LongLongPredicate;
 import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
@@ -47,12 +46,11 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
 
     public UndirectedEdgeSplitter(
         Optional<Long> maybeSeed,
-        double negativeSamplingRatio,
         IdMap sourceNodes,
         IdMap targetNodes,
         int concurrency
     ) {
-        super(maybeSeed, negativeSamplingRatio, sourceNodes, targetNodes, concurrency);
+        super(maybeSeed, sourceNodes, targetNodes, concurrency);
     }
 
     private long validPositiveRelationshipCandidateCount(Graph graph, LongLongPredicate isValidNodePair) {
@@ -81,24 +79,14 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
         return validRelationshipCountAdder.longValue();
     }
 
-    @TestOnly
-    public SplitResult split(Graph graph, double holdoutFraction) {
-        return split(graph, graph, null, holdoutFraction);
-    }
-
-    @Override
-    public SplitResult split(
+    //@Override
+    public SplitResult splitPositiveExamples(
         Graph graph,
-        Graph masterGraph,
-        Graph negativeSamplingGraph,
         double holdoutFraction
     ) {
         // TODO: move this validation higher into the hierarchy
         if (!graph.schema().isUndirected()) {
             throw new IllegalArgumentException("EdgeSplitter requires graph to be UNDIRECTED");
-        }
-        if (!masterGraph.schema().isUndirected()) {
-            throw new IllegalArgumentException("EdgeSplitter requires master graph to be UNDIRECTED");
         }
 
         LongPredicate isValidSourceNode = node -> sourceNodes.contains(graph.toOriginalNodeId(node));
@@ -127,11 +115,7 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
 
         var positiveSamples = (long) (validRelationshipCount * holdoutFraction) / 2;
         var positiveSamplesRemaining = new MutableLong(positiveSamples);
-        var negativeSamples = (long) (negativeSamplingRatio * positiveSamples);
-        var negativeSamplesRemaining = new MutableLong(negativeSamples);
         var candidateEdgesRemaining = new MutableLong(validRelationshipCount);
-
-        var validSourceNodeCount = new MutableLong(sourceNodes.nodeCount());
 
         graph.forEachNode(nodeId -> {
             positiveSampling(
@@ -144,24 +128,15 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
                 isValidNodePair
             );
 
-            if (negativeSamplingGraph == null) {
-                negativeSampling(
-                    graph,
-                    masterGraph,
-                    selectedRelsBuilder,
-                    negativeSamplesRemaining,
-                    nodeId,
-                    isValidSourceNode,
-                    isValidTargetNode,
-                    validSourceNodeCount
-                );
-            } else {
-                negativeSampleFromGivenGraph(negativeSamplingGraph, selectedRelsBuilder, nodeId);
-            }
             return true;
         });
 
-        return SplitResult.of(remainingRelsBuilder.build(), selectedRelsBuilder.build());
+        return SplitResult.of(
+            remainingRelsBuilder,
+            validRelationshipCount - positiveSamples,
+            selectedRelsBuilder,
+            positiveSamples
+        );
     }
 
     private void positiveSampling(

@@ -27,13 +27,10 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
-import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfigImpl;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -111,51 +108,6 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
     @Configuration.CollectKeys
     default Collection<String> configKeys() {
         return Collections.emptyList();
-    }
-
-    @Configuration.Ignore
-    default SplitRelationshipsBaseConfig testSplit(
-        RelationshipType targetRelationshipType,
-        String sourceNodeLabel,
-        String targetNodeLabel,
-        Optional<Long> randomSeed,
-        Optional<String> relationshipWeightProperty
-    ) {
-        return SplitRelationshipsBaseConfigImpl.builder()
-            .sourceNodeLabels(List.of(sourceNodeLabel))
-            .targetNodeLabels(List.of(targetNodeLabel))
-            .holdoutRelationshipType(testRelationshipType().name)
-            .remainingRelationshipType(testComplementRelationshipType().name)
-            .holdoutFraction(testFraction())
-            .negativeSamplingRatio(negativeSamplingRatio())
-            .negativeRelationshipType(negativeRelationshipType())
-            .relationshipWeightProperty(relationshipWeightProperty.orElse(null))
-            .relationshipTypes(List.of(targetRelationshipType.name))
-            .randomSeed(randomSeed)
-            .build();
-    }
-
-    @Configuration.Ignore
-    default SplitRelationshipsBaseConfig trainSplit(
-        RelationshipType targetRelationshipType,
-        String sourceNodeLabel,
-        String targetNodeLabel,
-        Optional<Long> randomSeed,
-        Optional<String> relationshipWeightProperty
-    ) {
-        return SplitRelationshipsBaseConfigImpl.builder()
-            .sourceNodeLabels(List.of(sourceNodeLabel))
-            .targetNodeLabels(List.of(targetNodeLabel))
-            .holdoutRelationshipType(trainRelationshipType().name)
-            .remainingRelationshipType(featureInputRelationshipType().name)
-            .holdoutFraction(trainFraction())
-            .negativeSamplingRatio(negativeSamplingRatio())
-            .relationshipWeightProperty(relationshipWeightProperty.orElse(null))
-            .relationshipTypes(List.of(testComplementRelationshipType().name))
-            .nonNegativeRelationshipTypes(List.of(targetRelationshipType.name))
-            .negativeRelationshipType(negativeRelationshipType())
-            .randomSeed(randomSeed)
-            .build();
     }
 
     static LinkPredictionSplitConfig of(CypherMapWrapper config) {

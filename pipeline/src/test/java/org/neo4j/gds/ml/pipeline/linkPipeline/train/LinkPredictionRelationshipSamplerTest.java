@@ -19,8 +19,10 @@
  */
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.InspectableTestProgressTracker;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.assertj.Extractors;
@@ -44,13 +46,13 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.TestSupport.assertMemoryRange;
-import static org.neo4j.gds.ml.pipeline.linkPipeline.train.RelationshipSplitter.progressTask;
-import static org.neo4j.gds.ml.pipeline.linkPipeline.train.RelationshipSplitter.splitEstimation;
+import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionRelationshipSampler.progressTask;
+import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionRelationshipSampler.splitEstimation;
 
 @GdlExtension
-class RelationshipSplitterTest {
+class LinkPredictionRelationshipSamplerTest {
 
-    @GdlGraph
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String GRAPH =
         "CREATE " +
         "(a:N {scalar: 0, array: [-1.0, -2.0, 1.0, 1.0, 3.0]}), " +
@@ -92,7 +94,7 @@ class RelationshipSplitterTest {
     @Inject
     GraphStore graphStore;
 
-    @GdlGraph(graphNamePrefix = "multi")
+    @GdlGraph(graphNamePrefix = "multi", orientation = Orientation.UNDIRECTED)
     private static final String MULTI_GRAPH =
         "CREATE " +
         "(n1:N), " +
@@ -129,14 +131,19 @@ class RelationshipSplitterTest {
             .negativeSamplingRatio(1.0)
             .build();
 
-        RelationshipSplitter relationshipSplitter = new RelationshipSplitter(
+        var trainConfig = createTrainConfig("REL", "N", "N", 42L);
+
+        LinkPredictionRelationshipSampler linkPredictionRelationshipSampler = new LinkPredictionRelationshipSampler(
             graphStore,
             splitConfig,
+            trainConfig,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         );
 
-        relationshipSplitter.splitRelationships(RelationshipType.of("REL"), "N", "N", Optional.of(42L), Optional.of("weight"));
+        linkPredictionRelationshipSampler.splitAndSampleRelationships(
+            Optional.of("weight")
+        );
 
         var expectedRelTypes = Stream.of(
                 splitConfig.trainRelationshipType(),
@@ -148,6 +155,14 @@ class RelationshipSplitterTest {
             .collect(Collectors.toList());
 
         assertThat(graphStore.relationshipTypes()).containsExactlyInAnyOrderElementsOf(expectedRelTypes);
+
+        var testGraphSize = graphStore.relationshipCount(splitConfig.testRelationshipType());
+        var trainGraphSize = graphStore.relationshipCount(splitConfig.trainRelationshipType());
+        var featureInputGraphSize = graphStore.relationshipCount(splitConfig.featureInputRelationshipType());
+
+        assertThat(testGraphSize).isEqualTo(4 + 4);
+        assertThat(trainGraphSize).isEqualTo(3 + 3);
+        assertThat(featureInputGraphSize).isEqualTo(18);
 
         var expectedRelProperties = Map.of(
             splitConfig.featureInputRelationshipType(), Set.of("weight"),
@@ -177,16 +192,20 @@ class RelationshipSplitterTest {
             .negativeSamplingRatio(1.0)
             .build();
 
+        var trainConfig = createTrainConfig("REL", "*", "N", 42L);
+
+
         var progressTracker = new InspectableTestProgressTracker(progressTask(splitConfig.expectedSetSizes(graphStore.relationshipCount())), "user", new JobId());
 
-        var relationshipSplitter = new RelationshipSplitter(
+        var relationshipSplitter = new LinkPredictionRelationshipSampler(
             graphStore,
             splitConfig,
+            trainConfig,
             progressTracker,
             TerminationFlag.RUNNING_TRUE
         );
 
-        relationshipSplitter.splitRelationships(RelationshipType.of("REL"), "*", "N", Optional.of(42L), Optional.of("weight"));
+        relationshipSplitter.splitAndSampleRelationships(Optional.of("weight"));
 
         assertThat(progressTracker.log().getMessages(TestLog.WARN))
             .extracting(Extractors.removingThreadId())
@@ -279,16 +298,34 @@ class RelationshipSplitterTest {
             .negativeSamplingRatio(1.0)
             .build();
 
-        RelationshipSplitter relationshipSplitter = new RelationshipSplitter(
+        var trainConfig = createTrainConfig("T", "N", "M", 42L);
+
+        LinkPredictionRelationshipSampler linkPredictionRelationshipSampler = new LinkPredictionRelationshipSampler(
             multiGraphStore,
             splitConfig,
+            trainConfig,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         );
 
         // due to the label filter most of the relationships are not valid
-        assertThatThrownBy(() -> relationshipSplitter.splitRelationships(RelationshipType.of("T"), "N", "M", Optional.of(42L), Optional.empty()))
+        assertThatThrownBy(() -> linkPredictionRelationshipSampler.splitAndSampleRelationships(Optional.empty()))
             .hasMessageContaining("The specified `testFraction` is too low for the current graph. The test set would have 0 relationship(s) but it must have at least 1.");
+    }
+
+    @NotNull
+    private LinkPredictionTrainConfig createTrainConfig(String targetRelationshipType, String sourceNodeLabel, String targetNodeLabel, long randomSeed) {
+        return LinkPredictionTrainConfigImpl
+            .builder()
+            .pipeline("p")
+            .targetRelationshipType(targetRelationshipType)
+            .graphName("g")
+            .modelName("m")
+            .modelUser("u")
+            .sourceNodeLabel(sourceNodeLabel)
+            .targetNodeLabel(targetNodeLabel)
+            .randomSeed(Optional.of(randomSeed))
+            .build();
     }
 
     @Test
@@ -298,25 +335,32 @@ class RelationshipSplitterTest {
             .testFraction(0.5)
             .validationFolds(2)
             .negativeSamplingRatio(99.0)
-            .negativeRelationshipType("NEGATIVE")
+            .negativeRelationshipType("NEGATIVE") // 3 total
             .build();
 
-        var relationshipSplitter = new RelationshipSplitter(
+        var trainConfig = createTrainConfig("REL", "*", "N", -1337L);
+
+        var relationshipSplitter = new LinkPredictionRelationshipSampler(
             graphStore,
             splitConfig,
+            trainConfig,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         );
 
-        relationshipSplitter.splitRelationships(RelationshipType.of("REL"), "*", "N", Optional.of(42L), Optional.of("weight"));
+        relationshipSplitter.splitAndSampleRelationships(
+            Optional.of("weight")
+        );
 
         var testGraphSize = graphStore.relationshipCount(splitConfig.testRelationshipType());
         var trainGraphSize = graphStore.relationshipCount(splitConfig.trainRelationshipType());
         var featureInputGraphSize = graphStore.relationshipCount(splitConfig.featureInputRelationshipType());
 
+        //16 * 0.5 = 8 positive, 3 * (2/3) = 2 negative
         assertThat(testGraphSize).isEqualTo(10);
+        //8 * 0.5 = 4 positive, 1 negative
         assertThat(trainGraphSize).isEqualTo(5);
-        assertThat(featureInputGraphSize).isEqualTo(7);
+        assertThat(featureInputGraphSize).isEqualTo(8);
 
     }
 }

@@ -222,7 +222,7 @@ As the default samplingRate is `1`, we use the xref:machine-learning/linkpredict
 [opts="header"]
 |===
 | person1   | person2   | probability
-| "Will"    | "Veselin" | 0.584994091515458
+| "Will"    | "Veselin" | 0.556618888540583
 |===
 
 We can see that the model only thinks that the Will and Veselin nodes should be connected, with a probability higher than 50%.
@@ -303,7 +303,7 @@ Because we are using the `UNDIRECTED` orientation, we will write twice as many r
 [opts="header",cols="3,7"]
 |===
 | relationshipsWritten | samplingStats
-| 16                   | {linksConsidered=48, didConverge=true, strategy=approximate, ranIterations=2}
+| 16                   | {linksConsidered=35, didConverge=true, strategy=approximate, ranIterations=1}
 |===
 --
 
@@ -343,7 +343,7 @@ As the default samplingRate is `1`, we use the xref:machine-learning/linkpredict
 [opts="header"]
 |===
 | person1   | person2   | probability
-| "Will"    | "Veselin" | 0.585064825714746
+| "Will"    | "Veselin" | 0.556716387529886
 |===
 
 We can see that our model predicts the same Will-Veselin link as it did with the unfiltered model `lp-pipeline-model`.

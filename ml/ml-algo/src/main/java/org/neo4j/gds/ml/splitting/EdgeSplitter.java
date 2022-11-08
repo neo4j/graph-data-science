@@ -19,20 +19,16 @@
  */
 package org.neo4j.gds.ml.splitting;
 
-import com.carrotsearch.hppc.predicates.LongPredicate;
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -48,22 +44,18 @@ public abstract class EdgeSplitter {
     protected final IdMap sourceNodes;
     protected final IdMap targetNodes;
     protected int concurrency;
-    protected final double negativeSamplingRatio;
 
-    EdgeSplitter(Optional<Long> maybeSeed, double negativeSamplingRatio, IdMap sourceNodes, IdMap targetNodes, int concurrency) {
+    EdgeSplitter(Optional<Long> maybeSeed, IdMap sourceNodes, IdMap targetNodes, int concurrency) {
         this.rng = new Random();
         maybeSeed.ifPresent(rng::setSeed);
 
-        this.negativeSamplingRatio = negativeSamplingRatio;
         this.sourceNodes = sourceNodes;
         this.targetNodes = targetNodes;
         this.concurrency = concurrency;
     }
 
-    public abstract SplitResult split(
+    public abstract SplitResult splitPositiveExamples(
         Graph graph,
-        Graph masterGraph,
-        Graph negativeSamplingGraph,
         double holdoutFraction
     );
 
@@ -104,75 +96,21 @@ public abstract class EdgeSplitter {
             .build();
     }
 
-    // Negative sampling does not guarantee negativeSamplesRemaining number of negative edges are sampled.
-    // because 1. for dense graphs there aren't enough possible negative edges
-    // and 2. If the last few nodes are dense, since we calculate negative samples needed per node, there won't be enough negative samples added.
-    void negativeSampling(
-        Graph graph,
-        Graph masterGraph,
-        RelationshipsBuilder selectedRelsBuilder,
-        MutableLong negativeSamplesRemaining,
-        long nodeId,
-        LongPredicate isValidSourceNode,
-        LongPredicate isValidTargetNode,
-        MutableLong validSourceNodeCount
-    ) {
-        if (!isValidSourceNode.apply(nodeId)) {
-            return;
-        }
-        var masterDegree = masterGraph.degree(nodeId);
-        var negativeEdgeCount = samplesPerNode(
-            (masterGraph.nodeCount() - 1) - masterDegree,
-            negativeSamplesRemaining.doubleValue(),
-            validSourceNodeCount.getAndDecrement()
-        );
-
-        var neighbours = new HashSet<Long>(masterDegree);
-        masterGraph.forEachRelationship(nodeId, (source, target) -> {
-            neighbours.add(target);
-            return true;
-        });
-
-        // this will not try to avoid duplicate negative relationships,
-        // nor will it avoid sampling edges that are sampled as negative in
-        // an outer split.
-        int retries = MAX_RETRIES;
-        for (int i = 0; i < negativeEdgeCount; i++) {
-            var negativeTarget = randomNodeId(graph);
-            // no self-relationships
-            if (isValidTargetNode.apply(negativeTarget) && !neighbours.contains(negativeTarget) && negativeTarget != nodeId) {
-                negativeSamplesRemaining.decrementAndGet();
-                selectedRelsBuilder.addFromInternal(graph.toRootNodeId(nodeId), graph.toRootNodeId(negativeTarget), NEGATIVE);
-            } else if (retries-- > 0) {
-                // we retry with a different negative target
-                // skipping here and relying on finding another source node is not safe
-                // we only retry a few times to protect against resampling forever for high deg nodes
-                i--;
-            }
-        }
-    }
-
-    void negativeSampleFromGivenGraph(
-        Graph negativeSamplingGraph,
-        RelationshipsBuilder selectedRelsBuilder,
-        long nodeId
-    ) {
-        negativeSamplingGraph.forEachRelationship(nodeId, (s, t) -> {
-            if (s < t) {
-                selectedRelsBuilder.addFromInternal(negativeSamplingGraph.toRootNodeId(s), negativeSamplingGraph.toRootNodeId(t), NEGATIVE);
-            }
-            return true;
-        });
-    }
-
-
     @ValueClass
     public interface SplitResult {
-        Relationships remainingRels();
-        Relationships selectedRels();
+        RelationshipsBuilder remainingRels();
 
-        static EdgeSplitter.SplitResult of(Relationships remainingRels, Relationships selectedRels) {
-            return ImmutableSplitResult.of(remainingRels, selectedRels);
+        long remainingRelCount();
+        RelationshipsBuilder selectedRels();
+        long selectedRelCount();
+
+        static EdgeSplitter.SplitResult of(
+            RelationshipsBuilder remainingRels,
+            long remainingRelCount,
+            RelationshipsBuilder selectedRels,
+            long selectedRelCount
+        ) {
+            return ImmutableSplitResult.of(remainingRels, remainingRelCount, selectedRels, selectedRelCount);
         }
     }
 }

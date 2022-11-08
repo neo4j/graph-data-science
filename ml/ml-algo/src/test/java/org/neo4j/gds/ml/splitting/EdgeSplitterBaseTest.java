@@ -48,7 +48,7 @@ abstract class EdgeSplitterBaseTest {
         }
     }
 
-    void assertRelSamplingProperties(Relationships selectedRels, Graph inputGraph, double negativeSamplingRatio) {
+    void assertRelSamplingProperties(Relationships selectedRels, Graph inputGraph) {
         MutableInt positiveCount = new MutableInt();
         inputGraph.forEachNode(source -> {
             var targetNodeCursor = selectedRels.topology().adjacencyList().adjacencyCursor(source);
@@ -64,7 +64,7 @@ abstract class EdgeSplitterBaseTest {
         });
 
         //For dense graph the assertion may fail since negativeSampling does not guarantee its count. Modify assertion if needed.
-        assertThat(selectedRels.topology().elementCount()).isEqualTo((long) Math.floor(positiveCount.intValue() * (1 + negativeSamplingRatio)));
+        assertThat(selectedRels.topology().elementCount()).isEqualTo(positiveCount.longValue());
     }
 
     void assertNodeLabelFilter(Relationships.Topology topology, Collection<NodeLabel> sourceLabels, Collection<NodeLabel> targetLabels, IdMap idmap) {

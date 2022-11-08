@@ -89,30 +89,8 @@ class SplitRelationshipsTest {
 
         EdgeSplitter.SplitResult result = splitter.compute();
 
-        assertThat(result.selectedRels().topology().elementCount()).isEqualTo(6);
-        assertThat(result.remainingRels().topology().elementCount()).isEqualTo(24);
-    }
-
-    @Test
-    void splitWithNegativeRelationshipType() {
-        var config = SplitRelationshipsBaseConfigImpl.builder()
-            .holdoutFraction(0.2)
-            .negativeSamplingRatio(99)
-            .relationshipTypes(List.of("REL"))
-            .negativeRelationshipType("REL2")
-            .holdoutRelationshipType("TEST")
-            .remainingRelationshipType("REST")
-            .randomSeed(1337L)
-            .build();
-
-        SplitRelationships splitter = SplitRelationships.of(graphStore, config);
-
-        EdgeSplitter.SplitResult result = splitter.compute();
-
-        //0.2*10 = 2 positive, 5 negative
-        assertThat(result.selectedRels().topology().elementCount()).isEqualTo(7);
-        //0.8*10 = 8 (so 16 undirected)
-        assertThat(result.remainingRels().topology().elementCount()).isEqualTo(16);
+        assertThat(result.selectedRels().build().topology().elementCount()).isEqualTo(6);
+        assertThat(result.remainingRels().build().topology().elementCount()).isEqualTo(24);
     }
 
     @Test
