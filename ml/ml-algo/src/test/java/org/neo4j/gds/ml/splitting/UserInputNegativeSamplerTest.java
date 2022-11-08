@@ -33,32 +33,27 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.negativeSampling.UserInputNegativeSampler;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.negativeSampling.NegativeSampler.NEGATIVE;
 
 @GdlExtension
 class UserInputNegativeSamplerTest {
 
-    @GdlGraph(orientation = Orientation.NATURAL, graphNamePrefix = "negative")
-    static String gdlNegative = "(n1 :A)-[:T {foo: 5} ]->(n2 :A)-[:T {foo: 5} ]->(n3 :A)-[:T {foo: 5} ]->(n4 :A)-[:T {foo: 5} ]->(n5 :B)-[:T {foo: 5} ]->(n6 :A), (n1)-[:NEGATIVE]->(n3), (n3)-[:NEGATIVE]->(n5), (n5)-[:NEGATIVE]->(n7 :A)";
-
-    @GdlGraph
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
     static String gdl =
         "(a1:A), " +
         "(a2:A), " +
         "(a3:A), " +
         "(a4:A), " +
         "(a5:A), " +
-        "(a6:A), " +
-        "(a7:A), " +
         "(a1)-->(a2), " +
         "(a1)-->(a3), " +
         "(a2)-->(a3), " +
         "(a3)-->(a4), " +
         "(a3)-->(a5), " +
-        "(a4)-->(a5), " +
-        "(a5)-->(a6), " +
-        "(a5)-->(a7)";
+        "(a4)-->(a5)";
 
     @Inject
     Graph graph;
@@ -66,10 +61,10 @@ class UserInputNegativeSamplerTest {
 
     @Test
     void generateNegativeSamples() {
-        int testSampleCount = 3;
         var sampler = new UserInputNegativeSampler(
             graph,
-            testSampleCount
+            (double) 1/3,
+            Optional.of(42L)
         );
 
         RelationshipsBuilder testBuilder = new RelationshipsBuilderBuilder().nodes(graph).addPropertyConfig(
@@ -84,8 +79,8 @@ class UserInputNegativeSamplerTest {
         Relationships testSet = testBuilder.build();
         Relationships trainSet = trainBuilder.build();
 
-        assertThat(testSet.topology().elementCount()).isEqualTo(testSampleCount);
-        assertThat(trainSet.topology().elementCount()).isEqualTo(5);
+        assertThat(testSet.topology().elementCount()).isEqualTo(2);
+        assertThat(trainSet.topology().elementCount()).isEqualTo(4);
 
         assertThat(testSet.properties()).isNotEmpty();
         graph.forEachNode(nodeId -> {

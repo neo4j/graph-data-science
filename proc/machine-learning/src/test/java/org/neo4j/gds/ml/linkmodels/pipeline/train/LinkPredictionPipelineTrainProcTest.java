@@ -230,7 +230,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
 
         Object expectedMetrics = Map.of("AUCPR", Map.of(
             "outerTrain", 1.0,
-            "test", 1.0,
+            "test", 0.7916666666666666,
             "validation", Map.of("min", 0.0, "avg", 0.5, "max", 1.0),
             "train", Map.of("min", 0.0, "avg", 0.5, "max", 1.0)
         ));
@@ -380,7 +380,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             "}) YIELD modelInfo" +
             " RETURN modelInfo.metrics.OUT_OF_BAG_ERROR.validation.min AS min_oob",
             Map.of("graphName", GRAPH_NAME, "pipeline", "pipe", "modelName", "anything"),
-            List.of(Map.of("min_oob", 0.4))
+            List.of(Map.of("min_oob", 0.3333333333333333))
         );
     }
 

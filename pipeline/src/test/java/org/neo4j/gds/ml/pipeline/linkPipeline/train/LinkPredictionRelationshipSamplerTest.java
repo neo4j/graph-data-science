@@ -351,7 +351,7 @@ class LinkPredictionRelationshipSamplerTest {
         var trainGraphSize = graphStore.relationshipCount(splitConfig.trainRelationshipType());
         var featureInputGraphSize = graphStore.relationshipCount(splitConfig.featureInputRelationshipType());
 
-        //16 * 0.5 = 8 positive, 3 * (2/3) = 2 negative
+        //16 * 0.5 = 8 positive, 3 * (8/(4+8)) = 2 negative
         assertThat(testGraphSize).isEqualTo(10);
         //8 * 0.5 = 4 positive, 1 negative
         assertThat(trainGraphSize).isEqualTo(5);

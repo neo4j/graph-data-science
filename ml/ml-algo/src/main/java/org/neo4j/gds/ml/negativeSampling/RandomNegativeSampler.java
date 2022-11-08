@@ -96,7 +96,6 @@ public class RandomNegativeSampler implements NegativeSampler {
                 var negativeTarget = randomNodeId(graph);
                 // no self-relationships
                 if (isValidTargetNodes.apply(negativeTarget) && !neighbours.contains(negativeTarget) && negativeTarget != nodeId) {
-                    //FIXME: Put in parallel and remove nodeId bias
                     if (remainingTestSamples.longValue() > 0l) {
                         remainingTestSamples.decrement();
                         testSetBuilder.addFromInternal(

@@ -23,16 +23,26 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 
+import java.util.Optional;
+import java.util.SplittableRandom;
+
 public class UserInputNegativeSampler implements NegativeSampler {
     private final Graph negativeExampleGraph;
-    private final long testRelationshipCount;
+    private final double testTrainFraction;
+
+    private final SplittableRandom rng;
 
     public UserInputNegativeSampler(
         Graph negativeExampleGraph,
-        long testRelationshipCount
+        double testTrainFraction,
+        Optional<Long> randomSeed
     ) {
+        if (!negativeExampleGraph.schema().isUndirected()) {
+            throw new IllegalArgumentException("UserInputNegativeSampler requires graph to be UNDIRECTED.");
+        }
         this.negativeExampleGraph = negativeExampleGraph;
-        this.testRelationshipCount = testRelationshipCount;
+        this.testTrainFraction = testTrainFraction;
+        this.rng = randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
     }
 
     @Override
@@ -40,22 +50,25 @@ public class UserInputNegativeSampler implements NegativeSampler {
         RelationshipsBuilder testSetBuilder,
         RelationshipsBuilder trainSetBuilder
     ) {
-        var negativeSampleCount = new MutableLong(0);
+        var totalRelationshipCount = negativeExampleGraph.relationshipCount()/2;
+        var testRelationshipCount = (long) (totalRelationshipCount * testTrainFraction);
+        var testRelationshipsToAdd = new MutableLong(testRelationshipCount);
+        var trainRelationshipsToAdd = new MutableLong(totalRelationshipCount - testRelationshipCount);
 
         negativeExampleGraph.forEachNode(nodeId -> {
             negativeExampleGraph.forEachRelationship(nodeId, (s, t) -> {
-                // add each relationship only once, even in UNDIRECTED graphs
-                //TODO Add randomness for splitting given graph
                 if (s < t) {
-                    if (negativeSampleCount.getAndIncrement() < testRelationshipCount) {
+                    if ((rng.nextDouble() < 0.5 && testRelationshipsToAdd.longValue() > 0) || trainRelationshipsToAdd.longValue() == 0) {
+                        testRelationshipsToAdd.decrement();
                         testSetBuilder.add(s, t, NEGATIVE);
                     } else {
+                        trainRelationshipsToAdd.decrement();
                         trainSetBuilder.add(s, t, NEGATIVE);
                     }
                 }
                 return true;
             });
-            return negativeSampleCount.getValue() < negativeExampleGraph.relationshipCount();
+            return true;
         });
     }
 }

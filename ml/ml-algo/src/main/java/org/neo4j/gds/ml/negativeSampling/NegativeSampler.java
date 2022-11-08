@@ -44,13 +44,12 @@ public interface NegativeSampler {
     ) {
         if (negativeRelationshipType.isPresent()) {
             Graph negativeExampleGraph = graphStore.getGraph(RelationshipType.of(negativeRelationshipType.orElseThrow()));
-            long totalRelationshipCount = negativeExampleGraph.relationshipCount() / 2;
             double testTrainFraction = testPositiveCount / (double) (testPositiveCount + trainPositiveCount);
-            long testRelationshipCount = (long) (totalRelationshipCount * testTrainFraction);
 
             return new UserInputNegativeSampler(
                 negativeExampleGraph,
-                testRelationshipCount
+                testTrainFraction,
+                randomSeed
             );
         } else {
             return new RandomNegativeSampler(
