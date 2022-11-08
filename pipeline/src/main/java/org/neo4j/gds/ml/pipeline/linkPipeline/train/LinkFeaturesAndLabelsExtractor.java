@@ -36,7 +36,6 @@ import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.gradientdescent.GradientDescentConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
-import org.neo4j.gds.ml.splitting.EdgeSplitter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +44,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.ToLongFunction;
 
+import static org.neo4j.gds.ml.negativeSampling.NegativeSampler.NEGATIVE;
+import static org.neo4j.gds.ml.splitting.EdgeSplitter.POSITIVE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class LinkFeaturesAndLabelsExtractor {
@@ -113,7 +114,7 @@ final class LinkFeaturesAndLabelsExtractor {
                 var currentRelationshipOffset = new MutableLong(startRelationshipOffset);
                 var localGraph = graph.concurrentCopy();
                 partition.consume(nodeId -> localGraph.forEachRelationship(nodeId, -10, (src, trg, weight) -> {
-                    if (weight == EdgeSplitter.NEGATIVE || weight == EdgeSplitter.POSITIVE) {
+                    if (weight == NEGATIVE || weight == POSITIVE) {
                         globalLabels.set(currentRelationshipOffset.getAndIncrement(), (int) weight);
                     } else {
                         throw new IllegalArgumentException(formatWithLocale(

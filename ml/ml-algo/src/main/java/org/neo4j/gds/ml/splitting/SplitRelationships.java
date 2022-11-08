@@ -28,6 +28,8 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.ml.negativeSampling.NegativeSampler;
+import org.neo4j.gds.ml.negativeSampling.RandomNegativeSampler;
 
 import java.util.Optional;
 
@@ -92,7 +94,8 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
 
     @Override
     public EdgeSplitter.SplitResult compute() {
-        var splitter = graph.schema().isUndirected()
+        boolean isUndirected = graph.schema().isUndirected();
+        var splitter = isUndirected
             ? new UndirectedEdgeSplitter(
             config.randomSeed(),
             sourceNodes,
@@ -106,24 +109,24 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
                 config.concurrency()
             );
 
-        var positiveSplitResult =  splitter.splitPositiveExamples(
+        var splitResult =  splitter.splitPositiveExamples(
             graph,
             config.holdoutFraction()
         );
 
-        NegativeSampler negativeSampler = new NegativeSampler.RandomNegativeSampler(
-            //TODO: test that passing graph fails (for SplitRelationshipProc)
+        NegativeSampler negativeSampler = new RandomNegativeSampler(
             masterGraph,
-            (long) (positiveSplitResult.selectedRelCount() * config.negativeSamplingRatio()),
+            (long) (splitResult.selectedRelCount() * config.negativeSamplingRatio()),
+            //SplitRelationshipsProc does not add negative samples to holdout set
             0,
             sourceNodes,
             targetNodes,
             config.randomSeed()
         );
 
-        negativeSampler.produceNegativeSamples(positiveSplitResult.selectedRels(), null);
+        negativeSampler.produceNegativeSamples(splitResult.selectedRels(), null);
 
-        return positiveSplitResult;
+        return splitResult;
     }
 
     @Override

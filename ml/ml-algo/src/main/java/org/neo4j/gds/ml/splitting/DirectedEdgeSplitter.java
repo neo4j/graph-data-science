@@ -20,15 +20,12 @@
 package org.neo4j.gds.ml.splitting;
 
 import com.carrotsearch.hppc.predicates.LongLongPredicate;
-import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.Optional;
@@ -45,10 +42,10 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         super(maybeSeed, sourceLabels, targetLabels, concurrency);
     }
 
-    private long validPositiveRelationshipCandidateCount(
+    @Override
+    protected long validPositiveRelationshipCandidateCount(
         Graph graph,
-        LongLongPredicate isValidNodePair,
-        HugeLongArray degreeResult
+        LongLongPredicate isValidNodePair
     ) {
         LongAdder validRelationshipCountAdder = new LongAdder();
         var countValidRelationshipTasks = PartitionUtils.rangePartition(
@@ -59,7 +56,6 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
                 partition.consume(nodeId -> concurrentGraph.forEachRelationship(nodeId, (s, t) -> {
                         if (isValidNodePair.apply(s, t)) {
                             validRelationshipCountAdder.add(1);
-                            degreeResult.addTo(nodeId, 1);
                         }
                         return true;
                     })
@@ -73,81 +69,26 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
     }
 
     @Override
-    public SplitResult splitPositiveExamples(
-        Graph graph,
-        double holdoutFraction
-    ) {
-        LongPredicate isValidSourceNode = node -> sourceNodes.contains(graph.toOriginalNodeId(node));
-        LongPredicate isValidTargetNode = node -> targetNodes.contains(graph.toOriginalNodeId(node));
-        LongLongPredicate isValidNodePair = (s, t) -> isValidSourceNode.apply(s) && isValidTargetNode.apply(t);
-
-        RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilderWithProp(graph, Orientation.NATURAL);
-
-        RelationshipsBuilder remainingRelsBuilder;
-        RelationshipWithPropertyConsumer remainingRelsConsumer;
-        if (graph.hasRelationshipProperty()) {
-            remainingRelsBuilder = newRelationshipsBuilderWithProp(graph, Orientation.NATURAL);
-            remainingRelsConsumer = (s, t, w) -> {
-                remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t), w);
-                return true;
-            };
-        } else {
-            remainingRelsBuilder = newRelationshipsBuilder(graph, Orientation.NATURAL);
-            remainingRelsConsumer = (s, t, w) -> {
-                remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t));
-                return true;
-            };
-        }
-
-        var validDegrees = HugeLongArray.newArray(graph.nodeCount());
-        var validRelationshipCount = validPositiveRelationshipCandidateCount(graph, isValidNodePair, validDegrees);
-
-        int positiveSamples = (int) (validRelationshipCount * holdoutFraction);
-        var positiveSamplesRemaining = new MutableLong(positiveSamples);
-
-        var candidateEdgesRemaining = new MutableLong(validRelationshipCount);
-
-        graph.forEachNode(nodeId -> {
-            positiveSampling(
-                graph,
-                selectedRelsBuilder,
-                remainingRelsConsumer,
-                positiveSamplesRemaining,
-                nodeId,
-                isValidSourceNode,
-                isValidTargetNode,
-                candidateEdgesRemaining
-            );
-
-            return true;
-        });
-
-        return SplitResult.of(
-            remainingRelsBuilder,
-            validRelationshipCount - positiveSamples,
-            selectedRelsBuilder,
-            positiveSamples
-        );
-    }
-
-    private void positiveSampling(
+    protected void positiveSampling(
         Graph graph,
         RelationshipsBuilder selectedRelsBuilder,
         RelationshipWithPropertyConsumer remainingRelsConsumer,
-        MutableLong positiveSamplesRemaining,
+        MutableLong selectedRelCount,
+        MutableLong remainingRelCount,
         long nodeId,
-        LongPredicate isValidSourceNode,
-        LongPredicate isValidTargetNode,
+        LongLongPredicate isValidNodePair,
+        MutableLong positiveSamplesRemaining,
         MutableLong candidateEdgesRemaining
     ) {
-        LongLongPredicate isValidNodePair = (s, t) -> isValidSourceNode.apply(s) && isValidTargetNode.apply(t);
 
         graph.forEachRelationship(nodeId, Double.NaN, (source, target, weight) -> {
             if (isValidNodePair.apply(source, target)) {
                 if (sample(positiveSamplesRemaining.doubleValue() / candidateEdgesRemaining.doubleValue())) {
                     positiveSamplesRemaining.decrementAndGet();
+                    selectedRelCount.increment();
                     selectedRelsBuilder.addFromInternal(graph.toRootNodeId(source), graph.toRootNodeId(target), POSITIVE);
                 } else {
+                    remainingRelCount.increment();
                     remainingRelsConsumer.accept(source, target, weight);
                 }
                 candidateEdgesRemaining.addAndGet(-1);

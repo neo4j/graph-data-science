@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.ConcurrencyConfig;
@@ -32,10 +33,10 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.ml.negativeSampling.NegativeSampler;
 import org.neo4j.gds.ml.pipeline.linkPipeline.ExpectedSetSizes;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
-import org.neo4j.gds.ml.splitting.NegativeSampler;
 import org.neo4j.gds.ml.splitting.UndirectedEdgeSplitter;
 import org.neo4j.values.storable.NumberType;
 
@@ -102,51 +103,15 @@ public class LinkPredictionRelationshipSampler {
 
         // Relationship sets: test, train, feature-input, test-complement. The nodes are always the same.
         // 1. Split base graph into test, test-complement
-        var testSplitter = new UndirectedEdgeSplitter(
-            trainConfig.randomSeed(),
-            sourceNodes,
-            targetNodes,
-            ConcurrencyConfig.DEFAULT_CONCURRENCY
-        );
-
-        var testSplitResult = testSplitter.splitPositiveExamples(
-            graph,
-            splitConfig.testFraction()
-        );
-        var testSplitRemainingRels = testSplitResult.remainingRels().build();
-        graphStore.addRelationshipType(
-            splitConfig.testComplementRelationshipType(),
-            relationshipWeightProperty,
-            Optional.of(NumberType.FLOATING_POINT),
-            testSplitRemainingRels
-        );
+        var testSplitResult = split(sourceNodes, targetNodes, graph, relationshipWeightProperty, splitConfig.testComplementRelationshipType(), splitConfig.testFraction());
 
         // 2. Split test-complement into (labeled) train and feature-input.
-        var trainSplitter = new UndirectedEdgeSplitter(
-            trainConfig.randomSeed(),
-            sourceNodes,
-            targetNodes,
-            ConcurrencyConfig.DEFAULT_CONCURRENCY
-        );
-
         var testComplementGraph = graphStore.getGraph(
             trainConfig.nodeLabelIdentifiers(graphStore),
             List.of(splitConfig.testComplementRelationshipType()),
             relationshipWeightProperty
         );
-
-        var trainSplitResult =  trainSplitter.splitPositiveExamples(
-            testComplementGraph,
-            splitConfig.trainFraction()
-        );
-
-        var trainSplitRemainingRels = trainSplitResult.remainingRels().build();
-        graphStore.addRelationshipType(
-            splitConfig.featureInputRelationshipType(),
-            relationshipWeightProperty,
-            Optional.of(NumberType.FLOATING_POINT),
-            trainSplitRemainingRels
-        );
+        var trainSplitResult = split(sourceNodes, targetNodes, testComplementGraph, relationshipWeightProperty, splitConfig.featureInputRelationshipType(), splitConfig.trainFraction());
 
         // 3. add negative examples to test and train
         NegativeSampler negativeSampler = NegativeSampler.of(
@@ -183,6 +148,33 @@ public class LinkPredictionRelationshipSampler {
         progressTracker.endSubTask("Split relationships");
     }
 
+    private EdgeSplitter.SplitResult split(IdMap sourceNodes, IdMap targetNodes, Graph graph, Optional<String> relationshipWeightProperty, RelationshipType remainingRelType, double selectedFraction) {
+        if (!graph.schema().isUndirected()) {
+            throw new IllegalArgumentException("EdgeSplitter requires graph to be UNDIRECTED");
+        }
+        var splitter = new UndirectedEdgeSplitter(
+            trainConfig.randomSeed(),
+            sourceNodes,
+            targetNodes,
+            ConcurrencyConfig.DEFAULT_CONCURRENCY
+        );
+
+        var splitResult = splitter.splitPositiveExamples(
+            graph,
+            selectedFraction
+        );
+
+        var remainingRels = splitResult.remainingRels().build();
+        graphStore.addRelationshipType(
+            remainingRelType,
+            relationshipWeightProperty,
+            Optional.of(NumberType.FLOATING_POINT),
+            remainingRels
+        );
+
+        return splitResult;
+    }
+
 
     private void validateTestSplit(GraphStore graphStore) {
         validateRelSetSize(graphStore.relationshipCount(splitConfig.testRelationshipType()), MIN_SET_SIZE, "test", "`testFraction` is too low");
@@ -201,7 +193,7 @@ public class LinkPredictionRelationshipSampler {
         );
     }
 
-    static MemoryEstimation splitEstimation(LinkPredictionSplitConfig splitConfig, String targetRelationshipType, Optional<String> relationshipWeight, String sourceNodeLabel, String targetNodeLabel) {
+    static MemoryEstimation splitEstimation(LinkPredictionSplitConfig splitConfig, String targetRelationshipType, Optional<String> relationshipWeight) {
         var checkTargetRelType = targetRelationshipType.equals(ElementProjection.PROJECT_ALL)
             ? RelationshipType.ALL_RELATIONSHIPS
             : RelationshipType.of(targetRelationshipType);
