@@ -60,7 +60,16 @@ public class GraphListProc extends CatalogProc {
                 .outputFields()
                 .anyMatch(s -> s.equalsIgnoreCase("degreeDistribution"));
 
-            return GraphInfoWithHistogram.of(graphProjectConfig, graphStore, computeDegreeDistribution);
+            boolean computeGraphSize = callContext
+                .outputFields()
+                .anyMatch(s -> s.equalsIgnoreCase("memoryUsage") || s.equalsIgnoreCase("sizeInBytes"));
+
+            return GraphInfoWithHistogram.of(
+                graphProjectConfig,
+                graphStore,
+                computeDegreeDistribution,
+                computeGraphSize
+            );
         });
     }
 }
