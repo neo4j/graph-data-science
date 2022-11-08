@@ -31,9 +31,10 @@ import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.ml.negativeSampling.UserInputNegativeSampler;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.splitting.NegativeSampler.NEGATIVE;
+import static org.neo4j.gds.ml.negativeSampling.NegativeSampler.NEGATIVE;
 
 @GdlExtension
 class UserInputNegativeSamplerTest {
@@ -66,7 +67,7 @@ class UserInputNegativeSamplerTest {
     @Test
     void generateNegativeSamples() {
         int testSampleCount = 3;
-        var sampler = new NegativeSampler.UserInputNegativeSampler(
+        var sampler = new UserInputNegativeSampler(
             graph,
             testSampleCount
         );
@@ -89,6 +90,15 @@ class UserInputNegativeSamplerTest {
         assertThat(testSet.properties()).isNotEmpty();
         graph.forEachNode(nodeId -> {
             try (var propertyCursor = testSet.properties().get().propertiesList().propertyCursor(nodeId)) {
+                while (propertyCursor.hasNextLong()) {
+                    assertThat(Double.longBitsToDouble(propertyCursor.nextLong())).isEqualTo(NEGATIVE);
+                }
+            }
+            return true;
+        });
+
+        graph.forEachNode(nodeId -> {
+            try (var propertyCursor = trainSet.properties().get().propertiesList().propertyCursor(nodeId)) {
                 while (propertyCursor.hasNextLong()) {
                     assertThat(Double.longBitsToDouble(propertyCursor.nextLong())).isEqualTo(NEGATIVE);
                 }

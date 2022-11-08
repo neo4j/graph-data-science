@@ -30,11 +30,12 @@ import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.ml.negativeSampling.RandomNegativeSampler;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.splitting.NegativeSampler.NEGATIVE;
+import static org.neo4j.gds.ml.negativeSampling.NegativeSampler.NEGATIVE;
 
 @GdlExtension
 class RandomNegativeSamplerTest {
@@ -60,7 +61,7 @@ class RandomNegativeSamplerTest {
     void generateNegativeSamples() {
         int testSampleCount = 3;
         int trainSampleCount = 5;
-        var sampler = new NegativeSampler.RandomNegativeSampler(
+        var sampler = new RandomNegativeSampler(
             graph,
             testSampleCount,
             trainSampleCount,
