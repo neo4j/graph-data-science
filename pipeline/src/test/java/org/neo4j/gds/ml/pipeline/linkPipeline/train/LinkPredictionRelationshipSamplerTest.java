@@ -28,7 +28,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -137,8 +136,7 @@ class LinkPredictionRelationshipSamplerTest {
             graphStore,
             splitConfig,
             trainConfig,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            ProgressTracker.NULL_TRACKER
         );
 
         linkPredictionRelationshipSampler.splitAndSampleRelationships(
@@ -201,8 +199,7 @@ class LinkPredictionRelationshipSamplerTest {
             graphStore,
             splitConfig,
             trainConfig,
-            progressTracker,
-            TerminationFlag.RUNNING_TRUE
+            progressTracker
         );
 
         relationshipSplitter.splitAndSampleRelationships(Optional.of("weight"));
@@ -304,8 +301,7 @@ class LinkPredictionRelationshipSamplerTest {
             multiGraphStore,
             splitConfig,
             trainConfig,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            ProgressTracker.NULL_TRACKER
         );
 
         // due to the label filter most of the relationships are not valid
@@ -344,8 +340,7 @@ class LinkPredictionRelationshipSamplerTest {
             graphStore,
             splitConfig,
             trainConfig,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            ProgressTracker.NULL_TRACKER
         );
 
         relationshipSplitter.splitAndSampleRelationships(

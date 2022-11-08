@@ -26,7 +26,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.ElementTypeValidator;
-import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -55,20 +54,17 @@ public class LinkPredictionRelationshipSampler {
     private LinkPredictionTrainConfig trainConfig;
     private final ProgressTracker progressTracker;
     private final GraphStore graphStore;
-    private final TerminationFlag terminationFlag;
 
      public LinkPredictionRelationshipSampler(
          GraphStore graphStore,
          LinkPredictionSplitConfig splitConfig,
          LinkPredictionTrainConfig trainConfig,
-         ProgressTracker progressTracker,
-         TerminationFlag terminationFlag
+         ProgressTracker progressTracker
      ) {
         this.graphStore = graphStore;
         this.splitConfig = splitConfig;
         this.trainConfig = trainConfig;
         this.progressTracker = progressTracker;
-        this.terminationFlag = terminationFlag;
     }
 
     @NotNull
@@ -106,8 +102,6 @@ public class LinkPredictionRelationshipSampler {
 
         // Relationship sets: test, train, feature-input, test-complement. The nodes are always the same.
         // 1. Split base graph into test, test-complement
-        //      Test also includes newly generated negative links, that were not in the base graph (and positive links).
-        // A1. split base graph into test, test-complement positive graph
         var testSplitter = new UndirectedEdgeSplitter(
             trainConfig.randomSeed(),
             sourceNodes,
@@ -127,12 +121,7 @@ public class LinkPredictionRelationshipSampler {
             testSplitRemainingRels
         );
 
-        //A.  (maybe combine A1 and A2)
-        // A2. split test-complement positive graph into train positive graph and feature-input
-        // TODO: make positive samples in one pass -- skip test-complement set altogether
-
         // 2. Split test-complement into (labeled) train and feature-input.
-        //      Train relationships also include newly generated negative links, that were not in the base graph (and positive links).
         var trainSplitter = new UndirectedEdgeSplitter(
             trainConfig.randomSeed(),
             sourceNodes,
@@ -159,8 +148,7 @@ public class LinkPredictionRelationshipSampler {
             trainSplitRemainingRels
         );
 
-
-        //B. add negative examples to test and train
+        // 3. add negative examples to test and train
         NegativeSampler negativeSampler = NegativeSampler.of(
             graphStore,
             graph,
@@ -174,7 +162,7 @@ public class LinkPredictionRelationshipSampler {
         );
         negativeSampler.produceNegativeSamples(testSplitResult.selectedRels(), trainSplitResult.selectedRels());
 
-        //C. Update graphStore with (positive+negative) 'TEST' and 'TRAIN' edges
+        // 4. Update graphStore with (positive+negative) 'TEST' and 'TRAIN' edges
         graphStore.addRelationshipType(
             splitConfig.testRelationshipType(),
             Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY),

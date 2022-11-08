@@ -64,7 +64,6 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         LinkPredictionTrainConfig config,
         ExecutionContext executionContext,
         GraphStore graphStore,
-
         ProgressTracker progressTracker
     ) {
         super(
@@ -84,8 +83,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             graphStore,
             pipeline.splitConfig(),
             config,
-            progressTracker,
-            terminationFlag
+            progressTracker
         );
     }
 
@@ -157,9 +155,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
 
     @Override
     public void splitDatasets() {
-        this.linkPredictionRelationshipSampler.splitAndSampleRelationships(
-            pipeline.relationshipWeightProperty(executionContext)
-        );
+        this.linkPredictionRelationshipSampler.splitAndSampleRelationships(pipeline.relationshipWeightProperty(executionContext));
     }
 
     @Override
