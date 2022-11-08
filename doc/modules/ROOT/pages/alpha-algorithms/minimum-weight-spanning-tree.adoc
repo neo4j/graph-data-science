@@ -83,7 +83,7 @@ YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                                                                             | Type    | Default   | Optional  | Description
-| startNodeId                                                                      | Integer | null      | no        | The start node ID
+| sourceNode                                                                      | Integer | null      | no        | The start node ID
 | xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null      | yes       | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 | writeProperty                                                                    | String  | 'mst'     | yes       | The relationship type written back as result
 | weightWriteProperty                                                              | String  | n/a       | no        | The weight property of the `writeProperty` relationship type written back
@@ -123,7 +123,7 @@ YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
 |===
 | Name                                                                             | Type    | Default | Optional  | Description
 | k                                                                                | Integer | null    | no        | The result is a tree with `k` nodes and `k − 1` relationships
-| startNodeId                                                                      | Integer | null    | no        | The start node ID
+| sourceNode                                                                      | Integer | null    | no        | The start node ID
 | xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes       | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 | writeProperty                                                                    | String  | 'MST'   | yes       | The relationship type written back as result
 | weightWriteProperty                                                              | String  | n/a     | no        | The weight property of the `writeProperty` relationship type written back
@@ -186,7 +186,7 @@ Minimum weight spanning tree visits all nodes that are in the same connected com
 ----
 MATCH (n:Place {id: 'D'})
 CALL gds.alpha.spanningTree.minimum.write('graph', {
-  startNodeId: id(n),
+  sourceNode: id(n),
   relationshipWeightProperty: 'cost',
   writeProperty: 'MINST',
   weightWriteProperty: 'writeCost'
@@ -228,7 +228,7 @@ Maximum weighted tree spanning algorithm is similar to the minimum one, except t
 ----
 MATCH (n:Place{id: 'D'})
 CALL gds.alpha.spanningTree.maximum.write('graph', {
-  startNodeId: id(n),
+  sourceNode: id(n),
   relationshipWeightProperty: 'cost',
   writeProperty: 'MAXST',
   weightWriteProperty: 'writeCost'
@@ -256,7 +256,7 @@ By setting the `k=3`, we define that we want to get returned a 3-minimum spannin
 MATCH (n:Place{id: 'D'})
 CALL gds.alpha.spanningTree.kmin.write('graph', {
   k: 3,
-  startNodeId: id(n),
+  sourceNode: id(n),
   relationshipWeightProperty: 'cost',
   writeProperty:'kminst'
 })
@@ -292,7 +292,7 @@ Nodes A, B, and C are the result 3-minimum spanning tree of our graph.
 MATCH (n:Place{id: 'D'})
 CALL gds.alpha.spanningTree.kmax.write('graph', {
   k: 3,
-  startNodeId: id(n),
+  sourceNode: id(n),
   relationshipWeightProperty: 'cost',
   writeProperty:'kmaxst'
 })

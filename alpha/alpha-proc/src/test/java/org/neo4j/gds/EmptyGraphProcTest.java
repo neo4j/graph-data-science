@@ -118,50 +118,55 @@ class EmptyGraphProcTest extends BaseProcTest {
     }
 
     @Test
+    @Disabled
     void testKSpanningTreeKMax() {
         String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.spanningTree.kmax")
             .writeMode()
-            .addParameter("startNodeId", 0)
+            .addParameter("sourceNode", 0)
             .addParameter("k", 3)
             .yields();
         runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
     }
 
     @Test
+    @Disabled
     void testKSpanningTreeKMin() {
         String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.spanningTree.kmin")
             .writeMode()
-            .addParameter("startNodeId", 0)
+            .addParameter("sourceNode", 0)
             .addParameter("k", 3)
             .yields();
         runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
     }
 
     @Test
+    @Disabled
     void testSpanningTree() {
         String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.spanningTree")
             .writeMode()
-            .addParameter("startNodeId", 0)
+            .addParameter("sourceNode", 0)
             .addParameter("weightWriteProperty", "weight")
             .yields();
         runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
     }
 
     @Test
+    @Disabled
     void testSpanningTreeMinimum() {
         String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.spanningTree.minimum")
             .writeMode()
-            .addParameter("startNodeId", 0)
+            .addParameter("sourceNode", 0)
             .addParameter("weightWriteProperty", "weight")
             .yields();
         runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
     }
 
     @Test
+    @Disabled
     void testSpanningTreeMaximum() {
         String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.spanningTree.maximum")

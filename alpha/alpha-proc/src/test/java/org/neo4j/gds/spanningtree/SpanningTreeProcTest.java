@@ -21,20 +21,11 @@ package org.neo4j.gds.spanningtree;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.configuration.SettingImpl;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.graphdb.config.Setting;
-import org.neo4j.test.TestDatabaseManagementServiceBuilder;
-import org.neo4j.test.extension.ExtensionCallback;
-
-import java.io.File;
-import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -50,37 +41,34 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
  *     |       |        |      |
  *     d --6-- e        d      e
  */
-public class SpanningTreeProcTest extends BaseProcTest {
+class SpanningTreeProcTest extends BaseProcTest {
 
     @Neo4jGraph
-    static final String DB_CYPHER = "CREATE(a:Node {start: true}) " +
-                    "CREATE(b:Node) " +
-                    "CREATE(c:Node) " +
-                    "CREATE(d:Node) " +
-                    "CREATE(e:Node) " +
-                    "CREATE(z:Node) " +
-                    "CREATE (a)-[:TYPE {cost:1.0}]->(b) " +
-                    "CREATE (a)-[:TYPE {cost:2.0}]->(c) " +
-                    "CREATE (b)-[:TYPE {cost:3.0}]->(c) " +
-                    "CREATE (b)-[:TYPE {cost:4.0}]->(d) " +
-                    "CREATE (c)-[:TYPE {cost:5.0}]->(e) " +
-                    "CREATE (d)-[:TYPE {cost:6.0}]->(e)";
+    static final String DB_CYPHER = "CREATE(a:Node) " +
+                                    "CREATE(b:Node) " +
+                                    "CREATE(c:Node) " +
+                                    "CREATE(d:Node) " +
+                                    "CREATE(e:Node) " +
+                                    "CREATE(z:Node) " +
+                                    "CREATE (a)-[:TYPE {cost:1.0}]->(b) " +
+                                    "CREATE (a)-[:TYPE {cost:2.0}]->(c) " +
+                                    "CREATE (b)-[:TYPE {cost:3.0}]->(c) " +
+                                    "CREATE (b)-[:TYPE {cost:4.0}]->(d) " +
+                                    "CREATE (c)-[:TYPE {cost:5.0}]->(e) " +
+                                    "CREATE (d)-[:TYPE {cost:6.0}]->(e)";
 
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(SpanningTreeProcMin.class, SpanningTreeProcMax.class, GraphProjectProc.class);
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphProject()
+            .withAnyLabel()
+            .withRelationshipType("TYPE", Orientation.UNDIRECTED)
+            .withRelationshipProperty("cost")
+            .yields();
+        runQuery(createQuery);
     }
 
-    @Override
-    @ExtensionCallback
-    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
-        super.configuration(builder);
-        ClassLoader classLoader = SpanningTreeProcTest.class.getClassLoader();
-        String root = new File(classLoader.getResource("transport-nodes.csv").getFile()).getParent();
-        Setting<Path> setting = Settings.loadCsvFileUrlRoot();
-        Path fileRoot = (((SettingImpl<Path>) setting)).parse(root);
-        builder.setConfig(setting, fileRoot);
-    }
 
     private long getSourceNode() {
         return idFunction.of("a");
@@ -88,15 +76,9 @@ public class SpanningTreeProcTest extends BaseProcTest {
     
     @Test
     void testMinimum() {
-        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphProject()
-            .withNodeLabel("Node")
-            .withRelationshipType("TYPE", Orientation.UNDIRECTED)
-            .withRelationshipProperty("cost", DefaultValue.of(1.0D))
-            .yields();
-        runQuery(createQuery);
+
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.spanningTree")
+            .algo("gds.alpha.spanningTree.minimum")
             .writeMode()
             .addParameter("sourceNode", getSourceNode())
             .addParameter("relationshipWeightProperty", "cost")
@@ -121,13 +103,6 @@ public class SpanningTreeProcTest extends BaseProcTest {
 
     @Test
     void testMaximum() {
-        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphProject()
-            .withNodeLabel("Node")
-            .withRelationshipType("TYPE", Orientation.UNDIRECTED)
-            .withRelationshipProperty("cost", DefaultValue.of(1.0D))
-            .yields();
-        runQuery(createQuery);
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.spanningTree.maximum")
             .writeMode()
@@ -151,42 +126,5 @@ public class SpanningTreeProcTest extends BaseProcTest {
         );
 
         assertEquals(relCount, 4);
-    }
-
-
-
-    @Test
-    void shouldTrackProgress() {
-      /*   loadGraph();
-        TestProcedureRunner.applyOnProcedure(db, SpanningTreeProcMin.class, proc -> {
-            var taskStore = new GlobalTaskStore();
-
-            proc.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore, jobId));
-            proc.relationshipExporterBuilder = new NativeRelationshipExporterBuilder(
-                TransactionContext.of(proc.databaseService, proc.procedureTransaction)
-            );
-
-            proc.spanningTree( // min or max doesn't matter
-                DEFAULT_GRAPH_NAME,
-                Map.of(
-                    "weightWriteProperty", "myProp",
-                    "sourceNode", 0L
-                )
-            );
-
-            assertThat(taskStore.taskStream().map(Task::description)).contains(
-                "SpanningTree",
-                "SpanningTree :: Relationships :: Write"
-            );
-        }); */
-    }
-
-    void loadGraph() {
-        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphProject()
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .yields();
-        runQuery(createQuery);
     }
 }

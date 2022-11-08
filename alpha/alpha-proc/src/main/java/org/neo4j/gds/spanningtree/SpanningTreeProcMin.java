@@ -45,7 +45,7 @@ public class SpanningTreeProcMin extends BaseProc {
     @Context
     public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
 
-    @Procedure(value = "gds.alpha.spanningTree.write", mode = WRITE)
+    @Procedure(value = "gds.alpha.spanningTree.minimum.write", mode = WRITE)
     @Description(MIN_DESCRIPTION)
     public Stream<WriteResult> spanningTree(
         @Name(value = "graphName") String graphName,
