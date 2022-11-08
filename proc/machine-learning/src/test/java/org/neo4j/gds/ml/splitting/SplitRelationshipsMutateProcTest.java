@@ -164,7 +164,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
                               ",(e:" + nodeLabel + " {id: %d})" +
                               ",(f:" + nodeLabel + " {id: %d})" +
                               ",(c)-[:test {w: 0.0}]->(a)" +
-                              ",(e)-[:test {w: 0.0}]->(b)" +
+                              ",(e)-[:test {w: 0.0}]->(c)" +
                               ",(e)-[:test {w: 1.0}]->(f)",
             nodeId0, nodeId1, nodeId2, nodeId3, nodeId4, nodeId5);
         var expectedTrain = formatWithLocale(
@@ -223,7 +223,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
                               ",(e:" + nodeLabel + " {id: %d})" +
                               ",(f:" + nodeLabel + " {id: %d})" +
                               ",(a)<-[:innerTest {w: 0.0}]-(c)" +
-                              ",(b)<-[:innerTest {w: 0.0}]-(e)" +
+                              ",(c)<-[:innerTest {w: 0.0}]-(e)" +
                               ",(d)-[:innerTest {w: 1.0}]->(e)", nodeId0, nodeId1, nodeId2, nodeId3, nodeId4, nodeId5);
         var expectedTrain = formatWithLocale("CREATE" +
                                " (a:" + nodeLabel + "{id: %d})" +

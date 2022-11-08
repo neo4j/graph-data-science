@@ -222,8 +222,8 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 assertThat(actualModel.customInfo().toMap()).containsEntry(
                     "metrics",
                     Map.of("OUT_OF_BAG_ERROR", Map.of(
-                            "test", 0.36363636363636365,
-                            "validation", Map.of("avg", 0.55, "max", 0.6, "min", 0.5)
+                            "test", 0.6363636363636364,
+                            "validation", Map.of("avg", 0.45, "max", 0.5, "min", 0.4)
                         )
                     )
                 );

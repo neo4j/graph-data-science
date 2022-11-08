@@ -96,7 +96,7 @@ public class RandomNegativeSampler implements NegativeSampler {
                 var negativeTarget = randomNodeId(graph);
                 // no self-relationships
                 if (isValidTargetNodes.apply(negativeTarget) && !neighbours.contains(negativeTarget) && negativeTarget != nodeId) {
-                    if (remainingTestSamples.longValue() > 0l) {
+                    if ((rng.nextDouble() < 0.5 & remainingTestSamples.longValue() > 0) || remainingTrainSamples.longValue() == 0) {
                         remainingTestSamples.decrement();
                         testSetBuilder.addFromInternal(
                             graph.toRootNodeId(nodeId),
