@@ -223,6 +223,78 @@ class PartitionUtilsTest {
     }
 
     @Test
+    void testCustomDegreePartitioningWithBatchSize() {
+        Graph graph = fromGdl(
+            "(a)-->(b)" +
+            "(a)-->(c)" +
+            "(b)-->(a)" +
+            "(b)-->(c)" +
+            "(a)-->(d)" +
+            "(a)-->(e)"
+        );
+
+
+        int[] weights = {1, 6, 6, 1, 1};
+        Function<Long, Integer> weightFunction = x -> weights[x.intValue()];
+        var partitions = PartitionUtils.customDegreePartitionWithBatchSize(
+            graph,
+            3,
+            weightFunction,
+            Function.identity(),
+            Optional.of(1),
+            Optional.of(9L)
+        );
+
+        assertEquals(3, partitions.size());
+
+        assertEquals(0, partitions.get(0).startNode());
+        assertEquals(2, partitions.get(0).nodeCount());
+
+        assertEquals(2, partitions.get(1).startNode());
+        assertEquals(1, partitions.get(1).nodeCount());
+
+        assertEquals(3, partitions.get(2).startNode());
+        assertEquals(2, partitions.get(2).nodeCount());
+
+    }
+
+    @Test
+    void testCustomDegreePartitioningWithBatchSizeWithoutTotalSumGiven() {
+        Graph graph = fromGdl(
+            "(a)-->(b)" +
+            "(a)-->(c)" +
+            "(b)-->(a)" +
+            "(b)-->(c)" +
+            "(a)-->(d)" +
+            "(a)-->(e)"
+        );
+
+
+        int[] weights = {1, 6, 6, 1, 1};
+        Function<Long, Integer> weightFunction = x -> weights[x.intValue()];
+        var partitions = PartitionUtils.customDegreePartitionWithBatchSize(
+            graph,
+            3,
+            weightFunction,
+            Function.identity(),
+            Optional.of(1),
+            Optional.empty()
+        );
+
+        assertEquals(3, partitions.size());
+
+        assertEquals(0, partitions.get(0).startNode());
+        assertEquals(2, partitions.get(0).nodeCount());
+
+        assertEquals(2, partitions.get(1).startNode());
+        assertEquals(1, partitions.get(1).nodeCount());
+
+        assertEquals(3, partitions.get(2).startNode());
+        assertEquals(2, partitions.get(2).nodeCount());
+
+    }
+
+    @Test
     void testDegreePartitioningWithNodeFilter() {
         Graph graph = fromGdl(
             "(a)-->(b)" +
