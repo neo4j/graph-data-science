@@ -1,0 +1,527 @@
+[[hashgnn]]
+= HashGNN
+:description: This section describes the HashGNN node embedding algorithm in the Neo4j Graph Data Science library.
+:entity: node
+:result: embedding
+:algorithm: HashGNN
+
+
+:directed:
+:undirected:
+:homogeneous:
+:heterogeneous:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
+[[algorithms-embeddings-hashgnn-introduction]]
+== Introduction
+
+HashGNN is a node embedding algorithm which resembles Graph Neural Networks (GNN) but does not include a model or require training.
+The neural networks of GNNs are replaced by random hash functions, in the flavor of the `min-hash` locality sensitive hashing.
+Thus, HashGNN combines ideas of GNNs and fast randomized algorithms.
+
+The algorithm is based on the paper "Hashing-Accelerated Graph Neural Networks for Link Prediction".
+However, the GDS implementation introduces a few improvements and generalizations.
+The generalizations include support for embedding heterogeneous graphs; relationships of different type are associated with different hash functions, which allows for preserving relationship-typed graph topology.
+Moreover, a way to specifying how much embeddings are updated using features from neighboring nodes versus features from the same node can be configured via `neighborInfluence`.
+
+The runtime of this algorithm is significantly lower than that of GNNs in general, but can still give comparable embedding quality for certain graphs as shown in the original paper.
+Moreover, the heterogeneous generalization also gives comparable results when compared to the paper "Graph Transformer Networks" when benchmarked on the same datasets.
+
+The execution does not require GPUs as GNNs typically use, and parallelizes well across many CPU cores.
+
+
+=== Features
+
+The HashGNN algorithm assumes that nodes have binary features as input, and produces binary embedding vectors as output.
+Since this is not always the case for real-world graphs, the algorithm also comes with an option to binarize node properties.
+
+This is done using a type of hyperplane rounding and is configured via a map parameter `binarizeFeatures` containing `densityLevel` and `dimension`.
+The hyperplane rounding uses hyperplanes defined by vectors that are potentially sparse.
+The `dimension` parameter determines the number of generated binary features that the input features are transformed into.
+Each input feature is given `densityLevel` binary features with positive weight and the same number of binary features with negative weight.
+Each node's raw features are then mapped, weighted using the feature weights and raw feature values, and the results are then summed over raw features.
+This gives for each node a weight for each binary feature, and the features with positive total weight are the active features for the node.
+
+If the graph already has binary features, the algorithm can also use these directly if `binarizeFeatures` is not specified.
+This is usually the best option if the graph has only binary features and a sufficient number of them.
+
+Even if the graph has binary features, one can apply the hyperplane rounding pre-processing.
+Using a higher dimension than the number of input feature introduces redundancy which allows HashGNN to produce a richer representation.
+
+=== Neighbor influence
+
+In each iteration of HashGNN, new embeddings are generated iteratively for each node using the embeddings of previous iterations.
+The active features in a node embedding are selected randomly from the node's own features and from features of its neighbors.
+The parameter `neighborInfluence` determines how prone the algorithm is to select neighbors' features over features from the same node.
+The default value of `neighborInfluence` is `1.0` and with this value, on average a feature will be selected from the neighbors `50%` of the time.
+Increasing the value leads to neighbors being selected more often.
+The probability of selecting a feature from the neighbors as a function of `neighborInfluence` has a hockey-stick-like shape, somewhat similar to the shape of `y=log(x)` or `y=C - 1/x`.
+This implies that the probability is more sensitive for low values of `neighborInfluence`.
+The exact workings of this parameter is technical and we will omit it.
+
+=== Heterogeneous HashGNN
+
+The GDS implementation of HashGNN provides a new generalization to heterogeneous graphs in that it can distinguish between different relationship types.
+To enable the heterogeneous support set `heterogeneous` to true.
+The generalization works as the original HashGNN algorithm, but whenever a hash function is applied to a feature of a neighbor node, the algorithm uses a hash function that depends not only on the iteration and on a number `k<embeddingDensity`, but also on the relationship type connecting to the neighbor.
+Consider an example where HashGNN is run with one iteration, and we have `(a)-[:R]->(x), (b)-[:R]->(x)` and `(c)-[:S]->(x)`.
+Assume that a feature `f` is selected for `(a)` and the hash value is very low.
+This will make it very likely that the feature is also selected for `(b)`.
+There will however be no correlation to `f` being selected for `(c)` when considering the relationship `(c)-[:S]->(x)`, because a different hash function is used for `S`.
+We can conclude that nodes with similar neighborhoods (including node properties and relationship types) get similar embeddings, while nodes that have less similar neighborhoods get less similar embeddings.
+
+An advantage of running heterogeneous HashGNN to running a homogenous embedding such as FastRP is that it is not necessary to manually select multiple projections or creating meta-path graphs before running FastRP on these multiple graphs.
+With the heterogeneous algorithm, the full heterogeneous graph can be used in a single execution.
+
+=== Node property schema for heterogeneous graphs
+
+Heterogenous graphs typically have different node properties for different node labels.
+HashGNN assumes that all nodes have the same allowed features.
+Use therefore a default value of `0` for in each graph projection.
+This works both in the binary input case and when binarization is applied.
+For the first case, having a binary feature with value `0` is the same as not having the feature.
+The `0` values are represented in a sparse format, so the memory overhead of storing `0` values for many nodes has a low overhead.
+For the case of binarization, features that have the value `0` also do not give rise to any binary features being active.
+The binarization maps features belong to different node labels into a single shared set of allowed binary features.
+
+=== Orientation
+
+Choosing the right orientation when creating the graph may have a large impact.
+HashGNN works for any orientation, and the choice of orientation is problem specific.
+Given a directed relationship type, you may pick one orientation, or use two projections with `NATURAL` and `REVERSE` to be able to traverse relationships in the opposite direction while reflecting in the embedding the direction a relationship was traversed.
+
+=== Output densification
+
+Since binary embeddings need to be of higher dimension than dense floating point embeddings to encode the same amount of information, binary embeddings require more memory and longer training time for downstream models.
+The output embeddings can be optionally densified, by using random projection, similar to what is done to initialize FastRP with node properties.
+This behavior is activated by specifying `outputDimension`.
+Output densification can improve runtime and memory at the cost of introducing approximation error due to the random nature of the projection.
+The larger the `outputDimension`, the lower the approximation error and performance savings.
+
+=== Usage in machine learning pipelines
+
+It may be useful to generate node embeddings with HashGNN as a node property step in a machine learning pipeline (like xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[] and xref:machine-learning/node-property-prediction/index.adoc[]).
+HashGNN is an xref:machine-learning/node-embeddings/index.adoc#node-embeddings-generalization[inductive] embedding algorithm.
+It is therefore suitable to use in pipelines.
+Since HashGNN is a random algorithm, in order for the embeddings to be consistent between runs (training and prediction calls), a value for the `randomSeed` configuration parameter should be provided when adding the HashGNN node property step to the training pipeline.
+
+[[algorithms-embeddings-hashgnn-parameter-tuning]]
+== Tuning algorithm parameters
+
+In order to improve the embedding quality using HashGNN on one of your graphs, it is possible to tune the algorithm parameters.
+This process of finding the best parameters for your specific use case and graph is typically referred to as https://en.wikipedia.org/wiki/Hyperparameter_optimization[hyperparameter tuning].
+We will go through each of the configuration parameters and explain how they behave.
+
+=== Iterations
+
+The `iterations` parameter determines the number of message passing steps used, and therefore the maximum number of hops between a node and other nodes that affect its embedding.
+This is analogous to the number of layers in a GNN or the number of iterations in FastRP.
+Often a value of `2` to `4` is sufficient.
+
+=== Embedding density
+
+The `embeddingDensity` parameter is what the original paper denotes by `k`.
+For each iteration of HashGNN, `k` features are selected from the previous iteration's embeddings for the same node and for its neighbors.
+The selected features are represented as a set, so the number of distinct selected features may be smaller than `k`.
+The higher this parameter is set, the longer it will take to run the algorithm, and the runtime increases in a linear fashion.
+To large extent, higher values give better embeddings.
+As a loose guideline, one may try to set `embeddingDensity` to 128, 256, 512, or roughly 25%-50% of the embedding dimension, i.e. the number of binary features.
+
+=== Feature binarization
+
+The `dimension` parameter determines the number of binary features when binarization is applied.
+A high dimension increases expressiveness, but also the sparsity of features.
+Therefore, a higher dimension should also be coupled with higher `embeddingDensity` and/or higher `densityLevel`.
+Higher dimension also leads to longer training times of downstream models and higher memory footprint.
+Some values to consider trying for `densityLevel` are very low values such as `1` or `2` or sometimes up to the maximum allowed value of `density/2`.
+The sparsity of the raw features and the input dimension can also affect the best value of `densityLevel`.
+
+=== Neighbor influence
+
+As explained above, the default value is a reasonable starting point.
+If using a hyperparameter tuning library, this parameter may favorably be transformed by a function with increasing derivative such as the exponential function, or a function of the type `a/(b - x)`.
+The probability of selecting (and keeping throughout the iterations) a feature from different node depends on `neighborInfluence` the number of hops to the node.
+Therefore `neighborInfluence` should be re-tuned when `iterations` is changed.
+
+=== Heterogeneous
+In general, there is a large amount of information to store about typed paths in a heterogeneous graph, so with many iterations and relationship types the information will become blurred unless the embedding dimension is very large.
+This is especially true for unsupervised embedding algorithms such as HashGNN.
+Therefore, caution should be taken when using many iterations in the heterogeneous mode.
+
+
+[[algorithms-embeddings-hashgnn-syntax]]
+== Syntax
+
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.HashGNN syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+
+.Run HashGNN in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.hashgnn.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+  nodeId: Integer,
+  embedding: List of Float
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/machine-learning/node-embeddings/hashgnn/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header"]
+|===
+| Name      | Type         | Description
+| nodeId    | Integer      | Node ID.
+| embedding | List of Float  | HashGNN node embedding.
+|===
+======
+
+[.include-with-mutate]
+======
+
+.Run HashGNN in mutate mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.hashgnn.mutate(
+  graphName: String,
+  configuration: Map
+) YIELD
+  nodeCount: Integer,
+  nodePropertiesWritten: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+include::partial$/machine-learning/node-embeddings/hashgnn/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header"]
+|===
+| Name                  | Type    | Description
+| nodeCount             | Integer | Number of nodes processed.
+| nodePropertiesWritten | Integer | Number of node properties written.
+| preProcessingMillis   | Integer | Milliseconds for preprocessing the graph.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| mutateMillis          | Integer | Milliseconds for adding properties to the in-memory graph.
+| configuration         | Map     | Configuration used for running the algorithm.
+|===
+======
+
+====
+
+
+[[algorithms-embeddings-hashgnn-examples]]
+== Examples
+
+:algorithm-name: HashGNN node embedding
+:graph-description: social network
+In this section we will show examples of running the {algorithm-name} algorithm on a concrete graph.
+The intention is to illustrate what the results look like and to provide a guide in how to make use of the algorithm in a real setting.
+We will do this on a small {graph-description} graph of a handful nodes connected in a particular pattern.
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (dan:Person {name: 'Dan',     age: 18, experience: 53, hipster: 0}),
+  (annie:Person {name: 'Annie', age: 12, experience: 5, hipster: 0}),
+  (matt:Person {name: 'Matt',   age: 22, experience: 42, hipster: 0}),
+  (jeff:Person {name: 'Jeff',   age: 51, experience: 51, hipster: 0}),
+  (brie:Person {name: 'Brie',   age: 45, experience: 23, hipster: 0}),
+  (elsa:Person {name: 'Elsa',   age: 65, experience: -99, hipster: 1}),
+  (john:Person {name: 'John',   age: 64, experience: 100, hipster: 0}),
+  (apple:Fruit {name: 'Apple',   tropical: 0, sourness: 0.3, sweetness: 0.6}),
+  (banana:Fruit {name: 'Banana', tropical: 1, sourness: 0.1, sweetness: 0.9}),
+  (mango:Fruit {name: 'Mango',   tropical: 1, sourness: 0.3, sweetness: 1.0}),
+  (plum:Fruit {name: 'Plum',    tropical: 0, sourness: 0.5, sweetness: 0.8}),
+
+  (dan)-[:LIKES]->(apple),
+  (annie)-[:LIKES]->(banana),
+  (matt)-[:LIKES]->(mango),
+  (jeff)-[:LIKES]->(mango),
+  (brie)-[:LIKES]->(banana),
+  (else)-[:LIKES]->(plum),
+  (john)-[:LIKES]->(plum),
+
+  (dan)-[:KNOWS]->(annie),
+  (dan)-[:KNOWS]->(matt),
+  (annie)-[:KNOWS]->(matt),
+  (annie)-[:KNOWS]->(jeff),
+  (annie)-[:KNOWS]->(brie),
+  (matt)-[:KNOWS]->(brie),
+  (brie)-[:KNOWS]->(elsa),
+  (brie)-[:KNOWS]->(jeff),
+  (john)-[:KNOWS]->(jeff);
+----
+
+This graph represents seven people who know one another.
+
+With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
+We do this using a native projection targeting the `Person` nodes and the `KNOWS` relationships.
+For the relationships we will use the `UNDIRECTED` orientation.
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+.The following statement will project a graph using a native projection and store it in the graph catalog under the name 'persons'.
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+  'persons',
+  ['Person', 'Fruit'],
+  {
+    KNOWS: {
+      orientation: 'UNDIRECTED'
+    },
+    LIKES: {
+      orientation: 'UNDIRECTED'
+    }
+  },
+  { nodeProperties: {
+      age: {defaultValue: 0.0},
+      experience: {defaultValue: 0.0},
+      hipster: {defaultValue: 0.0},
+      tropical: {defaultValue: 0.0},
+      sourness: {defaultValue: 0.0},
+      sweetness: {defaultValue: 0.0}
+    }
+  }
+)
+----
+
+
+[[algorithms-embeddings-hashgnn-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: stream
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.hashgnn.stream.estimate('persons', {nodeLabels: ['Person'], iterations: 3, embeddingDensity: 2, binarizeFeatures: {dimension: 4, densityLevel: 1}, featureProperties: ['age', 'experience']})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header", cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 7         | 18                | 134464   | 134464   | "131 KiB"
+|===
+--
+
+
+[[algorithms-embeddings-hashgnn-examples-stream]]
+=== Stream
+
+:stream-details: For example, we can collect the results and pass them into a similarity algorithm.
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm on Person nodes with binarization, and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.hashgnn.stream('persons',
+  {
+    nodeLabels: ['Person'],
+    iterations: 3,
+    embeddingDensity: 2,
+    binarizeFeatures: {dimension: 4, densityLevel: 1},
+    featureProperties: ['age', 'experience'],
+    randomSeed: 123
+  }
+)
+YIELD nodeId, embedding
+----
+
+[opts=header]
+.Results
+|===
+| nodeId | embedding
+| 0      | [0.0, 0.0, 0.0, 1.0]
+| 1      | [0.0, 1.0, 0.0, 1.0]
+| 2      | [0.0, 1.0, 0.0, 1.0]
+| 3      | [0.0, 1.0, 0.0, 1.0]
+| 4      | [0.0, 1.0, 0.0, 1.0]
+| 5      | [0.0, 1.0, 0.0, 0.0]
+| 6      | [0.0, 0.0, 0.0, 1.0]
+|===
+--
+
+The results of the algorithm are not very intuitively interpretable, as the node embedding format is a mathematical abstraction of the node within its neighborhood, designed for machine learning programs.
+What we can see is that the embeddings have four elements (as configured using `binarizeFeatures.dimension`).
+
+[NOTE]
+====
+Due to the random nature of the algorithm the results will vary between the runs, unless `randomSeed` is specified.
+====
+
+[role=query-example]
+--
+.The following will run the algorithm on Person nodes without binarization, and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.hashgnn.stream('persons',
+  {
+    nodeLabels: ['Person'],
+    iterations: 1,
+    embeddingDensity: 2,
+    featureProperties: ['hipster'],
+    randomSeed: 123
+  }
+)
+YIELD nodeId, embedding
+----
+
+[opts=header]
+.Results
+|===
+| nodeId | embedding
+| 0      | [0.0]
+| 1      | [0.0]
+| 2      | [0.0]
+| 3      | [0.0]
+| 4      | [1.0]
+| 5      | [1.0]
+| 6      | [0.0]
+|===
+--
+
+In this example the embedding dimension becomes `1` because without binarization it is the number of features which is `1` due to the single 'hipster' property.
+
+[role=query-example]
+--
+.The following will run the algorithm in heterogeneous mode, and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.hashgnn.stream('persons',
+  {
+    heterogeneous: true,
+    iterations: 3,
+    embeddingDensity: 6,
+    binarizeFeatures: {dimension: 6, densityLevel: 3},
+    featureProperties: ['age', 'experience', 'sourness', 'sweetness', 'tropical'],
+    randomSeed: 123
+  }
+)
+YIELD nodeId, embedding
+----
+
+[opts=header]
+.Results
+|===
+| nodeId | embedding
+| 0      | [1.0, 1.0, 1.0, 1.0, 0.0, 1.0]
+| 1      | [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+| 2      | [1.0, 1.0, 1.0, 1.0, 0.0, 1.0]
+| 3      | [1.0, 1.0, 1.0, 1.0, 0.0, 1.0]
+| 4      | [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+| 5      | [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+| 6      | [1.0, 1.0, 1.0, 1.0, 0.0, 1.0]
+| 7      | [1.0, 0.0, 1.0, 1.0, 0.0, 1.0]
+| 8      | [1.0, 0.0, 1.0, 1.0, 0.0, 0.0]
+| 9      | [1.0, 0.0, 1.0, 1.0, 0.0, 0.0]
+| 10     | [1.0, 0.0, 1.0, 1.0, 0.0, 1.0]
+|===
+--
+
+[role=query-example]
+--
+.The following will run the algorithm as in the previous example but with output densification, and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.hashgnn.stream('persons',
+  {
+    heterogeneous: true,
+    iterations: 3,
+    embeddingDensity: 6,
+    binarizeFeatures: {dimension: 6, densityLevel: 3},
+    featureProperties: ['age', 'experience', 'sourness', 'sweetness', 'tropical'],
+    outputDimension: 4,
+    randomSeed: 123
+  }
+)
+YIELD nodeId, embedding
+----
+
+[opts=header]
+.Results
+|===
+| nodeId | embedding
+| 0      | [0.0, 0.8660253882408142, 0.0, 1.7320507764816284]
+| 1      | [0.0, 0.8660253882408142, 0.0, 0.0]
+| 2      | [0.0, 0.8660253882408142, 0.0, 1.7320507764816284]
+| 3      | [0.0, 0.8660253882408142, 0.0, 1.7320507764816284]
+| 4      | [0.0, 0.8660253882408142, 0.0, 0.0]
+| 5      | [0.0, 0.8660253882408142, 0.0, 0.0]
+| 6      | [0.0, 0.8660253882408142, 0.0, 1.7320507764816284]
+| 7      | [0.0, 1.7320507764816284, 0.0, 0.8660253882408142]
+| 8      | [0.0, 1.7320507764816284, -0.8660253882408142, 0.8660253882408142]
+| 9      | [0.0, 1.7320507764816284, -0.8660253882408142, 0.8660253882408142]
+| 10     | [0.0, 1.7320507764816284, 0.0, 0.8660253882408142]
+|===
+--
+
+[[algorithms-embeddings-hashgnn-examples-mutate]]
+=== Mutate
+
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.hashgnn.mutate(
+  'persons',
+  {
+    nodeLabels: ['Person'],
+    mutateProperty: 'hashgnn-embedding',
+    iterations: 3,
+    embeddingDensity: 2,
+    binarizeFeatures: {dimension: 4, densityLevel: 1},
+    randomSeed: 42
+  }
+)
+YIELD nodePropertiesWritten
+----
+
+[opts=header]
+.Results
+|===
+| nodePropertiesWritten
+| 7
+|===
+--
+
+The graph 'persons' now has a node property `hashgnn-embedding` which stores the node embedding for each node.
+To find out how to inspect the new schema of the in-memory graph, see xref:graph-list.adoc[Listing graphs].
