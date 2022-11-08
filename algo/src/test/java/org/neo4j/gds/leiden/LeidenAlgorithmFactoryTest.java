@@ -21,12 +21,14 @@ package org.neo4j.gds.leiden;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class LeidenAlgorithmFactoryTest {
 
@@ -110,5 +112,20 @@ class LeidenAlgorithmFactoryTest {
             "    |-- next local move community volumes: 78 KiB\n" +
             "    |-- community to node map: 78 KiB\n";
         assertThat(estimate.render()).isEqualTo(expected);
+    }
+
+    @Test
+    void shouldThrowIfNotUndirected() {
+        var graph = GdlFactory.of("(a)-->(b)").build().getUnion();
+        var config = LeidenStatsConfigImpl.builder().maxLevels(3).build();
+        var leidenFactory = new LeidenAlgorithmFactory<>();
+        assertThatThrownBy(() -> {
+            leidenFactory.build(
+                graph,
+                config,
+                ProgressTracker.NULL_TRACKER
+            );
+        }).hasMessageContaining(
+            "undirected");
     }
 }

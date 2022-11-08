@@ -37,6 +37,10 @@ public class LeidenAlgorithmFactory<CONFIG extends LeidenBaseConfig> extends Gra
     @Override
     public Leiden build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
 
+        if (!graph.schema().isUndirected()) {
+            throw new IllegalArgumentException(
+                "The Leiden algorithm works only with undirected graphs. Please orient the edges properly");
+        }
         var seedValues = Optional
             .ofNullable(configuration.seedProperty()).map(graph::nodeProperties).orElse(null);
 
