@@ -31,7 +31,6 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DatabaseId;
@@ -81,6 +80,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -176,7 +176,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
             runQuery(GdsCypher.call(GRAPH_NAME)
                 .graphProject()
                 .withNodeLabel("N")
-                .withRelationshipType("REL", Orientation.UNDIRECTED)
+                .withRelationshipType("REL", UNDIRECTED)
                 .withNodeProperties(List.of("scalar", "array"), DefaultValue.DEFAULT)
                 .yields());
 
@@ -707,7 +707,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
             runQuery(GdsCypher.call(GRAPH_NAME)
                 .graphProject()
                 .withNodeLabel("Node")
-                .withRelationshipType("REL", Orientation.UNDIRECTED)
+                .withRelationshipType("REL", UNDIRECTED)
                 .withNodeProperties(List.of("age"), DefaultValue.DEFAULT)
                 .yields());
 
@@ -762,7 +762,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
     @GdlExtension
     class BiPartiteTest {
 
-        @GdlGraph
+        @GdlGraph(orientation = UNDIRECTED)
         private static final String GRAPH =
             "CREATE " +
             "(p1:P {height: 44})," +
@@ -864,9 +864,8 @@ final class LinkPredictionTrainPipelineExecutorTest {
             ).compute();
 
             // mainly a smoke test
-            assertThat(result.trainingStatistics().winningModelOuterTrainMetrics().get(LinkMetric.AUCPR)).isCloseTo(
-                0.666,
-                Offset.offset(1e-3)
+            assertThat(result.trainingStatistics().winningModelOuterTrainMetrics().get(LinkMetric.AUCPR))
+                .isCloseTo(0.375, Offset.offset(1e-3)
             );
         }
 
