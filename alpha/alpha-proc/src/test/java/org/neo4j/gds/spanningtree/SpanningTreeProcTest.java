@@ -21,11 +21,16 @@ package org.neo4j.gds.spanningtree;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -73,12 +78,20 @@ class SpanningTreeProcTest extends BaseProcTest {
     private long getSourceNode() {
         return idFunction.of("a");
     }
-    
-    @Test
-    void testMinimum() {
+
+    static Stream<Arguments> minimumQuery() {
+        return Stream.of(
+            Arguments.arguments("gds.alpha.spanningTree"),
+            Arguments.arguments("gds.alpha.spanningTree.minimum")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("minimumQuery")
+    void testMinimum(String minimumQuery) {
 
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.spanningTree.minimum")
+            .algo(minimumQuery)
             .writeMode()
             .addParameter("sourceNode", getSourceNode())
             .addParameter("relationshipWeightProperty", "cost")
@@ -94,12 +107,13 @@ class SpanningTreeProcTest extends BaseProcTest {
         );
 
         final long relCount = runQuery(
-            "MATCH (a)-[:MST]->(b) RETURN id(a) as a, id(b) as b",
+            "MATCH (a)-[:MST]->(b) RETURN id(a) AS a, id(b) AS b",
             result -> result.stream().count()
         );
 
         assertEquals(relCount, 4);
     }
+
 
     @Test
     void testMaximum() {

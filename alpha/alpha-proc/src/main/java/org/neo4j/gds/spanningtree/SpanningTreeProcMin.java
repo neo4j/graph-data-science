@@ -59,6 +59,20 @@ public class SpanningTreeProcMin extends BaseProc {
 
     }
 
+    @Procedure(value = "gds.alpha.spanningTree.write", mode = WRITE)
+    @Description(MIN_DESCRIPTION)
+    public Stream<WriteResult> shortenedSpanningTree(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return new ProcedureExecutor<>(
+            new SpanningTreeShortenedMinWriteSpec(),
+            executionContext()
+        ).compute(graphName, configuration, true, true);
+
+
+    }
+
     @Override
     public ExecutionContext executionContext() {
         return ImmutableExecutionContext

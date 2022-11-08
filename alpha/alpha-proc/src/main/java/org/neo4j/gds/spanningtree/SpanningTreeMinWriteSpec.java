@@ -27,7 +27,7 @@ import org.neo4j.gds.impl.spanningtree.SpanningTreeWriteConfig;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 
-@GdsCallable(name = "gds.alpha.spanningTree", description = SpanningTreeProcMin.MIN_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+@GdsCallable(name = "gds.alpha.spanningTree.minimum.write", description = SpanningTreeProcMin.MIN_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class SpanningTreeMinWriteSpec extends SpanningTreeWriteSpec {
 
     @Override
