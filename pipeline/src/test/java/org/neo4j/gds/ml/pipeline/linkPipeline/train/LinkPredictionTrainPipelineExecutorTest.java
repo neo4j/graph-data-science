@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.assertj.core.data.Offset;
-import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -55,7 +54,6 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
 import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.metrics.classification.OutOfBagError;
-import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
@@ -181,90 +179,6 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .yields());
 
             graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), GRAPH_NAME).graphStore();
-        }
-
-        @Test
-        void testProcedureAndLinkFeatures() {
-            LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
-
-            pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder()
-                .validationFolds(2)
-                .negativeSamplingRatio(1)
-                .trainFraction(0.5)
-                .testFraction(0.5)
-                .build());
-
-            pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of(
-                "patience",
-                5,
-                "tolerance",
-                0.00001,
-                "penalty",
-                100
-            )));
-            pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of(
-                "patience",
-                5,
-                "tolerance",
-                0.00001,
-                "penalty",
-                1
-            )));
-
-            pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
-
-            var config = LinkPredictionTrainConfigImpl.builder()
-                .modelUser(getUsername())
-                .modelName("model")
-                .graphName(GRAPH_NAME)
-                .targetRelationshipType("REL")
-                .sourceNodeLabel("N")
-                .targetNodeLabel("N")
-                .pipeline("DUMMY")
-                .negativeClassWeight(1)
-                .randomSeed(1337L)
-                .build();
-
-            TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-                var result = new LinkPredictionTrainPipelineExecutor(
-                    pipeline,
-                    config,
-                    caller.executionContext(),
-                    graphStore,
-                    ProgressTracker.NULL_TRACKER
-                ).compute();
-
-                var actualModel = result.model();
-                var logisticRegressionData = (LogisticRegressionData) actualModel.data();
-
-                assertThat(actualModel.name()).isEqualTo("model");
-
-                assertThat(actualModel.algoType()).isEqualTo(LinkPredictionTrainingPipeline.MODEL_TYPE);
-                assertThat(actualModel.trainConfig()).isEqualTo(config);
-                // length of the linkFeatures
-                assertThat(logisticRegressionData.weights().data().totalSize()).isEqualTo(6);
-
-                var customInfo = actualModel.customInfo();
-                assertThat(result.trainingStatistics().getValidationStats(LinkMetric.AUCPR))
-                    .hasSize(2)
-                    .satisfies(scores ->
-                        assertThat(scores.get(0).avg()).isNotCloseTo(
-                            scores.get(1).avg(),
-                            Percentage.withPercentage(0.2)
-                        )
-                    );
-
-                assertThat(customInfo.bestParameters())
-                    .usingRecursiveComparison()
-                    .isEqualTo(LogisticRegressionTrainConfig.of(Map.of(
-                        "penalty",
-                        1,
-                        "patience",
-                        5,
-                        "tolerance",
-                        0.00001
-                    )));
-            });
         }
 
         @Test
