@@ -3,16 +3,19 @@
 = Minimum Weight Spanning Tree
 :description: This section describes the Minimum Weight Spanning Tree algorithm in the Neo4j Graph Data Science library.
 
+include::partial$/operations-reference/alpha-note.adoc[]
+
+
+== Introduction
 
 The Minimum Weight Spanning Tree (MST) starts from a given node, and finds all its reachable nodes and the set of relationships that connect the nodes together with the minimum possible weight.
 Prim's algorithm is one of the simplest and best-known minimum spanning tree algorithms.
 The K-Means variant of this algorithm can be used to detect clusters in the graph.
 
-include::partial$/operations-reference/alpha-note.adoc[]
 
 
 [[algorithms-minimum-weight-spanning-tree-context]]
-== History and explanation
+=== History and explanation
 
 The first known algorithm for finding a minimum spanning tree was developed by the Czech scientist Otakar Borůvka in 1926, while trying to find an efficient electricity network for Moravia.
 Prim's algorithm was invented by Jarnik in 1930 and rediscovered by Prim in 1957.
@@ -28,7 +31,7 @@ The algorithm operates as follows:
 
 
 [[algorithms-minimum-weight-spanning-tree-usecase]]
-== Use-cases - when to use the Minimum Weight Spanning Tree algorithm
+=== Use-cases - when to use the Minimum Weight Spanning Tree algorithm
 
 * Minimum spanning tree was applied to analyze airline and sea connections of Papua New Guinea, and minimize the travel cost of exploring the country.
  It could be used to help design low-cost tours that visit many destinations across the country.
@@ -40,7 +43,7 @@ The algorithm operates as follows:
 
 
 [[algorithms-minimum-weight-spanning-tree-limitations]]
-== Constraints - when not to use the Minimum Weight Spanning Tree algorithm
+=== Constraints - when not to use the Minimum Weight Spanning Tree algorithm
 
 The MST algorithm only gives meaningful results when run on a graph, where the relationships have different weights.
 If the graph has no weights, or all relationships have the same weight, then any spanning tree is a minimum spanning tree.
@@ -167,7 +170,7 @@ YIELD effectiveNodeCount: Integer,
 | k                                                                                | Integer | null    | no        | The result is a tree with `k` nodes and `k − 1` relationships.
 | sourceNode                                                                      | Integer | null    | no        | The start node ID.
 | xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes       | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
-| writeProperty                                                                    | String  | 'MST'   | yes       | The relationship type written back as result
+| writeProperty                                                                    | String  | 'MST'   | yes       | The relationship type written back as result.
 | weightWriteProperty                                                              | String  | n/a     | no        | The weight property of the `writeProperty` relationship type written back
 |===
 
