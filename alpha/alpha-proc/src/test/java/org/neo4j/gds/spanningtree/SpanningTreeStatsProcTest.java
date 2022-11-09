@@ -20,8 +20,7 @@
 package org.neo4j.gds.spanningtree;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -29,20 +28,18 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- *
- *         a                a
- *     1 /   \ 2          /  \
- *      /     \          /    \
- *     b --3-- c        b      c
- *     |       |   =>   |      |
- *     4       5        |      |
- *     |       |        |      |
- *     d --6-- e        d      e
+ * a                a
+ * 1 /   \ 2          /  \
+ * /     \          /    \
+ * b --3-- c        b      c
+ * |       |   =>   |      |
+ * 4       5        |      |
+ * |       |        |      |
+ * d --6-- e        d      e
  */
-class SpanningTreeWriteProcTest extends BaseProcTest {
+class SpanningTreeStatsProcTest extends BaseProcTest {
 
     @Neo4jGraph
     static final String DB_CYPHER = "CREATE(a:Node) " +
@@ -60,7 +57,7 @@ class SpanningTreeWriteProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(SpanningTreeWriteProc.class, GraphProjectProc.class);
+        registerProcedures(SpanningTreeStatsProc.class, GraphProjectProc.class);
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .graphProject()
             .withAnyLabel()
@@ -70,47 +67,32 @@ class SpanningTreeWriteProcTest extends BaseProcTest {
         runQuery(createQuery);
     }
 
-
     private long getSourceNode() {
         return idFunction.of("a");
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"minimum", "maximum"})
-    void testYields(String objective) {
+    @Test
+    void testYields() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.spanningTree")
-            .writeMode()
+            .statsMode()
             .addParameter("sourceNode", getSourceNode())
             .addParameter("relationshipWeightProperty", "cost")
-            .addParameter("weightWriteProperty", "cost")
-            .addParameter("objective", objective)
             .yields(
                 "preProcessingMillis",
                 "computeMillis",
-                "writeMillis",
-                "effectiveNodeCount",
-                "relationshipsWritten"
+                "effectiveNodeCount"
             );
 
         runQueryWithRowConsumer(
             query,
             res -> {
+                assertThat(res.getNumber("effectiveNodeCount").longValue()).isEqualTo(5L);
                 assertThat(res.getNumber("preProcessingMillis").longValue()).isGreaterThanOrEqualTo(0L);
                 assertThat(res.getNumber("computeMillis").longValue()).isGreaterThanOrEqualTo(0L);
-                assertThat(res.getNumber("writeMillis").longValue()).isGreaterThanOrEqualTo(0L);
-                assertThat(res.getNumber("effectiveNodeCount").longValue()).isEqualTo(5L);
-                assertThat(res.getNumber("relationshipsWritten").longValue()).isEqualTo(4L);
-
             }
         );
 
-        final long relCount = runQuery(
-            "MATCH (a)-[:MST]->(b) RETURN id(a) AS a, id(b) AS b",
-            result -> result.stream().count()
-        );
-
-        assertEquals(relCount, 4);
     }
 
 }
