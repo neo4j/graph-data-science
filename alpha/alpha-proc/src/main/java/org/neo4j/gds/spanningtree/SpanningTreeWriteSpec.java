@@ -19,59 +19,31 @@
  */
 package org.neo4j.gds.spanningtree;
 
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.write.RelationshipExporter;
-import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.executor.AlgorithmSpec;
+import org.neo4j.gds.executor.AlgorithmSpecProgressTrackerProvider;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.impl.spanningtree.Prim;
 import org.neo4j.gds.impl.spanningtree.SpanningGraph;
 import org.neo4j.gds.impl.spanningtree.SpanningTree;
-import org.neo4j.gds.impl.spanningtree.SpanningTreeConfig;
-import org.neo4j.gds.utils.InputNodeValidator;
-import org.neo4j.procedure.Context;
+import org.neo4j.gds.impl.spanningtree.SpanningTreeAlgorithmFactory;
+import org.neo4j.gds.impl.spanningtree.SpanningTreeWriteConfig;
 
 import java.util.stream.Stream;
 
-// TODO: Always undirected
-public abstract class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningTreeConfig, Prim.Result> {
+abstract class SpanningTreeWriteSpec implements AlgorithmSpec<Prim, SpanningTree, SpanningTreeWriteConfig, Stream<WriteResult>, SpanningTreeAlgorithmFactory<SpanningTreeWriteConfig>> {
 
-    @Context
-    public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
 
-    @Override
-    public GraphAlgorithmFactory<Prim, SpanningTreeConfig> algorithmFactory() {
-        return new GraphAlgorithmFactory<>() {
-            @Override
-            public String taskName() {
-                return "SpanningTree";
-            }
+    public ComputationResultConsumer<Prim, SpanningTree, SpanningTreeWriteConfig, Stream<WriteResult>> computationResultConsumer() {
 
-            @Override
-            public Prim build(
-                Graph graph,
-                SpanningTreeConfig configuration,
-                ProgressTracker progressTracker
-            ) {
-                InputNodeValidator.validateStartNode(configuration.startNodeId(), graph);
-                return new Prim(graph, graph, configuration.minMax(), configuration.startNodeId(), progressTracker);
-            }
-        };
-    }
-
-    @Override
-    public ComputationResultConsumer<Prim, SpanningTree, SpanningTreeConfig, Stream<Prim.Result>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             Graph graph = computationResult.graph();
             Prim prim = computationResult.algorithm();
             SpanningTree spanningTree = computationResult.result();
-            SpanningTreeConfig config = computationResult.config();
+            SpanningTreeWriteConfig config = computationResult.config();
 
-            Prim.Builder builder = new Prim.Builder();
+            WriteResult.Builder builder = new WriteResult.Builder();
 
             if (graph.isEmpty()) {
                 graph.release();
@@ -82,18 +54,17 @@ public abstract class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, 
             try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
 
                 var spanningGraph = new SpanningGraph(graph, spanningTree);
-                var progressTracker = new TaskProgressTracker(
-                    RelationshipExporter.baseTask("SpanningTree", graph.relationshipCount()),
-                    log,
-                    RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
-                    taskRegistryFactory
-                );
 
-                relationshipExporterBuilder
+                executionContext.relationshipExporterBuilder()
                     .withGraph(spanningGraph)
                     .withIdMappingOperator(spanningGraph::toOriginalNodeId)
                     .withTerminationFlag(prim.getTerminationFlag())
-                    .withProgressTracker(progressTracker)
+                    .withProgressTracker(AlgorithmSpecProgressTrackerProvider.createProgressTracker(
+                        name(),
+                        graph.nodeCount(),
+                        config.writeConcurrency(),
+                        executionContext
+                    ))
                     .build()
                     .write(config.writeProperty(), config.weightWriteProperty());
             }

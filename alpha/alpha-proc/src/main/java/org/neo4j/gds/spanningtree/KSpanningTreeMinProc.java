@@ -43,7 +43,7 @@ public class KSpanningTreeMinProc extends KSpanningTreeProc {
 
     @Procedure(value = "gds.alpha.spanningTree.kmin.write", mode = WRITE)
     @Description(DESCRIPTION)
-    public Stream<Prim.Result> kmin(
+    public Stream<WriteResult> kmin(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

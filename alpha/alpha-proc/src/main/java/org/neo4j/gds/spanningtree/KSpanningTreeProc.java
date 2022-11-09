@@ -34,13 +34,12 @@ import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.impl.spanningtree.KSpanningTree;
 import org.neo4j.gds.impl.spanningtree.KSpanningTreeConfig;
-import org.neo4j.gds.impl.spanningtree.Prim;
 import org.neo4j.gds.impl.spanningtree.SpanningTree;
 import org.neo4j.gds.utils.InputNodeValidator;
 
 import java.util.stream.Stream;
 
-public abstract class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, SpanningTree, KSpanningTreeConfig, Prim.Result> {
+public abstract class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, SpanningTree, KSpanningTreeConfig, WriteResult> {
 
 
     @Override
@@ -69,13 +68,13 @@ public abstract class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTr
                 KSpanningTreeConfig configuration,
                 ProgressTracker progressTracker
             ) {
-                InputNodeValidator.validateStartNode(configuration.startNodeId(), graph);
+                InputNodeValidator.validateStartNode(configuration.sourceNode(), graph);
                 return new KSpanningTree(
                     graph,
                     graph,
                     graph,
                     configuration.minMax(),
-                    configuration.startNodeId(),
+                    configuration.sourceNode(),
                     configuration.k(),
                     progressTracker
                 );
@@ -84,13 +83,13 @@ public abstract class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTr
     }
 
     @Override
-    public ComputationResultConsumer<KSpanningTree, SpanningTree, KSpanningTreeConfig, Stream<Prim.Result>> computationResultConsumer() {
+    public ComputationResultConsumer<KSpanningTree, SpanningTree, KSpanningTreeConfig, Stream<WriteResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             Graph graph = computationResult.graph();
             SpanningTree spanningTree = computationResult.result();
             KSpanningTreeConfig config = computationResult.config();
 
-            Prim.Builder builder = new Prim.Builder();
+            WriteResult.Builder builder = new WriteResult.Builder();
 
             if (graph.isEmpty()) {
                 graph.release();

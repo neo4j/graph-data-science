@@ -77,14 +77,14 @@ class SpanningTreeDocTest extends BaseProcTest {
     @Test
     void shouldWriteMinimumWeightSpanningTree() {
         String spanningTreeQuery = "MATCH (n:Place {id: 'D'})" +
-                       " CALL gds.alpha.spanningTree.minimum.write('graph', {"+
-                       "   startNodeId: id(n)," +
-                       "   relationshipWeightProperty: 'cost'," +
-                       "   weightWriteProperty: 'writeCost'," +
-                       "   writeProperty: 'MINST'" +
-                       " })" +
-                       " YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount" +
-                       " RETURN preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount;";
+                                   " CALL gds.alpha.spanningTree.minimum.write('graph', {" +
+                                   "   sourceNode: id(n)," +
+                                   "   relationshipWeightProperty: 'cost'," +
+                                   "   weightWriteProperty: 'writeCost'," +
+                                   "   writeProperty: 'MINST'" +
+                                   " })" +
+                                   " YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount" +
+                                   " RETURN preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount;";
 
         runQuery(spanningTreeQuery);
 
@@ -111,14 +111,14 @@ class SpanningTreeDocTest extends BaseProcTest {
     @Test
     void shouldWriteMaximumWeightSpanningTree() {
         String spanningTreeQuery = "MATCH (n:Place {id: 'D'})" +
-                       " CALL gds.alpha.spanningTree.maximum.write('graph', {"+
-                       "   startNodeId: id(n)," +
-                       "   relationshipWeightProperty: 'cost'," +
-                       "   weightWriteProperty: 'writeCost'," + // -> the weight of the `writeProperty` relationship
-                       "   writeProperty: 'MAXST'" + // -> type of the new relationship
-                       " })" +
-                       " YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount" +
-                       " RETURN preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount;";
+                                   " CALL gds.alpha.spanningTree.maximum.write('graph', {" +
+                                   "   sourceNode: id(n)," +
+                                   "   relationshipWeightProperty: 'cost'," +
+                                   "   weightWriteProperty: 'writeCost'," + // -> the weight of the `writeProperty` relationship
+                                   "   writeProperty: 'MAXST'" + // -> type of the new relationship
+                                   " })" +
+                                   " YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount" +
+                                   " RETURN preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount;";
 
         runQuery(spanningTreeQuery);
 

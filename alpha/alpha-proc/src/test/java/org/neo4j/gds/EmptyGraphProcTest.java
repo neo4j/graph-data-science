@@ -20,22 +20,14 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.centrality.HarmonicCentralityStreamProc;
 import org.neo4j.gds.centrality.HarmonicCentralityWriteProc;
-import org.neo4j.gds.influenceMaximization.CELFStreamProc;
-import org.neo4j.gds.influenceMaximization.GreedyProc;
 import org.neo4j.gds.scc.SccStreamProc;
 import org.neo4j.gds.scc.SccWriteProc;
 import org.neo4j.gds.shortestpaths.AllShortestPathsProc;
-import org.neo4j.gds.spanningtree.KSpanningTreeMaxProc;
-import org.neo4j.gds.spanningtree.KSpanningTreeMinProc;
-import org.neo4j.gds.spanningtree.SpanningTreeProcMax;
-import org.neo4j.gds.spanningtree.SpanningTreeProcMin;
 import org.neo4j.gds.triangle.TriangleProc;
-import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -50,15 +42,9 @@ class EmptyGraphProcTest extends BaseProcTest {
             AllShortestPathsProc.class,
             HarmonicCentralityStreamProc.class,
             HarmonicCentralityWriteProc.class,
-            KSpanningTreeMaxProc.class,
-            KSpanningTreeMinProc.class,
-            SpanningTreeProcMax.class,
-            SpanningTreeProcMin.class,
             SccStreamProc.class,
             SccWriteProc.class,
             TriangleProc.class,
-            GreedyProc.class,
-            CELFStreamProc.class,
             GraphProjectProc.class
         );
 
@@ -117,73 +103,4 @@ class EmptyGraphProcTest extends BaseProcTest {
         runQueryWithResultConsumer(query, result -> assertFalse(result.hasNext()));
     }
 
-    @Test
-    void testKSpanningTreeKMax() {
-        String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.spanningTree.kmax")
-            .writeMode()
-            .addParameter("startNodeId", 0)
-            .addParameter("k", 3)
-            .yields();
-        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
-    }
-
-    @Test
-    void testKSpanningTreeKMin() {
-        String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.spanningTree.kmin")
-            .writeMode()
-            .addParameter("startNodeId", 0)
-            .addParameter("k", 3)
-            .yields();
-        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
-    }
-
-    @Test
-    void testSpanningTree() {
-        String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.spanningTree")
-            .writeMode()
-            .addParameter("startNodeId", 0)
-            .addParameter("weightWriteProperty", "weight")
-            .yields();
-        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
-    }
-
-    @Test
-    void testSpanningTreeMinimum() {
-        String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.spanningTree.minimum")
-            .writeMode()
-            .addParameter("startNodeId", 0)
-            .addParameter("weightWriteProperty", "weight")
-            .yields();
-        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
-    }
-
-    @Test
-    void testSpanningTreeMaximum() {
-        String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.spanningTree.maximum")
-            .writeMode()
-            .addParameter("startNodeId", 0)
-            .addParameter("weightWriteProperty", "weight")
-            .yields();
-        runQueryWithRowConsumer(query, row -> assertEquals(0L, row.getNumber("effectiveNodeCount")));
-    }
-
-    @Test
-    @Disabled
-    void testShortestPathsDeltaSteppingStream() {
-        boolean hasNext = runQuery("MATCH(n:Node {name:'s'}) WITH n CALL gds.alpha.shortestPath.deltaStepping.stream({startNode: n, delta: 0}) YIELD nodeId RETURN nodeId", Result::hasNext);
-        assertFalse(hasNext);
-    }
-
-    @Test
-    @Disabled
-    void testShortestPathsDeltaStepping() {
-        runQueryWithRowConsumer(
-            "MATCH(n:Node {name:'s'}) WITH n CALL gds.alpha.shortestPath.deltaStepping.write({startNode: n, delta: 0}) YIELD nodeCount RETURN nodeCount",
-            row -> assertEquals(0L, row.getNumber("nodeCount")));
-    }
 }

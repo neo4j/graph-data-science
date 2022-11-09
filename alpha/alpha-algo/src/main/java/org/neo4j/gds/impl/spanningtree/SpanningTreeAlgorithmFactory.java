@@ -19,20 +19,27 @@
  */
 package org.neo4j.gds.impl.spanningtree;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
-import org.neo4j.gds.config.SourceNodeConfig;
-import org.neo4j.gds.config.WritePropertyConfig;
+import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import java.util.function.DoubleUnaryOperator;
+public class SpanningTreeAlgorithmFactory<CONFIG extends SpanningTreeBaseConfig> extends GraphAlgorithmFactory<Prim, CONFIG> {
 
-public interface SpanningTreeBaseConfig extends
-    AlgoBaseConfig,
-    WritePropertyConfig,
-    RelationshipWeightConfig,
-    SourceNodeConfig
-{
-    @Configuration.Parameter
-    DoubleUnaryOperator minMax();
+    @Override
+    public Prim build(Graph graphOrGraphStore, CONFIG configuration, ProgressTracker progressTracker) {
+
+        return new Prim(
+            graphOrGraphStore,
+            graphOrGraphStore,
+            configuration.minMax(),
+            configuration.sourceNode(),
+            progressTracker
+        );
+
+    }
+
+    @Override
+    public String taskName() {
+        return "SpanningTree";
+    }
 }

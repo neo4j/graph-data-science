@@ -65,7 +65,7 @@ public class ParallelEdgeTest extends BaseProcTest {
             .addParameter("weightWriteProperty", "writeCost")
             .addParameter("relationshipWeightProperty", "cost")
             .addParameter("writeProperty", "MINST")
-            .addParameter("startNodeId", 0)
+            .addParameter("sourceNode", 0)
             .yields();
         runQuery(mstQuery);
         

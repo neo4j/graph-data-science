@@ -19,10 +19,13 @@
  */
 package org.neo4j.gds.spanningtree;
 
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.impl.spanningtree.Prim;
-import org.neo4j.gds.impl.spanningtree.SpanningTreeConfig;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.write.RelationshipExporter;
+import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.ImmutableExecutionContext;
+import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -30,31 +33,45 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
-import static org.neo4j.gds.spanningtree.SpanningTreeProcMax.MAX_DESCRIPTION;
 import static org.neo4j.procedure.Mode.WRITE;
 
 // TODO: Always undirected
-@GdsCallable(name = "gds.alpha.spanningTree.maximum.write", description = MAX_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class SpanningTreeProcMax extends SpanningTreeProc {
+public class SpanningTreeProcMax extends BaseProc {
 
     static final String MAX_DESCRIPTION =
         "Maximum weight spanning tree visits all nodes that are in the same connected component as the starting node, " +
         "and returns a spanning tree of all nodes in the component where the total weight of the relationships is maximized.";
 
+    @Context
+    public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
+
 
     @Procedure(value = "gds.alpha.spanningTree.maximum.write", mode = WRITE)
     @Description(MAX_DESCRIPTION)
-    public Stream<Prim.Result> maximumSpanningTree(
+    public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(graphName, configuration);
-        return computationResultConsumer().consume(computationResult, executionContext());
+        return new ProcedureExecutor<>(
+            new SpanningTreeMaxWriteSpec(),
+            executionContext()
+        ).compute(graphName, configuration, true, true);
     }
 
     @Override
-    protected SpanningTreeConfig newConfig(String username, CypherMapWrapper config) {
-        return SpanningTreeConfig.of(Prim.MAX_OPERATOR, config);
+    public ExecutionContext executionContext() {
+        return ImmutableExecutionContext
+            .builder()
+            .databaseService(databaseService)
+            .log(log)
+            .procedureTransaction(procedureTransaction)
+            .transaction(transaction)
+            .callContext(callContext)
+            .userLogRegistryFactory(userLogRegistryFactory)
+            .taskRegistryFactory(taskRegistryFactory)
+            .username(username())
+            .relationshipExporterBuilder(relationshipExporterBuilder)
+            .build();
     }
+
 }

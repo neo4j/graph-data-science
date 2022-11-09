@@ -26,8 +26,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import java.util.function.DoubleUnaryOperator;
 
 @Configuration
-public interface SpanningTreeConfig extends SpanningTreeBaseConfig
-{
+public interface SpanningTreeWriteConfig extends SpanningTreeBaseConfig {
     String WRITE_RELATIONSHIP_TYPE = "MST";
 
     String weightWriteProperty();
@@ -38,7 +37,7 @@ public interface SpanningTreeConfig extends SpanningTreeBaseConfig
         return WRITE_RELATIONSHIP_TYPE;
     }
 
-    static SpanningTreeConfig of(DoubleUnaryOperator minMax, CypherMapWrapper userInput) {
-        return new SpanningTreeConfigImpl(minMax, userInput);
+    static SpanningTreeWriteConfig of(DoubleUnaryOperator minMax, CypherMapWrapper userInput) {
+        return new SpanningTreeWriteConfigImpl(minMax, userInput);
     }
 }

@@ -27,7 +27,6 @@ import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.function.DoubleUnaryOperator;
 
@@ -123,42 +122,5 @@ public class Prim extends Algorithm<SpanningTree> {
         spanningTree = null;
     }
 
-    public static class Result {
 
-        public final long preProcessingMillis;
-        public final long computeMillis;
-        public final long writeMillis;
-        public final long effectiveNodeCount;
-
-        public Result(
-            long preProcessingMillis,
-            long computeMillis,
-            long writeMillis,
-            long effectiveNodeCount
-        ) {
-            this.preProcessingMillis = preProcessingMillis;
-            this.computeMillis = computeMillis;
-            this.writeMillis = writeMillis;
-            this.effectiveNodeCount = effectiveNodeCount;
-        }
-    }
-
-    public static class Builder extends AbstractResultBuilder<Result> {
-
-        protected long effectiveNodeCount;
-
-        public Builder withEffectiveNodeCount(long effectiveNodeCount) {
-            this.effectiveNodeCount = effectiveNodeCount;
-            return this;
-        }
-
-        public Result build() {
-            return new Result(
-                preProcessingMillis,
-                computeMillis,
-                writeMillis,
-                effectiveNodeCount
-            );
-        }
-    }
 }

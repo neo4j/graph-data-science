@@ -21,30 +21,17 @@ package org.neo4j.gds.spanningtree;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.configuration.SettingImpl;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.NonReleasingTaskRegistry;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestProcedureRunner;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.core.Settings;
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
-import org.neo4j.gds.core.utils.progress.TaskRegistry;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.write.NativeRelationshipExporterBuilder;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.graphdb.config.Setting;
-import org.neo4j.test.TestDatabaseManagementServiceBuilder;
-import org.neo4j.test.extension.ExtensionCallback;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.util.Map;
+import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -59,92 +46,54 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
  *     |       |        |      |
  *     d --6-- e        d      e
  */
-public class SpanningTreeProcTest extends BaseProcTest {
+class SpanningTreeProcTest extends BaseProcTest {
 
     @Neo4jGraph
-    static final String DB_CYPHER = "CREATE(a:Node {start: true}) " +
-                    "CREATE(b:Node) " +
-                    "CREATE(c:Node) " +
-                    "CREATE(d:Node) " +
-                    "CREATE(e:Node) " +
-                    "CREATE(z:Node) " +
-                    "CREATE (a)-[:TYPE {cost:1.0}]->(b) " +
-                    "CREATE (a)-[:TYPE {cost:2.0}]->(c) " +
-                    "CREATE (b)-[:TYPE {cost:3.0}]->(c) " +
-                    "CREATE (b)-[:TYPE {cost:4.0}]->(d) " +
-                    "CREATE (c)-[:TYPE {cost:5.0}]->(e) " +
-                    "CREATE (d)-[:TYPE {cost:6.0}]->(e)";
+    static final String DB_CYPHER = "CREATE(a:Node) " +
+                                    "CREATE(b:Node) " +
+                                    "CREATE(c:Node) " +
+                                    "CREATE(d:Node) " +
+                                    "CREATE(e:Node) " +
+                                    "CREATE(z:Node) " +
+                                    "CREATE (a)-[:TYPE {cost:1.0}]->(b) " +
+                                    "CREATE (a)-[:TYPE {cost:2.0}]->(c) " +
+                                    "CREATE (b)-[:TYPE {cost:3.0}]->(c) " +
+                                    "CREATE (b)-[:TYPE {cost:4.0}]->(d) " +
+                                    "CREATE (c)-[:TYPE {cost:5.0}]->(e) " +
+                                    "CREATE (d)-[:TYPE {cost:6.0}]->(e)";
 
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(SpanningTreeProcMin.class, SpanningTreeProcMax.class, GraphProjectProc.class);
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphProject()
+            .withAnyLabel()
+            .withRelationshipType("TYPE", Orientation.UNDIRECTED)
+            .withRelationshipProperty("cost")
+            .yields();
+        runQuery(createQuery);
     }
 
-    @Override
-    @ExtensionCallback
-    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
-        super.configuration(builder);
-        ClassLoader classLoader = SpanningTreeProcTest.class.getClassLoader();
-        String root = new File(classLoader.getResource("transport-nodes.csv").getFile()).getParent();
-        Setting<Path> setting = Settings.loadCsvFileUrlRoot();
-        Path fileRoot = (((SettingImpl<Path>) setting)).parse(root);
-        builder.setConfig(setting, fileRoot);
-    }
 
-    private long getStartNodeId() {
+    private long getSourceNode() {
         return idFunction.of("a");
     }
 
-    @Test
-    void github8_testOutOfBounds() {
-        String importQuery = "LOAD CSV WITH HEADERS FROM 'file:///transport-nodes.csv' AS row\n" +
-                             "MERGE (place:Place {id:row.id})";
-        String importRelsQuery =
-                             "// Import relationships\n" +
-                             "LOAD CSV WITH HEADERS FROM 'file:///transport-relationships.csv' AS row\n" +
-                             "MATCH (origin:Place {id: row.src})\n" +
-                             "MATCH (destination:Place {id: row.dst})\n" +
-                             "MERGE (origin)-[:EROAD {distance: toInteger(row.cost)}]->(destination);";
-        String insert1024NodesQuery = "";
-        for (int i = 0; i < 1024; i++) {
-            insert1024NodesQuery = insert1024NodesQuery + "CREATE(x" + i + ":Node) ";
-        }
-        String createQuery = "CALL gds.graph.project('spanningtree_example', 'Place', {" +
-                             "  EROAD: {" +
-                             "      type: 'EROAD'," +
-                             "      orientation: 'Undirected'," +
-                             "      properties: 'distance'" +
-                             "  }" +
-                             "})";
-        String algoQuery = "MATCH (n:Place {id:\"Amsterdam\"})\n" +
-                           "CALL gds.alpha.spanningTree.minimum.write('spanningtree_example', {" +
-                           "    weightWriteProperty:'cost'," +
-                           "    startNodeId: id(n)," +
-                           "    writeProperty:'MNIST'," +
-                           "    relationshipWeightProperty:'distance'" +
-                           "})\n" +
-                           "YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount\n" +
-                           "RETURN preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount";
-        runQuery(insert1024NodesQuery);
-        runQuery(importQuery);
-        runQuery(importRelsQuery);
-        runQuery(createQuery);
-        runQuery(algoQuery);
+    static Stream<Arguments> minimumQuery() {
+        return Stream.of(
+            Arguments.arguments("gds.alpha.spanningTree"),
+            Arguments.arguments("gds.alpha.spanningTree.minimum")
+        );
     }
 
-    @Test
-    void testMinimum() {
-        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphProject()
-            .withNodeLabel("Node")
-            .withRelationshipType("TYPE", Orientation.UNDIRECTED)
-            .withRelationshipProperty("cost", DefaultValue.of(1.0D))
-            .yields();
-        runQuery(createQuery);
+    @ParameterizedTest
+    @MethodSource("minimumQuery")
+    void testMinimum(String minimumQuery) {
+
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.spanningTree")
+            .algo(minimumQuery)
             .writeMode()
-            .addParameter("startNodeId", getStartNodeId())
+            .addParameter("sourceNode", getSourceNode())
             .addParameter("relationshipWeightProperty", "cost")
             .addParameter("weightWriteProperty", "cost")
             .yields("preProcessingMillis", "computeMillis", "writeMillis", "effectiveNodeCount");
@@ -158,26 +107,20 @@ public class SpanningTreeProcTest extends BaseProcTest {
         );
 
         final long relCount = runQuery(
-            "MATCH (a)-[:MST]->(b) RETURN id(a) as a, id(b) as b",
+            "MATCH (a)-[:MST]->(b) RETURN id(a) AS a, id(b) AS b",
             result -> result.stream().count()
         );
 
         assertEquals(relCount, 4);
     }
 
+
     @Test
     void testMaximum() {
-        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphProject()
-            .withNodeLabel("Node")
-            .withRelationshipType("TYPE", Orientation.UNDIRECTED)
-            .withRelationshipProperty("cost", DefaultValue.of(1.0D))
-            .yields();
-        runQuery(createQuery);
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.spanningTree.maximum")
             .writeMode()
-            .addParameter("startNodeId", getStartNodeId())
+            .addParameter("sourceNode", getSourceNode())
             .addParameter("writeProperty", "MAX")
             .addParameter("relationshipWeightProperty", "cost")
             .addParameter("weightWriteProperty", "cost")
@@ -197,53 +140,5 @@ public class SpanningTreeProcTest extends BaseProcTest {
         );
 
         assertEquals(relCount, 4);
-    }
-
-    @Test
-    void failOnInvalidStartNode() {
-        loadGraph();
-        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.spanningTree.maximum")
-            .writeMode()
-            .addParameter("weightWriteProperty", "cost")
-            .addParameter("startNodeId", 42)
-            .yields();
-
-        assertError(query, "startNode with id 42 was not loaded");
-    }
-
-    @Test
-    void shouldTrackProgress() {
-        loadGraph();
-        TestProcedureRunner.applyOnProcedure(db, SpanningTreeProcMin.class, proc -> {
-            var taskStore = new GlobalTaskStore();
-
-            proc.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore, jobId));
-            proc.relationshipExporterBuilder = new NativeRelationshipExporterBuilder(
-                TransactionContext.of(proc.databaseService, proc.procedureTransaction)
-            );
-
-            proc.spanningTree( // min or max doesn't matter
-                DEFAULT_GRAPH_NAME,
-                Map.of(
-                    "weightWriteProperty", "myProp",
-                    "startNodeId", 0L
-                )
-            );
-
-            assertThat(taskStore.taskStream().map(Task::description)).contains(
-                "SpanningTree",
-                "SpanningTree :: Relationships :: Write"
-            );
-        });
-    }
-
-    void loadGraph() {
-        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .graphProject()
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .yields();
-        runQuery(createQuery);
     }
 }
