@@ -23,6 +23,7 @@ import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResult;
@@ -83,26 +84,30 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
                 ComputationResult<SplitRelationships, SplitResult, SplitRelationshipsMutateConfig> computationResult,
                 ExecutionContext executionContext
             ) {
+                Relationships selectedRels;
+                Relationships remainingRels;
                 try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
                     GraphStore graphStore = computationResult.graphStore();
                     SplitResult splitResult = computationResult.result();
+                    selectedRels = splitResult.selectedRels().build();
+                    remainingRels = splitResult.remainingRels().build();
                     SplitRelationshipsBaseConfig config = computationResult.config();
                     graphStore.addRelationshipType(
                         config.remainingRelationshipType(),
                         config.relationshipWeightProperty(),
                         Optional.of(NumberType.FLOATING_POINT),
-                        splitResult.remainingRels().build()
+                        remainingRels
                     );
 
                     graphStore.addRelationshipType(
                         config.holdoutRelationshipType(),
                         Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY),
                         Optional.of(NumberType.INTEGRAL),
-                        splitResult.selectedRels().build()
+                        selectedRels
                     );
                 }
-                long holdoutWritten = computationResult.result().selectedRels().build().topology().elementCount();
-                long remainingWritten = computationResult.result().remainingRels().build().topology().elementCount();
+                long holdoutWritten = selectedRels.topology().elementCount();
+                long remainingWritten = remainingRels.topology().elementCount();
                 resultBuilder.withRelationshipsWritten(holdoutWritten + remainingWritten);
             }
         };

@@ -88,31 +88,27 @@ public class RandomNegativeSampler implements NegativeSampler {
                 return true;
             });
 
-            // this will not try to avoid duplicate negative relationships,
-            // nor will it avoid sampling edges that are sampled as negative in
-            // an outer split.
+            // this will not try to avoid duplicate negative relationships.
+            // If duplicate negative relationships are sampled, they can get added into the same setBuilder, or both setBuilders.
             int retries = MAX_RETRIES;
             for (int i = 0; i < negativeEdgeCount; i++) {
                 var negativeTarget = randomNodeId(graph);
                 // no self-relationships
                 if (isValidTargetNodes.apply(negativeTarget) && !neighbours.contains(negativeTarget) && negativeTarget != nodeId) {
-                    if ((rng.nextDouble() < 0.5 & remainingTestSamples.longValue() > 0) || remainingTrainSamples.longValue() == 0) {
+                    if (sample(remainingTestSamples.doubleValue()/(remainingTestSamples.doubleValue() + remainingTrainSamples.doubleValue()))) {
                         remainingTestSamples.decrement();
                         testSetBuilder.addFromInternal(
                             graph.toRootNodeId(nodeId),
                             graph.toRootNodeId(negativeTarget),
                             NEGATIVE
                         );
-                    } else if (remainingTrainSamples.longValue() > 0) {
+                    } else {
                         remainingTrainSamples.decrement();
                         trainSetBuilder.addFromInternal(
                             graph.toRootNodeId(nodeId),
                             graph.toRootNodeId(negativeTarget),
                             NEGATIVE
                         );
-                    } else {
-                        //both testSampleCount = trainSampleCount = 0
-                        return false;
                     }
                 } else if (retries-- > 0) {
                     // we retry with a different negative target

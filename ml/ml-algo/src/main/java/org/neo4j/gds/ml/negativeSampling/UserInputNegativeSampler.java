@@ -58,7 +58,7 @@ public class UserInputNegativeSampler implements NegativeSampler {
         negativeExampleGraph.forEachNode(nodeId -> {
             negativeExampleGraph.forEachRelationship(nodeId, (s, t) -> {
                 if (s < t) {
-                    if ((rng.nextDouble() < 0.5 && testRelationshipsToAdd.longValue() > 0) || trainRelationshipsToAdd.longValue() == 0) {
+                    if (sample(testRelationshipsToAdd.doubleValue()/(testRelationshipsToAdd.doubleValue() + trainRelationshipsToAdd.doubleValue()))) {
                         testRelationshipsToAdd.decrement();
                         testSetBuilder.add(s, t, NEGATIVE);
                     } else {
@@ -71,4 +71,9 @@ public class UserInputNegativeSampler implements NegativeSampler {
             return true;
         });
     }
+
+    private boolean sample(double probability) {
+        return rng.nextDouble() < probability;
+    }
+
 }

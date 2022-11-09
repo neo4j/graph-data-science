@@ -63,7 +63,6 @@ abstract class EdgeSplitterBaseTest {
             return true;
         });
 
-        //For dense graph the assertion may fail since negativeSampling does not guarantee its count. Modify assertion if needed.
         assertThat(selectedRels.topology().elementCount()).isEqualTo(positiveCount.longValue());
     }
 
