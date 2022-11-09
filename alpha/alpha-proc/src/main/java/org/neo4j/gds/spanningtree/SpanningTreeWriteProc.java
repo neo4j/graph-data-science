@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.WRITE;
 
 // TODO: Always undirected
-public class SpanningTreeProc extends BaseProc {
+public class SpanningTreeWriteProc extends BaseProc {
 
     static final String DESCRIPTION =
         "The spanning tree algorithm visits all nodes that are in the same connected component as the starting node, " +

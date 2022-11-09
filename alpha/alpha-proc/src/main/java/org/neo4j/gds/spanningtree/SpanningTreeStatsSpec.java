@@ -20,50 +20,47 @@
 package org.neo4j.gds.spanningtree;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.AlgorithmSpecProgressTrackerProvider;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.impl.spanningtree.Prim;
-import org.neo4j.gds.impl.spanningtree.SpanningGraph;
 import org.neo4j.gds.impl.spanningtree.SpanningTree;
 import org.neo4j.gds.impl.spanningtree.SpanningTreeAlgorithmFactory;
-import org.neo4j.gds.impl.spanningtree.SpanningTreeWriteConfig;
+import org.neo4j.gds.impl.spanningtree.SpanningTreeStatsConfig;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 
-@GdsCallable(name = "gds.alpha.spanningTree.write", description = SpanningTreeWriteProc.DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
-public class SpanningTreeWriteSpec implements AlgorithmSpec<Prim, SpanningTree, SpanningTreeWriteConfig, Stream<WriteResult>, SpanningTreeAlgorithmFactory<SpanningTreeWriteConfig>> {
+@GdsCallable(name = "gds.alpha.spanningTree.stats", description = SpanningTreeWriteProc.DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+public class SpanningTreeStatsSpec implements AlgorithmSpec<Prim, SpanningTree, SpanningTreeStatsConfig, Stream<StatsResult>, SpanningTreeAlgorithmFactory<SpanningTreeStatsConfig>> {
 
     @Override
     public String name() {
-        return "SpanningTreeWrite";
+        return "SpanningTreeStats";
     }
 
     @Override
-    public SpanningTreeAlgorithmFactory<SpanningTreeWriteConfig> algorithmFactory() {
+    public SpanningTreeAlgorithmFactory<SpanningTreeStatsConfig> algorithmFactory() {
         return new SpanningTreeAlgorithmFactory<>();
     }
 
     @Override
-    public NewConfigFunction<SpanningTreeWriteConfig> newConfigFunction() {
-        return (__, config) -> SpanningTreeWriteConfig.of(config);
+    public NewConfigFunction<SpanningTreeStatsConfig> newConfigFunction() {
+        return (__, config) -> SpanningTreeStatsConfig.of(config);
 
     }
 
-    public ComputationResultConsumer<Prim, SpanningTree, SpanningTreeWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Prim, SpanningTree, SpanningTreeStatsConfig, Stream<StatsResult>> computationResultConsumer() {
 
         return (computationResult, executionContext) -> {
             Graph graph = computationResult.graph();
             Prim prim = computationResult.algorithm();
             SpanningTree spanningTree = computationResult.result();
-            SpanningTreeWriteConfig config = computationResult.config();
+            SpanningTreeStatsConfig config = computationResult.config();
 
-            WriteResult.Builder builder = new WriteResult.Builder();
+            StatsResult.Builder builder = new StatsResult.Builder();
 
             if (graph.isEmpty()) {
                 graph.release();
@@ -71,26 +68,8 @@ public class SpanningTreeWriteSpec implements AlgorithmSpec<Prim, SpanningTree, 
             }
 
             builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount());
-            try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
-
-                var spanningGraph = new SpanningGraph(graph, spanningTree);
-
-                executionContext.relationshipExporterBuilder()
-                    .withGraph(spanningGraph)
-                    .withIdMappingOperator(spanningGraph::toOriginalNodeId)
-                    .withTerminationFlag(prim.getTerminationFlag())
-                    .withProgressTracker(AlgorithmSpecProgressTrackerProvider.createProgressTracker(
-                        name(),
-                        graph.nodeCount(),
-                        config.writeConcurrency(),
-                        executionContext
-                    ))
-                    .build()
-                    .write(config.writeProperty(), config.weightWriteProperty());
-            }
             builder.withComputeMillis(computationResult.computeMillis());
             builder.withPreProcessingMillis(computationResult.preProcessingMillis());
-            builder.withRelationshipsWritten(spanningTree.effectiveNodeCount() - 1);
             builder.withConfig(config);
             return Stream.of(builder.build());
         };

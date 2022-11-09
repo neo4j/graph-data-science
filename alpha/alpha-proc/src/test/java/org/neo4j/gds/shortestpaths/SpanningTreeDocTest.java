@@ -25,7 +25,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.spanningtree.KSpanningTreeProc;
-import org.neo4j.gds.spanningtree.SpanningTreeProc;
+import org.neo4j.gds.spanningtree.SpanningTreeWriteProc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,7 +54,7 @@ class SpanningTreeDocTest extends BaseProcTest {
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(
-            SpanningTreeProc.class,
+            SpanningTreeWriteProc.class,
             KSpanningTreeProc.class,
             GraphProjectProc.class
         );

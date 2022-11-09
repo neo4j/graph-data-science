@@ -20,15 +20,16 @@
 package org.neo4j.gds.spanningtree;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
  *
@@ -41,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
  *     |       |        |      |
  *     d --6-- e        d      e
  */
-class SpanningTreeProcTest extends BaseProcTest {
+class SpanningTreeWriteProcTest extends BaseProcTest {
 
     @Neo4jGraph
     static final String DB_CYPHER = "CREATE(a:Node) " +
@@ -59,7 +60,7 @@ class SpanningTreeProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(SpanningTreeProc.class, GraphProjectProc.class);
+        registerProcedures(SpanningTreeWriteProc.class, GraphProjectProc.class);
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .graphProject()
             .withAnyLabel()
@@ -74,23 +75,31 @@ class SpanningTreeProcTest extends BaseProcTest {
         return idFunction.of("a");
     }
 
-
-    @Test
-    void testMinimum() {
-
+    @ParameterizedTest
+    @ValueSource(strings = {"minimum", "maximum"})
+    void testYields(String objective) {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.spanningTree")
             .writeMode()
             .addParameter("sourceNode", getSourceNode())
             .addParameter("relationshipWeightProperty", "cost")
             .addParameter("weightWriteProperty", "cost")
-            .yields("preProcessingMillis", "computeMillis", "writeMillis", "effectiveNodeCount");
+            .addParameter("objective", objective)
+            .yields(
+                "preProcessingMillis",
+                "computeMillis",
+                "writeMillis",
+                "effectiveNodeCount",
+                "relationshipsWritten"
+            );
 
         runQueryWithRowConsumer(
             query,
             res -> {
-                assertNotEquals(-1L, res.getNumber("writeMillis").longValue());
-                assertEquals(5, res.getNumber("effectiveNodeCount").intValue());
+                assertThat(res.getNumber("writeMillis").longValue()).isGreaterThanOrEqualTo(0L);
+                assertThat(res.getNumber("effectiveNodeCount").longValue()).isEqualTo(5L);
+                assertThat(res.getNumber("relationshipsWritten").longValue()).isEqualTo(4L);
+
             }
         );
 
@@ -102,32 +111,4 @@ class SpanningTreeProcTest extends BaseProcTest {
         assertEquals(relCount, 4);
     }
 
-
-    @Test
-    void testMaximum() {
-        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.spanningTree")
-            .writeMode()
-            .addParameter("sourceNode", getSourceNode())
-            .addParameter("writeProperty", "MAX")
-            .addParameter("relationshipWeightProperty", "cost")
-            .addParameter("weightWriteProperty", "cost")
-            .addParameter("objective", "maximum")
-            .yields("preProcessingMillis", "computeMillis", "writeMillis", "effectiveNodeCount");
-
-        runQueryWithRowConsumer(
-            query,
-            res -> {
-                assertNotEquals(-1L, res.getNumber("writeMillis").longValue());
-                assertEquals(5, res.getNumber("effectiveNodeCount").intValue());
-            }
-        );
-
-        long relCount = runQuery(
-            "MATCH (a)-[:MAX]->(b) RETURN id(a) as a, id(b) as b",
-            result -> result.stream().count()
-        );
-
-        assertEquals(relCount, 4);
-    }
 }

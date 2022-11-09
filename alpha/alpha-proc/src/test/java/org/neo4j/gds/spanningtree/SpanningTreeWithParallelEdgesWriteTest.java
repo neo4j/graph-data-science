@@ -29,7 +29,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ParallelEdgeTest extends BaseProcTest {
+public class SpanningTreeWithParallelEdgesWriteTest extends BaseProcTest {
 
     @Neo4jGraph
     static final String DB_CYPHER =
@@ -41,7 +41,7 @@ public class ParallelEdgeTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(SpanningTreeProc.class, GraphProjectProc.class);
+        registerProcedures(SpanningTreeWriteProc.class, GraphProjectProc.class);
     }
 
     @Test

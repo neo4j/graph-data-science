@@ -20,48 +20,43 @@
 package org.neo4j.gds.spanningtree;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.results.StandardStatsResult;
 
 import java.util.Map;
 
-public final class WriteResult extends StatsResult {
+public class StatsResult extends StandardStatsResult {
 
+    public final long effectiveNodeCount;
 
-    public final long writeMillis;
-    public final long relationshipsWritten;
-
-    public WriteResult(
+    public StatsResult(
         long preProcessingMillis,
         long computeMillis,
-        long writeMillis,
         long effectiveNodeCount,
-        long relationshipsWritten,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, effectiveNodeCount, configuration);
-        this.writeMillis = writeMillis;
-        this.relationshipsWritten = relationshipsWritten;
+        super(preProcessingMillis, computeMillis, 0, configuration);
+        this.effectiveNodeCount = effectiveNodeCount;
     }
 
-    public static class Builder extends AbstractResultBuilder<WriteResult> {
+    static final class Builder extends AbstractResultBuilder<StatsResult> {
 
+        private long effectiveNodeCount;
 
-        long effectiveNodeCount;
+        @Override
+        public StatsResult build() {
+            return new StatsResult(
+                preProcessingMillis,
+                computeMillis,
+                effectiveNodeCount,
+                config.toMap()
+            );
+        }
 
-        Builder withEffectiveNodeCount(long effectiveNodeCount) {
+        public Builder withEffectiveNodeCount(long effectiveNodeCount) {
             this.effectiveNodeCount = effectiveNodeCount;
             return this;
         }
 
-        @Override
-        public WriteResult build() {
-            return new WriteResult(
-                preProcessingMillis,
-                computeMillis,
-                writeMillis,
-                effectiveNodeCount,
-                relationshipsWritten,
-                config.toMap()
-            );
-        }
+
     }
 }

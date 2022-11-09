@@ -20,30 +20,26 @@
 package org.neo4j.gds.spanningtree;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.results.StandardWriteResult;
 
 import java.util.Map;
 
-public final class WriteResult extends StatsResult {
+public final class kWriteResult extends StandardWriteResult {
 
+    public final long effectiveNodeCount;
 
-    public final long writeMillis;
-    public final long relationshipsWritten;
-
-    public WriteResult(
+    public kWriteResult(
         long preProcessingMillis,
         long computeMillis,
         long writeMillis,
         long effectiveNodeCount,
-        long relationshipsWritten,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, effectiveNodeCount, configuration);
-        this.writeMillis = writeMillis;
-        this.relationshipsWritten = relationshipsWritten;
+        super(preProcessingMillis, computeMillis, 0, writeMillis, configuration);
+        this.effectiveNodeCount = effectiveNodeCount;
     }
 
-    public static class Builder extends AbstractResultBuilder<WriteResult> {
-
+    public static class Builder extends AbstractResultBuilder<kWriteResult> {
 
         long effectiveNodeCount;
 
@@ -53,13 +49,12 @@ public final class WriteResult extends StatsResult {
         }
 
         @Override
-        public WriteResult build() {
-            return new WriteResult(
+        public kWriteResult build() {
+            return new kWriteResult(
                 preProcessingMillis,
                 computeMillis,
                 writeMillis,
                 effectiveNodeCount,
-                relationshipsWritten,
                 config.toMap()
             );
         }

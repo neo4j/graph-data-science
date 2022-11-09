@@ -39,8 +39,7 @@ import org.neo4j.gds.utils.InputNodeValidator;
 
 import java.util.stream.Stream;
 
-public abstract class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, SpanningTree, KSpanningTreeConfig, WriteResult> {
-
+public abstract class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, SpanningTree, KSpanningTreeConfig, kWriteResult> {
 
     @Override
     public GraphAlgorithmFactory<KSpanningTree, KSpanningTreeConfig> algorithmFactory() {
@@ -83,13 +82,13 @@ public abstract class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTr
     }
 
     @Override
-    public ComputationResultConsumer<KSpanningTree, SpanningTree, KSpanningTreeConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<KSpanningTree, SpanningTree, KSpanningTreeConfig, Stream<kWriteResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             Graph graph = computationResult.graph();
             SpanningTree spanningTree = computationResult.result();
             KSpanningTreeConfig config = computationResult.config();
 
-            WriteResult.Builder builder = new WriteResult.Builder();
+            kWriteResult.Builder builder = new kWriteResult.Builder();
 
             if (graph.isEmpty()) {
                 graph.release();
@@ -128,11 +127,14 @@ public abstract class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTr
                 );
 
                 builder.withNodePropertiesWritten(exporter.propertiesWritten());
+
             }
 
             builder.withComputeMillis(computationResult.computeMillis());
             builder.withPreProcessingMillis(computationResult.preProcessingMillis());
+            builder.withConfig(config);
             return Stream.of(builder.build());
         };
     }
 }
+
