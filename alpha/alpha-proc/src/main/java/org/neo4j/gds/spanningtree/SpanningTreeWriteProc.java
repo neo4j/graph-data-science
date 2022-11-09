@@ -41,10 +41,8 @@ public class SpanningTreeWriteProc extends BaseProc {
     static final String DESCRIPTION =
         "The spanning tree algorithm visits all nodes that are in the same connected component as the starting node, " +
         "and returns a spanning tree of all nodes in the component where the total weight of the relationships is either minimized or maximized.";
-
     @Context
     public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
-
     @Procedure(value = "gds.alpha.spanningTree.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<WriteResult> spanningTree(
@@ -55,7 +53,6 @@ public class SpanningTreeWriteProc extends BaseProc {
             new SpanningTreeWriteSpec(),
             executionContext()
         ).compute(graphName, configuration, true, true);
-
     }
 
     @Override

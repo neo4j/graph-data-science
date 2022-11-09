@@ -39,10 +39,8 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class SpanningTreeStatsProc extends BaseProc {
 
     static final String DESCRIPTION = SpanningTreeWriteProc.DESCRIPTION;
-
     @Context
     public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
-
     @Procedure(value = "gds.alpha.spanningTree.stats", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<StatsResult> spanningTree(
@@ -53,7 +51,6 @@ public class SpanningTreeStatsProc extends BaseProc {
             new SpanningTreeStatsSpec(),
             executionContext()
         ).compute(graphName, configuration, true, true);
-
     }
 
     @Override
