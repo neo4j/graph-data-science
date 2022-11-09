@@ -49,7 +49,7 @@ If the graph has no weights, or all relationships have the same weight, then any
 [[algorithms-minimum-weight-spanning-tree-syntax]]
 == Syntax
 
-.The following will run the algorithm and write back results:
+.The following will run the algorithm, compute a spanning tree and write back results:
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.spanningTree.write(
@@ -59,25 +59,6 @@ CALL gds.alpha.spanningTree.write(
 YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
 ----
 
-.The following will compute the minimum weight spanning tree and write the results:
-[source, cypher, role=noplay]
-----
-CALL gds.alpha.spanningTree.minimum.write(
-  graphName: string,
-  configuration: map
-)
-YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
-----
-
-.The following will compute the maximum weight spanning tree and write the results:
-[source, cypher, role=noplay]
-----
-CALL gds.alpha.spanningTree.maximum.write(
-  graphName: string,
-  configuration: map
-)
-YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
-----
 
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
@@ -87,6 +68,7 @@ YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
 | xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null      | yes       | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 | writeProperty                                                                    | String  | 'mst'     | yes       | The relationship type written back as result
 | weightWriteProperty                                                              | String  | n/a       | no        | The weight property of the `writeProperty` relationship type written back
+| objective  | String | 'minimum'  | yes      | If specified, the parameter dictates whether to find the minimum or the maximum weight spanning tree. By default, a minimum weight spanning tree is returned. Permitted values are 'minimum' and 'maximum'.
 |===
 
 .Results
@@ -185,7 +167,7 @@ Minimum weight spanning tree visits all nodes that are in the same connected com
 [source, cypher, role=noplay]
 ----
 MATCH (n:Place {id: 'D'})
-CALL gds.alpha.spanningTree.minimum.write('graph', {
+CALL gds.alpha.spanningTree.write('graph', {
   sourceNode: id(n),
   relationshipWeightProperty: 'cost',
   writeProperty: 'MINST',
@@ -227,11 +209,12 @@ Maximum weighted tree spanning algorithm is similar to the minimum one, except t
 [source, cypher, role=noplay]
 ----
 MATCH (n:Place{id: 'D'})
-CALL gds.alpha.spanningTree.maximum.write('graph', {
+CALL gds.alpha.spanningTree.write('graph', {
   sourceNode: id(n),
   relationshipWeightProperty: 'cost',
   writeProperty: 'MAXST',
-  weightWriteProperty: 'writeCost'
+  weightWriteProperty: 'writeCost',
+ objective: 'maximum'
 })
 YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
 RETURN preProcessingMillis,computeMillis, writeMillis, effectiveNodeCount;
