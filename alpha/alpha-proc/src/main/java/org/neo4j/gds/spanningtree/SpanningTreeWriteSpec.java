@@ -71,6 +71,7 @@ public class SpanningTreeWriteSpec implements AlgorithmSpec<Prim, SpanningTree, 
             }
 
             builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount());
+            builder.withTotalWeight(spanningTree.totalWeight());
             try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
 
                 var spanningGraph = new SpanningGraph(graph, spanningTree);

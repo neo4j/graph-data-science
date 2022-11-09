@@ -64,6 +64,7 @@ CALL gds.alpha.spanningTree.stats(
   configuration: Map
 )
 YIELD effectiveNodeCount: Integer,
+      totalWeight: Float,
       preProcessingMillis: Integer,
       computeMillis: Integer,
       configuration: Map
@@ -81,9 +82,10 @@ include::partial$/algorithms/alpha/spanning-tree/specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                | Type    | Description
-| effectiveNodeCount  | Integer | The number of visited nodes
-| preProcessingMillis | Integer | Milliseconds for preprocessing the data
-| computeMillis       | Integer | Milliseconds for running the algorithm
+| effectiveNodeCount  | Integer | The number of visited nodes.
+| totalWeight         | Float   | The sum of the weights of the relationships in the spanning tree.
+| preProcessingMillis | Integer | Milliseconds for preprocessing the data.
+| computeMillis       | Integer | Milliseconds for running the algorithm.
 | configuration         | Map       | The configuration used for running the algorithm.
 |===
 ======
@@ -99,6 +101,7 @@ CALL gds.alpha.spanningTree.write(
   configuration: map
 )
 YIELD effectiveNodeCount: Integer,
+      totalWeight: Float,
       relationshipsWritten: Integer,
       preProcessingMillis: Integer,
       computeMillis: Integer,
@@ -119,11 +122,12 @@ include::partial$/algorithms/alpha/spanning-tree/specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                | Type    | Description
-| effectiveNodeCount  | Integer | The number of visited nodes
+| effectiveNodeCount  | Integer | The number of visited nodes.
+| totalWeight         | Float   | The sum of the weights of the relationships in the spanning tree.
 | relationshipsWritten |Integer | The number of relationships written to the graph.
-| preProcessingMillis | Integer | Milliseconds for preprocessing the data
-| computeMillis       | Integer | Milliseconds for running the algorithm
-| writeMillis         | Integer | Milliseconds for writing result data back
+| preProcessingMillis | Integer | Milliseconds for preprocessing the data.
+| computeMillis       | Integer | Milliseconds for running the algorithm.
+| writeMillis         | Integer | Milliseconds for writing result data back.
 | configuration         | Map       | The configuration used for running the algorithm.
 |===
 ======
@@ -160,8 +164,8 @@ YIELD effectiveNodeCount: Integer,
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                                                                             | Type    | Default | Optional  | Description
-| k                                                                                | Integer | null    | no        | The result is a tree with `k` nodes and `k − 1` relationships
-| sourceNode                                                                      | Integer | null    | no        | The start node ID
+| k                                                                                | Integer | null    | no        | The result is a tree with `k` nodes and `k − 1` relationships.
+| sourceNode                                                                      | Integer | null    | no        | The start node ID.
 | xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes       | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 | writeProperty                                                                    | String  | 'MST'   | yes       | The relationship type written back as result
 | weightWriteProperty                                                              | String  | n/a     | no        | The weight property of the `writeProperty` relationship type written back
@@ -171,10 +175,10 @@ YIELD effectiveNodeCount: Integer,
 [opts="header",cols="1,1,6"]
 |===
 | Name                | Type    | Description
-| effectiveNodeCount  | Integer | The number of visited nodes
-| preProcessingMillis | Integer | Milliseconds for preprocessing the data
-| computeMillis       | Integer | Milliseconds for running the algorithm
-| writeMillis         | Integer | Milliseconds for writing result data back
+| effectiveNodeCount  | Integer | The number of visited nodes.
+| preProcessingMillis | Integer | Milliseconds for preprocessing the data.
+| computeMillis       | Integer | Milliseconds for running the algorithm.
+| writeMillis         | Integer | Milliseconds for writing result data back.
 |===
 
 

@@ -27,20 +27,24 @@ import java.util.Map;
 public class StatsResult extends StandardStatsResult {
 
     public final long effectiveNodeCount;
+    public final double totalWeight;
 
     public StatsResult(
         long preProcessingMillis,
         long computeMillis,
         long effectiveNodeCount,
+        double totalWeight,
         Map<String, Object> configuration
     ) {
         super(preProcessingMillis, computeMillis, 0, configuration);
         this.effectiveNodeCount = effectiveNodeCount;
+        this.totalWeight = totalWeight;
     }
 
     static final class Builder extends AbstractResultBuilder<StatsResult> {
 
         private long effectiveNodeCount;
+        private double totalWeight;
 
         @Override
         public StatsResult build() {
@@ -48,15 +52,20 @@ public class StatsResult extends StandardStatsResult {
                 preProcessingMillis,
                 computeMillis,
                 effectiveNodeCount,
+                totalWeight,
                 config.toMap()
             );
         }
 
-        public Builder withEffectiveNodeCount(long effectiveNodeCount) {
+        Builder withEffectiveNodeCount(long effectiveNodeCount) {
             this.effectiveNodeCount = effectiveNodeCount;
             return this;
         }
 
+        Builder withtotalWeight(double totalWeight) {
+            this.totalWeight = totalWeight;
+            return this;
+        }
 
     }
 }

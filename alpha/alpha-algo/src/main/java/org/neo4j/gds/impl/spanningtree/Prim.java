@@ -74,12 +74,13 @@ public class Prim extends Algorithm<SpanningTree> {
         HugeLongPriorityQueue queue = HugeLongPriorityQueue.min(nodeCount);
         BitSet visited = new BitSet(nodeCount);
         parent.fill(-1);
-
+        double totalWeight = 0;
         queue.add(startNodeId, 0.0);
         long effectiveNodeCount = 0;
         while (!queue.isEmpty() && terminationFlag.running()) {
             long node = queue.top();
             double cost = queue.cost(node);
+            totalWeight += cost;
             queue.pop();
 
             costToParent.set(node, minMax.applyAsDouble(cost));
@@ -108,7 +109,14 @@ public class Prim extends Algorithm<SpanningTree> {
             });
             progressTracker.logProgress();
         }
-        this.spanningTree = new SpanningTree(startNodeId, nodeCount, effectiveNodeCount, parent, costToParent);
+        this.spanningTree = new SpanningTree(
+            startNodeId,
+            nodeCount,
+            effectiveNodeCount,
+            parent,
+            costToParent,
+            minMax.applyAsDouble(totalWeight)
+        );
         progressTracker.endSubTask();
         return this.spanningTree;
     }

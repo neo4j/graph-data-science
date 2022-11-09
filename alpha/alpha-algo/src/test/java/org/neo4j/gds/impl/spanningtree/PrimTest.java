@@ -34,6 +34,7 @@ import org.neo4j.gds.extension.Inject;
 
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 
@@ -121,6 +122,7 @@ class PrimTest {
             idFunction.of(nodeId),
             ProgressTracker.NULL_TRACKER
         ).compute());
+        assertThat(mst.totalWeight()).isEqualTo(17L);
         assertTreeIsCorrect(mst, parentA, parentB, parentC, parentD, parentE);
     }
 
@@ -134,6 +136,7 @@ class PrimTest {
             idFunction.of(nodeId),
             ProgressTracker.NULL_TRACKER
         ).compute());
+        assertThat(mst.totalWeight()).isEqualTo(12L);
         assertTreeIsCorrect(mst, parentA, parentB, parentC, parentD, parentE);
     }
 

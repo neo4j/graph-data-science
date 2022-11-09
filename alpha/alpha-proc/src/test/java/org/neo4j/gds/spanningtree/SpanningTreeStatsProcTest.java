@@ -81,13 +81,15 @@ class SpanningTreeStatsProcTest extends BaseProcTest {
             .yields(
                 "preProcessingMillis",
                 "computeMillis",
-                "effectiveNodeCount"
+                "effectiveNodeCount",
+                "totalWeight"
             );
 
         runQueryWithRowConsumer(
             query,
             res -> {
                 assertThat(res.getNumber("effectiveNodeCount").longValue()).isEqualTo(5L);
+                assertThat(res.getNumber("totalWeight").doubleValue()).isEqualTo(12.0);
                 assertThat(res.getNumber("preProcessingMillis").longValue()).isGreaterThanOrEqualTo(0L);
                 assertThat(res.getNumber("computeMillis").longValue()).isGreaterThanOrEqualTo(0L);
             }

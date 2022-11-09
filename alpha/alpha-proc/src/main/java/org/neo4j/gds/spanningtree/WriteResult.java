@@ -35,20 +35,26 @@ public final class WriteResult extends StatsResult {
         long writeMillis,
         long effectiveNodeCount,
         long relationshipsWritten,
+        double totalCost,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, effectiveNodeCount, configuration);
+        super(preProcessingMillis, computeMillis, effectiveNodeCount, totalCost, configuration);
         this.writeMillis = writeMillis;
         this.relationshipsWritten = relationshipsWritten;
     }
 
     public static class Builder extends AbstractResultBuilder<WriteResult> {
 
-
         long effectiveNodeCount;
+        double totalWeight;
 
         Builder withEffectiveNodeCount(long effectiveNodeCount) {
             this.effectiveNodeCount = effectiveNodeCount;
+            return this;
+        }
+
+        Builder withTotalWeight(double totalWeight) {
+            this.totalWeight = totalWeight;
             return this;
         }
 
@@ -60,6 +66,7 @@ public final class WriteResult extends StatsResult {
                 writeMillis,
                 effectiveNodeCount,
                 relationshipsWritten,
+                totalWeight,
                 config.toMap()
             );
         }
