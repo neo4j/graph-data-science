@@ -42,4 +42,6 @@ public class SpanningTreeAlgorithmFactory<CONFIG extends SpanningTreeBaseConfig>
     public String taskName() {
         return "SpanningTree";
     }
+
+
 }

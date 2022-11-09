@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.impl.spanningtree;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
@@ -31,8 +32,14 @@ public interface SpanningTreeBaseConfig extends
     AlgoBaseConfig,
     WritePropertyConfig,
     RelationshipWeightConfig,
-    SourceNodeConfig
-{
+    SourceNodeConfig {
     @Configuration.Parameter
     DoubleUnaryOperator minMax();
+
+    @Value.Default
+    @Configuration.ConvertWith(method = "org.neo4j.gds.impl.spanningtree.SpanningTreeCompanion#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.impl.spanningtree.SpanningTreeCompanion#toString")
+    default DoubleUnaryOperator objective() {
+        return Prim.MIN_OPERATOR;
+    }
 }
