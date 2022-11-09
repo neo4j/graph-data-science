@@ -49,14 +49,24 @@ If the graph has no weights, or all relationships have the same weight, then any
 [[algorithms-minimum-weight-spanning-tree-syntax]]
 == Syntax
 
-.The following will run the algorithm, compute a spanning tree and write back results:
+
+.Spanning Tree syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stats]
+======
+.Run the Spanning Tree algorithm in write mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.spanningTree.write(
-  graphName: string,
-  configuration: map
+CALL gds.alpha.spanningTree.stats(
+  graphName: String,
+  configuration: Map
 )
-YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
+YIELD effectiveNodeCount: Integer,
+      preProcessingMillis: Integer,
+      computeMillis: Integer,
+      configuration: Map
 ----
 
 
@@ -64,11 +74,7 @@ YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                                                                             | Type    | Default   | Optional  | Description
-| sourceNode                                                                      | Integer | null      | no        | The start node ID
-| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null      | yes       | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
-| writeProperty                                                                    | String  | 'mst'     | yes       | The relationship type written back as result
-| weightWriteProperty                                                              | String  | n/a       | no        | The weight property of the `writeProperty` relationship type written back
-| objective  | String | 'minimum'  | yes      | If specified, the parameter dictates whether to find the minimum or the maximum weight spanning tree. By default, a minimum weight spanning tree is returned. Permitted values are 'minimum' and 'maximum'.
+include::partial$/algorithms/alpha/spanning-tree/specific-configuration.adoc[]
 |===
 
 .Results
@@ -78,26 +84,76 @@ YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
 | effectiveNodeCount  | Integer | The number of visited nodes
 | preProcessingMillis | Integer | Milliseconds for preprocessing the data
 | computeMillis       | Integer | Milliseconds for running the algorithm
-| writeMillis         | Integer | Milliseconds for writing result data back
+| configuration         | Map       | The configuration used for running the algorithm.
+|===
+======
+
+
+[.include-with-write]
+======
+.Run the Spanning Tree algorithm in write mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.spanningTree.write(
+  graphName: string,
+  configuration: map
+)
+YIELD effectiveNodeCount: Integer,
+      relationshipsWritten: Integer,
+      preProcessingMillis: Integer,
+      computeMillis: Integer,
+      writeMillis: Integer,
+      configuration: Map
+----
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                                                                             | Type    | Default   | Optional  | Description
+| writeProperty                                                                    | String  | 'mst'     | yes       | The relationship type written back as result
+| weightWriteProperty                                                              | String  | n/a       | no        | The weight property of the `writeProperty` relationship type written back
+include::partial$/algorithms/alpha/spanning-tree/specific-configuration.adoc[]
 |===
 
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                | Type    | Description
+| effectiveNodeCount  | Integer | The number of visited nodes
+| relationshipsWritten |Integer | The number of relationships written to the graph.
+| preProcessingMillis | Integer | Milliseconds for preprocessing the data
+| computeMillis       | Integer | Milliseconds for running the algorithm
+| writeMillis         | Integer | Milliseconds for writing result data back
+| configuration         | Map       | The configuration used for running the algorithm.
+|===
+======
+
+====
 .The following will run the k-spanning tree algorithms and write back results:
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.spanningTree.kmin.write(
-  graphName: string,
-  configuration: map
+  graphName: String,
+  configuration: Map
 )
-YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
+YIELD effectiveNodeCount: Integer,
+      preProcessingMillis: Integer,
+      computeMillis: Integer,
+      writeMillis: Integer,
+      configuration: Map
 ----
 
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.spanningTree.kmax.write(
-  graphName: string,
-  configuration: map
+   graphName: String,
+   configuration: Map
 )
-YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
+YIELD effectiveNodeCount: Integer,
+      preProcessingMillis: Integer,
+      computeMillis: Integer,
+      writeMillis: Integer,
+      configuration: Map
 ----
 
 .Configuration
@@ -123,11 +179,11 @@ YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
 
 
 [[algorithms-minimum-weight-spanning-tree-sample]]
-== Minimum Weight Spanning Tree algorithm sample
+== Minimum Weight Spanning Tree algorithm examples
 
 image::mst.png[]
 
-.The following will create a sample graph:
+.The following will create the sample graph depicted in the figure:
 [source, cypher, role=noplay]
 ----
 CREATE (a:Place {id: 'A'}),
@@ -161,7 +217,11 @@ CALL gds.graph.project(
 )
 ----
 
-Minimum weight spanning tree visits all nodes that are in the same connected component as the starting node, and returns a spanning tree of all nodes in the component where the total weight of the relationships is minimized.
+[[alpha-algorithms-spanning-tree-write]]
+=== Write
+
+
+include::partial$/algorithms/shared/examples-write-intro.adoc[]
 
 .The following will run the Minimum Weight Spanning Tree algorithm and write back results:
 [source, cypher, role=noplay]
@@ -223,8 +283,39 @@ RETURN preProcessingMillis,computeMillis, writeMillis, effectiveNodeCount;
 .Results
 image::maxst_result.png[]
 
+[[algorithms-spanning-tree-stats]]
+=== Stats
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example, no-result=true]
+--
+.The following will run the algorithm and returns the result in form of statistical and measurement values
+[source,cypher,role=noplay]
+----
+MATCH (n:Place{id: 'D'})
+CALL gds.alpha.spanningTree.write('graph', {
+  sourceNode: id(n),
+  relationshipWeightProperty: 'cost',
+  writeProperty: 'MAXST',
+  weightWriteProperty: 'writeCost',
+ objective: 'mininum'
+})
+YIELD effectiveNodeCount
+RETURN effectiveNodeCount
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| effectiveNodeCount
+| 5
+|===
+--
+
+
+
 [[algorithms-minimum-weight-spanning-tree-k]]
-=== K-Spanning tree
+== K-Spanning tree examples
 
 Sometimes we want to limit the size of our spanning tree result, as we are only interested in finding a smaller tree within our graph that does not span across all nodes.
 K-Spanning tree algorithm returns a tree with `k` nodes and `k − 1` relationships.
