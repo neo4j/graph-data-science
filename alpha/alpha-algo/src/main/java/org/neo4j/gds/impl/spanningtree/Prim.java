@@ -22,7 +22,6 @@ package org.neo4j.gds.impl.spanningtree;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -46,14 +45,13 @@ public class Prim extends Algorithm<SpanningTree> {
     public static final DoubleUnaryOperator MAX_OPERATOR = (w) -> -w;
     public static final DoubleUnaryOperator MIN_OPERATOR = (w) -> w;
     private final Graph graph;
-    private final int nodeCount;
+    private final long nodeCount;
     private final DoubleUnaryOperator minMax;
-    private final int startNodeId;
+    private final long startNodeId;
 
     private SpanningTree spanningTree;
 
     public Prim(
-        IdMap idMap,
         Graph graph,
         DoubleUnaryOperator minMax,
         long startNodeId,
@@ -61,9 +59,9 @@ public class Prim extends Algorithm<SpanningTree> {
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.nodeCount = Math.toIntExact(idMap.nodeCount());
+        this.nodeCount = graph.nodeCount();
         this.minMax = minMax;
-        this.startNodeId = (int) graph.toMappedNodeId(startNodeId);
+        this.startNodeId = startNodeId;
     }
 
     @Override

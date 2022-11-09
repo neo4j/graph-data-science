@@ -77,8 +77,14 @@ class KSpanningTreeTest {
 
     @Test
     void testMaximumKSpanningTree() {
-        final SpanningTree spanningTree = new KSpanningTree(graph, graph, graph, Prim.MAX_OPERATOR, a, 2, ProgressTracker.NULL_TRACKER)
-                .compute();
+        final SpanningTree spanningTree = new KSpanningTree(
+            graph,
+            Prim.MAX_OPERATOR,
+            a,
+            2,
+            ProgressTracker.NULL_TRACKER
+        )
+            .compute();
 
         assertEquals(spanningTree.head(a), spanningTree.head(b));
         assertEquals(spanningTree.head(c), spanningTree.head(d));
@@ -89,8 +95,14 @@ class KSpanningTreeTest {
 
     @Test
     void testMinimumKSpanningTree() {
-        final SpanningTree spanningTree = new KSpanningTree(graph, graph, graph, Prim.MIN_OPERATOR, a, 2, ProgressTracker.NULL_TRACKER)
-                .compute();
+        final SpanningTree spanningTree = new KSpanningTree(
+            graph,
+            Prim.MIN_OPERATOR,
+            a,
+            2,
+            ProgressTracker.NULL_TRACKER
+        )
+            .compute();
 
         assertEquals(spanningTree.head(a), spanningTree.head(d));
         assertEquals(spanningTree.head(b), spanningTree.head(c));
@@ -102,10 +114,10 @@ class KSpanningTreeTest {
     @Test
     @Disabled("Need to extend GdlGraph to generate offset node IDs and fix the test")
     void testNeoIdsWithOffset() {
-        SpanningTree spanningTree = new KSpanningTree(graph, graph, graph, Prim.MIN_OPERATOR, 0, 2, ProgressTracker.NULL_TRACKER)
+        SpanningTree spanningTree = new KSpanningTree(graph, Prim.MIN_OPERATOR, 0, 2, ProgressTracker.NULL_TRACKER)
             .compute();
 
-        SpanningTree otherSpanningTree = new KSpanningTree(graph, graph, graph, Prim.MIN_OPERATOR, 5, 2, ProgressTracker.NULL_TRACKER)
+        SpanningTree otherSpanningTree = new KSpanningTree(graph, Prim.MIN_OPERATOR, 5, 2, ProgressTracker.NULL_TRACKER)
             .compute();
 
         assertEquals(spanningTree, otherSpanningTree);

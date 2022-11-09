@@ -117,7 +117,6 @@ class PrimTest {
     void testMaximum(String nodeId, String parentA, String parentB, String parentC, String parentD, String parentE) {
         var mst = (new Prim(
             graph,
-            graph,
             Prim.MAX_OPERATOR,
             idFunction.of(nodeId),
             ProgressTracker.NULL_TRACKER
@@ -130,7 +129,6 @@ class PrimTest {
     @MethodSource("parametersMinimum")
     void testMinimum(String nodeId, String parentA, String parentB, String parentC, String parentD, String parentE) {
         var mst = (new Prim(
-            graph,
             graph,
             Prim.MIN_OPERATOR,
             idFunction.of(nodeId),

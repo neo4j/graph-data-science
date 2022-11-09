@@ -21,8 +21,6 @@ package org.neo4j.gds.impl.spanningtree;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.RelationshipProperties;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
@@ -40,9 +38,7 @@ import java.util.function.DoubleUnaryOperator;
  */
 public class KSpanningTree extends Algorithm<SpanningTree> {
 
-    private IdMap idMap;
     private Graph graph;
-    private RelationshipProperties weights;
     private final DoubleUnaryOperator minMax;
     private final long startNodeId;
     private final long k;
@@ -50,18 +46,14 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
     private SpanningTree spanningTree;
 
     public KSpanningTree(
-        IdMap idMap,
         Graph graph,
-        RelationshipProperties weights,
         DoubleUnaryOperator minMax,
         long startNodeId,
         long k,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
-        this.idMap = idMap;
         this.graph = graph;
-        this.weights = weights;
         this.minMax = minMax;
         this.startNodeId = (int) graph.toMappedNodeId(startNodeId);
 
@@ -72,10 +64,9 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
     public SpanningTree compute() {
         progressTracker.beginSubTask();
         Prim prim = new Prim(
-            idMap,
             graph,
             minMax,
-            graph.toOriginalNodeId(startNodeId),
+            startNodeId,
             progressTracker
         );
         prim.setTerminationFlag(getTerminationFlag());
@@ -90,7 +81,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
             if (p == -1) {
                 continue;
             }
-            priorityQueue.add(i, weights.relationshipProperty(p, i, 0.0D));
+            priorityQueue.add(i, graph.relationshipProperty(p, i, 0.0D));
             progressTracker.logProgress();
         }
         progressTracker.endSubTask();
@@ -109,9 +100,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
 
     @Override
     public void release() {
-        idMap = null;
         graph = null;
-        weights = null;
         spanningTree = null;
     }
 }

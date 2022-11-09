@@ -70,10 +70,8 @@ public abstract class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTr
                 InputNodeValidator.validateStartNode(configuration.sourceNode(), graph);
                 return new KSpanningTree(
                     graph,
-                    graph,
-                    graph,
                     configuration.minMax(),
-                    configuration.sourceNode(),
+                    graph.toMappedNodeId(configuration.sourceNode()),
                     configuration.k(),
                     progressTracker
                 );
