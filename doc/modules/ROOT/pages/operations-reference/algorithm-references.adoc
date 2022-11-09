@@ -294,7 +294,8 @@
 | `gds.alpha.sllpa.stream.estimate`
 | `gds.alpha.sllpa.write`
 | `gds.alpha.sllpa.write.estimate`
-.3+<.^|xref:alpha-algorithms/minimum-weight-spanning-tree.adoc[Spanning Tree]
+.4+<.^|xref:alpha-algorithms/minimum-weight-spanning-tree.adoc[Spanning Tree]
+| `gds.alpha.spanningTree.stats`
 | `gds.alpha.spanningTree.write`
 | `gds.alpha.spanningTree.kmax.write`
 | `gds.alpha.spanningTree.kmin.write`
