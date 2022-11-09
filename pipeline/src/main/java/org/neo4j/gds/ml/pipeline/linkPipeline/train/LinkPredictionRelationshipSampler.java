@@ -81,7 +81,7 @@ public class LinkPredictionRelationshipSampler {
     ) {
         progressTracker.beginSubTask("Split relationships");
 
-        splitConfig.validateAgainstGraphStore(graphStore, trainConfig.internalTargetRelationshipType());
+        splitConfig.validateAgainstGraphStore(graphStore, trainConfig.internalTargetRelationshipType(), trainConfig.sourceNodeLabel(), trainConfig.targetNodeLabel());
 
         if (trainConfig.sourceNodeLabel().equals(ElementProjection.PROJECT_ALL) || trainConfig.targetNodeLabel().equals(ElementProjection.PROJECT_ALL)) {
             progressTracker.logWarning(formatWithLocale(

@@ -330,7 +330,6 @@ class LinkPredictionRelationshipSamplerTest {
             .trainFraction(0.5)
             .testFraction(0.5)
             .validationFolds(2)
-            .negativeSamplingRatio(99.0)
             .negativeRelationshipType("NEGATIVE") // 3 total
             .build();
 
