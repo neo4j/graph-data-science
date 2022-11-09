@@ -28,6 +28,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -220,7 +221,7 @@ class LinkPredictionRelationshipSamplerTest {
         var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(28_800, 35_840));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(16_000, 16_000));
 
         splitConfig = splitConfigBuilder.testFraction(0.8).build();
         actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
@@ -228,7 +229,7 @@ class LinkPredictionRelationshipSamplerTest {
 
         // higher testFraction -> lower estimation as test-complement is smaller
         // the test_complement is kept until the end of all splitting
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(19_152, 32_912));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(15_984, 15_984));
     }
 
     @Test
@@ -242,13 +243,13 @@ class LinkPredictionRelationshipSamplerTest {
         var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(27_200, 34_240));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(16_000, 16_000));
 
         splitConfig = splitConfigBuilder.trainFraction(0.8).build();
         actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(27_184, 40_944));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(15_984, 15_984));
     }
 
     @Test
@@ -262,13 +263,38 @@ class LinkPredictionRelationshipSamplerTest {
         var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(27184, 35_344));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(15_984, 15_984));
 
         splitConfig = splitConfigBuilder.negativeSamplingRatio(4).build();
         actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(39424, 59_824));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(28_224, 28_224));
+    }
+
+    @Test
+    void estimateWithNegativeRelationshipType() {
+        var splitConfig = LinkPredictionSplitConfigImpl.builder()
+            .testFraction(0.3)
+            .trainFraction(0.3)
+            .validationFolds(3)
+            .negativeRelationshipType("NEG")
+            .build();
+
+        var graphDimensionBuilder = ImmutableGraphDimensions.builder()
+            .nodeCount(100)
+            .relationshipCounts(Map.of(RelationshipType.of("REL"), 1000L))
+            .relCountUpperBound(3000L);
+
+        var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
+            .estimate(splitConfig.expectedGraphDimensions(graphDimensionBuilder.relationshipCounts(Map.of(RelationshipType.of("NEG"), 1000L)).build(), "REL"), 4);
+
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(43_760, 43_760));
+
+        actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
+            .estimate(splitConfig.expectedGraphDimensions(graphDimensionBuilder.relationshipCounts(Map.of(RelationshipType.of("NEG"), 2000L)).build(), "REL"), 4);
+
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(51_760, 51_760));
     }
 
     @Test

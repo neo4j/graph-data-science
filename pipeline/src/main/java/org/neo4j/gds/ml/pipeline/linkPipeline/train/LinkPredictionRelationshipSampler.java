@@ -198,55 +198,79 @@ public class LinkPredictionRelationshipSampler {
             ? RelationshipType.ALL_RELATIONSHIPS
             : RelationshipType.of(targetRelationshipType);
 
-        // randomSeed does not matter for memory estimation
-        Optional<Long> randomSeed = Optional.empty();
-
-        var firstSplitEstimation = MemoryEstimations
-            .builder("Test/Test-complement split")
-            .add(estimate(
+        return MemoryEstimations.builder("Split relationships")
+            .add(estimatePositiveRelations(
                 checkTargetRelType.name,
                 splitConfig.testFraction(),
-                splitConfig.negativeSamplingRatio(),
-                relationshipWeight
-            ))
-            .build();
-
-        var secondSplitEstimation = MemoryEstimations
-            .builder("Train/Feature-input split")
-            .add(estimate(
-                splitConfig.testComplementRelationshipType().name,
+                splitConfig.trainFraction(),
+                relationshipWeight))
+            .add(estimateNegativeSampling(
+                checkTargetRelType.name,
+                splitConfig.testFraction(),
                 splitConfig.trainFraction(),
                 splitConfig.negativeSamplingRatio(),
-                relationshipWeight
-            ))
-            .build();
-
-        return MemoryEstimations.builder("Split relationships")
-            .add(firstSplitEstimation)
-            .add(secondSplitEstimation)
+                splitConfig.negativeRelationshipType(),
+                relationshipWeight))
             .build();
     }
 
-    public static MemoryEstimation estimate(String relationshipType, double holdoutFraction, double negativeSamplingRatio, Optional<String> relationshipWeight) {
-        // we cannot assume any compression of the relationships
+
+    public static MemoryEstimation estimatePositiveRelations(
+        String relationshipType,
+        double testFraction,
+        double trainFraction,
+        Optional<String> relationshipWeight
+    ) {
         var pessimisticSizePerRel = relationshipWeight.isPresent()
             ? Double.BYTES + 2 * Long.BYTES
             : 2 * Long.BYTES;
 
         return MemoryEstimations.builder("Relationship splitter")
-            .perGraphDimension("Selected relationships", (graphDimensions, threads) -> {
-                var positiveRelCount = graphDimensions.estimatedRelCount(List.of(relationshipType)) * holdoutFraction;
-                var negativeRelCount = positiveRelCount * negativeSamplingRatio;
-                long selectedRelCount = (long) (positiveRelCount + negativeRelCount);
-
-                // Whether the graph is undirected or directed
-                return MemoryRange.of(selectedRelCount / 2, selectedRelCount).times(pessimisticSizePerRel);
+            .perGraphDimension("Test and train positive relationships", (graphDimensions, threads) -> {
+                var testAndTrainRelCount = (long) (graphDimensions.estimatedRelCount(List.of(relationshipType)) * (testFraction + trainFraction - testFraction * trainFraction));
+                //selectedRelBuilders are directed
+                return MemoryRange.of(testAndTrainRelCount / 2).times(pessimisticSizePerRel);
             })
-            .perGraphDimension("Remaining relationships", (graphDimensions, threads) -> {
-                long remainingRelCount = (long) (graphDimensions.estimatedRelCount(List.of(relationshipType)) * (1 - holdoutFraction));
-                // remaining relationships are always undirected
-                return MemoryRange.of(remainingRelCount * pessimisticSizePerRel);
+            .perGraphDimension("Feature input relationships", (graphDimensions, threads) -> {
+                var featureInputRelCount = (long) (graphDimensions.estimatedRelCount(List.of(relationshipType)) * (1 - testFraction) * (1 - trainFraction));
+                //remainingRelBuilder is undirected
+                return MemoryRange.of(featureInputRelCount).times(pessimisticSizePerRel);
             })
             .build();
     }
+
+
+    public static MemoryEstimation estimateNegativeSampling(
+        String relationshipType,
+        double testFraction,
+        double trainFraction,
+        double negativeSamplingRatio,
+        Optional<String> negativeRelationshipType,
+        Optional<String> relationshipWeight
+    ) {
+        var pessimisticSizePerRel = relationshipWeight.isPresent()
+            ? Double.BYTES + 2 * Long.BYTES
+            : 2 * Long.BYTES;
+
+        if (negativeRelationshipType.isPresent()) {
+            return MemoryEstimations.builder("Relationship splitter")
+                .perGraphDimension("Negative relationships", (graphDimensions, threads) -> {
+                    var negativeRelCount = graphDimensions.estimatedRelCount(List.of(negativeRelationshipType.get()));
+                    //selectedRelBuilders are directed
+                    return MemoryRange.of(negativeRelCount / 2).times(pessimisticSizePerRel);
+                })
+                .build();
+        } else {
+            return MemoryEstimations.builder("Relationship splitter")
+                .perGraphDimension("Negative relationships", (graphDimensions, threads) -> {
+                    var testAndTrainPositiveRelCount = graphDimensions.estimatedRelCount(List.of(relationshipType)) * (testFraction + trainFraction - testFraction * trainFraction);
+                    var negativeRelCount = (long) (testAndTrainPositiveRelCount * negativeSamplingRatio);
+                    //selectedRelBuilders are directed
+                    return MemoryRange.of(negativeRelCount / 2).times(pessimisticSizePerRel);
+                })
+                .build();
+        }
+
+    }
+
 }
