@@ -41,7 +41,7 @@ public class ParallelEdgeTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(SpanningTreeProcMin.class, SpanningTreeProcMax.class, GraphProjectProc.class);
+        registerProcedures(SpanningTreeProc.class, GraphProjectProc.class);
     }
 
     @Test
@@ -60,7 +60,7 @@ public class ParallelEdgeTest extends BaseProcTest {
         runQuery(project);
 
         var mstQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.spanningTree.minimum")
+            .algo("gds.alpha.spanningTree")
             .writeMode()
             .addParameter("weightWriteProperty", "writeCost")
             .addParameter("relationshipWeightProperty", "cost")

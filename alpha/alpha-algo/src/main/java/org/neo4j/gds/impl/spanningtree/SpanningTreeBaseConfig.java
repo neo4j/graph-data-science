@@ -33,9 +33,7 @@ public interface SpanningTreeBaseConfig extends
     WritePropertyConfig,
     RelationshipWeightConfig,
     SourceNodeConfig {
-    @Configuration.Parameter
-    DoubleUnaryOperator minMax();
-
+    
     @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.impl.spanningtree.SpanningTreeCompanion#parse")
     @Configuration.ToMapValue("org.neo4j.gds.impl.spanningtree.SpanningTreeCompanion#toString")

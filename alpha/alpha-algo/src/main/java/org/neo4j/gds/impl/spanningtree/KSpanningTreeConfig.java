@@ -29,6 +29,9 @@ public interface KSpanningTreeConfig extends SpanningTreeBaseConfig {
 
     long k();
 
+    @Configuration.Parameter
+    DoubleUnaryOperator minMax();
+
     @Override
     default String writeProperty() {
         return "partition";

@@ -36,40 +36,25 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.WRITE;
 
 // TODO: Always undirected
-public class SpanningTreeProcMin extends BaseProc {
+public class SpanningTreeProc extends BaseProc {
 
-    static final String MIN_DESCRIPTION =
-        "Minimum weight spanning tree visits all nodes that are in the same connected component as the starting node, " +
-        "and returns a spanning tree of all nodes in the component where the total weight of the relationships is minimized.";
+    static final String DESCRIPTION =
+        "The spanning tree algorithm visits all nodes that are in the same connected component as the starting node, " +
+        "and returns a spanning tree of all nodes in the component where the total weight of the relationships is either minimized or maximized.";
 
     @Context
     public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
 
-    @Procedure(value = "gds.alpha.spanningTree.minimum.write", mode = WRITE)
-    @Description(MIN_DESCRIPTION)
+    @Procedure(value = "gds.alpha.spanningTree.write", mode = WRITE)
+    @Description(DESCRIPTION)
     public Stream<WriteResult> spanningTree(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return new ProcedureExecutor<>(
-            new SpanningTreeMinWriteSpec(),
+            new SpanningTreeWriteSpec(),
             executionContext()
         ).compute(graphName, configuration, true, true);
-
-
-    }
-
-    @Procedure(value = "gds.alpha.spanningTree.write", mode = WRITE)
-    @Description(MIN_DESCRIPTION)
-    public Stream<WriteResult> shortenedSpanningTree(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return new ProcedureExecutor<>(
-            new SpanningTreeShortenedMinWriteSpec(),
-            executionContext()
-        ).compute(graphName, configuration, true, true);
-
 
     }
 

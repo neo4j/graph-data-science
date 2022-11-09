@@ -31,7 +31,7 @@ public class SpanningTreeAlgorithmFactory<CONFIG extends SpanningTreeBaseConfig>
         return new Prim(
             graphOrGraphStore,
             graphOrGraphStore,
-            configuration.minMax(),
+            configuration.objective(),
             configuration.sourceNode(),
             progressTracker
         );

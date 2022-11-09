@@ -25,8 +25,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.spanningtree.KSpanningTreeProc;
-import org.neo4j.gds.spanningtree.SpanningTreeProcMax;
-import org.neo4j.gds.spanningtree.SpanningTreeProcMin;
+import org.neo4j.gds.spanningtree.SpanningTreeProc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -55,8 +54,7 @@ class SpanningTreeDocTest extends BaseProcTest {
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(
-            SpanningTreeProcMin.class,
-            SpanningTreeProcMax.class,
+            SpanningTreeProc.class,
             KSpanningTreeProc.class,
             GraphProjectProc.class
         );
@@ -77,7 +75,7 @@ class SpanningTreeDocTest extends BaseProcTest {
     @Test
     void shouldWriteMinimumWeightSpanningTree() {
         String spanningTreeQuery = "MATCH (n:Place {id: 'D'})" +
-                                   " CALL gds.alpha.spanningTree.minimum.write('graph', {" +
+                                   " CALL gds.alpha.spanningTree.write('graph', {" +
                                    "   sourceNode: id(n)," +
                                    "   relationshipWeightProperty: 'cost'," +
                                    "   weightWriteProperty: 'writeCost'," +
@@ -111,11 +109,12 @@ class SpanningTreeDocTest extends BaseProcTest {
     @Test
     void shouldWriteMaximumWeightSpanningTree() {
         String spanningTreeQuery = "MATCH (n:Place {id: 'D'})" +
-                                   " CALL gds.alpha.spanningTree.maximum.write('graph', {" +
+                                   " CALL gds.alpha.spanningTree.write('graph', {" +
                                    "   sourceNode: id(n)," +
                                    "   relationshipWeightProperty: 'cost'," +
                                    "   weightWriteProperty: 'writeCost'," + // -> the weight of the `writeProperty` relationship
-                                   "   writeProperty: 'MAXST'" + // -> type of the new relationship
+                                   "   writeProperty: 'MAXST'," + // -> type of the new relationship
+                                   "   objective: 'maximum'" +
                                    " })" +
                                    " YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount" +
                                    " RETURN preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount;";
