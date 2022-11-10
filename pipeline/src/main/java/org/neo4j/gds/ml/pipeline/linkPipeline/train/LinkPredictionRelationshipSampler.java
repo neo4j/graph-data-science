@@ -27,6 +27,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.ElementTypeValidator;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -54,19 +55,24 @@ public class LinkPredictionRelationshipSampler {
     private final LinkPredictionSplitConfig splitConfig;
     private LinkPredictionTrainConfig trainConfig;
     private final ProgressTracker progressTracker;
+
+    private final TerminationFlag terminationFlag;
+
     private final GraphStore graphStore;
 
      public LinkPredictionRelationshipSampler(
          GraphStore graphStore,
          LinkPredictionSplitConfig splitConfig,
          LinkPredictionTrainConfig trainConfig,
-         ProgressTracker progressTracker
+         ProgressTracker progressTracker,
+         TerminationFlag terminationFlag
      ) {
         this.graphStore = graphStore;
         this.splitConfig = splitConfig;
         this.trainConfig = trainConfig;
         this.progressTracker = progressTracker;
-    }
+         this.terminationFlag = terminationFlag;
+     }
 
     @NotNull
     static LeafTask progressTask(ExpectedSetSizes sizes) {
@@ -103,14 +109,16 @@ public class LinkPredictionRelationshipSampler {
 
         // Relationship sets: test, train, feature-input, test-complement. The nodes are always the same.
         // 1. Split base graph into test, test-complement
+        terminationFlag.assertRunning();
         var testSplitResult = split(sourceNodes, targetNodes, graph, relationshipWeightProperty, splitConfig.testComplementRelationshipType(), splitConfig.testFraction());
-
         // 2. Split test-complement into (labeled) train and feature-input.
         var testComplementGraph = graphStore.getGraph(
             trainConfig.nodeLabelIdentifiers(graphStore),
             List.of(splitConfig.testComplementRelationshipType()),
             relationshipWeightProperty
         );
+
+        terminationFlag.assertRunning();
         var trainSplitResult = split(sourceNodes, targetNodes, testComplementGraph, relationshipWeightProperty, splitConfig.featureInputRelationshipType(), splitConfig.trainFraction());
 
         // 3. add negative examples to test and train
@@ -125,6 +133,8 @@ public class LinkPredictionRelationshipSampler {
             targetNodes,
             trainConfig.randomSeed()
         );
+
+        terminationFlag.assertRunning();
         negativeSampler.produceNegativeSamples(testSplitResult.selectedRels(), trainSplitResult.selectedRels());
 
         // 4. Update graphStore with (positive+negative) 'TEST' and 'TRAIN' edges

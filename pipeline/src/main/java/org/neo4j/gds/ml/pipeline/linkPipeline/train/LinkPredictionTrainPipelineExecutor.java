@@ -83,7 +83,8 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             graphStore,
             pipeline.splitConfig(),
             config,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
     }
 
