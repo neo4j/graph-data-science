@@ -1,6 +1,6 @@
 apply plugin: 'java-library'
 
-description = 'Neo4j Graph Data Science :: Docs'
+description = 'Neo4j Graph Data Science :: Documentation Testing'
 
 group = 'org.neo4j.gds'
 
@@ -41,3 +41,7 @@ tasks.register('unpackDocs', Copy) {
 }
 
 processTestResources.dependsOn tasks.named('unpackDocs')
+
+tasks.test {
+    enabled = !rootProject.hasProperty('aurads')
+}

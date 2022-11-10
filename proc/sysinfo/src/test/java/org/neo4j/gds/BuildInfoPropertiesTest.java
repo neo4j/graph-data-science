@@ -50,7 +50,7 @@ class BuildInfoPropertiesTest {
             fail("Could not find version in file: " + file.toAbsolutePath()));
 
         var buildInfo = BuildInfoProperties.get();
-        assertEquals(version, buildInfo.gdsVersion());
+        assertThat(buildInfo.gdsVersion()).startsWith(version);
     }
 
     @Test
@@ -106,7 +106,7 @@ class BuildInfoPropertiesTest {
     }
 
     private Optional<String> findVersion(Path file) throws IOException {
-        Pattern pattern = Pattern.compile(".*gdsVersion = '(\\d\\.\\d\\.\\d+(-alpha\\d+|-beta\\d+)?)'.*");
+        Pattern pattern = Pattern.compile(".*gdsBaseVersion = '(\\d\\.\\d\\.\\d+(-alpha\\d+|-beta\\d+)?)'.*");
         return Files.lines(file, StandardCharsets.UTF_8)
             .flatMap(line -> {
                 var matcher = pattern.matcher(line);
