@@ -166,6 +166,8 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
                     .getCells()
                     .get(0)) // Get the first column in the row --> corresponds to the return column names
                 .map(Cell::getText)
+                // as java identifier cannot contain white spaces, remove anything after the first space such as footnote:
+                .map(name -> name.split("\\s+")[0])
                 .collect(Collectors.toList());
 
             syntaxAssertions.assertThat(documentedValues)
@@ -210,11 +212,6 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
     }
 
     private static boolean includeFieldInResult(Field field) {
-        // Deprecated fields shouldn't be in the documentation
-        if (field.isAnnotationPresent(Deprecated.class)) {
-            return false;
-        }
-
         // Ignore static fields
         return !Modifier.isStatic(field.getModifiers());
     }
