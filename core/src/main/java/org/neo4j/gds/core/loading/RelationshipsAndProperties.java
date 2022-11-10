@@ -91,6 +91,7 @@ public interface RelationshipsAndProperties {
         var relTypeCount = builders.size();
         Map<RelationshipType, Relationships.Topology> relationships = new HashMap<>(relTypeCount);
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>(relTypeCount);
+        Map<RelationshipType, Orientation> orientations = new HashMap<>(relTypeCount);
 
         builders.forEach((context) -> {
             var adjacencyListsWithProperties = context.singleTypeRelationshipImporter().build();
@@ -120,11 +121,14 @@ public interface RelationshipsAndProperties {
                     )
                 );
             }
+
+            orientations.put(context.relationshipType(), context.relationshipProjection().orientation());
         });
 
         return ImmutableRelationshipsAndProperties.builder()
             .relationships(relationships)
             .properties(relationshipPropertyStores)
+            .orientations(orientations)
             .build();
     }
 
