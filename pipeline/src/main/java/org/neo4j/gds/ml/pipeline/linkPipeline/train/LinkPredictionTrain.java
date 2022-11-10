@@ -47,7 +47,6 @@ import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
-import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.training.CrossValidation;
 import org.neo4j.gds.ml.training.TrainingStatistics;
@@ -58,7 +57,9 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
+import static org.neo4j.gds.ml.negativeSampling.NegativeSampler.NEGATIVE;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkFeaturesAndLabelsExtractor.extractFeaturesAndLabels;
+import static org.neo4j.gds.ml.splitting.EdgeSplitter.POSITIVE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class LinkPredictionTrain {
@@ -73,7 +74,7 @@ public final class LinkPredictionTrain {
 
 
     private static LocalIdMap makeClassIdMap() {
-        return LocalIdMap.of((long) EdgeSplitter.NEGATIVE, (long) EdgeSplitter.POSITIVE);
+        return LocalIdMap.of((long) NEGATIVE, (long) POSITIVE);
     }
 
     public LinkPredictionTrain(

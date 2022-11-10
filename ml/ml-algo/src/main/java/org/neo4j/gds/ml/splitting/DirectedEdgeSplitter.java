@@ -20,16 +20,12 @@
 package org.neo4j.gds.ml.splitting;
 
 import com.carrotsearch.hppc.predicates.LongLongPredicate;
-import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.Optional;
@@ -39,18 +35,17 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
 
     public DirectedEdgeSplitter(
         Optional<Long> maybeSeed,
-        double negativeSamplingRatio,
         IdMap sourceLabels,
         IdMap targetLabels,
         int concurrency
     ) {
-        super(maybeSeed, negativeSamplingRatio, sourceLabels, targetLabels, concurrency);
+        super(maybeSeed, sourceLabels, targetLabels, concurrency);
     }
 
-    private long validPositiveRelationshipCandidateCount(
+    @Override
+    protected long validPositiveRelationshipCandidateCount(
         Graph graph,
-        LongLongPredicate isValidNodePair,
-        HugeLongArray degreeResult
+        LongLongPredicate isValidNodePair
     ) {
         LongAdder validRelationshipCountAdder = new LongAdder();
         var countValidRelationshipTasks = PartitionUtils.rangePartition(
@@ -61,7 +56,6 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
                 partition.consume(nodeId -> concurrentGraph.forEachRelationship(nodeId, (s, t) -> {
                         if (isValidNodePair.apply(s, t)) {
                             validRelationshipCountAdder.add(1);
-                            degreeResult.addTo(nodeId, 1);
                         }
                         return true;
                     })
@@ -74,118 +68,31 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         return validRelationshipCountAdder.longValue();
     }
 
-    @TestOnly
-    public SplitResult split(Graph graph, double holdoutFraction) {
-        return split(graph, graph, holdoutFraction);
-    }
-
     @Override
-    public SplitResult split(
+    protected void positiveSampling(
         Graph graph,
-        Graph masterGraph,
-        double holdoutFraction
-    ) {
-        LongPredicate isValidSourceNode = node -> sourceNodes.contains(graph.toOriginalNodeId(node));
-        LongPredicate isValidTargetNode = node -> targetNodes.contains(graph.toOriginalNodeId(node));
-        LongLongPredicate isValidNodePair = (s, t) -> isValidSourceNode.apply(s) && isValidTargetNode.apply(t);
-
-        RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilderWithProp(graph, Orientation.NATURAL);
-
-        RelationshipsBuilder remainingRelsBuilder;
-        RelationshipWithPropertyConsumer remainingRelsConsumer;
-        if (graph.hasRelationshipProperty()) {
-            remainingRelsBuilder = newRelationshipsBuilderWithProp(graph, Orientation.NATURAL);
-            remainingRelsConsumer = (s, t, w) -> {
-                remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t), w);
-                return true;
-            };
-        } else {
-            remainingRelsBuilder = newRelationshipsBuilder(graph, Orientation.NATURAL);
-            remainingRelsConsumer = (s, t, w) -> {
-                remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t));
-                return true;
-            };
-        }
-
-        var validDegrees = HugeLongArray.newArray(graph.nodeCount());
-        var validRelationshipCount = validPositiveRelationshipCandidateCount(graph, isValidNodePair, validDegrees);
-
-        int positiveSamples = (int) (validRelationshipCount * holdoutFraction);
-        var positiveSamplesRemaining = new MutableLong(positiveSamples);
-        var negativeSamples = (long) (negativeSamplingRatio * validRelationshipCount * holdoutFraction);
-        var negativeSamplesRemaining = new MutableLong(negativeSamples);
-
-        var validPositiveSourceNodeCount = new MutableLong(sourceNodes.nodeCount());
-        var validNegativeSourceNodeCount = new MutableLong(sourceNodes.nodeCount());
-
-        graph.forEachNode(nodeId -> {
-            positiveSampling(
-                graph,
-                validDegrees,
-                selectedRelsBuilder,
-                remainingRelsConsumer,
-                positiveSamplesRemaining,
-                nodeId,
-                validPositiveSourceNodeCount,
-                isValidSourceNode,
-                isValidTargetNode
-            );
-
-            negativeSampling(
-                graph,
-                masterGraph,
-                selectedRelsBuilder,
-                negativeSamplesRemaining,
-                nodeId,
-                isValidSourceNode,
-                isValidTargetNode,
-                validNegativeSourceNodeCount
-            );
-            return true;
-        });
-
-        return SplitResult.of(remainingRelsBuilder.build(), selectedRelsBuilder.build());
-    }
-
-    private void positiveSampling(
-        Graph graph,
-        HugeLongArray validDegrees,
         RelationshipsBuilder selectedRelsBuilder,
         RelationshipWithPropertyConsumer remainingRelsConsumer,
-        MutableLong positiveSamplesRemaining,
+        MutableLong selectedRelCount,
+        MutableLong remainingRelCount,
         long nodeId,
-        MutableLong validSourceNodeCount,
-        LongPredicate isValidSourceNode,
-        LongPredicate isValidTargetNode
+        LongLongPredicate isValidNodePair,
+        MutableLong positiveSamplesRemaining,
+        MutableLong candidateEdgesRemaining
     ) {
-        if (!isValidSourceNode.apply(nodeId)) {
-            graph.forEachRelationship(nodeId, Double.NaN, remainingRelsConsumer);
-            return;
-        }
-
-        MutableLong validDegree = new MutableLong(validDegrees.get(nodeId));
-
-        var relsToSelectFromThisNode = samplesPerNode(
-            validDegree.longValue(),
-            positiveSamplesRemaining.doubleValue(),
-            validSourceNodeCount.getAndDecrement()
-        );
-        var localSelectedRemaining = new MutableLong(relsToSelectFromThisNode);
 
         graph.forEachRelationship(nodeId, Double.NaN, (source, target, weight) -> {
-            double localSelectedDouble = localSelectedRemaining.doubleValue();
-            if (isValidTargetNode.apply(target)) {
-                var isSelected = sample(localSelectedDouble / validDegree.getAndDecrement());
-                if (relsToSelectFromThisNode > 0 && localSelectedDouble > 0 && isSelected) {
+            if (isValidNodePair.apply(source, target)) {
+                if (sample(positiveSamplesRemaining.doubleValue() / candidateEdgesRemaining.doubleValue())) {
                     positiveSamplesRemaining.decrementAndGet();
-                    localSelectedRemaining.decrementAndGet();
+                    selectedRelCount.increment();
                     selectedRelsBuilder.addFromInternal(graph.toRootNodeId(source), graph.toRootNodeId(target), POSITIVE);
                 } else {
+                    remainingRelCount.increment();
                     remainingRelsConsumer.accept(source, target, weight);
                 }
+                candidateEdgesRemaining.addAndGet(-1);
             }
-            // invalid relationships will be added to neither holdout or remaining
-
             return true;
         });
     }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.splitting;
 
+import com.carrotsearch.hppc.predicates.LongLongPredicate;
 import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Orientation;
@@ -26,52 +27,110 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
 public abstract class EdgeSplitter {
-
-    public static final double NEGATIVE = 0D;
     public static final double POSITIVE = 1D;
     public static final String RELATIONSHIP_PROPERTY = "label";
-    private static final int MAX_RETRIES = 20;
     private final Random rng;
 
     protected final IdMap sourceNodes;
     protected final IdMap targetNodes;
     protected int concurrency;
-    protected final double negativeSamplingRatio;
 
-    EdgeSplitter(Optional<Long> maybeSeed, double negativeSamplingRatio, IdMap sourceNodes, IdMap targetNodes, int concurrency) {
+    EdgeSplitter(Optional<Long> maybeSeed, IdMap sourceNodes, IdMap targetNodes, int concurrency) {
         this.rng = new Random();
         maybeSeed.ifPresent(rng::setSeed);
 
-        this.negativeSamplingRatio = negativeSamplingRatio;
         this.sourceNodes = sourceNodes;
         this.targetNodes = targetNodes;
         this.concurrency = concurrency;
     }
 
-    public abstract SplitResult split(
+    public SplitResult splitPositiveExamples(
         Graph graph,
-        Graph masterGraph,
         double holdoutFraction
+    ) {
+        LongPredicate isValidSourceNode = node -> sourceNodes.contains(graph.toOriginalNodeId(node));
+        LongPredicate isValidTargetNode = node -> targetNodes.contains(graph.toOriginalNodeId(node));
+        LongLongPredicate isValidNodePair = (s, t) -> isValidSourceNode.apply(s) && isValidTargetNode.apply(t);
+
+        RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilderWithProp(graph, Orientation.NATURAL);
+
+        Orientation remainingRelOrientation = graph.schema().isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
+
+        RelationshipsBuilder remainingRelsBuilder;
+        RelationshipWithPropertyConsumer remainingRelsConsumer;
+        if (graph.hasRelationshipProperty()) {
+            remainingRelsBuilder = newRelationshipsBuilderWithProp(graph, remainingRelOrientation);
+            remainingRelsConsumer = (s, t, w) -> {
+                remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t), w);
+                return true;
+            };
+        } else {
+            remainingRelsBuilder = newRelationshipsBuilder(graph, remainingRelOrientation);
+            remainingRelsConsumer = (s, t, w) -> {
+                remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t));
+                return true;
+            };
+        }
+
+        var validRelationshipCount = validPositiveRelationshipCandidateCount(graph, isValidNodePair);
+
+        var positiveSamples = (long) (validRelationshipCount * holdoutFraction);
+        var positiveSamplesRemaining = new MutableLong(positiveSamples);
+        var candidateEdgesRemaining = new MutableLong(validRelationshipCount);
+        var selectedRelCount = new MutableLong(0);
+        var remainingRelCount = new MutableLong(0);
+
+        graph.forEachNode(nodeId -> {
+            positiveSampling(
+                graph,
+                selectedRelsBuilder,
+                remainingRelsConsumer,
+                selectedRelCount,
+                remainingRelCount,
+                nodeId,
+                isValidNodePair,
+                positiveSamplesRemaining,
+                candidateEdgesRemaining
+            );
+
+            return true;
+        });
+
+        return SplitResult.of(
+            remainingRelsBuilder,
+            remainingRelCount.longValue(),
+            selectedRelsBuilder,
+            selectedRelCount.longValue()
+        );
+    }
+
+    protected abstract void positiveSampling(
+        Graph graph,
+        RelationshipsBuilder selectedRelsBuilder,
+        RelationshipWithPropertyConsumer remainingRelsConsumer,
+        MutableLong selectedRelCount,
+        MutableLong remainingRelCount,
+        long nodeId,
+        LongLongPredicate isValidNodePair,
+        MutableLong positiveSamplesRemaining,
+        MutableLong candidateEdgesRemaining
     );
+
+    protected abstract long validPositiveRelationshipCandidateCount(Graph graph, LongLongPredicate isValidNodePair);
 
     protected boolean sample(double probability) {
         return rng.nextDouble() < probability;
-    }
-
-    private long randomNodeId(Graph graph) {
-        return Math.abs(rng.nextLong() % graph.nodeCount());
     }
 
     protected long samplesPerNode(long maxSamples, double remainingSamples, long remainingNodes) {
@@ -103,62 +162,21 @@ public abstract class EdgeSplitter {
             .build();
     }
 
-    // Negative sampling does not guarantee negativeSamplesRemaining number of negative edges are sampled.
-    // because 1. for dense graphs there aren't enough possible negative edges
-    // and 2. If the last few nodes are dense, since we calculate negative samples needed per node, there won't be enough negative samples added.
-    void negativeSampling(
-        Graph graph,
-        Graph masterGraph,
-        RelationshipsBuilder selectedRelsBuilder,
-        MutableLong negativeSamplesRemaining,
-        long nodeId,
-        LongPredicate isValidSourceNode,
-        LongPredicate isValidTargetNode,
-        MutableLong validSourceNodeCount
-    ) {
-        if (!isValidSourceNode.apply(nodeId)) {
-            return;
-        }
-        var masterDegree = masterGraph.degree(nodeId);
-        var negativeEdgeCount = samplesPerNode(
-            (masterGraph.nodeCount() - 1) - masterDegree,
-            negativeSamplesRemaining.doubleValue(),
-            validSourceNodeCount.getAndDecrement()
-        );
-
-        var neighbours = new HashSet<Long>(masterDegree);
-        masterGraph.forEachRelationship(nodeId, (source, target) -> {
-            neighbours.add(target);
-            return true;
-        });
-
-        // this will not try to avoid duplicate negative relationships,
-        // nor will it avoid sampling edges that are sampled as negative in
-        // an outer split.
-        int retries = MAX_RETRIES;
-        for (int i = 0; i < negativeEdgeCount; i++) {
-            var negativeTarget = randomNodeId(graph);
-            // no self-relationships
-            if (isValidTargetNode.apply(negativeTarget) && !neighbours.contains(negativeTarget) && negativeTarget != nodeId) {
-                negativeSamplesRemaining.decrementAndGet();
-                selectedRelsBuilder.addFromInternal(graph.toRootNodeId(nodeId), graph.toRootNodeId(negativeTarget), NEGATIVE);
-            } else if (retries-- > 0) {
-                // we retry with a different negative target
-                // skipping here and relying on finding another source node is not safe
-                // we only retry a few times to protect against resampling forever for high deg nodes
-                i--;
-            }
-        }
-    }
-
-
     @ValueClass
     public interface SplitResult {
-        Relationships remainingRels();
-        Relationships selectedRels();
+        RelationshipsBuilder remainingRels();
 
-        static EdgeSplitter.SplitResult of(Relationships remainingRels, Relationships selectedRels) {
-            return ImmutableSplitResult.of(remainingRels, selectedRels);
+        long remainingRelCount();
+        RelationshipsBuilder selectedRels();
+        long selectedRelCount();
+
+        static EdgeSplitter.SplitResult of(
+            RelationshipsBuilder remainingRels,
+            long remainingRelCount,
+            RelationshipsBuilder selectedRels,
+            long selectedRelCount
+        ) {
+            return ImmutableSplitResult.of(remainingRels, remainingRelCount, selectedRels, selectedRelCount);
         }
     }
 }

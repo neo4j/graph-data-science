@@ -272,7 +272,7 @@ CALL gds.beta.pipeline.linkPrediction.train('myGraph', {
   modelName: 'lp-pipeline-model',
   metrics: ['AUCPR', 'OUT_OF_BAG_ERROR'],
   targetRelationshipType: 'KNOWS',
-  randomSeed: 73
+  randomSeed: 12
 }) YIELD modelInfo, modelSelectionStats
 RETURN
   modelInfo.bestParameters AS winningModel,
@@ -286,10 +286,10 @@ RETURN
 [opts="header", cols="6, 2, 2, 2, 6"]
 |===
 | winningModel                                                                                                                                | avgTrainScore      | outerTrainScore     | testScore | validationScores
-| {maxEpochs=100, minEpochs=1, penalty=1.0, patience=2, methodName=MultilayerPerceptron, focusWeight=0.0, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001} | 0.799603174603175 |  0.8 | 0.75 | [0.5555555555555555, 0.7083333333333334, 0.75, 0.5555555555555555, 0.5555555555555555]
+| {maxEpochs=100, minEpochs=1, penalty=1.0, patience=2, methodName=MultilayerPerceptron, focusWeight=0.0, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001} | 0.858465608465608 |  0.82 | 0.677777777777778 | [0.5555555555555555, 0.4444444444444444, 0.875, 0.4305555555555555, 0.4305555555555555]
 |===
 --
-We can see the MLP model configuration won, and has a score of `0.8` on the test set.
+We can see the MLP model configuration won, and has a score of `0.67` on the test set.
 The score computed as the xref:machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-metrics[AUCPR] metric, which is in the range [0, 1].
 A model which gives higher score to all links than non-links will have a score of 1.0, and a model that assigns random scores will on average have a score of 0.5.
 
@@ -387,7 +387,7 @@ CALL gds.beta.pipeline.linkPrediction.train('fullGraph', {
   sourceNodeLabel: 'Person',
   targetNodeLabel: 'Person',
   targetRelationshipType: 'KNOWS',
-  randomSeed: 73
+  randomSeed: 12
 }) YIELD modelInfo, modelSelectionStats
 RETURN
   modelInfo.bestParameters AS winningModel,
@@ -401,10 +401,9 @@ RETURN
 [opts="header", cols="6, 2, 2, 2, 6"]
 |===
 | winningModel                                                                                                                                | avgTrainScore      | outerTrainScore     | testScore | validationScores
-| {maxEpochs=100, minEpochs=1, penalty=1.0, patience=2, methodName=MultilayerPerceptron, focusWeight=0.0, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001} | 0.799603174603175 |  0.8 | 0.75 | [0.75]
+| {maxEpochs=100, minEpochs=1, penalty=1.0, patience=2, methodName=MultilayerPerceptron, focusWeight=0.0, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001} | 0.858465608465608 |  0.82 | 0.677777777777778 | [0.875]
 |===
 --
 
-As we can see, the results are effectively identical with a slight decrease of the validation score in one of the folds.
-The change is due to the embeddings taking into account more contextual information.
+As we can see, the results are effectively identical.
 While the train and test score stays the same in this toy example, it is likely that the contextual information will have a greater impact for larger datasets.

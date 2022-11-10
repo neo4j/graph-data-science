@@ -48,14 +48,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline.MODEL_TYPE;
+import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionRelationshipSampler.splitEstimation;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainPipelineExecutor.LinkPredictionTrainPipelineResult;
-import static org.neo4j.gds.ml.pipeline.linkPipeline.train.RelationshipSplitter.splitEstimation;
 import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallRelationshipSets;
 
 public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     <LinkPredictionTrainConfig, LinkPredictionTrainingPipeline, LinkPredictionTrainPipelineResult> {
 
-    private final RelationshipSplitter relationshipSplitter;
+    private final LinkPredictionRelationshipSampler linkPredictionRelationshipSampler;
 
     private final Set<RelationshipType> availableRelationshipTypesForNodeProperty;
 
@@ -64,7 +64,6 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         LinkPredictionTrainConfig config,
         ExecutionContext executionContext,
         GraphStore graphStore,
-
         ProgressTracker progressTracker
     ) {
         super(
@@ -80,18 +79,18 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             .filter(relType -> !relType.name.equals(config.targetRelationshipType()))
             .collect(Collectors.toSet());
 
-        this.relationshipSplitter = new RelationshipSplitter(
+        this.linkPredictionRelationshipSampler = new LinkPredictionRelationshipSampler(
             graphStore,
             pipeline.splitConfig(),
-            progressTracker,
-            terminationFlag
+            config,
+            progressTracker
         );
     }
 
     public static Task progressTask(String taskName, LinkPredictionTrainingPipeline pipeline, long relationshipCount) {
         var sizes = pipeline.splitConfig().expectedSetSizes(relationshipCount);
         return Tasks.task(taskName, new ArrayList<>() {{
-            add(RelationshipSplitter.progressTask(sizes));
+            add(LinkPredictionRelationshipSampler.progressTask(sizes));
             add(NodePropertyStepExecutor.tasks(pipeline.nodePropertySteps(), sizes.featureInputSize()));
             addAll(LinkPredictionTrain.progressTasks(
                 relationshipCount,
@@ -111,9 +110,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         var splitEstimations = splitEstimation(
             pipeline.splitConfig(),
             configuration.targetRelationshipType(),
-            pipeline.relationshipWeightProperty(executionContext),
-            configuration.sourceNodeLabel(),
-            configuration.targetNodeLabel()
+            pipeline.relationshipWeightProperty(executionContext)
         );
 
         MemoryEstimation maxOverNodePropertySteps = NodePropertyStepExecutor.estimateNodePropertySteps(
@@ -156,13 +153,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
 
     @Override
     public void splitDatasets() {
-        this.relationshipSplitter.splitRelationships(
-            config.internalTargetRelationshipType(),
-            config.sourceNodeLabel(),
-            config.targetNodeLabel(),
-            config.randomSeed(),
-            pipeline.relationshipWeightProperty(executionContext)
-        );
+        this.linkPredictionRelationshipSampler.splitAndSampleRelationships(pipeline.relationshipWeightProperty(executionContext));
     }
 
     @Override

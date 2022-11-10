@@ -28,6 +28,8 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.ml.negativeSampling.NegativeSampler;
+import org.neo4j.gds.ml.negativeSampling.RandomNegativeSampler;
 
 import java.util.Optional;
 
@@ -35,6 +37,7 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
 
     private final Graph graph;
     private final Graph masterGraph;
+
     private final SplitRelationshipsBaseConfig config;
 
     private final IdMap sourceNodes;
@@ -91,23 +94,39 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
 
     @Override
     public EdgeSplitter.SplitResult compute() {
-        var splitter = graph.schema().isUndirected()
+        boolean isUndirected = graph.schema().isUndirected();
+        var splitter = isUndirected
             ? new UndirectedEdgeSplitter(
             config.randomSeed(),
-            config.negativeSamplingRatio(),
             sourceNodes,
             targetNodes,
             config.concurrency()
         )
             : new DirectedEdgeSplitter(
                 config.randomSeed(),
-                config.negativeSamplingRatio(),
                 sourceNodes,
                 targetNodes,
                 config.concurrency()
             );
 
-        return splitter.split(graph, masterGraph, config.holdoutFraction());
+        var splitResult =  splitter.splitPositiveExamples(
+            graph,
+            config.holdoutFraction()
+        );
+
+        NegativeSampler negativeSampler = new RandomNegativeSampler(
+            masterGraph,
+            (long) (splitResult.selectedRelCount() * config.negativeSamplingRatio()),
+            //SplitRelationshipsProc does not add negative samples to holdout set
+            0,
+            sourceNodes,
+            targetNodes,
+            config.randomSeed()
+        );
+
+        negativeSampler.produceNegativeSamples(splitResult.selectedRels(), null);
+
+        return splitResult;
     }
 
     @Override
