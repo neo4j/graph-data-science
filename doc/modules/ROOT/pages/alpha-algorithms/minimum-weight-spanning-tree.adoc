@@ -2,6 +2,9 @@
 [.alpha]
 = Minimum Weight Spanning Tree
 :description: This section describes the Minimum Weight Spanning Tree algorithm in the Neo4j Graph Data Science library.
+:entity: node
+:result: spanning tree edge
+:algorithm: Prim
 
 include::partial$/operations-reference/alpha-note.adoc[]
 
@@ -135,6 +138,47 @@ include::partial$/algorithms/alpha/spanning-tree/specific-configuration.adoc[]
 |===
 ======
 
+[.include-with-mutate]
+======
+.Run the Spanning Tree algorithm in write mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.spanningTree.mutate(
+  graphName: string,
+  configuration: map
+)
+YIELD effectiveNodeCount: Integer,
+      totalWeight: Float,
+      relationshipsWritten: Integer,
+      preProcessingMillis: Integer,
+      computeMillis: Integer,
+      mutateMillis: Integer,
+      configuration: Map
+----
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                                                                             | Type    | Default   | Optional  | Description
+| mutateProperty                                                                    | String  | 'mst'     | yes       | The relationship type used for the new relationships written to the projected graph.
+| weightMutateProperty                                                              | String  | n/a       | no        | The weight property of the `mutateProperty` relationship type written back
+include::partial$/algorithms/alpha/spanning-tree/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                | Type    | Description
+| effectiveNodeCount  | Integer | The number of visited nodes.
+| totalWeight         | Float   | The sum of the weights of the relationships in the spanning tree.
+| relationshipsWritten |Integer | The number of relationships added to the in-memory graph.
+| preProcessingMillis | Integer | Milliseconds for preprocessing the data.
+| computeMillis       | Integer | Milliseconds for running the algorithm.
+| mutateMillis         | Integer | Milliseconds for writing result data back.
+| configuration         | Map       | The configuration used for running the algorithm.
+|===
+======
+
 ====
 .The following will run the k-spanning tree algorithms and write back results:
 [source, cypher, role=noplay]
@@ -224,13 +268,13 @@ CALL gds.graph.project(
 )
 ----
 
-[[alpha-algorithms-spanning-tree-write]]
+[[alpha-algorithms-spanning-tree-examples-write]]
 === Write
 
 
 include::partial$/algorithms/shared/examples-write-intro.adoc[]
 
-.The following will run the Minimum Weight Spanning Tree algorithm and write back results:
+.The following will run the Minimum Weight Spanning Tree algorithm and mutate the in-memory graph.
 [source, cypher, role=noplay]
 ----
 MATCH (n:Place {id: 'D'})
@@ -290,7 +334,33 @@ RETURN preProcessingMillis,computeMillis, writeMillis, effectiveNodeCount;
 .Results
 image::maxst_result.png[]
 
-[[algorithms-spanning-tree-stats]]
+[[algorithms-spanning-tree-examples-mutate]]
+=== Mutate
+
+
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
+
+.The following will run the Minimum Weight Spanning Tree algorithm and write back results:
+[source, cypher, role=noplay]
+----
+MATCH (n:Place {id: 'D'})
+CALL gds.alpha.spanningTree.mutate('graph', {
+  sourceNode: id(n),
+  relationshipWeightProperty: 'cost',
+  mutateProperty: 'MINST',
+  weightMutateProperty: 'writeCost'
+})
+YIELD relationshipsWritten
+RETURN relationshipsWritten
+----
+.Results
+[opts="header"]
+|===
+| relationshipsWritten
+| 4
+|===
+
+[[algorithms-spanning-tree-examples-stats]]
 === Stats
 include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
@@ -300,11 +370,9 @@ include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 [source,cypher,role=noplay]
 ----
 MATCH (n:Place{id: 'D'})
-CALL gds.alpha.spanningTree.write('graph', {
+CALL gds.alpha.spanningTree.stats('graph', {
   sourceNode: id(n),
   relationshipWeightProperty: 'cost',
-  writeProperty: 'MAXST',
-  weightWriteProperty: 'writeCost',
  objective: 'mininum'
 })
 YIELD effectiveNodeCount
