@@ -168,24 +168,20 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
             int iteration = 0;
             for (; iteration < config.maxIterations(); iteration++) {
-                try {
-                    terminationFlag.assertRunning();
-                    progressTracker.beginSubTask();
+                terminationFlag.assertRunning();
+                progressTracker.beginSubTask();
 
-                    computer.initIteration(iteration);
-                    messenger.initIteration(iteration);
-                    computer.runIteration();
-                } finally {
-                    progressTracker.endSubTask();
-                }
+                computer.initIteration(iteration);
+                messenger.initIteration(iteration);
+                computer.runIteration();
 
-                try {
-                    progressTracker.beginSubTask();
+                progressTracker.endSubTask();
 
-                    didConverge = runMasterComputeStep(iteration) || computer.hasConverged();
-                } finally {
-                    progressTracker.endSubTask();
-                }
+                progressTracker.beginSubTask();
+
+                didConverge = runMasterComputeStep(iteration) || computer.hasConverged();
+
+                progressTracker.endSubTask();
 
                 if (didConverge) {
                     break;
