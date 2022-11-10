@@ -81,8 +81,8 @@ class UserInputNegativeSamplerTest {
 
         sampler.produceNegativeSamples(testBuilder, trainBuilder);
 
-        Relationships testSet = testBuilder.build();
-        Relationships trainSet = trainBuilder.build();
+        Relationships testSet = testBuilder.build().relationships();
+        Relationships trainSet = trainBuilder.build().relationships();
 
         assertThat(testSet.topology().elementCount()).isEqualTo(2);
         assertThat(trainSet.topology().elementCount()).isEqualTo(4);

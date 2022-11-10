@@ -23,8 +23,8 @@ import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.loading.construction.RelationshipsAndSchema;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -84,8 +84,8 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
                 ComputationResult<SplitRelationships, SplitResult, SplitRelationshipsMutateConfig> computationResult,
                 ExecutionContext executionContext
             ) {
-                Relationships selectedRels;
-                Relationships remainingRels;
+                RelationshipsAndSchema selectedRels;
+                RelationshipsAndSchema remainingRels;
                 try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
                     GraphStore graphStore = computationResult.graphStore();
                     SplitResult splitResult = computationResult.result();
@@ -106,8 +106,8 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
                         selectedRels
                     );
                 }
-                long holdoutWritten = selectedRels.topology().elementCount();
-                long remainingWritten = remainingRels.topology().elementCount();
+                long holdoutWritten = selectedRels.relationships().topology().elementCount();
+                long remainingWritten = remainingRels.relationships().topology().elementCount();
                 resultBuilder.withRelationshipsWritten(holdoutWritten + remainingWritten);
             }
         };
