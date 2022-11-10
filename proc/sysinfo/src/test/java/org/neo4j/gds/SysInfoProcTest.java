@@ -140,6 +140,7 @@ class SysInfoProcTest extends BaseProcTest {
                 expectedCompatibilities = Set.of(
                     "Neo4j Settings 5.2.0 (placeholder)",
                     "Neo4j Settings 5.2.0",
+                    "Neo4j Settings DEV",
                     "Neo4j DEV (placeholder)",
                     "Neo4j DEV"
                 );
