@@ -24,11 +24,11 @@ import org.neo4j.gds.results.StandardWriteResult;
 
 import java.util.Map;
 
-public final class kWriteResult extends StandardWriteResult {
+public final class KSpanningTreeWriteResult extends StandardWriteResult {
 
     public final long effectiveNodeCount;
 
-    public kWriteResult(
+    public KSpanningTreeWriteResult(
         long preProcessingMillis,
         long computeMillis,
         long writeMillis,
@@ -39,7 +39,7 @@ public final class kWriteResult extends StandardWriteResult {
         this.effectiveNodeCount = effectiveNodeCount;
     }
 
-    public static class Builder extends AbstractResultBuilder<kWriteResult> {
+    public static class Builder extends AbstractResultBuilder<KSpanningTreeWriteResult> {
 
         long effectiveNodeCount;
 
@@ -49,8 +49,8 @@ public final class kWriteResult extends StandardWriteResult {
         }
 
         @Override
-        public kWriteResult build() {
-            return new kWriteResult(
+        public KSpanningTreeWriteResult build() {
+            return new KSpanningTreeWriteResult(
                 preProcessingMillis,
                 computeMillis,
                 writeMillis,

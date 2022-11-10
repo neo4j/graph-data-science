@@ -39,7 +39,7 @@ import org.neo4j.gds.utils.InputNodeValidator;
 
 import java.util.stream.Stream;
 
-public abstract class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, SpanningTree, KSpanningTreeConfig, kWriteResult> {
+public abstract class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTree, SpanningTree, KSpanningTreeConfig, KSpanningTreeWriteResult> {
 
     @Override
     public GraphAlgorithmFactory<KSpanningTree, KSpanningTreeConfig> algorithmFactory() {
@@ -82,13 +82,13 @@ public abstract class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTr
     }
 
     @Override
-    public ComputationResultConsumer<KSpanningTree, SpanningTree, KSpanningTreeConfig, Stream<kWriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<KSpanningTree, SpanningTree, KSpanningTreeConfig, Stream<KSpanningTreeWriteResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             Graph graph = computationResult.graph();
             SpanningTree spanningTree = computationResult.result();
             KSpanningTreeConfig config = computationResult.config();
 
-            kWriteResult.Builder builder = new kWriteResult.Builder();
+            KSpanningTreeWriteResult.Builder builder = new KSpanningTreeWriteResult.Builder();
 
             if (graph.isEmpty()) {
                 graph.release();
