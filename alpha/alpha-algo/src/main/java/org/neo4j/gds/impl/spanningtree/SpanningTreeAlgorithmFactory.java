@@ -21,7 +21,13 @@ package org.neo4j.gds.impl.spanningtree;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
+import org.neo4j.gds.mem.MemoryUsage;
 
 public class SpanningTreeAlgorithmFactory<CONFIG extends SpanningTreeBaseConfig> extends GraphAlgorithmFactory<Prim, CONFIG> {
 
@@ -42,5 +48,13 @@ public class SpanningTreeAlgorithmFactory<CONFIG extends SpanningTreeBaseConfig>
         return "SpanningTree";
     }
 
-
+    @Override
+    public MemoryEstimation memoryEstimation(CONFIG config) {
+        return MemoryEstimations.builder(Prim.class)
+            .perNode("Parent array", HugeLongArray::memoryEstimation)
+            .perNode("Parent cost array", HugeDoubleArray::memoryEstimation)
+            .add("Priority queue", HugeLongPriorityQueue.memoryEstimation())
+            .perNode("visited", MemoryUsage::sizeOfBitset)
+            .build();
+    }
 }
