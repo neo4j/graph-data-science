@@ -43,6 +43,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -66,6 +67,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.TestSupport.assertTransactionTermination;
 import static org.neo4j.gds.TestSupport.crossArguments;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.beta.pregel.PregelTest.CompositeTestComputation.DOUBLE_ARRAY_KEY;
@@ -110,6 +112,24 @@ class PregelTest {
 
         var nodeValues = pregelJob.run().nodeValues();
         assertArrayEquals(expected, nodeValues.doubleProperties(KEY).toArray());
+    }
+
+    @Test
+    void stopsImportingWhenTransactionHasBeenTerminated() {
+        TerminationFlag terminationFlag = () -> false;
+
+        var config = PregelConfigImpl.builder().maxIterations(10).build();
+
+        Pregel<PregelConfig> pregelJob = Pregel.create(
+            graph,
+            config,
+            new TestPregelComputation(),
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        );
+        pregelJob.setTerminationFlag(terminationFlag);
+
+        assertTransactionTermination(pregelJob::run);
     }
 
     @ParameterizedTest
