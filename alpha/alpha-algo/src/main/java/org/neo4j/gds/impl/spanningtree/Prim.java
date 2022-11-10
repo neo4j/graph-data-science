@@ -66,7 +66,7 @@ public class Prim extends Algorithm<SpanningTree> {
 
     @Override
     public SpanningTree compute() {
-        progressTracker.beginSubTask(graph.nodeCount());
+        progressTracker.beginSubTask("SpanningTree");
         HugeLongArray parent = HugeLongArray.newArray(graph.nodeCount());
         HugeDoubleArray costToParent = HugeDoubleArray.newArray(graph.nodeCount());
         HugeLongPriorityQueue queue = HugeLongPriorityQueue.min(nodeCount);
@@ -105,7 +105,7 @@ public class Prim extends Algorithm<SpanningTree> {
 
                 return true;
             });
-            progressTracker.logProgress();
+            progressTracker.logProgress(graph.degree(node));
         }
         this.spanningTree = new SpanningTree(
             startNodeId,
@@ -115,7 +115,7 @@ public class Prim extends Algorithm<SpanningTree> {
             costToParent,
             minMax.applyAsDouble(totalWeight)
         );
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("SpanningTree");
         return this.spanningTree;
     }
 
