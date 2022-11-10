@@ -47,7 +47,7 @@ CALL gds.graph.list(
 | configuration          | Map      | The configuration used to project the graph in memory.
 | nodeCount              | Integer  | Number of nodes in the graph.
 | relationshipCount      | Integer  | Number of relationships in the graph.
-| schema                 | Map      | Node labels, relationship types and properties contained in the projected graph.
+| schema footnote:deprecated[In the next major release this field will get the semantics of `schemaWithOrientation`.]                | Map      | Node labels, relationship types and properties contained in the projected graph.
 | schemaWithOrientation  | Map      | Node labels, relationship types, relationship orientation and properties contained in the projected graph.
 | degreeDistribution     | Map      | Histogram of degrees in the graph.
 | density                | Float    | Density of the graph.
