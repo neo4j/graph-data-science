@@ -128,7 +128,7 @@ class HashGNNTest {
         var result = new HashGNN(binaryGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
         //dimension should be equal to dimension of feature input which is 3
         assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("a")))).containsExactly(1.0, 0.0, 0.0);
-        assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("b")))).containsExactly(0.0, 0.0, 1.0);
+        assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("b")))).containsExactly(1.0, 0.0, 0.0);
         assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("c")))).containsExactly(0.0, 0.0, 1.0);
     }
 
@@ -187,13 +187,10 @@ class HashGNNTest {
         var configBefore = configBuilder.neighborInfluence(0).build();
         var resultBefore = new HashGNN(doubleGraph, configBefore, ProgressTracker.NULL_TRACKER).compute().embeddings();
 
-
-        var avgDegree = doubleGraph.relationshipCount() / (double) doubleGraph.nodeCount();
-        var config = configBuilder.neighborInfluence(avgDegree / embeddingDensity).build();
+        var config = configBuilder.neighborInfluence(1.0).build();
         var result = new HashGNN(doubleGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
         // because of high neighbor influence and high embeddingDensity, we expect the node `b` to have the union of features of its neighbors
         // the neighbors are expected to have the same features as their initial projection
-
 
         double[] embeddingB = result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("b")));
         double[] embeddingABefore = resultBefore.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("a")));

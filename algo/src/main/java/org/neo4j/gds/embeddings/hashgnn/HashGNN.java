@@ -96,11 +96,15 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
 
         double avgDegree = (graph.relationshipCount() / (double) graph.nodeCount());
         int upperBoundBits = Math.min(embeddingDimension, config.embeddingDensity());
-        int upperBoundExpectedBits = (int) Math.round(upperBoundBits * (1 - Math.pow(
+        int upperBoundSelfExpectedBits = (int) Math.round(upperBoundBits * (1 - Math.pow(
             1 - (1.0 / upperBoundBits),
             config.embeddingDensity()
         )));
-        double scaledNeighborInfluence = graph.relationshipCount() == 0 ? 1.0 : upperBoundExpectedBits * config.neighborInfluence() / avgDegree;
+        double upperBoundNeighborExpectedBits = upperBoundBits * (1 - Math.pow(
+            1 - (1.0 / upperBoundBits),
+            avgDegree
+        ));
+        double scaledNeighborInfluence = graph.relationshipCount() == 0 ? 1.0 : upperBoundSelfExpectedBits * config.neighborInfluence() / upperBoundNeighborExpectedBits;
 
         var hashes = HashTask.compute(
             embeddingDimension,
