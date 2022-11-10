@@ -51,7 +51,7 @@ public class ModelCatalogResult {
         );
 
         trainConfig = model.trainConfig().toMap();
-        graphSchema = model.graphSchema().toMap();
+        graphSchema = model.graphSchema().toMapOld();
         loaded = model.loaded();
         stored = model.stored();
         creationTime = model.creationTime();
