@@ -31,9 +31,9 @@ import org.neo4j.gds.impl.spanningtree.SpanningTreeStatsConfig;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
+import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
-@GdsCallable(name = "gds.alpha.spanningTree.stats", description = SpanningTreeWriteProc.DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+@GdsCallable(name = "gds.alpha.spanningTree.stats", description = SpanningTreeWriteProc.DESCRIPTION, executionMode = STATS)
 public class SpanningTreeStatsSpec implements AlgorithmSpec<Prim, SpanningTree, SpanningTreeStatsConfig, Stream<StatsResult>, SpanningTreeAlgorithmFactory<SpanningTreeStatsConfig>> {
 
     @Override

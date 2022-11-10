@@ -33,7 +33,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.procedure.Mode.WRITE;
+import static org.neo4j.procedure.Mode.READ;
 
 // TODO: Always undirected
 public class SpanningTreeStatsProc extends BaseProc {
@@ -41,7 +41,8 @@ public class SpanningTreeStatsProc extends BaseProc {
     static final String DESCRIPTION = SpanningTreeWriteProc.DESCRIPTION;
     @Context
     public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
-    @Procedure(value = "gds.alpha.spanningTree.stats", mode = WRITE)
+
+    @Procedure(value = "gds.alpha.spanningTree.stats", mode = READ)
     @Description(DESCRIPTION)
     public Stream<StatsResult> spanningTree(
         @Name(value = "graphName") String graphName,
