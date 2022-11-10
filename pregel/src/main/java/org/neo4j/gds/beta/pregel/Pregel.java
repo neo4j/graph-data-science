@@ -23,6 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
@@ -49,6 +50,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
     private final PregelComputer<CONFIG> computer;
 
     private final ProgressTracker progressTracker;
+    private TerminationFlag terminationFlag;
 
     private final ExecutorService executor;
 
@@ -128,6 +130,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         this.nodeValues = initialNodeValue;
         this.executor = executor;
         this.progressTracker = progressTracker;
+        this.terminationFlag = TerminationFlag.RUNNING_TRUE;
 
         var reducer = computation.reducer();
 
@@ -151,6 +154,10 @@ public final class Pregel<CONFIG extends PregelConfig> {
             .build();
     }
 
+    public void setTerminationFlag(TerminationFlag terminationFlag) {
+        this.terminationFlag = terminationFlag;
+    }
+
     public PregelResult run() {
         boolean didConverge = false;
 
@@ -163,6 +170,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             for (; iteration < config.maxIterations(); iteration++) {
                 try {
                     progressTracker.beginSubTask();
+                    terminationFlag.assertRunning();
 
                     computer.initIteration(iteration);
                     messenger.initIteration(iteration);

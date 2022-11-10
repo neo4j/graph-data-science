@@ -32,6 +32,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -233,6 +234,25 @@ class PageRankTest {
                     "PageRank :: Start",
                     "PageRank :: Finished"
                 );
+        }
+
+        @Test
+        void checkTerminationFlag() {
+            var config = ImmutablePageRankStreamConfig.builder()
+                .maxIterations(40)
+                .concurrency(1)
+                .build();
+
+            var algo = new PageRankAlgorithmFactory<>(Mode.PAGE_RANK)
+                .build(
+                    graph,
+                    config,
+                    ProgressTracker.NULL_TRACKER
+                );
+
+            algo.setTerminationFlag(() -> false);
+
+            TestSupport.assertTransactionTermination(algo::compute);
         }
     }
 
