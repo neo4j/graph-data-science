@@ -1,3 +1,6 @@
 ext {
-    gdsVersion = '2.2.4'
+    gdsBaseVersion = '2.2.4'
+    gdsAuraVersion = '2'
+
+    gdsVersion = gdsBaseVersion + (properties.getOrDefault('aurads', false) ? ".${gdsAuraVersion}" : "")
 }
