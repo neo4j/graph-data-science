@@ -24,6 +24,8 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.AlgorithmSpecProgressTrackerProvider;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.impl.spanningtree.Prim;
 import org.neo4j.gds.impl.spanningtree.SpanningGraph;
 import org.neo4j.gds.impl.spanningtree.SpanningTree;
@@ -32,8 +34,26 @@ import org.neo4j.gds.impl.spanningtree.SpanningTreeWriteConfig;
 
 import java.util.stream.Stream;
 
-abstract class SpanningTreeWriteSpec implements AlgorithmSpec<Prim, SpanningTree, SpanningTreeWriteConfig, Stream<WriteResult>, SpanningTreeAlgorithmFactory<SpanningTreeWriteConfig>> {
+import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 
+@GdsCallable(name = "gds.alpha.spanningTree.write", description = SpanningTreeProc.DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+public class SpanningTreeWriteSpec implements AlgorithmSpec<Prim, SpanningTree, SpanningTreeWriteConfig, Stream<WriteResult>, SpanningTreeAlgorithmFactory<SpanningTreeWriteConfig>> {
+
+    @Override
+    public String name() {
+        return "SpanningTreeWrite";
+    }
+
+    @Override
+    public SpanningTreeAlgorithmFactory<SpanningTreeWriteConfig> algorithmFactory() {
+        return new SpanningTreeAlgorithmFactory<>();
+    }
+
+    @Override
+    public NewConfigFunction<SpanningTreeWriteConfig> newConfigFunction() {
+        return (__, config) -> SpanningTreeWriteConfig.of(config);
+
+    }
 
     public ComputationResultConsumer<Prim, SpanningTree, SpanningTreeWriteConfig, Stream<WriteResult>> computationResultConsumer() {
 

@@ -21,16 +21,11 @@ package org.neo4j.gds.spanningtree;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
-
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -64,7 +59,7 @@ class SpanningTreeProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(SpanningTreeProcMin.class, SpanningTreeProcMax.class, GraphProjectProc.class);
+        registerProcedures(SpanningTreeProc.class, GraphProjectProc.class);
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .graphProject()
             .withAnyLabel()
@@ -79,19 +74,12 @@ class SpanningTreeProcTest extends BaseProcTest {
         return idFunction.of("a");
     }
 
-    static Stream<Arguments> minimumQuery() {
-        return Stream.of(
-            Arguments.arguments("gds.alpha.spanningTree"),
-            Arguments.arguments("gds.alpha.spanningTree.minimum")
-        );
-    }
 
-    @ParameterizedTest
-    @MethodSource("minimumQuery")
-    void testMinimum(String minimumQuery) {
+    @Test
+    void testMinimum() {
 
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo(minimumQuery)
+            .algo("gds.alpha.spanningTree")
             .writeMode()
             .addParameter("sourceNode", getSourceNode())
             .addParameter("relationshipWeightProperty", "cost")
@@ -118,12 +106,13 @@ class SpanningTreeProcTest extends BaseProcTest {
     @Test
     void testMaximum() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.spanningTree.maximum")
+            .algo("gds.alpha.spanningTree")
             .writeMode()
             .addParameter("sourceNode", getSourceNode())
             .addParameter("writeProperty", "MAX")
             .addParameter("relationshipWeightProperty", "cost")
             .addParameter("weightWriteProperty", "cost")
+            .addParameter("objective", "maximum")
             .yields("preProcessingMillis", "computeMillis", "writeMillis", "effectiveNodeCount");
 
         runQueryWithRowConsumer(
