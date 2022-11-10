@@ -24,7 +24,9 @@ import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -37,12 +39,12 @@ import static org.neo4j.procedure.Mode.READ;
 
 // TODO: Always undirected
 public class SpanningTreeMutateProc extends BaseProc {
-
+    static final String procedure = "gds.alpha.spanningTree.mutate";
     static final String DESCRIPTION = SpanningTreeWriteProc.DESCRIPTION;
     @Context
     public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
 
-    @Procedure(value = "gds.alpha.spanningTree.mutate", mode = READ)
+    @Procedure(value = procedure, mode = READ)
     @Description(DESCRIPTION)
     public Stream<MutateResult> spanningTree(
         @Name(value = "graphName") String graphName,
@@ -52,6 +54,19 @@ public class SpanningTreeMutateProc extends BaseProc {
             new SpanningTreeMutateSpec(),
             executionContext()
         ).compute(graphName, configuration, true, true);
+    }
+
+    @Procedure(value = procedure + ".estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphName,
+        @Name(value = "algoConfiguration") Map<String, Object> configuration
+    ) {
+        var spec = new SpanningTreeMutateSpec();
+        return new MemoryEstimationExecutor<>(
+            spec,
+            executionContext()
+        ).computeEstimate(graphName, configuration);
     }
 
     @Override
