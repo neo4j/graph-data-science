@@ -42,6 +42,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.wcc.WccStreamProc;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Result;
 
 import java.util.List;
 import java.util.Map;
@@ -162,7 +163,7 @@ class CypherAggregationTest extends BaseProcTest {
             idLiteral
         );
         assertThatThrownBy(() -> runQuery(query))
-            .getRootCause()
+            .rootCause()
             .hasMessage("The node has to be either a NODE or an INTEGER, but got " + invalidType);
     }
 
@@ -170,7 +171,7 @@ class CypherAggregationTest extends BaseProcTest {
     void testInvalidRelationshipAsArbitraryId() {
         var query = "MATCH ()-[r]-() RETURN gds.alpha.graph.project('g', r)";
         assertThatThrownBy(() -> runQuery(query))
-            .getRootCause()
+            .rootCause()
             .hasMessage("The node has to be either a NODE or an INTEGER, but got RELATIONSHIP");
     }
 
@@ -178,7 +179,7 @@ class CypherAggregationTest extends BaseProcTest {
     void testInvalidPathAsArbitraryId() {
         var query = "MATCH p=()-[]-() RETURN gds.alpha.graph.project('g', p)";
         assertThatThrownBy(() -> runQuery(query))
-            .getRootCause()
+            .rootCause()
             .hasMessage("The node has to be either a NODE or an INTEGER, but got PATH");
     }
 
@@ -592,7 +593,7 @@ class CypherAggregationTest extends BaseProcTest {
     @CsvSource({"42, Long", "13.37, Double"})
     void testInvalidLabel(String label, String type) {
         assertThatThrownBy(() -> runQuery("MATCH (s) RETURN gds.alpha.graph.project('g', s, null, { sourceNodeLabels: " + label + " })"))
-            .getRootCause()
+            .rootCause()
             .hasMessage(
                 "The value of `sourceNodeLabels` must be either a `List of Strings`, a `String`, or a `Boolean`, but was `" + type + "`."
             );
@@ -602,9 +603,32 @@ class CypherAggregationTest extends BaseProcTest {
     @CsvSource({"42, Long", "13.37, Double", "true, Boolean", "\"A\", String"})
     void testInvalidProperties(String properties, String type) {
         assertThatThrownBy(() -> runQuery("MATCH (s) RETURN gds.alpha.graph.project('g', s, null, { sourceNodeProperties: " + properties + " })"))
-            .getRootCause()
+            .rootCause()
             .hasMessage(
                 "The value of `sourceNodeProperties` must be a `Map of Property Values`, but was `" + type + "`."
             );
     }
+
+    @Test
+    void testParsingAnInvalidConfig() {
+        assertThatThrownBy(() -> runQuery("MATCH (s) RETURN gds.alpha.graph.project('g', s, null, {}, {}, {readConcurrency: 80})"))
+            .rootCause()
+            .hasMessageContaining("80")
+            .hasMessageContaining("readConcurrency");
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void testReadConcurrencyIsParsedCorrectly() {
+        var configMap = (Map<String, Object>) runQuery(
+            "MATCH (s)" +
+            "RETURN gds.alpha.graph.project('g', s, null, {}, {}, {readConcurrency: 2}).config as config",
+            (Result result) -> result.next().get("configuration")
+        );
+
+        var config = CypherAggregation.GraphProjectFromCypherAggregationConfig.of("", "g", configMap);
+
+        assertThat(config.readConcurrency()).isEqualTo(2);
+    }
+
 }

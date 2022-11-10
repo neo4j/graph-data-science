@@ -81,7 +81,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 import static org.neo4j.gds.Orientation.NATURAL;
-import static org.neo4j.gds.config.ConcurrencyConfig.DEFAULT_CONCURRENCY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class CypherAggregation {
@@ -114,10 +113,11 @@ public final class CypherAggregation {
 
         // #result() is called twice, we cache the result of the first call to return it again in the second invocation
         private @Nullable AggregationResult result;
-
         private @Nullable String graphName;
         private @Nullable LazyIdMapBuilder idMapBuilder;
         private @Nullable List<RelationshipPropertySchema> relationshipPropertySchemas;
+        private @Nullable GraphProjectFromCypherAggregationConfig config;
+
         private final Map<RelationshipType, RelationshipsBuilder> relImporters;
         // Used for initializing builders
         private final Lock lock;
@@ -141,9 +141,12 @@ public final class CypherAggregation {
             @Name("sourceNode") Object sourceNode,
             @Nullable @Name(value = "targetNode", defaultValue = "null") Object targetNode,
             @Nullable @Name(value = "nodesConfig", defaultValue = "null") Map<String, Object> nodesConfig,
-            @Nullable @Name(value = "relationshipConfig", defaultValue = "null") Map<String, Object> relationshipConfig
+            @Nullable @Name(value = "relationshipConfig", defaultValue = "null") Map<String, Object> relationshipConfig,
+            @Nullable @Name(value = "config", defaultValue = "null") Map<String, Object> config
         ) {
             initGraphName(graphName);
+
+            initConfig(config);
 
             Map<String, Value> sourceNodePropertyValues = null;
             Map<String, Value> targetNodePropertyValues = null;
@@ -214,6 +217,14 @@ public final class CypherAggregation {
                 } else {
                     relImporter.addFromInternal(intermediateSourceId, intermediateTargetId);
                 }
+            }
+        }
+
+        private void initConfig(Map<String, Object> config) {
+            if (this.config == null) {
+                initObjectUnderLock(() -> this.config, () -> {
+                    this.config = GraphProjectFromCypherAggregationConfig.of(username, graphName, config);
+                });
             }
         }
 
@@ -289,7 +300,7 @@ public final class CypherAggregation {
         ) {
             boolean hasLabelInformation = !(sourceNodeLabels == null && targetNodeLabels == null);
             boolean hasProperties = !(sourceNodeProperties == null && targetNodeProperties == null);
-            return new LazyIdMapBuilder(DEFAULT_CONCURRENCY, hasLabelInformation, hasProperties);
+            return new LazyIdMapBuilder(config.readConcurrency(), hasLabelInformation, hasProperties);
         }
 
         private void validateGraphName(String graphName) {
@@ -381,7 +392,7 @@ public final class CypherAggregation {
                 .nodes(this.idMapBuilder)
                 .orientation(NATURAL)
                 .aggregation(Aggregation.NONE)
-                .concurrency(DEFAULT_CONCURRENCY);
+                .concurrency(config.readConcurrency());
 
             // There is a potential race between initializing the relationships builder and the
             // relationship property schemas. Both happen under lock, but under different ones.
@@ -540,7 +551,7 @@ public final class CypherAggregation {
             validateGraphName(graphName);
 
             var graphStoreBuilder = new GraphStoreBuilder()
-                .concurrency(4)
+                .concurrency(config.readConcurrency())
                 .capabilities(ImmutableStaticCapabilities.of(true))
                 .databaseId(databaseId);
 
@@ -548,7 +559,6 @@ public final class CypherAggregation {
             buildRelationshipsWithProperties(graphStoreBuilder, valueMapper);
 
             var graphStore = graphStoreBuilder.schema(graphSchemaBuilder.build()).build();
-            var config = GraphProjectFromCypherAggregationConfig.of(this.username, graphName);
 
             GraphStoreCatalog.set(config, graphStore);
 
@@ -559,6 +569,7 @@ public final class CypherAggregation {
                 .nodeCount(graphStore.nodeCount())
                 .relationshipCount(graphStore.relationshipCount())
                 .projectMillis(projectMillis)
+                .configuration(config.toMap())
                 .build();
 
             return this.result;
@@ -702,8 +713,8 @@ public final class CypherAggregation {
             );
         }
 
-        static GraphProjectFromCypherAggregationConfig of(String userName, String graphName) {
-            return new GraphProjectFromCypherAggregationConfigImpl(userName, graphName, CypherMapWrapper.empty());
+        static GraphProjectFromCypherAggregationConfig of(String userName, String graphName, Map<String, Object> config) {
+            return new GraphProjectFromCypherAggregationConfigImpl(userName, graphName, CypherMapWrapper.create(config));
         }
 
         @Override
@@ -745,6 +756,9 @@ public final class CypherAggregation {
 
         @ReturnType.Include
         long projectMillis();
+
+        @ReturnType.Include
+        Map<String, Object> configuration();
 
         @Configuration.ToMap
         Map<String, Object> toMap();

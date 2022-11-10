@@ -41,7 +41,7 @@ class GraphAggregatorTest {
         long source = 1L << 50;
         long target = (1L << 50) + 1;
 
-        aggregator.update(graphName, source, target, new HashMap<>(), new HashMap<>());
+        aggregator.update(graphName, source, target, new HashMap<>(), new HashMap<>(), new HashMap<>());
 
         var result = aggregator.buildGraph();
 
