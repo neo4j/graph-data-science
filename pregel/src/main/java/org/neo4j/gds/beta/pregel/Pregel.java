@@ -169,8 +169,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
             int iteration = 0;
             for (; iteration < config.maxIterations(); iteration++) {
                 try {
-                    progressTracker.beginSubTask();
                     terminationFlag.assertRunning();
+                    progressTracker.beginSubTask();
 
                     computer.initIteration(iteration);
                     messenger.initIteration(iteration);

@@ -115,7 +115,7 @@ class PregelTest {
     }
 
     @Test
-    void stopsImportingWhenTransactionHasBeenTerminated() {
+    void stopsEarlyWhenTransactionHasBeenTerminated() {
         TerminationFlag terminationFlag = () -> false;
 
         var config = PregelConfigImpl.builder().maxIterations(10).build();
