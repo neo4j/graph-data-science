@@ -52,7 +52,7 @@ import java.util.stream.Stream;
 
 public final class GdsCallableFinder {
 
-    private static final List<String> DEFAULT_PACKAGE_DENY_LIST = List.of("org.neo4j.gds.pregel");
+    private static final List<String> DEFAULT_PACKAGE_DENY_LIST = List.of();
 
     public static Stream<GdsCallableDefinition> findAll() {
         return findAll(DEFAULT_PACKAGE_DENY_LIST);
