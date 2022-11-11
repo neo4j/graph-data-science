@@ -223,7 +223,7 @@ public final class CypherAggregation {
         private void initConfig(Map<String, Object> config) {
             if (this.config == null) {
                 initObjectUnderLock(() -> this.config, () -> {
-                    this.config = GraphProjectFromCypherAggregationConfig.of(username, graphName, config);
+                    this.config = GraphProjectFromCypherAggregationConfig.of(username, Objects.requireNonNull(graphName), config);
                 });
             }
         }
