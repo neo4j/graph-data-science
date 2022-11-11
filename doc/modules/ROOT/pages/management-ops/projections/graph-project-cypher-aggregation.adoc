@@ -42,12 +42,14 @@ RETURN gds.alpha.graph.project(
     sourceNode: Node or Integer,
     targetNode: Node or Integer,
     nodesConfig: Map,
-    relationshipConfig: Map
+    relationshipConfig: Map,
+    configuration: Map
 ) YIELD
     graphName: String,
     nodeCount: Integer,
     relationshipCount: Integer,
-    projectMillis: Integer
+    projectMillis: Integer,
+    configuration: Map
 ----
 
 .Parameters
@@ -59,7 +61,17 @@ RETURN gds.alpha.graph.project(
 | targetNode         | yes      | The target node of the relationship. The targetNode can be null (for example due to an `OPTIONAL MATCH`), in which case the source node is projected as an unconnected node.
 | nodesConfig        | yes      | Properties and Labels configuration for the source and target nodes.
 | relationshipConfig | yes      | Properties and Type configuration for the relationship.
+| configuration      | yes      | Additional parameters to configure the cypher aggregation projection.
 |===
+
+[[graph-project-cypher-aggregation-syntax-configuration]]
+.Configuration
+[opts="header",cols="1,1,1,4"]
+|===
+| Name                   | Type                  | Default              | Description
+| readConcurrency        | Integer               | 4                    | The number of concurrent threads used for creating the graph.
+|===
+
 
 .Results
 [opts="header",cols="2,1,4"]
@@ -69,6 +81,7 @@ RETURN gds.alpha.graph.project(
 | nodeCount              | Integer  | The number of nodes stored in the projected graph.
 | relationshipCount      | Integer  | The number of relationships stored in the projected graph.
 | projectMillis          | Integer  | Milliseconds for projecting the graph.
+| configuration          | Integer  | The configuration used for this projection.
 |===
 --
 
