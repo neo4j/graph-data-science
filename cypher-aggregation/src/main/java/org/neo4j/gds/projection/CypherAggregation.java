@@ -142,7 +142,7 @@ public final class CypherAggregation {
             @Nullable @Name(value = "targetNode", defaultValue = "null") Object targetNode,
             @Nullable @Name(value = "nodesConfig", defaultValue = "null") Map<String, Object> nodesConfig,
             @Nullable @Name(value = "relationshipConfig", defaultValue = "null") Map<String, Object> relationshipConfig,
-            @Nullable @Name(value = "config", defaultValue = "null") Map<String, Object> config
+            @Nullable @Name(value = "configuration", defaultValue = "null") Map<String, Object> config
         ) {
             initGraphName(graphName);
 

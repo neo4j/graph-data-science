@@ -622,8 +622,8 @@ class CypherAggregationTest extends BaseProcTest {
     void testReadConcurrencyIsParsedCorrectly() {
         var configMap = (Map<String, Object>) runQuery(
             "MATCH (s)" +
-            "RETURN gds.alpha.graph.project('g', s, null, {}, {}, {readConcurrency: 2}).config as config",
-            (Result result) -> result.next().get("configuration")
+            "RETURN gds.alpha.graph.project('g', s, null, {}, {}, {readConcurrency: 2}).configuration as config",
+            (Result result) -> result.next().get("config")
         );
 
         var config = CypherAggregation.GraphProjectFromCypherAggregationConfig.of("", "g", configMap);
