@@ -107,9 +107,13 @@ public final class GdsCallableFinder {
                 .filter(c -> c.equals("com.neo4j.gds.estimation.cli.EstimationCli"))
                 .isEmpty();
 
-            if (collectViaScanning) {
-                classes.addAll(loadPossibleClassesViaClasspathScanning(classLoader));
-            } else {
+            // This is a bit of a hack, for some reason `Reflections` can't find any `GdsCallable`s when running against real Neo4j 5.x,
+            // we believe it is due to JDK 17 + MR Jar packaging but have no concrete proof
+            // If we need to collect callables via scanning try to do it;
+            // if no callables were found `classes.addAll` returns `false` => fallback to loading from META-INF
+            boolean didCollectCallablesViaScanning = collectViaScanning && classes.addAll(loadPossibleClassesViaClasspathScanning(classLoader));
+
+            if (!didCollectCallablesViaScanning) {
                 classes.addAll(loadPossibleClassesFromJar(classLoader));
                 classes.addAll(loadPossibleClassesFromResourcesFolder(classLoader));
             }
