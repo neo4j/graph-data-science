@@ -218,29 +218,33 @@ public final class CypherAggregation {
         }
 
         private void initRelationshipPropertySchemas(@NotNull Map<String, Object> relationshipConfig) {
-            initObjectUnderLock(() -> this.relationshipPropertySchemas, () -> {
-                this.relationshipPropertySchemas = new ArrayList<>();
+            if (this.relationshipPropertySchemas == null) {
+                initObjectUnderLock(() -> this.relationshipPropertySchemas, () -> {
+                    this.relationshipPropertySchemas = new ArrayList<>();
 
-                // We need to do this before extracting the `relationshipProperties`, because
-                // we remove the original entry from the map during converting; also we remove null keys
-                // so we could not create a schema entry for properties that are absent on the current relationship
-                var relationshipPropertyKeys = relationshipConfig.get("properties");
-                if (relationshipPropertyKeys instanceof Map) {
-                    for (var propertyKey : ((Map<?, ?>) relationshipPropertyKeys).keySet()) {
-                        this.relationshipPropertySchemas.add(RelationshipPropertySchema.of(
-                            String.valueOf(propertyKey),
-                            ValueType.DOUBLE
-                        ));
+                    // We need to do this before extracting the `relationshipProperties`, because
+                    // we remove the original entry from the map during converting; also we remove null keys
+                    // so we could not create a schema entry for properties that are absent on the current relationship
+                    var relationshipPropertyKeys = relationshipConfig.get("properties");
+                    if (relationshipPropertyKeys instanceof Map) {
+                        for (var propertyKey : ((Map<?, ?>) relationshipPropertyKeys).keySet()) {
+                            this.relationshipPropertySchemas.add(RelationshipPropertySchema.of(
+                                String.valueOf(propertyKey),
+                                ValueType.DOUBLE
+                            ));
+                        }
                     }
-                }
-            });
+                });
+            }
         }
 
         private void initGraphName(String graphName) {
-            initObjectUnderLock(() -> this.graphName, () -> {
-                validateGraphName(graphName);
-                this.graphName = graphName;
-            });
+            if (this.graphName == null) {
+                initObjectUnderLock(() -> this.graphName, () -> {
+                    validateGraphName(graphName);
+                    this.graphName = graphName;
+                });
+            }
         }
 
         private void initIdMapBuilder(
@@ -249,14 +253,16 @@ public final class CypherAggregation {
             @Nullable NodeLabelToken sourceNodeLabels,
             @Nullable NodeLabelToken targetNodeLabels
         ) {
-            initObjectUnderLock(() -> this.idMapBuilder, () -> {
-                this.idMapBuilder = newIdMapBuilder(
-                    sourceNodeLabels,
-                    sourceNodePropertyValues,
-                    targetNodeLabels,
-                    targetNodePropertyValues
-                );
-            });
+            if (this.idMapBuilder == null) {
+                initObjectUnderLock(() -> this.idMapBuilder, () -> {
+                    this.idMapBuilder = newIdMapBuilder(
+                        sourceNodeLabels,
+                        sourceNodePropertyValues,
+                        targetNodeLabels,
+                        targetNodePropertyValues
+                    );
+                });
+            }
         }
 
         /**
@@ -264,15 +270,13 @@ public final class CypherAggregation {
          * given code which initializes the object.
          */
         private void initObjectUnderLock(Supplier<Object> s, Runnable code) {
-            if (s.get() == null) {
-                this.lock.lock();
-                try {
-                    if (s.get() == null) {
-                        code.run();
-                    }
-                } finally {
-                    this.lock.unlock();
+            this.lock.lock();
+            try {
+                if (s.get() == null) {
+                    code.run();
                 }
+            } finally {
+                this.lock.unlock();
             }
         }
 
