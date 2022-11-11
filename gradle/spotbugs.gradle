@@ -1,5 +1,6 @@
 def shouldSpotbugs =
-    !project.hasProperty('no-spotbugs')
+    !project.hasProperty('no-spotbugs') &&
+    (neo4jDefault == project.properties.getOrDefault("neo4jVersion", "not-set"))
 
 if (shouldSpotbugs) {
     allprojects { proj ->
