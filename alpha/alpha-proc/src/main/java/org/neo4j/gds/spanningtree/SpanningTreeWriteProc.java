@@ -24,7 +24,9 @@ import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -33,17 +35,20 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 // TODO: Always undirected
 public class SpanningTreeWriteProc extends BaseProc {
 
+    static final String procedure = "gds.alpha.spanningTree.write";
     static final String DESCRIPTION =
         "The spanning tree algorithm visits all nodes that are in the same connected component as the starting node, " +
         "and returns a spanning tree of all nodes in the component where the total weight of the relationships is either minimized or maximized.";
     @Context
     public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
-    @Procedure(value = "gds.alpha.spanningTree.write", mode = WRITE)
+
+    @Procedure(value = procedure, mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<WriteResult> spanningTree(
         @Name(value = "graphName") String graphName,
@@ -53,6 +58,19 @@ public class SpanningTreeWriteProc extends BaseProc {
             new SpanningTreeWriteSpec(),
             executionContext()
         ).compute(graphName, configuration, true, true);
+    }
+
+    @Procedure(value = procedure + ".estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphName,
+        @Name(value = "algoConfiguration") Map<String, Object> configuration
+    ) {
+        var spec = new SpanningTreeWriteSpec();
+        return new MemoryEstimationExecutor<>(
+            spec,
+            executionContext()
+        ).computeEstimate(graphName, configuration);
     }
 
     @Override

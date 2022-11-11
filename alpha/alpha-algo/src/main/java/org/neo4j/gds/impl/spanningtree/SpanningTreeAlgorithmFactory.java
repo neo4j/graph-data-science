@@ -21,7 +21,13 @@ package org.neo4j.gds.impl.spanningtree;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
+import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
@@ -45,10 +51,16 @@ public class SpanningTreeAlgorithmFactory<CONFIG extends SpanningTreeBaseConfig>
     }
 
     @Override
+    public MemoryEstimation memoryEstimation(CONFIG config) {
+        return MemoryEstimations.builder(Prim.class)
+            .perNode("Parent array", HugeLongArray::memoryEstimation)
+            .perNode("Parent cost array", HugeDoubleArray::memoryEstimation)
+            .add("Priority queue", HugeLongPriorityQueue.memoryEstimation())
+            .perNode("visited", MemoryUsage::sizeOfBitset)
+            .build();
+    }
     public Task progressTask(Graph graph, CONFIG config) {
-
         return Tasks.leaf(taskName(), graph.relationshipCount());
     }
-
 
 }

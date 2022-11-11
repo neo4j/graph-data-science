@@ -267,6 +267,33 @@ CALL gds.graph.project(
   }
 )
 ----
+[[algorithms-spanning-tree-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: stats
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in write mode:
+[source, cypher, role=noplay]
+----
+MATCH (n:Place {id: 'D'})
+CALL gds.alpha.spanningTree.stats.estimate('myGraph', {sourceNode: id(n),relationshipWriteProperty:'cost'})
+YIELD nodeCount,
+      relationshipCount,
+      bytesMin,
+      bytesMax,
+      requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 7         | 14               | 568   | 568      | 568 Bytes"
+|===
+--
 
 [[alpha-algorithms-spanning-tree-examples-write]]
 === Write
