@@ -19,26 +19,16 @@
  */
 package org.neo4j.gds.impl.spanningtree;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.function.DoubleUnaryOperator;
-
+@ValueClass
 @Configuration
-public interface SpanningTreeConfig extends SpanningTreeBaseConfig
-{
-    String WRITE_RELATIONSHIP_TYPE = "MST";
+public interface SpanningTreeStatsConfig extends SpanningTreeBaseConfig {
 
-    String weightWriteProperty();
-
-    @Value.Default
-    @Value.Derived
-    default String writeProperty() {
-        return WRITE_RELATIONSHIP_TYPE;
+    static SpanningTreeStatsConfig of(CypherMapWrapper userInput) {
+        return new SpanningTreeStatsConfigImpl(userInput);
     }
 
-    static SpanningTreeConfig of(DoubleUnaryOperator minMax, CypherMapWrapper userInput) {
-        return new SpanningTreeConfigImpl(minMax, userInput);
-    }
 }

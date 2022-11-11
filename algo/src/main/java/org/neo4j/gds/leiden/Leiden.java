@@ -133,9 +133,9 @@ public class Leiden extends Algorithm<LeidenResult> {
                 gamma,
                 concurrency
             );
-
             var communitiesCount = localMovePhase.run();
             boolean localPhaseConverged = communitiesCount == workingGraph.nodeCount() || localMovePhase.swaps == 0;
+
             progressTracker.endSubTask("Local Move");
 
             progressTracker.beginSubTask("Modularity Computation");
@@ -148,6 +148,7 @@ public class Leiden extends Algorithm<LeidenResult> {
                 localPhaseConverged,
                 iteration
             );
+
             progressTracker.endSubTask("Modularity Computation");
 
             if (localPhaseConverged) {
@@ -194,6 +195,7 @@ public class Leiden extends Algorithm<LeidenResult> {
                 var refinedCommunities = refinementPhaseResult.communities();
                 var refinedCommunityVolumes = refinementPhaseResult.communityVolumes();
                 var maximumRefinedCommunityId = refinementPhaseResult.maximumRefinedCommunityId();
+
                 progressTracker.endSubTask("Refinement");
 
                 progressTracker.beginSubTask("Aggregation");

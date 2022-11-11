@@ -222,10 +222,14 @@ As the default samplingRate is `1`, we use the xref:machine-learning/linkpredict
 [opts="header"]
 |===
 | person1   | person2   | probability
-| "Will"    | "Veselin" | 0.584994091515458
+| "Alice"    | "Chris" | 0.761501243814014
+| "Chris"    | "Mark" | 0.698031344590453
+| "Alice"    | "Mark" | 0.592463259298279
+| "Alice"    | "Karin" | 0.573336902979323
+| "Alice"    | "Greg" | 0.563687033497625
 |===
 
-We can see that the model only thinks that the Will and Veselin nodes should be connected, with a probability higher than 50%.
+We can see that the model thinks that the above pairs should be connected.
 Other node pairs have a lower probability and are filtered out of the result.
 --
 
@@ -257,7 +261,7 @@ Because we are using the `UNDIRECTED` orientation, we will write twice as many r
 [opts="header"]
 |===
 | relationshipsWritten | samplingStats
-| 2                    | {linksConsidered=16, strategy=exhaustive}
+| 10                    | {linksConsidered=16, strategy=exhaustive}
 |===
 --
 
@@ -307,7 +311,7 @@ Because we are using the `UNDIRECTED` orientation, we will write twice as many r
 |===
 --
 
-As we can see in the `samplingStats`, we use the approximate search strategy and check 52 possible links during the prediction.
+As we can see in the `samplingStats`, we use the approximate search strategy and check 48 possible links during the prediction.
 Though in this small example we actually consider more links that in the exhaustive case, this will typically not be the case for larger graphs.
 Since the relationships we write are undirected, reported `relationshipsWritten` is 16 when we search for the best (`topK = 1`) prediction for each node.
 
@@ -343,9 +347,13 @@ As the default samplingRate is `1`, we use the xref:machine-learning/linkpredict
 [opts="header"]
 |===
 | person1   | person2   | probability
-| "Will"    | "Veselin" | 0.585064825714746
+| "Alice"    | "Chris" | 0.761499973561354
+| "Chris"    | "Mark" | 0.698029761673014
+| "Alice"    | "Mark" | 0.592463039575706
+| "Alice"    | "Karin" | 0.573335167938719
+| "Alice"    | "Greg" | 0.563686221461583
 |===
 
-We can see that our model predicts the same Will-Veselin link as it did with the unfiltered model `lp-pipeline-model`.
+We can see that our model predicts the same top 5 links as it did with the unfiltered model `lp-pipeline-model`.
 However, the probabilities vary slightly, due to the additional context information used in training and prediction.
 --

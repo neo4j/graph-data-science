@@ -22,6 +22,8 @@ package org.neo4j.gds.leiden;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
@@ -65,7 +67,8 @@ class LeidenStreamProcTest extends BaseProcTest {
             LeidenStreamProc.class
         );
 
-        runQuery("CALL gds.graph.project('leiden', '*', '*')");
+        var projectQuery = GdsCypher.call("leiden").graphProject().loadEverything(Orientation.UNDIRECTED).yields();
+        runQuery(projectQuery);
     }
 
     @Test
@@ -100,8 +103,9 @@ class LeidenStreamProcTest extends BaseProcTest {
                 assertThat(next.get("communityId")).isInstanceOf(Long.class);
                 assertThat(next.get("intermediateCommunityIds")).isInstanceOf(List.class);
                 List<Long> intermediateCommunities = (List<Long>) next.get("intermediateCommunityIds");
-                assertThat(intermediateCommunities).hasSize(2);
-                assertThat(intermediateCommunities.get(1)).isEqualTo((long) next.get("communityId"));
+                assertThat(intermediateCommunities).hasSize(1);
+                assertThat(intermediateCommunities.get(intermediateCommunities.size() - 1)).isEqualTo((long) next.get(
+                    "communityId"));
                 communities.add((Long) next.get("communityId"));
                 resultRowCount++;
             }

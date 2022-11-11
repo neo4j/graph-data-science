@@ -32,6 +32,7 @@ import org.neo4j.gds.config.RelationshipWeightConfig;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,6 +46,8 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
 
     @Configuration.DoubleRange(min = 0.0)
     double negativeSamplingRatio();
+
+    Optional<String> negativeRelationshipType();
 
     default List<String> sourceNodeLabels() {
         return List.of(ElementProjection.PROJECT_ALL);

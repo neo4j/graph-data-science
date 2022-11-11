@@ -22,6 +22,8 @@ package org.neo4j.gds.leiden;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
@@ -66,7 +68,8 @@ class LeidenStatsProcTest extends BaseProcTest {
             LeidenStatsProc.class
         );
 
-        runQuery("CALL gds.graph.project('leiden', '*', '*')");
+        var projectQuery = GdsCypher.call("leiden").graphProject().loadEverything(Orientation.UNDIRECTED).yields();
+        runQuery(projectQuery);
     }
 
     @Test

@@ -34,6 +34,7 @@ import org.neo4j.gds.extension.Inject;
 
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 
@@ -116,11 +117,11 @@ class PrimTest {
     void testMaximum(String nodeId, String parentA, String parentB, String parentC, String parentD, String parentE) {
         var mst = (new Prim(
             graph,
-            graph,
             Prim.MAX_OPERATOR,
             idFunction.of(nodeId),
             ProgressTracker.NULL_TRACKER
         ).compute());
+        assertThat(mst.totalWeight()).isEqualTo(17L);
         assertTreeIsCorrect(mst, parentA, parentB, parentC, parentD, parentE);
     }
 
@@ -129,11 +130,11 @@ class PrimTest {
     void testMinimum(String nodeId, String parentA, String parentB, String parentC, String parentD, String parentE) {
         var mst = (new Prim(
             graph,
-            graph,
             Prim.MIN_OPERATOR,
             idFunction.of(nodeId),
             ProgressTracker.NULL_TRACKER
         ).compute());
+        assertThat(mst.totalWeight()).isEqualTo(12L);
         assertTreeIsCorrect(mst, parentA, parentB, parentC, parentD, parentE);
     }
 

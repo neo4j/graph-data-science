@@ -34,28 +34,35 @@ public class SpanningTree {
     final long head;
     final long nodeCount;
     final long effectiveNodeCount;
-
     final HugeDoubleArray costToParent;
     final HugeLongArray parent;
+    final double totalWeight;
 
     SpanningTree(
         long head,
         long nodeCount,
         long effectiveNodeCount,
         HugeLongArray parent,
-        HugeDoubleArray costToParent
+        HugeDoubleArray costToParent,
+        double totalWeight
     ) {
         this.head = head;
         this.nodeCount = nodeCount;
         this.effectiveNodeCount = effectiveNodeCount;
         this.parent = parent;
         this.costToParent = costToParent;
+        this.totalWeight = totalWeight;
     }
 
 
     public long effectiveNodeCount() {
         return effectiveNodeCount;
     }
+
+    public double totalWeight() {
+        return totalWeight;
+    }
+
 
     double costToParent(long nodeId) {
         return costToParent.get(nodeId);

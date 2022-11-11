@@ -163,9 +163,9 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
                               ",(d:" + nodeLabel + " {id: %d})" +
                               ",(e:" + nodeLabel + " {id: %d})" +
                               ",(f:" + nodeLabel + " {id: %d})" +
-                              ",(d)-[:test {w: 0.0}]->(b)" +
+                              ",(c)-[:test {w: 0.0}]->(a)" +
                               ",(e)-[:test {w: 0.0}]->(c)" +
-                              ",(c)-[:test {w: 1.0}]->(d)",
+                              ",(e)-[:test {w: 1.0}]->(f)",
             nodeId0, nodeId1, nodeId2, nodeId3, nodeId4, nodeId5);
         var expectedTrain = formatWithLocale(
                                " (a:" + nodeLabel + " {id: %d})" +
@@ -177,11 +177,11 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
                                ",(a)<-[:train]-(b)" +
                                ",(b)<-[:train]-(c)" +
                                ",(d)<-[:train]-(e)" +
-                               ",(e)<-[:train]-(f)" +
+                               ",(d)<-[:train]-(c)" +
                                ",(a)-[:train]->(b)" +
                                ",(b)-[:train]->(c)" +
                                ",(d)-[:train]->(e)" +
-                               ",(e)-[:train]->(f)", nodeId0, nodeId1, nodeId2, nodeId3, nodeId4, nodeId5);
+                               ",(d)-[:train]->(c)", nodeId0, nodeId1, nodeId2, nodeId3, nodeId4, nodeId5);
         var query = GdsCypher.call("graph")
             .algo("gds.alpha.ml.splitRelationships")
             .mutateMode()
@@ -222,8 +222,8 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
                               ",(d:" + nodeLabel + " {id: %d})" +
                               ",(e:" + nodeLabel + " {id: %d})" +
                               ",(f:" + nodeLabel + " {id: %d})" +
-                              ",(c)-[:innerTest {w: 0.0}]->(e)" +
-                              ",(d)-[:innerTest {w: 0.0}]->(b)" +
+                              ",(a)<-[:innerTest {w: 0.0}]-(c)" +
+                              ",(c)<-[:innerTest {w: 0.0}]-(e)" +
                               ",(d)-[:innerTest {w: 1.0}]->(e)", nodeId0, nodeId1, nodeId2, nodeId3, nodeId4, nodeId5);
         var expectedTrain = formatWithLocale("CREATE" +
                                " (a:" + nodeLabel + "{id: %d})" +
@@ -234,10 +234,10 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
                                ",(f:" + nodeLabel + "{id: %d})" +
                                ",(a)<-[:innerTrain]-(b)" +
                                ",(b)<-[:innerTrain]-(c)" +
-                               ",(e)<-[:innerTrain]-(f)" +
                                ",(a)-[:innerTrain]->(b)" +
                                ",(b)-[:innerTrain]->(c)" +
-                               ",(e)-[:innerTrain]->(f)", nodeId0, nodeId1, nodeId2, nodeId3, nodeId4, nodeId5);
+                               ",(c)-[:innerTrain]->(d)" +
+                               ",(d)-[:innerTrain]->(c)", nodeId0, nodeId1, nodeId2, nodeId3, nodeId4, nodeId5);
         var outerSplitQuery = GdsCypher.call("graph")
             .algo("gds.alpha.ml.splitRelationships")
             .mutateMode()

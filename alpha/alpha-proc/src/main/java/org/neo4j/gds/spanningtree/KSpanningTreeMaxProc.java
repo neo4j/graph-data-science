@@ -43,7 +43,7 @@ public class KSpanningTreeMaxProc extends KSpanningTreeProc {
 
     @Procedure(value = "gds.alpha.spanningTree.kmax.write", mode = WRITE)
     @Description(DESCRIPTION)
-    public Stream<Prim.Result> kmax(
+    public Stream<KSpanningTreeWriteResult> kmax(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

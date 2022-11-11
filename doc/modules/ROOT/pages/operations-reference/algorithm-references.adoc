@@ -295,11 +295,11 @@
 | `gds.alpha.sllpa.write`
 | `gds.alpha.sllpa.write.estimate`
 .5+<.^|xref:alpha-algorithms/minimum-weight-spanning-tree.adoc[Spanning Tree]
+| `gds.alpha.spanningTree.mutate`
+| `gds.alpha.spanningTree.stats`
 | `gds.alpha.spanningTree.write`
 | `gds.alpha.spanningTree.kmax.write`
 | `gds.alpha.spanningTree.kmin.write`
-| `gds.alpha.spanningTree.maximum.write`
-| `gds.alpha.spanningTree.minimum.write`
 | xref:alpha-algorithms/adamic-adar.adoc[Adamic Adar] | `_gds.alpha.linkprediction.adamicAdar_`
 | xref:alpha-algorithms/common-neighbors.adoc[Common Neighbors] | `_gds.alpha.linkprediction.commonNeighbors_`
 | xref:alpha-algorithms/preferential-attachment.adoc[Preferential Attachment] | `_gds.alpha.linkprediction.preferentialAttachment_`
@@ -349,7 +349,9 @@
 .2+<.^| xref:algorithms/alpha/modularity.adoc[Modularity Metric]
 | `gds.alpha.modularity.stats`
 | `gds.alpha.modularity.stream`
-.2+<.^| HashGNN
+.4+<.^| HashGNN
 | `gds.alpha.hashgnn.mutate`
 | `gds.alpha.hashgnn.mutate.estimate`
+| `gds.alpha.hashgnn.stream`
+| `gds.alpha.hashgnn.stream.estimate`
 |===

@@ -22,19 +22,22 @@ package org.neo4j.gds.ml.splitting;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.SplitRelationshipGraphStoreMutator;
 import org.neo4j.gds.ml.splitting.EdgeSplitter.SplitResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
+import org.neo4j.values.storable.NumberType;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
@@ -81,15 +84,30 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
                 ComputationResult<SplitRelationships, SplitResult, SplitRelationshipsMutateConfig> computationResult,
                 ExecutionContext executionContext
             ) {
+                Relationships selectedRels;
+                Relationships remainingRels;
                 try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-                    SplitRelationshipGraphStoreMutator.mutate(
-                        computationResult.graphStore(),
-                        computationResult.result(),
-                        computationResult.config()
+                    GraphStore graphStore = computationResult.graphStore();
+                    SplitResult splitResult = computationResult.result();
+                    selectedRels = splitResult.selectedRels().build();
+                    remainingRels = splitResult.remainingRels().build();
+                    SplitRelationshipsBaseConfig config = computationResult.config();
+                    graphStore.addRelationshipType(
+                        config.remainingRelationshipType(),
+                        config.relationshipWeightProperty(),
+                        Optional.of(NumberType.FLOATING_POINT),
+                        remainingRels
+                    );
+
+                    graphStore.addRelationshipType(
+                        config.holdoutRelationshipType(),
+                        Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY),
+                        Optional.of(NumberType.INTEGRAL),
+                        selectedRels
                     );
                 }
-                long holdoutWritten = computationResult.result().selectedRels().topology().elementCount();
-                long remainingWritten = computationResult.result().remainingRels().topology().elementCount();
+                long holdoutWritten = selectedRels.topology().elementCount();
+                long remainingWritten = remainingRels.topology().elementCount();
                 resultBuilder.withRelationshipsWritten(holdoutWritten + remainingWritten);
             }
         };

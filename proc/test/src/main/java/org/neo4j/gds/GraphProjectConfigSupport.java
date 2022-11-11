@@ -79,6 +79,20 @@ public interface GraphProjectConfigSupport {
         );
     }
 
+    default GraphProjectFromStoreConfig withNameAndProjections(
+        String userName,
+        String graphName,
+        NodeProjections nodes,
+        RelationshipProjections rels
+    ) {
+        return ImmutableGraphProjectFromStoreConfig.of(
+            userName,
+            graphName,
+            nodes,
+            rels
+        );
+    }
+
     default GraphProjectFromCypherConfig emptyWithNameCypher(String userName, String graphName, List<String> nodeProperties
     ) {
         return withNameAndRelationshipQuery(

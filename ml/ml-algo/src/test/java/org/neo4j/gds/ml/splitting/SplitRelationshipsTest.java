@@ -62,14 +62,14 @@ class SplitRelationshipsTest {
         "        (a)-[:REL]->(f)," +
         "        (a)-[:REL]->(g)," +
         "        (b)-[:REL]->(c)," +
-        "        (b)-[:REL]->(a)," +
         "        (b)-[:REL]->(d)," +
         "        (b)-[:REL]->(e)," +
         "        (b)-[:REL]->(f)," +
-        "        (b)-[:REL]->(g)," +
-        "        (c)-[:REL]->(a)," +
-        "        (c)-[:REL]->(b)," +
-        "        (c)-[:REL]->(d)";
+        "        (b)-[:REL2]->(g)," +
+        "        (c)-[:REL2]->(d)," +
+        "        (c)-[:REL2]->(e)," +
+        "        (c)-[:REL2]->(f)," +
+        "        (c)-[:REL2]->(g)";
 
     @Inject
     GraphStore graphStore;
@@ -79,6 +79,7 @@ class SplitRelationshipsTest {
         var config = SplitRelationshipsBaseConfigImpl.builder()
             .holdoutFraction(0.2)
             .negativeSamplingRatio(1.0)
+            .relationshipTypes(List.of("REL", "REL2"))
             .holdoutRelationshipType("TEST")
             .remainingRelationshipType("REST")
             .randomSeed(1337L)
@@ -88,7 +89,8 @@ class SplitRelationshipsTest {
 
         EdgeSplitter.SplitResult result = splitter.compute();
 
-        assertThat(result.selectedRels().topology().elementCount()).isEqualTo(6);
+        assertThat(result.selectedRels().build().topology().elementCount()).isEqualTo(6);
+        assertThat(result.remainingRels().build().topology().elementCount()).isEqualTo(24);
     }
 
     @Test

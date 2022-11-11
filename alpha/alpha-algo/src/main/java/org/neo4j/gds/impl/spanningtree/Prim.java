@@ -22,12 +22,10 @@ package org.neo4j.gds.impl.spanningtree;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.function.DoubleUnaryOperator;
 
@@ -47,14 +45,13 @@ public class Prim extends Algorithm<SpanningTree> {
     public static final DoubleUnaryOperator MAX_OPERATOR = (w) -> -w;
     public static final DoubleUnaryOperator MIN_OPERATOR = (w) -> w;
     private final Graph graph;
-    private final int nodeCount;
+    private final long nodeCount;
     private final DoubleUnaryOperator minMax;
-    private final int startNodeId;
+    private final long startNodeId;
 
     private SpanningTree spanningTree;
 
     public Prim(
-        IdMap idMap,
         Graph graph,
         DoubleUnaryOperator minMax,
         long startNodeId,
@@ -62,9 +59,9 @@ public class Prim extends Algorithm<SpanningTree> {
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.nodeCount = Math.toIntExact(idMap.nodeCount());
+        this.nodeCount = graph.nodeCount();
         this.minMax = minMax;
-        this.startNodeId = (int) graph.toMappedNodeId(startNodeId);
+        this.startNodeId = startNodeId;
     }
 
     @Override
@@ -75,12 +72,13 @@ public class Prim extends Algorithm<SpanningTree> {
         HugeLongPriorityQueue queue = HugeLongPriorityQueue.min(nodeCount);
         BitSet visited = new BitSet(nodeCount);
         parent.fill(-1);
-
+        double totalWeight = 0;
         queue.add(startNodeId, 0.0);
         long effectiveNodeCount = 0;
         while (!queue.isEmpty() && terminationFlag.running()) {
             long node = queue.top();
             double cost = queue.cost(node);
+            totalWeight += cost;
             queue.pop();
 
             costToParent.set(node, minMax.applyAsDouble(cost));
@@ -109,7 +107,14 @@ public class Prim extends Algorithm<SpanningTree> {
             });
             progressTracker.logProgress();
         }
-        this.spanningTree = new SpanningTree(startNodeId, nodeCount, effectiveNodeCount, parent, costToParent);
+        this.spanningTree = new SpanningTree(
+            startNodeId,
+            nodeCount,
+            effectiveNodeCount,
+            parent,
+            costToParent,
+            minMax.applyAsDouble(totalWeight)
+        );
         progressTracker.endSubTask();
         return this.spanningTree;
     }
@@ -123,42 +128,5 @@ public class Prim extends Algorithm<SpanningTree> {
         spanningTree = null;
     }
 
-    public static class Result {
 
-        public final long preProcessingMillis;
-        public final long computeMillis;
-        public final long writeMillis;
-        public final long effectiveNodeCount;
-
-        public Result(
-            long preProcessingMillis,
-            long computeMillis,
-            long writeMillis,
-            long effectiveNodeCount
-        ) {
-            this.preProcessingMillis = preProcessingMillis;
-            this.computeMillis = computeMillis;
-            this.writeMillis = writeMillis;
-            this.effectiveNodeCount = effectiveNodeCount;
-        }
-    }
-
-    public static class Builder extends AbstractResultBuilder<Result> {
-
-        protected long effectiveNodeCount;
-
-        public Builder withEffectiveNodeCount(long effectiveNodeCount) {
-            this.effectiveNodeCount = effectiveNodeCount;
-            return this;
-        }
-
-        public Result build() {
-            return new Result(
-                preProcessingMillis,
-                computeMillis,
-                writeMillis,
-                effectiveNodeCount
-            );
-        }
-    }
 }

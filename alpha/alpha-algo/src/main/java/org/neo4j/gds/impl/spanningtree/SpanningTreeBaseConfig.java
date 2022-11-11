@@ -19,20 +19,23 @@
  */
 package org.neo4j.gds.impl.spanningtree;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
-import org.neo4j.gds.config.WritePropertyConfig;
+import org.neo4j.gds.config.SourceNodeConfig;
 
 import java.util.function.DoubleUnaryOperator;
 
 public interface SpanningTreeBaseConfig extends
     AlgoBaseConfig,
-    WritePropertyConfig,
-    RelationshipWeightConfig
-{
-    long startNodeId();
-
-    @Configuration.Parameter
-    DoubleUnaryOperator minMax();
+    RelationshipWeightConfig,
+    SourceNodeConfig {
+    
+    @Value.Default
+    @Configuration.ConvertWith(method = "org.neo4j.gds.impl.spanningtree.SpanningTreeCompanion#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.impl.spanningtree.SpanningTreeCompanion#toString")
+    default DoubleUnaryOperator objective() {
+        return Prim.MIN_OPERATOR;
+    }
 }

@@ -23,23 +23,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.NonReleasingTaskRegistry;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
-import org.neo4j.gds.core.utils.progress.TaskRegistry;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.HashMap;
-import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -81,7 +72,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
         String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.spanningTree.kmax")
             .writeMode()
-            .addParameter("startNodeId", idFunction.of("a"))
+            .addParameter("sourceNode", idFunction.of("a"))
             .addParameter("relationshipWeightProperty", "w")
             .addParameter("k", 2)
             .yields("preProcessingMillis", "computeMillis", "writeMillis");
@@ -110,7 +101,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
         String query = GdsCypher.call(GRAPH_NAME)
             .algo("gds.alpha.spanningTree.kmin")
             .writeMode()
-            .addParameter("startNodeId", idFunction.of("a"))
+            .addParameter("sourceNode", idFunction.of("a"))
             .addParameter("relationshipWeightProperty", "w")
             .addParameter("k", 2)
             .yields("preProcessingMillis", "computeMillis", "writeMillis");
@@ -134,41 +125,4 @@ class KSpanningTreeProcTest extends BaseProcTest {
         assertNotEquals(communities.get("a"), communities.get("b"));
     }
 
-    @Test
-    void failOnInvalidStartNode() {
-        String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.spanningTree.kmin")
-            .writeMode()
-            .addParameter("startNodeId", 42)
-            .addParameter("k", 2)
-            .yields();
-
-        assertError(query, "startNode with id 42 was not loaded");
-    }
-
-    @Test
-    void shouldTrackProgress() {
-        TestProcedureRunner.applyOnProcedure(db, KSpanningTreeMaxProc.class, proc -> {
-            var taskStore = new GlobalTaskStore();
-
-            proc.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore, jobId));
-            proc.nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(
-                TransactionContext.of(proc.databaseService, proc.procedureTransaction)
-            );
-
-            proc.kmax( // kmin or kmax doesn't matter
-                GRAPH_NAME,
-                Map.of(
-                    "writeProperty", "myProp",
-                    "k", 1L,
-                    "startNodeId", 0L
-                )
-            );
-
-            assertThat(taskStore.taskStream().map(Task::description)).contains(
-                "KSpanningTree",
-                "KSpanningTree :: WriteNodeProperties"
-            );
-        });
-    }
 }

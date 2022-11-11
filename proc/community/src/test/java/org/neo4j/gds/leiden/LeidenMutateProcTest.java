@@ -22,6 +22,8 @@ package org.neo4j.gds.leiden;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -73,7 +75,8 @@ class LeidenMutateProcTest  extends BaseProcTest {
             GraphStreamNodePropertiesProc.class
         );
 
-        runQuery("CALL gds.graph.project('leiden', '*', '*')");
+        var projectQuery = GdsCypher.call("leiden").graphProject().loadEverything(Orientation.UNDIRECTED).yields();
+        runQuery(projectQuery);
     }
 
     @Test
@@ -87,7 +90,7 @@ class LeidenMutateProcTest  extends BaseProcTest {
             communitySet.add(communities.longValue(nodeId));
             return true;
         });
-        assertThat(communitySet).containsExactly(2L, 3L);
+        assertThat(communitySet).containsExactly(3L, 6L);
 
     }
 

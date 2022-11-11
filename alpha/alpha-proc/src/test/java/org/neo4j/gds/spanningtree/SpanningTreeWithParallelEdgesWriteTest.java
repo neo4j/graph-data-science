@@ -29,7 +29,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ParallelEdgeTest extends BaseProcTest {
+public class SpanningTreeWithParallelEdgesWriteTest extends BaseProcTest {
 
     @Neo4jGraph
     static final String DB_CYPHER =
@@ -41,7 +41,7 @@ public class ParallelEdgeTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(SpanningTreeProcMin.class, SpanningTreeProcMax.class, GraphProjectProc.class);
+        registerProcedures(SpanningTreeWriteProc.class, GraphProjectProc.class);
     }
 
     @Test
@@ -60,12 +60,12 @@ public class ParallelEdgeTest extends BaseProcTest {
         runQuery(project);
 
         var mstQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.spanningTree.minimum")
+            .algo("gds.alpha.spanningTree")
             .writeMode()
             .addParameter("weightWriteProperty", "writeCost")
             .addParameter("relationshipWeightProperty", "cost")
             .addParameter("writeProperty", "MINST")
-            .addParameter("startNodeId", 0)
+            .addParameter("sourceNode", 0)
             .yields();
         runQuery(mstQuery);
         

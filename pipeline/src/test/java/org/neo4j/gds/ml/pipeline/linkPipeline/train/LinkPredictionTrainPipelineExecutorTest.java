@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.assertj.core.data.Offset;
-import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,6 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DatabaseId;
@@ -56,7 +54,6 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
 import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.metrics.classification.OutOfBagError;
-import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
@@ -81,6 +78,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -176,95 +174,11 @@ final class LinkPredictionTrainPipelineExecutorTest {
             runQuery(GdsCypher.call(GRAPH_NAME)
                 .graphProject()
                 .withNodeLabel("N")
-                .withRelationshipType("REL", Orientation.UNDIRECTED)
+                .withRelationshipType("REL", UNDIRECTED)
                 .withNodeProperties(List.of("scalar", "array"), DefaultValue.DEFAULT)
                 .yields());
 
             graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), GRAPH_NAME).graphStore();
-        }
-
-        @Test
-        void testProcedureAndLinkFeatures() {
-            LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
-
-            pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder()
-                .validationFolds(2)
-                .negativeSamplingRatio(1)
-                .trainFraction(0.5)
-                .testFraction(0.5)
-                .build());
-
-            pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of(
-                "patience",
-                5,
-                "tolerance",
-                0.00001,
-                "penalty",
-                100
-            )));
-            pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of(
-                "patience",
-                5,
-                "tolerance",
-                0.00001,
-                "penalty",
-                1
-            )));
-
-            pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
-
-            var config = LinkPredictionTrainConfigImpl.builder()
-                .modelUser(getUsername())
-                .modelName("model")
-                .graphName(GRAPH_NAME)
-                .targetRelationshipType("REL")
-                .sourceNodeLabel("N")
-                .targetNodeLabel("N")
-                .pipeline("DUMMY")
-                .negativeClassWeight(1)
-                .randomSeed(1337L)
-                .build();
-
-            TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-                var result = new LinkPredictionTrainPipelineExecutor(
-                    pipeline,
-                    config,
-                    caller.executionContext(),
-                    graphStore,
-                    ProgressTracker.NULL_TRACKER
-                ).compute();
-
-                var actualModel = result.model();
-                var logisticRegressionData = (LogisticRegressionData) actualModel.data();
-
-                assertThat(actualModel.name()).isEqualTo("model");
-
-                assertThat(actualModel.algoType()).isEqualTo(LinkPredictionTrainingPipeline.MODEL_TYPE);
-                assertThat(actualModel.trainConfig()).isEqualTo(config);
-                // length of the linkFeatures
-                assertThat(logisticRegressionData.weights().data().totalSize()).isEqualTo(6);
-
-                var customInfo = actualModel.customInfo();
-                assertThat(result.trainingStatistics().getValidationStats(LinkMetric.AUCPR))
-                    .hasSize(2)
-                    .satisfies(scores ->
-                        assertThat(scores.get(0).avg()).isNotCloseTo(
-                            scores.get(1).avg(),
-                            Percentage.withPercentage(0.2)
-                        )
-                    );
-
-                assertThat(customInfo.bestParameters())
-                    .usingRecursiveComparison()
-                    .isEqualTo(LogisticRegressionTrainConfig.of(Map.of(
-                        "penalty",
-                        1,
-                        "patience",
-                        5,
-                        "tolerance",
-                        0.00001
-                    )));
-            });
         }
 
         @Test
@@ -308,8 +222,8 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 assertThat(actualModel.customInfo().toMap()).containsEntry(
                     "metrics",
                     Map.of("OUT_OF_BAG_ERROR", Map.of(
-                            "test", 0.6666666666666666,
-                            "validation", Map.of("avg", 0.6666666666666666, "max", 0.6666666666666666, "min", 0.6666666666666666)
+                            "test", 0.5833333333333334,
+                            "validation", Map.of("avg", 0.5, "max", 0.5, "min", 0.5)
                         )
                     )
                 );
@@ -524,13 +438,13 @@ final class LinkPredictionTrainPipelineExecutorTest {
                         "Link Prediction Train Pipeline :: Select best model :: Best trial was Trial 1 with main validation metric 1.0000",
                         "Link Prediction Train Pipeline :: Select best model :: Finished",
                         "Link Prediction Train Pipeline :: Train best model :: Start",
-                        "Link Prediction Train Pipeline :: Train best model :: Epoch 1 with loss 0.6603",
-                        "Link Prediction Train Pipeline :: Train best model :: Epoch 2 with loss 0.6296",
-                        "Link Prediction Train Pipeline :: Train best model :: Epoch 3 with loss 0.6007",
-                        "Link Prediction Train Pipeline :: Train best model :: Epoch 98 with loss 0.1622",
-                        "Link Prediction Train Pipeline :: Train best model :: Epoch 99 with loss 0.1618",
-                        "Link Prediction Train Pipeline :: Train best model :: Epoch 100 with loss 0.1614",
-                        "Link Prediction Train Pipeline :: Train best model :: terminated after 100 out of 100 epochs. Initial loss: 0.6931, Last loss: 0.1614. Did not converge",
+                        "Link Prediction Train Pipeline :: Train best model :: Epoch 1 with loss 0.6474",
+                        "Link Prediction Train Pipeline :: Train best model :: Epoch 2 with loss 0.6053",
+                        "Link Prediction Train Pipeline :: Train best model :: Epoch 3 with loss 0.5665",
+                        "Link Prediction Train Pipeline :: Train best model :: Epoch 98 with loss 0.1239",
+                        "Link Prediction Train Pipeline :: Train best model :: Epoch 99 with loss 0.1236",
+                        "Link Prediction Train Pipeline :: Train best model :: Epoch 100 with loss 0.1233",
+                        "Link Prediction Train Pipeline :: Train best model :: terminated after 100 out of 100 epochs. Initial loss: 0.6931, Last loss: 0.1233. Did not converge",
                         "Link Prediction Train Pipeline :: Train best model 100%",
                         "Link Prediction Train Pipeline :: Train best model :: Finished",
                         "Link Prediction Train Pipeline :: Compute train metrics :: Start",
@@ -676,93 +590,10 @@ final class LinkPredictionTrainPipelineExecutorTest {
     }
 
     @Nested
-    class PythonTest extends BaseProcTest {
-
-        @Neo4jGraph
-        private static final String GRAPH =
-            "CREATE" +
-            "(a: Node {age: 2})," +
-            "(b: Node {age: 3})," +
-            "(c: Node {age: 2})," +
-            "(d: Node {age: 1})," +
-            "(e: Node {age: 2})," +
-            "(a)-[:REL]->(b)," +
-            "(a)-[:REL]->(c)," +
-            "(b)-[:REL]->(c)," +
-            "(b)-[:REL]->(a)," +
-            "(c)-[:REL]->(a)," +
-            "(c)-[:REL]->(b)";
-
-        public static final String GRAPH_NAME = "G";
-
-        private GraphStore graphStore;
-
-        @BeforeEach
-        void setup() throws Exception {
-            registerProcedures(
-                GraphProjectProc.class,
-                GraphStreamNodePropertiesProc.class
-            );
-
-            runQuery(GdsCypher.call(GRAPH_NAME)
-                .graphProject()
-                .withNodeLabel("Node")
-                .withRelationshipType("REL", Orientation.UNDIRECTED)
-                .withNodeProperties(List.of("age"), DefaultValue.DEFAULT)
-                .yields());
-
-            graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), GRAPH_NAME).graphStore();
-        }
-
-        @Test
-        void pygraph() {
-            LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
-
-            pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder()
-                .validationFolds(2)
-                //0.33 fails
-                .trainFraction(0.34)
-                .testFraction(0.2)
-                .build());
-
-            pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of(
-                "penalty",
-                1
-            )));
-
-            pipeline.addNodePropertyStep(new NodeIdPropertyStep(graphStore, "degree", "rank"));
-
-            pipeline.addFeatureStep(new L2FeatureStep(List.of("rank")));
-
-            var config = LinkPredictionTrainConfigImpl.builder()
-                .modelUser(getUsername())
-                .modelName("model")
-                .graphName(GRAPH_NAME)
-                .targetRelationshipType("REL")
-                .sourceNodeLabel("Node")
-                .targetNodeLabel("Node")
-                .pipeline("pipe")
-                .randomSeed(42L)
-                .build();
-
-            TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-                var result = new LinkPredictionTrainPipelineExecutor(
-                    pipeline,
-                    config,
-                    caller.executionContext(),
-                    graphStore,
-                    ProgressTracker.NULL_TRACKER
-                ).compute();
-            });
-
-        }
-    }
-
-    @Nested
     @GdlExtension
     class BiPartiteTest {
 
-        @GdlGraph
+        @GdlGraph(orientation = UNDIRECTED)
         private static final String GRAPH =
             "CREATE " +
             "(p1:P {height: 44})," +
@@ -865,7 +696,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
 
             // mainly a smoke test
             assertThat(result.trainingStatistics().winningModelOuterTrainMetrics().get(LinkMetric.AUCPR)).isCloseTo(
-                0.666,
+                0.375,
                 Offset.offset(1e-3)
             );
         }

@@ -20,14 +20,18 @@
 package org.neo4j.gds.impl.spanningtree;
 
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.function.DoubleUnaryOperator;
 
 @Configuration
-public interface KSpanningTreeConfig extends SpanningTreeBaseConfig {
+public interface KSpanningTreeConfig extends SpanningTreeBaseConfig, WritePropertyConfig {
 
     long k();
+
+    @Configuration.Parameter
+    DoubleUnaryOperator minMax();
 
     @Override
     default String writeProperty() {

@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.PrimitiveIterator;
 import java.util.function.Function;
+import java.util.stream.LongStream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -128,7 +129,29 @@ public final class PartitionUtils {
         return degreePartitionWithBatchSize(graph.nodeIterator(), graph::degree, batchSize, taskCreator);
     }
 
-    public static <TASK> List<TASK> degreePartitionWithBatchSize(Graph graph, long batchSize, Function<DegreePartition, TASK> taskCreator) {
+    public static <TASK> List<TASK> customDegreePartitionWithBatchSize(
+        Graph graph,
+        int concurrency,
+        Function<Long, Integer> customDegreeFunction,
+        Function<DegreePartition, TASK> taskCreator,
+        Optional<Integer> minBatchSize,
+        Optional<Long> weightSum
+    ) {
+        var actualWeightSum = weightSum.orElse(
+            LongStream.range(0, graph.nodeCount()).map(nodeId -> customDegreeFunction.apply(nodeId).longValue()).sum()
+        );
+        var batchSize = Math.max(
+            minBatchSize.orElse(ParallelUtil.DEFAULT_BATCH_SIZE),
+            BitUtil.ceilDiv(actualWeightSum, concurrency)
+        );
+        return degreePartitionWithBatchSize(graph.nodeIterator(), customDegreeFunction::apply, batchSize, taskCreator);
+    }
+
+    public static <TASK> List<TASK> degreePartitionWithBatchSize(
+        Graph graph,
+        long batchSize,
+        Function<DegreePartition, TASK> taskCreator
+    ) {
         return degreePartitionWithBatchSize(graph.nodeIterator(), graph::degree, batchSize, taskCreator);
     }
 
