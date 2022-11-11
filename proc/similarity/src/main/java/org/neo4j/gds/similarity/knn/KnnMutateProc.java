@@ -21,6 +21,7 @@ package org.neo4j.gds.similarity.knn;
 
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -143,7 +144,7 @@ public class KnnMutateProc extends AlgoBaseProc<Knn, Knn.Result, KnnMutateConfig
                         relationshipType,
                         Optional.of(config.mutateProperty()),
                         Optional.of(NumberType.FLOATING_POINT),
-                        similarityGraphResult.similarityGraph().schema().relationshipSchema().orientation(relationshipType),
+                        Orientation.NATURAL,
                         resultRelationships
                     );
             }
