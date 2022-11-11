@@ -21,11 +21,16 @@ package org.neo4j.gds.impl.spanningtree;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -36,6 +41,8 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 
 /**
@@ -72,13 +79,10 @@ class PrimTest {
         ", (d)-[:TYPE {cost: 6.0}]->(e)";
 
     private static long a, b, c, d, e, y, z;
-
     @Inject
     private Graph graph;
-
     @Inject
     private IdFunction idFunction;
-
     private static final String ROOT = "-1";
     @BeforeEach
     void setUp() {
@@ -138,6 +142,34 @@ class PrimTest {
         assertTreeIsCorrect(mst, parentA, parentB, parentC, parentD, parentE);
     }
 
+    @Test
+    void shouldLogProgress() {
+        var config = SpanningTreeStatsConfigImpl.builder().
+            sourceNode(a).
+            relationshipWeightProperty("cost").
+            build();
+        var factory = new SpanningTreeAlgorithmFactory<>();
+        var log = Neo4jProxy.testLog();
+        var progressTracker = new TestProgressTracker(
+            factory.progressTask(graph, config),
+            log,
+            1,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+        factory.build(graph, config, progressTracker).compute();
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "SpanningTree :: Start",
+                "SpanningTree 16%",
+                "SpanningTree 41%",
+                "SpanningTree 66%",
+                "SpanningTree 83%",
+                "SpanningTree 100%",
+                "SpanningTree :: Finished"
+            );
+    }
 
     private void assertTreeIsCorrect(
         SpanningTree mst,

@@ -28,6 +28,8 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 public class SpanningTreeAlgorithmFactory<CONFIG extends SpanningTreeBaseConfig> extends GraphAlgorithmFactory<Prim, CONFIG> {
 
@@ -57,4 +59,8 @@ public class SpanningTreeAlgorithmFactory<CONFIG extends SpanningTreeBaseConfig>
             .perNode("visited", MemoryUsage::sizeOfBitset)
             .build();
     }
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.leaf(taskName(), graph.relationshipCount());
+    }
+
 }

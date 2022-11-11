@@ -28,6 +28,7 @@ import com.squareup.javapoet.TypeSpec;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import javax.lang.model.SourceVersion;
@@ -59,6 +60,7 @@ class AlgorithmGenerator extends PregelGenerator {
 
         typeSpecBuilder.addField(pregelJobField());
         typeSpecBuilder.addMethod(constructor());
+        typeSpecBuilder.addMethod(setTerminatonFlag());
         typeSpecBuilder.addMethod(computeMethod());
         typeSpecBuilder.addMethod(releaseMethod());
 
@@ -115,6 +117,17 @@ class AlgorithmGenerator extends PregelGenerator {
             .addStatement("return pregelJob.run()")
             .build();
     }
+
+    private MethodSpec setTerminatonFlag() {
+        return MethodSpec.methodBuilder("setTerminationFlag")
+            .addAnnotation(Override.class)
+            .addParameter(TerminationFlag.class, "terminationFlag")
+            .addModifiers(Modifier.PUBLIC)
+            .addStatement("super.setTerminationFlag(terminationFlag)")
+            .addStatement("pregelJob.setTerminationFlag(terminationFlag)")
+            .build();
+    }
+
 
     private MethodSpec releaseMethod() {
         return MethodSpec.methodBuilder("release")
