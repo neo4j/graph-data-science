@@ -126,3 +126,18 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 | `gds.beta.node2vec.write`
 | `gds.beta.node2vec.write`.estimate
 |===
+
+[[embeddings-alpha-tier]]
+=== Alpha tier
+
+.List of all beta node embedding algorithms in the GDS library. Functions are written in _italic_.
+[[embeddings-table-beta]]
+[role=procedure-listing]
+[opts=header,cols="1, 2"]
+|===
+|Algorithm name | Operation
+.4+<.^|xref:machine-learning/node-embeddings/hashgnn.adoc[HashGNN]
+| `gds.alpha.hashgnn.mutate`
+| `gds.alpha.hashgnn.mutate.estimate`
+| `gds.alpha.hashgnn.stream`
+| `gds.alpha.hashgnn.stream.estimate`

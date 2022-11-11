@@ -270,6 +270,11 @@
 .2+<.^|xref:algorithms/harmonic-centrality.adoc[Harmonic Centrality]
 | `gds.alpha.closeness.harmonic.stream`
 | `gds.alpha.closeness.harmonic.write`
+.4+<.^|xref:machine-learning/node-embeddings/hashgnn.adoc[HashGNN]
+| `gds.alpha.hashgnn.mutate`
+| `gds.alpha.hashgnn.mutate.estimate`
+| `gds.alpha.hashgnn.stream`
+| `gds.alpha.hashgnn.stream.estimate`
 .8+<.^|xref:algorithms/hits.adoc[HITS]
 | `gds.alpha.hits.mutate`
 | `gds.alpha.hits.mutate.estimate`
@@ -355,9 +360,4 @@
 .2+<.^| xref:algorithms/alpha/modularity.adoc[Modularity Metric]
 | `gds.alpha.modularity.stats`
 | `gds.alpha.modularity.stream`
-.4+<.^| HashGNN
-| `gds.alpha.hashgnn.mutate`
-| `gds.alpha.hashgnn.mutate.estimate`
-| `gds.alpha.hashgnn.stream`
-| `gds.alpha.hashgnn.stream.estimate`
 |===
