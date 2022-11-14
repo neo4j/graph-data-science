@@ -73,7 +73,7 @@ class MLPClassifierObjectiveTest {
         var labels = HugeIntArray.of(1,2,3);
 
 
-        var objective = new MLPClassifierObjective(classifier, features, labels, 0.1, 0);
+        var objective = new MLPClassifierObjective(classifier, features, labels, 0.1, 0, new double[]{1,1,1});
         var batch = new RangeBatch(0,2,3);
         var ctx = new ComputationContext();
 

@@ -94,33 +94,39 @@ class LogisticRegressionObjectiveTest {
         Arrays.setAll(trainedReducedClassifier.data().weights().data().data(), i -> i);
         Arrays.setAll(trainedReducedClassifier.data().bias().data().data(), i -> i == 0 ? 0.4 : 0.8);
         var features = FeaturesFactory.wrap(featuresHOA);
+
+        var classWeights = new double[]{1,1};
         this.standardObjective = new LogisticRegressionObjective(
             standardClassifier,
             1.0,
             features,
             labels,
-            0
+            0,
+            classWeights
         );
         this.reducedObjective = new LogisticRegressionObjective(
             reducedClassifier,
             1.0,
             features,
             labels,
-            0
+            0,
+            classWeights
         );
         this.trainedStandardObjective = new LogisticRegressionObjective(
             trainedStandardClassifier,
             1.0,
             features,
             labels,
-            0
+            0,
+            classWeights
         );
         this.trainedReducedObjective = new LogisticRegressionObjective(
             trainedReducedClassifier,
             1.0,
             features,
             labels,
-            0
+            0,
+            classWeights
         );
     }
 
@@ -276,13 +282,13 @@ class LogisticRegressionObjectiveTest {
     void shouldParseFocusWeight() {
         var LRObjective = new LogisticRegressionObjective(LogisticRegressionClassifier.from(
             LogisticRegressionData.standard(1, 1)
-        ), 0.0, new TestFeatures(new double[1][1]), HugeIntArray.newArray(1), 0);
+        ), 0.0, new TestFeatures(new double[1][1]), HugeIntArray.newArray(1), 0, new double[]{1});
         var reducedCrossEntropyLoss = LRObjective.crossEntropyLoss(new SingletonBatch(0));
         assertThat(reducedCrossEntropyLoss).isNotInstanceOf(ReducedFocalLoss.class);
 
         var LRObjectiveWithFocus = new LogisticRegressionObjective(LogisticRegressionClassifier.from(
             LogisticRegressionData.standard(1, 1)
-        ), 0.0, new TestFeatures(new double[1][1]), HugeIntArray.newArray(1), 5);
+        ), 0.0, new TestFeatures(new double[1][1]), HugeIntArray.newArray(1), 5, new double[]{1});
         var reducedFocalLoss = LRObjectiveWithFocus.crossEntropyLoss(new SingletonBatch(0));
         assertThat(reducedFocalLoss).isInstanceOf(ReducedFocalLoss.class);
     }

@@ -39,9 +39,10 @@ public class ReducedFocalLoss extends ReducedCrossEntropyLoss {
         Weights<Vector> bias,
         Variable<Matrix> features,
         Variable<Vector> labels,
-        double focusWeight
+        double focusWeight,
+        double[] classWeights
     ) {
-        super(predictions,weights,bias,features,labels);
+        super(predictions,weights,bias,features,labels, classWeights);
         this.focusWeight = focusWeight;
     }
 
@@ -50,9 +51,9 @@ public class ReducedFocalLoss extends ReducedCrossEntropyLoss {
     }
 
     @Override
-    double computeIndividualLoss(double predictedProbabilityForTrueClass) {
+    double computeIndividualLoss(double predictedProbabilityForTrueClass, int trueClass) {
         double focalFactor = Math.pow(1 - predictedProbabilityForTrueClass, focusWeight);
-        return focalFactor * Math.log(predictedProbabilityForTrueClass);
+        return classWeights[trueClass] * focalFactor * Math.log(predictedProbabilityForTrueClass);
     }
 
     @Override
@@ -60,12 +61,13 @@ public class ReducedFocalLoss extends ReducedCrossEntropyLoss {
         int numberOfExamples,
         double predictedClassProbability,
         double indicatorIsTrueClass,
-        double predictedProbabilityForTrueClass
+        double predictedProbabilityForTrueClass,
+        int trueClass
     ) {
         var predictedProbabilityForWrongClasses = 1.0 - predictedProbabilityForTrueClass;
         var chainRuleGradient = Math.pow(predictedProbabilityForWrongClasses, focusWeight - 1.0);
 
-        var focalLossPerExample = (focusWeight * chainRuleGradient * Math.log(predictedProbabilityForTrueClass)
+        var focalLossPerExample = classWeights[trueClass] * (focusWeight * chainRuleGradient * Math.log(predictedProbabilityForTrueClass)
                                    - chainRuleGradient * predictedProbabilityForWrongClasses / predictedProbabilityForTrueClass)
                                   * (predictedProbabilityForTrueClass * (indicatorIsTrueClass - predictedClassProbability)) / numberOfExamples;
         return focalLossPerExample;

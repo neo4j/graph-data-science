@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.models.mlp;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -46,6 +47,19 @@ class MLPClassifierTrainConfigTest {
     void checkHiddenLayerSizesTyoe() {
         assertThatThrownBy(() -> MLPClassifierTrainConfig.of(Map.of("hiddenLayerSizes", 42)))
             .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void shouldInitializeClassWeights() {
+        Assertions.assertThat(MLPClassifierTrainConfigImpl.builder().build().initializeClassWeights(5))
+            .isEqualTo(new double[]{1,1,1,1,1});
+
+        Assertions.assertThat(MLPClassifierTrainConfigImpl.builder().classWeights(List.of(0.8, 0.2)).build().initializeClassWeights(5))
+            .isEqualTo(new double[]{0.8, 0.2});
+
+        assertThatThrownBy(() -> MLPClassifierTrainConfigImpl.builder().classWeights(List.of(0.5, 0.2)).build())
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("The class weights [0.5, 0.2] sum up to 0.7, they should sum up to 1 instead.");
     }
 
 }

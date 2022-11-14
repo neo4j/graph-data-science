@@ -49,14 +49,18 @@ public class MLPClassifierObjective implements Objective<MLPClassifierData> {
 
     private final double focusWeight;
 
+    private final double[] classWeights;
 
-    public MLPClassifierObjective(MLPClassifier classifier, Features features, HugeIntArray labels, double penalty, double focusWeight
+
+    public MLPClassifierObjective(MLPClassifier classifier, Features features, HugeIntArray labels, double penalty, double focusWeight,
+                                  double[] classWeights
     ) {
         this.classifier = classifier;
         this.features = features;
         this.labels = labels;
         this.penalty = penalty;
         this.focusWeight = focusWeight;
+        this.classWeights = classWeights;
     }
 
     @Override
@@ -81,10 +85,11 @@ public class MLPClassifierObjective implements Objective<MLPClassifierData> {
         if (focusWeight == 0) {
             return new CrossEntropyLoss(
                 predictions,
-                batchLabels
+                batchLabels,
+                classWeights
             );
         } else {
-            return new FocalLoss(predictions, batchLabels, focusWeight);
+            return new FocalLoss(predictions, batchLabels, focusWeight, classWeights);
         }
     }
 

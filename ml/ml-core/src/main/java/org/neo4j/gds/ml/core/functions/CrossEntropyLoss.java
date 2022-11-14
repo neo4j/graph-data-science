@@ -37,10 +37,13 @@ public class CrossEntropyLoss extends AbstractVariable<Scalar> {
     private final Variable<Matrix> predictions;
     private final Variable<Vector> targets;
 
-    public CrossEntropyLoss(Variable<Matrix> predictions, Variable<Vector> targets) {
+    protected final double[] classWeights;
+
+    public CrossEntropyLoss(Variable<Matrix> predictions, Variable<Vector> targets, double[] classWeights) {
         super(List.of(predictions, targets), Dimensions.scalar());
         this.predictions = predictions;
         this.targets = targets;
+        this.classWeights = classWeights;
     }
 
     public static long sizeInBytes() {
@@ -57,15 +60,15 @@ public class CrossEntropyLoss extends AbstractVariable<Scalar> {
             var trueClass = (int) targetsVector.dataAt(row);
             var predictedProbabilityForTrueClass = predictionsMatrix.dataAt(row, trueClass);
             if (predictedProbabilityForTrueClass > 0) {
-                result += computeIndividualLoss(predictedProbabilityForTrueClass);
+                result += computeIndividualLoss(predictedProbabilityForTrueClass, trueClass);
             }
         }
 
         return new Scalar(-result / predictionsMatrix.rows());
     }
 
-    double computeIndividualLoss(double predictedProbabilityForTrueClass) {
-        return Math.log(predictedProbabilityForTrueClass);
+    double computeIndividualLoss(double predictedProbabilityForTrueClass, int trueClass) {
+        return classWeights[trueClass] * Math.log(predictedProbabilityForTrueClass);
     }
 
     @Override
@@ -82,7 +85,7 @@ public class CrossEntropyLoss extends AbstractVariable<Scalar> {
 
                 // Compare to a threshold value rather than `0`, very small probability can result in setting infinite gradient values.
                 if (predictedProbabilityForTrueClass > PREDICTED_PROBABILITY_THRESHOLD) {
-                    gradient.setDataAt(row, trueClass, selfGradient * computeErrorPerExample(gradient.rows(), predictedProbabilityForTrueClass));
+                    gradient.setDataAt(row, trueClass, selfGradient * computeErrorPerExample(gradient.rows(), predictedProbabilityForTrueClass, trueClass));
                 }
             }
             return gradient;
@@ -93,8 +96,9 @@ public class CrossEntropyLoss extends AbstractVariable<Scalar> {
 
     double computeErrorPerExample(
         int numberOfExamples,
-        double predictedProbabilityForTrueClass
+        double predictedProbabilityForTrueClass,
+        int trueClass
     ) {
-        return -1 / (predictedProbabilityForTrueClass * numberOfExamples);
+        return -classWeights[trueClass] / (predictedProbabilityForTrueClass * numberOfExamples);
     }
 }

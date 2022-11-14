@@ -44,12 +44,15 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
     private final Variable<Matrix> features;
     private final Variable<Vector> labels;
 
+    protected final double[] classWeights;
+
     public ReducedCrossEntropyLoss(
         Variable<Matrix> predictions,
         Variable<Matrix> weights,
         Weights<Vector> bias,
         Variable<Matrix> features,
-        Variable<Vector> labels
+        Variable<Vector> labels,
+        double[] classWeights
     ) {
         super(
             List.of(weights, features, labels, bias),
@@ -61,6 +64,7 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
         this.features = features;
         this.labels = labels;
         this.bias = bias;
+        this.classWeights = classWeights;
     }
 
     public static long sizeInBytes() {
@@ -78,14 +82,14 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
             var trueClass = (int) labelsVector.dataAt(row);
             var predictedProbabilityForTrueClass = predictionsMatrix.dataAt(row, trueClass);
             if (predictedProbabilityForTrueClass > 0) {
-                result += computeIndividualLoss(predictedProbabilityForTrueClass);
+                result += computeIndividualLoss(predictedProbabilityForTrueClass, trueClass);
             }
         }
         return new Scalar(-result / predictionsMatrix.rows());
     }
 
-    double computeIndividualLoss(double predictedProbabilityForTrueClass) {
-        return Math.log(predictedProbabilityForTrueClass);
+    double computeIndividualLoss(double predictedProbabilityForTrueClass, int trueClass) {
+        return classWeights[trueClass] * Math.log(predictedProbabilityForTrueClass);
     }
 
     @Override
@@ -114,7 +118,8 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
                         numberOfExamples,
                         predictedClassProbability,
                         indicatorIsTrueClass,
-                        predictedProbabilityForTrueClass
+                        predictedProbabilityForTrueClass,
+                        trueClass
                     );
                     for (int feature = 0; feature < featureCount; feature++) {
                         gradient.addDataAt(classIdx, feature, selfGradient * errorPerExample * featureMatrix.dataAt(row, feature));
@@ -137,7 +142,8 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
                         numberOfExamples,
                         predictedClassProbability,
                         indicatorIsTrueClass,
-                        predictedProbabilityForTrueClass
+                        predictedProbabilityForTrueClass,
+                        trueClass
                     );
                     gradient.addDataAt(classIdx, selfGradient * errorPerExample);
                 }
@@ -153,8 +159,9 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
         int numberOfExamples,
         double predictedClassProbability,
         double indicatorIsTrueClass,
-        double predictedProbabilityForTrueClass
+        double predictedProbabilityForTrueClass,
+        int trueClass
     ) {
-        return (predictedClassProbability - indicatorIsTrueClass) / numberOfExamples;
+        return classWeights[trueClass] * (predictedClassProbability - indicatorIsTrueClass) / numberOfExamples;
     }
 }

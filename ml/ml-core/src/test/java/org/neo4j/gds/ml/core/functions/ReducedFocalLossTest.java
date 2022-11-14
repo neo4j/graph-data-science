@@ -54,7 +54,8 @@ class ReducedFocalLossTest implements FiniteDifferenceTest {
             bias,
             features,
             labels,
-            50
+            50,
+            new double[]{1,1}
         );
 
         var chainedLoss = new Sigmoid<>(loss);
@@ -77,7 +78,7 @@ class ReducedFocalLossTest implements FiniteDifferenceTest {
         var predictions = new ReducedSoftmax(affineVariable);
         var labels = Constant.vector(new double[]{1.0, 0.0, 2.0});
 
-        var loss = new ReducedFocalLoss(predictions, weights, bias, features, labels, 0.5);
+        var loss = new ReducedFocalLoss(predictions, weights, bias, features, labels, 0.5, new double[]{1,1,1});
         var ctx = new ComputationContext();
 
         double lossValue = ctx.forward(loss).value();
@@ -117,15 +118,15 @@ class ReducedFocalLossTest implements FiniteDifferenceTest {
             0.99,0.01
         }, 2, 2);
 
-        var crossEntropyLoss = new ReducedCrossEntropyLoss(predictions, weights, bias, features, labels);
+        var crossEntropyLoss = new ReducedCrossEntropyLoss(predictions, weights, bias, features, labels, new double[]{1,1});
         double crossEntropyLossValue = new ComputationContext().forward(crossEntropyLoss).value();
 
-        var loss = new ReducedFocalLoss(predictions, weights, bias, features, labels, 0);
+        var loss = new ReducedFocalLoss(predictions, weights, bias, features, labels, 0, new double[]{1,1});
         double lossValue = new ComputationContext().forward(loss).value();
 
         assertThat(crossEntropyLossValue).isEqualTo(lossValue);
 
-        var focalLoss = new ReducedFocalLoss(predictions, weights, bias, features, labels, 5);
+        var focalLoss = new ReducedFocalLoss(predictions, weights, bias, features, labels, 5, new double[]{1,1});
         double focalLossValue = new ComputationContext().forward(focalLoss).value();
 
         assertThat(lossValue).isGreaterThan(focalLossValue);
@@ -134,7 +135,8 @@ class ReducedFocalLossTest implements FiniteDifferenceTest {
             0.01,0.99,
             0.01,0.99
         }, 2, 2);
-        var focalLossForBadPredictions = new ReducedFocalLoss(badPredictions, weights, bias, features, labels, 5);
+        var focalLossForBadPredictions = new ReducedFocalLoss(badPredictions, weights, bias, features, labels, 5,
+            new double[]{1,1});
         double focalLossValueForBadPredictions = new ComputationContext().forward(focalLossForBadPredictions).value();
 
         assertThat(focalLossValue).isLessThan(focalLossValueForBadPredictions);

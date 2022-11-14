@@ -30,27 +30,29 @@ public class FocalLoss extends CrossEntropyLoss {
     public FocalLoss(
         Variable<Matrix> predictions,
         Variable<Vector> targets,
-        double focusWeight
+        double focusWeight,
+        double[] classWeights
     ) {
-        super(predictions, targets);
+        super(predictions, targets, classWeights);
         this.focusWeight = focusWeight;
     }
 
     @Override
-    double computeIndividualLoss(double predictedProbabilityForTrueClass) {
+    double computeIndividualLoss(double predictedProbabilityForTrueClass, int trueClass) {
         double focalFactor = Math.pow(1 - predictedProbabilityForTrueClass, focusWeight);
-        return focalFactor * Math.log(predictedProbabilityForTrueClass);
+        return classWeights[trueClass] * focalFactor * Math.log(predictedProbabilityForTrueClass);
     }
 
     @Override
     double computeErrorPerExample(
         int numberOfExamples,
-        double predictedProbabilityForTrueClass
+        double predictedProbabilityForTrueClass,
+        int trueClass
     ) {
         var predictedProbabilityForWrongClasses = 1.0 - predictedProbabilityForTrueClass;
         var chainRuleGradient = Math.pow(predictedProbabilityForWrongClasses, focusWeight - 1.0);
 
-        var focalLossPerExample = (focusWeight * chainRuleGradient * Math.log(predictedProbabilityForTrueClass)
+        var focalLossPerExample = classWeights[trueClass] * (focusWeight * chainRuleGradient * Math.log(predictedProbabilityForTrueClass)
                                    - chainRuleGradient * predictedProbabilityForWrongClasses / predictedProbabilityForTrueClass) / numberOfExamples;
         return focalLossPerExample;
     }

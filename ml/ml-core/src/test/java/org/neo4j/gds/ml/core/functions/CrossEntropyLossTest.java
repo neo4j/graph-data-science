@@ -43,7 +43,7 @@ class CrossEntropyLossTest implements FiniteDifferenceTest {
             3, 3
         );
 
-        var loss = new CrossEntropyLoss(predictions, targets);
+        var loss = new CrossEntropyLoss(predictions, targets, new double[]{0.5, 0.3, 0.2});
 
         double lossValue = ctx.forward(loss).value();
 
@@ -51,7 +51,7 @@ class CrossEntropyLossTest implements FiniteDifferenceTest {
         var p2 = -Math.log(0.1);
         var p3 = -Math.log(0.14);
 
-        var expected = 1.0 / 3 * (p1 + p2 + p3);
+        var expected = 1.0 / 3 * (0.3*p1 + 0.2*p2 + 0.5*p3);
 
         assertThat(lossValue).isCloseTo(expected, Offset.offset(1e-8));
     }
@@ -70,7 +70,7 @@ class CrossEntropyLossTest implements FiniteDifferenceTest {
             )
         );
 
-        var loss = new CrossEntropyLoss(predictions, targets);
+        var loss = new CrossEntropyLoss(predictions, targets, new double[]{0.5, 0.3, 0.2});
 
         finiteDifferenceShouldApproximateGradient(predictions, loss);
     }
@@ -89,7 +89,7 @@ class CrossEntropyLossTest implements FiniteDifferenceTest {
             )
         );
 
-        var loss = new CrossEntropyLoss(predictions, targets);
+        var loss = new CrossEntropyLoss(predictions, targets, new double[]{0.5, 0.3, 0.2});
         var chainedLoss = new Sigmoid<>(loss);
 
         finiteDifferenceShouldApproximateGradient(predictions, chainedLoss);
@@ -102,7 +102,7 @@ class CrossEntropyLossTest implements FiniteDifferenceTest {
         var targets = Constant.vector(new double[]{1});
 
         var ctx = new ComputationContext();
-        var crossEntropyLoss = new CrossEntropyLoss(predictions, targets);
+        var crossEntropyLoss = new CrossEntropyLoss(predictions, targets, new double[]{1,1});
 
         ctx.forward(crossEntropyLoss);
 
@@ -110,6 +110,29 @@ class CrossEntropyLossTest implements FiniteDifferenceTest {
         var actualGradient = ctx.gradient(predictions);
 
         assertThat(actualGradient).matches(TensorTestUtils::containsValidValues);
+    }
+
+    @Test
+    void classWeightedCEShouldFocusOnHighWeightClass() {
+        var labels = Constant.vector(new double[]{1.0, 0.0});
+        var weightsBiasedToClass0 = new double[]{0.8, 0.2};
+
+        var predictions = Constant.matrix(new double[]{
+            0.4,0.6,
+            0.6,0.4
+        }, 2, 2);
+
+        var crossEntropyLoss = new CrossEntropyLoss(predictions, labels, weightsBiasedToClass0);
+        double crossEntropyLossValue = new ComputationContext().forward(crossEntropyLoss).value();
+
+        var predictionsBiasedToClass0 = Constant.matrix(new double[]{
+            0.5,0.5,
+            0.7,0.3
+        }, 2, 2);
+        var weightedCrossEntropyLoss = new CrossEntropyLoss(predictionsBiasedToClass0, labels, weightsBiasedToClass0);
+        double weightedCrossEntropyLossValue = new ComputationContext().forward(weightedCrossEntropyLoss).value();
+
+        assertThat(weightedCrossEntropyLossValue).isLessThan(crossEntropyLossValue);
     }
 
     @Override
