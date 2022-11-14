@@ -181,7 +181,11 @@ include::partial$/algorithms/alpha/spanning-tree/specific-configuration.adoc[]
 [[algorithms-minimum-weight-spanning-tree-sample]]
 == Examples
 
-image::mst.png[]
+:algorithm-name: {algorithm}
+:graph-description: road network
+:image-file: spanning-tree-graph.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
 
 .The following will create the sample graph depicted in the figure:
 [source, cypher, role=noplay setup-query]
@@ -286,10 +290,9 @@ RETURN startNode(rel).id AS Source, endNode(rel).id AS Destination, rel.writeCos
 |===
 --
 
-image::minst_result.png[]
 
 The minimum spanning tree excludes the relationship with cost 6 from D to E, and the one with cost 3 from B to C.
-Nodes F and G aren't included because they're unreachable from D.
+Nodes F and G are not included because they're unreachable from D.
 
 [NOTE]
 ====
@@ -382,7 +385,5 @@ RETURN totalWeight
 | 17
 |===
 --
-
-image::maxst_result.png[]
 
 As can be seen, the maximum weighted spanning tree returns a different tree having a larger sum of relationship weights.
