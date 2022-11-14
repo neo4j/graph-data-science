@@ -13,54 +13,36 @@ include::partial$/operations-reference/alpha-note.adoc[]
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
-
-
 == Introduction
 
-The Minimum Weight Spanning Tree (MST) starts from a given node, and finds all its reachable nodes and the set of relationships that connect the nodes together with the minimum possible weight.
+The Minimum Weight Spanning Tree (MST) starts from a given node, finds all its reachable nodes and  returns the set of relationships that connect these nodes together with the minimum possible weight.
 Prim's algorithm is one of the simplest and best-known minimum spanning tree algorithms.
-The K-Means variant of this algorithm can be used to detect clusters in the graph.
+It operates similarly to Dijkstra's shortest path algorithm, but instead of   minimizing the total length of a path ending at each relationship, it minimizes the length of each relationship individually.
+Because of this, the algorithm can also work on graphs with negative weights.
 
+For more information on this algorithm, see:
 
-
-[[algorithms-minimum-weight-spanning-tree-context]]
-=== History and explanation
-
-The first known algorithm for finding a minimum spanning tree was developed by the Czech scientist Otakar Borůvka in 1926, while trying to find an efficient electricity network for Moravia.
-Prim's algorithm was invented by Jarnik in 1930 and rediscovered by Prim in 1957.
-It is similar to Dijkstra's shortest path algorithm but, rather than minimizing the total length of a path ending at each relationship, it minimizes the length of each relationship individually.
-Unlike Dijkstra's, Prim's can tolerate negative-weight relationships.
-
-The algorithm operates as follows:
-
-* Start with a tree containing only one node (and no relationships).
-* Select the minimal-weight relationship coming from that node, and add it to our tree.
-* Repeatedly choose a minimal-weight relationship that joins any node in the tree to one that is not in the tree, adding the new relationship and node to our tree.
-* When there are no more nodes to add, the tree we have built is a minimum spanning tree.
+* https://en.wikipedia.org/wiki/Minimum_spanning_tree[Minimum Spanning Tree]
 
 
 [[algorithms-minimum-weight-spanning-tree-usecase]]
-=== Use-cases - when to use the Minimum Weight Spanning Tree algorithm
+=== Use cases
 
 * Minimum spanning tree was applied to analyze airline and sea connections of Papua New Guinea, and minimize the travel cost of exploring the country.
- It could be used to help design low-cost tours that visit many destinations across the country.
- The research mentioned can be found in https://www.dwu.ac.pg/en/images/All_Attachements/Research%20Journals/vol_12/2010-V12-1_Fitina_et_al_spanning_trees_for_travel_planning.pdf["An Application of Minimum Spanning Trees to Travel Planning"].
+ It was also used to help design low-cost tours that visit many destinations across the country. See  https://junctiv.com/wp-content/uploads/2020/07/2010-V12-1_Fitina_et_al_spanning_trees_for_travel_planning.pdf["An Application of Minimum Spanning Trees to Travel Planning"].
 * Minimum spanning tree has been used to analyze and visualize correlations in a network of currencies, based on the correlation between currency returns.
   This is described in https://www.nbs.sk/_img/Documents/_PUBLIK_NBS_FSR/Biatec/Rok2013/07-2013/05_biatec13-7_resovsky_EN.pdf["Minimum Spanning Tree Application in the Currency Market"].
-* Minimum spanning tree has been shown to be a useful tool to trace the history of transmission of infection, in an outbreak supported by exhaustive clinical research.
-  For more information, see https://www.ncbi.nlm.nih.gov/pmc/articles/PMC516344/[Use of the Minimum Spanning Tree Model for Molecular Epidemiological Investigation of a Nosocomial Outbreak of Hepatitis C Virus Infection].
+* Minimum spanning tree has also been shown to be a useful tool for tracing  transmission of infections  in outbreaks. See https://www.ncbi.nlm.nih.gov/pmc/articles/PMC516344/[Use of the Minimum Spanning Tree Model for Molecular Epidemiological Investigation of a Nosocomial Outbreak of Hepatitis C Virus Infection].
 
 
 [[algorithms-minimum-weight-spanning-tree-limitations]]
-=== Constraints - when not to use the Minimum Weight Spanning Tree algorithm
+=== Consideration
 
-The MST algorithm only gives meaningful results when run on a graph, where the relationships have different weights.
-If the graph has no weights, or all relationships have the same weight, then any spanning tree is a minimum spanning tree.
-
+The MST algorithm gives meaningful results only if run on a graph where relationships have different weights.
+If the graph has no weights (or all relationships have the same weight) then any spanning tree is also a minimum spanning tree.
 
 [[algorithms-minimum-weight-spanning-tree-syntax]]
 == Syntax
-
 
 .Spanning Tree syntax per mode
 [.tabbed-example, caption = ]
@@ -186,7 +168,7 @@ include::partial$/algorithms/alpha/spanning-tree/specific-configuration.adoc[]
 ======
 ====
 [[algorithms-minimum-weight-spanning-tree-sample]]
-== Minimum Weight Spanning Tree algorithm examples
+== Examples
 
 image::mst.png[]
 
