@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.leiden.LeidenStreamProc.DESCRIPTION;
 
 
-@GdsCallable(name = "gds.alpha.leiden.mutate", description = DESCRIPTION, executionMode = ExecutionMode.MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.beta.leiden.mutate", description = DESCRIPTION, executionMode = ExecutionMode.MUTATE_NODE_PROPERTY)
 public class LeidenMutateSpec implements AlgorithmSpec<Leiden, LeidenResult, LeidenMutateConfig, Stream<MutateResult>, LeidenAlgorithmFactory<LeidenMutateConfig>> {
     @Override
     public String name() {

@@ -75,7 +75,7 @@ class LeidenStatsProcTest extends BaseProcTest {
     @Test
     void stats() {
 
-        var query = "CALL gds.alpha.leiden.stats('leiden')";
+        var query = "CALL gds.beta.leiden.stats('leiden')";
 
         runQuery(query, result -> {
             assertThat(result.columns())
@@ -137,7 +137,7 @@ class LeidenStatsProcTest extends BaseProcTest {
 
     @Test
     void shouldEstimateMemory() {
-        var query = "CALL gds.alpha.leiden.stats.estimate('leiden', {" +
+        var query = "CALL gds.beta.leiden.stats.estimate('leiden', {" +
                     "   includeIntermediateCommunities: true" +
                     "})";
         assertThatNoException().isThrownBy(() -> runQuery(query));
