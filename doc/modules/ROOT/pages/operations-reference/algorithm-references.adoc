@@ -294,13 +294,14 @@
 | `gds.alpha.sllpa.stream.estimate`
 | `gds.alpha.sllpa.write`
 | `gds.alpha.sllpa.write.estimate`
-.8+<.^|xref:alpha-algorithms/minimum-weight-spanning-tree.adoc[Spanning Tree]
+.6+<.^|xref:alpha-algorithms/minimum-weight-spanning-tree.adoc[Spanning Tree]
 | `gds.alpha.spanningTree.mutate`
 | `gds.alpha.spanningTree.mutate.estimate`
 | `gds.alpha.spanningTree.stats`
 | `gds.alpha.spanningTree.stats.estimate`
 | `gds.alpha.spanningTree.write`
 | `gds.alpha.spanningTree.write.estimate`
+.2+<.^|xref:alpha-algorithms/k-minimum-weight-spanning-tree.adoc[ k-Spanning Tree]
 | `gds.alpha.spanningTree.kmax.write`
 | `gds.alpha.spanningTree.kmin.write`
 | xref:alpha-algorithms/adamic-adar.adoc[Adamic Adar] | `_gds.alpha.linkprediction.adamicAdar_`

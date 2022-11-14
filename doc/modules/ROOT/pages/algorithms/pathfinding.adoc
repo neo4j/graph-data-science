@@ -18,4 +18,5 @@ The Neo4j GDS library includes the following path finding algorithms, grouped by
 
 * Alpha
 ** xref:alpha-algorithms/minimum-weight-spanning-tree.adoc[Minimum Weight Spanning Tree]
+** xref:alpha-algorithms/k-minimum-weight-spanning-tree.adoc[Minimum Weight k-Spanning Tree]
 ** xref:alpha-algorithms/all-pairs-shortest-path.adoc[All Pairs Shortest Path]
