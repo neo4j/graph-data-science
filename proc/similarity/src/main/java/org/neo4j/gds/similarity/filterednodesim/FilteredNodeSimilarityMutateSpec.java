@@ -171,11 +171,10 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
             resultRelationships = relationshipsBuilder.build();
         } else {
             HugeGraph similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
-            var orientation = similarityGraph
-                .schema()
-                .relationshipSchema()
-                .isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
-            resultRelationships = RelationshipsAndSchema.of(similarityGraph.relationships(), orientation);
+            resultRelationships = RelationshipsAndSchema.of(
+                similarityGraph.relationships(),
+                similarityGraphResult.orientation()
+            );
             if (shouldComputeHistogram(callContext)) {
                 resultBuilder.withHistogram(computeHistogram(similarityGraph));
             }

@@ -187,12 +187,11 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
             resultRelationshipsAndSchema = relationshipsBuilder.build();
         } else {
             HugeGraph similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
-            var or = similarityGraph
-                .schema()
-                .relationshipSchema()
-                .isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
 
-            resultRelationshipsAndSchema = RelationshipsAndSchema.of(similarityGraph.relationships(), or);
+            resultRelationshipsAndSchema = RelationshipsAndSchema.of(
+                similarityGraph.relationships(),
+                similarityGraphResult.orientation()
+            );
             if (shouldComputeHistogram(callContext)) {
                 resultBuilder.withHistogram(computeHistogram(similarityGraph));
             }
