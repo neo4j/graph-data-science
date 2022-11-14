@@ -15,10 +15,10 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 == Introduction
 
-The Minimum Weight Spanning Tree (MST) starts from a given node, finds all its reachable nodes and  returns the set of relationships that connect these nodes together with the minimum possible weight.
+The Minimum Weight Spanning Tree (MST) starts from a given node, finds all its reachable nodes and returns the set of relationships that connect these nodes together having the minimum possible weight.
 Prim's algorithm is one of the simplest and best-known minimum spanning tree algorithms.
-It operates similarly to Dijkstra's shortest path algorithm, but instead of   minimizing the total length of a path ending at each relationship, it minimizes the length of each relationship individually.
-Because of this, the algorithm can also work on graphs with negative weights.
+It operates similarly to xref:algorithms/dijkstra-single-source.adoc[Dijkstra's shortest path algorithm], but instead of minimizing the total length of a path ending at each relationship, it minimizes the length of each relationship individually.
+This allows the algorithm to work on graphs with negative weights.
 
 For more information on this algorithm, see:
 
@@ -28,18 +28,18 @@ For more information on this algorithm, see:
 [[algorithms-minimum-weight-spanning-tree-usecase]]
 === Use cases
 
-* Minimum spanning tree was applied to analyze airline and sea connections of Papua New Guinea, and minimize the travel cost of exploring the country.
- It was also used to help design low-cost tours that visit many destinations across the country. See  https://junctiv.com/wp-content/uploads/2020/07/2010-V12-1_Fitina_et_al_spanning_trees_for_travel_planning.pdf["An Application of Minimum Spanning Trees to Travel Planning"].
-* Minimum spanning tree has been used to analyze and visualize correlations in a network of currencies, based on the correlation between currency returns.
+* Minimum spanning trees were used to analyze airline and sea connections of Papua New Guinea, and minimize the travel cost for exploring the country.
+For example, they were used to help design low-cost tours that visit many destinations across the country. See  https://junctiv.com/wp-content/uploads/2020/07/2010-V12-1_Fitina_et_al_spanning_trees_for_travel_planning.pdf["An Application of Minimum Spanning Trees to Travel Planning"].
+* Minimum spanning trees have been used to analyze and visualize correlations in a network of currencies, based on the correlation between currency returns.
   This is described in https://www.nbs.sk/_img/Documents/_PUBLIK_NBS_FSR/Biatec/Rok2013/07-2013/05_biatec13-7_resovsky_EN.pdf["Minimum Spanning Tree Application in the Currency Market"].
-* Minimum spanning tree has also been shown to be a useful tool for tracing  transmission of infections  in outbreaks. See https://www.ncbi.nlm.nih.gov/pmc/articles/PMC516344/[Use of the Minimum Spanning Tree Model for Molecular Epidemiological Investigation of a Nosocomial Outbreak of Hepatitis C Virus Infection].
+* Minimum spanning trees have also proven to be a useful tool for tracing  transmission of infections  in outbreaks. See https://www.ncbi.nlm.nih.gov/pmc/articles/PMC516344/[Use of the Minimum Spanning Tree Model for Molecular Epidemiological Investigation of a Nosocomial Outbreak of Hepatitis C Virus Infection].
 
 
 [[algorithms-minimum-weight-spanning-tree-limitations]]
-=== Consideration
+=== Considerations
 
-The MST algorithm gives meaningful results only if run on a graph where relationships have different weights.
-If the graph has no weights (or all relationships have the same weight) then any spanning tree is also a minimum spanning tree.
+The MST algorithm provides meaningful results only when run on a graph where relationships have different weights.
+If the graph has no weights (or all relationships have the same weight), then any spanning tree is also a minimum spanning tree.
  The algorithm implementation is executed using a single thread. Altering the concurrency configuration has no effect.
 
 [[algorithms-minimum-weight-spanning-tree-syntax]]
@@ -70,7 +70,7 @@ YIELD
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
 .Configuration
-[opts="header",cols="1,1,1,1,4"]
+[opts="header",cols="3,2,3m,2,8"]
 |===
 | Name                                                                             | Type    | Default   | Optional  | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
@@ -111,7 +111,7 @@ YIELD
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
 .Configuration
-[opts="header",cols="1,1,1,1,4"]
+[opts="header",cols="3,2,3m,2,8"]
 |===
 | Name                                                                             | Type    | Default   | Optional  | Description
 | writeProperty                                                                    | String  | 'mst'     | yes       | The relationship type written back as result
@@ -155,7 +155,7 @@ YIELD
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
 .Configuration
-[opts="header",cols="1,1,1,1,4"]
+[opts="header",cols="3,2,3m,2,8"]
 |===
 | Name                                                                             | Type    | Default   | Optional  | Description
 | mutateProperty                                                                    | String  | 'mst'     | yes       | The relationship type used for the new relationships written to the projected graph.
@@ -291,6 +291,11 @@ image::minst_result.png[]
 The minimum spanning tree excludes the relationship with cost 6 from D to E, and the one with cost 3 from B to C.
 Nodes F and G aren't included because they're unreachable from D.
 
+[NOTE]
+====
+The relationships written back to the graph are always directed, even if the input graph is undirected.
+====
+
 [[algorithms-spanning-tree-examples-mutate]]
 === Mutate
 
@@ -318,6 +323,11 @@ RETURN relationshipsWritten
 | 4
 |===
 --
+[NOTE]
+====
+The relationships added back to the graph are always directed, even if the input graph is undirected.
+====
+
 
 [[algorithms-spanning-tree-examples-stats]]
 === Stats
