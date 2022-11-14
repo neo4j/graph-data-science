@@ -184,7 +184,7 @@ include::partial$/algorithms/alpha/spanning-tree/specific-configuration.adoc[]
 image::mst.png[]
 
 .The following will create the sample graph depicted in the figure:
-[source, cypher, role=noplay]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE (a:Place {id: 'A'}),
        (b:Place {id: 'B'}),
@@ -203,7 +203,7 @@ CREATE (a:Place {id: 'A'}),
 ----
 
 .The following will project and store a named graph:
-[source, cypher, role=noplay]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'graph',
@@ -224,24 +224,20 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
 --
-.The following will estimate the memory requirements for running the algorithm in write mode:
+.The following will estimate the memory requirements for running the algorithm in stats mode:
 [source, cypher, role=noplay]
 ----
 MATCH (n:Place {id: 'D'})
-CALL gds.alpha.spanningTree.stats.estimate('myGraph', {sourceNode: id(n),relationshipWriteProperty:'cost'})
-YIELD
-      nodeCount,
-      relationshipCount,
-      bytesMin,
-      bytesMax,
-      requiredMemory
+CALL gds.alpha.spanningTree.stats.estimate('graph', {sourceNode: id(n),relationshipWeightProperty:'cost'})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 ----
 
 .Results
 [opts="header"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 7         | 14               | 568   | 568      | 568 Bytes"
+| 7         | 14               | 568   | 568      | "568 Bytes"
 |===
 --
 
@@ -251,7 +247,9 @@ YIELD
 
 include::partial$/algorithms/shared/examples-write-intro.adoc[]
 
-.The following will run the Minimum Weight Spanning Tree algorithm and mutate the in-memory graph.
+[role=query-example, no-result=true,group=spanning-tree-write]
+--
+.The following will run the Minimum Weight Spanning Tree algorithm and write the result back to the graph.
 [source, cypher, role=noplay]
 ----
 MATCH (n:Place {id: 'D'})
@@ -264,60 +262,43 @@ CALL gds.alpha.spanningTree.write('graph', {
 YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
 RETURN preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount;
 ----
+--
 
-.To find all pairs of nodes included in our minimum spanning tree, run the following query:
+[role=query-example, group=spanning-tree-write]
+--
+.To find the relationships included in the minimum spanning tree, we can run the following query:
 [source, cypher, role=noplay]
 ----
 MATCH path = (n:Place {id: 'D'})-[:MINST*]-()
 WITH relationships(path) AS rels
 UNWIND rels AS rel
 WITH DISTINCT rel AS rel
-RETURN startNode(rel).id AS source, endNode(rel).id AS destination, rel.writeCost AS cost
+RETURN startNode(rel).id AS Source, endNode(rel).id AS Destination, rel.writeCost AS Cost
 ----
-
-.Results
-image::minst_result.png[]
-
 .Results
 [opts="header",cols="1,1,1"]
 |===
 | Source | Destination | Cost
-| D      | B           | 4
-| B      | A           | 1
-| A      | C           | 2
-| C      | E           | 5
+| "D"      | "B"           | 4
+| "B"      | "A"           | 1
+| "A"      | "C"           | 2
+| "C"      | "E"           | 5
 |===
+--
+
+image::minst_result.png[]
 
 The minimum spanning tree excludes the relationship with cost 6 from D to E, and the one with cost 3 from B to C.
 Nodes F and G aren't included because they're unreachable from D.
 
-Maximum weighted tree spanning algorithm is similar to the minimum one, except that it returns a spanning tree of all nodes in the component where the total weight of the relationships is maximized.
-
-.The following will run the maximum weight spanning tree algorithm and write back results:
-[source, cypher, role=noplay]
-----
-MATCH (n:Place{id: 'D'})
-CALL gds.alpha.spanningTree.write('graph', {
-  sourceNode: id(n),
-  relationshipWeightProperty: 'cost',
-  writeProperty: 'MAXST',
-  weightWriteProperty: 'writeCost',
- objective: 'maximum'
-})
-YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
-RETURN preProcessingMillis,computeMillis, writeMillis, effectiveNodeCount;
-----
-
-.Results
-image::maxst_result.png[]
-
 [[algorithms-spanning-tree-examples-mutate]]
 === Mutate
 
-
 include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 
-.The following will run the Minimum Weight Spanning Tree algorithm and write back results:
+[role=query-example]
+--
+.The following will run the Minimum Weight Spanning Tree algorithm and mutate the in-memory graph.
 [source, cypher, role=noplay]
 ----
 MATCH (n:Place {id: 'D'})
@@ -336,31 +317,62 @@ RETURN relationshipsWritten
 | relationshipsWritten
 | 4
 |===
+--
 
 [[algorithms-spanning-tree-examples-stats]]
 === Stats
 :stats-syntax: algorithms-minimum-weight-spanning-tree-syntax
 include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
-[role=query-example, no-result=true]
+[role=query-example]
 --
-.The following will run the algorithm and returns the result in form of statistical and measurement values
+.The following will run the Minimum Weight Spanning Tree algorithm and returns the result in form of statistical and measurement values
 [source,cypher,role=noplay]
 ----
 MATCH (n:Place{id: 'D'})
 CALL gds.alpha.spanningTree.stats('graph', {
   sourceNode: id(n),
-  relationshipWeightProperty: 'cost',
- objective: 'mininum'
+  relationshipWeightProperty: 'cost'
 })
-YIELD effectiveNodeCount
-RETURN effectiveNodeCount
+YIELD effectiveNodeCount, totalWeight
+RETURN effectiveNodeCount, totalWeight
 ----
 
 .Results
-[opts="header",cols="1"]
+[opts="header"]
 |===
-| effectiveNodeCount
-| 5
+| effectiveNodeCount | totalWeight
+| 5  | 12
 |===
 --
+
+[[algorithms-spanning-tree-examples-max]]
+=== Maximum spanning Tree
+
+The maximum weighted tree spanning algorithm is similar to the minimum one, except that it returns a spanning tree of all nodes in the component where the total weight of the relationships is maximized.
+
+[role=query-example]
+--
+.The following will run the Maximum Weight Spanning tree algorithm and compute its statistics.
+[source, cypher, role=noplay]
+----
+MATCH (n:Place{id: 'D'})
+CALL gds.alpha.spanningTree.stats('graph', {
+  sourceNode: id(n),
+  relationshipWeightProperty: 'cost',
+ objective: 'maximum'
+})
+YIELD totalWeight
+RETURN totalWeight
+----
+.Results
+[opts="header"]
+|===
+| totalWeight
+| 17
+|===
+--
+
+image::maxst_result.png[]
+
+As can be seen, the maximum weighted spanning tree returns a different tree having a larger sum of relationship weights.
