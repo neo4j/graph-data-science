@@ -326,26 +326,25 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 ----
 CALL gds.louvain.stream('myGraph')
 YIELD nodeId, communityId, intermediateCommunityIds
-RETURN gds.util.asNode(nodeId).name AS name, communityId, intermediateCommunityIds
+RETURN gds.util.asNode(nodeId).name AS name, communityId
 ORDER BY name ASC
 ----
 
 .Results
 [opts="header"]
 |===
-| name      | communityId   | intermediateCommunityIds
-| "Alice"   | 2             | null
-| "Bridget" | 2             | null
-| "Charles" | 2             | null
-| "Doug"    | 5             | null
-| "Mark"    | 5             | null
-| "Michael" | 5             | null
+| name      | communityId
+| "Alice"   | 2
+| "Bridget" | 2
+| "Charles" | 2
+| "Doug"    | 5
+| "Mark"    | 5
+| "Michael" | 5
 |===
 --
 
 We use default values for the procedure configuration parameter.
 Levels and `innerIterations` are set to 10 and the tolerance value is 0.0001.
-Because we did not set the value of `includeIntermediateCommunities` to `true`, the column communities is always `null`.
 
 
 [[algorithms-louvain-examples-stats]]
@@ -439,20 +438,20 @@ The Louvain algorithm can also run on weighted graphs, taking the given relation
 ----
 CALL gds.louvain.stream('myGraph', { relationshipWeightProperty: 'weight' })
 YIELD nodeId, communityId, intermediateCommunityIds
-RETURN gds.util.asNode(nodeId).name AS name, communityId, intermediateCommunityIds
+RETURN gds.util.asNode(nodeId).name AS name, communityId
 ORDER BY name ASC
 ----
 
 .Results
 [opts="header"]
 |===
-| name      | communityId   | intermediateCommunityIds
-| "Alice"   | 3             | null
-| "Bridget" | 2             | null
-| "Charles" | 2             | null
-| "Doug"    | 3             | null
-| "Mark"    | 5             | null
-| "Michael" | 5             | null
+| name      | communityId
+| "Alice"   | 3
+| "Bridget" | 2
+| "Charles" | 2
+| "Doug"    | 3
+| "Mark"    | 5
+| "Michael" | 5
 |===
 --
 
@@ -473,20 +472,20 @@ The algorithm will try to keep the seeded community IDs.
 ----
 CALL gds.louvain.stream('myGraph', { seedProperty: 'seed' })
 YIELD nodeId, communityId, intermediateCommunityIds
-RETURN gds.util.asNode(nodeId).name AS name, communityId, intermediateCommunityIds
+RETURN gds.util.asNode(nodeId).name AS name, communityId
 ORDER BY name ASC
 ----
 
 .Results
 [opts="header"]
 |===
-| name      | communityId | intermediateCommunityIds
-| "Alice"   | 42          | null
-| "Bridget" | 42          | null
-| "Charles" | 42          | null
-| "Doug"    | 47          | null
-| "Mark"    | 47          | null
-| "Michael" | 47          | null
+| name      | communityId
+| "Alice"   | 42
+| "Bridget" | 42
+| "Charles" | 42
+| "Doug"    | 47
+| "Mark"    | 47
+| "Michael" | 47
 |===
 --
 
