@@ -46,6 +46,12 @@ public interface ClassAwareTrainerConfig extends TrainerConfig {
                 initializedClassWeights[i] = 1;
             }
         } else {
+            if (classWeights().size() != numberOfClasses) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "The classWeights list %s has %s entries, but it should have %s entries instead, which is the number of classes.",
+                    classWeights(),classWeights().size(), numberOfClasses
+                ));
+            }
             initializedClassWeights = classWeights().stream().mapToDouble(i -> i).toArray();
         }
         return initializedClassWeights;
@@ -58,7 +64,7 @@ public interface ClassAwareTrainerConfig extends TrainerConfig {
             var classWeightsSum = classWeights().stream().mapToDouble(Double::doubleValue).sum();
             if (Math.abs(classWeightsSum - 1.0) > epsilon) {
                 throw new IllegalArgumentException(formatWithLocale(
-                    "The class weights %s sum up to %s, they should sum up to 1 instead.",
+                    "The classWeights %s sum up to %s, they should sum up to 1 instead.",
                     classWeights(), classWeightsSum
                 ));
             }

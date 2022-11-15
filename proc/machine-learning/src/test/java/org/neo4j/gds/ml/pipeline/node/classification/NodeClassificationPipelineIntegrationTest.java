@@ -61,15 +61,15 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
         ", (b9:N {name: '1_9', a: [71.66, 0.0], b: 1.8, class: 1})" +
         ", (b10:N {name: '1_10', a: [11.1, 0.0], b: 2.2, class: 1})" +
         ", (b11h:Hidden {name: '1_hidden', a: [22.32, 0.0], b: 3.2, class: 1})" +
-        ", (c1:N {name: '2_1', a: [2.0, 0.0], b: -10.0, class: 2})" +
-        ", (c2:N {name: '2_2', a: [2.0, 0.0], b: -1.6, class: 2})" +
-        ", (c3:N {name: '2_3', a: [5.0, 0.0], b: -7.8, class: 2})" +
-        ", (c4:N {name: '2_4', a: [5.0, 0.0], b: -73.8, class: 2})" +
-        ", (c5:N {name: '2_5', a: [2.0, 0.0], b: -0.8, class: 2})" +
-        ", (c6:N {name: '2_6', a: [5.0, 0.0], b: -7.8, class: 2})" +
-        ", (c7:N {name: '2_7', a: [4.0, 0.0], b: -5.8, class: 2})" +
-        ", (c8:N {name: '2_8', a: [1.0, 0.0], b: -0.9, class: 2})" +
-        ", (c9h:Hidden {name: '2_hidden', a: [3.0, 0.0], b: -10.9, class: 2})" +
+        ", (c1:N {name: '2_1', a: [2.0, 0.0], b: -10.0, class: 42})" +
+        ", (c2:N {name: '2_2', a: [2.0, 0.0], b: -1.6, class: 42})" +
+        ", (c3:N {name: '2_3', a: [5.0, 0.0], b: -7.8, class: 42})" +
+        ", (c4:N {name: '2_4', a: [5.0, 0.0], b: -73.8, class: 42})" +
+        ", (c5:N {name: '2_5', a: [2.0, 0.0], b: -0.8, class: 42})" +
+        ", (c6:N {name: '2_6', a: [5.0, 0.0], b: -7.8, class: 42})" +
+        ", (c7:N {name: '2_7', a: [4.0, 0.0], b: -5.8, class: 42})" +
+        ", (c8:N {name: '2_8', a: [1.0, 0.0], b: -0.9, class: 42})" +
+        ", (c9h:Hidden {name: '2_hidden', a: [3.0, 0.0], b: -10.9, class: 42})" +
         ", (a1)-[:T {w: 13}]->(a2)" +
         ", (a2)-[:T {w: 13}]->(c1)" +
         ", (a3)-[:T {w: 13}]->(b1)" +
@@ -140,8 +140,8 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
                  "  testFraction: 0.2, " +
                  "  validationFolds: 5" +
                  "})");
-        runQuery("CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('p', {penalty: 0.0625, maxEpochs: 1000})");
-        runQuery("CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('p', {penalty: 4.0, maxEpochs: 100})");
+        runQuery("CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('p', {penalty: 0.0625, maxEpochs: 1000, classWeights: [0.7, 0.2, 0.1]})");
+        runQuery("CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('p', {penalty: 4.0, maxEpochs: 100, classWeights: [0.5, 0.2, 0.3]})");
 
         runQuery("CALL gds.beta.pipeline.nodeClassification.train('g', {" +
                  " targetNodeLabels: ['N']," +
@@ -168,7 +168,7 @@ class NodeClassificationPipelineIntegrationTest extends BaseProcTest {
             List.of(
                 Map.of("name", "0_hidden", "predictedClass", 0L, "probabilities", listOfSize(3)),
                 Map.of("name", "1_hidden", "predictedClass", 1L, "probabilities", listOfSize(3)),
-                Map.of("name", "2_hidden", "predictedClass", 2L, "probabilities", listOfSize(3))
+                Map.of("name", "2_hidden", "predictedClass", 42L, "probabilities", listOfSize(3))
             )
         );
     }

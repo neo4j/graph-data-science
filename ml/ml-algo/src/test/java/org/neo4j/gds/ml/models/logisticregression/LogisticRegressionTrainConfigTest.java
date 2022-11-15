@@ -37,15 +37,19 @@ class LogisticRegressionTrainConfigTest {
     }
 
     @Test
-    void shouldInitializeClassWeights() {
+    void shouldInitializeCorrectClassWeights() {
         assertThat(LogisticRegressionTrainConfigImpl.builder().build().initializeClassWeights(5))
             .isEqualTo(new double[]{1,1,1,1,1});
 
-        assertThat(LogisticRegressionTrainConfigImpl.builder().classWeights(List.of(0.8, 0.2)).build().initializeClassWeights(5))
+        assertThat(LogisticRegressionTrainConfigImpl.builder().classWeights(List.of(0.8, 0.2)).build().initializeClassWeights(2))
             .isEqualTo(new double[]{0.8, 0.2});
 
         assertThatThrownBy(() -> LogisticRegressionTrainConfigImpl.builder().classWeights(List.of(0.5, 0.2)).build())
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("The class weights [0.5, 0.2] sum up to 0.7, they should sum up to 1 instead.");
+            .hasMessageContaining("The classWeights [0.5, 0.2] sum up to 0.7, they should sum up to 1 instead.");
+
+        assertThatThrownBy(() -> LogisticRegressionTrainConfigImpl.builder().classWeights(List.of(0.8, 0.2)).build().initializeClassWeights(5))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("The classWeights list [0.8, 0.2] has 2 entries, but it should have 5 entries instead, which is the number of classes.");
     }
 }
