@@ -54,17 +54,16 @@ public class SpanningTree {
         this.totalWeight = totalWeight;
     }
 
-
     public long effectiveNodeCount() {
         return effectiveNodeCount;
     }
-
     public double totalWeight() {
         return totalWeight;
     }
 
+    public long parent(long nodeId) {return parent.get(nodeId);}
 
-    double costToParent(long nodeId) {
+    public double costToParent(long nodeId) {
         return costToParent.get(nodeId);
     }
 
