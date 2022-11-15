@@ -1,6 +1,25 @@
+== Class weights
+This parameter introduces the concept of _class weights_, studied in https://arxiv.org/pdf/1708.02002v2.pdf[Focal Loss for Dense Object Detection].
+It is often called _balanced cross entropy_.
+It assigns a weight to each class in the cross-entropy loss function, thus allowing the model to treat different classes with varying importance. It is defined as:
+
+image::equations/balanced-cross-entropy.svg[align="center"]
+
+
+where `alpha~t~` denotes the class weight of the true class.  `p~t~` denotes the probability of the true class.
+
+The list of class weights, if specified, must sum up to 1.
+
+For link prediction, it must be a list of length 2 where the first weight is for negative examples (missing relationships) and the second for positive examples (actual relationships).
+
+For node classification, the `i^th^` weight is for the `i^th^` class, ordered by the class values (which must be integers). For example, if your node classification dataset has three classes: 0, 1, 42. Then the class weights must be of length 3. The third weight is applied to class 42.
+
+For class-imbalanced problems, the class weights are often set to the inverse of class frequencies to improve the inductive bias of the model on minority classes.
+
+
 == Focus weight
 
-This parameter introduces the concept of _focal loss_, studied in https://arxiv.org/pdf/1708.02002v2.pdf[Focal Loss for Dense Object Detection].
+This parameter introduces the concept of _focal loss_, again studied in https://arxiv.org/pdf/1708.02002v2.pdf[Focal Loss for Dense Object Detection].
 When `focusWeight` is a value greater than zero, the loss function changes from standard Cross-Entropy Loss to Focal Loss, defined as:
 
 image::equations/focal-loss.svg[align="center"]

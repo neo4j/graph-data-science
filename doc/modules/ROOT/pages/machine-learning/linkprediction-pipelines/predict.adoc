@@ -222,11 +222,11 @@ As the default samplingRate is `1`, we use the xref:machine-learning/linkpredict
 [opts="header"]
 |===
 | person1   | person2   | probability
-| "Alice"    | "Chris" | 0.761501243814014
-| "Chris"    | "Mark" | 0.698031344590453
-| "Alice"    | "Mark" | 0.592463259298279
-| "Alice"    | "Karin" | 0.573336902979323
-| "Alice"    | "Greg" | 0.563687033497625
+| "Alice"    | "Chris" | 0.730959477663635
+| "Chris"    | "Mark" | 0.668692594084923
+| "Alice"    | "Mark" | 0.568441606340764
+| "Alice"    | "Karin" | 0.550599611206969
+| "Alice"    | "Greg" | 0.541626603910584
 |===
 
 We can see that the model thinks that the above pairs should be connected.

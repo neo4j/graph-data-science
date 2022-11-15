@@ -442,7 +442,13 @@ YIELD
 | config          | Map         | The logistic regression config for a model candidate. The allowed parameters for a model are defined in the next table.
 |===
 
+.Logistic regression configuration
+[opts="header",cols="4m,5,2m,2,8"]
+|===
+| Name        | Type  | Default | Optional | Description
 include::partial$/machine-learning/training-methods/logisticRegressionConfig.adoc[]
+| classWeights | List of Float | [1.0, 1.0]     | yes      | Weights for each class in cross-entropy loss. The list must have length 2 and sum up to 1.0. The first weight is for negative examples (missing relationships), and the second for positive examples (actual relationships).
+|===
 
 include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.adoc[]
 --
@@ -510,7 +516,13 @@ YIELD
 | config          | Map         | The multilayer perceptron config for a model candidate. The allowed parameters for a model are defined in the next table.
 |===
 
+.Multilayer Perceptron Classification configuration
+[opts="header",cols="4,5,2m,2,8"]
+|===
+| Name                | Type                            | Default         | Optional | Description
 include::partial$/machine-learning/training-methods/mlp-classification-config.adoc[]
+| classWeights | List of Float | [1.0, 1.0]     | yes      | Weights for each class in cross-entropy loss. The list must have length 2 and sum up to 1.0. The first weight is for negative examples (missing relationships), and the second for positive examples (actual relationships).
+|===
 
 include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.adoc[]
 --
@@ -537,10 +549,10 @@ YIELD parameterSpace
 --
 
 [source, cypher, role=noplay query-example, no-result=true, group=lp]
-.The following will add a configured multilayer perceptron model:
+.The following will add a configured multilayer perceptron model with class weighted focal loss and ranged parameters:
 --
 CALL gds.alpha.pipeline.linkPrediction.addMLP('pipe',
-{hiddenLayerSizes: [4, 2], penalty: 1, patience: 2})
+{hiddenLayerSizes: [4, 2], penalty: 0.5, patience: 2, classWeights: [0.55, 0.45], focusWeight: {range: [0.0, 0.1]}})
 YIELD parameterSpace
 --
 
@@ -558,7 +570,7 @@ RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.Logistic
 [opts="header",cols="1, 1, 1"]
 |===
 | randomForestSpace | logisticRegressionSpace | MultilayerPerceptronSpace
-| [{maxDepth=2147483647, minLeafSize=1, criterion=GINI, minSplitSize=2, numberOfDecisionTrees=10, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, focusWeight=0.0, batchSize=100, tolerance=0.001, learningRate=0.001}, {maxEpochs=500, minEpochs=1, penalty={range=[1.0E-4, 100.0]}, patience=1, methodName=LogisticRegression, focusWeight=0.0, batchSize=100, tolerance=0.001, learningRate=0.001}] | [{maxEpochs=100, minEpochs=1, penalty=1, patience=2, methodName=MultilayerPerceptron, focusWeight=0.0, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001}]
+| [{maxDepth=2147483647, minLeafSize=1, criterion=GINI, minSplitSize=2, numberOfDecisionTrees=10, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, classWeights=[], penalty=0.0, patience=1, methodName=LogisticRegression, focusWeight=0.0, batchSize=100, tolerance=0.001, learningRate=0.001}, {maxEpochs=500, minEpochs=1, classWeights=[], penalty={range=[1.0E-4, 100.0]}, patience=1, methodName=LogisticRegression, focusWeight=0.0, batchSize=100, tolerance=0.001, learningRate=0.001}] | [{maxEpochs=100, minEpochs=1, classWeights=[0.55, 0.45], penalty=0.5, patience=2, methodName=MultilayerPerceptron, focusWeight={range=[0.0, 0.1]}, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001}]
 |===
 --
 

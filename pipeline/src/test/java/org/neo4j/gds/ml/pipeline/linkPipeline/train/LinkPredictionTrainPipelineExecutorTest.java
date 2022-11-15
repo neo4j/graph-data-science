@@ -428,7 +428,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                         "Link Prediction Train Pipeline :: Extract train features :: Finished",
                         "Link Prediction Train Pipeline :: Select best model :: Start",
                         "Link Prediction Train Pipeline :: Select best model :: Trial 1 of 1 :: Start",
-                        "Link Prediction Train Pipeline :: Select best model :: Trial 1 of 1 :: Method: LogisticRegression, Parameters: {focusWeight=0.0, batchSize=100, minEpochs=1, patience=1, maxEpochs=100, tolerance=0.001, learningRate=0.001, penalty=1.0}",
+                        "Link Prediction Train Pipeline :: Select best model :: Trial 1 of 1 :: Method: LogisticRegression, Parameters: {batchSize=100, minEpochs=1, patience=1, maxEpochs=100, tolerance=0.001, learningRate=0.001, penalty=1.0, focusWeight=0.0, classWeights=[]}",
                         "Link Prediction Train Pipeline :: Select best model :: Trial 1 of 1 50%",
                         "Link Prediction Train Pipeline :: Select best model :: Trial 1 of 1 100%",
                         "Link Prediction Train Pipeline :: Select best model :: Trial 1 of 1 :: Main validation metric (AUCPR): 1.0000",
