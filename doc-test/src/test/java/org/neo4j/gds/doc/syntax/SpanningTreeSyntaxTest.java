@@ -26,6 +26,7 @@ class SpanningTreeSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
+            SyntaxModeMeta.of(SyntaxMode.STREAM),
             SyntaxModeMeta.of(SyntaxMode.STATS),
             SyntaxModeMeta.of(SyntaxMode.WRITE),
             SyntaxModeMeta.of(SyntaxMode.MUTATE)
