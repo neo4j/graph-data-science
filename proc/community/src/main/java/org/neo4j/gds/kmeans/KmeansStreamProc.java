@@ -45,7 +45,7 @@ public class KmeansStreamProc extends AlgoBaseProc<
     static final String KMEANS_DESCRIPTION =
         "The Kmeans  algorithm clusters nodes into different communities based on Euclidean distance";
 
-    @Procedure(value = "gds.alpha.kmeans.stream", mode = READ)
+    @Procedure(value = "gds.beta.kmeans.stream", mode = READ)
     @Description(KMEANS_DESCRIPTION)
     public Stream<KmeansStreamProc.StreamResult> stream(
         @Name(value = "graphName") String graphName,
@@ -59,7 +59,7 @@ public class KmeansStreamProc extends AlgoBaseProc<
         ).compute(graphName, configuration, true, true);
     }
 
-    @Procedure(value = "gds.alpha.kmeans.stream.estimate", mode = READ)
+    @Procedure(value = "gds.beta.kmeans.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,

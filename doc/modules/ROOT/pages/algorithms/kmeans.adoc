@@ -1,12 +1,12 @@
-[[alpha-algorithms-k-means]]
-[.alpha]
+[[algorithms-k-means]]
+[.beta]
 = K-Means Clustering
 :description: This section describes the K-Means algorithm in the Neo4j Graph Data Science library.
 :entity: node
 :result: cluster
 :algorithm: K-Means
 
-include::partial$/operations-reference/alpha-note.adoc[]
+include::partial$/operations-reference/beta-note.adoc[]
 
 
 [[algorithms-k-means-intro]]
@@ -62,7 +62,7 @@ In order for K-Means to work properly, the property arrays for all nodes must ha
 .Run K-Means in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.kmeans.stream(
+CALL gds.beta.kmeans.stream(
   graphName: String,
   configuration: Map
 )
@@ -81,7 +81,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
+include::partial$/algorithms/kmeans/specific-configuration.adoc[]
 |===
 
 .Results
@@ -101,7 +101,7 @@ include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
 .Run K-Means in stats mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.kmeans.stats(
+CALL gds.beta.kmeans.stats(
   graphName: String,
   configuration: Map
 )
@@ -123,7 +123,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
+include::partial$/algorithms/kmeans/specific-configuration.adoc[]
 |===
 
 .Results
@@ -146,7 +146,7 @@ include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
 .Run K-Means in mutate mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.kmeans.mutate(
+CALL gds.beta.kmeans.mutate(
   graphName: String,
   configuration: Map
 )
@@ -171,7 +171,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
-include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
+include::partial$/algorithms/kmeans/specific-configuration.adoc[]
 |===
 
 .Results
@@ -197,7 +197,7 @@ include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
 .Run K-Means in write mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.kmeans.write(
+CALL gds.beta.kmeans.write(
   graphName: String,
   configuration: Map
 )
@@ -221,7 +221,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
-include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
+include::partial$/algorithms/kmeans/specific-configuration.adoc[]
 |===
 
 .Results
@@ -244,7 +244,7 @@ include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
 ====
 
 
-[[alpha-algorithms-k-means-examples]]
+[[algorithms-k-means-examples]]
 == Examples
 
 :algorithm-name: K-Means
@@ -290,7 +290,7 @@ CALL gds.graph.project(
 In the following examples we will demonstrate using the K-Means algorithm on this graph to find communities of cities that are close to each other geographically.
 
 
-[[alpha-algorithms-k-means-examples-memory-estimation]]
+[[algorithms-k-means-examples-memory-estimation]]
 === Memory Estimation
 
 :mode: write
@@ -301,7 +301,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.kmeans.write.estimate('cities', {
+CALL gds.beta.kmeans.write.estimate('cities', {
   writeProperty: 'kmeans',
   nodeProperty: 'coordinates'
 })
@@ -317,7 +317,7 @@ YIELD nodeCount, bytesMin, bytesMax, requiredMemory
 --
 
 
-[[alpha-algorithms-k-means-examples-stream]]
+[[algorithms-k-means-examples-stream]]
 === Stream
 
 include::partial$/algorithms/shared/examples-stream-intro.adoc[]
@@ -327,7 +327,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 .The following will run the algorithm and stream results:
 [source,cypher,role=noplay]
 ----
-CALL gds.alpha.kmeans.stream('cities', {
+CALL gds.beta.kmeans.stream('cities', {
   nodeProperty: 'coordinates',
   k: 3,
   randomSeed: 42
@@ -355,7 +355,7 @@ ORDER BY communityId, name ASC
 In the example above we can see that the cities are geographically clustered together.
 
 
-[[alpha-algorithms-k-means-examples-stats]]
+[[algorithms-k-means-examples-stats]]
 === Stats
 
 :stats-syntax: algorithms-k-means-syntax
@@ -366,7 +366,7 @@ include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 .The following will run the algorithm and returns the result in form of statistical and measurement values
 [source,cypher,role=noplay]
 ----
-CALL gds.alpha.kmeans.stats('cities', {
+CALL gds.beta.kmeans.stats('cities', {
   nodeProperty: 'coordinates',
   k: 3,
   randomSeed: 42
@@ -393,7 +393,7 @@ include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 .The following will run the algorithm and store the results in `cities` graph:
 [source,cypher,role=noplay]
 ----
-CALL gds.alpha.kmeans.mutate('cities', {
+CALL gds.beta.kmeans.mutate('cities', {
   nodeProperty: 'coordinates',
   k: 3,
   randomSeed: 42,
@@ -424,7 +424,7 @@ include::partial$/algorithms/shared/examples-write-intro.adoc[]
 .The following will run the algorithm and write the results back to Neo4j:
 [source,cypher,role=noplay]
 ----
-CALL gds.alpha.kmeans.write('cities', {
+CALL gds.beta.kmeans.write('cities', {
   nodeProperty: 'coordinates',
   k: 3,
   randomSeed: 42,
@@ -454,7 +454,7 @@ We run K-Means with initial seeds the coordinates of New York, Amsterdam, and Ro
 .The following will run the algorithm and stream results:
 [source,cypher,role=noplay]
 ----
-CALL gds.alpha.kmeans.stream('cities', {
+CALL gds.beta.kmeans.stream('cities', {
   nodeProperty: 'coordinates',
   k: 3,
   seedCentroids: [[40.712776,-74.005974], [52.370216,4.895168],[41.902782,12.496365]]

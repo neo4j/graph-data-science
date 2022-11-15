@@ -44,7 +44,7 @@ public class KmeansWriteProc extends BaseProc {
     @Context
     public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
 
-    @Procedure(value = "gds.alpha.kmeans.write", mode = WRITE)
+    @Procedure(value = "gds.beta.kmeans.write", mode = WRITE)
     @Description(KMEANS_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
@@ -58,7 +58,7 @@ public class KmeansWriteProc extends BaseProc {
         ).compute(graphName, configuration, true, true);
     }
 
-    @Procedure(value = "gds.alpha.kmeans.write.estimate", mode = READ)
+    @Procedure(value = "gds.beta.kmeans.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,

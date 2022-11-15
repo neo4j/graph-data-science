@@ -4,6 +4,6 @@
 | deltaThreshold    | Float     | 0.05      | yes       | Value as a percentage to determine when to stop early. If fewer  than 'deltaThreshold * \|nodes\|'  nodes change their cluster , the algorithm stops. Value must be between 0 (exclusive) and 1 (inclusive).
 | numberOfRestarts     | Integer   | 1        | yes       | Number of times to execute K-Means with different initial centers. The communities returned are those minimizing the average node-center distances.
 | randomSeed  | Integer         | n/a       | yes      | The seed value to control the initial centroid assignment.
-| xref:algorithms/alpha/kmeans.adoc#algorithms-kmeans-introduction-sampling[initialSampler]         | String          | "uniform" | yes      | The method used to sample the first `k` centroids. "uniform" and "kmeans++", both case-insensitive, are valid inputs.
+| xref:algorithms/kmeans.adoc#algorithms-kmeans-introduction-sampling[initialSampler]         | String          | "uniform" | yes      | The method used to sample the first `k` centroids. "uniform" and "kmeans++", both case-insensitive, are valid inputs.
 | seedCentroids | List of List of Float | [] | yes | Parameter to explicitly give the initial centroids. It cannot be enabled together with a non-default value of the `numberOfRestarts` parameter.
 | computeSilhouette | Boolean | false       | yes   | If set to true,  the https://en.wikipedia.org/wiki/Silhouette_(clustering)[silhouette scores] are computed once the clustering has been determined. Silhouette is a metric on how well the nodes have been clustered.

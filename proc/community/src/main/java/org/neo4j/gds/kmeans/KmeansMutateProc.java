@@ -38,7 +38,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class KmeansMutateProc extends AlgoBaseProc<Kmeans, KmeansResult, KmeansMutateConfig, MutateResult> {
 
-    @Procedure(value = "gds.alpha.kmeans.mutate", mode = READ)
+    @Procedure(value = "gds.beta.kmeans.mutate", mode = READ)
     @Description(KMEANS_DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
@@ -52,7 +52,7 @@ public class KmeansMutateProc extends AlgoBaseProc<Kmeans, KmeansResult, KmeansM
         ).compute(graphName, configuration, true, true);
     }
 
-    @Procedure(value = "gds.alpha.kmeans.mutate.estimate", mode = READ)
+    @Procedure(value = "gds.beta.kmeans.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,

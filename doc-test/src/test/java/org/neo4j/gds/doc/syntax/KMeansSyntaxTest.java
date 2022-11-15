@@ -40,6 +40,6 @@ class KMeansSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/algorithms/alpha/kmeans.adoc";
+        return "pages/algorithms/kmeans.adoc";
     }
 }

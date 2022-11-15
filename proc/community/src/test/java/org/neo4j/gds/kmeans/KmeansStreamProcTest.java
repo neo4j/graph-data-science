@@ -77,7 +77,7 @@ class KmeansStreamProcTest extends BaseProcTest {
         runQuery(createQuery);
 
         String algoQuery = GdsCypher.call("graph")
-            .algo("gds.alpha.kmeans")
+            .algo("gds.beta.kmeans")
             .streamMode()
             .addParameter("k", 2)
             .addParameter("nodeProperty", "kmeans")

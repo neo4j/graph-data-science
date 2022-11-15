@@ -67,7 +67,7 @@ class KmeansMutateProcTest extends BaseProcTest {
 
         String query = GdsCypher
             .call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.kmeans")
+            .algo("gds.beta.kmeans")
             .mutateMode()
             .addParameter("k", 3)
             .addParameter("nodeProperty", "weights")

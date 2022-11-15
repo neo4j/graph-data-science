@@ -37,7 +37,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class KmeansStatsProc extends AlgoBaseProc<Kmeans, KmeansResult, KmeansStatsConfig, StatsResult> {
 
-    @Procedure(value = "gds.alpha.kmeans.stats", mode = READ)
+    @Procedure(value = "gds.beta.kmeans.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
     public Stream<StatsResult> stats(
         @Name(value = "graphName") String graphName,
@@ -50,7 +50,7 @@ public class KmeansStatsProc extends AlgoBaseProc<Kmeans, KmeansResult, KmeansSt
         ).compute(graphName, configuration, true, true);
     }
 
-    @Procedure(value = "gds.alpha.kmeans.stats.estimate", mode = READ)
+    @Procedure(value = "gds.beta.kmeans.stats.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,
