@@ -332,7 +332,7 @@
 | `gds.alpha.knn.filtered.stats`
 | `gds.alpha.knn.filtered.stream`
 | `gds.alpha.knn.filtered.write`
-.8+<.^| xref:algorithms/alpha/leiden.adoc[Leiden]
+.8+<.^| xref:algorithms/leiden.adoc[Leiden]
 | `gds.beta.leiden.mutate`
 | `gds.beta.leiden.mutate.estimate`
 | `gds.beta.leiden.stats`
