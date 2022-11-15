@@ -42,7 +42,7 @@ public final class TunableTrainerConfig {
     static final double EPSILON = 1e-8;
     static final List<String> LOG_SCALE_PARAMETERS = List.of("penalty", "learningRate", "tolerance");
     // If you add a new entry here, make sure that `ParameterParser.parseConcreteNonNumericParameter` can handle the value type.
-    static final Map<String, Class> NON_NUMERIC_PARAMETERS = Map.of("criterion", String.class, "hiddenLayerSizes", List.class);
+    static final Map<String, Class> NON_NUMERIC_PARAMETERS = Map.of("criterion", String.class, "hiddenLayerSizes", List.class, "classWeights", List.class);
     private final Map<String, ConcreteParameter<?>> concreteParameters;
     public final Map<String, DoubleRangeParameter> doubleRanges;
     public final Map<String, IntegerRangeParameter> integerRanges;
