@@ -20,8 +20,7 @@ HashGNN is a node embedding algorithm which resembles Graph Neural Networks (GNN
 The neural networks of GNNs are replaced by random hash functions, in the flavor of the `min-hash` locality sensitive hashing.
 Thus, HashGNN combines ideas of GNNs and fast randomized algorithms.
 
-The algorithm is based on the paper "Hashing-Accelerated Graph Neural Networks for Link Prediction".
-However, the GDS implementation introduces a few improvements and generalizations.
+The GDS implementation of HashGNN is based on the paper "Hashing-Accelerated Graph Neural Networks for Link Prediction", and further introduces a few improvements and generalizations.
 The generalizations include support for embedding heterogeneous graphs; relationships of different type are associated with different hash functions, which allows for preserving relationship-typed graph topology.
 Moreover, a way to specifying how much embeddings are updated using features from neighboring nodes versus features from the same node can be configured via `neighborInfluence`.
 
@@ -30,6 +29,52 @@ Moreover, the heterogeneous generalization also gives comparable results when co
 
 The execution does not require GPUs as GNNs typically use, and parallelizes well across many CPU cores.
 
+For more information on this algorithm, see:
+
+* https://arxiv.org/pdf/2105.14280.pdf[W.Wu, B.Li, C.Luo and W.Nejdl "Hashing-Accelerated Graph Neural Networks for Link Prediction"^]
+
+=== The algorithm
+
+The first step of the algorithm is optional and transforms input features into binary features.
+The HashGNN can only run on binary features, so this step is necessary.
+Then for a number of iterations, a new binary embedding is computed for each node using the embeddings of the previous iteration.
+In the first iteration, the previous embeddings are the binary feature vectors.
+Each node vector is constructed by taking `K` random samples.
+The random sampling is carried out by successively selecting features with lowest min-hash values.
+In this selection, both features of the same node and of the neighbors of the node are considered.
+Hence, for each node, iteration and each `0 <= k < K` we sample a feature to add to the new embedding of the node, and we select either one of the node's own features or a feature from a neighbor.
+The sampling is consistent in the sense that if nodes `a` and `b` are same or similar in terms of their features, the features of their neighbors and the relationship types connecting the neighbors, the samples for `a` and `b` are also same or similar.
+The number `K` is called `embeddingDensity` in the configuration of the algorithm.
+The algorithm ends with another optional step that maps the binary embeddings to dense vectors.
+
+=== Virtual example
+
+To clarify how HashGNN works, we walk through a virtual example of three node graph for the reader curious about the details of the feature selection and prefers to learn from examples.
+Perhaps the below example is best enjoyed with a pen and paper.
+
+Let say we have a node `a` with feature `f1`, a node `b` with feature `f2` and a node `c` with features `f1` and `f3`.
+The graph structure is `a--b--c`.
+We imagine running HashGNN for one iteration with `embeddingDensity=2`.
+
+During the first iteration and `k=0`, we compute an embedding for `(a)`.
+A hash value for `f1` turns out to be `7`. Since `(b)` is a neighbor, we generate a value for its feature `f2` and it becomes `11`.
+The value `7` is sampled from a hash function which we call "one" and `11` from a hash function "two".
+Thus `f1` is added to the new features for `(a)` since it has a smaller hash value.
+We repeat for `k=1` and this time the hash values are `4` and `2`, so now `f2` is added as a feature to `(a)`.
+
+We now consider `(b)`.
+The feature `f2` gets hash value `8` using hash function "one".
+Looking at the neighbor `(a)`, we sample a hash value for `f1` which becomes `5` using hash function "two".
+Since `(c)` has more than one feature, we also have to select one of the two features `f1` and `f3` before considering the "winning" feature as before as input to hash function "two".
+We use a third hash function "three" for this purpose and `f3` gets the smaller value of `1`.
+We now compute a hash of `f3` using "two" and it becomes `6`.
+Since `5` is smaller than `6`, `f1` is the "winning" neighbor feature for `(b)`, and since `5` is also smaller than `8`, it is the overall "winning" feature.
+Therefore, we add `f1` to the embedding of `(b)`.
+We proceed similarily with `k=1` and `f1` is selected again.
+Since the embeddings consist of binary features, this second addition has no effect.
+
+We omit the details of computing the embedding of `(c)`.
+Our result is that `(a)` has features `f1` and `f2` and `(b)` has only the feature `f1`.
 
 === Features
 
@@ -39,9 +84,10 @@ Since this is not always the case for real-world graphs, the algorithm also come
 This is done using a type of hyperplane rounding and is configured via a map parameter `binarizeFeatures` containing `densityLevel` and `dimension`.
 The hyperplane rounding uses hyperplanes defined by vectors that are potentially sparse.
 The `dimension` parameter determines the number of generated binary features that the input features are transformed into.
-Each input feature is given `densityLevel` binary features with positive weight and the same number of binary features with negative weight.
-Each node's raw features are then mapped, weighted using the feature weights and raw feature values, and the results are then summed over raw features.
-This gives for each node a weight for each binary feature, and the features with positive total weight are the active features for the node.
+Each input feature is given `densityLevel` binary features with weight `1.0` and the same number of binary features with weight `-1.0`.
+The remaining features have weight `0.0`.
+For each node and each binary feature, we take the sum over the node's input feature values multiplied by the corresponding binary feature weight.
+Each feature which has positive total weight is added to the transformed features of the node.
 
 If the graph already has binary features, the algorithm can also use these directly if `binarizeFeatures` is not specified.
 This is usually the best option if the graph has only binary features and a sufficient number of them.
@@ -51,14 +97,11 @@ Using a higher dimension than the number of input feature introduces redundancy 
 
 === Neighbor influence
 
-In each iteration of HashGNN, new embeddings are generated iteratively for each node using the embeddings of previous iterations.
-The active features in a node embedding are selected randomly from the node's own features and from features of its neighbors.
 The parameter `neighborInfluence` determines how prone the algorithm is to select neighbors' features over features from the same node.
 The default value of `neighborInfluence` is `1.0` and with this value, on average a feature will be selected from the neighbors `50%` of the time.
 Increasing the value leads to neighbors being selected more often.
 The probability of selecting a feature from the neighbors as a function of `neighborInfluence` has a hockey-stick-like shape, somewhat similar to the shape of `y=log(x)` or `y=C - 1/x`.
 This implies that the probability is more sensitive for low values of `neighborInfluence`.
-The exact workings of this parameter is technical and we will omit it.
 
 === Heterogeneous HashGNN
 
@@ -79,17 +122,17 @@ With the heterogeneous algorithm, the full heterogeneous graph can be used in a 
 Heterogenous graphs typically have different node properties for different node labels.
 HashGNN assumes that all nodes have the same allowed features.
 Use therefore a default value of `0` for in each graph projection.
-This works both in the binary input case and when binarization is applied.
-For the first case, having a binary feature with value `0` is the same as not having the feature.
+This works both in the binary input case and when binarization is applied, because having a binary feature with value `0` behaves as if not having the feature.
 The `0` values are represented in a sparse format, so the memory overhead of storing `0` values for many nodes has a low overhead.
-For the case of binarization, features that have the value `0` also do not give rise to any binary features being active.
-The binarization maps features belong to different node labels into a single shared set of allowed binary features.
 
 === Orientation
 
 Choosing the right orientation when creating the graph may have a large impact.
 HashGNN works for any orientation, and the choice of orientation is problem specific.
-Given a directed relationship type, you may pick one orientation, or use two projections with `NATURAL` and `REVERSE` to be able to traverse relationships in the opposite direction while reflecting in the embedding the direction a relationship was traversed.
+Given a directed relationship type, you may pick one orientation, or use two projections with `NATURAL` and `REVERSE`.
+Using the analogy with GNN's, using a different relationship type for the reversed relationships leads to using a different set of weights when considering a relationship vis-à-vis the reversed relationship.
+For HashGNN's this means instead using different min-hash functions for the two relationships.
+For example, in a citation network, a paper citing another paper is very different from the paper being cited.
 
 === Output densification
 
@@ -114,8 +157,7 @@ This process of finding the best parameters for your specific use case and graph
 We will go through each of the configuration parameters and explain how they behave.
 
 === Iterations
-
-The `iterations` parameter determines the number of message passing steps used, and therefore the maximum number of hops between a node and other nodes that affect its embedding.
+The maximum number of hops between a node and other nodes that affect its embedding is equal to the number of iterations of HashGNN which is configured with `iterations`.
 This is analogous to the number of layers in a GNN or the number of iterations in FastRP.
 Often a value of `2` to `4` is sufficient.
 
