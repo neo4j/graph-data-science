@@ -20,11 +20,11 @@
 package org.neo4j.gds.spanningtree;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.results.StandardStatsResult;
+import org.neo4j.gds.results.StandardModeResult;
 
 import java.util.Map;
 
-public class StatsResult extends StandardStatsResult {
+public class StatsResult extends StandardModeResult {
 
     public final long effectiveNodeCount;
     public final double totalWeight;
@@ -36,7 +36,7 @@ public class StatsResult extends StandardStatsResult {
         double totalWeight,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, 0, configuration);
+        super(preProcessingMillis, computeMillis, configuration);
         this.effectiveNodeCount = effectiveNodeCount;
         this.totalWeight = totalWeight;
     }
