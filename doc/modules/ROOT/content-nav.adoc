@@ -67,7 +67,7 @@
 *** xref:algorithms/alpha/conductance.adoc[]
 *** xref:algorithms/alpha/modularity.adoc[]
 *** xref:algorithms/kmeans.adoc[]
-*** xref:algorithms/alpha/leiden.adoc[]
+*** xref:algorithms/leiden.adoc[]
 ** xref:algorithms/similarity.adoc[]
 *** xref:algorithms/node-similarity.adoc[]
 *** xref:algorithms/alpha/filtered-node-similarity.adoc[]
