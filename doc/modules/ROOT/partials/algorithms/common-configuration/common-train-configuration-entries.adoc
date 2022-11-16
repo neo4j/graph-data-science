@@ -1,3 +1,3 @@
 | modelName                                                     | String       | n/a     | no       | The name of the model to train, must not exist in the Model Catalog.
-| featureProperties                                             | List of String | []      | yes      | The names of the node properties that should be used as input features. All property names must exist in the projected graph and be of type Float or List of Float.
+| featureProperties                                             | List of String | n/a      | no      | The names of the node properties that should be used as input features. All property names must exist in the projected graph and be of type Float or List of Float.
 include::partial$/algorithms/common-configuration/common-configuration-entries.adoc[]
