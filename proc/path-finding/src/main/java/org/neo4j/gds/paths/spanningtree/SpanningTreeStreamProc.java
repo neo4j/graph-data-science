@@ -36,8 +36,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
-
-// TODO: Always undirected
 public class SpanningTreeStreamProc extends BaseProc {
     static final String procedure = "gds.beta.spanningTree.stream";
     static final String DESCRIPTION = SpanningTreeWriteProc.DESCRIPTION;

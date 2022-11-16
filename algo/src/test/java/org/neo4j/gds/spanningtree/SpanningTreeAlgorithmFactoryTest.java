@@ -21,10 +21,29 @@ package org.neo4j.gds.spanningtree;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.gdl.GdlFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class SpanningTreeAlgorithmFactoryTest {
+    @Test
+    void shouldThrowIfNotUndirected() {
+        var graph = GdlFactory.of("(a)-[:foo{cost:1.0}]->(b)").build().getUnion();
+        var config = SpanningTreeStatsConfigImpl.builder().sourceNode(0).relationshipWeightProperty("cost").build();
+        var spanningTreeAlgorithmFactory = new SpanningTreeAlgorithmFactory<>();
+        assertThatThrownBy(() -> {
+            spanningTreeAlgorithmFactory.build(
+                graph,
+                config,
+                ProgressTracker.NULL_TRACKER
+            );
+        }).hasMessageContaining(
+            "undirected");
+    }
+
+
     @Test
     void shouldEstimateMemory() {
         var config = SpanningTreeStatsConfigImpl.builder().sourceNode(0).relationshipWeightProperty("foo").build();

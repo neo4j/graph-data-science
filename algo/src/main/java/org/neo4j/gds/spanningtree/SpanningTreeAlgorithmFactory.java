@@ -35,7 +35,10 @@ public class SpanningTreeAlgorithmFactory<CONFIG extends SpanningTreeBaseConfig>
 
     @Override
     public Prim build(Graph graphOrGraphStore, CONFIG configuration, ProgressTracker progressTracker) {
-
+        if (!graphOrGraphStore.schema().isUndirected()) {
+            throw new IllegalArgumentException(
+                "The Spanning Tree algorithm works only with undirected graphs. Please orient the edges properly");
+        }
         return new Prim(
             graphOrGraphStore,
             configuration.objective(),

@@ -37,8 +37,6 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
-
-// TODO: Always undirected
 public class SpanningTreeWriteProc extends BaseProc {
 
     static final String procedure = "gds.beta.spanningTree.write";
