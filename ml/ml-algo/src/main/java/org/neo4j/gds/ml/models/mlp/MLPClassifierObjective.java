@@ -52,8 +52,13 @@ public class MLPClassifierObjective implements Objective<MLPClassifierData> {
     private final double[] classWeights;
 
 
-    public MLPClassifierObjective(MLPClassifier classifier, Features features, HugeIntArray labels, double penalty, double focusWeight,
-                                  double[] classWeights
+    public MLPClassifierObjective(
+        MLPClassifier classifier,
+        Features features,
+        HugeIntArray labels,
+        double penalty,
+        double focusWeight,
+        double[] classWeights
     ) {
         this.classifier = classifier;
         this.features = features;

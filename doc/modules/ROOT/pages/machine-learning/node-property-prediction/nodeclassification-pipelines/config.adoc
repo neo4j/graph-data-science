@@ -331,7 +331,7 @@ YIELD
 |===
 | Name        | Type  | Default | Optional | Description
 include::partial$/machine-learning/training-methods/logisticRegressionConfig.adoc[]
-| classWeights | List of Float | List of 1.0     | yes      | Weights for each class in cross-entropy loss. The `i^th^` weight is for the `i^th^` class (when ordering the classes by their integer values). The list must have length equal to the number of classes, and have weights sum up to 1.0.
+| classWeights | List of Float | List of 1.0     | yes      | Weights for each class in loss function. The `i^th^` weight is for the `i^th^` class (when ordering the classes by their integer values). The list must have length equal to the number of classes, and have weights sum up to 1.0.
 |===
 
 include::partial$/machine-learning/node-property-prediction/pipelineInfoResult.adoc[]

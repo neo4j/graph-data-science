@@ -133,6 +133,11 @@ class CrossEntropyLossTest implements FiniteDifferenceTest {
         double weightedCrossEntropyLossValue = new ComputationContext().forward(weightedCrossEntropyLoss).value();
 
         assertThat(weightedCrossEntropyLossValue).isLessThan(crossEntropyLossValue);
+
+        var nonWeightedCrossEntropyLoss = new CrossEntropyLoss(predictionsBiasedToClass0, labels, new double[]{0.5, 0.5});
+        double nonWeightedCrossEntropyLossValue = new ComputationContext().forward(nonWeightedCrossEntropyLoss).value();
+
+        assertThat(nonWeightedCrossEntropyLossValue).isGreaterThan(weightedCrossEntropyLossValue);
     }
 
     @Override

@@ -6,4 +6,5 @@ include::partial$/machine-learning/training-methods/penalty-common-config.adoc[]
 | hiddenLayerSizes
 | List of Integers
 | [100]            | yes      | List of integers representing number of neurons in each layer. The default value specifies an MLP with 1 hidden layer of 100 neurons.
-| focusWeight | Float or Map footnote:range[A map should be of the form `{range: [minValue, maxValue]}`. It is used by auto-tuning.]| 0.0     | yes      | Exponent for the focal loss factor, to make the model focus more on hard, misclassified examples in the train set. The default of `0.0` implies that focus is not applied and cross entropy is used. Must be positive.
+
+include::partial$/machine-learning/training-methods/focus-weight-common-config.adoc[]
