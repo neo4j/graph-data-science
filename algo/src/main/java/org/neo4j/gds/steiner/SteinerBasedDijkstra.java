@@ -35,7 +35,18 @@ import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
 
-  class SteinerBasedDijkstra extends Algorithm<DijkstraResult> {
+/*
+ * the idea of this Dijkstra modification is to provide an efficient implementation to the following heuristic:
+ *
+ * while there exists a terminal for which a path form the source has not been found yet
+ *              1. Find the shortest path in the current graph to any unvisited terminal
+ *              2. Modify the graph such that all edges in the discovered path have weight equal to zero.
+ *
+ * We do implicit zeroing by keeping an array of vertices which are accessible from root with zero cost.
+ * Also, when a path to terminal has been found, we do not start a shortest path search from scratch.
+ * We instead continue from where we left off.
+ */
+class SteinerBasedDijkstra extends Algorithm<DijkstraResult> {
     private final Graph graph;
     private long sourceNode;
     private final HugeLongPriorityQueue queue;
@@ -72,10 +83,10 @@ import java.util.stream.Stream;
 
         //this bitset tracks which vertices have been "merged" with source
         //i.e.,  those vertices for which their path to the root has been modified to zero cost
-        //the structure is modified every time a path to a termninal from source is found
-        //by  setting to "1" all un-merged vertices in the path.
+        //in essence it's as if they have been merged with the source into a ''supernode''
+        //the structure is modified every time a path to a terminal from source is found
+        //by setting to "1" all un-merged vertices in the path.
         var mergedWithSource = new BitSet(graph.nodeCount());
-
         mergedWithSource.set(sourceNode);
 
         var paths = Stream
@@ -85,129 +96,141 @@ import java.util.stream.Stream;
         return new DijkstraResult(paths);
     }
 
-      @Override
-      public void release() {
+    @Override
+    public void release() {
 
-      }
-      
-      private void specialRelaxNode(long nodeId, BitSet mergedWithSource) {
-          //this is a modified node relaxation to fit our needs
-          //a node is allowed to add to the priority queue, already visited nodes
-          //provided that they have not been merged to the root
-          //in that set rather than visited being a 0/1  "boolean" array
-          //consider visited as an array from 0...|terminals| where during iteration j
-          // visited[i] = j  would be equal to "true" and visited[i] < j would be equal to "false"
-          // and visited[i] gets sets to j, when its visited in the j-th iteration
-          double cost = distances.get(nodeId);
-          graph.forEachRelationship(
-              nodeId,
-              1.0D,
-              (source, target, weight) -> {
-                  if (visited.get(target)) {
-                      reexamineVisitedState(target, mergedWithSource.get(target), weight + cost);
-                  }
-                  if (!visited.get(target)) {
-                      updateCost(source, target, weight + cost);
-                  }
-                  return true;
-              }
-          );
-      }
+    }
 
-      private void reexamineVisitedState(long target, boolean targetIsMergedWithSource, double cost) {
-          if (!targetIsMergedWithSource && distances.get(target) > cost) {
-              visited.flip(target); //before it was true, now it becomes false again
-          }
-      }
+    private void specialRelaxNode(long nodeId, BitSet mergedWithSource) {
+        //this is a modified node relaxation to fit our needs
 
-      private void mergeNodesOnPathToSource(long nodeId, BitSet mergedWithSource) {
-          long currentId = nodeId;
-          //while i am not meeting merged nodes, add the current path node to the merge set
-          //if the parent i merged, then it's path to the source has already been zeroed,
-          //hence we can stop
-          while (!mergedWithSource.getAndSet(currentId)) {
-              if (currentId != nodeId) { //this is just to avoid processing "nodeId" twice
-                  queue.add(currentId, 0); //add the node to the queue with cost 0
-              }
-              distances.set(currentId, 0);
+        //normally, dijkstra relaxation for a node  u works as follows:
+        //for  v : neighbor (u) if  !visited(v)  update-in-queue
 
-              currentId = predecessors.getOrDefault(currentId, -1);
-              if (currentId == sourceNode || currentId == -1) {
-                  break;
-              }
-          }
-      }
+        //this dijkstra modification, however, can update v even if v was marked as visited.
+        //this is a consequence of not restarting dijkstra from scratch but continuing from where we left of
+        //the neighbors of a  freshly merged node u will need to have their score updated
+        //because   the cost of u->v is not   distance(u)+ cost(u->v) anymore but  only cost(u->v)
+        //since u is assumed to be merged to the source.
+        // So even if v has been marked as visited, it makes sense to reprocess it.
+        //Of course  v's own children might need to be reupdated due to v's potential new distance etc.
 
-      private PathResult next(
-          BitSet mergedWithSource,
-          ImmutablePathResult.Builder pathResultBuilder
-      ) {
+        //if this situation happens, we simply flip the visited state of a node to unvisited
 
-          long numberOfTerminals = isTerminal.cardinality();
-          while (!queue.isEmpty() && numberOfTerminals > metTerminals.longValue()) {
-              var node = queue.pop();
-              var cost = queue.cost(node);
-              distances.set(node, cost);
-              visited.set(node);
-              if (isTerminal.get(node)) { //if we have found a terminal
+        double cost = distances.get(nodeId);
+        graph.forEachRelationship(
+            nodeId,
+            1.0D,
+            (source, target, weight) -> {
+                if (visited.get(target)) { //let's see if it makes sense to flip it
+                    reExamineVisitedState(target, mergedWithSource.get(target), weight + cost);
+                }
+                if (!visited.get(target)) { //if unvisited, try to update score
+                    updateCost(source, target, weight + cost);
+                }
+                return true;
+            }
+        );
+    }
 
-                  metTerminals.increment();
+    private void reExamineVisitedState(long target, boolean targetIsMergedWithSource, double cost) {
+        //if it is merged with the source, we must not touch it
+        //otherwise, if we can improve on its current score let's go for it!
+        if (!targetIsMergedWithSource && distances.get(target) > cost) {
+            visited.flip(target); //before it was true, now it becomes false again
+        }
+    }
 
-                  var pathResult = pathResult(node, pathResultBuilder, mergedWithSource);
+    private void mergeNodesOnPathToSource(long nodeId, BitSet mergedWithSource) {
+        long currentId = nodeId;
+        //while not meeting merged nodes, add the current path node to the merge set
+        //if the parent i merged, then it's path to the source has already been zeroed,
+        //hence we can stop
+        while (!mergedWithSource.getAndSet(currentId)) {
+            if (currentId != nodeId) { //this is just to avoid processing "nodeId" twice
+                queue.add(currentId, 0); //add the node to the queue with cost 0
+            }
+            distances.set(currentId, 0);
 
-                  if (metTerminals.longValue() < numberOfTerminals) { //this is just optimization
-                      mergeNodesOnPathToSource(node, mergedWithSource);
-                      specialRelaxNode(node, mergedWithSource);
-                  }
-                  return pathResult;
+            currentId = predecessors.getOrDefault(currentId, -1);
+            if (currentId == sourceNode || currentId == -1) {
+                break;
+            }
+        }
+    }
 
-              } else {
-                  specialRelaxNode(node, mergedWithSource);
-              }
-          }
-          return PathResult.EMPTY;
-      }
+    private PathResult next(
+        BitSet mergedWithSource,
+        ImmutablePathResult.Builder pathResultBuilder
+    ) {
 
-      private void updateCost(long source, long target, double newCost) {
-          boolean shouldUpdate = !queue.containsElement(target) || newCost < queue.cost(target);
-          if (shouldUpdate) {
-              queue.add(target, newCost);
-              predecessors.put(target, source);
-          }
-      }
+        long numberOfTerminals = isTerminal.cardinality();
+        while (!queue.isEmpty() && numberOfTerminals > metTerminals.longValue()) {
+            var node = queue.pop();
+            var cost = queue.cost(node);
+            distances.set(node, cost);
+            visited.set(node);
+            if (isTerminal.get(node)) { //if we have found a terminal
 
-      private static final long[] EMPTY_ARRAY = new long[0];
+                metTerminals.increment();
 
-      private PathResult pathResult(
-          long target,
-          ImmutablePathResult.Builder pathResultBuilder,
-          BitSet mergedWithSource
-      ) {
-          var pathNodeIds = new LongArrayDeque();
-          var costs = new DoubleArrayDeque();
+                var pathResult = pathResult(node, pathResultBuilder, mergedWithSource);
 
-          var pathStart = this.sourceNode;
-          var lastNode = target;
+                if (metTerminals.longValue() < numberOfTerminals) { //this just avoids extra work
+                    mergeNodesOnPathToSource(node, mergedWithSource); ///update the merged bitset
+                    specialRelaxNode(node, mergedWithSource); //examine all neighbors of node
+                }
+                return pathResult;
 
-          while (true) {
-              pathNodeIds.addFirst(lastNode);
-              if (mergedWithSource.get(lastNode)) {
-                  break;
-              }
-              costs.addFirst(queue.cost(lastNode));
+            } else {
+                specialRelaxNode(node, mergedWithSource); //examine all neighbors of node
+                //we do not return anything, because we only care about paths ending in terminals
+            }
+        }
+        return PathResult.EMPTY;
+    }
 
-              lastNode = this.predecessors.getOrDefault(lastNode, pathStart);
+    private void updateCost(long source, long target, double newCost) {
+        boolean shouldUpdate = !queue.containsElement(target) || newCost < queue.cost(target);
+        if (shouldUpdate) {
+            queue.add(target, newCost);
+            predecessors.put(target, source);
+        }
+    }
 
-          }
+    private static final long[] EMPTY_ARRAY = new long[0];
 
-          return pathResultBuilder
-              .index(pathIndex++)
-              .targetNode(target)
-              .nodeIds(pathNodeIds.toArray())
-              .relationshipIds(EMPTY_ARRAY)
-              .costs(costs.toArray())
-              .build();
-      }
+    //we generate the path only until the first discovered merged node
+    private PathResult pathResult(
+        long target,
+        ImmutablePathResult.Builder pathResultBuilder,
+        BitSet mergedWithSource
+    ) {
+        var pathNodeIds = new LongArrayDeque();
+        var costs = new DoubleArrayDeque();
+
+        var pathStart = this.sourceNode;
+        var lastNode = target;
+
+        while (true) {
+            pathNodeIds.addFirst(lastNode); //node is always added
+            if (mergedWithSource.get(lastNode)) {
+                break;
+            }
+            costs.addFirst(queue.cost(lastNode)); //cost is added except the very last one
+
+            lastNode = this.predecessors.getOrDefault(lastNode, pathStart);
+
+        }
+
+        return pathResultBuilder
+            .index(pathIndex++)
+            .targetNode(target)
+            .nodeIds(pathNodeIds.toArray())
+            .relationshipIds(EMPTY_ARRAY)
+            .costs(costs.toArray())
+            .build();
+    }
 
 
 }
