@@ -22,6 +22,7 @@ package org.neo4j.gds.steiner;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -74,8 +75,10 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
 
         HugeLongArray parent = HugeLongArray.newArray(graph.nodeCount());
         HugeDoubleArray parentCost = HugeDoubleArray.newArray(graph.nodeCount());
-        parentCost.fill(PRUNED);
-        parent.fill(PRUNED);
+        ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency, v -> {
+            parentCost.set(v, PRUNED);
+            parent.set(v, PRUNED);
+        });
         DoubleAdder totalCost = new DoubleAdder();
 
         var shortestPaths = runShortestPaths();
