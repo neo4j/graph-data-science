@@ -103,9 +103,8 @@ import java.util.stream.Stream;
               nodeId,
               1.0D,
               (source, target, weight) -> {
-                  if (!mergedWithSource.get(target) && visited.get(target) && distances.get(target) > weight + cost) {
-                      visited.flip(target); //before it was true, now it becomes false again
-                      queue.set(target, distances.get(target));
+                  if (visited.get(target)) {
+                      reexamineVisitedState(target, mergedWithSource.get(target), weight + cost);
                   }
                   if (!visited.get(target)) {
                       updateCost(source, target, weight + cost);
@@ -113,7 +112,12 @@ import java.util.stream.Stream;
                   return true;
               }
           );
+      }
 
+      private void reexamineVisitedState(long target, boolean targetIsMergedWithSource, double cost) {
+          if (!targetIsMergedWithSource && distances.get(target) > cost) {
+              visited.flip(target); //before it was true, now it becomes false again
+          }
       }
 
       private void mergeNodesOnPathToSource(long nodeId, BitSet mergedWithSource) {
@@ -149,12 +153,12 @@ import java.util.stream.Stream;
 
                   metTerminals.increment();
 
+                  var pathResult = pathResult(node, pathResultBuilder);
+
                   if (metTerminals.longValue() < numberOfTerminals) { //this is just optimization
                       mergeNodesOnPathToSource(node, mergedWithSource);
+                      specialRelaxNode(node, mergedWithSource);
                   }
-
-                  var pathResult = pathResult(node, pathResultBuilder);
-                  specialRelaxNode(node, mergedWithSource);
                   return pathResult;
 
               } else {
