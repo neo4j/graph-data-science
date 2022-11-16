@@ -23,6 +23,7 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.spanningtree.SpanningTreeMutateProc;
 import org.neo4j.gds.spanningtree.SpanningTreeStatsProc;
+import org.neo4j.gds.spanningtree.SpanningTreeStreamProc;
 import org.neo4j.gds.spanningtree.SpanningTreeWriteProc;
 
 import java.util.List;
@@ -33,13 +34,14 @@ class SpanningTreeDocTest extends SingleFileDocTestBase {
     protected List<Class<?>> functions() {
         return List.of(AsNodeFunc.class);
     }
-
+    
     @Override
     protected List<Class<?>> procedures() {
         return List.of(
             SpanningTreeStatsProc.class,
             SpanningTreeMutateProc.class,
             SpanningTreeWriteProc.class,
+            SpanningTreeStreamProc.class,
             GraphProjectProc.class
         );
     }

@@ -17,24 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc.syntax;
+package org.neo4j.gds.impl.spanningtree;
 
-import java.util.List;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-class SpanningTreeSyntaxTest extends SyntaxTestBase {
+@ValueClass
+@Configuration
+public interface SpanningTreeStreamConfig extends SpanningTreeBaseConfig {
 
-    @Override
-    protected Iterable<SyntaxModeMeta> syntaxModes() {
-        return List.of(
-            SyntaxModeMeta.of(SyntaxMode.STREAM),
-            SyntaxModeMeta.of(SyntaxMode.STATS),
-            SyntaxModeMeta.of(SyntaxMode.WRITE),
-            SyntaxModeMeta.of(SyntaxMode.MUTATE)
-        );
+    static SpanningTreeStreamConfig of(CypherMapWrapper userInput) {
+        return new SpanningTreeStreamConfigImpl(userInput);
     }
 
-    @Override
-    protected String adocFile() {
-        return "pages/alpha-algorithms/minimum-weight-spanning-tree.adoc";
-    }
 }
