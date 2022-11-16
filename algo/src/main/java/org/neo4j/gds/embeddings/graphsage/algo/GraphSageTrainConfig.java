@@ -63,6 +63,9 @@ public interface GraphSageTrainConfig extends
     long serialVersionUID = 0x42L;
 
     @Override
+    List<String> featureProperties();
+
+    @Override
     @Value.Default
     default int embeddingDimension() {
         return 64;
