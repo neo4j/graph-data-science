@@ -153,7 +153,7 @@ import java.util.stream.Stream;
 
                   metTerminals.increment();
 
-                  var pathResult = pathResult(node, pathResultBuilder);
+                  var pathResult = pathResult(node, pathResultBuilder, mergedWithSource);
 
                   if (metTerminals.longValue() < numberOfTerminals) { //this is just optimization
                       mergeNodesOnPathToSource(node, mergedWithSource);
@@ -164,46 +164,50 @@ import java.util.stream.Stream;
               } else {
                   specialRelaxNode(node, mergedWithSource);
               }
-        }
-        return PathResult.EMPTY;
-    }
+          }
+          return PathResult.EMPTY;
+      }
 
-    private void updateCost(long source, long target, double newCost) {
-        boolean shouldUpdate= !queue.containsElement(target) ||newCost < queue.cost(target);
-        if (shouldUpdate) {
-            queue.add(target, newCost);
-            predecessors.put(target, source);
-        }
-    }
+      private void updateCost(long source, long target, double newCost) {
+          boolean shouldUpdate = !queue.containsElement(target) || newCost < queue.cost(target);
+          if (shouldUpdate) {
+              queue.add(target, newCost);
+              predecessors.put(target, source);
+          }
+      }
 
-    private static final long[] EMPTY_ARRAY = new long[0];
-    private PathResult pathResult(long target, ImmutablePathResult.Builder pathResultBuilder) {
-        var pathNodeIds = new LongArrayDeque();
-        var costs = new DoubleArrayDeque();
+      private static final long[] EMPTY_ARRAY = new long[0];
 
-        var pathStart = this.sourceNode;
-        var lastNode = target;
+      private PathResult pathResult(
+          long target,
+          ImmutablePathResult.Builder pathResultBuilder,
+          BitSet mergedWithSource
+      ) {
+          var pathNodeIds = new LongArrayDeque();
+          var costs = new DoubleArrayDeque();
 
-        while (true) {
-            pathNodeIds.addFirst(lastNode);
-            costs.addFirst(queue.cost(lastNode));
+          var pathStart = this.sourceNode;
+          var lastNode = target;
 
-            if (lastNode == pathStart) {
-                break;
-            }
+          while (true) {
+              pathNodeIds.addFirst(lastNode);
+              if (mergedWithSource.get(lastNode)) {
+                  break;
+              }
+              costs.addFirst(queue.cost(lastNode));
 
-            lastNode = this.predecessors.getOrDefault(lastNode, pathStart);
+              lastNode = this.predecessors.getOrDefault(lastNode, pathStart);
 
-        }
+          }
 
-        return pathResultBuilder
-            .index(pathIndex++)
-            .targetNode(target)
-            .nodeIds(pathNodeIds.toArray())
-            .relationshipIds(EMPTY_ARRAY)
-            .costs(costs.toArray())
-            .build();
-    }
+          return pathResultBuilder
+              .index(pathIndex++)
+              .targetNode(target)
+              .nodeIds(pathNodeIds.toArray())
+              .relationshipIds(EMPTY_ARRAY)
+              .costs(costs.toArray())
+              .build();
+      }
 
 
 }

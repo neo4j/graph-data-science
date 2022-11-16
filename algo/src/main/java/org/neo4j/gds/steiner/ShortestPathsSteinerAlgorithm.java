@@ -22,48 +22,37 @@ package org.neo4j.gds.steiner;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.DoubleAdder;
-import java.util.function.Function;
 
 public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> {
 
     public static long ROOTNODE = -1;
     public static long PRUNED = -2;
-
     private final Graph graph;
     private final long sourceId;
     private final List<Long> terminals;
     private final int concurrency;
     private final BitSet isTerminal;
-    private final String relationshipWeightProperty;
-
 
     public ShortestPathsSteinerAlgorithm(
         Graph graph,
         long sourceId,
         List<Long> terminals,
-        int concurrency,
-        String relationshipWeightProperty
+        int concurrency
     ) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
         this.sourceId = sourceId;
         this.terminals = terminals;
         this.concurrency = concurrency;
-        this.relationshipWeightProperty = relationshipWeightProperty;
-        isTerminal = createTerminalBitSet();
+        this.isTerminal = createTerminalBitSet();
     }
 
     private BitSet createTerminalBitSet() {
@@ -86,21 +75,18 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         HugeLongArray parent = HugeLongArray.newArray(graph.nodeCount());
         HugeDoubleArray parentCost = HugeDoubleArray.newArray(graph.nodeCount());
         parentCost.fill(PRUNED);
+        parent.fill(PRUNED);
         DoubleAdder totalCost = new DoubleAdder();
 
         var shortestPaths = runShortestPaths();
 
-        BitSet covered = new BitSet(graph.nodeCount());
-
-        initForSource(parent, parentCost, covered);
+        initForSource(parent, parentCost);
 
         shortestPaths.forEachPath(path -> {
-            processPath(path, parent, covered);
+            processPath(path, parent, parentCost, totalCost);
 
         });
 
-        ignoreAllOtherNodes(covered, parent);
-        calculateWeights(covered, parent, parentCost, totalCost);
         return SteinerTreeResult.of(parent, parentCost, totalCost.doubleValue());
     }
 
@@ -109,79 +95,35 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
 
     }
 
-    private void initForSource(HugeLongArray parent, HugeDoubleArray parentCost, BitSet covered) {
-        covered.set(sourceId);
+    private void initForSource(HugeLongArray parent, HugeDoubleArray parentCost) {
         parent.set(sourceId, ROOTNODE);
         parentCost.set(sourceId, 0);
-    }
-
-    private void ignoreAllOtherNodes(BitSet covered, HugeLongArray parent) {
-
-        ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency, nodeId -> {
-            if (!covered.get(nodeId)) {
-                parent.set(nodeId, PRUNED);
-            }
-        });
-
-    }
-
-    private void calculateWeights(
-        BitSet covered,
-        HugeLongArray parent,
-        HugeDoubleArray parentCost,
-        DoubleAdder totalCost
-    ) {
-        HugeLongArray coveredNodes = findCoveredNodes(covered);
-        Function<Long, Integer> customDegreeFunction = x -> graph.degree(coveredNodes.get(x));
-        var tasks = PartitionUtils.customDegreePartitionWithBatchSize(
-            concurrency,
-            coveredNodes.size(),
-            customDegreeFunction,
-            partition -> new CostCalculationTask(graph, partition, coveredNodes, parent, parentCost, totalCost),
-            Optional.empty(),
-            Optional.empty()
-        );
-        RunWithConcurrency
-            .builder()
-            .concurrency(concurrency)
-            .tasks(tasks)
-            .executor(Pools.DEFAULT)
-            .run();
-
-    }
-
-    private HugeLongArray findCoveredNodes(BitSet covered) {
-        var coveredNodes = HugeLongArray.newArray(covered.cardinality());
-        long nodeIndex = covered.nextSetBit(0);
-        long indexId = 0;
-        while (nodeIndex != -1) {
-            coveredNodes.set(indexId++, nodeIndex);
-            nodeIndex = covered.nextSetBit(nodeIndex + 1);
-        }
-        return coveredNodes;
     }
 
     private void processPath(
         PathResult path,
         HugeLongArray parent,
-        BitSet covered
+        HugeDoubleArray parentCost,
+        DoubleAdder totalCost
     ) {
 
         long targetId = path.targetNode();
 
         if (isTerminal.get(targetId)) {
             var ids = path.nodeIds();
-            var pathLength = ids.length;
-
-            for (int j = pathLength - 1; j >= 0; --j) {
-                long nodeId = ids[j];
-                if (covered.get(nodeId)) {
-                    break;
-                } else {
-                    covered.set(nodeId);
-                    long parentId = ids[j - 1];
-                    parent.set(nodeId, parentId);
+            var costs = path.costs();
+            var pastLength = costs.length;
+            totalCost.add(path.totalCost());
+            for (int j = pastLength - 1; j >= 0; --j) {
+                long nodeId = ids[j + 1];
+                long parentId = ids[j];
+                double cost = costs[j];
+                if (j > 0) {
+                    cost -= costs[j - 1];
                 }
+                parent.set(nodeId, parentId);
+                parentCost.set(nodeId, cost);
+
             }
         }
     }

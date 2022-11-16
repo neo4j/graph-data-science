@@ -134,9 +134,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             graph,
             0,
             List.of(2L, 5L),
-            1,
-            "weight"
-
+            1
         ).compute();
 
         long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOTNODE, 0, 1, 2, 3, 4};
@@ -157,9 +155,9 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             lineGraph,
             0,
             List.of(2L, 4L),
-            1,
-            "weight"
-        ).compute();
+            1
+        )
+            .compute();
 
         long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOTNODE, 0, 1, 2, 3};
 
@@ -185,7 +183,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
         assertThat(result.size()).isEqualTo(2);
         long[][] paths = new long[6][];
         paths[2] = new long[]{0, 1, 2};
-        paths[5] = new long[]{0, 1, 2, 3, 4, 5};
+        paths[5] = new long[]{2, 3, 4, 5};
         for (PathResult path : result) {
             long targetNode = path.targetNode();
             assertThat(targetNode).isIn(2L, 5L);
@@ -200,9 +198,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             extGraph,
             0,
             List.of(2L, 3L),
-            1,
-            "weight"
-
+            1
         ).compute();
 
         long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOTNODE, 0, 1, 6, 1, 4, 5};
@@ -226,8 +222,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             triangleGraph,
             0,
             List.of(1L, 3L),
-            1,
-            "weight"
+            1
         ).compute();
 
         long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOTNODE, 0, 1, 2};

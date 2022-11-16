@@ -147,30 +147,6 @@ public final class PartitionUtils {
         return degreePartitionWithBatchSize(graph.nodeIterator(), customDegreeFunction::apply, batchSize, taskCreator);
     }
 
-    public static <TASK> List<TASK> customDegreePartitionWithBatchSize(
-        int concurrency,
-        long nodeCount,
-        Function<Long, Integer> customDegreeFunction,
-        Function<DegreePartition, TASK> taskCreator,
-        Optional<Integer> minBatchSize,
-        Optional<Long> weightSum
-    ) {
-        var actualWeightSum = weightSum.orElse(
-            LongStream.range(0, nodeCount).map(nodeId -> customDegreeFunction.apply(nodeId).longValue()).sum()
-        );
-        var batchSize = Math.max(
-            minBatchSize.orElse(ParallelUtil.DEFAULT_BATCH_SIZE),
-            BitUtil.ceilDiv(actualWeightSum, concurrency)
-        );
-        return degreePartitionWithBatchSize(
-            LongStream.range(0, nodeCount).iterator(),
-            customDegreeFunction::apply,
-            batchSize,
-            taskCreator
-        );
-    }
-
-
     public static <TASK> List<TASK> degreePartitionWithBatchSize(
         Graph graph,
         long batchSize,

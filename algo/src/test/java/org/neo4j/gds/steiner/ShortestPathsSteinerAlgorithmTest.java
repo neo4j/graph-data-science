@@ -71,7 +71,12 @@ class ShortestPathsSteinerAlgorithmTest {
 
     @Test
     void shouldWorkCorrectly() {
-        var steinerTreeResult = new ShortestPathsSteinerAlgorithm(graph, 0L, List.of(4L, 7L, 8L), 1,"weight").compute();
+        var steinerTreeResult = new ShortestPathsSteinerAlgorithm(
+            graph,
+            0L,
+            List.of(4L, 7L, 8L),
+            1
+        ).compute();
         var pruned = ShortestPathsSteinerAlgorithm.PRUNED;
         var rootnode = ShortestPathsSteinerAlgorithm.ROOTNODE;
         long[] parentArray = new long[]{rootnode, pruned, 0, 0, 3, pruned, 2, 6, 6, pruned};
@@ -82,6 +87,6 @@ class ShortestPathsSteinerAlgorithmTest {
         assertThat(steinerTreeResult.totalCost()).isEqualTo(6.0);
 
 
-}
+    }
 
 }
