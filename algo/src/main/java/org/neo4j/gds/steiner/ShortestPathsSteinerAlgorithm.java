@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -133,8 +134,18 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
 
     private DijkstraResult runShortestPaths() {
 
-        var steinerBasedDijkstra = new SteinerBasedDijkstra(graph, sourceId, isTerminal);
-        return steinerBasedDijkstra.compute();
+        // var steinerBasedDijkstra = new SteinerBasedDijkstra(graph, sourceId, isTerminal);
+        var steinerBasedDelta = new SteinerBasedDeltaStepping(
+            graph,
+            sourceId,
+            2.0,
+            isTerminal,
+            concurrency,
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        return steinerBasedDelta.compute();
 
     }
 

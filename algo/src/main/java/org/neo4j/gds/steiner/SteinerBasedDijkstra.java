@@ -148,7 +148,7 @@ class SteinerBasedDijkstra extends Algorithm<DijkstraResult> {
         //hence we can stop
         while (!mergedWithSource.getAndSet(currentId)) {
             if (currentId != nodeId) { //this is just to avoid processing "nodeId" twice
-                queue.add(currentId, 0); //add the node to the queue with cost 0
+                queue.set(currentId, 0); //add the node to the queue with cost 0
             }
             distances.set(currentId, 0);
 
@@ -193,7 +193,7 @@ class SteinerBasedDijkstra extends Algorithm<DijkstraResult> {
     private void updateCost(long source, long target, double newCost) {
         boolean shouldUpdate = !queue.containsElement(target) || newCost < queue.cost(target);
         if (shouldUpdate) {
-            queue.add(target, newCost);
+            queue.set(target, newCost);
             predecessors.put(target, source);
         }
     }

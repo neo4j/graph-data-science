@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.paths.dijkstra;
 
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.paths.PathResult;
 
 import java.util.Optional;
@@ -62,7 +61,6 @@ public class DijkstraResult {
         return paths.map(fn).onClose(this::runConsumptionAction);
     }
 
-    @TestOnly
     public Set<PathResult> pathSet() {
         var resultSet = paths.collect(Collectors.toSet());
         runConsumptionAction();
