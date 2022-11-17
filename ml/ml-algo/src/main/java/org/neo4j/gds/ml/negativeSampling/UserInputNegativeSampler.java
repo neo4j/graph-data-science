@@ -20,29 +20,36 @@
 package org.neo4j.gds.ml.negativeSampling;
 
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.SplittableRandom;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class UserInputNegativeSampler implements NegativeSampler {
     private final Graph negativeExampleGraph;
     private final double testTrainFraction;
-
     private final SplittableRandom rng;
 
     public UserInputNegativeSampler(
         Graph negativeExampleGraph,
         double testTrainFraction,
-        Optional<Long> randomSeed
-    ) {
+        Optional<Long> randomSeed,
+        Collection<NodeLabel> sourceLabels,
+        Collection<NodeLabel> targetLabels
+        ) {
         if (!negativeExampleGraph.schema().isUndirected()) {
             throw new IllegalArgumentException("UserInputNegativeSampler requires graph to be UNDIRECTED.");
         }
         this.negativeExampleGraph = negativeExampleGraph;
         this.testTrainFraction = testTrainFraction;
         this.rng = randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
+
+        validateNegativeRelationships(sourceLabels, targetLabels);
     }
 
     @Override
@@ -74,6 +81,30 @@ public class UserInputNegativeSampler implements NegativeSampler {
 
     private boolean sample(double probability) {
         return rng.nextDouble() < probability;
+    }
+
+    private void validateNegativeRelationships(Collection<NodeLabel> validSourceLabel, Collection<NodeLabel> validTargetLabel) {
+         negativeExampleGraph.forEachNode(nodeId -> {
+                negativeExampleGraph.forEachRelationship(nodeId, (s, t) -> {
+                    var negativeRelHasCorrectType = nodePairsHaveValidLabels(negativeExampleGraph.nodeLabels(s), negativeExampleGraph.nodeLabels(t), validSourceLabel, validTargetLabel);
+                    if (!negativeRelHasCorrectType) {
+                        throw new IllegalArgumentException(formatWithLocale(
+                            "There is a relationship of negativeRelationshipType between nodes %s and %s. The nodes have types %s and %s. However, they need to be between %s and %s.",
+                            negativeExampleGraph.toOriginalNodeId(s), negativeExampleGraph.toOriginalNodeId(t),
+                            negativeExampleGraph.nodeLabels(s), negativeExampleGraph.nodeLabels(t), validSourceLabel.toString(), validTargetLabel.toString()
+                        ));
+                    }
+                    return true;
+                });
+                return true;
+            });
+    }
+
+    private boolean nodePairsHaveValidLabels(Collection<NodeLabel> candidateSource, Collection<NodeLabel> candidateTarget, Collection<NodeLabel> validSourceLabels, Collection<NodeLabel> validTargetLabels) {
+        return (candidateSource.stream().anyMatch(validSourceLabels::contains)
+                && candidateTarget.stream().anyMatch(validTargetLabels::contains)) ||
+               ((candidateSource.stream().anyMatch(validTargetLabels::contains)
+                 && candidateTarget.stream().anyMatch(validSourceLabels::contains)));
     }
 
 }

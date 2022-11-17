@@ -85,7 +85,7 @@ class LinkPredictionSplitConfigTest {
             .trainFraction(0.01)
             .build();
 
-        assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore, RelationshipType.ALL_RELATIONSHIPS, "*", "*"))
+        assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore, RelationshipType.ALL_RELATIONSHIPS))
             .hasMessageContaining("The specified `testFraction` is too high for the current graph. " +
                                   "The test-complement set would have 0 relationship(s) but it must have at least 3.");
     }
@@ -97,7 +97,7 @@ class LinkPredictionSplitConfigTest {
             .trainFraction(0.1)
             .build();
 
-        assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore, RelationshipType.ALL_RELATIONSHIPS, "*", "*"))
+        assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore, RelationshipType.ALL_RELATIONSHIPS))
             .hasMessageContaining("The specified `trainFraction` is too low for the current graph. " +
                                   "The train set would have 0 relationship(s) but it must have at least 2.");
     }
@@ -109,7 +109,7 @@ class LinkPredictionSplitConfigTest {
             .trainFraction(0.99)
             .build();
 
-        assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore, RelationshipType.ALL_RELATIONSHIPS, "*", "*"))
+        assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore, RelationshipType.ALL_RELATIONSHIPS))
             .hasMessageContaining("The specified `testFraction` is too low for the current graph. " +
                                   "The test set would have 0 relationship(s) but it must have at least 1.");
     }
@@ -121,7 +121,7 @@ class LinkPredictionSplitConfigTest {
             .trainFraction(0.99)
             .build();
 
-        assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore, RelationshipType.ALL_RELATIONSHIPS, "*", "*"))
+        assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore, RelationshipType.ALL_RELATIONSHIPS))
             .hasMessageContaining("The specified `trainFraction` is too high for the current graph. " +
                                   "The feature-input set would have 0 relationship(s) but it must have at least 1.");
     }
@@ -134,7 +134,7 @@ class LinkPredictionSplitConfigTest {
             .trainFraction(0.5)
             .build();
 
-        assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore, RelationshipType.ALL_RELATIONSHIPS, "A", "B"))
+        assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore, RelationshipType.ALL_RELATIONSHIPS))
             .hasMessageContaining(
                 "The specified `validationFolds` is too high or the `trainFraction` too low for the current graph. " +
                 "The validation set would have 0 relationship(s) but it must have at least 1.");
@@ -149,7 +149,7 @@ class LinkPredictionSplitConfigTest {
             .negativeRelationshipType("N")
             .build();
 
-        assertThatThrownBy(() -> config.validateAgainstGraphStore(negativeGraphStore, RelationshipType.ALL_RELATIONSHIPS, "*", "*"))
+        assertThatThrownBy(() -> config.validateAgainstGraphStore(negativeGraphStore, RelationshipType.ALL_RELATIONSHIPS))
             .hasMessageContaining("Could not find the specified negativeRelationshipType of ['N']. Available relationship types are ['T'].");
     }
 
@@ -163,21 +163,8 @@ class LinkPredictionSplitConfigTest {
             .negativeRelationshipType("T")
             .build();
 
-        assertThatThrownBy(() -> config.validateAgainstGraphStore(negativeGraphStore, RelationshipType.ALL_RELATIONSHIPS, "*", "*"))
-            .hasMessageContaining("NegativeSamplingRatio and NegativeRelationshipType cannot be used together.");
+        assertThatThrownBy(() -> config.validateAgainstGraphStore(negativeGraphStore, RelationshipType.ALL_RELATIONSHIPS))
+            .hasMessageContaining("Configuration parameter failure: `negativeSamplingRatio` and `negativeRelationshipType` cannot be used together.");
     }
 
-    @Test
-    void shouldValidateNegativeRelationshipTypeRespectNodeLabels() {
-        var config = LinkPredictionSplitConfigImpl.builder()
-            .validationFolds(2)
-            .testFraction(0.5)
-            .trainFraction(0.5)
-            .negativeRelationshipType("T")
-            .build();
-
-        assertThatThrownBy(() -> config.validateAgainstGraphStore(negativeGraphStore, RelationshipType.ALL_RELATIONSHIPS, "A", "B"))
-            .hasMessageContaining("There is a relationship of negativeRelationshipType T between nodes 0 and 1. " +
-                                  "The nodes have types [NodeLabel{name='A'}] and [NodeLabel{name='A'}]. However, they need to be between A and B.");
-    }
 }

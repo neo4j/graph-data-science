@@ -224,7 +224,7 @@ class LinkPredictionRelationshipSamplerTest {
         var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(16_000, 16_000));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(17_760, 17_760));
 
         splitConfig = splitConfigBuilder.testFraction(0.8).build();
         actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
@@ -232,7 +232,7 @@ class LinkPredictionRelationshipSamplerTest {
 
         // higher testFraction -> lower estimation as test-complement is smaller
         // the test_complement is kept until the end of all splitting
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(15_984, 15_984));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(19_424, 19_424));
     }
 
     @Test
@@ -246,13 +246,13 @@ class LinkPredictionRelationshipSamplerTest {
         var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(16_000, 16_000));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(17_760, 17_760));
 
         splitConfig = splitConfigBuilder.trainFraction(0.8).build();
         actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(15_984, 15_984));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(19_424, 19_424));
     }
 
     @Test
@@ -266,13 +266,13 @@ class LinkPredictionRelationshipSamplerTest {
         var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(15_984, 15_984));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(18_024, 18_024));
 
         splitConfig = splitConfigBuilder.negativeSamplingRatio(4).build();
         actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(28_224, 28_224));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(36_384, 36_384));
     }
 
     @Test
@@ -292,12 +292,12 @@ class LinkPredictionRelationshipSamplerTest {
         var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(graphDimensionBuilder.relationshipCounts(Map.of(RelationshipType.of("NEG"), 1000L)).build(), "REL"), 4);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(43_760, 43_760));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(47_760, 47_760));
 
         actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(graphDimensionBuilder.relationshipCounts(Map.of(RelationshipType.of("NEG"), 2000L)).build(), "REL"), 4);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(51_760, 51_760));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(59_760, 59_760));
     }
 
     @Test

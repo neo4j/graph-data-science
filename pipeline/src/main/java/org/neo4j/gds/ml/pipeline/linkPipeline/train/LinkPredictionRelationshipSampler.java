@@ -27,6 +27,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.ElementTypeValidator;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -87,7 +88,7 @@ public class LinkPredictionRelationshipSampler {
     ) {
         progressTracker.beginSubTask("Split relationships");
 
-        splitConfig.validateAgainstGraphStore(graphStore, trainConfig.internalTargetRelationshipType(), trainConfig.sourceNodeLabel(), trainConfig.targetNodeLabel());
+        splitConfig.validateAgainstGraphStore(graphStore, trainConfig.internalTargetRelationshipType());
 
         if (trainConfig.sourceNodeLabel().equals(ElementProjection.PROJECT_ALL) || trainConfig.targetNodeLabel().equals(ElementProjection.PROJECT_ALL)) {
             progressTracker.logWarning(formatWithLocale(
@@ -131,6 +132,8 @@ public class LinkPredictionRelationshipSampler {
             trainSplitResult.selectedRelCount(),
             sourceNodes,
             targetNodes,
+            sourceLabels,
+            targetLabels,
             trainConfig.randomSeed()
         );
 
@@ -219,8 +222,8 @@ public class LinkPredictionRelationshipSampler {
                 splitConfig.testFraction(),
                 splitConfig.trainFraction(),
                 splitConfig.negativeSamplingRatio(),
-                splitConfig.negativeRelationshipType(),
-                relationshipWeight))
+                splitConfig.negativeRelationshipType()
+            ))
             .build();
     }
 
@@ -255,32 +258,34 @@ public class LinkPredictionRelationshipSampler {
         double testFraction,
         double trainFraction,
         double negativeSamplingRatio,
-        Optional<String> negativeRelationshipType,
-        Optional<String> relationshipWeight
+        Optional<String> negativeRelationshipType
     ) {
-        var pessimisticSizePerRel = relationshipWeight.isPresent()
-            ? Double.BYTES + 2 * Long.BYTES
-            : 2 * Long.BYTES;
+        var sizePerRel = Double.BYTES + 2 * Long.BYTES;
 
-        if (negativeRelationshipType.isPresent()) {
-            return MemoryEstimations.builder("Relationship splitter")
-                .perGraphDimension("Negative relationships", (graphDimensions, threads) -> {
-                    var negativeRelCount = graphDimensions.estimatedRelCount(List.of(negativeRelationshipType.get()));
+        return MemoryEstimations.builder("Relationship splitter")
+            .perGraphDimension("Negative relationships", (graphDimensions, threads) -> {
+                var negativeRelCount = estimateNegativeRelCount(graphDimensions, relationshipType, testFraction, trainFraction, negativeSamplingRatio, negativeRelationshipType);
                     //selectedRelBuilders are directed
-                    return MemoryRange.of(negativeRelCount / 2).times(pessimisticSizePerRel);
-                })
-                .build();
-        } else {
-            return MemoryEstimations.builder("Relationship splitter")
-                .perGraphDimension("Negative relationships", (graphDimensions, threads) -> {
-                    var testAndTrainPositiveRelCount = graphDimensions.estimatedRelCount(List.of(relationshipType)) * (testFraction + trainFraction - testFraction * trainFraction);
-                    var negativeRelCount = (long) (testAndTrainPositiveRelCount * negativeSamplingRatio);
-                    //selectedRelBuilders are directed
-                    return MemoryRange.of(negativeRelCount / 2).times(pessimisticSizePerRel);
-                })
-                .build();
-        }
+                return MemoryRange.of(negativeRelCount / 2).times(sizePerRel);
+            })
+            .build();
 
+    }
+
+    private static long estimateNegativeRelCount(
+        GraphDimensions graphDimensions,
+        String relationshipType,
+        double testFraction,
+        double trainFraction,
+        double negativeSamplingRatio,
+        Optional<String> negativeRelationshipType
+    ) {
+         if (negativeRelationshipType.isPresent()) {
+             return graphDimensions.estimatedRelCount(List.of(negativeRelationshipType.get()));
+         } else {
+             var testAndTrainPositiveRelCount = graphDimensions.estimatedRelCount(List.of(relationshipType)) * (testFraction + trainFraction - testFraction * trainFraction);
+             return (long) (testAndTrainPositiveRelCount * negativeSamplingRatio);
+         }
     }
 
 }

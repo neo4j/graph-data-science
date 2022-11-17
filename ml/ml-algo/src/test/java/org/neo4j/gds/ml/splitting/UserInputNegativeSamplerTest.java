@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.splitting;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
@@ -33,9 +34,11 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.negativeSampling.UserInputNegativeSampler;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.neo4j.gds.ml.negativeSampling.NegativeSampler.NEGATIVE;
 
 @GdlExtension
@@ -64,7 +67,9 @@ class UserInputNegativeSamplerTest {
         var sampler = new UserInputNegativeSampler(
             graph,
             (double) 1/3,
-            Optional.of(42L)
+            Optional.of(42L),
+            List.of(NodeLabel.of("A")),
+            List.of(NodeLabel.of("A"))
         );
 
         RelationshipsBuilder testBuilder = new RelationshipsBuilderBuilder().nodes(graph).addPropertyConfig(
@@ -100,6 +105,22 @@ class UserInputNegativeSamplerTest {
             }
             return true;
         });
+    }
+
+    @Test
+    void shouldValidateNegativeExamplesRespectNodeLabels() {
+        assertThatThrownBy(() -> new UserInputNegativeSampler(
+            graph,
+            (double) 1 / 3,
+            Optional.of(42L),
+            List.of(NodeLabel.of("B")),
+            List.of(NodeLabel.of("A"))
+        ))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("There is a relationship of negativeRelationshipType between nodes 0 and 1. " +
+                                  "The nodes have types [NodeLabel{name='A'}] and [NodeLabel{name='A'}]. " +
+                                  "However, they need to be between [NodeLabel{name='B'}] and [NodeLabel{name='A'}]."
+            );
     }
 
 }

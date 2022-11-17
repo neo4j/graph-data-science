@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 
 import org.immutables.value.Value;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
@@ -118,7 +117,7 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
     }
 
     @Configuration.Ignore
-    default void validateAgainstGraphStore(GraphStore graphStore, RelationshipType targetRelationshipType, String sourceNodeLabel, String targetNodeLabel) {
+    default void validateAgainstGraphStore(GraphStore graphStore, RelationshipType targetRelationshipType) {
         var reservedTypes = Stream.of(
             testRelationshipType(),
             trainRelationshipType(),
@@ -142,25 +141,8 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
             String negativeRelType = negativeRelationshipType().get();
             ElementTypeValidator.resolveAndValidateTypes(graphStore, List.of(negativeRelType), "negativeRelationshipType");
             if (negativeSamplingRatio() != 1.0) {
-                throw new IllegalArgumentException("NegativeSamplingRatio and NegativeRelationshipType cannot be used together. ");
+                throw new IllegalArgumentException("Configuration parameter failure: `negativeSamplingRatio` and `negativeRelationshipType` cannot be used together.");
             }
-            var negativeGraph = graphStore.getGraph(RelationshipType.of(negativeRelType));
-            var validSourceLabel = ElementTypeValidator.resolve(graphStore, List.of(sourceNodeLabel));
-            var validTargetLabel = ElementTypeValidator.resolve(graphStore, List.of(targetNodeLabel));
-            negativeGraph.forEachNode(nodeId -> {
-                negativeGraph.forEachRelationship(nodeId, (s, t) -> {
-                    var negativeRelHasCorrectType = nodePairsHaveValidLabels(negativeGraph.nodeLabels(s), negativeGraph.nodeLabels(t), validSourceLabel, validTargetLabel);
-                    if (!negativeRelHasCorrectType) {
-                        throw new IllegalArgumentException(formatWithLocale(
-                            "There is a relationship of negativeRelationshipType %s between nodes %s and %s. The nodes have types %s and %s. However, they need to be between %s and %s.",
-                            negativeRelType, negativeGraph.toOriginalNodeId(s), negativeGraph.toOriginalNodeId(t),
-                            negativeGraph.nodeLabels(s), negativeGraph.nodeLabels(t), sourceNodeLabel, targetNodeLabel
-                        ));
-                    }
-                    return true;
-                });
-                return true;
-            });
         }
 
         var expectedSetSizes = expectedSetSizes(graphStore.relationshipCount(targetRelationshipType));
@@ -224,11 +206,5 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
             .putAllRelationshipCounts(baseDim.relationshipCounts())
             .build();
     }
-    @Configuration.Ignore
-    default boolean nodePairsHaveValidLabels(Collection<NodeLabel> candidateSource, Collection<NodeLabel> candidateTarget, Collection<NodeLabel> validSourceLabels, Collection<NodeLabel> validTargetLabels) {
-        return (candidateSource.stream().anyMatch(validSourceLabels::contains)
-                && candidateTarget.stream().anyMatch(validTargetLabels::contains)) ||
-               ((candidateSource.stream().anyMatch(validTargetLabels::contains)
-                 && candidateTarget.stream().anyMatch(validSourceLabels::contains)));
-    }
+
 }
