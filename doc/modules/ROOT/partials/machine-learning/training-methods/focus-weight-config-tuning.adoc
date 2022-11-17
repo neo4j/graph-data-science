@@ -9,8 +9,6 @@ image::equations/balanced-cross-entropy.svg[align="center"]
 
 where `a~t~` denotes the class weight of the true class.`p~t~` denotes the probability of the true class.
 
-The list of class weights, if specified, must sum up to 1.
-
 For class-imbalanced problems, the class weights are often set to the inverse of class frequencies to improve the inductive bias of the model on minority classes.
 
 === Usage in link prediction

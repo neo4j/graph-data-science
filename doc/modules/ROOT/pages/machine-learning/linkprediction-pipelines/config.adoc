@@ -447,7 +447,7 @@ YIELD
 |===
 | Name        | Type  | Default | Optional | Description
 include::partial$/machine-learning/training-methods/logisticRegressionConfig.adoc[]
-| classWeights | List of Float | [1.0, 1.0]     | yes      | Weights for each class in loss function. The list must have length 2 and sum up to 1.0. The first weight is for negative examples (missing relationships), and the second for positive examples (actual relationships).
+| classWeights | List of Float | [1.0, 1.0]     | yes      | Weights for each class in loss function. The list must have length 2. The first weight is for negative examples (missing relationships), and the second for positive examples (actual relationships).
 |===
 
 include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.adoc[]
@@ -521,7 +521,7 @@ YIELD
 |===
 | Name                | Type                            | Default         | Optional | Description
 include::partial$/machine-learning/training-methods/mlp-classification-config.adoc[]
-| classWeights | List of Float | [1.0, 1.0]     | yes      | Weights for each class in cross-entropy loss. The list must have length 2 and sum up to 1.0. The first weight is for negative examples (missing relationships), and the second for positive examples (actual relationships).
+| classWeights | List of Float | [1.0, 1.0]     | yes      | Weights for each class in cross-entropy loss. The list must have length 2. The first weight is for negative examples (missing relationships), and the second for positive examples (actual relationships).
 |===
 
 include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.adoc[]

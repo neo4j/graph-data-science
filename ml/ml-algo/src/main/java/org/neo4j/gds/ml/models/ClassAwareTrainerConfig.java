@@ -57,18 +57,4 @@ public interface ClassAwareTrainerConfig extends TrainerConfig {
         return initializedClassWeights;
     }
 
-    @Value.Check
-    default void validate() {
-        double epsilon = 1e-02;
-        if (!classWeights().isEmpty()) {
-            var classWeightsSum = classWeights().stream().mapToDouble(Double::doubleValue).sum();
-            if (Math.abs(classWeightsSum - 1.0) > epsilon) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "The classWeights %s sum up to %s, they should sum up to 1 instead.",
-                    classWeights(), classWeightsSum
-                ));
-            }
-        }
-    }
-
 }
