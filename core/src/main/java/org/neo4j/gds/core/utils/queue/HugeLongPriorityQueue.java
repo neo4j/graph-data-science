@@ -23,7 +23,6 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.mem.MemoryUsage;
@@ -57,7 +56,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
 
     private BitSet costKeys;
     private HugeLongArray heap;
-
+    private HugeLongArray mapIndexTo;
     private long size = 0;
 
     protected HugeDoubleArray costValues;
@@ -79,7 +78,16 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         this.capacity = capacity;
         this.costKeys = new BitSet(capacity);
         this.heap = HugeLongArray.newArray(heapSize);
+        this.mapIndexTo = HugeLongArray.newArray(heapSize);
         this.costValues = HugeDoubleArray.newArray(capacity);
+    }
+
+    /**
+     * Adds the element at the specified position in the heap array
+     */
+    private void placeElement(long position, long element) {
+        heap.set(position, element);
+        mapIndexTo.set(element, position);
     }
 
     /**
@@ -89,7 +97,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         assert element < capacity;
         addCost(element, cost);
         size++;
-        heap.set(size, element);
+        placeElement(size, element);
         upHeap(size);
     }
 
@@ -104,7 +112,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
             update(element);
         } else {
             size++;
-            heap.set(size, element);
+            placeElement(size, element);
             upHeap(size);
         }
     }
@@ -143,7 +151,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     public long pop() {
         if (size > 0) {
             long result = heap.get(1);    // save first value
-            heap.set(1, heap.get(size));    // move last to first
+            placeElement(1, heap.get(size));    // move last to first
             size--;
             downHeap(1);           // adjust heap
             removeCost(result);
@@ -210,24 +218,8 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     }
 
     private long findElementPosition(long element) {
-        long limit = size + 1;
-        HugeLongArray data = heap;
-        HugeCursor<long[]> cursor = data.initCursor(data.newCursor(), 1, limit);
-        while (cursor.next()) {
-            long[] internalArray = cursor.array;
-            int i = cursor.offset;
-            int localLimit = cursor.limit - 4;
-            for (; i <= localLimit; i += 4) {
-                if (internalArray[i] == element) return i + cursor.base;
-                if (internalArray[i + 1] == element) return i + 1 + cursor.base;
-                if (internalArray[i + 2] == element) return i + 2 + cursor.base;
-                if (internalArray[i + 3] == element) return i + 3 + cursor.base;
-            }
-            for (; i < cursor.limit; ++i) {
-                if (internalArray[i] == element) return i + cursor.base;
-            }
-        }
-        return 0;
+        return mapIndexTo.get(element);
+
     }
 
     private boolean upHeap(long origPos) {
@@ -238,13 +230,13 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         long j = i >>> 1;
         while (j > 0 && lessThan(node, heap.get(j))) {
             // shift parents down
-            heap.set(i, heap.get(j));
+            placeElement(i, heap.get(j));
             i = j;
             // find new parent of swapped node
             j = j >>> 1;
         }
         // install saved node
-        heap.set(i, node);
+        placeElement(i, node);
         return i != origPos;
     }
 
@@ -259,7 +251,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         }
         while (j <= size && lessThan(heap.get(j), node)) {
             // shift up child
-            heap.set(i, heap.get(j));
+            placeElement(i, heap.get(j));
             i = j;
             // find smallest child of swapped node
             j = i << 1;
@@ -269,7 +261,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
             }
         }
         // install saved node
-        heap.set(i, node);
+        placeElement(i, node);
     }
 
     private void update(long element) {
@@ -333,6 +325,9 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     }
 
 
+    /**
+     * Returns the element in the i-th position of the heap
+     */
     public long getIth(int i) {
         return heap.get(i + 1);
     }
