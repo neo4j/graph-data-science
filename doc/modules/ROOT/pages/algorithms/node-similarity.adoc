@@ -252,7 +252,7 @@ include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
 
 :algorithm-name: {algorithm}
 :graph-description: knowledge
-:image-file: node-similarity.svg
+:image-file: node-similarity.png
 include::partial$/algorithms/shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
@@ -276,7 +276,7 @@ CREATE
   (bob)-[:LIKES]->(synth),
   (carol)-[:LIKES]->(bongos),
   (dave)-[:LIKES]->(guitar),
-  (dave)-[:LIKES]->(synth),
+  (dave)-[:LIKES {strength: 1.5}]->(trumpet),
   (dave)-[:LIKES]->(bongos);
 ----
 
@@ -360,16 +360,16 @@ ORDER BY similarity DESCENDING, Person1, Person2
 [opts="header"]
 |===
 | Person1 | Person2 | similarity
-| "Alice" | "Dave"  | 1.0
-| "Dave"  | "Alice" | 1.0
 | "Alice" | "Bob"   | 0.6666666666666666
 | "Bob"   | "Alice" | 0.6666666666666666
-| "Bob"   | "Dave"  | 0.6666666666666666
-| "Dave"  | "Bob"   | 0.6666666666666666
+| "Alice" | "Dave"  | 0.5
+| "Dave"  | "Alice" | 0.5
 | "Alice" | "Carol" | 0.3333333333333333
 | "Carol" | "Alice" | 0.3333333333333333
 | "Carol" | "Dave"  | 0.3333333333333333
 | "Dave"  | "Carol" | 0.3333333333333333
+| "Bob"   | "Dave"  | 0.25
+| "Dave"  | "Bob"   | 0.25
 |===
 --
 
@@ -530,10 +530,10 @@ ORDER BY Person1
 [opts="header"]
 |===
 | Person1 | Person2 | similarity
-| "Alice" | "Dave"  | 1.0
-| "Bob"   | "Alice" | 0.6666666666666666
-| "Carol" | "Alice" | 0.3333333333333333
-| "Dave"  | "Alice" | 1.0
+| "Alice" | "Bob"  | 0.666666666666667
+| "Bob"   | "Alice" | 0.666666666666667
+| "Carol" | "Alice" | 0.333333333333333
+| "Dave"  | "Alice" | 0.5
 |===
 --
 
@@ -554,9 +554,9 @@ ORDER BY Person1
 |===
 | Person1 | Person2 | similarity
 | "Alice" | "Carol" | 0.3333333333333333
-| "Bob"   | "Alice" | 0.6666666666666666
+| "Bob"   | "Dave" | 0.25
 | "Carol" | "Alice" | 0.3333333333333333
-| "Dave"  | "Carol" | 0.3333333333333333
+| "Dave"  | "Bob" | 0.25
 |===
 --
 
@@ -585,9 +585,9 @@ ORDER BY similarity DESC, Person1, Person2
 [opts="header"]
 |===
 | Person1 | Person2 | similarity
-| "Alice" | "Dave"  | 1.0
-| "Dave"  | "Alice" | 1.0
-| "Bob"   | "Alice" | 0.6666666666666666
+| "Alice" | "Bob"  | 0.666666666666667
+| "Bob"  | "Alice" | 0.666666666666667
+| "Dave"   | "Alice" | 0.5
 |===
 --
 
@@ -613,8 +613,8 @@ ORDER BY Person1
 [opts="header"]
 |===
 | Person1 | Person2 | similarity
-| "Alice" | "Dave"  | 1.0
-| "Dave"  | "Alice" | 1.0
+| "Alice" | "Dave"  | 0.5
+| "Dave"  | "Alice" | 0.5
 |===
 --
 
@@ -641,12 +641,10 @@ ORDER BY Person1
 [opts="header"]
 |===
 | Person1 | Person2 | similarity
-| "Alice" | "Dave"  | 1.0
-| "Alice" | "Bob"   | 0.6666666666666666
-| "Bob"   | "Dave"  | 0.6666666666666666
+| "Alice" | "Bob"   | 0.666666666666667
+| "Alice" | "Dave"   | 0.5
 | "Bob"   | "Alice" | 0.6666666666666666
-| "Dave"  | "Alice" | 1.0
-| "Dave"  | "Bob"   | 0.6666666666666666
+| "Dave"  | "Alice" | 0.5
 |===
 --
 
@@ -654,7 +652,12 @@ ORDER BY Person1
 === Weighted Similarity
 
 Relationship properties can be used to modify the similarity induced by certain relationships.
-For example a relationship value of 2 is equal to counting that relationship twice while computing the similarity.
+Weighted node similarity is computed as the weighted Jaccard similarty, according to the formula:
+
+image::nodesim-formulas/weighted_jaccard.svg[role="middle"]
+
+Formally, given two nodes and their weighted neighbour lists `A'` and `B'`, we extend the lists to `A` and `B`, index over the union of their neighbours `A' ∪ B'` by setting weight = 0 for any non-neighbour, and then apply the weighted Jaccard similarity.
+
 
 [NOTE]
 ====
@@ -666,7 +669,7 @@ Weighted similarity metrics are only defined for values greater or equal to 0.
 .The following query will respect relationship properties in the similarity computation:
 [source,cypher,role=noplay]
 ----
-CALL gds.nodeSimilarity.stream('myGraph', { relationshipWeightProperty: 'strength', similarityCutoff: 0.5 })
+CALL gds.nodeSimilarity.stream('myGraph', { relationshipWeightProperty: 'strength', similarityCutoff: 0.3 })
 YIELD node1, node2, similarity
 RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
 ORDER BY Person1
@@ -676,15 +679,22 @@ ORDER BY Person1
 [opts="header"]
 |===
 | Person1 | Person2 | similarity
-| "Alice" | "Dave"  | 0.8333333333333334
 | "Alice" | "Bob"   | 0.8
+| "Alice" | "Dave"  | 0.333333333333333
 | "Bob"   | "Alice" | 0.8
-| "Bob"   | "Dave"  | 0.6666666666666666
-| "Dave"  | "Alice" | 0.8333333333333334
-| "Dave"  | "Bob"   | 0.6666666666666666
+| "Dave"  | "Alice" | 0.333333333333333
 |===
 --
 
-It can be seen that the similarity between Alice and Dave decreased compared to the non-weighted version of this algorithm.
-This is the case as the strength of the relationship between Alice and Bongos is reduced and both persons now only share 2.5 out of 3 possible instruments.
-Analogous the similarity between Alice and Bob increased as the missing liked instrument has a lower impact on the similarity score.
+It can be seen that the similarity between Alice and Dave decreased (from 0.5 to 0.33) compared to the non-weighted version of this algorithm.
+
+Alice likes Guitar, Synthesize and Bongos with strengths `(1, 1, 0.5)`.
+Dave likes Guitar, Bongos and Trumpet with strengths `(1, 1, 1.5)`.
+Therefore, taking Alice and Dave's neighbours, we have list of strengths for Alice as `A = (1, 1, 0.5, 0)` and for Dave `B = (1, 0, 1, 1.5)`, indexed as `Guitar, Synthesizer, Bongos, Trumpet`.
+
+The weighted node similarity of Alice and Dave is hence:
+
+image::nodesim-formulas/weighted_jaccard_example.svg[role="middle"]
+
+
+Analogously, the similarity between Alice and Bob increased (from 0.66 to 0.8) as the missing liked instrument has a lower impact on the similarity score.
