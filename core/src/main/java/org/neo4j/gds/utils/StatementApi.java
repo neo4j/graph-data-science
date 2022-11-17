@@ -56,6 +56,12 @@ public abstract class StatementApi {
         }
     }
 
+    protected final int getOrCreateNodeLabelToken(String nodeLabel) {
+        return applyInTransaction(stmt -> stmt
+            .tokenWrite()
+            .labelGetOrCreateForName(nodeLabel));
+    }
+
     protected final int getOrCreatePropertyToken(String propertyKey) {
         return applyInTransaction(stmt -> stmt
             .tokenWrite()
