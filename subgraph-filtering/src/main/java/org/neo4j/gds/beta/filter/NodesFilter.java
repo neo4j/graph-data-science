@@ -53,13 +53,13 @@ import java.util.function.Function;
 public final class NodesFilter {
 
     @ValueClass
-    interface FilteredNodes {
+    public interface FilteredNodes {
         IdMap idMap();
 
         NodePropertyStore propertyStores();
     }
 
-    static FilteredNodes filterNodes(
+    public static FilteredNodes filterNodes(
         GraphStore inputGraphStore,
         Expression expression,
         int concurrency,

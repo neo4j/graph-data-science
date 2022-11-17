@@ -19,10 +19,13 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.core.write.NativeNodeLabelExporter;
+import org.neo4j.gds.core.write.NativeNodeLabelExporterBuilder;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.core.write.NativeNodePropertyExporter;
 import org.neo4j.gds.core.write.NativeRelationshipExporterBuilder;
 import org.neo4j.gds.core.write.NativeRelationshipStreamExporterBuilder;
+import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
@@ -60,6 +63,12 @@ final class OpenGdsExportBuildersContextProvider extends LifecycleAdapter {
             OpenGdsExportBuildersContextProvider::relationshipExporterBuilder,
             true
         );
+
+        globalProcedures.registerComponent(
+            NodeLabelExporterBuilder.class,
+            OpenGdsExportBuildersContextProvider::nativeNodeLabelExporterNodeLabelExporterBuilder,
+            true
+        );
     }
 
     private static NodePropertyExporterBuilder<NativeNodePropertyExporter> nativeNodePropertyExporterBuilder(Context ctx) {
@@ -72,6 +81,10 @@ final class OpenGdsExportBuildersContextProvider extends LifecycleAdapter {
 
     private static RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder(Context ctx) {
         return new NativeRelationshipExporterBuilder(transactionContext(ctx));
+    }
+
+    private static NodeLabelExporterBuilder<NativeNodeLabelExporter> nativeNodeLabelExporterNodeLabelExporterBuilder(Context ctx) {
+        return new NativeNodeLabelExporterBuilder(transactionContext(ctx));
     }
 
     private static TransactionContext transactionContext(Context ctx) {
