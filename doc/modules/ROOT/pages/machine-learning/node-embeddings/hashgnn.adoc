@@ -29,10 +29,6 @@ Moreover, the heterogeneous generalization also gives comparable results when co
 
 The execution does not require GPUs as GNNs typically use, and parallelizes well across many CPU cores.
 
-For more information on this algorithm, see:
-
-* https://arxiv.org/pdf/2105.14280.pdf[W.Wu, B.Li, C.Luo and W.Nejdl "Hashing-Accelerated Graph Neural Networks for Link Prediction"^]
-
 === The algorithm
 
 To clarify how HashGNN works, we will walk through a virtual example <<algorithms-embeddings-hashgnn-virtual-example, below>> of a three node graph for the reader who is curious about the details of the feature selection and prefers to learn from examples.
@@ -41,7 +37,7 @@ The HashGNN algorithm can only run on binary features.
 Therefore, there is an optional first step to transform (possibly non-binary) input features into binary features as part of the algorithm.
 
 For a number of iterations, a new binary embedding is computed for each node using the embeddings of the previous iteration.
-In the first iteration, the previous embeddings are the binary feature vectors.
+In the first iteration, the previous embeddings are the input feature vectors or the binarized input vectors.
 
 During one iteration, each node embedding vector is constructed by taking `K` random samples.
 The random sampling is carried out by successively selecting features with lowest min-hash values.
@@ -50,7 +46,7 @@ Features of each node itself and of its neighbours are both considered.
 There are three types of hash functions involved: 1) a function applied to a node's own features, 2) a function applied to a subset of neighbors' features 3) a function applied to all neighbors' features to select the subset for hash function 2).
 For each iteration and sampling round `k<K`, new hash functions are used, and the third function also varies depending on the relationship type connecting to the neighbor it is being applied on.
 
-The sampling is consistent in the sense that if nodes `a` and `b` have identical or similar local graphs, the samples for `a` and `b` are also identical or similar.
+The sampling is consistent in the sense that if nodes (`a`) and (`b`) have identical or similar local graphs, the samples for (`a`) and (`b`) are also identical or similar.
 By local graph, we mean the subgraph with features and relationship types, containing all nodes at most `iterations` hops away.
 
 The number `K` is called `embeddingDensity` in the configuration of the algorithm.
@@ -59,8 +55,8 @@ The algorithm ends with another optional step that maps the binary embeddings to
 
 === Features
 
-The HashGNN algorithm assumes that nodes have binary features as input, and produces binary embedding vectors as output.
-Since this is not always the case for real-world graphs, the algorithm also comes with an option to binarize node properties.
+The original HashGNN algorithm assumes that nodes have binary features as input, and produces binary embedding vectors as output (unless output densification is opted for).
+Since this is not always the case for real-world graphs, our algorithm also comes with an option to binarize node properties.
 
 This is done using a type of hyperplane rounding and is configured via a map parameter `binarizeFeatures` containing `densityLevel` and `dimension`.
 The hyperplane rounding uses hyperplanes defined by vectors that are potentially sparse.
@@ -84,13 +80,13 @@ Increasing the value leads to neighbors being selected more often.
 The probability of selecting a feature from the neighbors as a function of `neighborInfluence` has a hockey-stick-like shape, somewhat similar to the shape of `y=log(x)` or `y=C - 1/x`.
 This implies that the probability is more sensitive for low values of `neighborInfluence`.
 
-=== Heterogeneous HashGNN
+=== Heterogeneity support
 
 The GDS implementation of HashGNN provides a new generalization to heterogeneous graphs in that it can distinguish between different relationship types.
 To enable the heterogeneous support set `heterogeneous` to true.
-The generalization works as the original HashGNN algorithm, but whenever a hash function is applied to a feature of a neighbor node, the algorithm uses a hash function that depends not only on the iteration and on a number `k<embeddingDensity`, but also on the relationship type connecting to the neighbor.
+The generalization works as the original HashGNN algorithm, but whenever a hash function is applied to a feature of a neighbor node, the algorithm uses a hash function that depends not only on the iteration and on a number `k<embeddingDensity`, but also on the type of the relationship connecting to the neighbor.
 Consider an example where HashGNN is run with one iteration, and we have `(a)-[:R]->(x), (b)-[:R]->(x)` and `(c)-[:S]->(x)`.
-Assume that a feature `f` is selected for `(a)` and the hash value is very low.
+Assume that a feature `f` of `(x)` is selected for `(a)` and the hash value is very small.
 This will make it very likely that the feature is also selected for `(b)`.
 There will however be no correlation to `f` being selected for `(c)` when considering the relationship `(c)-[:S]->(x)`, because a different hash function is used for `S`.
 We can conclude that nodes with similar neighborhoods (including node properties and relationship types) get similar embeddings, while nodes that have less similar neighborhoods get less similar embeddings.
@@ -120,7 +116,7 @@ For example, in a citation network, a paper citing another paper is very differe
 Since binary embeddings need to be of higher dimension than dense floating point embeddings to encode the same amount of information, binary embeddings require more memory and longer training time for downstream models.
 The output embeddings can be optionally densified, by using random projection, similar to what is done to initialize FastRP with node properties.
 This behavior is activated by specifying `outputDimension`.
-Output densification can improve runtime and memory at the cost of introducing approximation error due to the random nature of the projection.
+Output densification can improve runtime and memory of downstream tasks at the cost of introducing approximation error due to the random nature of the projection.
 The larger the `outputDimension`, the lower the approximation error and performance savings.
 
 === Usage in machine learning pipelines
@@ -140,7 +136,7 @@ We will go through each of the configuration parameters and explain how they beh
 === Iterations
 The maximum number of hops between a node and other nodes that affect its embedding is equal to the number of iterations of HashGNN which is configured with `iterations`.
 This is analogous to the number of layers in a GNN or the number of iterations in FastRP.
-Often a value of `2` to `4` is sufficient.
+Often a value of `2` to `4` is sufficient, but sometimes more iterations are useful.
 
 === Embedding density
 
@@ -164,11 +160,11 @@ The sparsity of the raw features and the input dimension can also affect the bes
 
 As explained above, the default value is a reasonable starting point.
 If using a hyperparameter tuning library, this parameter may favorably be transformed by a function with increasing derivative such as the exponential function, or a function of the type `a/(b - x)`.
-The probability of selecting (and keeping throughout the iterations) a feature from different node depends on `neighborInfluence` the number of hops to the node.
+The probability of selecting (and keeping throughout the iterations) a feature from different nodes depends on `neighborInfluence` and the number of hops to the node.
 Therefore `neighborInfluence` should be re-tuned when `iterations` is changed.
 
 === Heterogeneous
-In general, there is a large amount of information to store about typed paths in a heterogeneous graph, so with many iterations and relationship types the information will become blurred unless the embedding dimension is very large.
+In general, there is a large amount of information to store about paths containing multiple relationship types in a heterogeneous graph, so with many iterations and relationship types, a very high embedding dimension may be necessary.
 This is especially true for unsupervised embedding algorithms such as HashGNN.
 Therefore, caution should be taken when using many iterations in the heterogeneous mode.
 
@@ -557,6 +553,7 @@ Perhaps the below example is best enjoyed with a pen and paper.
 Let say we have a node `a` with feature `f1`, a node `b` with feature `f2` and a node `c` with features `f1` and `f3`.
 The graph structure is `a--b--c`.
 We imagine running HashGNN for one iteration with `embeddingDensity=2`.
+For simplicity, we will assume that the hash functions return some made up numbers as we go.
 
 During the first iteration and `k=0`, we compute an embedding for `(a)`.
 A hash value for `f1` turns out to be `7`.
