@@ -71,20 +71,17 @@ class GraphSageTrainConfigTest {
 
     @Test
     void shouldThrowIfNoPropertiesProvided() {
-        var mapWrapper = CypherMapWrapper.create(Map.of("modelName", "foo"));
-        var expectedMessage = "No value specified for the mandatory configuration parameter `featureProperties`";
-        assertThatThrownBy(() -> GraphSageTrainConfig.of("", mapWrapper))
+        assertThatThrownBy(() -> GraphSageTrainConfig.of("", CypherMapWrapper.create(Map.of("modelName", "foo"))))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage(expectedMessage);
+            .hasMessage("No value specified for the mandatory configuration parameter `featureProperties`");
     }
 
     @Test
     void shouldThrowIfEmptyPropertiesProvided() {
         var mapWrapper = CypherMapWrapper.create(Map.of("modelName", "foo", "featureProperties", List.of()));
-        var expectedMessage = "GraphSage requires at least one property.";
         assertThatThrownBy(() -> GraphSageTrainConfig.of("", mapWrapper))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage(expectedMessage);
+            .hasMessage("GraphSage requires at least one property.");
     }
 
     @ParameterizedTest
