@@ -42,7 +42,7 @@ class FocalLossTest implements FiniteDifferenceTest {
             )
         );
 
-        var loss = new FocalLoss(predictions, targets, 5);
+        var loss = new FocalLoss(predictions, targets, 5, new double[]{1,1,1});
 
         finiteDifferenceShouldApproximateGradient(predictions, loss);
     }
@@ -56,15 +56,15 @@ class FocalLossTest implements FiniteDifferenceTest {
             0.99,0.01
         }, 2, 2);
 
-        var crossEntropyLoss = new CrossEntropyLoss(predictions, labels);
+        var crossEntropyLoss = new CrossEntropyLoss(predictions, labels, new double[]{1, 1});
         double crossEntropyLossValue = new ComputationContext().forward(crossEntropyLoss).value();
 
-        var loss = new FocalLoss(predictions, labels, 0);
+        var loss = new FocalLoss(predictions, labels, 0, new double[]{1, 1});
         double lossValue = new ComputationContext().forward(loss).value();
 
         assertThat(crossEntropyLossValue).isEqualTo(lossValue);
 
-        var focalLoss = new FocalLoss(predictions, labels, 5);
+        var focalLoss = new FocalLoss(predictions, labels, 5, new double[]{1, 1});
         double focalLossValue = new ComputationContext().forward(focalLoss).value();
 
         assertThat(lossValue).isGreaterThan(focalLossValue);
@@ -73,7 +73,7 @@ class FocalLossTest implements FiniteDifferenceTest {
             0.01,0.99,
             0.01,0.99
         }, 2, 2);
-        var focalLossForBadPredictions = new FocalLoss(badPredictions, labels, 5);
+        var focalLossForBadPredictions = new FocalLoss(badPredictions, labels, 5, new double[]{1, 1});
         double focalLossValueForBadPredictions = new ComputationContext().forward(focalLossForBadPredictions).value();
 
         assertThat(focalLossValue).isLessThan(focalLossValueForBadPredictions);

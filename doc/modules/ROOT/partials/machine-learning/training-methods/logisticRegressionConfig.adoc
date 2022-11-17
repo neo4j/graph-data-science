@@ -1,11 +1,6 @@
-.Logistic regression configuration
-[opts="header",cols="4m,5,2m,2,8"]
-|===
-| Name        | Type  | Default | Optional | Description
 
 include::partial$/machine-learning/training-methods/gradient-descent-common-config.adoc[]
 
 include::partial$/machine-learning/training-methods/penalty-common-config.adoc[]
 
-| focusWeight | Float | 0.0     | yes      | Exponent for the focal loss factor, to make the model focus more on hard, misclassified examples in the train set. The default of `0.0` implies that focus is not applied and cross entropy is used. Must be positive.
-|===
+include::partial$/machine-learning/training-methods/focus-weight-common-config.adoc[]

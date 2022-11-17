@@ -1,0 +1,1 @@
+| focusWeight | Float or Map footnote:range[A map should be of the form `{range: [minValue, maxValue]}`. It is used by auto-tuning.]| 0.0     | yes      | Exponent for the focal loss factor, to make the model focus more on hard, misclassified examples in the train set. The default of `0.0` implies that focus is not applied and cross entropy is used. Must be positive.

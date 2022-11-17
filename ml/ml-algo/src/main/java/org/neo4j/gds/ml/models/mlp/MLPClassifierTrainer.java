@@ -69,7 +69,9 @@ public class MLPClassifierTrainer implements ClassifierTrainer {
     public MLPClassifier train(Features features, HugeIntArray labels, ReadOnlyHugeLongArray trainSet) {
         var data = MLPClassifierData.create(numberOfClasses, features.featureDimension(), trainConfig.hiddenLayerSizes(), random);
         var classifier = new MLPClassifier(data);
-        var objective = new MLPClassifierObjective(classifier, features, labels, trainConfig.penalty(), trainConfig.focusWeight());
+
+        var objective = new MLPClassifierObjective(classifier, features, labels, trainConfig.penalty(), trainConfig.focusWeight(),
+            trainConfig.initializeClassWeights(numberOfClasses));
         var training = new Training(trainConfig, progressTracker, messageLogLevel, trainSet.size(), terminationFlag);
 
         Supplier<BatchQueue> queueSupplier = () -> BatchQueue.fromArray(trainSet, trainConfig.batchSize());

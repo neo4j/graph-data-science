@@ -50,6 +50,8 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
 
     private final double focusWeight;
 
+    private final double[] classWeights;
+
     @SuppressWarnings({"PointlessArithmeticExpression", "UnnecessaryLocalVariable"})
     public static long sizeOfBatchInBytes(boolean isReduced, int batchSize, int numberOfFeatures, int numberOfClasses) {
         // perThread
@@ -102,13 +104,15 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
         double penalty,
         Features features,
         HugeIntArray labels,
-        double focusWeight
+        double focusWeight,
+        double[] classWeights
     ) {
         this.classifier = classifier;
         this.penalty = penalty;
         this.features = features;
         this.labels = labels;
         this.focusWeight = focusWeight;
+        this.classWeights = classWeights;
 
         assert features.size() > 0;
     }
@@ -139,7 +143,8 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
                 classifier.data().weights(),
                 classifier.data().bias(),
                 batchFeatures,
-                batchLabels
+                batchLabels,
+                classWeights
             );
         } else {
             return new ReducedFocalLoss(
@@ -148,7 +153,8 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
                 classifier.data().bias(),
                 batchFeatures,
                 batchLabels,
-                focusWeight
+                focusWeight,
+                classWeights
             );
         }
 

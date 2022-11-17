@@ -73,7 +73,8 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                         "batchSize", 100,
                         "learningRate", 0.001,
                         "tolerance", 0.001,
-                        "focusWeight", 0.0
+                        "focusWeight", 0.0,
+                        "classWeights", List.of()
                     ))
                 )
             ))
@@ -82,7 +83,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
 
     @Test
     void shouldAddMultipleModels() {
-        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('myPipeline', {minEpochs: 42, focusWeight: 2})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('myPipeline', {minEpochs: 42, focusWeight: 2, classWeights: [0.7, 0.3]})");
 
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('myPipeline', {minEpochs: 4})",
@@ -105,7 +106,8 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                             "batchSize", 100,
                             "learningRate", 0.001,
                             "tolerance", 0.001,
-                            "focusWeight", 2
+                            "focusWeight", 2,
+                            "classWeights", List.of(0.7, 0.3)
                         ),
                         Map.of(
                             "maxEpochs", 100,
@@ -116,7 +118,8 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                             "batchSize", 100,
                             "learningRate", 0.001,
                             "tolerance", 0.001,
-                            "focusWeight", 0.0
+                            "focusWeight", 0.0,
+                            "classWeights", List.of()
                         )
                     )
                 )

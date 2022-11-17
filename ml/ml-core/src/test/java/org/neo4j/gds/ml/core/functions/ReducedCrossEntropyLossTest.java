@@ -47,7 +47,7 @@ class ReducedCrossEntropyLossTest implements FiniteDifferenceTest {
         var predictions = new ReducedSoftmax(affineVariable);
         var labels = Constant.vector(new double[]{1.0, 0.0, 2.0});
 
-        var loss = new ReducedCrossEntropyLoss(predictions, weights, bias, features, labels);
+        var loss = new ReducedCrossEntropyLoss(predictions, weights, bias, features, labels, new double[]{1, 1, 1});
         var ctx = new ComputationContext();
 
         double lossValue = ctx.forward(loss).value();
@@ -89,8 +89,8 @@ class ReducedCrossEntropyLossTest implements FiniteDifferenceTest {
         var predictions = new Softmax(affineVariable);
         var labels = Constant.vector(new double[]{1.0, 0.0, 2.0});
 
-        var loss = new ReducedCrossEntropyLoss(predictions, weights, bias, features, labels);
-        var loss2 = new CrossEntropyLoss(predictions, labels);
+        var loss = new ReducedCrossEntropyLoss(predictions, weights, bias, features, labels, new double[]{1, 1, 1});
+        var loss2 = new CrossEntropyLoss(predictions, labels, new double[]{1, 1, 1});
         var ctx = new ComputationContext();
 
         double lossValue = ctx.forward(loss).value();
@@ -139,7 +139,8 @@ class ReducedCrossEntropyLossTest implements FiniteDifferenceTest {
             weights,
             bias,
             features,
-            labels
+            labels,
+            new double[]{1, 1, 1}
         );
 
         finiteDifferenceShouldApproximateGradient(List.of(bias, weights), loss);
@@ -166,7 +167,8 @@ class ReducedCrossEntropyLossTest implements FiniteDifferenceTest {
             weights,
             bias,
             features,
-            labels
+            labels,
+            new double[]{1, 1, 1}
         );
 
         finiteDifferenceShouldApproximateGradient(List.of(bias, weights), loss);
@@ -194,11 +196,42 @@ class ReducedCrossEntropyLossTest implements FiniteDifferenceTest {
             weights,
             bias,
             features,
-            labels
+            labels,
+            new double[]{1, 1, 1}
         );
         var chainedLoss = new Sigmoid<>(loss);
 
         finiteDifferenceShouldApproximateGradient(List.of(bias, weights), chainedLoss);
+    }
+
+    @Test
+    void classWeightedCEShouldFocusOnHighWeightClass() {
+        var weights = new Weights<>(new Matrix(new double[]{0.9}, 1, 1));
+        var bias = Weights.ofVector(0.9);
+        var features = Constant.matrix(
+            new double[]{0.23, 0.52},
+            2,
+            1
+        );
+        var labels = Constant.vector(new double[]{1.0, 0.0});
+        var weightsBiasedToClass0 = new double[]{0.8, 0.2};
+
+        var predictions = Constant.matrix(new double[]{
+            0.4,0.6,
+            0.6,0.4
+        }, 2, 2);
+
+        var crossEntropyLoss = new ReducedCrossEntropyLoss(predictions, weights, bias, features, labels, weightsBiasedToClass0);
+        double crossEntropyLossValue = new ComputationContext().forward(crossEntropyLoss).value();
+
+        var predictionsBiasedToClass0 = Constant.matrix(new double[]{
+            0.5,0.5,
+            0.7,0.3
+        }, 2, 2);
+        var weightedCrossEntropyLoss = new ReducedCrossEntropyLoss(predictionsBiasedToClass0, weights, bias, features, labels, weightsBiasedToClass0);
+        double weightedCrossEntropyLossValue = new ComputationContext().forward(weightedCrossEntropyLoss).value();
+
+        assertThat(weightedCrossEntropyLossValue).isLessThan(crossEntropyLossValue);
     }
 
     @Override

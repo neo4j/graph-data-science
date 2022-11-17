@@ -50,7 +50,8 @@ class TunableTrainerConfigTest {
             "patience", 1,
             "penalty", 0.1,
             "tolerance", 0.001,
-            "focusWeight", 0.0
+            "focusWeight", 0.0,
+            "classWeights", List.of()
         ));
     }
 
@@ -59,7 +60,8 @@ class TunableTrainerConfigTest {
         var userInput = Map.of(
             "penalty", Map.of("range", List.of(0.1, 0.2)),
             "patience", Map.of("range", List.of(42, 1337)),
-            "batchSize", 99
+            "batchSize", 99,
+            "classWeights", List.of(0.3, 0.7)
         );
         var config = TunableTrainerConfig.of(userInput, TrainingMethod.LogisticRegression);
         assertThat(config.toMap()).isEqualTo(Map.of(
@@ -71,18 +73,19 @@ class TunableTrainerConfigTest {
             "patience", Map.of("range", List.of(42, 1337)),
             "penalty", Map.of("range", List.of(0.1, 0.2)),
             "tolerance", 0.001,
-            "focusWeight", 0.0
+            "focusWeight", 0.0,
+            "classWeights", List.of(0.3, 0.7)
         ));
     }
 
     @Test
     void shouldMaterializeLRConfig() {
-        var userInput = Map.<String, Object>of("penalty", 0.1);
+        var userInput = Map.<String, Object>of("penalty", 0.1, "classWeights", List.of(0.3, 0.7));
         var config = TunableTrainerConfig.of(userInput, TrainingMethod.LogisticRegression);
         var trainerConfig = config.materialize(Map.of());
         assertThat(trainerConfig)
             .usingRecursiveComparison()
-            .isEqualTo(LogisticRegressionTrainConfigImpl.builder().penalty(0.1).build());
+            .isEqualTo(LogisticRegressionTrainConfigImpl.builder().penalty(0.1).classWeights(List.of(0.3, 0.7)).build());
     }
 
     @Test
@@ -266,6 +269,19 @@ class TunableTrainerConfigTest {
         assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForestClassification))
             .hasMessage("Ranges for training hyper-parameters must be of the form {range: {min, max}}, " +
                         "where both min and max are numerical. Invalid parameters: [`maxDepth={range=[foo, bar]}`]")
+            .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void failsForInvalidListParam() {
+        var userInput = Map.<String, Object>of("classWeights", 10);
+        assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.LogisticRegression))
+            .hasMessage("Parameter `classWeights` must be of the type `List`.")
+            .isInstanceOf(IllegalArgumentException.class);
+
+        var mlpUserInput = Map.<String, Object>of("hiddenLayerSizes", 10);
+        assertThatThrownBy(() -> TunableTrainerConfig.of(mlpUserInput, TrainingMethod.MLPClassification))
+            .hasMessage("Parameter `hiddenLayerSizes` must be of the type `List`.")
             .isInstanceOf(IllegalArgumentException.class);
     }
 

@@ -21,8 +21,10 @@ package org.neo4j.gds.ml.models.logisticregression;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class LogisticRegressionTrainConfigTest {
@@ -32,5 +34,18 @@ class LogisticRegressionTrainConfigTest {
         assertThatThrownBy(() -> LogisticRegressionTrainConfig.of(Map.of("boogiewoogie", 1, "methodName", "myMethod")))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Unexpected configuration keys: boogiewoogie, methodName");
+    }
+
+    @Test
+    void shouldInitializeCorrectClassWeights() {
+        assertThat(LogisticRegressionTrainConfigImpl.builder().build().initializeClassWeights(5))
+            .isEqualTo(new double[]{1,1,1,1,1});
+
+        assertThat(LogisticRegressionTrainConfigImpl.builder().classWeights(List.of(1.5, 0.5)).build().initializeClassWeights(2))
+            .isEqualTo(new double[]{1.5, 0.5});
+
+        assertThatThrownBy(() -> LogisticRegressionTrainConfigImpl.builder().classWeights(List.of(1.5, 0.5)).build().initializeClassWeights(5))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("The classWeights list [1.5, 0.5] has 2 entries, but it should have 5 entries instead, which is the number of classes.");
     }
 }

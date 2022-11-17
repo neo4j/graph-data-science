@@ -24,4 +24,4 @@ include::partial$/machine-learning/training-methods/gradient-descent-config-tuni
 
 include::partial$/machine-learning/training-methods/penalty-config-tuning.adoc[leveloffset =+ 1]
 
-include::partial$/machine-learning/training-methods/focus-weight-config.adoc[leveloffset =+ 1]
+include::partial$/machine-learning/training-methods/focus-weight-config-tuning.adoc[leveloffset =+ 1]

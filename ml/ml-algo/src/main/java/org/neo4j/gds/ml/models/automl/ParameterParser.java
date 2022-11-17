@@ -150,9 +150,13 @@ final class ParameterParser {
         }
 
         if (correctParameterType == List.class) {
-            //List of numbers from input are parsed as Long by default, we need to cast it to Integer
-            var intValues = ((List<Number>) value).stream().map(Number::intValue).collect(Collectors.toList());
-            return ListParameter.of(intValues);
+            if (key.equals("hiddenLayerSizes")) {
+                var intValues = ((List<Number>) value).stream().map(Number::intValue).collect(Collectors.toList());
+                return ListParameter.of(intValues);
+            } else if (key.equals("classWeights")) {
+                var doubleValues = ((List<Number>) value).stream().map(Number::doubleValue).collect(Collectors.toList());
+                return ListParameter.of(doubleValues);
+            }
         }
 
         throw new IllegalStateException(formatWithLocale(

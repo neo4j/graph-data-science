@@ -46,15 +46,15 @@ public class NodeClassificationPipelineFilteredTest extends BaseProcTest {
     private static final String DB_QUERY =
         "CREATE " +
         "  (x1:X {class: 0})" +
-        ", (x2:X {class: 1})" +
+        ", (x2:X {class: 5})" +
         ", (x3:X {class: 0})" +
-        ", (x4:X {class: 1})" +
+        ", (x4:X {class: 5})" +
         ", (x5:X {class: 0})" +
-        ", (x6:X {class: 1})" +
+        ", (x6:X {class: 5})" +
         ", (x7:X {class: 0})" +
-        ", (x8:X {class: 1})" +
+        ", (x8:X {class: 5})" +
         ", (x9:X {class: 0})" +
-        ", (x10:X {class: 1})" +
+        ", (x10:X {class: 5})" +
 
         ", (y1:Y {})" +
         ", (y2:Y {})" +
@@ -146,15 +146,15 @@ public class NodeClassificationPipelineFilteredTest extends BaseProcTest {
             "  YIELD nodeId, predictedClass",
             List.of(
                 Map.of("nodeId", 0L, "predictedClass", 0L),
-                Map.of("nodeId", 1L, "predictedClass", 1L),
+                Map.of("nodeId", 1L, "predictedClass", 5L),
                 Map.of("nodeId", 2L, "predictedClass", 0L),
-                Map.of("nodeId", 3L, "predictedClass", 1L),
+                Map.of("nodeId", 3L, "predictedClass", 5L),
                 Map.of("nodeId", 4L, "predictedClass", 0L),
-                Map.of("nodeId", 5L, "predictedClass", 1L),
+                Map.of("nodeId", 5L, "predictedClass", 5L),
                 Map.of("nodeId", 6L, "predictedClass", 0L),
-                Map.of("nodeId", 7L, "predictedClass", 1L),
+                Map.of("nodeId", 7L, "predictedClass", 5L),
                 Map.of("nodeId", 8L, "predictedClass", 0L),
-                Map.of("nodeId", 9L, "predictedClass", 1L)
+                Map.of("nodeId", 9L, "predictedClass", 5L)
             )
         );
         // this test identified a bug in the mutation path.
@@ -171,15 +171,15 @@ public class NodeClassificationPipelineFilteredTest extends BaseProcTest {
             ") YIELD nodeId, propertyValue",
             List.of(
                 Map.of("nodeId", 0L, "propertyValue", 0L),
-                Map.of("nodeId", 1L, "propertyValue", 1L),
+                Map.of("nodeId", 1L, "propertyValue", 5L),
                 Map.of("nodeId", 2L, "propertyValue", 0L),
-                Map.of("nodeId", 3L, "propertyValue", 1L),
+                Map.of("nodeId", 3L, "propertyValue", 5L),
                 Map.of("nodeId", 4L, "propertyValue", 0L),
-                Map.of("nodeId", 5L, "propertyValue", 1L),
+                Map.of("nodeId", 5L, "propertyValue", 5L),
                 Map.of("nodeId", 6L, "propertyValue", 0L),
-                Map.of("nodeId", 7L, "propertyValue", 1L),
+                Map.of("nodeId", 7L, "propertyValue", 5L),
                 Map.of("nodeId", 8L, "propertyValue", 0L),
-                Map.of("nodeId", 9L, "propertyValue", 1L)
+                Map.of("nodeId", 9L, "propertyValue", 5L)
             )
         );
     }

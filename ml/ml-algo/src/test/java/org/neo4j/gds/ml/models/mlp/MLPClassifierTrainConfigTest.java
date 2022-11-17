@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.models.mlp;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -46,6 +47,19 @@ class MLPClassifierTrainConfigTest {
     void checkHiddenLayerSizesTyoe() {
         assertThatThrownBy(() -> MLPClassifierTrainConfig.of(Map.of("hiddenLayerSizes", 42)))
             .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void shouldInitializeCorrectClassWeights() {
+        Assertions.assertThat(MLPClassifierTrainConfigImpl.builder().build().initializeClassWeights(5))
+            .isEqualTo(new double[]{1,1,1,1,1});
+
+        Assertions.assertThat(MLPClassifierTrainConfigImpl.builder().classWeights(List.of(1.5, 0.5)).build().initializeClassWeights(2))
+            .isEqualTo(new double[]{1.5, 0.5});
+
+        assertThatThrownBy(() -> MLPClassifierTrainConfigImpl.builder().classWeights(List.of(1.5, 0.5)).build().initializeClassWeights(5))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("The classWeights list [1.5, 0.5] has 2 entries, but it should have 5 entries instead, which is the number of classes.");
     }
 
 }

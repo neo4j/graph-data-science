@@ -53,7 +53,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
     @Test
     void shouldSetLRParams() {
         assertCypherResult(
-            "CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('myPipeline', {minEpochs: 42})",
+            "CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('myPipeline', {minEpochs: 42, classWeights: [0.3, 0.7]})",
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG,
@@ -72,7 +72,8 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                         "batchSize", 100,
                         "learningRate", 0.001,
                         "tolerance", 0.001,
-                        "focusWeight", 0.0
+                        "focusWeight", 0.0,
+                        "classWeights", List.of(0.3, 0.7)
                     ))
                 )
             ))
@@ -159,7 +160,8 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                             "batchSize", 100,
                             "learningRate", 0.001,
                             "tolerance", 0.001,
-                            "focusWeight", 0.0
+                            "focusWeight", 0.0,
+                            "classWeights", List.of()
                         ),
                         Map.of(
                             "maxEpochs", 100,
@@ -170,7 +172,8 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                             "batchSize", 100,
                             "learningRate", 0.001,
                             "tolerance", 0.001,
-                            "focusWeight", 0.0
+                            "focusWeight", 0.0,
+                            "classWeights", List.of()
                         )
                     ))
             ))
