@@ -21,8 +21,8 @@ The neural networks of GNNs are replaced by random hash functions, in the flavor
 Thus, HashGNN combines ideas of GNNs and fast randomized algorithms.
 
 The GDS implementation of HashGNN is based on the paper "Hashing-Accelerated Graph Neural Networks for Link Prediction", and further introduces a few improvements and generalizations.
-The generalizations include support for embedding heterogeneous graphs; relationships of different type are associated with different hash functions, which allows for preserving relationship-typed graph topology.
-Moreover, a way to specifying how much embeddings are updated using features from neighboring nodes versus features from the same node can be configured via `neighborInfluence`.
+The generalizations include support for embedding heterogeneous graphs; relationships of different types are associated with different hash functions, which allows for preserving relationship-typed graph topology.
+Moreover, a way to specify how much embeddings are updated using features from neighboring nodes versus features from the same node can be configured via `neighborInfluence`.
 
 The runtime of this algorithm is significantly lower than that of GNNs in general, but can still give comparable embedding quality for certain graphs as shown in the original paper.
 Moreover, the heterogeneous generalization also gives comparable results when compared to the paper "Graph Transformer Networks" when benchmarked on the same datasets.
@@ -35,8 +35,10 @@ For more information on this algorithm, see:
 
 === The algorithm
 
+To clarify how HashGNN works, we will walk through a virtual example <<algorithms-embeddings-hashgnn-virtual-example, below>> of a three node graph for the reader who is curious about the details of the feature selection and prefers to learn from examples.
+
 The HashGNN algorithm can only run on binary features.
-There is an optional first step to transform input features into binary features.
+Therefore, there is an optional first step to transform (possibly non-binary) input features into binary features as part of the algorithm.
 
 For a number of iterations, a new binary embedding is computed for each node using the embeddings of the previous iteration.
 In the first iteration, the previous embeddings are the binary feature vectors.
@@ -45,45 +47,15 @@ During one iteration, each node embedding vector is constructed by taking `K` ra
 The random sampling is carried out by successively selecting features with lowest min-hash values.
 Features of each node itself and of its neighbours are both considered.
 
-There are three types of hash functions involved: 1) a function applied to a node's own features, 2) a function applied to a subset of neighbor's feature 3) a function applied to all neighbor's features to select the subset for hash function 2).
-For each iteration and sampling round `k<K` new hash functions are used, and the third function also varies by relationship type connecting to the neighbor.
+There are three types of hash functions involved: 1) a function applied to a node's own features, 2) a function applied to a subset of neighbors' features 3) a function applied to all neighbors' features to select the subset for hash function 2).
+For each iteration and sampling round `k<K`, new hash functions are used, and the third function also varies depending on the relationship type connecting to the neighbor it is being applied on.
 
-The sampling is consistent in the sense that if nodes `a` and `b` are same or similar in terms of their features, the features of their neighbors and the relationship types connecting the neighbors, the samples for `a` and `b` are also same or similar.
+The sampling is consistent in the sense that if nodes `a` and `b` have identical or similar local graphs, the samples for `a` and `b` are also identical or similar.
+By local graph, we mean the subgraph with features and relationship types, containing all nodes at most `iterations` hops away.
+
 The number `K` is called `embeddingDensity` in the configuration of the algorithm.
+
 The algorithm ends with another optional step that maps the binary embeddings to dense vectors.
-
-=== Virtual example
-
-To clarify how HashGNN works, we walk through a virtual example of three node graph for the reader curious about the details of the feature selection and prefers to learn from examples.
-Perhaps the below example is best enjoyed with a pen and paper.
-
-Let say we have a node `a` with feature `f1`, a node `b` with feature `f2` and a node `c` with features `f1` and `f3`.
-The graph structure is `a--b--c`.
-We imagine running HashGNN for one iteration with `embeddingDensity=2`.
-
-During the first iteration and `k=0`, we compute an embedding for `(a)`.
-A hash value for `f1` turns out to be `7`.
-Since `(b)` is a neighbor, we generate a value for its feature `f2` and it becomes `11`.
-The value `7` is sampled from a hash function which we call "one" and `11` from a hash function "two".
-Thus `f1` is added to the new features for `(a)` since it has a smaller hash value.
-We repeat for `k=1` and this time the hash values are `4` and `2`, so now `f2` is added as a feature to `(a)`.
-
-We now consider `(b)`.
-The feature `f2` gets hash value `8` using hash function "one".
-Looking at the neighbor `(a)`, we sample a hash value for `f1` which becomes `5` using hash function "two".
-Since `(c)` has more than one feature, we also have to select one of the two features `f1` and `f3` before considering the "winning" feature as before as input to hash function "two".
-We use a third hash function "three" for this purpose and `f3` gets the smaller value of `1`.
-We now compute a hash of `f3` using "two" and it becomes `6`.
-Since `5` is smaller than `6`, `f1` is the "winning" neighbor feature for `(b)`, and since `5` is also smaller than `8`, it is the overall "winning" feature.
-Therefore, we add `f1` to the embedding of `(b)`.
-We proceed similarily with `k=1` and `f1` is selected again.
-Since the embeddings consist of binary features, this second addition has no effect.
-
-We omit the details of computing the embedding of `(c)`.
-
-After the 2 sampling rounds, the iteration is complete and since there is only one iteration, we are done.
-Each node has a binary embedding that contains some subset of the original binary features.
-In particular, `(a)` has features `f1` and `f2`, `(b)` has only the feature `f1`.
 
 === Features
 
@@ -576,3 +548,36 @@ YIELD nodePropertiesWritten
 
 The graph 'persons' now has a node property `hashgnn-embedding` which stores the node embedding for each node.
 To find out how to inspect the new schema of the in-memory graph, see xref:graph-list.adoc[Listing graphs].
+
+[[algorithms-embeddings-hashgnn-virtual-example]]
+=== Virtual example
+
+Perhaps the below example is best enjoyed with a pen and paper.
+
+Let say we have a node `a` with feature `f1`, a node `b` with feature `f2` and a node `c` with features `f1` and `f3`.
+The graph structure is `a--b--c`.
+We imagine running HashGNN for one iteration with `embeddingDensity=2`.
+
+During the first iteration and `k=0`, we compute an embedding for `(a)`.
+A hash value for `f1` turns out to be `7`.
+Since `(b)` is a neighbor of `(a)`, we generate a value for its feature `f2` which turns out to be `11`.
+The value `7` is sampled from a hash function which we call "one" and `11` from a hash function "two".
+Thus `f1` is added to the new features for `(a)` since it has a smaller hash value.
+We repeat for `k=1` and this time the hash values are `4` and `2`, so now `f2` is added as a feature to `(a)`.
+
+We now consider `(b)`.
+The feature `f2` gets hash value `8` using hash function "one".
+Looking at the neighbor `(a)`, we sample a hash value for `f1` which becomes `5` using hash function "two".
+Since `(c)` has more than one feature, we also have to select one of the two features `f1` and `f3` before considering the "winning" feature as before as input to hash function "two".
+We use a third hash function "three" for this purpose and `f3` gets the smaller value of `1`.
+We now compute a hash of `f3` using "two" and it becomes `6`.
+Since `5` is smaller than `6`, `f1` is the "winning" neighbor feature for `(b)`, and since `5` is also smaller than `8`, it is the overall "winning" feature.
+Therefore, we add `f1` to the embedding of `(b)`.
+We proceed similarily with `k=1` and `f1` is selected again.
+Since the embeddings consist of binary features, this second addition has no effect.
+
+We omit the details of computing the embedding of `(c)`.
+
+After the 2 sampling rounds, the iteration is complete and since there is only one iteration, we are done.
+Each node has a binary embedding that contains some subset of the original binary features.
+In particular, `(a)` has features `f1` and `f2`, `(b)` has only the feature `f1`.
