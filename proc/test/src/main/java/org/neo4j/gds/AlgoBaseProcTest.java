@@ -22,7 +22,8 @@ package org.neo4j.gds;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.GraphFactoryTestSupport.AllGraphStoreFactoryTypesTest;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
@@ -65,7 +66,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.GraphFactoryTestSupport.FactoryType.CYPHER;
 import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROPERTIES_KEY;
 import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROPERTIES_KEY;
@@ -279,10 +279,11 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         return true;
     }
 
-    @AllGraphStoreFactoryTypesTest
-    default void testRunMultipleTimesOnLoadedGraph(GraphFactoryTestSupport.FactoryType factoryType) {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    default void testRunMultipleTimesOnLoadedGraph(boolean cypherProjection) {
         String loadedGraphName = "loadedGraph";
-        GraphProjectConfig graphProjectConfig = factoryType == CYPHER
+        GraphProjectConfig graphProjectConfig = cypherProjection
             ? emptyWithNameCypher(TEST_USERNAME, loadedGraphName)
             : withNameAndRelationshipProjections(TEST_USERNAME, loadedGraphName, relationshipProjections());
 
