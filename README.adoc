@@ -95,7 +95,7 @@ OpenGDS is available to build, use, and extend under the constraints of the GNU 
 
 == Using the Pregel API
 
-To build your own algorithms using the Pregel API (see at https://neo4j.com/docs/graph-data-science/current/algorithms/pregel-api/#algorithms-pregel-api-example[docs]), we recommend starting with the https://github.com/neo4j/graph-data-science/tree/1.8.0/examples/pregel-bootstrap[pregel-bootstrap project].
+To build your own algorithms using the Pregel API (see at https://neo4j.com/docs/graph-data-science/current/algorithms/pregel-api/#algorithms-pregel-api-example[docs]), we recommend starting with the https://github.com/neo4j/graph-data-science/tree/2.2/examples/pregel-bootstrap[pregel-bootstrap project].
 
 NOTE: The module on `master` depends on the unpublished version of this library. The GDS version can be changed in the `build.gradle` of the `pregel-bootstrap` module.
 
