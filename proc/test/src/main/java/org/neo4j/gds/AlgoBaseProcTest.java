@@ -45,7 +45,6 @@ import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.core.write.NativeRelationshipExporterBuilder;
 import org.neo4j.gds.core.write.NativeRelationshipStreamExporterBuilder;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -192,37 +191,22 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
     default void shouldUnregisterTaskAfterComputation() {
         var taskStore = new InvocationCountingTaskStore();
 
-        String loadedGraphName = "loadedGraph";
-        GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
+        var loadedGraphName = "loadedGraph";
+        var graphProjectConfig = withNameAndRelationshipProjections(
             "",
             loadedGraphName,
             relationshipProjections()
         );
+
+        GraphStoreCatalog.set(
+            graphProjectConfig,
+            graphLoader(graphProjectConfig).graphStore()
+        );
+
         applyOnProcedure(proc -> {
             proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
 
-            GraphStore graphStore = graphLoader(graphProjectConfig).graphStore();
-            GraphStoreCatalog.set(
-                graphProjectConfig,
-                graphStore
-            );
-            Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-            ComputationResult<?, RESULT, CONFIG> computationResult1 = proc.compute(
-                loadedGraphName,
-                configMap,
-                releaseAlgorithm(),
-                true
-            );
-
-            ComputationResult<?, RESULT, CONFIG> computationResult2 = proc.compute(
-                loadedGraphName,
-                configMap,
-                releaseAlgorithm(),
-                true
-            );
-
-            // trigger consumption of stream return values
-            assertResultEquals(computationResult1.result(), computationResult2.result());
+            runTwiceAndAssertEqualResult(loadedGraphName, proc);
 
             assertThat(taskStore.taskStream())
                 .withFailMessage(() -> formatWithLocale(
@@ -282,32 +266,36 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     default void testRunMultipleTimesOnLoadedGraph(boolean cypherProjection) {
-        String loadedGraphName = "loadedGraph";
-        GraphProjectConfig graphProjectConfig = cypherProjection
+        var loadedGraphName = "loadedGraph";
+        var graphProjectConfig = cypherProjection
             ? emptyWithNameCypher(TEST_USERNAME, loadedGraphName)
-            : withNameAndRelationshipProjections(TEST_USERNAME, loadedGraphName, relationshipProjections());
-
-        applyOnProcedure((proc) -> {
-            GraphStoreCatalog.set(
-                graphProjectConfig,
-                graphLoader(graphProjectConfig).graphStore()
-            );
-            Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-            ComputationResult<?, RESULT, CONFIG> resultRun1 = proc.compute(
-                loadedGraphName,
-                configMap,
-                releaseAlgorithm(),
-                true
-            );
-            ComputationResult<?, RESULT, CONFIG> resultRun2 = proc.compute(
-                loadedGraphName,
-                configMap,
-                releaseAlgorithm(),
-                true
+            : withNameAndRelationshipProjections(TEST_USERNAME, loadedGraphName, relationshipProjections()
             );
 
-            assertResultEquals(resultRun1.result(), resultRun2.result());
-        });
+        GraphStoreCatalog.set(
+            graphProjectConfig,
+            graphLoader(graphProjectConfig).graphStore()
+        );
+
+        applyOnProcedure(proc -> runTwiceAndAssertEqualResult(loadedGraphName, proc));
+    }
+
+    private void runTwiceAndAssertEqualResult(String loadedGraphName, AlgoBaseProc<ALGORITHM, RESULT, CONFIG, ?> proc) {
+        var configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
+        var resultRun1 = proc.compute(
+            loadedGraphName,
+            configMap,
+            releaseAlgorithm(),
+            true
+        );
+        var resultRun2 = proc.compute(
+            loadedGraphName,
+            configMap,
+            releaseAlgorithm(),
+            true
+        );
+
+        assertResultEquals(resultRun1.result(), resultRun2.result());
     }
 
     @Test
