@@ -1,0 +1,65 @@
+apply plugin: 'java-library'
+apply plugin: 'me.champeau.mrjar'
+
+description = 'Neo4j Graph Data Science :: Storage Engine Adapter 5.2'
+
+group = 'org.neo4j.gds'
+
+// for 5.2.0 and all 5.x drops
+if (ver.'neo4j'.startsWith('5.')) {
+    sourceSets {
+        main {
+            java {
+                srcDirs = ['src/main/java17']
+            }
+        }
+    }
+
+    dependencies {
+        annotationProcessor project(':annotations')
+        annotationProcessor group: 'org.immutables', name: 'value',              version: ver.'immutables'
+        annotationProcessor group: 'org.neo4j',      name: 'annotations',        version: neos.'5.2'
+
+        compileOnly project(':annotations')
+        compileOnly group: 'org.immutables', name: 'value-annotations',           version: ver.'immutables'
+        compileOnly group: 'org.neo4j',      name: 'neo4j',                       version: neos.'5.2'
+        compileOnly group: 'org.neo4j',      name: 'neo4j-record-storage-engine', version: neos.'5.2'
+
+        implementation project(':core')
+        implementation project(':storage-engine-adapter-api')
+        implementation project(':config-api')
+        implementation project(':string-formatting')
+    }
+} else {
+    multiRelease {
+        targetVersions 11, 17
+    }
+
+    if (!project.hasProperty('no-forbidden-apis')) {
+        forbiddenApisJava17 {
+            exclude('**')
+        }
+    }
+
+    dependencies {
+        annotationProcessor group: 'org.neo4j', name: 'annotations', version: ver.'neo4j'
+        compileOnly group: 'org.neo4j', name: 'annotations', version: ver.'neo4j'
+
+        implementation project(':neo4j-adapter')
+        implementation project(':storage-engine-adapter-api')
+
+        java17AnnotationProcessor project(':annotations')
+        java17AnnotationProcessor group: 'org.immutables', name: 'value',              version: ver.'immutables'
+        java17AnnotationProcessor group: 'org.neo4j',      name: 'annotations',        version: neos.'5.2'
+
+        java17CompileOnly project(':annotations')
+        java17CompileOnly group: 'org.immutables', name: 'value-annotations',           version: ver.'immutables'
+        java17CompileOnly group: 'org.neo4j',      name: 'neo4j',                       version: neos.'5.2'
+        java17CompileOnly group: 'org.neo4j',      name: 'neo4j-record-storage-engine', version: neos.'5.2'
+
+        java17Implementation project(':core')
+        java17Implementation project(':storage-engine-adapter-api')
+        java17Implementation project(':config-api')
+        java17Implementation project(':string-formatting')
+    }
+}
