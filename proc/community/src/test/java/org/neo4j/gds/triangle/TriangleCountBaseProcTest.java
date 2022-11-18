@@ -23,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GraphFactoryTestSupport;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.OnlyUndirectedTest;
 import org.neo4j.gds.Orientation;
@@ -109,11 +108,8 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
     }
 
     @Override
-    public void testRunMultipleTimesOnLoadedGraph(GraphFactoryTestSupport.FactoryType factoryType) {
-        if (factoryType == GraphFactoryTestSupport.FactoryType.CYPHER) {
-            // TC only works on UNDIRECTED, and Cypher only projects directed
-            return;
-        }
-        OnlyUndirectedTest.super.testRunMultipleTimesOnLoadedGraph(factoryType);
+    public void testRunMultipleTimesOnLoadedGraph(boolean cypherProjection) {
+        // TC only works on UNDIRECTED, and Cypher only projects directed
+        OnlyUndirectedTest.super.testRunMultipleTimesOnLoadedGraph(false);
     }
 }
