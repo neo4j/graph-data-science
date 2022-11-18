@@ -15,7 +15,7 @@ The sequence of operations would normally be to project a graph, run one or more
 
 The below image illustrates an overview of standard operation of the GDS library:
 
-image::projected-graph-model.svg
+image::projected-graph-model.svg[]
 
 [NOTE]
 ====
