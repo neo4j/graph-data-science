@@ -40,7 +40,7 @@ import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.loading.construction.RelationshipsAndSchema;
+import org.neo4j.gds.core.loading.construction.RelationshipsAndOrientation;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.Collection;
@@ -203,7 +203,7 @@ public final class CSRGraphStoreUtil {
     }
 
     public static RelationshipPropertyStore buildRelationshipPropertyStore(
-        List<RelationshipsAndSchema> relationships,
+        List<RelationshipsAndOrientation> relationships,
         List<RelationshipPropertySchema> relationshipPropertySchemas
     ) {
         assert relationships.size() >= relationshipPropertySchemas.size();

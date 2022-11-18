@@ -136,11 +136,11 @@ public class RelationshipsBuilder {
         );
     }
 
-    public RelationshipsAndSchema build() {
+    public RelationshipsAndOrientation build() {
         return buildAll().get(0);
     }
 
-    public List<RelationshipsAndSchema> buildAll() {
+    public List<RelationshipsAndOrientation> buildAll() {
         return buildAll(Optional.empty(), Optional.empty());
     }
 
@@ -150,7 +150,7 @@ public class RelationshipsBuilder {
      *                           has been drained and its contents are written to the adjacency list. The consumer receives the number
      *                           of relationships that have been written. Implementations must be thread-safe.
      */
-    public List<RelationshipsAndSchema> buildAll(
+    public List<RelationshipsAndOrientation> buildAll(
         Optional<AdjacencyCompressor.ValueMapper> mapper,
         Optional<LongConsumer> drainCountConsumer
     ) {
@@ -181,7 +181,7 @@ public class RelationshipsBuilder {
                         compressedProperties,
                         DefaultValue.DOUBLE_DEFAULT_FALLBACK
                     );
-                    return RelationshipsAndSchema.of(relationships, orientation);
+                    return RelationshipsAndOrientation.of(relationships, orientation);
                 }
             ).collect(Collectors.toList());
         } else {
@@ -191,7 +191,7 @@ public class RelationshipsBuilder {
                 adjacencyList
             );
 
-            return List.of(RelationshipsAndSchema.of(relationships, orientation));
+            return List.of(RelationshipsAndOrientation.of(relationships, orientation));
         }
     }
 

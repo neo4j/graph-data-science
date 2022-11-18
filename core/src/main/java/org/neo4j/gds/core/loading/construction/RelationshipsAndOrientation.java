@@ -25,13 +25,13 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Relationships;
 
 @ValueClass
-public interface RelationshipsAndSchema {
+public interface RelationshipsAndOrientation {
 
     Relationships relationships();
 
     Orientation orientation();
 
-    static RelationshipsAndSchema of(Relationships relationships, Orientation orientation) {
-        return ImmutableRelationshipsAndSchema.of(relationships, orientation);
+    static RelationshipsAndOrientation of(Relationships relationships, Orientation orientation) {
+        return ImmutableRelationshipsAndOrientation.of(relationships, orientation);
     }
 }

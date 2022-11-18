@@ -24,7 +24,7 @@ import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.loading.construction.RelationshipsAndSchema;
+import org.neo4j.gds.core.loading.construction.RelationshipsAndOrientation;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -84,8 +84,8 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
                 ComputationResult<SplitRelationships, SplitResult, SplitRelationshipsMutateConfig> computationResult,
                 ExecutionContext executionContext
             ) {
-                RelationshipsAndSchema selectedRels;
-                RelationshipsAndSchema remainingRels;
+                RelationshipsAndOrientation selectedRels;
+                RelationshipsAndOrientation remainingRels;
                 try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
                     GraphStore graphStore = computationResult.graphStore();
                     SplitResult splitResult = computationResult.result();

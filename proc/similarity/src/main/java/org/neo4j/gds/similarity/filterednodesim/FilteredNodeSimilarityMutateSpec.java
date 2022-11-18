@@ -29,7 +29,7 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.loading.construction.RelationshipsAndSchema;
+import org.neo4j.gds.core.loading.construction.RelationshipsAndOrientation;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -104,7 +104,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
                 var config = computationResult.config();
 
                 try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-                    RelationshipsAndSchema relationshipsAndSchema = getRelationships(
+                    RelationshipsAndOrientation relationshipsAndOrientation = getRelationships(
                         computationResult,
                         computationResult.result().graphResult(),
                         (SimilarityProc.SimilarityResultBuilder<SimilarityMutateResult>) resultBuilder,
@@ -119,21 +119,21 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
                             relationshipType,
                             Optional.of(config.mutateProperty()),
                             Optional.of(NumberType.FLOATING_POINT),
-                            relationshipsAndSchema
+                            relationshipsAndOrientation
                         );
-                    resultBuilder.withRelationshipsWritten(relationshipsAndSchema.relationships().topology().elementCount());
+                    resultBuilder.withRelationshipsWritten(relationshipsAndOrientation.relationships().topology().elementCount());
                 }
             }
         };
     }
 
-    private RelationshipsAndSchema getRelationships(
+    private RelationshipsAndOrientation getRelationships(
         ComputationResult<NodeSimilarity, NodeSimilarityResult, FilteredNodeSimilarityMutateConfig> computationResult,
         SimilarityGraphResult similarityGraphResult,
         SimilarityProc.SimilarityResultBuilder<SimilarityMutateResult> resultBuilder,
         ProcedureCallContext callContext
     ) {
-        RelationshipsAndSchema resultRelationships;
+        RelationshipsAndOrientation resultRelationships;
 
         if (similarityGraphResult.isTopKGraph()) {
             TopKGraph topKGraph = (TopKGraph) similarityGraphResult.similarityGraph();
@@ -171,7 +171,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
             resultRelationships = relationshipsBuilder.build();
         } else {
             HugeGraph similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
-            resultRelationships = RelationshipsAndSchema.of(
+            resultRelationships = RelationshipsAndOrientation.of(
                 similarityGraph.relationships(),
                 similarityGraphResult.orientation()
             );
