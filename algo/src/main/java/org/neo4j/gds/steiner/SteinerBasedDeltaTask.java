@@ -44,7 +44,6 @@ class SteinerBasedDeltaTask implements Runnable {
     private LongArrayList[] localBins;
     private SteinerBasedDeltaStepping.Phase phase = SteinerBasedDeltaStepping.Phase.RELAX;
     private final BitSet mergedToSource;
-    private final BitSet unvisitedTerminal;
 
     SteinerBasedDeltaTask(
         Graph graph,
@@ -52,8 +51,7 @@ class SteinerBasedDeltaTask implements Runnable {
         TentativeDistances distances,
         double delta,
         AtomicLong frontierIndex,
-        BitSet mergedToSource,
-        BitSet unvisitedTerminal
+        BitSet mergedToSource
     ) {
 
         this.graph = graph.concurrentCopy();
@@ -63,7 +61,6 @@ class SteinerBasedDeltaTask implements Runnable {
         this.frontierIndex = frontierIndex;
         this.mergedToSource=mergedToSource;
         this.localBins = new LongArrayList[0];
-        this.unvisitedTerminal=unvisitedTerminal;
     }
 
     @Override
@@ -123,7 +120,7 @@ class SteinerBasedDeltaTask implements Runnable {
     }
     private void relaxNode(long nodeId) {
         graph.forEachRelationship(nodeId, 1.0, (sourceNodeId, targetNodeId, weight) -> {
-            if (!mergedToSource.get(targetNodeId)) {
+            if (!mergedToSource.get(targetNodeId)) { //ignore merged vertices
                 tryToUpdate(sourceNodeId, targetNodeId,weight);
             }
             return true;
