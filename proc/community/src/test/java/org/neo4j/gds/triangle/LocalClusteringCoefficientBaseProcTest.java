@@ -26,7 +26,6 @@ import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ConfigurableSeedConfigTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.GraphFactoryTestSupport;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.OnlyUndirectedTest;
 import org.neo4j.gds.Orientation;
@@ -186,11 +185,8 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
     }
 
     @Override
-    public void testRunMultipleTimesOnLoadedGraph(GraphFactoryTestSupport.FactoryType factoryType) {
-        if (factoryType == GraphFactoryTestSupport.FactoryType.CYPHER) {
-            // LCC only works on UNDIRECTED, and Cypher only projects directed
-            return;
-        }
-        OnlyUndirectedTest.super.testRunMultipleTimesOnLoadedGraph(factoryType);
+    public void testRunMultipleTimesOnLoadedGraph(boolean cypherProjection) {
+        // LCC only works on UNDIRECTED, and Cypher only projects directed
+        OnlyUndirectedTest.super.testRunMultipleTimesOnLoadedGraph(false);
     }
 }

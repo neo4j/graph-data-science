@@ -22,7 +22,8 @@ package org.neo4j.gds;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.GraphFactoryTestSupport.AllGraphStoreFactoryTypesTest;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
@@ -44,7 +45,6 @@ import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.core.write.NativeRelationshipExporterBuilder;
 import org.neo4j.gds.core.write.NativeRelationshipStreamExporterBuilder;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -67,7 +67,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.GraphFactoryTestSupport.FactoryType.CYPHER;
 import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROPERTIES_KEY;
 import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROPERTIES_KEY;
@@ -194,38 +193,23 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
     default void shouldUnregisterTaskAfterComputation() {
         var taskStore = new InvocationCountingTaskStore();
 
-        String loadedGraphName = "loadedGraph";
-        GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
+        var loadedGraphName = "loadedGraph";
+        var graphProjectConfig = withNameAndRelationshipProjections(
             "",
             loadedGraphName,
             relationshipProjections(),
             nodeProperties()
         );
+
+        GraphStoreCatalog.set(
+            graphProjectConfig,
+            graphLoader(graphProjectConfig).graphStore()
+        );
+
         applyOnProcedure(proc -> {
             proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
 
-            GraphStore graphStore = graphLoader(graphProjectConfig).graphStore();
-            GraphStoreCatalog.set(
-                graphProjectConfig,
-                graphStore
-            );
-            Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-            ComputationResult<?, RESULT, CONFIG> computationResult1 = proc.compute(
-                loadedGraphName,
-                configMap,
-                releaseAlgorithm(),
-                true
-            );
-
-            ComputationResult<?, RESULT, CONFIG> computationResult2 = proc.compute(
-                loadedGraphName,
-                configMap,
-                releaseAlgorithm(),
-                true
-            );
-
-            // trigger consumption of stream return values
-            assertResultEquals(computationResult1.result(), computationResult2.result());
+            runTwiceAndAssertEqualResult(loadedGraphName, proc);
 
             assertThat(taskStore.taskStream())
                 .withFailMessage(() -> formatWithLocale(
@@ -287,35 +271,40 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         return List.of();
     }
 
-    @AllGraphStoreFactoryTypesTest
-    default void testRunMultipleTimesOnLoadedGraph(GraphFactoryTestSupport.FactoryType factoryType) {
-        String loadedGraphName = "loadedGraph";
-        GraphProjectConfig graphProjectConfig = factoryType == CYPHER
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    default void testRunMultipleTimesOnLoadedGraph(boolean cypherProjection) {
+        var loadedGraphName = "loadedGraph";
+        var graphProjectConfig = cypherProjection
             ? emptyWithNameCypher(TEST_USERNAME, loadedGraphName, nodeProperties())
             : withNameAndRelationshipProjections(TEST_USERNAME, loadedGraphName, relationshipProjections(),
-                nodeProperties());
-
-        applyOnProcedure((proc) -> {
-            GraphStoreCatalog.set(
-                graphProjectConfig,
-                graphLoader(graphProjectConfig).graphStore()
-            );
-            Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-            ComputationResult<?, RESULT, CONFIG> resultRun1 = proc.compute(
-                loadedGraphName,
-                configMap,
-                releaseAlgorithm(),
-                true
-            );
-            ComputationResult<?, RESULT, CONFIG> resultRun2 = proc.compute(
-                loadedGraphName,
-                configMap,
-                releaseAlgorithm(),
-                true
+                nodeProperties()
             );
 
-            assertResultEquals(resultRun1.result(), resultRun2.result());
-        });
+        GraphStoreCatalog.set(
+            graphProjectConfig,
+            graphLoader(graphProjectConfig).graphStore()
+        );
+
+        applyOnProcedure(proc -> runTwiceAndAssertEqualResult(loadedGraphName, proc));
+    }
+
+    private void runTwiceAndAssertEqualResult(String loadedGraphName, AlgoBaseProc<ALGORITHM, RESULT, CONFIG, ?> proc) {
+        var configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
+        var resultRun1 = proc.compute(
+            loadedGraphName,
+            configMap,
+            releaseAlgorithm(),
+            true
+        );
+        var resultRun2 = proc.compute(
+            loadedGraphName,
+            configMap,
+            releaseAlgorithm(),
+            true
+        );
+
+        assertResultEquals(resultRun1.result(), resultRun2.result());
     }
 
     @Test

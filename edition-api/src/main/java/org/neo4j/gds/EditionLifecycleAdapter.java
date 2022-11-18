@@ -41,18 +41,18 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
     private final ExtensionContext context;
     private final Config config;
     private final GlobalProcedures globalProceduresRegistry;
-    private final Optional<LicenseState> licenseState;
+    private final Optional<LicenseState> licenseStateOverride;
 
     EditionLifecycleAdapter(
         ExtensionContext context,
         Config config,
         GlobalProcedures globalProceduresRegistry,
-        Optional<LicenseState> licenseState
+        Optional<LicenseState> licenseStateOverride
     ) {
         this.context = context;
         this.config = config;
         this.globalProceduresRegistry = globalProceduresRegistry;
-        this.licenseState = licenseState;
+        this.licenseStateOverride = licenseStateOverride;
     }
 
     @Override
@@ -66,12 +66,12 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
     }
 
     private LicenseState registerLicenseState() {
-        var licenseState = this.licenseState.orElseGet(this::loadLicenseState);
+        var licenseState = this.licenseStateOverride.orElseGet(this::loadLicenseState);
         context.dependencySatisfier().satisfyDependency(licenseState);
 
         globalProceduresRegistry.registerComponent(
             LicenseState.class,
-            (context) -> context.dependencyResolver().resolveDependency(LicenseState.class),
+            kernelContext -> kernelContext.dependencyResolver().resolveDependency(LicenseState.class),
             true
         );
         return licenseState;
@@ -132,7 +132,7 @@ public class EditionLifecycleAdapter extends LifecycleAdapter {
 
         globalProceduresRegistry.registerComponent(
             ModelCatalog.class,
-            (context) -> modelCatalog,
+            ignored -> modelCatalog,
             true
         );
         context.dependencySatisfier().satisfyDependency(modelCatalog);
