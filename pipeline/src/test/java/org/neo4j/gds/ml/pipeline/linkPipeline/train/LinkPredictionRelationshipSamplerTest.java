@@ -28,6 +28,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -136,7 +138,8 @@ class LinkPredictionRelationshipSamplerTest {
             graphStore,
             splitConfig,
             trainConfig,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         linkPredictionRelationshipSampler.splitAndSampleRelationships(
@@ -199,7 +202,8 @@ class LinkPredictionRelationshipSamplerTest {
             graphStore,
             splitConfig,
             trainConfig,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
 
         relationshipSplitter.splitAndSampleRelationships(Optional.of("weight"));
@@ -220,7 +224,7 @@ class LinkPredictionRelationshipSamplerTest {
         var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(28_800, 35_840));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(17_760, 17_760));
 
         splitConfig = splitConfigBuilder.testFraction(0.8).build();
         actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
@@ -228,7 +232,7 @@ class LinkPredictionRelationshipSamplerTest {
 
         // higher testFraction -> lower estimation as test-complement is smaller
         // the test_complement is kept until the end of all splitting
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(19_152, 32_912));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(19_424, 19_424));
     }
 
     @Test
@@ -242,13 +246,13 @@ class LinkPredictionRelationshipSamplerTest {
         var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(27_200, 34_240));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(17_760, 17_760));
 
         splitConfig = splitConfigBuilder.trainFraction(0.8).build();
         actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(27_184, 40_944));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(19_424, 19_424));
     }
 
     @Test
@@ -262,13 +266,38 @@ class LinkPredictionRelationshipSamplerTest {
         var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(27184, 35_344));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(18_024, 18_024));
 
         splitConfig = splitConfigBuilder.negativeSamplingRatio(4).build();
         actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(39424, 59_824));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(36_384, 36_384));
+    }
+
+    @Test
+    void estimateWithNegativeRelationshipType() {
+        var splitConfig = LinkPredictionSplitConfigImpl.builder()
+            .testFraction(0.3)
+            .trainFraction(0.3)
+            .validationFolds(3)
+            .negativeRelationshipType("NEG")
+            .build();
+
+        var graphDimensionBuilder = ImmutableGraphDimensions.builder()
+            .nodeCount(100)
+            .relationshipCounts(Map.of(RelationshipType.of("REL"), 1000L))
+            .relCountUpperBound(3000L);
+
+        var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
+            .estimate(splitConfig.expectedGraphDimensions(graphDimensionBuilder.relationshipCounts(Map.of(RelationshipType.of("NEG"), 1000L)).build(), "REL"), 4);
+
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(47_760, 47_760));
+
+        actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
+            .estimate(splitConfig.expectedGraphDimensions(graphDimensionBuilder.relationshipCounts(Map.of(RelationshipType.of("NEG"), 2000L)).build(), "REL"), 4);
+
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(59_760, 59_760));
     }
 
     @Test
@@ -301,7 +330,8 @@ class LinkPredictionRelationshipSamplerTest {
             multiGraphStore,
             splitConfig,
             trainConfig,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         // due to the label filter most of the relationships are not valid
@@ -330,7 +360,6 @@ class LinkPredictionRelationshipSamplerTest {
             .trainFraction(0.5)
             .testFraction(0.5)
             .validationFolds(2)
-            .negativeSamplingRatio(99.0)
             .negativeRelationshipType("NEGATIVE") // 3 total
             .build();
 
@@ -340,7 +369,8 @@ class LinkPredictionRelationshipSamplerTest {
             graphStore,
             splitConfig,
             trainConfig,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         relationshipSplitter.splitAndSampleRelationships(

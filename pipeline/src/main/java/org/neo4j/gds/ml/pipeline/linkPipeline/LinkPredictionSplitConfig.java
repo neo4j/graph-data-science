@@ -24,6 +24,7 @@ import org.immutables.value.Value;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
@@ -31,6 +32,7 @@ import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -135,6 +137,14 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
             ));
         }
 
+        if (negativeRelationshipType().isPresent()) {
+            String negativeRelType = negativeRelationshipType().get();
+            ElementTypeValidator.resolveAndValidateTypes(graphStore, List.of(negativeRelType), "negativeRelationshipType");
+            if (negativeSamplingRatio() != 1.0) {
+                throw new IllegalArgumentException("Configuration parameter failure: `negativeSamplingRatio` and `negativeRelationshipType` cannot be used together.");
+            }
+        }
+
         var expectedSetSizes = expectedSetSizes(graphStore.relationshipCount(targetRelationshipType));
 
         validateRelSetSize(expectedSetSizes.testSize(), MIN_SET_SIZE, "test", "`testFraction` is too low");
@@ -196,4 +206,5 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
             .putAllRelationshipCounts(baseDim.relationshipCounts())
             .build();
     }
+
 }

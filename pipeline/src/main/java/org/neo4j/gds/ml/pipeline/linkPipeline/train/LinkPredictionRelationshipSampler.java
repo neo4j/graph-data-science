@@ -27,6 +27,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.ElementTypeValidator;
+import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -54,19 +56,24 @@ public class LinkPredictionRelationshipSampler {
     private final LinkPredictionSplitConfig splitConfig;
     private LinkPredictionTrainConfig trainConfig;
     private final ProgressTracker progressTracker;
+
+    private final TerminationFlag terminationFlag;
+
     private final GraphStore graphStore;
 
      public LinkPredictionRelationshipSampler(
          GraphStore graphStore,
          LinkPredictionSplitConfig splitConfig,
          LinkPredictionTrainConfig trainConfig,
-         ProgressTracker progressTracker
+         ProgressTracker progressTracker,
+         TerminationFlag terminationFlag
      ) {
         this.graphStore = graphStore;
         this.splitConfig = splitConfig;
         this.trainConfig = trainConfig;
         this.progressTracker = progressTracker;
-    }
+         this.terminationFlag = terminationFlag;
+     }
 
     @NotNull
     static LeafTask progressTask(ExpectedSetSizes sizes) {
@@ -103,14 +110,16 @@ public class LinkPredictionRelationshipSampler {
 
         // Relationship sets: test, train, feature-input, test-complement. The nodes are always the same.
         // 1. Split base graph into test, test-complement
+        terminationFlag.assertRunning();
         var testSplitResult = split(sourceNodes, targetNodes, graph, relationshipWeightProperty, splitConfig.testComplementRelationshipType(), splitConfig.testFraction());
-
         // 2. Split test-complement into (labeled) train and feature-input.
         var testComplementGraph = graphStore.getGraph(
             trainConfig.nodeLabelIdentifiers(graphStore),
             List.of(splitConfig.testComplementRelationshipType()),
             relationshipWeightProperty
         );
+
+        terminationFlag.assertRunning();
         var trainSplitResult = split(sourceNodes, targetNodes, testComplementGraph, relationshipWeightProperty, splitConfig.featureInputRelationshipType(), splitConfig.trainFraction());
 
         // 3. add negative examples to test and train
@@ -123,8 +132,12 @@ public class LinkPredictionRelationshipSampler {
             trainSplitResult.selectedRelCount(),
             sourceNodes,
             targetNodes,
+            sourceLabels,
+            targetLabels,
             trainConfig.randomSeed()
         );
+
+        terminationFlag.assertRunning();
         negativeSampler.produceNegativeSamples(testSplitResult.selectedRels(), trainSplitResult.selectedRels());
 
         // 4. Update graphStore with (positive+negative) 'TEST' and 'TRAIN' edges
@@ -198,55 +211,81 @@ public class LinkPredictionRelationshipSampler {
             ? RelationshipType.ALL_RELATIONSHIPS
             : RelationshipType.of(targetRelationshipType);
 
-        // randomSeed does not matter for memory estimation
-        Optional<Long> randomSeed = Optional.empty();
-
-        var firstSplitEstimation = MemoryEstimations
-            .builder("Test/Test-complement split")
-            .add(estimate(
+        return MemoryEstimations.builder("Split relationships")
+            .add(estimatePositiveRelations(
                 checkTargetRelType.name,
                 splitConfig.testFraction(),
-                splitConfig.negativeSamplingRatio(),
-                relationshipWeight
-            ))
-            .build();
-
-        var secondSplitEstimation = MemoryEstimations
-            .builder("Train/Feature-input split")
-            .add(estimate(
-                splitConfig.testComplementRelationshipType().name,
+                splitConfig.trainFraction(),
+                relationshipWeight))
+            .add(estimateNegativeSampling(
+                checkTargetRelType.name,
+                splitConfig.testFraction(),
                 splitConfig.trainFraction(),
                 splitConfig.negativeSamplingRatio(),
-                relationshipWeight
+                splitConfig.negativeRelationshipType()
             ))
-            .build();
-
-        return MemoryEstimations.builder("Split relationships")
-            .add(firstSplitEstimation)
-            .add(secondSplitEstimation)
             .build();
     }
 
-    public static MemoryEstimation estimate(String relationshipType, double holdoutFraction, double negativeSamplingRatio, Optional<String> relationshipWeight) {
-        // we cannot assume any compression of the relationships
+
+    public static MemoryEstimation estimatePositiveRelations(
+        String relationshipType,
+        double testFraction,
+        double trainFraction,
+        Optional<String> relationshipWeight
+    ) {
         var pessimisticSizePerRel = relationshipWeight.isPresent()
             ? Double.BYTES + 2 * Long.BYTES
             : 2 * Long.BYTES;
 
         return MemoryEstimations.builder("Relationship splitter")
-            .perGraphDimension("Selected relationships", (graphDimensions, threads) -> {
-                var positiveRelCount = graphDimensions.estimatedRelCount(List.of(relationshipType)) * holdoutFraction;
-                var negativeRelCount = positiveRelCount * negativeSamplingRatio;
-                long selectedRelCount = (long) (positiveRelCount + negativeRelCount);
-
-                // Whether the graph is undirected or directed
-                return MemoryRange.of(selectedRelCount / 2, selectedRelCount).times(pessimisticSizePerRel);
+            .perGraphDimension("Test and train positive relationships", (graphDimensions, threads) -> {
+                var testAndTrainRelCount = (long) (graphDimensions.estimatedRelCount(List.of(relationshipType)) * (testFraction + trainFraction - testFraction * trainFraction));
+                //selectedRelBuilders are directed
+                return MemoryRange.of(testAndTrainRelCount / 2).times(pessimisticSizePerRel);
             })
-            .perGraphDimension("Remaining relationships", (graphDimensions, threads) -> {
-                long remainingRelCount = (long) (graphDimensions.estimatedRelCount(List.of(relationshipType)) * (1 - holdoutFraction));
-                // remaining relationships are always undirected
-                return MemoryRange.of(remainingRelCount * pessimisticSizePerRel);
+            .perGraphDimension("Feature input relationships", (graphDimensions, threads) -> {
+                var featureInputRelCount = (long) (graphDimensions.estimatedRelCount(List.of(relationshipType)) * (1 - testFraction) * (1 - trainFraction));
+                //remainingRelBuilder is undirected
+                return MemoryRange.of(featureInputRelCount).times(pessimisticSizePerRel);
             })
             .build();
     }
+
+
+    public static MemoryEstimation estimateNegativeSampling(
+        String relationshipType,
+        double testFraction,
+        double trainFraction,
+        double negativeSamplingRatio,
+        Optional<String> negativeRelationshipType
+    ) {
+        var sizePerRel = Double.BYTES + 2 * Long.BYTES;
+
+        return MemoryEstimations.builder("Relationship splitter")
+            .perGraphDimension("Negative relationships", (graphDimensions, threads) -> {
+                var negativeRelCount = estimateNegativeRelCount(graphDimensions, relationshipType, testFraction, trainFraction, negativeSamplingRatio, negativeRelationshipType);
+                    //selectedRelBuilders are directed
+                return MemoryRange.of(negativeRelCount / 2).times(sizePerRel);
+            })
+            .build();
+
+    }
+
+    private static long estimateNegativeRelCount(
+        GraphDimensions graphDimensions,
+        String relationshipType,
+        double testFraction,
+        double trainFraction,
+        double negativeSamplingRatio,
+        Optional<String> negativeRelationshipType
+    ) {
+         if (negativeRelationshipType.isPresent()) {
+             return graphDimensions.estimatedRelCount(List.of(negativeRelationshipType.get()));
+         } else {
+             var testAndTrainPositiveRelCount = graphDimensions.estimatedRelCount(List.of(relationshipType)) * (testFraction + trainFraction - testFraction * trainFraction);
+             return (long) (testAndTrainPositiveRelCount * negativeSamplingRatio);
+         }
+    }
+
 }

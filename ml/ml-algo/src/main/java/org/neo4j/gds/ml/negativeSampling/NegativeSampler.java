@@ -19,12 +19,14 @@
  */
 package org.neo4j.gds.ml.negativeSampling;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 
+import java.util.Collection;
 import java.util.Optional;
 
 public interface NegativeSampler {
@@ -40,6 +42,8 @@ public interface NegativeSampler {
         long trainPositiveCount,
         IdMap validSourceNodes,
         IdMap validTargetNodes,
+        Collection<NodeLabel> sourceLabels,
+        Collection<NodeLabel> targetLabels,
         Optional<Long> randomSeed
     ) {
         if (negativeRelationshipType.isPresent()) {
@@ -49,7 +53,9 @@ public interface NegativeSampler {
             return new UserInputNegativeSampler(
                 negativeExampleGraph,
                 testTrainFraction,
-                randomSeed
+                randomSeed,
+                sourceLabels,
+                targetLabels
             );
         } else {
             return new RandomNegativeSampler(

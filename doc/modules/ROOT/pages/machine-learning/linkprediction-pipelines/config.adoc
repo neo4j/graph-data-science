@@ -260,24 +260,19 @@ The splitting configuration of a pipeline can be inspected by using `gds.beta.mo
 The splitting of relationships proceeds internally in the following steps:
 
 1. The graph is filtered according to specified `sourceNodeLabel`, `targetNodeLabel` and `targetRelationshipType`, which are configured at train time.
-2. The relationships remaining after filtering we call _positive_, and they are split into a `test` set and remaining relationships which we refer to as `test-complement` set.[[def-test-complement]]
+2. The relationships remaining after filtering we call _positive_, they are split into `test`, `train` and `feature-input` sets.
 * The `test` set contains a `testFraction` fraction of the positive relationships.
-* Random negative relationships, which conform to the `sourceNodeLabel` and `targetNodeLabel` filter, are added to the `test` set.
-The number of negative relationships is the number of positive ones multiplied by the `negativeSamplingRatio`.
+The remaining positive relationships are referred to as the `testComplement` set. [[def-test-complement]]
+* The `train` set contains `trainFraction` of the `testComplement` set.
+* The `feature-input` set contains the rest.
+3. Random negative relationships, which conform to the `sourceNodeLabel` and `targetNodeLabel` filter, are added to the `test` and `train` sets.
+* The number of negative relationships in each set is the number of positive ones multiplied by the `negativeSamplingRatio`.
 * The negative relationships do not coincide with positive relationships.
-3. The relationships in the `test-complement` set are split into a `train` set and a `feature-input` set.
-* The `train` set contains a `trainFraction` fraction of the `test-complement` set.
-* The `feature-input` set contains a `(1-trainFraction)` fraction of the `test-complement` set. Additionally, the `feature-input` set can be extended with more relationships by using the `contextRelationshipType` parameter.
-* Random negative relationships, which conform to the `sourceNodeLabel` and `targetNodeLabel` filter, are added to the `train` set.
-The number of negative relationships is the number of positive ones multiplied by the `negativeSamplingRatio`.
-* The negative relationships do not coincide with positive relationships, nor with test relationships.
+* If `negativeRelationshipType` is specified, then instead of sampling, all relationships of this type in the graph are partitioned according to the `test` and `train` set size ratio and added as negative relationships.
+All relationships of `negativeRelationshipType` must also conform to the `sourceNodeLabel` and `targetNodeLabel` filter.
 
-The sampled positive and negative relationships are given relationship weights of `1.0` and `0.0` respectively so that they can be distinguished.
 
-The `feature-input` graph has nodes with `sourceNodeLabel`, `targetNodeLabel` and `contextNodeLabels` and the relationships from the `feature-input` set plus those of `contextRelationshipTypes`
-This graph is used for computing node properties and features which depend on node properties.
-The node properties generated in the `feature-input` graph are used in training and testing.
-
+The positive and negative relationships are given relationship weights of `1.0` and `0.0` respectively so that they can be distinguished.
 
 The `train` and `test` relationship sets are used for:
 
@@ -286,6 +281,11 @@ The `train` and `test` relationship sets are used for:
 
 However, they are not used by the algorithms run in the node property steps.
 The reason for this is that otherwise the model would use the prediction target (existence of a relationship) as a feature.
+
+Each node property step uses a feature-input _graph_.
+The `feature-input` graph has nodes with `sourceNodeLabel`, `targetNodeLabel` and `contextNodeLabels` and the relationships from the `feature-input` set plus those of `contextRelationshipTypes`.
+This graph is used for computing node properties and features which depend on node properties.
+The node properties generated in the `feature-input` graph are used in training and testing.
 
 
 === Syntax
@@ -323,7 +323,8 @@ YIELD
 | validationFolds       | Integer | 3       | Number of divisions of the training graph used during xref:machine-learning/linkprediction-pipelines/training.adoc[model selection].
 | testFraction          | Double  | 0.1     | Fraction of the graph reserved for testing. Must be in the range (0, 1).
 | trainFraction         | Double  | 0.1     | Fraction of the <<def-test-complement,test-complement set>> reserved for training. Must be in the range (0, 1).
-| negativeSamplingRatio | Double  | 1.0     | The desired ratio of negative to positive samples in the test and train set. More details xref:machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-classimbalance[here].
+| negativeSamplingRatio | Double  | 1.0     | The desired ratio of negative to positive samples in the test and train set. More details xref:machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-classimbalance[here]. It is a mutually exclusive parameter with `negativeRelationshipType`.
+| negativeRelationshipType | String | n/a | Specifies which relationships should be used as negative relationships, added to the `test` and `train` sets. It is a mutually exclusive parameter with `negativeSamplingRatio`.
 |===
 
 include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.adoc[]

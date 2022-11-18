@@ -42,6 +42,13 @@ class LinkPredictionSplitConfigTest {
     @Inject
     GraphStore graphStore;
 
+    @GdlGraph(graphNamePrefix = "negative")
+    static String negativeGraph =
+        "(:A)-[:T]->(:A)";
+
+    @Inject
+    GraphStore negativeGraphStore;
+
     @Test
     void expectedSetSize() {
         var config = LinkPredictionSplitConfigImpl.builder()
@@ -132,4 +139,32 @@ class LinkPredictionSplitConfigTest {
                 "The specified `validationFolds` is too high or the `trainFraction` too low for the current graph. " +
                 "The validation set would have 0 relationship(s) but it must have at least 1.");
     }
+
+    @Test
+    void shouldValidateNegativeRelationshipTypeExist() {
+        var config = LinkPredictionSplitConfigImpl.builder()
+            .validationFolds(2)
+            .testFraction(0.5)
+            .trainFraction(0.5)
+            .negativeRelationshipType("N")
+            .build();
+
+        assertThatThrownBy(() -> config.validateAgainstGraphStore(negativeGraphStore, RelationshipType.ALL_RELATIONSHIPS))
+            .hasMessageContaining("Could not find the specified negativeRelationshipType of ['N']. Available relationship types are ['T'].");
+    }
+
+    @Test
+    void shouldValidateNegativeRelationshipTypeAndNegativeSamplingRatioAreExclusive() {
+        var config = LinkPredictionSplitConfigImpl.builder()
+            .validationFolds(2)
+            .testFraction(0.5)
+            .trainFraction(0.5)
+            .negativeSamplingRatio(2.0)
+            .negativeRelationshipType("T")
+            .build();
+
+        assertThatThrownBy(() -> config.validateAgainstGraphStore(negativeGraphStore, RelationshipType.ALL_RELATIONSHIPS))
+            .hasMessageContaining("Configuration parameter failure: `negativeSamplingRatio` and `negativeRelationshipType` cannot be used together.");
+    }
+
 }
