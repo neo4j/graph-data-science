@@ -71,17 +71,19 @@ public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithm
         }
 
         int numRelTypes = config.heterogeneous() ? config.relationshipTypes().size() : 1;
-        tasks.add(Tasks.leaf(
-            "Precompute hashes",
-            config.iterations() * config.embeddingDensity() * (1 + 1 + numRelTypes)
-        ));
 
         tasks.add(Tasks.iterativeFixed(
             "Propagate embeddings",
-            () -> List.of(Tasks.leaf(
-                "Propagate embeddings iteration",
-                (2 * graph.nodeCount() + graph.relationshipCount()) * config.embeddingDensity()
-            )),
+            () -> List.of(
+                Tasks.leaf(
+                    "Precompute hashes",
+                    config.embeddingDensity() * (1 + 1 + numRelTypes)
+                ),
+                Tasks.leaf(
+                    "Propagate embeddings iteration",
+                    (2 * graph.nodeCount() + graph.relationshipCount()) * config.embeddingDensity()
+                )
+            ),
             config.iterations()
         ));
 

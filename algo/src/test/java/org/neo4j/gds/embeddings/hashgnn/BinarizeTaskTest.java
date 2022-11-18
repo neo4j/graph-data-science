@@ -66,12 +66,6 @@ class BinarizeTaskTest {
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, List.of("f1", "f2"));
         var features = HugeObjectArray.newArray(HugeAtomicBitSet.class, graph.nodeCount());
         // each feature is the minimal in one of the hash arrays
-        var hashes = List.of(
-            new int[]{0, 1, 2, 3},
-            new int[]{1, 0, 2, 3},
-            new int[]{2, 0, 1, 3},
-            new int[]{3, 0, 1, 2}
-        );
         // f1: [1 -1 0 0]
         // f2: [0 1 -1 0]
         // planes: p0: "f1 > 0" p1: "f2 - f1 > 0" , p2: "-f2 > 0", p3: "0 > 0"
@@ -83,7 +77,6 @@ class BinarizeTaskTest {
             features,
             featureExtractors,
             propertyEmbeddings,
-            hashes,
             ProgressTracker.NULL_TRACKER
         ).run();
 

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -37,6 +38,7 @@ class GenerateFeaturesTask implements Runnable {
     private final SplittableRandom rng;
     private final FeatureBinarizationConfig generateFeaturesConfig;
     private final ProgressTracker progressTracker;
+    private long totalNumFeatures = 0;
 
     GenerateFeaturesTask(
         Partition partition,
@@ -58,7 +60,8 @@ class GenerateFeaturesTask implements Runnable {
         HashGNNConfig config,
         SplittableRandom rng,
         ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        MutableLong totalNumFeaturesOutput
     ) {
         progressTracker.beginSubTask("Generate base node property features");
 
@@ -79,6 +82,8 @@ class GenerateFeaturesTask implements Runnable {
             .terminationFlag(terminationFlag)
             .run();
 
+        totalNumFeaturesOutput.add(tasks.stream().mapToLong(GenerateFeaturesTask::totalNumFeatures).sum());
+
         progressTracker.endSubTask("Generate base node property features");
 
         return output;
@@ -95,10 +100,15 @@ class GenerateFeaturesTask implements Runnable {
             var randomInts = rng.ints(densityLevel, 0, dimension);
             randomInts.forEach(generatedFeatures::set);
 
+            totalNumFeatures += generatedFeatures.cardinality();
+
             output.set(nodeId, generatedFeatures);
         });
 
         progressTracker.logProgress(partition.nodeCount());
     }
 
+    public long totalNumFeatures() {
+        return totalNumFeatures;
+    }
 }

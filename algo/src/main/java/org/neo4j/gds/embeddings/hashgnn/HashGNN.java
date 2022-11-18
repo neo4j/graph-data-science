@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.hashgnn;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -48,6 +49,7 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
     private final Graph graph;
     private final SplittableRandom rng;
     private final HashGNNConfig config;
+    private final MutableLong totalSetBits = new MutableLong();
 
     public HashGNN(Graph graph, HashGNNConfig config, ProgressTracker progressTracker) {
         super(progressTracker);
@@ -91,26 +93,12 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         embeddingsA.setAll(unused -> HugeAtomicBitSet.create(embeddingDimension));
 
         double avgDegree = (graph.relationshipCount() / (double) graph.nodeCount());
-        int upperBoundBits = Math.max(Math.min(embeddingDimension, config.embeddingDensity()), 1);
-        int upperBoundSelfExpectedBits = (int) Math.round(upperBoundBits * (1 - Math.pow(
-            1 - (1.0 / upperBoundBits),
-            config.embeddingDensity()
-        )));
-        double upperBoundNeighborExpectedBits = upperBoundBits * (1 - Math.pow(
-            1 - (1.0 / upperBoundBits),
-            avgDegree
-        ));
-        double scaledNeighborInfluence = graph.relationshipCount() == 0 ? 1.0 : upperBoundSelfExpectedBits * config.neighborInfluence() / upperBoundNeighborExpectedBits;
-
-        var hashes = HashTask.compute(
-            embeddingDimension,
-            scaledNeighborInfluence,
-            graphs.size(),
-            config,
-            randomSeed,
-            terminationFlag,
-            progressTracker
-        );
+        double upperBoundNeighborExpectedBits = embeddingDimension == 0
+            ? 1
+            : embeddingDimension * (1 - Math.pow(
+                1 - (1.0 / embeddingDimension),
+                avgDegree)
+            );
 
         progressTracker.beginSubTask("Propagate embeddings");
 
@@ -123,6 +111,19 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
                 currentEmbeddings.get(i).clear();
             }
 
+            double scaledNeighborInfluence = graph.relationshipCount() == 0 ? 1.0 : (totalSetBits.doubleValue() / graph.nodeCount()) * config.neighborInfluence() / upperBoundNeighborExpectedBits;
+            totalSetBits.setValue(0);
+
+            var hashes = HashTask.compute(
+                embeddingDimension,
+                scaledNeighborInfluence,
+                graphs.size(),
+                config,
+                randomSeed,
+                terminationFlag,
+                progressTracker
+            );
+
             MinHashTask.compute(
                 degreePartition,
                 graphs,
@@ -130,10 +131,10 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
                 embeddingDimension,
                 currentEmbeddings,
                 previousEmbeddings,
-                iteration,
                 hashes,
                 progressTracker,
-                terminationFlag
+                terminationFlag,
+                totalSetBits
             );
         }
 
@@ -210,18 +211,19 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
                     config,
                     rng,
                     progressTracker,
-                    terminationFlag
+                    terminationFlag,
+                    totalSetBits
                 ));
                 bitOffsets.add(embeddingDimension.getValue());
                 embeddingDimension.add(config.binarizeFeatures().get().dimension());
             } else {
                 inputEmbeddingsList.add(RawFeaturesTask.compute(
                     config,
-                    rng,
                     progressTracker,
                     graph,
                     partition,
-                    terminationFlag
+                    terminationFlag,
+                    totalSetBits
                 ));
                 var featureExtractors = FeatureExtraction.propertyExtractors(
                     graph,
@@ -242,7 +244,8 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
             config,
             rng,
             progressTracker,
-            terminationFlag
+            terminationFlag,
+            totalSetBits
         ));
         bitOffsets.add(embeddingDimension.getValue());
         embeddingDimension.add(config.generateFeatures().get().dimension());

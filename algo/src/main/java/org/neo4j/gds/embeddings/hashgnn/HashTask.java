@@ -69,9 +69,9 @@ class HashTask implements Runnable {
     ) {
         progressTracker.beginSubTask("Precompute hashes");
 
-        progressTracker.setSteps(config.iterations() * config.embeddingDensity());
+        progressTracker.setSteps(config.embeddingDensity());
 
-        var hashTasks = IntStream.range(0, config.iterations() * config.embeddingDensity()).mapToObj(seedOffset ->
+        var hashTasks = IntStream.range(0, config.embeddingDensity()).mapToObj(seedOffset ->
             new HashTask(
                 embeddingDimension,
                 scaledNeighborInfluence,
