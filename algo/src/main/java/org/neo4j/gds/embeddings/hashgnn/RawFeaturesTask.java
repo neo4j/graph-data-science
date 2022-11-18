@@ -41,12 +41,12 @@ import static org.neo4j.gds.embeddings.hashgnn.HashGNNCompanion.hashArgMin;
 
 class RawFeaturesTask implements Runnable {
     private final Partition partition;
-    private final HashGNNConfig config;
     private final List<FeatureExtractor> featureExtractors;
     private final int inputDimension;
     private final HugeObjectArray<HugeAtomicBitSet> features;
     private final List<int[]> hashesList;
     private final ProgressTracker progressTracker;
+    private final int sampledBits;
 
     RawFeaturesTask(
         Partition partition,
@@ -58,12 +58,16 @@ class RawFeaturesTask implements Runnable {
         ProgressTracker progressTracker
     ) {
         this.partition = partition;
-        this.config = config;
         this.featureExtractors = featureExtractors;
         this.inputDimension = inputDimension;
         this.features = features;
         this.hashesList = hashesList;
         this.progressTracker = progressTracker;
+
+        var densityOffset = config.generateFeatures().isPresent()
+            ? config.generateFeatures().get().densityLevel()
+            : 0;
+        this.sampledBits = config.embeddingDensity() - densityOffset;
     }
 
     static HugeObjectArray<HugeAtomicBitSet> compute(
@@ -140,7 +144,7 @@ class RawFeaturesTask implements Runnable {
                 return;
             }
             var sampledBitset = HugeAtomicBitSet.create(inputDimension);
-            for (int i = 0; i < config.embeddingDensity(); i++) {
+            for (int i = 0; i < sampledBits; i++) {
                 hashArgMin(nodeFeatures, hashesList.get(i), resMinAndArgMin, tempMinAndArgMin);
                 if (resMinAndArgMin.argMin != -1) {
                     sampledBitset.set(resMinAndArgMin.argMin);

@@ -58,10 +58,16 @@ public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithm
     public Task progressTask(Graph graph, CONFIG config) {
         var tasks = new ArrayList<Task>();
 
-        if (config.binarizeFeatures().isPresent()) {
-            tasks.add(Tasks.leaf("Binarize node property features", graph.nodeCount()));
-        } else {
-            tasks.add(Tasks.leaf("Extract raw node property features", graph.nodeCount()));
+        if (!config.featureProperties().isEmpty()) {
+            if (config.binarizeFeatures().isPresent()) {
+                tasks.add(Tasks.leaf("Binarize node property features", graph.nodeCount()));
+            } else {
+                tasks.add(Tasks.leaf("Extract raw node property features", graph.nodeCount()));
+            }
+        }
+
+        if (config.generateFeatures().isPresent()) {
+            tasks.add(Tasks.leaf("Generate base node property features", graph.nodeCount()));
         }
 
         int numRelTypes = config.heterogeneous() ? config.relationshipTypes().size() : 1;

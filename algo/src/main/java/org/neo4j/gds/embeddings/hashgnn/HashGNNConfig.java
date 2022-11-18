@@ -51,6 +51,12 @@ interface HashGNNConfig extends AlgoBaseConfig, FeaturePropertiesConfig, RandomS
 
     @Configuration.ToMapValue("org.neo4j.gds.embeddings.hashgnn.HashGNNConfig#toMapBinarizationConfig")
     @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.hashgnn.HashGNNConfig#parseBinarizationConfig", inverse = Configuration.ConvertWith.INVERSE_IS_TO_MAP)
+    default Optional<FeatureBinarizationConfig> generateFeatures() {
+        return Optional.empty();
+    }
+
+    @Configuration.ToMapValue("org.neo4j.gds.embeddings.hashgnn.HashGNNConfig#toMapBinarizationConfig")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.hashgnn.HashGNNConfig#parseBinarizationConfig", inverse = Configuration.ConvertWith.INVERSE_IS_TO_MAP)
     default Optional<FeatureBinarizationConfig> binarizeFeatures() {
         return Optional.empty();
     }

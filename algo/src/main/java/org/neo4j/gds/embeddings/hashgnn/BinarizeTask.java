@@ -42,7 +42,6 @@ import static org.neo4j.gds.embeddings.hashgnn.HashGNNCompanion.hashArgMin;
 
 class BinarizeTask implements Runnable {
     private final Partition partition;
-    private final HashGNNConfig config;
     private final HugeObjectArray<HugeAtomicBitSet> truncatedFeatures;
     private final List<FeatureExtractor> featureExtractors;
     private final int[][] propertyEmbeddings;
@@ -50,6 +49,7 @@ class BinarizeTask implements Runnable {
     private final HashGNN.MinAndArgmin minAndArgMin;
     private final FeatureBinarizationConfig binarizationConfig;
     private final ProgressTracker progressTracker;
+    private final int sampledBits;
 
     BinarizeTask(
         Partition partition,
@@ -61,7 +61,6 @@ class BinarizeTask implements Runnable {
         ProgressTracker progressTracker
     ) {
         this.partition = partition;
-        this.config = config;
         this.binarizationConfig = config.binarizeFeatures().orElseThrow();
         this.truncatedFeatures = truncatedFeatures;
         this.featureExtractors = featureExtractors;
@@ -69,6 +68,11 @@ class BinarizeTask implements Runnable {
         this.hashesList = hashesList;
         this.minAndArgMin = new HashGNN.MinAndArgmin();
         this.progressTracker = progressTracker;
+
+        var densityOffset = config.generateFeatures().isPresent()
+            ? config.generateFeatures().get().densityLevel()
+            : 0;
+        this.sampledBits = config.embeddingDensity() - densityOffset;
     }
 
     static HugeObjectArray<HugeAtomicBitSet> compute(
@@ -193,7 +197,7 @@ class BinarizeTask implements Runnable {
             }
         }
         var sampledBitset = HugeAtomicBitSet.create(binarizationConfig.dimension());
-        for (int i = 0; i < config.embeddingDensity(); i++) {
+        for (int i = 0; i < sampledBits; i++) {
             hashArgMin(tempBitSet, hashesList.get(i), minAndArgMin);
             if (minAndArgMin.argMin != -1) {
                 sampledBitset.set(minAndArgMin.argMin);

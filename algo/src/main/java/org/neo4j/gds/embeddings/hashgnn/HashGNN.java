@@ -19,15 +19,19 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -80,16 +84,8 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
             .collect(Collectors.toList())
             : List.of(graphCopy);
 
-        var embeddingsB = config.binarizeFeatures().isPresent()
-            ? BinarizeTask.compute(graph, rangePartition, config, rng, progressTracker, terminationFlag)
-            : RawFeaturesTask.compute(config, rng, progressTracker, graph, rangePartition, terminationFlag);
-        int embeddingDimension = config.binarizeFeatures().map(FeatureBinarizationConfig::dimension).orElseGet(() -> {
-            var featureExtractors = FeatureExtraction.propertyExtractors(
-                graph,
-                config.featureProperties()
-            );
-            return FeatureExtraction.featureCount(featureExtractors);
-        });
+        var embeddingsB = constructInputEmbeddings(rangePartition);
+        int embeddingDimension = (int) embeddingsB.get(0).size();
 
         var embeddingsA = HugeObjectArray.newArray(HugeAtomicBitSet.class, graph.nodeCount());
         embeddingsA.setAll(unused -> HugeAtomicBitSet.create(embeddingDimension));
@@ -201,4 +197,73 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         }
     }
 
+    private HugeObjectArray<HugeAtomicBitSet> constructInputEmbeddings(List<Partition> partition) {
+        List<HugeObjectArray<HugeAtomicBitSet>> inputEmbeddingsList = new ArrayList<>();
+        var embeddingDimension = new MutableInt();
+        var bitOffsets = new ArrayList<Integer>();
+
+        if (!config.featureProperties().isEmpty()) {
+            if (config.binarizeFeatures().isPresent()) {
+                inputEmbeddingsList.add(BinarizeTask.compute(
+                    graph,
+                    partition,
+                    config,
+                    rng,
+                    progressTracker,
+                    terminationFlag
+                ));
+                bitOffsets.add(embeddingDimension.getValue());
+                embeddingDimension.add(config.binarizeFeatures().get().dimension());
+            } else {
+                inputEmbeddingsList.add(RawFeaturesTask.compute(
+                    config,
+                    rng,
+                    progressTracker,
+                    graph,
+                    partition,
+                    terminationFlag
+                ));
+                var featureExtractors = FeatureExtraction.propertyExtractors(
+                    graph,
+                    config.featureProperties()
+                );
+                bitOffsets.add(embeddingDimension.getValue());
+                embeddingDimension.add(FeatureExtraction.featureCount(featureExtractors));
+            }
+        }
+
+        if (!config.generateFeatures().isPresent()) {
+            return inputEmbeddingsList.get(0);
+        }
+
+        inputEmbeddingsList.add(GenerateFeaturesTask.compute(
+            graph,
+            partition,
+            config,
+            rng,
+            progressTracker,
+            terminationFlag
+        ));
+        bitOffsets.add(embeddingDimension.getValue());
+        embeddingDimension.add(config.generateFeatures().get().dimension());
+
+        var concatInputEmbeddings = HugeObjectArray.newArray(HugeAtomicBitSet.class, graph.nodeCount());
+
+        var concatTasks = partition.stream().map(p -> (Runnable) () -> p.consume(nodeId -> {
+            var concatFeatures = HugeAtomicBitSet.create(embeddingDimension.getValue());
+            for (int i = 0; i < inputEmbeddingsList.size(); i++) {
+                var embedding = inputEmbeddingsList.get(i).get(nodeId);
+                int bitOffset = bitOffsets.get(i);
+                embedding.forEachSetBit(bit -> concatFeatures.set(bitOffset + bit));
+            }
+            concatInputEmbeddings.set(nodeId, concatFeatures);
+        })).collect(Collectors.toList());
+
+        RunWithConcurrency.builder()
+            .concurrency(config.concurrency())
+            .tasks(concatTasks)
+            .run();
+
+        return concatInputEmbeddings;
+    }
 }
