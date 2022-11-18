@@ -134,6 +134,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             graph,
             0,
             List.of(2L, 5L),
+            2.0,
             1
         ).compute();
 
@@ -155,6 +156,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             lineGraph,
             0,
             List.of(2L, 4L),
+            2.0,
             1
         )
             .compute();
@@ -198,6 +200,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             extGraph,
             0,
             List.of(2L, 3L),
+            2.0,
             1
         ).compute();
 
@@ -222,6 +225,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             triangleGraph,
             0,
             List.of(1L, 3L),
+            2.0,
             1
         ).compute();
 

@@ -43,10 +43,13 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
     private final int concurrency;
     private final BitSet isTerminal;
 
+    private final double delta;
+
     public ShortestPathsSteinerAlgorithm(
         Graph graph,
         long sourceId,
         List<Long> terminals,
+        double delta,
         int concurrency
     ) {
         super(ProgressTracker.NULL_TRACKER);
@@ -54,6 +57,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         this.sourceId = sourceId;
         this.terminals = terminals;
         this.concurrency = concurrency;
+        this.delta = delta;
         this.isTerminal = createTerminalBitSet();
     }
 
@@ -138,7 +142,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         var steinerBasedDelta = new SteinerBasedDeltaStepping(
             graph,
             sourceId,
-            2.0,
+            delta,
             isTerminal,
             concurrency,
             Pools.DEFAULT,

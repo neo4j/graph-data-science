@@ -75,6 +75,7 @@ class ShortestPathsSteinerAlgorithmTest {
             graph,
             0L,
             List.of(4L, 7L, 8L),
+            2.0,
             1
         ).compute();
         var pruned = ShortestPathsSteinerAlgorithm.PRUNED;
