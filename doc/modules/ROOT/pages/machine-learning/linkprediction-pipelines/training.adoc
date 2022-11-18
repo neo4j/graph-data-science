@@ -5,8 +5,9 @@ The train mode, `gds.beta.pipeline.linkPrediction.train`, is responsible for spl
 Running this mode results in a prediction model of type `LinkPrediction` being stored in the xref:model-catalog/index.adoc[model catalog] along with metrics collected during training.
 The model can be xref:machine-learning/linkprediction-pipelines/predict.adoc[applied] to a possibly different graph which produces a relationship type of predicted links, each having a predicted probability stored as a property.
 
-More precisely, the procedure will in order:
+image::misc/lp-train-flow.svg[Visualization of Link Prediction pipeline data flow,align="center"]
 
+More precisely, the procedure will in order:
 
 . Apply node filtering using `sourceNodeLabel` and `targetNodeLabel`, and relationship filtering using `targetRelationshipType`. The resulting graph is used as input to splitting.
 . Create a relationship split of the graph into `test`, `train` and `feature-input` graphs as described in xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[Configuring the relationship splits].
