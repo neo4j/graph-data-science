@@ -24,6 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.utils.StringJoining;
@@ -31,7 +33,6 @@ import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.neo4j.gds.beta.filter.expression.ValidationContext.Context.NODE;
@@ -84,8 +85,48 @@ class ExpressionValidationTest {
     }
 
     @Test
+    void hasLabels() {
+        var context = ImmutableTestValidationContext
+            .builder()
+            .addAvailableNodeLabels(NodeLabel.of("foo"), NodeLabel.of("bar"))
+            .build();
+
+        var expr = ImmutableHasNodeLabels
+            .builder()
+            .in(ImmutableVariable.builder().name("n").build())
+            .addNodeLabels(NodeLabel.of("foo"), NodeLabel.of("baz"))
+            .build();
+
+        assertThatExceptionOfType(SemanticErrors.class)
+            .isThrownBy(() -> expr.validate(context).validate())
+            .withMessageContaining("Unknown label `baz`. Did you mean `bar`?");
+    }
+
+    @Test
+    void hasTypes() {
+        var context = ImmutableTestValidationContext
+            .builder()
+            .addAvailableRelationshipTypes(RelationshipType.of("foo"), RelationshipType.of("bar"))
+            .build();
+
+        var expr = ImmutableHasRelationshipTypes
+            .builder()
+            .in(ImmutableVariable.builder().name("n").build())
+            .addRelationshipTypes(RelationshipType.of("foo"), RelationshipType.of("baz"))
+            .build();
+
+        assertThatExceptionOfType(SemanticErrors.class)
+            .isThrownBy(() -> expr.validate(context).validate())
+            .withMessageContaining("Unknown relationship type `baz`. Did you mean `bar`?");
+    }
+
+    @Test
     void hasLabelsOrTypes() {
-        var context = ImmutableTestValidationContext.builder().addAvailableLabelsOrTypes("foo", "bar").build();
+        var context = ImmutableTestValidationContext
+            .builder()
+            .addAvailableNodeLabels(NodeLabel.of("foo"), NodeLabel.of("bar"))
+            .build();
+
         var expr = ImmutableHasLabelsOrTypes
             .builder()
             .in(ImmutableVariable.builder().name("n").build())
@@ -104,7 +145,6 @@ class ExpressionValidationTest {
 
         var context = ImmutableTestValidationContext.builder()
             .context(RELATIONSHIP)
-            .addAvailableLabelsOrTypes("Foo", "Bar")
             .putAvailableProperty("bar", ValueType.DOUBLE)
             .putAvailableProperty("foot", ValueType.DOUBLE)
             .build();
@@ -112,7 +152,6 @@ class ExpressionValidationTest {
         assertThatExceptionOfType(SemanticErrors.class)
             .isThrownBy(() -> expr.validate(context).validate())
             .withMessageContaining("Only `r` is allowed")
-            .withMessageContaining("Unknown relationship type `Baz`")
             .withMessageContaining("Unknown property `foo`");
     }
 
@@ -209,12 +248,6 @@ class ExpressionValidationTest {
         @Value.Default
         default Context context() {
             return NODE;
-        }
-
-        @Override
-        @Value.Default
-        default Set<String> availableLabelsOrTypes() {
-            return Set.of();
         }
     }
 }

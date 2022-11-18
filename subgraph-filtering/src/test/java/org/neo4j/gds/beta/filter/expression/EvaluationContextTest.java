@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.extension.GdlExtension;
@@ -101,7 +102,7 @@ public class EvaluationContextTest {
     @Test
     void relationshipEvaluationContextPositive() {
         var context = new EvaluationContext.RelationshipEvaluationContext(Map.of("baz", 0), Map.of());
-        context.init("REL", new double[]{84});
+        context.init(RelationshipType.of("REL"), new double[]{84});
         assertThat(context.getProperty("baz", ValueType.DOUBLE)).isEqualTo(84);
         assertThat(context.hasLabelsOrTypes(List.of("REL"))).isTrue();
     }
@@ -109,7 +110,7 @@ public class EvaluationContextTest {
     @Test
     void relationshipEvaluationContextNegative() {
         var context = new EvaluationContext.RelationshipEvaluationContext(Map.of(), Map.of());
-        context.init("REL");
+        context.init(RelationshipType.of("REL"));
         assertThat(context.hasLabelsOrTypes(List.of("BAR"))).isFalse();
     }
 }

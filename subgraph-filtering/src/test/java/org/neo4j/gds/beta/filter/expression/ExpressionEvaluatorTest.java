@@ -30,6 +30,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.opencypher.v9_0.parser.javacc.ParseException;
@@ -39,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.beta.filter.expression.Expression.FALSE;
@@ -366,12 +369,12 @@ class ExpressionEvaluatorTest {
 
     @ParameterizedTest()
     @MethodSource("org.neo4j.gds.beta.filter.expression.ExpressionEvaluatorTest#hasLabelInput")
-    void hasLabelsOrTypes(Iterable<String> actual, Collection<String> requested, boolean expected) throws ParseException {
+    void hasNodeLabels(Iterable<String> actual, Collection<String> requested, boolean expected) throws ParseException {
         var labelExpression = requested.stream().map(label -> ":" + label).collect(Collectors.joining());
 
         var validationContext = ImmutableValidationContext.builder()
             .context(ValidationContext.Context.NODE)
-            .addAllAvailableLabelsOrTypes(actual)
+            .addAllAvailableNodeLabels(StreamSupport.stream(actual.spliterator(), false).map(NodeLabel::of).collect(Collectors.toList()))
             .build();
 
         var expr = ExpressionParser.parse("n" + labelExpression, validationContext.availableProperties());
@@ -380,9 +383,35 @@ class ExpressionEvaluatorTest {
         assertThat(expr.evaluate(evaluationContext) == TRUE).isEqualTo(expected);
     }
 
+    @ParameterizedTest()
+    @MethodSource("org.neo4j.gds.beta.filter.expression.ExpressionEvaluatorTest#hasLabelInput")
+    void hasRelationshipTypes(Iterable<String> actual, Collection<String> requested, boolean expected) throws ParseException {
+        var labelExpression = requested.stream().map(label -> ":" + label).collect(Collectors.joining());
+
+        var validationContext = ImmutableValidationContext.builder()
+            .context(ValidationContext.Context.RELATIONSHIP)
+            .addAllAvailableRelationshipTypes(StreamSupport.stream(actual.spliterator(), false).map(RelationshipType::of).collect(Collectors.toList()))
+            .build();
+
+        var expr = ExpressionParser.parse("r" + labelExpression, validationContext.availableProperties());
+
+        var evaluationContext = ImmutableTestContext.builder().addAllLabelsOrTypes(actual).build();
+        assertThat(expr.evaluate(evaluationContext) == TRUE).isEqualTo(expected);
+    }
+
     private static final EvaluationContext EMPTY_EVALUATION_CONTEXT = new EvaluationContext(Map.of()) {
         @Override
         double getProperty(String propertyKey, ValueType valueType) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean hasNodeLabels(List<NodeLabel> labels) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean hasRelationshipTypes(List<RelationshipType> types) {
             throw new UnsupportedOperationException();
         }
 
@@ -420,6 +449,16 @@ class ExpressionEvaluatorTest {
         double getProperty(String propertyKey, ValueType valueType) {
             assertThat(propertyKey).isEqualTo(propertyKey());
             return propertyValue();
+        }
+
+        @Override
+        public boolean hasNodeLabels(List<NodeLabel> labels) {
+            return hasLabelsOrTypes(labels.stream().map(NodeLabel::name).collect(Collectors.toList()));
+        }
+
+        @Override
+        public boolean hasRelationshipTypes(List<RelationshipType> types) {
+            return hasLabelsOrTypes(types.stream().map(RelationshipType::name).collect(Collectors.toList()));
         }
 
         @Override

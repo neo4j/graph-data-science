@@ -20,21 +20,36 @@
 package org.neo4j.gds.beta.filter.expression;
 
 import org.immutables.value.Value;
-import org.neo4j.gds.ElementIdentifier;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ValueClass
 public interface ValidationContext {
     Context context();
 
-    Set<String> availableLabelsOrTypes();
+    Set<NodeLabel> availableNodeLabels();
+
+    Set<RelationshipType> availableRelationshipTypes();
+
+    @Value.Derived
+    default Set<String> availableLabelsOrTypes() {
+        return Stream
+            .concat(
+                availableNodeLabels().stream().map(NodeLabel::name),
+                availableRelationshipTypes().stream().map(RelationshipType::name)
+            )
+            .collect(Collectors.toSet());
+    }
 
     Map<String, ValueType> availableProperties();
 
@@ -74,11 +89,7 @@ public interface ValidationContext {
         return ImmutableValidationContext
             .builder()
             .context(Context.NODE)
-            .addAllAvailableLabelsOrTypes(graphStore
-                .nodeLabels()
-                .stream()
-                .map(ElementIdentifier::name)
-                .collect(Collectors.toSet()))
+            .addAllAvailableNodeLabels(new HashSet<>(graphStore.nodeLabels()))
             .putAllAvailableProperties(propertiesAndTypes)
             .build();
     }
@@ -98,11 +109,7 @@ public interface ValidationContext {
         return ImmutableValidationContext
             .builder()
             .context(Context.RELATIONSHIP)
-            .addAllAvailableLabelsOrTypes(graphStore
-                .relationshipTypes()
-                .stream()
-                .map(ElementIdentifier::name)
-                .collect(Collectors.toSet()))
+            .addAllAvailableRelationshipTypes(new HashSet<>(graphStore.relationshipTypes()))
             .putAllAvailableProperties(propertiesAndTypes)
             .build();
     }

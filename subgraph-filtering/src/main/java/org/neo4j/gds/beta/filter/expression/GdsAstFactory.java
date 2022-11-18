@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.beta.filter.expression;
 
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.opencypher.v9_0.ast.factory.ASTFactory;
 
@@ -80,6 +82,17 @@ class GdsAstFactory extends AstFactoryAdapter {
 
     @Override
     public Expression hasLabelsOrTypes(Expression subject, List<ASTFactory.StringPos<InputPosition>> labels) {
+        if (subject instanceof Expression.LeafExpression.Variable) {
+            var variable = (Expression.LeafExpression.Variable) subject;
+            if (variable.name().equals("n")) {
+                var nodeLabels = labels.stream().map(l -> l.string).map(NodeLabel::of).collect(Collectors.toList());
+                return ImmutableHasNodeLabels.builder().in(subject).addAllNodeLabels(nodeLabels).build();
+            } else if (variable.name().equals("r")) {
+                var relationshipTypes = labels.stream().map(l -> l.string).map(RelationshipType::of).collect(Collectors.toList());
+                return ImmutableHasRelationshipTypes.builder().in(subject).addAllRelationshipTypes(relationshipTypes).build();
+            }
+        }
+        // Fallback, if the subject can not be identified as node or relationship variable
         var labelStrings = labels.stream().map(l -> l.string).collect(Collectors.toList());
 
         return ImmutableHasLabelsOrTypes

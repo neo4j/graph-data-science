@@ -251,7 +251,7 @@ public final class RelationshipsFilter {
                     var mappedTarget = outputNodes.toMappedNodeId(neoTarget);
 
                     if (mappedTarget != NOT_FOUND) {
-                        evaluationContext.init(relType.name, properties);
+                        evaluationContext.init(relType, properties);
 
                         if (expression.evaluate(evaluationContext) == Expression.TRUE) {
                             // TODO branching should happen somewhere else

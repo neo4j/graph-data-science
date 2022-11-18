@@ -22,6 +22,7 @@ package org.neo4j.gds.beta.filter.expression;
 import com.carrotsearch.hppc.ObjectIntMap;
 import com.carrotsearch.hppc.ObjectIntScatterMap;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -43,6 +44,10 @@ public abstract class EvaluationContext {
     }
 
     abstract double getProperty(String propertyKey, ValueType propertyType);
+
+    public abstract boolean hasNodeLabels(List<NodeLabel> labels);
+
+    public abstract boolean hasRelationshipTypes(List<RelationshipType> types);
 
     public abstract boolean hasLabelsOrTypes(List<String> labelsOrTypes);
 
@@ -73,6 +78,20 @@ public abstract class EvaluationContext {
         }
 
         @Override
+        public boolean hasNodeLabels(List<NodeLabel> labels) {
+            boolean hasAllLabels = true;
+            for (NodeLabel label : labels) {
+                hasAllLabels &= graphStore.nodes().hasLabel(nodeId, label);
+            }
+            return hasAllLabels;
+        }
+
+        @Override
+        public boolean hasRelationshipTypes(List<RelationshipType> types) {
+            return false;
+        }
+
+        @Override
         public boolean hasLabelsOrTypes(List<String> labels) {
             boolean hasAllLabels = true;
             for (String label: labels) {
@@ -88,7 +107,7 @@ public abstract class EvaluationContext {
 
     public static class RelationshipEvaluationContext extends EvaluationContext {
 
-        private String relType;
+        private RelationshipType relType;
 
         private double[] properties;
 
@@ -109,20 +128,34 @@ public abstract class EvaluationContext {
         }
 
         @Override
-        public boolean hasLabelsOrTypes(List<String> relTypes) {
+        public boolean hasNodeLabels(List<NodeLabel> labels) {
+            return false;
+        }
+
+        @Override
+        public boolean hasRelationshipTypes(List<RelationshipType> types) {
             boolean hasAnyType = false;
-            for (String relType : relTypes) {
+            for (RelationshipType relType : types) {
                 hasAnyType |= this.relType.equals(relType);
             }
             return hasAnyType;
         }
 
-        public void init(String relType) {
+        @Override
+        public boolean hasLabelsOrTypes(List<String> relTypes) {
+            boolean hasAnyType = false;
+            for (String relType : relTypes) {
+                hasAnyType |= this.relType.name.equals(relType);
+            }
+            return hasAnyType;
+        }
+
+        public void init(RelationshipType relType) {
             this.relType = relType;
             this.properties = null;
         }
 
-        public void init(String relType, double[] properties) {
+        public void init(RelationshipType relType, double[] properties) {
             this.relType = relType;
             this.properties = properties;
         }

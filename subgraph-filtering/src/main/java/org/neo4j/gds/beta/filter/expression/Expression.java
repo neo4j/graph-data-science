@@ -20,6 +20,8 @@
 package org.neo4j.gds.beta.filter.expression;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.utils.StringJoining;
@@ -27,6 +29,7 @@ import org.neo4j.gds.utils.StringJoining;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -148,6 +151,64 @@ public interface Expression {
             @Override
             default String prettyString() {
                 return in().prettyString() + "." + propertyKey();
+            }
+        }
+
+        @ValueClass
+        interface HasNodeLabels extends UnaryExpression {
+            List<NodeLabel> nodeLabels();
+
+            @Value.Derived
+            @Override
+            default double evaluate(EvaluationContext context) {
+                return context.hasNodeLabels(nodeLabels()) ? TRUE : FALSE;
+            }
+
+            @Override
+            default ValidationContext validate(ValidationContext context) {
+                context = in().validate(context);
+
+                var availableNodeLabels = context.availableNodeLabels();
+
+                for (var nodeLabel : nodeLabels()) {
+                    if (!availableNodeLabels.contains(nodeLabel)) {
+                        context = context.withError(SemanticErrors.SemanticError.of(prettySuggestions(
+                            formatWithLocale("Unknown label `%s`.", nodeLabel.name),
+                            nodeLabel.name,
+                            availableNodeLabels.stream().map(NodeLabel::name).collect(Collectors.toList())
+                        )));
+                    }
+                }
+                return context;
+            }
+        }
+
+        @ValueClass
+        interface HasRelationshipTypes extends UnaryExpression {
+            List<RelationshipType> relationshipTypes();
+
+            @Value.Derived
+            @Override
+            default double evaluate(EvaluationContext context) {
+                return context.hasRelationshipTypes(relationshipTypes()) ? TRUE : FALSE;
+            }
+
+            @Override
+            default ValidationContext validate(ValidationContext context) {
+                context = in().validate(context);
+
+                var availableRelationshipTypes = context.availableRelationshipTypes();
+
+                for (var relationshipType : relationshipTypes()) {
+                    if (!availableRelationshipTypes.contains(relationshipType)) {
+                        context = context.withError(SemanticErrors.SemanticError.of(prettySuggestions(
+                            formatWithLocale("Unknown relationship type `%s`.", relationshipType.name),
+                            relationshipType.name,
+                            availableRelationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toList())
+                        )));
+                    }
+                }
+                return context;
             }
         }
 
