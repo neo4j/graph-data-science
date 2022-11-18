@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.hashgnn;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -30,6 +29,7 @@ import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -91,21 +91,21 @@ class MinHashTask implements Runnable {
         progressTracker.setSteps(config.embeddingDensity() * graphs.get(0).nodeCount());
 
         var tasks = IntStream.range(0, config.embeddingDensity())
-            .boxed()
-            .flatMap(k -> degreePartition.stream().map(p -> TaskPair.of(k, p)))
-            .map(pair -> new MinHashTask(
-                pair.k(),
-                pair.partition(),
-                graphs,
-                config,
-                embeddingDimension,
-                currentEmbeddings,
-                previousEmbeddings,
-                iteration,
-                hashes,
-                terminationFlag,
-                progressTracker
-            ))
+            .mapToObj(k -> degreePartition.stream().map(p ->
+                new MinHashTask(
+                    k,
+                    p,
+                    graphs,
+                    config,
+                    embeddingDimension,
+                    currentEmbeddings,
+                    previousEmbeddings,
+                    iteration,
+                    hashes,
+                    terminationFlag,
+                    progressTracker
+                )))
+            .flatMap(Function.identity())
             .collect(Collectors.toList());
         RunWithConcurrency.builder()
             .concurrency(config.concurrency())
@@ -141,7 +141,12 @@ class MinHashTask implements Runnable {
                 var currentGraph = concurrentGraphs.get(i);
                 currentGraph.forEachRelationship(nodeId, (src, trg) -> {
                     var prevTargetEmbedding = previousEmbeddings.get(trg);
-                    hashArgMin(prevTargetEmbedding, preAggregationHashesForRel, neighborsMinAndArgMin, tempMinAndArgMin);
+                    hashArgMin(
+                        prevTargetEmbedding,
+                        preAggregationHashesForRel,
+                        neighborsMinAndArgMin,
+                        tempMinAndArgMin
+                    );
 
                     int argMin = neighborsMinAndArgMin.argMin;
                     if (argMin != -1) {
@@ -160,16 +165,5 @@ class MinHashTask implements Runnable {
         });
 
         progressTracker.logSteps(partition.nodeCount());
-    }
-
-    @ValueClass
-    interface TaskPair {
-        int k();
-
-        DegreePartition partition();
-
-        static TaskPair of(int k, DegreePartition partition) {
-            return ImmutableTaskPair.of(k, partition);
-        }
     }
 }

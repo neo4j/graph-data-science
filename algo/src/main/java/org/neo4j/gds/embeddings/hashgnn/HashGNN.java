@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
  * Based on the paper "Hashing-Accelerated Graph Neural Networks for Link Prediction"
  */
 public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
+    private static final long DEGREE_PARTITIONS_PER_THREAD = 4;
     private final long randomSeed;
     private final Graph graph;
     private final SplittableRandom rng;
@@ -59,7 +60,7 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         var degreePartition = PartitionUtils.degreePartition(
             graph,
             // Since degree only very approximately reflect the min hash task workload per node we decrease the partition sizes.
-            Math.toIntExact(Math.min(config.concurrency() * 4L, graph.nodeCount())),
+            Math.toIntExact(Math.min(config.concurrency() * DEGREE_PARTITIONS_PER_THREAD, graph.nodeCount())),
             Function.identity(),
             Optional.of(1)
         );

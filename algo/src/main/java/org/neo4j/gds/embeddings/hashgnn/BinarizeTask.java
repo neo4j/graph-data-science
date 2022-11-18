@@ -145,7 +145,7 @@ class BinarizeTask implements Runnable {
 
     @Override
     public void run() {
-        var tempBitSet = new BitSet(binarizationConfig.dimension());
+        var tempFeatureContainer = new BitSet(binarizationConfig.dimension());
 
         partition.consume(nodeId -> {
             var featureVector = new float[binarizationConfig.dimension()];
@@ -179,7 +179,7 @@ class BinarizeTask implements Runnable {
                 }
             });
 
-            truncatedFeatures.set(nodeId, roundAndSample(tempBitSet, featureVector));
+            truncatedFeatures.set(nodeId, roundAndSample(tempFeatureContainer, featureVector));
         });
 
         progressTracker.logProgress(partition.nodeCount());
