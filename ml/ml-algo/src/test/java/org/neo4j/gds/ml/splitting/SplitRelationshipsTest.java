@@ -89,8 +89,8 @@ class SplitRelationshipsTest {
 
         EdgeSplitter.SplitResult result = splitter.compute();
 
-        assertThat(result.selectedRels().build().topology().elementCount()).isEqualTo(6);
-        assertThat(result.remainingRels().build().topology().elementCount()).isEqualTo(24);
+        assertThat(result.selectedRels().build().relationships().topology().elementCount()).isEqualTo(6);
+        assertThat(result.remainingRels().build().relationships().topology().elementCount()).isEqualTo(24);
     }
 
     @Test

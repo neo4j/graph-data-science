@@ -136,12 +136,14 @@ public class KnnMutateProc extends AlgoBaseProc<Knn, Knn.Result, KnnMutateConfig
                     resultBuilder
                 );
 
+                var relationshipType = RelationshipType.of(config.mutateRelationshipType());
                 computationResult
                     .graphStore()
                     .addRelationshipType(
-                        RelationshipType.of(config.mutateRelationshipType()),
+                        relationshipType,
                         Optional.of(config.mutateProperty()),
                         Optional.of(NumberType.FLOATING_POINT),
+                        similarityGraphResult.orientation(),
                         resultRelationships
                     );
             }

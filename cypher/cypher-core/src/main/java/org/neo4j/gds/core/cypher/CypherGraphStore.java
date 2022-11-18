@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.cypher;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.GraphStoreAdapter;
@@ -107,9 +108,10 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
         RelationshipType relationshipType,
         Optional<String> relationshipPropertyKey,
         Optional<NumberType> relationshipPropertyType,
+        Orientation orientation,
         Relationships relationships
     ) {
-        super.addRelationshipType(relationshipType, relationshipPropertyKey, relationshipPropertyType, relationships);
+        super.addRelationshipType(relationshipType, relationshipPropertyKey, relationshipPropertyType, orientation, relationships);
         relationshipPropertyKey.ifPresent(
             propertyKey -> stateVisitors.forEach(stateVisitor -> stateVisitor.relationshipPropertyAdded(propertyKey))
         );

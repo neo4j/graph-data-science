@@ -189,12 +189,12 @@ public final class RelationshipsFilter {
             .run();
 
         var relationships = relationshipsBuilder.buildAll();
-        var topology = relationships.get(0).topology();
+        var topology = relationships.get(0).relationships().topology();
         var properties = IntStream.range(0, propertyKeys.size())
             .boxed()
             .collect(Collectors.toMap(
                 propertyKeys::get,
-                idx -> relationships.get(idx).properties().orElseThrow(IllegalStateException::new)
+                idx -> relationships.get(idx).relationships().properties().orElseThrow(IllegalStateException::new)
             ));
 
         return ImmutableFilteredRelationship.builder()

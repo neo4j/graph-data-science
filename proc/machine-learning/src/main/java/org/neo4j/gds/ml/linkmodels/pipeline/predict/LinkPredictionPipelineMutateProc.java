@@ -136,7 +136,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
                     })
                 );
 
-                var relationships = relationshipsBuilder.build();
+                var relationshipsAndSchema = relationshipsBuilder.build();
 
                 var config = computationResult.config();
                 try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
@@ -144,10 +144,10 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
                         RelationshipType.of(config.mutateRelationshipType()),
                         Optional.of(config.mutateProperty()),
                         Optional.of(NumberType.FLOATING_POINT),
-                        relationships
+                        relationshipsAndSchema
                     );
                 }
-                resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
+                resultBuilder.withRelationshipsWritten(relationshipsAndSchema.relationships().topology().elementCount());
             }
         };
     }

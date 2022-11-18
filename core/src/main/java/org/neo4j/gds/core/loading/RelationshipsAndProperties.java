@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
@@ -31,6 +32,7 @@ import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.ValueTypes;
+import org.neo4j.gds.core.loading.construction.RelationshipsAndOrientation;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.Collection;
@@ -47,16 +49,20 @@ public interface RelationshipsAndProperties {
 
     Map<RelationshipType, RelationshipPropertyStore> properties();
 
-    static RelationshipsAndProperties of(Map<RelationshipTypeAndProjection, List<Relationships>> relationshipsByType) {
+    Map<RelationshipType, Orientation> orientations();
+
+    static RelationshipsAndProperties of(Map<RelationshipTypeAndProjection, List<RelationshipsAndOrientation>> relationshipsByType) {
         var relTypeCount = relationshipsByType.size();
         Map<RelationshipType, Relationships.Topology> topologies = new HashMap<>(relTypeCount);
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>(relTypeCount);
+        Map<RelationshipType, Orientation> orientations = new HashMap<>(relTypeCount);
 
         relationshipsByType.forEach((relationshipTypeAndProjection, relationships) -> {
-            var topology = relationships.get(0).topology();
+            var topology = relationships.get(0).relationships().topology();
 
             var properties = relationships
                 .stream()
+                .map(RelationshipsAndOrientation::relationships)
                 .map(Relationships::properties)
                 .map(props -> props.map(Relationships.Properties::propertiesList))
                 .filter(Optional::isPresent)
@@ -71,11 +77,13 @@ public interface RelationshipsAndProperties {
 
             topologies.put(relationshipTypeAndProjection.relationshipType(), topology);
             relationshipPropertyStores.put(relationshipTypeAndProjection.relationshipType(), propertyStore);
+            orientations.put(relationshipTypeAndProjection.relationshipType(), relationshipTypeAndProjection.relationshipProjection().orientation());
         });
 
         return ImmutableRelationshipsAndProperties.builder()
             .relationships(topologies)
             .properties(relationshipPropertyStores)
+            .orientations(orientations)
             .build();
     }
 
@@ -83,6 +91,7 @@ public interface RelationshipsAndProperties {
         var relTypeCount = builders.size();
         Map<RelationshipType, Relationships.Topology> relationships = new HashMap<>(relTypeCount);
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>(relTypeCount);
+        Map<RelationshipType, Orientation> orientations = new HashMap<>(relTypeCount);
 
         builders.forEach((context) -> {
             var adjacencyListsWithProperties = context.singleTypeRelationshipImporter().build();
@@ -98,7 +107,6 @@ public interface RelationshipsAndProperties {
                 ImmutableTopology.of(
                     adjacency,
                     relationshipCount,
-                    projection.orientation(),
                     projection.isMultiGraph()
                 )
             );
@@ -113,11 +121,14 @@ public interface RelationshipsAndProperties {
                     )
                 );
             }
+
+            orientations.put(context.relationshipType(), context.relationshipProjection().orientation());
         });
 
         return ImmutableRelationshipsAndProperties.builder()
             .relationships(relationships)
             .properties(relationshipPropertyStores)
+            .orientations(orientations)
             .build();
     }
 
@@ -141,8 +152,6 @@ public interface RelationshipsAndProperties {
                     ImmutableProperties.of(
                         propertiesList,
                         relationshipCount,
-                        projection.orientation(),
-                        projection.isMultiGraph(),
                         // This is fine because relationships currently only support doubles
                         propertyMapping.defaultValue().doubleValue()
                     ),

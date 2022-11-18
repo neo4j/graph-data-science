@@ -77,11 +77,13 @@ public class SpanningTreeMutateSpec implements AlgorithmSpec<Prim, SpanningTree,
                 return Stream.of(builder.build());
             }
 
+            var orientation = Orientation.NATURAL;
+
             var relationshipsBuilder = GraphFactory
                 .initRelationshipsBuilder()
                 .nodes(computationResult.graph())
                 .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
-                .orientation(Orientation.NATURAL)
+                .orientation(orientation)
                 .build();
 
             var mutateRelationshipType = RelationshipType.of(config.mutateProperty());
@@ -106,13 +108,14 @@ public class SpanningTreeMutateSpec implements AlgorithmSpec<Prim, SpanningTree,
                 );
 
             }
-            relationships=relationshipsBuilder.build();
+            relationships = relationshipsBuilder.build().relationships();
             computationResult
                 .graphStore()
                 .addRelationshipType(
                     mutateRelationshipType,
                     Optional.of(config.weightMutateProperty()),
                     Optional.of(NumberType.FLOATING_POINT),
+                    orientation,
                     relationships
                 );
             builder.withComputeMillis(computationResult.computeMillis());

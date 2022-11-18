@@ -20,7 +20,6 @@
 package org.neo4j.gds.api;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.annotation.ValueClass;
 
 import java.util.Optional;
@@ -34,13 +33,11 @@ public interface Relationships {
 
     static Relationships of(
         long relationshipCount,
-        Orientation orientation,
         boolean isMultiGraph,
         AdjacencyList adjacencyList
     ) {
         return of(
             relationshipCount,
-            orientation,
             isMultiGraph,
             adjacencyList,
             null,
@@ -50,7 +47,6 @@ public interface Relationships {
 
     static Relationships of(
         long relationshipCount,
-        Orientation orientation,
         boolean isMultiGraph,
         AdjacencyList adjacencyList,
         @Nullable AdjacencyProperties adjacencyProperties,
@@ -59,7 +55,6 @@ public interface Relationships {
         Topology topology = ImmutableTopology.of(
             adjacencyList,
             relationshipCount,
-            orientation,
             isMultiGraph
         );
 
@@ -67,8 +62,6 @@ public interface Relationships {
             ? Optional.of(ImmutableProperties.of(
                 adjacencyProperties,
                 relationshipCount,
-                orientation,
-                isMultiGraph,
                 defaultPropertyValue
             )) : Optional.empty();
 
@@ -80,8 +73,6 @@ public interface Relationships {
         AdjacencyList adjacencyList();
 
         long elementCount();
-
-        Orientation orientation();
 
         boolean isMultiGraph();
 
@@ -97,11 +88,6 @@ public interface Relationships {
             }
 
             @Override
-            public Orientation orientation() {
-                return Orientation.NATURAL;
-            }
-
-            @Override
             public boolean isMultiGraph() {
                 return false;
             }
@@ -113,10 +99,6 @@ public interface Relationships {
         AdjacencyProperties propertiesList();
 
         long elementCount();
-
-        Orientation orientation();
-
-        boolean isMultiGraph();
 
         double defaultPropertyValue();
     }

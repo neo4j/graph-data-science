@@ -643,7 +643,7 @@ public final class CypherAggregation {
                     );
                 });
 
-                graphStoreBuilder.putRelationships(relationshipType, allRelationships.get(0).topology());
+                graphStoreBuilder.putRelationships(relationshipType, allRelationships.get(0).relationships().topology());
                 graphStoreBuilder.putRelationshipPropertyStores(relationshipType, propertyStore);
             });
             graphSchemaBuilder.relationshipSchema(relationshipSchemaBuilder.build());

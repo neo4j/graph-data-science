@@ -160,6 +160,7 @@ class CollapsePathTest {
             RelationshipType.of("SAME_DRUG"),
             Optional.empty(),
             Optional.empty(),
+            Orientation.NATURAL,
             relationships
         );
 
@@ -200,7 +201,7 @@ class CollapsePathTest {
             var relationships = new CollapsePathAlgorithmFactory()
                 .build(graphStore, config, ProgressTracker.NULL_TRACKER)
                 .compute();
-            graphStore.addRelationshipType(mutateRelType, Optional.empty(), Optional.empty(), relationships);
+            graphStore.addRelationshipType(mutateRelType, Optional.empty(), Optional.empty(), Orientation.NATURAL, relationships);
             var resultGraph = graphStore.getGraph(mutateRelType);
 
             // then two relationships should be created
@@ -225,7 +226,7 @@ class CollapsePathTest {
             var relationships = new CollapsePathAlgorithmFactory()
                 .build(graphStore, config, ProgressTracker.NULL_TRACKER)
                 .compute();
-            graphStore.addRelationshipType(mutateRelType, Optional.empty(), Optional.empty(), relationships);
+            graphStore.addRelationshipType(mutateRelType, Optional.empty(), Optional.empty(), Orientation.NATURAL, relationships);
             var resultGraph = graphStore.getGraph(mutateRelType);
 
             // a single relationship is created (there is no Dog)

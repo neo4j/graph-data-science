@@ -84,7 +84,7 @@ public class CollapsePath extends Algorithm<Relationships> {
             .tasks(tasks)
             .run();
 
-        return relImporter.build();
+        return relImporter.build().relationships();
     }
 
     @Override

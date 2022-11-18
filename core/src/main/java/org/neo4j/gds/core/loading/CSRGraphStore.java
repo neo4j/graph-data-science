@@ -417,6 +417,7 @@ public class CSRGraphStore implements GraphStore {
         RelationshipType relationshipType,
         Optional<String> relationshipPropertyKey,
         Optional<NumberType> relationshipPropertyType,
+        Orientation orientation,
         Relationships relationships
     ) {
         updateGraphStore(graphStore -> {
@@ -424,7 +425,6 @@ public class CSRGraphStore implements GraphStore {
                 RelationshipSchema.Builder newSchemaBuilder = RelationshipSchema.builder();
 
                 graphStore.relationships.put(relationshipType, relationships.topology());
-                Orientation orientation = relationships.topology().orientation();
                 newSchemaBuilder.addRelationshipType(relationshipType, orientation);
 
                 if (relationshipPropertyKey.isPresent()

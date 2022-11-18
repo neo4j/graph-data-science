@@ -128,6 +128,7 @@ public class FilteredKnnMutateProc extends AlgoBaseProc<FilteredKnn, FilteredKnn
                         RelationshipType.of(config.mutateRelationshipType()),
                         Optional.of(config.mutateProperty()),
                         Optional.of(NumberType.FLOATING_POINT),
+                        similarityGraphResult.orientation(),
                         resultRelationships
                     );
             }
