@@ -25,10 +25,12 @@ import com.carrotsearch.hppc.cursors.LongCursor;
 import com.carrotsearch.hppc.procedures.LongProcedure;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.paths.delta.TentativeDistances;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static org.neo4j.gds.steiner.SteinerBasedDeltaStepping.BIN_SIZE_THRESHOLD;
 import static org.neo4j.gds.steiner.SteinerBasedDeltaStepping.NO_BIN;
@@ -44,6 +46,9 @@ class SteinerBasedDeltaTask implements Runnable {
     private LongArrayList[] localBins;
     private SteinerBasedDeltaStepping.Phase phase = SteinerBasedDeltaStepping.Phase.RELAX;
     private final BitSet mergedToSource;
+    private final BitSet uninvisitedTerminal;
+    private final HugeLongPriorityQueue terminalQueue;
+    private final ReentrantLock terminalQueueLock;
 
     SteinerBasedDeltaTask(
         Graph graph,
@@ -51,7 +56,10 @@ class SteinerBasedDeltaTask implements Runnable {
         TentativeDistances distances,
         double delta,
         AtomicLong frontierIndex,
-        BitSet mergedToSource
+        BitSet mergedToSource,
+        HugeLongPriorityQueue terminalQueue,
+        ReentrantLock terminalQueueLock,
+        BitSet uninvisitedTerminal
     ) {
 
         this.graph = graph;
@@ -59,8 +67,11 @@ class SteinerBasedDeltaTask implements Runnable {
         this.distances = distances;
         this.delta = delta;
         this.frontierIndex = frontierIndex;
-        this.mergedToSource=mergedToSource;
+        this.mergedToSource = mergedToSource;
         this.localBins = new LongArrayList[0];
+        this.terminalQueue = terminalQueue;
+        this.terminalQueueLock = terminalQueueLock;
+        this.uninvisitedTerminal = uninvisitedTerminal;
     }
 
     @Override
@@ -147,6 +158,15 @@ class SteinerBasedDeltaTask implements Runnable {
             }
             // CAX failed, retry
             oldDist = witness;
+        }
+        if (uninvisitedTerminal.get(targetNodeId)) {
+
+            terminalQueueLock.lock();
+            if (!terminalQueue.containsElement(targetNodeId) || terminalQueue.cost(targetNodeId) > newDist) {
+                terminalQueue.set(targetNodeId, newDist);
+            }
+            terminalQueueLock.unlock();
+
         }
     }
 
