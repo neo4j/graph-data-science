@@ -17,24 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc.syntax;
+package org.neo4j.gds.paths.spanningtree;
 
-import java.util.List;
+public class StreamResult {
 
-class SpanningTreeSyntaxTest extends SyntaxTestBase {
+        public final long nodeId;
+        public final long parentId;
+        public final double cost;
 
-    @Override
-    protected Iterable<SyntaxModeMeta> syntaxModes() {
-        return List.of(
-            SyntaxModeMeta.of(SyntaxMode.STREAM),
-            SyntaxModeMeta.of(SyntaxMode.STATS),
-            SyntaxModeMeta.of(SyntaxMode.WRITE),
-            SyntaxModeMeta.of(SyntaxMode.MUTATE)
-        );
-    }
+        StreamResult(long nodeId, long parentId, double cost) {
+            this.nodeId = nodeId;
+            this.parentId = parentId;
+            this.cost = cost;
+        }
+    
 
-    @Override
-    protected String adocFile() {
-        return "pages/algorithms/minimum-weight-spanning-tree.adoc";
-    }
 }

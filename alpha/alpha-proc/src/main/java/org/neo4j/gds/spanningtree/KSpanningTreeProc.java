@@ -34,7 +34,6 @@ import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.impl.spanningtree.KSpanningTree;
 import org.neo4j.gds.impl.spanningtree.KSpanningTreeConfig;
-import org.neo4j.gds.impl.spanningtree.SpanningTree;
 import org.neo4j.gds.utils.InputNodeValidator;
 
 import java.util.stream.Stream;
