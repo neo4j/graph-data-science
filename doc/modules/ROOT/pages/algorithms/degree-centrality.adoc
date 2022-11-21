@@ -19,9 +19,12 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 The Degree Centrality algorithm can be used to find popular nodes within a graph.
 Degree centrality measures the number of incoming or outgoing (or both) relationships from a node, depending on the orientation of a relationship projection.
 For more information on relationship orientations, see the xref:management-ops/projections/graph-project.adoc#relationship-projection-syntax[relationship projection syntax section].
+
 It can be applied to either weighted or unweighted graphs.
 In the weighted case the algorithm computes the sum of all positive weights of adjacent relationships of a node, for each node in the graph.
 Non-positive weights are ignored.
+
+It can be applied to heterogenous graphs, however the algorithm will not calculate degree centrality per relationship type. Instead it will treat the graph as homogenous, as indicated by the algorithm traits.
 
 For more information on this algorithm, see:
 
