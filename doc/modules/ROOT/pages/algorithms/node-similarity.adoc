@@ -652,11 +652,15 @@ ORDER BY Person1
 === Weighted Similarity
 
 Relationship properties can be used to modify the similarity induced by certain relationships.
-Weighted node similarity is computed as the weighted Jaccard similarty, according to the formula:
+Weighted node similarity has as default the weighted Jaccard similarty, according to the formula:
 
 image::nodesim-formulas/weighted_jaccard.svg[role="middle"]
 
 Formally, given two nodes and their weighted neighbour lists `A'` and `B'`, we extend the lists to `A` and `B`, index over the union of their neighbours `A' ∪ B'` by setting weight = 0 for any non-neighbour, and then apply the weighted Jaccard similarity.
+
+It also supports weighted Overlap similarity, according to the formula:
+
+image::nodesim-formulas/weighted_overlap.svg[role="middle"]
 
 
 [NOTE]
@@ -692,7 +696,7 @@ Alice likes Guitar, Synthesize and Bongos with strengths `(1, 1, 0.5)`.
 Dave likes Guitar, Bongos and Trumpet with strengths `(1, 1, 1.5)`.
 Therefore, taking Alice and Dave's neighbours, we have list of strengths for Alice as `A = (1, 1, 0.5, 0)` and for Dave `B = (1, 0, 1, 1.5)`, indexed as `Guitar, Synthesizer, Bongos, Trumpet`.
 
-The weighted node similarity of Alice and Dave is hence:
+The weighted (Jaccard) node similarity of Alice and Dave is hence:
 
 image::nodesim-formulas/weighted_jaccard_example.svg[role="middle"]
 
