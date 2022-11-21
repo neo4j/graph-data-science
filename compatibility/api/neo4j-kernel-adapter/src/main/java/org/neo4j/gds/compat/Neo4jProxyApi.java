@@ -25,6 +25,7 @@ import org.neo4j.configuration.Config;
 import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.exceptions.KernelException;
+import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -294,6 +295,7 @@ public interface Neo4jProxyApi {
         boolean threadSafe
     );
 
+    @SuppressForbidden(reason = "This is the compat API")
     CallableProcedure callableProcedure(CompatCallableProcedure procedure);
 
     long transactionId(KernelTransactionHandle kernelTransactionHandle);

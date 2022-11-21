@@ -25,6 +25,7 @@ import org.neo4j.configuration.Config;
 import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.exceptions.KernelException;
+import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -442,6 +443,7 @@ public final class Neo4jProxy {
         return IMPL.userFunctionSignature(name, inputSignature, type, description, internal, threadSafe);
     }
 
+    @SuppressForbidden(reason = "This is the compat API")
     public static CallableProcedure callableProcedure(CompatCallableProcedure procedure) {
         return IMPL.callableProcedure(procedure);
     }

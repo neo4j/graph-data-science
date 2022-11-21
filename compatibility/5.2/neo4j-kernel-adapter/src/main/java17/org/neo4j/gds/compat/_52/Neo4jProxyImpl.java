@@ -875,6 +875,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    @SuppressForbidden(reason = "This is the compat API")
     public CallableProcedure callableProcedure(CompatCallableProcedure procedure) {
         return new CallableProcedureImpl(procedure);
     }
