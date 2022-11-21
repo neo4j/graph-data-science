@@ -48,10 +48,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
         "  (a1)-[:R {weight: 1.0}]->(a2)," +
         "  (a2)-[:R {weight: 1.0}]->(a3)," +
 
-        "  (a4)-[:R {weight: 0.0}]->(a3)" ;
-
-
-
+        "  (a4)-[:R {weight: 0.0}]->(a3)";
+    
     @Inject
     private TestGraph graph;
 
