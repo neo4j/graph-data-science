@@ -20,6 +20,7 @@
 package org.neo4j.gds.steiner;
 
 import com.carrotsearch.hppc.BitSet;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -212,7 +213,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
             }
         }
 
-        graph.forEachNode(nodeId -> {
+        ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency, nodeId -> {
             if (parent.get(nodeId) != PRUNED && parent.get(nodeId) != ROOTNODE) {
                 if (!endsAtTerminal.get(nodeId)) {
                     parent.set(nodeId, PRUNED);
@@ -220,14 +221,13 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
                     parentCost.set(nodeId, PRUNED);
                 }
             }
-            return true;
         });
 
     }
 
     private void reroute(HugeLongArray parent, HugeDoubleArray parentCost, DoubleAdder totalCost) {
         LinkCutTree tree = createLinkCutTree(parent);
-
+        MutableBoolean didReroutes = new MutableBoolean();
         graph.forEachNode(nodeId -> {
             if (parent.get(nodeId) != PRUNED) {
                 graph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
@@ -236,6 +236,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
                     if (parentId != PRUNED && parentId != ROOTNODE && w < targetParentCost) {
                         boolean shouldReconnect = checkIfRerouteIsValid(tree, s, t, parentId);
                         if (shouldReconnect) {
+                            didReroutes.setTrue();
                             reconnect(tree, parent, parentCost, totalCost, s, t, w);
                         } else {
                             tree.link(parentId, t);
@@ -247,8 +248,9 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
             return true;
 
         });
-
-        cutNodesAfterRerouting(parent, parentCost, totalCost);
+        if (didReroutes.isTrue()) {
+            cutNodesAfterRerouting(parent, parentCost, totalCost);
+        }
 
     }
 
