@@ -41,23 +41,24 @@ class AdamicAdarProcTest extends BaseProcTest {
     }
 
     private static final String DB_CYPHER =
-            "CREATE (mark:Person {name: 'Mark'})\n" +
-            "CREATE (michael:Person {name: 'Michael'})\n" +
-            "CREATE (praveena:Person {name: 'Praveena'})\n" +
-            "CREATE (ryan:Person {name: 'Ryan'})\n" +
-            "CREATE (karin:Person {name: 'Karin'})\n" +
-            "CREATE (jennifer:Person {name: 'Jennifer'})\n" +
-            "CREATE (elaine:Person {name: 'Elaine'})\n" +
+        "CREATE " +
+        " (mark:Person {name: 'Mark'}), " +
+        " (michael:Person {name: 'Michael'}), " +
+        " (praveena:Person {name: 'Praveena'}), " +
+        " (ryan:Person {name: 'Ryan'}), " +
+        " (karin:Person {name: 'Karin'}), " +
+        " (jennifer:Person {name: 'Jennifer'}), " +
+        " (elaine:Person {name: 'Elaine'}), " +
 
-            "MERGE (jennifer)-[:FRIENDS]-(ryan)\n" +
-            "MERGE (jennifer)-[:FRIENDS]-(karin)\n" +
-            "MERGE (elaine)-[:FRIENDS]-(ryan)\n" +
-            "MERGE (elaine)-[:FRIENDS]-(karin)\n" +
+        " (jennifer)-[:FRIENDS]->(ryan), " +
+        " (jennifer)-[:FRIENDS]->(karin), " +
+        " (elaine)-[:FRIENDS]->(ryan), " +
+        " (elaine)-[:FRIENDS]->(karin), " +
 
-            "MERGE (mark)-[:FRIENDS]-(michael)\n" +
-            "MERGE (mark)-[:WORKS_WITH]->(michael)\n" +
+        " (mark)-[:FRIENDS]->(michael), " +
+        " (mark)-[:WORKS_WITH]->(michael), " +
 
-            "MERGE (praveena)-[:FRIENDS]->(michael)";
+        " (praveena)-[:FRIENDS]->(michael)";
 
     @BeforeEach
     void setUp() throws Exception {
@@ -68,8 +69,8 @@ class AdamicAdarProcTest extends BaseProcTest {
     @Test
     void oneNodeInCommon() {
         String controlQuery =
-            "MATCH (p1:Person {name: 'Mark'})\n" +
-            "MATCH (p2:Person {name: 'Praveena'})\n" +
+            "MATCH (p1:Person {name: 'Mark'}) " +
+            "MATCH (p2:Person {name: 'Praveena'}) " +
             "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2) AS score, " +
             "       1/log(3) AS cypherScore";
 
@@ -80,8 +81,8 @@ class AdamicAdarProcTest extends BaseProcTest {
     @Test
     void oneNodeInCommonExplicit() {
         String controlQuery =
-            "MATCH (p1:Person {name: 'Mark'})\n" +
-            "MATCH (p2:Person {name: 'Praveena'})\n" +
+            "MATCH (p1:Person {name: 'Mark'}) " +
+            "MATCH (p2:Person {name: 'Praveena'}) " +
             "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2, " +
             "{relationshipQuery: 'FRIENDS', direction: 'BOTH'}) AS score," +
             "1/log(2) AS cypherScore";
@@ -93,8 +94,8 @@ class AdamicAdarProcTest extends BaseProcTest {
     @Test
     void twoNodesInCommon() {
         String controlQuery =
-            "MATCH (p1:Person {name: 'Jennifer'})\n" +
-            "MATCH (p2:Person {name: 'Elaine'})\n" +
+            "MATCH (p1:Person {name: 'Jennifer'}) " +
+            "MATCH (p2:Person {name: 'Elaine'}) " +
             "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2) AS score, " +
             "       1/log(2) + 1/log(2) AS cypherScore";
 
@@ -105,8 +106,8 @@ class AdamicAdarProcTest extends BaseProcTest {
     @Test
     void noNeighbors() {
         String controlQuery =
-            "MATCH (p1:Person {name: 'Jennifer'})\n" +
-            "MATCH (p2:Person {name: 'Ryan'})\n" +
+            "MATCH (p1:Person {name: 'Jennifer'}) " +
+            "MATCH (p2:Person {name: 'Ryan'}) " +
             "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2) AS score, " +
             "       0.0 AS cypherScore";
 
@@ -117,8 +118,8 @@ class AdamicAdarProcTest extends BaseProcTest {
     @Test
     void bothNodesTheSame() {
         String controlQuery =
-            "MATCH (p1:Person {name: 'Praveena'})\n" +
-            "MATCH (p2:Person {name: 'Praveena'})\n" +
+            "MATCH (p1:Person {name: 'Praveena'}) " +
+            "MATCH (p2:Person {name: 'Praveena'}) " +
             "RETURN gds.alpha.linkprediction.adamicAdar(p1, p2) AS score, " +
             "       0.0 AS cypherScore";
 

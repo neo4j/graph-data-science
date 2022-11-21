@@ -23,6 +23,7 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.kernel.impl.core.NodeEntity;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -57,7 +58,7 @@ public class NeighborsFinder {
     public Set<Node> findNeighbors(Node node, RelationshipType relationshipType, Direction direction) {
         Set<Node> neighbors = new HashSet<>();
 
-        for (Relationship rel : loadRelationships(node, relationshipType, direction)) {
+        for (Relationship rel : loadRelationships((NodeEntity) node, relationshipType, direction)) {
             Node endNode = rel.getOtherNode(node);
 
             if (!endNode.equals(node)) {
@@ -79,7 +80,7 @@ public class NeighborsFinder {
     }
 
     private boolean noCommonNeighbors(Node node, RelationshipType relationshipType, Direction direction, Node node2) {
-        for (Relationship rel : loadRelationships(node, relationshipType, direction)) {
+        for (Relationship rel : loadRelationships((NodeEntity) node, relationshipType, direction)) {
             if (rel.getOtherNode(node).equals(node2)) {
                 return false;
             }
@@ -87,7 +88,7 @@ public class NeighborsFinder {
         return true;
     }
 
-    private Iterable<Relationship> loadRelationships(Node node, RelationshipType relationshipType, Direction direction) {
+    private Iterable<Relationship> loadRelationships(NodeEntity node, RelationshipType relationshipType, Direction direction) {
         return relationshipType == null
             ? node.getRelationships(direction)
             : node.getRelationships(direction, relationshipType);
