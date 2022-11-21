@@ -131,7 +131,7 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 === Alpha tier
 
 .List of all beta node embedding algorithms in the GDS library. Functions are written in _italic_.
-[[embeddings-table-beta]]
+[[embeddings-table-alpha]]
 [role=procedure-listing]
 [opts=header,cols="1, 2"]
 |===
@@ -141,3 +141,4 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 | `gds.alpha.hashgnn.mutate.estimate`
 | `gds.alpha.hashgnn.stream`
 | `gds.alpha.hashgnn.stream.estimate`
+|===
