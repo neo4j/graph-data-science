@@ -186,14 +186,47 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         return !tree.connected(source, target);
     }
 
-    private void reroute(HugeLongArray parent, HugeDoubleArray parentCost, DoubleAdder totalCost) {
-        LinkCutTree tree = new LinkCutTree(graph.nodeCount());
+    private LinkCutTree createLinkCutTree(HugeLongArray parent) {
+        var tree = new LinkCutTree(graph.nodeCount());
         for (long nodeId = 0; nodeId < graph.nodeCount(); ++nodeId) {
             var parentId = parent.get(nodeId);
             if (parentId != PRUNED && parentId != ROOTNODE) {
                 tree.link(parentId, nodeId);
             }
         }
+        return tree;
+    }
+
+    private void cutNodesAfterRerouting(HugeLongArray parent, HugeDoubleArray parentCost, DoubleAdder totalCost) {
+        BitSet endsAtTerminal = new BitSet(graph.nodeCount());
+        HugeLongArrayQueue queue = HugeLongArrayQueue.newQueue(graph.nodeCount());
+        for (var terminal : terminals) {
+            queue.add(terminal);
+            endsAtTerminal.set(terminal);
+        }
+        while (!queue.isEmpty()) {
+            long nodeId = queue.remove();
+            long parentId = parent.get(nodeId);
+            if (parentId != sourceId && !endsAtTerminal.getAndSet(parentId)) {
+                queue.add(parentId);
+            }
+        }
+
+        graph.forEachNode(nodeId -> {
+            if (parent.get(nodeId) != PRUNED && parent.get(nodeId) != ROOTNODE) {
+                if (!endsAtTerminal.get(nodeId)) {
+                    parent.set(nodeId, PRUNED);
+                    totalCost.add(-parentCost.get(nodeId));
+                    parentCost.set(nodeId, PRUNED);
+                }
+            }
+            return true;
+        });
+
+    }
+
+    private void reroute(HugeLongArray parent, HugeDoubleArray parentCost, DoubleAdder totalCost) {
+        LinkCutTree tree = createLinkCutTree(parent);
 
         graph.forEachNode(nodeId -> {
             if (parent.get(nodeId) != PRUNED) {
@@ -214,34 +247,9 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
             return true;
 
         });
-        HugeLongArray numberOfTerminals = HugeLongArray.newArray(graph.nodeCount());
-        HugeLongArrayQueue queue = HugeLongArrayQueue.newQueue(graph.nodeCount());
-        for (var terminal : terminals) {
-            queue.add(terminal);
-            numberOfTerminals.set(terminal, 1);
-        }
-        while (!queue.isEmpty()) {
-            long nodeId = queue.remove();
-            long parentId = parent.get(nodeId);
-            if (parentId != sourceId) {
-                long terminalsForParent = numberOfTerminals.get(parentId);
-                numberOfTerminals.set(parentId, terminalsForParent + 1);
-                if (terminalsForParent == 0) {
-                    queue.add(parentId);
-                }
-            }
-        }
-        graph.forEachNode(nodeId -> {
-            if (parent.get(nodeId) != PRUNED && parent.get(nodeId) != ROOTNODE) {
-                if (numberOfTerminals.get(nodeId) == 0) {
-                    parent.set(nodeId, PRUNED);
-                    totalCost.add(-parentCost.get(nodeId));
-                    parentCost.set(nodeId, PRUNED);
-                }
-            }
-            return true;
-        });
-        var x = 3;
+
+        cutNodesAfterRerouting(parent, parentCost, totalCost);
+
     }
 
 
