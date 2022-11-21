@@ -26,6 +26,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
@@ -42,6 +43,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
     private final List<Long> terminals;
     private final int concurrency;
     private final BitSet isTerminal;
+    private final boolean applyRerouting;
 
     private final double delta;
 
@@ -50,7 +52,8 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         long sourceId,
         List<Long> terminals,
         double delta,
-        int concurrency
+        int concurrency,
+        boolean applyRerouting
     ) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
@@ -59,6 +62,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         this.concurrency = concurrency;
         this.delta = delta;
         this.isTerminal = createTerminals();
+        this.applyRerouting = applyRerouting;
     }
 
     private BitSet createTerminals() {
@@ -95,6 +99,9 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
 
         });
 
+        if (applyRerouting) {
+            reroute(parent, parentCost, totalCost);
+        }
         return SteinerTreeResult.of(parent, parentCost, totalCost.doubleValue());
     }
 
@@ -151,6 +158,90 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
 
         return steinerBasedDelta.compute();
 
+    }
+
+    private void reconnect(
+        LinkCutTree tree,
+        HugeLongArray parent,
+        HugeDoubleArray parentCost,
+        DoubleAdder totalCost,
+        long source,
+        long target,
+        double weight
+    ) {
+        double edgeCostOft = parentCost.get(target);
+        parent.set(target, source);
+        parentCost.set(target, weight);
+        totalCost.add(-edgeCostOft + weight);
+        tree.link(source, target);
+    }
+
+    private boolean checkIfRerouteIsValid(
+        LinkCutTree tree,
+        long source,
+        long target,
+        long parentTarget
+    ) {
+        tree.delete(parentTarget, target);
+        return !tree.connected(source, target);
+    }
+
+    private void reroute(HugeLongArray parent, HugeDoubleArray parentCost, DoubleAdder totalCost) {
+        LinkCutTree tree = new LinkCutTree(graph.nodeCount());
+        for (long nodeId = 0; nodeId < graph.nodeCount(); ++nodeId) {
+            var parentId = parent.get(nodeId);
+            if (parentId != PRUNED && parentId != ROOTNODE) {
+                tree.link(parentId, nodeId);
+            }
+        }
+
+        graph.forEachNode(nodeId -> {
+            if (parent.get(nodeId) != PRUNED) {
+                graph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
+                    var parentId = parent.get(t);
+                    double targetParentCost = parentCost.get(t);
+                    if (parentId != PRUNED && parentId != ROOTNODE && w < targetParentCost) {
+                        boolean shouldReconnect = checkIfRerouteIsValid(tree, s, t, parentId);
+                        if (shouldReconnect) {
+                            reconnect(tree, parent, parentCost, totalCost, s, t, w);
+                        } else {
+                            tree.link(parentId, t);
+                        }
+                    }
+                    return true;
+                });
+            }
+            return true;
+
+        });
+        HugeLongArray numberOfTerminals = HugeLongArray.newArray(graph.nodeCount());
+        HugeLongArrayQueue queue = HugeLongArrayQueue.newQueue(graph.nodeCount());
+        for (var terminal : terminals) {
+            queue.add(terminal);
+            numberOfTerminals.set(terminal, 1);
+        }
+        while (!queue.isEmpty()) {
+            long nodeId = queue.remove();
+            long parentId = parent.get(nodeId);
+            if (parentId != sourceId) {
+                long terminalsForParent = numberOfTerminals.get(parentId);
+                numberOfTerminals.set(parentId, terminalsForParent + 1);
+                if (terminalsForParent == 0) {
+                    queue.add(parentId);
+                }
+            }
+        }
+        graph.forEachNode(nodeId -> {
+            if (parent.get(nodeId) != PRUNED && parent.get(nodeId) != ROOTNODE) {
+                if (numberOfTerminals.get(nodeId) == 0) {
+                    parent.set(nodeId, PRUNED);
+                    totalCost.add(-parentCost.get(nodeId));
+                    parentCost.set(nodeId, PRUNED);
+                }
+            }
+            return true;
+        });
+        var x = 3;
     }
 
 

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.steiner;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -30,4 +31,8 @@ import org.neo4j.gds.config.TargetNodesConfig;
 @Configuration
 public interface SteinerTreeBaseConfig extends AlgoBaseConfig, SourceNodeConfig, TargetNodesConfig, RelationshipWeightConfig {
 
+    @Value.Default
+    default boolean applyRerouting() {
+        return false;
+    }
 }

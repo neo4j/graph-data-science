@@ -75,7 +75,8 @@ class ShortestPathsSteinerAlgorithmTest {
             a[0],
             List.of(a[4], a[7], a[8]),
             2.0,
-            1
+            1,
+            false
         ).compute();
         var pruned = ShortestPathsSteinerAlgorithm.PRUNED;
         var rootnode = ShortestPathsSteinerAlgorithm.ROOTNODE;

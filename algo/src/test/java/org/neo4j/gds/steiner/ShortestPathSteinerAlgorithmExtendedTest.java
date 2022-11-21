@@ -147,7 +147,8 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             a[0],
             List.of(a[2], a[5]),
             2.0,
-            1
+            1,
+            false
         ).compute();
 
         long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOTNODE, a[0], a[1], a[2], a[3], a[4]};
@@ -164,7 +165,8 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             a[0],
             List.of(a[2], a[4]),
             2.0,
-            1
+            1,
+            false
         )
             .compute();
 
@@ -212,7 +214,8 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             a[0],
             List.of(a[2], a[3]),
             2.0,
-            1
+            1,
+            false
         ).compute();
 
         long[] parentArray = new long[]{
@@ -238,7 +241,8 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             a[0],
             List.of(a[1], a[3]),
             2.0,
-            1
+            1,
+            false
         ).compute();
 
         long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOTNODE, a[0], a[1], a[2]};
