@@ -17,33 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.spanningtree;
+package org.neo4j.gds.spanningtree;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
-import org.neo4j.gds.config.SourceNodeConfig;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.function.DoubleUnaryOperator;
-
+@ValueClass
 @Configuration
-public interface KSpanningTreeConfig extends AlgoBaseConfig,
-    RelationshipWeightConfig,
-    SourceNodeConfig, WritePropertyConfig {
+public interface SpanningTreeWriteConfig extends SpanningTreeBaseConfig, WritePropertyConfig {
+    String WRITE_RELATIONSHIP_TYPE = "MST";
 
-    long k();
+    String weightWriteProperty();
 
-    @Configuration.Parameter
-    DoubleUnaryOperator minMax();
-
-    @Override
+    @Value.Default
     default String writeProperty() {
-        return "partition";
+        return WRITE_RELATIONSHIP_TYPE;
     }
 
-    static KSpanningTreeConfig of(DoubleUnaryOperator minMax, CypherMapWrapper userInput) {
-        return new KSpanningTreeConfigImpl(minMax, userInput);
+    static SpanningTreeWriteConfig of(CypherMapWrapper userInput) {
+        return new SpanningTreeWriteConfigImpl(userInput);
     }
 }

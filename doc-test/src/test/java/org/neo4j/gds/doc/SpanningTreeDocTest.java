@@ -21,10 +21,10 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.spanningtree.SpanningTreeMutateProc;
-import org.neo4j.gds.spanningtree.SpanningTreeStatsProc;
-import org.neo4j.gds.spanningtree.SpanningTreeStreamProc;
-import org.neo4j.gds.spanningtree.SpanningTreeWriteProc;
+import org.neo4j.gds.paths.spanningtree.SpanningTreeMutateProc;
+import org.neo4j.gds.paths.spanningtree.SpanningTreeStatsProc;
+import org.neo4j.gds.paths.spanningtree.SpanningTreeStreamProc;
+import org.neo4j.gds.paths.spanningtree.SpanningTreeWriteProc;
 
 import java.util.List;
 
@@ -48,7 +48,7 @@ class SpanningTreeDocTest extends SingleFileDocTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/alpha-algorithms/minimum-weight-spanning-tree.adoc";
+        return "pages/algorithms/minimum-weight-spanning-tree.adoc";
     }
 
 }

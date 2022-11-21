@@ -24,6 +24,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
+import org.neo4j.gds.spanningtree.Prim;
+import org.neo4j.gds.spanningtree.SpanningTree;
 
 import java.util.function.DoubleUnaryOperator;
 
@@ -71,7 +73,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         );
         prim.setTerminationFlag(getTerminationFlag());
         SpanningTree spanningTree = prim.compute();
-        HugeLongArray parent = spanningTree.parent;
+        HugeLongArray parent = spanningTree.parentArray();
         long parentSize = parent.size();
         HugeLongPriorityQueue priorityQueue = minMax == Prim.MAX_OPERATOR ? HugeLongPriorityQueue.min(parentSize) : HugeLongPriorityQueue.max(
             parentSize);
