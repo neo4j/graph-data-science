@@ -44,6 +44,8 @@ class Neo4jVersionTest {
         "5.3.0, V_Dev",
         "5.1.0-dev, V_5_1",
         "5.2.0-dev, V_5_2",
+        "5.2.0, V_5_2",
+        "5.3.0, V_5_3",
     })
     void testParse(String input, Neo4jVersion expected) {
         assertEquals(expected.name(), Neo4jVersion.parse(input).name());
@@ -78,6 +80,7 @@ class Neo4jVersionTest {
         "4.4.14, 4, 4",
         "5.1.0, 5, 1",
         "5.2.0, 5, 2",
+        "5.3.0, 5, 3",
     })
     void semanticVersion(String input, int expectedMajor, int expectedMinor) {
         Neo4jVersion version = Neo4jVersion.parse(input);
