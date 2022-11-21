@@ -67,6 +67,7 @@ import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
+import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
@@ -439,6 +440,10 @@ public final class Neo4jProxy {
         boolean threadSafe
     ) {
         return IMPL.userFunctionSignature(name, inputSignature, type, description, internal, threadSafe);
+    }
+
+    public static CallableProcedure callableProcedure(CompatCallableProcedure procedure) {
+        return IMPL.callableProcedure(procedure);
     }
 
     public static long transactionId(KernelTransactionHandle kernelTransactionHandle) {
