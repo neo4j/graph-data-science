@@ -29,8 +29,6 @@ import org.neo4j.gds.extension.TestGraph;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 @GdlExtension
 class ShortestPathsSteinerAlgorithmTest {
     @GdlGraph(orientation = Orientation.NATURAL)
@@ -71,22 +69,31 @@ class ShortestPathsSteinerAlgorithmTest {
 
     @Test
     void shouldWorkCorrectly() {
+        long[] a = SteinerTestUtils.getNodes(idFunction, 10);
         var steinerTreeResult = new ShortestPathsSteinerAlgorithm(
             graph,
-            0L,
-            List.of(4L, 7L, 8L),
+            a[0],
+            List.of(a[4], a[7], a[8]),
             2.0,
             1
         ).compute();
         var pruned = ShortestPathsSteinerAlgorithm.PRUNED;
         var rootnode = ShortestPathsSteinerAlgorithm.ROOTNODE;
-        long[] parentArray = new long[]{rootnode, pruned, 0, 0, 3, pruned, 2, 6, 6, pruned};
+        long[] parentArray = new long[]{
+            rootnode,
+            pruned,
+            a[0],
+            a[0],
+            a[3],
+            pruned,
+            a[2],
+            a[6],
+            a[6],
+            pruned
+        };
         double[] parentCostArray = new double[]{0, pruned, 1, 1, 1, pruned, 1, 1, 1, pruned};
 
-        assertThat(steinerTreeResult.parentArray().toArray()).isEqualTo(parentArray);
-        assertThat(steinerTreeResult.relationshipToParentCost().toArray()).isEqualTo(parentCostArray);
-        assertThat(steinerTreeResult.totalCost()).isEqualTo(6.0);
-
+        SteinerTestUtils.assertTreeIsCorrect(idFunction, steinerTreeResult, parentArray, parentCostArray, 6.0);
 
     }
 

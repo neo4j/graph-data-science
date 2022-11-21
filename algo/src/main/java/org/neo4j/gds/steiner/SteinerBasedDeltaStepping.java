@@ -226,7 +226,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
         var tasks = IntStream
             .range(0, concurrency)
             .mapToObj(i -> new SteinerBasedDeltaTask(
-                graph,
+                graph.concurrentCopy(),
                 frontier,
                 distances,
                 delta,

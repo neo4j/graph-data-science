@@ -58,10 +58,10 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         this.terminals = terminals;
         this.concurrency = concurrency;
         this.delta = delta;
-        this.isTerminal = createTerminalBitSet();
+        this.isTerminal = createTerminals();
     }
 
-    private BitSet createTerminalBitSet() {
+    private BitSet createTerminals() {
         long maxTerminalId = -1;
         for (long terminalId : terminals) {
             if (terminalId > maxTerminalId) {

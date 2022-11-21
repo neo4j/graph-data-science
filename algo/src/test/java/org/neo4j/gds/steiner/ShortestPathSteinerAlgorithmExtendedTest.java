@@ -20,9 +20,10 @@
 package org.neo4j.gds.steiner;
 
 import com.carrotsearch.hppc.BitSet;
-import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -87,6 +88,9 @@ class ShortestPathSteinerAlgorithmExtendedTest {
     @Inject
     private TestGraph lineGraph;
 
+    @Inject
+    private IdFunction lineIdFunction;
+
 
     @GdlGraph(graphNamePrefix = "ext", orientation = Orientation.NATURAL)
     private static final String extQuery =
@@ -112,6 +116,9 @@ class ShortestPathSteinerAlgorithmExtendedTest {
     @Inject
     private TestGraph extGraph;
 
+    @Inject
+    private IdFunction extIdFunction;
+
     @GdlGraph(graphNamePrefix = "triangle", orientation = Orientation.NATURAL)
     private static final String triangle =
         "CREATE " +
@@ -128,114 +135,116 @@ class ShortestPathSteinerAlgorithmExtendedTest {
     @Inject
     private TestGraph triangleGraph;
 
+    @Inject
+    private IdFunction triangleIdFunction;
+
     @Test
     void shouldWorkCorrectly() {
+
+        var a = SteinerTestUtils.getNodes(idFunction, 6);
         var steinerTreeResult = new ShortestPathsSteinerAlgorithm(
             graph,
-            0,
-            List.of(2L, 5L),
+            a[0],
+            List.of(a[2], a[5]),
             2.0,
             1
         ).compute();
 
-        long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOTNODE, 0, 1, 2, 3, 4};
-
-        assertThat(steinerTreeResult.relationshipToParentCost().get(5)).isCloseTo(4.1, Offset.offset(1e-5));
-        assertThat(steinerTreeResult.parentArray().toArray()).isEqualTo(parentArray);
-
-        assertThat(steinerTreeResult.relationshipToParentCost().get(1)).isEqualTo(1.0);
-        assertThat(steinerTreeResult.relationshipToParentCost().get(2)).isEqualTo(1.0);
-        assertThat(steinerTreeResult.relationshipToParentCost().get(3)).isEqualTo(1.0);
-        assertThat(steinerTreeResult.relationshipToParentCost().get(4)).isEqualTo(1.0);
-        assertThat(steinerTreeResult.totalCost()).isCloseTo(8.1, Offset.offset(1e-5));
+        long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOTNODE, a[0], a[1], a[2], a[3], a[4]};
+        double[] parentCostArray = new double[]{0, 1.0, 1.0, 1.0, 1.0, 4.1};
+        SteinerTestUtils.assertTreeIsCorrect(idFunction, steinerTreeResult, parentArray, parentCostArray, 8.1);
     }
 
     @Test
     void shouldWorkCorrectlyWithLineGraph() {
+
+        var a = SteinerTestUtils.getNodes(lineIdFunction, 5);
         var steinerTreeResult = new ShortestPathsSteinerAlgorithm(
             lineGraph,
-            0,
-            List.of(2L, 4L),
+            a[0],
+            List.of(a[2], a[4]),
             2.0,
             1
         )
             .compute();
 
-        long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOTNODE, 0, 1, 2, 3};
+        long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOTNODE, a[0], a[1], a[2], a[3]};
 
         double[] parentCostArray = new double[]{0, 1, 1, 1, 1};
 
-        assertThat(steinerTreeResult.parentArray().toArray()).isEqualTo(parentArray);
-        assertThat(steinerTreeResult.relationshipToParentCost().toArray()).isEqualTo(parentCostArray);
-        assertThat(steinerTreeResult.totalCost()).isEqualTo(4);
+        SteinerTestUtils.assertTreeIsCorrect(lineIdFunction, steinerTreeResult, parentArray, parentCostArray, 4);
     }
 
 
     @Test
-    void djikstraShouldWorkCorrectly() {
+    void deltaSteppingShouldWorkCorrectly() {
+        var a = SteinerTestUtils.getNodes(idFunction, 6);
         var isTerminal = new BitSet(graph.nodeCount());
-        isTerminal.set(2);
-        isTerminal.set(5);
-        var djikstraSteiner = new SteinerBasedDijkstra(
+        isTerminal.set(a[2]);
+        isTerminal.set(a[5]);
+        var deltaSteiner = new SteinerBasedDeltaStepping(
             graph,
             0,
-            isTerminal
+            2.0,
+            isTerminal,
+            1,
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
         );
-        var result = djikstraSteiner.compute().pathSet();
+        var result = deltaSteiner.compute().pathSet();
         assertThat(result.size()).isEqualTo(2);
         long[][] paths = new long[6][];
-        paths[2] = new long[]{0, 1, 2};
-        paths[5] = new long[]{2, 3, 4, 5};
+        paths[(int) a[2]] = new long[]{a[0], a[1], a[2]};
+        paths[(int) a[5]] = new long[]{a[2], a[3], a[4], a[5]};
         for (PathResult path : result) {
             long targetNode = path.targetNode();
-            assertThat(targetNode).isIn(2L, 5L);
-            assertThat(path.nodeIds()).isEqualTo(paths[(int) targetNode]);
+            assertThat(targetNode).isIn(a[2], a[5]);
+            assertThat(path.nodeIds()).isEqualTo(paths[(int) a[(int) targetNode]]);
         }
 
     }
 
     @Test
     void shouldWorkIfRevisitsVertices() {
+        var a = SteinerTestUtils.getNodes(extIdFunction, 7);
         var steinerTreeResult = new ShortestPathsSteinerAlgorithm(
             extGraph,
-            0,
-            List.of(2L, 3L),
+            a[0],
+            List.of(a[2], a[3]),
             2.0,
             1
         ).compute();
 
-        long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOTNODE, 0, 1, 6, 1, 4, 5};
+        long[] parentArray = new long[]{
+            ShortestPathsSteinerAlgorithm.ROOTNODE,
+            a[0],
+            a[1],
+            a[6],
+            a[1],
+            a[4],
+            a[5]
+        };
         double[] parentCostArray = new double[]{0, 1, 2.1, 8.1, 1, 0.1, 0.1};
 
-        assertThat(steinerTreeResult.parentArray().toArray()).isEqualTo(parentArray);
-        for (int i = 0; i < parentCostArray.length; ++i) {
-            assertThat(steinerTreeResult.relationshipToParentCost().get(i)).isCloseTo(
-                parentCostArray[i],
-                Offset.offset(1e-5)
-            );
-        }
-
-        assertThat(steinerTreeResult.totalCost()).isCloseTo(12.4, Offset.offset(1e-5));
+        SteinerTestUtils.assertTreeIsCorrect(extIdFunction, steinerTreeResult, parentArray, parentCostArray, 12.4);
 
     }
 
     @Test
     void shouldWorkOnTriangle() {
+        var a = SteinerTestUtils.getNodes(triangleIdFunction, 4);
         var steinerTreeResult = new ShortestPathsSteinerAlgorithm(
             triangleGraph,
-            0,
-            List.of(1L, 3L),
+            a[0],
+            List.of(a[1], a[3]),
             2.0,
             1
         ).compute();
 
-        long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOTNODE, 0, 1, 2};
+        long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOTNODE, a[0], a[1], a[2]};
         double[] parentCostArray = new double[]{0, 15, 3, 6};
 
-        assertThat(steinerTreeResult.parentArray().toArray()).isEqualTo(parentArray);
-        assertThat(steinerTreeResult.relationshipToParentCost().toArray()).isEqualTo(parentCostArray);
-
-        assertThat(steinerTreeResult.totalCost()).isEqualTo(24);
+        SteinerTestUtils.assertTreeIsCorrect(triangleIdFunction, steinerTreeResult, parentArray, parentCostArray, 24);
 
     }
 

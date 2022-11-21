@@ -54,7 +54,7 @@ class SteinerBasedDeltaTask implements Runnable {
         BitSet mergedToSource
     ) {
 
-        this.graph = graph.concurrentCopy();
+        this.graph = graph;
         this.frontier = frontier;
         this.distances = distances;
         this.delta = delta;
