@@ -12,3 +12,5 @@ org.neo4j.configuration.SettingImpl#newBuilder(java.lang.String, org.neo4j.confi
 org.neo4j.configuration.SettingBuilder(java.lang.String, org.neo4j.configuration.SettingValueParser, java.lang.Object) @ Use SettingProxy#newBuilder instead.
 
 java.util.ServiceLoader#load(java.lang.Class) @ Must pass explicit class loader with service loading, as the context class loader for the thread may be the wrong one
+
+org.neo4j.kernel.api.procedure.CallableProcedure @ Implement org.neo4j.gds.compat.CompatCallableProcedure instead and call Neo4jProxy.callableProcedure(compat).

@@ -20,6 +20,7 @@
 package org.neo4j.gds.compat._44;
 
 import org.neo4j.collection.RawIterator;
+import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.CompatCallableProcedure;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
@@ -28,6 +29,7 @@ import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.values.AnyValue;
 
+@SuppressForbidden(reason = "This is the compat API")
 public final class CallableProcedureImpl implements CallableProcedure {
     private final CompatCallableProcedure procedure;
 
