@@ -67,6 +67,7 @@ import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
+import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
@@ -292,6 +293,8 @@ public interface Neo4jProxyApi {
         boolean internal,
         boolean threadSafe
     );
+
+    CallableProcedure callableProcedure(CompatCallableProcedure procedure);
 
     long transactionId(KernelTransactionHandle kernelTransactionHandle);
 

@@ -30,6 +30,7 @@ import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.BoltTransactionRunner;
+import org.neo4j.gds.compat.CompatCallableProcedure;
 import org.neo4j.gds.compat.CompatExecutionMonitor;
 import org.neo4j.gds.compat.CompatIndexQuery;
 import org.neo4j.gds.compat.CompatInput;
@@ -101,6 +102,7 @@ import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
+import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.database.NormalizedDatabaseName;
 import org.neo4j.kernel.database.TestDatabaseIdRepository;
@@ -750,6 +752,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             isBuiltIn,
             internal
         );
+    }
+
+    @Override
+    public CallableProcedure callableProcedure(CompatCallableProcedure procedure) {
+        return new CallableProcedureImpl(procedure);
     }
 
     @Override
