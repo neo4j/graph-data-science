@@ -95,7 +95,7 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         embeddingsA.setAll(unused -> HugeAtomicBitSet.create(embeddingDimension));
 
         double avgDegree = (graph.relationshipCount() / (double) graph.nodeCount());
-        int upperBoundBits = Math.min(embeddingDimension, config.embeddingDensity());
+        int upperBoundBits = Math.max(Math.min(embeddingDimension, config.embeddingDensity()), 1);
         int upperBoundSelfExpectedBits = (int) Math.round(upperBoundBits * (1 - Math.pow(
             1 - (1.0 / upperBoundBits),
             config.embeddingDensity()
