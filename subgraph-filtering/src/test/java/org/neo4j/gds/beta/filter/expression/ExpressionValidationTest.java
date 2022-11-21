@@ -117,7 +117,7 @@ class ExpressionValidationTest {
 
         assertThatExceptionOfType(SemanticErrors.class)
             .isThrownBy(() -> expr.validate(context).validate())
-            .withMessageContaining("Unknown relationship type `baz`. Did you mean `bar`?");
+            .withMessageContaining("Unknown label `baz`. Did you mean `bar`?");
     }
 
     @Test

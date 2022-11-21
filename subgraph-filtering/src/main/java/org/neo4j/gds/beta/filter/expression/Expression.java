@@ -26,6 +26,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.utils.StringJoining;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -172,11 +173,11 @@ public interface Expression {
 
                 for (var nodeLabel : nodeLabels()) {
                     if (!availableNodeLabels.contains(nodeLabel)) {
-                        context = context.withError(SemanticErrors.SemanticError.of(prettySuggestions(
-                            formatWithLocale("Unknown label `%s`.", nodeLabel.name),
+                        context = trackMissingLabelOrTypeError(
+                            context,
                             nodeLabel.name,
                             availableNodeLabels.stream().map(NodeLabel::name).collect(Collectors.toList())
-                        )));
+                        );
                     }
                 }
                 return context;
@@ -201,11 +202,11 @@ public interface Expression {
 
                 for (var relationshipType : relationshipTypes()) {
                     if (!availableRelationshipTypes.contains(relationshipType)) {
-                        context = context.withError(SemanticErrors.SemanticError.of(prettySuggestions(
-                            formatWithLocale("Unknown relationship type `%s`.", relationshipType.name),
+                        context = trackMissingLabelOrTypeError(
+                            context,
                             relationshipType.name,
                             availableRelationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toList())
-                        )));
+                        );
                     }
                 }
                 return context;
@@ -226,22 +227,11 @@ public interface Expression {
             default ValidationContext validate(ValidationContext context) {
                 context = in().validate(context);
 
-                Set<String> availableLabelsOrTypes = context.availableLabelsOrTypes();
-                String elementType = context.context() == ValidationContext.Context.NODE
-                    ? "label"
-                    : "relationship type";
+                var availableLabelsOrTypes = context.availableLabelsOrTypes();
 
                 for (String labelOrType : labelsOrTypes()) {
                     if (!availableLabelsOrTypes.contains(labelOrType)) {
-                        context = context.withError(SemanticErrors.SemanticError.of(prettySuggestions(
-                            formatWithLocale(
-                                "Unknown %s `%s`.",
-                                elementType,
-                                labelOrType
-                            ),
-                            labelOrType,
-                            availableLabelsOrTypes
-                        )));
+                        context = trackMissingLabelOrTypeError(context, labelOrType, availableLabelsOrTypes);
                     }
                 }
 
@@ -595,6 +585,26 @@ public interface Expression {
         }
 
         return proposedLiteral;
+    }
+
+    static ValidationContext trackMissingLabelOrTypeError(
+        ValidationContext context,
+        String labelOrType,
+        Collection<String> availableLabelsOrTypes
+    ) {
+        var elementType = context.context() == ValidationContext.Context.NODE
+            ? "label"
+            : "relationship type";
+
+        return context.withError(SemanticErrors.SemanticError.of(prettySuggestions(
+            formatWithLocale(
+                "Unknown %s `%s`.",
+                elementType,
+                labelOrType
+            ),
+            labelOrType,
+            availableLabelsOrTypes
+        )));
     }
 
 }

@@ -151,20 +151,29 @@ class GraphProjectSubgraphProcTest extends BaseProcTest {
 
     @Test
     void throwsOnSemanticNodeError() {
-        var subGraphQuery = "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'r:Foo', 'true')";
-
-        assertThatThrownBy(() -> runQuery(subGraphQuery))
+        assertThatThrownBy(() -> runQuery("CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'r:Foo', 'true')"))
             .getRootCause()
             .isInstanceOf(SemanticErrors.class)
-            .hasMessageContaining("Only `n` is allowed for nodes")
-            .hasMessageContaining("Unknown label `Foo`");
+            .hasMessageContaining("Only `n` is allowed for nodes");
+
+        assertThatThrownBy(() -> runQuery(
+            "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'n:Foo AND n.foobar > 42', 'true')"))
+            .getRootCause()
+            .isInstanceOf(SemanticErrors.class)
+            .hasMessageContaining("Unknown property `foobar`.")
+            .hasMessageContaining("Unknown label `Foo`.");
     }
 
     @Test
     void throwsOnSemanticRelationshipError() {
-        var subGraphQuery = "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'true', 'r:BAR AND r.prop > 42')";
+        assertThatThrownBy(() -> runQuery(
+            "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'true', 'n:BAR')"))
+            .getRootCause()
+            .isInstanceOf(SemanticErrors.class)
+            .hasMessageContaining("Only `r` is allowed for relationships");
 
-        assertThatThrownBy(() -> runQuery(subGraphQuery))
+        assertThatThrownBy(() -> runQuery(
+            "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'true', 'r:BAR AND r.prop > 42')"))
             .getRootCause()
             .isInstanceOf(SemanticErrors.class)
             .hasMessageContaining("Unknown property `prop`.")
