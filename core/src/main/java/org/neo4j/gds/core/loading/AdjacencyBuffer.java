@@ -212,7 +212,7 @@ public final class AdjacencyBuffer {
                 if (propertyValues == null) {
                     compressedTargets.add(localId, targets, startOffset, endOffset, targetsToImport);
                 } else {
-                    if (aggregations[0] != Aggregation.NONE) {
+                    if (aggregations[0] != Aggregation.NONE && targetsToImport > 1) {
                         targetsToImport = preAggregate(targets, propertyValues, startOffset, endOffset, aggregations);
                     }
                     compressedTargets.add(localId, targets, propertyValues, startOffset, endOffset, targetsToImport);
