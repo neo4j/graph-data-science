@@ -33,6 +33,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -154,6 +155,47 @@ class OpenModelCatalogTest {
             model2,
             modelCatalog.get("user2", "testModel2", String.class, TestTrainConfig.class, ToMapConvertible.class)
         );
+    }
+
+    @Test
+    void shouldCountModels() {
+        var model1 = Model.of(
+            "testAlgo1",
+            GRAPH_SCHEMA,
+            "modelData1",
+            TestTrainConfig.of(USERNAME, "testModel1"),
+            Map::of
+        );
+
+        var model2 = Model.of(
+            "testAlgo2",
+            GRAPH_SCHEMA,
+            1337L,
+            TestTrainConfig.of(USERNAME, "testModel2"),
+            Map::of
+        );
+
+        var publicModel = Model.of(
+            "testAlgo2",
+            GRAPH_SCHEMA,
+            1337L,
+            TestTrainConfig.of("anotherUser", "testModel2"),
+            Map::of
+        );
+
+        assertThat(modelCatalog.modelsCount()).isEqualTo(0);
+
+        modelCatalog.set(model1);
+
+        assertThat(modelCatalog.modelsCount()).isEqualTo(1);
+
+        modelCatalog.set(model2);
+
+        assertThat(modelCatalog.modelsCount()).isEqualTo(2);
+
+        modelCatalog.set(publicModel);
+
+        assertThat(modelCatalog.modelsCount()).isEqualTo(3);
     }
 
     @Test

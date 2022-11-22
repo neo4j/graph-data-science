@@ -120,6 +120,11 @@ class OpenUserCatalog implements UserCatalog {
         verifyModelsLimit(modelType);
     }
 
+    @Override
+    public long size() {
+        return userModels.size();
+    }
+
     private <D, C extends ModelConfig, I extends ToMapConvertible> Model<D, C, I> get(
         Model<?, ?, ?> model,
         Class<D> dataClass,
