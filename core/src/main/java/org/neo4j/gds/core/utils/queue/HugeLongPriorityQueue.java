@@ -24,7 +24,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.PrimitiveIterator;
 
@@ -47,7 +46,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         return MemoryEstimations.builder(HugeLongPriorityQueue.class)
             .perNode("heap", HugeLongArray::memoryEstimation)
             .perNode("costs", HugeDoubleArray::memoryEstimation)
-            .perNode("keys", MemoryUsage::sizeOfBitset)
+            .perNode("inverted index", HugeLongArray::memoryEstimation)
             .build();
     }
 

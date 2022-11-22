@@ -276,7 +276,7 @@ RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 7         | 14               | 568   | 568      | "568 Bytes"
+| 7         | 14               | 616   | 616      | "616 Bytes"
 |===
 --
 [[algorithms-spanning-tree-examples-sream]]

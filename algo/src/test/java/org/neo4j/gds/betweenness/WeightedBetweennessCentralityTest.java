@@ -153,9 +153,9 @@ class WeightedBetweennessCentralityTest {
 
     static Stream<Arguments> expectedWeightedMemoryEstimation() {
         return Stream.of(
-            Arguments.of(1, 6_425_504L, 6_425_504L),
-            Arguments.of(4, 23_301_704L, 23_301_704L),
-            Arguments.of(42, 237_066_904L, 237_066_904L)
+            Arguments.of(1, 7_213_000L, 7_213_000L),
+            Arguments.of(4, 26_451_688L, 26_451_688L),
+            Arguments.of(42, 270_141_736L, 270_141_736L)
         );
     }
 }

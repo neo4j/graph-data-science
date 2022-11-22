@@ -71,13 +71,13 @@ final class DijkstraTest {
     static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
             // trackRelationships = false
-            Arguments.of(1_000, false, 32_744L),
-            Arguments.of(1_000_000, false, 32_250_488L),
-            Arguments.of(1_000_000_000, false, 32_254_883_400L),
+            Arguments.of(1_000, false, 40_616),
+            Arguments.of(1_000_000, false, 40_125_488L),
+            Arguments.of(1_000_000_000, false, 40_131_104_128L),
             // trackRelationships = true
-            Arguments.of(1_000, true, 48_960L),
-            Arguments.of(1_000_000, true, 48_250_704L),
-            Arguments.of(1_000_000_000, true, 48_257_325_072L)
+            Arguments.of(1_000, true, 56_832L),
+            Arguments.of(1_000_000, true, 56_125_704, 56_125_704L),
+            Arguments.of(1_000_000_000, true, 56_133_545_800L)
         );
     }
 
