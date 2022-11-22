@@ -5,7 +5,7 @@ description = 'Neo4j Graph Data Science :: Storage Engine Adapter 5.1'
 
 group = 'org.neo4j.gds'
 
-// for 5.2.0-dev and all 5.x drops
+// for all 5.x versions
 if (ver.'neo4j'.startsWith('5.')) {
     sourceSets {
         main {
