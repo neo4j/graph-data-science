@@ -93,6 +93,11 @@ public final class OpenModelCatalog implements ModelCatalog {
     }
 
     @Override
+    public long modelsCount() {
+        return userCatalogs.values().stream().mapToLong(OpenUserCatalog::size).sum();
+    }
+
+    @Override
     public boolean exists(String username, String modelName) {
         return getUserCatalog(username).exists(modelName);
     }

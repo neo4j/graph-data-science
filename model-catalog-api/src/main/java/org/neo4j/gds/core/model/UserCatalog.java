@@ -56,4 +56,6 @@ public interface UserCatalog {
     void removeAllLoadedModels();
 
     void verifyModelCanBeStored(String modelName, String modelType);
+
+    long size();
 }
