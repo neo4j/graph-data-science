@@ -24,7 +24,18 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class SteinerTreeAlgorithmFactory<CONFIG extends SteinerTreeBaseConfig> extends GraphAlgorithmFactory<ShortestPathsSteinerAlgorithm, CONFIG> {
+    private List<Long> getTargetNodes(
+        Graph graph,
+        CONFIG configuration
+    ) {
+        return configuration.targetNodes().stream()
+            .map(graph::safeToMappedNodeId)
+            .collect(Collectors.toList());
+    }
 
     @Override
     public ShortestPathsSteinerAlgorithm build(
@@ -34,8 +45,8 @@ public class SteinerTreeAlgorithmFactory<CONFIG extends SteinerTreeBaseConfig> e
     ) {
         return new ShortestPathsSteinerAlgorithm(
             graphOrGraphStore,
-            configuration.sourceNode(),
-            configuration.targetNodes(),
+            graphOrGraphStore.toMappedNodeId(configuration.sourceNode()),
+            getTargetNodes(graphOrGraphStore, configuration),
             configuration.delta(),
             configuration.concurrency(),
             configuration.applyRerouting(),
