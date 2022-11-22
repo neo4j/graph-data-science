@@ -121,24 +121,6 @@ class ExpressionValidationTest {
     }
 
     @Test
-    void hasLabelsOrTypes() {
-        var context = ImmutableTestValidationContext
-            .builder()
-            .addAvailableNodeLabels(NodeLabel.of("foo"), NodeLabel.of("bar"))
-            .build();
-
-        var expr = ImmutableHasLabelsOrTypes
-            .builder()
-            .in(ImmutableVariable.builder().name("n").build())
-            .addLabelsOrTypes("foo", "baz")
-            .build();
-
-        assertThatExceptionOfType(SemanticErrors.class)
-            .isThrownBy(() -> expr.validate(context).validate())
-            .withMessageContaining("Unknown label `baz`. Did you mean `bar`?");
-    }
-
-    @Test
     void multipleErrors() throws ParseException {
         var expressionString = "n:Baz AND n.foo = 42";
         var expr = ExpressionParser.parse(expressionString, Map.of());

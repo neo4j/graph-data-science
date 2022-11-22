@@ -214,32 +214,6 @@ public interface Expression {
         }
 
         @ValueClass
-        interface HasLabelsOrTypes extends UnaryExpression {
-            List<String> labelsOrTypes();
-
-            @Value.Derived
-            @Override
-            default double evaluate(EvaluationContext context) {
-                return context.hasLabelsOrTypes(labelsOrTypes()) ? TRUE : FALSE;
-            }
-
-            @Override
-            default ValidationContext validate(ValidationContext context) {
-                context = in().validate(context);
-
-                var availableLabelsOrTypes = context.availableLabelsOrTypes();
-
-                for (String labelOrType : labelsOrTypes()) {
-                    if (!availableLabelsOrTypes.contains(labelOrType)) {
-                        context = trackMissingLabelOrTypeError(context, labelOrType, availableLabelsOrTypes);
-                    }
-                }
-
-                return context;
-            }
-        }
-
-        @ValueClass
         interface Not extends UnaryExpression {
 
             @Value.Derived

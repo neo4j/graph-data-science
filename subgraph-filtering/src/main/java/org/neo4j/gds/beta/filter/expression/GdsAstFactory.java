@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 class GdsAstFactory extends AstFactoryAdapter {
 
     private static final String LONG_MIN_VALUE_DECIMAL_STRING = Long.toString(Long.MIN_VALUE).substring(1);
@@ -88,18 +90,24 @@ class GdsAstFactory extends AstFactoryAdapter {
                 var nodeLabels = labels.stream().map(l -> l.string).map(NodeLabel::of).collect(Collectors.toList());
                 return ImmutableHasNodeLabels.builder().in(subject).addAllNodeLabels(nodeLabels).build();
             } else if (variable.name().equals("r")) {
-                var relationshipTypes = labels.stream().map(l -> l.string).map(RelationshipType::of).collect(Collectors.toList());
-                return ImmutableHasRelationshipTypes.builder().in(subject).addAllRelationshipTypes(relationshipTypes).build();
+                var relationshipTypes = labels
+                    .stream()
+                    .map(l -> l.string)
+                    .map(RelationshipType::of)
+                    .collect(Collectors.toList());
+                return ImmutableHasRelationshipTypes
+                    .builder()
+                    .in(subject)
+                    .addAllRelationshipTypes(relationshipTypes)
+                    .build();
             }
+            throw new IllegalArgumentException(formatWithLocale(
+                "Invalid variable `%s`. Use `n` for nodes and `r` for relationships.",
+                variable.name()
+            ));
         }
-        // Fallback, if the subject can not be identified as node or relationship variable
-        var labelStrings = labels.stream().map(l -> l.string).collect(Collectors.toList());
-
-        return ImmutableHasLabelsOrTypes
-            .builder()
-            .in(subject)
-            .addAllLabelsOrTypes(labelStrings)
-            .build();
+        throw new UnsupportedOperationException(
+            "Label / Type expression can only be combined with variable expressions.");
     }
 
     @Override
