@@ -34,6 +34,7 @@ import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.DoubleAdder;
+import java.util.concurrent.atomic.LongAdder;
 
 public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> {
 
@@ -93,20 +94,29 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
             parent.set(v, PRUNED);
         });
         DoubleAdder totalCost = new DoubleAdder();
+        LongAdder effectiveNodeCount = new LongAdder();
+        LongAdder terminalsReached = new LongAdder();
 
+        effectiveNodeCount.increment(); //sourceNode is always in the solution
         var shortestPaths = runShortestPaths();
 
         initForSource(parent, parentCost);
 
         shortestPaths.forEachPath(path -> {
-            processPath(path, parent, parentCost, totalCost);
-
+            processPath(path, parent, parentCost, totalCost, effectiveNodeCount);
+            terminalsReached.increment();
         });
 
         if (applyRerouting) {
-            reroute(parent, parentCost, totalCost);
+            reroute(parent, parentCost, totalCost, effectiveNodeCount);
         }
-        return SteinerTreeResult.of(parent, parentCost, totalCost.doubleValue());
+        return SteinerTreeResult.of(
+            parent,
+            parentCost,
+            totalCost.doubleValue(),
+            effectiveNodeCount.longValue(),
+            terminalsReached.longValue()
+        );
     }
 
     @Override
@@ -123,7 +133,8 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         PathResult path,
         HugeLongArray parent,
         HugeDoubleArray parentCost,
-        DoubleAdder totalCost
+        DoubleAdder totalCost,
+        LongAdder effectiveNodeCount
     ) {
 
         long targetId = path.targetNode();
@@ -142,6 +153,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
                 }
                 parent.set(nodeId, parentId);
                 parentCost.set(nodeId, cost);
+                effectiveNodeCount.increment();
 
             }
         }
@@ -213,11 +225,16 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         return tree;
     }
 
-    private void cutNodesAfterRerouting(HugeLongArray parent, HugeDoubleArray parentCost, DoubleAdder totalCost) {
+    private void cutNodesAfterRerouting(
+        HugeLongArray parent,
+        HugeDoubleArray parentCost,
+        DoubleAdder totalCost,
+        LongAdder effectiveNodeCount
+    ) {
         BitSet endsAtTerminal = new BitSet(graph.nodeCount());
         HugeLongArrayQueue queue = HugeLongArrayQueue.newQueue(graph.nodeCount());
         for (var terminal : terminals) {
-            queue.add(terminal);
+            queue.add(terminal); //TODO: handle non-reachable terminals!
             endsAtTerminal.set(terminal);
         }
         while (!queue.isEmpty()) {
@@ -234,13 +251,19 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
                     parent.set(nodeId, PRUNED);
                     totalCost.add(-parentCost.get(nodeId));
                     parentCost.set(nodeId, PRUNED);
+                    effectiveNodeCount.decrement();
                 }
             }
         });
 
     }
 
-    private void reroute(HugeLongArray parent, HugeDoubleArray parentCost, DoubleAdder totalCost) {
+    private void reroute(
+        HugeLongArray parent,
+        HugeDoubleArray parentCost,
+        DoubleAdder totalCost,
+        LongAdder effectiveNodeCount
+    ) {
         //First, represent the tree as an LinkCutTree:
         // This is a dynamic tree (can answer connectivity like UnionFind)
         // but can also do some other cool stuff like answering path queries
@@ -270,7 +293,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
 
         });
         if (didReroutes.isTrue()) {
-            cutNodesAfterRerouting(parent, parentCost, totalCost);
+            cutNodesAfterRerouting(parent, parentCost, totalCost, effectiveNodeCount);
         }
 
     }

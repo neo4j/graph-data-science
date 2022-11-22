@@ -33,7 +33,24 @@ public interface SteinerTreeResult {
 
     double totalCost();
 
-    static SteinerTreeResult of(HugeLongArray parent, HugeDoubleArray relationshipToParentCost, double totalCost) {
-        return ImmutableSteinerTreeResult.of(parent, relationshipToParentCost, totalCost);
+    long effectiveNodeCount();
+
+    long effectiveTargetNodesCount();
+
+
+    static SteinerTreeResult of(
+        HugeLongArray parent,
+        HugeDoubleArray relationshipToParentCost,
+        double totalCost,
+        long effectiveNodeCount,
+        long effectiveTargetNodesCount
+    ) {
+        return ImmutableSteinerTreeResult.of(
+            parent,
+            relationshipToParentCost,
+            totalCost,
+            effectiveNodeCount,
+            effectiveTargetNodesCount
+        );
     }
 }

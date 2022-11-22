@@ -88,6 +88,9 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             Pools.DEFAULT
         ).compute();
         assertThat(steinerResult.totalCost()).isEqualTo(7.0);
+        assertThat(steinerResult.effectiveNodeCount()).isEqualTo(5);
+        assertThat(steinerResult.effectiveTargetNodesCount()).isEqualTo(2);
+
         var steinerResultWithReroute = new ShortestPathsSteinerAlgorithm(
             graph,
             idFunction.of("a0"),
@@ -98,6 +101,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             Pools.DEFAULT
         ).compute();
         assertThat(steinerResultWithReroute.totalCost()).isEqualTo(4.0);
+        assertThat(steinerResultWithReroute.effectiveNodeCount()).isEqualTo(3);
+        assertThat(steinerResultWithReroute.effectiveTargetNodesCount()).isEqualTo(2);
 
     }
 
