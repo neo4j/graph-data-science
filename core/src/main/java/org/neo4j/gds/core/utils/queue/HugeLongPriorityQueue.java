@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.utils.queue;
 
-import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -54,7 +53,6 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
 
     private final long capacity;
 
-    private BitSet costKeys;
     private HugeLongArray heap;
     private HugeLongArray mapIndexTo;
     private long size = 0;
@@ -76,7 +74,6 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
             heapSize = capacity + 1;
         }
         this.capacity = capacity;
-        this.costKeys = new BitSet(capacity);
         this.heap = HugeLongArray.newArray(heapSize);
         this.mapIndexTo = HugeLongArray.newArray(heapSize);
         this.costValues = HugeDoubleArray.newArray(capacity);
@@ -132,7 +129,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
      * Returns true, iff the element is contained in the queue.
      */
     public boolean containsElement(long element) {
-        return costKeys.get(element);
+        return mapIndexTo.get(element) > 0;
     }
 
     /**
@@ -175,7 +172,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     public void release() {
         size = 0;
         heap = null;
-        costKeys = null;
+        mapIndexTo = null;
         costValues.release();
     }
 
@@ -196,8 +193,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
      * @return true, if the element already existed, false otherwise.
      */
     private boolean addCost(long element, double cost) {
-        boolean elementExists = costKeys.get(element);
-        costKeys.set(element);
+        boolean elementExists = mapIndexTo.get(element) > 0;
         costValues.set(element, cost);
         return elementExists;
     }
@@ -214,7 +210,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
      */
     public void clear() {
         size = 0;
-        costKeys.clear();
+        mapIndexTo.fill(0L);
     }
 
     private long findElementPosition(long element) {
@@ -274,7 +270,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     }
 
     private void removeCost(long element) {
-        costKeys.clear(element);
+        mapIndexTo.set(element, 0);
     }
 
     @Override
