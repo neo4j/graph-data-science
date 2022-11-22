@@ -24,7 +24,6 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
@@ -33,6 +32,7 @@ import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.DoubleAdder;
 
 public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> {
@@ -45,8 +45,9 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
     private final int concurrency;
     private final BitSet isTerminal;
     private final boolean applyRerouting;
-
     private final double delta;
+    private final ExecutorService executorService;
+
 
     public ShortestPathsSteinerAlgorithm(
         Graph graph,
@@ -54,7 +55,8 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         List<Long> terminals,
         double delta,
         int concurrency,
-        boolean applyRerouting
+        boolean applyRerouting,
+        ExecutorService executorService
     ) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
@@ -64,6 +66,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         this.delta = delta;
         this.isTerminal = createTerminals();
         this.applyRerouting = applyRerouting;
+        this.executorService = executorService;
     }
 
     private BitSet createTerminals() {
@@ -153,7 +156,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
             delta,
             isTerminal,
             concurrency,
-            Pools.DEFAULT,
+            executorService,
             ProgressTracker.NULL_TRACKER
         );
 

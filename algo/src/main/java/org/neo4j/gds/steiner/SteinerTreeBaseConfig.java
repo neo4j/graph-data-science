@@ -35,4 +35,10 @@ public interface SteinerTreeBaseConfig extends AlgoBaseConfig, SourceNodeConfig,
     default boolean applyRerouting() {
         return false;
     }
+
+    @Configuration.DoubleRange(min = 0, minInclusive = false)
+    @Value.Default
+    default double delta() {
+        return 2.0;
+    }
 }

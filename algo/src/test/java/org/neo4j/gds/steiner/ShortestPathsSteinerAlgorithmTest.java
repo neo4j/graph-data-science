@@ -21,6 +21,7 @@ package org.neo4j.gds.steiner;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -76,7 +77,8 @@ class ShortestPathsSteinerAlgorithmTest {
             List.of(a[4], a[7], a[8]),
             2.0,
             1,
-            false
+            false,
+            Pools.DEFAULT
         ).compute();
         var pruned = ShortestPathsSteinerAlgorithm.PRUNED;
         var rootnode = ShortestPathsSteinerAlgorithm.ROOTNODE;

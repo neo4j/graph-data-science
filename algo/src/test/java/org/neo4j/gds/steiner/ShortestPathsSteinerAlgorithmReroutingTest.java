@@ -21,6 +21,7 @@ package org.neo4j.gds.steiner;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -83,7 +84,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             List.of(idFunction.of("a3"), idFunction.of("a4")),
             2.0,
             1,
-            false
+            false,
+            Pools.DEFAULT
         ).compute();
         assertThat(steinerResult.totalCost()).isEqualTo(7.0);
         var steinerResultWithReroute = new ShortestPathsSteinerAlgorithm(
@@ -92,7 +94,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             List.of(idFunction.of("a3"), idFunction.of("a4")),
             2.0,
             1,
-            true
+            true,
+            Pools.DEFAULT
         ).compute();
         assertThat(steinerResultWithReroute.totalCost()).isEqualTo(4.0);
 
@@ -108,7 +111,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             List.of(noRerouteIdFunction.of("a3")),
             2.0,
             1,
-            true
+            true,
+            Pools.DEFAULT
         ).compute();
         var parent = steinerResult.parentArray().toArray();
 
