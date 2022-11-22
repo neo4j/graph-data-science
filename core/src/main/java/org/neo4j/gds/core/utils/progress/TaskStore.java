@@ -40,4 +40,6 @@ public interface TaskStore {
     Stream<Task> taskStream();
 
     boolean isEmpty();
+
+    long tasksCount();
 }
