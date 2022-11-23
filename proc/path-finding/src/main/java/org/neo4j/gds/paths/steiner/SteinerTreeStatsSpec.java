@@ -20,7 +20,6 @@
 package org.neo4j.gds.paths.steiner;
 
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
@@ -57,12 +56,12 @@ public class SteinerTreeStatsSpec implements AlgorithmSpec<ShortestPathsSteinerA
     public ComputationResultConsumer<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeStatsConfig, Stream<StatsResult>> computationResultConsumer() {
 
         return (computationResult, executionContext) -> {
-            Graph graph = computationResult.graph();
+            var graph = computationResult.graph();
             var steinerAlgorithm = computationResult.algorithm();
             var steinerTreeResult = computationResult.result();
             SteinerTreeStatsConfig config = computationResult.config();
 
-            StatsResult.Builder builder = new StatsResult.Builder();
+            var builder = new StatsResult.Builder();
 
             if (graph.isEmpty()) {
                 graph.release();

@@ -201,7 +201,7 @@ class LinkCutTree {
             singleNodeFix(node);
             if (node.left() != null) {
                 LinkCutNode l = node.left();
-                addChild(node, null,Direction.LEFT);
+                addChild(node, null, Direction.LEFT);
                 l.setParent(null);
             }
         }
