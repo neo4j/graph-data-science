@@ -29,23 +29,27 @@ class LinkCutTree {
         public LinkCutTree(long nodeCount) {
             nodes = HugeObjectArray.newArray(LinkCutNode.class,nodeCount);
             for (long i = 0; i < nodeCount; i++) {
-                nodes.set(i, new LinkCutNode(i, i, null));
+                nodes.set(i, LinkCutNode.createSingle(i));
             }
             edgeInTree = HugeObjectArray.newArray(LinkCutNode.class,nodeCount);
         }
+
         private void fixSituation(LinkCutNode u) {
             singleNodeFix(u.parent());
             singleNodeFix(u);
         }
-        private void fixAndSingle(LinkCutNode node){
+
+    private void fixAndSingle(LinkCutNode node){
             fixSituation(node);
             singleRotation(node);
         }
-        private void zig(LinkCutNode u) {
+
+    private void zig(LinkCutNode u) {
             fixAndSingle(u.parent());
             fixAndSingle(u);
         }
-        private void zag(LinkCutNode u) {
+
+    private void zag(LinkCutNode u) {
             fixAndSingle(u);
         }
 
@@ -93,9 +97,7 @@ class LinkCutTree {
             }
         }
 
-
-
-        private void expose(LinkCutNode u) {
+    private void expose(LinkCutNode u) {
             LinkCutNode last = null;
             for (LinkCutNode cy = u; cy != null; cy = cy.parent()) {
                 splay(cy);

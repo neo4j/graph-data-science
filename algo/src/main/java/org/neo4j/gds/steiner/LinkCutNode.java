@@ -84,4 +84,8 @@ class LinkCutNode {
         return checkChild(node.left) || checkChild(node.right);
     }
 
+    static LinkCutNode createSingle(long id) {
+        return new LinkCutNode(id, id, null);
+    }
+
 }
