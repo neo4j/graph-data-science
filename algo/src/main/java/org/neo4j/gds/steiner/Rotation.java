@@ -20,5 +20,5 @@
 package org.neo4j.gds.steiner;
 
 public enum Rotation {
-    SPLICE,SINGLE,ZIGZIG,ZIGZAG
+    SPLICE, SINGLE, ZIGZIG, ZIGZAG
 }
