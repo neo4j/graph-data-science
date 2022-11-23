@@ -24,21 +24,12 @@ import org.neo4j.gds.annotation.Configuration;
 
 import java.util.Map;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
 @Configuration
-public interface FeatureBinarizationConfig {
+public interface GenerateFeaturesConfig {
     @Configuration.IntegerRange(min = 1)
     int dimension();
     @Configuration.IntegerRange(min = 1)
     int densityLevel();
-
-    @Value.Check
-    default void validate() {
-        if (2 * densityLevel() > dimension()) {
-            throw new IllegalArgumentException(formatWithLocale("The value %d of `densityLevel` may not exceed half of the value %d of `dimension`.", densityLevel(), dimension()));
-        }
-    }
 
     @Configuration.ToMap
     @Value.Auxiliary

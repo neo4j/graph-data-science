@@ -40,7 +40,7 @@ class DensifyTaskTest {
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(4)
-            .binarizeFeatures(Map.of("dimension", 4, "densityLevel", 1))
+            .binarizeFeatures(Map.of("dimension", 4))
             .outputDimension(5)
             .iterations(100)
             .build();

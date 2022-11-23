@@ -36,14 +36,14 @@ class GenerateFeaturesTask implements Runnable {
     private final Partition partition;
     private final HugeObjectArray<HugeAtomicBitSet> output;
     private final SplittableRandom rng;
-    private final FeatureBinarizationConfig generateFeaturesConfig;
+    private final GenerateFeaturesConfig generateFeaturesConfig;
     private final ProgressTracker progressTracker;
     private long totalNumFeatures = 0;
 
     GenerateFeaturesTask(
         Partition partition,
         SplittableRandom rng,
-        FeatureBinarizationConfig config,
+        GenerateFeaturesConfig config,
         HugeObjectArray<HugeAtomicBitSet> output,
         ProgressTracker progressTracker
     ) {

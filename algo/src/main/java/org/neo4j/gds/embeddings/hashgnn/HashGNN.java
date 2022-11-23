@@ -40,6 +40,8 @@ import java.util.SplittableRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 /**
  * Based on the paper "Hashing-Accelerated Graph Neural Networks for Link Prediction"
  */
@@ -89,6 +91,9 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         var embeddingsB = constructInputEmbeddings(rangePartition);
         int embeddingDimension = (int) embeddingsB.get(0).size();
 
+        double avgInputActiveFeatures = totalSetBits.doubleValue() / graph.nodeCount();
+        progressTracker.logInfo(formatWithLocale("Density (number of active features) of binary input features is %.4f.", avgInputActiveFeatures));
+
         var embeddingsA = HugeObjectArray.newArray(HugeAtomicBitSet.class, graph.nodeCount());
         embeddingsA.setAll(unused -> HugeAtomicBitSet.create(embeddingDimension));
 
@@ -136,6 +141,8 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
                 terminationFlag,
                 totalSetBits
             );
+            double avgActiveFeatures = totalSetBits.doubleValue() / graph.nodeCount();
+            progressTracker.logInfo(formatWithLocale("After iteration %d average node embedding density (number of active features) is %.4f.", iteration, avgActiveFeatures));
         }
 
         progressTracker.endSubTask("Propagate embeddings");

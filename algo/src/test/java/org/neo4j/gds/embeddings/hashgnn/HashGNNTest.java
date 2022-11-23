@@ -81,21 +81,20 @@ class HashGNNTest {
     private IdFunction doubleIdFunction;
 
     @Test
-    void binaryHighEmbeddingDensityLowNeighborInfluence() {
-        int embeddingDensity = 200;
-        double avgDegree = binaryGraph.relationshipCount() / (double) binaryGraph.nodeCount();
+    void binaryLowNeighborInfluence() {
+        int embeddingDensity = 4;
         var config = HashGNNConfigImpl
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(embeddingDensity)
-            .neighborInfluence(avgDegree / embeddingDensity)
+            .neighborInfluence(0.01)
             .iterations(10)
             .randomSeed(42L)
             .build();
         var result = new HashGNN(binaryGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
         //dimension should be equal to dimension of feature input which is 3
         assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("a")))).containsExactly(1.0, 0.0, 0.0);
-        assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("b")))).containsExactly(1.0, 1.0, 1.0);
+        assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("b")))).containsExactly(0.0, 1.0, 0.0);
         assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("c")))).containsExactly(0.0, 0.0, 1.0);
     }
 
@@ -113,22 +112,6 @@ class HashGNNTest {
         //dimension should be equal to dimension of feature input which is 3
         assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("a")))).containsExactly(1.0, 0.0, 0.0);
         assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("b")))).containsExactly(1.0, 0.0, 1.0);
-        assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("c")))).containsExactly(0.0, 0.0, 1.0);
-    }
-
-    @Test
-    void binaryLowEmbeddingDensity() {
-        var config = HashGNNConfigImpl
-            .builder()
-            .featureProperties(List.of("f1", "f2"))
-            .embeddingDensity(1)
-            .iterations(10)
-            .randomSeed(42L)
-            .build();
-        var result = new HashGNN(binaryGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
-        //dimension should be equal to dimension of feature input which is 3
-        assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("a")))).containsExactly(1.0, 0.0, 0.0);
-        assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("b")))).containsExactly(1.0, 0.0, 0.0);
         assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("c")))).containsExactly(0.0, 0.0, 1.0);
     }
 
@@ -155,7 +138,7 @@ class HashGNNTest {
             .randomSeed(43L);
 
         if (binarize) {
-            configBuilder.binarizeFeatures(Map.of("dimension", 12, "densityLevel", 6));
+            configBuilder.binarizeFeatures(Map.of("dimension", 12));
         }
 
         if (dimReduce) {
@@ -173,23 +156,26 @@ class HashGNNTest {
     }
 
     @Test
-    void shouldRunOnDoublesAndBeDeterministicEqualScaledNeighborInfluence() {
-        int embeddingDensity = 200;
-        int binarizationDimension = 16;
+    void shouldRunOnDoublesAndBeDeterministicEqualNeighborInfluence() {
+        int embeddingDensity = 100;
+        int binarizationDimension = 8;
 
+        // not all random seeds will give b a unique feature
+        // this intends to test that if b has a unique feature before the first iteration, then it also has it after the first iteration
+        // however we simulate what is before the first iteration by running with neighborInfluence 0
         var configBuilder = HashGNNConfigImpl
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(embeddingDensity)
-            .binarizeFeatures(Map.of("dimension", binarizationDimension, "densityLevel", 2))
+            .binarizeFeatures(Map.of("dimension", binarizationDimension))
             .iterations(1)
-            .randomSeed(43L);
+            .randomSeed(42L);
         var configBefore = configBuilder.neighborInfluence(0).build();
         var resultBefore = new HashGNN(doubleGraph, configBefore, ProgressTracker.NULL_TRACKER).compute().embeddings();
 
         var config = configBuilder.neighborInfluence(1.0).build();
         var result = new HashGNN(doubleGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
-        // because of high neighbor influence and high embeddingDensity, we expect the node `b` to have the union of features of its neighbors
+        // because of equal neighbor and self influence and high embeddingDensity, we expect the node `b` to have the union of features of its neighbors plus some of its own features
         // the neighbors are expected to have the same features as their initial projection
 
         double[] embeddingB = result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("b")));
@@ -213,26 +199,27 @@ class HashGNNTest {
 
     @Test
     void shouldRunOnDoublesAndBeDeterministicHighNeighborInfluence() {
-        int embeddingDensity = 50;
-        int binarizationDimension = 16;
+        int embeddingDensity = 100;
+        int binarizationDimension = 8;
 
         var configBuilder = HashGNNConfigImpl
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(embeddingDensity)
-            .binarizeFeatures(Map.of("dimension", binarizationDimension, "densityLevel", 2))
+            .binarizeFeatures(Map.of("dimension", binarizationDimension))
             .iterations(1)
-            .randomSeed(3L);
+            .randomSeed(42L);
         var configBefore = configBuilder.neighborInfluence(0).build();
         var resultBefore = new HashGNN(doubleGraph, configBefore, ProgressTracker.NULL_TRACKER).compute().embeddings();
 
 
         var config = configBuilder
-            .neighborInfluence(4)
+            .neighborInfluence(1000)
             .build();
         var result = new HashGNN(doubleGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
-        // because of equal neighbor and self influence and high embeddingDensity, we expect the node `b` to have the union of features of its neighbors plus some of its own features
+        // because of high neighbor influence and high embeddingDensity, we expect the node `b` to have the union of features of its neighbors
         // the neighbors are expected to have the same features as their initial projection
+
         double[] embeddingB = result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("b")));
         double[] embeddingABefore = resultBefore.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("a")));
         double[] embeddingCBefore = resultBefore.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("c")));
@@ -269,22 +256,22 @@ class HashGNNTest {
     @ParameterizedTest
     @CsvSource(value = {
         // BASE
-        "    10,  4,  10_000, 20_000, 1,  86_695_752",
+        "    10,  4,  10_000, 20_000, 1,  86_324_072",
 
         // Should increase fairly little with higher density
-        "   100,  4,  10_000, 20_000, 1,  91_155_432",
+        "   100,  4,  10_000, 20_000, 1,  87_438_992",
 
         // Should increase fairly little with more iterations
-        "    10, 16,  10_000, 20_000, 1,  88_182_312",
+        "    10, 16,  10_000, 20_000, 1,  86_324_072",
 
         // Should increase almost linearly with node count
-        "    10,  4, 100_000, 20_000, 1, 862_496_112",
+        "    10,  4, 100_000, 20_000, 1, 862_124_432",
 
         // Should be unaffected by relationship count
-        "    10,  4,  10_000, 80_000, 1,  86_695_752",
+        "    10,  4,  10_000, 80_000, 1,  86_324_072",
 
         // Should be unaffected by concurrency
-        "    10,  4,  10_000, 20_000, 8,  86_695_752",
+        "    10,  4,  10_000, 20_000, 8,  86_324_072",
     })
         void shouldEstimateMemory(
         int embeddingDensity,
@@ -326,7 +313,7 @@ class HashGNNTest {
             .iterations(2)
             .randomSeed(42L);
         if (dense) {
-            configBuilder.binarizeFeatures(Map.of("dimension", 16, "densityLevel", 2));
+            configBuilder.binarizeFeatures(Map.of("dimension", 16));
             configBuilder.outputDimension(10);
         }
         var config = configBuilder.build();

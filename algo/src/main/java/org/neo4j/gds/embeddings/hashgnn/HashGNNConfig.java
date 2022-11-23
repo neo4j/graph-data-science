@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.FeaturePropertiesConfig;
@@ -49,26 +50,48 @@ interface HashGNNConfig extends AlgoBaseConfig, FeaturePropertiesConfig, RandomS
         return false;
     }
 
-    @Configuration.ToMapValue("org.neo4j.gds.embeddings.hashgnn.HashGNNConfig#toMapBinarizationConfig")
-    @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.hashgnn.HashGNNConfig#parseBinarizationConfig", inverse = Configuration.ConvertWith.INVERSE_IS_TO_MAP)
-    default Optional<FeatureBinarizationConfig> generateFeatures() {
+    @Configuration.ToMapValue("org.neo4j.gds.embeddings.hashgnn.HashGNNConfig#toMapGenerateFeaturesConfig")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.hashgnn.HashGNNConfig#parseGenerateFeaturesConfig", inverse = Configuration.ConvertWith.INVERSE_IS_TO_MAP)
+    default Optional<GenerateFeaturesConfig> generateFeatures() {
         return Optional.empty();
     }
 
     @Configuration.ToMapValue("org.neo4j.gds.embeddings.hashgnn.HashGNNConfig#toMapBinarizationConfig")
     @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.hashgnn.HashGNNConfig#parseBinarizationConfig", inverse = Configuration.ConvertWith.INVERSE_IS_TO_MAP)
-    default Optional<FeatureBinarizationConfig> binarizeFeatures() {
+    default Optional<BinarizeFeaturesConfig> binarizeFeatures() {
         return Optional.empty();
     }
 
-    static Optional<FeatureBinarizationConfig> parseBinarizationConfig(Object o) {
-        if (o instanceof Optional) {
-            return (Optional<FeatureBinarizationConfig>) o;
+    @Value.Check
+    default void validate() {
+        if (!featureProperties().isEmpty() && generateFeatures().isPresent()) {
+            throw new IllegalArgumentException("It is not allowed to use `generateFeatures` and have non-empty `featureProperties`.");
         }
-        return Optional.of(new FeatureBinarizationConfigImpl(CypherMapWrapper.create((Map<String, Object>) o)));
+        if (generateFeatures().isPresent()) return;
+        if (featureProperties().isEmpty()) {
+            throw new IllegalArgumentException("When `generateFeatures` is not given, `featureProperties` must be non-empty.");
+        }
     }
 
-    static Map<String, Object> toMapBinarizationConfig(FeatureBinarizationConfig config) {
+    static Optional<BinarizeFeaturesConfig> parseBinarizationConfig(Object o) {
+        if (o instanceof Optional) {
+            return (Optional<BinarizeFeaturesConfig>) o;
+        }
+        return Optional.of(new BinarizeFeaturesConfigImpl(CypherMapWrapper.create((Map<String, Object>) o)));
+    }
+
+    static Map<String, Object> toMapBinarizationConfig(BinarizeFeaturesConfig config) {
+        return config.toMap();
+    }
+
+    static Optional<GenerateFeaturesConfig> parseGenerateFeaturesConfig(Object o) {
+        if (o instanceof Optional) {
+            return (Optional<GenerateFeaturesConfig>) o;
+        }
+        return Optional.of(new GenerateFeaturesConfigImpl(CypherMapWrapper.create((Map<String, Object>) o)));
+    }
+
+    static Map<String, Object> toMapGenerateFeaturesConfig(GenerateFeaturesConfig config) {
         return config.toMap();
     }
 }

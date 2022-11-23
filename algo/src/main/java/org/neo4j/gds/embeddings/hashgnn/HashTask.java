@@ -108,11 +108,13 @@ class HashTask implements Runnable {
 
     @Override
     public void run() {
-        double finalInfluence = Math.max(1e-5, Math.min(1e5, scaledNeighborInfluence));
+        // The product of the upper bound of finalInfluence and the lower bound of primeSeed must be < Integer.MAX_VALUE
+        // otherwise rng.nextInt can fail because lower bound is larger than upper bound
+        double finalInfluence = Math.max(1e-4, Math.min(1e4, scaledNeighborInfluence));
 
         // Multiply scaling by 1.001 to make sure we can find a prime >= primeSeed * scaleFactor
         int primeSeed = rng.nextInt(
-            1_000_000,
+            50_000,
             (int) Math.round(Integer.MAX_VALUE / (Math.max(1, finalInfluence) * 1.001))
         );
 

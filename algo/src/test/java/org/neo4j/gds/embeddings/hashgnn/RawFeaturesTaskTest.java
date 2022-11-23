@@ -70,11 +70,11 @@ class RawFeaturesTaskTest {
         var idB = graph.toMappedNodeId(idFunction.of("b"));
         var idC = graph.toMappedNodeId(idFunction.of("c"));
 
-        assertThat(features.get(idA).get(0)).isFalse();
+        assertThat(features.get(idA).get(0)).isTrue();
         assertThat(features.get(idA).get(1)).isTrue();
         assertThat(features.get(idA).get(2)).isTrue();
 
-        assertThat(features.get(idB).get(0)).isFalse();
+        assertThat(features.get(idB).get(0)).isTrue();
         assertThat(features.get(idB).get(1)).isTrue();
         assertThat(features.get(idB).get(2)).isFalse();
 

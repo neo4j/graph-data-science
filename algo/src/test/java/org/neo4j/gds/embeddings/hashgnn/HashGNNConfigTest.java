@@ -26,33 +26,41 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class HashGNNConfigTest {
-    @Test
-    void failsWithTooHighDensityLevel() {
-        assertThatThrownBy(() -> {
-            HashGNNConfigImpl
-                .builder()
-                .featureProperties(List.of("x"))
-                .embeddingDensity(4)
-                .binarizeFeatures(Map.of("dimension", 4, "densityLevel", 3))
-                .iterations(100)
-                .build();
-        }).isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining(formatWithLocale("The value %d of `densityLevel` may not exceed half of the value %d of `dimension`.", 3, 4));
-    }
-
     @Test
     void binarizationConfigCorrectType() {
         var config = HashGNNConfigImpl
             .builder()
             .featureProperties(List.of("x"))
-            .binarizeFeatures(Map.of("dimension", 100, "densityLevel", 3))
+            .binarizeFeatures(Map.of("dimension", 100))
             .embeddingDensity(4)
             .iterations(100)
             .build();
         var map = config.toMap();
         assertThat(map.get("binarizeFeatures")).isInstanceOf(Map.class);
+    }
+    @Test
+    void shouldNotAllowGeneratedAndFeatureProperties() {
+        assertThatThrownBy(() -> {
+            var config = HashGNNConfigImpl
+                .builder()
+                .featureProperties(List.of("x"))
+                .generateFeatures(Map.of("dimension", 100, "densityLevel", 2))
+                .embeddingDensity(4)
+                .iterations(100)
+                .build();
+        }).hasMessage("It is not allowed to use `generateFeatures` and have non-empty `featureProperties`.");
+    }
+
+    @Test
+    void requiresFeaturePropertiesIfNoGeneratedFeatures() {
+        assertThatThrownBy(() -> {
+            var config = HashGNNConfigImpl
+                .builder()
+                .embeddingDensity(4)
+                .iterations(100)
+                .build();
+        }).hasMessage("When `generateFeatures` is not given, `featureProperties` must be non-empty.");
     }
 }
