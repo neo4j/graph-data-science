@@ -181,7 +181,7 @@ class LinkCutTree {
         public boolean connected(long source,long target){
             LinkCutNode nodeSource=nodes.get(source);
             LinkCutNode nodeTarget=nodes.get(target);
-            if (nodeTarget == null || nodeTarget ==null){
+            if (nodeTarget == null || nodeSource == null) {
                 return false;
             }
             expose(nodeSource);
