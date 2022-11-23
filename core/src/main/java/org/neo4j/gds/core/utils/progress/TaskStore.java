@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.progress;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
@@ -41,6 +42,7 @@ public interface TaskStore {
 
     Optional<UserTask> query(String username, JobId jobId);
 
+    @TestOnly
     Stream<Task> taskStream();
 
     boolean isEmpty();
