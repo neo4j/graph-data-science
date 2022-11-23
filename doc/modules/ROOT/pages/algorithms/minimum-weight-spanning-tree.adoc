@@ -63,7 +63,7 @@ CALL gds.beta.spanningTree.stream(
 YIELD
       nodeId: Integer,
       parentId: Integer,
-      cost: Float
+      weight: Float
 ----
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
@@ -81,7 +81,7 @@ include::partial$/algorithms/spanning-tree/specific-configuration.adoc[]
 | Name                | Type    | Description
 | nodeId  | Integer | a node in the discovered spanning tree
 | parentId  | Integer | the parent of nodeId in the spanning tree or nodeId if it is equal to the source node.
-| cost  | Float | The cost of the relationship from parentId to nodeId.
+| weight  | Float | The weight of the relationship from parentId to nodeId.
 
 |===
 ======
@@ -294,15 +294,15 @@ CALL gds.beta.spanningTree.stream('graph', {
   sourceNode: id(n),
   relationshipWeightProperty: 'cost'
 })
-YIELD nodeId,parentId, cost
-RETURN gds.util.asNode(nodeId).id AS node, gds.util.asNode(parentId).id AS parent,cost
+YIELD nodeId,parentId, weight
+RETURN gds.util.asNode(nodeId).id AS node, gds.util.asNode(parentId).id AS parent,weight
 ORDER BY node
 ----
 
 .Results
 [opts="header"]
 |===
-| node  |parent | cost
+| node  |parent | weight
 | "A"  | "B" | 1
 | "B"  | "D" | 4
 | "C"  | "A" | 2

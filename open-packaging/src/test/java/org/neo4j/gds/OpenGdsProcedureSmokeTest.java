@@ -188,6 +188,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.spanningTree.kmin.write",
 
         "gds.alpha.steinerTree.stats",
+        "gds.alpha.steinerTree.stream",
 
         "gds.alpha.triangles",
         "gds.alpha.ml.splitRelationships.mutate",
@@ -524,7 +525,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 372;
+        int expectedCount = 373;
         assertEquals(
             expectedCount,
             registeredProcedures.size(),

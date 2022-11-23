@@ -68,7 +68,7 @@ public class SpanningTreeStatsSpec implements AlgorithmSpec<Prim, SpanningTree, 
             }
 
             builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount());
-            builder.withtotalWeight(spanningTree.totalWeight());
+            builder.withTotalWeight(spanningTree.totalWeight());
 
             builder.withComputeMillis(computationResult.computeMillis());
             builder.withPreProcessingMillis(computationResult.preProcessingMillis());

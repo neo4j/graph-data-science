@@ -62,7 +62,7 @@ public class StatsResult extends StandardModeResult {
             return this;
         }
 
-        Builder withtotalWeight(double totalWeight) {
+        Builder withTotalWeight(double totalWeight) {
             this.totalWeight = totalWeight;
             return this;
         }

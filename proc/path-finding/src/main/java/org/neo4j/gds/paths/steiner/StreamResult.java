@@ -17,19 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.spanningtree;
+package org.neo4j.gds.paths.steiner;
 
 public class StreamResult {
 
-    public final long nodeId;
-    public final long parentId;
-    public final double weight;
+        public final long nodeId;
+        public final long parentId;
+        public final double weight;
 
-    StreamResult(long nodeId, long parentId, double weight) {
-        this.nodeId = nodeId;
-        this.parentId = parentId;
-        this.weight = weight;
-    }
-
+        StreamResult(long nodeId, long parentId, double cost) {
+            this.nodeId = nodeId;
+            this.parentId = parentId;
+            this.weight = cost;
+        }
 
 }
