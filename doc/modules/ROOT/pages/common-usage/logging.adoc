@@ -37,15 +37,22 @@ Second, if the `jobId` parameter is set it will show a detailed view for the giv
 The detailed view will produce a row for each step or task that job will perform during execution.
 It will also show how tasks are structured as a tree and print progress for each individual task.
 
+[NOTE]
+====
+For administrator users, this procedure will also list the running tasks from other users.
+====
 
 [[logging-progress-logging-syntax]]
 === Syntax
 
+[.listProgress-syntax]
+--
 .Getting the progress of tasks:
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.listProgress(jobId: String)
 YIELD
+  username,
   jobId,
   taskName,
   progress,
@@ -66,6 +73,7 @@ YIELD
 [opts="header",cols="2m,1,6"]
 |===
 | Name          | Type      | Description
+| username      | String    | The user who started the running task.
 | jobId         | String    | A generated identifier of the running task.
 | taskName      | String    | The name of the running task, i.e. `Node2Vec`.
 | progress      | String    | The progress of the job shown as a percentage value.
@@ -74,6 +82,7 @@ YIELD
 | timeStarted   | LocalTime | The local wall clock time when the task has been started.
 | elapsedTime   | Duration  | The duration from `timeStarted` to now.
 |===
+--
 
 [NOTE]
 ====
@@ -119,6 +128,8 @@ When a user calls procedure `gds.alpha.userLog`, their respective list of genera
 [[userlog-syntax]]
 === Syntax
 
+[.userlog-syntax]
+--
 .Getting the hints and warnings for a user:
 [source,cypher,role=noplay]
 ----
@@ -137,6 +148,7 @@ YIELD
 |timeStarted      | LocalTime      | The local wall clock time when the task has been started.
 | message      | String    | A hint or warning associated with the task.
 |===
+--
 
 
 [[userlog-examples]]
