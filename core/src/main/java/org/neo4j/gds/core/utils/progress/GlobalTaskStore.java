@@ -19,14 +19,12 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -88,13 +86,6 @@ public class GlobalTaskStore implements TaskStore, ThrowingFunction<Context, Tas
                 .map(task -> ImmutableUserTask.of(username, jobId, task));
         }
         return Optional.empty();
-    }
-
-    @Override
-    public Stream<Task> taskStream() {
-        return registeredTasks.values().stream()
-            .map(Map::values)
-            .flatMap(Collection::stream);
     }
 
     @Override

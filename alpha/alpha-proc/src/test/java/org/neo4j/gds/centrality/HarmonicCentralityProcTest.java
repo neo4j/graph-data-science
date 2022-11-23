@@ -29,6 +29,7 @@ import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -125,7 +126,7 @@ class HarmonicCentralityProcTest extends BaseProcTest {
                 Map.of("writeProperty", "myProp")
             );
 
-            assertThat(taskStore.taskStream().map(Task::description)).containsExactlyInAnyOrder(
+            assertThat(taskStore.query().map(TaskStore.UserTask::task).map(Task::description)).containsExactlyInAnyOrder(
                 "HarmonicCentrality",
                 "HarmonicCentrality :: WriteNodeProperties"
             );

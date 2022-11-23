@@ -40,6 +40,7 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
@@ -211,10 +212,10 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
 
             runTwiceAndAssertEqualResult(loadedGraphName, proc);
 
-            assertThat(taskStore.taskStream())
+            assertThat(taskStore.query())
                 .withFailMessage(() -> formatWithLocale(
                     "Expected no tasks to be open but found %s",
-                    StringJoining.join(taskStore.taskStream().map(Task::description))
+                    StringJoining.join(taskStore.query().map(TaskStore.UserTask::task).map(Task::description))
                 )).isEmpty();
             assertThat(taskStore.registerTaskInvocations).isGreaterThan(1);
         });

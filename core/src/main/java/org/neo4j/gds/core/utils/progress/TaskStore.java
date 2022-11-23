@@ -42,9 +42,6 @@ public interface TaskStore {
 
     Optional<UserTask> query(String username, JobId jobId);
 
-    @TestOnly
-    Stream<Task> taskStream();
-
     boolean isEmpty();
 
     long taskCount();

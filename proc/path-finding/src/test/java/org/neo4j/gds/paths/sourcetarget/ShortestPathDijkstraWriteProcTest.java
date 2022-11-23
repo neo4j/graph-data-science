@@ -32,6 +32,7 @@ import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
@@ -195,7 +196,7 @@ class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<Sho
                 )
             );
 
-            assertThat(taskStore.taskStream().map(Task::description)).containsExactlyInAnyOrder(
+            assertThat(taskStore.query().map(TaskStore.UserTask::task).map(Task::description)).containsExactlyInAnyOrder(
                 "Dijkstra",
                 "Write shortest Paths :: WriteRelationshipStream"
             );

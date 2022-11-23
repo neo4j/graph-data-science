@@ -113,7 +113,7 @@ class WriteProcCancellationTest extends BaseTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("explicit fail while writing");
             assertThat(taskStore.removeTaskInvocations).isGreaterThanOrEqualTo(1);
-            assertThat(taskStore.taskStream()).isEmpty();
+            assertThat(taskStore.query()).isEmpty();
         }
     }
 }
