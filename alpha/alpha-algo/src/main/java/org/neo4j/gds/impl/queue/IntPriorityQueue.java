@@ -127,6 +127,7 @@ public abstract class IntPriorityQueue {
     public final int pop() {
         if (size > 0) {
             int result = heap.get(1);    // save first value
+            mapElementToIndex.remove(result);
             placeElement(1, heap.get(size));// move last to first
             size--;
             downHeap(1);           // adjust heap
@@ -268,7 +269,10 @@ public abstract class IntPriorityQueue {
 
         @Override
         protected boolean addCost(int element, double cost) {
-            return costs.put(element, cost) != 0D;
+            var contained = costs.containsKey(element);
+            costs.put(element, cost);
+            return contained;
+
         }
 
         @Override

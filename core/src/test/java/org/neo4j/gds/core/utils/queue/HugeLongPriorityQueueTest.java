@@ -189,6 +189,7 @@ class HugeLongPriorityQueueTest {
     void testSetZeroCost() {
         HugeLongPriorityQueue priorityQueue = HugeLongPriorityQueue.min(2);
         priorityQueue.set(1, 0);
+        priorityQueue.set(1, 0);
         Assertions.assertThat(priorityQueue.size()).isEqualTo(1);
     }
 
