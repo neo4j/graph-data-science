@@ -58,4 +58,15 @@ class GlobalTaskStoreTest {
 
         assertThat(taskStore.taskCount()).isEqualTo(3);
     }
+
+    @Test
+    void shouldQueryMultipleUsers() {
+        var taskStore = new GlobalTaskStore();
+        taskStore.store("alice", new JobId("42"), Tasks.leaf("leaf"));
+        taskStore.store("bob", new JobId("1337"), Tasks.leaf("other"));
+
+        assertThat(taskStore.query()).hasSize(2);
+        assertThat(taskStore.query(new JobId("42"))).hasSize(1);
+        assertThat(taskStore.query(new JobId(""))).hasSize(0);
+    }
 }

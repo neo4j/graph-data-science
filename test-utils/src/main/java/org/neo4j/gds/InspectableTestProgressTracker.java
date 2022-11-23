@@ -77,13 +77,13 @@ public class InspectableTestProgressTracker extends TaskProgressTracker {
     @Override
     public void beginSubTask() {
         super.beginSubTask();
-        progressHistory.add(taskStore.query(userName, jobId).map(Task::getProgress));
+        progressHistory.add(taskStore.query(userName, jobId).map(userTask -> userTask.task().getProgress()));
     }
 
     @Override
     public void endSubTask() {
         super.endSubTask();
-        progressHistory.add(taskStore.query(userName, jobId).map(Task::getProgress));
+        progressHistory.add(taskStore.query(userName, jobId).map(userTask -> userTask.task().getProgress()));
     }
 
     @Override

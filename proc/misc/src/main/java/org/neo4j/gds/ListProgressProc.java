@@ -38,6 +38,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -60,21 +61,53 @@ public class ListProgressProc extends BaseProc {
     }
 
     private Stream<ProgressResult> jobsSummaryView() {
-        return taskStore.query(username()).entrySet().stream().map(ProgressResult::fromTaskStoreEntry);
+        if (isGdsAdmin()) {
+            return taskStore.query().map(ProgressResult::fromTaskStoreEntry);
+        } else {
+            return taskStore
+                .query(username())
+                .entrySet()
+                .stream()
+                .map(entry -> ProgressResult.fromTaskStoreEntry(username(), entry));
+        }
     }
 
     private Stream<ProgressResult> jobDetailView(String jobIdAsString) {
         var jobId = new JobId(jobIdAsString);
-        var task = taskStore.query(username(), jobId).orElseThrow(
-            () -> new IllegalArgumentException(formatWithLocale("No task with job id `%s` was found.", jobIdAsString))
-        );
-        var jobProgressVisitor = new JobProgressVisitor(jobId);
-        TaskTraversal.visitPreOrderWithDepth(task, jobProgressVisitor);
+
+        if (isGdsAdmin()) {
+            var progressResults = taskStore
+                .query(jobId)
+                .flatMap(ListProgressProc::jobProgress)
+                .collect(Collectors.toList());
+
+            if (progressResults.isEmpty()) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "No task with job id `%s` was found.",
+                    jobIdAsString
+                ));
+            }
+
+            return progressResults.stream();
+        } else {
+            return taskStore.query(username(), jobId).map(ListProgressProc::jobProgress).orElseThrow(
+                () -> new IllegalArgumentException(formatWithLocale(
+                    "No task with job id `%s` was found.",
+                    jobIdAsString
+                ))
+            );
+        }
+    }
+
+    private static Stream<ProgressResult> jobProgress(TaskStore.UserTask userTask) {
+        var jobProgressVisitor = new JobProgressVisitor(userTask.jobId(), userTask.username());
+        TaskTraversal.visitPreOrderWithDepth(userTask.task(), jobProgressVisitor);
         return jobProgressVisitor.progressRowsStream();
     }
 
     @SuppressWarnings("unused")
     public static class ProgressResult {
+        public String username;
         public String jobId;
         public String taskName;
         public String progress;
@@ -83,22 +116,27 @@ public class ListProgressProc extends BaseProc {
         public LocalTimeValue timeStarted;
         public String elapsedTime;
 
-        static ProgressResult fromTaskStoreEntry(Map.Entry<JobId, Task> taskStoreEntry) {
+        static ProgressResult fromTaskStoreEntry(String username, Map.Entry<JobId, Task> taskStoreEntry) {
             var jobId = taskStoreEntry.getKey();
             var task = taskStoreEntry.getValue();
-            return new ProgressResult(task, jobId, task.description());
+            return new ProgressResult(username, task, jobId, task.description());
         }
 
-        static ProgressResult fromTaskWithDepth(Task task, JobId jobId, int depth) {
+        static ProgressResult fromTaskStoreEntry(TaskStore.UserTask userTask) {
+            return new ProgressResult(userTask.username(), userTask.task(), userTask.jobId(), userTask.task().description());
+        }
+
+        static ProgressResult fromTaskWithDepth(String username, Task task, JobId jobId, int depth) {
             var treeViewTaskName = StructuredOutputHelper.treeViewDescription(task.description(), depth);
-            return new ProgressResult(task, jobId, treeViewTaskName);
+            return new ProgressResult(username, task, jobId, treeViewTaskName);
         }
 
-        public ProgressResult(Task task, JobId jobId, String taskName) {
+        public ProgressResult(String username, Task task, JobId jobId, String taskName) {
             var progressContainer = task.getProgress();
 
             this.jobId = jobId.asString();
             this.taskName = taskName;
+            this.username = username;
             this.progress = StructuredOutputHelper.computeProgress(progressContainer);
             this.progressBar = StructuredOutputHelper.progressBar(progressContainer, PROGRESS_BAR_LENGTH);
             this.status = task.status().name();
@@ -132,10 +170,12 @@ public class ListProgressProc extends BaseProc {
     public static class JobProgressVisitor extends DepthAwareTaskVisitor {
 
         private final JobId jobId;
+        private final String username;
         private final List<ProgressResult> progressRows;
 
-        JobProgressVisitor(JobId jobId) {
+        JobProgressVisitor(JobId jobId, String username) {
             this.jobId = jobId;
+            this.username = username;
             this.progressRows = new ArrayList<>();
         }
 
@@ -145,7 +185,7 @@ public class ListProgressProc extends BaseProc {
 
         @Override
         public void visit(Task task) {
-            progressRows.add(ProgressResult.fromTaskWithDepth(task, jobId, depth()));
+            progressRows.add(ProgressResult.fromTaskWithDepth(username, task, jobId, depth()));
         }
     }
 }

@@ -55,14 +55,33 @@ public class GlobalTaskStore implements TaskStore, ThrowingFunction<Context, Tas
     }
 
     @Override
+    public Stream<UserTask> query() {
+        return registeredTasks
+            .entrySet()
+            .stream()
+            .flatMap(tasksPerUsers -> tasksPerUsers
+                .getValue()
+                .entrySet()
+                .stream()
+                .map(jobTask -> ImmutableUserTask.of(tasksPerUsers.getKey(), jobTask.getKey(), jobTask.getValue())));
+    }
+
+    @Override
+    public Stream<UserTask> query(JobId jobId) {
+        return query().filter(userTask -> userTask.jobId().equals(jobId));
+    }
+
+    @Override
     public @NotNull Map<JobId, Task> query(String username) {
         return registeredTasks.getOrDefault(username, Map.of());
     }
 
     @Override
-    public Optional<Task> query(String username, JobId jobId) {
+    public Optional<UserTask> query(String username, JobId jobId) {
         if (registeredTasks.containsKey(username)) {
-            return Optional.ofNullable(registeredTasks.get(username).get(jobId));
+            return Optional
+                .ofNullable(registeredTasks.get(username).get(jobId))
+                .map(task -> ImmutableUserTask.of(username, jobId, task));
         }
         return Optional.empty();
     }

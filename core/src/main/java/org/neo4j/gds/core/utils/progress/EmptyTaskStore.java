@@ -36,12 +36,22 @@ public enum EmptyTaskStore implements TaskStore {
     public void remove(String username, JobId jobId) {}
 
     @Override
+    public Stream<UserTask> query() {
+        return Stream.empty();
+    }
+
+    @Override
+    public Stream<UserTask> query(JobId jobId) {
+        return Stream.empty();
+    }
+
+    @Override
     public @NotNull Map<JobId, Task> query(String username) {
         return Map.of();
     }
 
     @Override
-    public Optional<Task> query(String username, JobId jobId) {
+    public Optional<UserTask> query(String username, JobId jobId) {
         return Optional.empty();
     }
 
