@@ -26,6 +26,7 @@ import org.neo4j.gds.core.utils.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.logging.Log;
 
 import java.util.List;
@@ -205,7 +206,7 @@ public class TaskProgressTrackerTest {
 
         progressTracker.beginSubTask();
 
-        assertThat(taskStore.query("")).containsValue(task);
+        assertThat(taskStore.query("").map(TaskStore.UserTask::task)).contains(task);
     }
 
     @Test

@@ -64,11 +64,7 @@ public class ListProgressProc extends BaseProc {
         if (isGdsAdmin()) {
             return taskStore.query().map(ProgressResult::fromTaskStoreEntry);
         } else {
-            return taskStore
-                .query(username())
-                .entrySet()
-                .stream()
-                .map(entry -> ProgressResult.fromTaskStoreEntry(username(), entry));
+            return taskStore.query(username()).map(ProgressResult::fromTaskStoreEntry);
         }
     }
 

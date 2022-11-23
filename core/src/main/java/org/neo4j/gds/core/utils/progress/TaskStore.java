@@ -37,8 +37,7 @@ public interface TaskStore {
 
     Stream<UserTask> query(JobId jobId);
 
-    @NotNull
-    Map<JobId, Task> query(String username);
+    Stream<UserTask> query(String username);
 
     Optional<UserTask> query(String username, JobId jobId);
 

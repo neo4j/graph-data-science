@@ -46,8 +46,8 @@ public enum EmptyTaskStore implements TaskStore {
     }
 
     @Override
-    public @NotNull Map<JobId, Task> query(String username) {
-        return Map.of();
+    public @NotNull Stream<UserTask> query(String username) {
+        return Stream.empty();
     }
 
     @Override
