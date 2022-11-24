@@ -21,7 +21,7 @@ ext {
             'asciidoctorj'        : '2.5.5',
             'reflections'         : '0.10.2'
         ],
-        'assertj'              : '3.20.2',
+        'assertj'              : '3.23.1',
         'auto-common'          : '1.1.2',
         'auto-service'         : '1.0',
         'bouncycastle-prov'     : '1.71',
