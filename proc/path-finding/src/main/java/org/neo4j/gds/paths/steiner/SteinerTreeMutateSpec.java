@@ -48,7 +48,7 @@ public class SteinerTreeMutateSpec implements AlgorithmSpec<ShortestPathsSteiner
 
     @Override
     public String name() {
-        return "SteinerTreeStream";
+        return "SteinerTreeMutate";
     }
 
     @Override
