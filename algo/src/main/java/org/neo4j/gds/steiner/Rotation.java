@@ -19,26 +19,6 @@
  */
 package org.neo4j.gds.steiner;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
-import org.neo4j.gds.config.SourceNodeConfig;
-import org.neo4j.gds.config.TargetNodesConfig;
-
-@ValueClass
-@Configuration
-public interface SteinerTreeBaseConfig extends AlgoBaseConfig, SourceNodeConfig, TargetNodesConfig, RelationshipWeightConfig {
-
-    @Value.Default
-    default boolean applyRerouting() {
-        return false;
-    }
-
-    @Configuration.DoubleRange(min = 0, minInclusive = false)
-    @Value.Default
-    default double delta() {
-        return 2.0;
-    }
+public enum Rotation {
+    SPLICE, SINGLE, ZIGZIG, ZIGZAG
 }

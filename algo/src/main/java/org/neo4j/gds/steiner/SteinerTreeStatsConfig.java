@@ -19,26 +19,16 @@
  */
 package org.neo4j.gds.steiner;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
-import org.neo4j.gds.config.SourceNodeConfig;
-import org.neo4j.gds.config.TargetNodesConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
-public interface SteinerTreeBaseConfig extends AlgoBaseConfig, SourceNodeConfig, TargetNodesConfig, RelationshipWeightConfig {
+public interface SteinerTreeStatsConfig  extends  SteinerTreeBaseConfig {
 
-    @Value.Default
-    default boolean applyRerouting() {
-        return false;
+    static SteinerTreeStatsConfig of(CypherMapWrapper userInput) {
+        return new SteinerTreeStatsConfigImpl(userInput);
     }
 
-    @Configuration.DoubleRange(min = 0, minInclusive = false)
-    @Value.Default
-    default double delta() {
-        return 2.0;
-    }
 }

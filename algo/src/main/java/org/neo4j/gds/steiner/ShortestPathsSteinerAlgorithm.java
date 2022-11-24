@@ -20,18 +20,21 @@
 package org.neo4j.gds.steiner;
 
 import com.carrotsearch.hppc.BitSet;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.DoubleAdder;
+import java.util.concurrent.atomic.LongAdder;
 
 public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> {
 
@@ -42,15 +45,19 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
     private final List<Long> terminals;
     private final int concurrency;
     private final BitSet isTerminal;
-
+    private final boolean applyRerouting;
     private final double delta;
+    private final ExecutorService executorService;
+
 
     public ShortestPathsSteinerAlgorithm(
         Graph graph,
         long sourceId,
         List<Long> terminals,
         double delta,
-        int concurrency
+        int concurrency,
+        boolean applyRerouting,
+        ExecutorService executorService
     ) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
@@ -59,6 +66,8 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         this.concurrency = concurrency;
         this.delta = delta;
         this.isTerminal = createTerminals();
+        this.applyRerouting = applyRerouting;
+        this.executorService = executorService;
     }
 
     private BitSet createTerminals() {
@@ -85,17 +94,29 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
             parent.set(v, PRUNED);
         });
         DoubleAdder totalCost = new DoubleAdder();
+        LongAdder effectiveNodeCount = new LongAdder();
+        LongAdder terminalsReached = new LongAdder();
 
+        effectiveNodeCount.increment(); //sourceNode is always in the solution
         var shortestPaths = runShortestPaths();
 
         initForSource(parent, parentCost);
 
         shortestPaths.forEachPath(path -> {
-            processPath(path, parent, parentCost, totalCost);
-
+            processPath(path, parent, parentCost, totalCost, effectiveNodeCount);
+            terminalsReached.increment();
         });
 
-        return SteinerTreeResult.of(parent, parentCost, totalCost.doubleValue());
+        if (applyRerouting) {
+            reroute(parent, parentCost, totalCost, effectiveNodeCount);
+        }
+        return SteinerTreeResult.of(
+            parent,
+            parentCost,
+            totalCost.doubleValue(),
+            effectiveNodeCount.longValue(),
+            terminalsReached.longValue()
+        );
     }
 
     @Override
@@ -112,7 +133,8 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         PathResult path,
         HugeLongArray parent,
         HugeDoubleArray parentCost,
-        DoubleAdder totalCost
+        DoubleAdder totalCost,
+        LongAdder effectiveNodeCount
     ) {
 
         long targetId = path.targetNode();
@@ -131,6 +153,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
                 }
                 parent.set(nodeId, parentId);
                 parentCost.set(nodeId, cost);
+                effectiveNodeCount.increment();
 
             }
         }
@@ -145,11 +168,133 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
             delta,
             isTerminal,
             concurrency,
-            Pools.DEFAULT,
+            executorService,
             ProgressTracker.NULL_TRACKER
         );
 
         return steinerBasedDelta.compute();
+
+    }
+
+    private void reconnect(
+        LinkCutTree tree,
+        HugeLongArray parent,
+        HugeDoubleArray parentCost,
+        DoubleAdder totalCost,
+        long source,
+        long target,
+        double weight
+    ) {
+        double edgeCostOft = parentCost.get(target);
+        parent.set(target, source);
+        parentCost.set(target, weight);
+        totalCost.add(-edgeCostOft + weight); //remove old cost, add new cost due to relinking
+        tree.link(source, target); // update tree
+    }
+
+    private boolean checkIfRerouteIsValid(
+        LinkCutTree tree,
+        long source,
+        long target,
+        long parentTarget
+    ) {
+        //we want to check if the edge source->target causes a loop
+        //i.e.,  target is a predecessor of source
+        //just checking if source is connected to target is not valid (this is a spanning tree all are connected)
+        //we use the LinkCutTree and cut the  target's parent. If the two are connected still, we'll have a loop
+        //Example:
+        //    pp->target-> a->b->->source
+        // after cutting pp->target
+        //  pp  target-> a->b->source
+        // We have loop ==> so source->target is not a viable replacement
+
+        //Otherwise, assuming no loop,  there is a root-source path not involving target. So by  setting source->target
+        //all terminals with  target as predecessor can still reach be reached by source.
+        tree.delete(parentTarget, target);
+        return !tree.connected(source, target);
+    }
+
+    private LinkCutTree createLinkCutTree(HugeLongArray parent) {
+        var tree = new LinkCutTree(graph.nodeCount());
+        for (long nodeId = 0; nodeId < graph.nodeCount(); ++nodeId) {
+            var parentId = parent.get(nodeId);
+            if (parentId != PRUNED && parentId != ROOTNODE) {
+                tree.link(parentId, nodeId);
+            }
+        }
+        return tree;
+    }
+
+    private void cutNodesAfterRerouting(
+        HugeLongArray parent,
+        HugeDoubleArray parentCost,
+        DoubleAdder totalCost,
+        LongAdder effectiveNodeCount
+    ) {
+        BitSet endsAtTerminal = new BitSet(graph.nodeCount());
+        HugeLongArrayQueue queue = HugeLongArrayQueue.newQueue(graph.nodeCount());
+        for (var terminal : terminals) {
+            queue.add(terminal); //TODO: handle non-reachable terminals!
+            endsAtTerminal.set(terminal);
+        }
+        while (!queue.isEmpty()) {
+            long nodeId = queue.remove();
+            long parentId = parent.get(nodeId);
+            if (parentId != sourceId && !endsAtTerminal.getAndSet(parentId)) {
+                queue.add(parentId);
+            }
+        }
+
+        ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency, nodeId -> {
+            if (parent.get(nodeId) != PRUNED && parent.get(nodeId) != ROOTNODE) {
+                if (!endsAtTerminal.get(nodeId)) {
+                    parent.set(nodeId, PRUNED);
+                    totalCost.add(-parentCost.get(nodeId));
+                    parentCost.set(nodeId, PRUNED);
+                    effectiveNodeCount.decrement();
+                }
+            }
+        });
+
+    }
+
+    private void reroute(
+        HugeLongArray parent,
+        HugeDoubleArray parentCost,
+        DoubleAdder totalCost,
+        LongAdder effectiveNodeCount
+    ) {
+        //First, represent the tree as an LinkCutTree:
+        // This is a dynamic tree (can answer connectivity like UnionFind)
+        // but can also do some other cool stuff like answering path queries
+        LinkCutTree tree = createLinkCutTree(parent);
+
+        MutableBoolean didReroutes = new MutableBoolean();
+        graph.forEachNode(nodeId -> {
+            if (parent.get(nodeId) != PRUNED) {
+                //we reroute only edges in the true
+                graph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
+                    var parentId = parent.get(t);
+                    double targetParentCost = parentCost.get(t);
+                    //we want to see if replacing t's parent with nodeId makes sense (i.e., smaller cost)
+                    if (parentId != PRUNED && parentId != ROOTNODE && w < targetParentCost) {
+                        boolean shouldReconnect = checkIfRerouteIsValid(tree, s, t, parentId);
+                        if (shouldReconnect) { //yes we can replace t's parent with s
+                            didReroutes.setTrue();
+                            reconnect(tree, parent, parentCost, totalCost, s, t, w);
+                        } else { //not possible, revert !
+                            tree.link(parentId, t);
+                        }
+                    }
+                    return true;
+                });
+            }
+            return true;
+
+        });
+        if (didReroutes.isTrue()) {
+            cutNodesAfterRerouting(parent, parentCost, totalCost, effectiveNodeCount);
+        }
 
     }
 
