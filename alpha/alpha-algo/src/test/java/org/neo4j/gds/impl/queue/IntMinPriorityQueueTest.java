@@ -20,6 +20,7 @@
 package org.neo4j.gds.impl.queue;
 
 import io.qala.datagen.RandomShortApi;
+import org.assertj.core.api.Assertions;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.junit.jupiter.api.Test;
@@ -193,9 +194,35 @@ final class IntMinPriorityQueueTest {
         }
     }
 
+    @Test
+    void testAddAndSetDifferentPrio() {
+        IntPriorityQueue priorityQueue = IntPriorityQueue.min(2);
+        priorityQueue.add(1, 1);
+        priorityQueue.set(1, 2);
+        Assertions.assertThat(priorityQueue.size()).isEqualTo(1);
+    }
+
+    @Test
+    void testAddAndSetSamePrio() {
+        IntPriorityQueue priorityQueue = IntPriorityQueue.min(2);
+        priorityQueue.add(1, 1);
+        priorityQueue.set(1, 1);
+        Assertions.assertThat(priorityQueue.size()).isEqualTo(1);
+    }
+
+    @Test
+    void testSetZeroCost() {
+        IntPriorityQueue priorityQueue = IntPriorityQueue.min(2);
+        priorityQueue.set(1, 0);
+        priorityQueue.set(1, 0);
+        Assertions.assertThat(priorityQueue.size()).isEqualTo(1);
+    }
+
+
     private double exclusiveDouble(
-            final double exclusiveMin,
-            final double exclusiveMax) {
+        final double exclusiveMin,
+        final double exclusiveMax
+    ) {
         return RandomShortApi.Double(Math.nextUp(exclusiveMin), exclusiveMax);
     }
 }

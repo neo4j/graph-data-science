@@ -17,8 +17,8 @@
 package org.neo4j.gds.impl.queue;
 
 import com.carrotsearch.hppc.IntDoubleScatterMap;
+import com.carrotsearch.hppc.IntLongScatterMap;
 import org.neo4j.gds.collections.ArrayUtil;
-import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 
 /**
@@ -39,6 +39,8 @@ public abstract class IntPriorityQueue {
     private static final int[] EMPTY_INT = new int[0];
 
     private HugeIntArray heap;
+
+    private IntLongScatterMap mapElementToIndex;
     private long size = 0;
 
     /**
@@ -56,6 +58,7 @@ public abstract class IntPriorityQueue {
             heapSize = initialCapacity + 1;
         }
         this.heap = HugeIntArray.newArray(ArrayUtil.oversizeHuge(heapSize, Integer.BYTES));
+        this.mapElementToIndex = new IntLongScatterMap(initialCapacity);
     }
 
     /**
@@ -95,14 +98,14 @@ public abstract class IntPriorityQueue {
         addCost(element, cost);
         size++;
         ensureCapacityForInsert();
-        heap.set(size, element);
+        placeElement(size, element);
         upHeap(size);
     }
 
     private void add(int element) {
         size++;
         ensureCapacityForInsert();
-        heap.set(size, element);
+        placeElement(size, element);
         upHeap(size);
     }
 
@@ -124,7 +127,8 @@ public abstract class IntPriorityQueue {
     public final int pop() {
         if (size > 0) {
             int result = heap.get(1);    // save first value
-            heap.set(1, heap.get(size));    // move last to first
+            mapElementToIndex.remove(result);
+            placeElement(1, heap.get(size));// move last to first
             size--;
             downHeap(1);           // adjust heap
             removeCost(result);
@@ -177,24 +181,7 @@ public abstract class IntPriorityQueue {
     }
 
     private long findElementPosition(int element) {
-        final long limit = size + 1;
-        final HugeIntArray data = heap;
-        HugeCursor<int[]> cursor = data.initCursor(data.newCursor(), 1, limit);
-        while (cursor.next()) {
-            int[] internalArray = cursor.array;
-            int i = cursor.offset;
-            int localLimit = cursor.limit - 4;
-            for (; i <= localLimit; i += 4) {
-                if (internalArray[i] == element) return i + cursor.base;
-                if (internalArray[i + 1] == element) return i + 1 + cursor.base;
-                if (internalArray[i + 2] == element) return i + 2 + cursor.base;
-                if (internalArray[i + 3] == element) return i + 3 + cursor.base;
-            }
-            for (; i < cursor.limit; ++i) {
-                if (internalArray[i] == element) return i + cursor.base;
-            }
-        }
-        return 0;
+        return mapElementToIndex.get(element);
     }
 
     /**
@@ -211,11 +198,11 @@ public abstract class IntPriorityQueue {
         int node = heap.get(i);          // save bottom node
         long j = i >>> 1;
         while (j > 0 && lessThan(node, heap.get(j))) {
-            heap.set(i, heap.get(j));       // shift parents down
+            placeElement(i, heap.get(j));// shift parents down
             i = j;
             j = j >>> 1;
         }
-        heap.set(i, node);              // install saved node
+        placeElement(i, node);              // install saved node
         return i != origPos;
     }
 
@@ -227,7 +214,7 @@ public abstract class IntPriorityQueue {
             j = k;
         }
         while (j <= size && lessThan(heap.get(j), node)) {
-            heap.set(i, heap.get(j));       // shift up child
+            placeElement(i, heap.get(j));       // shift up child
             i = j;
             j = i << 1;
             k = j + 1;
@@ -235,7 +222,7 @@ public abstract class IntPriorityQueue {
                 j = k;
             }
         }
-        heap.set(i, node);              // install saved node
+        placeElement(i, node);              // install saved node
     }
 
     private void ensureCapacityForInsert() {
@@ -282,7 +269,10 @@ public abstract class IntPriorityQueue {
 
         @Override
         protected boolean addCost(int element, double cost) {
-            return costs.put(element, cost) != 0D;
+            var contained = costs.containsKey(element);
+            costs.put(element, cost);
+            return contained;
+
         }
 
         @Override
@@ -309,6 +299,11 @@ public abstract class IntPriorityQueue {
             costs.keys = null;
             costs.values = null;
         }
+    }
+
+    private void placeElement(long position, int element) {
+        heap.set(position, element);
+        mapElementToIndex.put(element, position);
     }
 
 }

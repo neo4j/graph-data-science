@@ -53,15 +53,15 @@ class SpanningTreeAlgorithmFactoryTest {
                 4
             );
         var expected =
-            "Prim: 315 KiB\n" +
+            "Prim: 392 KiB\n" +
             "|-- this.instance: 48 Bytes\n" +
             "|-- Parent array: 78 KiB\n" +
             "|-- Parent cost array: 78 KiB\n" +
-            "|-- Priority queue: 157 KiB\n" +
+            "|-- Priority queue: 234 KiB\n" +
             "    |-- this.instance: 40 Bytes\n" +
             "    |-- heap: 78 KiB\n" +
             "    |-- costs: 78 KiB\n" +
-            "    |-- keys: 1296 Bytes\n" +
+            "    |-- inverted index: 78 KiB\n" +
             "|-- visited: 1296 Bytes\n";
         assertThat(estimate.render()).isEqualTo(expected);
     }
