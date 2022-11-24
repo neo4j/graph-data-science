@@ -45,7 +45,7 @@ public enum EmptyTaskStore implements TaskStore {
     }
 
     @Override
-    public @NotNull Stream<UserTask> query(String username) {
+    public Stream<UserTask> query(String username) {
         return Stream.empty();
     }
 
