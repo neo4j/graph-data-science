@@ -93,7 +93,7 @@ public final class OpenModelCatalog implements ModelCatalog {
     }
 
     @Override
-    public long modelsCount() {
+    public long modelCount() {
         return userCatalogs.values().stream().mapToLong(OpenUserCatalog::size).sum();
     }
 

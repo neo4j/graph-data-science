@@ -171,7 +171,7 @@ public final class GraphStoreCatalog {
         return getUserCatalog(username).exists(UserCatalog.UserCatalogKey.of(databaseId, graphName));
     }
 
-    public static int graphStoresCount() {
+    public static int graphStoreCount() {
         return userCatalogs
             .values()
             .stream()
@@ -179,7 +179,7 @@ public final class GraphStoreCatalog {
             .sum();
     }
 
-    public static int graphStoresCount(DatabaseId databaseId) {
+    public static int graphStoreCount(DatabaseId databaseId) {
         return userCatalogs
             .values()
             .stream()
@@ -188,7 +188,7 @@ public final class GraphStoreCatalog {
     }
 
     public static boolean isEmpty() {
-        return graphStoresCount() == 0;
+        return graphStoreCount() == 0;
     }
 
     public static Optional<Map<String, Object>> getDegreeDistribution(

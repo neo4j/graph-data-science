@@ -41,5 +41,5 @@ public interface TaskStore {
 
     boolean isEmpty();
 
-    long tasksCount();
+    long taskCount();
 }

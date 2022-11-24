@@ -89,7 +89,7 @@ public class GlobalTaskStore implements TaskStore, ThrowingFunction<Context, Tas
     }
 
     @Override
-    public long tasksCount() {
+    public long taskCount() {
         return registeredTasks.values().stream().mapToLong(Map::size).sum();
     }
 }
