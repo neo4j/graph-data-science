@@ -57,6 +57,7 @@ import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.PropertyMapping.DEFAULT_VALUE_KEY;
 import static org.neo4j.gds.PropertyMapping.PROPERTY_KEY;
 import static org.neo4j.gds.RelationshipProjection.AGGREGATION_KEY;
+import static org.neo4j.gds.RelationshipProjection.INDEX_INVERSE_KEY;
 import static org.neo4j.gds.RelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.gds.RelationshipProjection.TYPE_KEY;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
@@ -849,7 +850,8 @@ public abstract class GdsCypher {
         ElementIdentifier identifier
     ) {
         MinimalObject properties = toMinimalObject(projection.properties(), true);
-        if (properties.isEmpty() && matchesType(identifier.name, projection)) {
+
+        if (properties.isEmpty() && matchesType(identifier.name, projection) && allDefaults(projection)) {
             return MinimalObject.string(identifier.name);
         }
 
@@ -861,8 +863,15 @@ public abstract class GdsCypher {
         if (projection.aggregation() != DEFAULT) {
             value.put(AGGREGATION_KEY, projection.aggregation().name());
         }
+        if (projection.indexInverse()) {
+            value.put(INDEX_INVERSE_KEY, projection.indexInverse());
+        }
         properties.toObject().ifPresent(o -> value.put(PROPERTIES_KEY, o));
         return MinimalObject.map(value);
+    }
+
+    private static boolean allDefaults(RelationshipProjection projection) {
+        return projection.orientation() == NATURAL && projection.aggregation() == DEFAULT && !projection.indexInverse();
     }
 
     private static boolean matchesType(String type, RelationshipProjection projection) {
