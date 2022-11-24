@@ -20,17 +20,28 @@
 package org.neo4j.gds.embeddings.hashgnn;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.ResourceUtil;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.loading.ArrayIdMap;
+import org.neo4j.gds.core.loading.LabelInformation;
+import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -38,9 +49,12 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.ml.util.ShuffleUtil;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.SplittableRandom;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -335,5 +349,89 @@ class HashGNNTest {
         Assertions.assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .containsExactlyElementsOf(ResourceUtil.lines(logResource));
+    }
+
+    @Test
+    void shouldBeDeterministicGivenSameOriginalIds() {
+        long nodeCount = 1000;
+        int embeddingDimension = 32;
+        long degree = 4;
+
+        var firstMappedToOriginal = HugeLongArray.newArray(nodeCount);
+        firstMappedToOriginal.setAll(nodeId -> nodeId);
+        var firstOriginalToMappedBuilder = HugeSparseLongArray.builder(nodeCount);
+        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+            firstOriginalToMappedBuilder.set(nodeId, nodeId);
+        }
+        var firstIdMap = new ArrayIdMap(
+            firstMappedToOriginal,
+            firstOriginalToMappedBuilder.build(),
+            LabelInformation.single(new NodeLabel("hello")).build(nodeCount, firstMappedToOriginal::get),
+            nodeCount,
+            nodeCount - 1
+        );
+        RelationshipsBuilder firstRelationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(firstIdMap)
+            .orientation(Orientation.UNDIRECTED)
+            .executorService(Pools.DEFAULT)
+            .build();
+
+        var secondMappedToOriginal = HugeLongArray.newArray(nodeCount);
+        secondMappedToOriginal.setAll(nodeId -> nodeId);
+
+        var gen = ShuffleUtil.createRandomDataGenerator(Optional.of(42L));
+        ShuffleUtil.shuffleArray(secondMappedToOriginal, gen);
+        var secondOriginalToMappedBuilder = HugeSparseLongArray.builder(nodeCount);
+        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+            secondOriginalToMappedBuilder.set(secondMappedToOriginal.get(nodeId), nodeId);
+        }
+
+        var secondIdMap = new ArrayIdMap(
+            secondMappedToOriginal,
+            secondOriginalToMappedBuilder.build(),
+            LabelInformation.single(new NodeLabel("hello")).build(nodeCount, secondMappedToOriginal::get),
+            nodeCount,
+            nodeCount - 1
+        );
+        RelationshipsBuilder secondRelationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(secondIdMap)
+            .orientation(Orientation.UNDIRECTED)
+            .executorService(Pools.DEFAULT)
+            .build();
+
+        var random = new SplittableRandom(42);
+        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+            for (int j = 0; j < degree; j++) {
+                long target = random.nextLong(nodeCount);
+                firstRelationshipsBuilder.add(nodeId, target);
+                secondRelationshipsBuilder.add(nodeId, target);
+            }
+        }
+
+        var firstRelationships = firstRelationshipsBuilder.build();
+        var secondRelationships = secondRelationshipsBuilder.build();
+
+        var firstGraph = GraphFactory.create(firstIdMap, firstRelationships);
+        var secondGraph = GraphFactory.create(secondIdMap, secondRelationships);
+
+        var config = HashGNNConfigImpl
+            .builder()
+            .embeddingDensity(8)
+            .generateFeatures(Map.of("dimension", embeddingDimension, "densityLevel", 2))
+            .iterations(2)
+            .randomSeed(42L)
+            .build();
+
+        var firstEmbeddings = new HashGNN(firstGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
+        var secondEmbeddings = new HashGNN(secondGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
+
+        double cosineSum = 0;
+        for (long originalNodeId = 0; originalNodeId < nodeCount; originalNodeId++) {
+            var firstVector = firstEmbeddings.get(firstGraph.toMappedNodeId(originalNodeId));
+            var secondVector = secondEmbeddings.get(secondGraph.toMappedNodeId(originalNodeId));
+            double cosine = Intersections.cosine(firstVector, secondVector, secondVector.length);
+            cosineSum += cosine;
+        }
+        Assertions.assertThat(cosineSum / nodeCount).isCloseTo(1, Offset.offset(0.000001));
     }
 }

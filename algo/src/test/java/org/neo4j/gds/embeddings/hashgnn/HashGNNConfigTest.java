@@ -43,7 +43,7 @@ class HashGNNConfigTest {
     @Test
     void shouldNotAllowGeneratedAndFeatureProperties() {
         assertThatThrownBy(() -> {
-            var config = HashGNNConfigImpl
+            HashGNNConfigImpl
                 .builder()
                 .featureProperties(List.of("x"))
                 .generateFeatures(Map.of("dimension", 100, "densityLevel", 2))
@@ -56,7 +56,7 @@ class HashGNNConfigTest {
     @Test
     void requiresFeaturePropertiesIfNoGeneratedFeatures() {
         assertThatThrownBy(() -> {
-            var config = HashGNNConfigImpl
+            HashGNNConfigImpl
                 .builder()
                 .embeddingDensity(4)
                 .iterations(100)

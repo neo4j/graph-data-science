@@ -29,26 +29,31 @@ import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
-import java.util.SplittableRandom;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 class GenerateFeaturesTask implements Runnable {
     private final Partition partition;
     private final HugeObjectArray<HugeAtomicBitSet> output;
-    private final SplittableRandom rng;
+    private final Graph graph;
+    private final Random rng;
     private final GenerateFeaturesConfig generateFeaturesConfig;
     private final ProgressTracker progressTracker;
+    private final long randomSeed;
     private long totalNumFeatures = 0;
 
     GenerateFeaturesTask(
         Partition partition,
-        SplittableRandom rng,
+        Graph graph,
+        long randomSeed,
         GenerateFeaturesConfig config,
         HugeObjectArray<HugeAtomicBitSet> output,
         ProgressTracker progressTracker
     ) {
         this.partition = partition;
-        this.rng = rng;
+        this.graph = graph;
+        this.rng = new Random();
+        this.randomSeed = randomSeed;
         this.generateFeaturesConfig = config;
         this.output = output;
         this.progressTracker = progressTracker;
@@ -58,7 +63,7 @@ class GenerateFeaturesTask implements Runnable {
         Graph graph,
         List<Partition> partition,
         HashGNNConfig config,
-        SplittableRandom rng,
+        long randomSeed,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
         MutableLong totalNumFeaturesOutput
@@ -70,7 +75,8 @@ class GenerateFeaturesTask implements Runnable {
         var tasks = partition.stream()
             .map(p -> new GenerateFeaturesTask(
                 p,
-                rng.split(),
+                graph,
+                randomSeed,
                 config.generateFeatures().get(),
                 output,
                 progressTracker
@@ -97,6 +103,7 @@ class GenerateFeaturesTask implements Runnable {
         partition.consume(nodeId -> {
             var generatedFeatures = HugeAtomicBitSet.create(dimension);
 
+            rng.setSeed(this.randomSeed ^ graph.toOriginalNodeId(nodeId));
             var randomInts = rng.ints(densityLevel, 0, dimension);
             randomInts.forEach(generatedFeatures::set);
 

@@ -57,7 +57,9 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         super(progressTracker);
         this.graph = graph;
         this.config = config;
-        this.randomSeed = config.randomSeed().orElse((new SplittableRandom().nextLong()));
+
+        long tempRandomSeed = config.randomSeed().orElse((new SplittableRandom().nextLong()));
+        this.randomSeed = new SplittableRandom(tempRandomSeed).nextLong();
         this.rng = new SplittableRandom(randomSeed);
     }
 
@@ -141,6 +143,7 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
                 terminationFlag,
                 totalSetBits
             );
+
             double avgActiveFeatures = totalSetBits.doubleValue() / graph.nodeCount();
             progressTracker.logInfo(formatWithLocale("After iteration %d average node embedding density (number of active features) is %.4f.", iteration, avgActiveFeatures));
         }
@@ -249,7 +252,7 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
             graph,
             partition,
             config,
-            rng,
+            randomSeed,
             progressTracker,
             terminationFlag,
             totalSetBits
