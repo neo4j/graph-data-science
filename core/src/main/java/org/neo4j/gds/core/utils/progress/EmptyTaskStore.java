@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.Optional;
