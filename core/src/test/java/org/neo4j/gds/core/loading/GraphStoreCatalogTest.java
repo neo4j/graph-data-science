@@ -345,42 +345,42 @@ class GraphStoreCatalogTest {
 
     @Test
     void graphStoresCount() {
-        assertEquals(0, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
+        assertEquals(0, GraphStoreCatalog.graphStoreCount(DATABASE_ID));
         GraphStoreCatalog.set(CONFIG, graphStore);
-        assertEquals(1, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
+        assertEquals(1, GraphStoreCatalog.graphStoreCount(DATABASE_ID));
         GraphStoreCatalog.remove(
             CatalogRequest.of(USER_NAME, DATABASE_ID),
             GRAPH_NAME,
             graphStoreWithConfig -> {},
             true
         );
-        assertEquals(0, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
+        assertEquals(0, GraphStoreCatalog.graphStoreCount(DATABASE_ID));
     }
 
     @Test
     void graphStoresCountAcrossUsers() {
-        assertEquals(0, GraphStoreCatalog.graphStoresCount());
+        assertEquals(0, GraphStoreCatalog.graphStoreCount());
         GraphStoreCatalog.set(CONFIG, graphStore);
-        assertEquals(1, GraphStoreCatalog.graphStoresCount());
+        assertEquals(1, GraphStoreCatalog.graphStoreCount());
         GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
-        assertEquals(2, GraphStoreCatalog.graphStoresCount());
+        assertEquals(2, GraphStoreCatalog.graphStoreCount());
         GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("clive", GRAPH_NAME), graphStore);
-        assertEquals(3, GraphStoreCatalog.graphStoresCount());
+        assertEquals(3, GraphStoreCatalog.graphStoreCount());
         GraphStoreCatalog.remove(
             CatalogRequest.of(USER_NAME, DATABASE_ID),
             GRAPH_NAME,
             graphStoreWithConfig -> {},
             true
         );
-        assertEquals(2, GraphStoreCatalog.graphStoresCount());
+        assertEquals(2, GraphStoreCatalog.graphStoreCount());
     }
 
     @Test
     void removeAllLoadedGraphs() {
         GraphStoreCatalog.set(CONFIG, graphStore);
-        assertEquals(1, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
+        assertEquals(1, GraphStoreCatalog.graphStoreCount(DATABASE_ID));
         GraphStoreCatalog.removeAllLoadedGraphs();
-        assertEquals(0, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
+        assertEquals(0, GraphStoreCatalog.graphStoreCount(DATABASE_ID));
     }
 
     @Test

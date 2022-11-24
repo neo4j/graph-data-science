@@ -44,6 +44,8 @@ public interface ModelCatalog {
 
     Stream<Model<?, ?, ?>> getAllModels();
 
+    long modelCount();
+
     boolean exists(String username, String modelName);
 
     Model<?, ?, ?> dropOrThrow(String username, String modelName);

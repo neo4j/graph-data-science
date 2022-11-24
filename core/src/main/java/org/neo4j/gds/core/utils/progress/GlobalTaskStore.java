@@ -87,4 +87,9 @@ public class GlobalTaskStore implements TaskStore, ThrowingFunction<Context, Tas
             .stream()
             .allMatch(Map::isEmpty);
     }
+
+    @Override
+    public long taskCount() {
+        return registeredTasks.values().stream().mapToLong(Map::size).sum();
+    }
 }

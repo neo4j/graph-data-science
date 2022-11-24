@@ -42,4 +42,20 @@ class GlobalTaskStoreTest {
             .isNotNull()
             .isEmpty();
     }
+
+    @Test
+    void shouldCountAcrossUsers() {
+        var taskStore = new GlobalTaskStore();
+        taskStore.store("a", new JobId(), Tasks.leaf("v"));
+
+        assertThat(taskStore.taskCount()).isEqualTo(1);
+
+        taskStore.store("b", new JobId(), Tasks.leaf("x"));
+
+        assertThat(taskStore.taskCount()).isEqualTo(2);
+
+        taskStore.store("b", new JobId(), Tasks.leaf("y"));
+
+        assertThat(taskStore.taskCount()).isEqualTo(3);
+    }
 }

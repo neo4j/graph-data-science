@@ -55,4 +55,9 @@ public enum EmptyTaskStore implements TaskStore {
         return true;
     }
 
+    @Override
+    public long taskCount() {
+        return 0;
+    }
+
 }
