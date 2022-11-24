@@ -27,13 +27,13 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.api.schema.RelationshipSchemaEntry;
 import org.neo4j.gds.core.Aggregation;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.Orientation.NATURAL;
@@ -58,13 +58,11 @@ class RelationshipSchemaLoaderTest {
 
         assertThat(loadedRelationshipSchema.availableTypes()).containsExactlyInAnyOrder(RelationshipType.of("REL1"), RelationshipType.of("REL2"));
 
-        var rel1Orientation = loadedRelationshipSchema.orientation(RelationshipType.of("REL1"));
-        assertThat(rel1Orientation).isEqualTo(NATURAL);
-
-        var rel1Properties = loadedRelationshipSchema.filterProperties(Set.of(RelationshipType.of("REL1")));
+        var rel1Properties = loadedRelationshipSchema.get(RelationshipType.of("REL1"));
         assertThat(rel1Properties)
-            .containsExactlyInAnyOrderEntriesOf(Map.of(
+            .isEqualTo(new RelationshipSchemaEntry(
                 RelationshipType.of("REL1"),
+                NATURAL,
                 Map.of(
                     "prop1",
                     RelationshipPropertySchema.of(
@@ -77,13 +75,11 @@ class RelationshipSchemaLoaderTest {
                 )
             ));
 
-        var rel2Orientation = loadedRelationshipSchema.orientation(RelationshipType.of("REL2"));
-        assertThat(rel2Orientation).isEqualTo(UNDIRECTED);
-
-        var rel2Properties = loadedRelationshipSchema.filterProperties(Set.of(RelationshipType.of("REL2")));
+        var rel2Properties = loadedRelationshipSchema.get(RelationshipType.of("REL2"));
         assertThat(rel2Properties)
-            .containsExactlyInAnyOrderEntriesOf(Map.of(
+            .isEqualTo(new RelationshipSchemaEntry(
                 RelationshipType.of("REL2"),
+                NATURAL,
                 Map.of(
                     "prop2",
                     RelationshipPropertySchema.of(
@@ -127,13 +123,12 @@ class RelationshipSchemaLoaderTest {
 
         assertThat(loadedRelationshipSchema.availableTypes()).containsExactlyInAnyOrder(RelationshipType.of("REL1"), RelationshipType.of("REL3"));
 
-        var rel1Orientation = loadedRelationshipSchema.orientation(RelationshipType.of("REL1"));
-        assertThat(rel1Orientation).isEqualTo(NATURAL);
 
-        var rel1Properties = loadedRelationshipSchema.filterProperties(Set.of(RelationshipType.of("REL1")));
+        var rel1Properties = loadedRelationshipSchema.get(RelationshipType.of("REL1"));
         assertThat(rel1Properties)
-            .containsExactlyInAnyOrderEntriesOf(Map.of(
+            .isEqualTo(new RelationshipSchemaEntry(
                 RelationshipType.of("REL1"),
+                NATURAL,
                 Map.of(
                     "prop1",
                     RelationshipPropertySchema.of(
@@ -146,13 +141,11 @@ class RelationshipSchemaLoaderTest {
                 )
             ));
 
-        var rel3Orientation = loadedRelationshipSchema.orientation(RelationshipType.of("REL3"));
-        assertThat(rel3Orientation).isEqualTo(UNDIRECTED);
-
-        var rel3Properties = loadedRelationshipSchema.filterProperties(Set.of(RelationshipType.of("REL3")));
+        var rel3Properties = loadedRelationshipSchema.get(RelationshipType.of("REL3"));
         assertThat(rel3Properties)
-            .containsExactlyInAnyOrderEntriesOf(Map.of(
+            .isEqualTo(new RelationshipSchemaEntry(
                 RelationshipType.of("REL3"),
+                UNDIRECTED,
                 Map.of()
             ));
     }
@@ -171,13 +164,12 @@ class RelationshipSchemaLoaderTest {
 
         assertThat(loadedRelationshipSchema.availableTypes()).containsExactlyInAnyOrder(RelationshipType.of("REL1"), RelationshipType.of("REL3"));
 
-        var rel1Orientation = loadedRelationshipSchema.orientation(RelationshipType.of("REL1"));
-        assertThat(rel1Orientation).isEqualTo(NATURAL);
 
-        var rel1Properties = loadedRelationshipSchema.filterProperties(Set.of(RelationshipType.of("REL1")));
+        var rel1Properties = loadedRelationshipSchema.get(RelationshipType.of("REL1"));
         assertThat(rel1Properties)
-            .containsExactlyInAnyOrderEntriesOf(Map.of(
+            .isEqualTo(new RelationshipSchemaEntry(
                 RelationshipType.of("REL1"),
+                NATURAL,
                 Map.of(
                     "prop1",
                     RelationshipPropertySchema.of(
@@ -190,13 +182,11 @@ class RelationshipSchemaLoaderTest {
                 )
             ));
 
-        var rel3Orientation = loadedRelationshipSchema.orientation(RelationshipType.of("REL3"));
-        assertThat(rel3Orientation).isEqualTo(NATURAL);
-
-        var rel3Properties = loadedRelationshipSchema.filterProperties(Set.of(RelationshipType.of("REL3")));
+        var rel3Properties = loadedRelationshipSchema.get(RelationshipType.of("REL3"));
         assertThat(rel3Properties)
-            .containsExactlyInAnyOrderEntriesOf(Map.of(
+            .isEqualTo(new RelationshipSchemaEntry(
                 RelationshipType.of("REL3"),
+                NATURAL,
                 Map.of()
             ));
     }

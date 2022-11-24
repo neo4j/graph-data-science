@@ -70,7 +70,7 @@ class GraphSchemaIntegrationTest extends BaseTest {
             .build()
             .graph();
 
-        assertEquals(expectedSchema, graph.schema().nodeSchema().properties().get(NodeLabel.of("Node")).get("prop"));
+        assertEquals(expectedSchema, graph.schema().nodeSchema().get(NodeLabel.of("Node")).properties().get("prop"));
     }
 
     @ParameterizedTest
@@ -87,7 +87,7 @@ class GraphSchemaIntegrationTest extends BaseTest {
             .build()
             .graph();
 
-        assertEquals(expectedSchema, graph.schema().relationshipSchema().properties().get(RelationshipType.of("REL")).get("relProp"));
+        assertEquals(expectedSchema, graph.schema().relationshipSchema().get(RelationshipType.of("REL")).properties().get("relProp"));
     }
 
     private static Stream<Arguments> nodePropertyMappingsAndExpectedResults() {

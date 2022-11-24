@@ -25,6 +25,7 @@ import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.schema.ElementSchemaEntry;
 import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
@@ -176,10 +177,9 @@ class LinkPredictionRelationshipSamplerTest {
         Map<RelationshipType, Set<String>> actualRelProperties = graphStore
             .schema()
             .relationshipSchema()
-            .properties()
-            .entrySet()
+            .entries()
             .stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, i -> i.getValue().keySet()));
+            .collect(Collectors.toMap(ElementSchemaEntry::identifier, e -> e.properties().keySet()));
 
         assertThat(actualRelProperties).usingRecursiveComparison().isEqualTo(expectedRelProperties);
     }

@@ -59,7 +59,8 @@ class RandomGraphGeneratorTest {
         int nbrNodes = 10;
         long avgDeg = 5L;
 
-        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
+        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator
+            .builder()
             .nodeCount(nbrNodes)
             .averageDegree(avgDeg)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
@@ -80,7 +81,8 @@ class RandomGraphGeneratorTest {
         int nbrNodes = 10_000;
         long avgDeg = 5L;
 
-        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
+        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator
+            .builder()
             .nodeCount(nbrNodes)
             .averageDegree(avgDeg)
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
@@ -94,11 +96,7 @@ class RandomGraphGeneratorTest {
         var bucketSize = nbrNodes / 10;
         for (var start = 0L; start < nbrNodes; start += bucketSize) {
             var end = Math.min(start + bucketSize, nbrNodes);
-            var avgDegreeInBucket = LongStream
-                    .range(start, end)
-                    .mapToInt(graph::degree)
-                    .average()
-                    .orElse(0.0);
+            var avgDegreeInBucket = LongStream.range(start, end).mapToInt(graph::degree).average().orElse(0.0);
             assertThat(avgDegreeInBucket).isLessThanOrEqualTo(previousAvgDegree);
             previousAvgDegree = avgDegreeInBucket;
         }
@@ -109,7 +107,8 @@ class RandomGraphGeneratorTest {
         int nbrNodes = 1000;
         long avgDeg = 5L;
 
-        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
+        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator
+            .builder()
             .nodeCount(nbrNodes)
             .averageDegree(avgDeg)
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
@@ -131,7 +130,8 @@ class RandomGraphGeneratorTest {
         int nbrNodes = 1_000;
         long avgDeg = 5L;
 
-        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
+        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator
+            .builder()
             .nodeCount(nbrNodes)
             .averageDegree(avgDeg)
             .relationshipDistribution(RelationshipDistribution.RANDOM)
@@ -142,10 +142,9 @@ class RandomGraphGeneratorTest {
 
         AtomicLong actualRelCount = new AtomicLong();
         graph.forEachNode(node -> {
-                actualRelCount.addAndGet(graph.degree(node));
-                return true;
-            }
-        );
+            actualRelCount.addAndGet(graph.degree(node));
+            return true;
+        });
 
         double actualAverage = actualRelCount.get() / (double) nbrNodes;
 
@@ -158,7 +157,8 @@ class RandomGraphGeneratorTest {
         long avgDeg = 5L;
 
         double fixedValue = 42D;
-        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
+        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator
+            .builder()
             .nodeCount(nbrNodes)
             .averageDegree(avgDeg)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
@@ -180,7 +180,8 @@ class RandomGraphGeneratorTest {
         int lowerBound = -10;
         int upperBound = 10;
 
-        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
+        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator
+            .builder()
             .nodeCount(10)
             .averageDegree(5L)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
@@ -203,7 +204,8 @@ class RandomGraphGeneratorTest {
         var aLabel = NodeLabelTokens.of("A");
         var bLabel = NodeLabelTokens.of("B");
 
-        HugeGraph graph = RandomGraphGenerator.builder()
+        HugeGraph graph = RandomGraphGenerator
+            .builder()
             .nodeCount(10)
             .averageDegree(2)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
@@ -212,23 +214,27 @@ class RandomGraphGeneratorTest {
             .generate();
 
         graph.forEachNode(nodeId -> {
-                var nodeLabels = graph.nodeLabels(nodeId);
-                assertEquals(1, nodeLabels.size());
-                if (nodeId % 2 == 0) {
-                    assertTrue(nodeLabels.contains(NodeLabel.of("A")), formatWithLocale("node %d should have label A", nodeId));
-                } else {
-                    assertTrue(nodeLabels.contains(NodeLabel.of("B")), formatWithLocale("node %d should have label B", nodeId));
-                }
-                return true;
+            var nodeLabels = graph.nodeLabels(nodeId);
+            assertEquals(1, nodeLabels.size());
+            if (nodeId % 2 == 0) {
+                assertTrue(nodeLabels.contains(NodeLabel.of("A")),
+                    formatWithLocale("node %d should have label A", nodeId)
+                );
+            } else {
+                assertTrue(nodeLabels.contains(NodeLabel.of("B")),
+                    formatWithLocale("node %d should have label B", nodeId)
+                );
             }
-        );
+            return true;
+        });
     }
 
     @Test
     void shouldGenerateNodeProperties() {
         int lowerBound = 0;
         int upperBound = 1;
-        HugeGraph graph = RandomGraphGenerator.builder()
+        HugeGraph graph = RandomGraphGenerator
+            .builder()
             .nodeCount(10)
             .averageDegree(2)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
@@ -238,18 +244,18 @@ class RandomGraphGeneratorTest {
 
         NodePropertyValues nodePropertyValues = graph.nodeProperties("foo");
         graph.forEachNode(nodeId -> {
-                double value = nodePropertyValues.doubleValue(nodeId);
-                assertTrue(lowerBound <= value && value <= upperBound);
-                return true;
-            }
-        );
+            double value = nodePropertyValues.doubleValue(nodeId);
+            assertTrue(lowerBound <= value && value <= upperBound);
+            return true;
+        });
     }
 
     @Test
     void shouldGenerateEmbeddingsForNodeProperties() {
         float lowerBound = 0f;
         float upperBound = 1f;
-        HugeGraph graph = RandomGraphGenerator.builder()
+        HugeGraph graph = RandomGraphGenerator
+            .builder()
             .nodeCount(10)
             .averageDegree(2)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
@@ -273,7 +279,8 @@ class RandomGraphGeneratorTest {
         var aLabel = NodeLabelTokens.ofNodeLabels(NodeLabel.of("A"), NodeLabel.ALL_NODES);
         var bLabel = NodeLabelTokens.ofNodeLabels(NodeLabel.of("B"), NodeLabel.ALL_NODES);
 
-        HugeGraph graph = RandomGraphGenerator.builder()
+        HugeGraph graph = RandomGraphGenerator
+            .builder()
             .nodeCount(10)
             .averageDegree(2)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
@@ -291,30 +298,34 @@ class RandomGraphGeneratorTest {
         var bazProperties = graph.nodeProperties("baz");
 
         graph.forEachNode(nodeId -> {
-                var nodeLabels = graph.nodeLabels(nodeId);
-                assertEquals(2, nodeLabels.size());
-                assertEquals(1337.0, allProperties.doubleValue(nodeId));
-                if (nodeId % 2 == 0) {
-                    assertTrue(nodeLabels.contains(NodeLabel.of("A")), formatWithLocale("node %d should have label A", nodeId));
-                    assertEquals(42.0, fooProperties.doubleValue(nodeId));
-                    assertTrue(Double.isNaN(barProperties.doubleValue(nodeId)));
-                    assertTrue(Double.isNaN(bazProperties.doubleValue(nodeId)));
-                } else {
-                    assertTrue(nodeLabels.contains(NodeLabel.of("B")), formatWithLocale("node %d should have label B", nodeId));
-                    assertEquals(84.0, barProperties.doubleValue(nodeId));
-                    assertEquals(23.0, bazProperties.doubleValue(nodeId));
-                    assertTrue(Double.isNaN(fooProperties.doubleValue(nodeId)));
-                }
-                return true;
+            var nodeLabels = graph.nodeLabels(nodeId);
+            assertEquals(2, nodeLabels.size());
+            assertEquals(1337.0, allProperties.doubleValue(nodeId));
+            if (nodeId % 2 == 0) {
+                assertTrue(nodeLabels.contains(NodeLabel.of("A")),
+                    formatWithLocale("node %d should have label A", nodeId)
+                );
+                assertEquals(42.0, fooProperties.doubleValue(nodeId));
+                assertTrue(Double.isNaN(barProperties.doubleValue(nodeId)));
+                assertTrue(Double.isNaN(bazProperties.doubleValue(nodeId)));
+            } else {
+                assertTrue(nodeLabels.contains(NodeLabel.of("B")),
+                    formatWithLocale("node %d should have label B", nodeId)
+                );
+                assertEquals(84.0, barProperties.doubleValue(nodeId));
+                assertEquals(23.0, bazProperties.doubleValue(nodeId));
+                assertTrue(Double.isNaN(fooProperties.doubleValue(nodeId)));
             }
-        );
+            return true;
+        });
     }
 
     @Test
     void shouldNotAddEmptyNodePropertyProducer() {
         NodeLabel aLabel = NodeLabel.of("A");
 
-        HugeGraph graph = RandomGraphGenerator.builder()
+        HugeGraph graph = RandomGraphGenerator
+            .builder()
             .nodeCount(10)
             .averageDegree(2)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
@@ -328,7 +339,8 @@ class RandomGraphGeneratorTest {
 
     @Test
     void shouldFailForMultiplePropertyNames() {
-        assertThatThrownBy(() -> RandomGraphGenerator.builder()
+        assertThatThrownBy(() -> RandomGraphGenerator
+            .builder()
             .nodeCount(10)
             .averageDegree(2)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
@@ -336,17 +348,16 @@ class RandomGraphGeneratorTest {
             .nodePropertyProducer(PropertyProducer.fixedDouble("name", 42.0))
             .build()
             .generate())
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Duplicate node properties with name [name]. " +
-                    "The first property producer is [FixedDoubleProducer{propertyName='name', value=1337.0}], " +
-                    "the second one is [FixedDoubleProducer{propertyName='name', value=42.0}].");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Duplicate node properties with name [name]. " + "The first property producer is [FixedDoubleProducer{propertyName='name', value=1337.0}], " + "the second one is [FixedDoubleProducer{propertyName='name', value=42.0}].");
     }
 
     @Test
     void shouldFailForMultiplePropertyNamesForLabeledProducers() {
         var aLabel = NodeLabel.of("A");
         var bLabel = NodeLabel.of("B");
-        assertThatThrownBy(() -> RandomGraphGenerator.builder()
+        assertThatThrownBy(() -> RandomGraphGenerator
+            .builder()
             .nodeCount(10)
             .averageDegree(2)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
@@ -355,24 +366,22 @@ class RandomGraphGeneratorTest {
             .addNodePropertyProducer(bLabel, PropertyProducer.fixedDouble("name", 42.0))
             .build()
             .generate())
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Duplicate node properties with name [name]. " +
-                    "The first property producer is [FixedDoubleProducer{propertyName='name', value=1337.0}], " +
-                    "the second one is [FixedDoubleProducer{propertyName='name', value=42.0}].");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Duplicate node properties with name [name]. " + "The first property producer is [FixedDoubleProducer{propertyName='name', value=1337.0}], " + "the second one is [FixedDoubleProducer{propertyName='name', value=42.0}].");
     }
 
     @ParameterizedTest
     @MethodSource("producers")
     void shouldNotFailForMultiplePropertyNamesIfTheProducerIsTheSame(PropertyProducer<?> producer) {
-        assertThatCode(() -> RandomGraphGenerator.builder()
+        assertThatCode(() -> RandomGraphGenerator
+            .builder()
             .nodeCount(10)
             .averageDegree(2)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
             .nodePropertyProducer(producer)
             .nodePropertyProducer(producer)
             .build()
-            .generate())
-        .doesNotThrowAnyException();
+            .generate()).doesNotThrowAnyException();
     }
 
     @ParameterizedTest
@@ -380,7 +389,8 @@ class RandomGraphGeneratorTest {
     void shouldNotFailForMultiplePropertyNamesIfTheProducerIsTheSameForLabeledProducers(PropertyProducer<?> producer) {
         var aLabel = NodeLabel.of("A");
         var bLabel = NodeLabel.of("B");
-        assertThatCode(() -> RandomGraphGenerator.builder()
+        assertThatCode(() -> RandomGraphGenerator
+            .builder()
             .nodeCount(10)
             .averageDegree(2)
             .nodeLabelProducer((i) -> i % 2 == 0 ? NodeLabelTokens.of(aLabel) : NodeLabelTokens.of(bLabel))
@@ -388,13 +398,11 @@ class RandomGraphGeneratorTest {
             .addNodePropertyProducer(aLabel, producer)
             .addNodePropertyProducer(bLabel, producer)
             .build()
-            .generate())
-        .doesNotThrowAnyException();
+            .generate()).doesNotThrowAnyException();
     }
 
     static Stream<PropertyProducer<?>> producers() {
-        return Stream.of(
-            PropertyProducer.fixedDouble("name", 42.0),
+        return Stream.of(PropertyProducer.fixedDouble("name", 42.0),
             PropertyProducer.randomDouble("name", 42.0, 1337.0),
             PropertyProducer.randomEmbedding("name", 21, 42.0f, 1337.0f)
         );
@@ -406,14 +414,16 @@ class RandomGraphGeneratorTest {
         long avgDeg = 5L;
         long seed = 1337L;
 
-        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
+        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator
+            .builder()
             .nodeCount(nbrNodes)
             .averageDegree(avgDeg)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
             .seed(seed)
             .build();
 
-        RandomGraphGenerator otherRandomGenerator = RandomGraphGenerator.builder()
+        RandomGraphGenerator otherRandomGenerator = RandomGraphGenerator
+            .builder()
             .nodeCount(nbrNodes)
             .averageDegree(avgDeg)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
@@ -428,7 +438,8 @@ class RandomGraphGeneratorTest {
 
     @Test
     void shouldProduceCorrectRelationshipCountWithAggregation() {
-        var graph = RandomGraphGenerator.builder()
+        var graph = RandomGraphGenerator
+            .builder()
             .nodeCount(8)
             .averageDegree(4)
             .seed(42L)
@@ -442,10 +453,9 @@ class RandomGraphGeneratorTest {
         AtomicLong actualRelCount = new AtomicLong();
 
         graph.forEachNode(node -> {
-                actualRelCount.addAndGet(graph.degree(node));
-                return true;
-            }
-        );
+            actualRelCount.addAndGet(graph.degree(node));
+            return true;
+        });
 
         assertEquals(actualRelCount.get(), graph.relationshipCount());
     }
@@ -466,7 +476,8 @@ class RandomGraphGeneratorTest {
 
     @Test
     void shouldGenerateWithCorrectIdMap() {
-        var graph = RandomGraphGenerator.builder()
+        var graph = RandomGraphGenerator
+            .builder()
             .nodeCount(100)
             .averageDegree(1)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
@@ -483,12 +494,10 @@ class RandomGraphGeneratorTest {
 
     @Test
     void shouldGenerateWithCorrectIdMapWithLabelProducer() {
-        var graph = RandomGraphGenerator.builder()
+        var graph = RandomGraphGenerator
+            .builder()
             .nodeCount(100)
-            .nodeLabelProducer((nodeId) ->
-                nodeId % 2 == 0
-                    ? NodeLabelTokens.of("LABEL1")
-                    : NodeLabelTokens.of("LABEL2"))
+            .nodeLabelProducer((nodeId) -> nodeId % 2 == 0 ? NodeLabelTokens.of("LABEL1") : NodeLabelTokens.of("LABEL2"))
             .averageDegree(1)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
             .seed(123L)
@@ -498,140 +507,112 @@ class RandomGraphGeneratorTest {
             .build()
             .generate();
 
-        assertThat(graph.availableNodeLabels()).containsExactlyInAnyOrder(NodeLabel.of("LABEL1"), NodeLabel.of("LABEL2"));
+        assertThat(graph.availableNodeLabels()).containsExactlyInAnyOrder(NodeLabel.of("LABEL1"),
+            NodeLabel.of("LABEL2")
+        );
         var filteredIdMap = graph.withFilteredLabels(List.of(NodeLabel.of("LABEL1")), 4).get();
         assertThat(filteredIdMap.nodeCount()).isEqualTo(50);
     }
 
     static Stream<Arguments> expectedSchemas() {
-        return Stream.of(
-            Arguments.of(
-                "default",
-                RandomGraphGenerator
-                    .builder()
-                    .nodeCount(10)
-                    .averageDegree(1)
-                    .relationshipDistribution(RelationshipDistribution.RANDOM)
-                    .build(),
-                NodeSchema.builder().build(),
-                RelationshipSchema.builder().addRelationshipType(RelationshipType.of("REL"), NATURAL).build()
-            ),
-            Arguments.of(
-                "node label",
-                RandomGraphGenerator
-                    .builder()
-                    .nodeCount(10)
-                    .averageDegree(1)
-                    .nodeLabelProducer(nodeId -> NodeLabelTokens.ofNodeLabels(NodeLabel.of("A")))
-                    .relationshipDistribution(RelationshipDistribution.RANDOM)
-                    .build(),
-                NodeSchema.builder().addLabel(NodeLabel.of("A")).build(),
-                RelationshipSchema.builder().addRelationshipType(RelationshipType.of("REL"), NATURAL).build()
-            ),
-            Arguments.of(
-                "relationship type",
-                RandomGraphGenerator
-                    .builder()
-                    .nodeCount(10)
-                    .averageDegree(1)
-                    .relationshipType(RelationshipType.of("FOOBAR"))
-                    .relationshipDistribution(RelationshipDistribution.RANDOM)
-                    .build(),
-                NodeSchema.builder().build(),
-                RelationshipSchema.builder().addRelationshipType(RelationshipType.of("FOOBAR"), NATURAL).build()
-            ),
-            Arguments.of(
-                "node label and relationship type",
-                RandomGraphGenerator
-                    .builder()
-                    .nodeCount(10)
-                    .averageDegree(1)
-                    .nodeLabelProducer(nodeId -> NodeLabelTokens.ofNodeLabels(NodeLabel.of("A")))
-                    .relationshipType(RelationshipType.of("FOOBAR"))
-                    .relationshipDistribution(RelationshipDistribution.RANDOM)
-                    .build(),
-                NodeSchema.builder().addLabel(NodeLabel.of("A")).build(),
-                RelationshipSchema.builder().addRelationshipType(RelationshipType.of("FOOBAR"), NATURAL).build()
-            ),
-            Arguments.of(
-                "node label and node property",
-                RandomGraphGenerator
-                    .builder()
-                    .nodeCount(10)
-                    .averageDegree(1)
-                    .nodeLabelProducer(nodeId -> NodeLabelTokens.ofNodeLabels(NodeLabel.of("A")))
-                    .nodePropertyProducer(PropertyProducer.randomLong("nodeProp", 0, 42))
-                    .relationshipDistribution(RelationshipDistribution.RANDOM)
-                    .build(),
-                NodeSchema
-                    .builder()
-                    .addLabel(NodeLabel.of("A"))
-                    .addProperty(NodeLabel.of("A"), "nodeProp", ValueType.LONG)
-                    .build(),
-                RelationshipSchema
-                    .builder()
-                    .addRelationshipType(RelationshipType.of("REL"), NATURAL)
-                    .build()
-            ),
-            Arguments.of(
-                "relationship type and node property",
-                RandomGraphGenerator
-                    .builder()
-                    .nodeCount(10)
-                    .averageDegree(1)
-                    .relationshipType(RelationshipType.of("FOOBAR"))
-                    .relationshipPropertyProducer(PropertyProducer.randomDouble("relProperty", 0, 42))
-                    .relationshipDistribution(RelationshipDistribution.RANDOM)
-                    .build(),
-                NodeSchema.builder().build(),
-                RelationshipSchema
-                    .builder()
-                    .addProperty(RelationshipType.of("FOOBAR"), NATURAL, "relProperty", ValueType.DOUBLE)
-                    .build()
-            ),
-            Arguments.of(
-                "node label, node property, relationship type and relationship property",
-                RandomGraphGenerator
-                    .builder()
-                    .nodeCount(10)
-                    .averageDegree(1)
-                    .nodeLabelProducer(nodeId -> NodeLabelTokens.ofNodeLabels(NodeLabel.of("A")))
-                    .nodePropertyProducer(PropertyProducer.randomLong("nodeProp", 0, 42))
-                    .relationshipType(RelationshipType.of("FOOBAR"))
-                    .relationshipPropertyProducer(PropertyProducer.randomDouble("relProp", 0, 42))
-                    .relationshipDistribution(RelationshipDistribution.RANDOM)
-                    .build(),
-                NodeSchema
-                    .builder()
-                    .addLabel(NodeLabel.of("A"))
-                    .addProperty(NodeLabel.of("A"), "nodeProp", ValueType.LONG)
-                    .build(),
-                RelationshipSchema
-                    .builder()
-                    .addProperty(RelationshipType.of("FOOBAR"), NATURAL, "relProp", ValueType.DOUBLE)
-                    .build()
-            ),
-            Arguments.of(
-                "relationship type, relationship property, and undirected orientation",
-                RandomGraphGenerator
-                    .builder()
-                    .nodeCount(10)
-                    .averageDegree(1)
-                    .nodeLabelProducer(nodeId -> NodeLabelTokens.ofNodeLabels(NodeLabel.of("A")))
-                    .relationshipType(RelationshipType.of("FOOBAR"))
-                    .relationshipPropertyProducer(PropertyProducer.randomDouble("relProp", 0, 42))
-                    .relationshipDistribution(RelationshipDistribution.RANDOM)
-                    .orientation(Orientation.UNDIRECTED)
-                    .build(),
-                NodeSchema
-                    .builder()
-                    .addLabel(NodeLabel.of("A"))
-                    .build(),
-                RelationshipSchema
-                    .builder()
-                    .addProperty(RelationshipType.of("FOOBAR"), UNDIRECTED, "relProp", ValueType.DOUBLE)
-                    .build()
-            )
-        );
+        return Stream.of(Arguments.of("default",
+            RandomGraphGenerator
+                .builder()
+                .nodeCount(10)
+                .averageDegree(1)
+                .relationshipDistribution(RelationshipDistribution.RANDOM)
+                .build(),
+            NodeSchema.empty(),
+            RelationshipSchema.empty().addRelationshipType(RelationshipType.of("REL"), NATURAL)
+        ), Arguments.of("node label",
+            RandomGraphGenerator
+                .builder()
+                .nodeCount(10)
+                .averageDegree(1)
+                .nodeLabelProducer(nodeId -> NodeLabelTokens.ofNodeLabels(NodeLabel.of("A")))
+                .relationshipDistribution(RelationshipDistribution.RANDOM)
+                .build(),
+            NodeSchema.empty().addLabel(NodeLabel.of("A")),
+            RelationshipSchema.empty().addRelationshipType(RelationshipType.of("REL"), NATURAL)
+        ), Arguments.of("relationship type",
+            RandomGraphGenerator
+                .builder()
+                .nodeCount(10)
+                .averageDegree(1)
+                .relationshipType(RelationshipType.of("FOOBAR"))
+                .relationshipDistribution(RelationshipDistribution.RANDOM),
+            NodeSchema.empty(),
+            RelationshipSchema.empty().addRelationshipType(RelationshipType.of("FOOBAR"), NATURAL)
+        ), Arguments.of("node label and relationship type",
+            RandomGraphGenerator
+                .builder()
+                .nodeCount(10)
+                .averageDegree(1)
+                .nodeLabelProducer(nodeId -> NodeLabelTokens.ofNodeLabels(NodeLabel.of("A")))
+                .relationshipType(RelationshipType.of("FOOBAR"))
+                .relationshipDistribution(RelationshipDistribution.RANDOM),
+            NodeSchema.empty().addLabel(NodeLabel.of("A")),
+            RelationshipSchema.empty().addRelationshipType(RelationshipType.of("FOOBAR"), NATURAL)
+        ), Arguments.of("node label and node property",
+            RandomGraphGenerator
+                .builder()
+                .nodeCount(10)
+                .averageDegree(1)
+                .nodeLabelProducer(nodeId -> NodeLabelTokens.ofNodeLabels(NodeLabel.of("A")))
+                .nodePropertyProducer(PropertyProducer.randomLong("nodeProp", 0, 42))
+                .relationshipDistribution(RelationshipDistribution.RANDOM)
+                .build(),
+            NodeSchema
+                .empty()
+                .addLabel(NodeLabel.of("A"))
+                .addProperty(NodeLabel.of("A"), "nodeProp", ValueType.LONG),
+            RelationshipSchema.empty().addRelationshipType(RelationshipType.of("REL"), NATURAL)
+        ), Arguments.of("relationship type and node property",
+            RandomGraphGenerator
+                .builder()
+                .nodeCount(10)
+                .averageDegree(1)
+                .relationshipType(RelationshipType.of("FOOBAR"))
+                .relationshipPropertyProducer(PropertyProducer.randomDouble("relProperty", 0, 42))
+                .relationshipDistribution(RelationshipDistribution.RANDOM)
+                .build(),
+            NodeSchema.empty(),
+            RelationshipSchema
+                .empty()
+                .addProperty(RelationshipType.of("FOOBAR"), NATURAL, "relProperty", ValueType.DOUBLE)
+        ), Arguments.of("node label, node property, relationship type and relationship property",
+            RandomGraphGenerator
+                .builder()
+                .nodeCount(10)
+                .averageDegree(1)
+                .nodeLabelProducer(nodeId -> NodeLabelTokens.ofNodeLabels(NodeLabel.of("A")))
+                .nodePropertyProducer(PropertyProducer.randomLong("nodeProp", 0, 42))
+                .relationshipType(RelationshipType.of("FOOBAR"))
+                .relationshipPropertyProducer(PropertyProducer.randomDouble("relProp", 0, 42))
+                .relationshipDistribution(RelationshipDistribution.RANDOM)
+                .build(),
+            NodeSchema
+                .empty()
+                .addLabel(NodeLabel.of("A"))
+                .addProperty(NodeLabel.of("A"), "nodeProp", ValueType.LONG),
+            RelationshipSchema
+                .empty()
+                .addProperty(RelationshipType.of("FOOBAR"), NATURAL, "relProp", ValueType.DOUBLE)
+        ), Arguments.of("relationship type, relationship property, and undirected orientation",
+            RandomGraphGenerator
+                .builder()
+                .nodeCount(10)
+                .averageDegree(1)
+                .nodeLabelProducer(nodeId -> NodeLabelTokens.ofNodeLabels(NodeLabel.of("A")))
+                .relationshipType(RelationshipType.of("FOOBAR"))
+                .relationshipPropertyProducer(PropertyProducer.randomDouble("relProp", 0, 42))
+                .relationshipDistribution(RelationshipDistribution.RANDOM)
+                .orientation(Orientation.UNDIRECTED)
+                .build(),
+            NodeSchema.empty().addLabel(NodeLabel.of("A")),
+            RelationshipSchema
+                .empty()
+                .addProperty(RelationshipType.of("FOOBAR"), UNDIRECTED, "relProp", ValueType.DOUBLE)
+        ));
     }
 }

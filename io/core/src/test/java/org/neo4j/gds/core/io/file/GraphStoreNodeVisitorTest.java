@@ -55,7 +55,7 @@ class GraphStoreNodeVisitorTest {
 
     @Test
     void shouldAddNodesToNodesBuilder() {
-        NodeSchema nodeSchema = graphStore.schema().nodeSchema();
+        NodeSchema nodeSchema = NodeSchema.from(graphStore.schema().nodeSchema());
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder(nodeSchema)
             .concurrency(1)
             .maxOriginalId(graphStore.nodeCount())
@@ -81,9 +81,12 @@ class GraphStoreNodeVisitorTest {
             .orElseThrow(() -> new IllegalArgumentException("Expected node properties to be present"));
         var relationships = GraphFactory.emptyRelationships(idMap);
 
+        var relationshipSchema = RelationshipSchema.empty();
+        relationshipSchema.getOrCreateRelationshipType(RelationshipType.ALL_RELATIONSHIPS, UNDIRECTED);
+
         var graphSchema = GraphSchema.of(
             nodeSchema,
-            RelationshipSchema.builder().addRelationshipType(RelationshipType.ALL_RELATIONSHIPS, UNDIRECTED).build(),
+            relationshipSchema,
             Map.of()
         );
 

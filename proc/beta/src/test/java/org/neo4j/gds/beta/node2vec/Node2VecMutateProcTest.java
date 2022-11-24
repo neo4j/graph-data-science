@@ -145,7 +145,7 @@ class Node2VecMutateProcTest
 
         GraphSchema schema = mutatedGraphStore.schema();
         if (mutateProperty() != null) {
-            boolean nodesContainMutateProperty = containsMutateProperty(schema.nodeSchema().properties());
+            boolean nodesContainMutateProperty = containsMutateProperty(schema.nodeSchema());
             assertThat(nodesContainMutateProperty)
                 .withFailMessage(
                     "The node schema %s should contain a property called `%s` of type `%s`",
