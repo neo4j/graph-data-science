@@ -61,6 +61,10 @@ class SteinerTreeStreamProcTest extends BaseProcTest {
         return idFunction.of("b");
     }
 
+    private long getUnreachableTerminal() {
+        return idFunction.of("c");
+    }
+
     @Test
     void testYields() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
@@ -84,7 +88,7 @@ class SteinerTreeStreamProcTest extends BaseProcTest {
                 assertThat(next.get("weight")).isInstanceOf(Double.class);
                 assertThat((long) next.get("nodeId")).isIn(List.of(getSourceNode(),getTerminal()));
                 assertThat((long) next.get("parentId")).isEqualTo(getSourceNode());
-                assertThat((double) next.get("weight")).isIn(0.0,1.0);
+                assertThat((double) next.get("weight")).isIn(0.0, 1.0);
                 nodeCount.increment();
             }
 
@@ -93,5 +97,6 @@ class SteinerTreeStreamProcTest extends BaseProcTest {
         });
         assertThat(nodeCount.intValue()).isEqualTo(2);
     }
+    
 
 }

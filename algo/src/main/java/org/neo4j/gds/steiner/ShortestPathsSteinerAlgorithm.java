@@ -234,8 +234,10 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         BitSet endsAtTerminal = new BitSet(graph.nodeCount());
         HugeLongArrayQueue queue = HugeLongArrayQueue.newQueue(graph.nodeCount());
         for (var terminal : terminals) {
-            queue.add(terminal); //TODO: handle non-reachable terminals!
-            endsAtTerminal.set(terminal);
+            if (parent.get(terminal) != PRUNED) {
+                queue.add(terminal);
+                endsAtTerminal.set(terminal);
+            }
         }
         while (!queue.isEmpty()) {
             long nodeId = queue.remove();

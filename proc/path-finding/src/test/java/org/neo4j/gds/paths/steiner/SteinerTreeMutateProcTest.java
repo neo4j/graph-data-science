@@ -140,4 +140,5 @@ class SteinerTreeMutateProcTest extends BaseProcTest {
         assertThat(relationshipCounter.longValue()).isEqualTo(1L);
     }
 
+
 }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.steiner;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -42,6 +43,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
         "  (a2:Node)," +
         "  (a3:Node)," +
         "  (a4:Node)," +
+        " (a5:Node)," +
 
         "  (a0)-[:R {weight: 1.0}]->(a1)," +
         "  (a0)-[:R {weight: 4.0}]->(a4)," +
@@ -130,4 +132,43 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
     }
 
+    @Test
+    void shouldWorkForUnreachableAndReachableTerminals() {
+
+        Assertions.assertDoesNotThrow(() -> {
+
+            var steinerTreeResult = new ShortestPathsSteinerAlgorithm(
+                graph,
+                idFunction.of("a0"),
+                List.of(idFunction.of("a3"), idFunction.of("a4"), idFunction.of("a5")),
+                2.0,
+                1,
+                true,
+                Pools.DEFAULT
+            ).compute();
+            assertThat(steinerTreeResult.effectiveTargetNodesCount()).isEqualTo(2);
+        });
+
+    }
+
+    @Test
+    void shouldWorkIfNoReachableTerminals() {
+
+        Assertions.assertDoesNotThrow(() -> {
+
+            var steinerTreeResult = new ShortestPathsSteinerAlgorithm(
+                graph,
+                idFunction.of("a0"),
+                List.of(idFunction.of("a5")),
+                2.0,
+                1,
+                true,
+                Pools.DEFAULT
+            ).compute();
+            assertThat(steinerTreeResult.effectiveTargetNodesCount()).isEqualTo(0);
+            assertThat(steinerTreeResult.effectiveNodeCount()).isEqualTo(1);
+
+        });
+
+    }
 }

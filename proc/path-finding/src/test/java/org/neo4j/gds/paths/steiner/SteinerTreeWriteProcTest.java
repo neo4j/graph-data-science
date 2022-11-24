@@ -141,4 +141,5 @@ class SteinerTreeWriteProcTest extends BaseProcTest {
 
         assertThat(rowCounter.longValue()).isEqualTo(1L);
     }
+
 }
