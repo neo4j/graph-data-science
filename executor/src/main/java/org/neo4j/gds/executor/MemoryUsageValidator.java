@@ -130,7 +130,7 @@ public class MemoryUsageValidator {
             if (!GraphStoreCatalog.isEmpty()) {
                 errorMessage.add(formatWithLocale(
                     "Note: there are %s graphs currently loaded into memory.",
-                    GraphStoreCatalog.graphStoresCount()
+                    GraphStoreCatalog.graphStoreCount()
                 ));
             }
 

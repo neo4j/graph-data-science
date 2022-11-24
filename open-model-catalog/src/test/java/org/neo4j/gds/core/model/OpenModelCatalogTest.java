@@ -183,19 +183,19 @@ class OpenModelCatalogTest {
             Map::of
         );
 
-        assertThat(modelCatalog.modelsCount()).isEqualTo(0);
+        assertThat(modelCatalog.modelCount()).isEqualTo(0);
 
         modelCatalog.set(model1);
 
-        assertThat(modelCatalog.modelsCount()).isEqualTo(1);
+        assertThat(modelCatalog.modelCount()).isEqualTo(1);
 
         modelCatalog.set(model2);
 
-        assertThat(modelCatalog.modelsCount()).isEqualTo(2);
+        assertThat(modelCatalog.modelCount()).isEqualTo(2);
 
         modelCatalog.set(publicModel);
 
-        assertThat(modelCatalog.modelsCount()).isEqualTo(3);
+        assertThat(modelCatalog.modelCount()).isEqualTo(3);
     }
 
     @Test

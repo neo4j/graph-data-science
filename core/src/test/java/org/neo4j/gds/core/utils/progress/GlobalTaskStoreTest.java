@@ -48,14 +48,14 @@ class GlobalTaskStoreTest {
         var taskStore = new GlobalTaskStore();
         taskStore.store("a", new JobId(), Tasks.leaf("v"));
 
-        assertThat(taskStore.tasksCount()).isEqualTo(1);
+        assertThat(taskStore.taskCount()).isEqualTo(1);
 
         taskStore.store("b", new JobId(), Tasks.leaf("x"));
 
-        assertThat(taskStore.tasksCount()).isEqualTo(2);
+        assertThat(taskStore.taskCount()).isEqualTo(2);
 
         taskStore.store("b", new JobId(), Tasks.leaf("y"));
 
-        assertThat(taskStore.tasksCount()).isEqualTo(3);
+        assertThat(taskStore.taskCount()).isEqualTo(3);
     }
 }
