@@ -21,6 +21,9 @@ package org.neo4j.gds.beta.filter;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.ElementProjection;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -171,9 +174,16 @@ public final class GraphStoreFilter {
 
     public static GraphSchema filterSchema(GraphSchema inputGraphSchema, NodesFilter.FilteredNodes filteredNodes, RelationshipsFilter.FilteredRelationships filteredRelationships) {
         var nodeSchema = inputGraphSchema.nodeSchema().filter(filteredNodes.idMap().availableNodeLabels());
+        if (nodeSchema.availableLabels().isEmpty()) {
+            nodeSchema.addLabel(NodeLabel.ALL_NODES);
+        }
+
         RelationshipSchema relationshipSchema = inputGraphSchema
             .relationshipSchema()
             .filter(filteredRelationships.topology().keySet());
+        if (relationshipSchema.availableTypes().isEmpty()) {
+            relationshipSchema.addRelationshipType(RelationshipType.ALL_RELATIONSHIPS, Orientation.NATURAL);
+        }
 
         return GraphSchema.of(nodeSchema, relationshipSchema, Map.of());
     }

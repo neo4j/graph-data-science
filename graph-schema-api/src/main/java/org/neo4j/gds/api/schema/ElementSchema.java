@@ -81,9 +81,10 @@ public abstract class ElementSchema<
     }
 
     public boolean hasProperty(ELEMENT_IDENTIFIER elementIdentifier, String propertyKey) {
-        boolean hasIdentifier = entries.containsKey(elementIdentifier);
-        boolean hasProperty = entries.get(elementIdentifier).properties().containsKey(propertyKey);
-        return hasIdentifier && hasProperty;
+        return entries.containsKey(elementIdentifier) && entries
+            .get(elementIdentifier)
+            .properties()
+            .containsKey(propertyKey);
     }
 
     public List<PROPERTY_SCHEMA> propertySchemasFor(ELEMENT_IDENTIFIER elementIdentifier) {
@@ -140,5 +141,10 @@ public abstract class ElementSchema<
     @Override
     public int hashCode() {
         return entries.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return toMap().toString();
     }
 }

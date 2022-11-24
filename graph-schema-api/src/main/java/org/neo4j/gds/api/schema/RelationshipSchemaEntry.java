@@ -27,6 +27,7 @@ import org.neo4j.gds.core.Aggregation;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -52,12 +53,12 @@ public class RelationshipSchemaEntry extends ElementSchemaEntry<RelationshipSche
     }
 
     boolean isUndirected() {
-        return orientation != Orientation.UNDIRECTED;
+        return orientation == Orientation.UNDIRECTED;
     }
 
     @Override
     RelationshipSchemaEntry union(RelationshipSchemaEntry other) {
-        if (other.identifier() != this.identifier()) {
+        if (!other.identifier().equals(this.identifier())) {
             throw new UnsupportedOperationException(
                 formatWithLocale(
                     "Cannot union relationship schema entries with different types %s and %s",
@@ -68,8 +69,8 @@ public class RelationshipSchemaEntry extends ElementSchemaEntry<RelationshipSche
         }
 
         if (other.isUndirected() != this.isUndirected()) {
-            throw new UnsupportedOperationException(
-                "Cannot union relationship schema entries with different directionalities");
+            throw new IllegalArgumentException(
+                formatWithLocale("Conflicting directionality for relationship types %s", this.identifier().name));
         }
 
         return new RelationshipSchemaEntry(this.identifier(), this.orientation, unionProperties(other.properties));
@@ -100,9 +101,14 @@ public class RelationshipSchemaEntry extends ElementSchemaEntry<RelationshipSche
     @Override
     Map<String, Object> toMap() {
         return Map.of(
-            "identifier", identifier(),
-            "isUndirected", isUndirected(),
+            "orientation", orientation().name(),
             "properties", properties
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue()))
+                )
         );
     }
 

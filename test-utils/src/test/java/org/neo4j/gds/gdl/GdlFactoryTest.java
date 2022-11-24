@@ -249,15 +249,15 @@ class GdlFactoryTest {
 
         var expectedRelationshipSchema = RelationshipSchema.empty();
 
-        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("A"), NATURAL)
+        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("A"), orientation)
             .addProperty("prop1", ValueType.DOUBLE)
             .addProperty("prop2", ValueType.DOUBLE);
 
-        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("B"), NATURAL)
+        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("B"), orientation)
             .addProperty("prop1", ValueType.DOUBLE)
             .addProperty("prop3", ValueType.DOUBLE);
 
-        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("C"), NATURAL);
+        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("C"), orientation);
 
         assertThat(graphStore.schema().relationshipSchema()).isEqualTo(expectedRelationshipSchema);
     }

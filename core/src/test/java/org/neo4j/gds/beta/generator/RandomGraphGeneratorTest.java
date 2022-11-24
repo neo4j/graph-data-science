@@ -522,7 +522,7 @@ class RandomGraphGeneratorTest {
                 .averageDegree(1)
                 .relationshipDistribution(RelationshipDistribution.RANDOM)
                 .build(),
-            NodeSchema.empty(),
+            NodeSchema.empty().addLabel(NodeLabel.ALL_NODES),
             RelationshipSchema.empty().addRelationshipType(RelationshipType.of("REL"), NATURAL)
         ), Arguments.of("node label",
             RandomGraphGenerator
@@ -540,8 +540,9 @@ class RandomGraphGeneratorTest {
                 .nodeCount(10)
                 .averageDegree(1)
                 .relationshipType(RelationshipType.of("FOOBAR"))
-                .relationshipDistribution(RelationshipDistribution.RANDOM),
-            NodeSchema.empty(),
+                .relationshipDistribution(RelationshipDistribution.RANDOM)
+                .build(),
+            NodeSchema.empty().addLabel(NodeLabel.ALL_NODES),
             RelationshipSchema.empty().addRelationshipType(RelationshipType.of("FOOBAR"), NATURAL)
         ), Arguments.of("node label and relationship type",
             RandomGraphGenerator
@@ -550,7 +551,8 @@ class RandomGraphGeneratorTest {
                 .averageDegree(1)
                 .nodeLabelProducer(nodeId -> NodeLabelTokens.ofNodeLabels(NodeLabel.of("A")))
                 .relationshipType(RelationshipType.of("FOOBAR"))
-                .relationshipDistribution(RelationshipDistribution.RANDOM),
+                .relationshipDistribution(RelationshipDistribution.RANDOM)
+                .build(),
             NodeSchema.empty().addLabel(NodeLabel.of("A")),
             RelationshipSchema.empty().addRelationshipType(RelationshipType.of("FOOBAR"), NATURAL)
         ), Arguments.of("node label and node property",
@@ -576,7 +578,7 @@ class RandomGraphGeneratorTest {
                 .relationshipPropertyProducer(PropertyProducer.randomDouble("relProperty", 0, 42))
                 .relationshipDistribution(RelationshipDistribution.RANDOM)
                 .build(),
-            NodeSchema.empty(),
+            NodeSchema.empty().addLabel(NodeLabel.ALL_NODES),
             RelationshipSchema
                 .empty()
                 .addProperty(RelationshipType.of("FOOBAR"), NATURAL, "relProperty", ValueType.DOUBLE)

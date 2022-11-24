@@ -79,7 +79,7 @@ class RelationshipSchemaLoaderTest {
         assertThat(rel2Properties)
             .isEqualTo(new RelationshipSchemaEntry(
                 RelationshipType.of("REL2"),
-                NATURAL,
+                UNDIRECTED,
                 Map.of(
                     "prop2",
                     RelationshipPropertySchema.of(

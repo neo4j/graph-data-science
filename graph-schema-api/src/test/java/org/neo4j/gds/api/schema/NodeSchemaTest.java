@@ -55,7 +55,8 @@ class NodeSchemaTest {
         var nodeSchema = NodeSchema.empty();
         nodeSchema
             .getOrCreateLabel(label)
-            .addProperty(propertyName,
+            .addProperty(
+                propertyName,
                 PropertySchema.of(propertyName, ValueType.DOUBLE, defaultValue, PropertyState.PERSISTENT)
             );
 
@@ -71,7 +72,7 @@ class NodeSchemaTest {
 
         var nodeSchema = NodeSchema.empty();
         nodeSchema.getOrCreateLabel(label1).addProperty("bar", ValueType.DOUBLE).addProperty("baz", ValueType.DOUBLE);
-        nodeSchema.get(label2).addProperty("baz", ValueType.DOUBLE);
+        nodeSchema.getOrCreateLabel(label2).addProperty("baz", ValueType.DOUBLE);
 
         assertEquals(nodeSchema, nodeSchema.filter(Set.of(label1, label2)));
 
@@ -140,14 +141,14 @@ class NodeSchemaTest {
         var label1 = NodeLabel.of("Foo");
         var label2 = NodeLabel.of("Bar");
 
-        var nodeSchema = NodeSchema.empty();
+        var nodeSchema = NodeSchema.empty()
+            .addProperty(label1, "foo", ValueType.DOUBLE)
+            .addProperty(label1, "baz", ValueType.LONG)
+            .addProperty(label2, "bar", ValueType.LONG_ARRAY)
+            .addProperty(label2, "baz", ValueType.LONG);
 
-        nodeSchema.get(label1).addProperty("foo", ValueType.DOUBLE);
-        nodeSchema.get(label1).addProperty("baz", ValueType.LONG);
-        nodeSchema.get(label2).addProperty("bar", ValueType.LONG_ARRAY);
-        nodeSchema.get(label2).addProperty("baz", ValueType.LONG);
-
-        var expectedUnionSchema = Map.of("foo",
+        var expectedUnionSchema = Map.of(
+            "foo",
             PropertySchema.of("foo", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT),
             "bar",
             PropertySchema.of("bar", ValueType.LONG_ARRAY, DefaultValue.forLongArray(), PropertyState.PERSISTENT),
@@ -176,12 +177,11 @@ class NodeSchemaTest {
     }
 
     static Stream<Arguments> schemaAndHasProperties() {
-        var withProperties = NodeSchema.empty();
-        withProperties.getOrCreateLabel(NodeLabel.of("A")).addProperty("foo", ValueType.LONG);
+        NodeSchema.empty();
 
         return Stream.of(
-            Arguments.of(NodeSchema.empty().getOrCreateLabel(NodeLabel.of("A")), false),
-            Arguments.of(withProperties, true)
+            Arguments.of(NodeSchema.empty().addLabel(NodeLabel.of("A")), false),
+            Arguments.of(NodeSchema.empty().addProperty(NodeLabel.of("A"), "foo", ValueType.LONG), true)
         );
     }
 

@@ -62,7 +62,7 @@ public final class NodeSchema extends ElementSchema<NodeSchema, NodeLabel, NodeS
 
 
     public NodeSchemaEntry getOrCreateLabel(NodeLabel key) {
-        return this.entries.putIfAbsent(key, new NodeSchemaEntry(key));
+        return this.entries.computeIfAbsent(key, (__) -> new NodeSchemaEntry(key));
     }
 
     public NodeSchema addLabel(NodeLabel nodeLabel) {

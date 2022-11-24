@@ -90,4 +90,9 @@ public abstract class ElementSchemaEntry<SELF extends ElementSchemaEntry<SELF, E
         result = 31 * result + properties.hashCode();
         return result;
     }
+
+    @Override
+    public String toString() {
+        return toMap().toString();
+    }
 }

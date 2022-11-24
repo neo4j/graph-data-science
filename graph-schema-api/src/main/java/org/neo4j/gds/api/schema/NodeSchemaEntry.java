@@ -26,6 +26,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -45,7 +46,7 @@ public class NodeSchemaEntry extends ElementSchemaEntry<NodeSchemaEntry, NodeLab
 
     @Override
     NodeSchemaEntry union(NodeSchemaEntry other) {
-        if (other.identifier() != this.identifier()) {
+        if (!other.identifier().equals(this.identifier())) {
             throw new UnsupportedOperationException(
                 formatWithLocale(
                     "Cannot union node schema entries with different node labels %s and %s",
@@ -81,9 +82,14 @@ public class NodeSchemaEntry extends ElementSchemaEntry<NodeSchemaEntry, NodeLab
 
     @Override
     Map<String, Object> toMap() {
-        return Map.of(
-            "identifier", identifier(),
-            "properties", properties
-        );
+        return properties
+            .entrySet()
+            .stream()
+            .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue())
+                )
+
+            );
     }
 }

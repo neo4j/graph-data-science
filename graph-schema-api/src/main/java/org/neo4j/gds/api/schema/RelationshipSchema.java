@@ -27,6 +27,7 @@ import org.neo4j.gds.core.Aggregation;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 public class RelationshipSchema extends ElementSchema<RelationshipSchema, RelationshipType, RelationshipSchemaEntry, RelationshipPropertySchema> {
@@ -64,7 +65,7 @@ public class RelationshipSchema extends ElementSchema<RelationshipSchema, Relati
         RelationshipType relationshipType,
         Orientation orientation
     ) {
-        return this.entries.putIfAbsent(relationshipType, new RelationshipSchemaEntry(relationshipType, orientation));
+        return this.entries.computeIfAbsent(relationshipType, (__) -> new RelationshipSchemaEntry(relationshipType, orientation));
     }
 
     public RelationshipSchema addRelationshipType(RelationshipType relationshipType, Orientation orientation) {
@@ -101,5 +102,20 @@ public class RelationshipSchema extends ElementSchema<RelationshipSchema, Relati
     ) {
         getOrCreateRelationshipType(relationshipType, orientation).addProperty(propertyKey, valueType, aggregation);
         return this;
+    }
+
+    Object toMapOld() {
+        return entries()
+            .stream()
+            .collect(Collectors.toMap(
+                e -> e.identifier().name(),
+                e -> e.properties()
+                    .entrySet()
+                    .stream()
+                    .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue()))
+                    )
+            ));
     }
 }

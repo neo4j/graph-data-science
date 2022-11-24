@@ -66,9 +66,9 @@ class UnionGraphTest {
     void conflictingDirectionThrowsException() {
         Graph unionGraph = UnionGraph.of(List.of(naturalGraph, undirectedGraph));
 
-        assertThatThrownBy(() -> unionGraph.schema())
+        assertThatThrownBy(unionGraph::schema)
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Conflicting directionality for relationship types `[__ALL__]`");
+            .hasMessageContaining("Conflicting directionality for relationship types __ALL__");
     }
 
     @Test

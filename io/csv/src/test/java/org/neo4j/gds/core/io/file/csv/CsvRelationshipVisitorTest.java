@@ -75,7 +75,7 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
     }
     
     @Test
-    void visitNodesWithLabelsAndProperties() {
+    void visitRelationshipsWithTypesAndProperties() {
         var aType = RelationshipType.of("A");
         var bType = RelationshipType.of("B");
 
@@ -84,7 +84,7 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
             .addProperty("foo", ValueType.LONG)
             .addProperty("bar", ValueType.LONG);
 
-        relationshipSchema.getOrCreateRelationshipType(aType, NATURAL)
+        relationshipSchema.getOrCreateRelationshipType(bType, NATURAL)
             .addProperty("bar", ValueType.LONG)
             .addProperty("baz", ValueType.DOUBLE);
 

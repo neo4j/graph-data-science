@@ -58,7 +58,7 @@ class RelationshipSchemaTest {
 
         var directedSchema = RelationshipSchema.empty();
         directedSchema.getOrCreateRelationshipType(type, NATURAL);
-        assertThat(undirectedSchema.isUndirected()).isFalse();
+        assertThat(directedSchema.isUndirected()).isFalse();
     }
 
     @Test
@@ -196,9 +196,7 @@ class RelationshipSchemaTest {
             .addRelationshipType(RelationshipType.of("Y"), UNDIRECTED);
 
         assertThatThrownBy(() -> schema1.union(schema2))
-            .hasMessageContaining("Conflicting directionality for relationship types")
-            .hasMessageContaining("X")
-            .hasMessageNotContaining("Y");
+            .hasMessageContaining("Conflicting directionality for relationship types X");
     }
 
 
