@@ -19,147 +19,87 @@
  */
 package org.neo4j.gds.api.schema;
 
-import org.immutables.builder.Builder.AccessibleFields;
-import org.immutables.value.Value;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static org.neo4j.gds.Orientation.UNDIRECTED;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@ValueClass
-public interface RelationshipSchema extends ElementSchema<RelationshipSchema, RelationshipType, RelationshipPropertySchema> {
+public class RelationshipSchema extends ElementSchema<RelationshipSchema, RelationshipType, RelationshipSchemaEntry, RelationshipPropertySchema> {
 
-    Map<RelationshipType, Orientation> relTypeOrientationMap();
+    public static RelationshipSchema empty() {
+        return new RelationshipSchema(new LinkedHashMap<>());
+    }
 
-    default Orientation orientation(RelationshipType relationshipType) {
-        return relTypeOrientationMap().get(relationshipType);
+    public RelationshipSchema(Map<RelationshipType, RelationshipSchemaEntry> entries) {
+        super(entries);
     }
 
     @Override
-    default RelationshipSchema filter(Set<RelationshipType> relationshipTypesToKeep) {
-        return of(
-            filterProperties(relationshipTypesToKeep),
-            relTypeOrientationMap().entrySet().stream()
-                .filter(kv -> relationshipTypesToKeep.contains(kv.getKey()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-        );
+    public RelationshipSchema filter(Set<RelationshipType> relationshipTypesToKeep) {
+        return new RelationshipSchema(filterByElementIdentifier(relationshipTypesToKeep));
     }
 
     @Override
-    default RelationshipSchema union(RelationshipSchema other) {
-        var mismatchTypes = this
-            .relTypeOrientationMap()
-            .entrySet()
-            .stream()
-            .filter(e -> other.relTypeOrientationMap().containsKey(e.getKey()))
-            .filter(e -> other.orientation(e.getKey()) != e.getValue())
-            .map(e -> e.getKey().name)
-            .collect(Collectors.toSet());
-
-        if (!mismatchTypes.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Conflicting directionality for relationship types `%s`",
-                mismatchTypes
-            ));
-        } else {
-            return of(unionSchema(other.properties()), unionTypeIsUndirectedMap(other.relTypeOrientationMap()));
-        }
+    public RelationshipSchema union(RelationshipSchema other) {
+        return new RelationshipSchema(unionEntries(other));
     }
 
-    private Map<RelationshipType, Orientation> unionTypeIsUndirectedMap(Map<RelationshipType, Orientation> otherTypeIsUndirectedMap) {
-        return Stream
-            .concat(relTypeOrientationMap().entrySet().stream(), otherTypeIsUndirectedMap.entrySet().stream())
-            .distinct()
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    public Set<RelationshipType> availableTypes() {
+        return entries.keySet();
     }
 
-    default Set<RelationshipType> availableTypes() {
-        return properties().keySet();
-    }
-
-    default boolean isUndirected() {
+    public boolean isUndirected() {
         // a graph with no relationships is considered undirected
         // this is because algorithms such as TriangleCount are still well-defined
         // so it is the least restrictive decision
-        return relTypeOrientationMap().values().stream().allMatch(b -> b == UNDIRECTED);
+        return entries.values().stream().allMatch(RelationshipSchemaEntry::isUndirected);
     }
 
-    @Value.Derived
-    default Map<String, Object> toMap() {
-        return properties().entrySet().stream().collect(Collectors.toMap(
-            entry -> entry.getKey().name,
-            entry -> Map.of(
-                "orientation", relTypeOrientationMap().get(entry.getKey()).toString(),
-                "properties", properties(entry.getKey())
-            )
-        ));
-    }
-
-    @Value.Derived
-    default Map<String, Object> toMapOld() {
-        return properties().entrySet().stream().collect(Collectors.toMap(
-            entry -> entry.getKey().name,
-            entry -> properties(entry.getKey())
-        ));
-    }
-
-    static RelationshipSchema empty() {
-        return builder().build();
-    }
-
-    static RelationshipSchema of(
-        Map<RelationshipType, Map<String, RelationshipPropertySchema>> properties,
-        Map<RelationshipType, Orientation> relTypeOrientationMap
+    public RelationshipSchemaEntry getOrCreateRelationshipType(
+        RelationshipType relationshipType,
+        Orientation orientation
     ) {
-        return RelationshipSchema.builder().relTypeOrientationMap(relTypeOrientationMap).properties(properties).build();
+        return this.entries.putIfAbsent(relationshipType, new RelationshipSchemaEntry(relationshipType, orientation));
     }
 
-    static Builder builder() {
-        return new Builder().properties(new LinkedHashMap<>()).relTypeOrientationMap(new LinkedHashMap<>());
+    public RelationshipSchema addRelationshipType(RelationshipType relationshipType, Orientation orientation) {
+        getOrCreateRelationshipType(relationshipType, orientation);
+        return this;
     }
 
-    @AccessibleFields
-    class Builder extends ImmutableRelationshipSchema.Builder {
+    public RelationshipSchema addProperty(
+        RelationshipType relationshipType,
+        Orientation orientation,
+        String propertyKey,
+        RelationshipPropertySchema propertySchema
+    ) {
+        getOrCreateRelationshipType(relationshipType, orientation).addProperty(propertyKey, propertySchema);
+        return this;
+    }
 
-        public Builder addProperty(RelationshipType type, Orientation orientation, String propertyName, ValueType valueType) {
-            return addProperty(type, orientation, propertyName, RelationshipPropertySchema.of(propertyName, valueType));
-        }
+    public RelationshipSchema addProperty(
+        RelationshipType relationshipType,
+        Orientation orientation,
+        String propertyKey,
+        ValueType valueType
+    ) {
+        getOrCreateRelationshipType(relationshipType, orientation).addProperty(propertyKey, valueType);
+        return this;
+    }
 
-        public Builder addProperty(RelationshipType type, Orientation orientation, String propertyName, ValueType valueType, Aggregation aggregation) {
-            return addProperty(type, orientation, propertyName, RelationshipPropertySchema.of(propertyName, valueType, aggregation));
-        }
-
-        public Builder addProperty(
-            RelationshipType type,
-            Orientation orientation,
-            String propertyName,
-            RelationshipPropertySchema propertySchema
-        ) {
-            addRelationshipType(type, orientation);
-            this.properties.get(type).put(propertyName, propertySchema);
-            return this;
-        }
-
-        public Builder addRelationshipType(RelationshipType type, Orientation orientation) {
-            this.properties.computeIfAbsent(type, ignore -> new LinkedHashMap<>());
-            this.relTypeOrientationMap.putIfAbsent(type, orientation);
-            return this;
-        }
-
-        public Builder removeRelationshipType(RelationshipType type) {
-            this.properties.remove(type);
-            this.relTypeOrientationMap.remove(type);
-            return this;
-        }
+    public RelationshipSchema addProperty(
+        RelationshipType relationshipType,
+        Orientation orientation,
+        String propertyKey,
+        ValueType valueType,
+        Aggregation aggregation
+    ) {
+        getOrCreateRelationshipType(relationshipType, orientation).addProperty(propertyKey, valueType, aggregation);
+        return this;
     }
 }

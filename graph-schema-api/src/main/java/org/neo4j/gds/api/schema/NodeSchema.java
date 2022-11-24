@@ -19,104 +19,65 @@
  */
 package org.neo4j.gds.api.schema;
 
-import org.immutables.builder.Builder.AccessibleFields;
-import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-@ValueClass
-public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel, PropertySchema> {
+public final class NodeSchema extends ElementSchema<NodeSchema, NodeLabel, NodeSchemaEntry, PropertySchema> {
 
-    @Value.Derived
-    default Set<NodeLabel> availableLabels() {
-        return properties().keySet();
+    public static NodeSchema empty() {
+        return new NodeSchema(new LinkedHashMap<>());
     }
 
-    default boolean containsOnlyAllNodesLabel() {
+    private NodeSchema(Map<NodeLabel, NodeSchemaEntry> entries) {
+        super(entries);
+    }
+
+    public static NodeSchema from(NodeSchema fromSchema) {
+        var nodeSchema = NodeSchema.empty();
+        fromSchema.entries().forEach(fromEntry -> nodeSchema.set(NodeSchemaEntry.from(fromEntry)));
+
+        return nodeSchema;
+    }
+
+    public Set<NodeLabel> availableLabels() {
+        return entries.keySet();
+    }
+
+    public boolean containsOnlyAllNodesLabel() {
         return availableLabels().size() == 1 && availableLabels().contains(NodeLabel.ALL_NODES);
     }
 
-    default NodeSchema filter(Set<NodeLabel> labelsToKeep) {
-        return of(filterProperties(labelsToKeep));
+    public NodeSchema filter(Set<NodeLabel> labelsToKeep) {
+        return new NodeSchema(filterByElementIdentifier(labelsToKeep));
     }
 
     @Override
-    default NodeSchema union(NodeSchema other) {
-        return of(unionSchema(other.properties()));
+    public NodeSchema union(NodeSchema other) {
+        return new NodeSchema(unionEntries(other));
     }
 
-    @Value.Derived
-    default Map<String, Object> toMap() {
-        return properties().entrySet().stream().collect(Collectors.toMap(
-            entry -> entry.getKey().name,
-            entry -> properties(entry.getKey())
-        ));
+
+    public NodeSchemaEntry getOrCreateLabel(NodeLabel key) {
+        return this.entries.putIfAbsent(key, new NodeSchemaEntry(key));
     }
 
-    static NodeSchema of(Map<NodeLabel, Map<String, PropertySchema>> properties) {
-        if (properties.isEmpty()) {
-            return empty();
-        }
-        return NodeSchema.builder().properties(properties).build();
+    public NodeSchema addLabel(NodeLabel nodeLabel) {
+        getOrCreateLabel(nodeLabel);
+        return this;
     }
 
-    static NodeSchema empty() {
-        return builder().build();
+    public NodeSchema addProperty(NodeLabel nodeLabel, String propertyName, PropertySchema propertySchema) {
+        getOrCreateLabel(nodeLabel).addProperty(propertyName, propertySchema);
+        return this;
     }
 
-    static Builder builder() {
-        return new Builder().properties(new LinkedHashMap<>());
+    public NodeSchema addProperty(NodeLabel nodeLabel, String propertyKey, ValueType valueType) {
+        getOrCreateLabel(nodeLabel).addProperty(propertyKey, valueType);
+        return this;
     }
 
-    @AccessibleFields
-    class Builder extends ImmutableNodeSchema.Builder {
-
-        public Builder addProperty(NodeLabel key, String propertyName, ValueType valueType) {
-            return addProperty(
-                key,
-                propertyName,
-                PropertySchema.of(
-                    propertyName,
-                    valueType,
-                    valueType.fallbackValue(),
-                    PropertyState.PERSISTENT
-                )
-            );
-        }
-
-        public Builder addProperty(NodeLabel key, String propertyName, PropertySchema propertySchema) {
-            this.properties
-                .computeIfAbsent(key, ignore -> new LinkedHashMap<>())
-                .put(propertyName, propertySchema);
-
-            return this;
-        }
-
-        public Builder addLabel(NodeLabel key) {
-            this.properties.putIfAbsent(key, new LinkedHashMap<>());
-            return this;
-        }
-
-        public Builder removeProperty(String propertyName) {
-            this.properties.forEach((label, propertyMappings) -> {
-                propertyMappings.remove(propertyName);
-            });
-            return this;
-        }
-
-        @Override
-        public NodeSchema build() {
-            if (this.properties.isEmpty()) {
-                addLabel(NodeLabel.ALL_NODES);
-            }
-            return super.build();
-        }
-    }
 }

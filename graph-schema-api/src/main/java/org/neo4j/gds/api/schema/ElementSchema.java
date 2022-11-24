@@ -19,125 +19,126 @@
  */
 package org.neo4j.gds.api.schema;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.ElementIdentifier;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public interface ElementSchema<SELF extends ElementSchema<SELF, ELEMENT_IDENTIFIER, PROPERTY_SCHEMA>, ELEMENT_IDENTIFIER extends ElementIdentifier, PROPERTY_SCHEMA extends PropertySchema> {
+public abstract class ElementSchema<
+        SELF extends ElementSchema<SELF, ELEMENT_IDENTIFIER, ENTRY, PROPERTY_SCHEMA>,
+        ELEMENT_IDENTIFIER extends ElementIdentifier,
+        ENTRY extends ElementSchemaEntry<ENTRY, ELEMENT_IDENTIFIER, PROPERTY_SCHEMA>,
+        PROPERTY_SCHEMA extends PropertySchema
+    > {
 
-    Map<ELEMENT_IDENTIFIER, Map<String, PROPERTY_SCHEMA>> properties();
+    protected final Map<ELEMENT_IDENTIFIER, ENTRY> entries;
 
-    SELF filter(Set<ELEMENT_IDENTIFIER> elementIdentifieresToKeep);
+    ElementSchema(Map<ELEMENT_IDENTIFIER, ENTRY> entries) {
+        this.entries = entries;
+    }
 
-    SELF union(SELF other);
+    abstract SELF filter(Set<ELEMENT_IDENTIFIER> elementIdentifiersToKeep);
 
-    @Value.Derived
-    default Set<String> allProperties() {
-        return properties()
+    abstract SELF union(SELF other);
+
+    public Collection<ENTRY> entries() {
+        return this.entries.values();
+    }
+
+    public void set(ENTRY entry) {
+        entries.put(entry.identifier(), entry);
+    }
+    public ENTRY get(ELEMENT_IDENTIFIER identifier) {
+        return entries.get(identifier);
+    }
+
+    public void remove(ELEMENT_IDENTIFIER identifier) {
+        entries.remove(identifier);
+    }
+
+    public Set<String> allProperties() {
+        return this.entries
             .values()
             .stream()
-            .flatMap(propertyMapping -> propertyMapping.keySet().stream())
+            .flatMap(entry -> entry.properties().keySet().stream())
             .collect(Collectors.toSet());
     }
 
-    @Value.Derived
-    default Map<String, Object> properties(ELEMENT_IDENTIFIER type) {
-        return properties().get(type)
-            .entrySet()
-            .stream()
-            .collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue())
-                )
-            );
+    public Set<String> allProperties(ELEMENT_IDENTIFIER elementIdentifier) {
+        return Optional.ofNullable(this.entries.get(elementIdentifier))
+            .map(entry -> entry.properties().keySet())
+            .orElse(Set.of());
     }
 
-    @Value.Derived
-    default boolean hasProperties() {
-        return !allProperties().isEmpty();
+    public boolean hasProperties() {
+        return entries.values().stream().anyMatch(entry -> !entry.properties().isEmpty());
     }
 
-    @Value.Default
-    default boolean hasProperties(ELEMENT_IDENTIFIER elementIdentifier) {
-        return !properties().get(elementIdentifier).isEmpty();
+    public boolean hasProperty(ELEMENT_IDENTIFIER elementIdentifier, String propertyKey) {
+        boolean hasIdentifier = entries.containsKey(elementIdentifier);
+        boolean hasProperty = entries.get(elementIdentifier).properties().containsKey(propertyKey);
+        return hasIdentifier && hasProperty;
     }
 
-    @Value.Default
-    default boolean hasProperty(ELEMENT_IDENTIFIER elementIdentifier, String propertyKey) {
-        return properties().containsKey(elementIdentifier) && (!properties()
-            .get(elementIdentifier)
-            .isEmpty() && properties().get(elementIdentifier).containsKey(propertyKey));
-    }
-
-    @Value.Default
-    default List<PROPERTY_SCHEMA> propertySchemasFor(ELEMENT_IDENTIFIER elementIdentifier) {
-        var propertySchemaForTypes = filter(Set.of(elementIdentifier));
-        return new ArrayList<>(propertySchemaForTypes.unionProperties().values());
-    }
-
-    @Value.Derived
-    default Map<ELEMENT_IDENTIFIER, Map<String, PROPERTY_SCHEMA>> filterProperties(Set<ELEMENT_IDENTIFIER> identifiersToKeep) {
-        return properties()
-            .entrySet()
-            .stream()
-            .filter(entry -> identifiersToKeep.contains(entry.getKey()))
-            .collect(Collectors.toMap(Map.Entry::getKey, entry -> new HashMap<>(entry.getValue())));
-
+    public List<PROPERTY_SCHEMA> propertySchemasFor(ELEMENT_IDENTIFIER elementIdentifier) {
+        return Optional
+            .ofNullable(entries.get(elementIdentifier))
+            .map(entry -> entry.properties().values())
+            .map(ArrayList::new)
+            .orElse(new ArrayList<>());
     }
 
     /**
      * Returns a union of all properties in the given schema.
      */
-    @Value.Lazy
-    default Map<String, PROPERTY_SCHEMA> unionProperties() {
-        return properties()
+    public Map<String, PROPERTY_SCHEMA> unionProperties() {
+        return entries
             .values()
             .stream()
-            .flatMap(e -> e.entrySet().stream())
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                Map.Entry::getValue,
-                (leftSchema, rightSchema) -> leftSchema
-            ));
+            .flatMap(e -> e.properties().entrySet().stream())
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (leftSchema, rightSchema) -> leftSchema));
     }
 
-    /**
-     * For internal use only!
-     */
-    default Map<ELEMENT_IDENTIFIER, Map<String, PROPERTY_SCHEMA>> unionSchema(Map<ELEMENT_IDENTIFIER, Map<String, PROPERTY_SCHEMA>> rightProperties) {
-        return Stream.concat(
-            properties().entrySet().stream(),
-            rightProperties.entrySet().stream()
-        ).collect(Collectors.toMap(
-            Map.Entry::getKey,
-            Map.Entry::getValue,
-            (left, right) -> Stream.concat(
-                left.entrySet().stream(),
-                right.entrySet().stream()
-            ).collect(Collectors.toMap(
-                Map.Entry::getKey,
-                Map.Entry::getValue,
-                (leftType, rightType) -> {
-                    if (leftType.valueType() != rightType.valueType()) {
-                        throw new IllegalArgumentException(String.format(
-                            Locale.ENGLISH,
-                            "Combining schema entries with value type %s and %s is not supported.",
-                            left.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().valueType())),
-                            right.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().valueType()))
-                        ));
-                    } else {
-                        return leftType;
-                    }
-                }
-            ))
-        ));
+
+    public Map<String, Object> toMap() {
+        return entries
+            .entrySet()
+            .stream()
+            .collect(Collectors.toMap(entry -> entry.getKey().name, entry -> entry.getValue().toMap()));
+    }
+
+    Map<ELEMENT_IDENTIFIER, ENTRY> filterByElementIdentifier(Set<ELEMENT_IDENTIFIER> elementIdentifiersToKeep) {
+        return entries
+            .entrySet()
+            .stream()
+            .filter(e -> elementIdentifiersToKeep.contains(e.getKey()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    Map<ELEMENT_IDENTIFIER, ENTRY> unionEntries(SELF other) {
+        return Stream
+            .concat(entries.entrySet().stream(), other.entries.entrySet().stream())
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, ElementSchemaEntry::union));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ElementSchema<?, ?, ?, ?> that = (ElementSchema<?, ?, ?, ?>) o;
+
+        return entries.equals(that.entries);
+    }
+
+    @Override
+    public int hashCode() {
+        return entries.hashCode();
     }
 }
