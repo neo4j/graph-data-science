@@ -73,7 +73,7 @@ public abstract class HugeAtomicLongArray implements HugeCursorSupport<long[]> {
     public abstract HugeCursor<long[]> newCursor();
 
     /**
-     * @return the long value at the given index
+     * @return the long value at the given index (volatile)
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
     public abstract long get(long index);
@@ -88,7 +88,7 @@ public abstract class HugeAtomicLongArray implements HugeCursorSupport<long[]> {
     public abstract long getAndAdd(long index, long delta);
 
     /**
-     * Sets the long value at the given index to the given value.
+     * Sets the long value at the given index to the given value (volatile).
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
@@ -263,7 +263,8 @@ public abstract class HugeAtomicLongArray implements HugeCursorSupport<long[]> {
         return SingleHugeAtomicLongArray.of(size, pageFiller);
     }
 
-    static final class SingleHugeAtomicLongArray extends HugeAtomicLongArray {
+    static final class
+    SingleHugeAtomicLongArray extends HugeAtomicLongArray {
 
         private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(long[].class);
 
