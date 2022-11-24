@@ -60,6 +60,22 @@ class GlobalTaskStoreTest {
     }
 
     @Test
+    void shouldQueryByUser() {
+        var taskStore = new GlobalTaskStore();
+        taskStore.store("alice", new JobId("42"), Tasks.leaf("leaf"));
+        taskStore.store("alice", new JobId("666"), Tasks.leaf("leaf"));
+        taskStore.store("bob", new JobId("1337"), Tasks.leaf("other"));
+
+        assertThat(taskStore.query("alice")).hasSize(2)
+            .allMatch(task -> task.username().equals("alice"));
+
+        assertThat(taskStore.query("alice", new JobId("42"))).isPresent()
+            .get()
+            .matches(task -> task.jobId().asString().equals("42"))
+            .matches(task -> task.username().equals("alice"));
+    }
+
+    @Test
     void shouldQueryMultipleUsers() {
         var taskStore = new GlobalTaskStore();
         taskStore.store("alice", new JobId("42"), Tasks.leaf("leaf"));
