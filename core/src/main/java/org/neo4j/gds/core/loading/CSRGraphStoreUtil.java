@@ -66,9 +66,8 @@ public final class CSRGraphStoreUtil {
         var relationships = graph.relationships();
         Orientation orientation = graph.schema().isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
 
-        var relationshipSchemaBuilder = RelationshipSchema
-            .builder()
-            .addRelationshipType(relationshipType, orientation);
+        var relationshipSchema = RelationshipSchema.empty();
+        var entry = relationshipSchema.getOrCreateRelationshipType(relationshipType, orientation);
 
         relationshipPropertyKey.ifPresent(property -> {
 
@@ -79,9 +78,7 @@ public final class CSRGraphStoreUtil {
                 ));
             }
 
-            relationshipSchemaBuilder.addProperty(
-                relationshipType,
-                orientation,
+            entry.addProperty(
                 property,
                 ValueType.DOUBLE
             );
@@ -96,7 +93,7 @@ public final class CSRGraphStoreUtil {
             relationshipType
         );
 
-        var schema = GraphSchema.of(graph.schema().nodeSchema(), relationshipSchemaBuilder.build(), Map.of());
+        var schema = GraphSchema.of(NodeSchema.from(graph.schema().nodeSchema()), relationshipSchema, Map.of());
 
         return new CSRGraphStore(
             databaseId,
@@ -122,7 +119,8 @@ public final class CSRGraphStoreUtil {
             .unionProperties()
             .forEach((propertyKey, propertySchema) -> nodePropertyStoreBuilder.putIfAbsent(
                 propertyKey,
-                NodeProperty.of(propertyKey,
+                NodeProperty.of(
+                    propertyKey,
                     propertySchema.state(),
                     graph.nodeProperties(propertyKey),
                     propertySchema.defaultValue()
@@ -144,8 +142,8 @@ public final class CSRGraphStoreUtil {
             Map<String, RelationshipPropertySchema> relationshipPropertySchemas = graph
                 .schema()
                 .relationshipSchema()
-                .properties()
-                .get(relationshipType);
+                .get(relationshipType)
+                .properties();
 
             if (relationshipPropertySchemas.size() != 1) {
                 throw new IllegalStateException(formatWithLocale(
@@ -237,40 +235,48 @@ public final class CSRGraphStoreUtil {
     ) {
         var properties = idMapAndProperties.properties().properties();
 
-        var nodeSchemaBuilder = NodeSchema.builder();
+        var nodeSchema = NodeSchema.empty();
         for (var label : idMapAndProperties.idMap().availableNodeLabels()) {
+            var entry = nodeSchema.getOrCreateLabel(label);
             for (var propertyKey : propertiesByLabel.apply(label)) {
-                nodeSchemaBuilder.addProperty(
-                    label,
+                entry.addProperty(
                     propertyKey,
                     properties.get(propertyKey).propertySchema()
                 );
             }
         }
-        idMapAndProperties.idMap().availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
+        idMapAndProperties.idMap().availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
-        var relationshipSchemaBuilder = RelationshipSchema.builder();
+        var relationshipSchema = RelationshipSchema.empty();
         relationshipsAndProperties
             .properties()
-            .forEach((relType, propertyStore) -> propertyStore
-                .relationshipProperties()
-                .forEach((propertyKey, propertyValues) -> relationshipSchemaBuilder.addProperty(
+            .forEach((relType, propertyStore) -> {
+                var entry = relationshipSchema.getOrCreateRelationshipType(
                     relType,
-                    relationshipsAndProperties.orientations().get(relType),
-                    propertyKey,
-                    propertyValues.propertySchema()
-                )));
+                    relationshipsAndProperties.orientations().get(relType)
+                );
+
+                propertyStore
+                    .relationshipProperties()
+                    .forEach((propertyKey, propertyValues) -> entry.addProperty(
+                        propertyKey,
+                        propertyValues.propertySchema()
+                    ));
+            });
+
         relationshipsAndProperties
             .relationships()
             .keySet()
             .forEach(type -> {
-                relationshipSchemaBuilder.addRelationshipType(type,
-                    relationshipsAndProperties.orientations().get(type));
+                relationshipSchema.getOrCreateRelationshipType(
+                    type,
+                    relationshipsAndProperties.orientations().get(type)
+                );
             });
 
         return GraphSchema.of(
-            nodeSchemaBuilder.build(),
-            relationshipSchemaBuilder.build(),
+            nodeSchema,
+            relationshipSchema,
             Map.of()
         );
     }

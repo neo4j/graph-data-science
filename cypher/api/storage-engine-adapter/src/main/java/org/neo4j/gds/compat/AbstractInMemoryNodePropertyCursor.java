@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.compat;
 
-import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.values.storable.Value;
@@ -72,7 +72,11 @@ public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemor
         graphStore.nodes().forEachNodeLabel(nodeId, label -> {
             for (String nodePropertyKey : graphStore.nodePropertyKeys(label)) {
                 int propertyId = tokenHolders.propertyKeyTokens().getIdByName(nodePropertyKey);
-                if (propertySelection.test(propertyId) && !ArrayUtil.linearSearch(nodePropertyKeyMapping, nodePropertyKeyMapping.length, propertyId)) {
+                if (propertySelection.test(propertyId) && !ArrayUtil.linearSearch(
+                    nodePropertyKeyMapping,
+                    nodePropertyKeyMapping.length,
+                    propertyId
+                )) {
                     int propertyIndex = nodePropertyCount++;
                     nodePropertyKeyMapping[propertyIndex] = propertyId;
 
@@ -137,13 +141,11 @@ public abstract class AbstractInMemoryNodePropertyCursor extends AbstractInMemor
 
 
     private void populateKeyToValueGroupMapping() {
-        graphStore.schema().nodeSchema().properties()
-            .forEach((identifier, propertyMap) ->
-                propertyMap.forEach((propertyKey, propertySchema) ->
-                    this.propertyKeyToValueGroupMapping.put(
-                        tokenHolders.propertyKeyTokens().getIdByName(propertyKey),
-                        valueGroupFromValueType(propertySchema.valueType())
-                    )
+        graphStore.schema().nodeSchema().unionProperties()
+            .forEach((propertyKey, propertySchema) ->
+                this.propertyKeyToValueGroupMapping.put(
+                    tokenHolders.propertyKeyTokens().getIdByName(propertyKey),
+                    valueGroupFromValueType(propertySchema.valueType())
                 )
             );
     }

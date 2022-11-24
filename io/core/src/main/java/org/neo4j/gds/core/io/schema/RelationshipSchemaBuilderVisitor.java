@@ -24,22 +24,17 @@ import org.neo4j.gds.api.schema.RelationshipSchema;
 
 public class RelationshipSchemaBuilderVisitor extends RelationshipSchemaVisitor {
 
-    private final RelationshipSchema.Builder schemaBuilder;
-    private RelationshipSchema schema;
+    private final RelationshipSchema schema;
 
     public RelationshipSchemaBuilderVisitor() {
-        schemaBuilder = RelationshipSchema.builder();
+        this.schema = RelationshipSchema.empty();
     }
 
     @Override
     protected void export() {
-        // If the key is null we expect no properties but a relationship type
-        if (key() == null) {
-            schemaBuilder.addRelationshipType(relationshipType(), orientation());
-        } else {
-            schemaBuilder.addProperty(
-                relationshipType(),
-                orientation(),
+        var entry = schema.getOrCreateRelationshipType(relationshipType(), orientation());
+        if (key() != null) {
+            entry.addProperty(
                 key(),
                 RelationshipPropertySchema.of(key(), valueType(), defaultValue(), state(), aggregation())
             );
@@ -48,10 +43,5 @@ public class RelationshipSchemaBuilderVisitor extends RelationshipSchemaVisitor 
 
     public RelationshipSchema schema() {
         return schema;
-    }
-
-    @Override
-    public void close() {
-        schema = schemaBuilder.build();
     }
 }

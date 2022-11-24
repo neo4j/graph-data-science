@@ -585,7 +585,7 @@ public final class CypherAggregation {
 
             graphStoreBuilder.nodes(nodes);
 
-            var nodeSchema = maybeNodeProperties
+            var nodePropertySchema = maybeNodeProperties
                 .map(nodeProperties -> GraphAggregator.nodeSchemaWithProperties(
                     nodes.availableNodeLabels(),
                     nodeProperties
@@ -593,20 +593,20 @@ public final class CypherAggregation {
                 .orElseGet(() -> nodeSchemaWithoutProperties(nodes.availableNodeLabels()))
                 .unionProperties();
 
-            NodeSchema.Builder nodeSchemaBuilder = NodeSchema.builder();
-            nodes.availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
-            nodeSchema.forEach((propertyKey, propertySchema) -> {
+            NodeSchema nodeSchema = NodeSchema.empty();
+            nodes.availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
+            nodePropertySchema.forEach((propertyKey, propertySchema) -> {
                 nodes.availableNodeLabels().forEach(label -> {
-                    nodeSchemaBuilder.addProperty(label, propertySchema.key(), propertySchema);
+                    nodeSchema.getOrCreateLabel(label).addProperty(propertySchema.key(), propertySchema);
                 });
             });
 
-            graphSchemaBuilder.nodeSchema(nodeSchemaBuilder.build());
+            graphSchemaBuilder.nodeSchema(nodeSchema);
 
             maybeNodeProperties.ifPresent(allNodeProperties -> {
                 CSRGraphStoreUtil.extractNodeProperties(
                     graphStoreBuilder,
-                    nodeSchema::get,
+                    nodePropertySchema::get,
                     allNodeProperties
                 );
             });
@@ -621,7 +621,7 @@ public final class CypherAggregation {
             GraphStoreBuilder graphStoreBuilder,
             AdjacencyCompressor.ValueMapper valueMapper
         ) {
-            var relationshipSchemaBuilder = RelationshipSchema.builder();
+            var relationshipSchema = RelationshipSchema.empty();
 
             this.relImporters.forEach((relationshipType, relImporter) -> {
                 var allRelationships = relImporter.buildAll(
@@ -634,19 +634,18 @@ public final class CypherAggregation {
                 );
 
                 propertyStore.relationshipProperties().forEach((propertyKey, relationshipProperties) -> {
-                    relationshipSchemaBuilder.addProperty(
-                        relationshipType,
-                        // We do not analyze the cypher query for its orientation
-                        NATURAL,
-                        propertyKey,
-                        relationshipProperties.propertySchema()
+                    relationshipSchema
+                        .getOrCreateRelationshipType(relationshipType, NATURAL)
+                        .addProperty(
+                            propertyKey,
+                            relationshipProperties.propertySchema()
                     );
                 });
 
                 graphStoreBuilder.putRelationships(relationshipType, allRelationships.get(0).relationships().topology());
                 graphStoreBuilder.putRelationshipPropertyStores(relationshipType, propertyStore);
             });
-            graphSchemaBuilder.relationshipSchema(relationshipSchemaBuilder.build());
+            graphSchemaBuilder.relationshipSchema(relationshipSchema);
 
             // release all references to the builders
             // we are only be called once and don't support double invocations of `result` building
@@ -654,25 +653,24 @@ public final class CypherAggregation {
         }
 
         private static NodeSchema nodeSchemaWithProperties(Iterable<NodeLabel> nodeLabels, Map<String, NodePropertyValues> propertyMap) {
-            var nodeSchemaBuilder = NodeSchema.builder();
+            var nodeSchema = NodeSchema.empty();
 
             nodeLabels.forEach((nodeLabel) -> {
                 propertyMap.forEach((propertyName, nodeProperties) -> {
-                    nodeSchemaBuilder.addProperty(
-                        nodeLabel,
+                    nodeSchema.getOrCreateLabel(nodeLabel).addProperty(
                         propertyName,
                         nodeProperties.valueType()
                     );
                 });
             });
 
-            return nodeSchemaBuilder.build();
+            return nodeSchema;
         }
 
         private static NodeSchema nodeSchemaWithoutProperties(Iterable<NodeLabel> nodeLabels) {
-            var nodeSchemaBuilder = NodeSchema.builder();
-            nodeLabels.forEach(nodeSchemaBuilder::addLabel);
-            return nodeSchemaBuilder.build();
+            var nodeSchema = NodeSchema.empty();
+            nodeLabels.forEach(nodeSchema::getOrCreateLabel);
+            return nodeSchema;
         }
     }
 

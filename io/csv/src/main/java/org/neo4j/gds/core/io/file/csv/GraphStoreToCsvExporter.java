@@ -59,18 +59,15 @@ public final class GraphStoreToCsvExporter {
         var nodeSchema = graphStore.schema().nodeSchema();
         var relationshipSchema = graphStore.schema().relationshipSchema();
 
-        var builder = NodeSchema.builder();
+        var neoNodeSchema = NodeSchema.empty();
 
         // Add additional properties to each label present in the graph store.
-        var neoNodeSchema = neoNodeProperties.map(additionalProps -> {
-            additionalProps
-                .neoNodeProperties()
-                .forEach((key, ignore) -> nodeSchema
-                    .availableLabels()
-                    .forEach(label -> builder.addProperty(label, key, ValueType.STRING))
-                );
-            return builder.build();
-        }).orElseGet(builder::build);
+        neoNodeProperties.ifPresent(additionalProps -> additionalProps
+            .neoNodeProperties()
+            .forEach((key, ignore) -> nodeSchema
+                .availableLabels()
+                .forEach(label -> neoNodeSchema.getOrCreateLabel(label).addProperty(key, ValueType.STRING))
+            ));
 
         return new GraphStoreToFileExporter(
             graphStore,

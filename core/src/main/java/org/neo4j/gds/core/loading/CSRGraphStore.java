@@ -260,7 +260,7 @@ public class CSRGraphStore implements GraphStore {
 
     @Override
     public Set<String> nodePropertyKeys(NodeLabel label) {
-        return schema().nodeSchema().properties().getOrDefault(label, Map.of()).keySet();
+        return schema().nodeSchema().allProperties(label);
     }
 
     @Override
@@ -302,25 +302,18 @@ public class CSRGraphStore implements GraphStore {
                 .putIfAbsent(propertyKey, NodeProperty.of(propertyKey, PropertyState.TRANSIENT, propertyValues))
                 .build();
 
-            NodeSchema.Builder schemaBuilder = NodeSchema
-                .builder()
-                .from(schema().nodeSchema());
 
-            labels.forEach(label -> schemaBuilder.addProperty(
-                label,
-                propertyKey,
-                PropertySchema.of(propertyKey,
-                    propertyValues.valueType(),
-                    propertyValues.valueType().fallbackValue(),
-                    PropertyState.TRANSIENT
+            labels.forEach(label -> schema()
+                .nodeSchema()
+                .get(label)
+                .addProperty(
+                    propertyKey,
+                    PropertySchema.of(propertyKey,
+                        propertyValues.valueType(),
+                        propertyValues.valueType().fallbackValue(),
+                        PropertyState.TRANSIENT
                 )
             ));
-
-            this.schema = GraphSchema.of(
-                schemaBuilder.build(),
-                schema().relationshipSchema(),
-                schema.graphProperties()
-            );
         });
     }
 
@@ -332,16 +325,7 @@ public class CSRGraphStore implements GraphStore {
                 .removeProperty(propertyKey)
                 .build();
 
-            NodeSchema.Builder nodeSchemaBuilder = NodeSchema
-                .builder()
-                .from(schema().nodeSchema())
-                .removeProperty(propertyKey);
-
-            this.schema = GraphSchema.of(
-                nodeSchemaBuilder.build(),
-                schema().relationshipSchema(),
-                schema.graphProperties()
-            );
+            schema().nodeSchema().entries().forEach(entry -> entry.removeProperty(propertyKey));
         });
     }
 
@@ -422,14 +406,18 @@ public class CSRGraphStore implements GraphStore {
     ) {
         updateGraphStore(graphStore -> {
             if (!hasRelationshipType(relationshipType)) {
-                RelationshipSchema.Builder newSchemaBuilder = RelationshipSchema.builder();
 
                 graphStore.relationships.put(relationshipType, relationships.topology());
-                newSchemaBuilder.addRelationshipType(relationshipType, orientation);
+
+
+                var relationshipSchemaEntry = schema().relationshipSchema().getOrCreateRelationshipType(relationshipType, orientation);
+
+
 
                 if (relationshipPropertyKey.isPresent()
                     && relationshipPropertyType.isPresent()
                     && relationships.properties().isPresent()) {
+
                     addRelationshipProperty(
                         relationshipType,
                         relationshipPropertyKey.get(),
@@ -439,9 +427,7 @@ public class CSRGraphStore implements GraphStore {
                     );
 
                     ValueType valueType = ValueTypes.fromNumberType(relationshipPropertyType.get());
-                    newSchemaBuilder.addProperty(
-                        relationshipType,
-                        orientation,
+                    relationshipSchemaEntry.addProperty(
                         relationshipPropertyKey.get(),
                         RelationshipPropertySchema.of(
                             relationshipPropertyKey.get(),
@@ -451,13 +437,6 @@ public class CSRGraphStore implements GraphStore {
                             Aggregation.NONE
                         ));
                 }
-
-                var resultingRelationshipSchema = schema.relationshipSchema().union(newSchemaBuilder.build());
-                this.schema = GraphSchema.of(
-                    schema().nodeSchema(),
-                    resultingRelationshipSchema,
-                    schema.graphProperties()
-                );
             }
         });
     }
@@ -481,17 +460,7 @@ public class CSRGraphStore implements GraphStore {
                         ));
                 }
 
-                var relationshipSchema = RelationshipSchema
-                    .builder()
-                    .from(schema().relationshipSchema())
-                    .removeRelationshipType(relationshipType)
-                    .build();
-
-                this.schema = GraphSchema.of(
-                    schema().nodeSchema(),
-                    relationshipSchema,
-                    schema.graphProperties()
-                );
+                schema().relationshipSchema().remove(relationshipType);
             })
         );
     }

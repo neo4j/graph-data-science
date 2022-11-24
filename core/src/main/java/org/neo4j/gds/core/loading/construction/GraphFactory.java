@@ -294,23 +294,19 @@ public final class GraphFactory {
      * will be used.
      */
     public static HugeGraph create(IdMap idMap, RelationshipsAndOrientation relationshipsAndOrientation) {
-        var nodeSchemaBuilder = NodeSchema.builder();
-        idMap.availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
-        var nodeSchema = nodeSchemaBuilder.build();
+        var nodeSchema = NodeSchema.empty();
+        idMap.availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
-        var relationshipSchemaBuilder = RelationshipSchema.builder();
+        var relationshipSchema = RelationshipSchema.empty();
+
+        var entry = relationshipSchema.getOrCreateRelationshipType(
+            RelationshipType.of("REL"),
+            relationshipsAndOrientation.orientation()
+        );
+
         if (relationshipsAndOrientation.relationships().properties().isPresent()) {
-            relationshipSchemaBuilder.addProperty(
-                RelationshipType.of("REL"),
-                relationshipsAndOrientation.orientation(),
-                "property",
-                ValueType.DOUBLE
-            );
-        } else {
-            relationshipSchemaBuilder.addRelationshipType(RelationshipType.of("REL"), relationshipsAndOrientation.orientation());
+            entry.addProperty("property", ValueType.DOUBLE);
         }
-
-        var relationshipSchema = relationshipSchemaBuilder.build();
 
         return create(
             GraphSchema.of(nodeSchema, relationshipSchema, Map.of()),

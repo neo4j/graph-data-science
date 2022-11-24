@@ -143,15 +143,13 @@ public final class RandomGraphGenerator {
     }
 
     private RelationshipSchema relationshipSchema() {
-        var relationshipSchemaBuilder = RelationshipSchema.builder();
-        relationshipSchemaBuilder.addRelationshipType(relationshipType, orientation);
-        maybeRelationshipPropertyProducer.ifPresent(pp -> relationshipSchemaBuilder.addProperty(
-            relationshipType,
-            orientation,
+        var relationshipSchema = RelationshipSchema.empty();
+        var entry = relationshipSchema.getOrCreateRelationshipType(relationshipType, orientation);
+        maybeRelationshipPropertyProducer.ifPresent(pp -> entry.addProperty(
             pp.getPropertyName(),
             pp.propertyType()
         ));
-        return relationshipSchemaBuilder.build();
+        return relationshipSchema;
     }
 
     public RelationshipDistribution getRelationshipDistribution() {
@@ -221,10 +219,10 @@ public final class RandomGraphGenerator {
 
     private NodePropertiesAndSchema generateNodeProperties(IdMap idMap) {
         if (this.nodePropertyProducers.isEmpty()) {
-            var nodeSchemaBuilder = NodeSchema.builder();
-            idMap.availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
+            var nodeSchema = NodeSchema.empty();
+            idMap.availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
             return ImmutableNodePropertiesAndSchema.builder()
-                .nodeSchema(nodeSchemaBuilder.build())
+                .nodeSchema(nodeSchema)
                 .nodeProperties(Map.of())
                 .build();
         }
@@ -272,26 +270,28 @@ public final class RandomGraphGenerator {
         ));
 
         // Create a corresponding node schema
-        var nodeSchemaBuilder = NodeSchema.builder();
+        var nodeSchema = NodeSchema.empty();
         generatedProperties.forEach((propertyKey, property) -> propertyNameToLabels
             .get(propertyKey)
             .forEach(nodeLabel -> {
                 if (nodeLabel == NodeLabel.ALL_NODES) {
                     idMap
                         .availableNodeLabels()
-                        .forEach(actualNodeLabel -> nodeSchemaBuilder.addProperty(
-                            actualNodeLabel,
-                            propertyKey,
-                            property.valueType()
-                        ));
+                        .forEach(actualNodeLabel -> nodeSchema
+                            .getOrCreateLabel(actualNodeLabel)
+                            .addProperty(
+                                propertyKey,
+                                property.valueType()
+                            )
+                        );
                 } else {
-                    nodeSchemaBuilder.addProperty(nodeLabel, propertyKey, property.valueType());
+                    nodeSchema.getOrCreateLabel(nodeLabel).addProperty(propertyKey, property.valueType());
                 }
             }));
 
         return ImmutableNodePropertiesAndSchema.builder()
             .nodeProperties(generatedProperties)
-            .nodeSchema(nodeSchemaBuilder.build())
+            .nodeSchema(nodeSchema)
             .build();
     }
 

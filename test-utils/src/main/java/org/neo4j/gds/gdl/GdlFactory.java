@@ -67,6 +67,7 @@ import org.s1ck.gdl.model.Vertex;
 import org.s1ck.gdl.utils.ContinuousId;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -125,7 +126,13 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         // NOTE: We don't really have a database, but GDL is for testing to work as if we had a database
         var capabilities = graphCapabilities.orElseGet(() -> ImmutableStaticCapabilities.of(true));
 
-        return new GdlFactory(gdlHandler, config, graphDimensions, databaseId.orElse(GdlSupportPerMethodExtension.DATABASE_ID), capabilities);
+        return new GdlFactory(
+            gdlHandler,
+            config,
+            graphDimensions,
+            databaseId.orElse(GdlSupportPerMethodExtension.DATABASE_ID),
+            capabilities
+        );
     }
 
     private GdlFactory(
@@ -169,7 +176,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         IdMapAndProperties idMapAndProperties, RelationshipsAndProperties relationshipsAndProperties
     ) {
         var nodeProperties = idMapAndProperties.properties();
-        NodeSchema.Builder nodeSchemaBuilder = NodeSchema.builder();
+        var nodeSchema = NodeSchema.empty();
         gdlHandler
             .getVertices()
             .forEach(vertex -> {
@@ -180,43 +187,48 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
                 labels.forEach(label -> vertex
                     .getProperties()
-                    .forEach((propertyKey, propertyValue) -> nodeSchemaBuilder.addProperty(
-                        label,
-                        propertyKey,
-                        nodeProperties.get(propertyKey).valueType()
-                    )));
+                    .forEach((propertyKey, propertyValue) -> nodeSchema
+                        .getOrCreateLabel(label)
+                        .addProperty(
+                            propertyKey,
+                            nodeProperties.get(propertyKey).valueType()
+                        )
+                    )
+                );
             });
         // in case there were no properties add all labels
-        idMapAndProperties.idMap().availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
+        idMapAndProperties.idMap().availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
-        var relationshipSchemaBuilder = RelationshipSchema.builder();
+        var relationshipSchema = RelationshipSchema.empty();
         relationshipsAndProperties
             .properties()
             .forEach((relType, propertyStore) -> propertyStore
                 .relationshipProperties()
-                .forEach((propertyKey, propertyValues) -> relationshipSchemaBuilder.addProperty(
-                    relType,
-                    relationshipsAndProperties.orientations().get(relType),
-                    propertyKey,
-                    RelationshipPropertySchema.of(
+                .forEach((propertyKey, propertyValues) -> relationshipSchema
+                    .getOrCreateRelationshipType(relType, relationshipsAndProperties.orientations().get(relType))
+                    .addProperty(
                         propertyKey,
-                        propertyValues.valueType(),
-                        propertyValues.valueType().fallbackValue(),
-                        PropertyState.PERSISTENT,
-                        graphProjectConfig.aggregation()
+                        RelationshipPropertySchema.of(
+                            propertyKey,
+                            propertyValues.valueType(),
+                            propertyValues.valueType().fallbackValue(),
+                            PropertyState.PERSISTENT,
+                            graphProjectConfig.aggregation()
+                        )
                     )
-                )));
+                )
+            );
         relationshipsAndProperties
             .relationships()
             .keySet()
-            .forEach(type -> {
-                relationshipSchemaBuilder.addRelationshipType(type,
-                    relationshipsAndProperties.orientations().get(type));
-            });
+            .forEach(type -> relationshipSchema.getOrCreateRelationshipType(
+                type,
+                relationshipsAndProperties.orientations().get(type)
+            ));
 
         return GraphSchema.of(
-            nodeSchemaBuilder.build(),
-            relationshipSchemaBuilder.build(),
+            nodeSchema,
+            relationshipSchema,
             Map.of()
         );
     }
@@ -395,19 +407,22 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         var propertyKeysByRelType = new HashMap<RelationshipType, List<String>>();
 
         Orientation orientation = graphProjectConfig.orientation();
-        var schemaBuilder = RelationshipSchema.builder();
+        var relationshipSchema = RelationshipSchema.empty();
         gdlHandler.getEdges().forEach(edge -> {
             var relType = RelationshipType.of(edge.getLabel());
-            schemaBuilder.addRelationshipType(relType, orientation);
+            var entry = relationshipSchema.getOrCreateRelationshipType(relType, orientation);
             edge.getProperties().keySet().forEach(propertyKey ->
-                schemaBuilder.addProperty(relType, orientation, propertyKey, ValueType.DOUBLE)
+                entry.addProperty(propertyKey, ValueType.DOUBLE)
             );
         });
-        var schema = schemaBuilder.build();
 
-        schema.properties().forEach((relType, properties) -> {
-            propertyKeysByRelType.put(relType, properties.keySet().stream().sorted().collect(Collectors.toList()));
-        });
+        relationshipSchema
+            .availableTypes()
+            .forEach(relType -> propertyKeysByRelType.put(
+                relType,
+                new ArrayList<>(relationshipSchema.allProperties(relType))
+            ));
+
         return propertyKeysByRelType;
     }
 

@@ -39,6 +39,8 @@ public final class AdjacencyPreAggregation {
         int endOffset,
         Aggregation[] aggregations
     ) {
+
+
         // Step 1: Sort the targetIds (indirectly)
         var order = IndirectSort.mergesort(
             startOffset,
