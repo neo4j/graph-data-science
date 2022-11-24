@@ -360,9 +360,10 @@
 .2+<.^| xref:algorithms/alpha/modularity.adoc[Modularity Metric]
 | `gds.alpha.modularity.stats`
 | `gds.alpha.modularity.stream`
-.3+<.^| Directer Steiner Tree
+.4+<.^| Directer Steiner Tree
 | `gds.alpha.steinerTree.mutate`
 | `gds.alpha.steinerTree.stats`
 | `gds.alpha.steinerTree.stream`
+| `gds.alpha.steinerTree.write`
 
 |===

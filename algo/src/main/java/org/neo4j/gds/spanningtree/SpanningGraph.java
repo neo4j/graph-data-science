@@ -37,8 +37,8 @@ public class SpanningGraph extends GraphAdapter {
 
     @Override
     public int degree(long nodeId) {
-        if (spanningTree.parent.get(nodeId) == -1) {
-            return Math.toIntExact(Arrays.stream(spanningTree.parent.toArray()).filter(i -> i == -1).count());
+        if (spanningTree.parent.get(nodeId) < 0) {
+            return Math.toIntExact(Arrays.stream(spanningTree.parent.toArray()).filter(i -> i < 0).count());
         } else {
             return 1;
         }
@@ -56,7 +56,7 @@ public class SpanningGraph extends GraphAdapter {
     @Override
     public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
         long parent = spanningTree.parent.get(nodeId);
-        if (parent != -1) {
+        if (parent >=0) {
             consumer.accept(parent, nodeId, spanningTree.costToParent(nodeId));
         }
     }

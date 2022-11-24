@@ -38,7 +38,7 @@ public class SpanningTree {
     final HugeLongArray parent;
     final double totalWeight;
 
-    SpanningTree(
+    public SpanningTree(
         long head,
         long nodeCount,
         long effectiveNodeCount,
