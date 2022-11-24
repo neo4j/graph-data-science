@@ -29,6 +29,7 @@ Moreover, the heterogeneous generalization also gives comparable results when co
 
 The execution does not require GPUs as GNNs typically use, and parallelizes well across many CPU cores.
 
+
 === The algorithm
 
 To clarify how HashGNN works, we will walk through a virtual example <<algorithms-embeddings-hashgnn-virtual-example, below>> of a three node graph for the reader who is curious about the details of the feature selection and prefers to learn from examples.
@@ -53,24 +54,46 @@ The number `K` is called `embeddingDensity` in the configuration of the algorith
 
 The algorithm ends with another optional step that maps the binary embeddings to dense vectors.
 
+
 === Features
 
 The original HashGNN algorithm assumes that nodes have binary features as input, and produces binary embedding vectors as output (unless output densification is opted for).
-Since this is not always the case for real-world graphs, our algorithm also comes with an option to binarize node properties.
+Since this is not always the case for real-world graphs, our algorithm also comes with options to binarize node properties, or generate binary features from scratch.
 
-This is done using a type of hyperplane rounding and is configured via a map parameter `binarizeFeatures` containing `densityLevel` and `dimension`.
-The hyperplane rounding uses hyperplanes defined by vectors that are potentially sparse.
+
+==== Using binary node properties as features
+
+If your node properties have only 0 or 1 values (or arrays of such values), you can use them directly as input to the HashGNN algorithm.
+To do that, you provide them as `featureProperties` in the configuration.
+
+
+==== Feature generation
+
+To use the feature generation, specify a map including `dimension` and `densityLevel` for the `generateFeatures` configuration keyword.
+This will generate `dimension` number of features, where nodes have approximately `densityLevel` features switched on.
+The active features for each node are selected uniformly at random with replacement.
+Although the active features are random, the feature vector for a node acts as an approximately unique signature for that node.
+This is akin to onehot encoding of the node IDs, but approximate in that it has a much lower dimension than the node count of the graph.
+Please note that while using feature generation, it is not supported to supply any `featureProperties` which otherwise is mandatory.
+
+
+==== Feature binarization
+
+Feature binarization uses hyperplane rounding and is configured via `featureProperties` and a map parameter `binarizeFeatures` containing `threshold` and `dimension`.
+The hyperplane rounding uses hyperplanes defined by vectors filled with Gaussian random values.
 The `dimension` parameter determines the number of generated binary features that the input features are transformed into.
-Each input feature is given `densityLevel` binary features with weight `1.0` and the same number of binary features with weight `-1.0`.
-The remaining features have weight `0.0`.
-For each node and each binary feature, we take the sum over the node's input feature values multiplied by the corresponding binary feature weight.
-Each feature which has positive total weight is added to the transformed features of the node.
+For each hyperplane (one for each `dimension`) and node we compute the dot product of the node's input feature vector and the normal vector of the hyperplane.
+If this dot product is larger than the given `threshold`, the node gets the feature corresponding to that hyperplane.
 
-If the graph already has binary features, the algorithm can also use these directly if `binarizeFeatures` is not specified.
-This is usually the best option if the graph has only binary features and a sufficient number of them.
+Although hyperplane rounding can be applied to a binary input, it is often best to use the already binary input directly.
+However, sometimes using binarization with a different `dimension` than the number of input features can be useful to either act as dimensionality reduction or introduce redundancy that can be leveraged by HashGNN.
 
-Even if the graph has binary features, one can apply the hyperplane rounding pre-processing.
-Using a higher dimension than the number of input feature introduces redundancy which allows HashGNN to produce a richer representation.
+[NOTE]
+====
+The hyperplane rounding may not work well if the input feature are of different magnitudes since those of larger ones will influence of the generated binary features more.
+If this is not the intended behavior for your application we recommend normalizing your node properties (by feature dimension) prior to running HashGNN using xref:alpha-algorithms/scale-properties.adoc[Scale properties] or similar method.
+====
+
 
 === Neighbor influence
 
@@ -80,11 +103,12 @@ Increasing the value leads to neighbors being selected more often.
 The probability of selecting a feature from the neighbors as a function of `neighborInfluence` has a hockey-stick-like shape, somewhat similar to the shape of `y=log(x)` or `y=C - 1/x`.
 This implies that the probability is more sensitive for low values of `neighborInfluence`.
 
+
 === Heterogeneity support
 
 The GDS implementation of HashGNN provides a new generalization to heterogeneous graphs in that it can distinguish between different relationship types.
 To enable the heterogeneous support set `heterogeneous` to true.
-The generalization works as the original HashGNN algorithm, but whenever a hash function is applied to a feature of a neighbor node, the algorithm uses a hash function that depends not only on the iteration and on a number `k<embeddingDensity`, but also on the type of the relationship connecting to the neighbor.
+The generalization works as the original HashGNN algorithm, but whenever a hash function is applied to a feature of a neighbor node, the algorithm uses a hash function that depends not only on the iteration and on a number `k < embeddingDensity`, but also on the type of the relationship connecting to the neighbor.
 Consider an example where HashGNN is run with one iteration, and we have `(a)-[:R]->(x), (b)-[:R]->(x)` and `(c)-[:S]->(x)`.
 Assume that a feature `f` of `(x)` is selected for `(a)` and the hash value is very small.
 This will make it very likely that the feature is also selected for `(b)`.
@@ -94,6 +118,7 @@ We can conclude that nodes with similar neighborhoods (including node properties
 An advantage of running heterogeneous HashGNN to running a homogenous embedding such as FastRP is that it is not necessary to manually select multiple projections or creating meta-path graphs before running FastRP on these multiple graphs.
 With the heterogeneous algorithm, the full heterogeneous graph can be used in a single execution.
 
+
 === Node property schema for heterogeneous graphs
 
 Heterogenous graphs typically have different node properties for different node labels.
@@ -101,6 +126,7 @@ HashGNN assumes that all nodes have the same allowed features.
 Use therefore a default value of `0` for in each graph projection.
 This works both in the binary input case and when binarization is applied, because having a binary feature with value `0` behaves as if not having the feature.
 The `0` values are represented in a sparse format, so the memory overhead of storing `0` values for many nodes has a low overhead.
+
 
 === Orientation
 
@@ -111,6 +137,7 @@ Using the analogy with GNN's, using a different relationship type for the revers
 For HashGNN's this means instead using different min-hash functions for the two relationships.
 For example, in a citation network, a paper citing another paper is very different from the paper being cited.
 
+
 === Output densification
 
 Since binary embeddings need to be of higher dimension than dense floating point embeddings to encode the same amount of information, binary embeddings require more memory and longer training time for downstream models.
@@ -119,12 +146,26 @@ This behavior is activated by specifying `outputDimension`.
 Output densification can improve runtime and memory of downstream tasks at the cost of introducing approximation error due to the random nature of the projection.
 The larger the `outputDimension`, the lower the approximation error and performance savings.
 
+
 === Usage in machine learning pipelines
 
 It may be useful to generate node embeddings with HashGNN as a node property step in a machine learning pipeline (like xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[] and xref:machine-learning/node-property-prediction/index.adoc[]).
-HashGNN is an xref:machine-learning/node-embeddings/index.adoc#node-embeddings-generalization[inductive] embedding algorithm.
-It is therefore suitable to use in pipelines.
-Since HashGNN is a random algorithm, in order for the embeddings to be consistent between runs (training and prediction calls), a value for the `randomSeed` configuration parameter should be provided when adding the HashGNN node property step to the training pipeline.
+Since HashGNN is a random algorithm and xref:machine-learning/node-embeddings/index.adoc#node-embeddings-generalization[inductive] only when `featureProperties` and `randomSeed` are given, there are some things to have in mind.
+
+In order for a machine learning model to be able to make useful predictions, it is important that features produced during prediction are of a similar distribution to the features produced during training of the model.
+Moreover, node property steps (whether HashGNN or not) added to a pipeline are executed both during training, and during the prediction by the trained model.
+It is therefore problematic when a pipeline contains an embedding step which yields all too dissimilar embeddings during training and prediction.
+
+This has some implications on how to use HashGNN as a node property step.
+In general, if a pipeline is trained using HashGNN as a node property step on some graph "g", then the resulting trained model should only be applied to graphs that are not too dissimilar to "g".
+
+If feature generation is used, most of the nodes in the graph that a prediction is being run on, must be the same nodes (in the database sense) as in the original graph "g" that was used during training.
+The reason for this is that HashGNN generates the node features randomly, and in this case is seeded based on the nodes' ids in the Neo4j database from whence the nodes came.
+
+If feature generation is not used (`featureProperties` is given), the random initial node embeddings are derived from node property vectors only, so there is no random seeding based on node ids.
+
+Additionally, in order for the feature propagation of the HashGNN message passing to be consistent between runs (training and prediction calls), a value for the `randomSeed` configuration parameter must be provided when adding the HashGNN node property step to the training pipeline.
+
 
 [[algorithms-embeddings-hashgnn-parameter-tuning]]
 == Tuning algorithm parameters
@@ -133,10 +174,13 @@ In order to improve the embedding quality using HashGNN on one of your graphs, i
 This process of finding the best parameters for your specific use case and graph is typically referred to as https://en.wikipedia.org/wiki/Hyperparameter_optimization[hyperparameter tuning].
 We will go through each of the configuration parameters and explain how they behave.
 
+
 === Iterations
+
 The maximum number of hops between a node and other nodes that affect its embedding is equal to the number of iterations of HashGNN which is configured with `iterations`.
 This is analogous to the number of layers in a GNN or the number of iterations in FastRP.
 Often a value of `2` to `4` is sufficient, but sometimes more iterations are useful.
+
 
 === Embedding density
 
@@ -147,23 +191,41 @@ The higher this parameter is set, the longer it will take to run the algorithm, 
 To large extent, higher values give better embeddings.
 As a loose guideline, one may try to set `embeddingDensity` to 128, 256, 512, or roughly 25%-50% of the embedding dimension, i.e. the number of binary features.
 
+
+=== Feature generation
+
+The `dimension` parameter determines the number of binary features when feature generation is applied.
+A high dimension increases expressiveness but requires more data to be useful and can lead to the curse of high dimensionality for downstream machine learning tasks.
+Additionally more computation resources will be required.
+Some values to consider trying for `densityLevel` are very low values such as `1` or `2`, or increase as appropriate.
+
+
 === Feature binarization
 
 The `dimension` parameter determines the number of binary features when binarization is applied.
 A high dimension increases expressiveness, but also the sparsity of features.
-Therefore, a higher dimension should also be coupled with higher `embeddingDensity` and/or higher `densityLevel`.
+Therefore, a higher dimension should also be coupled with higher `embeddingDensity` and/or lower `threshold`.
 Higher dimension also leads to longer training times of downstream models and higher memory footprint.
-Some values to consider trying for `densityLevel` are very low values such as `1` or `2` or sometimes up to the maximum allowed value of `density/2`.
-The sparsity of the raw features and the input dimension can also affect the best value of `densityLevel`.
+Increasing the threshold leads to sparser feature vectors.
+
+The default threshold of `0` leads to fairly many features being active for each node.
+Often sparse feature vectors are better, and it may therefore be useful to increase the threshold beyond the default.
+One heuristic for choosing a good threshold is based on using the average and standard deviation of the hyperplane dot products plus with the node feature vectors.
+For example, one can set the threshold to the average plus two times the standard deviation.
+To obtain these values, run HashGNN and see the database logs where you read them off.
+Then you can use those values to reconfigure the threshold accordingly.
+
 
 === Neighbor influence
 
 As explained above, the default value is a reasonable starting point.
 If using a hyperparameter tuning library, this parameter may favorably be transformed by a function with increasing derivative such as the exponential function, or a function of the type `a/(b - x)`.
 The probability of selecting (and keeping throughout the iterations) a feature from different nodes depends on `neighborInfluence` and the number of hops to the node.
-Therefore `neighborInfluence` should be re-tuned when `iterations` is changed.
+Therefore, `neighborInfluence` should be re-tuned when `iterations` is changed.
+
 
 === Heterogeneous
+
 In general, there is a large amount of information to store about paths containing multiple relationship types in a heterogeneous graph, so with many iterations and relationship types, a very high embedding dimension may be necessary.
 This is especially true for unsupervised embedding algorithms such as HashGNN.
 Therefore, caution should be taken when using many iterations in the heterogeneous mode.
@@ -545,6 +607,7 @@ YIELD nodePropertiesWritten
 The graph 'persons' now has a node property `hashgnn-embedding` which stores the node embedding for each node.
 To find out how to inspect the new schema of the in-memory graph, see xref:graph-list.adoc[Listing graphs].
 
+
 [[algorithms-embeddings-hashgnn-virtual-example]]
 === Virtual example
 
@@ -570,7 +633,7 @@ We use a third hash function "three" for this purpose and `f3` gets the smaller 
 We now compute a hash of `f3` using "two" and it becomes `6`.
 Since `5` is smaller than `6`, `f1` is the "winning" neighbor feature for `(b)`, and since `5` is also smaller than `8`, it is the overall "winning" feature.
 Therefore, we add `f1` to the embedding of `(b)`.
-We proceed similarily with `k=1` and `f1` is selected again.
+We proceed similarly with `k=1` and `f1` is selected again.
 Since the embeddings consist of binary features, this second addition has no effect.
 
 We omit the details of computing the embedding of `(c)`.

@@ -32,7 +32,7 @@ For this to work, certain things are required of the embedding algorithm, and we
 In the GDS library the algorithms
 
 * xref:machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE]
-* xref:machine-learning/node-embeddings/hashgnn.adoc[HashGNN] with a `randomSeed`
+* xref:machine-learning/node-embeddings/hashgnn.adoc[HashGNN] with `featureProperties` and a `randomSeed`
 * xref:machine-learning/node-embeddings/fastrp.adoc[FastRP] with `propertyRatio=1.0` and a `randomSeed`
 
 are inductive.
