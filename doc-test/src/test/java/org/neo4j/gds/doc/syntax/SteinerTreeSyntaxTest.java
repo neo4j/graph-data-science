@@ -35,6 +35,6 @@ class SteinerTreeSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/alpha-algorithms/directed-steiner-tree.adoc";
+        return "pages/algorithms/directed-steiner-tree.adoc";
     }
 }

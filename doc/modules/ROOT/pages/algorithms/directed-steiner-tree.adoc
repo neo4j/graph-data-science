@@ -8,12 +8,35 @@
 
 include::partial$/operations-reference/alpha-note.adoc[]
 
+:undirected:
+:directed:
+:homogeneous:
+:weighted:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
 == Introduction
 
+Given a source node and a list of target nodes, a directed spanning tree in which there exists a path from the source node to each of the target nodes is called a Directed Steiner Tree.
+
+The Minimum Directed Steiner Tree problem asks for the steiner tree that minimizes the sum of all relationship weights in tree.
+
+The Minimum Directed Steiner Tree problem is known to be NP-Complete and no efficient exact algorithms have been proposed in the literature.
+The Neo4j GDS Library offers an efficient implementation of a well-known  https://link.springer.com/chapter/10.1007/3-540-45643-0_1[heuristic] for Steiner Tree related problems.
+
+The implemented algorithm works on a number of steps. At each step, the shortest path from the source to one of the undiscovered targets is found and added to the result.
+Following that, the weights in the relationships in this path are reduced to zero, and the algorithm continues similarly by finding the next closest unvisited target node.
+
+With a careful implementation, the above heuristic can run efficiently even for graphs of large size.
+In addition, the parallel shortest path algorithm of xref:algorithms/delta-single-source.adoc[Delta-Stepping] is used to  further speed-up computations.
 
 == Considerations
+As the Minimum Directed Steiner Tree algorithm relies on shortest-paths, it will not work for graphs with negative relationship weights.
 
+The Minimum Directed Steiner Tree problem is a variant of the more general Minimum Steiner Tree problem defined for undirected graphs.
+The Minimum Steiner Tree  problem accepts as input only a set of target nodes.
+The aim is then to find a spanning tree of minimum weight connecting these target nodes.
 
+It is possible to use the GDS implementation to find a solution for Minimum Steiner Tree problem by arbitrarily selecting one of the target nodes to fill the role of the source node.
 [[algorithms-directed-steiner-tree-syntax]]
 == Syntax
 
@@ -42,7 +65,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name                                                                             | Type    | Default   | Optional  | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-include::partial$/algorithms/spanning-tree/specific-configuration.adoc[]
+include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
 |===
 
 .Results
@@ -80,15 +103,15 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name                                                                             | Type    | Default   | Optional  | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-include::partial$/algorithms/spanning-tree/specific-configuration.adoc[]
+include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
 | Name                      | Type    | Description
-| effectiveNodeCount        | Integer | The number of visited nodes.
-| effectiveTargetNodesCount | Integer | TODO: FILL THIS PLEASE
+| effectiveNodeCount        | Integer | The number of nodes in the spanning tree.
+| effectiveTargetNodesCount | Integer | The number of target nodes in the spanning tree.
 | totalWeight               | Float   | The sum of the weights of the relationships in the spanning tree.
 | preProcessingMillis       | Integer | Milliseconds for preprocessing the data.
 | computeMillis             | Integer | Milliseconds for running the algorithm.
@@ -124,15 +147,15 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 | mutateProperty                                                                    | String  | 'mst'     | yes       | The relationship type used for the new relationships written to the projected graph.
 | weightMutateProperty                                                              | String  | n/a       | no        | The weight property of the `mutateProperty` relationship type written back
 include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
-include::partial$/algorithms/spanning-tree/specific-configuration.adoc[]
+include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
 | Name                      | Type    | Description
-| effectiveNodeCount        | Integer | The number of visited nodes.
-| effectiveTargetNodesCount | Integer | TODO: FILL THIS PLEASE
+| effectiveNodeCount        | Integer | The number of nodes in the spanning tree.
+| effectiveTargetNodesCount | Integer | The number of target nodes in the spanning tree.
 | totalWeight               | Float   | The sum of the weights of the relationships in the spanning tree.
 | relationshipsWritten      | Integer | The number of relationships added to the in-memory graph.
 | preProcessingMillis       | Integer | Milliseconds for preprocessing the data.
@@ -170,15 +193,15 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 | writeProperty                                                                    | String  | 'mst'     | yes       | The relationship type written back as result
 | weightWriteProperty                                                              | String  | n/a       | no        | The weight property of the `writeProperty` relationship type written back
 include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
-include::partial$/algorithms/spanning-tree/specific-configuration.adoc[]
+include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
 |===
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
 | Name                      | Type    | Description
-| effectiveNodeCount        | Integer | The number of visited nodes.
-| effectiveTargetNodesCount | Integer | TODO: FILL THIS PLEASE
+| effectiveNodeCount        | Integer | The number of nodes in the spanning tree.
+| effectiveTargetNodesCount | Integer | The number of target nodes in the spanning tree.
 | totalWeight               | Float   | The sum of the weights of the relationships in the spanning tree.
 | relationshipsWritten      | Integer | The number of relationships written to the graph.
 | preProcessingMillis       | Integer | Milliseconds for preprocessing the data.

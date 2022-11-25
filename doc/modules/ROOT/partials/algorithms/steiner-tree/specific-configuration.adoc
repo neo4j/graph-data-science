@@ -1,0 +1,4 @@
+| sourceNode                                                                      | Integer | null      | n/a        | The starting source node ID.
+| targetNodes                                                                      | List of Integer | null      | n/a        | The list of target nodes
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null      | yes       | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
+| applyRerouting  | boolean | false  | yes      | If specified, the algorithm will try to improve the outcome via an additional post-processing heuristic.
