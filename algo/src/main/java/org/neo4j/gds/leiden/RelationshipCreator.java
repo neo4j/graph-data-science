@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.RelationshipIterator;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -29,7 +29,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 final class RelationshipCreator implements Runnable {
 
-    private final Orientation orientation;
+    private final Direction direction;
     private final RelationshipsBuilder relationshipsBuilder;
     private final HugeLongArray communities;
     private final RelationshipIterator relationshipIterator;
@@ -46,10 +46,10 @@ final class RelationshipCreator implements Runnable {
         Partition partition,
         RelationshipsBuilder relationshipsBuilder,
         RelationshipIterator relationshipIterator,
-        Orientation orientation,
+        Direction direction,
         ProgressTracker progressTracker
     ) {
-        this.orientation = orientation;
+        this.direction = direction;
         this.relationshipsBuilder = relationshipsBuilder;
         this.communities = communities;
         this.relationshipIterator = relationshipIterator;
@@ -96,7 +96,7 @@ final class RelationshipCreator implements Runnable {
                     // hence we should add it as we encounter it from a
                     //otherwise  a<-[weight]->b will be visited from both a and b.
                     // To not include it twice we break a tie based on id.
-                    if (orientation == Orientation.NATURAL || currentCommunity > targetCommunityId) {
+                    if (direction == Direction.DIRECTED || currentCommunity > targetCommunityId) {
                         double valueToAdd = property;
                         if (encounteredCommunityWeights.get(targetCommunityId) == -1) {
                             encounteredCommunities.set(encountereCommunitiesCounter++, targetCommunityId);

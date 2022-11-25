@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.core.io.schema;
 
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.Aggregation;
 
@@ -30,7 +30,7 @@ public interface InputRelationshipSchemaVisitor extends InputSchemaVisitor, Rela
 
     boolean aggregation(Aggregation aggregation);
 
-    boolean orientation(Orientation orientation);
+    boolean direction(Direction direction);
 
     abstract class Adapter extends ElementSchemaVisitor implements InputRelationshipSchemaVisitor {
         @Override
@@ -44,6 +44,6 @@ public interface InputRelationshipSchemaVisitor extends InputSchemaVisitor, Rela
         }
 
         @Override
-        public boolean orientation(Orientation orientation) { return true; }
+        public boolean direction(Direction direction) { return true; }
     }
 }

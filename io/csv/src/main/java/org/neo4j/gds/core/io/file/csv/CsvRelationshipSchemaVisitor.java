@@ -56,7 +56,7 @@ public class CsvRelationshipSchemaVisitor extends RelationshipSchemaVisitor {
     protected void export() {
         try {
             csvAppender.appendField(relationshipType().name());
-            csvAppender.appendField(orientation().name());
+            csvAppender.appendField(direction().name());
             if (key() != null) {
                 csvAppender.appendField(key());
                 csvAppender.appendField(valueType().csvName());

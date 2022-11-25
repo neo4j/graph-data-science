@@ -22,10 +22,10 @@ package org.neo4j.gds.beta.filter;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.beta.filter.expression.Expression;
@@ -182,7 +182,7 @@ public final class GraphStoreFilter {
             .relationshipSchema()
             .filter(filteredRelationships.topology().keySet());
         if (relationshipSchema.availableTypes().isEmpty()) {
-            relationshipSchema.addRelationshipType(RelationshipType.ALL_RELATIONSHIPS, Orientation.NATURAL);
+            relationshipSchema.addRelationshipType(RelationshipType.ALL_RELATIONSHIPS, Direction.DIRECTED);
         }
 
         return GraphSchema.of(nodeSchema, relationshipSchema, Map.of());

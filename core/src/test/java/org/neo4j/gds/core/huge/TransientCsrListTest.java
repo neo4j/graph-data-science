@@ -23,11 +23,11 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -203,7 +203,7 @@ class TransientCsrListTest {
 
             var relsBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(nodes.idMap())
-                .orientation(Orientation.UNDIRECTED)
+                .direction(Direction.UNDIRECTED)
                 .build();
 
             for (int i = 1; i <= firstDegree; i++) {

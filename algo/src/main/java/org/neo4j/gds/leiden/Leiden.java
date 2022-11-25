@@ -22,9 +22,9 @@ package org.neo4j.gds.leiden;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.DoubleAdder;
 public class Leiden extends Algorithm<LeidenResult> {
 
     private final Graph rootGraph;
-    private final Orientation orientation;
+    private final Direction direction;
     private final int maxIterations;
     private final double initialGamma;
     private final double theta;
@@ -71,7 +71,7 @@ public class Leiden extends Algorithm<LeidenResult> {
     ) {
         super(progressTracker);
         this.rootGraph = graph;
-        this.orientation = rootGraph.schema().isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
+        this.direction = rootGraph.schema().direction();
         this.maxIterations = maxIterations;
         this.initialGamma = initialGamma;
         this.theta = theta;
@@ -209,7 +209,7 @@ public class Leiden extends Algorithm<LeidenResult> {
                 // 3 CREATE NEW GRAPH
                 var graphAggregationPhase = new GraphAggregationPhase(
                     workingGraph,
-                    this.orientation,
+                    this.direction,
                     refinedCommunities,
                     maximumRefinedCommunityId,
                     this.executorService,

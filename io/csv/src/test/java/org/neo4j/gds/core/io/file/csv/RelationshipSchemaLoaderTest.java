@@ -26,6 +26,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchemaEntry;
 import org.neo4j.gds.core.Aggregation;
@@ -36,8 +37,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.Orientation.NATURAL;
-import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipSchemaVisitor.RELATIONSHIP_SCHEMA_FILE_NAME;
 
 class RelationshipSchemaLoaderTest {
@@ -62,7 +61,7 @@ class RelationshipSchemaLoaderTest {
         assertThat(rel1Properties)
             .isEqualTo(new RelationshipSchemaEntry(
                 RelationshipType.of("REL1"),
-                NATURAL,
+                Direction.DIRECTED,
                 Map.of(
                     "prop1",
                     RelationshipPropertySchema.of(
@@ -79,7 +78,7 @@ class RelationshipSchemaLoaderTest {
         assertThat(rel2Properties)
             .isEqualTo(new RelationshipSchemaEntry(
                 RelationshipType.of("REL2"),
-                UNDIRECTED,
+                Direction.UNDIRECTED,
                 Map.of(
                     "prop2",
                     RelationshipPropertySchema.of(
@@ -128,7 +127,7 @@ class RelationshipSchemaLoaderTest {
         assertThat(rel1Properties)
             .isEqualTo(new RelationshipSchemaEntry(
                 RelationshipType.of("REL1"),
-                NATURAL,
+                Direction.DIRECTED,
                 Map.of(
                     "prop1",
                     RelationshipPropertySchema.of(
@@ -145,7 +144,7 @@ class RelationshipSchemaLoaderTest {
         assertThat(rel3Properties)
             .isEqualTo(new RelationshipSchemaEntry(
                 RelationshipType.of("REL3"),
-                UNDIRECTED,
+                Direction.UNDIRECTED,
                 Map.of()
             ));
     }
@@ -169,7 +168,7 @@ class RelationshipSchemaLoaderTest {
         assertThat(rel1Properties)
             .isEqualTo(new RelationshipSchemaEntry(
                 RelationshipType.of("REL1"),
-                NATURAL,
+                Direction.DIRECTED,
                 Map.of(
                     "prop1",
                     RelationshipPropertySchema.of(
@@ -186,7 +185,7 @@ class RelationshipSchemaLoaderTest {
         assertThat(rel3Properties)
             .isEqualTo(new RelationshipSchemaEntry(
                 RelationshipType.of("REL3"),
-                NATURAL,
+                Direction.DIRECTED,
                 Map.of()
             ));
     }

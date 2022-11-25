@@ -20,7 +20,6 @@
 package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
@@ -235,11 +234,10 @@ public final class Louvain extends Algorithm<Louvain> {
         if (workingGraph.schema().isUndirected()) {
             scaleCoefficient /= 2.0;
         }
-        Orientation orientation = rootGraph.schema().isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
         IdMap idMap = nodesBuilder.build().idMap();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
-            .orientation(orientation)
+            .direction(rootGraph.schema().direction())
             .addPropertyConfig(Aggregation.SUM, DefaultValue.forDouble())
             .executorService(executorService)
             .build();

@@ -48,7 +48,7 @@ import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
-import org.neo4j.gds.core.loading.construction.RelationshipsAndOrientation;
+import org.neo4j.gds.core.loading.construction.RelationshipsAndDirection;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -330,7 +330,7 @@ public abstract class FileToGraphStoreImporter {
 
     private static Relationships.Topology relationshipTopologyFrom(
         RelationshipType relationshipType,
-        List<RelationshipsAndOrientation> relationships,
+        List<RelationshipsAndDirection> relationships,
         List<RelationshipPropertySchema> propertySchemas,
         Map<RelationshipType, RelationshipPropertyStore> propertyStores
     ) {

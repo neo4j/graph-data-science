@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
@@ -36,7 +37,6 @@ import org.neo4j.gds.extension.Inject;
 
 import java.util.Map;
 
-import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 
 @GdlExtension
@@ -82,7 +82,7 @@ class GraphStoreNodeVisitorTest {
         var relationships = GraphFactory.emptyRelationships(idMap);
 
         var relationshipSchema = RelationshipSchema.empty();
-        relationshipSchema.getOrCreateRelationshipType(RelationshipType.ALL_RELATIONSHIPS, UNDIRECTED);
+        relationshipSchema.getOrCreateRelationshipType(RelationshipType.ALL_RELATIONSHIPS, Direction.UNDIRECTED);
 
         var graphSchema = GraphSchema.of(
             nodeSchema,

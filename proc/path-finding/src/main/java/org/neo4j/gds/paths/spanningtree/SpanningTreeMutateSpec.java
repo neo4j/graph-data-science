@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.paths.spanningtree;
 
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -77,13 +77,11 @@ public class SpanningTreeMutateSpec implements AlgorithmSpec<Prim, SpanningTree,
                 return Stream.of(builder.build());
             }
 
-            var orientation = Orientation.NATURAL;
-
             var relationshipsBuilder = GraphFactory
                 .initRelationshipsBuilder()
                 .nodes(computationResult.graph())
                 .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
-                .orientation(orientation)
+                .direction(Direction.DIRECTED)
                 .build();
 
             var mutateRelationshipType = RelationshipType.of(config.mutateProperty());
@@ -115,7 +113,7 @@ public class SpanningTreeMutateSpec implements AlgorithmSpec<Prim, SpanningTree,
                     mutateRelationshipType,
                     Optional.of(config.weightMutateProperty()),
                     Optional.of(NumberType.FLOATING_POINT),
-                    orientation,
+                    Direction.DIRECTED,
                     relationships
                 );
             builder.withComputeMillis(computationResult.computeMillis());

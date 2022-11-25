@@ -22,13 +22,13 @@ package org.neo4j.gds.core.io.file.csv;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipVisitor.END_ID_COLUMN_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipVisitor.START_ID_COLUMN_NAME;
 
@@ -80,11 +80,11 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
         var bType = RelationshipType.of("B");
 
         var relationshipSchema = RelationshipSchema.empty();
-        relationshipSchema.getOrCreateRelationshipType(aType, NATURAL)
+        relationshipSchema.getOrCreateRelationshipType(aType, Direction.DIRECTED)
             .addProperty("foo", ValueType.LONG)
             .addProperty("bar", ValueType.LONG);
 
-        relationshipSchema.getOrCreateRelationshipType(bType, NATURAL)
+        relationshipSchema.getOrCreateRelationshipType(bType, Direction.DIRECTED)
             .addProperty("bar", ValueType.LONG)
             .addProperty("baz", ValueType.DOUBLE);
 

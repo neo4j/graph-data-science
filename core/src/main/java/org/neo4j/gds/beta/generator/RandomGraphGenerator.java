@@ -21,12 +21,12 @@ package org.neo4j.gds.beta.generator;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
@@ -65,7 +65,7 @@ public final class RandomGraphGenerator {
     private final RelationshipType relationshipType;
     private final RelationshipDistribution relationshipDistribution;
     private final Aggregation aggregation;
-    private final Orientation orientation;
+    private final Direction direction;
     private final AllowSelfLoops allowSelfLoops;
 
     private final Optional<NodeLabelProducer> maybeNodeLabelProducer;
@@ -82,7 +82,7 @@ public final class RandomGraphGenerator {
         Map<NodeLabel, Set<PropertyProducer<?>>> nodePropertyProducers,
         Optional<PropertyProducer<double[]>> maybeRelationshipPropertyProducer,
         Aggregation aggregation,
-        Orientation orientation,
+        Direction direction,
         AllowSelfLoops allowSelfLoops
     ) {
         this.relationshipType = relationshipType;
@@ -93,7 +93,7 @@ public final class RandomGraphGenerator {
         this.nodeCount = nodeCount;
         this.averageDegree = averageDegree;
         this.aggregation = aggregation;
-        this.orientation = orientation;
+        this.direction = direction;
         this.allowSelfLoops = allowSelfLoops;
         this.random = new Random();
         if (seed != null) {
@@ -124,7 +124,7 @@ public final class RandomGraphGenerator {
 
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
-            .orientation(orientation)
+            .direction(direction)
             .addAllPropertyConfigs(maybeRelationshipPropertyProducer.isPresent()
                 ? List.of(GraphFactory.PropertyConfig.of(aggregation, DefaultValue.forDouble()))
                 : List.of()
@@ -144,7 +144,7 @@ public final class RandomGraphGenerator {
 
     private RelationshipSchema relationshipSchema() {
         var relationshipSchema = RelationshipSchema.empty();
-        var entry = relationshipSchema.getOrCreateRelationshipType(relationshipType, orientation);
+        var entry = relationshipSchema.getOrCreateRelationshipType(relationshipType, direction);
         maybeRelationshipPropertyProducer.ifPresent(pp -> entry.addProperty(
             pp.getPropertyName(),
             pp.propertyType()

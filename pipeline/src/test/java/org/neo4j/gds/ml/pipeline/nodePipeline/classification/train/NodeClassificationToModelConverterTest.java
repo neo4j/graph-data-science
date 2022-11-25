@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.ImmutableGraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
@@ -45,7 +46,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.Orientation.UNDIRECTED;
 
 class NodeClassificationToModelConverterTest {
 
@@ -96,7 +96,7 @@ class NodeClassificationToModelConverterTest {
 
         var originalSchema = ImmutableGraphSchema.builder()
             .nodeSchema(NodeSchema.empty().addLabel(NodeLabel.of("M")))
-            .relationshipSchema(RelationshipSchema.empty().addRelationshipType(RelationshipType.of("R"), UNDIRECTED))
+            .relationshipSchema(RelationshipSchema.empty().addRelationshipType(RelationshipType.of("R"), Direction.UNDIRECTED))
             .putGraphProperty("array", PropertySchema.of("array", ValueType.DOUBLE_ARRAY))
             .putGraphProperty("scalar", PropertySchema.of("scalar", ValueType.DOUBLE))
             .build();

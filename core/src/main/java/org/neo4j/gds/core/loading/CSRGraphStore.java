@@ -24,7 +24,6 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.CSRGraph;
@@ -46,6 +45,7 @@ import org.neo4j.gds.api.properties.graph.GraphPropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
@@ -401,7 +401,7 @@ public class CSRGraphStore implements GraphStore {
         RelationshipType relationshipType,
         Optional<String> relationshipPropertyKey,
         Optional<NumberType> relationshipPropertyType,
-        Orientation orientation,
+        Direction direction,
         Relationships relationships
     ) {
         updateGraphStore(graphStore -> {
@@ -410,16 +410,16 @@ public class CSRGraphStore implements GraphStore {
                 graphStore.relationships.put(relationshipType, relationships.topology());
 
 
-                var relationshipSchemaEntry = schema().relationshipSchema().getOrCreateRelationshipType(relationshipType, orientation);
+                var relationshipSchemaEntry = schema()
+                    .relationshipSchema()
+                    .getOrCreateRelationshipType(relationshipType, direction);
 
 
+                if (relationshipPropertyKey.isPresent() && relationshipPropertyType.isPresent() && relationships
+                    .properties()
+                    .isPresent()) {
 
-                if (relationshipPropertyKey.isPresent()
-                    && relationshipPropertyType.isPresent()
-                    && relationships.properties().isPresent()) {
-
-                    addRelationshipProperty(
-                        relationshipType,
+                    addRelationshipProperty(relationshipType,
                         relationshipPropertyKey.get(),
                         relationshipPropertyType.get(),
                         relationships.properties().get(),
@@ -427,15 +427,13 @@ public class CSRGraphStore implements GraphStore {
                     );
 
                     ValueType valueType = ValueTypes.fromNumberType(relationshipPropertyType.get());
-                    relationshipSchemaEntry.addProperty(
+                    relationshipSchemaEntry.addProperty(relationshipPropertyKey.get(), RelationshipPropertySchema.of(
                         relationshipPropertyKey.get(),
-                        RelationshipPropertySchema.of(
-                            relationshipPropertyKey.get(),
-                            valueType,
-                            valueType.fallbackValue(),
-                            PropertyState.TRANSIENT,
-                            Aggregation.NONE
-                        ));
+                        valueType,
+                        valueType.fallbackValue(),
+                        PropertyState.TRANSIENT,
+                        Aggregation.NONE
+                    ));
                 }
             }
         });

@@ -26,6 +26,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -160,7 +161,7 @@ class CollapsePathTest {
             RelationshipType.of("SAME_DRUG"),
             Optional.empty(),
             Optional.empty(),
-            Orientation.NATURAL,
+            Direction.DIRECTED,
             relationships
         );
 
@@ -201,7 +202,7 @@ class CollapsePathTest {
             var relationships = new CollapsePathAlgorithmFactory()
                 .build(graphStore, config, ProgressTracker.NULL_TRACKER)
                 .compute();
-            graphStore.addRelationshipType(mutateRelType, Optional.empty(), Optional.empty(), Orientation.NATURAL, relationships);
+            graphStore.addRelationshipType(mutateRelType, Optional.empty(), Optional.empty(), Direction.DIRECTED, relationships);
             var resultGraph = graphStore.getGraph(mutateRelType);
 
             // then two relationships should be created
@@ -226,7 +227,7 @@ class CollapsePathTest {
             var relationships = new CollapsePathAlgorithmFactory()
                 .build(graphStore, config, ProgressTracker.NULL_TRACKER)
                 .compute();
-            graphStore.addRelationshipType(mutateRelType, Optional.empty(), Optional.empty(), Orientation.NATURAL, relationships);
+            graphStore.addRelationshipType(mutateRelType, Optional.empty(), Optional.empty(), Direction.DIRECTED, relationships);
             var resultGraph = graphStore.getGraph(mutateRelType);
 
             // a single relationship is created (there is no Dog)

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.similarity;
 
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.schema.Direction;
 
 public class SimilarityGraphResult {
     private final Graph similarityGraph;
@@ -37,11 +37,10 @@ public class SimilarityGraphResult {
         return similarityGraph;
     }
 
-    public Orientation orientation() {
+    public Direction direction() {
         return similarityGraph
             .schema()
-            .relationshipSchema()
-            .isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
+            .direction();
     }
 
     public long comparedNodes() {

@@ -22,12 +22,12 @@ package org.neo4j.gds.ml.splitting;
 import com.carrotsearch.hppc.predicates.LongLongPredicate;
 import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -63,9 +63,9 @@ public abstract class EdgeSplitter {
         LongPredicate isValidTargetNode = node -> targetNodes.contains(graph.toOriginalNodeId(node));
         LongLongPredicate isValidNodePair = (s, t) -> isValidSourceNode.apply(s) && isValidTargetNode.apply(t);
 
-        RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilderWithProp(graph, Orientation.NATURAL);
+        RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilderWithProp(graph, Direction.DIRECTED);
 
-        Orientation remainingRelOrientation = graph.schema().isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
+        Direction remainingRelOrientation = graph.schema().direction();
 
         RelationshipsBuilder remainingRelsBuilder;
         RelationshipWithPropertyConsumer remainingRelsConsumer;
@@ -140,19 +140,19 @@ public abstract class EdgeSplitter {
         return Math.min(maxSamples, wholeSamples + extraSample);
     }
 
-    RelationshipsBuilder newRelationshipsBuilderWithProp(Graph graph, Orientation orientation) {
-        return newRelationshipsBuilder(graph, orientation, true);
+    RelationshipsBuilder newRelationshipsBuilderWithProp(Graph graph, Direction direction) {
+        return newRelationshipsBuilder(graph, direction, true);
     }
 
-    RelationshipsBuilder newRelationshipsBuilder(Graph graph, Orientation orientation) {
-        return newRelationshipsBuilder(graph, orientation, false);
+    RelationshipsBuilder newRelationshipsBuilder(Graph graph, Direction direction) {
+        return newRelationshipsBuilder(graph, direction, false);
     }
 
-    private static RelationshipsBuilder newRelationshipsBuilder(Graph graph, Orientation orientation, boolean loadRelationshipProperty) {
+    private static RelationshipsBuilder newRelationshipsBuilder(Graph graph, Direction direction, boolean loadRelationshipProperty) {
         return GraphFactory.initRelationshipsBuilder()
             .aggregation(Aggregation.SINGLE)
             .nodes(graph)
-            .orientation(orientation)
+            .direction(direction)
             .addAllPropertyConfigs(loadRelationshipProperty
                 ? List.of(GraphFactory.PropertyConfig.of(Aggregation.SINGLE, DefaultValue.forDouble()))
                 : List.of()

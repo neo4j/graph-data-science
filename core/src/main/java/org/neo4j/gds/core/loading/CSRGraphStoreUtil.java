@@ -21,7 +21,6 @@ package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
@@ -34,13 +33,14 @@ import org.neo4j.gds.api.properties.graph.GraphPropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.loading.construction.RelationshipsAndOrientation;
+import org.neo4j.gds.core.loading.construction.RelationshipsAndDirection;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.Collection;
@@ -64,10 +64,10 @@ public final class CSRGraphStoreUtil {
     ) {
         var relationshipType = RelationshipType.of(relationshipTypeString);
         var relationships = graph.relationships();
-        Orientation orientation = graph.schema().isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
+        Direction direction = graph.schema().isUndirected() ? Direction.UNDIRECTED : Direction.DIRECTED;
 
         var relationshipSchema = RelationshipSchema.empty();
-        var entry = relationshipSchema.getOrCreateRelationshipType(relationshipType, orientation);
+        var entry = relationshipSchema.getOrCreateRelationshipType(relationshipType, direction);
 
         relationshipPropertyKey.ifPresent(property -> {
 
@@ -201,7 +201,7 @@ public final class CSRGraphStoreUtil {
     }
 
     public static RelationshipPropertyStore buildRelationshipPropertyStore(
-        List<RelationshipsAndOrientation> relationships,
+        List<RelationshipsAndDirection> relationships,
         List<RelationshipPropertySchema> relationshipPropertySchemas
     ) {
         assert relationships.size() >= relationshipPropertySchemas.size();
@@ -253,7 +253,7 @@ public final class CSRGraphStoreUtil {
             .forEach((relType, propertyStore) -> {
                 var entry = relationshipSchema.getOrCreateRelationshipType(
                     relType,
-                    relationshipsAndProperties.orientations().get(relType)
+                    relationshipsAndProperties.directions().get(relType)
                 );
 
                 propertyStore
@@ -270,7 +270,7 @@ public final class CSRGraphStoreUtil {
             .forEach(type -> {
                 relationshipSchema.getOrCreateRelationshipType(
                     type,
-                    relationshipsAndProperties.orientations().get(type)
+                    relationshipsAndProperties.directions().get(type)
                 );
             });
 

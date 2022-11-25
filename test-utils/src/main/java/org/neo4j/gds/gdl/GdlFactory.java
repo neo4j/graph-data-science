@@ -22,7 +22,6 @@ package org.neo4j.gds.gdl;
 import org.immutables.builder.Builder;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
@@ -37,6 +36,7 @@ import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
@@ -205,7 +205,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             .forEach((relType, propertyStore) -> propertyStore
                 .relationshipProperties()
                 .forEach((propertyKey, propertyValues) -> relationshipSchema
-                    .getOrCreateRelationshipType(relType, relationshipsAndProperties.orientations().get(relType))
+                    .getOrCreateRelationshipType(relType, relationshipsAndProperties.directions().get(relType))
                     .addProperty(
                         propertyKey,
                         RelationshipPropertySchema.of(
@@ -223,7 +223,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             .keySet()
             .forEach(type -> relationshipSchema.getOrCreateRelationshipType(
                 type,
-                relationshipsAndProperties.orientations().get(type)
+                relationshipsAndProperties.directions().get(type)
             ));
 
         return GraphSchema.of(
@@ -240,7 +240,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
         var topologies = new HashMap<RelationshipType, Relationships.Topology>();
         var properties = new HashMap<RelationshipType, RelationshipPropertyStore>();
-        var orientations = new HashMap<RelationshipType, Orientation>();
+        var directions = new HashMap<RelationshipType, Direction>();
 
         relationships.forEach(loadResult -> {
             var builder = RelationshipPropertyStore.builder();
@@ -260,12 +260,12 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
             topologies.put(loadResult.relationshipType(), loadResult.topology());
             properties.put(loadResult.relationshipType(), builder.build());
-            orientations.put(loadResult.relationshipType(), graphProjectConfig().orientation());
+            directions.put(loadResult.relationshipType(), Direction.fromOrientation(graphProjectConfig().orientation()));
         });
 
         var schema = computeGraphSchema(
             nodes,
-            ImmutableRelationshipsAndProperties.of(topologies, properties, orientations)
+            ImmutableRelationshipsAndProperties.of(topologies, properties, directions)
         );
 
         return new GraphStoreBuilder()
@@ -406,7 +406,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     private HashMap<RelationshipType, List<String>> propertyKeysByRelType() {
         var propertyKeysByRelType = new HashMap<RelationshipType, List<String>>();
 
-        Orientation orientation = graphProjectConfig.orientation();
+        Direction orientation = Direction.fromOrientation(graphProjectConfig.orientation());
         var relationshipSchema = RelationshipSchema.empty();
         gdlHandler.getEdges().forEach(edge -> {
             var relType = RelationshipType.of(edge.getLabel());
@@ -475,7 +475,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
                     return GraphFactory.initRelationshipsBuilder()
                         .nodes(idMap)
-                        .orientation(graphProjectConfig.orientation())
+                        .direction(Direction.fromOrientation(graphProjectConfig.orientation()))
                         .aggregation(graphProjectConfig.aggregation())
                         .addAllPropertyConfigs(propertyConfigs)
                         .executorService(loadingContext.executor())

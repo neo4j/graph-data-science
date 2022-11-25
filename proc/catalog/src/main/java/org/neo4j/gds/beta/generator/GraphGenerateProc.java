@@ -22,6 +22,7 @@ package org.neo4j.gds.beta.generator;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -117,7 +118,7 @@ public final class GraphGenerateProc extends BaseProc {
             .relationshipDistribution(config.relationshipDistribution())
             .relationshipType(config.relationshipType())
             .aggregation(config.aggregation())
-            .orientation(config.orientation())
+            .direction(Direction.fromOrientation(config.orientation()))
             .allowSelfLoops(AllowSelfLoops.of(config.allowSelfLoops()));
        if (config.relationshipSeed() != null) {
            builder.seed(config.relationshipSeed());

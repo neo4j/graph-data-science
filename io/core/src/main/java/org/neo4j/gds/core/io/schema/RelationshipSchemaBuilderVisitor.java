@@ -32,7 +32,7 @@ public class RelationshipSchemaBuilderVisitor extends RelationshipSchemaVisitor 
 
     @Override
     protected void export() {
-        var entry = schema.getOrCreateRelationshipType(relationshipType(), orientation());
+        var entry = schema.getOrCreateRelationshipType(relationshipType(), direction());
         if (key() != null) {
             entry.addProperty(
                 key(),

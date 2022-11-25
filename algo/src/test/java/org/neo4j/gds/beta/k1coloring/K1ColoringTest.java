@@ -21,9 +21,9 @@ package org.neo4j.gds.beta.k1coloring;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -105,7 +105,7 @@ class K1ColoringTest {
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
             .seed(seed)
             .aggregation(Aggregation.NONE)
-            .orientation(Orientation.REVERSE)
+            .direction(Direction.DIRECTED)
             .allowSelfLoops(AllowSelfLoops.NO)
             .build();
 

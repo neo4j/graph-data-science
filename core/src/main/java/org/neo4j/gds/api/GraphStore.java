@@ -20,17 +20,17 @@
 package org.neo4j.gds.api;
 
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.GraphProperty;
 import org.neo4j.gds.api.properties.graph.GraphPropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.DeletionResult;
-import org.neo4j.gds.core.loading.construction.RelationshipsAndOrientation;
+import org.neo4j.gds.core.loading.construction.RelationshipsAndDirection;
 import org.neo4j.values.storable.NumberType;
 
 import java.time.ZonedDateTime;
@@ -160,14 +160,14 @@ public interface GraphStore {
         RelationshipType relationshipType,
         Optional<String> relationshipPropertyKey,
         Optional<NumberType> relationshipPropertyType,
-        RelationshipsAndOrientation relationshipsAndOrientation
+        RelationshipsAndDirection relationshipsAndDirection
     ) {
         addRelationshipType(
             relationshipType,
             relationshipPropertyKey,
             relationshipPropertyType,
-            relationshipsAndOrientation.orientation(),
-            relationshipsAndOrientation.relationships()
+            relationshipsAndDirection.direction(),
+            relationshipsAndDirection.relationships()
         );
     }
 
@@ -175,7 +175,7 @@ public interface GraphStore {
         RelationshipType relationshipType,
         Optional<String> relationshipPropertyKey,
         Optional<NumberType> relationshipPropertyType,
-        Orientation orientation,
+        Direction direction,
         Relationships relationships
     );
 

@@ -33,6 +33,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.ImmutableGraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
@@ -390,7 +391,7 @@ public final class CypherAggregation {
 
             var relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(this.idMapBuilder)
-                .orientation(NATURAL)
+                .direction(Direction.DIRECTED)
                 .aggregation(Aggregation.NONE)
                 .concurrency(config.readConcurrency());
 
@@ -635,7 +636,7 @@ public final class CypherAggregation {
 
                 propertyStore.relationshipProperties().forEach((propertyKey, relationshipProperties) -> {
                     relationshipSchema
-                        .getOrCreateRelationshipType(relationshipType, NATURAL)
+                        .getOrCreateRelationshipType(relationshipType, Direction.DIRECTED)
                         .addProperty(
                             propertyKey,
                             relationshipProperties.propertySchema()

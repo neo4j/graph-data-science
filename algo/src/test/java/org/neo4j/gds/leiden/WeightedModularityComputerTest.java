@@ -22,6 +22,7 @@ package org.neo4j.gds.leiden;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -101,7 +102,7 @@ class WeightedModularityComputerTest {
         });
         var aggregateGraph = new GraphAggregationPhase(
             graph,
-            Orientation.UNDIRECTED,
+            Direction.UNDIRECTED,
             localCommunities,
             1,
             Pools.DEFAULT,

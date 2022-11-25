@@ -30,6 +30,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -67,7 +68,7 @@ class CSRGraphStoreTest {
 
         RelationshipsBuilder relBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
-            .orientation(Orientation.UNDIRECTED)
+            .direction(Direction.UNDIRECTED)
             .build();
 
         relBuilder.add(gdlFactory.nodeId("a"), gdlFactory.nodeId("d"));
@@ -99,7 +100,7 @@ class CSRGraphStoreTest {
 
         RelationshipsBuilder relBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
-            .orientation(Orientation.NATURAL)
+            .direction(Direction.DIRECTED)
             .build();
 
         relBuilder.add(gdlFactory.nodeId("a"), gdlFactory.nodeId("d"));
@@ -139,7 +140,7 @@ class CSRGraphStoreTest {
 
         RelationshipsBuilder relBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
-            .orientation(addedOrientation)
+            .direction(Direction.fromOrientation(addedOrientation))
             .build();
 
         relBuilder.add(gdlFactory.nodeId("a"), gdlFactory.nodeId("d"));

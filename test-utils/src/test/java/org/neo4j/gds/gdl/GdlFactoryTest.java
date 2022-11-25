@@ -30,6 +30,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 
@@ -212,15 +213,15 @@ class GdlFactoryTest {
         var relationshipSchema = graph.schema().relationshipSchema();
         var expectedRelationshipSchema = RelationshipSchema.empty();
 
-        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("A"), NATURAL)
+        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("A"), Direction.DIRECTED)
             .addProperty("prop1", ValueType.DOUBLE)
             .addProperty("prop2", ValueType.DOUBLE);
 
-        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("B"), NATURAL)
+        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("B"), Direction.DIRECTED)
             .addProperty("prop1", ValueType.DOUBLE)
             .addProperty("prop3", ValueType.DOUBLE);
 
-        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("C"), NATURAL);
+        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("C"), Direction.DIRECTED);
         assertThat(relationshipSchema).isEqualTo(expectedRelationshipSchema);
     }
 
@@ -249,15 +250,16 @@ class GdlFactoryTest {
 
         var expectedRelationshipSchema = RelationshipSchema.empty();
 
-        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("A"), orientation)
+        var direction = Direction.fromOrientation(orientation);
+        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("A"), direction)
             .addProperty("prop1", ValueType.DOUBLE)
             .addProperty("prop2", ValueType.DOUBLE);
 
-        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("B"), orientation)
+        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("B"), direction)
             .addProperty("prop1", ValueType.DOUBLE)
             .addProperty("prop3", ValueType.DOUBLE);
 
-        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("C"), orientation);
+        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("C"), direction);
 
         assertThat(graphStore.schema().relationshipSchema()).isEqualTo(expectedRelationshipSchema);
     }

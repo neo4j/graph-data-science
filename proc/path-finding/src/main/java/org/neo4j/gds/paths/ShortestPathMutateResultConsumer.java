@@ -21,14 +21,14 @@ package org.neo4j.gds.paths;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.MutateComputationResultConsumer;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.loading.construction.RelationshipsAndOrientation;
+import org.neo4j.gds.core.loading.construction.RelationshipsAndDirection;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -64,10 +64,10 @@ public class ShortestPathMutateResultConsumer<ALGO extends Algorithm<DijkstraRes
             .initRelationshipsBuilder()
             .nodes(computationResult.graph())
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
-            .orientation(Orientation.NATURAL)
+            .direction(Direction.DIRECTED)
             .build();
 
-        RelationshipsAndOrientation relationshipsAndOrientation;
+        RelationshipsAndDirection RelationshipsAndDirection;
 
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
             result.forEachPath(pathResult -> {
@@ -76,8 +76,8 @@ public class ShortestPathMutateResultConsumer<ALGO extends Algorithm<DijkstraRes
                     pathResult.totalCost()
                 );
             });
-            relationshipsAndOrientation = relationshipsBuilder.build();
-            resultBuilder.withRelationshipsWritten(relationshipsAndOrientation.relationships().topology().elementCount());
+            RelationshipsAndDirection = relationshipsBuilder.build();
+            resultBuilder.withRelationshipsWritten(RelationshipsAndDirection.relationships().topology().elementCount());
         }
 
         computationResult
@@ -85,7 +85,7 @@ public class ShortestPathMutateResultConsumer<ALGO extends Algorithm<DijkstraRes
             .addRelationshipType(mutateRelationshipType,
                 Optional.of(TOTAL_COST_KEY),
                 Optional.of(NumberType.FLOATING_POINT),
-                relationshipsAndOrientation
+                RelationshipsAndDirection
             );
     }
 }

@@ -22,9 +22,9 @@ package org.neo4j.gds.walking;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.walking.CollapsePath;
 import org.neo4j.gds.beta.walking.CollapsePathAlgorithmFactory;
 import org.neo4j.gds.beta.walking.CollapsePathConfig;
@@ -80,7 +80,7 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
                         RelationshipType.of(computationResult.config().mutateRelationshipType()),
                         Optional.empty(),
                         Optional.empty(),
-                        Orientation.NATURAL,
+                        Direction.DIRECTED,
                         computationResult.result()
                     );
                 }

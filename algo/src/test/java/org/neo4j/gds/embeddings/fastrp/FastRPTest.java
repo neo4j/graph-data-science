@@ -25,13 +25,13 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
@@ -641,7 +641,7 @@ class FastRPTest extends BaseTest {
         );
         RelationshipsBuilder firstRelationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(firstIdMap)
-            .orientation(Orientation.UNDIRECTED)
+            .direction(Direction.UNDIRECTED)
             .executorService(Pools.DEFAULT)
             .build();
 
@@ -664,7 +664,7 @@ class FastRPTest extends BaseTest {
         );
         RelationshipsBuilder secondRelationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(secondIdMap)
-            .orientation(Orientation.UNDIRECTED)
+            .direction(Direction.UNDIRECTED)
             .executorService(Pools.DEFAULT)
             .build();
 
