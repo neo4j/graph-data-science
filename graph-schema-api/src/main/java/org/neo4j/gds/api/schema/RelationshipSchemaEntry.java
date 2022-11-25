@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.api.schema;
 
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -34,35 +33,35 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class RelationshipSchemaEntry extends ElementSchemaEntry<RelationshipSchemaEntry, RelationshipType, RelationshipPropertySchema> {
 
-    private final Orientation orientation;
+    private final Direction direction;
 
-    RelationshipSchemaEntry(RelationshipType identifier, Orientation orientation) {
-        this(identifier, orientation, new LinkedHashMap<>());
+    RelationshipSchemaEntry(RelationshipType identifier, Direction direction) {
+        this(identifier, direction, new LinkedHashMap<>());
     }
 
     public RelationshipSchemaEntry(
         RelationshipType identifier,
-        Orientation orientation,
+        Direction direction,
         Map<String, RelationshipPropertySchema> properties
     ) {
         super(identifier, properties);
-        this.orientation = orientation;
+        this.direction = direction;
     }
 
     static RelationshipSchemaEntry from(RelationshipSchemaEntry fromEntry) {
         return new RelationshipSchemaEntry(
             fromEntry.identifier(),
-            fromEntry.orientation,
+            fromEntry.direction,
             new HashMap<>(fromEntry.properties())
         );
     }
 
-    public Orientation orientation() {
-        return this.orientation;
+    public Direction direction() {
+        return this.direction;
     }
 
     boolean isUndirected() {
-        return orientation == Orientation.UNDIRECTED;
+        return direction() == Direction.UNDIRECTED;
     }
 
     @Override
@@ -82,7 +81,7 @@ public class RelationshipSchemaEntry extends ElementSchemaEntry<RelationshipSche
                 formatWithLocale("Conflicting directionality for relationship types %s", this.identifier().name));
         }
 
-        return new RelationshipSchemaEntry(this.identifier(), this.orientation, unionProperties(other.properties));
+        return new RelationshipSchemaEntry(this.identifier(), this.direction, unionProperties(other.properties));
     }
 
     public RelationshipSchemaEntry addProperty(String propertyKey, ValueType valueType) {
@@ -110,7 +109,7 @@ public class RelationshipSchemaEntry extends ElementSchemaEntry<RelationshipSche
     @Override
     Map<String, Object> toMap() {
         return Map.of(
-            "orientation", orientation().name(),
+            "direction", direction,
             "properties", properties
                 .entrySet()
                 .stream()
@@ -130,15 +129,13 @@ public class RelationshipSchemaEntry extends ElementSchemaEntry<RelationshipSche
 
         RelationshipSchemaEntry that = (RelationshipSchemaEntry) o;
 
-        return orientation == that.orientation;
+        return direction == that.direction;
     }
 
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + orientation.hashCode();
+        result = 31 * result + direction.hashCode();
         return result;
     }
-
-
 }

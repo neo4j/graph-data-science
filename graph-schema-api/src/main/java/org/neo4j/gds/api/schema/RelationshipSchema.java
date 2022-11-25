@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.api.schema;
 
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;
@@ -76,57 +75,53 @@ public class RelationshipSchema extends ElementSchema<RelationshipSchema, Relati
     }
 
     public RelationshipSchemaEntry getOrCreateRelationshipType(
-        RelationshipType relationshipType,
-        Orientation orientation
+        RelationshipType relationshipType, Direction direction
     ) {
         return this.entries.computeIfAbsent(
             relationshipType,
-            (__) -> new RelationshipSchemaEntry(relationshipType, orientation)
+            (__) -> new RelationshipSchemaEntry(relationshipType, direction)
         );
     }
 
-    public RelationshipSchema addRelationshipType(RelationshipType relationshipType, Orientation orientation) {
-        getOrCreateRelationshipType(relationshipType, orientation);
+    public RelationshipSchema addRelationshipType(RelationshipType relationshipType, Direction direction) {
+        getOrCreateRelationshipType(relationshipType, direction);
         return this;
     }
 
     public RelationshipSchema addProperty(
         RelationshipType relationshipType,
-        Orientation orientation,
+        Direction direction,
         String propertyKey,
         RelationshipPropertySchema propertySchema
     ) {
-        getOrCreateRelationshipType(relationshipType, orientation).addProperty(propertyKey, propertySchema);
+        getOrCreateRelationshipType(relationshipType, direction).addProperty(propertyKey, propertySchema);
         return this;
     }
 
     public RelationshipSchema addProperty(
-        RelationshipType relationshipType,
-        Orientation orientation,
-        String propertyKey,
-        ValueType valueType
+        RelationshipType relationshipType, Direction direction, String propertyKey, ValueType valueType
     ) {
-        getOrCreateRelationshipType(relationshipType, orientation).addProperty(propertyKey, valueType);
+        getOrCreateRelationshipType(relationshipType, direction).addProperty(propertyKey, valueType);
         return this;
     }
 
     public RelationshipSchema addProperty(
         RelationshipType relationshipType,
-        Orientation orientation,
+        Direction direction,
         String propertyKey,
         ValueType valueType,
         Aggregation aggregation
     ) {
-        getOrCreateRelationshipType(relationshipType, orientation).addProperty(propertyKey, valueType, aggregation);
+        getOrCreateRelationshipType(relationshipType, direction).addProperty(propertyKey, valueType, aggregation);
         return this;
     }
 
     Object toMapOld() {
         return entries()
             .stream()
-            .collect(Collectors.toMap(
-                e -> e.identifier().name(),
-                e -> e.properties()
+            .collect(Collectors.toMap(e -> e.identifier().name(),
+                e -> e
+                    .properties()
                     .entrySet()
                     .stream()
                     .collect(Collectors.toMap(
