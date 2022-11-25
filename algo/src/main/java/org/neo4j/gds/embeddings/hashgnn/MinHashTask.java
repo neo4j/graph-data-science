@@ -82,7 +82,7 @@ class MinHashTask implements Runnable {
         TerminationFlag terminationFlag,
         MutableLong totalNumFeaturesOutput
     ) {
-        progressTracker.beginSubTask("Propagate embeddings iteration");
+        progressTracker.beginSubTask("Perform min-hashing");
 
         progressTracker.setSteps(config.embeddingDensity() * graphs.get(0).nodeCount());
 
@@ -109,7 +109,7 @@ class MinHashTask implements Runnable {
 
         totalNumFeaturesOutput.add(tasks.stream().mapToLong(MinHashTask::totalNumFeatures).sum());
 
-        progressTracker.endSubTask("Propagate embeddings iteration");
+        progressTracker.endSubTask("Perform min-hashing");
     }
 
     @Override

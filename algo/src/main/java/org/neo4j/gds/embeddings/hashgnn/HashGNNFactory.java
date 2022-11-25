@@ -76,7 +76,7 @@ public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithm
                     config.embeddingDensity() * (1 + 1 + numRelTypes)
                 ),
                 Tasks.leaf(
-                    "Propagate embeddings iteration",
+                    "Perform min-hashing",
                     (2 * graph.nodeCount() + graph.relationshipCount()) * config.embeddingDensity()
                 )
             ),
