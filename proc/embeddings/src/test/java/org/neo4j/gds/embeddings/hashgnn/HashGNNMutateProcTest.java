@@ -61,7 +61,7 @@ class HashGNNMutateProcTest extends HashGNNProcTest<HashGNNMutateConfig> impleme
     public String expectedMutatedGraph() {
         return "CREATE" +
         "  (a {f1: 1, f2: [0.0, 0.0], embedding: [1.0, 0.0, 0.0]})" +
-        ", (b {f1: 0, f2: [1.0, 0.0], embedding: [0.0, 1.0, 1.0]})" +
+        ", (b {f1: 0, f2: [1.0, 0.0], embedding: [0.0, 0.0, 1.0]})" +
         ", (c {f1: 0, f2: [0.0, 1.0], embedding: [0.0, 0.0, 1.0]})" +
         ", (b)-[:R1]->(a)" +
         ", (b)-[:R2]->(c)";
