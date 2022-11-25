@@ -94,4 +94,19 @@ interface HashGNNConfig extends AlgoBaseConfig, FeaturePropertiesConfig, RandomS
     static Map<String, Object> toMapGenerateFeaturesConfig(GenerateFeaturesConfig config) {
         return config.toMap();
     }
+
+    static void checkConfigKeys(CypherMapWrapper config) {
+        if (config.containsKey("binarizeFeatures")) {
+            var binarizeFeaturesMap = config.getMap("binarizeFeatures");
+            var cypherMapWrapper = CypherMapWrapper.create(binarizeFeaturesMap);
+            var binarizeFeaturesConfig = new BinarizeFeaturesConfigImpl(cypherMapWrapper);
+            cypherMapWrapper.requireOnlyKeysFrom(binarizeFeaturesConfig.configKeys());
+        }
+        if (config.containsKey("generateFeatures")) {
+            var generateFeaturesMap = config.getMap("generateFeatures");
+            var cypherMapWrapper = CypherMapWrapper.create(generateFeaturesMap);
+            var generateFeaturesConfig = new GenerateFeaturesConfigImpl(cypherMapWrapper);
+            cypherMapWrapper.requireOnlyKeysFrom(generateFeaturesConfig.configKeys());
+        }
+    }
 }

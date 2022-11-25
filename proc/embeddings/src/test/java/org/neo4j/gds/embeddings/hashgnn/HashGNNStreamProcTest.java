@@ -25,8 +25,10 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @SuppressWarnings("unchecked")
 class HashGNNStreamProcTest extends HashGNNProcTest<HashGNNStreamConfig> {
@@ -69,5 +71,36 @@ class HashGNNStreamProcTest extends HashGNNProcTest<HashGNNStreamConfig> {
                 .anyMatch(value -> value != 0.0);
         });
 
+    }
+
+    @Test
+    void failsOnInvalidBinarizationKeys() {
+        assertThatThrownBy(() -> {
+            HashGNNStreamConfig.of(CypherMapWrapper.create(
+                Map.of(
+                    "featureProperties", List.of("x"),
+                    "binarizeFeatures", Map.of("dimension", 100, "treshold", 2.0),
+                    "embeddingDensity", 4,
+                    "iterations", 100
+                )
+            ));
+
+        }).isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Unexpected configuration key: treshold (Did you mean [threshold]?)");
+    }
+
+    @Test
+    void failsOnInvalidGenerateFeaturesKeys() {
+        assertThatThrownBy(() -> {
+            HashGNNStreamConfig.of(CypherMapWrapper.create(
+                Map.of(
+                    "generateFeatures", Map.of("dimension", 100, "densityElfen", 2),
+                    "embeddingDensity", 4,
+                    "iterations", 100
+                )
+            ));
+
+        }).isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("No value specified for the mandatory configuration parameter `densityLevel` (a similar parameter exists: [densityElfen])");
     }
 }
