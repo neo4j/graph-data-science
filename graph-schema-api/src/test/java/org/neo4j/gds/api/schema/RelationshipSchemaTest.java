@@ -275,4 +275,18 @@ class RelationshipSchemaTest {
         assertThat(schema.get(RelationshipType.of("Y")).orientation()).isEqualTo(NATURAL);
         assertThat(schema.get(RelationshipType.of("Z")).orientation()).isEqualTo(UNDIRECTED);
     }
+
+    @Test
+    void shouldCreateDeepCopiesWhenFiltering() {
+        var relType = RelationshipType.of("A");
+        var relationshipSchema = RelationshipSchema.empty();
+        relationshipSchema.getOrCreateRelationshipType(relType, NATURAL).addProperty("prop", ValueType.LONG);
+        var filteredSchema = relationshipSchema.filter(Set.of(relType));
+        filteredSchema
+            .getOrCreateRelationshipType(relType, NATURAL).addProperty("shouldNotExistInOriginalSchema", ValueType.LONG);
+
+        assertThat(relationshipSchema.get(relType).properties())
+            .doesNotContainKey("shouldNotExistInOriginalSchema")
+            .containsOnlyKeys("prop");
+    }
 }

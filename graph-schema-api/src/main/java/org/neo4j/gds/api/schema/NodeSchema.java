@@ -25,6 +25,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class NodeSchema extends ElementSchema<NodeSchema, NodeLabel, NodeSchemaEntry, PropertySchema> {
 
@@ -52,7 +53,14 @@ public final class NodeSchema extends ElementSchema<NodeSchema, NodeLabel, NodeS
     }
 
     public NodeSchema filter(Set<NodeLabel> labelsToKeep) {
-        return new NodeSchema(filterByElementIdentifier(labelsToKeep));
+        return new NodeSchema(entries
+            .entrySet()
+            .stream()
+            .filter(e -> labelsToKeep.contains(e.getKey()))
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> NodeSchemaEntry.from(entry.getValue())
+            )));
     }
 
     @Override

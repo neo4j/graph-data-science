@@ -40,9 +40,23 @@ public class RelationshipSchema extends ElementSchema<RelationshipSchema, Relati
         super(entries);
     }
 
+    public static RelationshipSchema from(RelationshipSchema fromSchema) {
+        var relationshipSchema = RelationshipSchema.empty();
+        fromSchema.entries().forEach(fromEntry -> relationshipSchema.set(RelationshipSchemaEntry.from(fromEntry)));
+
+        return relationshipSchema;
+    }
+
     @Override
     public RelationshipSchema filter(Set<RelationshipType> relationshipTypesToKeep) {
-        return new RelationshipSchema(filterByElementIdentifier(relationshipTypesToKeep));
+        return new RelationshipSchema(entries
+            .entrySet()
+            .stream()
+            .filter(e -> relationshipTypesToKeep.contains(e.getKey()))
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> RelationshipSchemaEntry.from(entry.getValue())
+            )));
     }
 
     @Override
@@ -65,7 +79,10 @@ public class RelationshipSchema extends ElementSchema<RelationshipSchema, Relati
         RelationshipType relationshipType,
         Orientation orientation
     ) {
-        return this.entries.computeIfAbsent(relationshipType, (__) -> new RelationshipSchemaEntry(relationshipType, orientation));
+        return this.entries.computeIfAbsent(
+            relationshipType,
+            (__) -> new RelationshipSchemaEntry(relationshipType, orientation)
+        );
     }
 
     public RelationshipSchema addRelationshipType(RelationshipType relationshipType, Orientation orientation) {
@@ -113,8 +130,9 @@ public class RelationshipSchema extends ElementSchema<RelationshipSchema, Relati
                     .entrySet()
                     .stream()
                     .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue()))
+                            Map.Entry::getKey,
+                            innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue())
+                        )
                     )
             ));
     }

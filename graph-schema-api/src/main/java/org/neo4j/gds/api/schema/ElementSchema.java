@@ -114,14 +114,6 @@ public abstract class ElementSchema<
             .collect(Collectors.toMap(entry -> entry.getKey().name, entry -> entry.getValue().toMap()));
     }
 
-    Map<ELEMENT_IDENTIFIER, ENTRY> filterByElementIdentifier(Set<ELEMENT_IDENTIFIER> elementIdentifiersToKeep) {
-        return entries
-            .entrySet()
-            .stream()
-            .filter(e -> elementIdentifiersToKeep.contains(e.getKey()))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
     Map<ELEMENT_IDENTIFIER, ENTRY> unionEntries(SELF other) {
         return Stream
             .concat(entries.entrySet().stream(), other.entries.entrySet().stream())

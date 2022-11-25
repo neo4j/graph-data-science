@@ -167,8 +167,7 @@ class NodeSchemaTest {
         var nodeSchema = NodeSchema.empty();
         nodeSchema.getOrCreateLabel(nodeLabel).addProperty("prop", ValueType.LONG);
         var filteredNodeSchema = nodeSchema.filter(Set.of(nodeLabel));
-        NodeSchema
-            .from(filteredNodeSchema)
+        filteredNodeSchema
             .getOrCreateLabel(nodeLabel).addProperty("shouldNotExistInOriginalSchema", ValueType.LONG);
 
         assertThat(nodeSchema.get(nodeLabel).properties())

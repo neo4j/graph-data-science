@@ -25,6 +25,7 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -46,6 +47,14 @@ public class RelationshipSchemaEntry extends ElementSchemaEntry<RelationshipSche
     ) {
         super(identifier, properties);
         this.orientation = orientation;
+    }
+
+    static RelationshipSchemaEntry from(RelationshipSchemaEntry fromEntry) {
+        return new RelationshipSchemaEntry(
+            fromEntry.identifier(),
+            fromEntry.orientation,
+            new HashMap<>(fromEntry.properties())
+        );
     }
 
     public Orientation orientation() {
@@ -106,8 +115,9 @@ public class RelationshipSchemaEntry extends ElementSchemaEntry<RelationshipSche
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue()))
+                        Map.Entry::getKey,
+                        innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue())
+                    )
                 )
         );
     }
