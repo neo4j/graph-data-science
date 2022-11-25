@@ -35,6 +35,7 @@ import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
@@ -201,7 +202,7 @@ public final class GraphFactory {
     @Builder.Factory
     static RelationshipsBuilder relationshipsBuilder(
         PartialIdMap nodes,
-        Optional<Orientation> orientation,
+        Optional<Direction> direction,
         List<PropertyConfig> propertyConfigs,
         Optional<Aggregation> aggregation,
         Optional<Boolean> validateRelationships,
@@ -220,10 +221,11 @@ public final class GraphFactory {
         var relationshipType = RelationshipType.ALL_RELATIONSHIPS;
         var isMultiGraph = Arrays.stream(aggregations).allMatch(Aggregation::equivalentToNone);
 
+        var actualDirection = direction.orElse(Direction.DIRECTED);
         var projectionBuilder = RelationshipProjection
             .builder()
             .type(relationshipType.name())
-            .orientation(orientation.orElse(Orientation.NATURAL));
+            .orientation(actualDirection == Direction.UNDIRECTED ? Orientation.UNDIRECTED : Orientation.NATURAL);
 
         propertyConfigs.forEach(propertyConfig -> projectionBuilder.addProperty(
             GraphFactory.DUMMY_PROPERTY,
@@ -270,7 +272,7 @@ public final class GraphFactory {
 
         return new RelationshipsBuilder(
             nodes,
-            orientation.orElse(Orientation.NATURAL),
+            actualDirection,
             bufferSize,
             propertyKeyIds,
             importerFactory,
@@ -293,7 +295,7 @@ public final class GraphFactory {
      * If a relationship property is present, the default relationship property key {@code "property"}
      * will be used.
      */
-    public static HugeGraph create(IdMap idMap, RelationshipsAndOrientation relationshipsAndOrientation) {
+    public static HugeGraph create(IdMap idMap, RelationshipsAndDirection relationshipsAndDirection) {
         var nodeSchema = NodeSchema.empty();
         idMap.availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
@@ -301,10 +303,10 @@ public final class GraphFactory {
 
         var entry = relationshipSchema.getOrCreateRelationshipType(
             RelationshipType.of("REL"),
-            relationshipsAndOrientation.orientation()
+            relationshipsAndDirection.direction()
         );
 
-        if (relationshipsAndOrientation.relationships().properties().isPresent()) {
+        if (relationshipsAndDirection.relationships().properties().isPresent()) {
             entry.addProperty("property", ValueType.DOUBLE);
         }
 
@@ -312,7 +314,7 @@ public final class GraphFactory {
             GraphSchema.of(nodeSchema, relationshipSchema, Map.of()),
             idMap,
             Map.of(),
-            relationshipsAndOrientation.relationships()
+            relationshipsAndDirection.relationships()
         );
     }
 

@@ -20,18 +20,18 @@
 package org.neo4j.gds.core.loading.construction;
 
 
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.schema.Direction;
 
 @ValueClass
-public interface RelationshipsAndOrientation {
+public interface RelationshipsAndDirection {
 
     Relationships relationships();
 
-    Orientation orientation();
+    Direction direction();
 
-    static RelationshipsAndOrientation of(Relationships relationships, Orientation orientation) {
-        return ImmutableRelationshipsAndOrientation.of(relationships, orientation);
+    static RelationshipsAndDirection of(Relationships relationships, Direction direction) {
+        return ImmutableRelationshipsAndDirection.of(relationships, direction);
     }
 }
