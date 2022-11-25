@@ -216,3 +216,242 @@ include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
 
 [[algorithms-directed-steiner-tree-sample]]
 == Examples
+
+:algorithm-name: {algorithm}
+:graph-description: road network
+:image-file: steiner-graph.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+
+.The following will create the sample graph depicted in the figure:
+[source, cypher, role=noplay setup-query]
+----
+CREATE (a:Place {id: 'A'}),
+       (b:Place {id: 'B'}),
+       (c:Place {id: 'C'}),
+       (d:Place {id: 'D'}),
+       (e:Place {id: 'E'}),
+       (f:Place {id: 'F'}),
+       (a)-[:LINK {cost:10}]->(f),
+       (a)-[:LINK {cost:1}]->(b),
+       (a)-[:LINK {cost:7}]->(e),
+       (b)-[:LINK {cost:1}]->(c),
+       (c)-[:LINK {cost:5}]->(d),
+       (c)-[:LINK {cost:6}]->(e),
+       (f)-[:LINK {cost:3}]->(d);
+----
+
+.The following will project and store a named graph:
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+  'graph',
+  'Place',
+  {
+    LINK: {
+      properties: 'cost'
+    }
+  }
+)
+----
+[[algorithms-steiner-tree-examples-sream]]
+=== Stream
+:!stream-details:
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the Minimum Directed Steiner Tree algorithm in stream mode and return results for each valid node.
+[source,cypher,role=noplay]
+----
+MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
+CALL gds.alpha.steinerTree.stream('graph', {
+  sourceNode: id(a),
+  targetNodes: [id(d), id(e), id(f)],
+  relationshipWeightProperty: 'cost'
+})
+YIELD nodeId,parentId, weight
+RETURN gds.util.asNode(nodeId).id AS node, gds.util.asNode(parentId).id AS parent,weight
+ORDER BY node
+----
+
+.Results
+[opts="header"]
+|===
+| node  |parent | weight
+| "A"  | "A" | 0
+| "B"  | "A" | 1
+| "C"  | "B" | 1
+| "D"  | "C" | 5
+| "E"  | "C" | 6
+| "F"  | "A" | 10
+
+|===
+--
+
+The algorithm first finds the shortest path from A to D.
+Then, even though the
+relationship weight from A to E is less than the sum of weighted path A,B,C,E,
+the algorithm realizes that the relationships between A and B as well as B and C are already included in the solution and therefore reaching E via C is a better alternative.
+Finally, the algorithm adds the relationship between A and F in the solution and terminates.
+
+[[algorithms-steiner-tree-examples-stats]]
+=== Stats
+:stats-syntax: algorithms-directed-steiner-tree-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the Minimum Weight Spanning Tree algorithm and return its statistics.
+[source,cypher,role=noplay]
+----
+MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
+CALL gds.alpha.steinerTree.stats('graph', {
+  sourceNode: id(a),
+  targetNodes: [id(d), id(e), id(f)],
+  relationshipWeightProperty: 'cost'
+})
+YIELD effectiveNodeCount, totalWeight
+RETURN effectiveNodeCount, totalWeight
+----
+
+.Results
+[opts="header"]
+|===
+| effectiveNodeCount | totalWeight
+| 6  | 23
+|===
+--
+
+[[algorithms-steiner-tree-examples-write]]
+=== Write
+
+
+include::partial$/algorithms/shared/examples-write-intro.adoc[]
+
+[role=query-example, no-result=true,group=steiner-tree-write]
+--
+.The following will run the Minimum Directed Steiner Tree algorithm and write the result back to the graph.
+[source, cypher, role=noplay]
+----
+MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
+CALL gds.alpha.steinerTree.write('graph', {
+  sourceNode: id(a),
+  targetNodes: [id(d), id(e), id(f)],
+  relationshipWeightProperty: 'cost',
+  writeProperty: 'steinerWeight',
+  writeRelationshipType: 'STEINER'
+})
+YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
+RETURN preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount;
+----
+--
+
+[role=query-example, group=steiner-tree-write]
+--
+.To find the relationships included in the minimum spanning tree, we can run the following query:
+[source, cypher, role=noplay]
+----
+MATCH path = (a:Place {id: 'A'})-[:STEINER*]-()
+WITH relationships(path) AS rels
+UNWIND rels AS rel
+WITH DISTINCT rel AS rel
+RETURN startNode(rel).id AS Source, endNode(rel).id AS Destination, rel.steinerWeight AS weight
+ORDER BY Source, Destination
+----
+.Results
+[opts="header",cols="1,1,1"]
+|===
+| Source | Destination | weight
+| "A"  | "B" | 1
+| "A"  | "F" | 10
+| "B"  | "C" | 1
+| "C"  | "D" | 5
+| "C"  | "E" | 6
+|===
+--
+
+[NOTE]
+====
+The relationships written back to the graph are always directed, even if the input graph is undirected.
+====
+
+[[algorithms-steiner-tree-examples-mutate]]
+=== Mutate
+
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the Minimum Directed Steiner Tree algorithm and mutate the in-memory graph.
+[source, cypher, role=noplay]
+----
+MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
+CALL gds.alpha.steinerTree.mutate('graph', {
+  sourceNode: id(a),
+  targetNodes: [id(d), id(e), id(f)],
+  relationshipWeightProperty: 'cost',
+  mutateProperty: 'steinerWeight',
+  mutateRelationshipType: 'STEINER'
+})
+YIELD relationshipsWritten
+RETURN relationshipsWritten
+----
+.Results
+[opts="header"]
+|===
+| relationshipsWritten
+| 5
+|===
+--
+[NOTE]
+====
+The relationships added back to the graph are always directed, even if the input graph is undirected.
+====
+[[algorithms-steiner-tree-examples-rerouting]]
+=== Rerouting
+
+It is also possible to try and augment the solution discovered by the heuristic via a post-processing  rerouting phase.
+This option can be enabled by setting  `applyRerouting:true` in the configuration.
+
+The rerouting phase re-examines the relationships in the discovered steiner tree and tries to reroute nodes (that is change their parent with another node in the tree) so as to decrease the cost.
+The rerouting phase might even have as an effect that some nodes are removed for a tree.
+
+[role=query-example]
+--
+.The following will run the Minimum Directed Steiner Tree algorithm with rerouting in stream mode and return results for each valid node.
+[source,cypher,role=noplay]
+----
+MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
+CALL gds.alpha.steinerTree.stream('graph', {
+  sourceNode: id(a),
+  targetNodes: [id(d), id(e), id(f)],
+  relationshipWeightProperty: 'cost',
+  applyRerouting: true
+})
+YIELD nodeId,parentId, weight
+RETURN gds.util.asNode(nodeId).id AS node, gds.util.asNode(parentId).id AS parent, weight
+ORDER BY node
+----
+
+.Results
+[opts="header"]
+|===
+| node | parent | weight
+| "A"  | "A"    | 0
+| "B"  | "A"    | 1
+| "C"  | "B"    | 1
+| "D"  | "F"    | 3
+| "E"  | "C"    | 6
+| "F"  | "A"    | 10
+
+|===
+--
+
+As can be seen, thanks to the rerouting step, D's parent has been replaced with F and the overall weight of the steiner tree is reduced by 2.
+
+
+[NOTE]
+====
+Unlike the main algorithm, the rerouting phase runs sequentially and is not affected by the concurrency parameter.
+====
