@@ -104,6 +104,9 @@ class GenerateFeaturesTask implements Runnable {
             var generatedFeatures = HugeAtomicBitSet.create(dimension);
 
             rng.setSeed(this.randomSeed ^ graph.toOriginalNodeId(nodeId));
+            // without this we get same results for different result, at least on example in doc test
+            rng.setSeed(rng.nextLong());
+
             var randomInts = rng.ints(densityLevel, 0, dimension);
             randomInts.forEach(generatedFeatures::set);
 
