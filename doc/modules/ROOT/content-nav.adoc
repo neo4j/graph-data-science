@@ -82,6 +82,7 @@
 *** xref:algorithms/yens.adoc[]
 *** xref:algorithms/minimum-weight-spanning-tree.adoc[]
 *** xref:alpha-algorithms/k-minimum-weight-spanning-tree.adoc[]
+*** xref:algorithms/directed-steiner-tree.adoc[]
 *** xref:alpha-algorithms/all-pairs-shortest-path.adoc[]
 *** xref:algorithms/random-walk.adoc[]
 *** xref:algorithms/bfs.adoc[]

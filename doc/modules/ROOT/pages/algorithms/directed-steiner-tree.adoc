@@ -1,0 +1,457 @@
+[[alpha-algorithms-directed-steiner-tree]]
+[.alpha]
+= Minimum Directed Steiner Tree
+:description: This section describes the Minimum Directed Steiner Tree algorithm in the Neo4j Graph Data Science library.
+:entity: node
+:result: spanning tree edge
+:algorithm: Steiner Tree heuristic
+
+include::partial$/operations-reference/alpha-note.adoc[]
+
+:undirected:
+:directed:
+:homogeneous:
+:weighted:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+== Introduction
+
+Given a source node and a list of target nodes, a directed spanning tree in which there exists a path from the source node to each of the target nodes is called a Directed Steiner Tree.
+
+The Minimum Directed Steiner Tree problem asks for the steiner tree that minimizes the sum of all relationship weights in tree.
+
+The Minimum Directed Steiner Tree problem is known to be NP-Complete and no efficient exact algorithms have been proposed in the literature.
+The Neo4j GDS Library offers an efficient implementation of a well-known  https://link.springer.com/chapter/10.1007/3-540-45643-0_1[heuristic] for Steiner Tree related problems.
+
+The implemented algorithm works on a number of steps. At each step, the shortest path from the source to one of the undiscovered targets is found and added to the result.
+Following that, the weights in the relationships in this path are reduced to zero, and the algorithm continues similarly by finding the next closest unvisited target node.
+
+With a careful implementation, the above heuristic can run efficiently even for graphs of large size.
+In addition, the parallel shortest path algorithm of xref:algorithms/delta-single-source.adoc[Delta-Stepping] is used to  further speed-up computations.
+
+== Considerations
+As the Minimum Directed Steiner Tree algorithm relies on shortest-paths, it will not work for graphs with negative relationship weights.
+
+The Minimum Directed Steiner Tree problem is a variant of the more general Minimum Steiner Tree problem defined for undirected graphs.
+The Minimum Steiner Tree  problem accepts as input only a set of target nodes.
+The aim is then to find a spanning tree of minimum weight connecting these target nodes.
+
+It is possible to use the GDS implementation to find a solution for Minimum Steiner Tree problem by arbitrarily selecting one of the target nodes to fill the role of the source node.
+[[algorithms-directed-steiner-tree-syntax]]
+== Syntax
+
+.Spanning Tree syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+.Run the algorithm in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.steinerTree.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  parentId: Integer,
+  weight: Float
+----
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name                                                                             | Type    | Default   | Optional  | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                | Type    | Description
+| nodeId  | Integer | a node in the discovered spanning tree
+| parentId  | Integer | the parent of nodeId in the spanning tree or nodeId if it is equal to the source node.
+| weight  | Float | The weight of the relationship from parentId to nodeId.
+|===
+
+======
+
+[.include-with-stats]
+======
+.Run the algorithm in stats mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.steinerTree.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  effectiveNodeCount: Integer,
+  effectiveTargetNodesCount: Integer,
+  totalWeight: Float,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  configuration: Map
+----
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name                                                                             | Type    | Default   | Optional  | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                      | Type    | Description
+| effectiveNodeCount        | Integer | The number of nodes in the spanning tree.
+| effectiveTargetNodesCount | Integer | The number of target nodes in the spanning tree.
+| totalWeight               | Float   | The sum of the weights of the relationships in the spanning tree.
+| preProcessingMillis       | Integer | Milliseconds for preprocessing the data.
+| computeMillis             | Integer | Milliseconds for running the algorithm.
+| configuration             | Map     | The configuration used for running the algorithm.
+|===
+======
+
+[.include-with-mutate]
+======
+.Run the Spanning Tree algorithm in write mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.steinerTree.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  effectiveNodeCount: Integer,
+  effectiveTargetNodesCount: Integer,
+  totalWeight: Float,
+  relationshipsWritten: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  configuration: Map
+----
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name                                                                             | Type    | Default   | Optional  | Description
+| mutateProperty                                                                    | String  | 'mst'     | yes       | The relationship type used for the new relationships written to the projected graph.
+| weightMutateProperty                                                              | String  | n/a       | no        | The weight property of the `mutateProperty` relationship type written back
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                      | Type    | Description
+| effectiveNodeCount        | Integer | The number of nodes in the spanning tree.
+| effectiveTargetNodesCount | Integer | The number of target nodes in the spanning tree.
+| totalWeight               | Float   | The sum of the weights of the relationships in the spanning tree.
+| relationshipsWritten      | Integer | The number of relationships added to the in-memory graph.
+| preProcessingMillis       | Integer | Milliseconds for preprocessing the data.
+| computeMillis             | Integer | Milliseconds for running the algorithm.
+| mutateMillis              | Integer | Milliseconds for writing result data back.
+| configuration             | Map     | The configuration used for running the algorithm.
+|===
+======
+
+[.include-with-write]
+======
+.Run the Spanning Tree algorithm in write mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.steinerTree.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  effectiveNodeCount: Integer,
+  effectiveTargetNodesCount: Integer,
+  totalWeight: Float,
+  relationshipsWritten: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  configuration: Map
+----
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name                                                                             | Type    | Default   | Optional  | Description
+| writeProperty                                                                    | String  | 'mst'     | yes       | The relationship type written back as result
+| weightWriteProperty                                                              | String  | n/a       | no        | The weight property of the `writeProperty` relationship type written back
+include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                      | Type    | Description
+| effectiveNodeCount        | Integer | The number of nodes in the spanning tree.
+| effectiveTargetNodesCount | Integer | The number of target nodes in the spanning tree.
+| totalWeight               | Float   | The sum of the weights of the relationships in the spanning tree.
+| relationshipsWritten      | Integer | The number of relationships written to the graph.
+| preProcessingMillis       | Integer | Milliseconds for preprocessing the data.
+| computeMillis             | Integer | Milliseconds for running the algorithm.
+| writeMillis               | Integer | Milliseconds for writing result data back.
+| configuration             | Map     | The configuration used for running the algorithm.
+|===
+======
+
+====
+
+
+[[algorithms-directed-steiner-tree-sample]]
+== Examples
+
+:algorithm-name: {algorithm}
+:graph-description: road network
+:image-file: steiner-graph.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+
+.The following will create the sample graph depicted in the figure:
+[source, cypher, role=noplay setup-query]
+----
+CREATE (a:Place {id: 'A'}),
+       (b:Place {id: 'B'}),
+       (c:Place {id: 'C'}),
+       (d:Place {id: 'D'}),
+       (e:Place {id: 'E'}),
+       (f:Place {id: 'F'}),
+       (a)-[:LINK {cost:10}]->(f),
+       (a)-[:LINK {cost:1}]->(b),
+       (a)-[:LINK {cost:7}]->(e),
+       (b)-[:LINK {cost:1}]->(c),
+       (c)-[:LINK {cost:5}]->(d),
+       (c)-[:LINK {cost:6}]->(e),
+       (f)-[:LINK {cost:3}]->(d);
+----
+
+.The following will project and store a named graph:
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+  'graph',
+  'Place',
+  {
+    LINK: {
+      properties: 'cost'
+    }
+  }
+)
+----
+[[algorithms-steiner-tree-examples-sream]]
+=== Stream
+:!stream-details:
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the Minimum Directed Steiner Tree algorithm in stream mode and return results for each valid node.
+[source,cypher,role=noplay]
+----
+MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
+CALL gds.alpha.steinerTree.stream('graph', {
+  sourceNode: id(a),
+  targetNodes: [id(d), id(e), id(f)],
+  relationshipWeightProperty: 'cost'
+})
+YIELD nodeId,parentId, weight
+RETURN gds.util.asNode(nodeId).id AS node, gds.util.asNode(parentId).id AS parent,weight
+ORDER BY node
+----
+
+.Results
+[opts="header"]
+|===
+| node  |parent | weight
+| "A"  | "A" | 0
+| "B"  | "A" | 1
+| "C"  | "B" | 1
+| "D"  | "C" | 5
+| "E"  | "C" | 6
+| "F"  | "A" | 10
+
+|===
+--
+
+The algorithm first finds the shortest path from A to D.
+Then, even though the
+relationship weight from A to E is less than the sum of weighted path A,B,C,E,
+the algorithm realizes that the relationships between A and B as well as B and C are already included in the solution and therefore reaching E via C is a better alternative.
+Finally, the algorithm adds the relationship between A and F in the solution and terminates.
+
+[[algorithms-steiner-tree-examples-stats]]
+=== Stats
+:stats-syntax: algorithms-directed-steiner-tree-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the Minimum Weight Spanning Tree algorithm and return its statistics.
+[source,cypher,role=noplay]
+----
+MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
+CALL gds.alpha.steinerTree.stats('graph', {
+  sourceNode: id(a),
+  targetNodes: [id(d), id(e), id(f)],
+  relationshipWeightProperty: 'cost'
+})
+YIELD effectiveNodeCount, totalWeight
+RETURN effectiveNodeCount, totalWeight
+----
+
+.Results
+[opts="header"]
+|===
+| effectiveNodeCount | totalWeight
+| 6  | 23
+|===
+--
+
+[[algorithms-steiner-tree-examples-write]]
+=== Write
+
+
+include::partial$/algorithms/shared/examples-write-intro.adoc[]
+
+[role=query-example, no-result=true,group=steiner-tree-write]
+--
+.The following will run the Minimum Directed Steiner Tree algorithm and write the result back to the graph.
+[source, cypher, role=noplay]
+----
+MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
+CALL gds.alpha.steinerTree.write('graph', {
+  sourceNode: id(a),
+  targetNodes: [id(d), id(e), id(f)],
+  relationshipWeightProperty: 'cost',
+  writeProperty: 'steinerWeight',
+  writeRelationshipType: 'STEINER'
+})
+YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
+RETURN preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount;
+----
+--
+
+[role=query-example, group=steiner-tree-write]
+--
+.To find the relationships included in the minimum spanning tree, we can run the following query:
+[source, cypher, role=noplay]
+----
+MATCH path = (a:Place {id: 'A'})-[:STEINER*]-()
+WITH relationships(path) AS rels
+UNWIND rels AS rel
+WITH DISTINCT rel AS rel
+RETURN startNode(rel).id AS Source, endNode(rel).id AS Destination, rel.steinerWeight AS weight
+ORDER BY Source, Destination
+----
+.Results
+[opts="header",cols="1,1,1"]
+|===
+| Source | Destination | weight
+| "A"  | "B" | 1
+| "A"  | "F" | 10
+| "B"  | "C" | 1
+| "C"  | "D" | 5
+| "C"  | "E" | 6
+|===
+--
+
+[NOTE]
+====
+The relationships written back to the graph are always directed, even if the input graph is undirected.
+====
+
+[[algorithms-steiner-tree-examples-mutate]]
+=== Mutate
+
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the Minimum Directed Steiner Tree algorithm and mutate the in-memory graph.
+[source, cypher, role=noplay]
+----
+MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
+CALL gds.alpha.steinerTree.mutate('graph', {
+  sourceNode: id(a),
+  targetNodes: [id(d), id(e), id(f)],
+  relationshipWeightProperty: 'cost',
+  mutateProperty: 'steinerWeight',
+  mutateRelationshipType: 'STEINER'
+})
+YIELD relationshipsWritten
+RETURN relationshipsWritten
+----
+.Results
+[opts="header"]
+|===
+| relationshipsWritten
+| 5
+|===
+--
+[NOTE]
+====
+The relationships added back to the graph are always directed, even if the input graph is undirected.
+====
+[[algorithms-steiner-tree-examples-rerouting]]
+=== Rerouting
+
+It is also possible to try and augment the solution discovered by the heuristic via a post-processing  rerouting phase.
+This option can be enabled by setting  `applyRerouting:true` in the configuration.
+
+The rerouting phase re-examines the relationships in the discovered steiner tree and tries to reroute nodes (that is change their parent with another node in the tree) so as to decrease the cost.
+The rerouting phase might even have as an effect that some nodes are removed for a tree.
+
+[role=query-example]
+--
+.The following will run the Minimum Directed Steiner Tree algorithm with rerouting in stream mode and return results for each valid node.
+[source,cypher,role=noplay]
+----
+MATCH (a:Place{id: 'A'}), (d:Place{id: 'D'}),(e:Place{id: 'E'}),(f:Place{id: 'F'})
+CALL gds.alpha.steinerTree.stream('graph', {
+  sourceNode: id(a),
+  targetNodes: [id(d), id(e), id(f)],
+  relationshipWeightProperty: 'cost',
+  applyRerouting: true
+})
+YIELD nodeId,parentId, weight
+RETURN gds.util.asNode(nodeId).id AS node, gds.util.asNode(parentId).id AS parent, weight
+ORDER BY node
+----
+
+.Results
+[opts="header"]
+|===
+| node | parent | weight
+| "A"  | "A"    | 0
+| "B"  | "A"    | 1
+| "C"  | "B"    | 1
+| "D"  | "F"    | 3
+| "E"  | "C"    | 6
+| "F"  | "A"    | 10
+
+|===
+--
+
+As can be seen, thanks to the rerouting step, D's parent has been replaced with F and the overall weight of the steiner tree is reduced by 2.
+
+
+[NOTE]
+====
+Unlike the main algorithm, the rerouting phase runs sequentially and is not affected by the concurrency parameter.
+====
