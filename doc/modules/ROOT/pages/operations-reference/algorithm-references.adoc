@@ -360,7 +360,7 @@
 .2+<.^| xref:algorithms/alpha/modularity.adoc[Modularity Metric]
 | `gds.alpha.modularity.stats`
 | `gds.alpha.modularity.stream`
-.4+<.^| Directer Steiner Tree
+.4+<.^| xref:alpha-algorithms/directed-steiner-tree.adoc[Minimum Directed Steiner Tree]
 | `gds.alpha.steinerTree.mutate`
 | `gds.alpha.steinerTree.stats`
 | `gds.alpha.steinerTree.stream`
