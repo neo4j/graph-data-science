@@ -27,9 +27,9 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
+import java.util.concurrent.atomic.LongAdder;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SteinerTreeWriteProcTest extends BaseProcTest {
 
@@ -118,12 +118,27 @@ class SteinerTreeWriteProcTest extends BaseProcTest {
 
         runQuery(query);
 
-        final long relCount = runQuery(
-            "MATCH (a)-[:STEINER]->(b) RETURN id(a) AS a, id(b) AS b",
-            result -> result.stream().count()
+        var rowCounter = new LongAdder();
+        runQueryWithRowConsumer(
+            "MATCH (a)-[r:STEINER]->(b) RETURN id(a) AS a, id(b) AS b, r.cost AS cost",
+            row -> {
+                var a = row.getNumber("a").longValue();
+                assertThat(a)
+                    .as("The source node should be the same as one specified in the procedure configuration")
+                    .isEqualTo(sourceNode);
+                var b = row.getNumber("b").longValue();
+                assertThat(b)
+                    .as("The terminal node should be the same as one specified in the procedure configuration")
+                    .isEqualTo(terminalNode);
+                var writtenCost = row.getNumber("cost").doubleValue();
+                assertThat(writtenCost)
+                    .as("The relationship property shoud be written correctly")
+                    .isEqualTo(5.4);
+
+                rowCounter.increment();
+            }
         );
 
-        assertEquals(relCount, 1);
+        assertThat(rowCounter.longValue()).isEqualTo(1L);
     }
-
 }
