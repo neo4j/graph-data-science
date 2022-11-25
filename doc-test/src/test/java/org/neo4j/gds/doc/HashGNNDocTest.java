@@ -22,6 +22,7 @@ package org.neo4j.gds.doc;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNMutateProc;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNStreamProc;
+import org.neo4j.gds.scaling.ScalePropertiesMutateProc;
 
 import java.util.List;
 
@@ -32,6 +33,7 @@ class HashGNNDocTest extends SingleFileDocTestBase {
         return List.of(
             HashGNNStreamProc.class,
             HashGNNMutateProc.class,
+            ScalePropertiesMutateProc.class,
             GraphProjectProc.class
         );
     }

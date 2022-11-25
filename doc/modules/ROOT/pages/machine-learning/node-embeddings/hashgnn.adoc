@@ -330,13 +330,13 @@ We will do this on a small {graph-description} graph of a handful nodes connecte
 [source, cypher, role=noplay setup-query]
 ----
 CREATE
-  (dan:Person {name: 'Dan',     age: 18, experience: 53, hipster: 0}),
+  (dan:Person {name: 'Dan',     age: 18, experience: 63, hipster: 0}),
   (annie:Person {name: 'Annie', age: 12, experience: 5, hipster: 0}),
   (matt:Person {name: 'Matt',   age: 22, experience: 42, hipster: 0}),
-  (jeff:Person {name: 'Jeff',   age: 51, experience: 51, hipster: 0}),
-  (brie:Person {name: 'Brie',   age: 45, experience: 23, hipster: 0}),
-  (elsa:Person {name: 'Elsa',   age: 65, experience: -99, hipster: 1}),
-  (john:Person {name: 'John',   age: 64, experience: 100, hipster: 0}),
+  (jeff:Person {name: 'Jeff',   age: 51, experience: 12, hipster: 0}),
+  (brie:Person {name: 'Brie',   age: 31, experience: 6, hipster: 0}),
+  (elsa:Person {name: 'Elsa',   age: 65, experience: 23, hipster: 1}),
+  (john:Person {name: 'John',   age: 4, experience: 100, hipster: 0}),
   (apple:Fruit {name: 'Apple',   tropical: 0, sourness: 0.3, sweetness: 0.6}),
   (banana:Fruit {name: 'Banana', tropical: 1, sourness: 0.1, sweetness: 0.9}),
   (mango:Fruit {name: 'Mango',   tropical: 1, sourness: 0.3, sweetness: 1.0}),
@@ -395,6 +395,17 @@ CALL gds.graph.project(
 )
 ----
 
+Since we will use binarization and the properties have different scales in some examples, we will create a scaled version of the `experience` property.
+
+.The following will scale the experience property and mutate the graph:
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.alpha.scaleProperties.mutate('persons', {
+  nodeProperties: ['experience'],
+  scaler: 'Minmax',
+  mutateProperty: 'experience_scaled'
+}) YIELD nodePropertiesWritten
+----
 
 [[algorithms-embeddings-hashgnn-examples-memory-estimation]]
 === Memory Estimation
@@ -407,7 +418,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.hashgnn.stream.estimate('persons', {nodeLabels: ['Person'], iterations: 3, embeddingDensity: 2, binarizeFeatures: {dimension: 4, densityLevel: 1}, featureProperties: ['age', 'experience']})
+CALL gds.alpha.hashgnn.stream.estimate('persons', {nodeLabels: ['Person'], iterations: 3, embeddingDensity: 2, binarizeFeatures: {dimension: 4, threshold: 0}, featureProperties: ['age', 'experience']})
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 ----
 
@@ -415,7 +426,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header", cols="1,1,1,1,1"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 7         | 18                | 134912   | 134912   | "131 KiB"
+| 7         | 18                | 59160   | 59160   | "57 KiB"
 |===
 --
 
@@ -434,11 +445,11 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 CALL gds.alpha.hashgnn.stream('persons',
   {
     nodeLabels: ['Person'],
-    iterations: 3,
+    iterations: 1,
     embeddingDensity: 2,
-    binarizeFeatures: {dimension: 4, densityLevel: 1},
+    binarizeFeatures: {dimension: 4, threshold: 32},
     featureProperties: ['age', 'experience'],
-    randomSeed: 123
+    randomSeed: 42
   }
 )
 YIELD nodeId, embedding
@@ -448,13 +459,13 @@ YIELD nodeId, embedding
 .Results
 |===
 | nodeId | embedding
-| 0      | [0.0, 0.0, 0.0, 1.0]
-| 1      | [0.0, 0.0, 0.0, 1.0]
-| 2      | [0.0, 0.0, 0.0, 1.0]
-| 3      | [0.0, 0.0, 0.0, 1.0]
-| 4      | [0.0, 0.0, 0.0, 1.0]
-| 5      | [0.0, 1.0, 0.0, 0.0]
-| 6      | [0.0, 0.0, 0.0, 1.0]
+| 0      | [0.0, 1.0, 0.0, 0.0]
+| 1      | [1.0, 0.0, 1.0, 0.0]
+| 2      | [1.0, 1.0, 0.0, 0.0]
+| 3      | [1.0, 0.0, 1.0, 0.0]
+| 4      | [1.0, 0.0, 0.0, 0.0]
+| 5      | [1.0, 0.0, 1.0, 0.0]
+| 6      | [1.0, 1.0, 0.0, 0.0]
 |===
 --
 
@@ -468,7 +479,7 @@ Due to the random nature of the algorithm the results will vary between the runs
 
 [role=query-example]
 --
-.The following will run the algorithm on Person nodes without binarization, and stream results:
+.The following will run the algorithm on Person nodes on binary properties, and stream results:
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.hashgnn.stream('persons',
@@ -501,16 +512,15 @@ In this example the embedding dimension becomes `1` because without binarization
 
 [role=query-example]
 --
-.The following will run the algorithm in heterogeneous mode, and stream results:
+.The following will run the algorithm on Person nodes on generated features, and stream results:
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.hashgnn.stream('persons',
   {
-    heterogeneous: true,
-    iterations: 3,
-    embeddingDensity: 6,
-    binarizeFeatures: {dimension: 6, densityLevel: 3},
-    featureProperties: ['age', 'experience', 'sourness', 'sweetness', 'tropical'],
+    nodeLabels: ['Person'],
+    iterations: 1,
+    embeddingDensity: 2,
+    generateFeatures: {dimension: 4, densityLevel: 1},
     randomSeed: 123
   }
 )
@@ -521,17 +531,48 @@ YIELD nodeId, embedding
 .Results
 |===
 | nodeId | embedding
-| 0      | [1.0, 0.0, 1.0, 0.0, 1.0, 0.0]
+| 0      | [0.0, 0.0, 1.0, 1.0]
+| 1      | [0.0, 0.0, 1.0, 0.0]
+| 2      | [0.0, 1.0, 1.0, 0.0]
+| 3      | [1.0, 0.0, 1.0, 0.0]
+| 4      | [0.0, 0.0, 1.0, 1.0]
+| 5      | [0.0, 0.0, 1.0, 0.0]
+| 6      | [1.0, 0.0, 0.0, 0.0]
+|===
+--
+[role=query-example]
+--
+.The following will run the algorithm in heterogeneous mode, and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.hashgnn.stream('persons',
+  {
+    heterogeneous: true,
+    iterations: 2,
+    embeddingDensity: 4,
+    binarizeFeatures: {dimension: 6, threshold: 0.2},
+    featureProperties: ['experience_scaled', 'sourness', 'sweetness', 'tropical'],
+    randomSeed: 42
+  }
+)
+YIELD nodeId, embedding
+----
+
+[opts=header]
+.Results
+|===
+| nodeId | embedding
+| 0      | [1.0, 1.0, 0.0, 0.0, 0.0, 1.0]
 | 1      | [1.0, 0.0, 1.0, 0.0, 0.0, 0.0]
-| 2      | [1.0, 0.0, 1.0, 0.0, 1.0, 0.0]
-| 3      | [1.0, 0.0, 1.0, 0.0, 1.0, 0.0]
+| 2      | [1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
+| 3      | [1.0, 0.0, 1.0, 0.0, 0.0, 0.0]
 | 4      | [1.0, 0.0, 1.0, 0.0, 0.0, 0.0]
-| 5      | [1.0, 0.0, 1.0, 0.0, 1.0, 0.0]
-| 6      | [1.0, 0.0, 1.0, 0.0, 1.0, 0.0]
-| 7      | [1.0, 0.0, 1.0, 0.0, 1.0, 0.0]
-| 8      | [1.0, 0.0, 1.0, 0.0, 1.0, 0.0]
-| 9      | [1.0, 0.0, 1.0, 0.0, 1.0, 0.0]
-| 10     | [1.0, 0.0, 1.0, 0.0, 1.0, 0.0]
+| 5      | [1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
+| 6      | [1.0, 1.0, 0.0, 0.0, 1.0, 1.0]
+| 7      | [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+| 8      | [1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+| 9      | [1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+| 10     | [0.0, 0.0, 1.0, 0.0, 1.0, 0.0]
 |===
 --
 
@@ -543,12 +584,12 @@ YIELD nodeId, embedding
 CALL gds.alpha.hashgnn.stream('persons',
   {
     heterogeneous: true,
-    iterations: 3,
-    embeddingDensity: 6,
-    binarizeFeatures: {dimension: 6, densityLevel: 3},
-    featureProperties: ['age', 'experience', 'sourness', 'sweetness', 'tropical'],
+    iterations: 2,
+    embeddingDensity: 4,
+    binarizeFeatures: {dimension: 6, threshold: 0.2},
+    featureProperties: ['experience_scaled', 'sourness', 'sweetness', 'tropical'],
     outputDimension: 4,
-    randomSeed: 123
+    randomSeed: 42
   }
 )
 YIELD nodeId, embedding
@@ -558,17 +599,17 @@ YIELD nodeId, embedding
 .Results
 |===
 | nodeId | embedding
-| 0      | [0.0, 0.8660253882408142, -1.7320507764816284, 0.0]
-| 1      | [0.0, 0.8660253882408142, -0.8660253882408142, 0.0]
-| 2      | [0.0, 0.8660253882408142, -1.7320507764816284, 0.0]
-| 3      | [0.0, 0.8660253882408142, -1.7320507764816284, 0.0]
-| 4      | [0.0, 0.8660253882408142, -0.8660253882408142, 0.0]
-| 5      | [0.0, 0.8660253882408142, -1.7320507764816284, 0.0]
-| 6      | [0.0, 0.8660253882408142, -1.7320507764816284, 0.0]
-| 7      | [0.0, 0.8660253882408142, -1.7320507764816284, 0.0]
-| 8      | [0.0, 0.8660253882408142, -1.7320507764816284, 0.0]
-| 9      | [0.0, 0.8660253882408142, -1.7320507764816284, 0.0]
-| 10     | [0.0, 0.8660253882408142, -1.7320507764816284, 0.0]
+| 0      | [0.0, 0.8660253882408142, -1.7320507764816284, 0.8660253882408142]
+| 1      | [0.0, 0.0, -1.7320507764816284, 0.8660253882408142]
+| 2      | [0.0, 0.8660253882408142, -0.8660253882408142, 0.0]
+| 3      | [0.0, 0.0, -1.7320507764816284, 0.8660253882408142]
+| 4      | [0.0, 0.0, -1.7320507764816284, 0.8660253882408142]
+| 5      | [0.0, 0.8660253882408142, -0.8660253882408142, 0.0]
+| 6      | [0.0, 0.8660253882408142, -1.7320507764816284, 0.8660253882408142]
+| 7      | [0.0, 0.0, -2.5980761647224426, 1.7320507764816284]
+| 8      | [0.0, 0.0, -1.7320507764816284, 0.8660253882408142]
+| 9      | [0.0, 0.0, -1.7320507764816284, 0.8660253882408142]
+| 10     | [0.0, 0.0, -0.8660253882408142, 0.8660253882408142]
 |===
 --
 
@@ -585,11 +626,12 @@ include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 CALL gds.alpha.hashgnn.mutate(
   'persons',
   {
-    nodeLabels: ['Person'],
     mutateProperty: 'hashgnn-embedding',
-    iterations: 3,
-    embeddingDensity: 2,
-    binarizeFeatures: {dimension: 4, densityLevel: 1},
+    heterogeneous: true,
+    iterations: 2,
+    embeddingDensity: 4,
+    binarizeFeatures: {dimension: 6, threshold: 0.2},
+    featureProperties: ['experience_scaled', 'sourness', 'sweetness', 'tropical'],
     randomSeed: 42
   }
 )
@@ -600,7 +642,7 @@ YIELD nodePropertiesWritten
 .Results
 |===
 | nodePropertiesWritten
-| 7
+| 11
 |===
 --
 
