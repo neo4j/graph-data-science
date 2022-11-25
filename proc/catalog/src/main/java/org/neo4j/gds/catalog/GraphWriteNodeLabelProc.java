@@ -40,17 +40,16 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class GraphWriteNodeLabelFilteredProc extends CatalogProc {
+public class GraphWriteNodeLabelProc extends CatalogProc {
 
     @Context
     public NodeLabelExporterBuilder<? extends NodeLabelExporter> nodeLabelExporterBuilder;
 
     @Procedure(name = "gds.alpha.graph.nodeLabel.writeFiltered", mode = WRITE)
     @Description("Writes the given node Label to an online Neo4j database.")
-    public Stream<Result> writeNodeLabelFiltered(
+    public Stream<WriteLabelResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeLabel") String nodeLabel,
-        @Name(value = "nodePropertyFilter") String nodePropertyFilter,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) throws ParseException {
 
@@ -59,9 +58,9 @@ public class GraphWriteNodeLabelFilteredProc extends CatalogProc {
         var procedureConfig = WriteLabelConfig.of(configuration);
 
         var graphStore = graphStoreFromCatalog(graphName).graphStore();
-        var filter = ExpressionParser.parse(nodePropertyFilter, Map.of());
+        var filter = ExpressionParser.parse(procedureConfig.nodeFilter(), Map.of());
 
-        Result.Builder resultBuilder = new Result.Builder(graphName, nodeLabel);
+        WriteLabelResult.Builder resultBuilder = new WriteLabelResult.Builder(graphName, nodeLabel);
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
             var filteredNodes = NodesFilter.filterNodes(
                 graphStore,
@@ -89,46 +88,4 @@ public class GraphWriteNodeLabelFilteredProc extends CatalogProc {
 
         return Stream.of(resultBuilder.build());
     }
-
-    @SuppressWarnings("unused")
-    public static class Result {
-        public final long writeMillis;
-        public final String graphName;
-        public final String nodeLabel;
-        public final long nodeLabelsWritten;
-
-        Result(long writeMillis, String graphName, String nodeLabel, long nodeLabelsWritten) {
-            this.writeMillis = writeMillis;
-            this.graphName = graphName;
-            this.nodeLabel = nodeLabel;
-            this.nodeLabelsWritten = nodeLabelsWritten;
-        }
-
-        static class Builder {
-            private final String graphName;
-            private final String nodeLabel;
-            private long nodeLabelsWritten;
-            private long writeMillis;
-
-            Builder(String graphName, String nodeLabel) {
-                this.graphName = graphName;
-                this.nodeLabel = nodeLabel;
-            }
-
-            Builder withWriteMillis(long writeMillis) {
-                this.writeMillis = writeMillis;
-                return this;
-            }
-
-            Builder withNodeLabelsWritten(long propertiesWritten) {
-                this.nodeLabelsWritten = propertiesWritten;
-                return this;
-            }
-
-            Result build() {
-                return new Result(writeMillis, graphName, nodeLabel, nodeLabelsWritten);
-            }
-        }
-    }
-
 }

@@ -33,4 +33,6 @@ public interface WriteLabelConfig extends BaseConfig, ConcurrencyConfig {
     static WriteLabelConfig of(Map<String, Object> rawConfig) {
         return new WriteLabelConfigImpl(CypherMapWrapper.create(rawConfig));
     }
+
+    String nodeFilter();
 }

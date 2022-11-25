@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.LongAdder;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
-class GraphWriteNodeLabelFilteredProcTest extends BaseProcTest {
+class GraphWriteNodeLabelProcTest extends BaseProcTest {
 
     @Neo4jGraph(offsetIds = true)
     private static final String DB_CYPHER =
@@ -45,7 +45,7 @@ class GraphWriteNodeLabelFilteredProcTest extends BaseProcTest {
     void setUp() throws Exception {
         registerProcedures(
             GraphProjectProc.class,
-            GraphWriteNodeLabelFilteredProc.class
+            GraphWriteNodeLabelProc.class
         );
     }
 
@@ -65,7 +65,7 @@ class GraphWriteNodeLabelFilteredProcTest extends BaseProcTest {
         );
 
         runQuery(
-            "CALL gds.alpha.graph.nodeLabel.writeFiltered('graph', 'TestLabel', 'n:A AND n.p > 1.0', {}) YIELD nodeLabelsWritten",
+            "CALL gds.alpha.graph.nodeLabel.writeFiltered('graph', 'TestLabel', { nodeFilter: 'n:A AND n.p > 1.0' }) YIELD nodeLabelsWritten",
             result -> {
                 assertThat(result.hasNext()).isTrue();
 
