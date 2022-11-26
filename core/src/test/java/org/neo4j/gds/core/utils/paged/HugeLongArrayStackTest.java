@@ -48,6 +48,17 @@ class HugeLongArrayStackTest {
     }
 
     @Test
+    void testPeek() {
+        var q = HugeLongArrayStack.newStack(10);
+        q.push(42);
+        assertEquals(q.peek(), 42);
+        q.push(1337);
+        assertEquals(q.peek(), 1337);
+        q.pop();
+        assertEquals(q.peek(), 42);
+    }
+
+    @Test
     void testPopFromFullStack() {
         var capacity = 10;
         var q = HugeLongArrayStack.newStack(capacity);

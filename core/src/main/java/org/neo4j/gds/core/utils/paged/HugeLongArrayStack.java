@@ -56,6 +56,13 @@ public final class HugeLongArrayStack {
         return array.get(--size);
     }
 
+    public long peek() {
+        if (isEmpty()) {
+            throw new IndexOutOfBoundsException("Stack is empty.");
+        }
+        return array.get(size - 1);
+    }
+    
     public long size() {
         return size;
     }
