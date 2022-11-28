@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.paths.traverse;
 
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsAndDirection;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -47,7 +47,7 @@ final class TraverseMutateResultConsumer {
         var relationshipsBuilder = GraphFactory
             .initRelationshipsBuilder()
             .nodes(graph)
-            .direction(Direction.DIRECTED)
+            .orientation(Orientation.NATURAL)
             .build();
 
         RelationshipsAndDirection RelationshipsAndDirection;

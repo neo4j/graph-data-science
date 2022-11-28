@@ -47,7 +47,7 @@ class RelationshipSchemaLoaderTest {
     void shouldLoadRelationshipSchemaCorrectly() throws IOException {
         var lines = List.of(
             String.join(", ", CsvRelationshipSchemaVisitorTest.RELATIONSHIP_SCHEMA_COLUMNS),
-            "REL1, NATURAL, prop1, long, DefaultValue(42), SUM, PERSISTENT",
+            "REL1, DIRECTED, prop1, long, DefaultValue(42), SUM, PERSISTENT",
             "REL2, UNDIRECTED, prop2, double, DefaultValue(13.37), COUNT, TRANSIENT"
         );
         FileUtils.writeLines(exportDir.resolve(RELATIONSHIP_SCHEMA_FILE_NAME).toFile(), lines);
@@ -112,7 +112,7 @@ class RelationshipSchemaLoaderTest {
     void shouldLoadMixedRelationshipSchema() throws IOException {
         var lines = List.of(
             String.join(", ", CsvRelationshipSchemaVisitorTest.RELATIONSHIP_SCHEMA_COLUMNS),
-            "REL1, NATURAL, prop1, long, DefaultValue(42), SUM, PERSISTENT",
+            "REL1, DIRECTED, prop1, long, DefaultValue(42), SUM, PERSISTENT",
             "REL3, UNDIRECTED"
         );
         FileUtils.writeLines(exportDir.resolve(RELATIONSHIP_SCHEMA_FILE_NAME).toFile(), lines);

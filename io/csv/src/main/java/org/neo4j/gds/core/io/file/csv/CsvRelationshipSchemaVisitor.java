@@ -37,7 +37,7 @@ public class CsvRelationshipSchemaVisitor extends RelationshipSchemaVisitor {
     static final String RELATIONSHIP_TYPE_COLUMN_NAME = "relationshipType";
     static final String AGGREGATION_COLUMN_NAME = "aggregation";
 
-    static final String ORIENTATION_COLUMN_NAME = "orientation";
+    static final String DIRECTION_COLUMN_NAME = "direction";
 
     public static final String RELATIONSHIP_SCHEMA_FILE_NAME = "relationship-schema.csv";
 
@@ -82,7 +82,7 @@ public class CsvRelationshipSchemaVisitor extends RelationshipSchemaVisitor {
 
     private void writeHeader() throws IOException {
         csvAppender.appendField(RELATIONSHIP_TYPE_COLUMN_NAME);
-        csvAppender.appendField(ORIENTATION_COLUMN_NAME);
+        csvAppender.appendField(DIRECTION_COLUMN_NAME);
         csvAppender.appendField(PROPERTY_KEY_COLUMN_NAME);
         csvAppender.appendField(VALUE_TYPE_COLUMN_NAME);
         csvAppender.appendField(DEFAULT_VALUE_COLUMN_NAME);

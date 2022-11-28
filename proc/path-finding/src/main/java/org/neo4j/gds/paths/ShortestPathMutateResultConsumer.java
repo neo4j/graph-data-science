@@ -21,9 +21,9 @@ package org.neo4j.gds.paths;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.MutateComputationResultConsumer;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.Aggregation;
@@ -64,7 +64,7 @@ public class ShortestPathMutateResultConsumer<ALGO extends Algorithm<DijkstraRes
             .initRelationshipsBuilder()
             .nodes(computationResult.graph())
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
-            .direction(Direction.DIRECTED)
+            .orientation(Orientation.NATURAL)
             .build();
 
         RelationshipsAndDirection RelationshipsAndDirection;

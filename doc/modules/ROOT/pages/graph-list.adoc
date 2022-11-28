@@ -207,7 +207,7 @@ YIELD graphName, schemaWithOrientation
 |===
 | graphName | schemaWithOrientation
 | "personsCypher"
-| {graphProperties={}, relationships={KNOWS={orientation=NATURAL, properties={}}}, nodes={Person={}}}
+| {graphProperties={}, relationships={KNOWS={properties={}, direction=DIRECTED}}, nodes={Person={}}}
 |===
 --
 
@@ -225,7 +225,7 @@ YIELD graphName, schemaWithOrientation
 |===
 | graphName       | schemaWithOrientation
 | "personsNative"
-| {graphProperties={}, relationships={KNOWS={orientation=NATURAL, properties={}}}, nodes={Person={}}}
+| {graphProperties={}, relationships={KNOWS={properties={}, direction=DIRECTED}}, nodes={Person={}}}
 |===
 --
 

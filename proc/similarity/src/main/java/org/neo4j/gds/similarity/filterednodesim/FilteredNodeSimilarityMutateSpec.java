@@ -21,10 +21,10 @@ package org.neo4j.gds.similarity.filterednodesim;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.gds.MutateComputationResultConsumer;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.HugeGraph;
@@ -140,7 +140,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
 
             RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(topKGraph)
-                .direction(Direction.DIRECTED)
+                .orientation(Orientation.NATURAL)
                 .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
                 .concurrency(1)
                 .executorService(Pools.DEFAULT)

@@ -22,10 +22,22 @@ package org.neo4j.gds.api.schema;
 import org.neo4j.gds.Orientation;
 
 public enum Direction {
-    DIRECTED,
-    UNDIRECTED;
+    DIRECTED {
+        @Override
+        public Orientation toOrientation() {
+            return Orientation.NATURAL;
+        }
+    }    ,
+    UNDIRECTED {
+        @Override
+        public Orientation toOrientation() {
+            return Orientation.UNDIRECTED;
+        }
+    };
 
     public static Direction fromOrientation(Orientation orientation) {
         return orientation == Orientation.UNDIRECTED ? Direction.UNDIRECTED : Direction.DIRECTED;
     }
+
+    public abstract Orientation toOrientation();
 }

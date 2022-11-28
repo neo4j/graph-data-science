@@ -109,7 +109,7 @@ public class RelationshipSchemaEntry extends ElementSchemaEntry<RelationshipSche
     @Override
     Map<String, Object> toMap() {
         return Map.of(
-            "direction", direction,
+            "direction", direction.name(),
             "properties", properties
                 .entrySet()
                 .stream()

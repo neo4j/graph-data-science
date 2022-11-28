@@ -34,11 +34,11 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
@@ -277,7 +277,7 @@ class Node2VecTest extends BaseTest {
         );
         RelationshipsBuilder firstRelationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(firstIdMap)
-            .direction(Direction.UNDIRECTED)
+            .orientation(Orientation.UNDIRECTED)
             .executorService(Pools.DEFAULT)
             .build();
 
@@ -298,7 +298,7 @@ class Node2VecTest extends BaseTest {
         );
         RelationshipsBuilder secondRelationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(secondIdMap)
-            .direction(Direction.UNDIRECTED)
+            .orientation(Orientation.UNDIRECTED)
             .executorService(Pools.DEFAULT)
             .build();
 

@@ -35,7 +35,7 @@ import static org.neo4j.gds.core.io.file.csv.CsvNodeSchemaVisitor.PROPERTY_KEY_C
 import static org.neo4j.gds.core.io.file.csv.CsvNodeSchemaVisitor.STATE_COLUMN_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvNodeSchemaVisitor.VALUE_TYPE_COLUMN_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipSchemaVisitor.AGGREGATION_COLUMN_NAME;
-import static org.neo4j.gds.core.io.file.csv.CsvRelationshipSchemaVisitor.ORIENTATION_COLUMN_NAME;
+import static org.neo4j.gds.core.io.file.csv.CsvRelationshipSchemaVisitor.DIRECTION_COLUMN_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipSchemaVisitor.RELATIONSHIP_SCHEMA_FILE_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipSchemaVisitor.RELATIONSHIP_TYPE_COLUMN_NAME;
 
@@ -43,7 +43,7 @@ public class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
 
     public static final List<String> RELATIONSHIP_SCHEMA_COLUMNS = List.of(
         RELATIONSHIP_TYPE_COLUMN_NAME,
-        ORIENTATION_COLUMN_NAME,
+        DIRECTION_COLUMN_NAME,
         PROPERTY_KEY_COLUMN_NAME,
         VALUE_TYPE_COLUMN_NAME,
         DEFAULT_VALUE_COLUMN_NAME,
@@ -90,7 +90,7 @@ public class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
             List.of(
                 defaultHeaderColumns(),
                 List.of("REL1", "UNDIRECTED", "prop1", "long", "DefaultValue(42)", "COUNT", "PERSISTENT"),
-                List.of("REL2", "NATURAL", "prop2", "double", "DefaultValue(13.37)", "DEFAULT", "TRANSIENT")
+                List.of("REL2", "DIRECTED", "prop2", "double", "DefaultValue(13.37)", "DEFAULT", "TRANSIENT")
             )
         );
     }
@@ -115,7 +115,7 @@ public class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
             List.of(
                 defaultHeaderColumns(),
                 List.of("REL1", "UNDIRECTED"),
-                List.of("REL2", "REVERSE")
+                List.of("REL2", "DIRECTED")
             )
         );
     }
@@ -145,7 +145,7 @@ public class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
             List.of(
                 defaultHeaderColumns(),
                 List.of("REL1", "UNDIRECTED", "prop1", "long", "DefaultValue(42)", "COUNT", "PERSISTENT"),
-                List.of("REL2", "NATURAL")
+                List.of("REL2", "DIRECTED")
             )
         );
     }

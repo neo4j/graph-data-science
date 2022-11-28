@@ -603,6 +603,8 @@ class RandomGraphGeneratorTest {
                 .nodeLabelProducer(nodeId -> NodeLabelTokens.ofNodeLabels(NodeLabel.of("A")))
                 .relationshipType(RelationshipType.of("FOOBAR"))
                 .relationshipPropertyProducer(PropertyProducer.randomDouble("relProp", 0, 42))
+                .relationshipDistribution(RelationshipDistribution.RANDOM)
+                .direction(UNDIRECTED)
                 .build(),
             NodeSchema.empty().addLabel(NodeLabel.of("A")),
             RelationshipSchema

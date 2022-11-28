@@ -294,7 +294,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var remainingRels = remainingRelsAndSchema.relationships();
         // 1 positive selected reduces remaining & 4 invalid relationships
         assertEquals(4L, remainingRels.topology().elementCount());
-        assertEquals(Orientation.UNDIRECTED, remainingRelsAndSchema.direction());
+        assertEquals(Direction.UNDIRECTED, remainingRelsAndSchema.direction());
         assertFalse(remainingRels.topology().isMultiGraph());
         assertThat(remainingRels.properties()).isNotEmpty();
 
@@ -303,7 +303,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertThat(selectedRels.topology()).satisfies(topology -> {
             assertRelSamplingProperties(selectedRels, graph);
             assertThat(topology.elementCount()).isEqualTo(1);
-            assertEquals(Orientation.NATURAL, selectedRelsAndSchema.direction());
+            assertEquals(Direction.DIRECTED, selectedRelsAndSchema.direction());
             assertFalse(topology.isMultiGraph());
         });
 
@@ -330,7 +330,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         // 2 positive selected reduces remaining & 4 invalid relationships
         assertEquals(2L, remainingRels.topology().elementCount());
-        assertEquals(Orientation.UNDIRECTED, remainingRelsAndSchema.direction());
+        assertEquals(Direction.UNDIRECTED, remainingRelsAndSchema.direction());
         assertFalse(remainingRels.topology().isMultiGraph());
         assertThat(remainingRels.properties()).isNotEmpty();
         assertRelInGraph(remainingRels, multiLabelGraph);
@@ -340,7 +340,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertThat(selectedRels.topology()).satisfies(topology -> {
             assertRelSamplingProperties(selectedRels, multiLabelGraph);
             assertThat(topology.elementCount()).isEqualTo(2);
-            assertEquals(Orientation.NATURAL, selectedRelsAndSchema.direction());
+            assertEquals(Direction.DIRECTED, selectedRelsAndSchema.direction());
             assertFalse(topology.isMultiGraph());
         });
 

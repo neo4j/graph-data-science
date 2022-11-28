@@ -391,7 +391,7 @@ public final class CypherAggregation {
 
             var relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(this.idMapBuilder)
-                .direction(Direction.DIRECTED)
+                .orientation(NATURAL)
                 .aggregation(Aggregation.NONE)
                 .concurrency(config.readConcurrency());
 

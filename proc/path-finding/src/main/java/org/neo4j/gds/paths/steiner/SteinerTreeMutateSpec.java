@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.paths.steiner;
 
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
@@ -79,7 +80,7 @@ public class SteinerTreeMutateSpec implements AlgorithmSpec<ShortestPathsSteiner
                 .initRelationshipsBuilder()
                 .nodes(computationResult.graph())
                 .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
-                .direction(Direction.DIRECTED)
+                .orientation(Orientation.NATURAL)
                 .build();
 
             var mutateRelationshipType = RelationshipType.of(config.mutateRelationshipType());

@@ -30,7 +30,6 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -178,7 +177,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipsAndProper
                 .nodes(idMap)
                 .concurrency(cypherConfig.readConcurrency())
                 .propertyConfigs(propertyConfigs)
-                .direction(Direction.DIRECTED)
+                .orientation(Orientation.NATURAL)
                 .validateRelationships(cypherConfig.validateRelationships())
                 .build();
         }

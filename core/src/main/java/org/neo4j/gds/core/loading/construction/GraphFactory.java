@@ -202,7 +202,7 @@ public final class GraphFactory {
     @Builder.Factory
     static RelationshipsBuilder relationshipsBuilder(
         PartialIdMap nodes,
-        Optional<Direction> direction,
+        Optional<Orientation> orientation,
         List<PropertyConfig> propertyConfigs,
         Optional<Aggregation> aggregation,
         Optional<Boolean> validateRelationships,
@@ -221,11 +221,11 @@ public final class GraphFactory {
         var relationshipType = RelationshipType.ALL_RELATIONSHIPS;
         var isMultiGraph = Arrays.stream(aggregations).allMatch(Aggregation::equivalentToNone);
 
-        var actualDirection = direction.orElse(Direction.DIRECTED);
+        var actualOrientation = orientation.orElse(Orientation.NATURAL);
         var projectionBuilder = RelationshipProjection
             .builder()
             .type(relationshipType.name())
-            .orientation(actualDirection == Direction.UNDIRECTED ? Orientation.UNDIRECTED : Orientation.NATURAL);
+            .orientation(actualOrientation);
 
         propertyConfigs.forEach(propertyConfig -> projectionBuilder.addProperty(
             GraphFactory.DUMMY_PROPERTY,
@@ -272,7 +272,7 @@ public final class GraphFactory {
 
         return new RelationshipsBuilder(
             nodes,
-            actualDirection,
+            Direction.fromOrientation(actualOrientation),
             bufferSize,
             propertyKeyIds,
             importerFactory,

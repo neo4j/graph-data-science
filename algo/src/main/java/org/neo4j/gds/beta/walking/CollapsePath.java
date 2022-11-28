@@ -20,9 +20,9 @@
 package org.neo4j.gds.beta.walking;
 
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.Relationships;
-import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
@@ -64,7 +64,7 @@ public class CollapsePath extends Algorithm<Relationships> {
     public Relationships compute() {
         RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
             .nodes(pathTemplates.get(0)[0]) // just need any arbitrary graph
-            .direction(Direction.DIRECTED)
+            .orientation(Orientation.NATURAL)
             .aggregation(Aggregation.NONE)
             .concurrency(concurrency)
             .executorService(executorService)

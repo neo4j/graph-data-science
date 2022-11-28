@@ -22,11 +22,11 @@ package org.neo4j.gds.similarity.nodesim;
 import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -156,7 +156,7 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
 
             RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(topKGraph)
-                .direction(Direction.DIRECTED)
+                .orientation(Orientation.NATURAL)
                 .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
                 .concurrency(1)
                 .executorService(Pools.DEFAULT)

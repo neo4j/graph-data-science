@@ -124,7 +124,7 @@ public final class RandomGraphGenerator {
 
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
-            .direction(direction)
+            .orientation(direction.toOrientation())
             .addAllPropertyConfigs(maybeRelationshipPropertyProducer.isPresent()
                 ? List.of(GraphFactory.PropertyConfig.of(aggregation, DefaultValue.forDouble()))
                 : List.of()

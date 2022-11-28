@@ -176,7 +176,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         // 2 positive selected reduces remaining
         assertEquals(3L, remainingRels.topology().elementCount());
-        assertEquals(Orientation.NATURAL, remainingRelsAndSchema.direction());
+        assertEquals(Direction.DIRECTED, remainingRelsAndSchema.direction());
         assertFalse(remainingRels.topology().isMultiGraph());
         assertThat(remainingRels.properties()).isNotEmpty();
         assertRelInGraph(remainingRels, graph);

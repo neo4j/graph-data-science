@@ -237,7 +237,7 @@ public final class Louvain extends Algorithm<Louvain> {
         IdMap idMap = nodesBuilder.build().idMap();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
-            .direction(rootGraph.schema().direction())
+            .orientation(rootGraph.schema().direction().toOrientation())
             .addPropertyConfig(Aggregation.SUM, DefaultValue.forDouble())
             .executorService(executorService)
             .build();

@@ -517,10 +517,10 @@ public class GraphStoreToCsvExporterTest extends CsvTest {
             RELATIONSHIP_SCHEMA_FILE_NAME,
             List.of(
                 CsvRelationshipSchemaVisitorTest.RELATIONSHIP_SCHEMA_COLUMNS,
-                List.of("REL1", "REVERSE"),
-                List.of("REL2", "REVERSE"),
-                List.of("REL3", "REVERSE"),
-                List.of("REL4", "REVERSE")
+                List.of("REL1", "DIRECTED"),
+                List.of("REL2", "DIRECTED"),
+                List.of("REL3", "DIRECTED"),
+                List.of("REL4", "DIRECTED")
             )
         );
     }

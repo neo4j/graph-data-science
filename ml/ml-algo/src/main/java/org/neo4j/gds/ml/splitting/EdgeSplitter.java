@@ -140,11 +140,11 @@ public abstract class EdgeSplitter {
         return Math.min(maxSamples, wholeSamples + extraSample);
     }
 
-    RelationshipsBuilder newRelationshipsBuilderWithProp(Graph graph, Direction direction) {
+    private RelationshipsBuilder newRelationshipsBuilderWithProp(Graph graph, Direction direction) {
         return newRelationshipsBuilder(graph, direction, true);
     }
 
-    RelationshipsBuilder newRelationshipsBuilder(Graph graph, Direction direction) {
+    private RelationshipsBuilder newRelationshipsBuilder(Graph graph, Direction direction) {
         return newRelationshipsBuilder(graph, direction, false);
     }
 
@@ -152,7 +152,7 @@ public abstract class EdgeSplitter {
         return GraphFactory.initRelationshipsBuilder()
             .aggregation(Aggregation.SINGLE)
             .nodes(graph)
-            .direction(direction)
+            .orientation(direction.toOrientation())
             .addAllPropertyConfigs(loadRelationshipProperty
                 ? List.of(GraphFactory.PropertyConfig.of(Aggregation.SINGLE, DefaultValue.forDouble()))
                 : List.of()

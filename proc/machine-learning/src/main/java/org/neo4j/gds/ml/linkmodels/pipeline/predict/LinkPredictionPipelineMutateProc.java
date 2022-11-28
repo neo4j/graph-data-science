@@ -26,9 +26,9 @@ import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.ProcedureConstants;
@@ -116,7 +116,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
                 var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
                     .aggregation(Aggregation.SINGLE)
                     .nodes(graph)
-                    .direction(Direction.UNDIRECTED)
+                    .orientation(Orientation.UNDIRECTED)
                     .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
                     .concurrency(concurrency)
                     .executorService(Pools.DEFAULT)
