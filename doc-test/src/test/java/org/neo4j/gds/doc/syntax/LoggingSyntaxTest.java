@@ -17,38 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.progress;
+package org.neo4j.gds.doc.syntax;
 
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
+import java.util.List;
 
-import java.util.Optional;
-import java.util.stream.Stream;
+class LoggingSyntaxTest extends SyntaxTestBase {
 
-public interface TaskStore {
+    @Override
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(SyntaxMode.LIST_PROGRESS),
+            SyntaxModeMeta.of(SyntaxMode.USER_LOG)
+        );
+    }
 
-    void store(String username, JobId jobId, Task task);
-
-    void remove(String username, JobId jobId);
-
-    Stream<UserTask> query();
-
-    Stream<UserTask> query(JobId jobId);
-
-    Stream<UserTask> query(String username);
-
-    Optional<UserTask> query(String username, JobId jobId);
-
-    boolean isEmpty();
-
-    long taskCount();
-
-    @ValueClass
-    interface UserTask {
-        String username();
-
-        JobId jobId();
-
-        Task task();
+    @Override
+    protected String adocFile() {
+        return "pages/common-usage/logging.adoc";
     }
 }

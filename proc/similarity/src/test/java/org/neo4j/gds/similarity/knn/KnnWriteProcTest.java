@@ -35,6 +35,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.List;
@@ -192,7 +193,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
 
             pathProc.write("undirectedGraph", createMinimalConfig(CypherMapWrapper.empty()).toMap());
 
-            Assertions.assertThat(taskStore.taskStream().map(Task::description)).containsExactlyInAnyOrder(
+            Assertions.assertThat(taskStore.query().map(TaskStore.UserTask::task).map(Task::description)).containsExactlyInAnyOrder(
                 "KnnWriteProc :: Relationships :: Write",
                 "Knn"
             );

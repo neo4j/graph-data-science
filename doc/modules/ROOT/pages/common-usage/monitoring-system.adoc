@@ -100,7 +100,7 @@ YIELD
 [opts="header",cols='2,3,5']
 |===
 | jvmAvailableCpuCores | availableCpuCoresNotRequested | ongoingGdsProcedures
-| 100                  | 84                            | [{ procedure: "Node2Vec", progress: "33.33%", estimatedMemoryRange: "[123 kB ... 234 kB]", requestedNumberOfCpuCores: "16" }]
+| 100                  | 84                            | [{ username: "bob", jobId: "42", procedure: "Node2Vec", progress: "33.33%", estimatedMemoryRange: "[123 kB ... 234 kB]", requestedNumberOfCpuCores: "16" }]
 |===
 
 Here we can note that there is only one GDS procedure currently running, namely the `Node2Vec` procedure we just started. It has finished around `33.33%` of its execution already.

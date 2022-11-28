@@ -99,6 +99,7 @@ import static org.neo4j.gds.config.GraphProjectFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
+import static org.neo4j.gds.core.utils.progress.TaskStore.UserTask;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphProjectProcTest extends BaseProcTest {
@@ -199,7 +200,7 @@ class GraphProjectProcTest extends BaseProcTest {
 
             proc.project("myGraph", "*", "*", Map.of());
 
-            Assertions.assertThat(taskStore.taskStream().map(Task::description)).contains("Loading");
+            Assertions.assertThat(taskStore.query().map(UserTask::task).map(Task::description)).contains("Loading");
         });
     }
 
@@ -211,7 +212,7 @@ class GraphProjectProcTest extends BaseProcTest {
 
             proc.projectCypher("myGraph", ALL_NODES_QUERY, ALL_RELATIONSHIPS_QUERY, Map.of());
 
-            Assertions.assertThat(taskStore.taskStream().map(Task::description)).contains("Loading");
+            Assertions.assertThat(taskStore.query().map(UserTask::task).map(Task::description)).contains("Loading");
         });
     }
 

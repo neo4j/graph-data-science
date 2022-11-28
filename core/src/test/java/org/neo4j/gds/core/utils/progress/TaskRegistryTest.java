@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.progress;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.utils.progress.TaskStore.UserTask;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,14 +37,14 @@ class TaskRegistryTest {
         var task1 = Tasks.leaf("task1");
         taskRegistry1.registerTask(task1);
 
-        assertThat(globalTaskStore.query("")).containsValue(task1);
+        assertThat(globalTaskStore.query("").map(UserTask::task)).contains(task1);
         assertThat(globalTaskStore.isEmpty()).isFalse();
 
         var taskRegistry2 = new TaskRegistry("", globalTaskStore);
         var task2 = Tasks.leaf("task2");
         taskRegistry2.registerTask(task2);
 
-        assertThat(globalTaskStore.query("")).containsValues(task1, task2);
+        assertThat(globalTaskStore.query("").map(UserTask::task)).contains(task1, task2);
         assertThat(globalTaskStore.isEmpty()).isFalse();
     }
 
@@ -57,7 +58,7 @@ class TaskRegistryTest {
 
         assertThat(globalTaskStore.isEmpty()).isFalse();
 
-        var jobId = globalTaskStore.query("").keySet().iterator().next();
+        var jobId = globalTaskStore.query("").map(UserTask::jobId).iterator().next();
         globalTaskStore.remove("", jobId);
 
         assertThat(globalTaskStore.isEmpty()).isTrue();

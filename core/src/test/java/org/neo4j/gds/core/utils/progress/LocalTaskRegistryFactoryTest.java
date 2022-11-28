@@ -53,7 +53,7 @@ class LocalTaskRegistryFactoryTest {
 
         taskRegistry1.unregisterTask();
 
-        assertThat(taskStore.query("")).containsValue(task2).doesNotContainValue(task1);
+        assertThat(taskStore.query("").map(TaskStore.UserTask::task)).contains(task2).doesNotContain(task1);
     }
 
     @Test

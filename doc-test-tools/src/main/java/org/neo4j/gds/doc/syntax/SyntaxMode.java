@@ -58,6 +58,8 @@ public enum SyntaxMode {
     PIPELINE_LIST("pipeline-list-syntax"),
     PIPELINE_EXISTS("pipeline-exists-syntax"),
     PIPELINE_DROP("pipeline-drop-syntax"),
+    LIST_PROGRESS("listProgress-syntax"),
+    USER_LOG("userlog-syntax", false),
     SYSTEM_MONITOR("system-monitor-syntax", false),
     SYS_INFO("debug-sysinfo-syntax", false),
     WRITE_NODE_LABEL("include-with-write-node-label", false),;

@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -36,18 +34,23 @@ public enum EmptyTaskStore implements TaskStore {
     public void remove(String username, JobId jobId) {}
 
     @Override
-    public @NotNull Map<JobId, Task> query(String username) {
-        return Map.of();
-    }
-
-    @Override
-    public Optional<Task> query(String username, JobId jobId) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Stream<Task> taskStream() {
+    public Stream<UserTask> query() {
         return Stream.empty();
+    }
+
+    @Override
+    public Stream<UserTask> query(JobId jobId) {
+        return Stream.empty();
+    }
+
+    @Override
+    public Stream<UserTask> query(String username) {
+        return Stream.empty();
+    }
+
+    @Override
+    public Optional<UserTask> query(String username, JobId jobId) {
+        return Optional.empty();
     }
 
     @Override

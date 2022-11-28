@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
@@ -72,11 +73,12 @@ public class ListProgressProcTest extends BaseProgressTest {
         runQuery("CALL gds.test.pl('foo')");
         assertCypherResult(
             "CALL gds.beta.listProgress() " +
-            "YIELD taskName, progress, progressBar, status, timeStarted, elapsedTime " +
-            "RETURN taskName, progress, progressBar, status, timeStarted, elapsedTime ",
+            "YIELD username, taskName, progress, progressBar, status, timeStarted, elapsedTime " +
+            "RETURN username, taskName, progress, progressBar, status, timeStarted, elapsedTime ",
             List.of(
                 Map.of(
                     "taskName","foo",
+                    "username", Username.EMPTY_USERNAME.username(),
                     "progress", "33.33%",
                     "progressBar", "[###~~~~~~~]",
                     "status", "RUNNING",

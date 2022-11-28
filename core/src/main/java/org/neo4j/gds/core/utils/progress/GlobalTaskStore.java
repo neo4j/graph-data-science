@@ -19,14 +19,12 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -55,23 +53,39 @@ public class GlobalTaskStore implements TaskStore, ThrowingFunction<Context, Tas
     }
 
     @Override
-    public @NotNull Map<JobId, Task> query(String username) {
-        return registeredTasks.getOrDefault(username, Map.of());
+    public Stream<UserTask> query() {
+        return registeredTasks
+            .entrySet()
+            .stream()
+            .flatMap(tasksPerUsers -> tasksPerUsers
+                .getValue()
+                .entrySet()
+                .stream()
+                .map(jobTask -> ImmutableUserTask.of(tasksPerUsers.getKey(), jobTask.getKey(), jobTask.getValue())));
     }
 
     @Override
-    public Optional<Task> query(String username, JobId jobId) {
+    public Stream<UserTask> query(JobId jobId) {
+        return query().filter(userTask -> userTask.jobId().equals(jobId));
+    }
+
+    @Override
+    public Stream<UserTask> query(String username) {
+        return registeredTasks
+            .getOrDefault(username, Map.of())
+            .entrySet()
+            .stream()
+            .map(jobIdTask -> ImmutableUserTask.of(username, jobIdTask.getKey(), jobIdTask.getValue()));
+    }
+
+    @Override
+    public Optional<UserTask> query(String username, JobId jobId) {
         if (registeredTasks.containsKey(username)) {
-            return Optional.ofNullable(registeredTasks.get(username).get(jobId));
+            return Optional
+                .ofNullable(registeredTasks.get(username).get(jobId))
+                .map(task -> ImmutableUserTask.of(username, jobId, task));
         }
         return Optional.empty();
-    }
-
-    @Override
-    public Stream<Task> taskStream() {
-        return registeredTasks.values().stream()
-            .map(Map::values)
-            .flatMap(Collection::stream);
     }
 
     @Override
