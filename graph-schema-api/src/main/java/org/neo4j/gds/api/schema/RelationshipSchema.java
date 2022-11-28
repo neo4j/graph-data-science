@@ -52,10 +52,7 @@ public class RelationshipSchema extends ElementSchema<RelationshipSchema, Relati
             .entrySet()
             .stream()
             .filter(e -> relationshipTypesToKeep.contains(e.getKey()))
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                entry -> RelationshipSchemaEntry.from(entry.getValue())
-            )));
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> RelationshipSchemaEntry.from(entry.getValue()))));
     }
 
     @Override
@@ -77,8 +74,7 @@ public class RelationshipSchema extends ElementSchema<RelationshipSchema, Relati
     public RelationshipSchemaEntry getOrCreateRelationshipType(
         RelationshipType relationshipType, Direction direction
     ) {
-        return this.entries.computeIfAbsent(
-            relationshipType,
+        return this.entries.computeIfAbsent(relationshipType,
             (__) -> new RelationshipSchemaEntry(relationshipType, direction)
         );
     }
@@ -117,11 +113,9 @@ public class RelationshipSchema extends ElementSchema<RelationshipSchema, Relati
                     .properties()
                     .entrySet()
                     .stream()
-                    .collect(Collectors.toMap(
-                            Map.Entry::getKey,
-                            innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue())
-                        )
-                    )
+                    .collect(Collectors.toMap(Map.Entry::getKey,
+                        innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue())
+                    ))
             ));
     }
 }
