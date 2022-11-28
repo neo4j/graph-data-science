@@ -46,7 +46,7 @@ class MinHashTask implements Runnable {
     private final HugeObjectArray<HugeAtomicBitSet> previousEmbeddings;
     private final TerminationFlag terminationFlag;
     private final ProgressTracker progressTracker;
-    private long totalNumFeatures = 0;
+    private long totalFeatureCount = 0;
 
     MinHashTask(
         int k,
@@ -80,7 +80,7 @@ class MinHashTask implements Runnable {
         List<HashTask.Hashes> hashes,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
-        MutableLong totalNumFeaturesOutput
+        MutableLong totalFeatureCountOutput
     ) {
         progressTracker.beginSubTask("Perform min-hashing");
 
@@ -107,7 +107,7 @@ class MinHashTask implements Runnable {
             .terminationFlag(terminationFlag)
             .run();
 
-        totalNumFeaturesOutput.add(tasks.stream().mapToLong(MinHashTask::totalNumFeatures).sum());
+        totalFeatureCountOutput.add(tasks.stream().mapToLong(MinHashTask::totalFeatureCount).sum());
 
         progressTracker.endSubTask("Perform min-hashing");
     }
@@ -157,7 +157,7 @@ class MinHashTask implements Runnable {
             int argMin = (neighborsMinAndArgMin.min < selfMinAndArgMin.min) ? neighborsMinAndArgMin.argMin : selfMinAndArgMin.argMin;
             if (argMin != -1) {
                 if (!currentEmbedding.getAndSet(argMin)) {
-                    totalNumFeatures++;
+                    totalFeatureCount++;
                 }
             }
         });
@@ -165,8 +165,8 @@ class MinHashTask implements Runnable {
         progressTracker.logSteps(partition.nodeCount());
     }
 
-    public long totalNumFeatures() {
-        return totalNumFeatures;
+    public long totalFeatureCount() {
+        return totalFeatureCount;
     }
 
 }

@@ -1,7 +1,7 @@
 HashGNN :: Start
 HashGNN :: Binarize node property features :: Start
 HashGNN :: Binarize node property features 100%
-HashGNN :: Binarize node property features :: Hyperplane scalar products have mean 0.0972 and standard deviation 2.0489. A threshold for binarization may be set to the average plus a few standard deviations.
+HashGNN :: Binarize node property features :: Hyperplane scalar products have mean 0.0972 and standard deviation 2.0489. A threshold for binarization may be set to the mean plus a few standard deviations.
 HashGNN :: Binarize node property features :: Finished
 HashGNN :: Density (number of active features) of binary input features is 8.3333.
 HashGNN :: Propagate embeddings :: Start

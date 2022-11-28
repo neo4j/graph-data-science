@@ -35,6 +35,9 @@ import java.util.stream.IntStream;
 import static org.neo4j.gds.embeddings.hashgnn.HashGNNCompanion.HashTriple.computeHashesFromTriple;
 
 class HashTask implements Runnable {
+    private static final double MAX_FINAL_INFLUENCE = 1e4;
+    private static final int PRIME_LOWER_BOUND = 50_000;
+
     private final int embeddingDimension;
     private final double scaledNeighborInfluence;
     private final int numberOfRelationshipTypes;
@@ -110,11 +113,11 @@ class HashTask implements Runnable {
     public void run() {
         // The product of the upper bound of finalInfluence and the lower bound of primeSeed must be < Integer.MAX_VALUE
         // otherwise rng.nextInt can fail because lower bound is larger than upper bound
-        double finalInfluence = Math.max(1e-4, Math.min(1e4, scaledNeighborInfluence));
+        double finalInfluence = Math.max(1 / MAX_FINAL_INFLUENCE, Math.min(MAX_FINAL_INFLUENCE, scaledNeighborInfluence));
 
         // Multiply scaling by 1.001 to make sure we can find a prime >= primeSeed * scaleFactor
         int primeSeed = rng.nextInt(
-            50_000,
+            PRIME_LOWER_BOUND,
             (int) Math.round(Integer.MAX_VALUE / (Math.max(1, finalInfluence) * 1.001))
         );
 

@@ -32,7 +32,6 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,20 +54,13 @@ class BinarizeTaskTest {
     @Test
     void shouldPerformHyperplaneRounding() {
         var partition = new Partition(0, graph.nodeCount());
-        var config = HashGNNConfigImpl
-            .builder()
-            .featureProperties(List.of("f1", "f2"))
-            .embeddingDensity(4)
-            .binarizeFeatures(Map.of("dimension", 4))
-            .iterations(100)
-            .build();
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, List.of("f1", "f2"));
         var features = HugeObjectArray.newArray(HugeAtomicBitSet.class, graph.nodeCount());
         var propertyEmbeddings = new double[][]{{-0.3, 0.1, 0.8, -0.3}, {0.6, 0.2, -0.1, -0.2}};
 
         new BinarizeTask(
             partition,
-            config,
+            BinarizeFeaturesConfigImpl.builder().dimension(4).build(),
             features,
             featureExtractors,
             propertyEmbeddings,
@@ -101,20 +93,13 @@ class BinarizeTaskTest {
     @Test
     void shouldPerformHyperplaneRoundingWithThreshold() {
         var partition = new Partition(0, graph.nodeCount());
-        var config = HashGNNConfigImpl
-            .builder()
-            .featureProperties(List.of("f1", "f2"))
-            .embeddingDensity(4)
-            .binarizeFeatures(Map.of("dimension", 4, "threshold", 0.4))
-            .iterations(100)
-            .build();
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, List.of("f1", "f2"));
         var features = HugeObjectArray.newArray(HugeAtomicBitSet.class, graph.nodeCount());
         var propertyEmbeddings = new double[][]{{-0.3, 0.1, 0.8, -0.3}, {0.6, 0.2, -0.1, -0.2}};
 
         new BinarizeTask(
             partition,
-            config,
+            BinarizeFeaturesConfigImpl.builder().dimension(4).threshold(0.4).build(),
             features,
             featureExtractors,
             propertyEmbeddings,

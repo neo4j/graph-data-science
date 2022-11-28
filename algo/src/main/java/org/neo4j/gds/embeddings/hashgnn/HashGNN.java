@@ -19,20 +19,16 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.core.features.FeatureExtraction;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -51,7 +47,7 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
     private final Graph graph;
     private final SplittableRandom rng;
     private final HashGNNConfig config;
-    private final MutableLong totalSetBits = new MutableLong();
+    private final MutableLong currentTotalFeatureCount = new MutableLong();
 
     public HashGNN(Graph graph, HashGNNConfig config, ProgressTracker progressTracker) {
         super(progressTracker);
@@ -93,8 +89,11 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         var embeddingsB = constructInputEmbeddings(rangePartition);
         int embeddingDimension = (int) embeddingsB.get(0).size();
 
-        double avgInputActiveFeatures = totalSetBits.doubleValue() / graph.nodeCount();
-        progressTracker.logInfo(formatWithLocale("Density (number of active features) of binary input features is %.4f.", avgInputActiveFeatures));
+        double avgInputActiveFeatures = currentTotalFeatureCount.doubleValue() / graph.nodeCount();
+        progressTracker.logInfo(formatWithLocale(
+            "Density (number of active features) of binary input features is %.4f.",
+            avgInputActiveFeatures
+        ));
 
         var embeddingsA = HugeObjectArray.newArray(HugeAtomicBitSet.class, graph.nodeCount());
         embeddingsA.setAll(unused -> HugeAtomicBitSet.create(embeddingDimension));
@@ -104,7 +103,8 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
             ? 1
             : embeddingDimension * (1 - Math.pow(
                 1 - (1.0 / embeddingDimension),
-                avgDegree)
+                avgDegree
+            )
             );
 
         progressTracker.beginSubTask("Propagate embeddings");
@@ -118,8 +118,8 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
                 currentEmbeddings.get(i).clear();
             }
 
-            double scaledNeighborInfluence = graph.relationshipCount() == 0 ? 1.0 : (totalSetBits.doubleValue() / graph.nodeCount()) * config.neighborInfluence() / upperBoundNeighborExpectedBits;
-            totalSetBits.setValue(0);
+            double scaledNeighborInfluence = graph.relationshipCount() == 0 ? 1.0 : (currentTotalFeatureCount.doubleValue() / graph.nodeCount()) * config.neighborInfluence() / upperBoundNeighborExpectedBits;
+            currentTotalFeatureCount.setValue(0);
 
             var hashes = HashTask.compute(
                 embeddingDimension,
@@ -141,11 +141,15 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
                 hashes,
                 progressTracker,
                 terminationFlag,
-                totalSetBits
+                currentTotalFeatureCount
             );
 
-            double avgActiveFeatures = totalSetBits.doubleValue() / graph.nodeCount();
-            progressTracker.logInfo(formatWithLocale("After iteration %d average node embedding density (number of active features) is %.4f.", iteration, avgActiveFeatures));
+            double avgActiveFeatures = currentTotalFeatureCount.doubleValue() / graph.nodeCount();
+            progressTracker.logInfo(formatWithLocale(
+                "After iteration %d average node embedding density (number of active features) is %.4f.",
+                iteration,
+                avgActiveFeatures
+            ));
         }
 
         progressTracker.endSubTask("Propagate embeddings");
@@ -209,74 +213,37 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
     }
 
     private HugeObjectArray<HugeAtomicBitSet> constructInputEmbeddings(List<Partition> partition) {
-        List<HugeObjectArray<HugeAtomicBitSet>> inputEmbeddingsList = new ArrayList<>();
-        var embeddingDimension = new MutableInt();
-        var bitOffsets = new ArrayList<Integer>();
-
         if (!config.featureProperties().isEmpty()) {
             if (config.binarizeFeatures().isPresent()) {
-                inputEmbeddingsList.add(BinarizeTask.compute(
+                return BinarizeTask.compute(
                     graph,
                     partition,
                     config,
                     rng,
                     progressTracker,
                     terminationFlag,
-                    totalSetBits
-                ));
-                bitOffsets.add(embeddingDimension.getValue());
-                embeddingDimension.add(config.binarizeFeatures().get().dimension());
+                    currentTotalFeatureCount
+                );
             } else {
-                inputEmbeddingsList.add(RawFeaturesTask.compute(
+                return RawFeaturesTask.compute(
                     config,
                     progressTracker,
                     graph,
                     partition,
                     terminationFlag,
-                    totalSetBits
-                ));
-                var featureExtractors = FeatureExtraction.propertyExtractors(
-                    graph,
-                    config.featureProperties()
+                    currentTotalFeatureCount
                 );
-                bitOffsets.add(embeddingDimension.getValue());
-                embeddingDimension.add(FeatureExtraction.featureCount(featureExtractors));
             }
+        } else {
+            return GenerateFeaturesTask.compute(
+                graph,
+                partition,
+                config,
+                randomSeed,
+                progressTracker,
+                terminationFlag,
+                currentTotalFeatureCount
+            );
         }
-
-        if (!config.generateFeatures().isPresent()) {
-            return inputEmbeddingsList.get(0);
-        }
-
-        inputEmbeddingsList.add(GenerateFeaturesTask.compute(
-            graph,
-            partition,
-            config,
-            randomSeed,
-            progressTracker,
-            terminationFlag,
-            totalSetBits
-        ));
-        bitOffsets.add(embeddingDimension.getValue());
-        embeddingDimension.add(config.generateFeatures().get().dimension());
-
-        var concatInputEmbeddings = HugeObjectArray.newArray(HugeAtomicBitSet.class, graph.nodeCount());
-
-        var concatTasks = partition.stream().map(p -> (Runnable) () -> p.consume(nodeId -> {
-            var concatFeatures = HugeAtomicBitSet.create(embeddingDimension.getValue());
-            for (int i = 0; i < inputEmbeddingsList.size(); i++) {
-                var embedding = inputEmbeddingsList.get(i).get(nodeId);
-                int bitOffset = bitOffsets.get(i);
-                embedding.forEachSetBit(bit -> concatFeatures.set(bitOffset + bit));
-            }
-            concatInputEmbeddings.set(nodeId, concatFeatures);
-        })).collect(Collectors.toList());
-
-        RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
-            .tasks(concatTasks)
-            .run();
-
-        return concatInputEmbeddings;
     }
 }

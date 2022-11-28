@@ -40,7 +40,7 @@ class RawFeaturesTask implements Runnable {
     private final int inputDimension;
     private final HugeObjectArray<HugeAtomicBitSet> features;
     private final ProgressTracker progressTracker;
-    private long totalNumFeatures = 0;
+    private long totalFeatureCount = 0;
 
     RawFeaturesTask(
         Partition partition,
@@ -62,7 +62,7 @@ class RawFeaturesTask implements Runnable {
         Graph graph,
         List<Partition> partitions,
         TerminationFlag terminationFlag,
-        MutableLong totalNumFeaturesOutput
+        MutableLong totalFeatureCountOutput
     ) {
         progressTracker.beginSubTask("Extract raw node property features");
 
@@ -89,7 +89,7 @@ class RawFeaturesTask implements Runnable {
             .terminationFlag(terminationFlag)
             .run();
 
-        totalNumFeaturesOutput.add(tasks.stream().mapToLong(RawFeaturesTask::totalNumFeatures).sum());
+        totalFeatureCountOutput.add(tasks.stream().mapToLong(RawFeaturesTask::totalFeatureCount).sum());
 
         progressTracker.endSubTask("Extract raw node property features");
 
@@ -117,14 +117,14 @@ class RawFeaturesTask implements Runnable {
                     }
                 }
             });
-            totalNumFeatures += nodeFeatures.cardinality();
+            totalFeatureCount += nodeFeatures.cardinality();
             features.set(nodeId, nodeFeatures);
         });
 
         progressTracker.logProgress(partition.nodeCount());
     }
 
-    public long totalNumFeatures() {
-        return totalNumFeatures;
+    public long totalFeatureCount() {
+        return totalFeatureCount;
     }
 }

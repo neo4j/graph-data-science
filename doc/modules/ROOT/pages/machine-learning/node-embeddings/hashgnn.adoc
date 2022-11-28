@@ -69,7 +69,7 @@ To do that, you provide them as `featureProperties` in the configuration.
 
 ==== Feature generation
 
-To use the feature generation, specify a map including `dimension` and `densityLevel` for the `generateFeatures` configuration keyword.
+To use the feature generation, specify a map including `dimension` and `densityLevel` for the `generateFeatures` configuration parameter.
 This will generate `dimension` number of features, where nodes have approximately `densityLevel` features switched on.
 The active features for each node are selected uniformly at random with replacement.
 Although the active features are random, the feature vector for a node acts as an approximately unique signature for that node.
@@ -90,8 +90,8 @@ However, sometimes using binarization with a different `dimension` than the numb
 
 [NOTE]
 ====
-The hyperplane rounding may not work well if the input feature are of different magnitudes since those of larger ones will influence of the generated binary features more.
-If this is not the intended behavior for your application we recommend normalizing your node properties (by feature dimension) prior to running HashGNN using xref:alpha-algorithms/scale-properties.adoc[Scale properties] or similar method.
+The hyperplane rounding may not work well if the input features are of different magnitudes since those of larger magnitudes will influence the generated binary features more.
+If this is not the intended behavior for your application we recommend normalizing your node properties (by feature dimension) prior to running HashGNN using xref:alpha-algorithms/scale-properties.adoc[Scale properties] or another similar method.
 ====
 
 
@@ -195,8 +195,8 @@ As a loose guideline, one may try to set `embeddingDensity` to 128, 256, 512, or
 === Feature generation
 
 The `dimension` parameter determines the number of binary features when feature generation is applied.
-A high dimension increases expressiveness but requires more data to be useful and can lead to the curse of high dimensionality for downstream machine learning tasks.
-Additionally more computation resources will be required.
+A high dimension increases expressiveness but requires more data in order to be useful and can lead to the curse of high dimensionality for downstream machine learning tasks.
+Additionally, more computation resources will be required.
 Some values to consider trying for `densityLevel` are very low values such as `1` or `2`, or increase as appropriate.
 
 
@@ -520,8 +520,8 @@ CALL gds.alpha.hashgnn.stream('persons',
     nodeLabels: ['Person'],
     iterations: 1,
     embeddingDensity: 2,
-    generateFeatures: {dimension: 4, densityLevel: 1},
-    randomSeed: 123
+    generateFeatures: {dimension: 6, densityLevel: 1},
+    randomSeed: 42
   }
 )
 YIELD nodeId, embedding
@@ -531,15 +531,19 @@ YIELD nodeId, embedding
 .Results
 |===
 | nodeId | embedding
-| 0      | [0.0, 0.0, 1.0, 1.0]
-| 1      | [0.0, 0.0, 1.0, 0.0]
-| 2      | [0.0, 1.0, 1.0, 0.0]
-| 3      | [1.0, 0.0, 1.0, 0.0]
-| 4      | [0.0, 0.0, 1.0, 1.0]
-| 5      | [0.0, 0.0, 1.0, 0.0]
-| 6      | [1.0, 0.0, 0.0, 0.0]
+| 0      | [0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+| 1      | [0.0, 0.0, 1.0, 0.0, 1.0, 0.0]
+| 2      | [0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+| 3      | [0.0, 0.0, 0.0, 1.0, 1.0, 0.0]
+| 4      | [0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+| 5      | [0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+| 6      | [0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
 |===
 --
+
+And as we can see, each node has at least one feature active. The density is about 50%, and no node more than two features active (limited by the `embeddingDensity`).
+
+
 [role=query-example]
 --
 .The following will run the algorithm in heterogeneous mode, and stream results:
@@ -612,6 +616,7 @@ YIELD nodeId, embedding
 | 10     | [0.0, 0.0, -0.8660253882408142, 0.8660253882408142]
 |===
 --
+
 
 [[algorithms-embeddings-hashgnn-examples-mutate]]
 === Mutate

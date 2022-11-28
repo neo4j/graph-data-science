@@ -50,7 +50,7 @@ class GenerateFeaturesTaskTest {
             .generate();
 
         var partition = new Partition(0, graph.nodeCount());
-        var totalNumFeatures = new MutableLong(0);
+        var totalFeatureCount = new MutableLong(0);
         var config = HashGNNConfigImpl
             .builder()
             .generateFeatures(Map.of("dimension", embeddingDimension, "densityLevel", densityLevel))
@@ -66,11 +66,11 @@ class GenerateFeaturesTaskTest {
             42L,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE,
-            totalNumFeatures
+            totalFeatureCount
         );
 
         assertThat(output.size()).isEqualTo(graph.nodeCount());
-        assertThat(totalNumFeatures.getValue()).isCloseTo(
+        assertThat(totalFeatureCount.getValue()).isCloseTo(
             densityLevel * graph.nodeCount(),
             Percentage.withPercentage(10)
         );

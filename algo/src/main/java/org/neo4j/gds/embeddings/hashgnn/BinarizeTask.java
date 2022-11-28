@@ -44,9 +44,9 @@ class BinarizeTask implements Runnable {
     private final double[][] propertyEmbeddings;
 
     private final double threshold;
-    private final BinarizeFeaturesConfig binarizationConfig;
+    private final int dimension;
     private final ProgressTracker progressTracker;
-    private long totalNumFeatures;
+    private long totalFeatureCount;
 
     private double scalarProductSum;
 
@@ -54,15 +54,15 @@ class BinarizeTask implements Runnable {
 
     BinarizeTask(
         Partition partition,
-        HashGNNConfig config,
+        BinarizeFeaturesConfig config,
         HugeObjectArray<HugeAtomicBitSet> truncatedFeatures,
         List<FeatureExtractor> featureExtractors,
         double[][] propertyEmbeddings,
         ProgressTracker progressTracker
     ) {
         this.partition = partition;
-        this.binarizationConfig = config.binarizeFeatures().orElseThrow();
-        this.threshold = binarizationConfig.threshold();
+        this.dimension = config.dimension();
+        this.threshold = config.threshold();
         this.truncatedFeatures = truncatedFeatures;
         this.featureExtractors = featureExtractors;
         this.propertyEmbeddings = propertyEmbeddings;
@@ -76,7 +76,7 @@ class BinarizeTask implements Runnable {
         SplittableRandom rng,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
-        MutableLong totalNumFeaturesOutput
+        MutableLong totalFeatureCountOutput
     ) {
         progressTracker.beginSubTask("Binarize node property features");
 
@@ -88,14 +88,14 @@ class BinarizeTask implements Runnable {
         );
 
         var inputDimension = FeatureExtraction.featureCount(featureExtractors);
-        var propertyEmbeddings = embedProperties(config, rng, inputDimension);
+        var propertyEmbeddings = embedProperties(binarizationConfig.dimension(), rng, inputDimension);
 
         var truncatedFeatures = HugeObjectArray.newArray(HugeAtomicBitSet.class, graph.nodeCount());
 
         var tasks = partition.stream()
             .map(p -> new BinarizeTask(
                 p,
-                config,
+                binarizationConfig,
                 truncatedFeatures,
                 featureExtractors,
                 propertyEmbeddings,
@@ -108,7 +108,7 @@ class BinarizeTask implements Runnable {
             .terminationFlag(terminationFlag)
             .run();
 
-        totalNumFeaturesOutput.add(tasks.stream().mapToLong(BinarizeTask::totalNumFeatures).sum());
+        totalFeatureCountOutput.add(tasks.stream().mapToLong(BinarizeTask::totalFeatureCount).sum());
 
         var squaredSum = tasks.stream().mapToDouble(BinarizeTask::scalarProductSumOfSquares).sum();
         var sum = tasks.stream().mapToDouble(BinarizeTask::scalarProductSum).sum();
@@ -118,38 +118,47 @@ class BinarizeTask implements Runnable {
         var variance = (squaredSum - exampleCount * avg * avg) / exampleCount;
         var std = Math.sqrt(variance);
 
-        progressTracker.logInfo(formatWithLocale("Hyperplane scalar products have mean %.4f and standard deviation %.4f. A threshold for binarization may be set to the average plus a few standard deviations.", avg, std));
+        progressTracker.logInfo(formatWithLocale(
+            "Hyperplane scalar products have mean %.4f and standard deviation %.4f. A threshold for binarization may be set to the mean plus a few standard deviations.",
+            avg,
+            std
+        ));
 
         progressTracker.endSubTask("Binarize node property features");
 
         return truncatedFeatures;
     }
+
     // creates a random projection vector for each feature
     // (input features vector for each node is the concatenation of the node's properties)
     // this array is used embed the properties themselves from inputDimension to embeddingDimension dimensions.
-    public static double[][] embedProperties(HashGNNConfig config, SplittableRandom rng, int inputDimension) {
-        var binarizationConfig = config.binarizeFeatures().orElseThrow();
+    public static double[][] embedProperties(int vectorDimension, SplittableRandom rng, int inputDimension) {
         var propertyEmbeddings = new double[inputDimension][];
 
         for (int inputFeature = 0; inputFeature < inputDimension; inputFeature++) {
-            propertyEmbeddings[inputFeature] = new double[binarizationConfig.dimension()];
-            for (int feature = 0; feature < binarizationConfig.dimension(); feature++) {
-                // Box-muller transformation to generate gaussian
-                double matrixValue = Math.sqrt(-2*Math.log(rng.nextDouble(0.0, 1.0))) * Math.cos(2*Math.PI * rng.nextDouble(0.0, 1.0));
-                propertyEmbeddings[inputFeature][feature] = matrixValue;
+            propertyEmbeddings[inputFeature] = new double[vectorDimension];
+            for (int feature = 0; feature < vectorDimension; feature++) {
+                propertyEmbeddings[inputFeature][feature] = boxMullerGaussianRandom(rng);
             }
         }
         return propertyEmbeddings;
     }
 
+    private static double boxMullerGaussianRandom(SplittableRandom rng) {
+        return Math.sqrt(-2 * Math.log(rng.nextDouble(
+            0.0,
+            1.0
+        ))) * Math.cos(2 * Math.PI * rng.nextDouble(0.0, 1.0));
+    }
+
     @Override
     public void run() {
         partition.consume(nodeId -> {
-            var featureVector = new float[binarizationConfig.dimension()];
+            var featureVector = new float[dimension];
             FeatureExtraction.extract(nodeId, -1, featureExtractors, new FeatureConsumer() {
                 @Override
                 public void acceptScalar(long nodeOffset, int offset, double value) {
-                    for (int feature = 0; feature < binarizationConfig.dimension(); feature++) {
+                    for (int feature = 0; feature < dimension; feature++) {
                         double featureValue = propertyEmbeddings[offset][feature];
                         featureVector[feature] += value * featureValue;
                     }
@@ -159,7 +168,7 @@ class BinarizeTask implements Runnable {
                 public void acceptArray(long nodeOffset, int offset, double[] values) {
                     for (int inputFeatureOffset = 0; inputFeatureOffset < values.length; inputFeatureOffset++) {
                         double value = values[inputFeatureOffset];
-                        for (int feature = 0; feature < binarizationConfig.dimension(); feature++) {
+                        for (int feature = 0; feature < dimension; feature++) {
                             double featureValue = propertyEmbeddings[offset + inputFeatureOffset][feature];
                             featureVector[feature] += value * featureValue;
                         }
@@ -168,7 +177,7 @@ class BinarizeTask implements Runnable {
             });
 
             var featureSet = round(featureVector);
-            totalNumFeatures += featureSet.cardinality();
+            totalFeatureCount += featureSet.cardinality();
             truncatedFeatures.set(nodeId, featureSet);
         });
 
@@ -188,13 +197,14 @@ class BinarizeTask implements Runnable {
         return bitset;
     }
 
-    public long totalNumFeatures() {
-        return totalNumFeatures;
+    public long totalFeatureCount() {
+        return totalFeatureCount;
     }
 
     public double scalarProductSum() {
         return scalarProductSum;
     }
+
     public double scalarProductSumOfSquares() {
         return scalarProductSumOfSquares;
     }

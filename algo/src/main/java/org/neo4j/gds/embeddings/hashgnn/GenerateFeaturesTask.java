@@ -40,7 +40,7 @@ class GenerateFeaturesTask implements Runnable {
     private final GenerateFeaturesConfig generateFeaturesConfig;
     private final ProgressTracker progressTracker;
     private final long randomSeed;
-    private long totalNumFeatures = 0;
+    private long totalFeatureCount = 0;
 
     GenerateFeaturesTask(
         Partition partition,
@@ -66,7 +66,7 @@ class GenerateFeaturesTask implements Runnable {
         long randomSeed,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
-        MutableLong totalNumFeaturesOutput
+        MutableLong totalFeatureCountOutput
     ) {
         progressTracker.beginSubTask("Generate base node property features");
 
@@ -77,7 +77,7 @@ class GenerateFeaturesTask implements Runnable {
                 p,
                 graph,
                 randomSeed,
-                config.generateFeatures().get(),
+                config.generateFeatures().orElseThrow(),
                 output,
                 progressTracker
             ))
@@ -88,7 +88,7 @@ class GenerateFeaturesTask implements Runnable {
             .terminationFlag(terminationFlag)
             .run();
 
-        totalNumFeaturesOutput.add(tasks.stream().mapToLong(GenerateFeaturesTask::totalNumFeatures).sum());
+        totalFeatureCountOutput.add(tasks.stream().mapToLong(GenerateFeaturesTask::totalFeatureCount).sum());
 
         progressTracker.endSubTask("Generate base node property features");
 
@@ -104,13 +104,11 @@ class GenerateFeaturesTask implements Runnable {
             var generatedFeatures = HugeAtomicBitSet.create(dimension);
 
             rng.setSeed(this.randomSeed ^ graph.toOriginalNodeId(nodeId));
-            // without this we get same results for different result, at least on example in doc test
-            rng.setSeed(rng.nextLong());
 
             var randomInts = rng.ints(densityLevel, 0, dimension);
             randomInts.forEach(generatedFeatures::set);
 
-            totalNumFeatures += generatedFeatures.cardinality();
+            totalFeatureCount += generatedFeatures.cardinality();
 
             output.set(nodeId, generatedFeatures);
         });
@@ -118,7 +116,7 @@ class GenerateFeaturesTask implements Runnable {
         progressTracker.logProgress(partition.nodeCount());
     }
 
-    public long totalNumFeatures() {
-        return totalNumFeatures;
+    public long totalFeatureCount() {
+        return totalFeatureCount;
     }
 }
