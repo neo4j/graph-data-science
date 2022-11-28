@@ -63,4 +63,16 @@ class HashGNNConfigTest {
                 .build();
         }).hasMessage("When `generateFeatures` is not given, `featureProperties` must be non-empty.");
     }
+
+    @Test
+    void requiresDensityLevelAtMostDensity() {
+        assertThatThrownBy(() -> {
+            HashGNNConfigImpl
+                .builder()
+                .embeddingDensity(4)
+                .generateFeatures(Map.of("dimension", 4, "densityLevel", 5))
+                .iterations(100)
+                .build();
+        }).hasMessage("Generate features requires `densityLevel` to be at most `dimension` but was 5 > 4.");
+    }
 }

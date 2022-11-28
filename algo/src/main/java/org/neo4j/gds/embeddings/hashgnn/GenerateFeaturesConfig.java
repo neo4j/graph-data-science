@@ -26,6 +26,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 @Configuration
 public interface GenerateFeaturesConfig {
     @Configuration.IntegerRange(min = 1)
@@ -46,5 +48,12 @@ public interface GenerateFeaturesConfig {
     @Value.Parameter(false)
     default Collection<String> configKeys() {
         return Collections.emptyList();
+    }
+
+    @Value.Check
+    default void validate() {
+        if (densityLevel() > dimension()) {
+            throw new IllegalArgumentException(formatWithLocale("Generate features requires `densityLevel` to be at most `dimension` but was %d > %d.", densityLevel(), dimension()));
+        }
     }
 }
