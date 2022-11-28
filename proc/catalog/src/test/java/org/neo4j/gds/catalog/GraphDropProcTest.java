@@ -146,7 +146,7 @@ class GraphDropProcTest extends BaseProcTest {
                     )),
                     entry("schemaWithOrientation", Map.of(
                         "nodes", Map.of("A", Map.of()),
-                        "relationships", Map.of("REL", Map.of("orientation", "NATURAL", "properties", Map.of())),
+                        "relationships", Map.of("REL", Map.of("direction", "DIRECTED", "properties", Map.of())),
                         "graphProperties", Map.of()
                     )),
                     entry("density", new Condition<>(Double::isFinite, "a finite double")),

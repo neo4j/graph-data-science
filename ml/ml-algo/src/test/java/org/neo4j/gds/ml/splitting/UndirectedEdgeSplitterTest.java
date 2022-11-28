@@ -25,13 +25,14 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyCursor;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.loading.construction.RelationshipsAndOrientation;
+import org.neo4j.gds.core.loading.construction.RelationshipsAndDirection;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -105,7 +106,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var remainingRels = remainingRelsAndSchema.relationships();
         // 1 positive selected reduces remaining
         assertEquals(8L, remainingRels.topology().elementCount());
-        assertEquals(Orientation.UNDIRECTED, remainingRelsAndSchema.orientation());
+        assertEquals(Direction.UNDIRECTED, remainingRelsAndSchema.direction());
         assertFalse(remainingRels.topology().isMultiGraph());
         assertThat(remainingRels.properties()).isNotEmpty();
 
@@ -114,7 +115,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertThat(selectedRels.topology()).satisfies(topology -> {
             assertRelSamplingProperties(selectedRels, graph);
             assertThat(topology.elementCount()).isEqualTo(1);
-            assertEquals(Orientation.NATURAL, selectedRelsAndSchema.orientation());
+            assertEquals(Direction.DIRECTED, selectedRelsAndSchema.direction());
             assertFalse(topology.isMultiGraph());
         });
     }
@@ -144,7 +145,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
             .seed(123L)
             .aggregation(Aggregation.SINGLE)
-            .orientation(Orientation.UNDIRECTED)
+            .direction(Direction.UNDIRECTED)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
             .build()
             .generate();
@@ -185,7 +186,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
             .seed(123L)
             .aggregation(Aggregation.SINGLE)
-            .orientation(Orientation.UNDIRECTED)
+            .direction(Direction.UNDIRECTED)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
             .build()
             .generate();
@@ -225,7 +226,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
             .seed(123L)
             .aggregation(Aggregation.SINGLE)
-            .orientation(Orientation.UNDIRECTED)
+            .direction(Direction.UNDIRECTED)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
             .build()
             .generate();
@@ -293,7 +294,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var remainingRels = remainingRelsAndSchema.relationships();
         // 1 positive selected reduces remaining & 4 invalid relationships
         assertEquals(4L, remainingRels.topology().elementCount());
-        assertEquals(Orientation.UNDIRECTED, remainingRelsAndSchema.orientation());
+        assertEquals(Direction.UNDIRECTED, remainingRelsAndSchema.direction());
         assertFalse(remainingRels.topology().isMultiGraph());
         assertThat(remainingRels.properties()).isNotEmpty();
 
@@ -302,7 +303,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertThat(selectedRels.topology()).satisfies(topology -> {
             assertRelSamplingProperties(selectedRels, graph);
             assertThat(topology.elementCount()).isEqualTo(1);
-            assertEquals(Orientation.NATURAL, selectedRelsAndSchema.orientation());
+            assertEquals(Direction.DIRECTED, selectedRelsAndSchema.direction());
             assertFalse(topology.isMultiGraph());
         });
 
@@ -329,7 +330,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         // 2 positive selected reduces remaining & 4 invalid relationships
         assertEquals(2L, remainingRels.topology().elementCount());
-        assertEquals(Orientation.UNDIRECTED, remainingRelsAndSchema.orientation());
+        assertEquals(Direction.UNDIRECTED, remainingRelsAndSchema.direction());
         assertFalse(remainingRels.topology().isMultiGraph());
         assertThat(remainingRels.properties()).isNotEmpty();
         assertRelInGraph(remainingRels, multiLabelGraph);
@@ -339,7 +340,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertThat(selectedRels.topology()).satisfies(topology -> {
             assertRelSamplingProperties(selectedRels, multiLabelGraph);
             assertThat(topology.elementCount()).isEqualTo(2);
-            assertEquals(Orientation.NATURAL, selectedRelsAndSchema.orientation());
+            assertEquals(Direction.DIRECTED, selectedRelsAndSchema.direction());
             assertFalse(topology.isMultiGraph());
         });
 
@@ -395,13 +396,13 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertThat(result.selectedRels().build().relationships().topology().elementCount()).isEqualTo(1);
     }
 
-    private boolean relationshipsAreEqual(IdMap mapping, RelationshipsAndOrientation r1, RelationshipsAndOrientation r2) {
+    private boolean relationshipsAreEqual(IdMap mapping, RelationshipsAndDirection r1, RelationshipsAndDirection r2) {
         var fallbackValue = -0.66;
         if (r1.relationships().topology().elementCount() != r2.relationships().topology().elementCount()) {
             return false;
         }
 
-        if (r1.orientation() != r2.orientation()) {
+        if (r1.direction() != r2.direction()) {
             return false;
         }
 

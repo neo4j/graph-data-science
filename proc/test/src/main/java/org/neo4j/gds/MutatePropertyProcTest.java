@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.ElementSchema;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -69,19 +70,18 @@ public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<RESULT>, CON
         TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), graphStore.getUnion());
         GraphSchema schema = graphStore.schema();
         if (mutateProperty() != null) {
-            boolean nodesContainMutateProperty = containsMutateProperty(schema.nodeSchema().properties());
-            boolean relationshipsContainMutateProperty = containsMutateProperty(schema
-                .relationshipSchema()
-                .properties());
+            boolean nodesContainMutateProperty = containsMutateProperty(schema.nodeSchema());
+            boolean relationshipsContainMutateProperty = containsMutateProperty(schema.relationshipSchema());
             assertTrue(nodesContainMutateProperty || relationshipsContainMutateProperty);
         }
     }
 
-    default <PS extends PropertySchema> boolean containsMutateProperty(Map<?, Map<String, PS>> entitySchema) {
+    default <PS extends PropertySchema> boolean containsMutateProperty(ElementSchema<?, ?, ?, PS> entitySchema) {
         return entitySchema
-            .values()
+            .entries()
             .stream()
-            .anyMatch(props -> props.containsKey(mutateProperty()) && props.get(mutateProperty()).valueType() == mutatePropertyType());
+            .flatMap(e -> e.properties().entrySet().stream())
+            .anyMatch(props -> props.getKey().equals(mutateProperty()) && props.getValue().valueType() == mutatePropertyType());
     }
 
     @Test

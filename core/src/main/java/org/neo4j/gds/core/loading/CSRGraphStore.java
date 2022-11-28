@@ -24,7 +24,6 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.CSRGraph;
@@ -46,6 +45,7 @@ import org.neo4j.gds.api.properties.graph.GraphPropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
@@ -260,7 +260,7 @@ public class CSRGraphStore implements GraphStore {
 
     @Override
     public Set<String> nodePropertyKeys(NodeLabel label) {
-        return schema().nodeSchema().properties().getOrDefault(label, Map.of()).keySet();
+        return schema().nodeSchema().allProperties(label);
     }
 
     @Override
@@ -302,25 +302,18 @@ public class CSRGraphStore implements GraphStore {
                 .putIfAbsent(propertyKey, NodeProperty.of(propertyKey, PropertyState.TRANSIENT, propertyValues))
                 .build();
 
-            NodeSchema.Builder schemaBuilder = NodeSchema
-                .builder()
-                .from(schema().nodeSchema());
 
-            labels.forEach(label -> schemaBuilder.addProperty(
-                label,
-                propertyKey,
-                PropertySchema.of(propertyKey,
-                    propertyValues.valueType(),
-                    propertyValues.valueType().fallbackValue(),
-                    PropertyState.TRANSIENT
+            labels.forEach(label -> schema()
+                .nodeSchema()
+                .get(label)
+                .addProperty(
+                    propertyKey,
+                    PropertySchema.of(propertyKey,
+                        propertyValues.valueType(),
+                        propertyValues.valueType().fallbackValue(),
+                        PropertyState.TRANSIENT
                 )
             ));
-
-            this.schema = GraphSchema.of(
-                schemaBuilder.build(),
-                schema().relationshipSchema(),
-                schema.graphProperties()
-            );
         });
     }
 
@@ -332,16 +325,7 @@ public class CSRGraphStore implements GraphStore {
                 .removeProperty(propertyKey)
                 .build();
 
-            NodeSchema.Builder nodeSchemaBuilder = NodeSchema
-                .builder()
-                .from(schema().nodeSchema())
-                .removeProperty(propertyKey);
-
-            this.schema = GraphSchema.of(
-                nodeSchemaBuilder.build(),
-                schema().relationshipSchema(),
-                schema.graphProperties()
-            );
+            schema().nodeSchema().entries().forEach(entry -> entry.removeProperty(propertyKey));
         });
     }
 
@@ -417,21 +401,25 @@ public class CSRGraphStore implements GraphStore {
         RelationshipType relationshipType,
         Optional<String> relationshipPropertyKey,
         Optional<NumberType> relationshipPropertyType,
-        Orientation orientation,
+        Direction direction,
         Relationships relationships
     ) {
         updateGraphStore(graphStore -> {
             if (!hasRelationshipType(relationshipType)) {
-                RelationshipSchema.Builder newSchemaBuilder = RelationshipSchema.builder();
 
                 graphStore.relationships.put(relationshipType, relationships.topology());
-                newSchemaBuilder.addRelationshipType(relationshipType, orientation);
 
-                if (relationshipPropertyKey.isPresent()
-                    && relationshipPropertyType.isPresent()
-                    && relationships.properties().isPresent()) {
-                    addRelationshipProperty(
-                        relationshipType,
+
+                var relationshipSchemaEntry = schema()
+                    .relationshipSchema()
+                    .getOrCreateRelationshipType(relationshipType, direction);
+
+
+                if (relationshipPropertyKey.isPresent() && relationshipPropertyType.isPresent() && relationships
+                    .properties()
+                    .isPresent()) {
+
+                    addRelationshipProperty(relationshipType,
                         relationshipPropertyKey.get(),
                         relationshipPropertyType.get(),
                         relationships.properties().get(),
@@ -439,25 +427,14 @@ public class CSRGraphStore implements GraphStore {
                     );
 
                     ValueType valueType = ValueTypes.fromNumberType(relationshipPropertyType.get());
-                    newSchemaBuilder.addProperty(
-                        relationshipType,
-                        orientation,
+                    relationshipSchemaEntry.addProperty(relationshipPropertyKey.get(), RelationshipPropertySchema.of(
                         relationshipPropertyKey.get(),
-                        RelationshipPropertySchema.of(
-                            relationshipPropertyKey.get(),
-                            valueType,
-                            valueType.fallbackValue(),
-                            PropertyState.TRANSIENT,
-                            Aggregation.NONE
-                        ));
+                        valueType,
+                        valueType.fallbackValue(),
+                        PropertyState.TRANSIENT,
+                        Aggregation.NONE
+                    ));
                 }
-
-                var resultingRelationshipSchema = schema.relationshipSchema().union(newSchemaBuilder.build());
-                this.schema = GraphSchema.of(
-                    schema().nodeSchema(),
-                    resultingRelationshipSchema,
-                    schema.graphProperties()
-                );
             }
         });
     }
@@ -481,17 +458,7 @@ public class CSRGraphStore implements GraphStore {
                         ));
                 }
 
-                var relationshipSchema = RelationshipSchema
-                    .builder()
-                    .from(schema().relationshipSchema())
-                    .removeRelationshipType(relationshipType)
-                    .build();
-
-                this.schema = GraphSchema.of(
-                    schema().nodeSchema(),
-                    relationshipSchema,
-                    schema.graphProperties()
-                );
+                schema().relationshipSchema().remove(relationshipType);
             })
         );
     }

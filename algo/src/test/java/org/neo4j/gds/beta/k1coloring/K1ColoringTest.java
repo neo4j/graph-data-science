@@ -21,9 +21,9 @@ package org.neo4j.gds.beta.k1coloring;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -33,13 +33,11 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -92,26 +90,16 @@ class K1ColoringTest {
     void testParallelK1Coloring() {
         long seed = 42L;
 
-        RandomGraphGenerator outGenerator = RandomGraphGenerator.builder()
-            .nodeCount(100_000)
-            .averageDegree(5)
-            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
-            .seed(seed)
-            .build();
-
-        RandomGraphGenerator inGenerator = RandomGraphGenerator.builder()
-            .nodeCount(100_000)
-            .averageDegree(5)
+        var graph = RandomGraphGenerator.builder()
+            .nodeCount(200_000)
+            .averageDegree(10)
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
             .seed(seed)
             .aggregation(Aggregation.NONE)
-            .orientation(Orientation.REVERSE)
+            .direction(Direction.UNDIRECTED)
             .allowSelfLoops(AllowSelfLoops.NO)
-            .build();
-
-        var naturalGraph = outGenerator.generate();
-        var reverseGraph = inGenerator.generate();
-        var graph = UnionGraph.of(Arrays.asList(naturalGraph, reverseGraph));
+            .build()
+            .generate();
 
         K1Coloring k1Coloring = new K1Coloring(
             graph,

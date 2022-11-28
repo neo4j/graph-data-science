@@ -171,7 +171,7 @@ class GraphGenerateProcTest extends BaseProcTest {
         var graph = GraphStoreCatalog.get(this.getUsername(), DatabaseId.of(this.db), "g").graphStore();
 
         assertThat(graph.schema().relationshipSchema().hasProperties()).isFalse();
-        assertThat(graph.schema().relationshipSchema().properties().get(RelationshipType.of("REL"))).isEmpty();
+        assertThat(graph.schema().relationshipSchema().get(RelationshipType.of("REL")).properties()).isEmpty();
     }
 
     @ParameterizedTest

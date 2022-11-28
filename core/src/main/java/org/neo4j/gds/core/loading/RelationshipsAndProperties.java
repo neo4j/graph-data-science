@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
@@ -32,7 +31,8 @@ import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.ValueTypes;
-import org.neo4j.gds.core.loading.construction.RelationshipsAndOrientation;
+import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.core.loading.construction.RelationshipsAndDirection;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.Collection;
@@ -49,20 +49,20 @@ public interface RelationshipsAndProperties {
 
     Map<RelationshipType, RelationshipPropertyStore> properties();
 
-    Map<RelationshipType, Orientation> orientations();
+    Map<RelationshipType, Direction> directions();
 
-    static RelationshipsAndProperties of(Map<RelationshipTypeAndProjection, List<RelationshipsAndOrientation>> relationshipsByType) {
+    static RelationshipsAndProperties of(Map<RelationshipTypeAndProjection, List<RelationshipsAndDirection>> relationshipsByType) {
         var relTypeCount = relationshipsByType.size();
         Map<RelationshipType, Relationships.Topology> topologies = new HashMap<>(relTypeCount);
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>(relTypeCount);
-        Map<RelationshipType, Orientation> orientations = new HashMap<>(relTypeCount);
+        Map<RelationshipType, Direction> directions = new HashMap<>(relTypeCount);
 
         relationshipsByType.forEach((relationshipTypeAndProjection, relationships) -> {
             var topology = relationships.get(0).relationships().topology();
 
             var properties = relationships
                 .stream()
-                .map(RelationshipsAndOrientation::relationships)
+                .map(RelationshipsAndDirection::relationships)
                 .map(Relationships::properties)
                 .map(props -> props.map(Relationships.Properties::propertiesList))
                 .filter(Optional::isPresent)
@@ -77,13 +77,15 @@ public interface RelationshipsAndProperties {
 
             topologies.put(relationshipTypeAndProjection.relationshipType(), topology);
             relationshipPropertyStores.put(relationshipTypeAndProjection.relationshipType(), propertyStore);
-            orientations.put(relationshipTypeAndProjection.relationshipType(), relationshipTypeAndProjection.relationshipProjection().orientation());
+
+            var orientation = relationshipTypeAndProjection.relationshipProjection().orientation();
+            directions.put(relationshipTypeAndProjection.relationshipType(), Direction.fromOrientation(orientation));
         });
 
         return ImmutableRelationshipsAndProperties.builder()
             .relationships(topologies)
             .properties(relationshipPropertyStores)
-            .orientations(orientations)
+            .directions(directions)
             .build();
     }
 
@@ -91,7 +93,7 @@ public interface RelationshipsAndProperties {
         var relTypeCount = builders.size();
         Map<RelationshipType, Relationships.Topology> relationships = new HashMap<>(relTypeCount);
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>(relTypeCount);
-        Map<RelationshipType, Orientation> orientations = new HashMap<>(relTypeCount);
+        Map<RelationshipType, Direction> directions = new HashMap<>(relTypeCount);
 
         builders.forEach((context) -> {
             var adjacencyListsWithProperties = context.singleTypeRelationshipImporter().build();
@@ -122,13 +124,13 @@ public interface RelationshipsAndProperties {
                 );
             }
 
-            orientations.put(context.relationshipType(), context.relationshipProjection().orientation());
+            directions.put(context.relationshipType(), Direction.fromOrientation(context.relationshipProjection().orientation()));
         });
 
         return ImmutableRelationshipsAndProperties.builder()
             .relationships(relationships)
             .properties(relationshipPropertyStores)
-            .orientations(orientations)
+            .directions(directions)
             .build();
     }
 

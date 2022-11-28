@@ -26,13 +26,13 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.NodeSchemaEntry;
 import org.neo4j.gds.api.schema.PropertySchema;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.core.io.file.csv.CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME;
@@ -59,9 +59,9 @@ class NodeSchemaLoaderTest {
 
         assertThat(nodeSchema.availableLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"));
 
-        var labelAProperties = nodeSchema.filterProperties(Set.of(NodeLabel.of("A")));
+        var labelAProperties = nodeSchema.get(NodeLabel.of("A"));
         assertThat(labelAProperties)
-            .containsExactlyInAnyOrderEntriesOf(Map.of(
+            .isEqualTo(new NodeSchemaEntry(
                 NodeLabel.of("A"),
                 Map.of(
                     "prop1",
@@ -74,9 +74,9 @@ class NodeSchemaLoaderTest {
                 )
             ));
 
-        var labelBProperties = nodeSchema.filterProperties(Set.of(NodeLabel.of("B")));
+        var labelBProperties = nodeSchema.get(NodeLabel.of("B"));
         assertThat(labelBProperties)
-            .containsExactlyInAnyOrderEntriesOf(Map.of(
+            .isEqualTo(new NodeSchemaEntry(
                 NodeLabel.of("B"),
                 Map.of(
                     "prop2",
@@ -124,9 +124,9 @@ class NodeSchemaLoaderTest {
 
         assertThat(nodeSchema.availableLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"));
 
-        var labelAProperties = nodeSchema.filterProperties(Set.of(NodeLabel.of("A")));
+        var labelAProperties = nodeSchema.get(NodeLabel.of("A"));
         assertThat(labelAProperties)
-            .containsExactlyInAnyOrderEntriesOf(Map.of(
+            .isEqualTo(new NodeSchemaEntry(
                 NodeLabel.of("A"),
                 Map.of(
                     "prop1",
@@ -139,9 +139,9 @@ class NodeSchemaLoaderTest {
                 )
             ));
 
-        var labelBProperties = nodeSchema.filterProperties(Set.of(NodeLabel.of("B")));
+        var labelBProperties = nodeSchema.get(NodeLabel.of("B"));
         assertThat(labelBProperties)
-            .containsExactlyInAnyOrderEntriesOf(Map.of(NodeLabel.of("B"), Map.of()));
+            .isEqualTo(new NodeSchemaEntry(NodeLabel.of("B"), Map.of()));
     }
 
 }

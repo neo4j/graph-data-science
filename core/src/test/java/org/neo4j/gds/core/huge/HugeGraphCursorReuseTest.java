@@ -22,10 +22,10 @@ package org.neo4j.gds.core.huge;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.ImmutableTopology;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 
@@ -43,7 +43,7 @@ class HugeGraphCursorReuseTest {
             .nodeCount(100)
             .averageDegree(5)
             .relationshipDistribution(RelationshipDistribution.RANDOM)
-            .orientation(Orientation.NATURAL)
+            .direction(Direction.DIRECTED)
             .build()
             .generate();
 

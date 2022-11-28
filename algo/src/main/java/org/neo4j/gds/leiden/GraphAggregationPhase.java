@@ -27,6 +27,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -98,7 +99,7 @@ class GraphAggregationPhase {
 
     private final Graph workingGraph;
     private final HugeLongArray communities;
-    private final Orientation orientation;
+    private final Direction direction;
     private final long maxCommunityId;
     private final ExecutorService executorService;
     private final int concurrency;
@@ -107,7 +108,7 @@ class GraphAggregationPhase {
 
     GraphAggregationPhase(
         Graph workingGraph,
-        Orientation orientation,
+        Direction direction,
         HugeLongArray communities,
         long maxCommunityId,
         ExecutorService executorService,
@@ -117,7 +118,7 @@ class GraphAggregationPhase {
     ) {
         this.workingGraph = workingGraph;
         this.communities = communities;
-        this.orientation = orientation;
+        this.direction = direction;
         this.maxCommunityId = maxCommunityId;
         this.executorService = executorService;
         this.concurrency = concurrency;
@@ -147,7 +148,7 @@ class GraphAggregationPhase {
         IdMap idMap = nodesBuilder.build().idMap();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
-            .orientation(orientation)
+            .orientation(direction.toOrientation())
             .addPropertyConfig(Aggregation.SUM, DefaultValue.forDouble())
             .executorService(executorService)
             .build();
@@ -169,7 +170,7 @@ class GraphAggregationPhase {
                     partition,
                     relationshipsBuilder,
                     workingGraph.concurrentCopy(),
-                    orientation,
+                    direction,
                     progressTracker
                 ),
             Optional.empty(),

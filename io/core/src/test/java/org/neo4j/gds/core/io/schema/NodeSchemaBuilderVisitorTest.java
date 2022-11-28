@@ -24,10 +24,10 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.NodeSchemaEntry;
 import org.neo4j.gds.api.schema.PropertySchema;
 
 import java.util.Map;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -59,34 +59,39 @@ class NodeSchemaBuilderVisitorTest {
         assertThat(builtSchema).isNotNull();
         assertThat(builtSchema.availableLabels()).containsExactlyInAnyOrder(labelA, labelB);
 
-        var labelAProperties = builtSchema.filterProperties(Set.of(NodeLabel.of("A")));
-        assertThat(labelAProperties)
-            .containsExactlyInAnyOrderEntriesOf(Map.of(
-                NodeLabel.of("A"),
-                Map.of(
-                    "prop1",
-                    PropertySchema.of("prop1",
-                        ValueType.LONG,
-                        DefaultValue.of(42L),
-                        PropertyState.PERSISTENT
+        var labelAEntry = builtSchema.get(NodeLabel.of("A"));
+        assertThat(labelAEntry)
+            .isEqualTo(
+                new NodeSchemaEntry(
+                    NodeLabel.of("A"),
+                    Map.of(
+                        "prop1",
+                        PropertySchema.of(
+                            "prop1",
+                            ValueType.LONG,
+                            DefaultValue.of(42L),
+                            PropertyState.PERSISTENT
+                        )
                     )
                 )
-            ));
+            );
 
-        var labelBProperties = builtSchema.filterProperties(Set.of(NodeLabel.of("B")));
-        assertThat(labelBProperties)
-            .containsExactlyInAnyOrderEntriesOf(Map.of(
-                NodeLabel.of("B"),
-                Map.of(
-                    "prop2",
-                    PropertySchema.of("prop2",
-                        ValueType.DOUBLE,
-                        DefaultValue.of(13.37D),
-                        PropertyState.TRANSIENT
+        var labelBEntry = builtSchema.get(NodeLabel.of("B"));
+        assertThat(labelBEntry)
+            .isEqualTo(
+                new NodeSchemaEntry(
+                    NodeLabel.of("B"),
+                    Map.of(
+                        "prop2",
+                        PropertySchema.of(
+                            "prop2",
+                            ValueType.DOUBLE,
+                            DefaultValue.of(13.37D),
+                            PropertyState.TRANSIENT
+                        )
                     )
                 )
-            ));
-
+            );
     }
 
 }

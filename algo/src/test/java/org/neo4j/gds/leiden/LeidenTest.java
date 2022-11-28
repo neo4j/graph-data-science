@@ -23,6 +23,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -216,7 +217,7 @@ class LeidenTest {
         var refinedCommunities = HugeLongArray.of(1, 1, 2, 3, 4, 3, 1, 3);
         var aggregationPhase = new GraphAggregationPhase(
             graph,
-            Orientation.UNDIRECTED,
+            Direction.UNDIRECTED,
             refinedCommunities,
             4,
             Pools.DEFAULT_SINGLE_THREAD_POOL,
@@ -264,7 +265,7 @@ class LeidenTest {
             .nodeCount(200)
             .averageDegree(10)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .orientation(Orientation.UNDIRECTED)
+            .direction(Direction.UNDIRECTED)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
             .aggregation(Aggregation.SINGLE)
             .seed(42)

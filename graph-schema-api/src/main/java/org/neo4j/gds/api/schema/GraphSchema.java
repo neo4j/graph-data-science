@@ -133,4 +133,7 @@ public interface GraphSchema {
         return relationshipSchema().isUndirected();
     }
 
+    default Direction direction() {
+        return relationshipSchema().isUndirected() ? Direction.UNDIRECTED : Direction.DIRECTED;
+    }
 }

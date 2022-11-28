@@ -42,7 +42,7 @@ class NodeSchemaTest {
 
     @Test
     void handlesOutsideOfSchemaRequests() {
-        NodeSchema empty = NodeSchema.builder().build();
+        NodeSchema empty = NodeSchema.empty();
         assertFalse(empty.hasProperty(NodeLabel.of("NotInSchema"), "notInSchemaEither"));
     }
 
@@ -52,19 +52,15 @@ class NodeSchemaTest {
 
         DefaultValue defaultValue = DefaultValue.of(42.0D);
         String propertyName = "baz";
-        var nodeSchema = NodeSchema.builder()
+        var nodeSchema = NodeSchema.empty();
+        nodeSchema
+            .getOrCreateLabel(label)
             .addProperty(
-                label,
                 propertyName,
-                PropertySchema.of(
-                    propertyName,
-                    ValueType.DOUBLE,
-                    defaultValue,
-                    PropertyState.PERSISTENT
-                )
-            ).build();
+                PropertySchema.of(propertyName, ValueType.DOUBLE, defaultValue, PropertyState.PERSISTENT)
+            );
 
-        PropertySchema nodePropertySchema = nodeSchema.properties().get(label).get(propertyName);
+        PropertySchema nodePropertySchema = nodeSchema.get(label).properties().get(propertyName);
         assertTrue(nodePropertySchema.defaultValue().isUserDefined());
         assertEquals(defaultValue, nodePropertySchema.defaultValue());
     }
@@ -74,18 +70,14 @@ class NodeSchemaTest {
         var label1 = NodeLabel.of("Foo");
         var label2 = NodeLabel.of("Bar");
 
-        var nodeSchema = NodeSchema.builder()
-            .addProperty(label1, "bar", ValueType.DOUBLE)
-            .addProperty(label1, "baz", ValueType.DOUBLE)
-            .addProperty(label2, "baz", ValueType.DOUBLE)
-            .build();
+        var nodeSchema = NodeSchema.empty();
+        nodeSchema.getOrCreateLabel(label1).addProperty("bar", ValueType.DOUBLE).addProperty("baz", ValueType.DOUBLE);
+        nodeSchema.getOrCreateLabel(label2).addProperty("baz", ValueType.DOUBLE);
 
         assertEquals(nodeSchema, nodeSchema.filter(Set.of(label1, label2)));
 
-        var expected = NodeSchema.builder()
-            .addProperty(label1, "bar", ValueType.DOUBLE)
-            .addProperty(label1, "baz", ValueType.DOUBLE)
-            .build();
+        var expected = NodeSchema.empty();
+        expected.getOrCreateLabel(label1).addProperty("bar", ValueType.DOUBLE).addProperty("baz", ValueType.DOUBLE);
 
         assertEquals(expected, nodeSchema.filter(Set.of(label1)));
     }
@@ -95,18 +87,15 @@ class NodeSchemaTest {
         var label1 = NodeLabel.of("Foo");
         var label2 = NodeLabel.of("Bar");
 
-        var nodeSchema1 = NodeSchema.builder()
-            .addProperty(label1, "bar", ValueType.DOUBLE)
-            .build();
+        var nodeSchema1 = NodeSchema.empty();
+        nodeSchema1.getOrCreateLabel(label1).addProperty("bar", ValueType.DOUBLE);
 
-        var nodeSchema2 = NodeSchema.builder()
-            .addProperty(label2, "bar", ValueType.DOUBLE)
-            .build();
+        var nodeSchema2 = NodeSchema.empty();
+        nodeSchema2.getOrCreateLabel(label2).addProperty("bar", ValueType.DOUBLE);
 
-        var expected = NodeSchema.builder()
-            .addProperty(label1, "bar", ValueType.DOUBLE)
-            .addProperty(label2, "bar", ValueType.DOUBLE)
-            .build();
+        var expected = NodeSchema.empty();
+        expected.getOrCreateLabel(label1).addProperty("bar", ValueType.DOUBLE);
+        expected.getOrCreateLabel(label2).addProperty("bar", ValueType.DOUBLE);
 
         assertEquals(expected, nodeSchema1.union(nodeSchema2));
     }
@@ -116,21 +105,17 @@ class NodeSchemaTest {
         var label1 = NodeLabel.of("Foo");
         var label2 = NodeLabel.of("Bar");
 
-        var nodeSchema1 = NodeSchema.builder()
-            .addProperty(label1, "bar", ValueType.DOUBLE)
-            .addLabel(label2)
-            .build();
+        var nodeSchema1 = NodeSchema.empty();
+        nodeSchema1.getOrCreateLabel(label1).addProperty("bar", ValueType.DOUBLE);
+        nodeSchema1.getOrCreateLabel(label2);
 
-        var nodeSchema2 = NodeSchema.builder()
-            .addProperty(label1, "baz", ValueType.DOUBLE)
-            .addProperty(label2, "baz", ValueType.DOUBLE)
-            .build();
+        var nodeSchema2 = NodeSchema.empty();
+        nodeSchema2.getOrCreateLabel(label1).addProperty("baz", ValueType.DOUBLE);
+        nodeSchema2.getOrCreateLabel(label2).addProperty("baz", ValueType.DOUBLE);
 
-        var expected = NodeSchema.builder()
-            .addProperty(label1, "bar", ValueType.DOUBLE)
-            .addProperty(label1, "baz", ValueType.DOUBLE)
-            .addProperty(label2, "baz", ValueType.DOUBLE)
-            .build();
+        var expected = NodeSchema.empty();
+        expected.getOrCreateLabel(label1).addProperty("bar", ValueType.DOUBLE).addProperty("baz", ValueType.DOUBLE);
+        expected.getOrCreateLabel(label2).addProperty("baz", ValueType.DOUBLE);
 
         assertEquals(expected, nodeSchema1.union(nodeSchema2));
     }
@@ -139,18 +124,13 @@ class NodeSchemaTest {
     void testUnionOfIncompatibleProperties() {
         var label1 = NodeLabel.of("Foo");
 
-        var nodeSchema1 = NodeSchema.builder()
-            .addProperty(label1, "bar", ValueType.DOUBLE)
-            .build();
+        var nodeSchema1 = NodeSchema.empty()
+            .getOrCreateLabel(label1).addProperty("bar", ValueType.DOUBLE);
 
-        var nodeSchema2 = NodeSchema.builder()
-            .addProperty(label1, "bar", ValueType.LONG)
-            .build();
+        var nodeSchema2 = NodeSchema.empty()
+            .getOrCreateLabel(label1).addProperty("bar", ValueType.LONG);
 
-        var ex = assertThrows(
-            IllegalArgumentException.class,
-            () -> nodeSchema1.union(nodeSchema2)
-        );
+        var ex = assertThrows(IllegalArgumentException.class, () -> nodeSchema1.union(nodeSchema2));
         assertTrue(ex
             .getMessage()
             .contains("Combining schema entries with value type {bar=DOUBLE} and {bar=LONG} is not supported."));
@@ -161,17 +141,19 @@ class NodeSchemaTest {
         var label1 = NodeLabel.of("Foo");
         var label2 = NodeLabel.of("Bar");
 
-        var nodeSchema = NodeSchema.builder()
+        var nodeSchema = NodeSchema.empty()
             .addProperty(label1, "foo", ValueType.DOUBLE)
             .addProperty(label1, "baz", ValueType.LONG)
             .addProperty(label2, "bar", ValueType.LONG_ARRAY)
-            .addProperty(label2, "baz", ValueType.LONG)
-            .build();
+            .addProperty(label2, "baz", ValueType.LONG);
 
         var expectedUnionSchema = Map.of(
-            "foo", PropertySchema.of("foo", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT),
-            "bar", PropertySchema.of("bar", ValueType.LONG_ARRAY, DefaultValue.forLongArray(), PropertyState.PERSISTENT),
-            "baz", PropertySchema.of("baz", ValueType.LONG, DefaultValue.forLong(), PropertyState.PERSISTENT)
+            "foo",
+            PropertySchema.of("foo", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT),
+            "bar",
+            PropertySchema.of("bar", ValueType.LONG_ARRAY, DefaultValue.forLongArray(), PropertyState.PERSISTENT),
+            "baz",
+            PropertySchema.of("baz", ValueType.LONG, DefaultValue.forLong(), PropertyState.PERSISTENT)
         );
 
         var unionPropertySchema = nodeSchema.unionProperties();
@@ -182,22 +164,23 @@ class NodeSchemaTest {
     @Test
     void shouldCreateDeepCopiesWhenFiltering() {
         var nodeLabel = NodeLabel.of("A");
-        var nodeSchema = NodeSchema.builder().addProperty(nodeLabel, "prop", ValueType.LONG).build();
+        var nodeSchema = NodeSchema.empty();
+        nodeSchema.getOrCreateLabel(nodeLabel).addProperty("prop", ValueType.LONG);
         var filteredNodeSchema = nodeSchema.filter(Set.of(nodeLabel));
-        NodeSchema.builder()
-            .from(filteredNodeSchema)
-            .addProperty(nodeLabel, "shouldNotExistInOriginalSchema", ValueType.LONG)
-            .build();
+        filteredNodeSchema
+            .getOrCreateLabel(nodeLabel).addProperty("shouldNotExistInOriginalSchema", ValueType.LONG);
 
-        assertThat(nodeSchema.properties().get(nodeLabel))
+        assertThat(nodeSchema.get(nodeLabel).properties())
             .doesNotContainKey("shouldNotExistInOriginalSchema")
             .containsOnlyKeys("prop");
     }
 
     static Stream<Arguments> schemaAndHasProperties() {
+        NodeSchema.empty();
+
         return Stream.of(
-            Arguments.of(NodeSchema.builder().addLabel(NodeLabel.of("A")).build(), false),
-            Arguments.of(NodeSchema.builder().addProperty(NodeLabel.of("A"), "foo", ValueType.LONG).build(), true)
+            Arguments.of(NodeSchema.empty().addLabel(NodeLabel.of("A")), false),
+            Arguments.of(NodeSchema.empty().addProperty(NodeLabel.of("A"), "foo", ValueType.LONG), true)
         );
     }
 

@@ -32,9 +32,11 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PartialIdMap;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
@@ -220,10 +222,11 @@ public final class GraphFactory {
         var relationshipType = RelationshipType.ALL_RELATIONSHIPS;
         var isMultiGraph = Arrays.stream(aggregations).allMatch(Aggregation::equivalentToNone);
 
+        var actualOrientation = orientation.orElse(Orientation.NATURAL);
         var projectionBuilder = RelationshipProjection
             .builder()
             .type(relationshipType.name())
-            .orientation(orientation.orElse(Orientation.NATURAL));
+            .orientation(actualOrientation);
 
         propertyConfigs.forEach(propertyConfig -> projectionBuilder.addProperty(
             GraphFactory.DUMMY_PROPERTY,
@@ -270,7 +273,7 @@ public final class GraphFactory {
 
         return new RelationshipsBuilder(
             nodes,
-            orientation.orElse(Orientation.NATURAL),
+            Direction.fromOrientation(actualOrientation),
             bufferSize,
             propertyKeyIds,
             importerFactory,
@@ -293,30 +296,26 @@ public final class GraphFactory {
      * If a relationship property is present, the default relationship property key {@code "property"}
      * will be used.
      */
-    public static HugeGraph create(IdMap idMap, RelationshipsAndOrientation relationshipsAndOrientation) {
-        var nodeSchemaBuilder = NodeSchema.builder();
-        idMap.availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
-        var nodeSchema = nodeSchemaBuilder.build();
+    public static HugeGraph create(IdMap idMap, RelationshipsAndDirection relationshipsAndDirection) {
+        var nodeSchema = NodeSchema.empty();
+        idMap.availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
-        var relationshipSchemaBuilder = RelationshipSchema.builder();
-        if (relationshipsAndOrientation.relationships().properties().isPresent()) {
-            relationshipSchemaBuilder.addProperty(
-                RelationshipType.of("REL"),
-                relationshipsAndOrientation.orientation(),
-                "property",
-                ValueType.DOUBLE
-            );
-        } else {
-            relationshipSchemaBuilder.addRelationshipType(RelationshipType.of("REL"), relationshipsAndOrientation.orientation());
+        var relationshipSchema = RelationshipSchema.empty();
+
+        var entry = relationshipSchema.getOrCreateRelationshipType(
+            RelationshipType.of("REL"),
+            relationshipsAndDirection.direction()
+        );
+
+        if (relationshipsAndDirection.relationships().properties().isPresent()) {
+            entry.addProperty("property", ValueType.DOUBLE, PropertyState.PERSISTENT);
         }
-
-        var relationshipSchema = relationshipSchemaBuilder.build();
 
         return create(
             GraphSchema.of(nodeSchema, relationshipSchema, Map.of()),
             idMap,
             Map.of(),
-            relationshipsAndOrientation.relationships()
+            relationshipsAndDirection.relationships()
         );
     }
 

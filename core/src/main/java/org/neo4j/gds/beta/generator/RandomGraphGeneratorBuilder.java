@@ -20,8 +20,8 @@
 package org.neo4j.gds.beta.generator;
 
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
 
@@ -40,7 +40,7 @@ public class RandomGraphGeneratorBuilder {
     private final Map<NodeLabel, Set<PropertyProducer<?>>> nodePropertyProducers = new HashMap<>();
     private Optional<PropertyProducer<double[]>> maybeRelationshipPropertyProducer = Optional.empty();
     private Aggregation aggregation = Aggregation.NONE;
-    private Orientation orientation = Orientation.NATURAL;
+    private Direction direction = Direction.DIRECTED;
     private RandomGraphGeneratorConfig.AllowSelfLoops allowSelfLoops = RandomGraphGeneratorConfig.AllowSelfLoops.NO;
     private RelationshipType relationshipType = RelationshipType.of("REL");
 
@@ -96,8 +96,8 @@ public class RandomGraphGeneratorBuilder {
         return this;
     }
 
-    public RandomGraphGeneratorBuilder orientation(Orientation orientation) {
-        this.orientation = orientation;
+    public RandomGraphGeneratorBuilder direction(Direction direction) {
+        this.direction = direction;
         return this;
     }
 
@@ -118,7 +118,7 @@ public class RandomGraphGeneratorBuilder {
             nodePropertyProducers,
             maybeRelationshipPropertyProducer,
             aggregation,
-            orientation,
+            direction,
             allowSelfLoops
         );
     }

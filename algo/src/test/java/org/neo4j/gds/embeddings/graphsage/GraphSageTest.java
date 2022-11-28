@@ -28,6 +28,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -105,7 +106,7 @@ class GraphSageTest {
             .relationshipPropertyProducer(PropertyProducer.fixedDouble("weight", 1.0))
             .seed(123L)
             .aggregation(Aggregation.SINGLE)
-            .orientation(Orientation.UNDIRECTED)
+            .direction(Direction.UNDIRECTED)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
             .build().generate();
 
@@ -189,7 +190,7 @@ class GraphSageTest {
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
             .relationshipPropertyProducer(PropertyProducer.fixedDouble("weight", 1.0))
             .aggregation(Aggregation.SINGLE)
-            .orientation(Orientation.UNDIRECTED)
+            .direction(Direction.UNDIRECTED)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
             .build()
             .generate();

@@ -34,7 +34,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
 
     @Test
     void visitNodesWithoutLabelsAndProperties() {
-        var nodeVisitor = new CsvNodeVisitor(tempDir, NodeSchema.builder().build());
+        var nodeVisitor = new CsvNodeVisitor(tempDir, NodeSchema.empty());
 
         nodeVisitor.id(0L);
         nodeVisitor.endOfEntity();
@@ -55,7 +55,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
 
     @Test
     void visitNodesWithLabels() {
-        var nodeVisitor = new CsvNodeVisitor(tempDir, NodeSchema.builder().build());
+        var nodeVisitor = new CsvNodeVisitor(tempDir, NodeSchema.empty());
 
         nodeVisitor.id(0L);
         nodeVisitor.labels(new String[]{"Foo", "Bar"});
@@ -92,10 +92,10 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
 
     @Test
     void visitNodesWithProperties() {
-        var nodeSchema = NodeSchema.builder()
-            .addProperty(NodeLabel.ALL_NODES, "foo", ValueType.DOUBLE)
-            .addProperty(NodeLabel.ALL_NODES, "bar", ValueType.DOUBLE)
-            .build();
+        var nodeSchema = NodeSchema.empty();
+        nodeSchema.getOrCreateLabel(NodeLabel.ALL_NODES)
+            .addProperty("foo", ValueType.DOUBLE)
+            .addProperty("bar", ValueType.DOUBLE);
         var nodeVisitor = new CsvNodeVisitor(tempDir, nodeSchema);
 
         nodeVisitor.id(0L);
@@ -131,17 +131,19 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
         var bLabel = NodeLabel.of("B");
         var cLabel = NodeLabel.of("C");
 
-        var nodeSchema = NodeSchema.builder()
-            .addProperty(aLabel, "foo", ValueType.LONG)
-            .addProperty(aLabel, "bar", ValueType.LONG)
+        var nodeSchema = NodeSchema.empty();
+        nodeSchema.getOrCreateLabel(aLabel)
+            .addProperty("foo", ValueType.LONG)
+            .addProperty("bar", ValueType.LONG);
 
-            .addProperty(bLabel, "bar", ValueType.LONG)
-            .addProperty(bLabel, "baz", ValueType.DOUBLE)
+        nodeSchema.getOrCreateLabel(bLabel)
+            .addProperty("bar", ValueType.LONG)
+            .addProperty("baz", ValueType.DOUBLE);
 
-            .addProperty(cLabel, "isolated", ValueType.DOUBLE)
-            .addProperty(cLabel, "isolated_array", ValueType.LONG_ARRAY)
+        nodeSchema.getOrCreateLabel(cLabel)
+            .addProperty("isolated", ValueType.DOUBLE)
+            .addProperty("isolated_array", ValueType.LONG_ARRAY);
 
-            .build();
         var nodeVisitor = new CsvNodeVisitor(tempDir, nodeSchema);
 
         // :A:B

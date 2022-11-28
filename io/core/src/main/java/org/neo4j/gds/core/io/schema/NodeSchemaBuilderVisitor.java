@@ -24,21 +24,18 @@ import org.neo4j.gds.api.schema.PropertySchema;
 
 public class NodeSchemaBuilderVisitor extends NodeSchemaVisitor {
 
-    private final NodeSchema.Builder schemaBuilder;
-    private NodeSchema schema;
+    private final NodeSchema nodeSchema;
 
     public NodeSchemaBuilderVisitor() {
-        schemaBuilder = NodeSchema.builder();
+        nodeSchema = NodeSchema.empty();
     }
 
     @Override
     protected void export() {
-        // If the key is null we expect no properties but a label
-        if (key() == null) {
-            schemaBuilder.addLabel(nodeLabel());
-        } else {
-            schemaBuilder.addProperty(
-                nodeLabel(),
+        var entry = nodeSchema.getOrCreateLabel(nodeLabel());
+
+        if (key() != null) {
+            entry.addProperty(
                 key(),
                 PropertySchema.of(key(), valueType(), defaultValue(), state())
             );
@@ -46,11 +43,6 @@ public class NodeSchemaBuilderVisitor extends NodeSchemaVisitor {
     }
 
     public NodeSchema schema() {
-        return schema;
-    }
-
-    @Override
-    public void close() {
-        schema = schemaBuilder.build();
+        return nodeSchema;
     }
 }

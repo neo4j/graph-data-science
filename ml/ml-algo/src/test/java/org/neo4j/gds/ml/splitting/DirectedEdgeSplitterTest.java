@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyCursor;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
@@ -175,7 +176,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         // 2 positive selected reduces remaining
         assertEquals(3L, remainingRels.topology().elementCount());
-        assertEquals(Orientation.NATURAL, remainingRelsAndSchema.orientation());
+        assertEquals(Direction.DIRECTED, remainingRelsAndSchema.direction());
         assertFalse(remainingRels.topology().isMultiGraph());
         assertThat(remainingRels.properties()).isNotEmpty();
         assertRelInGraph(remainingRels, graph);
@@ -195,7 +196,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
             .seed(123)
             .aggregation(Aggregation.SINGLE)
-            .orientation(Orientation.NATURAL)
+            .direction(Direction.DIRECTED)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
             .build()
             .generate();

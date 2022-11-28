@@ -37,6 +37,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
@@ -179,7 +180,7 @@ class GraphStoreTest extends BaseTest {
             42.0
         );
         Thread.sleep(42);
-        graphStore.addRelationshipType(RelationshipType.of("BAR"), Optional.empty(), Optional.empty(), Orientation.NATURAL, relationships);
+        graphStore.addRelationshipType(RelationshipType.of("BAR"), Optional.empty(), Optional.empty(), Direction.DIRECTED, relationships);
         ZonedDateTime relationshipTime = graphStore.modificationTime();
 
         assertTrue(initialTime.isBefore(nodePropertyTime), "Node property update did not change modificationTime");

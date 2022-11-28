@@ -26,18 +26,17 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.api.schema.RelationshipSchemaEntry;
 import org.neo4j.gds.core.Aggregation;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.Orientation.NATURAL;
-import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipSchemaVisitor.RELATIONSHIP_SCHEMA_FILE_NAME;
 
 class RelationshipSchemaLoaderTest {
@@ -48,7 +47,7 @@ class RelationshipSchemaLoaderTest {
     void shouldLoadRelationshipSchemaCorrectly() throws IOException {
         var lines = List.of(
             String.join(", ", CsvRelationshipSchemaVisitorTest.RELATIONSHIP_SCHEMA_COLUMNS),
-            "REL1, NATURAL, prop1, long, DefaultValue(42), SUM, PERSISTENT",
+            "REL1, DIRECTED, prop1, long, DefaultValue(42), SUM, PERSISTENT",
             "REL2, UNDIRECTED, prop2, double, DefaultValue(13.37), COUNT, TRANSIENT"
         );
         FileUtils.writeLines(exportDir.resolve(RELATIONSHIP_SCHEMA_FILE_NAME).toFile(), lines);
@@ -58,13 +57,11 @@ class RelationshipSchemaLoaderTest {
 
         assertThat(loadedRelationshipSchema.availableTypes()).containsExactlyInAnyOrder(RelationshipType.of("REL1"), RelationshipType.of("REL2"));
 
-        var rel1Orientation = loadedRelationshipSchema.orientation(RelationshipType.of("REL1"));
-        assertThat(rel1Orientation).isEqualTo(NATURAL);
-
-        var rel1Properties = loadedRelationshipSchema.filterProperties(Set.of(RelationshipType.of("REL1")));
+        var rel1Properties = loadedRelationshipSchema.get(RelationshipType.of("REL1"));
         assertThat(rel1Properties)
-            .containsExactlyInAnyOrderEntriesOf(Map.of(
+            .isEqualTo(new RelationshipSchemaEntry(
                 RelationshipType.of("REL1"),
+                Direction.DIRECTED,
                 Map.of(
                     "prop1",
                     RelationshipPropertySchema.of(
@@ -77,13 +74,11 @@ class RelationshipSchemaLoaderTest {
                 )
             ));
 
-        var rel2Orientation = loadedRelationshipSchema.orientation(RelationshipType.of("REL2"));
-        assertThat(rel2Orientation).isEqualTo(UNDIRECTED);
-
-        var rel2Properties = loadedRelationshipSchema.filterProperties(Set.of(RelationshipType.of("REL2")));
+        var rel2Properties = loadedRelationshipSchema.get(RelationshipType.of("REL2"));
         assertThat(rel2Properties)
-            .containsExactlyInAnyOrderEntriesOf(Map.of(
+            .isEqualTo(new RelationshipSchemaEntry(
                 RelationshipType.of("REL2"),
+                Direction.UNDIRECTED,
                 Map.of(
                     "prop2",
                     RelationshipPropertySchema.of(
@@ -117,7 +112,7 @@ class RelationshipSchemaLoaderTest {
     void shouldLoadMixedRelationshipSchema() throws IOException {
         var lines = List.of(
             String.join(", ", CsvRelationshipSchemaVisitorTest.RELATIONSHIP_SCHEMA_COLUMNS),
-            "REL1, NATURAL, prop1, long, DefaultValue(42), SUM, PERSISTENT",
+            "REL1, DIRECTED, prop1, long, DefaultValue(42), SUM, PERSISTENT",
             "REL3, UNDIRECTED"
         );
         FileUtils.writeLines(exportDir.resolve(RELATIONSHIP_SCHEMA_FILE_NAME).toFile(), lines);
@@ -127,13 +122,12 @@ class RelationshipSchemaLoaderTest {
 
         assertThat(loadedRelationshipSchema.availableTypes()).containsExactlyInAnyOrder(RelationshipType.of("REL1"), RelationshipType.of("REL3"));
 
-        var rel1Orientation = loadedRelationshipSchema.orientation(RelationshipType.of("REL1"));
-        assertThat(rel1Orientation).isEqualTo(NATURAL);
 
-        var rel1Properties = loadedRelationshipSchema.filterProperties(Set.of(RelationshipType.of("REL1")));
+        var rel1Properties = loadedRelationshipSchema.get(RelationshipType.of("REL1"));
         assertThat(rel1Properties)
-            .containsExactlyInAnyOrderEntriesOf(Map.of(
+            .isEqualTo(new RelationshipSchemaEntry(
                 RelationshipType.of("REL1"),
+                Direction.DIRECTED,
                 Map.of(
                     "prop1",
                     RelationshipPropertySchema.of(
@@ -146,13 +140,11 @@ class RelationshipSchemaLoaderTest {
                 )
             ));
 
-        var rel3Orientation = loadedRelationshipSchema.orientation(RelationshipType.of("REL3"));
-        assertThat(rel3Orientation).isEqualTo(UNDIRECTED);
-
-        var rel3Properties = loadedRelationshipSchema.filterProperties(Set.of(RelationshipType.of("REL3")));
+        var rel3Properties = loadedRelationshipSchema.get(RelationshipType.of("REL3"));
         assertThat(rel3Properties)
-            .containsExactlyInAnyOrderEntriesOf(Map.of(
+            .isEqualTo(new RelationshipSchemaEntry(
                 RelationshipType.of("REL3"),
+                Direction.UNDIRECTED,
                 Map.of()
             ));
     }
@@ -171,13 +163,12 @@ class RelationshipSchemaLoaderTest {
 
         assertThat(loadedRelationshipSchema.availableTypes()).containsExactlyInAnyOrder(RelationshipType.of("REL1"), RelationshipType.of("REL3"));
 
-        var rel1Orientation = loadedRelationshipSchema.orientation(RelationshipType.of("REL1"));
-        assertThat(rel1Orientation).isEqualTo(NATURAL);
 
-        var rel1Properties = loadedRelationshipSchema.filterProperties(Set.of(RelationshipType.of("REL1")));
+        var rel1Properties = loadedRelationshipSchema.get(RelationshipType.of("REL1"));
         assertThat(rel1Properties)
-            .containsExactlyInAnyOrderEntriesOf(Map.of(
+            .isEqualTo(new RelationshipSchemaEntry(
                 RelationshipType.of("REL1"),
+                Direction.DIRECTED,
                 Map.of(
                     "prop1",
                     RelationshipPropertySchema.of(
@@ -190,13 +181,11 @@ class RelationshipSchemaLoaderTest {
                 )
             ));
 
-        var rel3Orientation = loadedRelationshipSchema.orientation(RelationshipType.of("REL3"));
-        assertThat(rel3Orientation).isEqualTo(NATURAL);
-
-        var rel3Properties = loadedRelationshipSchema.filterProperties(Set.of(RelationshipType.of("REL3")));
+        var rel3Properties = loadedRelationshipSchema.get(RelationshipType.of("REL3"));
         assertThat(rel3Properties)
-            .containsExactlyInAnyOrderEntriesOf(Map.of(
+            .isEqualTo(new RelationshipSchemaEntry(
                 RelationshipType.of("REL3"),
+                Direction.DIRECTED,
                 Map.of()
             ));
     }

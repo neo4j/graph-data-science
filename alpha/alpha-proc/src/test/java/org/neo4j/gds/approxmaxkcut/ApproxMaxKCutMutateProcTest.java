@@ -74,10 +74,8 @@ class ApproxMaxKCutMutateProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutMut
         TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), graphStore.getUnion());
         GraphSchema schema = graphStore.schema();
         if (mutateProperty() != null) {
-            boolean nodesContainMutateProperty = containsMutateProperty(schema.nodeSchema().properties());
-            boolean relationshipsContainMutateProperty = containsMutateProperty(schema
-                .relationshipSchema()
-                .properties());
+            boolean nodesContainMutateProperty = containsMutateProperty(schema.nodeSchema());
+            boolean relationshipsContainMutateProperty = containsMutateProperty(schema.relationshipSchema());
             assertTrue(nodesContainMutateProperty || relationshipsContainMutateProperty);
         }
     }

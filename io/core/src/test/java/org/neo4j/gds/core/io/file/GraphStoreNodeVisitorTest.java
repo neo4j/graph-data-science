@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
@@ -36,7 +37,6 @@ import org.neo4j.gds.extension.Inject;
 
 import java.util.Map;
 
-import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 
 @GdlExtension
@@ -55,7 +55,7 @@ class GraphStoreNodeVisitorTest {
 
     @Test
     void shouldAddNodesToNodesBuilder() {
-        NodeSchema nodeSchema = graphStore.schema().nodeSchema();
+        NodeSchema nodeSchema = NodeSchema.from(graphStore.schema().nodeSchema());
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder(nodeSchema)
             .concurrency(1)
             .maxOriginalId(graphStore.nodeCount())
@@ -81,9 +81,12 @@ class GraphStoreNodeVisitorTest {
             .orElseThrow(() -> new IllegalArgumentException("Expected node properties to be present"));
         var relationships = GraphFactory.emptyRelationships(idMap);
 
+        var relationshipSchema = RelationshipSchema.empty();
+        relationshipSchema.getOrCreateRelationshipType(RelationshipType.ALL_RELATIONSHIPS, Direction.UNDIRECTED);
+
         var graphSchema = GraphSchema.of(
             nodeSchema,
-            RelationshipSchema.builder().addRelationshipType(RelationshipType.ALL_RELATIONSHIPS, UNDIRECTED).build(),
+            relationshipSchema,
             Map.of()
         );
 

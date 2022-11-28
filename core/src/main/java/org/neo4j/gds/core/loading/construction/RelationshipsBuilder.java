@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.core.loading.construction;
 
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
@@ -45,7 +45,7 @@ public class RelationshipsBuilder {
     private final boolean loadRelationshipProperty;
     private final boolean isMultiGraph;
 
-    private final Orientation orientation;
+    private final Direction direction;
     private final SingleTypeRelationshipImporter singleTypeRelationshipImporter;
 
     private final int concurrency;
@@ -55,7 +55,7 @@ public class RelationshipsBuilder {
 
     RelationshipsBuilder(
         PartialIdMap idMap,
-        Orientation orientation,
+        Direction direction,
         int bufferSize,
         int[] propertyKeyIds,
         SingleTypeRelationshipImporter singleTypeRelationshipImporter,
@@ -65,7 +65,7 @@ public class RelationshipsBuilder {
         ExecutorService executorService
     ) {
         this.idMap = idMap;
-        this.orientation = orientation;
+        this.direction = direction;
         this.singleTypeRelationshipImporter = singleTypeRelationshipImporter;
         this.loadRelationshipProperty = loadRelationshipProperty;
         this.isMultiGraph = isMultiGraph;
@@ -136,11 +136,11 @@ public class RelationshipsBuilder {
         );
     }
 
-    public RelationshipsAndOrientation build() {
+    public RelationshipsAndDirection build() {
         return buildAll().get(0);
     }
 
-    public List<RelationshipsAndOrientation> buildAll() {
+    public List<RelationshipsAndDirection> buildAll() {
         return buildAll(Optional.empty(), Optional.empty());
     }
 
@@ -150,7 +150,7 @@ public class RelationshipsBuilder {
      *                           has been drained and its contents are written to the adjacency list. The consumer receives the number
      *                           of relationships that have been written. Implementations must be thread-safe.
      */
-    public List<RelationshipsAndOrientation> buildAll(
+    public List<RelationshipsAndDirection> buildAll(
         Optional<AdjacencyCompressor.ValueMapper> mapper,
         Optional<LongConsumer> drainCountConsumer
     ) {
@@ -181,7 +181,7 @@ public class RelationshipsBuilder {
                         compressedProperties,
                         DefaultValue.DOUBLE_DEFAULT_FALLBACK
                     );
-                    return RelationshipsAndOrientation.of(relationships, orientation);
+                    return RelationshipsAndDirection.of(relationships, direction);
                 }
             ).collect(Collectors.toList());
         } else {
@@ -191,7 +191,7 @@ public class RelationshipsBuilder {
                 adjacencyList
             );
 
-            return List.of(RelationshipsAndOrientation.of(relationships, orientation));
+            return List.of(RelationshipsAndDirection.of(relationships, direction));
         }
     }
 

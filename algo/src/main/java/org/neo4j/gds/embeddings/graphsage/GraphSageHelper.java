@@ -276,10 +276,9 @@ public final class GraphSageHelper {
     private static Map<NodeLabel, Set<String>> propertyKeysPerNodeLabel(GraphSchema graphSchema) {
         return graphSchema
             .nodeSchema()
-            .properties()
-            .entrySet()
+            .entries()
             .stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().keySet()));
+            .collect(Collectors.toMap(e -> e.identifier, e -> e.properties().keySet()));
     }
 
     private static Map<NodeLabel, Set<String>> filteredPropertyKeysPerNodeLabel(Graph graph, GraphSageTrainConfig config) {

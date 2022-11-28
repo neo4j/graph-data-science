@@ -147,7 +147,7 @@ class GraphListProcTest extends BaseProcTest {
                 ),
                 "schemaWithOrientation", map(
                     "nodes", map("A", map()),
-                    "relationships", map("REL", map("orientation", "NATURAL", "properties", map())),
+                    "relationships", map("REL", map("direction", "DIRECTED", "properties", map())),
                     "graphProperties", map()
                 ),
                 "nodeCount", 2L,
@@ -270,7 +270,7 @@ class GraphListProcTest extends BaseProcTest {
                 ),
                 "schemaWithOrientation", map(
                     "nodes", map("__ALL__", map()),
-                    "relationships", map("REL", map("orientation", "NATURAL", "properties", map())),
+                    "relationships", map("REL", map("direction", "DIRECTED", "properties", map())),
                     "graphProperties", map()
                 ),
                 "nodeCount", 10L,
@@ -333,7 +333,7 @@ class GraphListProcTest extends BaseProcTest {
                 ),
                 "schemaWithOrientation", map(
                     "nodes", map(ALL_NODES.name, map()),
-                    "relationships", map(ALL_RELATIONSHIPS.name, map("orientation", "NATURAL", "properties", map())),
+                    "relationships", map(ALL_RELATIONSHIPS.name, map("direction", "DIRECTED", "properties", map())),
                     "graphProperties", map()
                 ),
                 "configuration", new Condition<>(config -> {

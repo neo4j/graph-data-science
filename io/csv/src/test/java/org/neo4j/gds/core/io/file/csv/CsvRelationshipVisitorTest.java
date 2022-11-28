@@ -21,14 +21,15 @@ package org.neo4j.gds.core.io.file.csv;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipVisitor.END_ID_COLUMN_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipVisitor.START_ID_COLUMN_NAME;
 
@@ -75,18 +76,19 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
     }
     
     @Test
-    void visitNodesWithLabelsAndProperties() {
+    void visitRelationshipsWithTypesAndProperties() {
         var aType = RelationshipType.of("A");
         var bType = RelationshipType.of("B");
 
-        var relationshipSchema = RelationshipSchema.builder()
-            .addProperty(aType, NATURAL, "foo", ValueType.LONG)
-            .addProperty(aType, NATURAL, "bar", ValueType.LONG)
+        var relationshipSchema = RelationshipSchema.empty();
+        relationshipSchema.getOrCreateRelationshipType(aType, Direction.DIRECTED)
+            .addProperty("foo", ValueType.LONG, PropertyState.PERSISTENT)
+            .addProperty("bar", ValueType.LONG, PropertyState.PERSISTENT);
 
-            .addProperty(bType, NATURAL, "bar", ValueType.LONG)
-            .addProperty(bType, NATURAL, "baz", ValueType.DOUBLE)
+        relationshipSchema.getOrCreateRelationshipType(bType, Direction.DIRECTED)
+            .addProperty("bar", ValueType.LONG, PropertyState.PERSISTENT)
+            .addProperty("baz", ValueType.DOUBLE, PropertyState.PERSISTENT);
 
-            .build();
         var relationshipVisitor= new CsvRelationshipVisitor(tempDir, relationshipSchema);
 
         // :A

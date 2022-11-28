@@ -28,15 +28,14 @@ import org.neo4j.gds.core.Aggregation;
 
 import java.util.List;
 
-import static org.neo4j.gds.Orientation.NATURAL;
-import static org.neo4j.gds.Orientation.REVERSE;
-import static org.neo4j.gds.Orientation.UNDIRECTED;
+import static org.neo4j.gds.api.schema.Direction.DIRECTED;
+import static org.neo4j.gds.api.schema.Direction.UNDIRECTED;
 import static org.neo4j.gds.core.io.file.csv.CsvNodeSchemaVisitor.DEFAULT_VALUE_COLUMN_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvNodeSchemaVisitor.PROPERTY_KEY_COLUMN_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvNodeSchemaVisitor.STATE_COLUMN_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvNodeSchemaVisitor.VALUE_TYPE_COLUMN_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipSchemaVisitor.AGGREGATION_COLUMN_NAME;
-import static org.neo4j.gds.core.io.file.csv.CsvRelationshipSchemaVisitor.ORIENTATION_COLUMN_NAME;
+import static org.neo4j.gds.core.io.file.csv.CsvRelationshipSchemaVisitor.DIRECTION_COLUMN_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipSchemaVisitor.RELATIONSHIP_SCHEMA_FILE_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipSchemaVisitor.RELATIONSHIP_TYPE_COLUMN_NAME;
 
@@ -44,7 +43,7 @@ public class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
 
     public static final List<String> RELATIONSHIP_SCHEMA_COLUMNS = List.of(
         RELATIONSHIP_TYPE_COLUMN_NAME,
-        ORIENTATION_COLUMN_NAME,
+        DIRECTION_COLUMN_NAME,
         PROPERTY_KEY_COLUMN_NAME,
         VALUE_TYPE_COLUMN_NAME,
         DEFAULT_VALUE_COLUMN_NAME,
@@ -71,7 +70,7 @@ public class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
         relationshipSchemaVisitor.defaultValue(DefaultValue.of(42L));
         relationshipSchemaVisitor.state(PropertyState.PERSISTENT);
         relationshipSchemaVisitor.aggregation(Aggregation.COUNT);
-        relationshipSchemaVisitor.orientation(UNDIRECTED);
+        relationshipSchemaVisitor.direction(UNDIRECTED);
         relationshipSchemaVisitor.endOfEntity();
 
         var relType2 = RelationshipType.of("REL2");
@@ -81,7 +80,7 @@ public class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
         relationshipSchemaVisitor.defaultValue(DefaultValue.of(13.37D));
         relationshipSchemaVisitor.state(PropertyState.TRANSIENT);
         relationshipSchemaVisitor.aggregation(Aggregation.DEFAULT);
-        relationshipSchemaVisitor.orientation(NATURAL);
+        relationshipSchemaVisitor.direction(DIRECTED);
         relationshipSchemaVisitor.endOfEntity();
 
         relationshipSchemaVisitor.close();
@@ -91,7 +90,7 @@ public class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
             List.of(
                 defaultHeaderColumns(),
                 List.of("REL1", "UNDIRECTED", "prop1", "long", "DefaultValue(42)", "COUNT", "PERSISTENT"),
-                List.of("REL2", "NATURAL", "prop2", "double", "DefaultValue(13.37)", "DEFAULT", "TRANSIENT")
+                List.of("REL2", "DIRECTED", "prop2", "double", "DefaultValue(13.37)", "DEFAULT", "TRANSIENT")
             )
         );
     }
@@ -101,12 +100,12 @@ public class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
         var relationshipSchemaVisitor = new CsvRelationshipSchemaVisitor(tempDir);
         RelationshipType rel1 = RelationshipType.of("REL1");
         relationshipSchemaVisitor.relationshipType(rel1);
-        relationshipSchemaVisitor.orientation(UNDIRECTED);
+        relationshipSchemaVisitor.direction(UNDIRECTED);
         relationshipSchemaVisitor.endOfEntity();
 
         RelationshipType rel2 = RelationshipType.of("REL2");
         relationshipSchemaVisitor.relationshipType(rel2);
-        relationshipSchemaVisitor.orientation(REVERSE);
+        relationshipSchemaVisitor.direction(DIRECTED);
         relationshipSchemaVisitor.endOfEntity();
 
         relationshipSchemaVisitor.close();
@@ -116,7 +115,7 @@ public class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
             List.of(
                 defaultHeaderColumns(),
                 List.of("REL1", "UNDIRECTED"),
-                List.of("REL2", "REVERSE")
+                List.of("REL2", "DIRECTED")
             )
         );
     }
@@ -131,12 +130,12 @@ public class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
         relationshipSchemaVisitor.defaultValue(DefaultValue.of(42L));
         relationshipSchemaVisitor.state(PropertyState.PERSISTENT);
         relationshipSchemaVisitor.aggregation(Aggregation.COUNT);
-        relationshipSchemaVisitor.orientation(UNDIRECTED);
+        relationshipSchemaVisitor.direction(UNDIRECTED);
         relationshipSchemaVisitor.endOfEntity();
 
         RelationshipType rel2 = RelationshipType.of("REL2");
         relationshipSchemaVisitor.relationshipType(rel2);
-        relationshipSchemaVisitor.orientation(NATURAL);
+        relationshipSchemaVisitor.direction(DIRECTED);
         relationshipSchemaVisitor.endOfEntity();
 
         relationshipSchemaVisitor.close();
@@ -146,7 +145,7 @@ public class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
             List.of(
                 defaultHeaderColumns(),
                 List.of("REL1", "UNDIRECTED", "prop1", "long", "DefaultValue(42)", "COUNT", "PERSISTENT"),
-                List.of("REL2", "NATURAL")
+                List.of("REL2", "DIRECTED")
             )
         );
     }

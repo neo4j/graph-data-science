@@ -221,13 +221,13 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
     private void exportNodeSchema(GraphStoreInput graphStoreInput) {
         var nodeSchema = graphStoreInput.metaDataStore().nodeSchema();
         try (var nodeSchemaVisitor = nodeSchemaVisitorSupplier.get()) {
-            nodeSchema.properties().forEach((nodeLabel, properties) -> {
-                if (properties.isEmpty()) {
-                    nodeSchemaVisitor.nodeLabel(nodeLabel);
+            nodeSchema.entries().forEach(nodeEntry -> {
+                if (nodeEntry.properties().isEmpty()) {
+                    nodeSchemaVisitor.nodeLabel(nodeEntry.identifier());
                     nodeSchemaVisitor.endOfEntity();
                 } else {
-                    properties.forEach((propertyKey, propertySchema) -> {
-                        nodeSchemaVisitor.nodeLabel(nodeLabel);
+                    nodeEntry.properties().forEach((propertyKey, propertySchema) -> {
+                        nodeSchemaVisitor.nodeLabel(nodeEntry.identifier());
                         nodeSchemaVisitor.key(propertyKey);
                         nodeSchemaVisitor.defaultValue(propertySchema.defaultValue());
                         nodeSchemaVisitor.valueType(propertySchema.valueType());
@@ -242,15 +242,15 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
     private void exportRelationshipSchema(GraphStoreInput graphStoreInput) {
         var relationshipSchema = graphStoreInput.metaDataStore().relationshipSchema();
         try (var relationshipSchemaVisitor = relationshipSchemaVisitorSupplier.get()) {
-            relationshipSchema.properties().forEach((relationshipType, properties) -> {
-                if (properties.isEmpty()) {
-                    relationshipSchemaVisitor.relationshipType(relationshipType);
-                    relationshipSchemaVisitor.orientation(relationshipSchema.orientation(relationshipType));
+            relationshipSchema.entries().forEach(relationshipEntry -> {
+                if (relationshipEntry.properties().isEmpty()) {
+                    relationshipSchemaVisitor.relationshipType(relationshipEntry.identifier());
+                    relationshipSchemaVisitor.direction(relationshipEntry.direction());
                     relationshipSchemaVisitor.endOfEntity();
                 } else {
-                    properties.forEach((propertyKey, propertySchema) -> {
-                        relationshipSchemaVisitor.relationshipType(relationshipType);
-                        relationshipSchemaVisitor.orientation(relationshipSchema.orientation(relationshipType));
+                    relationshipEntry.properties().forEach((propertyKey, propertySchema) -> {
+                        relationshipSchemaVisitor.relationshipType(relationshipEntry.identifier());
+                        relationshipSchemaVisitor.direction(relationshipEntry.direction());
                         relationshipSchemaVisitor.key(propertyKey);
                         relationshipSchemaVisitor.defaultValue(propertySchema.defaultValue());
                         relationshipSchemaVisitor.valueType(propertySchema.valueType());

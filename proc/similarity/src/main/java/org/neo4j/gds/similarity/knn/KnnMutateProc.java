@@ -143,7 +143,7 @@ public class KnnMutateProc extends AlgoBaseProc<Knn, Knn.Result, KnnMutateConfig
                         relationshipType,
                         Optional.of(config.mutateProperty()),
                         Optional.of(NumberType.FLOATING_POINT),
-                        similarityGraphResult.orientation(),
+                        similarityGraphResult.direction(),
                         resultRelationships
                     );
             }

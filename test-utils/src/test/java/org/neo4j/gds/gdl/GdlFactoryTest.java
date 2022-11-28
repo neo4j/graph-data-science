@@ -29,10 +29,11 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
-import org.neo4j.gds.core.Aggregation;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -195,29 +196,33 @@ class GdlFactoryTest {
         );
 
         var nodeSchema = graph.schema().nodeSchema();
-        var expectedNodeSchema = NodeSchema
-            .builder()
-            .addProperty(NodeLabel.of("A"), "double", ValueType.DOUBLE)
-            .addProperty(NodeLabel.of("A"), "long", ValueType.LONG)
-            .addProperty(NodeLabel.of("A"), "doubleArray", ValueType.DOUBLE_ARRAY)
-            .addProperty(NodeLabel.of("A"), "longArray", ValueType.LONG_ARRAY)
-            .addProperty(NodeLabel.of("B"), "double", ValueType.DOUBLE)
-            .addProperty(NodeLabel.of("B"), "long", ValueType.LONG)
-            .addLabel(NodeLabel.of("C"))
-            .build();
+        var expectedNodeSchema = NodeSchema.empty();
 
+        expectedNodeSchema.getOrCreateLabel(NodeLabel.of("A"))
+            .addProperty("double", ValueType.DOUBLE)
+            .addProperty("long", ValueType.LONG)
+            .addProperty("doubleArray", ValueType.DOUBLE_ARRAY)
+            .addProperty("longArray", ValueType.LONG_ARRAY);
+
+        expectedNodeSchema.getOrCreateLabel(NodeLabel.of("B"))
+            .addProperty("double", ValueType.DOUBLE)
+            .addProperty("long", ValueType.LONG);
+
+        expectedNodeSchema.getOrCreateLabel(NodeLabel.of("C"));
         assertThat(nodeSchema).isEqualTo(expectedNodeSchema);
 
         var relationshipSchema = graph.schema().relationshipSchema();
-        var expectedRelationshipSchema = RelationshipSchema
-            .builder()
-            .addProperty(RelationshipType.of("A"), NATURAL, "prop1", ValueType.DOUBLE, Aggregation.DEFAULT)
-            .addProperty(RelationshipType.of("A"), NATURAL, "prop2", ValueType.DOUBLE, Aggregation.DEFAULT)
-            .addProperty(RelationshipType.of("B"), NATURAL, "prop1", ValueType.DOUBLE, Aggregation.DEFAULT)
-            .addProperty(RelationshipType.of("B"), NATURAL, "prop3", ValueType.DOUBLE, Aggregation.DEFAULT)
-            .addRelationshipType(RelationshipType.of("C"), NATURAL)
-            .build();
+        var expectedRelationshipSchema = RelationshipSchema.empty();
 
+        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("A"), Direction.DIRECTED)
+            .addProperty("prop1", ValueType.DOUBLE, PropertyState.PERSISTENT)
+            .addProperty("prop2", ValueType.DOUBLE, PropertyState.PERSISTENT);
+
+        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("B"), Direction.DIRECTED)
+            .addProperty("prop1", ValueType.DOUBLE, PropertyState.PERSISTENT)
+            .addProperty("prop3", ValueType.DOUBLE, PropertyState.PERSISTENT);
+
+        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("C"), Direction.DIRECTED);
         assertThat(relationshipSchema).isEqualTo(expectedRelationshipSchema);
     }
 
@@ -244,14 +249,18 @@ class GdlFactoryTest {
                 .build()
         ).build().build();
 
-        var expectedRelationshipSchema = RelationshipSchema
-            .builder()
-            .addProperty(RelationshipType.of("A"), orientation, "prop1", ValueType.DOUBLE, Aggregation.DEFAULT)
-            .addProperty(RelationshipType.of("A"), orientation, "prop2", ValueType.DOUBLE, Aggregation.DEFAULT)
-            .addProperty(RelationshipType.of("B"), orientation, "prop1", ValueType.DOUBLE, Aggregation.DEFAULT)
-            .addProperty(RelationshipType.of("B"), orientation, "prop3", ValueType.DOUBLE, Aggregation.DEFAULT)
-            .addRelationshipType(RelationshipType.of("C"), orientation)
-            .build();
+        var expectedRelationshipSchema = RelationshipSchema.empty();
+
+        var direction = Direction.fromOrientation(orientation);
+        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("A"), direction)
+            .addProperty("prop1", ValueType.DOUBLE, PropertyState.PERSISTENT)
+            .addProperty("prop2", ValueType.DOUBLE, PropertyState.PERSISTENT);
+
+        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("B"), direction)
+            .addProperty("prop1", ValueType.DOUBLE, PropertyState.PERSISTENT)
+            .addProperty("prop3", ValueType.DOUBLE, PropertyState.PERSISTENT);
+
+        expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("C"), direction);
 
         assertThat(graphStore.schema().relationshipSchema()).isEqualTo(expectedRelationshipSchema);
     }

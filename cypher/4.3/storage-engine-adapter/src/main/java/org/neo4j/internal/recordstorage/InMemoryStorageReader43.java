@@ -254,25 +254,20 @@ public class InMemoryStorageReader43 implements StorageReader {
         int nodePropertyCount = graphStore
             .schema()
             .nodeSchema()
-            .properties()
-            .values()
-            .stream()
-            .mapToInt(map -> map.keySet().size())
-            .sum();
+            .unionProperties()
+            .size();
         int relPropertyCount = graphStore
             .schema()
             .relationshipSchema()
-            .properties()
-            .values()
-            .stream()
-            .mapToInt(map -> map.keySet().size())
-            .sum();
+            .unionProperties()
+            .size();
+
         return nodePropertyCount + relPropertyCount;
     }
 
     @Override
     public int relationshipTypeCount() {
-        return graphStore.schema().relationshipSchema().properties().keySet().size();
+        return graphStore.schema().relationshipSchema().entries().size();
     }
 
     @Override

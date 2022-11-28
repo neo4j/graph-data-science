@@ -18,6 +18,7 @@ dependencies {
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':graph-schema-api')
 
     implementation project(':executor')
     implementation project(':memory-usage')
@@ -36,6 +37,7 @@ dependencies {
     testAnnotationProcessor project(':annotations')
 
     testImplementation project(':proc-test')
+    testImplementation project(':graph-schema-api')
     testImplementation group: 'org.mockito', name:'mockito-junit-jupiter', version: ver.'mockito-junit-jupiter'
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'

@@ -54,7 +54,7 @@ public final class CanonicalAdjacencyMatrix {
 
             String sortedProperties = g.nodeLabels(nodeId)
                 .stream()
-                .flatMap(label -> g.schema().nodeSchema().properties().get(label).keySet().stream())
+                .flatMap(label -> g.schema().nodeSchema().allProperties(label).stream())
                 .distinct()
                 .map(propertyKey -> {
                     var nodeProperties = g.nodeProperties(propertyKey);
