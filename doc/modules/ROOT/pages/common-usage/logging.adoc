@@ -39,7 +39,7 @@ It will also show how tasks are structured as a tree and print progress for each
 
 [NOTE]
 ====
-For administrator users, this procedure will also list the running tasks from other users.
+For users with administrator privileges, this procedure will list the running tasks of all users.
 ====
 
 [[logging-progress-logging-syntax]]
