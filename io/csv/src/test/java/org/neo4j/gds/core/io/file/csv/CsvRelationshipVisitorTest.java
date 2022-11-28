@@ -21,6 +21,7 @@ package org.neo4j.gds.core.io.file.csv;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.RelationshipSchema;
@@ -81,12 +82,12 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
 
         var relationshipSchema = RelationshipSchema.empty();
         relationshipSchema.getOrCreateRelationshipType(aType, Direction.DIRECTED)
-            .addProperty("foo", ValueType.LONG)
-            .addProperty("bar", ValueType.LONG);
+            .addProperty("foo", ValueType.LONG, PropertyState.PERSISTENT)
+            .addProperty("bar", ValueType.LONG, PropertyState.PERSISTENT);
 
         relationshipSchema.getOrCreateRelationshipType(bType, Direction.DIRECTED)
-            .addProperty("bar", ValueType.LONG)
-            .addProperty("baz", ValueType.DOUBLE);
+            .addProperty("bar", ValueType.LONG, PropertyState.PERSISTENT)
+            .addProperty("baz", ValueType.DOUBLE, PropertyState.PERSISTENT);
 
         var relationshipVisitor= new CsvRelationshipVisitor(tempDir, relationshipSchema);
 

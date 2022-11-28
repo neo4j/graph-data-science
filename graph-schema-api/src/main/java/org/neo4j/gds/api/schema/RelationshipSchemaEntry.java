@@ -84,19 +84,15 @@ public class RelationshipSchemaEntry extends ElementSchemaEntry<RelationshipSche
         return new RelationshipSchemaEntry(this.identifier(), this.direction, unionProperties(other.properties));
     }
 
-    public RelationshipSchemaEntry addProperty(String propertyKey, ValueType valueType) {
-        return addProperty(propertyKey, valueType, Aggregation.DEFAULT);
-    }
-
-    public RelationshipSchemaEntry addProperty(String propertyKey, ValueType valueType, Aggregation aggregation) {
+    public RelationshipSchemaEntry addProperty(String propertyKey, ValueType valueType, PropertyState propertyState) {
         return addProperty(
             propertyKey,
             RelationshipPropertySchema.of(
                 propertyKey,
                 valueType,
                 valueType.fallbackValue(),
-                PropertyState.PERSISTENT,
-                aggregation
+                propertyState,
+                Aggregation.DEFAULT
             )
         );
     }

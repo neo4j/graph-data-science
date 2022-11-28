@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
@@ -559,10 +560,7 @@ class RandomGraphGeneratorTest {
                 .nodePropertyProducer(PropertyProducer.randomLong("nodeProp", 0, 42))
                 .relationshipDistribution(RelationshipDistribution.RANDOM)
                 .build(),
-            NodeSchema
-                .empty()
-                .addLabel(NodeLabel.of("A"))
-                .addProperty(NodeLabel.of("A"), "nodeProp", ValueType.LONG),
+            NodeSchema.empty().addLabel(NodeLabel.of("A")).addProperty(NodeLabel.of("A"), "nodeProp", ValueType.LONG),
             RelationshipSchema.empty().addRelationshipType(RelationshipType.of("REL"), Direction.DIRECTED)
         ), Arguments.of("relationship type and node property",
             RandomGraphGenerator
@@ -574,9 +572,12 @@ class RandomGraphGeneratorTest {
                 .relationshipDistribution(RelationshipDistribution.RANDOM)
                 .build(),
             NodeSchema.empty().addLabel(NodeLabel.ALL_NODES),
-            RelationshipSchema
-                .empty()
-                .addProperty(RelationshipType.of("FOOBAR"), Direction.DIRECTED, "relProperty", ValueType.DOUBLE)
+            RelationshipSchema.empty().addProperty(RelationshipType.of("FOOBAR"),
+                Direction.DIRECTED,
+                "relProperty",
+                ValueType.DOUBLE,
+                PropertyState.PERSISTENT
+            )
         ), Arguments.of("node label, node property, relationship type and relationship property",
             RandomGraphGenerator
                 .builder()
@@ -588,13 +589,13 @@ class RandomGraphGeneratorTest {
                 .relationshipPropertyProducer(PropertyProducer.randomDouble("relProp", 0, 42))
                 .relationshipDistribution(RelationshipDistribution.RANDOM)
                 .build(),
-            NodeSchema
-                .empty()
-                .addLabel(NodeLabel.of("A"))
-                .addProperty(NodeLabel.of("A"), "nodeProp", ValueType.LONG),
-            RelationshipSchema
-                .empty()
-                .addProperty(RelationshipType.of("FOOBAR"), Direction.DIRECTED, "relProp", ValueType.DOUBLE)
+            NodeSchema.empty().addLabel(NodeLabel.of("A")).addProperty(NodeLabel.of("A"), "nodeProp", ValueType.LONG),
+            RelationshipSchema.empty().addProperty(RelationshipType.of("FOOBAR"),
+                Direction.DIRECTED,
+                "relProp",
+                ValueType.DOUBLE,
+                PropertyState.PERSISTENT
+            )
         ), Arguments.of("relationship type, relationship property, and undirected orientation",
             RandomGraphGenerator
                 .builder()
@@ -609,7 +610,12 @@ class RandomGraphGeneratorTest {
             NodeSchema.empty().addLabel(NodeLabel.of("A")),
             RelationshipSchema
                 .empty()
-                .addProperty(RelationshipType.of("FOOBAR"), UNDIRECTED, "relProp", ValueType.DOUBLE)
+                .addProperty(RelationshipType.of("FOOBAR"),
+                    UNDIRECTED,
+                    "relProp",
+                    ValueType.DOUBLE,
+                    PropertyState.PERSISTENT
+                )
         ));
     }
 }

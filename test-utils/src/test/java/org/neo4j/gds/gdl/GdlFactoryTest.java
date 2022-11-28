@@ -29,6 +29,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.NodeSchema;
@@ -214,12 +215,12 @@ class GdlFactoryTest {
         var expectedRelationshipSchema = RelationshipSchema.empty();
 
         expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("A"), Direction.DIRECTED)
-            .addProperty("prop1", ValueType.DOUBLE)
-            .addProperty("prop2", ValueType.DOUBLE);
+            .addProperty("prop1", ValueType.DOUBLE, PropertyState.PERSISTENT)
+            .addProperty("prop2", ValueType.DOUBLE, PropertyState.PERSISTENT);
 
         expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("B"), Direction.DIRECTED)
-            .addProperty("prop1", ValueType.DOUBLE)
-            .addProperty("prop3", ValueType.DOUBLE);
+            .addProperty("prop1", ValueType.DOUBLE, PropertyState.PERSISTENT)
+            .addProperty("prop3", ValueType.DOUBLE, PropertyState.PERSISTENT);
 
         expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("C"), Direction.DIRECTED);
         assertThat(relationshipSchema).isEqualTo(expectedRelationshipSchema);
@@ -252,12 +253,12 @@ class GdlFactoryTest {
 
         var direction = Direction.fromOrientation(orientation);
         expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("A"), direction)
-            .addProperty("prop1", ValueType.DOUBLE)
-            .addProperty("prop2", ValueType.DOUBLE);
+            .addProperty("prop1", ValueType.DOUBLE, PropertyState.PERSISTENT)
+            .addProperty("prop2", ValueType.DOUBLE, PropertyState.PERSISTENT);
 
         expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("B"), direction)
-            .addProperty("prop1", ValueType.DOUBLE)
-            .addProperty("prop3", ValueType.DOUBLE);
+            .addProperty("prop1", ValueType.DOUBLE, PropertyState.PERSISTENT)
+            .addProperty("prop3", ValueType.DOUBLE, PropertyState.PERSISTENT);
 
         expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("C"), direction);
 

@@ -25,6 +25,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -147,7 +148,8 @@ public final class RandomGraphGenerator {
         var entry = relationshipSchema.getOrCreateRelationshipType(relationshipType, direction);
         maybeRelationshipPropertyProducer.ifPresent(pp -> entry.addProperty(
             pp.getPropertyName(),
-            pp.propertyType()
+            pp.propertyType(),
+            PropertyState.PERSISTENT
         ));
         return relationshipSchema;
     }

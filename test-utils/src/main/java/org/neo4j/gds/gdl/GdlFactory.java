@@ -412,7 +412,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             var relType = RelationshipType.of(edge.getLabel());
             var entry = relationshipSchema.getOrCreateRelationshipType(relType, orientation);
             edge.getProperties().keySet().forEach(propertyKey ->
-                entry.addProperty(propertyKey, ValueType.DOUBLE)
+                entry.addProperty(propertyKey, ValueType.DOUBLE, PropertyState.PERSISTENT)
             );
         });
 

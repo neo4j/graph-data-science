@@ -20,8 +20,8 @@
 package org.neo4j.gds.api.schema;
 
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.Aggregation;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -99,20 +99,13 @@ public class RelationshipSchema extends ElementSchema<RelationshipSchema, Relati
     }
 
     public RelationshipSchema addProperty(
-        RelationshipType relationshipType, Direction direction, String propertyKey, ValueType valueType
-    ) {
-        getOrCreateRelationshipType(relationshipType, direction).addProperty(propertyKey, valueType);
-        return this;
-    }
-
-    public RelationshipSchema addProperty(
         RelationshipType relationshipType,
         Direction direction,
         String propertyKey,
         ValueType valueType,
-        Aggregation aggregation
+        PropertyState propertyState
     ) {
-        getOrCreateRelationshipType(relationshipType, direction).addProperty(propertyKey, valueType, aggregation);
+        getOrCreateRelationshipType(relationshipType, direction).addProperty(propertyKey, valueType, propertyState);
         return this;
     }
 
