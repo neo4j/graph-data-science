@@ -45,12 +45,12 @@ public class GraphWriteNodeLabelProc extends CatalogProc {
     @Context
     public NodeLabelExporterBuilder<? extends NodeLabelExporter> nodeLabelExporterBuilder;
 
-    @Procedure(name = "gds.alpha.graph.nodeLabel.writeFiltered", mode = WRITE)
+    @Procedure(name = "gds.alpha.graph.nodeLabel.write", mode = WRITE)
     @Description("Writes the given node Label to an online Neo4j database.")
     public Stream<WriteLabelResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeLabel") String nodeLabel,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+        @Name(value = "configuration") Map<String, Object> configuration
     ) throws ParseException {
 
         ProcPreconditions.check();

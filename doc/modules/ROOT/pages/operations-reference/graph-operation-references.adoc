@@ -72,5 +72,5 @@
 |Drop a graph property from a named graph          | `gds.alpha.graph.graphProperty.drop`
 |Stream a graph property to the procedure caller   | `gds.alpha.graph.graphProperty.stream`
 |Sample a subgraph using random walk with restarts | `gds.alpha.graph.sample.rwr`
-|Write node labels do the database                 | `gds.alpha.graph.nodeLabel.writeFiltered`
+|Write node labels do the database                 | `gds.alpha.graph.nodeLabel.write`
 |===

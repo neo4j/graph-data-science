@@ -65,7 +65,7 @@ class GraphWriteNodeLabelProcTest extends BaseProcTest {
         );
 
         runQuery(
-            "CALL gds.alpha.graph.nodeLabel.writeFiltered('graph', 'TestLabel', { nodeFilter: 'n:A AND n.p > 1.0' }) YIELD nodeLabelsWritten",
+            "CALL gds.alpha.graph.nodeLabel.write('graph', 'TestLabel', { nodeFilter: 'n:A AND n.p > 1.0' }) YIELD nodeLabelsWritten",
             result -> {
                 assertThat(result.hasNext()).isTrue();
 
