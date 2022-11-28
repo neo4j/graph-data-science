@@ -27,7 +27,7 @@ public enum Direction {
         public Orientation toOrientation() {
             return Orientation.NATURAL;
         }
-    }    ,
+    },
     UNDIRECTED {
         @Override
         public Orientation toOrientation() {
