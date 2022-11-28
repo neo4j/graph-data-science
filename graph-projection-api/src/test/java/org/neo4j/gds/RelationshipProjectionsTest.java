@@ -38,8 +38,11 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.ElementProjection.PROPERTIES_KEY;
+import static org.neo4j.gds.RelationshipProjection.INDEX_INVERSE_KEY;
 import static org.neo4j.gds.RelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.gds.RelationshipProjection.TYPE_KEY;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
@@ -54,7 +57,8 @@ class RelationshipProjectionsTest {
             "MY_TYPE", Map.of(
                 "type", "T",
                 "orientation", "NATURAL",
-                "aggregation", "SINGLE"
+                "aggregation", "SINGLE",
+                "indexInverse", true
             ));
         noProperties.put(
             "ANOTHER", Map.of(
@@ -69,13 +73,20 @@ class RelationshipProjectionsTest {
         assertThat(projections.allProjections(), hasSize(2));
         assertThat(
             projections.getFilter(RelationshipType.of("MY_TYPE")),
-            equalTo(RelationshipProjection.of("T", Orientation.NATURAL, SINGLE))
-        );
+            equalTo(RelationshipProjection
+                .builder()
+                .type("T")
+                .aggregation(SINGLE)
+                .orientation(Orientation.NATURAL)
+                .indexInverse(true)
+                .build()
+            ));
         assertThat(
             projections.getFilter(RelationshipType.of("ANOTHER")),
             equalTo(RelationshipProjection
                 .builder()
                 .type("FOO")
+                .indexInverse(false)
                 .properties(PropertyMappings
                     .builder()
                     .addMapping(PropertyMapping.of("prop1", DefaultValue.DEFAULT))
@@ -219,6 +230,19 @@ class RelationshipProjectionsTest {
             )
         );
         assertThat(projections.typeFilter(), equalTo("T|FOO"));
+    }
+
+    @Test
+    void shouldHandleIndexInverse() {
+        // default
+        var projection = RelationshipProjection.fromMap(Map.of(), RelationshipType.of("FOO"));
+        assertFalse(projection.indexInverse());
+        // explicitly set
+        projection = RelationshipProjection.fromMap(Map.of(INDEX_INVERSE_KEY, true), RelationshipType.of("FOO"));
+        assertTrue(projection.indexInverse());
+        // explicitly unset
+        projection = RelationshipProjection.fromMap(Map.of(INDEX_INVERSE_KEY, false), RelationshipType.of("FOO"));
+        assertFalse(projection.indexInverse());
     }
 
     static Stream<Arguments> syntacticSugarsSimple() {

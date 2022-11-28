@@ -52,6 +52,11 @@ public abstract class RelationshipProjection extends ElementProjection {
     }
 
     @Value.Default
+    public boolean indexInverse() {
+        return false;
+    }
+
+    @Value.Default
     @Value.Parameter(false)
     @Override
     public PropertyMappings properties() {
@@ -66,6 +71,7 @@ public abstract class RelationshipProjection extends ElementProjection {
     public static final String TYPE_KEY = "type";
     public static final String ORIENTATION_KEY = "orientation";
     public static final String AGGREGATION_KEY = "aggregation";
+    public static final String INDEX_INVERSE_KEY = "indexInverse";
 
     public static RelationshipProjection fromMap(Map<String, Object> map, RelationshipType relationshipType) {
         RelationshipProjection.Builder builder = RelationshipProjection.builder();
@@ -76,6 +82,10 @@ public abstract class RelationshipProjection extends ElementProjection {
         builder.type(type);
         if (map.containsKey(ORIENTATION_KEY)) {
             builder.orientation(Orientation.parse(nonEmptyString(map, ORIENTATION_KEY)));
+        }
+        if (map.containsKey(INDEX_INVERSE_KEY)) {
+            boolean indexInverse = (boolean) map.get(INDEX_INVERSE_KEY);
+            builder.indexInverse(indexInverse);
         }
         if (map.containsKey(AGGREGATION_KEY)) {
             Aggregation aggregation = Aggregation.parse(nonEmptyString(map, AGGREGATION_KEY));
@@ -138,6 +148,7 @@ public abstract class RelationshipProjection extends ElementProjection {
         value.put(TYPE_KEY, type());
         value.put(ORIENTATION_KEY, orientation().name());
         value.put(AGGREGATION_KEY, aggregation().name());
+        value.put(INDEX_INVERSE_KEY, indexInverse());
     }
 
     @Override
@@ -170,7 +181,13 @@ public abstract class RelationshipProjection extends ElementProjection {
     }
 
     private static void validateConfigKeys(Map<String, Object> map) {
-        ConfigKeyValidation.requireOnlyKeysFrom(List.of(TYPE_KEY, ORIENTATION_KEY, AGGREGATION_KEY, PROPERTIES_KEY), map.keySet());
+        ConfigKeyValidation.requireOnlyKeysFrom(List.of(
+            TYPE_KEY,
+            ORIENTATION_KEY,
+            AGGREGATION_KEY,
+            PROPERTIES_KEY,
+            INDEX_INVERSE_KEY
+        ), map.keySet());
     }
 
     @org.immutables.builder.Builder.AccessibleFields
