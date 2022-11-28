@@ -19,14 +19,15 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.core.features.FeatureExtraction;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,8 @@ import java.util.Set;
 import java.util.SplittableRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 /**
  * Based on the paper "Hashing-Accelerated Graph Neural Networks for Link Prediction"
@@ -44,12 +47,15 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
     private final Graph graph;
     private final SplittableRandom rng;
     private final HashGNNConfig config;
+    private final MutableLong currentTotalFeatureCount = new MutableLong();
 
     public HashGNN(Graph graph, HashGNNConfig config, ProgressTracker progressTracker) {
         super(progressTracker);
         this.graph = graph;
         this.config = config;
-        this.randomSeed = config.randomSeed().orElse((new SplittableRandom().nextLong()));
+
+        long tempRandomSeed = config.randomSeed().orElse((new SplittableRandom().nextLong()));
+        this.randomSeed = new SplittableRandom(tempRandomSeed).nextLong();
         this.rng = new SplittableRandom(randomSeed);
     }
 
@@ -80,41 +86,26 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
             .collect(Collectors.toList())
             : List.of(graphCopy);
 
-        var embeddingsB = config.binarizeFeatures().isPresent()
-            ? BinarizeTask.compute(graph, rangePartition, config, rng, progressTracker, terminationFlag)
-            : RawFeaturesTask.compute(config, rng, progressTracker, graph, rangePartition, terminationFlag);
-        int embeddingDimension = config.binarizeFeatures().map(FeatureBinarizationConfig::dimension).orElseGet(() -> {
-            var featureExtractors = FeatureExtraction.propertyExtractors(
-                graph,
-                config.featureProperties()
-            );
-            return FeatureExtraction.featureCount(featureExtractors);
-        });
+        var embeddingsB = constructInputEmbeddings(rangePartition);
+        int embeddingDimension = (int) embeddingsB.get(0).size();
+
+        double avgInputActiveFeatures = currentTotalFeatureCount.doubleValue() / graph.nodeCount();
+        progressTracker.logInfo(formatWithLocale(
+            "Density (number of active features) of binary input features is %.4f.",
+            avgInputActiveFeatures
+        ));
 
         var embeddingsA = HugeObjectArray.newArray(HugeAtomicBitSet.class, graph.nodeCount());
         embeddingsA.setAll(unused -> HugeAtomicBitSet.create(embeddingDimension));
 
         double avgDegree = (graph.relationshipCount() / (double) graph.nodeCount());
-        int upperBoundBits = Math.max(Math.min(embeddingDimension, config.embeddingDensity()), 1);
-        int upperBoundSelfExpectedBits = (int) Math.round(upperBoundBits * (1 - Math.pow(
-            1 - (1.0 / upperBoundBits),
-            config.embeddingDensity()
-        )));
-        double upperBoundNeighborExpectedBits = upperBoundBits * (1 - Math.pow(
-            1 - (1.0 / upperBoundBits),
-            avgDegree
-        ));
-        double scaledNeighborInfluence = graph.relationshipCount() == 0 ? 1.0 : upperBoundSelfExpectedBits * config.neighborInfluence() / upperBoundNeighborExpectedBits;
-
-        var hashes = HashTask.compute(
-            embeddingDimension,
-            scaledNeighborInfluence,
-            graphs.size(),
-            config,
-            randomSeed,
-            terminationFlag,
-            progressTracker
-        );
+        double upperBoundNeighborExpectedBits = embeddingDimension == 0
+            ? 1
+            : embeddingDimension * (1 - Math.pow(
+                1 - (1.0 / embeddingDimension),
+                avgDegree
+            )
+            );
 
         progressTracker.beginSubTask("Propagate embeddings");
 
@@ -127,6 +118,19 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
                 currentEmbeddings.get(i).clear();
             }
 
+            double scaledNeighborInfluence = graph.relationshipCount() == 0 ? 1.0 : (currentTotalFeatureCount.doubleValue() / graph.nodeCount()) * config.neighborInfluence() / upperBoundNeighborExpectedBits;
+            currentTotalFeatureCount.setValue(0);
+
+            var hashes = HashTask.compute(
+                embeddingDimension,
+                scaledNeighborInfluence,
+                graphs.size(),
+                config,
+                randomSeed,
+                terminationFlag,
+                progressTracker
+            );
+
             MinHashTask.compute(
                 degreePartition,
                 graphs,
@@ -134,11 +138,18 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
                 embeddingDimension,
                 currentEmbeddings,
                 previousEmbeddings,
-                iteration,
                 hashes,
                 progressTracker,
-                terminationFlag
+                terminationFlag,
+                currentTotalFeatureCount
             );
+
+            double avgActiveFeatures = currentTotalFeatureCount.doubleValue() / graph.nodeCount();
+            progressTracker.logInfo(formatWithLocale(
+                "After iteration %d average node embedding density (number of active features) is %.4f.",
+                iteration,
+                avgActiveFeatures
+            ));
         }
 
         progressTracker.endSubTask("Propagate embeddings");
@@ -201,4 +212,38 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         }
     }
 
+    private HugeObjectArray<HugeAtomicBitSet> constructInputEmbeddings(List<Partition> partition) {
+        if (!config.featureProperties().isEmpty()) {
+            if (config.binarizeFeatures().isPresent()) {
+                return BinarizeTask.compute(
+                    graph,
+                    partition,
+                    config,
+                    rng,
+                    progressTracker,
+                    terminationFlag,
+                    currentTotalFeatureCount
+                );
+            } else {
+                return RawFeaturesTask.compute(
+                    config,
+                    progressTracker,
+                    graph,
+                    partition,
+                    terminationFlag,
+                    currentTotalFeatureCount
+                );
+            }
+        } else {
+            return GenerateFeaturesTask.compute(
+                graph,
+                partition,
+                config,
+                randomSeed,
+                progressTracker,
+                terminationFlag,
+                currentTotalFeatureCount
+            );
+        }
+    }
 }

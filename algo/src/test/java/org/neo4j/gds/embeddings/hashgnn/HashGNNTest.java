@@ -20,17 +20,28 @@
 package org.neo4j.gds.embeddings.hashgnn;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.ResourceUtil;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.loading.ArrayIdMap;
+import org.neo4j.gds.core.loading.LabelInformation;
+import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -38,9 +49,12 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.ml.util.ShuffleUtil;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.SplittableRandom;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -81,21 +95,20 @@ class HashGNNTest {
     private IdFunction doubleIdFunction;
 
     @Test
-    void binaryHighEmbeddingDensityLowNeighborInfluence() {
-        int embeddingDensity = 200;
-        double avgDegree = binaryGraph.relationshipCount() / (double) binaryGraph.nodeCount();
+    void binaryLowNeighborInfluence() {
+        int embeddingDensity = 4;
         var config = HashGNNConfigImpl
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(embeddingDensity)
-            .neighborInfluence(avgDegree / embeddingDensity)
+            .neighborInfluence(0.01)
             .iterations(10)
             .randomSeed(42L)
             .build();
         var result = new HashGNN(binaryGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
         //dimension should be equal to dimension of feature input which is 3
         assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("a")))).containsExactly(1.0, 0.0, 0.0);
-        assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("b")))).containsExactly(1.0, 1.0, 1.0);
+        assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("b")))).containsExactly(0.0, 1.0, 0.0);
         assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("c")))).containsExactly(0.0, 0.0, 1.0);
     }
 
@@ -113,22 +126,6 @@ class HashGNNTest {
         //dimension should be equal to dimension of feature input which is 3
         assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("a")))).containsExactly(1.0, 0.0, 0.0);
         assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("b")))).containsExactly(1.0, 0.0, 1.0);
-        assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("c")))).containsExactly(0.0, 0.0, 1.0);
-    }
-
-    @Test
-    void binaryLowEmbeddingDensity() {
-        var config = HashGNNConfigImpl
-            .builder()
-            .featureProperties(List.of("f1", "f2"))
-            .embeddingDensity(1)
-            .iterations(10)
-            .randomSeed(42L)
-            .build();
-        var result = new HashGNN(binaryGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
-        //dimension should be equal to dimension of feature input which is 3
-        assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("a")))).containsExactly(1.0, 0.0, 0.0);
-        assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("b")))).containsExactly(1.0, 0.0, 0.0);
         assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("c")))).containsExactly(0.0, 0.0, 1.0);
     }
 
@@ -155,7 +152,7 @@ class HashGNNTest {
             .randomSeed(43L);
 
         if (binarize) {
-            configBuilder.binarizeFeatures(Map.of("dimension", 12, "densityLevel", 6));
+            configBuilder.binarizeFeatures(Map.of("dimension", 12));
         }
 
         if (dimReduce) {
@@ -173,23 +170,26 @@ class HashGNNTest {
     }
 
     @Test
-    void shouldRunOnDoublesAndBeDeterministicEqualScaledNeighborInfluence() {
-        int embeddingDensity = 200;
-        int binarizationDimension = 16;
+    void shouldRunOnDoublesAndBeDeterministicEqualNeighborInfluence() {
+        int embeddingDensity = 100;
+        int binarizationDimension = 8;
 
+        // not all random seeds will give b a unique feature
+        // this intends to test that if b has a unique feature before the first iteration, then it also has it after the first iteration
+        // however we simulate what is before the first iteration by running with neighborInfluence 0
         var configBuilder = HashGNNConfigImpl
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(embeddingDensity)
-            .binarizeFeatures(Map.of("dimension", binarizationDimension, "densityLevel", 2))
+            .binarizeFeatures(Map.of("dimension", binarizationDimension))
             .iterations(1)
-            .randomSeed(43L);
+            .randomSeed(42L);
         var configBefore = configBuilder.neighborInfluence(0).build();
         var resultBefore = new HashGNN(doubleGraph, configBefore, ProgressTracker.NULL_TRACKER).compute().embeddings();
 
         var config = configBuilder.neighborInfluence(1.0).build();
         var result = new HashGNN(doubleGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
-        // because of high neighbor influence and high embeddingDensity, we expect the node `b` to have the union of features of its neighbors
+        // because of equal neighbor and self influence and high embeddingDensity, we expect the node `b` to have the union of features of its neighbors plus some of its own features
         // the neighbors are expected to have the same features as their initial projection
 
         double[] embeddingB = result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("b")));
@@ -213,26 +213,27 @@ class HashGNNTest {
 
     @Test
     void shouldRunOnDoublesAndBeDeterministicHighNeighborInfluence() {
-        int embeddingDensity = 50;
-        int binarizationDimension = 16;
+        int embeddingDensity = 100;
+        int binarizationDimension = 8;
 
         var configBuilder = HashGNNConfigImpl
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(embeddingDensity)
-            .binarizeFeatures(Map.of("dimension", binarizationDimension, "densityLevel", 2))
+            .binarizeFeatures(Map.of("dimension", binarizationDimension))
             .iterations(1)
-            .randomSeed(3L);
+            .randomSeed(42L);
         var configBefore = configBuilder.neighborInfluence(0).build();
         var resultBefore = new HashGNN(doubleGraph, configBefore, ProgressTracker.NULL_TRACKER).compute().embeddings();
 
 
         var config = configBuilder
-            .neighborInfluence(4)
+            .neighborInfluence(1000)
             .build();
         var result = new HashGNN(doubleGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
-        // because of equal neighbor and self influence and high embeddingDensity, we expect the node `b` to have the union of features of its neighbors plus some of its own features
+        // because of high neighbor influence and high embeddingDensity, we expect the node `b` to have the union of features of its neighbors
         // the neighbors are expected to have the same features as their initial projection
+
         double[] embeddingB = result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("b")));
         double[] embeddingABefore = resultBefore.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("a")));
         double[] embeddingCBefore = resultBefore.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("c")));
@@ -269,22 +270,22 @@ class HashGNNTest {
     @ParameterizedTest
     @CsvSource(value = {
         // BASE
-        "    10,  4,  10_000, 20_000, 1,  86_695_752",
+        "    10,  4,  10_000, 20_000, 1,  86_324_072",
 
         // Should increase fairly little with higher density
-        "   100,  4,  10_000, 20_000, 1,  91_155_432",
+        "   100,  4,  10_000, 20_000, 1,  87_438_992",
 
         // Should increase fairly little with more iterations
-        "    10, 16,  10_000, 20_000, 1,  88_182_312",
+        "    10, 16,  10_000, 20_000, 1,  86_324_072",
 
         // Should increase almost linearly with node count
-        "    10,  4, 100_000, 20_000, 1, 862_496_112",
+        "    10,  4, 100_000, 20_000, 1, 862_124_432",
 
         // Should be unaffected by relationship count
-        "    10,  4,  10_000, 80_000, 1,  86_695_752",
+        "    10,  4,  10_000, 80_000, 1,  86_324_072",
 
         // Should be unaffected by concurrency
-        "    10,  4,  10_000, 20_000, 8,  86_695_752",
+        "    10,  4,  10_000, 20_000, 8,  86_324_072",
     })
         void shouldEstimateMemory(
         int embeddingDensity,
@@ -326,7 +327,7 @@ class HashGNNTest {
             .iterations(2)
             .randomSeed(42L);
         if (dense) {
-            configBuilder.binarizeFeatures(Map.of("dimension", 16, "densityLevel", 2));
+            configBuilder.binarizeFeatures(Map.of("dimension", 16));
             configBuilder.outputDimension(10);
         }
         var config = configBuilder.build();
@@ -348,5 +349,89 @@ class HashGNNTest {
         Assertions.assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .containsExactlyElementsOf(ResourceUtil.lines(logResource));
+    }
+
+    @Test
+    void shouldBeDeterministicGivenSameOriginalIds() {
+        long nodeCount = 1000;
+        int embeddingDimension = 32;
+        long degree = 4;
+
+        var firstMappedToOriginal = HugeLongArray.newArray(nodeCount);
+        firstMappedToOriginal.setAll(nodeId -> nodeId);
+        var firstOriginalToMappedBuilder = HugeSparseLongArray.builder(nodeCount);
+        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+            firstOriginalToMappedBuilder.set(nodeId, nodeId);
+        }
+        var firstIdMap = new ArrayIdMap(
+            firstMappedToOriginal,
+            firstOriginalToMappedBuilder.build(),
+            LabelInformation.single(new NodeLabel("hello")).build(nodeCount, firstMappedToOriginal::get),
+            nodeCount,
+            nodeCount - 1
+        );
+        RelationshipsBuilder firstRelationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(firstIdMap)
+            .orientation(Orientation.UNDIRECTED)
+            .executorService(Pools.DEFAULT)
+            .build();
+
+        var secondMappedToOriginal = HugeLongArray.newArray(nodeCount);
+        secondMappedToOriginal.setAll(nodeId -> nodeId);
+
+        var gen = ShuffleUtil.createRandomDataGenerator(Optional.of(42L));
+        ShuffleUtil.shuffleArray(secondMappedToOriginal, gen);
+        var secondOriginalToMappedBuilder = HugeSparseLongArray.builder(nodeCount);
+        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+            secondOriginalToMappedBuilder.set(secondMappedToOriginal.get(nodeId), nodeId);
+        }
+
+        var secondIdMap = new ArrayIdMap(
+            secondMappedToOriginal,
+            secondOriginalToMappedBuilder.build(),
+            LabelInformation.single(new NodeLabel("hello")).build(nodeCount, secondMappedToOriginal::get),
+            nodeCount,
+            nodeCount - 1
+        );
+        RelationshipsBuilder secondRelationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(secondIdMap)
+            .orientation(Orientation.UNDIRECTED)
+            .executorService(Pools.DEFAULT)
+            .build();
+
+        var random = new SplittableRandom(42);
+        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+            for (int j = 0; j < degree; j++) {
+                long target = random.nextLong(nodeCount);
+                firstRelationshipsBuilder.add(nodeId, target);
+                secondRelationshipsBuilder.add(nodeId, target);
+            }
+        }
+
+        var firstRelationships = firstRelationshipsBuilder.build();
+        var secondRelationships = secondRelationshipsBuilder.build();
+
+        var firstGraph = GraphFactory.create(firstIdMap, firstRelationships);
+        var secondGraph = GraphFactory.create(secondIdMap, secondRelationships);
+
+        var config = HashGNNConfigImpl
+            .builder()
+            .embeddingDensity(8)
+            .generateFeatures(Map.of("dimension", embeddingDimension, "densityLevel", 2))
+            .iterations(2)
+            .randomSeed(42L)
+            .build();
+
+        var firstEmbeddings = new HashGNN(firstGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
+        var secondEmbeddings = new HashGNN(secondGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
+
+        double cosineSum = 0;
+        for (long originalNodeId = 0; originalNodeId < nodeCount; originalNodeId++) {
+            var firstVector = firstEmbeddings.get(firstGraph.toMappedNodeId(originalNodeId));
+            var secondVector = secondEmbeddings.get(secondGraph.toMappedNodeId(originalNodeId));
+            double cosine = Intersections.cosine(firstVector, secondVector, secondVector.length);
+            cosineSum += cosine;
+        }
+        Assertions.assertThat(cosineSum / nodeCount).isCloseTo(1, Offset.offset(0.000001));
     }
 }

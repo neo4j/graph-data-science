@@ -54,24 +54,15 @@ class RawFeaturesTaskTest {
     @Test
     void shouldPickCorrectFeatures() {
         var partition = new Partition(0, graph.nodeCount());
-        var config = HashGNNConfigImpl
-            .builder()
-            .featureProperties(List.of("f1", "f2"))
-            .embeddingDensity(2)
-            .iterations(100)
-            .build();
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, List.of("f1", "f2"));
         var features = HugeObjectArray.newArray(HugeAtomicBitSet.class, graph.nodeCount());
         var inputDimension = FeatureExtraction.featureCount(featureExtractors);
-        var hashes = List.of(new int[]{4, 2, 9}, new int[]{6, 2, 1});
 
         new RawFeaturesTask(
             partition,
-            config,
             featureExtractors,
             inputDimension,
             features,
-            hashes,
             ProgressTracker.NULL_TRACKER
         ).run();
 
@@ -79,11 +70,11 @@ class RawFeaturesTaskTest {
         var idB = graph.toMappedNodeId(idFunction.of("b"));
         var idC = graph.toMappedNodeId(idFunction.of("c"));
 
-        assertThat(features.get(idA).get(0)).isFalse();
+        assertThat(features.get(idA).get(0)).isTrue();
         assertThat(features.get(idA).get(1)).isTrue();
         assertThat(features.get(idA).get(2)).isTrue();
 
-        assertThat(features.get(idB).get(0)).isFalse();
+        assertThat(features.get(idB).get(0)).isTrue();
         assertThat(features.get(idB).get(1)).isTrue();
         assertThat(features.get(idB).get(2)).isFalse();
 

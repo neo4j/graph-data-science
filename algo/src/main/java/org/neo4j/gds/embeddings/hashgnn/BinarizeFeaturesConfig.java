@@ -17,30 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc;
+package org.neo4j.gds.embeddings.hashgnn;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNMutateProc;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNStreamProc;
-import org.neo4j.gds.scaling.ScalePropertiesMutateProc;
+import org.immutables.value.Value;
+import org.neo4j.gds.annotation.Configuration;
 
-import java.util.List;
+import java.util.Map;
 
-class HashGNNDocTest extends SingleFileDocTestBase {
+@Configuration
+public interface BinarizeFeaturesConfig {
+    @Configuration.IntegerRange(min = 1)
+    int dimension();
 
-    @Override
-    protected List<Class<?>> procedures() {
-        return List.of(
-            HashGNNStreamProc.class,
-            HashGNNMutateProc.class,
-            ScalePropertiesMutateProc.class,
-            GraphProjectProc.class
-        );
+    default double threshold() {
+        return 0.0;
     }
 
-    @Override
-    protected String adocFile() {
-        return "pages/machine-learning/node-embeddings/hashgnn.adoc";
+    @Configuration.ToMap
+    @Value.Auxiliary
+    @Value.Derived
+    default Map<String, Object> toMap() {
+        return Map.of(); // Will be overwritten
     }
-
 }

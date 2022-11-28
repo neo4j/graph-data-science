@@ -53,7 +53,7 @@ class HashTaskTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        assertThat(hashes.size()).isEqualTo(ITERATIONS * EMBEDDING_DENSITY);
+        assertThat(hashes.size()).isEqualTo(EMBEDDING_DENSITY);
         assertThat(hashes.get(0).neighborsAggregationHashes().length).isEqualTo(EMBEDDING_DIMENSION);
         assertThat(hashes.get(0).preAggregationHashes().size()).isEqualTo(NUMBER_OF_RELATIONSHIPS);
         assertThat(hashes.get(0).selfAggregationHashes().length).isEqualTo(EMBEDDING_DIMENSION);

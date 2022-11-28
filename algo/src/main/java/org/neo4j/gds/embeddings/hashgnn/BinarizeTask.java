@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import com.carrotsearch.hppc.BitSet;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -30,44 +30,42 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.features.FeatureConsumer;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.features.FeatureExtractor;
-import org.neo4j.gds.ml.util.ShuffleUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.embeddings.hashgnn.HashGNNCompanion.hashArgMin;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class BinarizeTask implements Runnable {
     private final Partition partition;
-    private final HashGNNConfig config;
     private final HugeObjectArray<HugeAtomicBitSet> truncatedFeatures;
     private final List<FeatureExtractor> featureExtractors;
-    private final int[][] propertyEmbeddings;
-    private final List<int[]> hashesList;
-    private final HashGNN.MinAndArgmin minAndArgMin;
-    private final FeatureBinarizationConfig binarizationConfig;
+    private final double[][] propertyEmbeddings;
+
+    private final double threshold;
+    private final int dimension;
     private final ProgressTracker progressTracker;
+    private long totalFeatureCount;
+
+    private double scalarProductSum;
+
+    private double scalarProductSumOfSquares;
 
     BinarizeTask(
         Partition partition,
-        HashGNNConfig config,
+        BinarizeFeaturesConfig config,
         HugeObjectArray<HugeAtomicBitSet> truncatedFeatures,
         List<FeatureExtractor> featureExtractors,
-        int[][] propertyEmbeddings,
-        List<int[]> hashesList,
+        double[][] propertyEmbeddings,
         ProgressTracker progressTracker
     ) {
         this.partition = partition;
-        this.config = config;
-        this.binarizationConfig = config.binarizeFeatures().orElseThrow();
+        this.dimension = config.dimension();
+        this.threshold = config.threshold();
         this.truncatedFeatures = truncatedFeatures;
         this.featureExtractors = featureExtractors;
         this.propertyEmbeddings = propertyEmbeddings;
-        this.hashesList = hashesList;
-        this.minAndArgMin = new HashGNN.MinAndArgmin();
         this.progressTracker = progressTracker;
     }
 
@@ -77,17 +75,12 @@ class BinarizeTask implements Runnable {
         HashGNNConfig config,
         SplittableRandom rng,
         ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        MutableLong totalFeatureCountOutput
     ) {
         progressTracker.beginSubTask("Binarize node property features");
 
-        var hashesList = new ArrayList<int[]>(config.embeddingDensity());
-        for (int i = 0; i < config.embeddingDensity(); i++) {
-            hashesList.add(HashGNNCompanion.HashTriple.computeHashesFromTriple(
-                config.binarizeFeatures().get().dimension(),
-                HashGNNCompanion.HashTriple.generate(rng)
-            ));
-        }
+        var binarizationConfig = config.binarizeFeatures().orElseThrow();
 
         var featureExtractors = FeatureExtraction.propertyExtractors(
             graph,
@@ -95,18 +88,17 @@ class BinarizeTask implements Runnable {
         );
 
         var inputDimension = FeatureExtraction.featureCount(featureExtractors);
-        var propertyEmbeddings = embedProperties(config, rng, inputDimension);
+        var propertyEmbeddings = embedProperties(binarizationConfig.dimension(), rng, inputDimension);
 
         var truncatedFeatures = HugeObjectArray.newArray(HugeAtomicBitSet.class, graph.nodeCount());
 
         var tasks = partition.stream()
             .map(p -> new BinarizeTask(
                 p,
-                config,
+                binarizationConfig,
                 truncatedFeatures,
                 featureExtractors,
                 propertyEmbeddings,
-                hashesList,
                 progressTracker
             ))
             .collect(Collectors.toList());
@@ -116,90 +108,105 @@ class BinarizeTask implements Runnable {
             .terminationFlag(terminationFlag)
             .run();
 
+        totalFeatureCountOutput.add(tasks.stream().mapToLong(BinarizeTask::totalFeatureCount).sum());
+
+        var squaredSum = tasks.stream().mapToDouble(BinarizeTask::scalarProductSumOfSquares).sum();
+        var sum = tasks.stream().mapToDouble(BinarizeTask::scalarProductSum).sum();
+        long exampleCount = graph.nodeCount() * binarizationConfig.dimension();
+        var avg = sum / exampleCount;
+
+        var variance = (squaredSum - exampleCount * avg * avg) / exampleCount;
+        var std = Math.sqrt(variance);
+
+        progressTracker.logInfo(formatWithLocale(
+            "Hyperplane scalar products have mean %.4f and standard deviation %.4f. A threshold for binarization may be set to the mean plus a few standard deviations.",
+            avg,
+            std
+        ));
+
         progressTracker.endSubTask("Binarize node property features");
 
         return truncatedFeatures;
     }
 
-    // creates a sparse projection array with one row per input feature
+    // creates a random projection vector for each feature
     // (input features vector for each node is the concatenation of the node's properties)
-    // the first half of each row contains indices of positive output features in the projected space
-    // the second half of each row contains indices of negative output features in the projected space
     // this array is used embed the properties themselves from inputDimension to embeddingDimension dimensions.
-    public static int[][] embedProperties(HashGNNConfig config, SplittableRandom rng, int inputDimension) {
-        var binarizationConfig = config.binarizeFeatures().orElseThrow();
-        var permutation = new int[binarizationConfig.dimension()];
-        Arrays.setAll(permutation, i -> i);
-
-        var propertyEmbeddings = new int[inputDimension][];
+    public static double[][] embedProperties(int vectorDimension, SplittableRandom rng, int inputDimension) {
+        var propertyEmbeddings = new double[inputDimension][];
 
         for (int inputFeature = 0; inputFeature < inputDimension; inputFeature++) {
-            ShuffleUtil.shuffleArray(permutation, rng);
-            propertyEmbeddings[inputFeature] = new int[2 * binarizationConfig.densityLevel()];
-            for (int feature = 0; feature < 2 * binarizationConfig.densityLevel(); feature++) {
-                propertyEmbeddings[inputFeature][feature] = permutation[feature];
+            propertyEmbeddings[inputFeature] = new double[vectorDimension];
+            for (int feature = 0; feature < vectorDimension; feature++) {
+                propertyEmbeddings[inputFeature][feature] = boxMullerGaussianRandom(rng);
             }
         }
         return propertyEmbeddings;
     }
 
+    private static double boxMullerGaussianRandom(SplittableRandom rng) {
+        return Math.sqrt(-2 * Math.log(rng.nextDouble(
+            0.0,
+            1.0
+        ))) * Math.cos(2 * Math.PI * rng.nextDouble(0.0, 1.0));
+    }
+
     @Override
     public void run() {
-        var tempFeatureContainer = new BitSet(binarizationConfig.dimension());
-
         partition.consume(nodeId -> {
-            var featureVector = new float[binarizationConfig.dimension()];
+            var featureVector = new float[dimension];
             FeatureExtraction.extract(nodeId, -1, featureExtractors, new FeatureConsumer() {
                 @Override
                 public void acceptScalar(long nodeOffset, int offset, double value) {
-                    for (int feature = 0; feature < binarizationConfig.densityLevel(); feature++) {
-                        int positiveFeature = propertyEmbeddings[offset][feature];
-                        featureVector[positiveFeature] += value;
-                    }
-
-                    for (int feature = binarizationConfig.densityLevel(); feature < 2 * binarizationConfig.densityLevel(); feature++) {
-                        int negativeFeature = propertyEmbeddings[offset][feature];
-                        featureVector[negativeFeature] -= value;
-
+                    for (int feature = 0; feature < dimension; feature++) {
+                        double featureValue = propertyEmbeddings[offset][feature];
+                        featureVector[feature] += value * featureValue;
                     }
                 }
 
                 @Override
                 public void acceptArray(long nodeOffset, int offset, double[] values) {
                     for (int inputFeatureOffset = 0; inputFeatureOffset < values.length; inputFeatureOffset++) {
-                        for (int feature = 0; feature < binarizationConfig.densityLevel(); feature++) {
-                            int positiveFeature = propertyEmbeddings[offset + inputFeatureOffset][feature];
-                            featureVector[positiveFeature] += values[inputFeatureOffset];
-                        }
-                        for (int feature = binarizationConfig.densityLevel(); feature < 2 * binarizationConfig.densityLevel(); feature++) {
-                            int negativeFeature = propertyEmbeddings[offset + inputFeatureOffset][feature];
-                            featureVector[negativeFeature] -= values[inputFeatureOffset];
+                        double value = values[inputFeatureOffset];
+                        for (int feature = 0; feature < dimension; feature++) {
+                            double featureValue = propertyEmbeddings[offset + inputFeatureOffset][feature];
+                            featureVector[feature] += value * featureValue;
                         }
                     }
                 }
             });
 
-            truncatedFeatures.set(nodeId, roundAndSample(tempFeatureContainer, featureVector));
+            var featureSet = round(featureVector);
+            totalFeatureCount += featureSet.cardinality();
+            truncatedFeatures.set(nodeId, featureSet);
         });
 
         progressTracker.logProgress(partition.nodeCount());
     }
 
-    private HugeAtomicBitSet roundAndSample(BitSet tempBitSet, float[] floatVector) {
-        tempBitSet.clear();
+    private HugeAtomicBitSet round(float[] floatVector) {
+        var bitset = HugeAtomicBitSet.create(floatVector.length);
         for (int feature = 0; feature < floatVector.length; feature++) {
-            if (floatVector[feature] > 0) {
-                tempBitSet.set(feature);
+            var scalarProduct = floatVector[feature];
+            scalarProductSum += scalarProduct;
+            scalarProductSumOfSquares += scalarProduct * scalarProduct;
+            if (scalarProduct > threshold) {
+                bitset.set(feature);
             }
         }
-        var sampledBitset = HugeAtomicBitSet.create(binarizationConfig.dimension());
-        for (int i = 0; i < config.embeddingDensity(); i++) {
-            hashArgMin(tempBitSet, hashesList.get(i), minAndArgMin);
-            if (minAndArgMin.argMin != -1) {
-                sampledBitset.set(minAndArgMin.argMin);
-            }
-        }
-        return sampledBitset;
+        return bitset;
+    }
+
+    public long totalFeatureCount() {
+        return totalFeatureCount;
+    }
+
+    public double scalarProductSum() {
+        return scalarProductSum;
+    }
+
+    public double scalarProductSumOfSquares() {
+        return scalarProductSumOfSquares;
     }
 
 }

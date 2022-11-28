@@ -58,24 +58,28 @@ public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithm
     public Task progressTask(Graph graph, CONFIG config) {
         var tasks = new ArrayList<Task>();
 
-        if (config.binarizeFeatures().isPresent()) {
+        if (config.generateFeatures().isPresent()) {
+            tasks.add(Tasks.leaf("Generate base node property features", graph.nodeCount()));
+        } else if (config.binarizeFeatures().isPresent()) {
             tasks.add(Tasks.leaf("Binarize node property features", graph.nodeCount()));
         } else {
             tasks.add(Tasks.leaf("Extract raw node property features", graph.nodeCount()));
         }
 
         int numRelTypes = config.heterogeneous() ? config.relationshipTypes().size() : 1;
-        tasks.add(Tasks.leaf(
-            "Precompute hashes",
-            config.iterations() * config.embeddingDensity() * (1 + 1 + numRelTypes)
-        ));
 
         tasks.add(Tasks.iterativeFixed(
             "Propagate embeddings",
-            () -> List.of(Tasks.leaf(
-                "Propagate embeddings iteration",
-                (2 * graph.nodeCount() + graph.relationshipCount()) * config.embeddingDensity()
-            )),
+            () -> List.of(
+                Tasks.leaf(
+                    "Precompute hashes",
+                    config.embeddingDensity() * (1 + 1 + numRelTypes)
+                ),
+                Tasks.leaf(
+                    "Perform min-hashing",
+                    (2 * graph.nodeCount() + graph.relationshipCount()) * config.embeddingDensity()
+                )
+            ),
             config.iterations()
         ));
 
@@ -92,21 +96,25 @@ public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithm
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
         int FUDGED_BINARY_DIMENSION = 1024;
+        int binaryDimension = config
+            .generateFeatures()
+            .map(GenerateFeaturesConfig::dimension)
+            .orElse(config.binarizeFeatures().map(BinarizeFeaturesConfig::dimension).orElse(FUDGED_BINARY_DIMENSION));
 
-        MemoryEstimations.Builder builder = MemoryEstimations.builder(HashGNN.class);
+        MemoryEstimations.Builder builder = MemoryEstimations.builder(HashGNN.class.getSimpleName());
 
         builder.perNode(
             "Embeddings cache 1",
-            n -> HugeObjectArray.memoryEstimation(n, HugeAtomicBitSet.memoryEstimation(FUDGED_BINARY_DIMENSION))
+            n -> HugeObjectArray.memoryEstimation(n, HugeAtomicBitSet.memoryEstimation(binaryDimension))
         );
         builder.perNode(
             "Embeddings cache 2",
-            n -> HugeObjectArray.memoryEstimation(n, HugeAtomicBitSet.memoryEstimation(FUDGED_BINARY_DIMENSION))
+            n -> HugeObjectArray.memoryEstimation(n, HugeAtomicBitSet.memoryEstimation(binaryDimension))
         );
 
         builder.perGraphDimension("Hashes cache", (dims, concurrency) -> MemoryRange.of(
-            config.embeddingDensity() * config.iterations() * HashTask.Hashes.memoryEstimation(
-                FUDGED_BINARY_DIMENSION,
+            config.embeddingDensity() * HashTask.Hashes.memoryEstimation(
+                binaryDimension,
                 config.heterogeneous() ? dims.relationshipCounts().size() : 1
             )));
 

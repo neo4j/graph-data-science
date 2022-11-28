@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.hashgnn;
 
 import com.carrotsearch.hppc.BitSet;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -38,25 +39,22 @@ import static org.neo4j.gds.embeddings.hashgnn.HashGNNCompanion.hashArgMin;
 class MinHashTask implements Runnable {
     private final List<HashTask.Hashes> hashes;
     private final int k;
-    private final HashGNNConfig config;
     private final int embeddingDimension;
     private final DegreePartition partition;
     private final List<Graph> concurrentGraphs;
     private final HugeObjectArray<HugeAtomicBitSet> currentEmbeddings;
     private final HugeObjectArray<HugeAtomicBitSet> previousEmbeddings;
-    private final int iteration;
     private final TerminationFlag terminationFlag;
     private final ProgressTracker progressTracker;
+    private long totalFeatureCount = 0;
 
     MinHashTask(
         int k,
         DegreePartition partition,
         List<Graph> graphs,
-        HashGNNConfig config,
         int embeddingDimension,
         HugeObjectArray<HugeAtomicBitSet> currentEmbeddings,
         HugeObjectArray<HugeAtomicBitSet> previousEmbeddings,
-        int iteration,
         List<HashTask.Hashes> hashes,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
@@ -64,11 +62,9 @@ class MinHashTask implements Runnable {
         this.k = k;
         this.partition = partition;
         this.concurrentGraphs = graphs.stream().map(Graph::concurrentCopy).collect(Collectors.toList());
-        this.config = config;
         this.embeddingDimension = embeddingDimension;
         this.currentEmbeddings = currentEmbeddings;
         this.previousEmbeddings = previousEmbeddings;
-        this.iteration = iteration;
         this.hashes = hashes;
         this.terminationFlag = terminationFlag;
         this.progressTracker = progressTracker;
@@ -81,12 +77,12 @@ class MinHashTask implements Runnable {
         int embeddingDimension,
         HugeObjectArray<HugeAtomicBitSet> currentEmbeddings,
         HugeObjectArray<HugeAtomicBitSet> previousEmbeddings,
-        int iteration,
         List<HashTask.Hashes> hashes,
         ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        MutableLong totalFeatureCountOutput
     ) {
-        progressTracker.beginSubTask("Propagate embeddings iteration");
+        progressTracker.beginSubTask("Perform min-hashing");
 
         progressTracker.setSteps(config.embeddingDensity() * graphs.get(0).nodeCount());
 
@@ -96,11 +92,9 @@ class MinHashTask implements Runnable {
                     k,
                     p,
                     graphs,
-                    config,
                     embeddingDimension,
                     currentEmbeddings,
                     previousEmbeddings,
-                    iteration,
                     hashes,
                     terminationFlag,
                     progressTracker
@@ -113,7 +107,9 @@ class MinHashTask implements Runnable {
             .terminationFlag(terminationFlag)
             .run();
 
-        progressTracker.endSubTask("Propagate embeddings iteration");
+        totalFeatureCountOutput.add(tasks.stream().mapToLong(MinHashTask::totalFeatureCount).sum());
+
+        progressTracker.endSubTask("Perform min-hashing");
     }
 
     @Override
@@ -125,7 +121,7 @@ class MinHashTask implements Runnable {
 
         terminationFlag.assertRunning();
 
-        var hashesForK = hashes.get(iteration * config.embeddingDensity() + k);
+        var hashesForK = hashes.get(k);
         var neighborsAggregationHashes = hashesForK.neighborsAggregationHashes();
         var selfAggregationHashes = hashesForK.selfAggregationHashes();
         var preAggregationHashes = hashesForK.preAggregationHashes();
@@ -160,10 +156,17 @@ class MinHashTask implements Runnable {
             hashArgMin(neighborsVector, neighborsAggregationHashes, neighborsMinAndArgMin);
             int argMin = (neighborsMinAndArgMin.min < selfMinAndArgMin.min) ? neighborsMinAndArgMin.argMin : selfMinAndArgMin.argMin;
             if (argMin != -1) {
-                currentEmbedding.set(argMin);
+                if (!currentEmbedding.getAndSet(argMin)) {
+                    totalFeatureCount++;
+                }
             }
         });
 
         progressTracker.logSteps(partition.nodeCount());
     }
+
+    public long totalFeatureCount() {
+        return totalFeatureCount;
+    }
+
 }

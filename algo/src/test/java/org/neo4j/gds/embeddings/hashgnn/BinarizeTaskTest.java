@@ -32,8 +32,6 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 
 import java.util.List;
-import java.util.Map;
-import java.util.SplittableRandom;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -56,34 +54,16 @@ class BinarizeTaskTest {
     @Test
     void shouldPerformHyperplaneRounding() {
         var partition = new Partition(0, graph.nodeCount());
-        var config = HashGNNConfigImpl
-            .builder()
-            .featureProperties(List.of("f1", "f2"))
-            .embeddingDensity(4)
-            .binarizeFeatures(Map.of("dimension", 4, "densityLevel", 1))
-            .iterations(100)
-            .build();
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, List.of("f1", "f2"));
         var features = HugeObjectArray.newArray(HugeAtomicBitSet.class, graph.nodeCount());
-        // each feature is the minimal in one of the hash arrays
-        var hashes = List.of(
-            new int[]{0, 1, 2, 3},
-            new int[]{1, 0, 2, 3},
-            new int[]{2, 0, 1, 3},
-            new int[]{3, 0, 1, 2}
-        );
-        // f1: [1 -1 0 0]
-        // f2: [0 1 -1 0]
-        // planes: p0: "f1 > 0" p1: "f2 - f1 > 0" , p2: "-f2 > 0", p3: "0 > 0"
-        var propertyEmbeddings = new int[][]{{0, 1}, {1, 2}};
+        var propertyEmbeddings = new double[][]{{-0.3, 0.1, 0.8, -0.3}, {0.6, 0.2, -0.1, -0.2}};
 
         new BinarizeTask(
             partition,
-            config,
+            BinarizeFeaturesConfigImpl.builder().dimension(4).build(),
             features,
             featureExtractors,
             propertyEmbeddings,
-            hashes,
             ProgressTracker.NULL_TRACKER
         ).run();
 
@@ -91,45 +71,61 @@ class BinarizeTaskTest {
         var idB = graph.toMappedNodeId(idFunction.of("b"));
         var idC = graph.toMappedNodeId(idFunction.of("c"));
 
+        // computed by taking prop matrix * embedding matrix in python
         assertThat(features.get(idA).get(0)).isTrue();
-        assertThat(features.get(idA).get(1)).isFalse();
-        assertThat(features.get(idA).get(2)).isFalse();
+        assertThat(features.get(idA).get(1)).isTrue();
+        assertThat(features.get(idA).get(2)).isTrue();
         assertThat(features.get(idA).get(3)).isFalse();
 
-        assertThat(features.get(idB).get(0)).isFalse();
+        assertThat(features.get(idB).get(0)).isTrue();
         assertThat(features.get(idB).get(1)).isTrue();
         assertThat(features.get(idB).get(2)).isFalse();
-        assertThat(features.get(idB).get(3)).isFalse();
+        assertThat(features.get(idB).get(3)).isTrue();
 
-        assertThat(features.get(idC).get(0)).isTrue();
+        assertThat(features.get(idC).get(0)).isFalse();
         assertThat(features.get(idC).get(1)).isFalse();
         assertThat(features.get(idC).get(2)).isTrue();
         assertThat(features.get(idC).get(3)).isFalse();
 
     }
 
+
     @Test
-    void embedsPropertiesToTheRightDimension() {
-        var rng = new SplittableRandom();
+    void shouldPerformHyperplaneRoundingWithThreshold() {
+        var partition = new Partition(0, graph.nodeCount());
+        var featureExtractors = FeatureExtraction.propertyExtractors(graph, List.of("f1", "f2"));
+        var features = HugeObjectArray.newArray(HugeAtomicBitSet.class, graph.nodeCount());
+        var propertyEmbeddings = new double[][]{{-0.3, 0.1, 0.8, -0.3}, {0.6, 0.2, -0.1, -0.2}};
 
-        int densityLevel = 3;
-        int binarizedDimension = 8;
-        var config = HashGNNConfigImpl
-            .builder()
-            .featureProperties(List.of("f1", "f2"))
-            .embeddingDensity(4)
-            .binarizeFeatures(Map.of("dimension", binarizedDimension, "densityLevel", densityLevel))
-            .iterations(100)
-            .build();
-        int inputDimension = 12;
-        int[][] projectionArray = BinarizeTask.embedProperties(config, rng, inputDimension);
-        assertThat(projectionArray.length).isEqualTo(inputDimension);
-        for (int i = 0; i < inputDimension; i++) {
-            assertThat(projectionArray[i].length).isEqualTo(2 * densityLevel);
-            for (int j = 0; j < 2 * densityLevel; j++) {
-                assertThat(projectionArray[i][j]).isBetween(0, binarizedDimension - 1);
-            }
+        new BinarizeTask(
+            partition,
+            BinarizeFeaturesConfigImpl.builder().dimension(4).threshold(0.4).build(),
+            features,
+            featureExtractors,
+            propertyEmbeddings,
+            ProgressTracker.NULL_TRACKER
+        ).run();
 
-        }
+        var idA = graph.toMappedNodeId(idFunction.of("a"));
+        var idB = graph.toMappedNodeId(idFunction.of("b"));
+        var idC = graph.toMappedNodeId(idFunction.of("c"));
+
+        // computed by taking prop matrix * embedding matrix in python and checking product > threshold
+        assertThat(features.get(idA).get(0)).isFalse();
+        assertThat(features.get(idA).get(1)).isFalse();
+        assertThat(features.get(idA).get(2)).isTrue();
+        assertThat(features.get(idA).get(3)).isFalse();
+
+        assertThat(features.get(idB).get(0)).isTrue();
+        assertThat(features.get(idB).get(1)).isFalse();
+        assertThat(features.get(idB).get(2)).isFalse();
+        assertThat(features.get(idB).get(3)).isFalse();
+
+        assertThat(features.get(idC).get(0)).isFalse();
+        assertThat(features.get(idC).get(1)).isFalse();
+        assertThat(features.get(idC).get(2)).isTrue();
+        assertThat(features.get(idC).get(3)).isFalse();
+
     }
+
 }
