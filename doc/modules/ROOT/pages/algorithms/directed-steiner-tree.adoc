@@ -415,7 +415,11 @@ It is also possible to try and augment the solution discovered by the heuristic 
 This option can be enabled by setting  `applyRerouting:true` in the configuration.
 
 The rerouting phase re-examines the relationships in the discovered steiner tree and tries to reroute nodes (that is change their parent with another node in the tree) so as to decrease the cost.
-The rerouting phase might even have as an effect that some nodes are removed for a tree.
+After the rerouting phase some nodes might end up being childless, that is not part of any path between the source and a target.
+Such nodes are then removed from the returned solution.
+
+Note that there is no guarantee that enabling rerouting will always lead to an improvement in quality.
+
 
 [role=query-example]
 --
