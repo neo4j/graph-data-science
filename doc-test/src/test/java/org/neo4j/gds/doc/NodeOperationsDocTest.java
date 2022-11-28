@@ -22,6 +22,7 @@ package org.neo4j.gds.doc;
 import org.neo4j.gds.catalog.GraphDropNodePropertiesProc;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.gds.catalog.GraphWriteNodeLabelProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.degree.DegreeCentralityMutateProc;
 import org.neo4j.gds.functions.AsNodeFunc;
@@ -38,7 +39,8 @@ final class NodeOperationsDocTest extends SingleFileDocTestBase {
             DegreeCentralityMutateProc.class,
             GraphStreamNodePropertiesProc.class,
             GraphWriteNodePropertiesProc.class,
-            GraphDropNodePropertiesProc.class
+            GraphDropNodePropertiesProc.class,
+            GraphWriteNodeLabelProc.class
         );
     }
 

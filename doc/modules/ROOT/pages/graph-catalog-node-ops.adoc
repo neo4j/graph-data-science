@@ -161,6 +161,51 @@ YIELD
 |===
 ======
 
+[.include-with-write-node-label]
+======
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.graph.nodeLabel.write(
+    graphName: String,
+    nodeLabel: String,
+    configuration: Map
+)
+YIELD
+    writeMillis: Integer,
+    nodeLabelsWritten: Integer,
+    nodeLabel: String,
+    graphName: String
+----
+
+.Parameters
+[opts="header",cols="1,3,1,5"]
+|===
+| Name           | Type                       | Optional | Description
+| graphName      | String                     | no       | The name under which the graph is stored in the catalog.
+| nodeLabel      | String                     | no       | The node label to write back.
+| configuration  | Map                        | yes      | Additional parameters to configure writeNodeProperties.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,7"]
+|===
+| Name                   | Type                  | Default           | Description
+| nodeFilter             | String                | n/a               | A Cypher predicate for filtering nodes in the input graph. See xref:management-ops/projections/graph-project-subgraph.adoc[Projecting a subgraph].
+| concurrency            | Integer               | 4                 | The number of concurrent threads used for running the procedure. Also provides the default value for `writeConcurrency`
+| writeConcurrency       | Integer               | 'concurrency'     | The number of concurrent threads used for writing the node properties.
+|===
+
+.Results
+[opts="header",cols="2,3,5"]
+|===
+| Name              | Type                     | Description
+| writeMillis       | Integer                  | Milliseconds for writing result data back to Neo4j.
+| nodeLabelsWritten | Integer                  | Number of node labels written.
+| graphName         | String                   | The name of a graph stored in the catalog.
+| nodeLabel         | String                   | The written node label.
+|===
+======
+
 [.include-with-remove]
 ======
 [source, cypher, role=noplay]
@@ -391,6 +436,49 @@ YIELD propertiesWritten
 --
 If the `nodeLabels` parameter is specified, it is required that _all_ given node labels have _all_ of the given properties.
 --
+
+
+[[catalog-graph-write-node-label-example]]
+=== Write Node Label
+
+To write a new node label to the database for nodes with score higher than `0`, we use the following query:
+
+[role=query-example, group=write-label]
+--
+.Write the `Reader` node label back to Neo4j:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.graph.nodeLabel.write('socialGraph', 'Reader', { nodeFilter: 'n.score > 0.0' })
+YIELD nodeLabelsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodeLabelsWritten
+| 2
+|===
+--
+
+[role=query-example, group=write-label]
+--
+.Query the `Reader` node label:
+[source, cypher, role=noplay]
+----
+MATCH (n:Reader) RETURN n.name AS name, labels(n) AS labels
+ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name       | labels
+| "Adam"       | [Person, Reader]
+| "Florentin"  | [Person, Reader]
+|===
+--
+
+As we can see from the database `Veselin` who has `score: 0.0` is not a `Reader`.
 
 
 [[catalog-graph-remove-node-properties-example]]

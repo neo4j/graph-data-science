@@ -59,7 +59,8 @@ public enum SyntaxMode {
     PIPELINE_EXISTS("pipeline-exists-syntax"),
     PIPELINE_DROP("pipeline-drop-syntax"),
     SYSTEM_MONITOR("system-monitor-syntax", false),
-    SYS_INFO("debug-sysinfo-syntax", false);
+    SYS_INFO("debug-sysinfo-syntax", false),
+    WRITE_NODE_LABEL("include-with-write-node-label", false),;
 
     private final String mode;
     public final boolean hasParameters;
