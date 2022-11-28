@@ -58,6 +58,8 @@ import java.util.stream.IntStream;
 public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
 
     public static final int NO_BIN = Integer.MAX_VALUE;
+
+    private static final long NO_TERMINAL = -1;
     public static final int BIN_SIZE_THRESHOLD = 1000;
     private final Graph graph;
     private final long startNode;
@@ -144,7 +146,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
     }
 
     private long nextTerminal(HugeLongPriorityQueue terminalQueue) {
-        return (terminalQueue.isEmpty()) ? -1 : terminalQueue.top();
+        return (terminalQueue.isEmpty()) ? NO_TERMINAL : terminalQueue.top();
     }
 
     private boolean updateSteinerTree(long terminalId,AtomicLong frontierIndex,List<PathResult> paths, ImmutablePathResult.Builder pathResultBuilder) {
@@ -183,12 +185,12 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
         //For the moment, we use a simple criteria to discover if there is a terminal for which with full certainty,
         //we have found a shortest to it: Whenever we change from one bin to another, we find the terminal of smallest distance
         //if it's distance is below the currentBin, the path to it is optimal.
-        if (currentBin == -1 || oldBin < currentBin) {
+        if (currentBin == NO_BIN || oldBin < currentBin) {
             shouldComputeClosestTerminal = true;
         }
         if (shouldComputeClosestTerminal) {
             long terminalId = nextTerminal(terminalQueue);
-            if (terminalId == -1) return -1;
+            if (terminalId == NO_TERMINAL) return NO_TERMINAL;
             if (distances.distance(terminalId) < currentBin * delta) {
                 return terminalId;
             }
