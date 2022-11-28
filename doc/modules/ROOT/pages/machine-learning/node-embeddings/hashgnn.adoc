@@ -197,6 +197,8 @@ As a loose guideline, one may try to set `embeddingDensity` to 128, 256, 512, or
 The `dimension` parameter determines the number of binary features when feature generation is applied.
 A high dimension increases expressiveness but requires more data in order to be useful and can lead to the curse of high dimensionality for downstream machine learning tasks.
 Additionally, more computation resources will be required.
+However, there is only one bit of information per dimension with binary embeddings, whereas dense `Float` embeddings have 64 bits of information per dimension.
+Consequently, one typically needs a significantly higher dimension for HashGNN compared to algorithms producing dense embeddings like FastRP or GraphSAGE, in order to get as good embeddings.
 Some values to consider trying for `densityLevel` are very low values such as `1` or `2`, or increase as appropriate.
 
 
@@ -207,6 +209,9 @@ A high dimension increases expressiveness, but also the sparsity of features.
 Therefore, a higher dimension should also be coupled with higher `embeddingDensity` and/or lower `threshold`.
 Higher dimension also leads to longer training times of downstream models and higher memory footprint.
 Increasing the threshold leads to sparser feature vectors.
+
+There is only one bit of information per dimension with binary embeddings, whereas dense `Float` embeddings have 64 bits of information per dimension.
+Consequently, one typically needs a significantly higher dimension for HashGNN compared to algorithms producing dense embeddings like FastRP or GraphSAGE, in order to get as good embeddings.
 
 The default threshold of `0` leads to fairly many features being active for each node.
 Often sparse feature vectors are better, and it may therefore be useful to increase the threshold beyond the default.
