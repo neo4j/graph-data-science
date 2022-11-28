@@ -50,6 +50,8 @@ class SteinerBasedDeltaTask implements Runnable {
     private final HugeLongPriorityQueue terminalQueue;
     private final ReentrantLock terminalQueueLock;
 
+    private double smallest;
+
     SteinerBasedDeltaTask(
         Graph graph,
         HugeLongArray frontier,
@@ -77,12 +79,15 @@ class SteinerBasedDeltaTask implements Runnable {
     @Override
     public void run() {
         if (phase == SteinerBasedDeltaStepping.Phase.RELAX) {
+            smallest = Double.MAX_VALUE;
             relaxGlobalBin();
             relaxLocalBin();
         } else if (phase == SteinerBasedDeltaStepping.Phase.SYNC) {
             updateFrontier();
         }
     }
+
+    double getSmallest() {return smallest;}
 
     void setPhase(SteinerBasedDeltaStepping.Phase phase) {
         this.phase = phase;
@@ -132,7 +137,8 @@ class SteinerBasedDeltaTask implements Runnable {
     private void relaxNode(long nodeId) {
         graph.forEachRelationship(nodeId, 1.0, (sourceNodeId, targetNodeId, weight) -> {
             if (!mergedToSource.get(targetNodeId)) { //ignore merged vertices
-                tryToUpdate(sourceNodeId, targetNodeId,weight);
+                tryToUpdate(sourceNodeId, targetNodeId, weight);
+                smallest = Math.min(weight, smallest);
             }
             return true;
         });

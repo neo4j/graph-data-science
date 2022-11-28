@@ -173,29 +173,65 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
 
     }
 
-    private long tryToUpdateSteinerTree(long oldBin, long currentBin, HugeLongPriorityQueue terminalQueue) {
-        boolean shouldComputeClosestTerminal = false;
-        //delta-Stepping differs by Dijkstra in that it processes the nodes not one-by-one but in batches
-        //whereas in dijkstra once we examine a node, we are certain we have found the shortest path to it,
-        //in delta-stepping this is not the case
-        //for example assume a huge delta  and assume a bin  contains two nodes with distance a (distance=101) and
-        //b  (distance=98) in the same bucket.  Assume furthermore, the edge b->a  with  cost 1 exists.
-        //Then  a is examined, and because of b->a it is re-examined and hten we find a smaller distance from it (99).
-
-        //For the moment, we use a simple criteria to discover if there is a terminal for which with full certainty,
-        //we have found a shortest to it: Whenever we change from one bin to another, we find the terminal of smallest distance
-        //if it's distance is below the currentBin, the path to it is optimal.
-        if (currentBin == NO_BIN || oldBin < currentBin) {
-            shouldComputeClosestTerminal = true;
-        }
-        if (shouldComputeClosestTerminal) {
-            long terminalId = nextTerminal(terminalQueue);
-            if (terminalId == NO_TERMINAL) return NO_TERMINAL;
-            if (distances.distance(terminalId) < currentBin * delta) {
-                return terminalId;
+    private boolean ensureShortest(
+        double distance,
+        long oldBin,
+        long currentBin,
+        List<SteinerBasedDeltaTask> tasks
+    ) {
+        if (oldBin == currentBin) {
+            //if closest terminal is still far off, unknown if shortest path found
+            if (distance >= currentBin * delta) {
+                return false;
             }
+            //find closest node to be processed afterwards
+            double currentMinDistance = tasks
+                .stream()
+                .mapToDouble(SteinerBasedDeltaTask::getSmallest)
+                .min()
+                .orElseThrow();
+            //return true if the closet terminal is at least as close as the  closest next node
+            return distance <= currentMinDistance;
+        } else {
+            return (distance < currentBin * delta);
         }
-        return -1;
+    }
+
+    //delta-Stepping differs by Dijkstra in that it processes the nodes not one-by-one but in batches
+    //whereas in dijkstra once we examine a node, we are certain we have found the shortest path to it,
+    //in delta-stepping this is not the case
+    //for example assume a huge delta  and assume a bin  contains two nodes with distance a (distance=101) and
+    //b  (distance=98) in the same bucket.  Assume furthermore, the edge b->a  with  cost 1 exists.
+    //Then  a is examined, and because of b->a it is re-examined and then we find a smaller distance from it (99).
+    private long tryToUpdateSteinerTree(
+        long oldBin,
+        long currentBin,
+        HugeLongPriorityQueue terminalQueue,
+        List<SteinerBasedDeltaTask> tasks
+    ) {
+
+        //Use two simple criterias to discover if there is a terminal for which with full certainty,
+        //we have found a shortest to it:
+
+        // Whenever we change from one bin to another, we find the terminal of smallest distance
+        //if it's distance is below the currentBin, the path to it is optimal.
+
+        //Otherwise, if we keep the current bin, ensure all  future entries in the current bin
+        //are worse of than the shortest path to a terminal (hence its shortest distance cannot improve)
+
+        long terminalId = nextTerminal(terminalQueue);
+        if (terminalId == NO_TERMINAL) {
+            return NO_TERMINAL;
+        }
+
+        boolean shouldReturnTerminal = ensureShortest(
+            distances.distance(terminalId),
+            oldBin,
+            currentBin,
+            tasks
+        );
+
+        return (shouldReturnTerminal) ? terminalId : NO_TERMINAL;
     }
 
     @Override
@@ -241,9 +277,9 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
             // Find smallest non-empty bin across all tasks
             currentBin = tasks.stream().mapToInt(SteinerBasedDeltaTask::minNonEmptyBin).min().orElseThrow();
 
-            long terminalId = tryToUpdateSteinerTree(oldCurrentBin, currentBin, terminalQueue);
+            long terminalId = tryToUpdateSteinerTree(oldCurrentBin, currentBin, terminalQueue, tasks);
 
-            if (terminalId != -1) { //if we are certain that we have found a shortest path to one of the remaining terminals
+            if (terminalId != NO_TERMINAL) { //if we are certain that we have found a shortest path to one of the remaining terminals
                 //we update the solution and merge its path to the root
                 terminalQueue.pop();
                 shouldBreak = updateSteinerTree(terminalId, frontierIndex, paths, pathResultBuilder);
