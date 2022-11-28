@@ -19,16 +19,10 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.CypherMapWrapper;
-
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 class HashGNNMutateProcTest extends HashGNNProcTest<HashGNNMutateConfig> implements
     MutateNodePropertyTest<HashGNN, HashGNNMutateConfig, HashGNN.HashGNNResult> {
@@ -71,37 +65,5 @@ class HashGNNMutateProcTest extends HashGNNProcTest<HashGNNMutateConfig> impleme
         ", (c {f1: 0, f2: [0.0, 1.0], embedding: [0.0, 0.0, 1.0]})" +
         ", (b)-[:R1]->(a)" +
         ", (b)-[:R2]->(c)";
-    }
-
-    @Test
-    void failsOnInvalidBinarizationKeys() {
-        assertThatThrownBy(() -> {
-            HashGNNMutateConfig.of(CypherMapWrapper.create(
-                Map.of(
-                    "mutateProperty", "foo",
-                    "featureProperties", List.of("x"),
-                    "binarizeFeatures", Map.of("dimension", 100, "treshold", 2.0),
-                    "embeddingDensity", 4,
-                    "iterations", 100
-                )
-            ));
-
-        }).isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Unexpected configuration key: treshold (Did you mean [threshold]?)");
-    }
-
-    @Test
-    void failsOnInvalidGenerateFeaturesKeys() {
-        assertThatThrownBy(() -> {
-            HashGNNMutateConfig.of(CypherMapWrapper.create(
-                Map.of(
-                    "generateFeatures", Map.of("dimension", 100, "densityElfen", 2),
-                    "embeddingDensity", 4,
-                    "iterations", 100
-                )
-            ));
-
-        }).isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("No value specified for the mandatory configuration parameter `densityLevel` (a similar parameter exists: [densityElfen])");
     }
 }

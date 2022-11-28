@@ -77,7 +77,10 @@ interface HashGNNConfig extends AlgoBaseConfig, FeaturePropertiesConfig, RandomS
         if (o instanceof Optional) {
             return (Optional<BinarizeFeaturesConfig>) o;
         }
-        return Optional.of(new BinarizeFeaturesConfigImpl(CypherMapWrapper.create((Map<String, Object>) o)));
+        var cypherMapWrapper = CypherMapWrapper.create((Map<String, Object>) o);
+        var binarizeFeaturesConfig = new BinarizeFeaturesConfigImpl(cypherMapWrapper);
+        cypherMapWrapper.requireOnlyKeysFrom(binarizeFeaturesConfig.configKeys());
+        return Optional.of(binarizeFeaturesConfig);
     }
 
     static Map<String, Object> toMapBinarizationConfig(BinarizeFeaturesConfig config) {
@@ -88,25 +91,14 @@ interface HashGNNConfig extends AlgoBaseConfig, FeaturePropertiesConfig, RandomS
         if (o instanceof Optional) {
             return (Optional<GenerateFeaturesConfig>) o;
         }
-        return Optional.of(new GenerateFeaturesConfigImpl(CypherMapWrapper.create((Map<String, Object>) o)));
+        var cypherMapWrapper = CypherMapWrapper.create((Map<String, Object>) o);
+        var generateFeaturesConfig = new GenerateFeaturesConfigImpl(cypherMapWrapper);
+        cypherMapWrapper.requireOnlyKeysFrom(generateFeaturesConfig.configKeys());
+        return Optional.of(generateFeaturesConfig);
     }
 
     static Map<String, Object> toMapGenerateFeaturesConfig(GenerateFeaturesConfig config) {
         return config.toMap();
     }
 
-    static void checkConfigKeys(CypherMapWrapper config) {
-        if (config.containsKey("binarizeFeatures")) {
-            var binarizeFeaturesMap = config.getMap("binarizeFeatures");
-            var cypherMapWrapper = CypherMapWrapper.create(binarizeFeaturesMap);
-            var binarizeFeaturesConfig = new BinarizeFeaturesConfigImpl(cypherMapWrapper);
-            cypherMapWrapper.requireOnlyKeysFrom(binarizeFeaturesConfig.configKeys());
-        }
-        if (config.containsKey("generateFeatures")) {
-            var generateFeaturesMap = config.getMap("generateFeatures");
-            var cypherMapWrapper = CypherMapWrapper.create(generateFeaturesMap);
-            var generateFeaturesConfig = new GenerateFeaturesConfigImpl(cypherMapWrapper);
-            cypherMapWrapper.requireOnlyKeysFrom(generateFeaturesConfig.configKeys());
-        }
-    }
 }

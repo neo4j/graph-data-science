@@ -27,7 +27,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 public interface HashGNNMutateConfig extends HashGNNConfig, MutatePropertyConfig {
 
     static HashGNNMutateConfig of(CypherMapWrapper config) {
-        HashGNNConfig.checkConfigKeys(config);
         return new HashGNNMutateConfigImpl(config);
     }
 

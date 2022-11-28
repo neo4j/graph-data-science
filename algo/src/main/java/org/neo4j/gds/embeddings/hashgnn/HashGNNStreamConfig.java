@@ -26,7 +26,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 public interface HashGNNStreamConfig extends HashGNNConfig {
 
     static HashGNNStreamConfig of(CypherMapWrapper config) {
-        HashGNNConfig.checkConfigKeys(config);
         return new HashGNNStreamConfigImpl(config);
     }
 }
