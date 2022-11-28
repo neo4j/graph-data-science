@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.delta.TentativeDistances;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -56,6 +58,8 @@ import java.util.stream.IntStream;
 public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
 
     public static final int NO_BIN = Integer.MAX_VALUE;
+
+    private static final long NO_TERMINAL = -1;
     public static final int BIN_SIZE_THRESHOLD = 1000;
     private final Graph graph;
     private final long startNode;
@@ -65,11 +69,9 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
     private final TentativeDistances distances;
     private final ExecutorService executorService;
     private long pathIndex;
-
     private final long numOfTerminals;
     private  final BitSet unvisitedTerminal;
     private final BitSet mergedWithSource;
-
     private final LongAdder metTerminals;
 
     SteinerBasedDeltaStepping(
@@ -143,24 +145,13 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
         progressTracker.endSubTask();
     }
 
-    private long nextTerminal(){
-        long index=unvisitedTerminal.nextSetBit(0);
-        long bestTerminal=index;
-        double bestDistance=distances.distance(bestTerminal);
-        index=unvisitedTerminal.nextSetBit(index+1);
-        while (index!=-1){
-            double currentDistance=distances.distance(index);
-            if (currentDistance  < bestDistance){
-                bestTerminal=index;
-                bestDistance=currentDistance;
-            }
-            index=unvisitedTerminal.nextSetBit(index+1);
-        }
-        return bestTerminal;
+    private long nextTerminal(HugeLongPriorityQueue terminalQueue) {
+        return (terminalQueue.isEmpty()) ? NO_TERMINAL : terminalQueue.top();
     }
 
     private boolean updateSteinerTree(long terminalId,AtomicLong frontierIndex,List<PathResult> paths, ImmutablePathResult.Builder pathResultBuilder) {
         //add the new path to the solution
+
         paths.add(pathResult(
             pathResultBuilder,
             pathIndex++,
@@ -182,7 +173,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
 
     }
 
-    private long tryToUpdateSteinerTree(long oldBin, long currentBin) {
+    private long tryToUpdateSteinerTree(long oldBin, long currentBin, HugeLongPriorityQueue terminalQueue) {
         boolean shouldComputeClosestTerminal = false;
         //delta-Stepping differs by Dijkstra in that it processes the nodes not one-by-one but in batches
         //whereas in dijkstra once we examine a node, we are certain we have found the shortest path to it,
@@ -194,11 +185,12 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
         //For the moment, we use a simple criteria to discover if there is a terminal for which with full certainty,
         //we have found a shortest to it: Whenever we change from one bin to another, we find the terminal of smallest distance
         //if it's distance is below the currentBin, the path to it is optimal.
-        if (currentBin == -1 || oldBin < currentBin) {
+        if (currentBin == NO_BIN || oldBin < currentBin) {
             shouldComputeClosestTerminal = true;
         }
         if (shouldComputeClosestTerminal) {
-            long terminalId = nextTerminal();
+            long terminalId = nextTerminal(terminalQueue);
+            if (terminalId == NO_TERMINAL) return NO_TERMINAL;
             if (distances.distance(terminalId) < currentBin * delta) {
                 return terminalId;
             }
@@ -217,12 +209,14 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
         var frontierIndex = new AtomicLong(0);
         var frontierSize = new AtomicLong(1);
 
-        List<PathResult>  paths=new ArrayList<>();
+        List<PathResult> paths = new ArrayList<>();
 
         this.frontier.set(currentBin, startNode);
         mergedWithSource.set(startNode);
         this.distances.set(startNode, -1, 0);
 
+        HugeLongPriorityQueue terminalQueue = HugeLongPriorityQueue.min(unvisitedTerminal.size());
+        var terminalQueueLock = new ReentrantLock();
         var tasks = IntStream
             .range(0, concurrency)
             .mapToObj(i -> new SteinerBasedDeltaTask(
@@ -231,7 +225,10 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
                 distances,
                 delta,
                 frontierIndex,
-                mergedWithSource
+                mergedWithSource,
+                terminalQueue,
+                terminalQueueLock,
+                unvisitedTerminal
             ))
             .collect(Collectors.toList());
 
@@ -244,10 +241,11 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
             // Find smallest non-empty bin across all tasks
             currentBin = tasks.stream().mapToInt(SteinerBasedDeltaTask::minNonEmptyBin).min().orElseThrow();
 
-            long terminalId = tryToUpdateSteinerTree(oldCurrentBin, currentBin);
+            long terminalId = tryToUpdateSteinerTree(oldCurrentBin, currentBin, terminalQueue);
 
             if (terminalId != -1) { //if we are certain that we have found a shortest path to one of the remaining terminals
                 //we update the solution and merge its path to the root
+                terminalQueue.pop();
                 shouldBreak = updateSteinerTree(terminalId, frontierIndex, paths, pathResultBuilder);
                 currentBin = 0;
             } else { //otherwise proceed as normal, sync the contents of the  bucket for each thread to the global queue.

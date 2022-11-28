@@ -236,7 +236,7 @@ CREATE (a:Place {id: 'A'}),
        (a)-[:LINK {cost:1}]->(b),
        (a)-[:LINK {cost:7}]->(e),
        (b)-[:LINK {cost:1}]->(c),
-       (c)-[:LINK {cost:5}]->(d),
+       (c)-[:LINK {cost:4}]->(d),
        (c)-[:LINK {cost:6}]->(e),
        (f)-[:LINK {cost:3}]->(d);
 ----
@@ -282,7 +282,7 @@ ORDER BY node
 | "A"  | "A" | 0
 | "B"  | "A" | 1
 | "C"  | "B" | 1
-| "D"  | "C" | 5
+| "D"  | "C" | 4
 | "E"  | "C" | 6
 | "F"  | "A" | 10
 
@@ -319,7 +319,7 @@ RETURN effectiveNodeCount, totalWeight
 [opts="header"]
 |===
 | effectiveNodeCount | totalWeight
-| 6  | 23
+| 6  | 22
 |===
 --
 
@@ -366,7 +366,7 @@ ORDER BY Source, Destination
 | "A"  | "B" | 1
 | "A"  | "F" | 10
 | "B"  | "C" | 1
-| "C"  | "D" | 5
+| "C"  | "D" | 4
 | "C"  | "E" | 6
 |===
 --
