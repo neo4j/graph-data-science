@@ -26,9 +26,26 @@ import java.util.stream.Collectors;
 
 public enum Orientation {
 
-    NATURAL,
-    REVERSE,
-    UNDIRECTED;
+    NATURAL {
+        @Override
+        public Orientation inverse() {
+            return REVERSE;
+        }
+    },
+    REVERSE {
+        @Override
+        public Orientation inverse() {
+            return NATURAL;
+        }
+    },
+    UNDIRECTED {
+        @Override
+        public Orientation inverse() {
+            return UNDIRECTED;
+        }
+    };
+
+    public abstract Orientation inverse();
 
     private static final List<String> VALUES = Arrays
         .stream(Orientation.values())
