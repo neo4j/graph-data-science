@@ -109,6 +109,7 @@ class GraphDropProcTest extends BaseProcTest {
                                         "type", "REL",
                                         "orientation", "NATURAL",
                                         "aggregation", "DEFAULT",
+                                        "indexInverse", false,
                                         "properties", emptyMap()
                                     )
                                 )

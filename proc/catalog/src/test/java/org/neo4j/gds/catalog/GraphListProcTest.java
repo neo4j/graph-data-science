@@ -116,6 +116,7 @@ class GraphListProcTest extends BaseProcTest {
                                     "type", "REL",
                                     "orientation", "NATURAL",
                                     "aggregation", "DEFAULT",
+                                    "indexInverse", false,
                                     "properties", emptyMap()
                                 )
                             )
@@ -225,6 +226,7 @@ class GraphListProcTest extends BaseProcTest {
                                 "type", "REL",
                                 "orientation", "NATURAL",
                                 "aggregation", "NONE",
+                                "indexInverse", false,
                                 "properties", emptyMap()
                             )
                         ))

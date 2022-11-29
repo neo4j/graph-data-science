@@ -85,6 +85,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.AbstractNodeProjection.LABEL_KEY;
 import static org.neo4j.gds.ElementProjection.PROPERTIES_KEY;
 import static org.neo4j.gds.RelationshipProjection.AGGREGATION_KEY;
+import static org.neo4j.gds.RelationshipProjection.INDEX_INVERSE_KEY;
 import static org.neo4j.gds.RelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.gds.RelationshipProjection.TYPE_KEY;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
@@ -160,6 +161,7 @@ class GraphProjectProcTest extends BaseProcTest {
                         TYPE_KEY, "REL",
                         ORIENTATION_KEY, Orientation.NATURAL.name(),
                         AGGREGATION_KEY, Aggregation.DEFAULT.name(),
+                        INDEX_INVERSE_KEY, false,
                         PROPERTIES_KEY, emptyMap()
                     )
                 ),
@@ -435,7 +437,12 @@ class GraphProjectProcTest extends BaseProcTest {
                 "graphName", name,
                 NODE_PROJECTION_KEY, isA(Map.class),
                 RELATIONSHIP_PROJECTION_KEY, map("B", genericMap(
-                    map("type", "REL", ORIENTATION_KEY, orientation, PROPERTIES_KEY, emptyMap()),
+                    map(
+                        "type", "REL",
+                        ORIENTATION_KEY, orientation,
+                        INDEX_INVERSE_KEY, false,
+                        PROPERTIES_KEY, emptyMap()
+                    ),
                     AGGREGATION_KEY,
                     Aggregation.DEFAULT.name()
                 )),
@@ -473,6 +480,7 @@ class GraphProjectProcTest extends BaseProcTest {
                     map("type", "REL",
                         ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, "DEFAULT",
+                        INDEX_INVERSE_KEY, false,
                         PROPERTIES_KEY, expectedProperties
                     )
                 ),
@@ -547,6 +555,7 @@ class GraphProjectProcTest extends BaseProcTest {
                         "type", "REL",
                         ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, aggregation,
+                        INDEX_INVERSE_KEY, false,
                         PROPERTIES_KEY, map(
                             "weight", map(
                                 "property", "weight",
@@ -598,6 +607,7 @@ class GraphProjectProcTest extends BaseProcTest {
                         "type", "REL",
                         ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, "DEFAULT",
+                        INDEX_INVERSE_KEY, false,
                         PROPERTIES_KEY, map("weight", map(
                                 "property", "weight",
                                 AGGREGATION_KEY, aggregation,
@@ -708,6 +718,7 @@ class GraphProjectProcTest extends BaseProcTest {
                         "type", "REL",
                         ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, "DEFAULT",
+                        INDEX_INVERSE_KEY, false,
                         PROPERTIES_KEY, map(
                             "weight", map(
                                 "property", "weight",
@@ -1666,14 +1677,11 @@ class GraphProjectProcTest extends BaseProcTest {
                 map(
                     "REL",
                     map(
-                        "type",
-                        "REL",
-                        ORIENTATION_KEY,
-                        "NATURAL",
-                        AGGREGATION_KEY,
-                        "DEFAULT",
-                        PROPERTIES_KEY,
-                        emptyMap()
+                        "type", "REL",
+                        ORIENTATION_KEY, "NATURAL",
+                        AGGREGATION_KEY, "DEFAULT",
+                        INDEX_INVERSE_KEY, false,
+                        PROPERTIES_KEY, emptyMap()
                     )
                 )
             ),
@@ -1683,14 +1691,11 @@ class GraphProjectProcTest extends BaseProcTest {
                 map(
                     "CONNECTS",
                     map(
-                        "type",
-                        "REL",
-                        ORIENTATION_KEY,
-                        "NATURAL",
-                        AGGREGATION_KEY,
-                        "DEFAULT",
-                        PROPERTIES_KEY,
-                        emptyMap()
+                        "type", "REL",
+                        ORIENTATION_KEY, "NATURAL",
+                        AGGREGATION_KEY, "DEFAULT",
+                        INDEX_INVERSE_KEY, false,
+                        PROPERTIES_KEY, emptyMap()
                     )
                 )
             ),
@@ -1700,14 +1705,11 @@ class GraphProjectProcTest extends BaseProcTest {
                 map(
                     "REL",
                     map(
-                        "type",
-                        "REL",
-                        ORIENTATION_KEY,
-                        "NATURAL",
-                        AGGREGATION_KEY,
-                        "DEFAULT",
-                        PROPERTIES_KEY,
-                        emptyMap()
+                        "type", "REL",
+                        ORIENTATION_KEY, "NATURAL",
+                        AGGREGATION_KEY, "DEFAULT",
+                        INDEX_INVERSE_KEY, false,
+                        PROPERTIES_KEY, emptyMap()
                     )
                 )
             )
