@@ -31,8 +31,10 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.TrainingMethod;
 
+import java.io.Serializable;
+
 @ValueClass
-public interface LogisticRegressionData extends Classifier.ClassifierData {
+public interface LogisticRegressionData extends Classifier.ClassifierData, Serializable {
 
     Weights<Matrix> weights();
     Weights<Vector> bias();
