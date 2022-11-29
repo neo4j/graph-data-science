@@ -22,10 +22,13 @@ package org.neo4j.gds.core.loading;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeProjections;
+import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyList;
+import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
@@ -46,17 +49,19 @@ import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.logging.NullLog;
 
+import java.util.function.LongToIntFunction;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ScanningRelationshipsImporterTest extends BaseTest {
 
     @Neo4jGraph
     public static final String DB = "CREATE " +
-                                    "(a)-[:R]->(b)," +
-                                    "(a)-[:R]->(c)," +
-                                    "(a)-[:R]->(d)," +
-                                    "(b)-[:R]->(c)," +
-                                    "(c)-[:R]->(a)";
+                                    "(a)-[:R { p: 1.0 }]->(b)," +
+                                    "(a)-[:R { p: 2.0 }]->(c)," +
+                                    "(a)-[:R { p: 3.0 }]->(d)," +
+                                    "(b)-[:R { p: 4.0 }]->(c)," +
+                                    "(c)-[:R { p: 5.0 }]->(a)";
 
     @Inject
     private IdFunction idFunction;
@@ -101,10 +106,55 @@ class ScanningRelationshipsImporterTest extends BaseTest {
         assertThat(degree("c", inverseAdjacencyList)).isEqualTo(2); // (a)-->(c),(b)-->(c)
         assertThat(degree("d", inverseAdjacencyList)).isEqualTo(1); // (a)-->(d)
 
-        assertThat(targets("a", inverseAdjacencyList)).isEqualTo(nodeIds("c")); // (c)-->(a)
-        assertThat(targets("b", inverseAdjacencyList)).isEqualTo(nodeIds("a")); // (a)-->(b)
-        assertThat(targets("c", inverseAdjacencyList)).isEqualTo(nodeIds("a", "b")); // (a)-->(c),(b)-->(c)
-        assertThat(targets("d", inverseAdjacencyList)).isEqualTo(nodeIds("a")); // (a)-->(d)
+        assertThat(targets("a", inverseAdjacencyList)).isEqualTo(nodeIds("c"));         // (c)-->(a)
+        assertThat(targets("b", inverseAdjacencyList)).isEqualTo(nodeIds("a"));         // (a)-->(b)
+        assertThat(targets("c", inverseAdjacencyList)).isEqualTo(nodeIds("a", "b"));    // (a)-->(c),(b)-->(c)
+        assertThat(targets("d", inverseAdjacencyList)).isEqualTo(nodeIds("a"));         // (a)-->(d)
+    }
+
+    @Test
+    void shouldLoadInverseRelationshipsWithProperties() {
+        var relationshipType = RelationshipType.of("R");
+        var graphProjectConfig = ImmutableGraphProjectFromStoreConfig.builder()
+            .graphName("testGraph")
+            .nodeProjections(NodeProjections.ALL)
+            .relationshipProjections(
+                RelationshipProjections.single(
+                    relationshipType,
+                    RelationshipProjection.builder()
+                        .type("R")
+                        .indexInverse(true)
+                        .properties(PropertyMappings.of(PropertyMapping.of("p")))
+                        .build()
+                ))
+            .build();
+
+        var graphLoaderContext = graphLoaderContext();
+        var graphDimensions = graphDimensions(graphProjectConfig, graphLoaderContext);
+        var importer = new ScanningRelationshipsImporterBuilder()
+            .idMap(new DirectIdMap(graphDimensions.nodeCount()))
+            .loadingContext(graphLoaderContext)
+            .progressTracker(ProgressTracker.NULL_TRACKER)
+            .dimensions(graphDimensions)
+            .concurrency(1)
+            .graphProjectConfig(graphProjectConfig)
+            .build();
+
+        var relationshipsAndProperties = importer.call();
+
+        var adjacencyList = relationshipsAndProperties.relationships().get(relationshipType).adjacencyList();
+        var properties = relationshipsAndProperties.properties()
+            .get(relationshipType)
+            .get("p")
+            .values()
+            .propertiesList();
+
+        //@formatter:off
+        assertThat(properties("a", properties, adjacencyList::degree)).containsExactly(5.0);       // (c)-[5.0]->(a)
+        assertThat(properties("b", properties, adjacencyList::degree)).containsExactly(1.0);       // (a)-[1.0]->(b)
+        assertThat(properties("c", properties, adjacencyList::degree)).containsExactly(2.0, 4.0);  // (a)-[2.0]->(c),(b)-[4.0]->(c)
+        assertThat(properties("d", properties, adjacencyList::degree)).containsExactly(3.0);       // (a)-[3.0->(d)
+        //@formatter:on
     }
 
     private int degree(String nodeVariable, AdjacencyList adjacencyList) {
@@ -122,6 +172,22 @@ class ScanningRelationshipsImporterTest extends BaseTest {
             targets[i++] = cursor.nextVLong();
         }
         return targets;
+    }
+
+    private double[] properties(
+        String nodeVariable,
+        AdjacencyProperties adjacencyProperties,
+        LongToIntFunction degrees
+    ) {
+        var nodeId = idFunction.of(nodeVariable);
+        var degree = degrees.applyAsInt(nodeId);
+        var properties = new double[degree];
+        var cursor = adjacencyProperties.propertyCursor(nodeId);
+        int i = 0;
+        while (cursor.hasNextLong()) {
+            properties[i++] = Double.longBitsToDouble(cursor.nextLong());
+        }
+        return properties;
     }
 
     private long[] nodeIds(String... nodeVariables) {
