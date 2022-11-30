@@ -78,50 +78,6 @@ class ScanningRelationshipsImporterTest extends BaseTest {
                     RelationshipProjection.builder()
                         .type("R")
                         .indexInverse(true)
-                        .build()
-                ))
-            .build();
-
-        var graphLoaderContext = graphLoaderContext();
-        var graphDimensions = graphDimensions(graphProjectConfig, graphLoaderContext);
-        var importer = new ScanningRelationshipsImporterBuilder()
-            .idMap(new DirectIdMap(graphDimensions.nodeCount()))
-            .loadingContext(graphLoaderContext)
-            .progressTracker(ProgressTracker.NULL_TRACKER)
-            .dimensions(graphDimensions)
-            .concurrency(1)
-            .graphProjectConfig(graphProjectConfig)
-            .build();
-
-        var relationshipsAndProperties = importer.call();
-
-        var singleTypeRelationshipImportResult = relationshipsAndProperties.importResults().get(relationshipType);
-        assertThat(singleTypeRelationshipImportResult.inverseTopology()).isPresent();
-        var adjacencyList = singleTypeRelationshipImportResult.inverseTopology().get().adjacencyList();
-
-        assertThat(degree("a", adjacencyList)).isEqualTo(1); // (c)-->(a)
-        assertThat(degree("b", adjacencyList)).isEqualTo(1); // (a)-->(b)
-        assertThat(degree("c", adjacencyList)).isEqualTo(2); // (a)-->(c),(b)-->(c)
-        assertThat(degree("d", adjacencyList)).isEqualTo(1); // (a)-->(d)
-
-        assertThat(targets("a", adjacencyList)).isEqualTo(nodeIds("c"));         // (c)-->(a)
-        assertThat(targets("b", adjacencyList)).isEqualTo(nodeIds("a"));         // (a)-->(b)
-        assertThat(targets("c", adjacencyList)).isEqualTo(nodeIds("a", "b"));    // (a)-->(c),(b)-->(c)
-        assertThat(targets("d", adjacencyList)).isEqualTo(nodeIds("a"));         // (a)-->(d)
-    }
-
-    @Test
-    void shouldLoadInverseRelationshipsWithProperties() {
-        var relationshipType = RelationshipType.of("R");
-        var graphProjectConfig = ImmutableGraphProjectFromStoreConfig.builder()
-            .graphName("testGraph")
-            .nodeProjections(NodeProjections.ALL)
-            .relationshipProjections(
-                RelationshipProjections.single(
-                    relationshipType,
-                    RelationshipProjection.builder()
-                        .type("R")
-                        .indexInverse(true)
                         .properties(PropertyMappings.of(PropertyMapping.of("p")))
                         .build()
                 ))
@@ -152,6 +108,16 @@ class ScanningRelationshipsImporterTest extends BaseTest {
             .propertiesList();
 
         //@formatter:off
+        assertThat(degree("a", adjacencyList)).isEqualTo(1); // (c)-->(a)
+        assertThat(degree("b", adjacencyList)).isEqualTo(1); // (a)-->(b)
+        assertThat(degree("c", adjacencyList)).isEqualTo(2); // (a)-->(c),(b)-->(c)
+        assertThat(degree("d", adjacencyList)).isEqualTo(1); // (a)-->(d)
+
+        assertThat(targets("a", adjacencyList)).isEqualTo(nodeIds("c"));         // (c)-->(a)
+        assertThat(targets("b", adjacencyList)).isEqualTo(nodeIds("a"));         // (a)-->(b)
+        assertThat(targets("c", adjacencyList)).isEqualTo(nodeIds("a", "b"));    // (a)-->(c),(b)-->(c)
+        assertThat(targets("d", adjacencyList)).isEqualTo(nodeIds("a"));         // (a)-->(d)
+
         assertThat(properties("a", propertyList, adjacencyList::degree)).containsExactly(5.0);       // (c)-[5.0]->(a)
         assertThat(properties("b", propertyList, adjacencyList::degree)).containsExactly(1.0);       // (a)-[1.0]->(b)
         assertThat(properties("c", propertyList, adjacencyList::degree)).containsExactly(2.0, 4.0);  // (a)-[2.0]->(c),(b)-[4.0]->(c)
