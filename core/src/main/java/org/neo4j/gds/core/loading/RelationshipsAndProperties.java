@@ -46,11 +46,41 @@ import java.util.stream.Collectors;
 @ValueClass
 public interface RelationshipsAndProperties {
 
-    Map<RelationshipType, Relationships.Topology> relationships();
+    @Value.Default
+    default Map<RelationshipType, Relationships.Topology> relationships() {
+        return importResults().entrySet().stream().collect(Collectors.toMap(
+            Map.Entry::getKey,
+            e -> {
+                var importResult = e.getValue();
+                return importResult.forwardTopology();
+            }
+        ));
+    }
 
-    Map<RelationshipType, RelationshipPropertyStore> properties();
+    @Value.Default
+    default Map<RelationshipType, RelationshipPropertyStore> properties() {
+        return importResults().entrySet().stream()
+            .filter(e -> e.getValue().forwardProperties().isPresent())
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                e -> {
+                    var importResult = e.getValue();
+                    return importResult.forwardProperties().get();
+                }
+            ));
+    }
 
-    Map<RelationshipType, Direction> directions();
+    @Value.Default
+    default Map<RelationshipType, Direction> directions() {
+        return importResults().entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                e -> {
+                    var importResult = e.getValue();
+                    return importResult.direction();
+                }
+            ));
+    }
 
     @Value.Parameter(false)
     @Value.Default
