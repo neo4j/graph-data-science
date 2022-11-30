@@ -366,7 +366,7 @@ class HashGNNTest {
         var firstIdMap = new ArrayIdMap(
             firstMappedToOriginal,
             firstOriginalToMappedBuilder.build(),
-            LabelInformationBuilders.singleLabel(new NodeLabel("hello")).build(nodeCount, firstMappedToOriginal::get),
+            LabelInformationBuilders.singleLabel(NodeLabel.of("hello")).build(nodeCount, firstMappedToOriginal::get),
             nodeCount,
             nodeCount - 1
         );
