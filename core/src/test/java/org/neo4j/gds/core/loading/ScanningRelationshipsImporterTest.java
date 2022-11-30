@@ -95,21 +95,19 @@ class ScanningRelationshipsImporterTest extends BaseTest {
 
         var relationshipsAndProperties = importer.call();
 
-        var topology = relationshipsAndProperties.relationships().get(relationshipType);
+        var singleTypeRelationshipImportResult = relationshipsAndProperties.importResults().get(relationshipType);
+        assertThat(singleTypeRelationshipImportResult.inverseTopology()).isPresent();
+        var adjacencyList = singleTypeRelationshipImportResult.inverseTopology().get().adjacencyList();
 
-        assertThat(topology.inverseAdjacencyList()).isPresent();
+        assertThat(degree("a", adjacencyList)).isEqualTo(1); // (c)-->(a)
+        assertThat(degree("b", adjacencyList)).isEqualTo(1); // (a)-->(b)
+        assertThat(degree("c", adjacencyList)).isEqualTo(2); // (a)-->(c),(b)-->(c)
+        assertThat(degree("d", adjacencyList)).isEqualTo(1); // (a)-->(d)
 
-        var inverseAdjacencyList = topology.inverseAdjacencyList().get();
-
-        assertThat(degree("a", inverseAdjacencyList)).isEqualTo(1); // (c)-->(a)
-        assertThat(degree("b", inverseAdjacencyList)).isEqualTo(1); // (a)-->(b)
-        assertThat(degree("c", inverseAdjacencyList)).isEqualTo(2); // (a)-->(c),(b)-->(c)
-        assertThat(degree("d", inverseAdjacencyList)).isEqualTo(1); // (a)-->(d)
-
-        assertThat(targets("a", inverseAdjacencyList)).isEqualTo(nodeIds("c"));         // (c)-->(a)
-        assertThat(targets("b", inverseAdjacencyList)).isEqualTo(nodeIds("a"));         // (a)-->(b)
-        assertThat(targets("c", inverseAdjacencyList)).isEqualTo(nodeIds("a", "b"));    // (a)-->(c),(b)-->(c)
-        assertThat(targets("d", inverseAdjacencyList)).isEqualTo(nodeIds("a"));         // (a)-->(d)
+        assertThat(targets("a", adjacencyList)).isEqualTo(nodeIds("c"));         // (c)-->(a)
+        assertThat(targets("b", adjacencyList)).isEqualTo(nodeIds("a"));         // (a)-->(b)
+        assertThat(targets("c", adjacencyList)).isEqualTo(nodeIds("a", "b"));    // (a)-->(c),(b)-->(c)
+        assertThat(targets("d", adjacencyList)).isEqualTo(nodeIds("a"));         // (a)-->(d)
     }
 
     @Test
@@ -142,18 +140,22 @@ class ScanningRelationshipsImporterTest extends BaseTest {
 
         var relationshipsAndProperties = importer.call();
 
-        var adjacencyList = relationshipsAndProperties.relationships().get(relationshipType).adjacencyList();
-        var properties = relationshipsAndProperties.properties()
-            .get(relationshipType)
+        var singleTypeRelationshipImportResult = relationshipsAndProperties.importResults().get(relationshipType);
+        assertThat(singleTypeRelationshipImportResult.inverseTopology()).isPresent();
+        assertThat(singleTypeRelationshipImportResult.inverseProperties()).isPresent();
+
+        var adjacencyList = singleTypeRelationshipImportResult.inverseTopology().get().adjacencyList();
+        var propertyList = singleTypeRelationshipImportResult.inverseProperties().get()
+            .relationshipProperties()
             .get("p")
             .values()
             .propertiesList();
 
         //@formatter:off
-        assertThat(properties("a", properties, adjacencyList::degree)).containsExactly(5.0);       // (c)-[5.0]->(a)
-        assertThat(properties("b", properties, adjacencyList::degree)).containsExactly(1.0);       // (a)-[1.0]->(b)
-        assertThat(properties("c", properties, adjacencyList::degree)).containsExactly(2.0, 4.0);  // (a)-[2.0]->(c),(b)-[4.0]->(c)
-        assertThat(properties("d", properties, adjacencyList::degree)).containsExactly(3.0);       // (a)-[3.0->(d)
+        assertThat(properties("a", propertyList, adjacencyList::degree)).containsExactly(5.0);       // (c)-[5.0]->(a)
+        assertThat(properties("b", propertyList, adjacencyList::degree)).containsExactly(1.0);       // (a)-[1.0]->(b)
+        assertThat(properties("c", propertyList, adjacencyList::degree)).containsExactly(2.0, 4.0);  // (a)-[2.0]->(c),(b)-[4.0]->(c)
+        assertThat(properties("d", propertyList, adjacencyList::degree)).containsExactly(3.0);       // (a)-[3.0->(d)
         //@formatter:on
     }
 
