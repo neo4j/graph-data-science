@@ -2,8 +2,8 @@
 [.alpha]
 = Minimum Directed Steiner Tree
 :description: This section describes the Minimum Directed Steiner Tree algorithm in the Neo4j Graph Data Science library.
-:entity: node
-:result: spanning tree edge
+:entity: relationship
+:result: weight
 :algorithm: Steiner Tree heuristic
 
 include::partial$/operations-reference/alpha-note.adoc[]
@@ -144,8 +144,6 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name                                                                             | Type    | Default   | Optional  | Description
-| mutateProperty                                                                    | String  | 'mst'     | yes       | The relationship type used for the new relationships written to the projected graph.
-| weightMutateProperty                                                              | String  | n/a       | no        | The weight property of the `mutateProperty` relationship type written back
 include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
 include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
 |===
@@ -190,8 +188,6 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name                                                                             | Type    | Default   | Optional  | Description
-| writeProperty                                                                    | String  | 'mst'     | yes       | The relationship type written back as result
-| weightWriteProperty                                                              | String  | n/a       | no        | The weight property of the `writeProperty` relationship type written back
 include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
 include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
 |===
