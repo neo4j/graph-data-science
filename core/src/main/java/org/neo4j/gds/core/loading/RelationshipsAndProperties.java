@@ -89,43 +89,65 @@ public interface RelationshipsAndProperties {
             .build();
     }
 
-    static RelationshipsAndProperties of(Collection<SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext> builders) {
-        var relTypeCount = builders.size();
-        Map<RelationshipType, Relationships.Topology> relationships = new HashMap<>(relTypeCount);
+    /**
+     * This method creates the final {@link org.neo4j.gds.core.loading.RelationshipsAndProperties} in preparation
+     * for the {@link org.neo4j.gds.api.GraphStore}.
+     * <p>
+     * The method is used in the context of native projection, where each projected relationship type (and its
+     * properties) is represented by a {@link org.neo4j.gds.core.loading.SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext}.
+     *
+     * @param importContexts each import context maps to a relationship type being created
+     * @return a wrapper type ready to be consumed by a {@link org.neo4j.gds.api.GraphStore}
+     */
+    static RelationshipsAndProperties of(Collection<SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext> importContexts) {
+        var relTypeCount = importContexts.size();
+        Map<RelationshipType, ImmutableTopology.Builder> relationshipBuilders = new HashMap<>(relTypeCount);
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>(relTypeCount);
         Map<RelationshipType, Direction> directions = new HashMap<>(relTypeCount);
 
-        builders.forEach((context) -> {
-            var adjacencyListsWithProperties = context.singleTypeRelationshipImporter().build();
+        importContexts.forEach((importContext) -> {
+            var adjacencyListsWithProperties = importContext.singleTypeRelationshipImporter().build();
 
             var adjacency = adjacencyListsWithProperties.adjacency();
             var properties = adjacencyListsWithProperties.properties();
-            long relationshipCount = adjacencyListsWithProperties.relationshipCount();
+            var relationshipCount = adjacencyListsWithProperties.relationshipCount();
+            var relationshipProjection = importContext.relationshipProjection();
 
-            RelationshipProjection projection = context.relationshipProjection();
-
-            relationships.put(
-                context.relationshipType(),
-                ImmutableTopology.of(
-                    adjacency,
-                    relationshipCount,
-                    projection.isMultiGraph()
-                )
+            var topologyBuilder = relationshipBuilders.computeIfAbsent(
+                importContext.relationshipType(),
+                relationshipType -> ImmutableTopology.builder()
+                    .elementCount(relationshipCount)
+                    .isMultiGraph(relationshipProjection.isMultiGraph())
             );
 
-            if (!projection.properties().isEmpty()) {
+            importContext.inverseOfRelationshipType().ifPresentOrElse(
+                __ -> topologyBuilder.inverseAdjacencyList(adjacency),
+                () -> topologyBuilder.adjacencyList(adjacency)
+            );
+
+            // TODO: we only add the properties for the forward relationships for now
+            if (!relationshipProjection.properties().isEmpty() && importContext.inverseOfRelationshipType().isEmpty()) {
                 relationshipPropertyStores.put(
-                    context.relationshipType(),
+                    importContext.relationshipType(),
                     constructRelationshipPropertyStore(
-                        projection,
+                        relationshipProjection,
                         properties,
                         relationshipCount
                     )
                 );
             }
 
-            directions.put(context.relationshipType(), Direction.fromOrientation(context.relationshipProjection().orientation()));
+            directions.put(
+                importContext.relationshipType(),
+                Direction.fromOrientation(importContext.relationshipProjection().orientation())
+            );
         });
+
+        var relationships = relationshipBuilders.entrySet().stream().collect(
+            Collectors.toMap(
+                Map.Entry::getKey,
+                e -> e.getValue().build()
+            ));
 
         return ImmutableRelationshipsAndProperties.builder()
             .relationships(relationships)
