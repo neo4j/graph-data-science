@@ -87,8 +87,8 @@ class K1ColoringTest {
             .isNotEqualTo(colorOfNode1)
             .isNotEqualTo(colorOfNode2);
         assertThat(colorOfNode1)
-            .as("Color of Node1 should be unique")
-            .isNotEqualTo(colorOfNode2);
+            .as("Color of Node1 should be the same as color of Node2")
+            .isEqualTo(colorOfNode2);
     }
 
     @Test
