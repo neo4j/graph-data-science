@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.IntObjectMap;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.IdMap;
 
@@ -31,20 +30,6 @@ import java.util.Set;
 import java.util.function.LongUnaryOperator;
 
 public interface LabelInformation {
-    static Builder single(NodeLabel singleLabel) {
-        return new SingleLabelInformation.Builder(singleLabel);
-    }
-
-    static Builder builder(long expectedCapacity) {
-        return MultiLabelInformation.Builder.of(expectedCapacity);
-    }
-
-    static Builder builder(
-        long expectedCapacity,
-        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping
-    ) {
-        return MultiLabelInformation.Builder.of(expectedCapacity, labelTokenNodeLabelMapping);
-    }
 
     boolean isEmpty();
 

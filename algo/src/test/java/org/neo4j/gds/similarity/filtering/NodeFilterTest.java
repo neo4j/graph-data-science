@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
-import org.neo4j.gds.core.loading.LabelInformation;
+import org.neo4j.gds.core.loading.LabelInformationBuilders;
 
 import java.util.Collections;
 import java.util.List;
@@ -45,7 +45,7 @@ class NodeFilterTest {
         labelTokenNodeLabelMappings.put(1, Collections.singletonList(labelOne));
         labelTokenNodeLabelMappings.put(2, Collections.singletonList(labelTwo));
 
-        var labelInformationBuilder = LabelInformation.builder(4, labelTokenNodeLabelMappings);
+        var labelInformationBuilder = LabelInformationBuilders.multiLabelWithCapacityAndLabelInformation(4, labelTokenNodeLabelMappings);
         labelInformationBuilder.addNodeIdToLabel(labelOne, 0);
         labelInformationBuilder.addNodeIdToLabel(labelTwo, 1);
         labelInformationBuilder.addNodeIdToLabel(labelOne, 2);

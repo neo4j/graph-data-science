@@ -36,7 +36,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.ArrayIdMap;
-import org.neo4j.gds.core.loading.LabelInformation;
+import org.neo4j.gds.core.loading.LabelInformationBuilders;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.Intersections;
@@ -366,7 +366,7 @@ class HashGNNTest {
         var firstIdMap = new ArrayIdMap(
             firstMappedToOriginal,
             firstOriginalToMappedBuilder.build(),
-            LabelInformation.single(new NodeLabel("hello")).build(nodeCount, firstMappedToOriginal::get),
+            LabelInformationBuilders.singleLabel(new NodeLabel("hello")).build(nodeCount, firstMappedToOriginal::get),
             nodeCount,
             nodeCount - 1
         );
@@ -389,7 +389,7 @@ class HashGNNTest {
         var secondIdMap = new ArrayIdMap(
             secondMappedToOriginal,
             secondOriginalToMappedBuilder.build(),
-            LabelInformation.single(new NodeLabel("hello")).build(nodeCount, secondMappedToOriginal::get),
+            LabelInformationBuilders.singleLabel(NodeLabel.of("hello")).build(nodeCount, secondMappedToOriginal::get),
             nodeCount,
             nodeCount - 1
         );
