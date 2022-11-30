@@ -24,22 +24,9 @@ The minimum weight k-Spanning Tree is NP-Hard. The algorithm in the Neo4j GDS Li
 .The following will run the k-spanning tree algorithms and write back results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.spanningTree.kmin.write(
+CALL gds.alpha.kSpanningTree.write(
   graphName: String,
   configuration: Map
-)
-YIELD effectiveNodeCount: Integer,
-      preProcessingMillis: Integer,
-      computeMillis: Integer,
-      writeMillis: Integer,
-      configuration: Map
-----
-
-[source, cypher, role=noplay]
-----
-CALL gds.alpha.spanningTree.kmax.write(
-   graphName: String,
-   configuration: Map
 )
 YIELD effectiveNodeCount: Integer,
       preProcessingMillis: Integer,
@@ -55,8 +42,8 @@ YIELD effectiveNodeCount: Integer,
 | k                                                                                | Integer | null    | no        | The result is a tree with `k` nodes and `k − 1` relationships.
 | sourceNode                                                                      | Integer | null    | no        | The start node ID.
 | xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes       | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
-| writeProperty                                                                    | String  | 'MST'   | yes       | The relationship type written back as result.
-| weightWriteProperty                                                              | String  | n/a     | no        | The weight property of the `writeProperty` relationship type written back
+| writeProperty                                                                    | String  | n/a   | no       | The partition that a node belongs to.
+| objective  | String | 'minimum'  | yes      | If specified, the parameter dictates whether to try and find the minimum or the maximum  k-spanning tree. By default, the algorithm looks for the minimum one. Permitted values are 'minimum' and 'maximum'.
 |===
 
 .Results
@@ -119,7 +106,7 @@ By setting the `k=3`, we define that we want to get returned a 3-minimum spannin
 [source, cypher, role=noplay]
 ----
 MATCH (n:Place{id: 'D'})
-CALL gds.alpha.spanningTree.kmin.write('graph', {
+CALL gds.alpha.kSpanningTree.write('graph', {
   k: 3,
   sourceNode: id(n),
   relationshipWeightProperty: 'cost',
@@ -155,11 +142,12 @@ Nodes A, B, and C are the result 3-minimum spanning tree of our graph.
 [source, cypher, role=noplay]
 ----
 MATCH (n:Place{id: 'D'})
-CALL gds.alpha.spanningTree.kmax.write('graph', {
+CALL gds.alpha.kSpanningTree.write('graph', {
   k: 3,
   sourceNode: id(n),
   relationshipWeightProperty: 'cost',
-  writeProperty:'kmaxst'
+  writeProperty:'kmaxst',
+  objective: 'maximum',
 })
 YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
 RETURN preProcessingMillis,computeMillis,writeMillis, effectiveNodeCount;

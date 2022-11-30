@@ -308,9 +308,8 @@
 | `gds.beta.spanningTree.stream.estimate`
 | `gds.beta.spanningTree.write`
 | `gds.beta.spanningTree.write.estimate`
-.2+<.^|xref:alpha-algorithms/k-minimum-weight-spanning-tree.adoc[ k-Spanning Tree]
-| `gds.alpha.spanningTree.kmax.write`
-| `gds.alpha.spanningTree.kmin.write`
+.1+<.^|xref:alpha-algorithms/k-minimum-weight-spanning-tree.adoc[ k-Spanning Tree]
+| `gds.alpha.kSpanningTree.write`
 | xref:alpha-algorithms/adamic-adar.adoc[Adamic Adar] | `_gds.alpha.linkprediction.adamicAdar_`
 | xref:alpha-algorithms/common-neighbors.adoc[Common Neighbors] | `_gds.alpha.linkprediction.commonNeighbors_`
 | xref:alpha-algorithms/preferential-attachment.adoc[Preferential Attachment] | `_gds.alpha.linkprediction.preferentialAttachment_`

@@ -20,30 +20,13 @@
 package org.neo4j.gds.impl.spanningtree;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
-import org.neo4j.gds.config.SourceNodeConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.function.DoubleUnaryOperator;
-
 @Configuration
-public interface KSpanningTreeConfig extends AlgoBaseConfig,
-    RelationshipWeightConfig,
-    SourceNodeConfig, WritePropertyConfig {
+public interface KSpanningTreeWriteConfig extends KSpanningTreeBaseConfig, WritePropertyConfig {
 
-    long k();
-
-    @Configuration.Parameter
-    DoubleUnaryOperator minMax();
-
-    @Override
-    default String writeProperty() {
-        return "partition";
-    }
-
-    static KSpanningTreeConfig of(DoubleUnaryOperator minMax, CypherMapWrapper userInput) {
-        return new KSpanningTreeConfigImpl(minMax, userInput);
+    static KSpanningTreeWriteConfig of(CypherMapWrapper userInput) {
+        return new KSpanningTreeWriteConfigImpl(userInput);
     }
 }
