@@ -19,23 +19,15 @@
  */
 package org.neo4j.gds.spanningtree;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
-public interface SpanningTreeMutateConfig extends SpanningTreeBaseConfig, MutatePropertyConfig {
-    String MUTATE_RELATIONSHIP_TYPE = "MST";
-
-    String weightMutateProperty();
-
-    @Value.Default
-    default String mutateProperty() {
-        return MUTATE_RELATIONSHIP_TYPE;
-    }
+public interface SpanningTreeMutateConfig extends SpanningTreeBaseConfig, MutatePropertyConfig, MutateRelationshipConfig {
 
     static SpanningTreeMutateConfig of(CypherMapWrapper userInput) {
         return new SpanningTreeMutateConfigImpl(userInput);

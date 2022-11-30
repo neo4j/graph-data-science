@@ -87,7 +87,7 @@ public class SpanningTreeWriteSpec implements AlgorithmSpec<Prim, SpanningTree, 
                         executionContext
                     ))
                     .build()
-                    .write(config.writeProperty(), config.weightWriteProperty());
+                    .write(config.writeRelationshipType(), config.writeProperty());
             }
             builder.withComputeMillis(computationResult.computeMillis());
             builder.withPreProcessingMillis(computationResult.preProcessingMillis());

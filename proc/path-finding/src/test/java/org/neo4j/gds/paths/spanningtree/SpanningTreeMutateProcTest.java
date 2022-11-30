@@ -87,8 +87,8 @@ class SpanningTreeMutateProcTest extends BaseProcTest {
             .mutateMode()
             .addParameter("sourceNode", getSourceNode())
             .addParameter("relationshipWeightProperty", "cost")
-            .addParameter("weightMutateProperty", "foo")
-            .addParameter("mutateProperty", "MST")
+            .addParameter("mutateProperty", "foo")
+            .addParameter("mutateRelationshipType", "MST")
             .yields(
                 "preProcessingMillis",
                 "computeMillis",

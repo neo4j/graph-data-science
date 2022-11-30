@@ -62,9 +62,9 @@ public class SpanningTreeWithParallelEdgesWriteTest extends BaseProcTest {
         var mstQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.beta.spanningTree")
             .writeMode()
-            .addParameter("weightWriteProperty", "writeCost")
+            .addParameter("writeProperty", "writeCost")
             .addParameter("relationshipWeightProperty", "cost")
-            .addParameter("writeProperty", "MINST")
+            .addParameter("writeRelationshipType", "MINST")
             .addParameter("sourceNode", 0)
             .yields();
         runQuery(mstQuery);

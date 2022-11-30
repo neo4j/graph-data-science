@@ -85,7 +85,7 @@ public class SpanningTreeMutateSpec implements AlgorithmSpec<Prim, SpanningTree,
                 .orientation(Orientation.NATURAL)
                 .build();
 
-            var mutateRelationshipType = RelationshipType.of(config.mutateProperty());
+            var mutateRelationshipType = RelationshipType.of(config.mutateRelationshipType());
 
             builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount());
             builder.withTotalWeight(spanningTree.totalWeight());
@@ -112,7 +112,7 @@ public class SpanningTreeMutateSpec implements AlgorithmSpec<Prim, SpanningTree,
                 .graphStore()
                 .addRelationshipType(
                     mutateRelationshipType,
-                    Optional.of(config.weightMutateProperty()),
+                    Optional.of(config.mutateProperty()),
                     Optional.of(NumberType.FLOATING_POINT),
                     Direction.DIRECTED,
                     relationships

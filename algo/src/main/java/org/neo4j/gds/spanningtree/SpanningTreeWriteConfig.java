@@ -19,24 +19,16 @@
  */
 package org.neo4j.gds.spanningtree;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.WritePropertyConfig;
+import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
-public interface SpanningTreeWriteConfig extends SpanningTreeBaseConfig, WritePropertyConfig {
-    String WRITE_RELATIONSHIP_TYPE = "MST";
-
-    String weightWriteProperty();
-
-    @Value.Default
-    default String writeProperty() {
-        return WRITE_RELATIONSHIP_TYPE;
-    }
-
+public interface SpanningTreeWriteConfig extends SpanningTreeBaseConfig, WritePropertyConfig, WriteRelationshipConfig {
+    
     static SpanningTreeWriteConfig of(CypherMapWrapper userInput) {
         return new SpanningTreeWriteConfigImpl(userInput);
     }

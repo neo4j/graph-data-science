@@ -2,8 +2,8 @@
 [.beta]
 = Minimum Weight Spanning Tree
 :description: This section describes the Minimum Weight Spanning Tree algorithm in the Neo4j Graph Data Science library.
-:entity: node
-:result: spanning tree edge
+:entity: relationship
+:result: weight
 :algorithm: Prim
 
 include::partial$/operations-reference/beta-note.adoc[]
@@ -149,8 +149,6 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name                                                                             | Type    | Default   | Optional  | Description
-| writeProperty                                                                    | String  | 'mst'     | yes       | The relationship type written back as result
-| weightWriteProperty                                                              | String  | n/a       | no        | The weight property of the `writeProperty` relationship type written back
 include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
 include::partial$/algorithms/spanning-tree/specific-configuration.adoc[]
 |===
@@ -193,8 +191,6 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name                                                                             | Type    | Default   | Optional  | Description
-| mutateProperty                                                                    | String  | 'mst'     | yes       | The relationship type used for the new relationships written to the projected graph.
-| weightMutateProperty                                                              | String  | n/a       | no        | The weight property of the `mutateProperty` relationship type written back
 include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
 include::partial$/algorithms/spanning-tree/specific-configuration.adoc[]
 |===
@@ -312,6 +308,34 @@ ORDER BY node
 |===
 --
 
+[[algorithms-spanning-tree-examples-stats]]
+=== Stats
+:stats-syntax: algorithms-minimum-weight-spanning-tree-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the Minimum Weight Spanning Tree algorithm and return its statistics.
+[source,cypher,role=noplay]
+----
+MATCH (n:Place{id: 'D'})
+CALL gds.beta.spanningTree.stats('graph', {
+  sourceNode: id(n),
+  relationshipWeightProperty: 'cost'
+})
+YIELD effectiveNodeCount, totalWeight
+RETURN effectiveNodeCount, totalWeight
+----
+
+.Results
+[opts="header"]
+|===
+| effectiveNodeCount | totalWeight
+| 5  | 12
+|===
+--
+
+
 [[algorithms-spanning-tree-examples-write]]
 === Write
 
@@ -327,8 +351,8 @@ MATCH (n:Place {id: 'D'})
 CALL gds.beta.spanningTree.write('graph', {
   sourceNode: id(n),
   relationshipWeightProperty: 'cost',
-  writeProperty: 'MINST',
-  weightWriteProperty: 'writeCost'
+  writeProperty: 'writeCost',
+  writeRelationshipType: 'MINST'
 })
 YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
 RETURN preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount;
@@ -380,8 +404,8 @@ MATCH (n:Place {id: 'D'})
 CALL gds.beta.spanningTree.mutate('graph', {
   sourceNode: id(n),
   relationshipWeightProperty: 'cost',
-  mutateProperty: 'MINST',
-  weightMutateProperty: 'writeCost'
+  mutateProperty: 'writeCost',
+  mutateRelationshipType: 'MINST'
 })
 YIELD relationshipsWritten
 RETURN relationshipsWritten
@@ -399,33 +423,6 @@ The relationships added back to the graph are always directed, even if the input
 ====
 
 
-[[algorithms-spanning-tree-examples-stats]]
-=== Stats
-:stats-syntax: algorithms-minimum-weight-spanning-tree-syntax
-include::partial$/algorithms/shared/examples-stats-intro.adoc[]
-
-[role=query-example]
---
-.The following will run the Minimum Weight Spanning Tree algorithm and return its statistics.
-[source,cypher,role=noplay]
-----
-MATCH (n:Place{id: 'D'})
-CALL gds.beta.spanningTree.stats('graph', {
-  sourceNode: id(n),
-  relationshipWeightProperty: 'cost'
-})
-YIELD effectiveNodeCount, totalWeight
-RETURN effectiveNodeCount, totalWeight
-----
-
-.Results
-[opts="header"]
-|===
-| effectiveNodeCount | totalWeight
-| 5  | 12
-|===
---
-
 [[algorithms-spanning-tree-examples-max]]
 === Maximum spanning Tree
 
@@ -440,7 +437,7 @@ MATCH (n:Place{id: 'D'})
 CALL gds.beta.spanningTree.stats('graph', {
   sourceNode: id(n),
   relationshipWeightProperty: 'cost',
- objective: 'maximum'
+  objective: 'maximum'
 })
 YIELD totalWeight
 RETURN totalWeight

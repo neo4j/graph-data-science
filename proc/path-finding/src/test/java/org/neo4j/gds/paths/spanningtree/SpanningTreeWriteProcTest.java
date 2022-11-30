@@ -83,7 +83,8 @@ class SpanningTreeWriteProcTest extends BaseProcTest {
             .writeMode()
             .addParameter("sourceNode", getSourceNode())
             .addParameter("relationshipWeightProperty", "cost")
-            .addParameter("weightWriteProperty", "cost")
+            .addParameter("writeProperty", "cost")
+            .addParameter("writeRelationshipType", "MST")
             .addParameter("objective", objective)
             .yields(
                 "preProcessingMillis",
