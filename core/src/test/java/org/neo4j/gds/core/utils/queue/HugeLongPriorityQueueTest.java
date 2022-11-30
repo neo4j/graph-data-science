@@ -193,6 +193,19 @@ class HugeLongPriorityQueueTest {
         Assertions.assertThat(priorityQueue.size()).isEqualTo(1);
     }
 
+    @Test
+    void testMapIndex() {
+        HugeLongPriorityQueue priorityQueue = HugeLongPriorityQueue.min(11);
+        for (int i = 0; i < 10; ++i) {
+            priorityQueue.add(i, 10 - i);
+        }
+        for (int i = 0; i < 10; ++i) {
+            var ith = priorityQueue.getIth(i);
+            assertEquals(priorityQueue.findElementPosition(ith), i + 1);
+        }
+        assertEquals(priorityQueue.findElementPosition(10), 0);
+    }
+
     private double exclusiveDouble(double exclusiveMin, double exclusiveMax) {
         return RandomShortApi.Double(Math.nextUp(exclusiveMin), exclusiveMax);
     }

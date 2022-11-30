@@ -18,6 +18,7 @@ package org.neo4j.gds.impl.queue;
 
 import com.carrotsearch.hppc.IntDoubleScatterMap;
 import com.carrotsearch.hppc.IntLongScatterMap;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 
@@ -180,7 +181,7 @@ public abstract class IntPriorityQueue {
         }
     }
 
-    private long findElementPosition(int element) {
+    long findElementPosition(int element) {
         return mapElementToIndex.get(element);
     }
 
@@ -304,6 +305,11 @@ public abstract class IntPriorityQueue {
     private void placeElement(long position, int element) {
         heap.set(position, element);
         mapElementToIndex.put(element, position);
+    }
+
+    @TestOnly
+    long getIth(int i) {
+        return heap.get(i + 1);
     }
 
 }
