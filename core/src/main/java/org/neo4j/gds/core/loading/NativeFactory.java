@@ -227,10 +227,10 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
 
     @Override
     protected GraphSchema computeGraphSchema(
-        IdMapAndProperties idMapAndProperties, RelationshipImportResult relationshipImportResult
+        NodeImportResult nodeImportResult, RelationshipImportResult relationshipImportResult
     ) {
         return CSRGraphStoreUtil.computeGraphSchema(
-            idMapAndProperties,
+            nodeImportResult,
             (label) -> storeConfig.nodeProjections().projections().get(label).properties().propertyKeys(),
             relationshipImportResult
         );
@@ -243,7 +243,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         int concurrency = graphProjectConfig.readConcurrency();
         try {
             progressTracker.beginSubTask();
-            IdMapAndProperties nodes = loadNodes(concurrency);
+            NodeImportResult nodes = loadNodes(concurrency);
             RelationshipImportResult relationships = loadRelationships(nodes.idMap(), concurrency);
             CSRGraphStore graphStore = createGraphStore(nodes, relationships);
 
@@ -255,7 +255,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         }
     }
 
-    private IdMapAndProperties loadNodes(int concurrency) {
+    private NodeImportResult loadNodes(int concurrency) {
         var scanningNodesImporter = new ScanningNodesImporterBuilder()
             .concurrency(concurrency)
             .graphProjectConfig(graphProjectConfig)

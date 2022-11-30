@@ -231,14 +231,14 @@ public final class CSRGraphStoreUtil {
     }
 
     public static GraphSchema computeGraphSchema(
-        IdMapAndProperties idMapAndProperties,
+        NodeImportResult nodeImportResult,
         Function<NodeLabel, Collection<String>> propertiesByLabel,
         RelationshipImportResult relationshipImportResult
     ) {
-        var properties = idMapAndProperties.properties().properties();
+        var properties = nodeImportResult.properties().properties();
 
         var nodeSchema = NodeSchema.empty();
-        for (var label : idMapAndProperties.idMap().availableNodeLabels()) {
+        for (var label : nodeImportResult.idMap().availableNodeLabels()) {
             var entry = nodeSchema.getOrCreateLabel(label);
             for (var propertyKey : propertiesByLabel.apply(label)) {
                 entry.addProperty(
@@ -247,7 +247,7 @@ public final class CSRGraphStoreUtil {
                 );
             }
         }
-        idMapAndProperties.idMap().availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
+        nodeImportResult.idMap().availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
         var relationshipSchema = RelationshipSchema.empty();
         relationshipImportResult
