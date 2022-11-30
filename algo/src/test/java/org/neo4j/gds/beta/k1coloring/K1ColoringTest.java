@@ -40,14 +40,11 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
@@ -81,9 +78,17 @@ class K1ColoringTest {
 
         HugeLongArray colors = k1Coloring.colors();
 
-        assertNotEquals(colors.get(0), colors.get(1));
-        assertNotEquals(colors.get(0), colors.get(2));
-        assertEquals(colors.get(1), colors.get(2));
+        var colorOfNode0 = colors.get(0);
+        var colorOfNode1 = colors.get(1);
+        var colorOfNode2 = colors.get(2);
+
+        assertThat(colorOfNode0)
+            .as("Color of Node0 should be unique")
+            .isNotEqualTo(colorOfNode1)
+            .isNotEqualTo(colorOfNode2);
+        assertThat(colorOfNode1)
+            .as("Color of Node1 should be unique")
+            .isNotEqualTo(colorOfNode2);
     }
 
     @Test
@@ -113,21 +118,26 @@ class K1ColoringTest {
         k1Coloring.compute();
         HugeLongArray colors = k1Coloring.colors();
 
-        Set<Long> colorsUsed = new HashSet<>(100);
-        MutableLong conflicts = new MutableLong(0);
+        var usedColors = new HashSet<>(100);
+        var conflicts = new MutableLong(0);
         graph.forEachNode((nodeId) -> {
             graph.forEachRelationship(nodeId, (source, target) -> {
                 if (source != target && colors.get(source) == colors.get(target)) {
                     conflicts.increment();
                 }
-                colorsUsed.add(colors.get(source));
+                usedColors.add(colors.get(source));
                 return true;
             });
             return true;
         });
 
-        assertTrue(conflicts.getValue() < 20);
-        assertTrue(colorsUsed.size() < 20);
+        assertThat(conflicts.longValue())
+            .as("Conflicts should be less than 20")
+            .isLessThan(20L);
+
+        assertThat(usedColors.size())
+            .as("Used colors should be less than 20")
+            .isLessThan(20);
     }
 
 
@@ -174,7 +184,9 @@ class K1ColoringTest {
 
         k1Coloring.compute();
 
-        assertFalse(k1Coloring.usedColors().get(ColoringStep.INITIAL_FORBIDDEN_COLORS));
+        assertThat(k1Coloring.usedColors().get(ColoringStep.INITIAL_FORBIDDEN_COLORS))
+            .as("The result should not contain the initial forbidden colors")
+            .isFalse();
     }
 
     @Test
