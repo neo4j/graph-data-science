@@ -48,9 +48,9 @@ import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.IdMapAndProperties;
-import org.neo4j.gds.core.loading.ImmutableRelationshipsAndProperties;
+import org.neo4j.gds.core.loading.ImmutableRelationshipImportResult;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
-import org.neo4j.gds.core.loading.RelationshipsAndProperties;
+import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -173,7 +173,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
     @Override
     protected GraphSchema computeGraphSchema(
-        IdMapAndProperties idMapAndProperties, RelationshipsAndProperties relationshipsAndProperties
+        IdMapAndProperties idMapAndProperties, RelationshipImportResult relationshipImportResult
     ) {
         var nodeProperties = idMapAndProperties.properties();
         var nodeSchema = NodeSchema.empty();
@@ -200,12 +200,12 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         idMapAndProperties.idMap().availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
         var relationshipSchema = RelationshipSchema.empty();
-        relationshipsAndProperties
+        relationshipImportResult
             .properties()
             .forEach((relType, propertyStore) -> propertyStore
                 .relationshipProperties()
                 .forEach((propertyKey, propertyValues) -> relationshipSchema
-                    .getOrCreateRelationshipType(relType, relationshipsAndProperties.directions().get(relType))
+                    .getOrCreateRelationshipType(relType, relationshipImportResult.directions().get(relType))
                     .addProperty(
                         propertyKey,
                         RelationshipPropertySchema.of(
@@ -218,12 +218,12 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                     )
                 )
             );
-        relationshipsAndProperties
+        relationshipImportResult
             .relationships()
             .keySet()
             .forEach(type -> relationshipSchema.getOrCreateRelationshipType(
                 type,
-                relationshipsAndProperties.directions().get(type)
+                relationshipImportResult.directions().get(type)
             ));
 
         return GraphSchema.of(
@@ -265,7 +265,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
         var schema = computeGraphSchema(
             nodes,
-            ImmutableRelationshipsAndProperties.of(topologies, properties, directions)
+            ImmutableRelationshipImportResult.of(topologies, properties, directions)
         );
 
         return new GraphStoreBuilder()

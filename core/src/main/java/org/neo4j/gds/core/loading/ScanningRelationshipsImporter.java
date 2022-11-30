@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
-public final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipReference, RelationshipsAndProperties> {
+public final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipReference, RelationshipImportResult> {
 
     private final GraphProjectFromStoreConfig graphProjectConfig;
     private final GraphLoaderContext loadingContext;
@@ -172,7 +172,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
     }
 
     @Override
-    public RelationshipsAndProperties build() {
-        return RelationshipsAndProperties.of(importContexts);
+    public RelationshipImportResult build() {
+        return RelationshipImportResult.of(importContexts);
     }
 }

@@ -44,7 +44,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @ValueClass
-public interface RelationshipsAndProperties {
+public interface RelationshipImportResult {
 
     @Value.Default
     default Map<RelationshipType, Relationships.Topology> relationships() {
@@ -88,7 +88,7 @@ public interface RelationshipsAndProperties {
         return Map.of();
     }
 
-    static RelationshipsAndProperties of(Map<RelationshipTypeAndProjection, List<RelationshipsAndDirection>> relationshipsByType) {
+    static RelationshipImportResult of(Map<RelationshipTypeAndProjection, List<RelationshipsAndDirection>> relationshipsByType) {
         var relTypeCount = relationshipsByType.size();
         Map<RelationshipType, Relationships.Topology> topologies = new HashMap<>(relTypeCount);
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>(relTypeCount);
@@ -119,7 +119,7 @@ public interface RelationshipsAndProperties {
             directions.put(relationshipTypeAndProjection.relationshipType(), Direction.fromOrientation(orientation));
         });
 
-        return ImmutableRelationshipsAndProperties.builder()
+        return ImmutableRelationshipImportResult.builder()
             .relationships(topologies)
             .properties(relationshipPropertyStores)
             .directions(directions)
@@ -127,7 +127,7 @@ public interface RelationshipsAndProperties {
     }
 
     /**
-     * This method creates the final {@link org.neo4j.gds.core.loading.RelationshipsAndProperties} in preparation
+     * This method creates the final {@link RelationshipImportResult} in preparation
      * for the {@link org.neo4j.gds.api.GraphStore}.
      * <p>
      * The method is used in the context of native projection, where each projected relationship type (and its
@@ -136,7 +136,7 @@ public interface RelationshipsAndProperties {
      * @param importContexts each import context maps to a relationship type being created
      * @return a wrapper type ready to be consumed by a {@link org.neo4j.gds.api.GraphStore}
      */
-    static RelationshipsAndProperties of(Collection<SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext> importContexts) {
+    static RelationshipImportResult of(Collection<SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext> importContexts) {
         var builders = new HashMap<RelationshipType, ImmutableSingleTypeRelationshipImportResult.Builder>(importContexts.size());
 
         importContexts.forEach((importContext) -> {
@@ -175,7 +175,7 @@ public interface RelationshipsAndProperties {
                 e -> e.getValue().build()
             ));
 
-        return ImmutableRelationshipsAndProperties.builder()
+        return ImmutableRelationshipImportResult.builder()
             .importResults(importResults)
             .build();
     }
