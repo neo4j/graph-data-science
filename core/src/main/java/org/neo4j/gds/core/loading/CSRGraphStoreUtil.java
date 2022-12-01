@@ -97,18 +97,18 @@ public final class CSRGraphStoreUtil {
 
         var schema = GraphSchema.of(NodeSchema.from(graph.schema().nodeSchema()), relationshipSchema, Map.of());
 
-        return new CSRGraphStore(
-            databaseId,
+        return new GraphStoreBuilder()
+            .databaseId(databaseId)
             // TODO: is it correct that we only use this for generated graphs?
-            ImmutableStaticCapabilities.of(false),
-            schema,
-            graph.idMap(),
-            nodeProperties,
-            topology,
-            relationshipProperties,
-            GraphPropertyStore.empty(),
-            concurrency
-        );
+            .capabilities(ImmutableStaticCapabilities.of(false))
+            .schema(schema)
+            .nodes(graph.idMap())
+            .nodePropertyStore(nodeProperties)
+            .putAllRelationships(topology)
+            .putAllRelationshipPropertyStores(relationshipProperties)
+            .graphProperties(GraphPropertyStore.empty())
+            .concurrency(concurrency)
+            .build();
     }
 
     @NotNull

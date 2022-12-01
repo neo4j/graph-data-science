@@ -151,11 +151,13 @@ public interface RelationshipImportResult {
                 .isMultiGraph(importContext.relationshipProjection().isMultiGraph())
                 .build();
 
-            var properties = constructRelationshipPropertyStore(
-                importContext.relationshipProjection(),
-                adjacencyListsWithProperties.properties(),
-                adjacencyListsWithProperties.relationshipCount()
-            );
+            var properties = (importContext.relationshipProjection().properties().isEmpty())
+                ? Optional.<RelationshipPropertyStore>empty()
+                : Optional.of(constructRelationshipPropertyStore(
+                    importContext.relationshipProjection(),
+                    adjacencyListsWithProperties.properties(),
+                    adjacencyListsWithProperties.relationshipCount()
+                ));
 
             var importResultBuilder = builders.computeIfAbsent(
                 importContext.relationshipType(),
