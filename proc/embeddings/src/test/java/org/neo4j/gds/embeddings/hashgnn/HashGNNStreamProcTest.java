@@ -68,6 +68,5 @@ class HashGNNStreamProcTest extends HashGNNProcTest<HashGNNStreamConfig> {
                 .hasSize(3)
                 .anyMatch(value -> value != 0.0);
         });
-
     }
 }

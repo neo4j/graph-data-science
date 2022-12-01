@@ -29,4 +29,5 @@ public interface HashGNNMutateConfig extends HashGNNConfig, MutatePropertyConfig
     static HashGNNMutateConfig of(CypherMapWrapper config) {
         return new HashGNNMutateConfigImpl(config);
     }
+
 }

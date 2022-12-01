@@ -22,6 +22,8 @@ package org.neo4j.gds.embeddings.hashgnn;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 @Configuration
@@ -39,4 +41,13 @@ public interface BinarizeFeaturesConfig {
     default Map<String, Object> toMap() {
         return Map.of(); // Will be overwritten
     }
+
+    @Configuration.CollectKeys
+    @Value.Auxiliary
+    @Value.Default
+    @Value.Parameter(false)
+    default Collection<String> configKeys() {
+        return List.of();
+    }
+
 }
