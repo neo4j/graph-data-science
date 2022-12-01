@@ -23,7 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -47,7 +47,7 @@ public interface GenerateFeaturesConfig {
     @Value.Default
     @Value.Parameter(false)
     default Collection<String> configKeys() {
-        return Collections.emptyList();
+        return List.of();
     }
 
     @Value.Check
