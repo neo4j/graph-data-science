@@ -64,13 +64,18 @@ The action body is a JSON document containing metadata for the import process:
 {
     name: "my_graph",
     database_name: "neo4j",
-    concurrency: 4
+    concurrency: 4,
+    undirected_relationship_types: []
 }
 ----
 
 The `name` is used to identify the import process, it is also the name of the resulting in-memory graph in the graph catalog.
 The `database_name` is used to tell the server on which database the projected graph will be available.
 The `concurrency` key is optional, it is used during finalizing the in-memory graph on the server after all data has been received.
+The `undirected_relationship_types` key is optional, it is used to declare a number of relationship types as undirected. Relationships with the specified types will be imported as undirected. `*` can be used to declare all relationship types as undirected.
+
+[NOTE]
+Relationships declared as undirected should only be provided once, i.e. in a single direction.
 
 The server acknowledges creating the import process by sending a result JSON document which contains the name of the import process.
 If an error occurs, e.g., if the graph already exists or if the server is not started, the client is informed accordingly.
