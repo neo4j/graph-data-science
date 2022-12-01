@@ -403,7 +403,7 @@ public class CSRGraphStore implements GraphStore {
         return Optional.ofNullable(relationships.get(relationshipType))
             .flatMap(SingleTypeRelationshipImportResult::properties)
             .map(propertyStore -> propertyStore.get(propertyKey))
-            .orElseGet(() -> RelationshipPropertyStore.empty().get(propertyKey));
+            .orElseThrow(() -> new IllegalArgumentException("No relationship properties found for relationship type `" + relationshipType + "` and property key `" + propertyKey + "`."));
     }
 
     @Override
@@ -557,13 +557,12 @@ public class CSRGraphStore implements GraphStore {
 
         var relationship = relationships.get(relationshipType);
         var adjacencyList = relationship.topology().adjacencyList();
-        var relationshipPropertyStore = relationship.properties().orElse(RelationshipPropertyStore.empty());
 
         var properties = propertyKeys.isEmpty()
             ? CSRCompositeRelationshipIterator.EMPTY_PROPERTIES
             : propertyKeys
                 .stream()
-                .map(relationshipPropertyStore::get)
+                .map(propertyKey -> relationshipPropertyValues(relationshipType, propertyKey))
                 .map(RelationshipProperty::values)
                 .map(Relationships.Properties::propertiesList)
                 .toArray(AdjacencyProperties[]::new);

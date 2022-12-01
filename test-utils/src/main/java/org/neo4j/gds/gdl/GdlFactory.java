@@ -235,35 +235,39 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         var relationshipImportResultBuilder = RelationshipImportResult.builder();
 
         relationships.forEach(loadResult -> {
-            var propertyStoreBuilder = loadResult
-                .properties()
-                .entrySet()
-                .stream()
-                .reduce(RelationshipPropertyStore.builder(), (builder, stringPropertiesEntry) -> {
-                    var propertyKey = stringPropertiesEntry.getKey();
-                    var properties = stringPropertiesEntry.getValue();
+            var singleTypeRelationshipImportBuilder = SingleTypeRelationshipImportResult.builder()
+                .direction(Direction.fromOrientation(graphProjectConfig().orientation()))
+                .topology(loadResult.topology());
 
-                    builder.putIfAbsent(
-                        propertyKey,
-                        RelationshipProperty.of(
+            if (!loadResult.properties().isEmpty()) {
+                var propertyStoreBuilder = loadResult
+                    .properties()
+                    .entrySet()
+                    .stream()
+                    .reduce(RelationshipPropertyStore.builder(), (builder, stringPropertiesEntry) -> {
+                        var propertyKey = stringPropertiesEntry.getKey();
+                        var properties = stringPropertiesEntry.getValue();
+
+                        builder.putIfAbsent(
                             propertyKey,
-                            NumberType.FLOATING_POINT,
-                            PropertyState.PERSISTENT,
-                            properties,
-                            DefaultValue.forDouble(),
-                            graphProjectConfig.aggregation()
-                        )
-                    );
-                    return builder;
-                }, (builder, __) -> builder);
+                            RelationshipProperty.of(
+                                propertyKey,
+                                NumberType.FLOATING_POINT,
+                                PropertyState.PERSISTENT,
+                                properties,
+                                DefaultValue.forDouble(),
+                                graphProjectConfig.aggregation()
+                            )
+                        );
+                        return builder;
+                    }, (builder, __) -> builder);
+
+                singleTypeRelationshipImportBuilder.properties(propertyStoreBuilder.build());
+            }
 
             relationshipImportResultBuilder.putImportResult(
                 loadResult.relationshipType(),
-                SingleTypeRelationshipImportResult.builder()
-                    .direction(Direction.fromOrientation(graphProjectConfig().orientation()))
-                    .topology(loadResult.topology())
-                    .properties(propertyStoreBuilder.build())
-                    .build()
+                singleTypeRelationshipImportBuilder.build()
             );
         });
 

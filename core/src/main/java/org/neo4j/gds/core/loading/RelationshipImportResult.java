@@ -62,7 +62,7 @@ public interface RelationshipImportResult {
             relationshipType,
             SingleTypeRelationshipImportResult.builder()
                 .topology(topology)
-                .properties(Optional.ofNullable(properties.get(relationshipType)).filter(p -> !p.isEmpty()))
+                .properties(Optional.ofNullable(properties.get(relationshipType)))
                 .direction(directions.get(relationshipType))
                 .build()
         ));
