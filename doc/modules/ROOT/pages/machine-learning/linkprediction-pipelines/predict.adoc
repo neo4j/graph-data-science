@@ -347,11 +347,11 @@ As the default samplingRate is `1`, we use the xref:machine-learning/linkpredict
 [opts="header"]
 |===
 | person1   | person2   | probability
-| "Alice"    | "Chris" | 0.761499973561354
+| "Alice"    | "Chris" | 0.761499973561355
 | "Chris"    | "Mark" | 0.698029761673014
-| "Alice"    | "Mark" | 0.592463039575706
-| "Alice"    | "Karin" | 0.573335167938719
-| "Alice"    | "Greg" | 0.563686221461583
+| "Alice"    | "Mark" | 0.592463039575708
+| "Alice"    | "Karin" | 0.573335167938716
+| "Alice"    | "Greg" | 0.563686221461585
 |===
 
 We can see that our model predicts the same top 5 links as it did with the unfiltered model `lp-pipeline-model`.

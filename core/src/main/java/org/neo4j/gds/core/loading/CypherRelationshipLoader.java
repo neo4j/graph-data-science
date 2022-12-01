@@ -45,7 +45,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Value.Enclosing
-class CypherRelationshipLoader extends CypherRecordLoader<RelationshipsAndProperties> {
+class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResult> {
 
     private final IdMap idMap;
     private final Context loaderContext;
@@ -133,16 +133,16 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipsAndProper
     void updateCounts(BatchLoadResult result) {}
 
     @Override
-    RelationshipsAndProperties result() {
+    RelationshipImportResult result() {
         var relationshipsByType = loaderContext.relationshipBuildersByType.entrySet().stream().collect(Collectors.toMap(
             entry -> {
                 var projection = projectionBuilder.type(entry.getKey().name).build();
-                return RelationshipsAndProperties.RelationshipTypeAndProjection.of(entry.getKey(), projection);
+                return RelationshipImportResult.RelationshipTypeAndProjection.of(entry.getKey(), projection);
             },
             entry -> entry.getValue().buildAll()
         ));
 
-        return RelationshipsAndProperties.of(relationshipsByType);
+        return RelationshipImportResult.of(relationshipsByType);
     }
 
     @Override

@@ -47,10 +47,10 @@ import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
-import org.neo4j.gds.core.loading.IdMapAndProperties;
-import org.neo4j.gds.core.loading.ImmutableRelationshipsAndProperties;
+import org.neo4j.gds.core.loading.ImmutableRelationshipImportResult;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
-import org.neo4j.gds.core.loading.RelationshipsAndProperties;
+import org.neo4j.gds.core.loading.NodeImportResult;
+import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -173,9 +173,9 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
     @Override
     protected GraphSchema computeGraphSchema(
-        IdMapAndProperties idMapAndProperties, RelationshipsAndProperties relationshipsAndProperties
+        NodeImportResult nodeImportResult, RelationshipImportResult relationshipImportResult
     ) {
-        var nodeProperties = idMapAndProperties.properties();
+        var nodeProperties = nodeImportResult.properties();
         var nodeSchema = NodeSchema.empty();
         gdlHandler
             .getVertices()
@@ -197,15 +197,15 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                 );
             });
         // in case there were no properties add all labels
-        idMapAndProperties.idMap().availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
+        nodeImportResult.idMap().availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
         var relationshipSchema = RelationshipSchema.empty();
-        relationshipsAndProperties
+        relationshipImportResult
             .properties()
             .forEach((relType, propertyStore) -> propertyStore
                 .relationshipProperties()
                 .forEach((propertyKey, propertyValues) -> relationshipSchema
-                    .getOrCreateRelationshipType(relType, relationshipsAndProperties.directions().get(relType))
+                    .getOrCreateRelationshipType(relType, relationshipImportResult.directions().get(relType))
                     .addProperty(
                         propertyKey,
                         RelationshipPropertySchema.of(
@@ -218,12 +218,12 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                     )
                 )
             );
-        relationshipsAndProperties
+        relationshipImportResult
             .relationships()
             .keySet()
             .forEach(type -> relationshipSchema.getOrCreateRelationshipType(
                 type,
-                relationshipsAndProperties.directions().get(type)
+                relationshipImportResult.directions().get(type)
             ));
 
         return GraphSchema.of(
@@ -265,7 +265,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
         var schema = computeGraphSchema(
             nodes,
-            ImmutableRelationshipsAndProperties.of(topologies, properties, directions)
+            ImmutableRelationshipImportResult.of(topologies, properties, directions)
         );
 
         return new GraphStoreBuilder()
@@ -280,7 +280,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             .build();
     }
 
-    private IdMapAndProperties loadNodes() {
+    private NodeImportResult loadNodes() {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(dimensions.highestPossibleNodeCount() - 1)
             .hasLabelInformation(true)
@@ -303,7 +303,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
         var idMap = nodesBuilder.build().idMap();
 
-        return IdMapAndProperties.of(idMap, loadNodeProperties(idMap));
+        return NodeImportResult.of(idMap, loadNodeProperties(idMap));
     }
 
     private Map<PropertyMapping, NodePropertyValues> loadNodeProperties(IdMap idMap) {

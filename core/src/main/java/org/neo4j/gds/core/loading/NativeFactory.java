@@ -227,12 +227,12 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
 
     @Override
     protected GraphSchema computeGraphSchema(
-        IdMapAndProperties idMapAndProperties, RelationshipsAndProperties relationshipsAndProperties
+        NodeImportResult nodeImportResult, RelationshipImportResult relationshipImportResult
     ) {
         return CSRGraphStoreUtil.computeGraphSchema(
-            idMapAndProperties,
+            nodeImportResult,
             (label) -> storeConfig.nodeProjections().projections().get(label).properties().propertyKeys(),
-            relationshipsAndProperties
+            relationshipImportResult
         );
     }
 
@@ -243,8 +243,8 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         int concurrency = graphProjectConfig.readConcurrency();
         try {
             progressTracker.beginSubTask();
-            IdMapAndProperties nodes = loadNodes(concurrency);
-            RelationshipsAndProperties relationships = loadRelationships(nodes.idMap(), concurrency);
+            NodeImportResult nodes = loadNodes(concurrency);
+            RelationshipImportResult relationships = loadRelationships(nodes.idMap(), concurrency);
             CSRGraphStore graphStore = createGraphStore(nodes, relationships);
 
             logLoadingSummary(graphStore);
@@ -255,7 +255,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         }
     }
 
-    private IdMapAndProperties loadNodes(int concurrency) {
+    private NodeImportResult loadNodes(int concurrency) {
         var scanningNodesImporter = new ScanningNodesImporterBuilder()
             .concurrency(concurrency)
             .graphProjectConfig(graphProjectConfig)
@@ -272,7 +272,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         }
     }
 
-    private RelationshipsAndProperties loadRelationships(IdMap idMap, int concurrency) {
+    private RelationshipImportResult loadRelationships(IdMap idMap, int concurrency) {
         var scanningRelationshipsImporter = new ScanningRelationshipsImporterBuilder()
             .idMap(idMap)
             .graphProjectConfig(graphProjectConfig)
