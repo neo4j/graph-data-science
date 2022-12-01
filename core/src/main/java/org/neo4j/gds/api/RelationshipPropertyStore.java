@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.api;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 
 import java.util.Collection;
@@ -31,6 +30,10 @@ import java.util.Set;
 public interface RelationshipPropertyStore {
 
     Map<String, RelationshipProperty> relationshipProperties();
+
+    default boolean isEmpty() {
+        return relationshipProperties().isEmpty();
+    }
 
     default RelationshipProperty get(String propertyKey) {
         return relationshipProperties().get(propertyKey);
@@ -46,13 +49,6 @@ public interface RelationshipPropertyStore {
 
     default boolean containsKey(String propertyKey) {
         return relationshipProperties().containsKey(propertyKey);
-    }
-
-    @Value.Check
-    default void validate() {
-        if (relationshipProperties().isEmpty()) {
-            throw new IllegalStateException("Relationship property store must not be empty.");
-        }
     }
 
     static Builder builder() {
