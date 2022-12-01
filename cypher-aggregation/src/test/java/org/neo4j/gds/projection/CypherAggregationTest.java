@@ -24,7 +24,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.BaseTest;
@@ -49,6 +51,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -576,6 +579,48 @@ class CypherAggregationTest extends BaseProcTest {
             });
 
         });
+    }
+
+    @ParameterizedTest
+    @MethodSource("undirectedTypes")
+    void testRespectUndirectedTypes(List<String> undirectedConfig, List<String> expectedUndirectedTypes) {
+        runQuery(
+            "UNWIND [" +
+            " {s: 0, t: 1, type: 'UNDIRECTED'}, " +
+            " {s: 1, t: 2, type: 'DIRECTED'} " +
+            "] as d" +
+            " RETURN gds.alpha.graph.project('g', d.s, d.t, null, {relationshipType: d.type}, {undirectedRelationshipTypes: $undirected})",
+            Map.of("undirected", undirectedConfig)
+        );
+
+        assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
+        var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
+
+
+        graphStore
+            .schema()
+            .relationshipSchema()
+            .entries()
+            .forEach(entry -> {
+                var expectedDirection = expectedUndirectedTypes.contains(entry.identifier.name) ? org.neo4j.gds.api.schema.Direction.UNDIRECTED : org.neo4j.gds.api.schema.Direction.DIRECTED;
+                assertThat(entry.direction()).isEqualTo(expectedDirection);
+            });
+    }
+    static Stream<Arguments> undirectedTypes() {
+        return Stream.of(
+            Arguments.of(
+                List.of("UNDIRECTED"),
+                List.of("UNDIRECTED")
+            ),
+            Arguments.of(
+                List.of("UNDIRECTED", "DIRECTED"),
+                List.of("UNDIRECTED", "DIRECTED")
+            ),
+            Arguments.of(
+                List.of("*"),
+                List.of("UNDIRECTED", "DIRECTED")
+            )
+        );
     }
 
     @Test
