@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
@@ -45,42 +44,6 @@ import java.util.stream.Collectors;
 
 @ValueClass
 public interface RelationshipImportResult {
-
-    @Value.Default
-    default Map<RelationshipType, Relationships.Topology> relationships() {
-        return importResults().entrySet().stream().collect(Collectors.toMap(
-            Map.Entry::getKey,
-            e -> {
-                var importResult = e.getValue();
-                return importResult.forwardTopology();
-            }
-        ));
-    }
-
-    @Value.Default
-    default Map<RelationshipType, RelationshipPropertyStore> properties() {
-        return importResults().entrySet().stream()
-            .filter(e -> e.getValue().forwardProperties().isPresent())
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                e -> {
-                    var importResult = e.getValue();
-                    return importResult.forwardProperties().get();
-                }
-            ));
-    }
-
-    @Value.Default
-    default Map<RelationshipType, Direction> directions() {
-        return importResults().entrySet().stream()
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                e -> {
-                    var importResult = e.getValue();
-                    return importResult.direction();
-                }
-            ));
-    }
 
     Map<RelationshipType, SingleTypeRelationshipImportResult> importResults();
 
