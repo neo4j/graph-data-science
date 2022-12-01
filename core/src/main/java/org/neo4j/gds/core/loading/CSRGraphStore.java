@@ -109,11 +109,9 @@ public class CSRGraphStore implements GraphStore {
         GraphSchema schema,
         IdMap nodes,
         @Nullable NodePropertyStore nodePropertyStore,
-        Map<RelationshipType, Relationships.Topology> relationships,
-        Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores,
         Optional<GraphPropertyStore> graphProperties,
         Optional<NodeImportResult> nodeImportResult,
-        Optional<RelationshipImportResult> relationshipImportResult,
+        RelationshipImportResult relationshipImportResult,
         int concurrency
     ) {
         // TODO: compat code to be removed
@@ -124,18 +122,6 @@ public class CSRGraphStore implements GraphStore {
         var nodeProps = nodeImportResult
             .map(NodeImportResult::properties)
             .orElseGet(() -> nodePropertyStore == null ? NodePropertyStore.empty() : nodePropertyStore);
-        var relationshipImportResults = relationshipImportResult
-            .map(RelationshipImportResult::importResults)
-            .orElseGet(() ->
-                relationships.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e ->
-                    ImmutableSingleTypeRelationshipImportResult.builder()
-                        .forwardTopology(e.getValue())
-                        .forwardProperties(
-                            Optional.ofNullable(relationshipPropertyStores.get(e.getKey()))
-                                .filter(relationshipPropertyStore -> !relationshipPropertyStore.isEmpty()))
-                        .direction(Direction.DIRECTED)
-                        .build()
-            )));
 
         return new CSRGraphStore(
             databaseId,
@@ -143,7 +129,7 @@ public class CSRGraphStore implements GraphStore {
             schema,
             idMap,
             nodeProps,
-            relationshipImportResults,
+            relationshipImportResult.importResults(),
             graphProperties.orElseGet(GraphPropertyStore::empty),
             concurrency
         );
@@ -169,7 +155,8 @@ public class CSRGraphStore implements GraphStore {
         this.nodes = nodes;
         this.nodeProperties = nodeProperties;
 
-        this.relationships = relationships;
+        // We want mutable collections inside the GraphStore
+        this.relationships = new HashMap<>(relationships);
 
         this.concurrency = concurrency;
         this.createdGraphs = new HashSet<>();

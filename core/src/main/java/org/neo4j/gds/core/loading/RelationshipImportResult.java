@@ -82,10 +82,32 @@ public interface RelationshipImportResult {
             ));
     }
 
-    @Value.Parameter(false)
     @Value.Default
     default Map<RelationshipType, SingleTypeRelationshipImportResult> importResults() {
         return Map.of();
+    }
+
+    static ImmutableRelationshipImportResult.Builder builder() {
+        return ImmutableRelationshipImportResult.builder();
+    }
+
+    static RelationshipImportResult of(
+        Map<RelationshipType, Relationships.Topology> topologies,
+        Map<RelationshipType, RelationshipPropertyStore> properties,
+        Map<RelationshipType, Direction> directions
+    ) {
+        var relationshipImportResultBuilder = RelationshipImportResult.builder();
+
+        topologies.forEach((relationshipType, topology) -> relationshipImportResultBuilder.putImportResult(
+            relationshipType,
+            SingleTypeRelationshipImportResult.builder()
+                .forwardTopology(topology)
+                .forwardProperties(Optional.ofNullable(properties.get(relationshipType)).filter(p -> !p.isEmpty()))
+                .direction(directions.get(relationshipType))
+                .build()
+        ));
+
+        return relationshipImportResultBuilder.build();
     }
 
     static RelationshipImportResult of(Map<RelationshipTypeAndProjection, List<RelationshipsAndDirection>> relationshipsByType) {

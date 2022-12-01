@@ -29,7 +29,10 @@ import java.util.Optional;
 @ValueClass
 public interface SingleTypeRelationshipImportResult {
 
+    // TODO: remove
     Direction direction();
+
+    // TODO: add RelationshipSchema
 
     Relationships.Topology forwardTopology();
 
@@ -38,4 +41,8 @@ public interface SingleTypeRelationshipImportResult {
     Optional<Relationships.Topology> inverseTopology();
 
     Optional<RelationshipPropertyStore> inverseProperties();
+
+    static ImmutableSingleTypeRelationshipImportResult.Builder builder() {
+        return ImmutableSingleTypeRelationshipImportResult.builder();
+    }
 }

@@ -265,7 +265,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
         var schema = computeGraphSchema(
             nodes,
-            ImmutableRelationshipImportResult.of(topologies, properties, directions)
+            ImmutableRelationshipImportResult.of(topologies, properties, directions, Map.of())
         );
 
         return new GraphStoreBuilder()
@@ -274,8 +274,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             .schema(schema)
             .nodes(nodes.idMap())
             .nodePropertyStore(nodes.properties())
-            .relationships(topologies)
-            .relationshipPropertyStores(properties)
+            .relationshipImportResult(RelationshipImportResult.of(topologies, properties, directions))
             .concurrency(1)
             .build();
     }

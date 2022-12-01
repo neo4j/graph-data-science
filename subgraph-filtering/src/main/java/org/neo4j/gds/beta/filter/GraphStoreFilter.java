@@ -34,6 +34,7 @@ import org.neo4j.gds.beta.filter.expression.SemanticErrors;
 import org.neo4j.gds.beta.filter.expression.ValidationContext;
 import org.neo4j.gds.config.GraphProjectFromGraphConfig;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
+import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -120,8 +121,11 @@ public final class GraphStoreFilter {
                 .schema(filteredSchema)
                 .nodes(filteredNodes.idMap())
                 .nodePropertyStore(filteredNodes.propertyStores())
-                .relationships(filteredRelationships.topology())
-                .relationshipPropertyStores(filteredRelationships.propertyStores())
+                .relationshipImportResult(RelationshipImportResult.of(
+                    filteredRelationships.topology(),
+                    filteredRelationships.propertyStores(),
+                    filteredSchema.relationshipSchema().directions()
+                ))
                 .concurrency(config.concurrency())
                 .build();
         } finally {
