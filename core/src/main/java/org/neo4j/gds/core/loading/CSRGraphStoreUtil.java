@@ -239,7 +239,7 @@ public final class CSRGraphStoreUtil {
         Function<NodeLabel, Collection<String>> propertiesByLabel,
         RelationshipImportResult relationshipImportResult
     ) {
-        var properties = nodeImportResult.properties().properties();
+        var nodeProperties = nodeImportResult.properties().properties();
 
         var nodeSchema = NodeSchema.empty();
         for (var label : nodeImportResult.idMap().availableNodeLabels()) {
@@ -247,38 +247,28 @@ public final class CSRGraphStoreUtil {
             for (var propertyKey : propertiesByLabel.apply(label)) {
                 entry.addProperty(
                     propertyKey,
-                    properties.get(propertyKey).propertySchema()
+                    nodeProperties.get(propertyKey).propertySchema()
                 );
             }
         }
         nodeImportResult.idMap().availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
         var relationshipSchema = RelationshipSchema.empty();
-        relationshipImportResult
-            .properties()
-            .forEach((relType, propertyStore) -> {
-                var entry = relationshipSchema.getOrCreateRelationshipType(
-                    relType,
-                    relationshipImportResult.directions().get(relType)
-                );
 
-                propertyStore
-                    .relationshipProperties()
-                    .forEach((propertyKey, propertyValues) -> entry.addProperty(
-                        propertyKey,
-                        propertyValues.propertySchema()
-                    ));
-            });
-
-        relationshipImportResult
-            .relationships()
-            .keySet()
-            .forEach(type -> {
-                relationshipSchema.getOrCreateRelationshipType(
-                    type,
-                    relationshipImportResult.directions().get(type)
-                );
-            });
+        relationshipImportResult.importResults().forEach(((relationshipType, singleTypeRelationshipImportResult) -> {
+            relationshipSchema.getOrCreateRelationshipType(
+                relationshipType,
+                singleTypeRelationshipImportResult.direction()
+            );
+            singleTypeRelationshipImportResult.forwardProperties()
+                .map(RelationshipPropertyStore::relationshipProperties)
+                .ifPresent(properties -> properties.forEach((propertyKey, propertyValues) -> relationshipSchema
+                    .getOrCreateRelationshipType(
+                        relationshipType,
+                        singleTypeRelationshipImportResult.direction()
+                    )
+                    .addProperty(propertyKey, propertyValues.propertySchema())));
+        }));
 
         return GraphSchema.of(
             nodeSchema,

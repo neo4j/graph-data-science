@@ -172,9 +172,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     }
 
     @Override
-    protected GraphSchema computeGraphSchema(
-        NodeImportResult nodeImportResult, RelationshipImportResult relationshipImportResult
-    ) {
+    protected GraphSchema computeGraphSchema(NodeImportResult nodeImportResult, RelationshipImportResult relationshipImportResult) {
         var nodeProperties = nodeImportResult.properties();
         var nodeSchema = NodeSchema.empty();
         gdlHandler
@@ -200,31 +198,27 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         nodeImportResult.idMap().availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
         var relationshipSchema = RelationshipSchema.empty();
-        relationshipImportResult
-            .properties()
-            .forEach((relType, propertyStore) -> propertyStore
-                .relationshipProperties()
-                .forEach((propertyKey, propertyValues) -> relationshipSchema
-                    .getOrCreateRelationshipType(relType, relationshipImportResult.directions().get(relType))
-                    .addProperty(
-                        propertyKey,
-                        RelationshipPropertySchema.of(
-                            propertyKey,
-                            propertyValues.valueType(),
-                            propertyValues.valueType().fallbackValue(),
-                            PropertyState.PERSISTENT,
-                            graphProjectConfig.aggregation()
-                        )
-                    )
-                )
+
+        relationshipImportResult.importResults().forEach(((relationshipType, singleTypeRelationshipImportResult) -> {
+            relationshipSchema.getOrCreateRelationshipType(
+                relationshipType,
+                singleTypeRelationshipImportResult.direction()
             );
-        relationshipImportResult
-            .relationships()
-            .keySet()
-            .forEach(type -> relationshipSchema.getOrCreateRelationshipType(
-                type,
-                relationshipImportResult.directions().get(type)
-            ));
+            singleTypeRelationshipImportResult.forwardProperties()
+                .map(RelationshipPropertyStore::relationshipProperties)
+                .ifPresent(properties -> properties.forEach((propertyKey, propertyValues) -> relationshipSchema
+                    .getOrCreateRelationshipType(
+                        relationshipType,
+                        singleTypeRelationshipImportResult.direction()
+                    )
+                    .addProperty(propertyKey, RelationshipPropertySchema.of(
+                        propertyKey,
+                        propertyValues.valueType(),
+                        propertyValues.valueType().fallbackValue(),
+                        PropertyState.PERSISTENT,
+                        graphProjectConfig.aggregation()
+                    ))));
+        }));
 
         return GraphSchema.of(
             nodeSchema,
