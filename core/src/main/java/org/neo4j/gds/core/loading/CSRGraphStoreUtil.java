@@ -96,8 +96,8 @@ public final class CSRGraphStoreUtil {
         var relationshipImportResult = RelationshipImportResult.builder().putImportResult(
             relationshipType,
             SingleTypeRelationshipImportResult.builder()
-                .forwardTopology(relationships.topology())
-                .forwardProperties(relationshipProperties)
+                .topology(relationships.topology())
+                .properties(relationshipProperties)
                 .build()
         ).build();
 
@@ -260,7 +260,7 @@ public final class CSRGraphStoreUtil {
                 relationshipType,
                 singleTypeRelationshipImportResult.direction()
             );
-            singleTypeRelationshipImportResult.forwardProperties()
+            singleTypeRelationshipImportResult.properties()
                 .map(RelationshipPropertyStore::relationshipProperties)
                 .ifPresent(properties -> properties.forEach((propertyKey, propertyValues) -> relationshipSchema
                     .getOrCreateRelationshipType(

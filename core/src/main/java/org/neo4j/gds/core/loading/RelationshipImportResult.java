@@ -61,8 +61,8 @@ public interface RelationshipImportResult {
         topologies.forEach((relationshipType, topology) -> relationshipImportResultBuilder.putImportResult(
             relationshipType,
             SingleTypeRelationshipImportResult.builder()
-                .forwardTopology(topology)
-                .forwardProperties(Optional.ofNullable(properties.get(relationshipType)).filter(p -> !p.isEmpty()))
+                .topology(topology)
+                .properties(Optional.ofNullable(properties.get(relationshipType)).filter(p -> !p.isEmpty()))
                 .direction(directions.get(relationshipType))
                 .build()
         ));
@@ -101,8 +101,8 @@ public interface RelationshipImportResult {
             relationshipImportResultBuilder.putImportResult(
                 relationshipType,
                 SingleTypeRelationshipImportResult.builder()
-                    .forwardTopology(topology)
-                    .forwardProperties(propertyStore)
+                    .topology(topology)
+                    .properties(propertyStore)
                     .direction(direction)
                     .build()
             );
@@ -146,13 +146,13 @@ public interface RelationshipImportResult {
 
             var importResultBuilder = builders.computeIfAbsent(
                 importContext.relationshipType(),
-                relationshipType -> ImmutableSingleTypeRelationshipImportResult.builder().direction(direction)
+                relationshipType -> SingleTypeRelationshipImportResult.builder().direction(direction)
             );
 
             if (isInverseRelationship) {
                 importResultBuilder.inverseTopology(topology).inverseProperties(properties);
             } else {
-                importResultBuilder.forwardTopology(topology).forwardProperties(properties);
+                importResultBuilder.topology(topology).properties(properties);
             }
         });
 

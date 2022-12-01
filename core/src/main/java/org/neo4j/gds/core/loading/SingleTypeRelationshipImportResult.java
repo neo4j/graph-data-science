@@ -34,9 +34,9 @@ public interface SingleTypeRelationshipImportResult {
 
     // TODO: add RelationshipSchema
 
-    Relationships.Topology forwardTopology();
+    Relationships.Topology topology();
 
-    Optional<RelationshipPropertyStore> forwardProperties();
+    Optional<RelationshipPropertyStore> properties();
 
     Optional<Relationships.Topology> inverseTopology();
 

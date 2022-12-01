@@ -659,8 +659,8 @@ public final class CypherAggregation {
                 relationshipImportResultBuilder.putImportResult(
                     relationshipType,
                     SingleTypeRelationshipImportResult.builder()
-                        .forwardTopology(topology)
-                        .forwardProperties(propertyStore)
+                        .topology(topology)
+                        .properties(propertyStore)
                         .build()
                 );
             });

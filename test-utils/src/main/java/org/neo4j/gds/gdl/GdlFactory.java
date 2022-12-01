@@ -204,7 +204,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                 relationshipType,
                 singleTypeRelationshipImportResult.direction()
             );
-            singleTypeRelationshipImportResult.forwardProperties()
+            singleTypeRelationshipImportResult.properties()
                 .map(RelationshipPropertyStore::relationshipProperties)
                 .ifPresent(properties -> properties.forEach((propertyKey, propertyValues) -> relationshipSchema
                     .getOrCreateRelationshipType(
@@ -261,8 +261,8 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                 loadResult.relationshipType(),
                 SingleTypeRelationshipImportResult.builder()
                     .direction(Direction.fromOrientation(graphProjectConfig().orientation()))
-                    .forwardTopology(loadResult.topology())
-                    .forwardProperties(propertyStoreBuilder.build())
+                    .topology(loadResult.topology())
+                    .properties(propertyStoreBuilder.build())
                     .build()
             );
         });
