@@ -29,7 +29,6 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicGrowingBitSet;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.PrimitiveIterator;
@@ -54,11 +53,6 @@ public final class MultiLabelInformation implements LabelInformation {
     @Override
     public boolean isEmpty() {
         return labelInformation.isEmpty();
-    }
-
-    @Override
-    public Set<NodeLabel> labelSet() {
-        return labelInformation.keySet();
     }
 
     @Override
@@ -105,7 +99,7 @@ public final class MultiLabelInformation implements LabelInformation {
 
     @Override
     public Set<NodeLabel> availableNodeLabels() {
-        return labelSet();
+        return labelInformation.keySet();
     }
 
     @Override
@@ -134,13 +128,13 @@ public final class MultiLabelInformation implements LabelInformation {
     public void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels) {
         List<ElementIdentifier> invalidLabels = nodeLabels
             .stream()
-            .filter(label -> !new HashSet<>(labelSet()).contains(label))
+            .filter(label -> !labelInformation.containsKey(label))
             .collect(Collectors.toList());
         if (!invalidLabels.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Specified labels %s do not correspond to any of the node projections %s.",
                 invalidLabels,
-                labelSet()
+                availableNodeLabels()
             ));
         }
     }

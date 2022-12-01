@@ -53,11 +53,6 @@ final class SingleLabelInformation implements LabelInformation {
     }
 
     @Override
-    public Set<NodeLabel> labelSet() {
-        return labelSet;
-    }
-
-    @Override
     public void forEach(LabelInformationConsumer consumer) {
         throw new UnsupportedOperationException("There are not BitSets in empty label information");
     }
@@ -110,7 +105,7 @@ final class SingleLabelInformation implements LabelInformation {
             throw new IllegalArgumentException(formatWithLocale(
                 "Specified labels %s do not correspond to any of the node projections %s.",
                 invalidLabels,
-                labelSet()
+                availableNodeLabels()
             ));
         }
     }

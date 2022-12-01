@@ -33,8 +33,6 @@ public interface LabelInformation {
 
     boolean isEmpty();
 
-    Set<NodeLabel> labelSet();
-
     void forEach(LabelInformationConsumer consumer);
 
     LabelInformation filter(Collection<NodeLabel> nodeLabels);
