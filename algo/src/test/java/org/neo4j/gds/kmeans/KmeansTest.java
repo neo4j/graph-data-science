@@ -21,6 +21,8 @@ package org.neo4j.gds.kmeans;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -45,9 +47,9 @@ class KmeansTest {
     @GdlGraph
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a {  kmeans: [1.0, 1.0]} )" +
+        "  (a {  kmeans: [1.0, 1.0], fail: [1.0]} )" +
         "  (b {  kmeans: [1.0, 2.0]} )" +
-        "  (c {  kmeans: [102.0, 100.0]} )" +
+        "  (c {  kmeans: [102.0, 100.0], fail:[1.0]} )" +
         "  (d {  kmeans: [100.0, 102.0]} )";
     @Inject
     private Graph graph;
@@ -501,6 +503,28 @@ class KmeansTest {
                 "Kmeans :: Silhouette :: Finished",
                 "Kmeans :: Finished"
             );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"fail", "kfail"})
+    void shouldThrowForMissingProperty(String property) {
+
+        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+            .nodeProperty(property)
+            .concurrency(1)
+            .randomSeed(19L)
+            .k(2)
+            .build();
+        var kmeansContext = ImmutableKmeansContext.builder().build();
+        var kmeans =
+
+            assertThatThrownBy(
+                () -> Kmeans.createKmeans(
+                    graph,
+                    kmeansConfig,
+                    kmeansContext
+                ).compute()
+            ).hasMessageContaining(property);
     }
 
 }

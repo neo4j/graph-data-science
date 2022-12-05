@@ -98,7 +98,7 @@ public final class TestIdMap extends LabeledIdMap {
         public Builder() {
             this.forwardMap = new LongLongHashMap();
             this.reverseMap = new LongLongHashMap();
-            this.labelInformationBuilder = LabelInformation.builder(42);
+            this.labelInformationBuilder = LabelInformationBuilders.multiLabelWithCapacity(42);
         }
 
         public Builder addAll(long... mappings) {

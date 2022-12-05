@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference, IdMapAndProperties> {
+public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference, NodeImportResult> {
 
     private final IndexPropertyMappings.LoadablePropertyMappings propertyMappings;
     private final TerminationFlag terminationFlag;
@@ -78,9 +78,9 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
         LabelInformation.Builder labelInformationBuilder;
         if (graphProjectConfig.nodeProjections().allProjections().size() == 1) {
             var singleLabel = graphProjectConfig.nodeProjections().projections().keySet().iterator().next();
-            labelInformationBuilder = LabelInformation.single(singleLabel);
+            labelInformationBuilder = LabelInformationBuilders.singleLabel(singleLabel);
         } else {
-            labelInformationBuilder = LabelInformation.builder(expectedCapacity, labelTokenNodeLabelMapping);
+            labelInformationBuilder = LabelInformationBuilders.multiLabelWithCapacityAndLabelInformation(expectedCapacity, labelTokenNodeLabelMapping);
         }
 
         var propertyMappings = IndexPropertyMappings.prepareProperties(
@@ -172,7 +172,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
     }
 
     @Override
-    public IdMapAndProperties build() {
+    public NodeImportResult build() {
         var idMap = idMapBuilder.build(
             labelInformationBuilder,
             Math.max(dimensions.highestPossibleNodeCount() - 1, 0),
@@ -187,7 +187,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
             importPropertiesFromIndex(idMap, nodeProperties);
         }
 
-        return IdMapAndProperties.of(idMap, nodeProperties);
+        return NodeImportResult.of(idMap, nodeProperties);
     }
 
     private void importPropertiesFromIndex(

@@ -98,7 +98,7 @@ class LabelInformationTest {
 
     private LabelInformation buildLabelInformation(Collection<Long> nodeIds, LongUnaryOperator nodeIdMap, LabelProducer labelProducer) {
         var nodeCount = nodeIds.size();
-        var builder = LabelInformation.builder(nodeCount, new IntObjectHashMap<>());
+        var builder = LabelInformationBuilders.multiLabelWithCapacityAndLabelInformation(nodeCount, new IntObjectHashMap<>());
 
         for (var nodeId : nodeIds) {
             for (NodeLabel nodeLabel : labelProducer.get(nodeId)) {

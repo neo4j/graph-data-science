@@ -7,7 +7,7 @@ plugins {
 
 ext {
     // Make sure these are the same as your installation of GDS and Neo4j
-    gdsVersion = '2.3.0-alpha03'
+    gdsVersion = '2.3.0-alpha04'
     neo4jVersion = '5.1.0'
 
     // Necessary to generate value classes for Pregel configs
@@ -66,6 +66,16 @@ dependencies {
 test {
     // Use junit platform for unit tests
     useJUnitPlatform()
+
+    // Since JDK 17 the default access to the following
+    // packages is "deny". We need to open them in order
+    // to gain access in GDS / Neo4j.
+    jvmArgs += '--add-opens=java.base/java.lang=ALL-UNNAMED'
+    jvmArgs += '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED'
+    jvmArgs += '--add-opens=java.base/java.nio=ALL-UNNAMED'
+    jvmArgs += '--add-opens=java.base/java.util.stream=ALL-UNNAMED'
+    jvmArgs += '--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED'
+    jvmArgs += '--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED'
 }
 
 // This task produces a single jar.

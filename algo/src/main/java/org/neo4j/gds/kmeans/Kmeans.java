@@ -39,7 +39,7 @@ import java.util.concurrent.ExecutorService;
 public class Kmeans extends Algorithm<KmeansResult> {
 
     private static final int UNASSIGNED = -1;
-
+    private final String nodeWeightProperty;
     private HugeIntArray bestCommunities;
     private final Graph graph;
     private final int k;
@@ -73,6 +73,9 @@ public class Kmeans extends Algorithm<KmeansResult> {
     public static Kmeans createKmeans(Graph graph, KmeansBaseConfig config, KmeansContext context) {
         String nodeWeightProperty = config.nodeProperty();
         NodePropertyValues nodeProperties = graph.nodeProperties(nodeWeightProperty);
+        if (nodeProperties == null) {
+            throw new IllegalArgumentException("Property '" + nodeWeightProperty + "' does not exist for all nodes");
+        }
         return new Kmeans(
             context.progressTracker(),
             context.executor(),
@@ -86,6 +89,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             config.computeSilhouette(),
             config.initialSampler(),
             config.seedCentroids(),
+            nodeWeightProperty,
             getSplittableRandom(config.randomSeed())
         );
     }
@@ -104,9 +108,11 @@ public class Kmeans extends Algorithm<KmeansResult> {
         boolean computeSilhouette,
         KmeansSampler.SamplerType initialSampler,
         List<List<Double>> seededCentroids,
+        String nodeWeightProperty,
         SplittableRandom random
     ) {
         super(progressTracker);
+        this.nodeWeightProperty = nodeWeightProperty;
         this.executorService = executorService;
         this.graph = graph;
         this.k = k;
@@ -317,6 +323,9 @@ public class Kmeans extends Algorithm<KmeansResult> {
         ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency, nodeId -> {
             if (nodePropertyValues.valueType() == ValueType.FLOAT_ARRAY) {
                 var value = nodePropertyValues.floatArrayValue(nodeId);
+                if (value == null) {
+                    throw new IllegalArgumentException("Property '" + nodeWeightProperty + "' does not exist for all nodes");
+                }
                 if (value.length != dimensions) {
                     throw new IllegalStateException(
                         "All property arrays for K-Means should have the same number of dimensions");
@@ -329,6 +338,9 @@ public class Kmeans extends Algorithm<KmeansResult> {
                 }
             } else {
                 var value = nodePropertyValues.doubleArrayValue(nodeId);
+                if (value == null) {
+                    throw new IllegalArgumentException("Property '" + nodeWeightProperty + "' does not exist for all nodes");
+                }
                 if (value.length != dimensions) {
                     throw new IllegalStateException(
                         "All property arrays for K-Means should have the same number of dimensions");

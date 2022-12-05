@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.hashgnn;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.List;
 import java.util.Map;
@@ -62,5 +63,49 @@ class HashGNNConfigTest {
                 .iterations(100)
                 .build();
         }).hasMessage("When `generateFeatures` is not given, `featureProperties` must be non-empty.");
+    }
+
+    @Test
+    void requiresDensityLevelAtMostDensity() {
+        assertThatThrownBy(() -> {
+            HashGNNConfigImpl
+                .builder()
+                .embeddingDensity(4)
+                .generateFeatures(Map.of("dimension", 4, "densityLevel", 5))
+                .iterations(100)
+                .build();
+        }).hasMessage("Generate features requires `densityLevel` to be at most `dimension` but was 5 > 4.");
+    }
+
+    @Test
+    void failsOnInvalidBinarizationKeys() {
+        assertThatThrownBy(() -> {
+            new HashGNNConfigImpl(CypherMapWrapper.create(
+                Map.of(
+                    "mutateProperty", "foo",
+                    "featureProperties", List.of("x"),
+                    "binarizeFeatures", Map.of("dimension", 100, "treshold", 2.0),
+                    "embeddingDensity", 4,
+                    "iterations", 100
+                )
+            ));
+
+        }).isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Unexpected configuration key: treshold (Did you mean [threshold]?)");
+    }
+
+    @Test
+    void failsOnInvalidGenerateFeaturesKeys() {
+        assertThatThrownBy(() -> {
+            new HashGNNConfigImpl(CypherMapWrapper.create(
+                Map.of(
+                    "generateFeatures", Map.of("dimension", 100, "densityElfen", 2),
+                    "embeddingDensity", 4,
+                    "iterations", 100
+                )
+            ));
+
+        }).isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("No value specified for the mandatory configuration parameter `densityLevel` (a similar parameter exists: [densityElfen])");
     }
 }

@@ -25,8 +25,8 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
-import org.neo4j.gds.core.loading.IdMapAndProperties;
-import org.neo4j.gds.core.loading.RelationshipsAndProperties;
+import org.neo4j.gds.core.loading.NodeImportResult;
+import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -43,17 +43,17 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
     }
 
     protected CSRGraphStore createGraphStore(
-        IdMapAndProperties idMapAndProperties,
-        RelationshipsAndProperties relationshipsAndProperties
+        NodeImportResult nodeImportResult,
+        RelationshipImportResult relationshipImportResult
     ) {
         return new GraphStoreBuilder()
             .databaseId(DatabaseId.of(loadingContext.graphDatabaseService()))
             .capabilities(capabilities)
-            .schema(computeGraphSchema(idMapAndProperties, relationshipsAndProperties))
-            .nodes(idMapAndProperties.idMap())
-            .nodePropertyStore(idMapAndProperties.properties())
-            .relationships(relationshipsAndProperties.relationships())
-            .relationshipPropertyStores(relationshipsAndProperties.properties())
+            .schema(computeGraphSchema(nodeImportResult, relationshipImportResult))
+            .nodes(nodeImportResult.idMap())
+            .nodePropertyStore(nodeImportResult.properties())
+            .relationships(relationshipImportResult.relationships())
+            .relationshipPropertyStores(relationshipImportResult.properties())
             .concurrency(graphProjectConfig.readConcurrency())
             .build();
     }
@@ -64,5 +64,8 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
         progressTracker.logInfo(formatWithLocale("Actual memory usage of the loaded graph: %s", memoryUsage));
     }
 
-    protected abstract GraphSchema computeGraphSchema(IdMapAndProperties idMapAndProperties, RelationshipsAndProperties relationshipsAndProperties);
+    protected abstract GraphSchema computeGraphSchema(
+        NodeImportResult nodeImportResult,
+        RelationshipImportResult relationshipImportResult
+    );
 }

@@ -17,37 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.hashgnn;
+package org.neo4j.gds.core.loading;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.RelationshipPropertyStore;
+import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.schema.Direction;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
-@Configuration
-public interface BinarizeFeaturesConfig {
-    @Configuration.IntegerRange(min = 1)
-    int dimension();
+@ValueClass
+public interface SingleTypeRelationshipImportResult {
 
-    default double threshold() {
-        return 0.0;
-    }
+    Direction direction();
 
-    @Configuration.ToMap
-    @Value.Auxiliary
-    @Value.Derived
-    default Map<String, Object> toMap() {
-        return Map.of(); // Will be overwritten
-    }
+    Relationships.Topology forwardTopology();
 
-    @Configuration.CollectKeys
-    @Value.Auxiliary
-    @Value.Default
-    @Value.Parameter(false)
-    default Collection<String> configKeys() {
-        return List.of();
-    }
+    Optional<RelationshipPropertyStore> forwardProperties();
 
+    Optional<Relationships.Topology> inverseTopology();
+
+    Optional<RelationshipPropertyStore> inverseProperties();
 }

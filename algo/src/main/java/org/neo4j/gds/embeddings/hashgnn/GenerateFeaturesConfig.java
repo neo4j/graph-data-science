@@ -22,7 +22,11 @@ package org.neo4j.gds.embeddings.hashgnn;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
 public interface GenerateFeaturesConfig {
@@ -36,5 +40,20 @@ public interface GenerateFeaturesConfig {
     @Value.Derived
     default Map<String, Object> toMap() {
         return Map.of(); // Will be overwritten
+    }
+
+    @Configuration.CollectKeys
+    @Value.Auxiliary
+    @Value.Default
+    @Value.Parameter(false)
+    default Collection<String> configKeys() {
+        return List.of();
+    }
+
+    @Value.Check
+    default void validate() {
+        if (densityLevel() > dimension()) {
+            throw new IllegalArgumentException(formatWithLocale("Generate features requires `densityLevel` to be at most `dimension` but was %d > %d.", densityLevel(), dimension()));
+        }
     }
 }

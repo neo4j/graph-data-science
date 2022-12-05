@@ -30,13 +30,13 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import java.util.Map;
 
 @ValueClass
-public interface IdMapAndProperties {
+public interface NodeImportResult {
 
     IdMap idMap();
 
     NodePropertyStore properties();
 
-    static IdMapAndProperties of(IdMap idMap, Map<PropertyMapping, NodePropertyValues> properties) {
+    static NodeImportResult of(IdMap idMap, Map<PropertyMapping, NodePropertyValues> properties) {
         NodePropertyStore.Builder builder = NodePropertyStore.builder();
         properties.forEach((mapping, nodeProperties) -> builder.putProperty(
             mapping.propertyKey(),
@@ -49,6 +49,6 @@ public interface IdMapAndProperties {
                     : nodeProperties.valueType().fallbackValue()
             )
         ));
-        return ImmutableIdMapAndProperties.of(idMap, builder.build());
+        return ImmutableNodeImportResult.of(idMap, builder.build());
     }
 }
