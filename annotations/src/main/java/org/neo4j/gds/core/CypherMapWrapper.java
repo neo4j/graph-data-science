@@ -19,27 +19,37 @@
  */
 package org.neo4j.gds.core;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.core.ConfigKeyValidation.StringAndScore;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
-
-import static org.neo4j.gds.core.MissingParameterExceptions.missingValueMessage;
 
 /**
  * Wrapper around configuration options map
  */
-public final class CypherMapWrapper {
+public final class CypherMapWrapper implements CypherMapAccess {
+
+    public static CypherMapWrapper create(Map<String, Object> config) {
+        if (config == null) {
+            return empty();
+        }
+        Map<String, Object> configMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        config.forEach((key, value) -> {
+            if (value != null) {
+                configMap.put(key, value);
+            }
+        });
+        return new CypherMapWrapper(configMap);
+    }
+
+    public static CypherMapWrapper empty() {
+        return new CypherMapWrapper(Map.of());
+    }
 
     private final Map<String, Object> config;
 
@@ -47,103 +57,18 @@ public final class CypherMapWrapper {
         this.config = config;
     }
 
-    /**
-     * Checks if the given key exists in the configuration.
-     *
-     * @param key key to look for
-     * @return true, iff the key exists
-     */
+    @Override
     public boolean containsKey(String key) {
         return this.config.containsKey(key);
     }
 
-    public boolean isEmpty() {
-        return config.isEmpty();
+    @Override
+    public Collection<String> keySet() {
+        return Collections.unmodifiableSet(this.config.keySet());
     }
 
-    public Optional<String> getString(String key) {
-        return Optional.ofNullable(getChecked(key, null, String.class));
-    }
-
-    public String requireString(String key) {
-        return requireChecked(key, String.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> getMap(String key) {
-        return getChecked(key, Map.of(), Map.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<String> getList(String key) {
-        return getChecked(key, List.of(), List.class);
-    }
-
-    public <E> Optional<E> getOptional(String key, Class<E> clazz) {
-        return Optional.ofNullable(getChecked(key, null, clazz));
-    }
-
-    @Contract("_, !null -> !null")
-    public @Nullable String getString(String key, @Nullable String defaultValue) {
-        return getChecked(key, defaultValue, String.class);
-    }
-
-    @Contract("_, _, !null -> !null")
-    public @Nullable String getString(String key, String oldKey, @Nullable String defaultValue) {
-        String value = getChecked(key, null, String.class);
-        if (value != null) {
-            return value;
-        }
-        return getChecked(oldKey, defaultValue, String.class);
-    }
-
-    public boolean getBool(String key, boolean defaultValue) {
-        return getChecked(key, defaultValue, Boolean.class);
-    }
-
-    public boolean requireBool(String key) {
-        return requireChecked(key, Boolean.class);
-    }
-
-    public Number getNumber(String key, Number defaultValue) {
-        return getChecked(key, defaultValue, Number.class);
-    }
-
-    public Number requireNumber(String key) {
-        return requireChecked(key, Number.class);
-    }
-
-    public Number getNumber(String key, String oldKey, Number defaultValue) {
-        Number value = getChecked(key, null, Number.class);
-        if (value != null) {
-            return value;
-        }
-        return getChecked(oldKey, defaultValue, Number.class);
-    }
-
-    public long getLong(String key, long defaultValue) {
-        return getChecked(key, defaultValue, Long.class);
-    }
-
-    public long requireLong(String key) {
-        return requireChecked(key, Long.class);
-    }
-
-    public int getInt(String key, int defaultValue) {
-        if (!containsKey(key)) {
-            return defaultValue;
-        }
-        return getLongAsInt(key);
-    }
-
-    public int requireInt(String key) {
-        if (!containsKey(key)) {
-            throw missingValueFor(key);
-        }
-        return getLongAsInt(key);
-    }
-
-    private int getLongAsInt(String key) {
+    @Override
+    public int getLongAsInt(String key) {
         Object value = config.get(key);
         // Cypher always uses longs, so we have to downcast them to ints
         if (value instanceof Long) {
@@ -152,120 +77,9 @@ public final class CypherMapWrapper {
         return typedValue(key, Integer.class, value);
     }
 
-    public double getDouble(String key, double defaultValue) {
-        return getChecked(key, defaultValue, Double.class);
-    }
-
-    /**
-     * Returns a copy of the internal Map.
-     */
-    public Map<String, Object> toMap() {
-        return new HashMap<>(config);
-    }
-
-    public double requireDouble(String key) {
-        return requireChecked(key, Double.class);
-    }
-
-    /**
-     * Get and convert the value under the given key to the given type.
-     *
-     * @return the found value under the key - if it is of the provided type,
-     *     or the provided default value if no entry for the key is found (or it's mapped to null).
-     * @throws IllegalArgumentException if a value was found, but it is not of the expected type.
-     */
-    @Contract("_, !null, _ -> !null")
-    public @Nullable <V> V getChecked(String key, @Nullable V defaultValue, Class<V> expectedType) {
-        if (!containsKey(key)) {
-            return defaultValue;
-        }
+    @Override
+    public <V> @NotNull V typedValue(String key, Class<V> expectedType) {
         return typedValue(key, expectedType, config.get(key));
-    }
-
-    public <V> V requireChecked(String key, Class<V> expectedType) {
-        if (!containsKey(key)) {
-            throw missingValueFor(key);
-        }
-        return typedValue(key, expectedType, config.get(key));
-    }
-
-    public void requireOnlyKeysFrom(Collection<String> allowedKeys) {
-        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, config.keySet());
-    }
-
-    public static <T> T failOnNull(String key, T value) {
-        if (value == null) {
-            throw MissingParameterExceptions.missingValueFor(key, Collections.emptySet());
-        }
-        return value;
-    }
-
-    public static @NotNull String failOnBlank(String key, @Nullable String value) {
-        if (value == null || value.trim().isEmpty()) {
-            throw blankValueFor(key, value);
-        }
-        return value;
-    }
-
-    public static int validateIntegerRange(
-        String key,
-        int value,
-        int min,
-        int max,
-        boolean minInclusive,
-        boolean maxInclusive
-    ) {
-        boolean meetsLowerBound = minInclusive ? value >= min : value > min;
-        boolean meetsUpperBound = maxInclusive ? value <= max : value < max;
-
-        if (!meetsLowerBound || !meetsUpperBound) {
-            throw outOfRangeError(key, value, Integer.toString(min), Integer.toString(max), minInclusive, maxInclusive);
-        }
-
-        return value;
-    }
-
-    public static long validateLongRange(
-        String key,
-        long value,
-        long min,
-        long max,
-        boolean minInclusive,
-        boolean maxInclusive
-    ) {
-        boolean meetsLowerBound = minInclusive ? value >= min : value > min;
-        boolean meetsUpperBound = maxInclusive ? value <= max : value < max;
-
-        if (!meetsLowerBound || !meetsUpperBound) {
-            throw outOfRangeError(key, value, Long.toString(min), Long.toString(max), minInclusive, maxInclusive);
-        }
-
-        return value;
-    }
-
-    public static double validateDoubleRange(
-        String key,
-        double value,
-        double min,
-        double max,
-        boolean minInclusive,
-        boolean maxInclusive
-    ) {
-        boolean meetsLowerBound = minInclusive ? value >= min : value > min;
-        boolean meetsUpperBound = maxInclusive ? value <= max : value < max;
-
-        if (!meetsLowerBound || !meetsUpperBound) {
-            throw outOfRangeError(
-                key,
-                value,
-                String.format(Locale.ENGLISH, "%.2f", min),
-                String.format(Locale.ENGLISH, "%.2f", max),
-                minInclusive,
-                maxInclusive
-            );
-        }
-
-        return value;
     }
 
     private static <V> V typedValue(String key, Class<V> expectedType, @Nullable Object value) {
@@ -286,201 +100,12 @@ public final class CypherMapWrapper {
         return expectedType.cast(value);
     }
 
-    private IllegalArgumentException missingValueFor(String key) {
-        return MissingParameterExceptions.missingValueFor(key, config.keySet());
-    }
-
-    public enum PairResult {
-        FIRST_PAIR,
-        SECOND_PAIR,
-    }
-
-    /**
-     * Verifies that only one of two mutually exclusive pairs of configuration keys is present.
-     *
-     * More precisely, the following condition is checked:
-     *  {@code (firstPairKeyOne AND firstPairKeyTwo) XOR (secondPairKeyOne AND secondPairKeyTwo)}
-     * If the condition is verified, the return value will identify which one of the pairs is present.
-     *
-     * In the error case where the condition is violated, an {@link IllegalArgumentException} is thrown.
-     * The message of that exception depends on which keys are present, possible mis-spelled, or absent.
-     */
-    public PairResult verifyMutuallyExclusivePairs(
-        String firstPairKeyOne,
-        String firstPairKeyTwo,
-        String secondPairKeyOne,
-        String secondPairKeyTwo,
-        String errorPrefix
-    ) throws IllegalArgumentException {
-        boolean isValidFirstPair = checkMutuallyExclusivePairs(
-            firstPairKeyOne, firstPairKeyTwo, secondPairKeyOne, secondPairKeyTwo
-        );
-        if (isValidFirstPair) {
-            return PairResult.FIRST_PAIR;
-        }
-
-        boolean isValidSecondPair = checkMutuallyExclusivePairs(
-            secondPairKeyOne, secondPairKeyTwo, firstPairKeyOne, firstPairKeyTwo
-        );
-        if (isValidSecondPair) {
-            return PairResult.SECOND_PAIR;
-        }
-
-        String message = missingMutuallyExclusivePairMessage(firstPairKeyOne, firstPairKeyTwo, secondPairKeyOne, secondPairKeyTwo);
-        throw new IllegalArgumentException(String.format(Locale.ENGLISH,"%s %s", errorPrefix, message));
-    }
-
-    private boolean checkMutuallyExclusivePairs(
-        String firstPairKeyOne,
-        String firstPairKeyTwo,
-        String secondPairKeyOne,
-        String secondPairKeyTwo
-    ) throws IllegalArgumentException {
-        if (config.containsKey(firstPairKeyOne) && config.containsKey(firstPairKeyTwo)) {
-            boolean secondOneExists = config.containsKey(secondPairKeyOne);
-            boolean secondTwoExists = config.containsKey(secondPairKeyTwo);
-            if (secondOneExists && secondTwoExists) {
-                throw new IllegalArgumentException(String.format(
-                    Locale.ENGLISH,
-                    "Invalid keys: [%s, %s]. Those keys cannot be used together with `%s` and `%s`.",
-                    secondPairKeyOne,
-                    secondPairKeyTwo,
-                    firstPairKeyOne,
-                    firstPairKeyTwo
-                ));
-            } else if (secondOneExists || secondTwoExists) {
-                throw new IllegalArgumentException(String.format(
-                    Locale.ENGLISH,
-                    "Invalid key: [%s]. This key cannot be used together with `%s` and `%s`.",
-                    secondOneExists ? secondPairKeyOne : secondPairKeyTwo,
-                    firstPairKeyOne,
-                    firstPairKeyTwo
-                ));
-            }
-            return true;
-        }
-        return false;
-    }
-
-    private String missingMutuallyExclusivePairMessage(
-        String firstPairKeyOne,
-        String firstPairKeyTwo,
-        String secondPairKeyOne,
-        String secondPairKeyTwo
-    ) {
-        StringAndScore firstMessage = missingMutuallyExclusivePairs(firstPairKeyOne, firstPairKeyTwo, secondPairKeyOne, secondPairKeyTwo);
-        StringAndScore secondMessage = missingMutuallyExclusivePairs(secondPairKeyOne, secondPairKeyTwo, firstPairKeyOne, firstPairKeyTwo);
-
-        if (firstMessage != null && firstMessage.isBetterThan(secondMessage)) {
-            // only return if the second message does not have a competitive score
-            return firstMessage.string();
-        }
-
-        if (secondMessage != null && secondMessage.isBetterThan(firstMessage)) {
-            // only return if the first message does not have a competitive score
-            return secondMessage.string();
-        }
-
-        // either pairs have the same possibility score, we don't know which one we should use
-        return String.format(
-            Locale.ENGLISH,
-            "Specify either `%s` and `%s` or `%s` and `%s`.",
-            firstPairKeyOne,
-            firstPairKeyTwo,
-            secondPairKeyOne,
-            secondPairKeyTwo
-        );
-    }
-
-    private @Nullable StringAndScore missingMutuallyExclusivePairs(
-        String keyOne,
-        String keyTwo,
-        String... forbiddenSuggestions
-    ) {
-        Collection<String> missingAndCandidates = new ArrayList<>();
-        Collection<String> missingWithoutCandidates = new ArrayList<>();
-        boolean hasAtLastOneKey = false;
-        for (String key : List.of(keyOne, keyTwo)) {
-            if (config.containsKey(key)) {
-                hasAtLastOneKey = true;
-            } else {
-                List<String> candidates = StringSimilarity.similarStringsIgnoreCase(key, config.keySet());
-                candidates.removeAll(List.of(forbiddenSuggestions));
-                String message = missingValueMessage(key, candidates);
-                (candidates.isEmpty()
-                    ? missingWithoutCandidates
-                    : missingAndCandidates
-                ).add(message);
-            }
-        }
-        // if one of the keys matches, we give it a full score,
-        //   meaning "this is probably a pair that should be used"
-        // if one of the keys is mis-spelled, we give it a half score,
-        //   meaning "this could be that pair, but it might me something else"
-        // If none of the keys are present or mis-spelled, we give it a zero score,
-        //   meaning "This is not pair you are looking for" *waves hand*
-        double score = hasAtLastOneKey ? 1.0 : !missingAndCandidates.isEmpty() ? 0.5 : 0.0;
-        if (!missingAndCandidates.isEmpty()) {
-            missingAndCandidates.addAll(missingWithoutCandidates);
-            String message = String.join(". ", missingAndCandidates);
-            return ImmutableStringAndScore.of(message, score);
-        }
-        if (hasAtLastOneKey && !missingWithoutCandidates.isEmpty()) {
-            String message = String.join(". ", missingWithoutCandidates);
-            return ImmutableStringAndScore.of(message, score);
-        }
-        // null here means, that there are no valid keys, but also no good error message
-        // so it might be that this pair is not relevant for the error reporting
-        return null;
-    }
-
-    private static IllegalArgumentException blankValueFor(String key, @Nullable String value) {
-        return new IllegalArgumentException(String.format(
-            Locale.ENGLISH,
-            "`%s` can not be null or blank, but it was `%s`",
-            key,
-            value
-        ));
-    }
-
-    private static IllegalArgumentException outOfRangeError(
-        String key,
-        Number value,
-        String min,
-        String max,
-        boolean minInclusive,
-        boolean maxInclusive
-    ) {
-        return new IllegalArgumentException(String.format(
-            Locale.ENGLISH,
-            "Value for `%s` was `%s`, but must be within the range %s%s, %s%s.",
-            key,
-            value,
-            minInclusive ? "[" : "(",
-            min,
-            max,
-            maxInclusive ? "]" : ")"
-        ));
+    @Override
+    public Map<String, Object> toMap() {
+        return new HashMap<>(config);
     }
 
     // FACTORIES
-
-    public static CypherMapWrapper create(Map<String, Object> config) {
-        if (config == null) {
-            return empty();
-        }
-        Map<String, Object> configMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-        config.forEach((key, value) -> {
-            if (value != null) {
-                configMap.put(key, value);
-            }
-        });
-        return new CypherMapWrapper(configMap);
-    }
-
-    public static CypherMapWrapper empty() {
-        return new CypherMapWrapper(Map.of());
-    }
 
     public CypherMapWrapper withString(String key, String value) {
         return withEntry(key, value);

@@ -22,7 +22,7 @@ package org.neo4j.gds.catalog;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
@@ -32,7 +32,7 @@ import java.util.Optional;
 public abstract class CatalogProc extends BaseProc {
 
     protected @NotNull String validateGraphName(@Nullable String graphName) {
-        return CypherMapWrapper.failOnBlank("graphName", graphName);
+        return CypherMapAccess.failOnBlank("graphName", graphName);
     }
 
     GraphStoreWithConfig graphStoreFromCatalog(String graphName) {

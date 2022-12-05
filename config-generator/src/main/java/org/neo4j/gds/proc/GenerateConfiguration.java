@@ -35,7 +35,7 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.Configuration.ConvertWith;
 import org.neo4j.gds.annotation.Configuration.Parameter;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.CypherMapAccess;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.SourceVersion;
@@ -233,7 +233,7 @@ final class GenerateConfiguration {
 
         if (requiredMapParameter) {
             constructorMethodBuilder.addParameter(
-                TypeName.get(CypherMapWrapper.class).annotated(NOT_NULL),
+                TypeName.get(CypherMapAccess.class).annotated(NOT_NULL),
                 names.get(CONFIG_VAR)
             );
         }
@@ -321,7 +321,7 @@ final class GenerateConfiguration {
             if (!isNullable) {
                 codeBlock = CodeBlock.of(
                     "$T.failOnNull($S, $L)",
-                    CypherMapWrapper.class,
+                    CypherMapAccess.class,
                     definition.configKey(),
                     codeBlock
                 );
@@ -362,7 +362,7 @@ final class GenerateConfiguration {
                 .getAnnotation(Configuration.IntegerRange.class);
             validationConsumer.accept(CodeBlock.of(
                 "$T.validateIntegerRange($S, $L, $L, $L, $L, $L)",
-                CypherMapWrapper.class,
+                CypherMapAccess.class,
                 definition.configKey(),
                 definition.fieldName(),
                 elementUtils.getConstantExpression(range.min()),
@@ -379,7 +379,7 @@ final class GenerateConfiguration {
                 .getAnnotation(Configuration.LongRange.class);
             validationConsumer.accept(CodeBlock.of(
                 "$T.validateLongRange($S, $L, $L, $L, $L, $L)",
-                CypherMapWrapper.class,
+                CypherMapAccess.class,
                 definition.configKey(),
                 definition.fieldName(),
                 elementUtils.getConstantExpression(range.min()),
@@ -396,7 +396,7 @@ final class GenerateConfiguration {
                 .getAnnotation(Configuration.DoubleRange.class);
             validationConsumer.accept(CodeBlock.of(
                 "$T.validateDoubleRange($S, $L, $L, $L, $L, $L)",
-                CypherMapWrapper.class,
+                CypherMapAccess.class,
                 definition.configKey(),
                 definition.fieldName(),
                 elementUtils.getConstantExpression(range.min()),
@@ -423,7 +423,7 @@ final class GenerateConfiguration {
                 paramType = paramType.annotated(NOT_NULL);
                 valueProducer = CodeBlock.of(
                     "$T.failOnNull($S, $N)",
-                    CypherMapWrapper.class,
+                    CypherMapAccess.class,
                     definition.configKey(),
                     definition.fieldName()
                 );

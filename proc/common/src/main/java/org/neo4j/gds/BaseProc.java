@@ -23,7 +23,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.config.BaseConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
@@ -122,16 +122,16 @@ public abstract class BaseProc {
         }
     }
 
-    protected final void validateConfig(CypherMapWrapper cypherConfig, BaseConfig config) {
+    protected final void validateConfig(CypherMapAccess cypherConfig, BaseConfig config) {
         validateConfig(cypherConfig, config.configKeys());
     }
 
-    protected final void validateConfig(CypherMapWrapper cypherConfig, Collection<String> allowedKeys) {
+    protected final void validateConfig(CypherMapAccess cypherConfig, Collection<String> allowedKeys) {
         cypherConfig.requireOnlyKeysFrom(allowedKeys);
     }
 
     protected final void validateGraphName(String username, String graphName) {
-        CypherMapWrapper.failOnBlank("graphName", graphName);
+        CypherMapAccess.failOnBlank("graphName", graphName);
         if (GraphStoreCatalog.exists(username, databaseId(), graphName)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "A graph with name '%s' already exists.",
