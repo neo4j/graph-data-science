@@ -6,7 +6,7 @@
 include::partial$/common-usage/not-on-aurads-note.adoc[]
 
 Neo4j Fabric is a way to store and retrieve data in multiple databases, whether they are on the same Neo4j DBMS or in multiple DBMSs, using a single Cypher query.
-For more information about Fabric itself, please visit the https://neo4j.com/docs/operations-manual/current/fabric/introduction/?ref=blog[documentation].
+For more information about Fabric itself, please visit the https://neo4j.com/docs/operations-manual/4.4/fabric/introduction/[Fabric documentation].
 
 A typical Neo4j Fabric setup consists of two components: one or more shards that hold the data and one or more Fabric proxies that coordinate the distributed queries.
 Currently, the way of running the Neo4j Graph Data Science library in a Fabric deployment is to run GDS on the shards.
