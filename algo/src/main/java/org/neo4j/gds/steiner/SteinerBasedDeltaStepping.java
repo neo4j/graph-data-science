@@ -217,11 +217,26 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
         //We Use two simple criteria to discover if there is a terminal for which with full certainty,
         //we have found a shortest to it:
 
-        // Whenever we change from one bin to another, we find the terminal of smallest distance
-        //if it's distance is below the currentBin, the path to it is optimal.
+        // The first criterion checks whenever  when we move to a new bucket in the next iteration.
+        //We first consider the terminal which currently has the shortest distance from the source node.
+        // If it's distance is below the threshold of the currentBin (i.e., the one processed in the
+        //next step), then it means its path from source cannot be improved further
+        // (since all values in the next bucket are further from the source node).
 
-        //Otherwise, if we keep the current bin, ensure all  future entries in the current bin
-        //are worse of than the shortest path to a terminal (hence its shortest distance cannot improve)
+        //The next criterion is relevant when we continue with the same bucket in the next iteration.
+        //Again, we consider the terminal  t which currently has the shortest distance from the source node.
+        //If this terminal is inside the current Bucket,
+        //We consider from all nodes that will be relaxed later on, the one with smallest distance from source
+        //(let's call this node r)
+        //Since any nodes that will be updated in the next iteration,  will end up having a distance >=d(r)
+        //any future nodes examined for the same bucket during the current phase, will have a distance d >= d(r).
+        //Hence, if  d(t) <=d(r) we can be certain neither of those next examined vertices will be able to improve
+        // t's path (or improve the path to any other terminal since they too would end up with a value >=d(r)).
+
+        //Note it is not required that t (the closet terminal) is in the current bucket B.
+        //After a path has been merged, we return back to Bucket 0. If t is in the bucket B  where B>0.
+        //Then at some point, we must pass from a bucket B' <B  to a bucket   B<=B'' hence the first criterion
+        //will be able to locate t via the change of bucket criterion.
 
         long terminalId = nextTerminal(terminalQueue);
         if (terminalId == NO_TERMINAL) {
@@ -287,7 +302,15 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
                 terminalQueue.pop();
                 shouldBreak = updateSteinerTree(terminalId, frontierIndex, paths, pathResultBuilder);
                 currentBin = 0;
-            } else { //otherwise proceed as normal, sync the contents of the  bucket for each thread to the global queue.
+                //Note  if this scenario occurs:
+                // The content in the local buckets which normally would have been synced,  remains stored inside buckets
+                //and can be processed next time the currentBin is set as the smallest bin.
+                //There might be some invalid situations (for example node a is located in multiple local buckets of different threads)
+                //But such situations are also possible for the original delta-stepping algorithm,
+                //although admittedly, this might be more frequent due to the "revert path to zero" steiner heuristic!
+                // I doubt this is a very big problem though
+            } else {
+                //otherwise proceed as normal, sync the contents of the  bucket for each thread to the global queue.
                 // Phase 2
                 syncPhase(tasks, currentBin, frontierIndex);
             }
