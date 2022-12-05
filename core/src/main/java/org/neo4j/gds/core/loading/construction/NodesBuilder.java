@@ -41,6 +41,7 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicGrowingBitSet;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 import org.neo4j.values.storable.Value;
+import org.neo4j.values.virtual.MapValue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -175,7 +176,11 @@ public final class NodesBuilder {
     }
 
     public void addNode(long originalId, Map<String, Value> properties, NodeLabelToken nodeLabels) {
-        this.threadLocalBuilder.get().addNode(originalId, properties, nodeLabels);
+        this.addNode(originalId, nodeLabels, PropertyValues.of(properties));
+    }
+
+    public void addNode(long originalId, MapValue properties, NodeLabelToken nodeLabels) {
+        this.addNode(originalId, nodeLabels, PropertyValues.of(properties));
     }
 
     public void addNode(long originalId, Map<String, Value> properties, NodeLabel... nodeLabels) {
@@ -184,6 +189,10 @@ public final class NodesBuilder {
 
     public void addNode(long originalId, Map<String, Value> properties, NodeLabel nodeLabel) {
         this.addNode(originalId, properties, NodeLabelTokens.ofNodeLabel(nodeLabel));
+    }
+
+    public void addNode(long originalId, NodeLabelToken nodeLabels, PropertyValues properties) {
+        this.threadLocalBuilder.get().addNode(originalId, nodeLabels, properties);
     }
 
     public long importedNodes() {
@@ -280,7 +289,7 @@ public final class NodesBuilder {
         private final Function<NodeLabel, Integer> labelTokenIdFn;
         private final Function<String, NodePropertiesFromStoreBuilder> propertyBuilderFn;
         private final NodeImporter nodeImporter;
-        private final List<Map<String, Value>> batchNodeProperties;
+        private final List<PropertyValues> batchNodeProperties;
 
         ThreadLocalBuilder(
             LongAdder importedNodes,
@@ -319,7 +328,7 @@ public final class NodesBuilder {
             }
         }
 
-        public void addNode(long originalId, Map<String, Value> properties, NodeLabelToken nodeLabels) {
+        public void addNode(long originalId, NodeLabelToken nodeLabels, PropertyValues properties) {
             if (!seenNodeIdPredicate.test(originalId)) {
                 long[] labels = labelTokens(nodeLabels);
 
@@ -358,8 +367,8 @@ public final class NodesBuilder {
                 (nodeReference, labelIds, propertiesReference) -> {
                     if (!propertiesReference.isEmpty()) {
                         var propertyValueIndex = (int) ((LongPropertyReference) propertiesReference).id;
-                        Map<String, Value> properties = batchNodeProperties.get(propertyValueIndex);
-                        MutableInt importedProperties = new MutableInt(0);
+                        var properties = batchNodeProperties.get(propertyValueIndex);
+                        var importedProperties = new MutableInt(0);
                         properties.forEach((propertyKey, propertyValue) -> importedProperties.add(importProperty(
                             nodeReference,
                             propertyKey,

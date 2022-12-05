@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.internal.kernel.api.PropertyCursor;
+import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.NumberValue;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
@@ -69,11 +70,11 @@ public final class ReadHelper {
         }
     }
 
-    public static double extractValue(Value value, double defaultValue) {
+    public static double extractValue(AnyValue value, double defaultValue) {
         return extractValue(Aggregation.NONE, value, defaultValue);
     }
 
-    public static double extractValue(Aggregation aggregation, Value value, double defaultValue) {
+    public static double extractValue(Aggregation aggregation, AnyValue value, double defaultValue) {
         // slightly different logic than org.neo4j.values.storable.Values#coerceToDouble
         // b/c we want to fallback to the default value if the value is empty
         if (value instanceof NumberValue) {
@@ -88,7 +89,7 @@ public final class ReadHelper {
         //       Do we want to do so or is failing on non numeric properties ok?
         throw new IllegalArgumentException(formatWithLocale(
             "Unsupported type [%s] of value %s. Please use a numeric property.",
-            value.valueGroup(),
+            value.getTypeName(),
             value
         ));
     }

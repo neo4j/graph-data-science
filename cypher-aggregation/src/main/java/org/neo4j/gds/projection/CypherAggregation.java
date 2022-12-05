@@ -511,7 +511,11 @@ public final class CypherAggregation {
 
             return nodeProperties == null
                 ? this.idMapBuilder.addNode(originalNodeId, nodeLabels)
-                : this.idMapBuilder.addNodeWithProperties(originalNodeId, nodeProperties, nodeLabels);
+                : this.idMapBuilder.addNodeWithProperties(
+                    originalNodeId,
+                    PropertyValues.of(nodeProperties),
+                    nodeLabels
+                );
         }
 
         private static double loadOneRelationshipProperty(
