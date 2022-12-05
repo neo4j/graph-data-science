@@ -50,7 +50,7 @@ class SteinerBasedDeltaTask implements Runnable {
     private final HugeLongPriorityQueue terminalQueue;
     private final ReentrantLock terminalQueueLock;
 
-    private double smallest;
+    private double smallestConsideredDistance;
 
     SteinerBasedDeltaTask(
         Graph graph,
@@ -79,7 +79,7 @@ class SteinerBasedDeltaTask implements Runnable {
     @Override
     public void run() {
         if (phase == SteinerBasedDeltaStepping.Phase.RELAX) {
-            smallest = Double.MAX_VALUE;
+            smallestConsideredDistance = Double.MAX_VALUE;
             relaxGlobalBin();
             relaxLocalBin();
         } else if (phase == SteinerBasedDeltaStepping.Phase.SYNC) {
@@ -87,7 +87,7 @@ class SteinerBasedDeltaTask implements Runnable {
         }
     }
 
-    double getSmallest() {return smallest;}
+    double getSmallestConsideredDistance() {return smallestConsideredDistance;}
 
     void setPhase(SteinerBasedDeltaStepping.Phase phase) {
         this.phase = phase;
@@ -138,7 +138,7 @@ class SteinerBasedDeltaTask implements Runnable {
         graph.forEachRelationship(nodeId, 1.0, (sourceNodeId, targetNodeId, weight) -> {
             if (!mergedToSource.get(targetNodeId)) { //ignore merged vertices
                 tryToUpdate(sourceNodeId, targetNodeId, weight);
-                smallest = Math.min(weight, smallest);
+                smallestConsideredDistance = Math.min(weight, smallestConsideredDistance);
             }
             return true;
         });

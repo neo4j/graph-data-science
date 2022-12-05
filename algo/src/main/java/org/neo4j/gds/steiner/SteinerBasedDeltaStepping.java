@@ -58,7 +58,6 @@ import java.util.stream.IntStream;
 public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
 
     public static final int NO_BIN = Integer.MAX_VALUE;
-
     private static final long NO_TERMINAL = -1;
     public static final int BIN_SIZE_THRESHOLD = 1000;
     private final Graph graph;
@@ -70,7 +69,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
     private final ExecutorService executorService;
     private long pathIndex;
     private final long numOfTerminals;
-    private  final BitSet unvisitedTerminal;
+    private final BitSet unvisitedTerminal;
     private final BitSet mergedWithSource;
     private final LongAdder metTerminals;
 
@@ -94,16 +93,16 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
             graph.nodeCount(),
             concurrency
         );
-        this.mergedWithSource =new BitSet(graph.nodeCount());
-        this.unvisitedTerminal=  new BitSet(isTerminal.size());
+        this.mergedWithSource = new BitSet(graph.nodeCount());
+        this.unvisitedTerminal = new BitSet(isTerminal.size());
         unvisitedTerminal.or(isTerminal);
-        this.pathIndex=0;
-        this.metTerminals=new LongAdder();
-        this.numOfTerminals=isTerminal.cardinality();
+        this.pathIndex = 0;
+        this.metTerminals = new LongAdder();
+        this.numOfTerminals = isTerminal.cardinality();
 
     }
 
-    private void mergeNodesOnPathToSource(long nodeId,AtomicLong frontierIndex) {
+    private void mergeNodesOnPathToSource(long nodeId, AtomicLong frontierIndex) {
         long currentId = nodeId;
         //while not meeting merged nodes, add the current path node to the merge set
         //if the parent i merged, then it's path to the source has already been zeroed,
@@ -123,7 +122,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
         }
     }
 
-    private void relaxPhase(List<SteinerBasedDeltaTask> tasks,int currentBin,AtomicLong frontierSize){
+    private void relaxPhase(List<SteinerBasedDeltaTask> tasks, int currentBin, AtomicLong frontierSize) {
         // Phase 1
         for (var task : tasks) {
             task.setPhase(Phase.RELAX);
@@ -133,7 +132,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
         ParallelUtil.run(tasks, executorService);
     }
 
-    private void syncPhase(List<SteinerBasedDeltaTask> tasks,int currentBin, AtomicLong frontierIndex){
+    private void syncPhase(List<SteinerBasedDeltaTask> tasks, int currentBin, AtomicLong frontierIndex) {
         frontierIndex.set(0);
         tasks.forEach(task -> task.setPhase(Phase.SYNC));
 
@@ -149,7 +148,12 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
         return (terminalQueue.isEmpty()) ? NO_TERMINAL : terminalQueue.top();
     }
 
-    private boolean updateSteinerTree(long terminalId,AtomicLong frontierIndex,List<PathResult> paths, ImmutablePathResult.Builder pathResultBuilder) {
+    private boolean updateSteinerTree(
+        long terminalId,
+        AtomicLong frontierIndex,
+        List<PathResult> paths,
+        ImmutablePathResult.Builder pathResultBuilder
+    ) {
         //add the new path to the solution
 
         paths.add(pathResult(
@@ -187,7 +191,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
             //find closest node to be processed afterwards
             double currentMinDistance = tasks
                 .stream()
-                .mapToDouble(SteinerBasedDeltaTask::getSmallest)
+                .mapToDouble(SteinerBasedDeltaTask::getSmallestConsideredDistance)
                 .min()
                 .orElseThrow();
             //return true if the closet terminal is at least as close as the  closest next node
@@ -210,7 +214,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
         List<SteinerBasedDeltaTask> tasks
     ) {
 
-        //Use two simple criterias to discover if there is a terminal for which with full certainty,
+        //We Use two simple criteria to discover if there is a terminal for which with full certainty,
         //we have found a shortest to it:
 
         // Whenever we change from one bin to another, we find the terminal of smallest distance
@@ -236,7 +240,6 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
 
     @Override
     public DijkstraResult compute() {
-        int iteration = 0;
         int currentBin = 0;
 
         var pathResultBuilder = ImmutablePathResult.builder()
@@ -288,7 +291,6 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
                 // Phase 2
                 syncPhase(tasks, currentBin, frontierIndex);
             }
-            iteration += 1;
             frontierSize.set(frontierIndex.longValue());
             frontierIndex.set(0);
         }
