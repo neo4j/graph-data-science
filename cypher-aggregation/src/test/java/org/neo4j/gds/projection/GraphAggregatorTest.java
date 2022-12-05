@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.ProgressTimer;
-
-import java.util.HashMap;
+import org.neo4j.values.storable.Values;
+import org.neo4j.values.virtual.MapValue;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,7 +41,14 @@ class GraphAggregatorTest {
         long source = 1L << 50;
         long target = (1L << 50) + 1;
 
-        aggregator.update(graphName, source, target, new HashMap<>(), new HashMap<>(), new HashMap<>());
+        aggregator.update(
+            Values.stringValue(graphName),
+            Values.longValue(source),
+            Values.longValue(target),
+            MapValue.EMPTY,
+            MapValue.EMPTY,
+            MapValue.EMPTY
+        );
 
         var result = aggregator.buildGraph();
 

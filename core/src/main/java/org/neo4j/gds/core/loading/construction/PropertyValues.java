@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.core.loading.construction;
 
+import org.neo4j.gds.core.loading.ValueConverter;
 import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.MapValue;
 
 import java.util.Map;
@@ -67,8 +69,8 @@ public abstract class PropertyValues {
         @Override
         public void forEach(BiConsumer<String, Value> consumer) {
             this.properties.foreach((k, v) -> {
-                if (v instanceof Value) {
-                    consumer.accept(k, (Value) v);
+                if (v != Values.NO_VALUE) {
+                    consumer.accept(k, ValueConverter.toValue(v));
                 }
             });
         }

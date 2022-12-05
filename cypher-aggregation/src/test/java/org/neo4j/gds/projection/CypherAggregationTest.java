@@ -160,7 +160,7 @@ class CypherAggregationTest extends BaseProcTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"13.37, FLOAT", "true, BOOLEAN", "false, BOOLEAN", "null, NULL", "\"42\", STRING", "[42], LIST", "[13.37], LIST", "{foo:42}, MAP", "{foo:13.37}, MAP"})
+    @CsvSource({"13.37, Double", "true, Boolean", "false, Boolean", "null, NO_VALUE", "\"42\", String", "[42], List", "[13.37], List", "{foo:42}, Map", "{foo:13.37}, Map"})
     void testInvalidArbitraryIds(String idLiteral, String invalidType) {
         var query = formatWithLocale(
             "WITH %s AS source RETURN gds.alpha.graph.project('g', source)",
@@ -176,7 +176,7 @@ class CypherAggregationTest extends BaseProcTest {
         var query = "MATCH ()-[r]-() RETURN gds.alpha.graph.project('g', r)";
         assertThatThrownBy(() -> runQuery(query))
             .rootCause()
-            .hasMessage("The node has to be either a NODE or an INTEGER, but got RELATIONSHIP");
+            .hasMessage("The node has to be either a NODE or an INTEGER, but got RelationshipReference");
     }
 
     @Test
@@ -184,7 +184,7 @@ class CypherAggregationTest extends BaseProcTest {
         var query = "MATCH p=()-[]-() RETURN gds.alpha.graph.project('g', p)";
         assertThatThrownBy(() -> runQuery(query))
             .rootCause()
-            .hasMessage("The node has to be either a NODE or an INTEGER, but got PATH");
+            .hasMessage("The node has to be either a NODE or an INTEGER, but got Path");
     }
 
     @Nested
@@ -335,13 +335,11 @@ class CypherAggregationTest extends BaseProcTest {
 
     @Test
     void testDirectLabelMapping() {
-        runQuery("MATCH (s)" +
-                 "RETURN gds.alpha.graph.project('g', s, null, { sourceNodeLabels: true })");
-
-        var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
-        assertThat(graphStore.nodeLabels())
-            .extracting(NodeLabel::name)
-            .containsExactly("A", "B", "__ALL__", "DifferentLabel");
+        assertThatThrownBy(() -> runQuery(
+            "MATCH (s) RETURN gds.alpha.graph.project('g', s, null, { sourceNodeLabels: true })"))
+            .rootCause()
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Using `true` to load all labels is deprecated, use `{ sourceNodeLabels: labels(s) }` instead");
     }
 
     @ParameterizedTest

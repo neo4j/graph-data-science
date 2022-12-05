@@ -50,7 +50,6 @@ import org.neo4j.gds.core.loading.LazyIdMapBuilder;
 import org.neo4j.gds.core.loading.ReadHelper;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
-import org.neo4j.gds.core.loading.ValueConverter;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
@@ -58,21 +57,26 @@ import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Path;
-import org.neo4j.graphdb.Relationship;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserAggregationFunction;
 import org.neo4j.procedure.UserAggregationResult;
 import org.neo4j.procedure.UserAggregationUpdate;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
+import org.neo4j.values.AnyValue;
+import org.neo4j.values.SequenceValue;
+import org.neo4j.values.storable.BooleanValue;
+import org.neo4j.values.storable.IntegralValue;
+import org.neo4j.values.storable.NoValue;
+import org.neo4j.values.storable.StringArray;
+import org.neo4j.values.storable.StringValue;
+import org.neo4j.values.storable.TextArray;
+import org.neo4j.values.storable.TextValue;
+import org.neo4j.values.virtual.MapValue;
+import org.neo4j.values.virtual.VirtualNodeValue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -133,35 +137,42 @@ public final class CypherAggregation {
 
         @UserAggregationUpdate
         public void update(
-            @Name("graphName") String graphName,
-            @Name("sourceNode") Object sourceNode,
-            @Nullable @Name(value = "targetNode", defaultValue = "null") Object targetNode,
-            @Nullable @Name(value = "nodesConfig", defaultValue = "null") Map<String, Object> nodesConfig,
-            @Nullable @Name(value = "relationshipConfig", defaultValue = "null") Map<String, Object> relationshipConfig,
-            @Nullable @Name(value = "configuration", defaultValue = "null") Map<String, Object> config
+            @Name("graphName") TextValue graphName,
+            @Name("sourceNode") AnyValue sourceNode,
+            @Name(value = "targetNode", defaultValue = "null") AnyValue targetNode,
+            @Name(value = "nodesConfig", defaultValue = "null") AnyValue nodesConfig,
+            @Name(value = "relationshipConfig", defaultValue = "null") AnyValue relationshipConfig,
+            @Name(value = "configuration", defaultValue = "null") AnyValue config
         ) {
-            @Nullable Map<String, Value> sourceNodePropertyValues = null;
-            @Nullable Map<String, Value> targetNodePropertyValues = null;
+            @Nullable MapValue sourceNodePropertyValues = null;
+            @Nullable MapValue targetNodePropertyValues = null;
             NodeLabelToken sourceNodeLabels = NodeLabelTokens.missing();
             NodeLabelToken targetNodeLabels = NodeLabelTokens.missing();
 
-            if (nodesConfig != null) {
-                sourceNodePropertyValues = LazyImporter.propertiesConfig("sourceNodeProperties", nodesConfig);
-                sourceNodeLabels = labelsConfig(sourceNode, "sourceNodeLabels", nodesConfig);
+            if (nodesConfig instanceof MapValue) {
+                sourceNodePropertyValues = LazyImporter.propertiesConfig(
+                    "sourceNodeProperties",
+                    (MapValue) nodesConfig
+                );
+                sourceNodeLabels = labelsConfig("sourceNodeLabels", (MapValue) nodesConfig);
 
-                if (targetNode != null) {
-                    targetNodePropertyValues = LazyImporter.propertiesConfig("targetNodeProperties", nodesConfig);
-                    targetNodeLabels = labelsConfig(targetNode, "targetNodeLabels", nodesConfig);
-                }
-
-                if (!nodesConfig.isEmpty()) {
-                    CypherMapWrapper.create(nodesConfig).requireOnlyKeysFrom(List.of(
-                        "sourceNodeProperties",
-                        "sourceNodeLabels",
+                if (targetNode != NoValue.NO_VALUE) {
+                    targetNodePropertyValues = LazyImporter.propertiesConfig(
                         "targetNodeProperties",
-                        "targetNodeLabels"
-                    ));
+                        (MapValue) nodesConfig
+                    );
+                    targetNodeLabels = labelsConfig("targetNodeLabels", (MapValue) nodesConfig);
                 }
+
+                // TODO:
+//                if (!nodesConfig.isEmpty()) {
+//                    CypherMapWrapper.create(nodesConfig).requireOnlyKeysFrom(List.of(
+//                        "sourceNodeProperties",
+//                        "sourceNodeLabels",
+//                        "targetNodeProperties",
+//                        "targetNodeLabels"
+//                    ));
+//                }
             }
 
             var data = initGraphData(
@@ -186,13 +197,13 @@ public final class CypherAggregation {
         }
 
         private LazyImporter initGraphData(
-            String graphName,
-            @Nullable Map<String, Object> config,
-            @Nullable Map<String, Value> sourceNodePropertyValues,
-            @Nullable Map<String, Value> targetNodePropertyValues,
+            TextValue graphName,
+            AnyValue config,
+            @Nullable MapValue sourceNodePropertyValues,
+            @Nullable MapValue targetNodePropertyValues,
             NodeLabelToken sourceNodeLabels,
             NodeLabelToken targetNodeLabels,
-            @Nullable Map<String, Object> relationshipConfig
+            AnyValue relationshipConfig
         ) {
             var data = this.importer;
             if (data != null) {
@@ -222,41 +233,20 @@ public final class CypherAggregation {
             }
         }
 
-
-        private static NodeLabelToken labelsConfig(
-            Object node,
-            String nodeLabelKey,
-            @NotNull Map<String, Object> nodesConfig
-        ) {
-            var nodeLabelsEntry = nodesConfig.remove(nodeLabelKey);
-            return tryLabelsConfig(node, nodeLabelsEntry, nodeLabelKey);
+        private static NodeLabelToken labelsConfig(String nodeLabelKey, @NotNull MapValue nodesConfig) {
+            // TODO: was remove
+            var nodeLabelsEntry = nodesConfig.get(nodeLabelKey);
+            return tryLabelsConfig(nodeLabelsEntry, nodeLabelKey);
         }
 
-        private static NodeLabelToken tryLabelsConfig(
-            Object node,
-            @Nullable Object nodeLabels,
-            String nodeLabelKey
-        ) {
-            if (Boolean.FALSE.equals(nodeLabels)) {
-                return NodeLabelTokens.empty();
-            }
-
-            if (Boolean.TRUE.equals(nodeLabels)) {
-                if (!(node instanceof Node)) {
-                    throw new IllegalArgumentException(
-                        "Using `true` to load all labels does only work if the node is a Neo4j node object"
-                    );
-                }
-                nodeLabels = ((Node) node).getLabels();
-            }
-
-            var nodeLabelToken = NodeLabelTokens.ofNullable(nodeLabels);
+        private static NodeLabelToken tryLabelsConfig(AnyValue nodeLabels, String nodeLabelKey) {
+            var nodeLabelToken = nodeLabels.map(ReadNodeLabels.INSTANCE);
 
             if (nodeLabelToken.isInvalid()) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "The value of `%s` must be either a `List of Strings`, a `String`, or a `Boolean`, but was `%s`.",
                     nodeLabelKey,
-                    nodeLabels != null ? nodeLabels.getClass().getSimpleName() : "null"
+                    nodeLabels.getTypeName()
                 ));
             }
 
@@ -317,23 +307,25 @@ public final class CypherAggregation {
         }
 
         static LazyImporter of(
-            String graphName,
+            TextValue graphNameValue,
             String username,
             DatabaseId databaseId,
-            @Nullable Map<String, Object> configMap,
-            @Nullable Map<String, Value> sourceNodePropertyValues,
-            @Nullable Map<String, Value> targetNodePropertyValues,
+            AnyValue configMap,
+            @Nullable MapValue sourceNodePropertyValues,
+            @Nullable MapValue targetNodePropertyValues,
             NodeLabelToken sourceNodeLabels,
             NodeLabelToken targetNodeLabels,
-            @Nullable Map<String, Object> relationshipConfig,
+            AnyValue relationshipConfig,
             Lock lock
         ) {
+
+            var graphName = graphNameValue.stringValue();
 
             validateGraphName(graphName, username, databaseId);
             var config = GraphProjectFromCypherAggregationConfig.of(
                 username,
                 graphName,
-                configMap
+                (configMap instanceof MapValue) ? (MapValue) configMap : MapValue.EMPTY
             );
 
             var idMapBuilder = idMapBuilder(
@@ -357,9 +349,9 @@ public final class CypherAggregation {
 
         private static LazyIdMapBuilder idMapBuilder(
             NodeLabelToken sourceNodeLabels,
-            @Nullable Map<String, Value> sourceNodeProperties,
+            @Nullable MapValue sourceNodeProperties,
             NodeLabelToken targetNodeLabels,
-            @Nullable Map<String, Value> targetNodeProperties,
+            @Nullable MapValue targetNodeProperties,
             int readConcurrency
         ) {
             boolean hasLabelInformation = !(sourceNodeLabels.isMissing() && targetNodeLabels.isMissing());
@@ -367,10 +359,13 @@ public final class CypherAggregation {
             return new LazyIdMapBuilder(readConcurrency, hasLabelInformation, hasProperties);
         }
 
-        private static @Nullable List<RelationshipPropertySchema> relationshipPropertySchemas(@Nullable Map<String, Object> relationshipConfig) {
-            if (relationshipConfig == null) {
+        private static @Nullable List<RelationshipPropertySchema> relationshipPropertySchemas(AnyValue relationshipConfigValue) {
+            if (!(relationshipConfigValue instanceof MapValue)) {
                 return null;
             }
+
+            //noinspection PatternVariableCanBeUsed
+            var relationshipConfig = (MapValue) relationshipConfigValue;
 
             var relationshipPropertySchemas = new ArrayList<RelationshipPropertySchema>();
 
@@ -378,10 +373,10 @@ public final class CypherAggregation {
             // we remove the original entry from the map during converting; also we remove null keys
             // so we could not create a schema entry for properties that are absent on the current relationship
             var relationshipPropertyKeys = relationshipConfig.get("properties");
-            if (relationshipPropertyKeys instanceof Map) {
-                for (var propertyKey : ((Map<?, ?>) relationshipPropertyKeys).keySet()) {
+            if (relationshipPropertyKeys instanceof MapValue) {
+                for (var propertyKey : ((MapValue) relationshipPropertyKeys).keySet()) {
                     relationshipPropertySchemas.add(RelationshipPropertySchema.of(
-                        String.valueOf(propertyKey),
+                        propertyKey,
                         ValueType.DOUBLE
                     ));
                 }
@@ -395,32 +390,33 @@ public final class CypherAggregation {
         }
 
         void update(
-            Object sourceNode,
-            @Nullable Object targetNode,
-            @Nullable Map<String, Value> sourceNodePropertyValues,
-            @Nullable Map<String, Value> targetNodePropertyValues,
+            AnyValue sourceNode,
+            AnyValue targetNode,
+            @Nullable MapValue sourceNodePropertyValues,
+            @Nullable MapValue targetNodePropertyValues,
             NodeLabelToken sourceNodeLabels,
             NodeLabelToken targetNodeLabels,
-            @Nullable Map<String, Object> relationshipConfig
+            AnyValue relationshipConfig
         ) {
-            Map<String, Value> relationshipProperties = null;
+            MapValue relationshipProperties = null;
             RelationshipType relationshipType = RelationshipType.ALL_RELATIONSHIPS;
 
-            if (relationshipConfig != null) {
-                relationshipProperties = propertiesConfig("properties", relationshipConfig);
-                relationshipType = typeConfig("relationshipType", relationshipConfig);
+            if (relationshipConfig instanceof MapValue) {
+                relationshipProperties = propertiesConfig("properties", (MapValue) relationshipConfig);
+                relationshipType = typeConfig("relationshipType", (MapValue) relationshipConfig);
 
-                if (!relationshipConfig.isEmpty()) {
-                    CypherMapWrapper.create(relationshipConfig).requireOnlyKeysFrom(List.of(
-                        "properties",
-                        "relationshipType"
-                    ));
-                }
+                // TODO:
+//                if (!relationshipConfig.isEmpty()) {
+//                    CypherMapWrapper.create(relationshipConfig).requireOnlyKeysFrom(List.of(
+//                        "properties",
+//                        "relationshipType"
+//                    ));
+//                }
             }
 
             var intermediateSourceId = loadNode(sourceNode, sourceNodeLabels, sourceNodePropertyValues);
 
-            if (targetNode != null) {
+            if (targetNode != NoValue.NO_VALUE) {
                 var relImporter = this.relImporters.computeIfAbsent(relationshipType, this::newRelImporter);
                 var intermediateTargetId = loadNode(targetNode, targetNodeLabels, targetNodePropertyValues);
 
@@ -447,7 +443,6 @@ public final class CypherAggregation {
         }
 
         AggregationResult result(String username, DatabaseId databaseId, ProgressTimer timer) {
-
             var graphName = this.graphName;
 
             // in case something else has written something with the same graph name
@@ -526,9 +521,9 @@ public final class CypherAggregation {
          * @return intermediate node id
          */
         private long loadNode(
-            @Nullable Object node,
+            @NotNull AnyValue node,
             NodeLabelToken nodeLabels,
-            @Nullable Map<String, Value> nodeProperties
+            @Nullable MapValue nodeProperties
         ) {
             var originalNodeId = extractNodeId(node);
 
@@ -542,16 +537,15 @@ public final class CypherAggregation {
         }
 
         private static double loadOneRelationshipProperty(
-            @NotNull Map<String, Value> relationshipProperties,
+            @NotNull MapValue relationshipProperties,
             String relationshipPropertyKey
         ) {
-            var propertyValueObject = relationshipProperties.get(relationshipPropertyKey);
-            var propertyValue = Objects.requireNonNullElse(propertyValueObject, Values.NO_VALUE);
+            var propertyValue = relationshipProperties.get(relationshipPropertyKey);
             return ReadHelper.extractValue(propertyValue, DefaultValue.DOUBLE_DEFAULT_FALLBACK);
         }
 
         private static double[] loadMultipleRelationshipProperties(
-            @NotNull Map<String, Value> relationshipProperties,
+            @NotNull MapValue relationshipProperties,
             List<RelationshipPropertySchema> relationshipPropertyKeys
         ) {
             var propertyValues = new double[relationshipPropertyKeys.size()];
@@ -676,103 +670,59 @@ public final class CypherAggregation {
         }
 
         @Nullable
-        private static Map<String, Value> propertiesConfig(
+        private static MapValue propertiesConfig(
             String propertyKey,
-            @NotNull Map<String, Object> propertiesConfig
+            @NotNull MapValue propertiesConfig
         ) {
-            var nodeProperties = propertiesConfig.remove(propertyKey);
-            if (nodeProperties == null || nodeProperties instanceof Map) {
-                //noinspection unchecked
-                return objectsToValues((Map<String, Object>) nodeProperties);
+            // TODO: was remove
+            var nodeProperties = propertiesConfig.get(propertyKey);
+            if (nodeProperties instanceof MapValue) {
+                return (MapValue) nodeProperties;
             }
+            if (nodeProperties == NoValue.NO_VALUE) {
+                return null;
+            }
+
             throw new IllegalArgumentException(formatWithLocale(
                 "The value of `%s` must be a `Map of Property Values`, but was `%s`.",
                 propertyKey,
-                nodeProperties.getClass().getSimpleName()
+                nodeProperties.getTypeName()
             ));
-        }
-
-        private static @Nullable Map<String, Value> objectsToValues(@Nullable Map<String, Object> properties) {
-            if (properties == null) {
-                return null;
-            }
-            var values = new HashMap<String, Value>(properties.size());
-            properties.forEach((key, valueObject) -> {
-                if (valueObject != null) {
-                    var value = ValueConverter.toValue(valueObject);
-                    values.put(key, value);
-                }
-            });
-            return values;
         }
 
         private static RelationshipType typeConfig(
             @SuppressWarnings("SameParameterValue") String relationshipTypeKey,
-            @NotNull Map<String, Object> relationshipConfig
+            @NotNull MapValue relationshipConfig
         ) {
-            var relationshipTypeEntry = relationshipConfig.remove(relationshipTypeKey);
-            if (relationshipTypeEntry instanceof String) {
-                return RelationshipType.of((String) relationshipTypeEntry);
+            // TODO: was remove
+            var relationshipTypeEntry = relationshipConfig.get(relationshipTypeKey);
+            if (relationshipTypeEntry instanceof TextValue) {
+                return RelationshipType.of(((TextValue) relationshipTypeEntry).stringValue());
             }
-            if (relationshipTypeEntry == null) {
+            if (relationshipTypeEntry == NoValue.NO_VALUE) {
                 return RelationshipType.ALL_RELATIONSHIPS;
             }
+
             throw new IllegalArgumentException(formatWithLocale(
                 "The value of `%s` must be `String`, but was `%s`.",
                 relationshipTypeKey,
-                relationshipTypeEntry.getClass().getSimpleName()
+                relationshipTypeEntry.valueRepresentation().valueGroup()
             ));
         }
 
-        private static long extractNodeId(@Nullable Object node) {
-            if (node instanceof Node) {
-                //noinspection removal
-                return ((Node) node).getId();
-            } else if (node instanceof Long) {
-                return (Long) node;
-            } else if (node instanceof Integer) {
-                return (Integer) node;
+        private static long extractNodeId(@NotNull AnyValue node) {
+            // TODO: mapper
+            if (node instanceof VirtualNodeValue) {
+                return ((VirtualNodeValue) node).id();
+            } else if (node instanceof IntegralValue) {
+                return ((IntegralValue) node).longValue();
             } else {
                 throw invalidNodeType(node);
             }
         }
 
-        private static IllegalArgumentException invalidNodeType(@Nullable Object node) {
-            // According to the docs of @UserAggregation, possible types are:
-            //   String
-            //   Long or long
-            //   Double or double
-            //   Number
-            //   Boolean or boolean
-            //   org.neo4j.graphdb.Node
-            //   org.neo4j.graphdb.Relationship
-            //   org.neo4j.graphdb.Path
-            //   java.util.Map with key String and value of any type in this list, including java.util.Map
-            //   java.util.List with element type of any type in this list, including java.util.List
-
-            String nodeType;
-            if (node instanceof String) {
-                nodeType = "STRING";
-            } else if (node instanceof Number) {
-                nodeType = "FLOAT";
-            } else if (node instanceof Boolean) {
-                nodeType = "BOOLEAN";
-            } else if (node instanceof Relationship) {
-                nodeType = "RELATIONSHIP";
-            } else if (node instanceof Path) {
-                nodeType = "PATH";
-            } else if (node instanceof Map) {
-                nodeType = "MAP";
-            } else if (node instanceof List) {
-                nodeType = "LIST";
-            } else if (node == null) {
-                nodeType = "NULL";
-            } else {
-                // should not happen unless new types are introduced into the procedure framework
-                nodeType = "UNKNOWN: " + node.getClass().getName();
-            }
-
-            return new IllegalArgumentException("The node has to be either a NODE or an INTEGER, but got " + nodeType);
+        private static IllegalArgumentException invalidNodeType(@NotNull AnyValue node) {
+            return new IllegalArgumentException("The node has to be either a NODE or an INTEGER, but got " + node.getTypeName());
         }
     }
 
@@ -819,8 +769,24 @@ public final class CypherAggregation {
             );
         }
 
-        static GraphProjectFromCypherAggregationConfig of(String userName, String graphName, @Nullable Map<String, Object> config) {
-            return new GraphProjectFromCypherAggregationConfigImpl(userName, graphName, CypherMapWrapper.create(config));
+        static GraphProjectFromCypherAggregationConfig of(String userName, String graphName, MapValue config) {
+            return new GraphProjectFromCypherAggregationConfigImpl(
+                userName,
+                graphName,
+                ValueMapWrapper.create(config)
+            );
+        }
+
+        static GraphProjectFromCypherAggregationConfig of(
+            String userName,
+            String graphName,
+            @Nullable Map<String, Object> config
+        ) {
+            return new GraphProjectFromCypherAggregationConfigImpl(
+                userName,
+                graphName,
+                CypherMapWrapper.create(config)
+            );
         }
 
         @Override
@@ -868,5 +834,58 @@ public final class CypherAggregation {
 
         @Configuration.ToMap
         Map<String, Object> toMap();
+    }
+
+    private enum ReadNodeLabels implements PartialValueMapper<NodeLabelToken> {
+        INSTANCE;
+
+        @Override
+        public NodeLabelToken unsupported(AnyValue value) {
+            return NodeLabelTokens.invalid();
+        }
+
+        @Override
+        public NodeLabelToken mapNoValue() {
+            return NodeLabelTokens.missing();
+        }
+
+        @Override
+        public NodeLabelToken mapBoolean(BooleanValue value) {
+            if (value.booleanValue()) {
+                throw new IllegalArgumentException(
+                    "Using `true` to load all labels is deprecated, use `{ sourceNodeLabels: labels(s) }` instead"
+                );
+            }
+            return NodeLabelTokens.empty();
+        }
+
+        @Override
+        public NodeLabelToken mapText(TextValue value) {
+            return NodeLabelTokens.of(value);
+        }
+
+        @Override
+        public NodeLabelToken mapString(StringValue value) {
+            return mapText(value);
+        }
+
+        @Override
+        public NodeLabelToken mapSequence(SequenceValue value) {
+            if (value.isEmpty()) {
+                return NodeLabelTokens.empty();
+            }
+
+            return NodeLabelTokens.of(value);
+        }
+
+        @Override
+        public NodeLabelToken mapTextArray(TextArray value) {
+            return NodeLabelTokens.of(value);
+        }
+
+        @Override
+        public NodeLabelToken mapStringArray(StringArray value) {
+            return mapTextArray(value);
+        }
     }
 }
