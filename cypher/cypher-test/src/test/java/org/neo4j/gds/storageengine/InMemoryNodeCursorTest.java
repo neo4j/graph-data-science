@@ -104,7 +104,6 @@ class InMemoryNodeCursorTest extends CypherTest {
     }
 
     @Test
-    @EnableForNeo4jVersion(Neo4jVersion.V_4_3)
     void shouldHaveProperties43() {
         nodeCursor.next();
         assertThat(nodeCursor.hasProperties()).isTrue();
@@ -112,7 +111,6 @@ class InMemoryNodeCursorTest extends CypherTest {
     }
 
     @Test
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
     void shouldHaveProperties() {
         nodeCursor.next();
         assertThat(nodeCursor.hasProperties()).isTrue();

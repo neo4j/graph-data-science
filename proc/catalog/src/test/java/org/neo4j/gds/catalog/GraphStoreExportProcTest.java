@@ -91,7 +91,6 @@ class GraphStoreExportProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
     @Test
     void exportGraph() {
         projectGraph();
@@ -109,7 +108,6 @@ class GraphStoreExportProcTest extends BaseProcTest {
         });
     }
 
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
     @Test
     void exportGraphWithAdditionalNodeProperties() {
         projectGraph();
@@ -135,7 +133,6 @@ class GraphStoreExportProcTest extends BaseProcTest {
         });
     }
 
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
     @Test
     void exportGraphWithAdditionalNodePropertiesShortHandSyntax() {
         projectGraph();
@@ -161,7 +158,6 @@ class GraphStoreExportProcTest extends BaseProcTest {
         });
     }
 
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
     @Test
     void exportGraphWithAdditionalNodePropertiesDuplicateProperties() {
         projectGraph();
@@ -294,7 +290,6 @@ class GraphStoreExportProcTest extends BaseProcTest {
     }
 
 
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
     @Test
     void exportCsvWithAdditionalNodePropertiesDuplicateProperties() {
         projectGraph();
