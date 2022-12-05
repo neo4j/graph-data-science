@@ -32,7 +32,7 @@ public class KSpanningTreeAlgorithmFactory<CONFIG extends KSpanningTreeBaseConfi
         Graph graph,
         KSpanningTreeBaseConfig configuration,
         ProgressTracker progressTracker
-            ) {
+    ) {
         if (!graph.schema().isUndirected()) {
             throw new IllegalArgumentException(
                 "The K-Spanning Tree algorithm works only with undirected graphs. Please orient the edges properly");

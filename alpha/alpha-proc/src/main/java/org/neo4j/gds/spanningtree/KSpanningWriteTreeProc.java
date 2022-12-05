@@ -45,7 +45,7 @@ public class KSpanningWriteTreeProc extends BaseProc {
     
     @Procedure(value = "gds.alpha.kSpanningTree.write", mode = WRITE)
     @Description(DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<KSpanningTreeWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -54,6 +54,7 @@ public class KSpanningWriteTreeProc extends BaseProc {
             executionContext()
         ).compute(graphName, configuration, true, true);
     }
+
     @Override
     public ExecutionContext executionContext() {
         return ImmutableExecutionContext
