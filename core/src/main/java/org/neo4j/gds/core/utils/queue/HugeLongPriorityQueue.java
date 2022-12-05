@@ -212,10 +212,10 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         mapIndexTo.fill(0L);
     }
 
-    private long findElementPosition(long element) {
-        return mapIndexTo.get(element);
+     long findElementPosition(long element) {
+         return mapIndexTo.get(element);
 
-    }
+     }
 
     private boolean upHeap(long origPos) {
         long i = origPos;

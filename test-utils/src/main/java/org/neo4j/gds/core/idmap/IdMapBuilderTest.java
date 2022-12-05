@@ -31,9 +31,9 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.IdMapBuilder;
-import org.neo4j.gds.core.loading.LabelInformation;
-import org.neo4j.gds.mem.HugeArrays;
+import org.neo4j.gds.core.loading.LabelInformationBuilders;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.mem.HugeArrays;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -243,7 +243,7 @@ public abstract class IdMapBuilderTest {
 
         ParallelUtil.run(tasks, Pools.DEFAULT);
 
-        var idMap = idMapBuilder.build(LabelInformation.single(NodeLabel.ALL_NODES), highestOriginalId, concurrency);
+        var idMap = idMapBuilder.build(LabelInformationBuilders.allNodes(), highestOriginalId, concurrency);
 
         assertThat(idMap.nodeCount()).as("node count").isEqualTo(nodeCount);
         assertThat(idMap.highestOriginalId()).as("highest original id").isEqualTo(highestOriginalId);
@@ -329,12 +329,12 @@ public abstract class IdMapBuilderTest {
         idMapAllocator.insert(originalIds);
 
         var labelInformationBuilder = labelFn.map(lFn -> {
-            var multiLabelBuilder = LabelInformation.builder(originalIds.length);
+            var multiLabelBuilder = LabelInformationBuilders.multiLabelWithCapacity(originalIds.length);
             for (long originalNodeId : originalIds) {
                 lFn.apply(originalNodeId).forEach(label -> multiLabelBuilder.addNodeIdToLabel(label, originalNodeId));
             }
             return multiLabelBuilder;
-        }).orElseGet(() -> LabelInformation.single(NodeLabel.ALL_NODES));
+        }).orElseGet(LabelInformationBuilders::allNodes);
 
         return ImmutableIdMapAndHighestId.builder()
             .idMap(builder.build(labelInformationBuilder, highestOriginalId, concurrency))

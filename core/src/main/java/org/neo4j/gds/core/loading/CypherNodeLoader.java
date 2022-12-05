@@ -34,7 +34,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Value.Enclosing
-class CypherNodeLoader extends CypherRecordLoader<IdMapAndProperties> {
+class CypherNodeLoader extends CypherRecordLoader<NodeImportResult> {
 
     private final long nodeCount;
     private final ProgressTracker progressTracker;
@@ -97,13 +97,13 @@ class CypherNodeLoader extends CypherRecordLoader<IdMapAndProperties> {
     }
 
     @Override
-    IdMapAndProperties result() {
+    NodeImportResult result() {
         var idMapAndProperties = nodesBuilder.build(highestNodeId);
         var idMap = idMapAndProperties.idMap();
         var nodeProperties = idMapAndProperties.nodeProperties().orElseGet(Map::of);
         var nodePropertiesWithPropertyMappings = propertiesWithPropertyMappings(nodeProperties);
 
-        return IdMapAndProperties.of(idMap, nodePropertiesWithPropertyMappings);
+        return NodeImportResult.of(idMap, nodePropertiesWithPropertyMappings);
     }
 
     @Override

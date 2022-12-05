@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class KSpanningTreeProcTest extends BaseProcTest {
+class KSpanningTreeWriteProcTest extends BaseProcTest {
 
     private static String GRAPH_NAME = "graph";
 
@@ -58,7 +58,7 @@ class KSpanningTreeProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(KSpanningTreeMinProc.class, KSpanningTreeMaxProc.class, GraphProjectProc.class);
+        registerProcedures(KSpanningWriteTreeProc.class, GraphProjectProc.class);
         var createQuery = GdsCypher.call(GRAPH_NAME)
             .graphProject()
             .withRelationshipProperty("w")
@@ -70,11 +70,13 @@ class KSpanningTreeProcTest extends BaseProcTest {
     @Test
     void testMax() {
         String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.spanningTree.kmax")
+            .algo("gds.alpha.kSpanningTree")
             .writeMode()
             .addParameter("sourceNode", idFunction.of("a"))
             .addParameter("relationshipWeightProperty", "w")
             .addParameter("k", 2)
+            .addParameter("writeProperty", "partition")
+            .addParameter("objective", "maximum")
             .yields("preProcessingMillis", "computeMillis", "writeMillis");
 
         runQueryWithRowConsumer(query, row -> {
@@ -83,11 +85,11 @@ class KSpanningTreeProcTest extends BaseProcTest {
             assertTrue(row.getNumber("computeMillis").longValue() >= 0);
         });
 
-        final HashMap<String, Integer> communities = new HashMap<>();
+        final HashMap<String, Long> communities = new HashMap<>();
 
         runQueryWithRowConsumer("MATCH (n) WHERE n.partition IS NOT NULL RETURN n.name as name, n.partition as p", row -> {
             final String name = row.getString("name");
-            final int p = row.getNumber("p").intValue();
+            final long p = row.getNumber("p").longValue();
             communities.put(name, p);
         });
 
@@ -99,12 +101,14 @@ class KSpanningTreeProcTest extends BaseProcTest {
     @Test
     void testMin() {
         String query = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.spanningTree.kmin")
+            .algo("gds.alpha.kSpanningTree")
             .writeMode()
             .addParameter("sourceNode", idFunction.of("a"))
             .addParameter("relationshipWeightProperty", "w")
             .addParameter("k", 2)
+            .addParameter("writeProperty", "partition")
             .yields("preProcessingMillis", "computeMillis", "writeMillis");
+
 
         runQueryWithRowConsumer(query, row -> {
             assertTrue(row.getNumber("preProcessingMillis").longValue() >= 0);

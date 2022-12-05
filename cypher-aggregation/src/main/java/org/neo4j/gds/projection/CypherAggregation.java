@@ -82,6 +82,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 import static org.neo4j.gds.Orientation.NATURAL;
+import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class CypherAggregation {
@@ -192,7 +193,7 @@ public final class CypherAggregation {
                 }
             }
 
-            var relImporter = this.relImporters.computeIfAbsent(relationshipType, type -> newRelImporter());
+            var relImporter = this.relImporters.computeIfAbsent(relationshipType, this::newRelImporter);
 
             var intermediateSourceId = loadNode(sourceNode, sourceNodeLabels, sourceNodePropertyValues);
 
@@ -386,12 +387,17 @@ public final class CypherAggregation {
             ));
         }
 
-        private RelationshipsBuilder newRelImporter() {
+        private RelationshipsBuilder newRelImporter(RelationshipType relType) {
             assert this.idMapBuilder != null;
+
+            var undirectedTypes = config.undirectedRelationshipTypes();
+            var orientation = undirectedTypes.contains(relType.name) || undirectedTypes.contains("*")
+                ? UNDIRECTED
+                : NATURAL;
 
             var relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(this.idMapBuilder)
-                .orientation(NATURAL)
+                .orientation(orientation)
                 .aggregation(Aggregation.NONE)
                 .concurrency(config.readConcurrency());
 
@@ -690,6 +696,12 @@ public final class CypherAggregation {
         @Configuration.Ignore
         default Aggregation aggregation() {
             return Aggregation.NONE;
+        }
+
+        @org.immutables.value.Value.Default
+        @NotNull
+        default List<String> undirectedRelationshipTypes() {
+            return List.of();
         }
 
         @Configuration.Ignore

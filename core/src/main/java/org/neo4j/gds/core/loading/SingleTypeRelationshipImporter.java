@@ -214,6 +214,8 @@ public final class SingleTypeRelationshipImporter {
     public interface SingleTypeRelationshipImportContext {
         RelationshipType relationshipType();
 
+        Optional<RelationshipType> inverseOfRelationshipType();
+
         RelationshipProjection relationshipProjection();
 
         SingleTypeRelationshipImporter singleTypeRelationshipImporter();

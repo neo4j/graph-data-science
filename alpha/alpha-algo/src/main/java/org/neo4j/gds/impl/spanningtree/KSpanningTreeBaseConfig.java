@@ -17,37 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.hashgnn;
+package org.neo4j.gds.impl.spanningtree;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
 
 @Configuration
-public interface BinarizeFeaturesConfig {
-    @Configuration.IntegerRange(min = 1)
-    int dimension();
-
-    default double threshold() {
-        return 0.0;
-    }
-
-    @Configuration.ToMap
-    @Value.Auxiliary
-    @Value.Derived
-    default Map<String, Object> toMap() {
-        return Map.of(); // Will be overwritten
-    }
-
-    @Configuration.CollectKeys
-    @Value.Auxiliary
-    @Value.Default
-    @Value.Parameter(false)
-    default Collection<String> configKeys() {
-        return List.of();
-    }
+public interface KSpanningTreeBaseConfig extends SpanningTreeBaseConfig {
+    long k();
 
 }

@@ -102,7 +102,7 @@ class ArrayIdMapTest {
         int length = 1337;
         int highestNeoId = length - 1;
         var arrayIdMapBuilder = ArrayIdMapBuilder.of(length);
-        var emptyLabelInformationBuilder = LabelInformation.single(NodeLabel.ALL_NODES);
+        var emptyLabelInformationBuilder = LabelInformationBuilders.allNodes();
         var hugeIdMap = ArrayIdMapBuilderOps.build(
             arrayIdMapBuilder.array(),
             length,

@@ -34,8 +34,11 @@ import org.neo4j.gds.ml.core.features.FeatureExtractor;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 class RawFeaturesTask implements Runnable {
     private final Partition partition;
+    private final Graph graph;
     private final List<FeatureExtractor> featureExtractors;
     private final int inputDimension;
     private final HugeObjectArray<HugeAtomicBitSet> features;
@@ -44,12 +47,14 @@ class RawFeaturesTask implements Runnable {
 
     RawFeaturesTask(
         Partition partition,
+        Graph graph,
         List<FeatureExtractor> featureExtractors,
         int inputDimension,
         HugeObjectArray<HugeAtomicBitSet> features,
         ProgressTracker progressTracker
     ) {
         this.partition = partition;
+        this.graph = graph;
         this.featureExtractors = featureExtractors;
         this.inputDimension = inputDimension;
         this.features = features;
@@ -77,6 +82,7 @@ class RawFeaturesTask implements Runnable {
         var tasks = partitions.stream()
             .map(p -> new RawFeaturesTask(
                 p,
+                graph,
                 featureExtractors,
                 inputDimension,
                 features,
@@ -103,16 +109,21 @@ class RawFeaturesTask implements Runnable {
             FeatureExtraction.extract(nodeId, -1, featureExtractors, new FeatureConsumer() {
                 @Override
                 public void acceptScalar(long nodeOffset, int offset, double value) {
-                    if (value != 0.0) {
+                    if (value == 1.0) {
                         nodeFeatures.set(offset);
+                    } else if (value != 0.0) {
+                        throw new IllegalArgumentException(formatWithLocale("Feature properties may only contain values 0 and 1 unless `binarizeFeatures` is used. Node %d and possibly other nodes have a feature property containing value %f", graph.toOriginalNodeId(nodeId), value));
                     }
                 }
 
                 @Override
                 public void acceptArray(long nodeOffset, int offset, double[] values) {
                     for (int inputFeatureOffset = 0; inputFeatureOffset < values.length; inputFeatureOffset++) {
-                        if (values[inputFeatureOffset] != 0.0) {
+                        var value = values[inputFeatureOffset];
+                        if (value == 1.0) {
                             nodeFeatures.set(offset + inputFeatureOffset);
+                        } else if (value != 0.0) {
+                            throw new IllegalArgumentException(formatWithLocale("Feature properties may only contain values 0 and 1 unless `binarizeFeatures` is used. Node %d and possibly other nodes have a feature property containing value %.17f", graph.toOriginalNodeId(nodeId), value));
                         }
                     }
                 }

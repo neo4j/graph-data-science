@@ -46,10 +46,10 @@ class KmeansAlgorithmFactoryTest {
 
         assertThat(estimate.min)
             .as("Min should be correct")
-            .isEqualTo(33944L);
+            .isEqualTo(33952L);
         assertThat(estimate.max)
             .as("Max should be correct")
-            .isEqualTo(54936L);
+            .isEqualTo(54944L);
     }
 
     @Test
@@ -69,10 +69,10 @@ class KmeansAlgorithmFactoryTest {
 
         assertThat(estimate.min)
             .as("Min should be correct")
-            .isEqualTo(33944L + MemoryUsage.sizeOf(centroidsSeeds));
+            .isEqualTo(33952L + MemoryUsage.sizeOf(centroidsSeeds));
         assertThat(estimate.max)
             .as("Max should be correct")
-            .isEqualTo(54936L + MemoryUsage.sizeOf(centroidsSeeds));
+            .isEqualTo(54944L + MemoryUsage.sizeOf(centroidsSeeds));
     }
 
     @Test
@@ -92,10 +92,10 @@ class KmeansAlgorithmFactoryTest {
 
         assertThat(estimate.min)
             .as("Min should be correct")
-            .isEqualTo(34320L);
+            .isEqualTo(34328L);
         assertThat(estimate.max)
             .as("Max should be correct")
-            .isEqualTo(55312L);
+            .isEqualTo(55320L);
     }
 
 }

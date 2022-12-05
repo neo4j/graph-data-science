@@ -34,6 +34,7 @@ import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @GdlExtension
 class RawFeaturesTaskTest {
@@ -45,12 +46,41 @@ class RawFeaturesTaskTest {
         ", (b:N {f1: 1, f2: [1.0, 0.0]})" +
         ", (c:N {f1: 1, f2: [0.0, 1.0]})";
 
+    @GdlGraph(graphNamePrefix = "nonBinary")
+    private static final String NON_BINARY =
+        "CREATE" +
+        "  (a:N {f1: 1, f2: [1.0, 1.0]})" +
+        ", (b:N {f1: 1, f2: [1.0, 0.0000000001]})" +
+        ", (c:N {f1: 1, f2: [0.0, 1.0]})";
+
     @Inject
     private Graph graph;
 
     @Inject
+    private Graph nonBinaryGraph;
+
+    @Inject
     private IdFunction idFunction;
 
+    @Test
+    void shouldFailOnNonBinaryFeatures() {
+        var partition = new Partition(0, nonBinaryGraph.nodeCount());
+        var featureExtractors = FeatureExtraction.propertyExtractors(nonBinaryGraph, List.of("f1", "f2"));
+        var features = HugeObjectArray.newArray(HugeAtomicBitSet.class, nonBinaryGraph.nodeCount());
+        var inputDimension = FeatureExtraction.featureCount(featureExtractors);
+
+        assertThatThrownBy(() -> {
+            new RawFeaturesTask(
+                partition,
+                nonBinaryGraph,
+                featureExtractors,
+                inputDimension,
+                features,
+                ProgressTracker.NULL_TRACKER
+            ).run();
+        }).isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Feature properties may only contain values 0 and 1 unless `binarizeFeatures` is used. Node 1 and possibly other nodes have a feature property containing value 0.00000000010000000");
+    }
     @Test
     void shouldPickCorrectFeatures() {
         var partition = new Partition(0, graph.nodeCount());
@@ -60,6 +90,7 @@ class RawFeaturesTaskTest {
 
         new RawFeaturesTask(
             partition,
+            graph,
             featureExtractors,
             inputDimension,
             features,

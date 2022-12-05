@@ -68,8 +68,9 @@ RETURN gds.alpha.graph.project(
 .Configuration
 [opts="header",cols="1,1,1,4"]
 |===
-| Name                   | Type                  | Default              | Description
-| readConcurrency        | Integer               | 4                    | The number of concurrent threads used for creating the graph.
+| Name                          | Type                  | Default              | Description
+| readConcurrency               | Integer               | 4                    | The number of concurrent threads used for creating the graph.
+| undirectedRelationshipTypes   | List of String        | []                   | Declare a number of relationship types as undirected. Relationships with the specified types will be imported as undirected. `*` can be used to declare all relationship types as undirected.
 |===
 
 

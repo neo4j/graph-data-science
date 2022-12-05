@@ -31,6 +31,7 @@ import org.neo4j.gds.compat.LongPropertyReference;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.LabelInformation;
+import org.neo4j.gds.core.loading.LabelInformationBuilders;
 import org.neo4j.gds.core.loading.NodeImporter;
 import org.neo4j.gds.core.loading.NodesBatchBuffer;
 import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
@@ -97,8 +98,8 @@ public final class NodesBuilder {
         this.elementIdentifierLabelTokenMapping = elementIdentifierLabelTokenMapping;
         this.idMapBuilder = idMapBuilder;
         this.labelInformationBuilder = !hasLabelInformation
-            ? LabelInformation.single(NodeLabel.ALL_NODES)
-            : LabelInformation.builder(maxOriginalId + 1);
+            ? LabelInformationBuilders.allNodes()
+            : LabelInformationBuilders.multiLabelWithCapacity(maxOriginalId + 1);
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
         this.nextLabelId = 0;
         this.lock = new ReentrantLock(true);
