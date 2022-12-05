@@ -218,6 +218,18 @@ final class IntMinPriorityQueueTest {
         Assertions.assertThat(priorityQueue.size()).isEqualTo(1);
     }
 
+    @Test
+    void testMapIndex() {
+        IntPriorityQueue priorityQueue = IntPriorityQueue.min(11);
+        for (int i = 0; i < 10; ++i) {
+            priorityQueue.add(i, 10 - i);
+        }
+        for (int i = 0; i < 10; ++i) {
+            var ith = (int) priorityQueue.getIth(i);
+            assertEquals(priorityQueue.findElementPosition(ith), i + 1);
+        }
+        assertEquals(priorityQueue.findElementPosition(10), 0);
+    }
 
     private double exclusiveDouble(
         final double exclusiveMin,
