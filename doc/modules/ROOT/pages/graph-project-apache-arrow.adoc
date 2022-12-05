@@ -118,6 +118,8 @@ The following table describes the node columns with reserved names.
 Any additional column is interpreted as a node property.
 The supported data types are equivalent to the GDS node property types, i.e., `long`, `double`, `long[]`, `double[]` and `float[]`.
 
+NOTE: For floating point values, `null` will be converted to `NaN`.
+
 To increase the throughput, multiple Flight streams can be sent in parallel.
 The server manages multiple incoming streams for the same import process.
 In addition to the number of parallel streams, the size of a single record batch can also affect the overall throughput.
