@@ -32,7 +32,6 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static org.neo4j.gds.steiner.SteinerBasedDeltaStepping.BIN_SIZE_THRESHOLD;
 import static org.neo4j.gds.steiner.SteinerBasedDeltaStepping.NO_BIN;
 
 class SteinerBasedDeltaTask implements Runnable {
@@ -49,8 +48,8 @@ class SteinerBasedDeltaTask implements Runnable {
     private final BitSet uninvisitedTerminal;
     private final HugeLongPriorityQueue terminalQueue;
     private final ReentrantLock terminalQueueLock;
-
     private double smallestConsideredDistance;
+    private int binSizeThreshold;
 
     SteinerBasedDeltaTask(
         Graph graph,
@@ -61,7 +60,8 @@ class SteinerBasedDeltaTask implements Runnable {
         BitSet mergedToSource,
         HugeLongPriorityQueue terminalQueue,
         ReentrantLock terminalQueueLock,
-        BitSet uninvisitedTerminal
+        BitSet uninvisitedTerminal,
+        int binSizeThreshold
     ) {
 
         this.graph = graph;
@@ -74,6 +74,7 @@ class SteinerBasedDeltaTask implements Runnable {
         this.terminalQueue = terminalQueue;
         this.terminalQueueLock = terminalQueueLock;
         this.uninvisitedTerminal = uninvisitedTerminal;
+        this.binSizeThreshold = binSizeThreshold;
     }
 
     @Override
@@ -128,7 +129,7 @@ class SteinerBasedDeltaTask implements Runnable {
         while (binIndex < localBins.length
                && localBins[binIndex] != null
                && !localBins[binIndex].isEmpty()
-               && localBins[binIndex].size() < BIN_SIZE_THRESHOLD) {
+               && localBins[binIndex].size() < binSizeThreshold) {
             var binCopy = localBins[binIndex].clone();
             localBins[binIndex].elementsCount = 0;
             binCopy.forEach((LongProcedure) this::relaxNode);

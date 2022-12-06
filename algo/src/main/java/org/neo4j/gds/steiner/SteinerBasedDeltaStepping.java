@@ -72,6 +72,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
     private final BitSet unvisitedTerminal;
     private final BitSet mergedWithSource;
     private final LongAdder metTerminals;
+    private int binSizeThreshold;
 
     SteinerBasedDeltaStepping(
         Graph graph,
@@ -79,6 +80,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
         double delta,
         BitSet isTerminal,
         int concurrency,
+        int binSizeThreshold,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
@@ -99,7 +101,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
         this.pathIndex = 0;
         this.metTerminals = new LongAdder();
         this.numOfTerminals = isTerminal.cardinality();
-
+        this.binSizeThreshold = binSizeThreshold;
     }
 
     private void mergeNodesOnPathToSource(long nodeId, AtomicLong frontierIndex) {
@@ -198,7 +200,6 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
                 .min()
                 .orElseThrow();
             //return true if the closet terminal is at least as close as the  closest next node
-            System.out.println("hi" + distance + " " + currentMinDistance + " " + (distance <= currentMinDistance) + " " + oldBin + " " + currentBin);
             return distance <= currentMinDistance;
         } else {
             return (distance < currentBin * delta);
@@ -286,7 +287,8 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
                 mergedWithSource,
                 terminalQueue,
                 terminalQueueLock,
-                unvisitedTerminal
+                unvisitedTerminal,
+                binSizeThreshold
             ))
             .collect(Collectors.toList());
 

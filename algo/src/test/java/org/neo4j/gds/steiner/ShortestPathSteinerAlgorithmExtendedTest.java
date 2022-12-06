@@ -22,7 +22,8 @@ package org.neo4j.gds.steiner;
 import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -34,8 +35,10 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.paths.PathResult;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 @GdlExtension
 class ShortestPathSteinerAlgorithmExtendedTest {
@@ -140,12 +143,18 @@ class ShortestPathSteinerAlgorithmExtendedTest {
     @Inject
     private IdFunction triangleIdFunction;
 
+    static Stream<Arguments> inputTuples() {
+        return Stream.of(
+
+            arguments(2.0, SteinerBasedDeltaStepping.BIN_SIZE_THRESHOLD), //default settings
+            arguments(5.0, 0), //values in two buckets, can deduce lowest shortest without changing bucket
+            arguments(100, 0) //everything in a single bucket, can likewise
+        );
+    }
+    
     @ParameterizedTest
-    @ValueSource(doubles = {2.0, 5.0, 100.0})
-        //2.0 is the standard one we use everything
-        //5.0 is one such that we can deduce a2 is best without changing bucket
-        //100.0 is a big one where everything takes place inside a single bucket
-    void shouldWorkCorrectly(double delta) {
+    @MethodSource("inputTuples")
+    void shouldWorkCorrectly(double delta, int binSizeThreshold) {
 
         var a = SteinerTestUtils.getNodes(idFunction, 6);
         var steinerTreeResult = new ShortestPathsSteinerAlgorithm(
@@ -155,6 +164,8 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             delta,
             1,
             false,
+            binSizeThreshold,
+            //setting custom threshold for such a small graph allows to not examine everything in a single iteration
             Pools.DEFAULT
         ).compute();
 
@@ -198,6 +209,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             2.0,
             isTerminal,
             1,
+            SteinerBasedDeltaStepping.BIN_SIZE_THRESHOLD,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
