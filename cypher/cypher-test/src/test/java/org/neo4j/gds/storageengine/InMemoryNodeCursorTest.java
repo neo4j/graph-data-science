@@ -26,11 +26,8 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryNodeCursor;
-import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
-import org.neo4j.gds.junit.annotation.EnableForNeo4jVersion;
 import org.neo4j.token.api.TokenNotFoundException;
 import org.neo4j.values.storable.LongValue;
 
