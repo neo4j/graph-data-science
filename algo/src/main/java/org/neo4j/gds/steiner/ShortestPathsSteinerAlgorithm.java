@@ -21,6 +21,7 @@ package org.neo4j.gds.steiner;
 
 import com.carrotsearch.hppc.BitSet;
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -51,7 +52,6 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
 
     private int binSizeThreshold;
 
-
     public ShortestPathsSteinerAlgorithm(
         Graph graph,
         long sourceId,
@@ -70,19 +70,21 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         this.isTerminal = createTerminals();
         this.applyRerouting = applyRerouting;
         this.executorService = executorService;
+        this.binSizeThreshold = SteinerBasedDeltaStepping.BIN_SIZE_THRESHOLD;
     }
 
-     ShortestPathsSteinerAlgorithm(
-         Graph graph,
-         long sourceId,
-         List<Long> terminals,
-         double delta,
-         int concurrency,
-         boolean applyRerouting,
-         int binSizeThreshold,
-         ExecutorService executorService
-     ) {
-         super(ProgressTracker.NULL_TRACKER);
+    @TestOnly
+    ShortestPathsSteinerAlgorithm(
+        Graph graph,
+        long sourceId,
+        List<Long> terminals,
+        double delta,
+        int concurrency,
+        boolean applyRerouting,
+        int binSizeThreshold,
+        ExecutorService executorService
+    ) {
+        super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
         this.sourceId = sourceId;
         this.terminals = terminals;
