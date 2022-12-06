@@ -101,13 +101,6 @@ class InMemoryNodeCursorTest extends CypherTest {
     }
 
     @Test
-    void shouldHaveProperties43() {
-        nodeCursor.next();
-        assertThat(nodeCursor.hasProperties()).isTrue();
-        assertThat(nodeCursor.propertiesReference()).isEqualTo(0L);
-    }
-
-    @Test
     void shouldHaveProperties() {
         nodeCursor.next();
         assertThat(nodeCursor.hasProperties()).isTrue();
