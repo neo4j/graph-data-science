@@ -25,6 +25,7 @@ import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -38,7 +39,7 @@ class NodeFilterTest {
         var labelOne = NodeLabel.of("one");
         var labelTwo = NodeLabel.of("two");
 
-        var labelInformationBuilder = LabelInformationBuilders.multiLabelWithCapacityAndLabelInformation(4, List.of(labelOne, labelTwo), List.of());
+        var labelInformationBuilder = LabelInformationBuilders.multiLabelWithCapacityAndLabelInformation(4, List.of(labelOne, labelTwo), Collections.emptyList());
         labelInformationBuilder.addNodeIdToLabel(labelOne, 0);
         labelInformationBuilder.addNodeIdToLabel(labelTwo, 1);
         labelInformationBuilder.addNodeIdToLabel(labelOne, 2);
