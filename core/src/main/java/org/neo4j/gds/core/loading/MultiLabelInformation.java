@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.IntObjectMap;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.BatchNodeIterable;
@@ -35,11 +34,8 @@ import java.util.PrimitiveIterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.LongUnaryOperator;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
-import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class MultiLabelInformation implements LabelInformation {
@@ -150,12 +146,12 @@ public final class MultiLabelInformation implements LabelInformation {
     public static final class Builder implements LabelInformation.Builder {
         private final long expectedCapacity;
         private final Map<NodeLabel, HugeAtomicGrowingBitSet> labelInformation;
-        private final List<NodeLabel> starNodeLabelMappings;
+        private final Collection<NodeLabel> starNodeLabelMappings;
 
         private Builder(
             long expectedCapacity,
             Map<NodeLabel, HugeAtomicGrowingBitSet> labelInformation,
-            List<NodeLabel> starNodeLabelMappings
+            Collection<NodeLabel> starNodeLabelMappings
         ) {
             this.expectedCapacity = expectedCapacity;
             this.labelInformation = labelInformation;
@@ -166,35 +162,18 @@ public final class MultiLabelInformation implements LabelInformation {
             return new Builder(expectedCapacity, new ConcurrentHashMap<>(), List.of());
         }
 
-        static Builder of(
+        static LabelInformation.Builder of(
             long expectedCapacity,
-            IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping
+            Collection<NodeLabel> availableNodeLabels,
+            Collection<NodeLabel> starNodeLabelMappings
         ) {
-            var starNodeLabelMappings = labelTokenNodeLabelMapping.getOrDefault(ANY_LABEL, List.of());
-
-            var nodeLabelBitSetMap = prepareLabelMap(
-                labelTokenNodeLabelMapping,
-                () -> HugeAtomicGrowingBitSet.create(expectedCapacity)
-            );
-
-            return new Builder(expectedCapacity, nodeLabelBitSetMap, starNodeLabelMappings);
-        }
-
-        private static <T> Map<NodeLabel, T> prepareLabelMap(
-            IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
-            Supplier<T> mapSupplier
-        ) {
-            return StreamSupport.stream(
-                    labelTokenNodeLabelMapping.values().spliterator(),
-                    false
+            var nodeLabelBitSetMap = availableNodeLabels.stream().collect(
+                Collectors.toMap(
+                    nodeLabel -> nodeLabel,
+                    ignored -> HugeAtomicGrowingBitSet.create(expectedCapacity)
                 )
-                .flatMap(cursor -> cursor.value.stream())
-                .distinct()
-                .collect(Collectors.toMap(
-                        nodeLabel -> nodeLabel,
-                        nodeLabel -> mapSupplier.get()
-                    )
-                );
+            );
+            return new Builder(expectedCapacity, nodeLabelBitSetMap, starNodeLabelMappings);
         }
 
         public void addNodeIdToLabel(NodeLabel nodeLabel, long nodeId) {
@@ -205,7 +184,7 @@ public final class MultiLabelInformation implements LabelInformation {
                 ).set(nodeId);
         }
 
-        Map<NodeLabel, BitSet> buildInner(long nodeCount, LongUnaryOperator mappedIdFn) {
+        private Map<NodeLabel, BitSet> buildInner(long nodeCount, LongUnaryOperator mappedIdFn) {
             return this.labelInformation
                 .entrySet()
                 .stream()
@@ -223,10 +202,10 @@ public final class MultiLabelInformation implements LabelInformation {
             var labelInformation = buildInner(nodeCount, mappedIdFn);
 
             if (labelInformation.isEmpty() && starNodeLabelMappings.isEmpty()) {
-                return new SingleLabelInformation.Builder(NodeLabel.ALL_NODES).build(nodeCount, mappedIdFn);
+                return LabelInformationBuilders.allNodes().build(nodeCount, mappedIdFn);
             }
             else if (labelInformation.size() == 1 && starNodeLabelMappings.isEmpty()) {
-                return new SingleLabelInformation.Builder(labelInformation.keySet().iterator().next()).build(nodeCount, mappedIdFn);
+                return LabelInformationBuilders.singleLabel(labelInformation.keySet().iterator().next()).build(nodeCount, mappedIdFn);
             }
 
             // set the whole range for '*' projections

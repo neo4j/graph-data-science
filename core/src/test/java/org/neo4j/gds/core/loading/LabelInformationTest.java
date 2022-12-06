@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.loading;
 
-import com.carrotsearch.hppc.IntObjectHashMap;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -98,7 +97,7 @@ class LabelInformationTest {
 
     private LabelInformation buildLabelInformation(Collection<Long> nodeIds, LongUnaryOperator nodeIdMap, LabelProducer labelProducer) {
         var nodeCount = nodeIds.size();
-        var builder = LabelInformationBuilders.multiLabelWithCapacityAndLabelInformation(nodeCount, new IntObjectHashMap<>());
+        var builder = LabelInformationBuilders.multiLabelWithCapacity(nodeCount);
 
         for (var nodeId : nodeIds) {
             for (NodeLabel nodeLabel : labelProducer.get(nodeId)) {

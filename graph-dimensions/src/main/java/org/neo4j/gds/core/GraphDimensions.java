@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core;
 
+import com.carrotsearch.hppc.IntObjectAssociativeContainer;
+import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.LongSet;
 import com.carrotsearch.hppc.ObjectIntHashMap;
@@ -31,12 +33,16 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Spliterators;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @ValueClass
 public interface GraphDimensions {
@@ -82,6 +88,28 @@ public interface GraphDimensions {
 
     @Nullable
     IntObjectMap<List<NodeLabel>> tokenNodeLabelMapping();
+
+    @Value.Derived
+    default Collection<NodeLabel> availableNodeLabels() {
+        var nodeLabelsIterator = Optional.ofNullable(tokenNodeLabelMapping())
+            .map(IntObjectAssociativeContainer::values)
+            .map(Iterable::spliterator)
+            .orElseGet(Spliterators::emptySpliterator);
+
+        return StreamSupport.stream(
+                nodeLabelsIterator,
+                false
+            )
+            .flatMap(cursor -> cursor.value.stream())
+            .collect(Collectors.toSet());
+    }
+
+    @Value.Derived
+    default Collection<NodeLabel> starNodeLabelMappings() {
+        return Optional.ofNullable(tokenNodeLabelMapping())
+            .orElseGet(IntObjectHashMap::new)
+            .getOrDefault(ANY_LABEL, List.of());
+    }
 
     @Nullable
     IntObjectMap<List<RelationshipType>> tokenRelationshipTypeMapping();

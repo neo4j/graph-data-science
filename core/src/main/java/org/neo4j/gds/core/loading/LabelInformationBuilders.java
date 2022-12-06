@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.core.loading;
 
-import com.carrotsearch.hppc.IntObjectMap;
 import org.neo4j.gds.NodeLabel;
 
-import java.util.List;
+import java.util.Collection;
 
 public final class LabelInformationBuilders {
 
@@ -42,8 +41,9 @@ public final class LabelInformationBuilders {
 
     public static LabelInformation.Builder multiLabelWithCapacityAndLabelInformation(
         long expectedCapacity,
-        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping
+        Collection<NodeLabel> availableNodeLabels,
+        Collection<NodeLabel> starNodeLabelMappings
     ) {
-        return MultiLabelInformation.Builder.of(expectedCapacity, labelTokenNodeLabelMapping);
+        return MultiLabelInformation.Builder.of(expectedCapacity, availableNodeLabels, starNodeLabelMappings);
     }
 }

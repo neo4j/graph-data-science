@@ -63,7 +63,6 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
         int concurrency
     ) {
         var expectedCapacity = dimensions.highestPossibleNodeCount();
-        var labelTokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
 
         var scannerFactory = scannerFactory(loadingContext.transactionContext(), dimensions, loadingContext.log());
 
@@ -80,7 +79,11 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
             var singleLabel = graphProjectConfig.nodeProjections().projections().keySet().iterator().next();
             labelInformationBuilder = LabelInformationBuilders.singleLabel(singleLabel);
         } else {
-            labelInformationBuilder = LabelInformationBuilders.multiLabelWithCapacityAndLabelInformation(expectedCapacity, labelTokenNodeLabelMapping);
+            labelInformationBuilder = LabelInformationBuilders.multiLabelWithCapacityAndLabelInformation(
+                expectedCapacity,
+                dimensions.availableNodeLabels(),
+                dimensions.starNodeLabelMappings()
+            );
         }
 
         var propertyMappings = IndexPropertyMappings.prepareProperties(
