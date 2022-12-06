@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.PrimitiveIterator;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
@@ -159,10 +158,10 @@ public final class MultiLabelInformation implements LabelInformation {
         }
 
         static Builder of(long expectedCapacity) {
-            return new Builder(expectedCapacity, new ConcurrentHashMap<>(), List.of());
+            return of(expectedCapacity, List.of(), List.of());
         }
 
-        static LabelInformation.Builder of(
+        static Builder of(
             long expectedCapacity,
             Collection<NodeLabel> availableNodeLabels,
             Collection<NodeLabel> starNodeLabelMappings
