@@ -138,7 +138,6 @@ class SteinerBasedDeltaTask implements Runnable {
         graph.forEachRelationship(nodeId, 1.0, (sourceNodeId, targetNodeId, weight) -> {
             if (!mergedToSource.get(targetNodeId)) { //ignore merged vertices
                 tryToUpdate(sourceNodeId, targetNodeId, weight);
-                smallestConsideredDistance = Math.min(weight, smallestConsideredDistance);
             }
             return true;
         });
@@ -165,6 +164,8 @@ class SteinerBasedDeltaTask implements Runnable {
             // CAX failed, retry
             oldDist = witness;
         }
+        smallestConsideredDistance = Math.min(newDist, smallestConsideredDistance);
+
         if (uninvisitedTerminal.get(targetNodeId)) {
 
             terminalQueueLock.lock();

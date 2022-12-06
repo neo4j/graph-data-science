@@ -198,6 +198,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
                 .min()
                 .orElseThrow();
             //return true if the closet terminal is at least as close as the  closest next node
+            System.out.println("hi" + distance + " " + currentMinDistance + " " + (distance <= currentMinDistance) + " " + oldBin + " " + currentBin);
             return distance <= currentMinDistance;
         } else {
             return (distance < currentBin * delta);

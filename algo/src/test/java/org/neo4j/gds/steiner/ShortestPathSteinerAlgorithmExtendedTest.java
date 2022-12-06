@@ -21,6 +21,8 @@ package org.neo4j.gds.steiner;
 
 import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -138,15 +140,19 @@ class ShortestPathSteinerAlgorithmExtendedTest {
     @Inject
     private IdFunction triangleIdFunction;
 
-    @Test
-    void shouldWorkCorrectly() {
+    @ParameterizedTest
+    @ValueSource(doubles = {2.0, 5.0, 100.0})
+        //2.0 is the standard one we use everything
+        //5.0 is one such that we can deduce a2 is best without changing bucket
+        //100.0 is a big one where everything takes place inside a single bucket
+    void shouldWorkCorrectly(double delta) {
 
         var a = SteinerTestUtils.getNodes(idFunction, 6);
         var steinerTreeResult = new ShortestPathsSteinerAlgorithm(
             graph,
             a[0],
             List.of(a[2], a[5]),
-            2.0,
+            delta,
             1,
             false,
             Pools.DEFAULT
