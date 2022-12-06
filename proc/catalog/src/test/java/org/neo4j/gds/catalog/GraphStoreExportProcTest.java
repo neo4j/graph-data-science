@@ -31,11 +31,9 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.compat.DatabaseMode;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.compat.SettingProxy;
 import org.neo4j.gds.core.GraphStoreExportSettings;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.io.fs.DefaultFileSystemAbstraction;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
@@ -91,7 +89,6 @@ class GraphStoreExportProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
     @Test
     void exportGraph() {
         projectGraph();
@@ -109,7 +106,6 @@ class GraphStoreExportProcTest extends BaseProcTest {
         });
     }
 
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
     @Test
     void exportGraphWithAdditionalNodeProperties() {
         projectGraph();
@@ -135,7 +131,6 @@ class GraphStoreExportProcTest extends BaseProcTest {
         });
     }
 
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
     @Test
     void exportGraphWithAdditionalNodePropertiesShortHandSyntax() {
         projectGraph();
@@ -161,7 +156,6 @@ class GraphStoreExportProcTest extends BaseProcTest {
         });
     }
 
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
     @Test
     void exportGraphWithAdditionalNodePropertiesDuplicateProperties() {
         projectGraph();
@@ -294,7 +288,6 @@ class GraphStoreExportProcTest extends BaseProcTest {
     }
 
 
-    @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
     @Test
     void exportCsvWithAdditionalNodePropertiesDuplicateProperties() {
         projectGraph();

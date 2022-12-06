@@ -29,8 +29,7 @@ public class SettingProxyFactoryImpl implements SettingProxyFactory {
 
     @Override
     public boolean canLoad(Neo4jVersion version) {
-        return version == Neo4jVersion.V_4_3 ||
-               version == Neo4jVersion.V_4_4;
+        return version == Neo4jVersion.V_4_4;
     }
 
     @Override
@@ -40,6 +39,6 @@ public class SettingProxyFactoryImpl implements SettingProxyFactory {
 
     @Override
     public String description() {
-        return "Neo4j Settings 4.x";
+        return "Neo4j Settings 4.4";
     }
 }

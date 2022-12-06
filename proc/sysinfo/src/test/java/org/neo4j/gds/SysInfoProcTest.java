@@ -48,9 +48,8 @@ import static org.neo4j.gds.GdsEditionTestCondition.GDS_EDITION;
 class SysInfoProcTest extends BaseProcTest {
 
     private static final Collection<String> ALL_COMPATIBILITIES = List.of(
-        "Neo4j 4.3",
         "Neo4j 4.4",
-        "Neo4j Settings 4.x",
+        "Neo4j Settings 4.4",
 
         "Neo4j 5.1",
         "Neo4j 5.1 (placeholder)",
@@ -119,11 +118,8 @@ class SysInfoProcTest extends BaseProcTest {
 
         Set<String> expectedCompatibilities;
         switch (neo4jVersion) {
-            case V_4_3:
-                expectedCompatibilities = Set.of("Neo4j 4.3", "Neo4j Settings 4.x");
-                break;
             case V_4_4:
-                expectedCompatibilities = Set.of("Neo4j 4.4", "Neo4j Settings 4.x");
+                expectedCompatibilities = Set.of("Neo4j 4.4", "Neo4j Settings 4.4");
                 break;
             case V_5_1:
                 expectedCompatibilities = Set.of(

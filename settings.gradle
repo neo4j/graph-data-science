@@ -121,9 +121,6 @@ project(':neo4j-adapter').projectDir = file('neo4j-adapter')
 include('neo4j-kernel-adapter')
 project(':neo4j-kernel-adapter').projectDir = file('compatibility/common/neo4j-kernel-adapter')
 
-include('neo4j-kernel-adapter-4.3')
-project(':neo4j-kernel-adapter-4.3').projectDir = file('compatibility/4.3/neo4j-kernel-adapter')
-
 include('neo4j-kernel-adapter-4.4')
 project(':neo4j-kernel-adapter-4.4').projectDir = file('compatibility/4.4/neo4j-kernel-adapter')
 
@@ -198,9 +195,6 @@ project(':proc-pipeline-catalog').projectDir = file('proc/pipeline-catalog')
 
 include('storage-engine-adapter')
 project(':storage-engine-adapter').projectDir = file('cypher/common/storage-engine-adapter')
-
-include('storage-engine-adapter-4.3')
-project(':storage-engine-adapter-4.3').projectDir = file('cypher/4.3/storage-engine-adapter')
 
 include('storage-engine-adapter-4.4')
 project(':storage-engine-adapter-4.4').projectDir = file('cypher/4.4/storage-engine-adapter')
