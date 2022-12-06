@@ -268,6 +268,21 @@ class GraphProjectProcTest extends BaseProcTest {
         assertGraphExists(graphName);
     }
 
+
+    @Test
+    void cypherProjectionShouldFailOnInvalidRelationships() {
+        var query = "CALL gds.graph.project.cypher(" +
+                    "   'g'," +
+                    "   'UNWIND [1,2,3] as i RETURN i as id'," +
+                    "   'UNWIND [1,2,3] as i return i as source, i+1 as target'" +
+                    ")";
+
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Failed to load a relationship because its target-node");
+    }
+
     @Test
     void nodeProjectionWithAsterisk() {
         String query = "CALL gds.graph.project('g', '*', 'REL') YIELD nodeCount";
