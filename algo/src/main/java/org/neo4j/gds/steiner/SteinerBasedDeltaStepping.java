@@ -183,9 +183,12 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
         long currentBin,
         List<SteinerBasedDeltaTask> tasks
     ) {
+        if (currentBin == NO_BIN) { //there is no more nodes to relax, path to target node is certainly shortest
+            return true;
+        }
         if (oldBin == currentBin) {
             //if closest terminal is in another bucket, can't be sure it's the best path
-            if (distance >= (currentBin+1) * delta) {
+            if (distance >= (currentBin + 1) * delta) {
                 return false;
             }
             //find closest node to be processed afterwards
