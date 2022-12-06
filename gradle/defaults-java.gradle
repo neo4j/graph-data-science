@@ -21,7 +21,7 @@ ext.languageVersion = { ->
 }
 
 allprojects {
-    plugins.withType(JavaLibraryPlugin) {
+    plugins.withType(JavaLibraryPlugin).configureEach {
 
         repositories {
             mavenCentral()
@@ -95,7 +95,7 @@ allprojects {
             }
         }
 
-        tasks.withType(JavaCompile) {
+        tasks.withType(JavaCompile).configureEach {
             options.warnings = true
             options.encoding = 'UTF-8'
 
@@ -115,6 +115,10 @@ allprojects {
             ]
         }
 
+        tasks.withType(Jar).configureEach {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        }
+
         afterEvaluate {
             if (group.startsWith('com.neo4j.gds')) {
                 javadoc {
@@ -123,4 +127,5 @@ allprojects {
             }
         }
     }
+
 }
