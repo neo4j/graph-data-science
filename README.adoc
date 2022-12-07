@@ -226,6 +226,10 @@ OpenGDS uses the build tool `Gradle`.
 Gradle is shipped with this repository using the Gradle Wrapper.
 This means you can simply run any Gradle task by running `./gradlew TASK` from the repository root.
 
+By default we build against Neo4j version `4.4.x`, which is defined in `public/gradle/dependencies.gradle`.
+Therefore, you either select JDK 11 or if you want to run with JDK 17, you add `-Pneo4jVersion=5.1.0`.
+
+
 Running tests::
 To run all tests you can simply run `./gradlew check`
 
