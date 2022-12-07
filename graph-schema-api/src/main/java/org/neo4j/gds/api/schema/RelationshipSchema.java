@@ -23,7 +23,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
-import javax.management.relation.Relation;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
