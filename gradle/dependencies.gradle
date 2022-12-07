@@ -63,7 +63,7 @@ ext {
         'sb-contrib'           : '7.4.7',
         'scala'                : scalas[neo4j_minor],
         'spotbugsToolVersion'  : '4.7.2',
-        'protobuf'             : '3.21.7',
+        'protobuf'             : '3.21.10',
     ]
     dep = [
         junit5bom:          "org.junit:junit-bom:${ver.junit5bom}",
