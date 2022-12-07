@@ -36,6 +36,14 @@ public interface NodeImportResult {
 
     NodePropertyStore properties();
 
+    static NodeImportResult of(IdMap idmap) {
+        return ImmutableNodeImportResult.of(idmap, NodePropertyStore.empty());
+    }
+
+    static NodeImportResult of(IdMap idmap, NodePropertyStore nodePropertyStore) {
+        return ImmutableNodeImportResult.of(idmap, nodePropertyStore);
+    }
+
     static NodeImportResult of(IdMap idMap, Map<PropertyMapping, NodePropertyValues> properties) {
         NodePropertyStore.Builder builder = NodePropertyStore.builder();
         properties.forEach((mapping, nodeProperties) -> builder.putProperty(

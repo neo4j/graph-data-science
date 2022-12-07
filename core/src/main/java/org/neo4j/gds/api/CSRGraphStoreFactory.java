@@ -50,8 +50,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
             .databaseId(DatabaseId.of(loadingContext.graphDatabaseService()))
             .capabilities(capabilities)
             .schema(computeGraphSchema(nodeImportResult, relationshipImportResult))
-            .nodes(nodeImportResult.idMap())
-            .nodePropertyStore(nodeImportResult.properties())
+            .nodeImportResult(NodeImportResult.of(nodeImportResult.idMap(), nodeImportResult.properties()))
             .relationshipImportResult(relationshipImportResult)
             .concurrency(graphProjectConfig.readConcurrency())
             .build();

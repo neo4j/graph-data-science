@@ -229,8 +229,8 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
     @Override
     public CSRGraphStore build() {
-        var nodes = loadNodes();
-        var relationships = loadRelationships(nodes.idMap());
+        var nodeImportResult = loadNodes();
+        var relationships = loadRelationships(nodeImportResult.idMap());
 
         var relationshipImportResultBuilder = RelationshipImportResult.builder();
 
@@ -273,14 +273,13 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
         var relationshipImportResult = relationshipImportResultBuilder.build();
 
-        var schema = computeGraphSchema(nodes, relationshipImportResult);
+        var schema = computeGraphSchema(nodeImportResult, relationshipImportResult);
 
         return new GraphStoreBuilder()
             .databaseId(databaseId)
             .capabilities(capabilities)
             .schema(schema)
-            .nodes(nodes.idMap())
-            .nodePropertyStore(nodes.properties())
+            .nodeImportResult(nodeImportResult)
             .relationshipImportResult(relationshipImportResult)
             .concurrency(1)
             .build();

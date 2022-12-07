@@ -47,6 +47,7 @@ import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.ImmutableNodeImportResult;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.LazyIdMapBuilder;
 import org.neo4j.gds.core.loading.ReadHelper;
@@ -554,7 +555,9 @@ public final class CypherAggregation {
 
             var maybeNodeProperties = idMapAndProperties.nodeProperties();
 
-            graphStoreBuilder.nodes(nodes);
+            var nodesImportResultBuilder = ImmutableNodeImportResult.builder()
+                .idMap(nodes);
+
 
             var nodePropertySchema = maybeNodeProperties
                 .map(nodeProperties -> nodeSchemaWithProperties(
@@ -576,11 +579,13 @@ public final class CypherAggregation {
 
             maybeNodeProperties.ifPresent(allNodeProperties -> {
                 CSRGraphStoreUtil.extractNodeProperties(
-                    graphStoreBuilder,
+                    nodesImportResultBuilder,
                     nodePropertySchema::get,
                     allNodeProperties
                 );
             });
+
+            graphStoreBuilder.nodeImportResult(nodesImportResultBuilder.build());
 
             // Relationships are added using their intermediate node ids.
             // In order to map to the final internal ids, we need to use

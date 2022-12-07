@@ -109,8 +109,7 @@ public final class CSRGraphStoreUtil {
             // TODO: is it correct that we only use this for generated graphs?
             .capabilities(ImmutableStaticCapabilities.of(false))
             .schema(schema)
-            .nodes(graph.idMap())
-            .nodePropertyStore(nodeProperties)
+            .nodeImportResult(NodeImportResult.of(graph.idMap(), nodeProperties))
             .relationshipImportResult(relationshipImportResult)
             .graphProperties(GraphPropertyStore.empty())
             .concurrency(concurrency)
@@ -187,7 +186,7 @@ public final class CSRGraphStoreUtil {
     }
 
     public static void extractNodeProperties(
-        GraphStoreBuilder graphStoreBuilder,
+        ImmutableNodeImportResult.Builder nodeImportResultBuilder,
         Function<String, PropertySchema> nodeSchema,
         Map<String, NodePropertyValues> nodeProperties
     ) {
@@ -204,7 +203,7 @@ public final class CSRGraphStoreUtil {
                 )
             );
         });
-        graphStoreBuilder.nodePropertyStore(propertyStoreBuilder.build());
+        nodeImportResultBuilder.properties(propertyStoreBuilder.build());
     }
 
     public static RelationshipPropertyStore buildRelationshipPropertyStore(

@@ -22,7 +22,6 @@ package org.neo4j.gds.core.loading;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyProperties;
@@ -107,27 +106,17 @@ public class CSRGraphStore implements GraphStore {
         DatabaseId databaseId,
         Capabilities capabilities,
         GraphSchema schema,
-        IdMap nodes,
-        @Nullable NodePropertyStore nodePropertyStore,
-        Optional<GraphPropertyStore> graphProperties,
-        Optional<NodeImportResult> nodeImportResult,
+        NodeImportResult nodeImportResult,
         RelationshipImportResult relationshipImportResult,
+        Optional<GraphPropertyStore> graphProperties,
         int concurrency
     ) {
-        // TODO: compat code to be removed
-        // The import results take precedence if they are present
-        // If they are not present, we take the information from the old input.
-        // This is just for compat and will be removed.
-        var idMap = nodeImportResult.map(NodeImportResult::idMap).orElse(nodes);
-        var nodeProps = nodeImportResult
-            .map(NodeImportResult::properties)
-            .orElseGet(() -> nodePropertyStore == null ? NodePropertyStore.empty() : nodePropertyStore);
-
-        return new CSRGraphStore(databaseId,
+        return new CSRGraphStore(
+            databaseId,
             capabilities,
             schema,
-            idMap,
-            nodeProps,
+            nodeImportResult.idMap(),
+            nodeImportResult.properties(),
             relationshipImportResult.importResults(),
             graphProperties.orElseGet(GraphPropertyStore::empty),
             concurrency

@@ -28,6 +28,7 @@ import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.core.io.GraphStoreRelationshipVisitor;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
+import org.neo4j.gds.core.loading.NodeImportResult;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -131,7 +132,7 @@ class GraphStoreRelationshipVisitorTest {
         return new GraphStoreBuilder()
             .schema(expectedGraph.schema())
             .capabilities(ImmutableStaticCapabilities.of(true))
-            .nodes(expectedGraph)
+            .nodeImportResult(NodeImportResult.of(expectedGraph))
             .relationshipImportResult(RelationshipImportResult.of(
                 actualRelationships.topologies(),
                 propertyStores,
