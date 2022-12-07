@@ -87,7 +87,11 @@ For more information see xref:management-ops/index.adoc[Graph Management].
 
 The Neo4j Graph Data Science library is available in two editions.
 
-* The open source Community Edition includes all algorithms and features, but is limited to four CPU cores.
+* The open source Community Edition:
+** Includes all algorithms
+** Most of the catalog operations to manage graphs, models and pipelines
+** Limits the concurrency to 4 CPU cores
+** Limits the capacity of the model catalog to 4 models
 * The Neo4j Graph Data Science library Enterprise Edition:
 ** Can run on an unlimited amount of CPU cores.
 ** Supports the role-based access control system (RBAC) from Neo4j Enterprise Edition.
