@@ -58,7 +58,6 @@ import java.util.stream.IntStream;
 public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
 
     public static final int NO_BIN = Integer.MAX_VALUE;
-
     private static final long NO_TERMINAL = -1;
     public static final int BIN_SIZE_THRESHOLD = 1000;
     private final Graph graph;
@@ -70,9 +69,10 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
     private final ExecutorService executorService;
     private long pathIndex;
     private final long numOfTerminals;
-    private  final BitSet unvisitedTerminal;
+    private final BitSet unvisitedTerminal;
     private final BitSet mergedWithSource;
     private final LongAdder metTerminals;
+    private int binSizeThreshold;
 
     SteinerBasedDeltaStepping(
         Graph graph,
@@ -80,6 +80,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
         double delta,
         BitSet isTerminal,
         int concurrency,
+        int binSizeThreshold,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
@@ -94,16 +95,16 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
             graph.nodeCount(),
             concurrency
         );
-        this.mergedWithSource =new BitSet(graph.nodeCount());
-        this.unvisitedTerminal=  new BitSet(isTerminal.size());
+        this.mergedWithSource = new BitSet(graph.nodeCount());
+        this.unvisitedTerminal = new BitSet(isTerminal.size());
         unvisitedTerminal.or(isTerminal);
-        this.pathIndex=0;
-        this.metTerminals=new LongAdder();
-        this.numOfTerminals=isTerminal.cardinality();
-
+        this.pathIndex = 0;
+        this.metTerminals = new LongAdder();
+        this.numOfTerminals = isTerminal.cardinality();
+        this.binSizeThreshold = binSizeThreshold;
     }
 
-    private void mergeNodesOnPathToSource(long nodeId,AtomicLong frontierIndex) {
+    private void mergeNodesOnPathToSource(long nodeId, AtomicLong frontierIndex) {
         long currentId = nodeId;
         //while not meeting merged nodes, add the current path node to the merge set
         //if the parent i merged, then it's path to the source has already been zeroed,
@@ -123,7 +124,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
         }
     }
 
-    private void relaxPhase(List<SteinerBasedDeltaTask> tasks,int currentBin,AtomicLong frontierSize){
+    private void relaxPhase(List<SteinerBasedDeltaTask> tasks, int currentBin, AtomicLong frontierSize) {
         // Phase 1
         for (var task : tasks) {
             task.setPhase(Phase.RELAX);
@@ -133,7 +134,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
         ParallelUtil.run(tasks, executorService);
     }
 
-    private void syncPhase(List<SteinerBasedDeltaTask> tasks,int currentBin, AtomicLong frontierIndex){
+    private void syncPhase(List<SteinerBasedDeltaTask> tasks, int currentBin, AtomicLong frontierIndex) {
         frontierIndex.set(0);
         tasks.forEach(task -> task.setPhase(Phase.SYNC));
 
@@ -149,7 +150,12 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
         return (terminalQueue.isEmpty()) ? NO_TERMINAL : terminalQueue.top();
     }
 
-    private boolean updateSteinerTree(long terminalId,AtomicLong frontierIndex,List<PathResult> paths, ImmutablePathResult.Builder pathResultBuilder) {
+    private boolean updateSteinerTree(
+        long terminalId,
+        AtomicLong frontierIndex,
+        List<PathResult> paths,
+        ImmutablePathResult.Builder pathResultBuilder
+    ) {
         //add the new path to the solution
 
         paths.add(pathResult(
@@ -173,34 +179,87 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
 
     }
 
-    private long tryToUpdateSteinerTree(long oldBin, long currentBin, HugeLongPriorityQueue terminalQueue) {
-        boolean shouldComputeClosestTerminal = false;
-        //delta-Stepping differs by Dijkstra in that it processes the nodes not one-by-one but in batches
-        //whereas in dijkstra once we examine a node, we are certain we have found the shortest path to it,
-        //in delta-stepping this is not the case
-        //for example assume a huge delta  and assume a bin  contains two nodes with distance a (distance=101) and
-        //b  (distance=98) in the same bucket.  Assume furthermore, the edge b->a  with  cost 1 exists.
-        //Then  a is examined, and because of b->a it is re-examined and hten we find a smaller distance from it (99).
-
-        //For the moment, we use a simple criteria to discover if there is a terminal for which with full certainty,
-        //we have found a shortest to it: Whenever we change from one bin to another, we find the terminal of smallest distance
-        //if it's distance is below the currentBin, the path to it is optimal.
-        if (currentBin == NO_BIN || oldBin < currentBin) {
-            shouldComputeClosestTerminal = true;
+    private boolean ensureShortest(
+        double distance,
+        long oldBin,
+        long currentBin,
+        List<SteinerBasedDeltaTask> tasks
+    ) {
+        if (currentBin == NO_BIN) { //there is no more nodes to relax, path to target node is certainly shortest
+            return true;
         }
-        if (shouldComputeClosestTerminal) {
-            long terminalId = nextTerminal(terminalQueue);
-            if (terminalId == NO_TERMINAL) return NO_TERMINAL;
-            if (distances.distance(terminalId) < currentBin * delta) {
-                return terminalId;
+        if (oldBin == currentBin) {
+            //if closest terminal is in another bucket, can't be sure it's the best path
+            if (distance >= (currentBin + 1) * delta) {
+                return false;
             }
+            //find closest node to be processed afterwards
+            double currentMinDistance = tasks
+                .stream()
+                .mapToDouble(SteinerBasedDeltaTask::getSmallestConsideredDistance)
+                .min()
+                .orElseThrow();
+            //return true if the closet terminal is at least as close as the  closest next node
+            return distance <= currentMinDistance;
+        } else {
+            return (distance < currentBin * delta);
         }
-        return -1;
+    }
+
+    //delta-Stepping differs by Dijkstra in that it processes the nodes not one-by-one but in batches
+    //whereas in dijkstra once we examine a node, we are certain we have found the shortest path to it,
+    //in delta-stepping this is not the case
+    //for example assume a huge delta  and assume a bin  contains two nodes with distance a (distance=101) and
+    //b  (distance=98) in the same bucket.  Assume furthermore, the edge b->a  with  cost 1 exists.
+    //Then  a is examined, and because of b->a it is re-examined and then we find a smaller distance from it (99).
+    private long tryToUpdateSteinerTree(
+        long oldBin,
+        long currentBin,
+        HugeLongPriorityQueue terminalQueue,
+        List<SteinerBasedDeltaTask> tasks
+    ) {
+
+        //We Use two simple criteria to discover if there is a terminal for which with full certainty,
+        //we have found a shortest to it:
+
+        // The first criterion checks whenever  when we move to a new bucket in the next iteration.
+        //We first consider the terminal which currently has the shortest distance from the source node.
+        // If it's distance is below the threshold of the currentBin (i.e., the one processed in the
+        //next step), then it means its path from source cannot be improved further
+        // (since all values in the next bucket are further from the source node).
+
+        //The next criterion is relevant when we continue with the same bucket in the next iteration.
+        //Again, we consider the terminal  t which currently has the shortest distance from the source node.
+        //If this terminal is inside the current Bucket,
+        //We consider from all nodes that will be relaxed later on, the one with smallest distance from source
+        //(let's call this node r)
+        //Since any nodes that will be updated in the next iteration,  will end up having a distance >=d(r)
+        //any future nodes examined for the same bucket during the current phase, will have a distance d >= d(r).
+        //Hence, if  d(t) <=d(r) we can be certain neither of those next examined vertices will be able to improve
+        // t's path (or improve the path to any other terminal since they too would end up with a value >=d(r)).
+
+        //Note it is not required that t (the closet terminal) is in the current bucket B.
+        //After a path has been merged, we return back to Bucket 0. If t is in the bucket B  where B>0.
+        //Then at some point, we must pass from a bucket B' <B  to a bucket   B<=B'' hence the first criterion
+        //will be able to locate t via the change of bucket criterion.
+
+        long terminalId = nextTerminal(terminalQueue);
+        if (terminalId == NO_TERMINAL) {
+            return NO_TERMINAL;
+        }
+
+        boolean shouldReturnTerminal = ensureShortest(
+            distances.distance(terminalId),
+            oldBin,
+            currentBin,
+            tasks
+        );
+
+        return (shouldReturnTerminal) ? terminalId : NO_TERMINAL;
     }
 
     @Override
     public DijkstraResult compute() {
-        int iteration = 0;
         int currentBin = 0;
 
         var pathResultBuilder = ImmutablePathResult.builder()
@@ -228,7 +287,8 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
                 mergedWithSource,
                 terminalQueue,
                 terminalQueueLock,
-                unvisitedTerminal
+                unvisitedTerminal,
+                binSizeThreshold
             ))
             .collect(Collectors.toList());
 
@@ -241,18 +301,25 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
             // Find smallest non-empty bin across all tasks
             currentBin = tasks.stream().mapToInt(SteinerBasedDeltaTask::minNonEmptyBin).min().orElseThrow();
 
-            long terminalId = tryToUpdateSteinerTree(oldCurrentBin, currentBin, terminalQueue);
+            long terminalId = tryToUpdateSteinerTree(oldCurrentBin, currentBin, terminalQueue, tasks);
 
-            if (terminalId != -1) { //if we are certain that we have found a shortest path to one of the remaining terminals
+            if (terminalId != NO_TERMINAL) { //if we are certain that we have found a shortest path to one of the remaining terminals
                 //we update the solution and merge its path to the root
                 terminalQueue.pop();
                 shouldBreak = updateSteinerTree(terminalId, frontierIndex, paths, pathResultBuilder);
                 currentBin = 0;
-            } else { //otherwise proceed as normal, sync the contents of the  bucket for each thread to the global queue.
+                //Note  if this scenario occurs:
+                // The content in the local buckets which normally would have been synced,  remains stored inside buckets
+                //and can be processed next time the currentBin is set as the smallest bin.
+                //There might be some invalid situations (for example node a is located in multiple local buckets of different threads)
+                //But such situations are also possible for the original delta-stepping algorithm,
+                //although admittedly, this might be more frequent due to the "revert path to zero" steiner heuristic!
+                // I doubt this is a very big problem though
+            } else {
+                //otherwise proceed as normal, sync the contents of the  bucket for each thread to the global queue.
                 // Phase 2
                 syncPhase(tasks, currentBin, frontierIndex);
             }
-            iteration += 1;
             frontierSize.set(frontierIndex.longValue());
             frontierIndex.set(0);
         }

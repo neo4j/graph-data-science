@@ -32,7 +32,6 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static org.neo4j.gds.steiner.SteinerBasedDeltaStepping.BIN_SIZE_THRESHOLD;
 import static org.neo4j.gds.steiner.SteinerBasedDeltaStepping.NO_BIN;
 
 class SteinerBasedDeltaTask implements Runnable {
@@ -49,6 +48,8 @@ class SteinerBasedDeltaTask implements Runnable {
     private final BitSet uninvisitedTerminal;
     private final HugeLongPriorityQueue terminalQueue;
     private final ReentrantLock terminalQueueLock;
+    private double smallestConsideredDistance;
+    private int binSizeThreshold;
 
     SteinerBasedDeltaTask(
         Graph graph,
@@ -59,7 +60,8 @@ class SteinerBasedDeltaTask implements Runnable {
         BitSet mergedToSource,
         HugeLongPriorityQueue terminalQueue,
         ReentrantLock terminalQueueLock,
-        BitSet uninvisitedTerminal
+        BitSet uninvisitedTerminal,
+        int binSizeThreshold
     ) {
 
         this.graph = graph;
@@ -72,17 +74,21 @@ class SteinerBasedDeltaTask implements Runnable {
         this.terminalQueue = terminalQueue;
         this.terminalQueueLock = terminalQueueLock;
         this.uninvisitedTerminal = uninvisitedTerminal;
+        this.binSizeThreshold = binSizeThreshold;
     }
 
     @Override
     public void run() {
         if (phase == SteinerBasedDeltaStepping.Phase.RELAX) {
+            smallestConsideredDistance = Double.MAX_VALUE;
             relaxGlobalBin();
             relaxLocalBin();
         } else if (phase == SteinerBasedDeltaStepping.Phase.SYNC) {
             updateFrontier();
         }
     }
+
+    double getSmallestConsideredDistance() {return smallestConsideredDistance;}
 
     void setPhase(SteinerBasedDeltaStepping.Phase phase) {
         this.phase = phase;
@@ -123,7 +129,7 @@ class SteinerBasedDeltaTask implements Runnable {
         while (binIndex < localBins.length
                && localBins[binIndex] != null
                && !localBins[binIndex].isEmpty()
-               && localBins[binIndex].size() < BIN_SIZE_THRESHOLD) {
+               && localBins[binIndex].size() < binSizeThreshold) {
             var binCopy = localBins[binIndex].clone();
             localBins[binIndex].elementsCount = 0;
             binCopy.forEach((LongProcedure) this::relaxNode);
@@ -132,7 +138,7 @@ class SteinerBasedDeltaTask implements Runnable {
     private void relaxNode(long nodeId) {
         graph.forEachRelationship(nodeId, 1.0, (sourceNodeId, targetNodeId, weight) -> {
             if (!mergedToSource.get(targetNodeId)) { //ignore merged vertices
-                tryToUpdate(sourceNodeId, targetNodeId,weight);
+                tryToUpdate(sourceNodeId, targetNodeId, weight);
             }
             return true;
         });
@@ -159,6 +165,8 @@ class SteinerBasedDeltaTask implements Runnable {
             // CAX failed, retry
             oldDist = witness;
         }
+        smallestConsideredDistance = Math.min(newDist, smallestConsideredDistance);
+
         if (uninvisitedTerminal.get(targetNodeId)) {
 
             terminalQueueLock.lock();
