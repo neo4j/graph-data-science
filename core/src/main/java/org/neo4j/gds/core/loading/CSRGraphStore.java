@@ -53,7 +53,7 @@ import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.huge.CSRCompositeRelationshipIterator;
-import org.neo4j.gds.core.huge.HugeGraph;
+import org.neo4j.gds.core.huge.HugeGraphBuilder;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.utils.TimeUtil;
@@ -664,12 +664,12 @@ public class CSRGraphStore implements GraphStore {
 
         var graphSchema = GraphSchema.of(nodeSchema, RelationshipSchema.empty(), schema.graphProperties());
 
-        var initialGraph = HugeGraph.create(nodes,
-            graphSchema,
-            filteredNodeProperties,
-            Relationships.Topology.EMPTY,
-            Optional.empty()
-        );
+        var initialGraph = new HugeGraphBuilder()
+            .nodes(nodes)
+            .schema(graphSchema)
+            .nodeProperties(filteredNodeProperties)
+            .topology(Relationships.Topology.EMPTY)
+            .build();
 
         return filteredNodes.isPresent() ? new NodeFilteredGraph(initialGraph, filteredNodes.get()) : initialGraph;
     }
@@ -701,12 +701,22 @@ public class CSRGraphStore implements GraphStore {
             .map(props -> props.get(propertyKey).values())
             .orElseThrow(() -> new IllegalArgumentException("Relationship property key not present in graph: " + propertyKey)));
 
-        var initialGraph = HugeGraph.create(nodes,
-            graphSchema,
-            filteredNodeProperties,
-            relationship.topology(),
-            properties
-        );
+        var inverseProperties = relationship
+            .inverseProperties()
+            .map(inversePropertyStore -> maybeRelationshipProperty
+                .map(propertyKey -> inversePropertyStore.get(propertyKey).values())
+                .orElseThrow(() -> new IllegalStateException(
+                    "Relationship type is inverse indexed, but is missing property. This is a bug.")));
+
+        var initialGraph = new HugeGraphBuilder()
+            .nodes(nodes)
+            .schema(graphSchema)
+            .nodeProperties(filteredNodeProperties)
+            .topology(relationship.topology())
+            .relationshipProperties(properties)
+            .inverseTopology(relationship.inverseTopology())
+            .inverseRelationshipProperties(inverseProperties)
+            .build();
 
         return filteredNodes.isPresent() ? new NodeFilteredGraph(initialGraph, filteredNodes.get()) : initialGraph;
     }

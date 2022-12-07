@@ -44,6 +44,7 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.HugeGraph;
+import org.neo4j.gds.core.huge.HugeGraphBuilder;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImmutableImportMetaData;
 import org.neo4j.gds.core.loading.ImportSizing;
@@ -325,12 +326,12 @@ public final class GraphFactory {
         Map<String, NodePropertyValues> nodeProperties,
         Relationships relationships
     ) {
-        return HugeGraph.create(
-            idMap,
-            graphSchema,
-            nodeProperties,
-            relationships.topology(),
-            relationships.properties()
-        );
+        return new HugeGraphBuilder()
+            .nodes(idMap)
+            .schema(graphSchema)
+            .nodeProperties(nodeProperties)
+            .topology(relationships.topology())
+            .relationshipProperties(relationships.properties())
+            .build();
     }
 }

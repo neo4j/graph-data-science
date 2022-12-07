@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.huge;
 
+import org.immutables.builder.Builder;
+import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
@@ -87,6 +89,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding#varints">more abount vlong</a>
  * @see <a href="https://shipilev.net/jvm-anatomy-park/4-tlab-allocation/">more abount TLAB allocation</a>
  */
+@Value.Style(typeBuilder = "HugeGraphBuilder")
 public class HugeGraph implements CSRGraph {
 
     static final double NO_PROPERTY_VALUE = Double.NaN;
@@ -100,25 +103,32 @@ public class HugeGraph implements CSRGraph {
     protected final long relationshipCount;
 
     protected AdjacencyList adjacency;
+    protected @Nullable AdjacencyList inverseAdjacency;
 
     private final double defaultPropertyValue;
     protected @Nullable AdjacencyProperties properties;
+    protected @Nullable AdjacencyProperties inverseProperties;
 
     private AdjacencyCursor adjacencyCursorCache;
+    private @Nullable AdjacencyCursor inverseAdjacencyCursorCache;
 
-    private PropertyCursor propertyCursorCache;
+    private @Nullable PropertyCursor propertyCursorCache;
+    private @Nullable PropertyCursor inversePropertyCursorCache;
 
     private boolean canRelease = true;
 
     protected final boolean hasRelationshipProperty;
     protected final boolean isMultiGraph;
 
-    public static HugeGraph create(
+    @Builder.Factory
+    static HugeGraph create(
         IdMap nodes,
         GraphSchema schema,
         Map<String, NodePropertyValues> nodeProperties,
         Relationships.Topology topology,
-        Optional<Relationships.Properties> maybeRelationshipProperty
+        Optional<Relationships.Properties> relationshipProperties,
+        Optional<Relationships.Topology> inverseTopology,
+        Optional<Relationships.Properties> inverseRelationshipProperties
     ) {
         return new HugeGraph(
             nodes,
@@ -126,9 +136,11 @@ public class HugeGraph implements CSRGraph {
             nodeProperties,
             topology.elementCount(),
             topology.adjacencyList(),
-            maybeRelationshipProperty.isPresent(),
-            maybeRelationshipProperty.map(Relationships.Properties::defaultPropertyValue).orElse(Double.NaN),
-            maybeRelationshipProperty.map(Relationships.Properties::propertiesList).orElse(null),
+            inverseTopology.map(Relationships.Topology::adjacencyList).orElse(null),
+            relationshipProperties.isPresent(),
+            relationshipProperties.map(Relationships.Properties::defaultPropertyValue).orElse(Double.NaN),
+            relationshipProperties.map(Relationships.Properties::propertiesList).orElse(null),
+            inverseRelationshipProperties.map(Relationships.Properties::propertiesList).orElse(null),
             topology.isMultiGraph()
         );
     }
@@ -139,9 +151,11 @@ public class HugeGraph implements CSRGraph {
         Map<String, NodePropertyValues> nodeProperties,
         long relationshipCount,
         @NotNull AdjacencyList adjacency,
+        @Nullable AdjacencyList inverseAdjacency,
         boolean hasRelationshipProperty,
         double defaultRelationshipPropertyValue,
         @Nullable AdjacencyProperties relationshipProperty,
+        @Nullable AdjacencyProperties inverseRelationshipProperty,
         boolean isMultiGraph
     ) {
         this.idMap = idMap;
@@ -150,11 +164,16 @@ public class HugeGraph implements CSRGraph {
         this.nodeProperties = nodeProperties;
         this.relationshipCount = relationshipCount;
         this.adjacency = adjacency;
+        this.inverseAdjacency = inverseAdjacency;
         this.defaultPropertyValue = defaultRelationshipPropertyValue;
         this.properties = relationshipProperty;
+        this.inverseProperties = inverseRelationshipProperty;
         this.hasRelationshipProperty = hasRelationshipProperty;
+
         this.adjacencyCursorCache = adjacency.rawAdjacencyCursor();
+        this.inverseAdjacencyCursorCache = inverseAdjacency != null ? inverseAdjacency.rawAdjacencyCursor() : null;
         this.propertyCursorCache = relationshipProperty != null ? relationshipProperty.rawPropertyCursor() : null;
+        this.inversePropertyCursorCache = inverseRelationshipProperty != null ? inverseRelationshipProperty.rawPropertyCursor() : null;
     }
 
     @Override
@@ -365,9 +384,11 @@ public class HugeGraph implements CSRGraph {
             nodeProperties,
             relationshipCount,
             adjacency,
+            inverseAdjacency,
             hasRelationshipProperty,
             defaultPropertyValue,
             properties,
+            inverseProperties,
             isMultiGraph
         );
     }
