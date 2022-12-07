@@ -41,7 +41,7 @@ Currently, we only support xref:machine-learning/training-methods/logistic-regre
 ----
 CALL gds.alpha.model.store(
     modelName: String,
-    failIfUnsupportedType: Boolean
+    failIfUnsupported: Boolean
 )
 YIELD
     modelName: String,
@@ -53,7 +53,7 @@ YIELD
 |===
 | Name                      | Type    | Default | Optional | Description
 | modelName                 | String  | n/a     | no       | The name of a model.
-| failIfUnsupportedType     | Boolean | true    | yes      | By default, the library will raise an error when trying to store a non-supported model. When set to `false`, the procedure returns an empty result.
+| failIfUnsupported         | Boolean | true    | yes      | By default, the library will raise an error when trying to store a non-supported model. When set to `false`, the procedure returns an empty result.
 |===
 
 .Results
