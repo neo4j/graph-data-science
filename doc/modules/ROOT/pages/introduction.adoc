@@ -91,10 +91,17 @@ The Neo4j Graph Data Science library is available in two editions.
 * The Neo4j Graph Data Science library Enterprise Edition:
 ** Can run on an unlimited amount of CPU cores.
 ** Supports the role-based access control system (RBAC) from Neo4j Enterprise Edition.
+** xref::production-deployment/causal-cluster.adoc[Support running GDS as part of Neo4j Causal Cluster deployment.]
+** xref::common-usage/monitoring-system.adoc[Monitor a system's capacity and analytics workload]
+** Supports various additional graph catalog features
+*** xref::management-ops/backup-restore.adoc[Backup and restore graphs]
+*** xref::management-ops/create-cypher-db.adoc[Run cypher queries against a projected graph]
+*** xref:installation/installation-apache-arrow.adoc[Import and export data via Apache Arrow]
 ** Supports various additional model catalog features
 *** Storing unlimited amounts of models in the model catalog
 *** xref:model-catalog/publish.adoc[Publishing a stored model]
 *** xref:model-catalog/store.adoc#model-catalog-store-ops[Persisting a stored model to disk]
 ** Supports an xref:production-deployment/feature-toggles.adoc#bit-id-map-feature-toggle[optimized graph implementation]
+** xref:management-ops/defaults-and-limits.adoc[Configure defaults and limits]
 
 For more information see xref:installation/System-requirements.adoc#system-requirements-cpu[System Requirements - CPU].
