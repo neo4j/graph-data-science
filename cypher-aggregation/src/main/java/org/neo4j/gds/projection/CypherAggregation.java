@@ -661,6 +661,7 @@ public final class CypherAggregation {
                     SingleTypeRelationshipImportResult.builder()
                         .topology(topology)
                         .properties(propertyStore)
+                        .direction(Direction.DIRECTED)
                         .build()
                 );
             });

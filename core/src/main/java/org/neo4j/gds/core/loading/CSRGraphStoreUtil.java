@@ -98,6 +98,7 @@ public final class CSRGraphStoreUtil {
             SingleTypeRelationshipImportResult.builder()
                 .topology(relationships.topology())
                 .properties(relationshipProperties)
+                .direction(direction)
                 .build()
         ).build();
 
