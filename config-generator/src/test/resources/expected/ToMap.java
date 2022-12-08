@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Generated("org.neo4j.gds.proc.ConfigurationProcessor")
@@ -41,7 +42,7 @@ public final class ToMapConfig implements ToMap {
 
     private Optional<Double> maybeBaz;
 
-    public ToMapConfig(int foo, @NotNull CypherMapWrapper config) {
+    public ToMapConfig(int foo, @NotNull CypherMapAccess config) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         try {
             this.foo = foo;
@@ -59,12 +60,12 @@ public final class ToMapConfig implements ToMap {
             errors.add(e);
         }
         try {
-            this.maybeBar = CypherMapWrapper.failOnNull("maybeBar", config.getOptional("maybeBar", Long.class));
+            this.maybeBar = CypherMapAccess.failOnNull("maybeBar", config.getOptional("maybeBar", Long.class));
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
         try {
-            this.maybeBaz = CypherMapWrapper.failOnNull("maybeBaz", config.getOptional("maybeBaz", Double.class));
+            this.maybeBaz = CypherMapAccess.failOnNull("maybeBaz", config.getOptional("maybeBaz", Double.class));
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }

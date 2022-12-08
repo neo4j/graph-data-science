@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Generated("org.neo4j.gds.proc.ConfigurationProcessor")
@@ -37,7 +38,7 @@ public final class CollectingKeysConfig implements CollectingKeys {
 
     private double baz;
 
-    public CollectingKeysConfig(int foo, @NotNull CypherMapWrapper config) {
+    public CollectingKeysConfig(int foo, @NotNull CypherMapAccess config) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         try {
             this.foo = foo;

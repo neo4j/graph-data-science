@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Generated("org.neo4j.gds.proc.ConfigurationProcessor")
@@ -36,7 +37,7 @@ public final class NullableFieldsConfig implements NullableFields {
 
     private @Nullable String conversionCanReturnNull;
 
-    public NullableFieldsConfig(@NotNull CypherMapWrapper config) {
+    public NullableFieldsConfig(@NotNull CypherMapAccess config) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         try {
             this.nullableRequiredField = config.requireString("nullableRequiredField");

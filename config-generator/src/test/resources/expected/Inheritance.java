@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
 
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Generated("org.neo4j.gds.proc.ConfigurationProcessor")
@@ -42,10 +43,10 @@ public final class MyConfigImpl implements Inheritance.MyConfig {
 
     private short inheritedDefaultValue;
 
-    public MyConfigImpl(@NotNull CypherMapWrapper config) {
+    public MyConfigImpl(@NotNull CypherMapAccess config) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         try {
-            this.baseValue = CypherMapWrapper.failOnNull("baseValue", config.requireString("baseValue"));
+            this.baseValue = CypherMapAccess.failOnNull("baseValue", config.requireString("baseValue"));
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }

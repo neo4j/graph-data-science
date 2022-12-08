@@ -25,13 +25,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Generated("org.neo4j.gds.proc.ConfigurationProcessor")
 public final class MyConfigImpl implements Ignores.MyConfig {
     private long notIgnored;
 
-    public MyConfig(@NotNull CypherMapWrapper config) {
+    public MyConfig(@NotNull CypherMapAccess config) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         try {
             this.notIgnored = config.requireLong("notIgnored");

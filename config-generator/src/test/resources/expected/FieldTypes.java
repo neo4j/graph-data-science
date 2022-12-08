@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Generated("org.neo4j.gds.proc.ConfigurationProcessor")
@@ -55,7 +56,7 @@ public final class FieldTypesConfig implements FieldTypes {
 
     private Optional<String> anOptional;
 
-    public FieldTypesConfig(@NotNull CypherMapWrapper config) {
+    public FieldTypesConfig(@NotNull CypherMapAccess config) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         try {
             this.aBoolean = config.requireBool("aBoolean");
@@ -93,27 +94,27 @@ public final class FieldTypesConfig implements FieldTypes {
             errors.add(e);
         }
         try {
-            this.aNumber = CypherMapWrapper.failOnNull("aNumber", config.requireNumber("aNumber"));
+            this.aNumber = CypherMapAccess.failOnNull("aNumber", config.requireNumber("aNumber"));
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
         try {
-            this.aString = CypherMapWrapper.failOnNull("aString", config.requireString("aString"));
+            this.aString = CypherMapAccess.failOnNull("aString", config.requireString("aString"));
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
         try {
-            this.aMap = CypherMapWrapper.failOnNull("aMap", config.requireChecked("aMap", Map.class));
+            this.aMap = CypherMapAccess.failOnNull("aMap", config.requireChecked("aMap", Map.class));
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
         try {
-            this.aList = CypherMapWrapper.failOnNull("aList", config.requireChecked("aList", List.class));
+            this.aList = CypherMapAccess.failOnNull("aList", config.requireChecked("aList", List.class));
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
         try {
-            this.anOptional = CypherMapWrapper.failOnNull("anOptional", config.getOptional("anOptional", String.class));
+            this.anOptional = CypherMapAccess.failOnNull("anOptional", config.getOptional("anOptional", String.class));
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
