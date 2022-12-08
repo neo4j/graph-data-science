@@ -43,6 +43,7 @@ public class RandomGraphGeneratorBuilder {
     private Direction direction = Direction.DIRECTED;
     private RandomGraphGeneratorConfig.AllowSelfLoops allowSelfLoops = RandomGraphGeneratorConfig.AllowSelfLoops.NO;
     private RelationshipType relationshipType = RelationshipType.of("REL");
+    private boolean forceDag = false;
 
     public RandomGraphGeneratorBuilder nodeCount(long nodeCount) {
         this.nodeCount = nodeCount;
@@ -106,6 +107,11 @@ public class RandomGraphGeneratorBuilder {
         return this;
     }
 
+    public RandomGraphGeneratorBuilder forceDag(boolean forceDag) {
+        this.forceDag = forceDag;
+        return this;
+    }
+
     public RandomGraphGenerator build() {
         validate();
         return new RandomGraphGenerator(
@@ -119,7 +125,8 @@ public class RandomGraphGeneratorBuilder {
             maybeRelationshipPropertyProducer,
             aggregation,
             direction,
-            allowSelfLoops
+            allowSelfLoops,
+            forceDag
         );
     }
 
@@ -132,6 +139,12 @@ public class RandomGraphGeneratorBuilder {
         }
         if (relationshipDistribution == null) {
             throw new IllegalArgumentException("Must provide a RelationshipDistribution");
+        }
+        if (allowSelfLoops.value() && forceDag) {
+            throw new IllegalArgumentException("Cannot create DAG with self loops");
+        }
+        if (relationshipDistribution == RelationshipDistribution.POWER_LAW && forceDag) {
+            throw new IllegalArgumentException("Forcing DAG with power law distributions is not supported in current implementation (this limitation might be removed in the future)");
         }
     }
 }

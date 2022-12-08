@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-import org.neo4j.gds.ml.util.ShuffleUtil;
+import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
 
 import java.util.List;
 import java.util.Optional;

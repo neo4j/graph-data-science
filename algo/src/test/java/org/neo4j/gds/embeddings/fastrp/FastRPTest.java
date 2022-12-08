@@ -48,7 +48,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.features.FeatureExtractor;
-import org.neo4j.gds.ml.util.ShuffleUtil;
+import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
 
 import java.util.List;
 import java.util.Optional;

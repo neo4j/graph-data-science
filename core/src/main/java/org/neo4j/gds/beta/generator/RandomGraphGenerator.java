@@ -40,6 +40,7 @@ import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,6 +51,7 @@ import java.util.Optional;
 import java.util.PrimitiveIterator;
 import java.util.Random;
 import java.util.Set;
+import java.util.SplittableRandom;
 import java.util.function.Function;
 import java.util.function.LongUnaryOperator;
 
@@ -70,6 +72,8 @@ public final class RandomGraphGenerator {
     private final Optional<NodeLabelProducer> maybeNodeLabelProducer;
     private final Optional<PropertyProducer<double[]>> maybeRelationshipPropertyProducer;
     private final Map<NodeLabel, Set<PropertyProducer<?>>> nodePropertyProducers;
+    private final boolean forceDag;
+    private final HugeLongArray randomDagMapping;
 
     RandomGraphGenerator(
         long nodeCount,
@@ -82,7 +86,8 @@ public final class RandomGraphGenerator {
         Optional<PropertyProducer<double[]>> maybeRelationshipPropertyProducer,
         Aggregation aggregation,
         Direction direction,
-        AllowSelfLoops allowSelfLoops
+        AllowSelfLoops allowSelfLoops,
+        boolean forceDag
     ) {
         this.relationshipType = relationshipType;
         this.relationshipDistribution = relationshipDistribution;
@@ -94,12 +99,11 @@ public final class RandomGraphGenerator {
         this.aggregation = aggregation;
         this.direction = direction;
         this.allowSelfLoops = allowSelfLoops;
+        this.forceDag = forceDag;
         this.random = new Random();
-        if (seed != null) {
-            this.random.setSeed(seed);
-        } else {
-            this.random.setSeed(1);
-        }
+        long actualSeed = seed != null ? seed : 1;
+        this.random.setSeed(actualSeed);
+        this.randomDagMapping = generateRandomMapping(actualSeed);
     }
 
     public static RandomGraphGeneratorBuilder builder() {
@@ -193,16 +197,30 @@ public final class RandomGraphGenerator {
                 }
                 assert (targetId < nodeCount);
                 relationshipPropertyProducer.setProperty(nodeId, property, 0, random);
+                if (forceDag) {
+                    addDagRelationship(relationshipsImporter, nodeId, targetId, property);
+                }
                 // For POWER_LAW, we generate a normal distributed out-degree value
                 // and connect to nodes where the target is power-law-distributed.
                 // In order to have the out degree follow a power-law distribution,
                 // we have to swap the relationship.
-                if (relationshipDistribution == RelationshipDistribution.POWER_LAW) {
+                else if (relationshipDistribution == RelationshipDistribution.POWER_LAW) {
                     relationshipsImporter.addFromInternal(targetId, nodeId, property[0]);
                 } else {
                     relationshipsImporter.addFromInternal(nodeId, targetId, property[0]);
                 }
             }
+        }
+    }
+
+    private void addDagRelationship(RelationshipsBuilder relationshipsImporter,
+                                    long nodeId,
+                                    long targetId,
+                                    double[] property) {
+        if (targetId > nodeId) {
+            relationshipsImporter.addFromInternal(randomDagMapping.get(nodeId), randomDagMapping.get(targetId), property[0]);
+        } else {
+            relationshipsImporter.addFromInternal(randomDagMapping.get(targetId), randomDagMapping.get(nodeId), property[0]);
         }
     }
 
@@ -365,5 +383,15 @@ public final class RandomGraphGenerator {
         return Math.toIntExact(targetNode - cursor.base);
     }
 
+    private @Nullable HugeLongArray generateRandomMapping(long seed) {
+        if (forceDag) {
+            var randomDagMapping = HugeLongArray.newArray(nodeCount);
+            randomDagMapping.setAll(i -> i);
+            ShuffleUtil.shuffleArray(randomDagMapping, new SplittableRandom(seed));
+            return randomDagMapping;
+        } else {
+            return null;
+        }
+    }
 
 }

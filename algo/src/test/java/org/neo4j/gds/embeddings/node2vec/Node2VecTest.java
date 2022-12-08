@@ -56,7 +56,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig.EmbeddingInitializer;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
-import org.neo4j.gds.ml.util.ShuffleUtil;
+import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
 
 import java.util.List;
 import java.util.Optional;

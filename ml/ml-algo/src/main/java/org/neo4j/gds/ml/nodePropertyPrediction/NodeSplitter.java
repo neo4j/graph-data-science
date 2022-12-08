@@ -26,12 +26,12 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
-import org.neo4j.gds.ml.util.ShuffleUtil;
+import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
 
 import java.util.Optional;
 import java.util.function.LongUnaryOperator;
 
-import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
+import static org.neo4j.gds.core.utils.shuffle.ShuffleUtil.createRandomDataGenerator;
 import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallNodeSets;
 
 public final class NodeSplitter {
