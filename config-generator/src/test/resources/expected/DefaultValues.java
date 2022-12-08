@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Generated("org.neo4j.gds.proc.ConfigurationProcessor")
@@ -33,7 +34,7 @@ public final class DefaultValuesConfig implements DefaultValues {
 
     private String defaultString;
 
-    public DefaultValuesConfig(@NotNull CypherMapWrapper config) {
+    public DefaultValuesConfig(@NotNull CypherMapAccess config) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         try {
             this.defaultInt = config.getInt("defaultInt", DefaultValues.super.defaultInt());
@@ -41,7 +42,7 @@ public final class DefaultValuesConfig implements DefaultValues {
             errors.add(e);
         }
         try {
-            this.defaultString = CypherMapWrapper.failOnNull(
+            this.defaultString = CypherMapAccess.failOnNull(
                 "defaultString",
                 config.getString("defaultString", DefaultValues.super.defaultString())
             );

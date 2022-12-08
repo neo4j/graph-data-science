@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Generated("org.neo4j.gds.proc.ConfigurationProcessor")
@@ -35,7 +36,7 @@ public final class NamingConflictConfig implements NamingConflict {
 
     private int config_;
 
-    public NamingConflictConfig(int config_, @NotNull CypherMapWrapper config__) {
+    public NamingConflictConfig(int config_, @NotNull CypherMapAccess config__) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         try {
             this.config = config__.requireInt("config");

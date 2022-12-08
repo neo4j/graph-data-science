@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Generated("org.neo4j.gds.proc.ConfigurationProcessor")
@@ -33,7 +34,7 @@ public final class KeyRenamesConfig implements KeyRenames {
 
     private int whitespaceWillBeTrimmed;
 
-    public KeyRenamesConfig(@NotNull CypherMapWrapper config) {
+    public KeyRenamesConfig(@NotNull CypherMapAccess config) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         try {
             this.lookupUnderAnotherKey = config.requireInt("key could also be an invalid identifier");

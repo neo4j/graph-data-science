@@ -20,14 +20,14 @@
 package org.neo4j.gds.pipeline.catalog;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.CypherMapAccess;
 
 abstract class PipelineCatalogProc extends BaseProc {
 
     static final String NO_VALUE = "__NO_VALUE";
 
     void validatePipelineName(String pipelineName) {
-        CypherMapWrapper.failOnBlank("pipelineName", pipelineName);
+        CypherMapAccess.failOnBlank("pipelineName", pipelineName);
     }
 
 }

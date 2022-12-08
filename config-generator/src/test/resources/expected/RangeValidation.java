@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Generated("org.neo4j.gds.proc.ConfigurationProcessor")
@@ -41,11 +42,11 @@ public final class RangeValidationConfig implements RangeValidation {
 
     private List<Double> listDoubleWithinRange;
 
-    public RangeValidationConfig(@NotNull CypherMapWrapper config) {
+    public RangeValidationConfig(@NotNull CypherMapAccess config) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         try {
             this.integerWithinRange = config.requireInt("integerWithinRange")
-            CypherMapWrapper.validateIntegerRange(
+            CypherMapAccess.validateIntegerRange(
                 "integerWithinRange",
                 integerWithinRange,
                 21,
@@ -58,7 +59,7 @@ public final class RangeValidationConfig implements RangeValidation {
         }
         try {
             this.longWithinRange = config.requireLong("longWithinRange")
-            CypherMapWrapper.validateLongRange(
+            CypherMapAccess.validateLongRange(
                 "longWithinRange",
                 longWithinRange,
                 21L,
@@ -70,7 +71,7 @@ public final class RangeValidationConfig implements RangeValidation {
         }
         try {
             this.doubleWithinRange = config.requireDouble("doubleWithinRange");
-            CypherMapWrapper.validateDoubleRange(
+            CypherMapAccess.validateDoubleRange(
                 "doubleWithinRange",
                 doubleWithinRange,
                 21.0,
@@ -82,12 +83,12 @@ public final class RangeValidationConfig implements RangeValidation {
             errors.add(e);
         }
         try {
-            this.maybeDoubleWithinRange = CypherMapWrapper.failOnNull(
+            this.maybeDoubleWithinRange = CypherMapAccess.failOnNull(
                 "maybeDoubleWithinRange",
                 config.getOptional("maybeDoubleWithinRange", Double.class)
             );
             maybeDoubleWithinRange.ifPresent(maybeDoubleWithinRange ->
-                CypherMapWrapper.validateDoubleRange(
+                CypherMapAccess.validateDoubleRange(
                     "maybeDoubleWithinRange",
                     maybeDoubleWithinRange,
                     21.0,
@@ -100,11 +101,11 @@ public final class RangeValidationConfig implements RangeValidation {
             errors.add(e);
         }
         try {
-            this.listDoubleWithinRange = CypherMapWrapper.failOnNull(
+            this.listDoubleWithinRange = CypherMapAccess.failOnNull(
                 "listDoubleWithinRange",
                 config.requireChecked("listDoubleWithinRange", List.class)
             );
-            this.listDoubleWithinRange.forEach(listDoubleWithinRange -> CypherMapWrapper.validateDoubleRange(
+            this.listDoubleWithinRange.forEach(listDoubleWithinRange -> CypherMapAccess.validateDoubleRange(
                 "listDoubleWithinRange",
                 listDoubleWithinRange,
                 21.0,

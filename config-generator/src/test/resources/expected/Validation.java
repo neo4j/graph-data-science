@@ -25,13 +25,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Generated("org.neo4j.gds.proc.ConfigurationProcessor")
 public final class ValidationConfig implements Validation {
     private int foo;
 
-    private ValidationConfig(@NotNull CypherMapWrapper config) {
+    private ValidationConfig(@NotNull CypherMapAccess config) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         try {
             this.foo = config.requireInt("foo");
@@ -62,7 +63,7 @@ public final class ValidationConfig implements Validation {
         }
     }
 
-    public static Validation of(@NotNull CypherMapWrapper config) {
+    public static Validation of(@NotNull CypherMapAccess config) {
         Validation instance = new ValidationConfig(config);
         instance = instance.normalize();
         return instance;

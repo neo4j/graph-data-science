@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Generated("org.neo4j.gds.proc.ConfigurationProcessor")
@@ -42,11 +43,11 @@ public final class NullableParametersConfig implements NullableParameters {
         @NotNull String referenceTypesDefaultToNotNull,
         @NotNull String referenceTypesCanBeMarkedAsNotNull,
         @Nullable String referenceTypesCanBeMarkedAsNullable,
-        @NotNull CypherMapWrapper config
+        @NotNull CypherMapAccess config
     ) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         try {
-            this.referenceTypesDefaultToNotNull = CypherMapWrapper.failOnNull(
+            this.referenceTypesDefaultToNotNull = CypherMapAccess.failOnNull(
                 "referenceTypesDefaultToNotNull",
                 referenceTypesDefaultToNotNull
             );
@@ -54,7 +55,7 @@ public final class NullableParametersConfig implements NullableParameters {
             errors.add(e);
         }
         try {
-            this.referenceTypesCanBeMarkedAsNotNull = CypherMapWrapper.failOnNull(
+            this.referenceTypesCanBeMarkedAsNotNull = CypherMapAccess.failOnNull(
                 "referenceTypesCanBeMarkedAsNotNull",
                 referenceTypesCanBeMarkedAsNotNull
             );
