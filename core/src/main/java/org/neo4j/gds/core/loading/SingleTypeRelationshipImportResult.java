@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
@@ -29,13 +30,31 @@ import java.util.Optional;
 @ValueClass
 public interface SingleTypeRelationshipImportResult {
 
+    // TODO: remove
     Direction direction();
 
-    Relationships.Topology forwardTopology();
+    // TODO: add RelationshipSchema
 
-    Optional<RelationshipPropertyStore> forwardProperties();
+    Relationships.Topology topology();
+
+    Optional<RelationshipPropertyStore> properties();
 
     Optional<Relationships.Topology> inverseTopology();
 
     Optional<RelationshipPropertyStore> inverseProperties();
+
+    @Value.Check
+    default SingleTypeRelationshipImportResult normalize() {
+        if (properties().map(RelationshipPropertyStore::isEmpty).orElse(false)) {
+            return builder().from(this).properties(Optional.empty()).build();
+        }
+        if (inverseProperties().map(RelationshipPropertyStore::isEmpty).orElse(false)) {
+            return builder().from(this).inverseProperties(Optional.empty()).build();
+        }
+        return this;
+    }
+
+    static ImmutableSingleTypeRelationshipImportResult.Builder builder() {
+        return ImmutableSingleTypeRelationshipImportResult.builder();
+    }
 }

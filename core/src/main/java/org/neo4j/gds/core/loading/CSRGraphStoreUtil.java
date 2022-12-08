@@ -45,13 +45,11 @@ import org.neo4j.gds.core.loading.construction.RelationshipsAndDirection;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static java.util.Collections.singletonMap;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class CSRGraphStoreUtil {
@@ -64,7 +62,6 @@ public final class CSRGraphStoreUtil {
         int concurrency
     ) {
         var relationshipType = RelationshipType.of(relationshipTypeString);
-        var relationships = graph.relationships();
         Direction direction = graph.schema().isUndirected() ? Direction.UNDIRECTED : Direction.DIRECTED;
 
         var relationshipSchema = RelationshipSchema.empty();
@@ -86,8 +83,9 @@ public final class CSRGraphStoreUtil {
             );
         });
 
-        var topology = Map.of(relationshipType, relationships.topology());
         var nodeProperties = constructNodePropertiesFromGraph(graph);
+
+        var relationships = graph.relationships();
         var relationshipProperties = constructRelationshipPropertiesFromGraph(
             graph,
             relationshipPropertyKey,
@@ -95,20 +93,28 @@ public final class CSRGraphStoreUtil {
             relationshipType
         );
 
+        var relationshipImportResult = RelationshipImportResult.builder().putImportResult(
+            relationshipType,
+            SingleTypeRelationshipImportResult.builder()
+                .topology(relationships.topology())
+                .properties(relationshipProperties)
+                .direction(direction)
+                .build()
+        ).build();
+
         var schema = GraphSchema.of(NodeSchema.from(graph.schema().nodeSchema()), relationshipSchema, Map.of());
 
-        return new CSRGraphStore(
-            databaseId,
+        return new GraphStoreBuilder()
+            .databaseId(databaseId)
             // TODO: is it correct that we only use this for generated graphs?
-            ImmutableStaticCapabilities.of(false),
-            schema,
-            graph.idMap(),
-            nodeProperties,
-            topology,
-            relationshipProperties,
-            GraphPropertyStore.empty(),
-            concurrency
-        );
+            .capabilities(ImmutableStaticCapabilities.of(false))
+            .schema(schema)
+            .nodes(graph.idMap())
+            .nodePropertyStore(nodeProperties)
+            .relationshipImportResult(relationshipImportResult)
+            .graphProperties(GraphPropertyStore.empty())
+            .concurrency(concurrency)
+            .build();
     }
 
     @NotNull
@@ -133,52 +139,51 @@ public final class CSRGraphStoreUtil {
     }
 
     @NotNull
-    private static Map<RelationshipType, RelationshipPropertyStore> constructRelationshipPropertiesFromGraph(
+    private static Optional<RelationshipPropertyStore> constructRelationshipPropertiesFromGraph(
         Graph graph,
         Optional<String> relationshipProperty,
         Relationships relationships,
         RelationshipType relationshipType
     ) {
-        Map<RelationshipType, RelationshipPropertyStore> relationshipProperties = Collections.emptyMap();
-        if (relationshipProperty.isPresent() && relationships.properties().isPresent()) {
-            Map<String, RelationshipPropertySchema> relationshipPropertySchemas = graph
-                .schema()
-                .relationshipSchema()
-                .get(relationshipType)
-                .properties();
-
-            if (relationshipPropertySchemas.size() != 1) {
-                throw new IllegalStateException(formatWithLocale(
-                    "Relationship schema is expected to have exactly one property but had %s",
-                    relationshipPropertySchemas.size()
-                ));
-            }
-
-            RelationshipPropertySchema relationshipPropertySchema = relationshipPropertySchemas
-                .values()
-                .stream()
-                .findFirst()
-                .orElseThrow();
-
-            String propertyKey = relationshipProperty.get();
-            relationshipProperties = singletonMap(
-                relationshipType,
-                RelationshipPropertyStore.builder().putIfAbsent(
-                    propertyKey,
-                    RelationshipProperty.of(
-                        propertyKey,
-                        NumberType.FLOATING_POINT,
-                        relationshipPropertySchema.state(),
-                        relationships.properties().orElseThrow(),
-                        relationshipPropertySchema.defaultValue().isUserDefined()
-                            ? relationshipPropertySchema.defaultValue()
-                            : ValueTypes.fromNumberType(NumberType.FLOATING_POINT).fallbackValue(),
-                        relationshipPropertySchema.aggregation()
-                    )
-                ).build()
-            );
+        if (relationshipProperty.isEmpty() || relationships.properties().isEmpty()) {
+            return Optional.empty();
         }
-        return relationshipProperties;
+
+        Map<String, RelationshipPropertySchema> relationshipPropertySchemas = graph
+            .schema()
+            .relationshipSchema()
+            .get(relationshipType)
+            .properties();
+
+        if (relationshipPropertySchemas.size() != 1) {
+            throw new IllegalStateException(formatWithLocale(
+                "Relationship schema is expected to have exactly one property but had %s",
+                relationshipPropertySchemas.size()
+            ));
+        }
+
+        RelationshipPropertySchema relationshipPropertySchema = relationshipPropertySchemas
+            .values()
+            .stream()
+            .findFirst()
+            .orElseThrow();
+
+        String propertyKey = relationshipProperty.get();
+
+        return Optional.of(RelationshipPropertyStore.builder().putIfAbsent(
+            propertyKey,
+            RelationshipProperty.of(
+                propertyKey,
+                NumberType.FLOATING_POINT,
+                relationshipPropertySchema.state(),
+                relationships.properties().orElseThrow(),
+                relationshipPropertySchema.defaultValue().isUserDefined()
+                    ? relationshipPropertySchema.defaultValue()
+                    : ValueTypes.fromNumberType(NumberType.FLOATING_POINT).fallbackValue(),
+                relationshipPropertySchema.aggregation()
+            )
+        ).build());
+
     }
 
     public static void extractNodeProperties(
@@ -235,7 +240,7 @@ public final class CSRGraphStoreUtil {
         Function<NodeLabel, Collection<String>> propertiesByLabel,
         RelationshipImportResult relationshipImportResult
     ) {
-        var properties = nodeImportResult.properties().properties();
+        var nodeProperties = nodeImportResult.properties().properties();
 
         var nodeSchema = NodeSchema.empty();
         for (var label : nodeImportResult.idMap().availableNodeLabels()) {
@@ -243,38 +248,28 @@ public final class CSRGraphStoreUtil {
             for (var propertyKey : propertiesByLabel.apply(label)) {
                 entry.addProperty(
                     propertyKey,
-                    properties.get(propertyKey).propertySchema()
+                    nodeProperties.get(propertyKey).propertySchema()
                 );
             }
         }
         nodeImportResult.idMap().availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
         var relationshipSchema = RelationshipSchema.empty();
-        relationshipImportResult
-            .properties()
-            .forEach((relType, propertyStore) -> {
-                var entry = relationshipSchema.getOrCreateRelationshipType(
-                    relType,
-                    relationshipImportResult.directions().get(relType)
-                );
 
-                propertyStore
-                    .relationshipProperties()
-                    .forEach((propertyKey, propertyValues) -> entry.addProperty(
-                        propertyKey,
-                        propertyValues.propertySchema()
-                    ));
-            });
-
-        relationshipImportResult
-            .relationships()
-            .keySet()
-            .forEach(type -> {
-                relationshipSchema.getOrCreateRelationshipType(
-                    type,
-                    relationshipImportResult.directions().get(type)
-                );
-            });
+        relationshipImportResult.importResults().forEach(((relationshipType, singleTypeRelationshipImportResult) -> {
+            relationshipSchema.getOrCreateRelationshipType(
+                relationshipType,
+                singleTypeRelationshipImportResult.direction()
+            );
+            singleTypeRelationshipImportResult.properties()
+                .map(RelationshipPropertyStore::relationshipProperties)
+                .ifPresent(properties -> properties.forEach((propertyKey, propertyValues) -> relationshipSchema
+                    .getOrCreateRelationshipType(
+                        relationshipType,
+                        singleTypeRelationshipImportResult.direction()
+                    )
+                    .addProperty(propertyKey, propertyValues.propertySchema())));
+        }));
 
         return GraphSchema.of(
             nodeSchema,

@@ -46,6 +46,7 @@ import org.neo4j.gds.core.io.GraphStoreRelationshipVisitor;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
+import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsAndDirection;
@@ -214,9 +215,13 @@ public abstract class FileToGraphStoreImporter {
         ParallelUtil.run(tasks, Pools.DEFAULT);
 
         var relationships = relationshipTopologyAndProperties(relationshipBuildersByType, relationshipSchema);
+        var relationshipImportResult = RelationshipImportResult.of(
+            relationships.topologies(),
+            relationships.properties(),
+            relationshipSchema.directions()
+        );
 
-        graphStoreBuilder.relationships(relationships.topologies());
-        graphStoreBuilder.relationshipPropertyStores(relationships.properties());
+        graphStoreBuilder.relationshipImportResult(relationshipImportResult);
 
         progressTracker.endSubTask();
     }

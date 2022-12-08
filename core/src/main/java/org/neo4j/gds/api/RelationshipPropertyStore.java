@@ -31,12 +31,12 @@ public interface RelationshipPropertyStore {
 
     Map<String, RelationshipProperty> relationshipProperties();
 
-    default RelationshipProperty get(String propertyKey) {
-        return relationshipProperties().get(propertyKey);
-    }
-
     default boolean isEmpty() {
         return relationshipProperties().isEmpty();
+    }
+
+    default RelationshipProperty get(String propertyKey) {
+        return relationshipProperties().get(propertyKey);
     }
 
     default Set<String> keySet() {
@@ -49,10 +49,6 @@ public interface RelationshipPropertyStore {
 
     default boolean containsKey(String propertyKey) {
         return relationshipProperties().containsKey(propertyKey);
-    }
-
-    static RelationshipPropertyStore empty() {
-        return ImmutableRelationshipPropertyStore.of(Collections.emptyMap());
     }
 
     static Builder builder() {

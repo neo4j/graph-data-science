@@ -47,10 +47,10 @@ import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
-import org.neo4j.gds.core.loading.ImmutableRelationshipImportResult;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.NodeImportResult;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -172,9 +172,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     }
 
     @Override
-    protected GraphSchema computeGraphSchema(
-        NodeImportResult nodeImportResult, RelationshipImportResult relationshipImportResult
-    ) {
+    protected GraphSchema computeGraphSchema(NodeImportResult nodeImportResult, RelationshipImportResult relationshipImportResult) {
         var nodeProperties = nodeImportResult.properties();
         var nodeSchema = NodeSchema.empty();
         gdlHandler
@@ -200,31 +198,27 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         nodeImportResult.idMap().availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
         var relationshipSchema = RelationshipSchema.empty();
-        relationshipImportResult
-            .properties()
-            .forEach((relType, propertyStore) -> propertyStore
-                .relationshipProperties()
-                .forEach((propertyKey, propertyValues) -> relationshipSchema
-                    .getOrCreateRelationshipType(relType, relationshipImportResult.directions().get(relType))
-                    .addProperty(
-                        propertyKey,
-                        RelationshipPropertySchema.of(
-                            propertyKey,
-                            propertyValues.valueType(),
-                            propertyValues.valueType().fallbackValue(),
-                            PropertyState.PERSISTENT,
-                            graphProjectConfig.aggregation()
-                        )
-                    )
-                )
+
+        relationshipImportResult.importResults().forEach(((relationshipType, singleTypeRelationshipImportResult) -> {
+            relationshipSchema.getOrCreateRelationshipType(
+                relationshipType,
+                singleTypeRelationshipImportResult.direction()
             );
-        relationshipImportResult
-            .relationships()
-            .keySet()
-            .forEach(type -> relationshipSchema.getOrCreateRelationshipType(
-                type,
-                relationshipImportResult.directions().get(type)
-            ));
+            singleTypeRelationshipImportResult.properties()
+                .map(RelationshipPropertyStore::relationshipProperties)
+                .ifPresent(properties -> properties.forEach((propertyKey, propertyValues) -> relationshipSchema
+                    .getOrCreateRelationshipType(
+                        relationshipType,
+                        singleTypeRelationshipImportResult.direction()
+                    )
+                    .addProperty(propertyKey, RelationshipPropertySchema.of(
+                        propertyKey,
+                        propertyValues.valueType(),
+                        propertyValues.valueType().fallbackValue(),
+                        PropertyState.PERSISTENT,
+                        graphProjectConfig.aggregation()
+                    ))));
+        }));
 
         return GraphSchema.of(
             nodeSchema,
@@ -238,35 +232,48 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         var nodes = loadNodes();
         var relationships = loadRelationships(nodes.idMap());
 
-        var topologies = new HashMap<RelationshipType, Relationships.Topology>();
-        var properties = new HashMap<RelationshipType, RelationshipPropertyStore>();
-        var directions = new HashMap<RelationshipType, Direction>();
+        var relationshipImportResultBuilder = RelationshipImportResult.builder();
 
         relationships.forEach(loadResult -> {
-            var builder = RelationshipPropertyStore.builder();
-            loadResult.properties().forEach((propertyKey, propertyValues) -> {
-                builder.putIfAbsent(
-                    propertyKey,
-                    RelationshipProperty.of(
-                        propertyKey,
-                        NumberType.FLOATING_POINT,
-                        PropertyState.PERSISTENT,
-                        propertyValues,
-                        DefaultValue.forDouble(),
-                        graphProjectConfig.aggregation()
-                    )
-                );
-            });
+            var singleTypeRelationshipImportBuilder = SingleTypeRelationshipImportResult.builder()
+                .direction(Direction.fromOrientation(graphProjectConfig().orientation()))
+                .topology(loadResult.topology());
 
-            topologies.put(loadResult.relationshipType(), loadResult.topology());
-            properties.put(loadResult.relationshipType(), builder.build());
-            directions.put(loadResult.relationshipType(), Direction.fromOrientation(graphProjectConfig().orientation()));
+            if (!loadResult.properties().isEmpty()) {
+                var propertyStoreBuilder = loadResult
+                    .properties()
+                    .entrySet()
+                    .stream()
+                    .reduce(RelationshipPropertyStore.builder(), (builder, stringPropertiesEntry) -> {
+                        var propertyKey = stringPropertiesEntry.getKey();
+                        var properties = stringPropertiesEntry.getValue();
+
+                        builder.putIfAbsent(
+                            propertyKey,
+                            RelationshipProperty.of(
+                                propertyKey,
+                                NumberType.FLOATING_POINT,
+                                PropertyState.PERSISTENT,
+                                properties,
+                                DefaultValue.forDouble(),
+                                graphProjectConfig.aggregation()
+                            )
+                        );
+                        return builder;
+                    }, (builder, __) -> builder);
+
+                singleTypeRelationshipImportBuilder.properties(propertyStoreBuilder.build());
+            }
+
+            relationshipImportResultBuilder.putImportResult(
+                loadResult.relationshipType(),
+                singleTypeRelationshipImportBuilder.build()
+            );
         });
 
-        var schema = computeGraphSchema(
-            nodes,
-            ImmutableRelationshipImportResult.of(topologies, properties, directions)
-        );
+        var relationshipImportResult = relationshipImportResultBuilder.build();
+
+        var schema = computeGraphSchema(nodes, relationshipImportResult);
 
         return new GraphStoreBuilder()
             .databaseId(databaseId)
@@ -274,8 +281,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             .schema(schema)
             .nodes(nodes.idMap())
             .nodePropertyStore(nodes.properties())
-            .relationships(topologies)
-            .relationshipPropertyStores(properties)
+            .relationshipImportResult(relationshipImportResult)
             .concurrency(1)
             .build();
     }

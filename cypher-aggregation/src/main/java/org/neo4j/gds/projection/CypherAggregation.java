@@ -49,6 +49,8 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.LazyIdMapBuilder;
 import org.neo4j.gds.core.loading.ReadHelper;
+import org.neo4j.gds.core.loading.RelationshipImportResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.ValueConverter;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
@@ -630,11 +632,16 @@ public final class CypherAggregation {
         ) {
             var relationshipSchema = RelationshipSchema.empty();
 
+            var relationshipImportResultBuilder = RelationshipImportResult.builder();
+
             this.relImporters.forEach((relationshipType, relImporter) -> {
                 var allRelationships = relImporter.buildAll(
                     Optional.of(valueMapper),
                     Optional.empty()
                 );
+
+                var topology = allRelationships.get(0).relationships().topology();
+
                 var propertyStore = CSRGraphStoreUtil.buildRelationshipPropertyStore(
                     allRelationships,
                     Objects.requireNonNullElse(this.relationshipPropertySchemas, List.of())
@@ -646,12 +653,20 @@ public final class CypherAggregation {
                         .addProperty(
                             propertyKey,
                             relationshipProperties.propertySchema()
-                    );
+                        );
                 });
 
-                graphStoreBuilder.putRelationships(relationshipType, allRelationships.get(0).relationships().topology());
-                graphStoreBuilder.putRelationshipPropertyStores(relationshipType, propertyStore);
+                relationshipImportResultBuilder.putImportResult(
+                    relationshipType,
+                    SingleTypeRelationshipImportResult.builder()
+                        .topology(topology)
+                        .properties(propertyStore)
+                        .direction(Direction.DIRECTED)
+                        .build()
+                );
             });
+
+            graphStoreBuilder.relationshipImportResult(relationshipImportResultBuilder.build());
             graphSchemaBuilder.relationshipSchema(relationshipSchema);
 
             // release all references to the builders

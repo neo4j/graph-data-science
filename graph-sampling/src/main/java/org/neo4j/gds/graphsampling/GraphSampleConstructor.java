@@ -33,6 +33,7 @@ import org.neo4j.gds.config.GraphSampleAlgoConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
+import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
@@ -116,14 +117,19 @@ public class GraphSampleConstructor {
             filteredRelationships
         );
 
+        var relationshipImportResult = RelationshipImportResult.of(
+            filteredRelationships.topology(),
+            filteredRelationships.propertyStores(),
+            filteredSchema.relationshipSchema().directions()
+        );
+
         var outputGraphStore = new GraphStoreBuilder()
             .databaseId(inputGraphStore.databaseId())
             .capabilities(inputGraphStore.capabilities())
             .schema(filteredSchema)
             .nodes(idMap)
             .nodePropertyStore(nodePropertyStore)
-            .relationships(filteredRelationships.topology())
-            .relationshipPropertyStores(filteredRelationships.propertyStores())
+            .relationshipImportResult(relationshipImportResult)
             .concurrency(config.concurrency())
             .build();
 

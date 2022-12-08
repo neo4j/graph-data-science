@@ -90,9 +90,7 @@ public class CSRGraphStore implements GraphStore {
 
     private final IdMap nodes;
 
-    private final Map<RelationshipType, Relationships.Topology> relationships;
-
-    private final Map<RelationshipType, RelationshipPropertyStore> relationshipProperties;
+    private final Map<RelationshipType, SingleTypeRelationshipImportResult> relationships;
 
     private final Set<Graph> createdGraphs;
 
@@ -111,32 +109,39 @@ public class CSRGraphStore implements GraphStore {
         GraphSchema schema,
         IdMap nodes,
         @Nullable NodePropertyStore nodePropertyStore,
-        Map<RelationshipType, Relationships.Topology> relationships,
-        Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores,
         Optional<GraphPropertyStore> graphProperties,
+        Optional<NodeImportResult> nodeImportResult,
+        RelationshipImportResult relationshipImportResult,
         int concurrency
     ) {
+        // TODO: compat code to be removed
+        // The import results take precedence if they are present
+        // If they are not present, we take the information from the old input.
+        // This is just for compat and will be removed.
+        var idMap = nodeImportResult.map(NodeImportResult::idMap).orElse(nodes);
+        var nodeProps = nodeImportResult
+            .map(NodeImportResult::properties)
+            .orElseGet(() -> nodePropertyStore == null ? NodePropertyStore.empty() : nodePropertyStore);
+
         return new CSRGraphStore(
             databaseId,
             capabilities,
             schema,
-            nodes,
-            nodePropertyStore == null ? NodePropertyStore.empty() : nodePropertyStore,
-            relationships,
-            relationshipPropertyStores,
+            idMap,
+            nodeProps,
+            relationshipImportResult.importResults(),
             graphProperties.orElseGet(GraphPropertyStore::empty),
             concurrency
         );
     }
 
-    protected CSRGraphStore(
+    private CSRGraphStore(
         DatabaseId databaseId,
         Capabilities capabilities,
         GraphSchema schema,
         IdMap nodes,
         NodePropertyStore nodeProperties,
-        Map<RelationshipType, Relationships.Topology> relationships,
-        Map<RelationshipType, RelationshipPropertyStore> relationshipProperties,
+        Map<RelationshipType, SingleTypeRelationshipImportResult> relationships,
         GraphPropertyStore graphProperties,
         int concurrency
     ) {
@@ -150,8 +155,8 @@ public class CSRGraphStore implements GraphStore {
         this.nodes = nodes;
         this.nodeProperties = nodeProperties;
 
+        // We want mutable collections inside the GraphStore
         this.relationships = new HashMap<>(relationships);
-        this.relationshipProperties = new HashMap<>(relationshipProperties);
 
         this.concurrency = concurrency;
         this.createdGraphs = new HashSet<>();
@@ -347,8 +352,8 @@ public class CSRGraphStore implements GraphStore {
     @Override
     public long relationshipCount() {
         long sum = 0L;
-        for (var topology : relationships.values()) {
-            long elementCount = topology.elementCount();
+        for (var relationship : relationships.values()) {
+            long elementCount = relationship.topology().elementCount();
             sum += elementCount;
         }
         return sum;
@@ -356,19 +361,21 @@ public class CSRGraphStore implements GraphStore {
 
     @Override
     public long relationshipCount(RelationshipType relationshipType) {
-        return relationships.get(relationshipType).elementCount();
+        return relationships.get(relationshipType).topology().elementCount();
     }
 
     @Override
     public boolean hasRelationshipProperty(RelationshipType relType, String propertyKey) {
-        return relationshipProperties.containsKey(relType) && relationshipProperties
-            .get(relType)
-            .containsKey(propertyKey);
+        return Optional.ofNullable(relationships.get(relType))
+            .flatMap(SingleTypeRelationshipImportResult::properties)
+            .map(propertyStore -> propertyStore.containsKey(propertyKey))
+            .orElse(false);
     }
 
     @Override
     public ValueType relationshipPropertyType(String propertyKey) {
-        return relationshipProperties.values().stream()
+        return relationships.values().stream()
+            .flatMap(relationship -> relationship.properties().stream())
             .filter(propertyStore -> propertyStore.containsKey(propertyKey))
             .map(propertyStore -> propertyStore.get(propertyKey).valueType())
             .findFirst()
@@ -377,23 +384,26 @@ public class CSRGraphStore implements GraphStore {
 
     @Override
     public Set<String> relationshipPropertyKeys() {
-        return relationshipProperties
-            .values()
-            .stream()
-            .flatMap(relationshipPropertyStore -> relationshipPropertyStore.keySet().stream())
+        return relationships.values().stream()
+            .flatMap(relationship -> relationship.properties().stream())
+            .flatMap(propertyStore -> propertyStore.keySet().stream())
             .collect(Collectors.toSet());
     }
 
     @Override
     public Set<String> relationshipPropertyKeys(RelationshipType relationshipType) {
-        return relationshipProperties.getOrDefault(relationshipType, RelationshipPropertyStore.empty()).keySet();
+        return Optional.ofNullable(relationships.get(relationshipType))
+            .flatMap(SingleTypeRelationshipImportResult::properties)
+            .map(RelationshipPropertyStore::keySet)
+            .orElseGet(Set::of);
     }
 
     @Override
-    public RelationshipProperty relationshipPropertyValues(
-        RelationshipType relationshipType, String propertyKey
-    ) {
-        return relationshipProperties.getOrDefault(relationshipType, RelationshipPropertyStore.empty()).get(propertyKey);
+    public RelationshipProperty relationshipPropertyValues(RelationshipType relationshipType, String propertyKey) {
+        return Optional.ofNullable(relationships.get(relationshipType))
+            .flatMap(SingleTypeRelationshipImportResult::properties)
+            .map(propertyStore -> propertyStore.get(propertyKey))
+            .orElseThrow(() -> new IllegalArgumentException("No relationship properties found for relationship type `" + relationshipType + "` and property key `" + propertyKey + "`."));
     }
 
     @Override
@@ -405,37 +415,45 @@ public class CSRGraphStore implements GraphStore {
         Relationships relationships
     ) {
         updateGraphStore(graphStore -> {
-            if (!hasRelationshipType(relationshipType)) {
-
-                graphStore.relationships.put(relationshipType, relationships.topology());
-
+            graphStore.relationships.computeIfAbsent(relationshipType, __ -> {
+                var builder = SingleTypeRelationshipImportResult.builder()
+                    .topology(relationships.topology())
+                    .direction(direction);
 
                 var relationshipSchemaEntry = schema()
                     .relationshipSchema()
                     .getOrCreateRelationshipType(relationshipType, direction);
 
-
                 if (relationshipPropertyKey.isPresent() && relationshipPropertyType.isPresent() && relationships
                     .properties()
                     .isPresent()) {
+                    var propertyKey = relationshipPropertyKey.get();
+                    var propertyType = relationshipPropertyType.get();
 
-                    addRelationshipProperty(relationshipType,
-                        relationshipPropertyKey.get(),
-                        relationshipPropertyType.get(),
-                        relationships.properties().get(),
-                        graphStore
-                    );
+                    var properties = RelationshipPropertyStore.builder()
+                        .putIfAbsent(relationshipPropertyKey.get(), RelationshipProperty.of(
+                            propertyKey,
+                            propertyType,
+                            PropertyState.TRANSIENT,
+                            relationships.properties().get(),
+                            ValueTypes.fromNumberType(propertyType).fallbackValue(),
+                            Aggregation.NONE
+                        )).build();
 
-                    ValueType valueType = ValueTypes.fromNumberType(relationshipPropertyType.get());
-                    relationshipSchemaEntry.addProperty(relationshipPropertyKey.get(), RelationshipPropertySchema.of(
-                        relationshipPropertyKey.get(),
+                    builder.properties(properties);
+
+                    var valueType = ValueTypes.fromNumberType(relationshipPropertyType.get());
+                    relationshipSchemaEntry.addProperty(propertyKey, RelationshipPropertySchema.of(
+                        propertyKey,
                         valueType,
                         valueType.fallbackValue(),
                         PropertyState.TRANSIENT,
                         Aggregation.NONE
                     ));
                 }
-            }
+
+                return builder.build();
+            });
         });
     }
 
@@ -443,22 +461,22 @@ public class CSRGraphStore implements GraphStore {
     public DeletionResult deleteRelationships(RelationshipType relationshipType) {
         return DeletionResult.of(builder ->
             updateGraphStore(graphStore -> {
-                var removedTopology = graphStore.relationships.remove(relationshipType);
-                builder.deletedRelationships(removedTopology == null ? 0 : removedTopology.elementCount());
-
-                var removedProperties = graphStore.relationshipProperties.remove(relationshipType);
-
-                if (removedProperties != null) {
-                    removedProperties
-                        .relationshipProperties()
-                        .values()
-                        .forEach(property -> builder.putDeletedProperty(
-                            property.key(),
-                            property.values().elementCount()
-                        ));
-                }
-
-                schema().relationshipSchema().remove(relationshipType);
+                Optional.ofNullable(graphStore.relationships.remove(relationshipType))
+                    .ifPresentOrElse(
+                        relationship -> {
+                            builder.deletedRelationships(relationship.topology().elementCount());
+                            relationship.properties().ifPresent(properties -> {
+                                properties
+                                    .values()
+                                    .forEach(property -> builder.putDeletedProperty(
+                                        property.key(),
+                                        property.values().elementCount()
+                                    ));
+                            });
+                            schema().relationshipSchema().remove(relationshipType);
+                        },
+                        () -> builder.deletedRelationships(0)
+                    );
             })
         );
     }
@@ -487,22 +505,16 @@ public class CSRGraphStore implements GraphStore {
         if (relationships.isEmpty()) {
             return getGraph(nodeLabels());
         }
-        var graphs = relationships
-            .keySet()
-            .stream()
-            .flatMap(relationshipType -> {
-                if (relationshipProperties.containsKey(relationshipType)
-                    && !relationshipProperties.get(relationshipType).isEmpty()) {
-                    return relationshipProperties
-                        .get(relationshipType)
-                        .keySet()
-                        .stream()
-                        .map(propertyKey -> createGraph(nodeLabels(), relationshipType, Optional.of(propertyKey)));
-                } else {
-                    return Stream.of(createGraph(nodeLabels(), relationshipType, Optional.empty()));
-                }
-            })
-            .collect(Collectors.toList());
+        var graphs = relationships.entrySet().stream().flatMap(entry -> {
+            var relationshipType = entry.getKey();
+            var relationship = entry.getValue();
+
+            return relationship
+                .properties()
+                .map(properties -> properties.keySet().stream().map(Optional::of))
+                .orElseGet(() -> Stream.of(Optional.empty()))
+                .map(propertyKey -> createGraph(nodeLabels(), relationshipType, propertyKey));
+        }).collect(Collectors.toList());
 
         return UnionGraph.of(graphs);
     }
@@ -543,14 +555,14 @@ public class CSRGraphStore implements GraphStore {
             ));
         }
 
-        var adjacencyList = relationships.get(relationshipType).adjacencyList();
+        var relationship = relationships.get(relationshipType);
+        var adjacencyList = relationship.topology().adjacencyList();
 
-        var relationshipPropertyStore = relationshipProperties.get(relationshipType);
         var properties = propertyKeys.isEmpty()
             ? CSRCompositeRelationshipIterator.EMPTY_PROPERTIES
             : propertyKeys
                 .stream()
-                .map(relationshipPropertyStore::get)
+                .map(propertyKey -> relationshipPropertyValues(relationshipType, propertyKey))
                 .map(RelationshipProperty::values)
                 .map(Relationships.Properties::propertiesList)
                 .toArray(AdjacencyProperties[]::new);
@@ -573,10 +585,14 @@ public class CSRGraphStore implements GraphStore {
         if (this.nodes instanceof AutoCloseable) {
             closeables.accept((AutoCloseable) this.nodes);
         }
-        this.relationships.values().forEach(rel -> closeables.add(rel.adjacencyList()));
-        this.relationshipProperties.forEach((propertyName, properties) ->
-            properties.values().forEach(prop -> closeables.add(prop.values().propertiesList()))
-        );
+        this.relationships.values().forEach(relationship -> {
+            closeables.add(relationship.topology().adjacencyList());
+            relationship
+                .properties()
+                .stream()
+                .flatMap(properties -> properties.values().stream())
+                .forEach(property -> closeables.add(property.values().propertiesList()));
+        });
 
         ExceptionUtil.closeAll(ExceptionUtil.RETHROW_UNCHECKED, closeables.build().distinct());
     }
@@ -589,32 +605,6 @@ public class CSRGraphStore implements GraphStore {
     private synchronized void updateGraphStore(Consumer<CSRGraphStore> updateFunction) {
         updateFunction.accept(this);
         this.modificationTime = TimeUtil.now();
-    }
-
-    private void addRelationshipProperty(
-        RelationshipType relationshipType,
-        String propertyKey,
-        NumberType propertyType,
-        Relationships.Properties properties,
-        CSRGraphStore graphStore
-    ) {
-        graphStore.relationshipProperties.compute(relationshipType, (relType, propertyStore) -> {
-            RelationshipPropertyStore.Builder builder = RelationshipPropertyStore.builder();
-            if (propertyStore != null) {
-                builder.from(propertyStore);
-            }
-            return builder.putIfAbsent(
-                propertyKey,
-                RelationshipProperty.of(
-                    propertyKey,
-                    propertyType,
-                    PropertyState.TRANSIENT,
-                    properties,
-                    ValueTypes.fromNumberType(propertyType).fallbackValue(),
-                    Aggregation.NONE
-                )
-            ).build();
-        });
     }
 
     private CSRGraph createGraph(
@@ -707,16 +697,17 @@ public class CSRGraphStore implements GraphStore {
             schema.graphProperties()
         );
 
-        var topology = relationships.get(relationshipType);
-        var properties = maybeRelationshipProperty.map(propertyKey -> relationshipProperties
-            .get(relationshipType)
-            .get(propertyKey).values());
+        var relationship = relationships.get(relationshipType);
+        var properties = maybeRelationshipProperty.map(propertyKey -> relationship
+            .properties()
+            .map(props -> props.get(propertyKey).values())
+            .orElseThrow(() -> new IllegalArgumentException("Relationship property key not present in graph: " + propertyKey)));
 
         var initialGraph = HugeGraph.create(
             nodes,
             graphSchema,
             filteredNodeProperties,
-            topology,
+            relationship.topology(),
             properties
         );
 
@@ -766,5 +757,4 @@ public class CSRGraphStore implements GraphStore {
             });
         });
     }
-
 }

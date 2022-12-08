@@ -105,6 +105,16 @@ public class RelationshipSchema extends ElementSchema<RelationshipSchema, Relati
         return this;
     }
 
+    // TODO: remove
+    public Map<RelationshipType, Direction> directions() {
+        return availableTypes()
+            .stream()
+            .collect(Collectors.toMap(
+                relationshipType -> relationshipType,
+                relationshipType -> entries.get(relationshipType).direction()
+            ));
+    }
+
     Object toMapOld() {
         return entries()
             .stream()
