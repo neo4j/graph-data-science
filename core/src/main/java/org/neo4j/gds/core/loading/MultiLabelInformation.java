@@ -167,7 +167,7 @@ public final class MultiLabelInformation implements LabelInformation {
             Collection<NodeLabel> starNodeLabelMappings
         ) {
             var nodeLabelBitSetMap = availableNodeLabels.stream().collect(
-                Collectors.toMap(
+                Collectors.toConcurrentMap(
                     nodeLabel -> nodeLabel,
                     ignored -> HugeAtomicGrowingBitSet.create(expectedCapacity)
                 )

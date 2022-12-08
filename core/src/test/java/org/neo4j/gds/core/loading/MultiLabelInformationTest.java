@@ -25,13 +25,16 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.BatchNodeIterable;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongConsumer;
 import java.util.function.LongUnaryOperator;
+import java.util.stream.LongStream;
 
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -365,6 +368,29 @@ class MultiLabelInformationTest {
             assertThat(labelInformation.nodeLabelsForNodeId(1L)).contains(NodeLabel.of("A"));
             assertThat(labelInformation.nodeLabelsForNodeId(2L)).contains(NodeLabel.of("B"));
             assertThat(labelInformation.nodeLabelsForNodeId(3L)).contains(NodeLabel.of("B"));
+        }
+
+
+        @Test
+        void shouldAcceptConcurrentInserts() {
+            var builder = MultiLabelInformation.Builder.of(110, List.of(), List.of());
+
+            // Create 10 tasks that try to insert overlapping node labels
+             List<Runnable> tasks = LongStream
+                 .range(0, 10)
+                 .mapToObj(i ->
+                     (Runnable) () -> LongStream.range(i * 10, i * 10 + 20).forEach(l -> builder.addNodeIdToLabel(NodeLabel.of("" + l), l))
+                 ).collect(toList());
+
+            RunWithConcurrency.builder()
+                .tasks(tasks)
+                .concurrency(4)
+                .build()
+                .run();
+
+            var map = builder.build(110, i -> i);
+
+            LongStream.range(0, 110).forEach(i -> assertThat(map.hasLabel(i, NodeLabel.of("" + i))).isTrue());
         }
 
     }
