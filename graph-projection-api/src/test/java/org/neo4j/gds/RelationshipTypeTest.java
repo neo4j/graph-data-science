@@ -19,30 +19,16 @@
  */
 package org.neo4j.gds;
 
-import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.stream.Collectors;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class NodeLabel extends ElementIdentifier {
+class RelationshipTypeTest {
 
-    public static final NodeLabel ALL_NODES = NodeLabel.of("__ALL__");
-
-    public NodeLabel(String name) {
-        super(name, "Node label");
+    @Test
+    void failOnInvalidName() {
+        assertThatThrownBy(() -> new RelationshipType("")).isInstanceOf(IllegalArgumentException.class)
+            .hasMessageMatching("Relationship type cannot be empty");
     }
 
-    @Override
-    public ElementIdentifier projectAll() {
-        return ALL_NODES;
-    }
-
-    public static NodeLabel of(@NotNull String name) {
-        return new NodeLabel(name);
-    }
-
-    public static Collection<NodeLabel> listOf(@NotNull String... nodeLabels) {
-        return Arrays.stream(nodeLabels).map(NodeLabel::of).collect(Collectors.toList());
-    }
 }

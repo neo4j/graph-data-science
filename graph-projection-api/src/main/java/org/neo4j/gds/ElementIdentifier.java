@@ -30,11 +30,11 @@ public abstract class ElementIdentifier {
 
     public final @NotNull String name;
 
-    ElementIdentifier(@NotNull String name) {
+    ElementIdentifier(@NotNull String name, String type) {
         if (name.equals(ElementProjection.PROJECT_ALL)) {
-            throw new IllegalArgumentException("name cannot be `*`");
+            throw new IllegalArgumentException(type + " cannot be `*`");
         } else if (StringFormatting.isEmpty(name)) {
-            throw new IllegalArgumentException("name cannot be empty");
+            throw new IllegalArgumentException(type + " cannot be empty");
         }
         this.name = name;
     }
