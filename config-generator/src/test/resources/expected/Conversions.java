@@ -22,6 +22,7 @@ package positive;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +38,8 @@ public final class ConversionsConfig implements Conversions.MyConversion {
     private int qualifiedMethod;
 
     private String referenceTypeAsResult;
+
+    private Optional<Conversions.Foo> optional;
 
     public ConversionsConfig(@NotNull CypherMapAccess config) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
@@ -60,6 +63,11 @@ public final class ConversionsConfig implements Conversions.MyConversion {
                 "referenceTypeAsResult",
                 Conversions.MyConversion.add42(config.requireString("referenceTypeAsResult"))
             );
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.optional = CypherMapAccess.failOnNull("optional", config.getOptional("optional", Map.class).map(Conversions.MyConversion::toFoo));
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
@@ -101,6 +109,11 @@ public final class ConversionsConfig implements Conversions.MyConversion {
         return this.referenceTypeAsResult;
     }
 
+    @Override
+    public Optional<Conversions.Foo> optional() {
+        return this.optional;
+    }
+
     public static ConversionsConfig.Builder builder() {
         return new ConversionsConfig.Builder();
     }
@@ -118,6 +131,7 @@ public final class ConversionsConfig implements Conversions.MyConversion {
             builder.inheritedMethod(String.valueOf(baseConfig.inheritedMethod()));
             builder.qualifiedMethod(String.valueOf(baseConfig.qualifiedMethod()));
             builder.referenceTypeAsResult(positive.Conversions.MyConversion.remove42(baseConfig.referenceTypeAsResult()));
+            builder.optional(baseConfig.optional().map(v -> positive.Conversions.MyConversion.fromFoo(v)));
             return builder;
         }
 
@@ -138,6 +152,16 @@ public final class ConversionsConfig implements Conversions.MyConversion {
 
         public ConversionsConfig.Builder referenceTypeAsResult(String referenceTypeAsResult) {
             this.config.put("referenceTypeAsResult", referenceTypeAsResult);
+            return this;
+        }
+
+        public ConversionsConfig.Builder optional(Map optional) {
+            this.config.put("optional", optional));
+            return this;
+        }
+
+        public ConversionsConfig.Builder optional(Optional<Map> optional) {
+            optional.ifPresent(actualoptional -> this.config.put("optional", actualoptional));
             return this;
         }
 

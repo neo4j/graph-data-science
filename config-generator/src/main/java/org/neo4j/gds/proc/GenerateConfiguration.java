@@ -44,7 +44,6 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
@@ -454,7 +453,7 @@ final class GenerateConfiguration {
         TypeMirror targetType = method.getReturnType();
         ConvertWith convertWith = method.getAnnotation(ConvertWith.class);
         if (convertWith == null) {
-            return memberDefinition(names, member, targetType);
+            return memberDefinition(names, member, targetType, Optional.empty());
         }
 
         String converter = convertWith.method().trim();
@@ -555,9 +554,22 @@ final class GenerateConfiguration {
 
             if (validCandidates.size() == 1) {
                 ExecutableElement candidate = validCandidates.get(0);
-                VariableElement parameter = candidate.getParameters().get(0);
                 TypeMirror currentType = currentClass.asType();
-                return memberDefinition(names, member, parameter.asType())
+                TypeMirror converterInputType = candidate.getParameters().get(0).asType();
+                if (isTypeOf(Optional.class, targetType)) {
+                    return memberDefinition(names, member, targetType, Optional.of(converterInputType))
+                        .map(d -> ImmutableMemberDefinition.builder()
+                            .from(d)
+                            .addConverter(c -> CodeBlock.of(
+                                "$L.map($T::$N)",
+                                c,
+                                currentType,
+                                candidate.getSimpleName().toString()
+                            ))
+                            .build()
+                        );
+                }
+                return memberDefinition(names, member, converterInputType, Optional.empty())
                     .map(d -> ImmutableMemberDefinition.builder()
                         .from(d)
                         .addConverter(c -> CodeBlock.of(
@@ -612,6 +624,9 @@ final class GenerateConfiguration {
         if (!(candidate.getParameters().size() == 1)) {
             invalidCandidates.add(InvalidCandidate.of(candidate, "May only accept one parameter"));
         }
+        if (isTypeOf(Optional.class, targetType)) {
+            targetType = ((DeclaredType) targetType).getTypeArguments().get(0);
+        }
         if (!typeUtils.isAssignable(candidate.getReturnType(), targetType)) {
             invalidCandidates.add(InvalidCandidate.of(
                 candidate,
@@ -624,7 +639,8 @@ final class GenerateConfiguration {
     private Optional<MemberDefinition> memberDefinition(
         NameAllocator names,
         ConfigParser.Member member,
-        TypeMirror targetType
+        TypeMirror targetType,
+        Optional<TypeMirror> converterInputType
     ) {
         ImmutableMemberDefinition.Builder builder = ImmutableMemberDefinition
             .builder()
@@ -680,7 +696,16 @@ final class GenerateConfiguration {
                         }
                     }
 
-                    if (maybeInnerType.isPresent()) {
+                    if (converterInputType.isPresent()) {
+                        TypeMirror expectedType = typeUtils.erasure(converterInputType.get());
+                        var x = typeUtils.getDeclaredType(elementUtils.getTypeElement("java.util.Optional"), expectedType);
+                        builder
+                            .methodPrefix("get")
+                            .methodName("Optional")
+                            .expectedType(CodeBlock.of("$T.class", expectedType))
+                            .expectedTypeRaw(expectedType)
+                            .expectedTypeRawWrappedInOptional(x);
+                    } else if (maybeInnerType.isPresent()) {
                         builder
                             .methodPrefix("get")
                             .methodName("Optional")
@@ -759,6 +784,10 @@ final class GenerateConfiguration {
         Optional<CodeBlock> defaultProvider();
 
         Optional<CodeBlock> expectedType();
+
+        Optional<TypeMirror> expectedTypeRaw();
+
+        Optional<TypeMirror> expectedTypeRawWrappedInOptional();
 
         List<UnaryOperator<CodeBlock>> converters();
     }

@@ -21,6 +21,8 @@ package positive;
 
 import org.neo4j.gds.annotation.Configuration;
 
+import java.util.Map;
+import java.util.Optional;
 
 public interface Conversions {
 
@@ -51,6 +53,9 @@ public interface Conversions {
         @Configuration.ConvertWith(method = "add42", inverse = "positive.Conversions.MyConversion#remove42")
         String referenceTypeAsResult();
 
+        @Configuration.ConvertWith(method = "toFoo", inverse = "positive.Conversions.MyConversion#fromFoo")
+        Optional<Foo> optional();
+
         static int toInt(String input) {
             return Integer.parseInt(input);
         }
@@ -62,5 +67,14 @@ public interface Conversions {
         static String remove42(String input) {
             return input.substring(0, input.length() - 2);
         }
+
+        static Foo toFoo(Map<String, Object> parameter) {
+            return new Foo() {};
+        }
+        static Map<String, Object> fromFoo(Foo f) {
+            return Map.of();
+        }
     }
+
+    interface Foo {}
 }
