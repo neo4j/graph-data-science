@@ -36,7 +36,7 @@ class HashTaskTest {
         int NUMBER_OF_RELATIONSHIPS = 3;
         int EMBEDDING_DIMENSION = 10;
 
-        var config = HashGNNConfigImpl
+        var config = HashGNNStreamConfigImpl
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .iterations(ITERATIONS)

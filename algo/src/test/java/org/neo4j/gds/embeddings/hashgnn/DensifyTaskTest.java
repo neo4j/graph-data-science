@@ -36,7 +36,7 @@ class DensifyTaskTest {
         var nodeCount = 3;
 
         var partition = new Partition(0, nodeCount);
-        var config = HashGNNConfigImpl
+        var config = HashGNNStreamConfigImpl
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(4)

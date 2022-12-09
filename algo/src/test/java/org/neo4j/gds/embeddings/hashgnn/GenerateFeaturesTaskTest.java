@@ -51,7 +51,7 @@ class GenerateFeaturesTaskTest {
 
         var partition = new Partition(0, graph.nodeCount());
         var totalFeatureCount = new MutableLong(0);
-        var config = HashGNNConfigImpl
+        var config = HashGNNStreamConfigImpl
             .builder()
             .generateFeatures(Map.of("dimension", embeddingDimension, "densityLevel", densityLevel))
             .iterations(1337)
