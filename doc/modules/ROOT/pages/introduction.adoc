@@ -103,7 +103,7 @@ The Neo4j Graph Data Science library is available in two editions.
 *** Data import and export via xref:installation/installation-apache-arrow.adoc[Apache Arrow].
 ** Supports various additional model catalog features, including:
 *** Storing unlimited amounts of models in the model catalog.
-*** Model xref:model-catalog/publish.adoc[publish].
+*** Sharing of models between users, by xref:model-catalog/publish.adoc[publishing it].
 *** Model xref:model-catalog/store.adoc#model-catalog-store-ops[persistence to disk].
 ** Supports an xref:production-deployment/feature-toggles.adoc#bit-id-map-feature-toggle[optimized graph implementation].
 ** Allows the configuration of xref:management-ops/defaults-and-limits.adoc[defaults and limits].
