@@ -28,7 +28,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -104,7 +103,6 @@ public final class CanonicalAdjacencyMatrix {
         Map<Long, List<String>> outAdjacencies = new HashMap<>();
         Map<Long, List<String>> inAdjacencies = new HashMap<>();
         for (RelationshipType relationshipType : g.schema().relationshipSchema().availableTypes()) {
-            var relTypeGraph = g.relationshipTypeFilteredGraph(Set.of(relationshipType));
             g.forEachNode(nodeId -> {
                 g.forEachRelationship(nodeId, 1.0, (sourceId, targetId, propertyValue) -> {
                     outAdjacencies.compute(
