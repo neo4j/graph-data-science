@@ -195,11 +195,10 @@ public final class CypherAggregation {
                 }
             }
 
-            var relImporter = this.relImporters.computeIfAbsent(relationshipType, this::newRelImporter);
-
             var intermediateSourceId = loadNode(sourceNode, sourceNodeLabels, sourceNodePropertyValues);
 
             if (targetNode != null) {
+                var relImporter = this.relImporters.computeIfAbsent(relationshipType, this::newRelImporter);
                 var intermediateTargetId = loadNode(targetNode, targetNodeLabels, targetNodePropertyValues);
 
                 if (this.relationshipPropertySchemas != null && !this.relationshipPropertySchemas.isEmpty()) {

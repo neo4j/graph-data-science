@@ -441,6 +441,20 @@ class CypherAggregationTest extends BaseProcTest {
             .returns(4L, Graph::relationshipCount);
     }
 
+
+    @Test
+    void ignoreRelationshipTypeIfTargetIsNull() {
+        runQuery(
+            "UNWIND [[1, null, null], [1, 2, 'REL']] AS data" +
+            " RETURN gds.alpha.graph.project('g', data[0], data[1], {}, {relationshipType: data[2]})"
+        );
+
+        var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
+
+        assertThat(graphStore.relationshipCount()).isEqualTo(1);
+        assertThat(graphStore.relationshipTypes()).containsOnly(org.neo4j.gds.RelationshipType.of("REL"));
+    }
+
     @Test
     void shouldNotFailOnMissingProperty() {
         var query = "MATCH (s:B)-[:REL]->(t:B) " +
