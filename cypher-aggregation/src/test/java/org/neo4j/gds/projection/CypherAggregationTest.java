@@ -31,6 +31,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.ResourceUtil;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -205,6 +206,28 @@ class CypherAggregationTest extends BaseProcTest {
             assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
             var graph = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore().getUnion();
             assertThat(graph.nodeCount()).isEqualTo(10000);
+        }
+    }
+
+    @Nested
+    class CoraGraphTest extends BaseTest {
+        @Test
+        void load_cora_rels() {
+            List<String> lines = ResourceUtil.lines("cora_rels.csv");
+            List<long[]> rows = lines.stream().map(i -> {
+                var values = i.split(",");
+                return new long[]{Long.parseLong(values[0]), Long.parseLong(values[1])};
+            }).collect(Collectors.toList());
+
+            runQuery(
+                "UNWIND $data AS data WITH data RETURN gds.alpha.graph.project('g', data[0], data[1], {}, {}, {readConcurrency: 1})",
+                Map.of("data", rows)
+            );
+
+            assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
+            var graph = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore().getUnion();
+            assertThat(graph.nodeCount()).isEqualTo(2708);
+            assertThat(graph.relationshipCount()).isEqualTo(rows.size());
         }
     }
 

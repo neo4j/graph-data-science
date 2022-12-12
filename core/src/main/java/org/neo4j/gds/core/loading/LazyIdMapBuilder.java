@@ -51,6 +51,10 @@ public final class LazyIdMapBuilder implements PartialIdMap {
             .build();
     }
 
+    public void prepareForFlush() {
+        isEmpty.set(false);
+    }
+
     public long addNode(long nodeId, NodeLabelToken nodeLabels) {
         var intermediateId = this.intermediateIdMapBuilder.toMappedNodeId(nodeId);
 
@@ -61,7 +65,6 @@ public final class LazyIdMapBuilder implements PartialIdMap {
 
         intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
 
-        isEmpty.lazySet(false);
         this.nodesBuilder.addNode(intermediateId, nodeLabels);
 
         return intermediateId;
@@ -80,7 +83,6 @@ public final class LazyIdMapBuilder implements PartialIdMap {
         }
 
         intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
-        isEmpty.lazySet(false);
         if (properties.isEmpty()) {
             this.nodesBuilder.addNode(intermediateId, nodeLabels);
         } else {

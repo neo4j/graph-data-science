@@ -136,7 +136,8 @@ public final class AdjacencyBuffer {
 
         return new AdjacencyBuffer(
             importMetaData,
-            adjacencyCompressorFactory, localBuilders,
+            adjacencyCompressorFactory,
+            localBuilders,
             compressedAdjacencyLists,
             paging,
             atLeastOnePropertyToLoad

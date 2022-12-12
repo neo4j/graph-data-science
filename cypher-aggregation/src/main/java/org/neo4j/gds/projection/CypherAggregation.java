@@ -567,6 +567,8 @@ public final class CypherAggregation {
             // validate again before doing the heavier graph building
             validateGraphName(graphName);
 
+            Objects.requireNonNull(idMapBuilder).prepareForFlush();
+
             var graphStoreBuilder = new GraphStoreBuilder()
                 .concurrency(config.readConcurrency())
                 .capabilities(ImmutableStaticCapabilities.of(true))
