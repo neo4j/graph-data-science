@@ -641,16 +641,18 @@ public final class CypherAggregation {
                     Optional.empty()
                 );
 
-                var topology = allRelationships.get(0).relationships().topology();
+                var firstRelationshipsAndDirection = allRelationships.get(0);
+                var topology = firstRelationshipsAndDirection.relationships().topology();
+                var direction = firstRelationshipsAndDirection.direction();
 
                 var propertyStore = CSRGraphStoreUtil.buildRelationshipPropertyStore(
                     allRelationships,
                     Objects.requireNonNullElse(this.relationshipPropertySchemas, List.of())
                 );
 
+                var relationshipSchemaEntry = relationshipSchema.getOrCreateRelationshipType(relationshipType, direction);
                 propertyStore.relationshipProperties().forEach((propertyKey, relationshipProperties) -> {
-                    relationshipSchema
-                        .getOrCreateRelationshipType(relationshipType, Direction.DIRECTED)
+                    relationshipSchemaEntry
                         .addProperty(
                             propertyKey,
                             relationshipProperties.propertySchema()

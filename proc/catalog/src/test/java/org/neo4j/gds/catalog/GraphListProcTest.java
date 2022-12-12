@@ -31,6 +31,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -403,12 +404,12 @@ class GraphListProcTest extends BaseProcTest {
                 "database", "neo4j",
                 "schema", map(
                     "nodes", map(ALL_NODES.name, map()),
-                    "relationships", map(),
+                    "relationships", map(ALL_RELATIONSHIPS.name, map()),
                     "graphProperties", map()
                 ),
                 "schemaWithOrientation", map(
                     "nodes", map(ALL_NODES.name, map()),
-                    "relationships", map(),
+                    "relationships", map(ALL_RELATIONSHIPS.name, map("properties", map(), "direction", Direction.DIRECTED.toString())),
                     "graphProperties", map()
                 ),
                 "configuration", new Condition<>(config -> {
