@@ -76,7 +76,7 @@ public final class ReadHelper {
 
     public static double extractValue(Aggregation aggregation, AnyValue value, double defaultValue) {
         // slightly different logic than org.neo4j.values.storable.Values#coerceToDouble
-        // b/c we want to fallback to the default value if the value is empty
+        // b/c we want to fall back to the default value if the value is empty
         if (value instanceof NumberValue) {
             double propertyValue = ((NumberValue) value).doubleValue();
             return aggregation.normalizePropertyValue(propertyValue);
@@ -89,7 +89,7 @@ public final class ReadHelper {
         //       Do we want to do so or is failing on non numeric properties ok?
         throw new IllegalArgumentException(formatWithLocale(
             "Unsupported type [%s] of value %s. Please use a numeric property.",
-            value.getTypeName(),
+            value.valueRepresentation().valueGroup(),
             value
         ));
     }
