@@ -216,7 +216,7 @@ final class GenerateConfigurationBuilder {
 
                 MethodSpec.Builder setMethodBuilder = MethodSpec.methodBuilder(configKeyName)
                     .addModifiers(Modifier.PUBLIC)
-                    .addParameter(unpackedType(implMember.expectedTypeRaw().orElse(parameterType)), configKeyName)
+                    .addParameter(unpackedType(implMember.expectedType().orElse(parameterType)), configKeyName)
                     .returns(builderClassName)
                     .addCode(CodeBlock.builder()
                         .addStatement(
@@ -236,7 +236,10 @@ final class GenerateConfigurationBuilder {
 
                     var optionalSetterBuilder = MethodSpec.methodBuilder(configKeyName)
                         .addModifiers(Modifier.PUBLIC)
-                        .addParameter(TypeName.get(implMember.expectedTypeRawWrappedInOptional().orElse(parameterType)), configKeyName)
+                        .addParameter(
+                            TypeName.get(implMember.expectedTypeWrappedInOptional().orElse(parameterType)),
+                            configKeyName
+                        )
                         .returns(builderClassName)
                         .addStatement(
                             "$1N.ifPresent($2N -> this.$3N.put(\"$4L\", $2N))",
