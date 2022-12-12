@@ -44,7 +44,6 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
@@ -309,7 +308,7 @@ final class GenerateConfiguration {
             definition.configKey()
         );
         definition.defaultProvider().ifPresent(d -> code.add(", $L", d));
-        definition.expectedType().ifPresent(t -> code.add(", $L", t));
+        definition.expectedTypeCodeBlock().ifPresent(t -> code.add(", $L", t));
         CodeBlock codeBlock = code.add(")").build();
         for (UnaryOperator<CodeBlock> converter : definition.converters()) {
             codeBlock = converter.apply(codeBlock);
@@ -454,7 +453,7 @@ final class GenerateConfiguration {
         TypeMirror targetType = method.getReturnType();
         ConvertWith convertWith = method.getAnnotation(ConvertWith.class);
         if (convertWith == null) {
-            return memberDefinition(names, member, targetType);
+            return memberDefinition(names, member, targetType, Optional.empty());
         }
 
         String converter = convertWith.method().trim();
@@ -555,9 +554,22 @@ final class GenerateConfiguration {
 
             if (validCandidates.size() == 1) {
                 ExecutableElement candidate = validCandidates.get(0);
-                VariableElement parameter = candidate.getParameters().get(0);
                 TypeMirror currentType = currentClass.asType();
-                return memberDefinition(names, member, parameter.asType())
+                TypeMirror converterInputType = candidate.getParameters().get(0).asType();
+                if (isTypeOf(Optional.class, targetType)) {
+                    return memberDefinition(names, member, targetType, Optional.of(converterInputType))
+                        .map(definition -> ImmutableMemberDefinition.builder()
+                            .from(definition)
+                            .addConverter(codeBlock -> CodeBlock.of(
+                                "$L.map($T::$N)",
+                                codeBlock,
+                                currentType,
+                                candidate.getSimpleName().toString()
+                            ))
+                            .build()
+                        );
+                }
+                return memberDefinition(names, member, converterInputType, Optional.empty())
                     .map(d -> ImmutableMemberDefinition.builder()
                         .from(d)
                         .addConverter(c -> CodeBlock.of(
@@ -612,6 +624,10 @@ final class GenerateConfiguration {
         if (!(candidate.getParameters().size() == 1)) {
             invalidCandidates.add(InvalidCandidate.of(candidate, "May only accept one parameter"));
         }
+        if (isTypeOf(Optional.class, targetType)) {
+            // for a parameter declared as Optional<T>, we want to find a converter that returns T
+            targetType = ((DeclaredType) targetType).getTypeArguments().get(0);
+        }
         if (!typeUtils.isAssignable(candidate.getReturnType(), targetType)) {
             invalidCandidates.add(InvalidCandidate.of(
                 candidate,
@@ -624,7 +640,8 @@ final class GenerateConfiguration {
     private Optional<MemberDefinition> memberDefinition(
         NameAllocator names,
         ConfigParser.Member member,
-        TypeMirror targetType
+        TypeMirror targetType,
+        Optional<TypeMirror> converterInputType
     ) {
         ImmutableMemberDefinition.Builder builder = ImmutableMemberDefinition
             .builder()
@@ -680,18 +697,30 @@ final class GenerateConfiguration {
                         }
                     }
 
-                    if (maybeInnerType.isPresent()) {
+                    if (converterInputType.isPresent()) {
+                        TypeMirror expectedType = typeUtils.erasure(converterInputType.get());
+                        var expectedWrappedInOptional = typeUtils.getDeclaredType(
+                            elementUtils.getTypeElement("java.util.Optional"),
+                            expectedType
+                        );
                         builder
                             .methodPrefix("get")
                             .methodName("Optional")
-                            .expectedType(CodeBlock.of("$T.class", maybeInnerType.get()));
+                            .expectedTypeCodeBlock(CodeBlock.of("$T.class", expectedType))
+                            .expectedType(expectedType)
+                            .expectedTypeWrappedInOptional(expectedWrappedInOptional);
+                    } else if (maybeInnerType.isPresent()) {
+                        builder
+                            .methodPrefix("get")
+                            .methodName("Optional")
+                            .expectedTypeCodeBlock(CodeBlock.of("$T.class", maybeInnerType.get()));
                     } else {
                         return Optional.empty();
                     }
                 } else {
                     builder
                         .methodName("Checked")
-                        .expectedType(CodeBlock.of("$T.class", ClassName.get(asTypeElement(targetType))));
+                        .expectedTypeCodeBlock(CodeBlock.of("$T.class", ClassName.get(asTypeElement(targetType))));
                 }
                 break;
             default:
@@ -758,7 +787,11 @@ final class GenerateConfiguration {
 
         Optional<CodeBlock> defaultProvider();
 
-        Optional<CodeBlock> expectedType();
+        Optional<CodeBlock> expectedTypeCodeBlock();
+
+        Optional<TypeMirror> expectedType();
+
+        Optional<TypeMirror> expectedTypeWrappedInOptional();
 
         List<UnaryOperator<CodeBlock>> converters();
     }

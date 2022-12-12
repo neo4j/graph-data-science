@@ -60,7 +60,7 @@ public interface BaseConfig extends ToMapConvertible {
         return new HashMap<>();
     }
 
-    static Optional<String> trim(Optional<String> input) {
-        return input.map(String::trim).filter(s -> !s.isEmpty());
+    static String trim(String input) {
+        return input.trim();
     }
 }

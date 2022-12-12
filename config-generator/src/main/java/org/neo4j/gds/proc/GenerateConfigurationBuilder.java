@@ -212,10 +212,11 @@ final class GenerateConfigurationBuilder {
             .flatMap(implMember -> {
                 var setterMethods = Stream.<MethodSpec>builder();
                 String configKeyName = implMember.member().methodName();
+                TypeMirror parameterType = implMember.parameterType();
 
                 MethodSpec.Builder setMethodBuilder = MethodSpec.methodBuilder(configKeyName)
                     .addModifiers(Modifier.PUBLIC)
-                    .addParameter(unpackedType(implMember.parameterType()), configKeyName)
+                    .addParameter(unpackedType(implMember.expectedType().orElse(parameterType)), configKeyName)
                     .returns(builderClassName)
                     .addCode(CodeBlock.builder()
                         .addStatement(
@@ -230,12 +231,15 @@ final class GenerateConfigurationBuilder {
 
                 setterMethods.add(setMethodBuilder.build());
 
-                if (isTypeOf(Optional.class, implMember.parameterType())) {
+                if (isTypeOf(Optional.class, parameterType)) {
                     String lambdaVarName = "actual" + configKeyName;
 
                     var optionalSetterBuilder = MethodSpec.methodBuilder(configKeyName)
                         .addModifiers(Modifier.PUBLIC)
-                        .addParameter(TypeName.get(implMember.parameterType()), configKeyName)
+                        .addParameter(
+                            TypeName.get(implMember.expectedTypeWrappedInOptional().orElse(parameterType)),
+                            configKeyName
+                        )
                         .returns(builderClassName)
                         .addStatement(
                             "$1N.ifPresent($2N -> this.$3N.put(\"$4L\", $2N))",

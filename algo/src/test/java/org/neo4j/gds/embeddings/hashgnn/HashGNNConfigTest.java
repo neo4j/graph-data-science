@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class HashGNNConfigTest {
     @Test
     void binarizationConfigCorrectType() {
-        var config = HashGNNConfigImpl
+        var config = HashGNNStreamConfigImpl
             .builder()
             .featureProperties(List.of("x"))
             .binarizeFeatures(Map.of("dimension", 100))
@@ -44,7 +44,7 @@ class HashGNNConfigTest {
     @Test
     void shouldNotAllowGeneratedAndFeatureProperties() {
         assertThatThrownBy(() -> {
-            HashGNNConfigImpl
+            HashGNNStreamConfigImpl
                 .builder()
                 .featureProperties(List.of("x"))
                 .generateFeatures(Map.of("dimension", 100, "densityLevel", 2))
@@ -57,7 +57,7 @@ class HashGNNConfigTest {
     @Test
     void requiresFeaturePropertiesIfNoGeneratedFeatures() {
         assertThatThrownBy(() -> {
-            HashGNNConfigImpl
+            HashGNNStreamConfigImpl
                 .builder()
                 .embeddingDensity(4)
                 .iterations(100)
@@ -68,7 +68,7 @@ class HashGNNConfigTest {
     @Test
     void requiresDensityLevelAtMostDensity() {
         assertThatThrownBy(() -> {
-            HashGNNConfigImpl
+            HashGNNStreamConfigImpl
                 .builder()
                 .embeddingDensity(4)
                 .generateFeatures(Map.of("dimension", 4, "densityLevel", 5))
@@ -80,7 +80,7 @@ class HashGNNConfigTest {
     @Test
     void failsOnInvalidBinarizationKeys() {
         assertThatThrownBy(() -> {
-            new HashGNNConfigImpl(CypherMapWrapper.create(
+            new HashGNNStreamConfigImpl(CypherMapWrapper.create(
                 Map.of(
                     "mutateProperty", "foo",
                     "featureProperties", List.of("x"),
@@ -97,7 +97,7 @@ class HashGNNConfigTest {
     @Test
     void failsOnInvalidGenerateFeaturesKeys() {
         assertThatThrownBy(() -> {
-            new HashGNNConfigImpl(CypherMapWrapper.create(
+            new HashGNNStreamConfigImpl(CypherMapWrapper.create(
                 Map.of(
                     "generateFeatures", Map.of("dimension", 100, "densityElfen", 2),
                     "embeddingDensity", 4,

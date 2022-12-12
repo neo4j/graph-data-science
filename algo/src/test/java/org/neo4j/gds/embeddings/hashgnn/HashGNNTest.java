@@ -97,7 +97,7 @@ class HashGNNTest {
     @Test
     void binaryLowNeighborInfluence() {
         int embeddingDensity = 4;
-        var config = HashGNNConfigImpl
+        var config = HashGNNStreamConfigImpl
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(embeddingDensity)
@@ -114,7 +114,7 @@ class HashGNNTest {
 
     @Test
     void binaryHighEmbeddingDensityHighNeighborInfluence() {
-        var config = HashGNNConfigImpl
+        var config = HashGNNStreamConfigImpl
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(200)
@@ -143,7 +143,7 @@ class HashGNNTest {
     @ParameterizedTest
     @MethodSource("determinismParams")
     void shouldBeDeterministic(int concurrency, boolean binarize, boolean dimReduce) {
-        var configBuilder = HashGNNConfigImpl
+        var configBuilder = HashGNNStreamConfigImpl
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(2)
@@ -177,7 +177,7 @@ class HashGNNTest {
         // not all random seeds will give b a unique feature
         // this intends to test that if b has a unique feature before the first iteration, then it also has it after the first iteration
         // however we simulate what is before the first iteration by running with neighborInfluence 0
-        var configBuilder = HashGNNConfigImpl
+        var configBuilder = HashGNNStreamConfigImpl
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(embeddingDensity)
@@ -216,7 +216,7 @@ class HashGNNTest {
         int embeddingDensity = 100;
         int binarizationDimension = 8;
 
-        var configBuilder = HashGNNConfigImpl
+        var configBuilder = HashGNNStreamConfigImpl
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(embeddingDensity)
@@ -251,7 +251,7 @@ class HashGNNTest {
     void outputDimensionIsApplied() {
         int embeddingDensity = 200;
         double avgDegree = binaryGraph.relationshipCount() / (double) binaryGraph.nodeCount();
-        var config = HashGNNConfigImpl
+        var config = HashGNNStreamConfigImpl
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(embeddingDensity)
@@ -295,7 +295,7 @@ class HashGNNTest {
         int concurrency,
         long expectedMemory
     ) {
-        var config = HashGNNConfigImpl
+        var config = HashGNNStreamConfigImpl
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(embeddingDensity)
@@ -318,7 +318,7 @@ class HashGNNTest {
 
         int embeddingDensity = 200;
         double avgDegree = g.relationshipCount() / (double) g.nodeCount();
-        var configBuilder = HashGNNConfigImpl
+        var configBuilder = HashGNNStreamConfigImpl
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(embeddingDensity)
@@ -414,7 +414,7 @@ class HashGNNTest {
         var firstGraph = GraphFactory.create(firstIdMap, firstRelationships);
         var secondGraph = GraphFactory.create(secondIdMap, secondRelationships);
 
-        var config = HashGNNConfigImpl
+        var config = HashGNNStreamConfigImpl
             .builder()
             .embeddingDensity(8)
             .generateFeatures(Map.of("dimension", embeddingDimension, "densityLevel", 2))

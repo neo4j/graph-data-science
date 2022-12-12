@@ -29,7 +29,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import java.util.Map;
 import java.util.Optional;
 
-@Configuration
 interface HashGNNConfig extends AlgoBaseConfig, FeaturePropertiesConfig, RandomSeedConfig {
 
     @Configuration.IntegerRange(min = 1)
@@ -51,16 +50,12 @@ interface HashGNNConfig extends AlgoBaseConfig, FeaturePropertiesConfig, RandomS
     }
 
     @Configuration.ToMapValue("org.neo4j.gds.embeddings.hashgnn.HashGNNConfig#toMapGenerateFeaturesConfig")
-    @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.hashgnn.HashGNNConfig#parseGenerateFeaturesConfig", inverse = Configuration.ConvertWith.INVERSE_IS_TO_MAP)
-    default Optional<GenerateFeaturesConfig> generateFeatures() {
-        return Optional.empty();
-    }
+    @Configuration.ConvertWith(method = "parseGenerateFeaturesConfig", inverse = Configuration.ConvertWith.INVERSE_IS_TO_MAP)
+    Optional<GenerateFeaturesConfig> generateFeatures();
 
     @Configuration.ToMapValue("org.neo4j.gds.embeddings.hashgnn.HashGNNConfig#toMapBinarizationConfig")
-    @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.hashgnn.HashGNNConfig#parseBinarizationConfig", inverse = Configuration.ConvertWith.INVERSE_IS_TO_MAP)
-    default Optional<BinarizeFeaturesConfig> binarizeFeatures() {
-        return Optional.empty();
-    }
+    @Configuration.ConvertWith(method = "parseBinarizationConfig", inverse = Configuration.ConvertWith.INVERSE_IS_TO_MAP)
+    Optional<BinarizeFeaturesConfig> binarizeFeatures();
 
     @Value.Check
     default void validate() {
@@ -73,28 +68,22 @@ interface HashGNNConfig extends AlgoBaseConfig, FeaturePropertiesConfig, RandomS
         }
     }
 
-    static Optional<BinarizeFeaturesConfig> parseBinarizationConfig(Object o) {
-        if (o instanceof Optional) {
-            return (Optional<BinarizeFeaturesConfig>) o;
-        }
-        var cypherMapWrapper = CypherMapWrapper.create((Map<String, Object>) o);
+    static BinarizeFeaturesConfig parseBinarizationConfig(Map<String, Object> parameter) {
+        var cypherMapWrapper = CypherMapWrapper.create(parameter);
         var binarizeFeaturesConfig = new BinarizeFeaturesConfigImpl(cypherMapWrapper);
         cypherMapWrapper.requireOnlyKeysFrom(binarizeFeaturesConfig.configKeys());
-        return Optional.of(binarizeFeaturesConfig);
+        return binarizeFeaturesConfig;
     }
 
     static Map<String, Object> toMapBinarizationConfig(BinarizeFeaturesConfig config) {
         return config.toMap();
     }
 
-    static Optional<GenerateFeaturesConfig> parseGenerateFeaturesConfig(Object o) {
-        if (o instanceof Optional) {
-            return (Optional<GenerateFeaturesConfig>) o;
-        }
-        var cypherMapWrapper = CypherMapWrapper.create((Map<String, Object>) o);
+    static GenerateFeaturesConfig parseGenerateFeaturesConfig(Map<String, Object> parameter) {
+        var cypherMapWrapper = CypherMapWrapper.create(parameter);
         var generateFeaturesConfig = new GenerateFeaturesConfigImpl(cypherMapWrapper);
         cypherMapWrapper.requireOnlyKeysFrom(generateFeaturesConfig.configKeys());
-        return Optional.of(generateFeaturesConfig);
+        return generateFeaturesConfig;
     }
 
     static Map<String, Object> toMapGenerateFeaturesConfig(GenerateFeaturesConfig config) {
