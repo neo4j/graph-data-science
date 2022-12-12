@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.projection;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
@@ -225,7 +224,7 @@ public final class CypherAggregation {
             }
         }
 
-        private void initConfig(Map<String, Object> config) {
+        private void initConfig(@Nullable Map<String, Object> config) {
             if (this.config == null) {
                 initObjectUnderLock(() -> this.config, () -> {
                     this.config = GraphProjectFromCypherAggregationConfig.of(username, Objects.requireNonNull(graphName), config);
@@ -264,8 +263,8 @@ public final class CypherAggregation {
         }
 
         private void initIdMapBuilder(
-            Map<String, Value> sourceNodePropertyValues,
-            Map<String, Value> targetNodePropertyValues,
+            @Nullable Map<String, Value> sourceNodePropertyValues,
+            @Nullable Map<String, Value> targetNodePropertyValues,
             @Nullable NodeLabelToken sourceNodeLabels,
             @Nullable NodeLabelToken targetNodeLabels
         ) {
@@ -303,6 +302,8 @@ public final class CypherAggregation {
             @Nullable NodeLabelToken targetNodeLabels,
             @Nullable Map<String, Value> targetNodeProperties
         ) {
+            assert this.config != null;
+
             boolean hasLabelInformation = !(sourceNodeLabels == null && targetNodeLabels == null);
             boolean hasProperties = !(sourceNodeProperties == null && targetNodeProperties == null);
             return new LazyIdMapBuilder(config.readConcurrency(), hasLabelInformation, hasProperties);
@@ -331,7 +332,7 @@ public final class CypherAggregation {
             ));
         }
 
-        private @Nullable NodeLabelToken labelsConfig(
+        private NodeLabelToken labelsConfig(
             Object node,
             String nodeLabelKey,
             @NotNull Map<String, Object> nodesConfig
@@ -340,26 +341,27 @@ public final class CypherAggregation {
             return tryLabelsConfig(node, nodeLabelsEntry, nodeLabelKey);
         }
 
-        @Contract("_, null, _ -> null")
-        private @Nullable NodeLabelToken tryLabelsConfig(
+        private NodeLabelToken tryLabelsConfig(
             Object node,
             @Nullable Object nodeLabels,
             String nodeLabelKey
         ) {
             if (nodeLabels == null || Boolean.FALSE.equals(nodeLabels)) {
-                return null;
+                return NodeLabelTokens.empty();
             }
+
+            NodeLabelToken nodeLabelToken;
 
             if (Boolean.TRUE.equals(nodeLabels)) {
-                if (node instanceof Node) {
-                    return NodeLabelTokens.ofNullable(((Node) node).getLabels());
+                if (!(node instanceof Node)) {
+                    throw new IllegalArgumentException(
+                        "Using `true` to load all labels does only work if the node is a Neo4j node object"
+                    );
                 }
-                throw new IllegalArgumentException(
-                    "Using `true` to load all labels does only work if the node is a Neo4j node object"
-                );
+                nodeLabelToken = NodeLabelTokens.ofNullable(((Node) node).getLabels());
+            } else {
+                nodeLabelToken = NodeLabelTokens.ofNullable(nodeLabels);
             }
-
-            var nodeLabelToken = NodeLabelTokens.ofNullable(nodeLabels);
 
             if (nodeLabelToken == null) {
                 throw new IllegalArgumentException(formatWithLocale(
@@ -392,6 +394,7 @@ public final class CypherAggregation {
 
         private RelationshipsBuilder newRelImporter(RelationshipType relType) {
             assert this.idMapBuilder != null;
+            assert this.config != null;
 
             var undirectedTypes = config.undirectedRelationshipTypes();
             var orientation = undirectedTypes.contains(relType.name) || undirectedTypes.contains("*")
@@ -447,6 +450,7 @@ public final class CypherAggregation {
 
         private long extractNodeId(@Nullable Object node) {
             if (node instanceof Node) {
+                //noinspection removal
                 return ((Node) node).getId();
             } else if (node instanceof Long) {
                 return (Long) node;
@@ -509,6 +513,9 @@ public final class CypherAggregation {
             assert this.idMapBuilder != null;
 
             var originalNodeId = extractNodeId(node);
+            if (nodeLabels == null) {
+                nodeLabels = NodeLabelTokens.empty();
+            }
 
             return nodeProperties == null
                 ? this.idMapBuilder.addNode(originalNodeId, nodeLabels)
@@ -559,6 +566,8 @@ public final class CypherAggregation {
             if (this.result != null) {
                 return this.result;
             }
+
+            assert this.config != null;
 
             // in case something else has written something with the same graph name
             // validate again before doing the heavier graph building
@@ -719,7 +728,6 @@ public final class CypherAggregation {
         }
 
         @org.immutables.value.Value.Default
-        @NotNull
         default List<String> undirectedRelationshipTypes() {
             return List.of();
         }
@@ -744,7 +752,7 @@ public final class CypherAggregation {
             );
         }
 
-        static GraphProjectFromCypherAggregationConfig of(String userName, String graphName, Map<String, Object> config) {
+        static GraphProjectFromCypherAggregationConfig of(String userName, String graphName, @Nullable Map<String, Object> config) {
             return new GraphProjectFromCypherAggregationConfigImpl(userName, graphName, CypherMapWrapper.create(config));
         }
 

@@ -34,7 +34,7 @@ import java.util.TreeMap;
  */
 public final class CypherMapWrapper implements CypherMapAccess {
 
-    public static CypherMapWrapper create(Map<String, Object> config) {
+    public static CypherMapWrapper create(@Nullable Map<String, Object> config) {
         if (config == null) {
             return empty();
         }
