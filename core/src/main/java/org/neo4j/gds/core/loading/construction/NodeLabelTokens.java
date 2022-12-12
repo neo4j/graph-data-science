@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading.construction;
 
 import org.eclipse.collections.api.block.function.primitive.ObjectIntToObjectFunction;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
@@ -40,32 +39,19 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public final class NodeLabelTokens {
     public static @NotNull NodeLabelToken of(@Nullable Object nodeLabels) {
         var nodeLabelToken = ofNullable(nodeLabels);
-        if (nodeLabelToken == null) {
+        if (nodeLabelToken.isInvalid()) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Could not represent a value of type[%s] as nodeLabels: %s",
-                nodeLabels.getClass(),
+                nodeLabels != null ? nodeLabels.getClass() : "null",
                 nodeLabels
             ));
         }
         return nodeLabelToken;
     }
 
-    public static NodeLabelToken of(TextValue textValue) {
-        return new Singleton<>(textValue, tv -> NodeLabelTokens.labelOf(tv.stringValue()));
-    }
-
-    public static NodeLabelToken of(TextArray textArray) {
-        return new Sequence<>(textArray, TextArray::stringValue);
-    }
-
-    public static @NotNull NodeLabelToken of(SequenceValue nodeLabels) {
-        return new Sequence<>(nodeLabels, (s, i) -> ((TextValue) s.value(i)).stringValue());
-    }
-
-    @Contract("null -> !null")
-    public static @Nullable NodeLabelToken ofNullable(@Nullable Object nodeLabels) {
+    public static NodeLabelToken ofNullable(@Nullable Object nodeLabels) {
         if (nodeLabels == null) {
-            return empty();
+            return missing();
         }
 
         if (nodeLabels instanceof NodeLabel[]) {
@@ -88,8 +74,28 @@ public final class NodeLabelTokens {
         return ofSingleton(nodeLabels);
     }
 
+    public static @NotNull NodeLabelToken missing() {
+        return Missing.INSTANCE;
+    }
+
+    public static @NotNull NodeLabelToken invalid() {
+        return Invalid.INSTANCE;
+    }
+
     public static @NotNull NodeLabelToken empty() {
-        return Null.INSTANCE;
+        return Empty.INSTANCE;
+    }
+
+    public static NodeLabelToken of(TextValue textValue) {
+        return new Singleton<>(textValue, tv -> NodeLabelTokens.labelOf(tv.stringValue()));
+    }
+
+    public static NodeLabelToken of(TextArray textArray) {
+        return new Sequence<>(textArray, TextArray::stringValue);
+    }
+
+    public static @NotNull NodeLabelToken of(SequenceValue nodeLabels) {
+        return new Sequence<>(nodeLabels, (s, i) -> ((TextValue) s.value(i)).stringValue());
     }
 
     public static @NotNull NodeLabelToken ofNodeLabels(NodeLabel... nodeLabels) {
@@ -104,7 +110,7 @@ public final class NodeLabelTokens {
         return new Singleton<>(nodeLabel, Function.identity());
     }
 
-    private static @Nullable NodeLabelToken ofList(List<?> nodeLabels) {
+    private static NodeLabelToken ofList(List<?> nodeLabels) {
         if (nodeLabels.isEmpty()) {
             return empty();
         }
@@ -128,10 +134,10 @@ public final class NodeLabelTokens {
             return new JavaList<>((List<Label>) nodeLabels, NodeLabelTokens::labelOf);
         }
 
-        return null;
+        return invalid();
     }
 
-    private static @Nullable NodeLabelToken ofSingleton(Object nodeLabel) {
+    private static NodeLabelToken ofSingleton(Object nodeLabel) {
         if (nodeLabel instanceof NodeLabel) {
             return new Singleton<>((NodeLabel) nodeLabel, Function.identity());
         }
@@ -144,7 +150,7 @@ public final class NodeLabelTokens {
             return new Singleton<>((Label) nodeLabel, NodeLabelTokens::labelOf);
         }
 
-        return null;
+        return invalid();
     }
 
     private static NodeLabel labelOf(String label) {
@@ -155,7 +161,87 @@ public final class NodeLabelTokens {
         return new NodeLabel(label.name());
     }
 
-    private enum Null implements NodeLabelToken {
+    private enum Missing implements NodeLabelToken {
+        INSTANCE;
+
+        @Override
+        public boolean isMissing() {
+            return true;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
+
+        @Override
+        public boolean isInvalid() {
+            return false;
+        }
+
+        @Override
+        public int size() {
+            return 0;
+        }
+
+        @Override
+        public @NotNull NodeLabel get(int index) {
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        public String[] getStrings() {
+            return new String[0];
+        }
+    }
+
+    private enum Invalid implements NodeLabelToken {
+        INSTANCE;
+
+        @Override
+        public boolean isMissing() {
+            return false;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
+
+        @Override
+        public boolean isInvalid() {
+            return true;
+        }
+
+        @Override
+        public int size() {
+            return 0;
+        }
+
+        @Override
+        public @NotNull NodeLabel get(int index) {
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        public String[] getStrings() {
+            return new String[0];
+        }
+    }
+
+    private interface ValidNodeLabelToken extends NodeLabelToken {
+        @Override
+        default boolean isMissing() {
+            return false;
+        }
+
+        @Override
+        default boolean isInvalid() {
+            return false;
+        }
+    }
+
+    private enum Empty implements ValidNodeLabelToken {
         INSTANCE;
 
         @Override
@@ -179,7 +265,7 @@ public final class NodeLabelTokens {
         }
     }
 
-    private static final class Array<T> implements NodeLabelToken {
+    private static final class Array<T> implements ValidNodeLabelToken {
         private final @NotNull T[] nodeLabels;
 
         private final Function<T, NodeLabel> toNodeLabel;
@@ -223,7 +309,7 @@ public final class NodeLabelTokens {
         }
     }
 
-    private static final class JavaList<T> implements NodeLabelToken {
+    private static final class JavaList<T> implements ValidNodeLabelToken {
         private final @NotNull List<T> nodeLabels;
 
         private final Function<T, NodeLabel> toNodeLabel;
@@ -267,7 +353,7 @@ public final class NodeLabelTokens {
         }
     }
 
-    private static final class Sequence<T extends SequenceValue> implements NodeLabelToken {
+    private static final class Sequence<T extends SequenceValue> implements ValidNodeLabelToken {
         private final T sequence;
         private final ObjectIntToObjectFunction<T, String> toString;
 
@@ -312,7 +398,7 @@ public final class NodeLabelTokens {
         }
     }
 
-    private static final class Singleton<T> implements NodeLabelToken {
+    private static final class Singleton<T> implements ValidNodeLabelToken {
 
         private final NodeLabel item;
 

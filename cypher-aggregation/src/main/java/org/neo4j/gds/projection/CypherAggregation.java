@@ -154,8 +154,8 @@ public final class CypherAggregation {
 
             Map<String, Value> sourceNodePropertyValues = null;
             Map<String, Value> targetNodePropertyValues = null;
-            @Nullable NodeLabelToken sourceNodeLabels = null;
-            @Nullable NodeLabelToken targetNodeLabels = null;
+            NodeLabelToken sourceNodeLabels = NodeLabelTokens.missing();
+            NodeLabelToken targetNodeLabels = NodeLabelTokens.missing();
 
             if (nodesConfig != null) {
                 sourceNodePropertyValues = propertiesConfig("sourceNodeProperties", nodesConfig);
@@ -265,8 +265,8 @@ public final class CypherAggregation {
         private void initIdMapBuilder(
             @Nullable Map<String, Value> sourceNodePropertyValues,
             @Nullable Map<String, Value> targetNodePropertyValues,
-            @Nullable NodeLabelToken sourceNodeLabels,
-            @Nullable NodeLabelToken targetNodeLabels
+            NodeLabelToken sourceNodeLabels,
+            NodeLabelToken targetNodeLabels
         ) {
             if (this.idMapBuilder == null) {
                 initObjectUnderLock(() -> this.idMapBuilder, () -> {
@@ -297,14 +297,14 @@ public final class CypherAggregation {
 
         @NotNull
         private LazyIdMapBuilder newIdMapBuilder(
-            @Nullable NodeLabelToken sourceNodeLabels,
+            NodeLabelToken sourceNodeLabels,
             @Nullable Map<String, Value> sourceNodeProperties,
-            @Nullable NodeLabelToken targetNodeLabels,
+            NodeLabelToken targetNodeLabels,
             @Nullable Map<String, Value> targetNodeProperties
         ) {
             assert this.config != null;
 
-            boolean hasLabelInformation = !(sourceNodeLabels == null && targetNodeLabels == null);
+            boolean hasLabelInformation = !(sourceNodeLabels.isMissing() && targetNodeLabels.isMissing());
             boolean hasProperties = !(sourceNodeProperties == null && targetNodeProperties == null);
             return new LazyIdMapBuilder(config.readConcurrency(), hasLabelInformation, hasProperties);
         }
@@ -346,11 +346,9 @@ public final class CypherAggregation {
             @Nullable Object nodeLabels,
             String nodeLabelKey
         ) {
-            if (nodeLabels == null || Boolean.FALSE.equals(nodeLabels)) {
+            if (Boolean.FALSE.equals(nodeLabels)) {
                 return NodeLabelTokens.empty();
             }
-
-            NodeLabelToken nodeLabelToken;
 
             if (Boolean.TRUE.equals(nodeLabels)) {
                 if (!(node instanceof Node)) {
@@ -358,16 +356,16 @@ public final class CypherAggregation {
                         "Using `true` to load all labels does only work if the node is a Neo4j node object"
                     );
                 }
-                nodeLabelToken = NodeLabelTokens.ofNullable(((Node) node).getLabels());
-            } else {
-                nodeLabelToken = NodeLabelTokens.ofNullable(nodeLabels);
+                nodeLabels = ((Node) node).getLabels();
             }
 
-            if (nodeLabelToken == null) {
+            var nodeLabelToken = NodeLabelTokens.ofNullable(nodeLabels);
+
+            if (nodeLabelToken.isInvalid()) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "The value of `%s` must be either a `List of Strings`, a `String`, or a `Boolean`, but was `%s`.",
                     nodeLabelKey,
-                    nodeLabels.getClass().getSimpleName()
+                    nodeLabels != null ? nodeLabels.getClass().getSimpleName() : "null"
                 ));
             }
 
@@ -507,15 +505,12 @@ public final class CypherAggregation {
          */
         private long loadNode(
             @Nullable Object node,
-            @Nullable NodeLabelToken nodeLabels,
+            NodeLabelToken nodeLabels,
             @Nullable Map<String, Value> nodeProperties
         ) {
             assert this.idMapBuilder != null;
 
             var originalNodeId = extractNodeId(node);
-            if (nodeLabels == null) {
-                nodeLabels = NodeLabelTokens.empty();
-            }
 
             return nodeProperties == null
                 ? this.idMapBuilder.addNode(originalNodeId, nodeLabels)

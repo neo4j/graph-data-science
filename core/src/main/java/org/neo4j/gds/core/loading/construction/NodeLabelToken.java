@@ -24,6 +24,21 @@ import org.neo4j.gds.NodeLabel;
 
 public interface NodeLabelToken {
 
+    /**
+     * @return `true` iff no label information was provided at all.
+     */
+    boolean isMissing();
+
+    /**
+     * @return `true` iff the provided label information could not be mapped to an internal type
+     *         because it was provided as a wrong type.
+     */
+    boolean isInvalid();
+
+    /**
+     * @return `true` if the provided label information does not actually contain any labels or
+     *         if no label information was provided at all.
+     */
     boolean isEmpty();
 
     int size();
