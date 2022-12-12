@@ -30,6 +30,7 @@ import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.DeletionResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.RelationshipsAndDirection;
 import org.neo4j.values.storable.NumberType;
 
@@ -177,6 +178,11 @@ public interface GraphStore {
         Optional<NumberType> relationshipPropertyType,
         Direction direction,
         Relationships relationships
+    );
+
+    void addRelationshipType(
+        RelationshipType relationshipType,
+        SingleTypeRelationshipImportResult relationships
     );
 
     DeletionResult deleteRelationships(RelationshipType relationshipType);

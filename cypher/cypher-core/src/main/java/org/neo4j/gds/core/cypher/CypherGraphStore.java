@@ -29,6 +29,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.values.storable.NumberType;
 
@@ -115,6 +116,21 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
             direction, relationships);
         relationshipPropertyKey.ifPresent(
             propertyKey -> stateVisitors.forEach(stateVisitor -> stateVisitor.relationshipPropertyAdded(propertyKey))
+        );
+        stateVisitors.forEach(stateVisitor -> stateVisitor.relationshipTypeAdded(relationshipType.name()));
+    }
+
+    @Override
+    public void addRelationshipType(
+        RelationshipType relationshipType,
+        SingleTypeRelationshipImportResult relationships
+    ) {
+        innerGraphStore().addRelationshipType(relationshipType, relationships);
+        relationships.properties().ifPresent(
+            properties -> properties
+                .keySet()
+                .forEach(propertyKey -> stateVisitors.forEach(stateVisitor -> stateVisitor.relationshipPropertyAdded(
+                    propertyKey)))
         );
         stateVisitors.forEach(stateVisitor -> stateVisitor.relationshipTypeAdded(relationshipType.name()));
     }
