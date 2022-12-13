@@ -9,8 +9,10 @@ Neo4j Fabric is a way to store and retrieve data in multiple databases, whether 
 For more information about Fabric itself, please visit the https://neo4j.com/docs/operations-manual/4.4/fabric/introduction/[Fabric documentation].
 
 A typical Neo4j Fabric setup consists of two components: one or more shards that hold the data and one or more Fabric proxies that coordinate the distributed queries.
-Currently, the way of running the Neo4j Graph Data Science library in a Fabric deployment is to run GDS on the shards.
-Executing GDS on a Fabric proxy is currently not supported.
+There are two ways of running the Neo4j Graph Data Science library in a Fabric deployment, both of which are covered in this section:
+
+ . Running GDS on a Fabric <<fabric-shard, _shard_>>
+ . Running GDS on a Fabric <<fabric-proxy, _proxy_>>
 
 [[fabric-shard]]
 == Running GDS on the Shards
@@ -75,7 +77,54 @@ The query first connects to the analytical database where the PageRank algorithm
 The algorithm results are streamed to the proxy, together with the unique node id.
 For every row returned by the first subquery, the operational database is then queried for the persons name, again using the unique node id to identify the `Person` node across the shards.
 
-[[fabric-shard-limitations]]
-=== Limitations
 
-* It is not possible to run algorithms across shards.
+[[fabric-proxy]]
+== Running GDS on the Fabric Proxy
+
+In this mode of using GDS in a Fabric environment, the GDS operations are executed on the Fabric proxy server.
+The graph projections are then using the data stored on the shards to construct the in-memory graph.
+
+NOTE: Currently only xref:management-ops/projections/graph-project-cypher-aggregation.adoc[Cypher Aggregation] is supported for projecting in-memory graphs on a Fabric proxy.
+
+Graph algorithms can then be executed on the Fabric proxy, similar to a single machine setup.
+This scenario is useful, if a graph, that logically represents a single graph, is distributed to different Fabric shards.
+
+[[fabric-proxy-setup]]
+=== Setup
+
+In this scenario we need to set up the proxy to run the Neo4j Graph Data Science library.
+
+The dbms that manages the Fabric proxy database needs to have the GDS plugin installed and configured.
+For more information see xref:installation/index.adoc[Installation].
+The proxy node should also be configured to handle the amount of data received from the shards as well as executing graph projections and algorithms.
+
+Fabric shards do not need any special configuration, i.e., the GDS library plugin does not need to be installed.
+
+[[fabric-proxy-examples]]
+=== Examples
+
+Let's assume we have a Fabric setup with two shards.
+Both shards function as the operational databases and hold graphs with the schema `(Person)-[KNOWS]->(Person)`.
+
+We now need to query the shards in order to drive the import process on the proxy node.
+
+[source, cypher, role=noplay]
+----
+CALL {
+  USE FABRIC_DB_NAME.FABRIC_SHARD_0_NAME
+  MATCH (p:Person) OPTIONAL MATCH (p)-[:KNOWS]->(n:Person)
+  RETURN p, n
+  UNION
+  USE FABRIC_DB_NAME.FABRIC_SHARD_1_NAME
+  MATCH (p:Person) OPTIONAL MATCH (p)-[:KNOWS]->(n:Person)
+  RETURN p, n
+}
+WITH gds.alpha.graph.project('graph', p, n) AS graph
+RETURN
+  graph.graphName AS graphName,
+  graph.nodeCount AS nodeCount,
+  graph.relationshipCount AS relationshipCount
+----
+
+We have now projected a graph with 5 nodes and 4 relationships.
+This graph can now be used like any standalone GDS database.
