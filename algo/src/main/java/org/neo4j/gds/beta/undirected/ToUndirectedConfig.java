@@ -23,14 +23,18 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.MutateConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
-public interface ToUndirectedConfig extends AlgoBaseConfig {
+public interface ToUndirectedConfig extends AlgoBaseConfig, MutateConfig {
 
-    @Configuration.Parameter
     RelationshipType fromRelationshipType();
 
-    @Configuration.Parameter
     RelationshipType toRelationshipType();
+
+    public static ToUndirectedConfig of(CypherMapWrapper configuration) {
+        return new ToUndirectedConfigImpl(configuration);
+    }
 }
