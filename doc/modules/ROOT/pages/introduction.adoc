@@ -22,6 +22,8 @@ Each of these exist in one of three tiers of maturity:
 ** Indicates that the feature is experimental and might be changed or removed at any time.
 ** Features in this tier are prefixed with `gds.alpha.<operation>`.
 
+The xref:operations-reference/appendix-a.adoc[Operations Reference], lists all operations in GDS according to their tier.
+
 
 [[introduction-algorithms]]
 == Algorithms
