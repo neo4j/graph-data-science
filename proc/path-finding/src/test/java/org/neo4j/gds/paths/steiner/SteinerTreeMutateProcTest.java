@@ -64,7 +64,7 @@ class SteinerTreeMutateProcTest extends BaseProcTest {
         var terminalNode = idFunction.of("b");
 
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.steinerTree")
+            .algo("gds.beta.steinerTree")
             .mutateMode()
             .addParameter("sourceNode", sourceNode)
             .addParameter("targetNodes", List.of(terminalNode))
@@ -111,7 +111,7 @@ class SteinerTreeMutateProcTest extends BaseProcTest {
         var terminalNode = idFunction.of("b");
 
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.steinerTree")
+            .algo("gds.beta.steinerTree")
             .mutateMode()
             .addParameter("sourceNode", sourceNode)
             .addParameter("targetNodes", List.of(terminalNode))

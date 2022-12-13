@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 
 public class SteinerTreeMutateProc extends BaseProc {
-    static final String procedure = "gds.alpha.steinerTree.mutate";
+    static final String procedure = "gds.beta.steinerTree.mutate";
     static final String DESCRIPTION = SteinerTreeStatsProc.DESCRIPTION;
 
 

@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
 
-@GdsCallable(name = "gds.alpha.SteinerTree.write", description = SteinerTreeStatsProc.DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
+@GdsCallable(name = "gds.beta.SteinerTree.write", description = SteinerTreeStatsProc.DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
 public class SteinerTreeWriteSpec implements AlgorithmSpec<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeWriteConfig, Stream<WriteResult>, SteinerTreeAlgorithmFactory<SteinerTreeWriteConfig>> {
 
     @Override

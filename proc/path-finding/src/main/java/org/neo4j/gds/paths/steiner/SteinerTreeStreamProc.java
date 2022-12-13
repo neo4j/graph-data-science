@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 
 public class SteinerTreeStreamProc extends BaseProc {
-    static final String procedure = "gds.alpha.steinerTree.stream";
+    static final String procedure = "gds.beta.steinerTree.stream";
     static final String DESCRIPTION = SteinerTreeStatsProc.DESCRIPTION;
 
 

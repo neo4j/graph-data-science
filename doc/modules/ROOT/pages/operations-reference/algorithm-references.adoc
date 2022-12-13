@@ -360,9 +360,9 @@
 | `gds.alpha.modularity.stats`
 | `gds.alpha.modularity.stream`
 .4+<.^| xref:algorithms/directed-steiner-tree.adoc[Minimum Directed Steiner Tree]
-| `gds.alpha.steinerTree.mutate`
-| `gds.alpha.steinerTree.stats`
-| `gds.alpha.steinerTree.stream`
-| `gds.alpha.steinerTree.write`
+| `gds.beta.steinerTree.mutate`
+| `gds.beta.steinerTree.stats`
+| `gds.beta.steinerTree.stream`
+| `gds.beta.steinerTree.write`
 
 |===

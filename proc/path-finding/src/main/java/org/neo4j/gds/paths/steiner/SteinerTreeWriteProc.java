@@ -40,7 +40,7 @@ public class SteinerTreeWriteProc extends BaseProc {
     @Context
     public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
 
-    @Procedure(value = "gds.alpha.steinerTree.write", mode = WRITE)
+    @Procedure(value = "gds.beta.steinerTree.write", mode = WRITE)
     @Description(SteinerTreeStatsProc.DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
