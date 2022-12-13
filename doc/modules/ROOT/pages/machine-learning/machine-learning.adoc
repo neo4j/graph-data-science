@@ -2,11 +2,11 @@
 = Machine learning
 :description: This chapter provides explanations and examples for the supervised machine learning in the Neo4j Graph Data Science library.
 
-image::pipeline-prediction.svg[]
-
 In GDS, our pipelines offer an end-to-end workflow, from feature extraction to training and applying machine learning models.
 Pipelines can be inspected through the xref:pipeline-catalog/pipeline-catalog.adoc[Pipeline catalog].
 The trained models can then be accessed via the xref:model-catalog/index.adoc[Model catalog] and used to make predictions about your graph.
+
+image::pipeline-prediction.svg["Workflow of pipelines and models."]
 
 To help with building the ML models, there are additional guides for pre-processing and hyperparameter tuning available in:
 
