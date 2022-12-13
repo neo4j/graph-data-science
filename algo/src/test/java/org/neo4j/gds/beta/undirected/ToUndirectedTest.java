@@ -92,6 +92,96 @@ class ToUndirectedTest {
         }
     }
 
+    @GdlGraph(graphNamePrefix = "singleDirected", orientation = Orientation.NATURAL)
+    private static final String SINGLE_PROPERTY_DIRECTED =
+        "  (a), (b), (c), (d)" +
+        ", (a)-[:T1 {prop1: 42.0D}]->(b)" +
+        ", (b)-[:T1 {prop1: 1.0D}]->(a)" +
+        ", (b)-[:T1 {prop1: 4.0D}]->(c)" +
+        ", (a)-[:T1 {prop1: 4.0D}]->(a)";
+
+    @GdlGraph(graphNamePrefix = "singleUndirected", orientation = Orientation.UNDIRECTED)
+    private static final String SINGLE_PROPERTY_UNDIRECTED =
+        "  (a), (b), (c), (d)" +
+        ", (a)-[:T2 {prop1: 42.0D}]->(b)" +
+        ", (b)-[:T2 {prop1: 1.0D}]->(a)" +
+        ", (b)-[:T2 {prop1: 4.0D}]->(c)" +
+        ", (a)-[:T2 {prop1: 4.0D}]->(a)";
+    @Inject
+    GraphStore singleDirectedGraphStore;
+    @Inject
+    GraphStore singleUndirectedGraphStore;
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void shouldCreateUndirectedRelationshipsWithSingleRelationshipProperty(int concurrency) {
+        var config = ImmutableToUndirectedConfig
+            .builder()
+            .concurrency(concurrency)
+            .relationshipType("T1")
+            .mutateRelationshipType("T2")
+            .build();
+
+        SingleTypeRelationshipImportResult undirectedRelationships = new ToUndirected(
+            singleDirectedGraphStore,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            Pools.DEFAULT
+        ).compute();
+
+        singleDirectedGraphStore.addRelationshipType(RelationshipType.of(config.mutateRelationshipType()), undirectedRelationships);
+
+        assertGraphEquals(
+            singleUndirectedGraphStore.getGraph(RelationshipType.of("T2"), Optional.of("prop1")),
+            singleDirectedGraphStore.getGraph(RelationshipType.of("T2"), Optional.of("prop1"))
+        );
+    }
+
+    @GdlGraph(graphNamePrefix = "noPropertyDirected", orientation = Orientation.NATURAL)
+    private static final String NO_PROPERTY_DIRECTED =
+        "  (a), (b), (c), (d)" +
+        ", (a)-[:T1]->(b)" +
+        ", (b)-[:T1]->(a)" +
+        ", (b)-[:T1]->(c)" +
+        ", (a)-[:T1]->(a)";
+
+    @GdlGraph(graphNamePrefix = "noPropertyUndirected", orientation = Orientation.UNDIRECTED)
+    private static final String NO_PROPERTY_UNDIRECTED =
+        "  (a), (b), (c), (d)" +
+        ", (a)-[:T2]->(b)" +
+        ", (b)-[:T2]->(a)" +
+        ", (b)-[:T2]->(c)" +
+        ", (a)-[:T2]->(a)";
+    @Inject
+    GraphStore noPropertyDirectedGraphStore;
+    @Inject
+    GraphStore noPropertyUndirectedGraphStore;
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void shouldCreateUndirectedRelationshipsWithNoRelationshipProperty(int concurrency) {
+        var config = ImmutableToUndirectedConfig
+            .builder()
+            .concurrency(concurrency)
+            .relationshipType("T1")
+            .mutateRelationshipType("T2")
+            .build();
+
+        SingleTypeRelationshipImportResult undirectedRelationships = new ToUndirected(
+            noPropertyDirectedGraphStore,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            Pools.DEFAULT
+        ).compute();
+
+        noPropertyDirectedGraphStore.addRelationshipType(RelationshipType.of(config.mutateRelationshipType()), undirectedRelationships);
+
+        assertGraphEquals(
+            noPropertyUndirectedGraphStore.getGraph(RelationshipType.of("T2")),
+            noPropertyDirectedGraphStore.getGraph(RelationshipType.of("T2"))
+        );
+    }
+
     @Test
     void shouldLogProgress() {
         var log = Neo4jProxy.testLog();
