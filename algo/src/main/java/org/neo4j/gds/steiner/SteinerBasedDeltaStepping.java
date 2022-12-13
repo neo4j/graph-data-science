@@ -143,7 +143,6 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
             task.setBinIndex(currentBin);
         }
         ParallelUtil.run(tasks, executorService);
-        progressTracker.endSubTask();
     }
 
     private long nextTerminal(HugeLongPriorityQueue terminalQueue) {
@@ -169,6 +168,8 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
         frontierIndex.set(0);
         metTerminals.increment();
         unvisitedTerminal.flip(terminalId);
+
+        progressTracker.logProgress();
 
         if (metTerminals.longValue() == numOfTerminals) { //if we have found paths to all terminals,  terminate early
             return true;

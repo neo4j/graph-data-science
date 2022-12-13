@@ -166,7 +166,8 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             false,
             binSizeThreshold,
             //setting custom threshold for such a small graph allows to not examine everything in a single iteration
-            Pools.DEFAULT
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
         ).compute();
 
         long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOTNODE, a[0], a[1], a[2], a[3], a[4]};
@@ -185,7 +186,8 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             2.0,
             1,
             false,
-            Pools.DEFAULT
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
         )
             .compute();
 
@@ -236,7 +238,8 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             2.0,
             1,
             false,
-            Pools.DEFAULT
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
         ).compute();
 
         long[] parentArray = new long[]{
@@ -264,7 +267,8 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             2.0,
             1,
             false,
-            Pools.DEFAULT
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
         ).compute();
 
         long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOTNODE, a[0], a[1], a[2]};

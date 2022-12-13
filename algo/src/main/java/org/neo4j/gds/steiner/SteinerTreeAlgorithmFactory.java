@@ -23,6 +23,8 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,7 +52,8 @@ public class SteinerTreeAlgorithmFactory<CONFIG extends SteinerTreeBaseConfig> e
             configuration.delta(),
             configuration.concurrency(),
             configuration.applyRerouting(),
-            Pools.DEFAULT
+            Pools.DEFAULT,
+            progressTracker
         );
 
     }
@@ -58,5 +61,19 @@ public class SteinerTreeAlgorithmFactory<CONFIG extends SteinerTreeBaseConfig> e
     @Override
     public String taskName() {
         return "SteinerTree";
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        var targetNodesSize = config.targetNodes().size();
+        if (config.applyRerouting()) {
+            long nodeCount = graph.nodeCount();
+            return Tasks.task(taskName(), List.of(
+                Tasks.leaf("Main", targetNodesSize),
+                Tasks.leaf("Rerouting", nodeCount)
+            ));
+        } else {
+            return Tasks.leaf(taskName(), targetNodesSize);
+        }
     }
 }
