@@ -7,6 +7,8 @@ In GDS, our pipelines offer an end-to-end workflow, from feature extraction to t
 Pipelines can be inspected through the xref:pipeline-catalog/pipeline-catalog.adoc[Pipeline catalog].
 The trained models can then be accessed via the xref:model-catalog/index.adoc[Model catalog] and used to make predictions about your graph.
 
+image::pipeline-prediction.svg["Workflow of pipelines and models."]
+
 To help with building the ML models, there are additional guides for pre-processing and hyperparameter tuning available in:
 
 * xref:machine-learning/pre-processing.adoc[Pre-processing]
