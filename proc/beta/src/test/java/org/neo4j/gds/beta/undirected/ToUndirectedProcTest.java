@@ -32,6 +32,7 @@ import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,9 +49,9 @@ class ToUndirectedProcTest extends BaseProcTest {
                                     "(a:A) " +
                                     ",(b:B) " +
                                     ",(c:C) " +
-                                    ",(a)-[:REL]->(b)" +
-                                    ",(a)-[:REL]->(c)" +
-                                    ",(b)-[:REL]->(c)";
+                                    ",(a)-[:REL {prop1: 1.0}]->(b)" +
+                                    ",(a)-[:REL {prop1: 2.0}]->(c)" +
+                                    ",(b)-[:REL {prop1: 3.0}]->(c)";
 
     @BeforeEach
     void setup() throws Exception {
@@ -62,6 +63,7 @@ class ToUndirectedProcTest extends BaseProcTest {
             .withNodeLabel("B")
             .withNodeLabel("C")
             .withRelationshipType("REL")
+            .withRelationshipProperty("prop1")
             .yields()
         );
     }
@@ -80,8 +82,11 @@ class ToUndirectedProcTest extends BaseProcTest {
         ));
 
         var gs = GraphStoreCatalog.get("", "neo4j", "graph");
-        var graph = gs.graphStore().getGraph(RelationshipType.of("REL2"));
-        assertGraphEquals(fromGdl(DB.replace("REL", "REL2"), Orientation.UNDIRECTED), graph);
+        var graph = gs.graphStore().getGraph(RelationshipType.of("REL2"), Optional.of("prop1"));
+        assertGraphEquals(
+            fromGdl(DB.replace("REL", "REL2"), Orientation.UNDIRECTED),
+            graph
+        );
     }
 
     @Test
