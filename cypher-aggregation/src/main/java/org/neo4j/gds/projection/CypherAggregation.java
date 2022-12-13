@@ -66,8 +66,12 @@ import org.neo4j.procedure.UserAggregationUpdate;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.SequenceValue;
 import org.neo4j.values.storable.BooleanValue;
+import org.neo4j.values.storable.ByteValue;
+import org.neo4j.values.storable.IntValue;
 import org.neo4j.values.storable.IntegralValue;
+import org.neo4j.values.storable.LongValue;
 import org.neo4j.values.storable.NoValue;
+import org.neo4j.values.storable.ShortValue;
 import org.neo4j.values.storable.StringArray;
 import org.neo4j.values.storable.StringValue;
 import org.neo4j.values.storable.TextArray;
@@ -711,18 +715,7 @@ public final class CypherAggregation {
         }
 
         private static long extractNodeId(@NotNull AnyValue node) {
-            // TODO: mapper
-            if (node instanceof VirtualNodeValue) {
-                return ((VirtualNodeValue) node).id();
-            } else if (node instanceof IntegralValue) {
-                return ((IntegralValue) node).longValue();
-            } else {
-                throw invalidNodeType(node);
-            }
-        }
-
-        private static IllegalArgumentException invalidNodeType(@NotNull AnyValue node) {
-            return new IllegalArgumentException("The node has to be either a NODE or an INTEGER, but got " + node.getTypeName());
+            return node.map(ExtractNodeId.INSTANCE);
         }
     }
 
@@ -886,6 +879,54 @@ public final class CypherAggregation {
         @Override
         public NodeLabelToken mapStringArray(StringArray value) {
             return mapTextArray(value);
+        }
+    }
+
+    private enum ExtractNodeId implements PartialValueMapper<Long> {
+        INSTANCE;
+
+        @Override
+        public Long unsupported(AnyValue value) {
+            throw invalidNodeType(value.getTypeName());
+        }
+
+        @Override
+        public Long mapNode(VirtualNodeValue value) {
+            return value.id();
+        }
+
+        @Override
+        public Long mapSequence(SequenceValue value) {
+            throw invalidNodeType("List");
+        }
+
+        @Override
+        public Long mapIntegral(IntegralValue value) {
+            return value.longValue();
+        }
+
+        @Override
+        public Long mapByte(ByteValue value) {
+            return value.longValue();
+        }
+
+        @Override
+        public Long mapShort(ShortValue value) {
+            return value.longValue();
+        }
+
+        @Override
+        public Long mapInt(IntValue value) {
+            return value.longValue();
+        }
+
+        @Override
+        public Long mapLong(LongValue value) {
+            return value.longValue();
+        }
+
+        private static IllegalArgumentException invalidNodeType(String typeName) {
+            return new IllegalArgumentException("The node has to be either a NODE or an INTEGER, but got " + typeName);
         }
     }
 }
