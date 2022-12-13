@@ -2,6 +2,7 @@
 = Pregel API
 :description: This chapter provides documentation for the Pregel API in the Neo4j Graph Data Science library.
 
+include::partial$/common-usage/not-on-aurads-note.adoc[]
 
 [[algorithms-pregel-api-intro]]
 == Introduction
