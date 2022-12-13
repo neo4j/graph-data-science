@@ -21,8 +21,10 @@ package org.neo4j.gds.beta.undirected;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.executor.ProcedureExecutorSpec;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -48,5 +50,21 @@ public class ToUndirectedProc extends BaseProc {
             pipelineSpec,
             executionContext()
         ).compute(graphName, configuration, true, true);
+    }
+
+    @Procedure(value = "gds.beta.graph.relationships.toUndirected.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        var mutateSpec = new ToUndirectedSpec();
+        var pipelineSpec = new ProcedureExecutorSpec<ToUndirected, SingleTypeRelationshipImportResult, ToUndirectedConfig>();
+
+        return new MemoryEstimationExecutor<>(
+            mutateSpec,
+            pipelineSpec,
+            executionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

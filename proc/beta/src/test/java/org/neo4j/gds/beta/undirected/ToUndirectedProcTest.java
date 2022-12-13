@@ -112,4 +112,21 @@ class ToUndirectedProcTest extends BaseProcTest {
         );
         assertEquals(expectedMessage, throwable.getMessage());
     }
+
+    @Test
+    void memoryEstimation() {
+        String query = "CALL gds.beta.graph.relationships.toUndirected.estimate('graph', {relationshipType: 'REL', mutateRelationshipType: 'REL2'})";
+
+        assertCypherResult(query, List.of(Map.of(
+            "mapView", instanceOf(Map.class),
+            "treeView", instanceOf(String.class),
+            "bytesMax", 524632L,
+            "heapPercentageMin", 0.1D,
+            "nodeCount", 3L,
+            "requiredMemory", "[256 KiB ... 512 KiB]",
+            "bytesMin", 262360L,
+            "heapPercentageMax", 0.1D,
+            "relationshipCount", 3L
+        )));
+    }
 }

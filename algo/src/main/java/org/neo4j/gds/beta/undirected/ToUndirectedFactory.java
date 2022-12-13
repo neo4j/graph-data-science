@@ -20,8 +20,14 @@
 package org.neo4j.gds.beta.undirected;
 
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.huge.CompressedAdjacencyList;
+import org.neo4j.gds.core.huge.UncompressedAdjacencyList;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -49,5 +55,25 @@ public class ToUndirectedFactory extends GraphStoreAlgorithmFactory<ToUndirected
             Tasks.leaf("Create Undirected Relationships", graphStore.nodeCount()),
             Tasks.leaf("Build undirected Adjacency list")
         );
+    }
+
+    @Override
+    public MemoryEstimation memoryEstimation(ToUndirectedConfig configuration) {
+        RelationshipType relationshipType = RelationshipType.of(configuration.relationshipType());
+
+        var builder = MemoryEstimations.builder(ToUndirected.class)
+            .add("relationships", CompressedAdjacencyList.adjacencyListEstimation(relationshipType, true));
+
+        builder.perGraphDimension("properties", ((graphDimensions, integer) -> {
+            long max = graphDimensions.relationshipPropertyTokens().keySet().stream().mapToLong(__ ->
+                UncompressedAdjacencyList
+                    .adjacencyPropertiesEstimation(relationshipType, true)
+                    .estimate(graphDimensions, integer)
+                    .memoryUsage().max
+            ).sum();
+            return MemoryRange.of(0, max);
+        }));
+
+        return builder.build();
     }
 }

@@ -32,6 +32,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -78,10 +79,17 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
         );
         long relCount = filteredGraph.relationshipCount();
 
+        var relationshipTypeTokens = new HashMap<String, Integer>();
+        var i = 0;
+        for (String key : graphStore.relationshipPropertyKeys()) {
+            relationshipTypeTokens.put(key, i++);
+        }
+
         return ImmutableGraphDimensions.builder()
             .nodeCount(filteredGraph.nodeCount())
             .relationshipCounts(filteredGraphRelationshipCounts(config, graphStore, filteredGraph))
             .relCountUpperBound(relCount)
+            .relationshipPropertyTokens(relationshipTypeTokens)
             .build();
     }
 
