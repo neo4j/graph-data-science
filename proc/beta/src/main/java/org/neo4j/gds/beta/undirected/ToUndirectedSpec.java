@@ -75,6 +75,7 @@ public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeR
                     RelationshipType.of(computationResult.config().mutateRelationshipType()),
                     computationResult.result()
                 );
+                resultBuilder.withRelationshipsWritten(computationResult.result().topology().elementCount());
             }
         };
     }
@@ -111,8 +112,8 @@ public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeR
                 return new MutateResult(
                     preProcessingMillis,
                     computeMillis,
-                    0L,
                     mutateMillis,
+                    0,
                     inputRelationships,
                     relationshipsWritten,
                     config.toMap()

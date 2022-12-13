@@ -36,13 +36,13 @@ public interface ToUndirectedConfig extends AlgoBaseConfig, MutateRelationshipCo
     @Override
     @Configuration.Ignore
     default List<String> relationshipTypes() {
-        return List.of();
+        return List.of("*");
     }
 
     @Override
     @Configuration.Ignore
     default List<String> nodeLabels() {
-        return List.of();
+        return List.of("*");
     }
 
     public static ToUndirectedConfig of(CypherMapWrapper configuration) {
