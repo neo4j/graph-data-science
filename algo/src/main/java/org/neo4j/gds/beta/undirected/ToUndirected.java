@@ -21,6 +21,7 @@ package org.neo4j.gds.beta.undirected;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
@@ -66,10 +67,12 @@ public class ToUndirected extends Algorithm<SingleTypeRelationshipImportResult> 
     public SingleTypeRelationshipImportResult compute() {
         progressTracker.beginSubTask();
 
+        RelationshipType fromRelationshipType = RelationshipType.of(config.relationshipType());
+
         var propertySchemas = graphStore
             .schema()
             .relationshipSchema()
-            .propertySchemasFor(config.fromRelationshipType());
+            .propertySchemasFor(fromRelationshipType);
         var propertyKeys = propertySchemas.stream().map(PropertySchema::key).collect(Collectors.toList());
 
         RelationshipsBuilderBuilder relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
@@ -86,12 +89,12 @@ public class ToUndirected extends Algorithm<SingleTypeRelationshipImportResult> 
         RelationshipsBuilder relationshipsBuilder = relationshipsBuilderBuilder.build();
 
         CompositeRelationshipIterator relationshipIterator = graphStore.getCompositeRelationshipIterator(
-            config.fromRelationshipType(),
+            fromRelationshipType,
             propertyKeys
         );
 
         List<ToUndirectedTask> tasks = PartitionUtils.degreePartition(
-            graphStore.getGraph(config.fromRelationshipType()),
+            graphStore.getGraph(fromRelationshipType),
             config.concurrency(),
             (partition) -> new ToUndirectedTask(relationshipsBuilder, relationshipIterator.concurrentCopy(), partition, progressTracker),
             Optional.empty()

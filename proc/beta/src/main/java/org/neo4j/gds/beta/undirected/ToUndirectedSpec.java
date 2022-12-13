@@ -20,6 +20,7 @@
 package org.neo4j.gds.beta.undirected;
 
 import org.neo4j.gds.MutateComputationResultConsumer;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -34,13 +35,14 @@ import org.neo4j.gds.results.StandardMutateResult;
 import java.util.Map;
 import java.util.stream.Stream;
 
-@GdsCallable(name = "gds.beta.graph.relationship.toUndirected", executionMode = ExecutionMode.MUTATE_RELATIONSHIP)
+@GdsCallable(name = "gds.beta.graph.relationships.toUndirected", executionMode = ExecutionMode.MUTATE_RELATIONSHIP, description = ToUndirectedSpec.DESCRIPTION)
 public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeRelationshipImportResult, ToUndirectedConfig, Stream<ToUndirectedSpec.MutateResult>, ToUndirectedFactory> {
 
+    public static final String DESCRIPTION = "The ToUndirected procedure converts directed relationships to undirected relationships";
 
     @Override
     public String name() {
-        return "gds.beta.graph.relationship.toUndirected";
+        return "gds.beta.graph.relationships.toUndirected";
     }
 
     @Override
@@ -57,8 +59,7 @@ public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeR
         ComputationResult<ToUndirected, SingleTypeRelationshipImportResult, ToUndirectedConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        return new MutateResult.Builder()
-            .withInputRelationships(computeResult.graph().relationshipCount());
+        return new MutateResult.Builder().withInputRelationships(computeResult.graph().relationshipCount());
     }
 
     @Override
@@ -70,9 +71,10 @@ public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeR
                 ComputationResult<ToUndirected, SingleTypeRelationshipImportResult, ToUndirectedConfig> computationResult,
                 ExecutionContext executionContext
             ) {
-                computationResult
-                    .graphStore()
-                    .addRelationshipType(computationResult.config().toRelationshipType(), computationResult.result());
+                computationResult.graphStore().addRelationshipType(
+                    RelationshipType.of(computationResult.config().mutateRelationshipType()),
+                    computationResult.result()
+                );
             }
         };
     }

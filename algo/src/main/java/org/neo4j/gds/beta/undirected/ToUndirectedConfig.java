@@ -19,20 +19,31 @@
  */
 package org.neo4j.gds.beta.undirected;
 
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.MutateConfig;
+import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+
+import java.util.List;
 
 @ValueClass
 @Configuration
-public interface ToUndirectedConfig extends AlgoBaseConfig, MutateConfig {
+public interface ToUndirectedConfig extends AlgoBaseConfig, MutateRelationshipConfig {
+    @Configuration.ConvertWith(method = "validateTypeIdentifier")
+    String relationshipType();
 
-    RelationshipType fromRelationshipType();
+    @Override
+    @Configuration.Ignore
+    default List<String> relationshipTypes() {
+        return List.of();
+    }
 
-    RelationshipType toRelationshipType();
+    @Override
+    @Configuration.Ignore
+    default List<String> nodeLabels() {
+        return List.of();
+    }
 
     public static ToUndirectedConfig of(CypherMapWrapper configuration) {
         return new ToUndirectedConfigImpl(configuration);

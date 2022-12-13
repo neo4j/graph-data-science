@@ -71,8 +71,8 @@ class ToUndirectedTest {
         var config = ImmutableToUndirectedConfig
             .builder()
             .concurrency(concurrency)
-            .fromRelationshipType(RelationshipType.of("T1"))
-            .toRelationshipType(RelationshipType.of("T2"))
+            .relationshipType("T1")
+            .mutateRelationshipType("T2")
             .build();
 
         SingleTypeRelationshipImportResult undirectedRelationships = new ToUndirected(
@@ -82,7 +82,7 @@ class ToUndirectedTest {
             Pools.DEFAULT
         ).compute();
 
-        directedGraphStore.addRelationshipType(config.toRelationshipType(), undirectedRelationships);
+        directedGraphStore.addRelationshipType(RelationshipType.of(config.mutateRelationshipType()), undirectedRelationships);
 
         for (String relationshipPropertyKey : undirectedGraphStore.relationshipPropertyKeys()) {
             assertGraphEquals(
@@ -99,8 +99,8 @@ class ToUndirectedTest {
         var config = ImmutableToUndirectedConfig
             .builder()
             .concurrency(4)
-            .fromRelationshipType(RelationshipType.of("T1"))
-            .toRelationshipType(RelationshipType.of("T2"))
+            .relationshipType("T1")
+            .mutateRelationshipType("T2")
             .build();
 
         ToUndirected toUndirected = new ToUndirectedFactory().build(
