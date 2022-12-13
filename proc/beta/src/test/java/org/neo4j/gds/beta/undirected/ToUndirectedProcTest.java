@@ -28,13 +28,18 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ToUndirectedProcTest extends BaseProcTest {
 
@@ -62,7 +67,7 @@ class ToUndirectedProcTest extends BaseProcTest {
     }
 
     @Test
-    void convertToUndirect() {
+    void convertToUndirected() {
         String query = "CALL gds.beta.graph.relationships.toUndirected('graph', {relationshipType: 'REL', mutateRelationshipType: 'REL2'})";
 
         assertCypherResult(query, List.of(Map.of("inputRelationships", 3L,
@@ -77,5 +82,29 @@ class ToUndirectedProcTest extends BaseProcTest {
         var gs = GraphStoreCatalog.get("", "neo4j", "graph");
         var graph = gs.graphStore().getGraph(RelationshipType.of("REL2"));
         assertGraphEquals(fromGdl(DB.replace("REL", "REL2"), Orientation.UNDIRECTED), graph);
+    }
+
+    @Test
+    void shouldFailIfMutateRelationshipTypeExists() {
+        String query = "CALL gds.beta.graph.relationships.toUndirected('graph', {relationshipType: 'REL', mutateRelationshipType: 'REL'})";
+
+        Throwable throwable = rootCause(assertThrows(QueryExecutionException.class, () -> runQuery(query)));
+        assertEquals(IllegalArgumentException.class, throwable.getClass());
+        String expectedMessage = formatWithLocale(
+            "Relationship type `REL` already exists in the in-memory graph."
+        );
+        assertEquals(expectedMessage, throwable.getMessage());
+    }
+
+    @Test
+    void shouldFailIfRelationshipTypeDoesNotExists() {
+        String query = "CALL gds.beta.graph.relationships.toUndirected('graph', {relationshipType: 'REL2', mutateRelationshipType: 'REL2'})";
+
+        Throwable throwable = rootCause(assertThrows(QueryExecutionException.class, () -> runQuery(query)));
+        assertEquals(IllegalArgumentException.class, throwable.getClass());
+        String expectedMessage = formatWithLocale(
+            "Could not find the specified `relationshipType` of ['REL2']. Available relationship types are ['REL']."
+        );
+        assertEquals(expectedMessage, throwable.getMessage());
     }
 }
