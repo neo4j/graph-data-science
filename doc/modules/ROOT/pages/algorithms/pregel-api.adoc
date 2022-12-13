@@ -2,6 +2,7 @@
 = Pregel API
 :description: This chapter provides documentation for the Pregel API in the Neo4j Graph Data Science library.
 
+include::partial$/common-usage/not-on-aurads-note.adoc[]
 
 [[algorithms-pregel-api-intro]]
 == Introduction
@@ -29,11 +30,6 @@ First, we need to implement the algorithm using the Pregel Java API.
 Second, we need to expose the algorithm via a Cypher procedure to make use of it.
 
 For an example on how to expose a custom Pregel computation via a Neo4j procedure, have a look at the https://github.com/neo4j/graph-data-science/tree/{docs-version}/examples/pregel-example/src/main/java/org/neo4j/gds/beta/pregel[Pregel examples].
-
-[NOTE]
-====
-The Pregel API is not available in AuraDS.
-====
 
 [[algorithms-pregel-api-java]]
 == Pregel Java API
