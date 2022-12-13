@@ -334,9 +334,9 @@ class CypherAggregationTest extends BaseProcTest {
     }
 
     @Test
-    void testDirectLabelMapping() {
-        assertThatThrownBy(() -> runQuery(
-            "MATCH (s) RETURN gds.alpha.graph.project('g', s, null, { sourceNodeLabels: true })"))
+    void testInvalidDirectLabelMapping() {
+        var query = "MATCH (s) RETURN gds.alpha.graph.project('g', s, null, { sourceNodeLabels: true })";
+        assertThatThrownBy(() -> runQuery(query))
             .rootCause()
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Using `true` to load all labels is deprecated, use `{ sourceNodeLabels: labels(s) }` instead");
@@ -709,6 +709,40 @@ class CypherAggregationTest extends BaseProcTest {
         var config = CypherAggregation.GraphProjectFromCypherAggregationConfig.of("", "g", configMap);
 
         assertThat(config.readConcurrency()).isEqualTo(2);
+    }
+
+    @Test
+    void testUnknownNodeConfigKeys() {
+        var query = "MATCH (s) RETURN gds.alpha.graph.project('g', s, null, {foo: 'bar'})";
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .hasMessage("Unexpected configuration key: foo");
+    }
+
+    @Test
+    void testUnknownNodeConfigKeysWithSuggestion() {
+        var query = "MATCH (s) RETURN gds.alpha.graph.project('g', s, null, {sourceNode: 'bar'})";
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .hasMessage(
+                "Unexpected configuration key: sourceNode (Did you mean one of [sourceNodeLabels, sourceNodeProperties]?)");
+    }
+
+    @Test
+    void testUnknownRelationshipConfigKeys() {
+        var query = "MATCH (s)-->(t) RETURN gds.alpha.graph.project('g', s, t, null, {foo: 'bar'})";
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .hasMessage("Unexpected configuration key: foo");
+    }
+
+    @Test
+    void testUnknownRelationshipConfigKeysWithSuggestion() {
+        var query = "MATCH (s)--(t) RETURN gds.alpha.graph.project('g', s, null, null, {property: 'bar'})";
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .hasMessage(
+                "Unexpected configuration key: property (Did you mean [properties]?)");
     }
 
 }

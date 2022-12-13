@@ -32,9 +32,14 @@ public final class ConfigKeyValidation {
 
     private ConfigKeyValidation() {}
 
-    public static void requireOnlyKeysFrom(Collection<String> allowedKeys, Collection<String> configKeys) {
+    public static void requireOnlyKeysFrom(Collection<String> allowedKeys, Iterable<String> configKeys) {
         var unexpectedKeys = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-        unexpectedKeys.addAll(configKeys);
+        if (configKeys instanceof Collection<?>) {
+            unexpectedKeys.addAll((Collection<String>) configKeys);
+        } else {
+            configKeys.forEach(unexpectedKeys::add);
+        }
+
 
         // We are doing the equivalent of `removeAll` here.
         // As of jdk16, TreeSet does not have a specialized removeAll implementation and reverts to use
@@ -54,7 +59,12 @@ public final class ConfigKeyValidation {
         List<String> suggestions = unexpectedKeys.stream()
             .map(invalid -> {
                 List<String> candidates = StringSimilarity.similarStringsIgnoreCase(invalid, allowedKeys);
-                candidates.removeAll(configKeys);
+                if (configKeys instanceof Collection<?>) {
+                    candidates.removeAll((Collection<String>) configKeys);
+                } else {
+                    configKeys.forEach(candidates::remove);
+                }
+
 
                 if (candidates.isEmpty()) {
                     return invalid;
@@ -62,7 +72,12 @@ public final class ConfigKeyValidation {
                 if (candidates.size() == 1) {
                     return String.format(Locale.ENGLISH, "%s (Did you mean [%s]?)", invalid, candidates.get(0));
                 }
-                return String.format(Locale.ENGLISH, "%s (Did you mean one of [%s]?)", invalid, String.join(", ", candidates));
+                return String.format(
+                    Locale.ENGLISH,
+                    "%s (Did you mean one of [%s]?)",
+                    invalid,
+                    String.join(", ", candidates)
+                );
             })
             .collect(Collectors.toList());
 

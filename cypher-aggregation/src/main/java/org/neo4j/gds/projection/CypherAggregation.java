@@ -21,6 +21,7 @@ package org.neo4j.gds.projection;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
@@ -39,6 +40,7 @@ import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.ConfigKeyValidation;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
@@ -87,6 +89,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -121,6 +124,8 @@ public final class CypherAggregation {
         private final DatabaseId databaseId;
         private final String username;
 
+        private final ConfigValidator configValidator;
+
         // #result() may be called twice, we cache the result of the first call to return it again in the second invocation
         private @Nullable AggregationResult result;
 
@@ -137,6 +142,7 @@ public final class CypherAggregation {
             this.databaseId = databaseId;
             this.username = username;
             this.lock = new ReentrantLock();
+            this.configValidator = new ConfigValidator();
         }
 
         @UserAggregationUpdate
@@ -168,15 +174,7 @@ public final class CypherAggregation {
                     targetNodeLabels = labelsConfig("targetNodeLabels", (MapValue) nodesConfig);
                 }
 
-                // TODO:
-//                if (!nodesConfig.isEmpty()) {
-//                    CypherMapWrapper.create(nodesConfig).requireOnlyKeysFrom(List.of(
-//                        "sourceNodeProperties",
-//                        "sourceNodeLabels",
-//                        "targetNodeProperties",
-//                        "targetNodeLabels"
-//                    ));
-//                }
+                this.configValidator.validateNodesConfig((MapValue) nodesConfig);
             }
 
             var data = initGraphData(
@@ -196,7 +194,8 @@ public final class CypherAggregation {
                 targetNodePropertyValues,
                 sourceNodeLabels,
                 targetNodeLabels,
-                relationshipConfig
+                relationshipConfig,
+                this.configValidator
             );
         }
 
@@ -238,7 +237,6 @@ public final class CypherAggregation {
         }
 
         private static NodeLabelToken labelsConfig(String nodeLabelKey, @NotNull MapValue nodesConfig) {
-            // TODO: was remove
             var nodeLabelsEntry = nodesConfig.get(nodeLabelKey);
             return tryLabelsConfig(nodeLabelsEntry, nodeLabelKey);
         }
@@ -400,7 +398,8 @@ public final class CypherAggregation {
             @Nullable MapValue targetNodePropertyValues,
             NodeLabelToken sourceNodeLabels,
             NodeLabelToken targetNodeLabels,
-            AnyValue relationshipConfig
+            AnyValue relationshipConfig,
+            ConfigValidator configValidator
         ) {
             MapValue relationshipProperties = null;
             RelationshipType relationshipType = RelationshipType.ALL_RELATIONSHIPS;
@@ -409,13 +408,7 @@ public final class CypherAggregation {
                 relationshipProperties = propertiesConfig("properties", (MapValue) relationshipConfig);
                 relationshipType = typeConfig("relationshipType", (MapValue) relationshipConfig);
 
-                // TODO:
-//                if (!relationshipConfig.isEmpty()) {
-//                    CypherMapWrapper.create(relationshipConfig).requireOnlyKeysFrom(List.of(
-//                        "properties",
-//                        "relationshipType"
-//                    ));
-//                }
+                configValidator.validateRelationshipsConfig((MapValue) relationshipConfig);
             }
 
             var intermediateSourceId = loadNode(sourceNode, sourceNodeLabels, sourceNodePropertyValues);
@@ -678,7 +671,6 @@ public final class CypherAggregation {
             String propertyKey,
             @NotNull MapValue propertiesConfig
         ) {
-            // TODO: was remove
             var nodeProperties = propertiesConfig.get(propertyKey);
             if (nodeProperties instanceof MapValue) {
                 return (MapValue) nodeProperties;
@@ -698,7 +690,6 @@ public final class CypherAggregation {
             @SuppressWarnings("SameParameterValue") String relationshipTypeKey,
             @NotNull MapValue relationshipConfig
         ) {
-            // TODO: was remove
             var relationshipTypeEntry = relationshipConfig.get(relationshipTypeKey);
             if (relationshipTypeEntry instanceof TextValue) {
                 return RelationshipType.of(((TextValue) relationshipTypeEntry).stringValue());
@@ -719,6 +710,34 @@ public final class CypherAggregation {
         }
     }
 
+    private static final class ConfigValidator {
+        private static final Set<String> NODES_CONFIG_KEYS = Set.of(
+            "sourceNodeProperties",
+            "sourceNodeLabels",
+            "targetNodeProperties",
+            "targetNodeLabels"
+        );
+
+        private static final Set<String> RELATIONSHIPS_CONFIG_KEYS = Set.of(
+            "properties",
+            "relationshipType"
+        );
+
+        private final AtomicBoolean validateNodes = new AtomicBoolean(true);
+        private final AtomicBoolean validateRelationships = new AtomicBoolean(true);
+
+        void validateNodesConfig(MapValue nodesConfig) {
+            if (this.validateNodes.getAndSet(false)) {
+                ConfigKeyValidation.requireOnlyKeysFrom(NODES_CONFIG_KEYS, nodesConfig.keySet());
+            }
+        }
+
+        void validateRelationshipsConfig(MapValue relationshipConfig) {
+            if (this.validateRelationships.getAndSet(false)) {
+                ConfigKeyValidation.requireOnlyKeysFrom(RELATIONSHIPS_CONFIG_KEYS, relationshipConfig.keySet());
+            }
+        }
+    }
 
     @ValueClass
     @Configuration
@@ -770,6 +789,7 @@ public final class CypherAggregation {
             );
         }
 
+        @TestOnly
         static GraphProjectFromCypherAggregationConfig of(
             String userName,
             String graphName,
