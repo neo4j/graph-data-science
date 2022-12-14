@@ -26,7 +26,7 @@ import org.neo4j.values.SequenceValue;
 import org.neo4j.values.storable.BooleanValue;
 import org.neo4j.values.storable.FloatingPointValue;
 import org.neo4j.values.storable.IntegralValue;
-import org.neo4j.values.storable.StringArray;
+import org.neo4j.values.storable.TextArray;
 import org.neo4j.values.storable.TextValue;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.virtual.MapValue;
@@ -151,11 +151,11 @@ public final class ValueMapWrapper implements CypherMapAccess {
         }
 
         @Override
-        public T mapStringArray(StringArray value) {
+        public T mapTextArray(TextArray value) {
             if (List.class.isAssignableFrom(expectedType)) {
                 return expectedType.cast(List.of(value.asObject()));
             }
-            return PartialValueMapper.super.mapStringArray(value);
+            return PartialValueMapper.super.mapTextArray(value);
         }
 
         @Override

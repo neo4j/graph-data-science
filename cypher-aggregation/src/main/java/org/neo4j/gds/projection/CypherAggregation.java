@@ -68,14 +68,8 @@ import org.neo4j.procedure.UserAggregationUpdate;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.SequenceValue;
 import org.neo4j.values.storable.BooleanValue;
-import org.neo4j.values.storable.ByteValue;
-import org.neo4j.values.storable.IntValue;
 import org.neo4j.values.storable.IntegralValue;
-import org.neo4j.values.storable.LongValue;
 import org.neo4j.values.storable.NoValue;
-import org.neo4j.values.storable.ShortValue;
-import org.neo4j.values.storable.StringArray;
-import org.neo4j.values.storable.StringValue;
 import org.neo4j.values.storable.TextArray;
 import org.neo4j.values.storable.TextValue;
 import org.neo4j.values.virtual.MapValue;
@@ -858,6 +852,15 @@ public final class CypherAggregation {
         }
 
         @Override
+        public NodeLabelToken mapSequence(SequenceValue value) {
+            if (value.isEmpty()) {
+                return NodeLabelTokens.empty();
+            }
+
+            return NodeLabelTokens.of(value);
+        }
+
+        @Override
         public NodeLabelToken mapNoValue() {
             return NodeLabelTokens.missing();
         }
@@ -878,27 +881,8 @@ public final class CypherAggregation {
         }
 
         @Override
-        public NodeLabelToken mapString(StringValue value) {
-            return mapText(value);
-        }
-
-        @Override
-        public NodeLabelToken mapSequence(SequenceValue value) {
-            if (value.isEmpty()) {
-                return NodeLabelTokens.empty();
-            }
-
-            return NodeLabelTokens.of(value);
-        }
-
-        @Override
         public NodeLabelToken mapTextArray(TextArray value) {
             return NodeLabelTokens.of(value);
-        }
-
-        @Override
-        public NodeLabelToken mapStringArray(StringArray value) {
-            return mapTextArray(value);
         }
     }
 
@@ -911,37 +895,17 @@ public final class CypherAggregation {
         }
 
         @Override
-        public Long mapNode(VirtualNodeValue value) {
-            return value.id();
-        }
-
-        @Override
         public Long mapSequence(SequenceValue value) {
             throw invalidNodeType("List");
         }
 
         @Override
+        public Long mapNode(VirtualNodeValue value) {
+            return value.id();
+        }
+
+        @Override
         public Long mapIntegral(IntegralValue value) {
-            return value.longValue();
-        }
-
-        @Override
-        public Long mapByte(ByteValue value) {
-            return value.longValue();
-        }
-
-        @Override
-        public Long mapShort(ShortValue value) {
-            return value.longValue();
-        }
-
-        @Override
-        public Long mapInt(IntValue value) {
-            return value.longValue();
-        }
-
-        @Override
-        public Long mapLong(LongValue value) {
             return value.longValue();
         }
 
