@@ -46,6 +46,7 @@ import org.neo4j.gds.wcc.WccStreamProc;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
+import org.neo4j.kernel.api.procedure.GlobalProcedures;
 
 import java.util.List;
 import java.util.Map;
@@ -83,7 +84,9 @@ class CypherAggregationTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerAggregationFunctions(CypherAggregation.class);
+        var procedures = GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class);
+        procedures.register(new CypherAggregationFunction());
+//        registerAggregationFunctions(CypherAggregation.class);
         registerProcedures(GraphDropProc.class, GraphListProc.class, WccStreamProc.class);
     }
 

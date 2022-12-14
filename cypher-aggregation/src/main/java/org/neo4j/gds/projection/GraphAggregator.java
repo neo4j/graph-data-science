@@ -49,13 +49,20 @@ import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
+import org.neo4j.internal.kernel.api.procs.UserAggregationReducer;
+import org.neo4j.internal.kernel.api.procs.UserAggregationUpdater;
+import org.neo4j.kernel.api.exceptions.Status;
+import org.neo4j.kernel.impl.util.ValueUtils;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserAggregationResult;
 import org.neo4j.procedure.UserAggregationUpdate;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.TextValue;
+import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.MapValue;
+import org.neo4j.values.virtual.MapValueBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,7 +81,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 // public is required for the Cypher runtime
 @SuppressWarnings("WeakerAccess")
-public class GraphAggregator {
+public class GraphAggregator implements UserAggregationReducer, UserAggregationUpdater {
 
     private final DatabaseId databaseId;
     private final String username;
@@ -104,7 +111,7 @@ public class GraphAggregator {
     }
 
     @UserAggregationUpdate
-    public void update(
+    public void projectNextRelationship(
         @Name("graphName") TextValue graphName,
         @Name("sourceNode") AnyValue sourceNode,
         @Name(value = "targetNode", defaultValue = "null") AnyValue targetNode,
@@ -213,7 +220,7 @@ public class GraphAggregator {
 
     @UserAggregationResult
     @ReturnType(AggregationResult.class)
-    public @Nullable Map<String, Object> result() {
+    public @Nullable Map<String, Object> buildResult() {
         AggregationResult result = buildGraph();
         return result == null ? null : result.toMap();
     }
@@ -233,6 +240,65 @@ public class GraphAggregator {
         this.result = importer.result(this.username, this.databaseId, this.progressTimer);
 
         return this.result;
+    }
+
+    @Override
+    public UserAggregationUpdater newUpdater() {
+        return this;
+    }
+
+    @Override
+    public void update(AnyValue[] input) throws ProcedureException {
+        try {
+            this.projectNextRelationship(
+                (TextValue) input[0],
+                input[1],
+                input[2],
+                input[3],
+                input[4],
+                input[5]
+            );
+        } catch (Exception e) {
+            throw new ProcedureException(
+                Status.Procedure.ProcedureCallFailed,
+                e,
+                "Failed to invoke function `%s`: Caused by: %s",
+                CypherAggregationFunction.FUNCTION_NAME,
+                e
+            );
+        }
+    }
+
+    @Override
+    public void applyUpdates() {
+    }
+
+    @Override
+    public AnyValue result() throws ProcedureException {
+        AggregationResult result;
+        try {
+            result = buildGraph();
+        } catch (Exception e) {
+            throw new ProcedureException(
+                Status.Procedure.ProcedureCallFailed,
+                e,
+                "Failed to invoke function `%s`: Caused by: %s",
+                CypherAggregationFunction.FUNCTION_NAME,
+                e
+            );
+        }
+
+        if (result == null) {
+            return Values.NO_VALUE;
+        }
+
+        var builder = new MapValueBuilder(6);
+        builder.add("graphName", Values.stringValue(result.graphName()));
+        builder.add("nodeCount", Values.longValue(result.nodeCount()));
+        builder.add("relationshipCount", Values.longValue(result.relationshipCount()));
+        builder.add("projectMillis", Values.longValue(result.projectMillis()));
+        builder.add("configuration", ValueUtils.asAnyValue(result.configuration()));
+        return builder.build();
     }
 
     private static final class ConfigValidator {

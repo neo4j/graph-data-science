@@ -40,7 +40,7 @@ class GraphAggregatorTest {
         long source = 1L << 50;
         long target = (1L << 50) + 1;
 
-        aggregator.update(
+        aggregator.projectNextRelationship(
             Values.stringValue(graphName),
             Values.longValue(source),
             Values.longValue(target),
