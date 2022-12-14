@@ -723,7 +723,7 @@ class CypherAggregationTest extends BaseProcTest {
             (Result result) -> result.next().get("config")
         );
 
-        var config = CypherAggregation.GraphProjectFromCypherAggregationConfig.of("", "g", configMap);
+        var config = GraphProjectFromCypherAggregationConfig.of("", "g", configMap);
 
         assertThat(config.readConcurrency()).isEqualTo(2);
     }

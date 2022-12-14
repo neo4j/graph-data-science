@@ -27,7 +27,7 @@ import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.config.GraphSampleProcConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.mem.MemoryUsage;
-import org.neo4j.gds.projection.CypherAggregation;
+import org.neo4j.gds.projection.GraphProjectFromCypherAggregationConfig;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
@@ -137,7 +137,7 @@ public class GraphInfo {
 
     static final class Visitor implements
         GraphProjectConfig.Visitor,
-        CypherAggregation.GraphProjectFromCypherAggregationConfig.Visitor {
+        GraphProjectFromCypherAggregationConfig.Visitor {
 
         Map<String, Object> configuration = null;
 
@@ -152,7 +152,7 @@ public class GraphInfo {
         }
 
         @Override
-        public void visit(CypherAggregation.GraphProjectFromCypherAggregationConfig cypherAggregationConfig) {
+        public void visit(GraphProjectFromCypherAggregationConfig cypherAggregationConfig) {
             configuration = cleansed(cypherAggregationConfig.toMap(), cypherAggregationConfig.outputFieldDenylist());
         }
 
