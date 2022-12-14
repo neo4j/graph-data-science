@@ -8,11 +8,8 @@ We use asciidoc for writing documentation, and we render it to both HTML and PDF
 
 ### Rendering the docs locally
 
-First, you have to run `npm install`.
-Second, you have to run `npm install @neo4j-antora/antora-page-roles --save`.
-After having done this once, you needn't do it again.
-
-To build and view the docs locally, you can use `npm run start`.
+First, run `npm install` to install all dependencies. You only need to do this once.
+To build and view the docs locally, use `npm start`.
 This will build the docs, start a web server hosting the docs at http://localhost:8000.
 
 [NOTE]
