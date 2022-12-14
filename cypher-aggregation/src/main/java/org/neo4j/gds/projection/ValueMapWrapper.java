@@ -20,6 +20,7 @@
 package org.neo4j.gds.projection;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.SequenceValue;
@@ -45,7 +46,7 @@ import java.util.TreeMap;
  */
 public final class ValueMapWrapper implements CypherMapAccess {
 
-    public static ValueMapWrapper create(MapValue config) {
+    public static ValueMapWrapper create(@Nullable MapValue config) {
         if (config == null || config.isEmpty()) {
             return empty();
         }
