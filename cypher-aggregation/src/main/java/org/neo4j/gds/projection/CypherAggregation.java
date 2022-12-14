@@ -81,7 +81,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
 
 import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.Orientation.UNDIRECTED;
@@ -107,24 +106,19 @@ public final class CypherAggregation {
     }
 
     // public is required for the Cypher runtime
-    @SuppressWarnings({"WeakerAccess", "CodeBlock2Expr"})
+    @SuppressWarnings("WeakerAccess")
     public static class GraphAggregator {
 
         private final ProgressTimer progressTimer;
         private final DatabaseId databaseId;
-        private final ImmutableGraphSchema.Builder graphSchemaBuilder;
         private final String username;
 
-        // #result() is called twice, we cache the result of the first call to return it again in the second invocation
+        // #result() may be called twice, we cache the result of the first call to return it again in the second invocation
         private @Nullable AggregationResult result;
-        private @Nullable String graphName;
-        private @Nullable LazyIdMapBuilder idMapBuilder;
-        private @Nullable List<RelationshipPropertySchema> relationshipPropertySchemas;
-        private @Nullable GraphProjectFromCypherAggregationConfig config;
 
-        private final Map<RelationshipType, RelationshipsBuilder> relImporters;
-        // Used for initializing builders
+        // Used for initializing the data and rel importers
         private final Lock lock;
+        private volatile @Nullable CypherAggregation.LazyImporter importer;
 
         GraphAggregator(
             ProgressTimer progressTimer,
@@ -134,8 +128,6 @@ public final class CypherAggregation {
             this.progressTimer = progressTimer;
             this.databaseId = databaseId;
             this.username = username;
-            this.relImporters = new ConcurrentHashMap<>();
-            this.graphSchemaBuilder = ImmutableGraphSchema.builder();
             this.lock = new ReentrantLock();
         }
 
@@ -148,21 +140,17 @@ public final class CypherAggregation {
             @Nullable @Name(value = "relationshipConfig", defaultValue = "null") Map<String, Object> relationshipConfig,
             @Nullable @Name(value = "configuration", defaultValue = "null") Map<String, Object> config
         ) {
-            initGraphName(graphName);
-
-            initConfig(config);
-
-            Map<String, Value> sourceNodePropertyValues = null;
-            Map<String, Value> targetNodePropertyValues = null;
+            @Nullable Map<String, Value> sourceNodePropertyValues = null;
+            @Nullable Map<String, Value> targetNodePropertyValues = null;
             NodeLabelToken sourceNodeLabels = NodeLabelTokens.missing();
             NodeLabelToken targetNodeLabels = NodeLabelTokens.missing();
 
             if (nodesConfig != null) {
-                sourceNodePropertyValues = propertiesConfig("sourceNodeProperties", nodesConfig);
+                sourceNodePropertyValues = LazyImporter.propertiesConfig("sourceNodeProperties", nodesConfig);
                 sourceNodeLabels = labelsConfig(sourceNode, "sourceNodeLabels", nodesConfig);
 
                 if (targetNode != null) {
-                    targetNodePropertyValues = propertiesConfig("targetNodeProperties", nodesConfig);
+                    targetNodePropertyValues = LazyImporter.propertiesConfig("targetNodeProperties", nodesConfig);
                     targetNodeLabels = labelsConfig(targetNode, "targetNodeLabels", nodesConfig);
                 }
 
@@ -176,162 +164,66 @@ public final class CypherAggregation {
                 }
             }
 
-            initIdMapBuilder(sourceNodePropertyValues, targetNodePropertyValues, sourceNodeLabels, targetNodeLabels);
+            var data = initGraphData(
+                graphName,
+                config,
+                targetNodePropertyValues,
+                sourceNodePropertyValues,
+                targetNodeLabels,
+                sourceNodeLabels,
+                relationshipConfig
+            );
 
-            Map<String, Value> relationshipProperties = null;
-            RelationshipType relationshipType = RelationshipType.ALL_RELATIONSHIPS;
-
-            if (relationshipConfig != null) {
-                initRelationshipPropertySchemas(relationshipConfig);
-
-                relationshipProperties = propertiesConfig("properties", relationshipConfig);
-                relationshipType = typeConfig("relationshipType", relationshipConfig);
-
-                if (!relationshipConfig.isEmpty()) {
-                    CypherMapWrapper.create(relationshipConfig).requireOnlyKeysFrom(List.of(
-                        "properties",
-                        "relationshipType"
-                    ));
-                }
-            }
-
-            var intermediateSourceId = loadNode(sourceNode, sourceNodeLabels, sourceNodePropertyValues);
-
-            if (targetNode != null) {
-                var relImporter = this.relImporters.computeIfAbsent(relationshipType, this::newRelImporter);
-                var intermediateTargetId = loadNode(targetNode, targetNodeLabels, targetNodePropertyValues);
-
-                if (this.relationshipPropertySchemas != null && !this.relationshipPropertySchemas.isEmpty()) {
-                    assert relationshipProperties != null;
-                    if (this.relationshipPropertySchemas.size() == 1) {
-                        var relationshipProperty = this.relationshipPropertySchemas.get(0).key();
-                        double propertyValue = loadOneRelationshipProperty(
-                            relationshipProperties,
-                            relationshipProperty
-                        );
-                        relImporter.addFromInternal(intermediateSourceId, intermediateTargetId, propertyValue);
-                    } else {
-                        var propertyValues = loadMultipleRelationshipProperties(
-                            relationshipProperties,
-                            this.relationshipPropertySchemas
-                        );
-                        relImporter.addFromInternal(intermediateSourceId, intermediateTargetId, propertyValues);
-                    }
-                } else {
-                    relImporter.addFromInternal(intermediateSourceId, intermediateTargetId);
-                }
-            }
+            data.update(
+                sourceNode,
+                targetNode,
+                sourceNodePropertyValues,
+                targetNodePropertyValues,
+                sourceNodeLabels,
+                targetNodeLabels,
+                relationshipConfig
+            );
         }
 
-        private void initConfig(@Nullable Map<String, Object> config) {
-            if (this.config == null) {
-                initObjectUnderLock(() -> this.config, () -> {
-                    this.config = GraphProjectFromCypherAggregationConfig.of(username, Objects.requireNonNull(graphName), config);
-                });
-            }
-        }
-
-        private void initRelationshipPropertySchemas(@NotNull Map<String, Object> relationshipConfig) {
-            if (this.relationshipPropertySchemas == null) {
-                initObjectUnderLock(() -> this.relationshipPropertySchemas, () -> {
-                    this.relationshipPropertySchemas = new ArrayList<>();
-
-                    // We need to do this before extracting the `relationshipProperties`, because
-                    // we remove the original entry from the map during converting; also we remove null keys
-                    // so we could not create a schema entry for properties that are absent on the current relationship
-                    var relationshipPropertyKeys = relationshipConfig.get("properties");
-                    if (relationshipPropertyKeys instanceof Map) {
-                        for (var propertyKey : ((Map<?, ?>) relationshipPropertyKeys).keySet()) {
-                            this.relationshipPropertySchemas.add(RelationshipPropertySchema.of(
-                                String.valueOf(propertyKey),
-                                ValueType.DOUBLE
-                            ));
-                        }
-                    }
-                });
-            }
-        }
-
-        private void initGraphName(String graphName) {
-            if (this.graphName == null) {
-                initObjectUnderLock(() -> this.graphName, () -> {
-                    validateGraphName(graphName);
-                    this.graphName = graphName;
-                });
-            }
-        }
-
-        private void initIdMapBuilder(
+        private LazyImporter initGraphData(
+            String graphName,
+            @Nullable Map<String, Object> config,
             @Nullable Map<String, Value> sourceNodePropertyValues,
             @Nullable Map<String, Value> targetNodePropertyValues,
             NodeLabelToken sourceNodeLabels,
-            NodeLabelToken targetNodeLabels
+            NodeLabelToken targetNodeLabels,
+            @Nullable Map<String, Object> relationshipConfig
         ) {
-            if (this.idMapBuilder == null) {
-                initObjectUnderLock(() -> this.idMapBuilder, () -> {
-                    this.idMapBuilder = newIdMapBuilder(
-                        sourceNodeLabels,
-                        sourceNodePropertyValues,
-                        targetNodeLabels,
-                        targetNodePropertyValues
-                    );
-                });
+            var data = this.importer;
+            if (data != null) {
+                return data;
             }
-        }
 
-        /**
-         * Performs double-checked locking and executes the
-         * given code which initializes the object.
-         */
-        private void initObjectUnderLock(Supplier<Object> s, Runnable code) {
             this.lock.lock();
             try {
-                if (s.get() == null) {
-                    code.run();
+                data = this.importer;
+                if (data == null) {
+                    this.importer = data = LazyImporter.of(
+                        graphName,
+                        this.username,
+                        this.databaseId,
+                        config,
+                        sourceNodePropertyValues,
+                        targetNodePropertyValues,
+                        sourceNodeLabels,
+                        targetNodeLabels,
+                        relationshipConfig,
+                        this.lock
+                    );
                 }
+                return data;
             } finally {
                 this.lock.unlock();
             }
         }
 
-        @NotNull
-        private LazyIdMapBuilder newIdMapBuilder(
-            NodeLabelToken sourceNodeLabels,
-            @Nullable Map<String, Value> sourceNodeProperties,
-            NodeLabelToken targetNodeLabels,
-            @Nullable Map<String, Value> targetNodeProperties
-        ) {
-            assert this.config != null;
 
-            boolean hasLabelInformation = !(sourceNodeLabels.isMissing() && targetNodeLabels.isMissing());
-            boolean hasProperties = !(sourceNodeProperties == null && targetNodeProperties == null);
-            return new LazyIdMapBuilder(config.readConcurrency(), hasLabelInformation, hasProperties);
-        }
-
-        private void validateGraphName(String graphName) {
-            if (GraphStoreCatalog.exists(this.username, this.databaseId, graphName)) {
-                throw new IllegalArgumentException("Graph " + graphName + " already exists");
-            }
-        }
-
-        @Nullable
-        private Map<String, Value> propertiesConfig(
-            String propertyKey,
-            @NotNull Map<String, Object> propertiesConfig
-        ) {
-            var nodeProperties = propertiesConfig.remove(propertyKey);
-            if (nodeProperties == null || nodeProperties instanceof Map) {
-                //noinspection unchecked
-                return objectsToValues((Map<String, Object>) nodeProperties);
-            }
-            throw new IllegalArgumentException(formatWithLocale(
-                "The value of `%s` must be a `Map of Property Values`, but was `%s`.",
-                propertyKey,
-                nodeProperties.getClass().getSimpleName()
-            ));
-        }
-
-        private NodeLabelToken labelsConfig(
+        private static NodeLabelToken labelsConfig(
             Object node,
             String nodeLabelKey,
             @NotNull Map<String, Object> nodesConfig
@@ -340,7 +232,7 @@ public final class CypherAggregation {
             return tryLabelsConfig(node, nodeLabelsEntry, nodeLabelKey);
         }
 
-        private NodeLabelToken tryLabelsConfig(
+        private static NodeLabelToken tryLabelsConfig(
             Object node,
             @Nullable Object nodeLabels,
             String nodeLabelKey
@@ -371,29 +263,225 @@ public final class CypherAggregation {
             return nodeLabelToken;
         }
 
-        private RelationshipType typeConfig(
-            @SuppressWarnings("SameParameterValue") String relationshipTypeKey,
-            @NotNull Map<String, Object> relationshipConfig
+        @UserAggregationResult
+        @ReturnType(AggregationResult.class)
+        public @Nullable Map<String, Object> result() {
+            AggregationResult result = buildGraph();
+            return result == null ? null : result.toMap();
+        }
+
+        public @Nullable AggregationResult buildGraph() {
+            var importer = this.importer;
+            if (importer == null) {
+                // Nothing aggregated
+                return null;
+            }
+
+            // Older cypher runtimes call the result method multiple times, we cache the result of the first call
+            if (this.result != null) {
+                return this.result;
+            }
+
+            this.result = importer.result(this.username, this.databaseId, this.progressTimer);
+
+            return this.result;
+        }
+    }
+
+    // Does the actual importing work, but is lazily initialized with the first row
+    @SuppressWarnings("CodeBlock2Expr")
+    private static final class LazyImporter {
+        private final String graphName;
+        private final GraphProjectFromCypherAggregationConfig config;
+        private final LazyIdMapBuilder idMapBuilder;
+        private final @Nullable List<RelationshipPropertySchema> relationshipPropertySchemas;
+
+        private final Lock lock;
+        private final Map<RelationshipType, RelationshipsBuilder> relImporters;
+        private final ImmutableGraphSchema.Builder graphSchemaBuilder;
+
+        private LazyImporter(
+            String graphName,
+            GraphProjectFromCypherAggregationConfig config,
+            LazyIdMapBuilder idMapBuilder,
+            @Nullable List<RelationshipPropertySchema> relationshipPropertySchemas,
+            Lock lock
         ) {
-            var relationshipTypeEntry = relationshipConfig.remove(relationshipTypeKey);
-            if (relationshipTypeEntry instanceof String) {
-                return RelationshipType.of((String) relationshipTypeEntry);
+            this.graphName = graphName;
+            this.config = config;
+            this.idMapBuilder = idMapBuilder;
+            this.relationshipPropertySchemas = relationshipPropertySchemas;
+            this.lock = lock;
+            this.relImporters = new ConcurrentHashMap<>();
+            this.graphSchemaBuilder = ImmutableGraphSchema.builder();
+        }
+
+        static LazyImporter of(
+            String graphName,
+            String username,
+            DatabaseId databaseId,
+            @Nullable Map<String, Object> configMap,
+            @Nullable Map<String, Value> sourceNodePropertyValues,
+            @Nullable Map<String, Value> targetNodePropertyValues,
+            NodeLabelToken sourceNodeLabels,
+            NodeLabelToken targetNodeLabels,
+            @Nullable Map<String, Object> relationshipConfig,
+            Lock lock
+        ) {
+
+            validateGraphName(graphName, username, databaseId);
+            var config = GraphProjectFromCypherAggregationConfig.of(
+                username,
+                graphName,
+                configMap
+            );
+
+            var idMapBuilder = idMapBuilder(
+                sourceNodeLabels,
+                sourceNodePropertyValues,
+                targetNodeLabels,
+                targetNodePropertyValues,
+                config.readConcurrency()
+            );
+
+            var relationshipPropertySchemas = relationshipPropertySchemas(relationshipConfig);
+
+            return new LazyImporter(graphName, config, idMapBuilder, relationshipPropertySchemas, lock);
+        }
+
+        private static void validateGraphName(String graphName, String username, DatabaseId databaseId) {
+            if (GraphStoreCatalog.exists(username, databaseId, graphName)) {
+                throw new IllegalArgumentException("Graph " + graphName + " already exists");
             }
-            if (relationshipTypeEntry == null) {
-                return RelationshipType.ALL_RELATIONSHIPS;
+        }
+
+        private static LazyIdMapBuilder idMapBuilder(
+            NodeLabelToken sourceNodeLabels,
+            @Nullable Map<String, Value> sourceNodeProperties,
+            NodeLabelToken targetNodeLabels,
+            @Nullable Map<String, Value> targetNodeProperties,
+            int readConcurrency
+        ) {
+            boolean hasLabelInformation = !(sourceNodeLabels.isMissing() && targetNodeLabels.isMissing());
+            boolean hasProperties = !(sourceNodeProperties == null && targetNodeProperties == null);
+            return new LazyIdMapBuilder(readConcurrency, hasLabelInformation, hasProperties);
+        }
+
+        private static @Nullable List<RelationshipPropertySchema> relationshipPropertySchemas(@Nullable Map<String, Object> relationshipConfig) {
+            if (relationshipConfig == null) {
+                return null;
             }
-            throw new IllegalArgumentException(formatWithLocale(
-                "The value of `%s` must be `String`, but was `%s`.",
-                relationshipTypeKey,
-                relationshipTypeEntry.getClass().getSimpleName()
-            ));
+
+            var relationshipPropertySchemas = new ArrayList<RelationshipPropertySchema>();
+
+            // We need to do this before extracting the `relationshipProperties`, because
+            // we remove the original entry from the map during converting; also we remove null keys
+            // so we could not create a schema entry for properties that are absent on the current relationship
+            var relationshipPropertyKeys = relationshipConfig.get("properties");
+            if (relationshipPropertyKeys instanceof Map) {
+                for (var propertyKey : ((Map<?, ?>) relationshipPropertyKeys).keySet()) {
+                    relationshipPropertySchemas.add(RelationshipPropertySchema.of(
+                        String.valueOf(propertyKey),
+                        ValueType.DOUBLE
+                    ));
+                }
+            }
+
+            if (relationshipPropertySchemas.isEmpty()) {
+                return null;
+            }
+
+            return relationshipPropertySchemas;
+        }
+
+        void update(
+            Object sourceNode,
+            @Nullable Object targetNode,
+            @Nullable Map<String, Value> sourceNodePropertyValues,
+            @Nullable Map<String, Value> targetNodePropertyValues,
+            NodeLabelToken sourceNodeLabels,
+            NodeLabelToken targetNodeLabels,
+            @Nullable Map<String, Object> relationshipConfig
+        ) {
+            Map<String, Value> relationshipProperties = null;
+            RelationshipType relationshipType = RelationshipType.ALL_RELATIONSHIPS;
+
+            if (relationshipConfig != null) {
+                relationshipProperties = propertiesConfig("properties", relationshipConfig);
+                relationshipType = typeConfig("relationshipType", relationshipConfig);
+
+                if (!relationshipConfig.isEmpty()) {
+                    CypherMapWrapper.create(relationshipConfig).requireOnlyKeysFrom(List.of(
+                        "properties",
+                        "relationshipType"
+                    ));
+                }
+            }
+
+            var intermediateSourceId = loadNode(sourceNode, sourceNodeLabels, sourceNodePropertyValues);
+
+            if (targetNode != null) {
+                var relImporter = this.relImporters.computeIfAbsent(relationshipType, this::newRelImporter);
+                var intermediateTargetId = loadNode(targetNode, targetNodeLabels, targetNodePropertyValues);
+
+                if (this.relationshipPropertySchemas != null) {
+                    assert relationshipProperties != null;
+                    if (this.relationshipPropertySchemas.size() == 1) {
+                        var relationshipProperty = this.relationshipPropertySchemas.get(0).key();
+                        double propertyValue = loadOneRelationshipProperty(
+                            relationshipProperties,
+                            relationshipProperty
+                        );
+                        relImporter.addFromInternal(intermediateSourceId, intermediateTargetId, propertyValue);
+                    } else {
+                        var propertyValues = loadMultipleRelationshipProperties(
+                            relationshipProperties,
+                            this.relationshipPropertySchemas
+                        );
+                        relImporter.addFromInternal(intermediateSourceId, intermediateTargetId, propertyValues);
+                    }
+                } else {
+                    relImporter.addFromInternal(intermediateSourceId, intermediateTargetId);
+                }
+            }
+        }
+
+        AggregationResult result(String username, DatabaseId databaseId, ProgressTimer timer) {
+
+            var graphName = this.graphName;
+
+            // in case something else has written something with the same graph name
+            // validate again before doing the heavier graph building
+            validateGraphName(graphName, username, databaseId);
+
+            this.idMapBuilder.prepareForFlush();
+
+            var graphStoreBuilder = new GraphStoreBuilder()
+                .concurrency(this.config.readConcurrency())
+                .capabilities(ImmutableStaticCapabilities.of(true))
+                .databaseId(databaseId);
+
+            var valueMapper = buildNodesWithProperties(graphStoreBuilder);
+            buildRelationshipsWithProperties(graphStoreBuilder, valueMapper);
+
+            var graphStore = graphStoreBuilder.schema(this.graphSchemaBuilder.build()).build();
+
+            GraphStoreCatalog.set(this.config, graphStore);
+
+            var projectMillis = timer.stop().getDuration();
+
+            return AggregationResultImpl.builder()
+                .graphName(graphName)
+                .nodeCount(graphStore.nodeCount())
+                .relationshipCount(graphStore.relationshipCount())
+                .projectMillis(projectMillis)
+                .configuration(this.config.toMap())
+                .build();
         }
 
         private RelationshipsBuilder newRelImporter(RelationshipType relType) {
-            assert this.idMapBuilder != null;
-            assert this.config != null;
 
-            var undirectedTypes = config.undirectedRelationshipTypes();
+            var undirectedTypes = this.config.undirectedRelationshipTypes();
             var orientation = undirectedTypes.contains(relType.name) || undirectedTypes.contains("*")
                 ? UNDIRECTED
                 : NATURAL;
@@ -402,7 +490,7 @@ public final class CypherAggregation {
                 .nodes(this.idMapBuilder)
                 .orientation(orientation)
                 .aggregation(Aggregation.NONE)
-                .concurrency(config.readConcurrency());
+                .concurrency(this.config.readConcurrency());
 
             // There is a potential race between initializing the relationships builder and the
             // relationship property schemas. Both happen under lock, but under different ones.
@@ -431,71 +519,6 @@ public final class CypherAggregation {
             return relationshipsBuilderBuilder.build();
         }
 
-        private static @Nullable Map<String, Value> objectsToValues(@Nullable Map<String, Object> properties) {
-            if (properties == null) {
-                return null;
-            }
-            var values = new HashMap<String, Value>(properties.size());
-            properties.forEach((key, valueObject) -> {
-                if (valueObject != null) {
-                    var value = ValueConverter.toValue(valueObject);
-                    values.put(key, value);
-                }
-            });
-            return values;
-        }
-
-        private long extractNodeId(@Nullable Object node) {
-            if (node instanceof Node) {
-                //noinspection removal
-                return ((Node) node).getId();
-            } else if (node instanceof Long) {
-                return (Long) node;
-            } else if (node instanceof Integer) {
-                return (Integer) node;
-            } else {
-                throw invalidNodeType(node);
-            }
-        }
-
-        private IllegalArgumentException invalidNodeType(@Nullable Object node) {
-            // According to the docs of @UserAggregation, possible types are:
-            //   String
-            //   Long or long
-            //   Double or double
-            //   Number
-            //   Boolean or boolean
-            //   org.neo4j.graphdb.Node
-            //   org.neo4j.graphdb.Relationship
-            //   org.neo4j.graphdb.Path
-            //   java.util.Map with key String and value of any type in this list, including java.util.Map
-            //   java.util.List with element type of any type in this list, including java.util.List
-
-            String nodeType;
-            if (node instanceof String) {
-                nodeType = "STRING";
-            } else if (node instanceof Number) {
-                nodeType = "FLOAT";
-            } else if (node instanceof Boolean) {
-                nodeType = "BOOLEAN";
-            } else if (node instanceof Relationship) {
-                nodeType = "RELATIONSHIP";
-            } else if (node instanceof Path) {
-                nodeType = "PATH";
-            } else if (node instanceof Map) {
-                nodeType = "MAP";
-            } else if (node instanceof List) {
-                nodeType = "LIST";
-            } else if (node == null) {
-                nodeType = "NULL";
-            } else {
-                // should not happen unless new types are introduced into the procedure framework
-                nodeType = "UNKNOWN: " + node.getClass().getName();
-            }
-
-            return new IllegalArgumentException("The node has to be either a NODE or an INTEGER, but got " + nodeType);
-        }
-
         /**
          * Adds the given node to the internal nodes builder and returns
          * the intermediate node id which can be used for relationships.
@@ -507,8 +530,6 @@ public final class CypherAggregation {
             NodeLabelToken nodeLabels,
             @Nullable Map<String, Value> nodeProperties
         ) {
-            assert this.idMapBuilder != null;
-
             var originalNodeId = extractNodeId(node);
 
             return nodeProperties == null
@@ -541,61 +562,7 @@ public final class CypherAggregation {
             return propertyValues;
         }
 
-        @UserAggregationResult
-        @ReturnType(AggregationResult.class)
-        public @Nullable Map<String, Object> result() {
-            AggregationResult result = buildGraph();
-            return result == null ? null : result.toMap();
-        }
-
-        public @Nullable AggregationResult buildGraph() {
-
-            var graphName = this.graphName;
-
-            if (graphName == null) {
-                // Nothing aggregated
-                return null;
-            }
-
-            if (this.result != null) {
-                return this.result;
-            }
-
-            assert this.config != null;
-
-            // in case something else has written something with the same graph name
-            // validate again before doing the heavier graph building
-            validateGraphName(graphName);
-
-            Objects.requireNonNull(idMapBuilder).prepareForFlush();
-
-            var graphStoreBuilder = new GraphStoreBuilder()
-                .concurrency(config.readConcurrency())
-                .capabilities(ImmutableStaticCapabilities.of(true))
-                .databaseId(databaseId);
-
-            var valueMapper = buildNodesWithProperties(graphStoreBuilder);
-            buildRelationshipsWithProperties(graphStoreBuilder, valueMapper);
-
-            var graphStore = graphStoreBuilder.schema(graphSchemaBuilder.build()).build();
-
-            GraphStoreCatalog.set(config, graphStore);
-
-            var projectMillis = this.progressTimer.stop().getDuration();
-
-            this.result = AggregationResultImpl.builder()
-                .graphName(graphName)
-                .nodeCount(graphStore.nodeCount())
-                .relationshipCount(graphStore.relationshipCount())
-                .projectMillis(projectMillis)
-                .configuration(config.toMap())
-                .build();
-
-            return this.result;
-        }
-
         private AdjacencyCompressor.ValueMapper buildNodesWithProperties(GraphStoreBuilder graphStoreBuilder) {
-            assert this.idMapBuilder != null;
 
             var idMapAndProperties = this.idMapBuilder.build();
             var nodes = idMapAndProperties.idMap();
@@ -605,7 +572,7 @@ public final class CypherAggregation {
             graphStoreBuilder.nodes(nodes);
 
             var nodePropertySchema = maybeNodeProperties
-                .map(nodeProperties -> GraphAggregator.nodeSchemaWithProperties(
+                .map(nodeProperties -> nodeSchemaWithProperties(
                     nodes.availableNodeLabels(),
                     nodeProperties
                 ))
@@ -620,7 +587,7 @@ public final class CypherAggregation {
                 });
             });
 
-            graphSchemaBuilder.nodeSchema(nodeSchema);
+            this.graphSchemaBuilder.nodeSchema(nodeSchema);
 
             maybeNodeProperties.ifPresent(allNodeProperties -> {
                 CSRGraphStoreUtil.extractNodeProperties(
@@ -634,6 +601,30 @@ public final class CypherAggregation {
             // In order to map to the final internal ids, we need to use
             // the mapping function of the wrapped id map.
             return nodes.rootIdMap()::toMappedNodeId;
+        }
+
+        private static NodeSchema nodeSchemaWithProperties(
+            Iterable<NodeLabel> nodeLabels,
+            Map<String, NodePropertyValues> propertyMap
+        ) {
+            var nodeSchema = NodeSchema.empty();
+
+            nodeLabels.forEach((nodeLabel) -> {
+                propertyMap.forEach((propertyName, nodeProperties) -> {
+                    nodeSchema.getOrCreateLabel(nodeLabel).addProperty(
+                        propertyName,
+                        nodeProperties.valueType()
+                    );
+                });
+            });
+
+            return nodeSchema;
+        }
+
+        private static NodeSchema nodeSchemaWithoutProperties(Iterable<NodeLabel> nodeLabels) {
+            var nodeSchema = NodeSchema.empty();
+            nodeLabels.forEach(nodeSchema::getOrCreateLabel);
+            return nodeSchema;
         }
 
         private void buildRelationshipsWithProperties(
@@ -677,34 +668,114 @@ public final class CypherAggregation {
             });
 
             graphStoreBuilder.relationshipImportResult(relationshipImportResultBuilder.build());
-            graphSchemaBuilder.relationshipSchema(relationshipSchema);
+            this.graphSchemaBuilder.relationshipSchema(relationshipSchema);
 
             // release all references to the builders
             // we are only be called once and don't support double invocations of `result` building
             this.relImporters.clear();
         }
 
-        private static NodeSchema nodeSchemaWithProperties(Iterable<NodeLabel> nodeLabels, Map<String, NodePropertyValues> propertyMap) {
-            var nodeSchema = NodeSchema.empty();
-
-            nodeLabels.forEach((nodeLabel) -> {
-                propertyMap.forEach((propertyName, nodeProperties) -> {
-                    nodeSchema.getOrCreateLabel(nodeLabel).addProperty(
-                        propertyName,
-                        nodeProperties.valueType()
-                    );
-                });
-            });
-
-            return nodeSchema;
+        @Nullable
+        private static Map<String, Value> propertiesConfig(
+            String propertyKey,
+            @NotNull Map<String, Object> propertiesConfig
+        ) {
+            var nodeProperties = propertiesConfig.remove(propertyKey);
+            if (nodeProperties == null || nodeProperties instanceof Map) {
+                //noinspection unchecked
+                return objectsToValues((Map<String, Object>) nodeProperties);
+            }
+            throw new IllegalArgumentException(formatWithLocale(
+                "The value of `%s` must be a `Map of Property Values`, but was `%s`.",
+                propertyKey,
+                nodeProperties.getClass().getSimpleName()
+            ));
         }
 
-        private static NodeSchema nodeSchemaWithoutProperties(Iterable<NodeLabel> nodeLabels) {
-            var nodeSchema = NodeSchema.empty();
-            nodeLabels.forEach(nodeSchema::getOrCreateLabel);
-            return nodeSchema;
+        private static @Nullable Map<String, Value> objectsToValues(@Nullable Map<String, Object> properties) {
+            if (properties == null) {
+                return null;
+            }
+            var values = new HashMap<String, Value>(properties.size());
+            properties.forEach((key, valueObject) -> {
+                if (valueObject != null) {
+                    var value = ValueConverter.toValue(valueObject);
+                    values.put(key, value);
+                }
+            });
+            return values;
+        }
+
+        private static RelationshipType typeConfig(
+            @SuppressWarnings("SameParameterValue") String relationshipTypeKey,
+            @NotNull Map<String, Object> relationshipConfig
+        ) {
+            var relationshipTypeEntry = relationshipConfig.remove(relationshipTypeKey);
+            if (relationshipTypeEntry instanceof String) {
+                return RelationshipType.of((String) relationshipTypeEntry);
+            }
+            if (relationshipTypeEntry == null) {
+                return RelationshipType.ALL_RELATIONSHIPS;
+            }
+            throw new IllegalArgumentException(formatWithLocale(
+                "The value of `%s` must be `String`, but was `%s`.",
+                relationshipTypeKey,
+                relationshipTypeEntry.getClass().getSimpleName()
+            ));
+        }
+
+        private static long extractNodeId(@Nullable Object node) {
+            if (node instanceof Node) {
+                //noinspection removal
+                return ((Node) node).getId();
+            } else if (node instanceof Long) {
+                return (Long) node;
+            } else if (node instanceof Integer) {
+                return (Integer) node;
+            } else {
+                throw invalidNodeType(node);
+            }
+        }
+
+        private static IllegalArgumentException invalidNodeType(@Nullable Object node) {
+            // According to the docs of @UserAggregation, possible types are:
+            //   String
+            //   Long or long
+            //   Double or double
+            //   Number
+            //   Boolean or boolean
+            //   org.neo4j.graphdb.Node
+            //   org.neo4j.graphdb.Relationship
+            //   org.neo4j.graphdb.Path
+            //   java.util.Map with key String and value of any type in this list, including java.util.Map
+            //   java.util.List with element type of any type in this list, including java.util.List
+
+            String nodeType;
+            if (node instanceof String) {
+                nodeType = "STRING";
+            } else if (node instanceof Number) {
+                nodeType = "FLOAT";
+            } else if (node instanceof Boolean) {
+                nodeType = "BOOLEAN";
+            } else if (node instanceof Relationship) {
+                nodeType = "RELATIONSHIP";
+            } else if (node instanceof Path) {
+                nodeType = "PATH";
+            } else if (node instanceof Map) {
+                nodeType = "MAP";
+            } else if (node instanceof List) {
+                nodeType = "LIST";
+            } else if (node == null) {
+                nodeType = "NULL";
+            } else {
+                // should not happen unless new types are introduced into the procedure framework
+                nodeType = "UNKNOWN: " + node.getClass().getName();
+            }
+
+            return new IllegalArgumentException("The node has to be either a NODE or an INTEGER, but got " + nodeType);
         }
     }
+
 
     @ValueClass
     @Configuration
