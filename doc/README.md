@@ -13,6 +13,12 @@ Second, you have to run `npm install @neo4j-antora/antora-page-roles --save`.
 After having done this once, you needn't do it again.
 
 To build and view the docs locally, you can use `npm run start`.
+This will build the docs, start a web server hosting the docs at http://localhost:8000.
+
+[NOTE]
+----
+If you experiene any kind of trouble, try `npm cache clear --force`
+----
 
 
 ### A note on inline LaTeX: you can't
