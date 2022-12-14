@@ -30,6 +30,7 @@ import org.neo4j.values.storable.IntegralValue;
 import org.neo4j.values.storable.TextArray;
 import org.neo4j.values.storable.TextValue;
 import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.MapValue;
 
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public final class ValueMapWrapper implements CypherMapAccess {
         }
         Map<String, AnyValue> configMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         config.foreach((key, value) -> {
-            if (value != null) {
+            if (value != null && value != Values.NO_VALUE) {
                 configMap.put(key, value);
             }
         });
