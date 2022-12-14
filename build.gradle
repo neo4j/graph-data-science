@@ -31,12 +31,16 @@ ext {
                     project(':neo4j-kernel-adapter-4.3'),
                     project(':neo4j-kernel-adapter-4.4'),
                     project(':neo4j-kernel-adapter-5.1'),
+                    project(':neo4j-kernel-adapter-5.2'),
+                    project(':neo4j-kernel-adapter-5.3'),
             ],
             'storage-engine-adapter': [
                     project(':storage-engine-adapter-unsupported'),
                     project(':storage-engine-adapter-4.3'),
                     project(':storage-engine-adapter-4.4'),
                     project(':storage-engine-adapter-5.1'),
+                    project(':storage-engine-adapter-5.2'),
+                    project(':storage-engine-adapter-5.3'),
             ]
     ]
 }

@@ -130,6 +130,12 @@ project(':neo4j-kernel-adapter-4.4').projectDir = file('compatibility/4.4/neo4j-
 include('neo4j-kernel-adapter-5.1')
 project(':neo4j-kernel-adapter-5.1').projectDir = file('compatibility/5.1/neo4j-kernel-adapter')
 
+include('neo4j-kernel-adapter-5.2')
+project(':neo4j-kernel-adapter-5.2').projectDir = file('compatibility/5.2/neo4j-kernel-adapter')
+
+include('neo4j-kernel-adapter-5.3')
+project(':neo4j-kernel-adapter-5.3').projectDir = file('compatibility/5.3/neo4j-kernel-adapter')
+
 include('neo4j-kernel-adapter-api')
 project(':neo4j-kernel-adapter-api').projectDir = file('compatibility/api/neo4j-kernel-adapter')
 
@@ -207,6 +213,12 @@ project(':storage-engine-adapter-4.4').projectDir = file('cypher/4.4/storage-eng
 
 include('storage-engine-adapter-5.1')
 project(':storage-engine-adapter-5.1').projectDir = file('cypher/5.1/storage-engine-adapter')
+
+include('storage-engine-adapter-5.2')
+project(':storage-engine-adapter-5.2').projectDir = file('cypher/5.2/storage-engine-adapter')
+
+include('storage-engine-adapter-5.3')
+project(':storage-engine-adapter-5.3').projectDir = file('cypher/5.3/storage-engine-adapter')
 
 include('storage-engine-adapter-api')
 project(':storage-engine-adapter-api').projectDir = file('cypher/api/storage-engine-adapter')
