@@ -64,11 +64,11 @@ public class ToUndirectedFactory extends GraphStoreAlgorithmFactory<ToUndirected
         var builder = MemoryEstimations.builder(ToUndirected.class)
             .add("relationships", CompressedAdjacencyList.adjacencyListEstimation(relationshipType, true));
 
-        builder.perGraphDimension("properties", ((graphDimensions, integer) -> {
+        builder.perGraphDimension("properties", ((graphDimensions, concurrency) -> {
             long max = graphDimensions.relationshipPropertyTokens().keySet().stream().mapToLong(__ ->
                 UncompressedAdjacencyList
                     .adjacencyPropertiesEstimation(relationshipType, true)
-                    .estimate(graphDimensions, integer)
+                    .estimate(graphDimensions, concurrency)
                     .memoryUsage().max
             ).sum();
             return MemoryRange.of(0, max);
