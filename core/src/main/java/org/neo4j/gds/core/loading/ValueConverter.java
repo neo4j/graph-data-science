@@ -21,7 +21,6 @@ package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.kernel.impl.util.ValueUtils;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.ArrayValue;
 import org.neo4j.values.storable.DoubleArray;
@@ -57,10 +56,6 @@ public final class ValueConverter {
                 value.getTypeName()
             ));
         }
-    }
-
-    public static Value toValue(@NotNull Object valueObject) {
-        return toValue(ValueUtils.of(valueObject));
     }
 
     public static Value toValue(@NotNull AnyValue value) {
