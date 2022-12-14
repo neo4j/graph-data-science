@@ -1,5 +1,4 @@
 [[create-cypher-db]]
-[.enterprise-edition]
 = Cypher on GDS graph
 :description: This chapter explains how to execute Cypher queries on named graphs in the Neo4j Graph Data Science library.
 
@@ -7,6 +6,8 @@
 include::partial$/operations-reference/alpha-note.adoc[]
 
 include::partial$/common-usage/not-on-aurads-note.adoc[]
+
+NOTE: This feature requires Neo4j Enterprise Edition.
 
 Exploring projected graphs after loading them and potentially executing algorithms in mutate mode can be tricky in the Neo4j Graph Data Science library.
 A natural way to achieve this in the Neo4j database is to use Cypher queries.

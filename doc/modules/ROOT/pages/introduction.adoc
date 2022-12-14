@@ -99,7 +99,6 @@ The Neo4j Graph Data Science library is available in two editions.
 ** Includes capacity and load xref::common-usage/monitoring-system.adoc[monitoring].
 ** Supports various additional graph catalog features, including:
 *** Graph xref::management-ops/backup-restore.adoc[backup and restore].
-*** Cypher queries against a xref::management-ops/create-cypher-db.adoc[projected graph].
 *** Data import and export via xref:installation/installation-apache-arrow.adoc[Apache Arrow].
 ** Supports various additional model catalog features, including:
 *** Storing unlimited amounts of models in the model catalog.
