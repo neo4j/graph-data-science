@@ -39,6 +39,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.catalog.GraphDropProc;
 import org.neo4j.gds.catalog.GraphListProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.RandomGraphTestCase;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -85,8 +86,7 @@ class CypherAggregationTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         var procedures = GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class);
-        procedures.register(new CypherAggregationFunction());
-//        registerAggregationFunctions(CypherAggregation.class);
+        procedures.register(Neo4jProxy.callableUserAggregationFunction(new CypherAggregationFunction()));
         registerProcedures(GraphDropProc.class, GraphListProc.class, WccStreamProc.class);
     }
 

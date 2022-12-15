@@ -70,6 +70,7 @@ import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
+import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
@@ -300,6 +301,9 @@ public interface Neo4jProxyApi {
 
     @SuppressForbidden(reason = "This is the compat API")
     CallableProcedure callableProcedure(CompatCallableProcedure procedure);
+
+    @SuppressForbidden(reason = "This is the compat API")
+    CallableUserAggregationFunction callableUserAggregationFunction(CompatUserAggregationFunction function);
 
     long transactionId(KernelTransactionHandle kernelTransactionHandle);
 

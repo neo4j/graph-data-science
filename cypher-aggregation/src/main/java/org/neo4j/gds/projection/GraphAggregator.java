@@ -32,6 +32,7 @@ import org.neo4j.gds.api.schema.ImmutableGraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.compat.CompatUserAggregator;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.ConfigKeyValidation;
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
@@ -50,8 +51,6 @@ import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
-import org.neo4j.internal.kernel.api.procs.UserAggregationReducer;
-import org.neo4j.internal.kernel.api.procs.UserAggregationUpdater;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.impl.util.ValueUtils;
 import org.neo4j.procedure.Name;
@@ -81,7 +80,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 // public is required for the Cypher runtime
 @SuppressWarnings("WeakerAccess")
-public class GraphAggregator implements UserAggregationReducer, UserAggregationUpdater {
+public class GraphAggregator implements CompatUserAggregator {
 
     private final DatabaseId databaseId;
     private final String username;
@@ -243,11 +242,6 @@ public class GraphAggregator implements UserAggregationReducer, UserAggregationU
     }
 
     @Override
-    public UserAggregationUpdater newUpdater() {
-        return this;
-    }
-
-    @Override
     public void update(AnyValue[] input) throws ProcedureException {
         try {
             this.projectNextRelationship(
@@ -267,10 +261,6 @@ public class GraphAggregator implements UserAggregationReducer, UserAggregationU
                 e
             );
         }
-    }
-
-    @Override
-    public void applyUpdates() {
     }
 
     @Override

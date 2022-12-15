@@ -17,3 +17,4 @@ org.neo4j.io.layout.Neo4jLayout.of(org.neo4j.graphdb.config.Configuration) @ Use
 java.util.ServiceLoader#load(java.lang.Class) @ Must pass explicit class loader with service loading, as the context class loader for the thread may be the wrong one
 
 org.neo4j.kernel.api.procedure.CallableProcedure @ Implement org.neo4j.gds.compat.CompatCallableProcedure instead and call Neo4jProxy.callableProcedure(compat).
+org.neo4j.kernel.api.procedure.CallableUserAggregationFunction @ Implement org.neo4j.gds.compat.CompatUserAggregationFunction instead and call Neo4jProxy.callableUserAggregationFunction(compat).

@@ -20,6 +20,8 @@
 package org.neo4j.gds.projection;
 
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.compat.CompatUserAggregationFunction;
+import org.neo4j.gds.compat.CompatUserAggregator;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Username;
@@ -28,9 +30,7 @@ import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
-import org.neo4j.internal.kernel.api.procs.UserAggregationReducer;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
-import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 
@@ -38,7 +38,7 @@ import java.util.List;
 
 import static org.neo4j.internal.kernel.api.procs.DefaultParameterValue.nullValue;
 
-public class CypherAggregationFunction implements CallableUserAggregationFunction {
+public class CypherAggregationFunction implements CompatUserAggregationFunction {
     static final QualifiedName FUNCTION_NAME = new QualifiedName(
         new String[]{"gds", "alpha", "graph"},
         "project"
@@ -75,7 +75,7 @@ public class CypherAggregationFunction implements CallableUserAggregationFunctio
     }
 
     @Override
-    public UserAggregationReducer createReducer(Context ctx) throws ProcedureException {
+    public CompatUserAggregator create(Context ctx) throws ProcedureException {
         // TODO: reuse AuraProcedureUtil
 
         var procedures = GraphDatabaseApiProxy.resolveDependency(
@@ -92,6 +92,4 @@ public class CypherAggregationFunction implements CallableUserAggregationFunctio
             username.username()
         );
     }
-
-
 }
