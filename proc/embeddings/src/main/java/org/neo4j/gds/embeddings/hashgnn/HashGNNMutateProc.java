@@ -39,10 +39,10 @@ import static org.neo4j.gds.embeddings.hashgnn.HashGNNProcCompanion.DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.alpha.hashgnn.mutate", description = DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.beta.hashgnn.mutate", description = DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class HashGNNMutateProc extends MutatePropertyProc<HashGNN, HashGNN.HashGNNResult, HashGNNMutateProc.MutateResult, HashGNNMutateConfig> {
 
-    @Procedure(value = "gds.alpha.hashgnn.mutate", mode = READ)
+    @Procedure(value = "gds.beta.hashgnn.mutate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
@@ -55,7 +55,7 @@ public class HashGNNMutateProc extends MutatePropertyProc<HashGNN, HashGNN.HashG
         return mutate(computationResult);
     }
 
-    @Procedure(value = "gds.alpha.hashgnn.mutate.estimate", mode = READ)
+    @Procedure(value = "gds.beta.hashgnn.mutate.estimate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,

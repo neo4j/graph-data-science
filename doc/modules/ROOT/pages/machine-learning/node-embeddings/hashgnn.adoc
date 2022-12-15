@@ -4,7 +4,7 @@
 :entity: node
 :result: embedding
 :algorithm: HashGNN
-
+include::partial$/operations-reference/beta-note.adoc[]
 
 :directed:
 :undirected:
@@ -253,7 +253,7 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 .Run HashGNN in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.hashgnn.stream(
+CALL gds.beta.hashgnn.stream(
   graphName: String,
   configuration: Map
 ) YIELD
@@ -286,7 +286,7 @@ include::partial$/machine-learning/node-embeddings/hashgnn/specific-configuratio
 .Run HashGNN in mutate mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.hashgnn.mutate(
+CALL gds.beta.hashgnn.mutate(
   graphName: String,
   configuration: Map
 ) YIELD
@@ -425,7 +425,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.hashgnn.stream.estimate('persons', {nodeLabels: ['Person'], iterations: 3, embeddingDensity: 2, binarizeFeatures: {dimension: 4, threshold: 0}, featureProperties: ['age', 'experience']})
+CALL gds.beta.hashgnn.stream.estimate('persons', {nodeLabels: ['Person'], iterations: 3, embeddingDensity: 2, binarizeFeatures: {dimension: 4, threshold: 0}, featureProperties: ['age', 'experience']})
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 ----
 
@@ -449,7 +449,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 .The following will run the algorithm on Person nodes with binarization, and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.hashgnn.stream('persons',
+CALL gds.beta.hashgnn.stream('persons',
   {
     nodeLabels: ['Person'],
     iterations: 1,
@@ -489,7 +489,7 @@ Due to the random nature of the algorithm the results will vary between the runs
 .The following will run the algorithm on Person nodes on binary properties, and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.hashgnn.stream('persons',
+CALL gds.beta.hashgnn.stream('persons',
   {
     nodeLabels: ['Person'],
     iterations: 1,
@@ -522,7 +522,7 @@ In this example the embedding dimension becomes `1` because without binarization
 .The following will run the algorithm on Person nodes on generated features, and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.hashgnn.stream('persons',
+CALL gds.beta.hashgnn.stream('persons',
   {
     nodeLabels: ['Person'],
     iterations: 1,
@@ -556,7 +556,7 @@ And as we can see, each node has at least one feature active. The density is abo
 .The following will run the algorithm in heterogeneous mode, and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.hashgnn.stream('persons',
+CALL gds.beta.hashgnn.stream('persons',
   {
     heterogeneous: true,
     iterations: 2,
@@ -592,7 +592,7 @@ YIELD nodeId, embedding
 .The following will run the algorithm as in the previous example but with output densification, and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.hashgnn.stream('persons',
+CALL gds.beta.hashgnn.stream('persons',
   {
     heterogeneous: true,
     iterations: 2,
@@ -635,7 +635,7 @@ include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 .The following will run the algorithm in `mutate` mode:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.hashgnn.mutate(
+CALL gds.beta.hashgnn.mutate(
   'persons',
   {
     mutateProperty: 'hashgnn-embedding',

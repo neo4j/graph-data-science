@@ -97,11 +97,6 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.modularity.stats",
         "gds.alpha.modularity.stream",
 
-        "gds.alpha.hashgnn.mutate",
-        "gds.alpha.hashgnn.mutate.estimate",
-        "gds.alpha.hashgnn.stream",
-        "gds.alpha.hashgnn.stream.estimate",
-
         "gds.alpha.hits.mutate",
         "gds.alpha.hits.mutate.estimate",
         "gds.alpha.hits.stats",
@@ -119,6 +114,11 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.nodeSimilarity.filtered.stream.estimate",
         "gds.alpha.nodeSimilarity.filtered.write",
         "gds.alpha.nodeSimilarity.filtered.write.estimate",
+
+        "gds.beta.hashgnn.mutate",
+        "gds.beta.hashgnn.mutate.estimate",
+        "gds.beta.hashgnn.stream",
+        "gds.beta.hashgnn.stream.estimate",
 
         "gds.beta.pipeline.linkPrediction.addFeature",
         "gds.beta.pipeline.linkPrediction.addNodeProperty",

@@ -270,11 +270,6 @@
 .2+<.^|xref:algorithms/harmonic-centrality.adoc[Harmonic Centrality]
 | `gds.alpha.closeness.harmonic.stream`
 | `gds.alpha.closeness.harmonic.write`
-.4+<.^|xref:machine-learning/node-embeddings/hashgnn.adoc[HashGNN]
-| `gds.alpha.hashgnn.mutate`
-| `gds.alpha.hashgnn.mutate.estimate`
-| `gds.alpha.hashgnn.stream`
-| `gds.alpha.hashgnn.stream.estimate`
 .8+<.^|xref:algorithms/hits.adoc[HITS]
 | `gds.alpha.hits.mutate`
 | `gds.alpha.hits.mutate.estimate`
@@ -324,6 +319,11 @@
 | `gds.alpha.influenceMaximization.greedy.stream`
 .1+<.^| xref:algorithms/alpha/conductance.adoc[Conductance]
 | `gds.alpha.conductance.stream`
+.4+<.^|xref:machine-learning/node-embeddings/hashgnn.adoc[HashGNN]
+| `gds.beta.hashgnn.mutate`
+| `gds.beta.hashgnn.mutate.estimate`
+| `gds.beta.hashgnn.stream`
+| `gds.beta.hashgnn.stream.estimate`
 .8+<.^| xref:algorithms/kmeans.adoc[Kmeans]
 | `gds.beta.kmeans.mutate`
 | `gds.beta.kmeans.mutate.estimate`
