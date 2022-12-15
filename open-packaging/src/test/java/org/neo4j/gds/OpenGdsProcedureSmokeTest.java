@@ -349,6 +349,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.fastRP.write.estimate",
 
         "gds.beta.graph.relationships.stream",
+        "gds.beta.graph.relationships.toUndirected",
+        "gds.beta.graph.relationships.toUndirected.estimate",
 
         "gds.graph.deleteRelationships",
         "gds.graph.relationships.drop",
@@ -528,7 +530,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 375;
+        int expectedCount = 377;
         assertEquals(
             expectedCount,
             registeredProcedures.size(),
