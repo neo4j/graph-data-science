@@ -114,7 +114,7 @@ a|
 |===
 ======
 
-[.include-with-stream]
+[.include-with-stream-multiple-properties]
 ======
 [source, cypher, role=noplay]
 ----
@@ -162,6 +162,55 @@ a|
 * Integer
 * Float
 .^| The stored property value.
+|===
+======
+
+[.include-with-convert-to-undirected]
+======
+[source, cypher, role=noplay]
+----
+CALL gds.beta.graph.relationships.toUndirected(
+    graphName: String,
+    configuration: Map
+)
+YIELD
+    inputRelationships: Integer,
+    relationshipsWritten: Integer,
+    mutateMillis: Integer,
+    postProcessingMillis: Integer,
+    preProcessingMillis: Integer,
+    computeMillis: Integer,
+    configuration: Map
+----
+
+.Parameters
+[opts="header",cols="1,1,1,7"]
+|===
+| Name                   | Type                       | Optional | Description
+| graphName              | String                     | no       | The name under which the graph is stored in the catalog.
+| configuration          | Map                        | yes      | Additional parameters to configure streamNodeProperties.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,1,6"]
+|===
+| Name                   | Type                  | Default | Optional | Description
+| relationshipType       | String                | n/a     | no       | The relationship type to make undirected.
+| mutateRelationshipType | String                | n/a     | no       | The relationship type to be added to the graph.
+include::partial$/algorithms/common-configuration/common-configuration-jobid-concurrency-entries.adoc[]
+|===
+
+.Results
+[opts="header",cols="2,1,7"]
+|===
+| Name                   | Type      | Description
+| inputRelationships     | Integer   | The number of relationships that were processed.
+| relationshipsWritten   | Integer   | The number of relationships that were added.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Unused.
+| mutateMillis           | Integer   | Milliseconds for adding relationships to the projected graph.
+| configuration          | Map       | The configuration used for running the algorithm.
 |===
 ======
 
@@ -611,6 +660,37 @@ ORDER BY source ASC, target ASC
 --
 
 NOTE: The properties we want to stream must exist for each specified relationship type.
+
+=== Convert to undirected
+
+Some algorithms such as Triangle Count and Link Prediction expect undirected relationships. The following shows how to convert the relationships of type `LIKES` in the graph from directed to undirected by creating an undirected relationship of new type `INTERACTS`.
+
+[role=query-example]
+--
+.Convert relationships from directed to undirected:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.graph.relationships.toUndirected(
+  'personsAndInstruments',                                          // <1>
+  {relationshipType: 'LIKES', mutateRelationshipType: 'INTERACTS'}  // <2>
+)
+YIELD
+  inputRelationships, relationshipsWritten
+----
+<1> The name of the projected graph.
+<2> A map that includes the relationship type to make undirected and the relationship type to be added to the graph.
+
+.Results
+[opts="header"]
+|===
+| inputRelationships      | relationshipsWritten
+| 19                       | 18
+|===
+--
+
+Here is an illustration of how the example graph looks in Neo4j after executing the example above.
+
+image::example-graphs/convert_relationships_graph.svg[Visualization of the example graph after converting the relationships to undirected,align="center"]
 
 [[catalog-graph-write-relationship-example]]
 === Write

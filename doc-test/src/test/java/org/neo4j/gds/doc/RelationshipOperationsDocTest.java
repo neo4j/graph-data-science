@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
+import org.neo4j.gds.beta.undirected.ToUndirectedProc;
 import org.neo4j.gds.catalog.GraphDropRelationshipProc;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
@@ -43,6 +44,7 @@ final class RelationshipOperationsDocTest extends SingleFileDocTestBase {
             NodeSimilarityMutateProc.class,
             GraphStreamRelationshipsProc.class,
             GraphStreamRelationshipPropertiesProc.class,
+            ToUndirectedProc.class,
             GraphWriteRelationshipProc.class,
             GraphDropRelationshipProc.class
         );

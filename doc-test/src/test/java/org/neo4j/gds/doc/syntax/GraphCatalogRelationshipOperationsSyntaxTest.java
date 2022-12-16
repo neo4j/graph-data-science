@@ -26,9 +26,10 @@ class GraphCatalogRelationshipOperationsSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.STREAM),
             SyntaxModeMeta.of(SyntaxMode.STREAM_SINGLE_PROPERTY),
             SyntaxModeMeta.of(SyntaxMode.STREAM_TOPOLOGY),
+            SyntaxModeMeta.of(SyntaxMode.STREAM_MULTIPLE_PROPERTIES),
+            SyntaxModeMeta.of(SyntaxMode.CONVERT_TO_UNDIRECTED),
             SyntaxModeMeta.of(SyntaxMode.WRITE),
             SyntaxModeMeta.of(SyntaxMode.DELETE_RELATIONSHIPS)
         );
