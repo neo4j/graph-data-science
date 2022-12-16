@@ -41,10 +41,10 @@ import static org.neo4j.gds.embeddings.hashgnn.HashGNNProcCompanion.DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.alpha.hashgnn.stream", description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.beta.hashgnn.stream", description = DESCRIPTION, executionMode = STREAM)
 public class HashGNNStreamProc extends StreamProc<HashGNN, HashGNN.HashGNNResult, HashGNNStreamProc.StreamResult, HashGNNStreamConfig> {
 
-    @Procedure(value = "gds.alpha.hashgnn.stream", mode = READ)
+    @Procedure(value = "gds.beta.hashgnn.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
@@ -57,7 +57,7 @@ public class HashGNNStreamProc extends StreamProc<HashGNN, HashGNN.HashGNNResult
         return stream(computationResult);
     }
 
-    @Procedure(value = "gds.alpha.hashgnn.stream.estimate", mode = READ)
+    @Procedure(value = "gds.beta.hashgnn.stream.estimate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,

@@ -55,7 +55,7 @@ class HashGNNStreamProcTest extends HashGNNProcTest<HashGNNStreamConfig> {
         runQuery(graphCreateQuery);
 
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.alpha.hashgnn")
+            .algo("gds.beta.hashgnn")
             .streamMode()
             .addParameter("featureProperties", List.of("f1", "f2"))
             .addParameter("embeddingDensity", 2)
