@@ -32,7 +32,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-public class ToUndirectedFactory extends GraphStoreAlgorithmFactory<ToUndirected, ToUndirectedConfig> {
+public class ToUndirectedAlgorithmFactory extends GraphStoreAlgorithmFactory<ToUndirected, ToUndirectedConfig> {
 
     @Override
     public ToUndirected build(

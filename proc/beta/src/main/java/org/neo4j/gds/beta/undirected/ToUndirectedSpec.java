@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 @GdsCallable(name = "gds.beta.graph.relationships.toUndirected", executionMode = ExecutionMode.MUTATE_RELATIONSHIP, description = ToUndirectedSpec.DESCRIPTION)
-public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeRelationshipImportResult, ToUndirectedConfig, Stream<ToUndirectedSpec.MutateResult>, ToUndirectedFactory> {
+public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeRelationshipImportResult, ToUndirectedConfig, Stream<ToUndirectedSpec.MutateResult>, ToUndirectedAlgorithmFactory> {
 
     public static final String DESCRIPTION = "The ToUndirected procedure converts directed relationships to undirected relationships";
 
@@ -50,8 +50,8 @@ public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeR
     }
 
     @Override
-    public ToUndirectedFactory algorithmFactory() {
-        return new ToUndirectedFactory();
+    public ToUndirectedAlgorithmFactory algorithmFactory() {
+        return new ToUndirectedAlgorithmFactory();
     }
 
     @Override

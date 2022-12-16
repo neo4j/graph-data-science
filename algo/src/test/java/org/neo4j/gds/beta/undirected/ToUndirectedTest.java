@@ -193,7 +193,7 @@ class ToUndirectedTest {
             .mutateRelationshipType("T2")
             .build();
 
-        ToUndirected toUndirected = new ToUndirectedFactory().build(
+        ToUndirected toUndirected = new ToUndirectedAlgorithmFactory().build(
             directedGraphStore,
             config,
             log,

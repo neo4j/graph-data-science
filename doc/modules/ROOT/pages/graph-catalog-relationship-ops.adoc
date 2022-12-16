@@ -194,9 +194,9 @@ YIELD
 .Configuration
 [opts="header",cols="1,1,1,1,6"]
 |===
-| Name                   | Type                  | Optional | Default | Description
-| relationshipType       | String                | no       | n/a     | The relationship type to make undirected.
-| mutateRelationshipType | String                | no       | n/a     | The relationship type to be added to the graph.
+| Name                   | Type                  | Default | Optional | Description
+| relationshipType       | String                | n/a     | no       | The relationship type to make undirected.
+| mutateRelationshipType | String                | n/a     | no       | The relationship type to be added to the graph.
 include::partial$/algorithms/common-configuration/common-configuration-jobid-concurrency-entries.adoc[]
 |===
 
