@@ -28,7 +28,7 @@ import java.util.Map;
  * Statistics of the metric of the model candidate over (inner) folds
  */
 @ValueClass
-public interface ModelStats {
+public interface EvaluationScores {
 
     double avg();
 
@@ -45,7 +45,7 @@ public interface ModelStats {
         );
     }
 
-    static ModelStats of(double avg, double min, double max) {
-        return ImmutableModelStats.of(avg, min, max);
+    static EvaluationScores of(double avg, double min, double max) {
+        return ImmutableEvaluationScores.of(avg, min, max);
     }
 }

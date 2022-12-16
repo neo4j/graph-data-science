@@ -34,7 +34,7 @@ import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.ReadOnlyHugeLongIdentityArray;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.metrics.ImmutableModelStats;
+import org.neo4j.gds.ml.metrics.ImmutableEvaluationScores;
 import org.neo4j.gds.ml.metrics.MetricConsumer;
 import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
@@ -325,7 +325,7 @@ public final class LinkPredictionTrain {
             .add("Outer train stats map", TrainingStatistics.memoryEstimationStatsMap(numberOfMetrics, 1, 1))
             .add("Test stats map", TrainingStatistics.memoryEstimationStatsMap(numberOfMetrics, 1, 1))
             .fixed("Best model stats", MemoryRange
-                .of(MemoryUsage.sizeOfInstance(ImmutableModelStats.class))
+                .of(MemoryUsage.sizeOfInstance(ImmutableEvaluationScores.class))
                 .times(2)
                 .add(Double.BYTES * 2)
                 .times(numberOfMetrics))

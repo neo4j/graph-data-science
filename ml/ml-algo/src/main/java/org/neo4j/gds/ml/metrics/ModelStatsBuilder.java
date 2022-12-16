@@ -47,15 +47,15 @@ public class ModelStatsBuilder {
         sum.merge(metric, value, Double::sum);
     }
 
-    public ModelStats build(Metric metric) {
-        return ModelStats.of(
+    public EvaluationScores build(Metric metric) {
+        return EvaluationScores.of(
             sum.get(metric) / numberOfSplits,
             min.get(metric),
             max.get(metric)
         );
     }
 
-    public Map<Metric, ModelStats> build() {
+    public Map<Metric, EvaluationScores> build() {
         return sum.keySet().stream()
             .collect(
             Collectors.toMap(Function.identity(), this::build)

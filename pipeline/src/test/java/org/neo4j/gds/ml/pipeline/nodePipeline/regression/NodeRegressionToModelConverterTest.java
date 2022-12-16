@@ -21,8 +21,8 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.ml.metrics.EvaluationScores;
 import org.neo4j.gds.ml.metrics.ModelCandidateStats;
-import org.neo4j.gds.ml.metrics.ModelStats;
 import org.neo4j.gds.ml.metrics.regression.RegressionMetrics;
 import org.neo4j.gds.ml.models.Regressor;
 import org.neo4j.gds.ml.models.TrainingMethod;
@@ -104,8 +104,8 @@ class NodeRegressionToModelConverterTest {
         trainStats.addTestScore(metric, 0.799999);
         trainStats.addOuterTrainScore(metric, 0.666666);
         trainStats.addCandidateStats(ModelCandidateStats.of(modelCandidate,
-            Map.of(metric, ModelStats.of(0.89999, 0.79999, 0.99999)),
-            Map.of(metric, ModelStats.of(0.649999, 0.499999, 0.7999999))
+            Map.of(metric, EvaluationScores.of(0.89999, 0.79999, 0.99999)),
+            Map.of(metric, EvaluationScores.of(0.649999, 0.499999, 0.7999999))
         ));
 
         var trainResult = ImmutableNodeRegressionTrainResult.of(regressor, trainStats);
