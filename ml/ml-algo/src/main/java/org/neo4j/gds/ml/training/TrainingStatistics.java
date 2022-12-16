@@ -22,10 +22,10 @@ package org.neo4j.gds.ml.training;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.ml.metrics.ImmutableModelStats;
+import org.neo4j.gds.ml.metrics.EvaluationScores;
+import org.neo4j.gds.ml.metrics.ImmutableEvaluationScores;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelCandidateStats;
-import org.neo4j.gds.ml.metrics.ModelStats;
 import org.neo4j.gds.ml.models.TrainerConfig;
 
 import java.util.ArrayList;
@@ -51,12 +51,12 @@ public final class TrainingStatistics {
     }
 
     @TestOnly
-    public List<ModelStats> getTrainStats(Metric metric) {
+    public List<EvaluationScores> getTrainStats(Metric metric) {
         return modelCandidateStats.stream().map(stats -> stats.trainingStats().get(metric)).collect(Collectors.toList());
     }
 
     @TestOnly
-    public List<ModelStats> getValidationStats(Metric metric) {
+    public List<EvaluationScores> getValidationStats(Metric metric) {
         return modelCandidateStats.stream().map(stats -> stats.validationStats().get(metric)).collect(Collectors.toList());
     }
 
@@ -85,7 +85,7 @@ public final class TrainingStatistics {
         return extractAverage(modelCandidateStats.get(trial).trainingStats());
     }
 
-    private Map<Metric, Double> extractAverage(Map<Metric, ModelStats> statsMap) {
+    private Map<Metric, Double> extractAverage(Map<Metric, EvaluationScores> statsMap) {
         return statsMap.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
@@ -148,7 +148,7 @@ public final class TrainingStatistics {
     public static MemoryEstimation memoryEstimationStatsMap(int numberOfMetricsSpecifications, int numberOfModelCandidates, int numberOfClasses) {
         var numberOfMetrics = numberOfMetricsSpecifications * numberOfClasses;
         var numberOfModelStats = numberOfMetrics * numberOfModelCandidates;
-        var sizeOfOneModelStatsInBytes = sizeOfInstance(ImmutableModelStats.class);
+        var sizeOfOneModelStatsInBytes = sizeOfInstance(ImmutableEvaluationScores.class);
         var sizeOfAllModelStatsInBytes = sizeOfOneModelStatsInBytes * numberOfModelStats;
         return MemoryEstimations.builder("StatsMap")
             .fixed("array list", sizeOfInstance(ArrayList.class))

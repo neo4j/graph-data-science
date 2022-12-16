@@ -34,18 +34,18 @@ class ModelCandidateStatsTest {
     void testRender() {
         var candidateStats = ModelCandidateStats.of(
             LogisticRegressionTrainConfig.DEFAULT,
-            Map.of(OUT_OF_BAG_ERROR, ModelStats.of(
+            Map.of(OUT_OF_BAG_ERROR, EvaluationScores.of(
                 0.33,
                 0.13,
                 0.13
             )),
             Map.of(
-                ROOT_MEAN_SQUARED_ERROR, ModelStats.of(
+                ROOT_MEAN_SQUARED_ERROR, EvaluationScores.of(
                     0.3,
                     0.1,
                     0.1
                 ),
-                AUCPR, ModelStats.of(
+                AUCPR, EvaluationScores.of(
                     0.4,
                     0.2,
                     0.2
