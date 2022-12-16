@@ -688,6 +688,10 @@ YIELD
 |===
 --
 
+Here is an illustration of how the example graph looks in Neo4j after executing the example above.
+
+image::example-graphs/convert_relationships_graph.svg[Visualization of the example graph after converting the relationships to undirected,align="center"]
+
 [[catalog-graph-write-relationship-example]]
 === Write
 
