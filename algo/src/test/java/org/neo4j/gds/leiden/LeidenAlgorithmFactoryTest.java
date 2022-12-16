@@ -66,51 +66,51 @@ class LeidenAlgorithmFactoryTest {
                 4
             );
         var expected =
-            "Leiden: [3127 KiB ... 5256 KiB]\n" +
-            "|-- this.instance: 96 Bytes\n" +
-            "|-- local move communities: 78 KiB\n" +
-            "|-- local move node volumes: 78 KiB\n" +
-            "|-- local move community volumes: 78 KiB\n" +
-            "|-- current communities: 78 KiB\n" +
-            "|-- local move phase: 1173 KiB\n" +
-            "    |-- this.instance: 48 Bytes\n" +
-            "    |-- community weights: 78 KiB\n" +
-            "    |-- community volumes: 78 KiB\n" +
-            "    |-- global queue: 78 KiB\n" +
-            "    |-- global queue bitset: 1328 Bytes\n" +
-            "    |-- local move task: 938 KiB\n" +
-            "        |-- neighbor communities: 78 KiB\n" +
-            "        |-- neighbor weights: 78 KiB\n" +
-            "        |-- local queue: 78 KiB\n" +
-            "            |-- this.instance: 40 Bytes\n" +
-            "            |-- array: 78 KiB\n" +
-            "|-- modularity computation: 78 KiB\n" +
-            "    |-- this.instance: 16 Bytes\n" +
-            "    |-- relationships outside community: 78 KiB\n" +
-            "    |-- relationship calculator: 128 Bytes\n" +
-            "        |-- this.instance: 32 Bytes\n" +
-            "|-- dendogram manager: 78 KiB\n" +
-            "    |-- this.instance: 40 Bytes\n" +
-            "    |-- dendograms: 78 KiB\n" +
-            "|-- refinement phase: 470 KiB\n" +
-            "    |-- this.instance: 96 Bytes\n" +
-            "    |-- encountered communities: 78 KiB\n" +
-            "    |-- encountered community weights: 78 KiB\n" +
-            "    |-- next community probabilities: 78 KiB\n" +
-            "    |-- merged community volumes: 78 KiB\n" +
-            "    |-- relationships between communities: 78 KiB\n" +
-            "    |-- refined communities: 78 KiB\n" +
-            "    |-- merge tracking bitset: 1296 Bytes\n" +
-            "|-- aggregation phase: [700 KiB ... 2830 KiB]\n" +
-            "    |-- this.instance: 48 Bytes\n" +
-            "    |-- aggregated graph: [544 KiB ... 2674 KiB]\n" +
-            "    |-- sorted communities: 78 KiB\n" +
-            "    |-- atomic coordination array: 78 KiB\n" +
-            "|-- post-aggregation phase: 312 KiB\n" +
-            "    |-- next local move communities: 78 KiB\n" +
-            "    |-- next local move node volumes: 78 KiB\n" +
-            "    |-- next local move community volumes: 78 KiB\n" +
-            "    |-- community to node map: 78 KiB\n";
+            "Leiden: [3127 KiB ... 5256 KiB]" + System.lineSeparator() +
+            "|-- this.instance: 96 Bytes" + System.lineSeparator() +
+            "|-- local move communities: 78 KiB" + System.lineSeparator() +
+            "|-- local move node volumes: 78 KiB" + System.lineSeparator() +
+            "|-- local move community volumes: 78 KiB" + System.lineSeparator() +
+            "|-- current communities: 78 KiB" + System.lineSeparator() +
+            "|-- local move phase: 1173 KiB" + System.lineSeparator() +
+            "    |-- this.instance: 48 Bytes" + System.lineSeparator() +
+            "    |-- community weights: 78 KiB" + System.lineSeparator() +
+            "    |-- community volumes: 78 KiB" + System.lineSeparator() +
+            "    |-- global queue: 78 KiB" + System.lineSeparator() +
+            "    |-- global queue bitset: 1328 Bytes" + System.lineSeparator() +
+            "    |-- local move task: 938 KiB" + System.lineSeparator() +
+            "        |-- neighbor communities: 78 KiB" + System.lineSeparator() +
+            "        |-- neighbor weights: 78 KiB" + System.lineSeparator() +
+            "        |-- local queue: 78 KiB" + System.lineSeparator() +
+            "            |-- this.instance: 40 Bytes" + System.lineSeparator() +
+            "            |-- array: 78 KiB" + System.lineSeparator() +
+            "|-- modularity computation: 78 KiB" + System.lineSeparator() +
+            "    |-- this.instance: 16 Bytes" + System.lineSeparator() +
+            "    |-- relationships outside community: 78 KiB" + System.lineSeparator() +
+            "    |-- relationship calculator: 128 Bytes" + System.lineSeparator() +
+            "        |-- this.instance: 32 Bytes" + System.lineSeparator() +
+            "|-- dendogram manager: 78 KiB" + System.lineSeparator() +
+            "    |-- this.instance: 40 Bytes" + System.lineSeparator() +
+            "    |-- dendograms: 78 KiB" + System.lineSeparator() +
+            "|-- refinement phase: 470 KiB" + System.lineSeparator() +
+            "    |-- this.instance: 96 Bytes" + System.lineSeparator() +
+            "    |-- encountered communities: 78 KiB" + System.lineSeparator() +
+            "    |-- encountered community weights: 78 KiB" + System.lineSeparator() +
+            "    |-- next community probabilities: 78 KiB" + System.lineSeparator() +
+            "    |-- merged community volumes: 78 KiB" + System.lineSeparator() +
+            "    |-- relationships between communities: 78 KiB" + System.lineSeparator() +
+            "    |-- refined communities: 78 KiB" + System.lineSeparator() +
+            "    |-- merge tracking bitset: 1296 Bytes" + System.lineSeparator() +
+            "|-- aggregation phase: [700 KiB ... 2830 KiB]" + System.lineSeparator() +
+            "    |-- this.instance: 48 Bytes" + System.lineSeparator() +
+            "    |-- aggregated graph: [544 KiB ... 2674 KiB]" + System.lineSeparator() +
+            "    |-- sorted communities: 78 KiB" + System.lineSeparator() +
+            "    |-- atomic coordination array: 78 KiB" + System.lineSeparator() +
+            "|-- post-aggregation phase: 312 KiB" + System.lineSeparator() +
+            "    |-- next local move communities: 78 KiB" + System.lineSeparator() +
+            "    |-- next local move node volumes: 78 KiB" + System.lineSeparator() +
+            "    |-- next local move community volumes: 78 KiB" + System.lineSeparator() +
+            "    |-- community to node map: 78 KiB" + System.lineSeparator();
         assertThat(estimate.render()).isEqualTo(expected);
     }
 
@@ -119,13 +119,11 @@ class LeidenAlgorithmFactoryTest {
         var graph = GdlFactory.of("(a)-->(b)").build().getUnion();
         var config = LeidenStatsConfigImpl.builder().maxLevels(3).build();
         var leidenFactory = new LeidenAlgorithmFactory<>();
-        assertThatThrownBy(() -> {
-            leidenFactory.build(
-                graph,
-                config,
-                ProgressTracker.NULL_TRACKER
-            );
-        }).hasMessageContaining(
+        assertThatThrownBy(() -> leidenFactory.build(
+            graph,
+            config,
+            ProgressTracker.NULL_TRACKER
+        )).hasMessageContaining(
             "undirected");
     }
 }

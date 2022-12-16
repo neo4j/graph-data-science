@@ -33,14 +33,11 @@ class SpanningTreeAlgorithmFactoryTest {
         var graph = GdlFactory.of("(a)-[:foo{cost:1.0}]->(b)").build().getUnion();
         var config = SpanningTreeStatsConfigImpl.builder().sourceNode(0).relationshipWeightProperty("cost").build();
         var spanningTreeAlgorithmFactory = new SpanningTreeAlgorithmFactory<>();
-        assertThatThrownBy(() -> {
-            spanningTreeAlgorithmFactory.build(
-                graph,
-                config,
-                ProgressTracker.NULL_TRACKER
-            );
-        }).hasMessageContaining(
-            "undirected");
+        assertThatThrownBy(() -> spanningTreeAlgorithmFactory.build(
+            graph,
+            config,
+            ProgressTracker.NULL_TRACKER
+        )).hasMessageContaining("undirected");
     }
 
 
@@ -53,16 +50,16 @@ class SpanningTreeAlgorithmFactoryTest {
                 4
             );
         var expected =
-            "Prim: 392 KiB\n" +
-            "|-- this.instance: 48 Bytes\n" +
-            "|-- Parent array: 78 KiB\n" +
-            "|-- Parent cost array: 78 KiB\n" +
-            "|-- Priority queue: 234 KiB\n" +
-            "    |-- this.instance: 40 Bytes\n" +
-            "    |-- heap: 78 KiB\n" +
-            "    |-- costs: 78 KiB\n" +
-            "    |-- inverted index: 78 KiB\n" +
-            "|-- visited: 1296 Bytes\n";
+            "Prim: 392 KiB" + System.lineSeparator() +
+            "|-- this.instance: 48 Bytes" + System.lineSeparator() +
+            "|-- Parent array: 78 KiB" + System.lineSeparator() +
+            "|-- Parent cost array: 78 KiB" + System.lineSeparator() +
+            "|-- Priority queue: 234 KiB" + System.lineSeparator() +
+            "    |-- this.instance: 40 Bytes" + System.lineSeparator() +
+            "    |-- heap: 78 KiB" + System.lineSeparator() +
+            "    |-- costs: 78 KiB" + System.lineSeparator() +
+            "    |-- inverted index: 78 KiB" + System.lineSeparator() +
+            "|-- visited: 1296 Bytes" + System.lineSeparator();
         assertThat(estimate.render()).isEqualTo(expected);
     }
 }
