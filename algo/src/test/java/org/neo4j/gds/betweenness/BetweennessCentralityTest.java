@@ -19,14 +19,19 @@
  */
 package org.neo4j.gds.betweenness;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.TestGraph;
 
@@ -34,11 +39,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.TestSupport.crossArguments;
 import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 class BetweennessCentralityTest {
 
@@ -181,5 +189,60 @@ class BetweennessCentralityTest {
             concurrency,
             MemoryRange.of(expectedMinBytes, expectedMaxBytes)
         );
+    }
+    
+    @Test
+    void testShouldLogProgress() {
+        var config = BetweennessCentralityStreamConfigImpl.builder().samplingSize(2L).build();
+        var factory = new BetweennessCentralityFactory<>();
+        var log = Neo4jProxy.testLog();
+        var testGraph = fromGdl(DIAMOND, "diamond");
+        var progressTracker = new TestProgressTracker(
+            factory.progressTask(testGraph, config),
+            log,
+            4,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+        factory.build(testGraph, config, progressTracker).compute();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "BetweennessCentrality :: Start",
+                "BetweennessCentrality 50%",
+                "BetweennessCentrality 100%",
+                "BetweennessCentrality :: Finished"
+            );
+    }
+
+    @Test
+    void testShouldLogProgressNoSampling() {
+        var config = BetweennessCentralityStreamConfigImpl.builder().build();
+        var factory = new BetweennessCentralityFactory<>();
+        var log = Neo4jProxy.testLog();
+        var testGraph = fromGdl(DIAMOND, "diamond");
+        var progressTracker = new TestProgressTracker(
+            factory.progressTask(testGraph, config),
+            log,
+            4,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+        factory.build(testGraph, config, progressTracker).compute();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "BetweennessCentrality :: Start",
+                "BetweennessCentrality 14%",
+                "BetweennessCentrality 28%",
+                "BetweennessCentrality 42%",
+                "BetweennessCentrality 57%",
+                "BetweennessCentrality 71%",
+                "BetweennessCentrality 85%",
+                "BetweennessCentrality 100%",
+                "BetweennessCentrality :: Finished"
+            );
     }
 }
