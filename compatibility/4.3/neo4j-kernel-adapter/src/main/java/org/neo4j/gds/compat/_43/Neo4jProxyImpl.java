@@ -647,7 +647,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
     public GdsDatabaseLayout databaseLayout(Config config, String databaseName) {
-        return new GdsDatabaseLayoutImpl(Neo4jLayout.of(config).databaseLayout(databaseName));
+        return new GdsDatabaseLayoutImpl(neo4jLayout(config).databaseLayout(databaseName));
     }
 
     @Override
