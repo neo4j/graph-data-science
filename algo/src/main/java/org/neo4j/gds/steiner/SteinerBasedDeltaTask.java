@@ -49,7 +49,7 @@ class SteinerBasedDeltaTask implements Runnable {
     private final HugeLongPriorityQueue terminalQueue;
     private final ReentrantLock terminalQueueLock;
     private double smallestConsideredDistance;
-    private int binSizeThreshold;
+    private final int binSizeThreshold;
 
     SteinerBasedDeltaTask(
         Graph graph,

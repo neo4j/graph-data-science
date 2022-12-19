@@ -23,8 +23,8 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 class LinkCutTree {
 //Look here: https://dl.acm.org/doi/pdf/10.1145/3828.3835
-        HugeObjectArray<LinkCutNode> nodes;
-        HugeObjectArray<LinkCutNode> edgeInTree;
+        private final HugeObjectArray<LinkCutNode> nodes;
+        private final HugeObjectArray<LinkCutNode> edgeInTree;
 
         public LinkCutTree(long nodeCount) {
             nodes = HugeObjectArray.newArray(LinkCutNode.class,nodeCount);
@@ -162,7 +162,7 @@ class LinkCutTree {
         public void link(long source, long target) {
             LinkCutNode nodeSource = nodes.get(source);
             LinkCutNode nodeTarget = nodes.get(target);
-            LinkCutNode nodeEdge = new LinkCutNode(source, target, null);
+            LinkCutNode nodeEdge = new LinkCutNode(source, null);
             edgeInTree.set(target,nodeEdge);
             nodeEdge.setParent(nodeSource);
             evert(target);
