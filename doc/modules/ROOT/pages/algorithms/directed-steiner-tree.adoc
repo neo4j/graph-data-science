@@ -14,6 +14,7 @@ include::partial$/operations-reference/beta-note.adoc[]
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
+
 == Introduction
 
 Given a source node and a list of target nodes, a directed spanning tree in which there exists a path from the source node to each of the target nodes is called a Directed Steiner Tree.
@@ -21,22 +22,27 @@ Given a source node and a list of target nodes, a directed spanning tree in whic
 The Minimum Directed Steiner Tree problem asks for the steiner tree that minimizes the sum of all relationship weights in tree.
 
 The Minimum Directed Steiner Tree problem is known to be NP-Complete and no efficient exact algorithms have been proposed in the literature.
-The Neo4j GDS Library offers an efficient implementation of a well-known  https://link.springer.com/chapter/10.1007/3-540-45643-0_1[heuristic] for Steiner Tree related problems.
+The Neo4j GDS Library offers an efficient implementation of a well-known https://link.springer.com/chapter/10.1007/3-540-45643-0_1[heuristic] for Steiner Tree related problems.
 
-The implemented algorithm works on a number of steps. At each step, the shortest path from the source to one of the undiscovered targets is found and added to the result.
+The implemented algorithm works on a number of steps.
+At each step, the shortest path from the source to one of the undiscovered targets is found and added to the result.
 Following that, the weights in the relationships in this path are reduced to zero, and the algorithm continues similarly by finding the next closest unvisited target node.
 
 With a careful implementation, the above heuristic can run efficiently even for graphs of large size.
-In addition, the parallel shortest path algorithm of xref:algorithms/delta-single-source.adoc[Delta-Stepping] is used to  further speed-up computations.
+In addition, the parallel shortest path algorithm of xref:algorithms/delta-single-source.adoc[Delta-Stepping] is used to further speed-up computations.
+
 
 == Considerations
+
 As the Minimum Directed Steiner Tree algorithm relies on shortest-paths, it will not work for graphs with negative relationship weights.
 
 The Minimum Directed Steiner Tree problem is a variant of the more general Minimum Steiner Tree problem defined for undirected graphs.
-The Minimum Steiner Tree  problem accepts as input only a set of target nodes.
+The Minimum Steiner Tree problem accepts as input only a set of target nodes.
 The aim is then to find a spanning tree of minimum weight connecting these target nodes.
 
 It is possible to use the GDS implementation to find a solution for Minimum Steiner Tree problem by arbitrarily selecting one of the target nodes to fill the role of the source node.
+
+
 [[algorithms-directed-steiner-tree-syntax]]
 == Syntax
 
@@ -63,7 +69,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
-| Name                                                                             | Type    | Default   | Optional  | Description
+| Name | Type | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
 include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
 |===
@@ -71,10 +77,10 @@ include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                | Type    | Description
-| nodeId  | Integer | a node in the discovered spanning tree
-| parentId  | Integer | the parent of nodeId in the spanning tree or nodeId if it is equal to the source node.
-| weight  | Float | The weight of the relationship from parentId to nodeId.
+| Name     | Type    | Description
+| nodeId   | Integer | A node in the discovered spanning tree.
+| parentId | Integer | The parent of nodeId in the spanning tree or nodeId if it is equal to the source node.
+| weight   | Float   | The weight of the relationship from parentId to nodeId.
 |===
 
 ======
@@ -96,12 +102,13 @@ YIELD
   computeMillis: Integer,
   configuration: Map
 ----
+
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
-|===
-| Name                                                                             | Type    | Default   | Optional  | Description
+| ===
+| Name | Type | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
 include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
 |===
@@ -138,12 +145,13 @@ YIELD
   mutateMillis: Integer,
   configuration: Map
 ----
+
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
-|===
-| Name                                                                             | Type    | Default   | Optional  | Description
+| ===
+| Name | Type | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
 include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
 |===
@@ -182,12 +190,13 @@ YIELD
   writeMillis: Integer,
   configuration: Map
 ----
+
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
-|===
-| Name                                                                             | Type    | Default   | Optional  | Description
+| ===
+| Name | Type | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
 include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
 |===
@@ -250,9 +259,12 @@ CALL gds.graph.project(
   }
 )
 ----
+
+
 [[algorithms-steiner-tree-examples-sream]]
 === Stream
 :!stream-details:
+
 include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
 [role=query-example]
@@ -274,26 +286,25 @@ ORDER BY node
 .Results
 [opts="header"]
 |===
-| node  |parent | weight
-| "A"  | "A" | 0
-| "B"  | "A" | 1
-| "C"  | "B" | 1
-| "D"  | "C" | 4
-| "E"  | "C" | 6
-| "F"  | "A" | 10
-
+| node | parent | weight
+| "A"  | "A"    | 0
+| "B"  | "A"    | 1
+| "C"  | "B"    | 1
+| "D"  | "C"    | 4
+| "E"  | "C"    | 6
+| "F"  | "A"    | 10
 |===
 --
 
 The algorithm first finds the shortest path from A to D.
-Then, even though the
-relationship weight from A to E is less than the sum of weighted path A,B,C,E,
-the algorithm realizes that the relationships between A and B as well as B and C are already included in the solution and therefore reaching E via C is a better alternative.
+Then, even though the relationship weight from A to E is less than the sum of weighted path A,B,C,E, the algorithm realizes that the relationships between A and B as well as B and C are already included in the solution and therefore reaching E via C is a better alternative.
 Finally, the algorithm adds the relationship between A and F in the solution and terminates.
+
 
 [[algorithms-steiner-tree-examples-stats]]
 === Stats
 :stats-syntax: algorithms-directed-steiner-tree-syntax
+
 include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
 [role=query-example]
@@ -315,13 +326,13 @@ RETURN effectiveNodeCount, totalWeight
 [opts="header"]
 |===
 | effectiveNodeCount | totalWeight
-| 6  | 22
+| 6                  | 22
 |===
 --
 
+
 [[algorithms-steiner-tree-examples-write]]
 === Write
-
 
 include::partial$/algorithms/shared/examples-write-intro.adoc[]
 
@@ -359,11 +370,11 @@ ORDER BY Source, Destination
 [opts="header",cols="1,1,1"]
 |===
 | Source | Destination | weight
-| "A"  | "B" | 1
-| "A"  | "F" | 10
-| "B"  | "C" | 1
-| "C"  | "D" | 4
-| "C"  | "E" | 6
+| "A"    | "B"         | 1
+| "A"    | "F"         | 10
+| "B"    | "C"         | 1
+| "C"    | "D"         | 4
+| "C"    | "E"         | 6
 |===
 --
 
@@ -371,6 +382,7 @@ ORDER BY Source, Destination
 ====
 The relationships written back to the graph are always directed, even if the input graph is undirected.
 ====
+
 
 [[algorithms-steiner-tree-examples-mutate]]
 === Mutate
@@ -393,6 +405,7 @@ CALL gds.beta.steinerTree.mutate('graph', {
 YIELD relationshipsWritten
 RETURN relationshipsWritten
 ----
+
 .Results
 [opts="header"]
 |===
@@ -404,18 +417,19 @@ RETURN relationshipsWritten
 ====
 The relationships added back to the graph are always directed, even if the input graph is undirected.
 ====
+
+
 [[algorithms-steiner-tree-examples-rerouting]]
 === Rerouting
 
-It is also possible to try and augment the solution discovered by the heuristic via a post-processing  rerouting phase.
-This option can be enabled by setting  `applyRerouting:true` in the configuration.
+It is also possible to try and augment the solution discovered by the heuristic via a post-processing rerouting phase.
+This option can be enabled by setting `applyRerouting: true` in the configuration.
 
 The rerouting phase re-examines the relationships in the discovered steiner tree and tries to reroute nodes (that is change their parent with another node in the tree) so as to decrease the cost.
 After the rerouting phase some nodes might end up being childless, that is not part of any path between the source and a target.
 Such nodes are then removed from the returned solution.
 
 Note that there is no guarantee that enabling rerouting will always lead to an improvement in quality.
-
 
 [role=query-example]
 --
@@ -444,7 +458,6 @@ ORDER BY node
 | "D"  | "F"    | 3
 | "E"  | "C"    | 6
 | "F"  | "A"    | 10
-
 |===
 --
 
