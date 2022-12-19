@@ -215,8 +215,10 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             .extracting(replaceTimings())
             .containsExactly(
                 "SteinerTree :: Start",
-                "SteinerTree 50%",
-                "SteinerTree 100%",
+                "SteinerTree :: Traverse :: Start",
+                "SteinerTree :: Traverse 50%",
+                "SteinerTree :: Traverse 100%",
+                "SteinerTree :: Traverse :: Finished",
                 "SteinerTree :: Finished"
             );
     }
@@ -252,18 +254,18 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             .extracting(replaceTimings())
             .containsExactly(
                 "SteinerTree :: Start",
-                "SteinerTree :: Main :: Start",
-                "SteinerTree :: Main 50%",
-                "SteinerTree :: Main 100%",
-                "SteinerTree :: Main :: Finished",
-                "SteinerTree :: Rerouting :: Start",
-                "SteinerTree :: Rerouting 16%",
-                "SteinerTree :: Rerouting 33%",
-                "SteinerTree :: Rerouting 50%",
-                "SteinerTree :: Rerouting 66%",
-                "SteinerTree :: Rerouting 83%",
-                "SteinerTree :: Rerouting 100%",
-                "SteinerTree :: Rerouting :: Finished",
+                "SteinerTree :: Traverse :: Start",
+                "SteinerTree :: Traverse 50%",
+                "SteinerTree :: Traverse 100%",
+                "SteinerTree :: Traverse :: Finished",
+                "SteinerTree :: Reroute :: Start",
+                "SteinerTree :: Reroute 16%",
+                "SteinerTree :: Reroute 33%",
+                "SteinerTree :: Reroute 50%",
+                "SteinerTree :: Reroute 66%",
+                "SteinerTree :: Reroute 83%",
+                "SteinerTree :: Reroute 100%",
+                "SteinerTree :: Reroute :: Finished",
                 "SteinerTree :: Finished"
             );
     }
