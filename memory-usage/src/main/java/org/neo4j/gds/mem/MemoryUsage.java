@@ -298,7 +298,12 @@ public final class MemoryUsage {
         if (!VmInfoHolder.VM_INFO_AVAILABLE) {
             return -1L;
         }
-        return new GraphWalker().walk(thing).totalSize();
+
+        try {
+            return new GraphWalker().walk(thing).totalSize();
+        } catch (RuntimeException e) {
+            return -1;
+        }
     }
 
     /**
