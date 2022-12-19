@@ -93,10 +93,10 @@ The `modelInfo` return field has the following algorithm-specific subfields:
 .Model info fields
 [opts="header",cols="1,1,6"]
 |===
-| Name                    | Type            | Description
-| bestParameters          | Map             | The model parameters which performed best on average on validation folds according to the primary metric.
-| metrics                 | Map             | Map from metric description to evaluated metrics for the winning model over the subsets of the data, see below.
-| pipeline                | Map             | The pipeline used to generate and select the node features.
+| Name            | Type  | Description
+| bestParameters  | Map   | The model parameters which performed best on average on validation folds according to the primary metric.
+| metrics         | Map   | Map from metric description to evaluated metrics for the winning model over the subsets of the data, see below.
+| pipeline        | Map   | Steps to produce input features for the pipeline model.
 |===
 
 The structure of `modelInfo` is:
@@ -348,4 +348,3 @@ RETURN
 As we can see, the results indicate a lower mean square error for the random forest model, compared to `nr-pipeline-model` in earlier section.
 The change is due to the embeddings taking into account more contextual information.
 While this is a toy example, additional context can sometimes provide valuable information to pipeline steps, resulting in better performance.
-
