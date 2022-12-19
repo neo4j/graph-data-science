@@ -766,6 +766,12 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    @SuppressForbidden(reason = "This is the compat specific use")
+    public Neo4jLayout neo4jLayout(Config config) {
+        return Neo4jLayout.of(config);
+    }
+
+    @Override
     public BoltTransactionRunner<?, ?> boltTransactionRunner() {
         return new BoltTransactionRunnerImpl();
     }
