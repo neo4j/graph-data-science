@@ -69,8 +69,8 @@ public class SteinerTreeAlgorithmFactory<CONFIG extends SteinerTreeBaseConfig> e
         if (config.applyRerouting()) {
             long nodeCount = graph.nodeCount();
             return Tasks.task(taskName(), List.of(
-                Tasks.leaf("Main", targetNodesSize),
-                Tasks.leaf("Rerouting", nodeCount)
+                Tasks.leaf("Traverse", targetNodesSize),
+                Tasks.leaf("Reroute", nodeCount)
             ));
         } else {
             return Tasks.leaf(taskName(), targetNodesSize);

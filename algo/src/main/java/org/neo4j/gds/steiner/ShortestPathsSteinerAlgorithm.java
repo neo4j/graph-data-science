@@ -115,7 +115,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
     public SteinerTreeResult compute() {
         progressTracker.beginSubTask("SteinerTree");
         if (applyRerouting) {
-            progressTracker.beginSubTask("Main");
+            progressTracker.beginSubTask("Traverse");
         }
         HugeLongArray parent = HugeLongArray.newArray(graph.nodeCount());
         HugeDoubleArray parentCost = HugeDoubleArray.newArray(graph.nodeCount());
@@ -138,7 +138,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         });
 
         if (applyRerouting) {
-            progressTracker.endSubTask("Main");
+            progressTracker.endSubTask("Traverse");
             reroute(parent, parentCost, totalCost, effectiveNodeCount);
         }
         progressTracker.endSubTask("SteinerTree");
@@ -298,7 +298,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         DoubleAdder totalCost,
         LongAdder effectiveNodeCount
     ) {
-        progressTracker.beginSubTask("Rerouting");
+        progressTracker.beginSubTask("Reroute");
         //First, represent the tree as an LinkCutTree:
         // This is a dynamic tree (can answer connectivity like UnionFind)
         // but can also do some other cool stuff like answering path queries
@@ -330,7 +330,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         if (didReroutes.isTrue()) {
             cutNodesAfterRerouting(parent, parentCost, totalCost, effectiveNodeCount);
         }
-        progressTracker.endSubTask("Rerouting");
+        progressTracker.endSubTask("Reroute");
     }
 
 
