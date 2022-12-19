@@ -170,7 +170,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             ProgressTracker.NULL_TRACKER
         ).compute();
 
-        long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOTNODE, a[0], a[1], a[2], a[3], a[4]};
+        long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOT_NODE, a[0], a[1], a[2], a[3], a[4]};
         double[] parentCostArray = new double[]{0, 1.0, 1.0, 1.0, 1.0, 4.1};
         SteinerTestUtils.assertTreeIsCorrect(idFunction, steinerTreeResult, parentArray, parentCostArray, 8.1);
     }
@@ -191,7 +191,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
         )
             .compute();
 
-        long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOTNODE, a[0], a[1], a[2], a[3]};
+        long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOT_NODE, a[0], a[1], a[2], a[3]};
 
         double[] parentCostArray = new double[]{0, 1, 1, 1, 1};
 
@@ -243,7 +243,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
         ).compute();
 
         long[] parentArray = new long[]{
-            ShortestPathsSteinerAlgorithm.ROOTNODE,
+            ShortestPathsSteinerAlgorithm.ROOT_NODE,
             a[0],
             a[1],
             a[6],
@@ -271,7 +271,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             ProgressTracker.NULL_TRACKER
         ).compute();
 
-        long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOTNODE, a[0], a[1], a[2]};
+        long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOT_NODE, a[0], a[1], a[2]};
         double[] parentCostArray = new double[]{0, 15, 3, 6};
 
         SteinerTestUtils.assertTreeIsCorrect(triangleIdFunction, steinerTreeResult, parentArray, parentCostArray, 24);

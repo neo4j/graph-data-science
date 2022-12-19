@@ -83,7 +83,7 @@ class ShortestPathsSteinerAlgorithmTest {
             ProgressTracker.NULL_TRACKER
         ).compute();
         var pruned = ShortestPathsSteinerAlgorithm.PRUNED;
-        var rootnode = ShortestPathsSteinerAlgorithm.ROOTNODE;
+        var rootnode = ShortestPathsSteinerAlgorithm.ROOT_NODE;
         long[] parentArray = new long[]{
             rootnode,
             pruned,

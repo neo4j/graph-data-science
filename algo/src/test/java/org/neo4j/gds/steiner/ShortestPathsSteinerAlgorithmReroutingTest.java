@@ -134,7 +134,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
         ).compute();
         var parent = steinerResult.parentArray().toArray();
 
-        assertThat(parent[(int) idFunction.of("a0")]).isEqualTo(ShortestPathsSteinerAlgorithm.ROOTNODE);
+        assertThat(parent[(int) idFunction.of("a0")]).isEqualTo(ShortestPathsSteinerAlgorithm.ROOT_NODE);
         assertThat(parent[(int) idFunction.of("a1")]).isEqualTo(idFunction.of("a0"));
         assertThat(parent[(int) idFunction.of("a2")]).isEqualTo(idFunction.of("a1"));
         assertThat(parent[(int) idFunction.of("a3")]).isEqualTo(idFunction.of("a2"));
