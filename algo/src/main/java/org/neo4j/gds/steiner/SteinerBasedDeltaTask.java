@@ -88,7 +88,9 @@ class SteinerBasedDeltaTask implements Runnable {
         }
     }
 
-    double getSmallestConsideredDistance() {return smallestConsideredDistance;}
+    double getSmallestConsideredDistance() {
+        return smallestConsideredDistance;
+    }
 
     void setPhase(SteinerBasedDeltaStepping.Phase phase) {
         this.phase = phase;
@@ -135,6 +137,7 @@ class SteinerBasedDeltaTask implements Runnable {
             binCopy.forEach((LongProcedure) this::relaxNode);
         }
     }
+
     private void relaxNode(long nodeId) {
         graph.forEachRelationship(nodeId, 1.0, (sourceNodeId, targetNodeId, weight) -> {
             if (!mergedToSource.get(targetNodeId)) { //ignore merged vertices
@@ -143,7 +146,8 @@ class SteinerBasedDeltaTask implements Runnable {
             return true;
         });
     }
-    private void tryToUpdate(long sourceNodeId, long targetNodeId,double weight) {
+
+    private void tryToUpdate(long sourceNodeId, long targetNodeId, double weight) {
         var oldDist = distances.distance(targetNodeId);
         var newDist = distances.distance(sourceNodeId) + weight;
         while (Double.compare(newDist, oldDist) < 0) {

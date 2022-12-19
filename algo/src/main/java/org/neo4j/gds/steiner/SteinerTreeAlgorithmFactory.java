@@ -31,10 +31,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class SteinerTreeAlgorithmFactory<CONFIG extends SteinerTreeBaseConfig> extends GraphAlgorithmFactory<ShortestPathsSteinerAlgorithm, CONFIG> {
-    private List<Long> getTargetNodes(
-        Graph graph,
-        CONFIG configuration
-    ) {
+
+    private List<Long> getTargetNodes(Graph graph, CONFIG configuration) {
         return configuration.targetNodes().stream()
             .map(graph::safeToMappedNodeId)
             .collect(Collectors.toList());
@@ -56,7 +54,6 @@ public class SteinerTreeAlgorithmFactory<CONFIG extends SteinerTreeBaseConfig> e
             Pools.DEFAULT,
             progressTracker
         );
-
     }
 
     @Override

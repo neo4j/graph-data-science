@@ -151,9 +151,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
     }
 
     @Override
-    public void release() {
-
-    }
+    public void release() {}
 
     private void initForSource(HugeLongArray parent, HugeDoubleArray parentCost) {
         parent.set(sourceId, ROOT_NODE);
@@ -185,13 +183,11 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
                 parent.set(nodeId, parentId);
                 parentCost.set(nodeId, cost);
                 effectiveNodeCount.increment();
-
             }
         }
     }
 
     private DijkstraResult runShortestPaths() {
-
         var steinerBasedDelta = new SteinerBasedDeltaStepping(
             graph,
             sourceId,
@@ -204,7 +200,6 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         );
 
         return steinerBasedDelta.compute();
-
     }
 
     private void reconnect(
@@ -331,6 +326,4 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         }
         progressTracker.endSubTask("Reroute");
     }
-
-
 }
