@@ -39,24 +39,36 @@ import static com.carrotsearch.hppc.BitSetIterator.NO_MORE;
 public interface SelectionStrategy {
 
     SelectionStrategy ALL = new SelectionStrategy() {
-        @Override
-        public void init(Graph graph, ExecutorService executorService, int concurrency) { }
+        private final AtomicLong nodeQueue = new AtomicLong();
+        private long graphSize;
 
         @Override
-        public boolean select(long nodeId) {
-            return true;
+        public void init(Graph graph, ExecutorService executorService, int concurrency) {
+            this.graphSize = graph.nodeCount();
+            nodeQueue.set(0);
+        }
+
+        @Override
+        public long next() {
+            long next = nodeQueue.getAndIncrement();
+            if (next >= graphSize) {
+                return -1;
+            }
+            return next;
         }
     };
 
     void init(Graph graph, ExecutorService executorService, int concurrency);
 
-    boolean select(long nodeId);
+    long next();
 
     class RandomDegree implements SelectionStrategy {
 
         private final long samplingSize;
         private final Optional<Long> maybeRandomSeed;
+        private final AtomicLong nodeQueue = new AtomicLong();
 
+        private long graphSize;
         private BitSet bitSet;
 
         public RandomDegree(long samplingSize) {
@@ -72,17 +84,25 @@ public interface SelectionStrategy {
         public void init(Graph graph, ExecutorService executorService, int concurrency) {
             assert samplingSize <= graph.nodeCount();
             this.bitSet = new BitSet(graph.nodeCount());
+            this.graphSize = graph.nodeCount();
+            nodeQueue.set(0);
             var partitions = PartitionUtils.numberAlignedPartitioning(concurrency, graph.nodeCount(), Long.SIZE);
             var maxDegree = maxDegree(graph, partitions, executorService, concurrency);
             selectNodes(graph, partitions, maxDegree, executorService, concurrency);
         }
 
         @Override
-        public boolean select(long nodeId) {
-            return bitSet.get(nodeId);
+        public long next() {
+            long next;
+            while ((next = nodeQueue.getAndIncrement()) < graphSize) {
+                if (bitSet.get(next)) {
+                    return next;
+                }
+            }
+            return -1;
         }
 
-        private int maxDegree(
+        private static int maxDegree(
             Graph graph,
             Collection<Partition> partitions,
             ExecutorService executorService,

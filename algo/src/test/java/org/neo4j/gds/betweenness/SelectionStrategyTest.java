@@ -33,7 +33,6 @@ import org.neo4j.gds.extension.TestGraph;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
@@ -61,7 +60,7 @@ class SelectionStrategyTest {
     void selectAll() {
         SelectionStrategy selectionStrategy = SelectionStrategy.ALL;
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
-        assertEquals(graph.nodeCount(), samplingSize(graph.nodeCount(), selectionStrategy));
+        assertEquals(graph.nodeCount(), samplingSize(selectionStrategy));
     }
 
     @ParameterizedTest
@@ -69,7 +68,7 @@ class SelectionStrategyTest {
     void selectSamplingSize(long samplingSize) {
         SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(samplingSize);
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
-        assertEquals(samplingSize, samplingSize(graph.nodeCount(), selectionStrategy));
+        assertEquals(samplingSize, samplingSize(selectionStrategy));
     }
 
     @ParameterizedTest
@@ -83,17 +82,18 @@ class SelectionStrategyTest {
             .generate();
         SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(samplingSize, Optional.of(42L));
         selectionStrategy.init(graph, Pools.DEFAULT, 4);
-        assertEquals(samplingSize, samplingSize(graph.nodeCount(), selectionStrategy));
+        assertEquals(samplingSize, samplingSize(selectionStrategy));
     }
 
     @Test
     void selectSamplingSizeWithSeed() {
         SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(3, Optional.of(42L));
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
-        assertEquals(3, samplingSize(graph.nodeCount(), selectionStrategy));
-        assertTrue(selectionStrategy.select(graph.toMappedNodeId("a")));
-        assertTrue(selectionStrategy.select(graph.toMappedNodeId("b")));
-        assertTrue(selectionStrategy.select(graph.toMappedNodeId("f")));
+        assertEquals(3, samplingSize(selectionStrategy));
+        selectionStrategy.init(graph, Pools.DEFAULT, 1);
+        assertEquals(graph.toMappedNodeId("a"), selectionStrategy.next());
+        assertEquals(graph.toMappedNodeId("b"), selectionStrategy.next());
+        assertEquals(graph.toMappedNodeId("f"), selectionStrategy.next());
     }
 
     @Test
@@ -102,8 +102,9 @@ class SelectionStrategyTest {
 
         SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(1);
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
-        assertEquals(1, samplingSize(graph.nodeCount(), selectionStrategy));
-        assertTrue(selectionStrategy.select(graph.toMappedNodeId("a")));
+        assertEquals(1, samplingSize(selectionStrategy));
+        selectionStrategy.init(graph, Pools.DEFAULT, 1);
+        assertEquals(graph.toMappedNodeId("a"), selectionStrategy.next());
     }
 
     @Test
@@ -112,27 +113,26 @@ class SelectionStrategyTest {
 
         SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(1, Optional.of(42L));
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
-        assertEquals(1, samplingSize(graph.nodeCount(), selectionStrategy));
-        assertFalse(selectionStrategy.select(graph.toMappedNodeId("a")));
-        assertTrue(selectionStrategy.select(graph.toMappedNodeId("b")));
+        assertEquals(1, samplingSize(selectionStrategy));
+        selectionStrategy.init(graph, Pools.DEFAULT, 1);
+        assertEquals(graph.toMappedNodeId("b"), selectionStrategy.next());
     }
 
     @Test
     void selectHighDegreeNode() {
         SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(1);
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
-        assertEquals(1, samplingSize(graph.nodeCount(), selectionStrategy));
-        var isA = selectionStrategy.select(graph.toMappedNodeId("a"));
-        var isB = selectionStrategy.select(graph.toMappedNodeId("b"));
-        assertTrue(isA || isB);
+        assertEquals(1, samplingSize(selectionStrategy));
+        selectionStrategy.init(graph, Pools.DEFAULT, 1);
+        var isA = selectionStrategy.next();
+        var isB = selectionStrategy.next();
+        assertTrue(isA >= 0 || isB  >= 0);
     }
 
-    private static long samplingSize(long nodeCount, SelectionStrategy selectionStrategy) {
+    private static long samplingSize(SelectionStrategy selectionStrategy) {
         long samplingSize = 0;
-        for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
-            if (selectionStrategy.select(nodeId)) {
-                samplingSize++;
-            }
+        while (selectionStrategy.next() >= 0) {
+            samplingSize++;
         }
         return samplingSize;
     }
