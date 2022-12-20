@@ -86,7 +86,10 @@ public class GraphInfo {
         GraphStore graphStore
     ) {
         var sizeInBytes = MemoryUsage.sizeOf(graphStore);
-        var memoryUsage = MemoryUsage.humanReadable(sizeInBytes);
+
+        var memoryUsage = sizeInBytes >= 0
+            ? MemoryUsage.humanReadable(sizeInBytes)
+            : null;
 
         return create(
             graphProjectConfig,
