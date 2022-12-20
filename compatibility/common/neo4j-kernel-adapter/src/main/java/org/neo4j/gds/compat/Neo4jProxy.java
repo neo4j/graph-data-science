@@ -63,6 +63,7 @@ import org.neo4j.internal.schema.IndexCapability;
 import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.io.layout.Neo4jLayout;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
@@ -396,6 +397,10 @@ public final class Neo4jProxy {
 
     public static GdsDatabaseLayout databaseLayout(Config config, String databaseName) {
         return IMPL.databaseLayout(config, databaseName);
+    }
+
+    public static Neo4jLayout neo4jLayout(Config config) {
+        return IMPL.neo4jLayout(config);
     }
 
     public static BoltTransactionRunner<?, ?> boltTransactionRunner() {

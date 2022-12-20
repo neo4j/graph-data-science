@@ -21,7 +21,6 @@ package org.neo4j.gds.compat;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.common.DependencyResolver;
-import org.neo4j.configuration.Config;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -30,7 +29,6 @@ import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.io.layout.Neo4jLayout;
 import org.neo4j.kernel.GraphDatabaseQueryService;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
@@ -112,11 +110,6 @@ public final class GraphDatabaseApiProxy {
     // It should not be used in code paths run in production. Tests are ok
     public static DatabaseLayout databaseLayout(GraphDatabaseService db) {
         return cast(db).databaseLayout();
-    }
-
-    public static Neo4jLayout neo4jLayout(GraphDatabaseService db) {
-        Config configuration = resolveDependency(db, Config.class);
-        return Neo4jLayout.of(configuration);
     }
 
     public static DbmsInfo dbmsInfo(GraphDatabaseService db) {

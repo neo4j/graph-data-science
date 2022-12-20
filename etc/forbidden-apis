@@ -11,6 +11,9 @@ org.neo4j.logging.internal.LogService#getInternalLog(java.lang.Class) @ Use Neo4
 org.neo4j.configuration.SettingImpl#newBuilder(java.lang.String, org.neo4j.configuration.SettingValueParser, java.lang.Object) @ Use SettingProxy#newBuilder instead.
 org.neo4j.configuration.SettingBuilder(java.lang.String, org.neo4j.configuration.SettingValueParser, java.lang.Object) @ Use SettingProxy#newBuilder instead.
 
+org.neo4j.io.layout.Neo4jLayout.of(org.neo4j.configuration.Config) @ Use Neo4jProxy.neo4jLayout instead.
+org.neo4j.io.layout.Neo4jLayout.of(org.neo4j.graphdb.config.Configuration) @ Use Neo4jProxy.neo4jLayout instead.
+
 java.util.ServiceLoader#load(java.lang.Class) @ Must pass explicit class loader with service loading, as the context class loader for the thread may be the wrong one
 
 org.neo4j.kernel.api.procedure.CallableProcedure @ Implement org.neo4j.gds.compat.CompatCallableProcedure instead and call Neo4jProxy.callableProcedure(compat).
