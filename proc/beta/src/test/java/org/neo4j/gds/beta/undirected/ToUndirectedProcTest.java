@@ -46,7 +46,7 @@ class ToUndirectedProcTest extends BaseProcTest {
 
     @Neo4jGraph
     public static final String DB = "CREATE " +
-                                    "(a:A) " +
+                                    " (a:A) " +
                                     ",(b:B) " +
                                     ",(c:C) " +
                                     ",(a)-[:REL {prop1: 1.0}]->(b)" +
@@ -63,6 +63,16 @@ class ToUndirectedProcTest extends BaseProcTest {
             .withNodeLabel("B")
             .withNodeLabel("C")
             .withRelationshipType("REL")
+            .withRelationshipProperty("prop1")
+            .yields()
+        );
+
+        runQuery(GdsCypher.call("undirected_graph")
+            .graphProject()
+            .withNodeLabel("A")
+            .withNodeLabel("B")
+            .withNodeLabel("C")
+            .withRelationshipType("REL", Orientation.UNDIRECTED)
             .withRelationshipProperty("prop1")
             .yields()
         );
@@ -111,6 +121,15 @@ class ToUndirectedProcTest extends BaseProcTest {
             "Could not find the specified `relationshipType` of ['REL2']. Available relationship types are ['REL']."
         );
         assertEquals(expectedMessage, throwable.getMessage());
+    }
+
+    @Test
+    void shouldFailIfRelationshipTypeIsAlreadyUndirected() {
+        String query = "CALL gds.beta.graph.relationships.toUndirected('undirected_graph', {relationshipType: 'REL', mutateRelationshipType: 'REL2'})";
+
+        Throwable throwable = rootCause(assertThrows(QueryExecutionException.class, () -> runQuery(query)));
+        assertEquals(UnsupportedOperationException.class, throwable.getClass());
+        assertEquals("The specified relationship type `REL` is already undirected.", throwable.getMessage());
     }
 
     @Test
