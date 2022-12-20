@@ -55,8 +55,8 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
         var samplingSeed = configuration.samplingSeed();
 
         var strategy = samplingSize.isPresent() && samplingSize.get() < graph.nodeCount()
-            ? new SelectionStrategy.RandomDegree(samplingSize.get(), samplingSeed)
-            : SelectionStrategy.ALL;
+            ? new RandomDegreeSelectionStrategy(samplingSize.get(), samplingSeed)
+            : new FullSelectionStrategy();
 
         ForwardTraverser.Factory traverserFactory = configuration.hasRelationshipWeightProperty()
             ? ForwardTraverser.Factory.weighted()

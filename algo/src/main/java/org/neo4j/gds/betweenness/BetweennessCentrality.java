@@ -111,7 +111,7 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
 
             for (;;) {
                 long startNodeId = selectionStrategy.next();
-                if (startNodeId == -1 || !terminationFlag.running()) {
+                if (startNodeId == SelectionStrategy.NONE_SELECTED || !terminationFlag.running()) {
                     return;
                 }
 

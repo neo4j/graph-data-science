@@ -58,7 +58,7 @@ class SelectionStrategyTest {
 
     @Test
     void selectAll() {
-        SelectionStrategy selectionStrategy = SelectionStrategy.ALL;
+        SelectionStrategy selectionStrategy = new FullSelectionStrategy();
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
         assertEquals(graph.nodeCount(), samplingSize(selectionStrategy));
     }
@@ -66,7 +66,7 @@ class SelectionStrategyTest {
     @ParameterizedTest
     @ValueSource(longs = {0, 1, 2, 10, 11})
     void selectSamplingSize(long samplingSize) {
-        SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(samplingSize);
+        SelectionStrategy selectionStrategy = new RandomDegreeSelectionStrategy(samplingSize);
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
         assertEquals(samplingSize, samplingSize(selectionStrategy));
     }
@@ -80,14 +80,14 @@ class SelectionStrategyTest {
             .relationshipDistribution(RelationshipDistribution.RANDOM)
             .build()
             .generate();
-        SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(samplingSize, Optional.of(42L));
+        SelectionStrategy selectionStrategy = new RandomDegreeSelectionStrategy(samplingSize, Optional.of(42L));
         selectionStrategy.init(graph, Pools.DEFAULT, 4);
         assertEquals(samplingSize, samplingSize(selectionStrategy));
     }
 
     @Test
     void selectSamplingSizeWithSeed() {
-        SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(3, Optional.of(42L));
+        SelectionStrategy selectionStrategy = new RandomDegreeSelectionStrategy(3, Optional.of(42L));
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
         assertEquals(3, samplingSize(selectionStrategy));
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
@@ -100,7 +100,7 @@ class SelectionStrategyTest {
     void neverIncludeZeroDegNodesIfBetterChoicesExist() {
         TestGraph graph = fromGdl("(), (), (), (), (), (a)-->(), (), (), ()");
 
-        SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(1);
+        SelectionStrategy selectionStrategy = new RandomDegreeSelectionStrategy(1);
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
         assertEquals(1, samplingSize(selectionStrategy));
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
@@ -111,7 +111,7 @@ class SelectionStrategyTest {
     void not100PercentLikelyUnlessMaxDegNode() {
         TestGraph graph = fromGdl("(a)-->(b), (b)-->(c), (b)-->(d)");
 
-        SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(1, Optional.of(42L));
+        SelectionStrategy selectionStrategy = new RandomDegreeSelectionStrategy(1, Optional.of(42L));
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
         assertEquals(1, samplingSize(selectionStrategy));
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
@@ -120,18 +120,18 @@ class SelectionStrategyTest {
 
     @Test
     void selectHighDegreeNode() {
-        SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(1);
+        SelectionStrategy selectionStrategy = new RandomDegreeSelectionStrategy(1);
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
         assertEquals(1, samplingSize(selectionStrategy));
         selectionStrategy.init(graph, Pools.DEFAULT, 1);
         var isA = selectionStrategy.next();
         var isB = selectionStrategy.next();
-        assertTrue(isA >= 0 || isB  >= 0);
+        assertTrue(isA != SelectionStrategy.NONE_SELECTED || isB != SelectionStrategy.NONE_SELECTED);
     }
 
     private static long samplingSize(SelectionStrategy selectionStrategy) {
         long samplingSize = 0;
-        while (selectionStrategy.next() >= 0) {
+        while (selectionStrategy.next() != SelectionStrategy.NONE_SELECTED) {
             samplingSize++;
         }
         return samplingSize;

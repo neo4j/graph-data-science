@@ -139,7 +139,7 @@ class BetweennessCentralityTest {
     void sampling(int concurrency, TestGraph graph, int samplingSize, Map<String, Double> expectedResult) {
         HugeAtomicDoubleArray actualResult = new BetweennessCentrality(
             graph,
-            new SelectionStrategy.RandomDegree(samplingSize, Optional.of(42L)),
+            new RandomDegreeSelectionStrategy(samplingSize, Optional.of(42L)),
             ForwardTraverser.Factory.unweighted(),
             Pools.DEFAULT,
             concurrency,
@@ -158,7 +158,7 @@ class BetweennessCentralityTest {
         TestGraph graph = fromGdl(LINE);
         var actualResult = new BetweennessCentrality(
             graph,
-            SelectionStrategy.ALL,
+            new FullSelectionStrategy(),
             ForwardTraverser.Factory.unweighted(),
             Pools.DEFAULT,
             concurrency,
