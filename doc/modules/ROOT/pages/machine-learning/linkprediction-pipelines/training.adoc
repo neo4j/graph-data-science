@@ -90,12 +90,12 @@ The `modelInfo` return field has the following algorithm-specific subfields:
 .Fields of modelInfo
 [opts="header",cols="1,1,6"]
 |===
-| Name                    | Type          | Description
-| modelName               | String        | The name of the trained model.
-| modelType               | String        | The type of the trained model.
-| bestParameters          | Map           | The model parameters which performed best on average on validation folds according to the primary metric.
-| metrics                 | Map           | Map from metric description to evaluated metrics for the winning model over the subsets of the data, see below.
-| trainingPipeline        | Map           | The pipeline used for the training.
+| Name             | Type   | Description
+| modelName        | String | The name of the trained model.
+| modelType        | String | The type of the trained model.
+| bestParameters   | Map    | The model parameters which performed best on average on validation folds according to the primary metric.
+| metrics          | Map    | Map from metric description to evaluated metrics for the winning model over the subsets of the data, see below.
+| pipeline         | Map    | Steps to produce input features for the pipeline model.
 |===
 
 
@@ -105,7 +105,7 @@ The structure of `modelInfo` is:
 ----
 {
     bestParameters: Map,        // <1>
-    trainingPipeline: Map       // <2>
+    pipeline: Map               // <2>
     metrics: {                  // <3>
         AUCPR: {
             test: Float,        // <4>
