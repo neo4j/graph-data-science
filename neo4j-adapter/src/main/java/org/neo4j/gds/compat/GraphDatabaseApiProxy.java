@@ -32,6 +32,7 @@ import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.GraphDatabaseQueryService;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
@@ -100,6 +101,12 @@ public final class GraphDatabaseApiProxy {
         for (Class<?> clazz : functionClasses) {
             procedures.registerAggregationFunction(clazz);
         }
+    }
+
+    public static void register(GraphDatabaseService db, CallableUserAggregationFunction function) throws
+        KernelException {
+        GlobalProcedures procedures = resolveDependency(db, GlobalProcedures.class);
+        procedures.register(function);
     }
 
     public static NamedDatabaseId databaseId(GraphDatabaseService db) {

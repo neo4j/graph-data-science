@@ -63,6 +63,7 @@ import static org.neo4j.gds.assertj.AssertionsHelper.creationTimeAssertConsumer;
 import static org.neo4j.gds.assertj.AssertionsHelper.intAssertConsumer;
 import static org.neo4j.gds.assertj.AssertionsHelper.stringAssertConsumer;
 import static org.neo4j.gds.assertj.AssertionsHelper.stringObjectMapAssertFactory;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.register;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
@@ -80,7 +81,7 @@ class GraphListProcTest extends BaseProcTest {
             GraphGenerateProc.class,
             GraphListProc.class
         );
-        registerAggregationFunctions(CypherAggregation.class);
+        register(db, CypherAggregation.newInstance());
         runQuery(DB_CYPHER);
     }
 

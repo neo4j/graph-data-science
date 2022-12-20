@@ -33,6 +33,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
+import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,10 @@ public class BaseProcTest extends BaseTest {
 
     protected void registerAggregationFunctions(Class<?>... functionClasses) throws Exception {
         GraphDatabaseApiProxy.registerAggregationFunctions(db, functionClasses);
+    }
+
+    protected void registerAggregationFunction(CallableUserAggregationFunction function) throws Exception {
+        GraphDatabaseApiProxy.register(db, function);
     }
 
     protected void registerFunctions(GraphDatabaseService db, Class<?>... functionClasses) throws Exception {

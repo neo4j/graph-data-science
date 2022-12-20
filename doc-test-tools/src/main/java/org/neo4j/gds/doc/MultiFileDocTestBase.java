@@ -31,6 +31,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.doc.syntax.DocQuery;
 import org.neo4j.graphdb.Result;
+import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -58,7 +59,9 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
         Class<?>[] clazzArray = new Class<?>[0];
         registerProcedures(procedures().toArray(clazzArray));
         registerFunctions(functions().toArray(clazzArray));
-        registerAggregationFunctions(aggregationFunctions().toArray(clazzArray));
+        for (var function : aggregationFunctions()) {
+            registerAggregationFunction(function);
+        }
 
         var treeProcessor = new QueryCollectingTreeProcessor();
         var includeProcessor = new PartialsIncludeProcessor();
@@ -184,7 +187,7 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
         return List.of();
     }
 
-    protected List<Class<?>> aggregationFunctions() {
+    protected List<CallableUserAggregationFunction> aggregationFunctions() {
         return List.of();
     }
 

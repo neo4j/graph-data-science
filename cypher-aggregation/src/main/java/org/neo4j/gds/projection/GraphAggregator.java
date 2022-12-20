@@ -257,7 +257,7 @@ public class GraphAggregator implements CompatUserAggregator {
                 Status.Procedure.ProcedureCallFailed,
                 e,
                 "Failed to invoke function `%s`: Caused by: %s",
-                CypherAggregationFunction.FUNCTION_NAME,
+                CypherAggregation.FUNCTION_NAME,
                 e
             );
         }
@@ -273,7 +273,7 @@ public class GraphAggregator implements CompatUserAggregator {
                 Status.Procedure.ProcedureCallFailed,
                 e,
                 "Failed to invoke function `%s`: Caused by: %s",
-                CypherAggregationFunction.FUNCTION_NAME,
+                CypherAggregation.FUNCTION_NAME,
                 e
             );
         }

@@ -20,27 +20,82 @@
 package org.neo4j.gds.projection;
 
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.compat.CompatUserAggregationFunction;
+import org.neo4j.gds.compat.CompatUserAggregator;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Username;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.procedure.Context;
-import org.neo4j.procedure.Description;
-import org.neo4j.procedure.UserAggregationFunction;
+import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
+import org.neo4j.internal.kernel.api.procs.FieldSignature;
+import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
+import org.neo4j.internal.kernel.api.procs.QualifiedName;
+import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
+import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
+import org.neo4j.kernel.api.procedure.Context;
+import org.neo4j.kernel.api.procedure.GlobalProcedures;
 
+import java.util.List;
 
-public final class CypherAggregation {
+import static org.neo4j.internal.kernel.api.procs.DefaultParameterValue.nullValue;
 
-    @Context
-    public GraphDatabaseService databaseService;
+public class CypherAggregation implements CompatUserAggregationFunction {
+    static final QualifiedName FUNCTION_NAME = new QualifiedName(
+        new String[]{"gds", "alpha", "graph"},
+        "project"
+    );
 
-    @Context
-    public Username username = Username.EMPTY_USERNAME;
+    public static CallableUserAggregationFunction newInstance() {
+        return Neo4jProxy.callableUserAggregationFunction(new CypherAggregation());
+    }
 
-    @UserAggregationFunction(name = "gds.alpha.graph.project")
-    @Description("Creates a named graph in the catalog for use by algorithms.")
-    public GraphAggregator projectFromCypherAggregation() {
+    @Override
+    public UserFunctionSignature signature() {
+        return Neo4jProxy.userFunctionSignature(
+            FUNCTION_NAME,
+            // input signature:
+            List.of(
+                // @Name("graphName") TextValue graphName
+                FieldSignature.inputField("graphName", Neo4jTypes.NTString),
+                // @Name("sourceNode") AnyValue sourceNode
+                FieldSignature.inputField("sourceNode", Neo4jTypes.NTAny),
+                // @Name(value = "targetNode", defaultValue = "null") AnyValue targetNode
+                FieldSignature.inputField("targetNode", Neo4jTypes.NTAny, nullValue(Neo4jTypes.NTAny)),
+                // @Name(value = "nodesConfig", defaultValue = "null") AnyValue nodesConfig
+                FieldSignature.inputField("nodesConfig", Neo4jTypes.NTAny, nullValue(Neo4jTypes.NTAny)),
+                // @Name(value = "relationshipConfig", defaultValue = "null") AnyValue relationshipConfig
+                FieldSignature.inputField("relationshipConfig", Neo4jTypes.NTAny, nullValue(Neo4jTypes.NTAny)),
+                // @Name(value = "configuration", defaultValue = "null") AnyValue config
+                FieldSignature.inputField("configuration", Neo4jTypes.NTAny, nullValue(Neo4jTypes.NTAny))
+            ),
+            // output type: Map
+            Neo4jTypes.NTMap,
+            // function description
+            "Creates a named graph in the catalog for use by algorithms.",
+            // not internal
+            false,
+            // thread-safe, yes please
+            true
+        );
+    }
+
+    @Override
+    public CompatUserAggregator create(Context ctx) throws ProcedureException {
+        // TODO: reuse AuraProcedureUtil
+
+        var procedures = GraphDatabaseApiProxy.resolveDependency(
+            ctx.dependencyResolver(),
+            GlobalProcedures.class
+        );
+        var databaseService = procedures
+            .lookupComponentProvider(GraphDatabaseService.class, true)
+            .apply(ctx);
+
+        var username = procedures.lookupComponentProvider(Username.class, true).apply(ctx);
         var runsOnCompositeDatabase = DatabaseTopologyHelper.isCompositeDatabase(databaseService);
+
         return new GraphAggregator(
-            DatabaseId.of(this.databaseService),
+            DatabaseId.of(databaseService),
             username.username(),
             !runsOnCompositeDatabase
         );
