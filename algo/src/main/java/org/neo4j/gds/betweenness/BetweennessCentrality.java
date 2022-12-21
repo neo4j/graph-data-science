@@ -33,13 +33,11 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
 
     private final Graph graph;
-    private final AtomicLong nodeQueue = new AtomicLong();
     private final long nodeCount;
     private final double divisor;
     private final ForwardTraverser.Factory traverserFactory;
@@ -75,7 +73,6 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
     @Override
     public HugeAtomicDoubleArray compute() {
         progressTracker.beginSubTask();
-        nodeQueue.set(0);
         ParallelUtil.run(ParallelUtil.tasks(concurrency, BCTask::new), executorService);
         progressTracker.endSubTask();
         return centrality;
@@ -113,15 +110,11 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
             );
 
             for (;;) {
-                // take start node from the queue
-                long startNodeId = nodeQueue.getAndIncrement();
-                if (startNodeId >= nodeCount || !terminationFlag.running()) {
+                long startNodeId = selectionStrategy.next();
+                if (startNodeId == SelectionStrategy.NONE_SELECTED || !terminationFlag.running()) {
                     return;
                 }
-                // check whether the node is part of the subset
-                if (!selectionStrategy.select(startNodeId)) {
-                    continue;
-                }
+
                 // reset
                 getProgressTracker().logProgress();
 
