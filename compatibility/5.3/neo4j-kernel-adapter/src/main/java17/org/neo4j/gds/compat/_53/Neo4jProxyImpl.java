@@ -761,8 +761,15 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public GdsDatabaseLayout databaseLayout(Config config, String databaseName) {
         var storageEngineFactory = StorageEngineFactory.selectStorageEngine(config);
-        var databaseLayout = storageEngineFactory.formatSpecificDatabaseLayout(Neo4jLayout.of(config).databaseLayout(databaseName));
+        var dbLayout = neo4jLayout(config).databaseLayout(databaseName);
+        var databaseLayout = storageEngineFactory.formatSpecificDatabaseLayout(dbLayout);
         return new GdsDatabaseLayoutImpl(databaseLayout);
+    }
+
+    @Override
+    @SuppressForbidden(reason = "This is the compat specific use")
+    public Neo4jLayout neo4jLayout(Config config) {
+        return Neo4jLayout.of(config);
     }
 
     @Override
