@@ -64,7 +64,7 @@ class SteinerTreeStatsProcTest extends BaseProcTest {
     @Test
     void testYields() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.steinerTree")
+            .algo("gds.beta.steinerTree")
             .statsMode()
             .addParameter("sourceNode", getSourceNode())
             .addParameter("targetNodes", List.of(getTerminal()))

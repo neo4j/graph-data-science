@@ -22,7 +22,13 @@ package org.neo4j.gds.steiner;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -32,6 +38,8 @@ import org.neo4j.gds.extension.TestGraph;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 class ShortestPathsSteinerAlgorithmReroutingTest {
@@ -87,7 +95,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             2.0,
             1,
             false,
-            Pools.DEFAULT
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
         ).compute();
         assertThat(steinerResult.totalCost()).isEqualTo(7.0);
         assertThat(steinerResult.effectiveNodeCount()).isEqualTo(5);
@@ -100,7 +109,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             2.0,
             1,
             true,
-            Pools.DEFAULT
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
         ).compute();
         assertThat(steinerResultWithReroute.totalCost()).isEqualTo(4.0);
         assertThat(steinerResultWithReroute.effectiveNodeCount()).isEqualTo(3);
@@ -119,11 +129,12 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             2.0,
             1,
             true,
-            Pools.DEFAULT
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
         ).compute();
         var parent = steinerResult.parentArray().toArray();
 
-        assertThat(parent[(int) idFunction.of("a0")]).isEqualTo(ShortestPathsSteinerAlgorithm.ROOTNODE);
+        assertThat(parent[(int) idFunction.of("a0")]).isEqualTo(ShortestPathsSteinerAlgorithm.ROOT_NODE);
         assertThat(parent[(int) idFunction.of("a1")]).isEqualTo(idFunction.of("a0"));
         assertThat(parent[(int) idFunction.of("a2")]).isEqualTo(idFunction.of("a1"));
         assertThat(parent[(int) idFunction.of("a3")]).isEqualTo(idFunction.of("a2"));
@@ -144,7 +155,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
                 2.0,
                 1,
                 true,
-                Pools.DEFAULT
+                Pools.DEFAULT,
+                ProgressTracker.NULL_TRACKER
             ).compute();
             assertThat(steinerTreeResult.effectiveTargetNodesCount()).isEqualTo(2);
         });
@@ -163,12 +175,99 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
                 2.0,
                 1,
                 true,
-                Pools.DEFAULT
+                Pools.DEFAULT,
+                ProgressTracker.NULL_TRACKER
             ).compute();
             assertThat(steinerTreeResult.effectiveTargetNodesCount()).isEqualTo(0);
             assertThat(steinerTreeResult.effectiveNodeCount()).isEqualTo(1);
 
         });
-
     }
+
+    @Test
+    void shouldLogProgress() {
+
+        var sourceId = graph.toOriginalNodeId(idFunction.of("a0"));
+        var target1 = graph.toOriginalNodeId(idFunction.of("a3"));
+        var target2 = graph.toOriginalNodeId(idFunction.of("a4"));
+
+        var config = SteinerTreeStatsConfigImpl
+            .builder()
+            .sourceNode(sourceId)
+            .targetNodes(List.of(target1, target2))
+            .build();
+
+        var steinerTreeAlgorithmFactory = new SteinerTreeAlgorithmFactory();
+        var log = Neo4jProxy.testLog();
+        Task baseTask = steinerTreeAlgorithmFactory.progressTask(graph, config);
+        var progressTracker = new TestProgressTracker(
+            baseTask,
+            log,
+            4,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+
+        steinerTreeAlgorithmFactory.build(graph, config, progressTracker).compute();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "SteinerTree :: Start",
+                "SteinerTree :: Traverse :: Start",
+                "SteinerTree :: Traverse 50%",
+                "SteinerTree :: Traverse 100%",
+                "SteinerTree :: Traverse :: Finished",
+                "SteinerTree :: Finished"
+            );
+    }
+
+    @Test
+    void shouldLogProgressWithRerouting() {
+
+        var sourceId = graph.toOriginalNodeId(idFunction.of("a0"));
+        var target1 = graph.toOriginalNodeId(idFunction.of("a3"));
+        var target2 = graph.toOriginalNodeId(idFunction.of("a4"));
+
+        var config = SteinerTreeStatsConfigImpl
+            .builder()
+            .sourceNode(sourceId)
+            .applyRerouting(true)
+            .targetNodes(List.of(target1, target2))
+            .build();
+
+        var steinerTreeAlgorithmFactory = new SteinerTreeAlgorithmFactory();
+        var log = Neo4jProxy.testLog();
+        Task baseTask = steinerTreeAlgorithmFactory.progressTask(graph, config);
+        var progressTracker = new TestProgressTracker(
+            baseTask,
+            log,
+            4,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        steinerTreeAlgorithmFactory.build(graph, config, progressTracker).compute();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "SteinerTree :: Start",
+                "SteinerTree :: Traverse :: Start",
+                "SteinerTree :: Traverse 50%",
+                "SteinerTree :: Traverse 100%",
+                "SteinerTree :: Traverse :: Finished",
+                "SteinerTree :: Reroute :: Start",
+                "SteinerTree :: Reroute 16%",
+                "SteinerTree :: Reroute 33%",
+                "SteinerTree :: Reroute 50%",
+                "SteinerTree :: Reroute 66%",
+                "SteinerTree :: Reroute 83%",
+                "SteinerTree :: Reroute 100%",
+                "SteinerTree :: Reroute :: Finished",
+                "SteinerTree :: Finished"
+            );
+    }
+
 }

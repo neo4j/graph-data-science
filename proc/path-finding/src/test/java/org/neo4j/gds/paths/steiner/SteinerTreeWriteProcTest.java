@@ -60,7 +60,7 @@ class SteinerTreeWriteProcTest extends BaseProcTest {
         var terminalNode = idFunction.of("b");
 
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.steinerTree")
+            .algo("gds.beta.steinerTree")
             .writeMode()
             .addParameter("sourceNode", sourceNode)
             .addParameter("targetNodes", List.of(terminalNode))
@@ -107,7 +107,7 @@ class SteinerTreeWriteProcTest extends BaseProcTest {
         var terminalNode = idFunction.of("b");
 
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo("gds.alpha.steinerTree")
+            .algo("gds.beta.steinerTree")
             .writeMode()
             .addParameter("sourceNode", sourceNode)
             .addParameter("targetNodes", List.of(terminalNode))

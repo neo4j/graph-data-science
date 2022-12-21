@@ -39,8 +39,8 @@ import java.util.concurrent.atomic.LongAdder;
 
 public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> {
 
-    public static long ROOTNODE = -1;
-    public static long PRUNED = -2;
+    public static final long ROOT_NODE = -1;
+    public static final long PRUNED = -2;
     private final Graph graph;
     private final long sourceId;
     private final List<Long> terminals;
@@ -49,8 +49,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
     private final boolean applyRerouting;
     private final double delta;
     private final ExecutorService executorService;
-
-    private int binSizeThreshold;
+    private final int binSizeThreshold;
 
     public ShortestPathsSteinerAlgorithm(
         Graph graph,
@@ -59,9 +58,10 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         double delta,
         int concurrency,
         boolean applyRerouting,
-        ExecutorService executorService
+        ExecutorService executorService,
+        ProgressTracker progressTracker
     ) {
-        super(ProgressTracker.NULL_TRACKER);
+        super(progressTracker);
         this.graph = graph;
         this.sourceId = sourceId;
         this.terminals = terminals;
@@ -82,9 +82,10 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         int concurrency,
         boolean applyRerouting,
         int binSizeThreshold,
-        ExecutorService executorService
+        ExecutorService executorService,
+        ProgressTracker progressTracker
     ) {
-        super(ProgressTracker.NULL_TRACKER);
+        super(progressTracker);
         this.graph = graph;
         this.sourceId = sourceId;
         this.terminals = terminals;
@@ -112,7 +113,8 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
 
     @Override
     public SteinerTreeResult compute() {
-
+        progressTracker.beginSubTask("SteinerTree");
+        progressTracker.beginSubTask("Traverse");
         HugeLongArray parent = HugeLongArray.newArray(graph.nodeCount());
         HugeDoubleArray parentCost = HugeDoubleArray.newArray(graph.nodeCount());
         ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency, v -> {
@@ -132,10 +134,13 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
             processPath(path, parent, parentCost, totalCost, effectiveNodeCount);
             terminalsReached.increment();
         });
+        progressTracker.endSubTask("Traverse");
 
         if (applyRerouting) {
             reroute(parent, parentCost, totalCost, effectiveNodeCount);
         }
+
+        progressTracker.endSubTask("SteinerTree");
         return SteinerTreeResult.of(
             parent,
             parentCost,
@@ -146,12 +151,10 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
     }
 
     @Override
-    public void release() {
-
-    }
+    public void release() {}
 
     private void initForSource(HugeLongArray parent, HugeDoubleArray parentCost) {
-        parent.set(sourceId, ROOTNODE);
+        parent.set(sourceId, ROOT_NODE);
         parentCost.set(sourceId, 0);
     }
 
@@ -180,14 +183,11 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
                 parent.set(nodeId, parentId);
                 parentCost.set(nodeId, cost);
                 effectiveNodeCount.increment();
-
             }
         }
     }
 
     private DijkstraResult runShortestPaths() {
-
-        // var steinerBasedDijkstra = new SteinerBasedDijkstra(graph, sourceId, isTerminal);
         var steinerBasedDelta = new SteinerBasedDeltaStepping(
             graph,
             sourceId,
@@ -196,11 +196,10 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
             concurrency,
             binSizeThreshold,
             executorService,
-            ProgressTracker.NULL_TRACKER
+            progressTracker
         );
 
         return steinerBasedDelta.compute();
-
     }
 
     private void reconnect(
@@ -245,7 +244,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         var tree = new LinkCutTree(graph.nodeCount());
         for (long nodeId = 0; nodeId < graph.nodeCount(); ++nodeId) {
             var parentId = parent.get(nodeId);
-            if (parentId != PRUNED && parentId != ROOTNODE) {
+            if (parentId != PRUNED && parentId != ROOT_NODE) {
                 tree.link(parentId, nodeId);
             }
         }
@@ -275,7 +274,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         }
 
         ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency, nodeId -> {
-            if (parent.get(nodeId) != PRUNED && parent.get(nodeId) != ROOTNODE) {
+            if (parent.get(nodeId) != PRUNED && parent.get(nodeId) != ROOT_NODE) {
                 if (!endsAtTerminal.get(nodeId)) {
                     parent.set(nodeId, PRUNED);
                     totalCost.add(-parentCost.get(nodeId));
@@ -293,6 +292,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         DoubleAdder totalCost,
         LongAdder effectiveNodeCount
     ) {
+        progressTracker.beginSubTask("Reroute");
         //First, represent the tree as an LinkCutTree:
         // This is a dynamic tree (can answer connectivity like UnionFind)
         // but can also do some other cool stuff like answering path queries
@@ -306,7 +306,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
                     var parentId = parent.get(t);
                     double targetParentCost = parentCost.get(t);
                     //we want to see if replacing t's parent with nodeId makes sense (i.e., smaller cost)
-                    if (parentId != PRUNED && parentId != ROOTNODE && w < targetParentCost) {
+                    if (parentId != PRUNED && parentId != ROOT_NODE && w < targetParentCost) {
                         boolean shouldReconnect = checkIfRerouteIsValid(tree, s, t, parentId);
                         if (shouldReconnect) { //yes we can replace t's parent with s
                             didReroutes.setTrue();
@@ -318,14 +318,12 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
                     return true;
                 });
             }
+            progressTracker.logProgress();
             return true;
-
         });
         if (didReroutes.isTrue()) {
             cutNodesAfterRerouting(parent, parentCost, totalCost, effectiveNodeCount);
         }
-
+        progressTracker.endSubTask("Reroute");
     }
-
-
 }

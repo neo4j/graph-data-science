@@ -23,17 +23,14 @@ class LinkCutNode {
     private LinkCutNode up;
     private LinkCutNode left;
     private LinkCutNode right;
-    private long source;//from;
-    private long target;//to;
-
+    private final long source;//from;
     private boolean reverseBit;
 
-    LinkCutNode(long source, long target, LinkCutNode p) {
+    LinkCutNode(long source, LinkCutNode p) {
         up = p;
         left = null;
         right = null;
         this.source = source;
-        this.target = target;
         reverseBit = false;
     }
 
@@ -49,16 +46,25 @@ class LinkCutNode {
         }
     }
 
-    boolean getReversedBit() {return reverseBit;}
+    boolean getReversedBit() {
+        return reverseBit;
+    }
 
-    long source() {return source;}
+    long source() {
+        return source;
+    }
 
+    LinkCutNode parent() {
+        return up;
+    }
 
-    LinkCutNode parent() {return up;}
+    LinkCutNode left() {
+        return left;
+    }
 
-    LinkCutNode left() {return left;}
-
-    LinkCutNode right() {return right;}
+    LinkCutNode right() {
+        return right;
+    }
 
     LinkCutNode root() {
         LinkCutNode current = this;
@@ -85,7 +91,6 @@ class LinkCutNode {
     }
 
     static LinkCutNode createSingle(long id) {
-        return new LinkCutNode(id, id, null);
+        return new LinkCutNode(id, null);
     }
-
 }

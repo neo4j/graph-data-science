@@ -57,7 +57,7 @@ import java.util.stream.IntStream;
  */
 public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
 
-    public static final int NO_BIN = Integer.MAX_VALUE;
+    static final int NO_BIN = Integer.MAX_VALUE;
     private static final long NO_TERMINAL = -1;
     public static final int BIN_SIZE_THRESHOLD = 1000;
     private final Graph graph;
@@ -72,7 +72,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
     private final BitSet unvisitedTerminal;
     private final BitSet mergedWithSource;
     private final LongAdder metTerminals;
-    private int binSizeThreshold;
+    private final int binSizeThreshold;
 
     SteinerBasedDeltaStepping(
         Graph graph,
@@ -143,7 +143,6 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
             task.setBinIndex(currentBin);
         }
         ParallelUtil.run(tasks, executorService);
-        progressTracker.endSubTask();
     }
 
     private long nextTerminal(HugeLongPriorityQueue terminalQueue) {
@@ -169,6 +168,8 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
         frontierIndex.set(0);
         metTerminals.increment();
         unvisitedTerminal.flip(terminalId);
+
+        progressTracker.logProgress();
 
         if (metTerminals.longValue() == numOfTerminals) { //if we have found paths to all terminals,  terminate early
             return true;
