@@ -21,6 +21,7 @@ package org.neo4j.gds.beta.undirected;
 
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -36,6 +37,7 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.StandardMutateResult;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -93,6 +95,21 @@ public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeR
                     (graphStore, graphProjectConfig, config) -> {
                         var relationshipType = RelationshipType.of(config.relationshipType());
                         ElementTypeValidator.validateTypes(graphStore, List.of(relationshipType), "`relationshipType`");
+                    },
+                    (graphStore, graphProjectConfig, config) -> {
+                        var relationshipType = RelationshipType.of(config.relationshipType());
+                        Direction direction = graphStore
+                            .schema()
+                            .relationshipSchema()
+                            .get(relationshipType)
+                            .direction();
+                        if (direction == Direction.UNDIRECTED) {
+                            throw new UnsupportedOperationException(String.format(
+                                Locale.US,
+                                "The specified relationship type `%s` is already undirected.",
+                                relationshipType.name
+                            ));
+                        }
                     }
                 );
             }
