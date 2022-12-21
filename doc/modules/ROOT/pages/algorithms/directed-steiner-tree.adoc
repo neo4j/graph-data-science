@@ -107,7 +107,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
-| ===
+|===
 | Name | Type | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
 include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
@@ -150,7 +150,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
-| ===
+|===
 | Name | Type | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
 include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
@@ -195,7 +195,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
-| ===
+|===
 | Name | Type | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
 include::partial$/algorithms/steiner-tree/specific-configuration.adoc[]
