@@ -12,13 +12,26 @@ include::partial$/operations-reference/beta-note.adoc[]
 
 [[alpha-algorithms-celf-intro]]
 == Introduction
-The CELF algorithm for influence maximization aims to find `k` nodes that maximize the expected spread of influence in the network.
-It simulates the influence spread using the Independent Cascade model, which calculates the expected spread by taking the average spread over the `mc` Monte-Carlo simulations.
-In the propagation process, a node is influenced in case that a uniform random draw is less than the probability `p`.
+The  influence maximization problem asks for a set of `k` nodes that maximize the expected spread of influence in the network.
+The set of these initial `k` is called the `seed set`.
 
-Leskovec et al. 2007 introduced the CELF algorithm in their study https://www.cs.cmu.edu/~jure/pubs/detect-kdd07.pdf[Cost-effective Outbreak Detection in Networks] to deal with the NP-hard problem of influence maximization.
-The CELF algorithm is based on a "lazy-forward" optimization.
-Τhe CELF algorithm dramatically improves the efficiency of the xref:algorithms/influence-maximization/greedy.adoc[Greedy] algorithm and should be preferred for large networks.
+The Neo4j GDS Library supports approximate computation of under the Independent Cascade propagation model.
+In this propagation mode, nodes in the seed set become influenced and the process works as follows.
+An influenced node influences each of its neighbors with probability `p`.
+The spread is then the number of nodes that become influenced.
+
+The Neo4j GDS Library supports the CELF algorithm, introduced in 2007 by Leskovec et al. in https://www.cs.cmu.edu/~jure/pubs/detect-kdd07.pdf[Cost-effective Outbreak Detection in Networks] to compute a seed set.
+
+The CELF algorithm is based on the https://www.cs.cornell.edu/home/kleinber/kdd03-inf.pdf[Greedy] algorithm for hte problem.
+It works iteratively in `k` steps to create the returned seed set `S`,
+where at each step the node yielding the maximum expected spread gain is added to `S`.
+
+The expected spread gain of a node `u` not in `S` is estimated by running `mc` monte carlo simulations of the propagation process and counting for each the number of nodes that would become influenced if `u` were to be added in `S`.
+
+The CELF algorithm extends on Greedy by introducing a _lazy forwarding_ mechanism, which
+prunes a lot of nodes from being examined, thereby massively reducing the number of conducted simulations.
+This makes CELF massively faster than Greedy on large networks.
+
 
 [[alpha-algorithms-celf-syntax]]
 == Syntax
