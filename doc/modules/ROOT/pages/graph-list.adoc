@@ -51,8 +51,8 @@ CALL gds.graph.list(
 | density                | Float    | Density of the graph.
 | creationTime           | Datetime | Time when the graph was projected.
 | modificationTime       | Datetime | Time when the graph was last modified.
-| sizeInBytes            | Integer  | Number of bytes used in the Java heap to store the graph.
-| memoryUsage            | String   | Human readable description of `sizeInBytes`.
+| sizeInBytes            | Integer  | Number of bytes used in the Java heap to store the graph. This feature is not supported on all JDKs and might return -1 instead.
+| memoryUsage            | String   | Human readable description of `sizeInBytes`. This feature is not supported on all JDKs and might return null instead.
 |===
 --
 
