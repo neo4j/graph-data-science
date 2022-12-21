@@ -315,8 +315,6 @@
 | `gds.alpha.ml.splitRelationships.mutate`
 .1+<.^| xref:algorithms/triangle-count.adoc#algorithms-triangle-count-examples-triangles-listing[Triangle Listing]
 | `gds.alpha.triangles`
-.1+<.^| xref:algorithms/influence-maximization/greedy.adoc[Influence Maximization - Greedy]
-| `gds.alpha.influenceMaximization.greedy.stream`
 .1+<.^| xref:algorithms/alpha/conductance.adoc[Conductance]
 | `gds.alpha.conductance.stream`
 .4+<.^|xref:machine-learning/node-embeddings/hashgnn.adoc[HashGNN]

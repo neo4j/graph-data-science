@@ -52,7 +52,6 @@
 *** xref:algorithms/hits.adoc[]
 *** xref:algorithms/influence-maximization.adoc[]
 **** xref:algorithms/influence-maximization/celf.adoc[]
-**** xref:algorithms/influence-maximization/greedy.adoc[]
 ** xref:algorithms/community.adoc[]
 *** xref:algorithms/louvain.adoc[]
 *** xref:algorithms/label-propagation.adoc[]
