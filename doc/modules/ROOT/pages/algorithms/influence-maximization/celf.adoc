@@ -16,7 +16,7 @@ The  influence maximization problem asks for a set of `k` nodes that maximize th
 The set of these initial `k` is called the `seed set`.
 
 The Neo4j GDS Library supports approximate computation of the best seed set under the Independent Cascade propagation model.
-In this propagation model, initially we assume that the nodes in the seet set become influenced and the process works as follows.
+In this propagation model, initially we assume that the nodes in the seed set become influenced and the process works as follows.
 An influenced node influences each of its neighbors with probability `p`.
 The spread is then the number of nodes that become influenced.
 
