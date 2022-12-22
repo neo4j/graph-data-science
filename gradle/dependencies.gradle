@@ -1,7 +1,7 @@
 ext {
     neos = [
         '4.3'           : properties.getOrDefault('neo4jVersion43', '4.3.23'),
-        '4.4'           : properties.getOrDefault('neo4jVersion44', '4.4.15'),
+        '4.4'           : properties.getOrDefault('neo4jVersion44', '4.4.16'),
         '5.1'           : properties.getOrDefault('neo4jVersion51', '5.1.0'),
         '5.2'           : properties.getOrDefault('neo4jVersion52', '5.2.0'),
         '5.3'           : properties.getOrDefault('neo4jVersion53', '5.3.0')
