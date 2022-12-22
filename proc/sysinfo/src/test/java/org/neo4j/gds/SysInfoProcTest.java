@@ -22,7 +22,6 @@ package org.neo4j.gds;
 import org.assertj.core.api.Condition;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
@@ -93,7 +92,6 @@ class SysInfoProcTest extends BaseProcTest {
             .setConfig(Settings.transactionStateMaxOffHeapMemory(), 1337L);
     }
 
-    @Disabled
     @Test
     void testSysInfoProc() throws IOException {
         var result = runQuery("CALL gds.debug.sysInfo()", res -> res.stream().collect(
