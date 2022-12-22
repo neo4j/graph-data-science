@@ -15,23 +15,22 @@ include::partial$/operations-reference/beta-note.adoc[]
 The  influence maximization problem asks for a set of `k` nodes that maximize the expected spread of influence in the network.
 The set of these initial `k` is called the `seed set`.
 
-The Neo4j GDS Library supports approximate computation of under the Independent Cascade propagation model.
-In this propagation mode, nodes in the seed set become influenced and the process works as follows.
+The Neo4j GDS Library supports approximate computation of the best seed set under the Independent Cascade propagation model.
+In this propagation model, initially we assume that the nodes in the seet set become influenced and the process works as follows.
 An influenced node influences each of its neighbors with probability `p`.
 The spread is then the number of nodes that become influenced.
 
-The Neo4j GDS Library supports the CELF algorithm, introduced in 2007 by Leskovec et al. in https://www.cs.cmu.edu/~jure/pubs/detect-kdd07.pdf[Cost-effective Outbreak Detection in Networks] to compute a seed set.
+The Neo4j GDS Library supports the CELF algorithm, introduced in 2007 by Leskovec et al. in https://www.cs.cmu.edu/~jure/pubs/detect-kdd07.pdf[Cost-effective Outbreak Detection in Networks] to compute a seed set with a large expected spread.
 
-The CELF algorithm is based on the https://www.cs.cornell.edu/home/kleinber/kdd03-inf.pdf[Greedy] algorithm for hte problem.
+The CELF algorithm is based on the https://www.cs.cornell.edu/home/kleinber/kdd03-inf.pdf[Greedy] algorithm for the problem.
 It works iteratively in `k` steps to create the returned seed set `S`,
 where at each step the node yielding the maximum expected spread gain is added to `S`.
 
-The expected spread gain of a node `u` not in `S` is estimated by running `mc` monte carlo simulations of the propagation process and counting for each the number of nodes that would become influenced if `u` were to be added in `S`.
+The expected spread gain of a node `u` not in `S` is estimated by running `mc` different monte carlo simulations of the propagation process and counting for each simulation the number of nodes that would become influenced if `u` were to be added in `S`.
 
 The CELF algorithm extends on Greedy by introducing a _lazy forwarding_ mechanism, which
 prunes a lot of nodes from being examined, thereby massively reducing the number of conducted simulations.
 This makes CELF massively faster than Greedy on large networks.
-
 
 [[alpha-algorithms-celf-syntax]]
 == Syntax
