@@ -195,7 +195,6 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
         "gds.alpha.triangles",
         "gds.alpha.ml.splitRelationships.mutate",
-        "gds.alpha.influenceMaximization.greedy.stream",
 
         "gds.beta.influenceMaximization.celf.mutate",
         "gds.beta.influenceMaximization.celf.mutate.estimate",
@@ -530,7 +529,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 377;
+        int expectedCount = 376;
         assertEquals(
             expectedCount,
             registeredProcedures.size(),
