@@ -30,7 +30,7 @@ The expected spread gain of a node `u` not in `S` is estimated by running `mc` d
 
 The CELF algorithm extends on Greedy by introducing a _lazy forwarding_ mechanism, which
 prunes a lot of nodes from being examined, thereby massively reducing the number of conducted simulations.
-This makes CELF massively faster than Greedy on large networks.
+This makes CELF much faster than Greedy on large networks.
 
 [[alpha-algorithms-celf-syntax]]
 == Syntax
