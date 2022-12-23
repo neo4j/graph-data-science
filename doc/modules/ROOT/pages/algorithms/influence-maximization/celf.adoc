@@ -26,7 +26,7 @@ The CELF algorithm is based on the https://www.cs.cornell.edu/home/kleinber/kdd0
 It works iteratively in `k` steps to create the returned seed set `S`,
 where at each step the node yielding the maximum expected spread gain is added to `S`.
 
-The expected spread gain of a node `u` not in `S` is estimated by running `mc` different monte carlo simulations of the propagation process and counting for each simulation the number of nodes that would become influenced if `u` were to be added in `S`.
+The expected spread gain of a node `u` not in `S` is estimated by running `mc` different Monte Carlo simulations of the propagation process and counting for each simulation the number of nodes that would become influenced if `u` were to be added in `S`.
 
 The CELF algorithm extends on Greedy by introducing a _lazy forwarding_ mechanism, which
 prunes a lot of nodes from being examined, thereby massively reducing the number of conducted simulations.
