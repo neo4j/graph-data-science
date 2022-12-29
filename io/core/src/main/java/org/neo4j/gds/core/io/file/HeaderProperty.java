@@ -33,9 +33,7 @@ public interface HeaderProperty {
 
     static HeaderProperty parse(int position, String propertyString) {
         String[] propertyArgs = propertyString.split(":");
-        if (propertyArgs.length != 2) {
-            throw wrongHeaderFormatException(propertyString);
-        } else if (propertyArgs[0].isEmpty() || propertyArgs[1].isEmpty()) {
+        if (propertyArgs.length != 2 || propertyArgs[0].isEmpty() || propertyArgs[1].isEmpty()) {
             throw wrongHeaderFormatException(propertyString);
         }
         return ImmutableHeaderProperty.of(position, propertyArgs[0], ValueType.fromCsvName(propertyArgs[1]));

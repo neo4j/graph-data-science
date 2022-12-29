@@ -60,7 +60,7 @@ final class CsvFileInput implements FileInput {
     private static final char COLUMN_SEPARATOR = ',';
     private static final String ARRAY_ELEMENT_SEPARATOR = ";";
     private static final CsvMapper CSV_MAPPER = new CsvMapper();
-    private static final ObjectReader LINE_READER = CSV_MAPPER
+    static final ObjectReader LINE_READER = CSV_MAPPER
         .readerForArrayOf(String.class)
         .with(CsvSchema
             .emptySchema()
