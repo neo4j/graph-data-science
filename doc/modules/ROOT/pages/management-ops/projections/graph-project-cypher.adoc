@@ -172,8 +172,10 @@ YIELD
 === Relationship orientation
 
 The native projection supports specifying an orientation per relationship type.
-The Cypher projection will treat every relationship returned by the relationship query as if it was in `NATURAL` orientation.
-It is thus not possible to project graphs in `UNDIRECTED` or `REVERSE` orientation when Cypher projections are used.
+The Cypher projection treats every relationship returned by the relationship query as if it were in `NATURAL` orientation and creates a  directed relationship from the first provided id (source) to the second (target).
+Pprojecting in `REVERSE` orientation can be achieved by switching the order of ids in the RETURN clause such as `MATCH (n)-[r:KNOWS]->(m) RETURN id(m) AS source, id(n) AS target, type(r) AS type`.
+
+It not possible to project graphs in `UNDIRECTED` orientation when Cypher projections are used.
 
 [NOTE]
 --
