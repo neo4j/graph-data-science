@@ -52,10 +52,10 @@ class CsvToGraphStoreImporterIntegrationTest {
     private static final String GDL =
         "CREATE" +
         //                                      This triggers jackson wrapping the values in quotes
-        "  (a:A:B { prop1: 0, prop2: 42, prop3: [0.30000001192092896D, 0.20000000298023224D]})" +
-        ", (b:A:B { prop1: 1, prop2: 43})" +
-        ", (c:A:C { prop1: 2, prop2: 44, prop3: [-0.04D] })" +
-        ", (d:B { prop1: 3 })" +
+        "  (a:A:B { averylongpropertynamegreaterthantwentyfour: 0, prop2: 42, prop3: [0.30000001192092896D, 0.20000000298023224D]})" +
+        ", (b:A:B { averylongpropertynamegreaterthantwentyfour: 1, prop2: 43})" +
+        ", (c:A:C { averylongpropertynamegreaterthantwentyfour: 2, prop2: 44, prop3: [-0.04D] })" +
+        ", (d:B { averylongpropertynamegreaterthantwentyfour: 3 })" +
         ", (a)-[:REL1 { prop1: 0, prop2: 42 }]->(a)" +
         ", (a)-[:REL1 { prop1: 1, prop2: 43 }]->(b)" +
         ", (b)-[:REL1 { prop1: 2, prop2: 44 }]->(a)" +
@@ -91,13 +91,18 @@ class CsvToGraphStoreImporterIntegrationTest {
     void shouldImportGraphStoreWithGraphProperties(int concurrency) {
         addLongGraphProperty();
         addDoubleArrayGraphProperty();
+        addLongNamedGraphProperty();
 
         GraphStoreToCsvExporter.create(graphStore, exportConfig(concurrency), graphLocation).run();
         var importer = new CsvToGraphStoreImporter(concurrency, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
         var graphStore = userGraphStore.graphStore();
 
-        assertThat(graphStore.graphPropertyKeys()).containsExactlyInAnyOrder("longProp", "doubleArrayProp");
+        assertThat(graphStore.graphPropertyKeys()).containsExactlyInAnyOrder(
+            "longProp",
+            "doubleArrayProp",
+            "thisisaverylongnameintentionallytotriggerquoting"
+        );
 
         var expectedLongValues = LongStream.range(0, 10_000).toArray();
         assertThat(graphStore.graphProperty("longProp").values().longValues().toArray())
@@ -171,6 +176,20 @@ class CsvToGraphStoreImporterIntegrationTest {
 
     private void addLongGraphProperty() {
         graphStore.addGraphProperty("longProp", new LongGraphPropertyValues() {
+            @Override
+            public LongStream longValues() {
+                return LongStream.range(0, 10_000);
+            }
+
+            @Override
+            public long size() {
+                return 10_000;
+            }
+        });
+    }
+
+    private void addLongNamedGraphProperty() {
+        graphStore.addGraphProperty("thisisaverylongnameintentionallytotriggerquoting", new LongGraphPropertyValues() {
             @Override
             public LongStream longValues() {
                 return LongStream.range(0, 10_000);

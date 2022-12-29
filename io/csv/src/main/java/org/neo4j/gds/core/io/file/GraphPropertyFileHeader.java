@@ -23,6 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.PropertySchema;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
@@ -43,7 +44,13 @@ public interface GraphPropertyFileHeader extends FileHeader<Map<String, Property
         return Map.of(graphPropertySchema.key(), graphPropertySchema);
     }
 
-    static GraphPropertyFileHeader of(String headerLine) {
-        return ImmutableGraphPropertyFileHeader.of(HeaderProperty.parse(0, headerLine));
+    static GraphPropertyFileHeader of(String[] headerLine) {
+        if (headerLine.length != 1) {
+            throw new IllegalArgumentException(
+                "Graph property headers should contain exactly one property column, but got: "
+                + Arrays.toString(headerLine)
+            );
+        }
+        return ImmutableGraphPropertyFileHeader.of(HeaderProperty.parse(0, headerLine[0]));
     }
 }

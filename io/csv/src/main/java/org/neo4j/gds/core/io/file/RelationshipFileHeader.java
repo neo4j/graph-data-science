@@ -38,9 +38,8 @@ public interface RelationshipFileHeader extends FileHeader<RelationshipSchema, R
         return schema.filter(Set.of(RelationshipType.of(relationshipType()))).unionProperties();
     }
 
-    static RelationshipFileHeader of(String headerLine, String relationshipType) {
+    static RelationshipFileHeader of(String[] csvColumns, String relationshipType) {
         var builder = ImmutableRelationshipFileHeader.builder();
-        String[] csvColumns = headerLine.split(",");
         if (csvColumns.length == 0 || !csvColumns[0].equals(CsvRelationshipVisitor.START_ID_COLUMN_NAME)) {
             throw new IllegalArgumentException(StringFormatting.formatWithLocale("First column of header must be %s.", CsvRelationshipVisitor.START_ID_COLUMN_NAME));
         }

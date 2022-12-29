@@ -200,6 +200,18 @@ class CsvImportFileUtilTest {
     }
 
     @Test
+    void shouldFailToParseBadGraphPropertyHeaderFile() throws IOException {
+        var headerPath = tempDir.resolve("graph_property_prop1_header.csv");
+        FileUtils.writeLines(headerPath.toFile(), List.of("prop1:long"));
+
+        var parsedHeader = CsvImportFileUtil.parseGraphPropertyHeader(headerPath);
+
+        assertThat(parsedHeader.propertyMapping()).isEqualTo(
+            HeaderProperty.parse(0, "prop1:long")
+        );
+    }
+
+    @Test
     void shouldReturnEmptyArrayForNoLabels() {
         var noLabelsNodeHeaderFileName = "nodes_header.csv";
         assertThat(CsvImportFileUtil.inferNodeLabels(noLabelsNodeHeaderFileName)).isEmpty();

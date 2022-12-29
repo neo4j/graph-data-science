@@ -1,4 +1,4 @@
 label,propertyKey,valueType,defaultValue,state
-A,prop1,long,DefaultValue(42),PERSISTENT
+A,thisisaverylongnameintentionallytotriggerquoting,long,DefaultValue(42),PERSISTENT
 A,prop2,float[],DefaultValue(null),PERSISTENT
 B

@@ -30,15 +30,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipVisitor.END_ID_COLUMN_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipVisitor.START_ID_COLUMN_NAME;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class RelationshipFileHeaderTest {
 
     @Test
     void shouldBuildRelationshipFileHeader() {
-        var headerLine = ":START_ID,:END_ID,foo:long,bar:double,baz:long";
+        var parsedLine = new String[]{":START_ID",":END_ID","foo:long","bar:double","baz:long"};
 
-        var fileHeader = RelationshipFileHeader.of(headerLine, "REL");
+        var fileHeader = RelationshipFileHeader.of(parsedLine, "REL");
 
         assertThat(fileHeader).isNotNull();
         assertThat(fileHeader.relationshipType()).isEqualTo("REL");
@@ -55,8 +54,10 @@ class RelationshipFileHeaderTest {
         ":END_ID,foo:long,bar:double",
         "",
         ":END_ID,:START_ID"
-    })    void shouldFailIfStartIdColumnIsMissing(String headerLine) {
-        assertThatThrownBy(() -> RelationshipFileHeader.of(headerLine, "REL"))
+    })
+    void shouldFailIfStartIdColumnIsMissing(String headerLine) {
+        String[] parsed = headerLine.split(",");
+        assertThatThrownBy(() -> RelationshipFileHeader.of(parsed, "REL"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("First column")
             .hasMessageContaining("must be " + START_ID_COLUMN_NAME);
@@ -69,7 +70,8 @@ class RelationshipFileHeaderTest {
         ":START_ID"
     })
     void shouldFailIfEndIdColumnIsMissing(String headerLine) {
-        assertThatThrownBy(() -> RelationshipFileHeader.of(headerLine, "REL"))
+        String[] parsed = headerLine.split(",");
+        assertThatThrownBy(() -> RelationshipFileHeader.of(parsed, "REL"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Second column")
             .hasMessageContaining("must be " + END_ID_COLUMN_NAME);
@@ -78,7 +80,7 @@ class RelationshipFileHeaderTest {
     @ParameterizedTest
     @ValueSource(strings = {"foo::Bar", ":BAR", "foo:", ":foo:BAR", ":"})
     void shouldFailOnMalformedProperties(String propertyHeaderString) {
-        var headerString = formatWithLocale("%s,%s,%s", START_ID_COLUMN_NAME, END_ID_COLUMN_NAME, propertyHeaderString);
+        var headerString = new String[]{START_ID_COLUMN_NAME, END_ID_COLUMN_NAME, propertyHeaderString};
         assertThatThrownBy(() -> RelationshipFileHeader.of(headerString, "REL"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("does not have expected format <string>:<string>");

@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.ObjectReader;
 import org.neo4j.gds.core.io.file.GraphPropertyFileHeader;
 import org.neo4j.gds.core.io.file.NodeFileHeader;
 import org.neo4j.gds.core.io.file.RelationshipFileHeader;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -36,29 +36,45 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import static org.neo4j.gds.core.io.file.csv.CsvFileInput.LINE_READER;
+
 public final class CsvImportFileUtil {
+
+    private static final ObjectReader HEADER_FILE_READER = LINE_READER;
 
     private CsvImportFileUtil() {}
 
     public static NodeFileHeader parseNodeHeader(Path headerFile) {
-        try (var headerReader = Files.newBufferedReader(headerFile, StandardCharsets.UTF_8)) {
-            return NodeFileHeader.of(checkedReadLine(headerReader), inferNodeLabels(headerFile));
+        try (MappingIterator<String[]> iterator = HEADER_FILE_READER.readValues(headerFile.toFile())) {
+            var headerLine = iterator.next();
+            if (headerLine == null) {
+                throw new UncheckedIOException(new IOException("Header line was null"));
+            }
+            return NodeFileHeader.of(headerLine, inferNodeLabels(headerFile));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
     public static RelationshipFileHeader parseRelationshipHeader(Path headerFile) {
-        try (var headerReader = Files.newBufferedReader(headerFile, StandardCharsets.UTF_8)) {
-            return RelationshipFileHeader.of(checkedReadLine(headerReader), inferRelationshipType(headerFile));
+        try (MappingIterator<String[]> iterator = HEADER_FILE_READER.readValues(headerFile.toFile())) {
+            var headerLine = iterator.next();
+            if (headerLine == null) {
+                throw new UncheckedIOException(new IOException("Header line was null"));
+            }
+            return RelationshipFileHeader.of(headerLine, inferRelationshipType(headerFile));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
     public static GraphPropertyFileHeader parseGraphPropertyHeader(Path headerFile) {
-        try (var headerReader = Files.newBufferedReader(headerFile, StandardCharsets.UTF_8)) {
-            return GraphPropertyFileHeader.of(checkedReadLine(headerReader));
+        try (MappingIterator<String[]> iterator = HEADER_FILE_READER.readValues(headerFile.toFile())) {
+            var headerLine = iterator.next();
+            if (headerLine == null) {
+                throw new UncheckedIOException(new IOException("Header line was null"));
+            }
+            return GraphPropertyFileHeader.of(headerLine);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -131,13 +147,5 @@ public final class CsvImportFileUtil {
     private static String inferRelationshipType(Path headerFile) {
         var headerFileName = headerFile.getFileName().toString();
         return headerFileName.replaceAll("relationships_|_header.csv", "");
-    }
-
-    private static String checkedReadLine(BufferedReader reader) throws IOException {
-        String line = reader.readLine();
-        if (line == null) {
-            throw new IOException("Line was null");
-        }
-        return line;
     }
 }
