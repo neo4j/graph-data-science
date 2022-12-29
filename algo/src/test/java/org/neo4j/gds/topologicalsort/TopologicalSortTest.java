@@ -20,6 +20,8 @@
 package org.neo4j.gds.topologicalsort;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.beta.generator.RandomGraphGenerator;
+import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -27,6 +29,8 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -230,5 +234,22 @@ class TopologicalSortTest {
         assertTrue(second == 7 || second == 8);
         assertEquals(3, result.size());
         assertEquals(6, third);
+    }
+
+    @Test
+    void shouldContainAllNodesOnDag() {
+        Random rand = new Random();
+        var graph = RandomGraphGenerator.builder()
+            .nodeCount(100)
+            .averageDegree(6)
+            .relationshipDistribution(RelationshipDistribution.RANDOM)
+            .seed(rand.nextInt())
+            .forceDag(true)
+            .build()
+            .generate();
+
+        TopologicalSort ts = new TopologicalSort(graph, CONFIG, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
+        TopologicalSortResult result = ts.compute();
+        assertEquals(100, result.size());
     }
 }
