@@ -269,7 +269,7 @@ public final class AdjacencyBuffer {
     /**
      * Responsible for writing a page of ChunkedAdjacencyLists into the adjacency list.
      */
-    static final class AdjacencyListBuilderTask implements Runnable {
+    public static final class AdjacencyListBuilderTask implements Runnable {
 
         private final int page;
         private final AdjacencyBufferPaging paging;

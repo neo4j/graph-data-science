@@ -19,65 +19,25 @@
  */
 package org.neo4j.gds.core.loading.construction;
 
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PartialIdMap;
-import org.neo4j.gds.api.Relationships;
-import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
-import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.loading.PropertyReader;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
-import org.neo4j.gds.core.loading.ThreadLocalSingleTypeRelationshipImporter;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 import java.util.function.LongConsumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class RelationshipsBuilder {
 
     private final PartialIdMap idMap;
+    private final SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder;
+    private final AutoCloseableThreadLocal<ThreadLocalRelationshipsBuilder> threadLocalRelationshipsBuilders;
 
-    private final boolean loadRelationshipProperty;
-    private final boolean isMultiGraph;
-
-    private final Direction direction;
-    private final SingleTypeRelationshipImporter singleTypeRelationshipImporter;
-
-    private final int concurrency;
-    private final ExecutorService executorService;
-
-    private final AutoCloseableThreadLocal<ThreadLocalBuilder> threadLocalBuilders;
-
-    RelationshipsBuilder(
-        PartialIdMap idMap,
-        Direction direction,
-        int bufferSize,
-        int[] propertyKeyIds,
-        SingleTypeRelationshipImporter singleTypeRelationshipImporter,
-        boolean loadRelationshipProperty,
-        boolean isMultiGraph,
-        int concurrency,
-        ExecutorService executorService
-    ) {
-        this.idMap = idMap;
-        this.direction = direction;
-        this.singleTypeRelationshipImporter = singleTypeRelationshipImporter;
-        this.loadRelationshipProperty = loadRelationshipProperty;
-        this.isMultiGraph = isMultiGraph;
-        this.concurrency = concurrency;
-        this.executorService = executorService;
-
-        this.threadLocalBuilders = AutoCloseableThreadLocal.withInitial(() -> new ThreadLocalBuilder(
-            idMap,
-            singleTypeRelationshipImporter,
-            bufferSize,
-            propertyKeyIds
-        ));
+    RelationshipsBuilder(SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder) {
+        this.singleTypeRelationshipsBuilder = singleTypeRelationshipsBuilder;
+        this.idMap = singleTypeRelationshipsBuilder.partialIdMap();
+        this.threadLocalRelationshipsBuilders = AutoCloseableThreadLocal.withInitial(singleTypeRelationshipsBuilder::threadLocalRelationshipsBuilder);
     }
 
     public void add(long source, long target) {
@@ -117,11 +77,11 @@ public class RelationshipsBuilder {
     }
 
     public void addFromInternal(long source, long target) {
-        threadLocalBuilders.get().addRelationship(source, target);
+        this.threadLocalRelationshipsBuilders.get().addRelationship(source, target);
     }
 
     public void addFromInternal(long source, long target, double relationshipPropertyValue) {
-        threadLocalBuilders.get().addRelationship(
+        this.threadLocalRelationshipsBuilders.get().addRelationship(
             source,
             target,
             relationshipPropertyValue
@@ -129,7 +89,7 @@ public class RelationshipsBuilder {
     }
 
     public void addFromInternal(long source, long target, double[] relationshipPropertyValues) {
-        threadLocalBuilders.get().addRelationship(
+        this.threadLocalRelationshipsBuilders.get().addRelationship(
             source,
             target,
             relationshipPropertyValues
@@ -154,123 +114,8 @@ public class RelationshipsBuilder {
         Optional<AdjacencyCompressor.ValueMapper> mapper,
         Optional<LongConsumer> drainCountConsumer
     ) {
-        threadLocalBuilders.close();
-
-        var adjacencyListBuilderTasks = singleTypeRelationshipImporter.adjacencyListBuilderTasks(
-            mapper,
-            drainCountConsumer
-        );
-
-        RunWithConcurrency.builder()
-            .concurrency(concurrency)
-            .tasks(adjacencyListBuilderTasks)
-            .executor(executorService)
-            .run();
-
-        var adjacencyListsWithProperties = singleTypeRelationshipImporter.build();
-        var adjacencyList = adjacencyListsWithProperties.adjacency();
-        var relationshipCount = adjacencyListsWithProperties.relationshipCount();
-
-        if (loadRelationshipProperty) {
-            return adjacencyListsWithProperties.properties().stream().map(compressedProperties ->
-                {
-                    var relationships = Relationships.of(
-                        relationshipCount,
-                        isMultiGraph,
-                        adjacencyList,
-                        compressedProperties,
-                        DefaultValue.DOUBLE_DEFAULT_FALLBACK
-                    );
-                    return RelationshipsAndDirection.of(relationships, direction);
-                }
-            ).collect(Collectors.toList());
-        } else {
-            var relationships = Relationships.of(
-                relationshipCount,
-                isMultiGraph,
-                adjacencyList
-            );
-
-            return List.of(RelationshipsAndDirection.of(relationships, direction));
-        }
-    }
-
-    private static class ThreadLocalBuilder implements AutoCloseable {
-
-        private final ThreadLocalSingleTypeRelationshipImporter importer;
-        private final PropertyReader.Buffered bufferedPropertyReader;
-        private final int[] propertyKeyIds;
-
-        private int localRelationshipId;
-
-        ThreadLocalBuilder(
-            PartialIdMap idMap,
-            SingleTypeRelationshipImporter singleTypeRelationshipImporter,
-            int bufferSize,
-            int[] propertyKeyIds
-        ) {
-            this.propertyKeyIds = propertyKeyIds;
-
-            if (propertyKeyIds.length > 1) {
-                this.bufferedPropertyReader = PropertyReader.buffered(bufferSize, propertyKeyIds.length);
-                this.importer = singleTypeRelationshipImporter.threadLocalImporter(
-                    idMap,
-                    bufferSize,
-                    bufferedPropertyReader
-                );
-            } else {
-                this.bufferedPropertyReader = null;
-                this.importer = singleTypeRelationshipImporter.threadLocalImporter(
-                    idMap,
-                    bufferSize,
-                    PropertyReader.preLoaded()
-                );
-            }
-        }
-
-        void addRelationship(long source, long target) {
-            importer.buffer().add(source, target);
-            if (importer.buffer().isFull()) {
-                flushBuffer();
-            }
-        }
-
-        void addRelationship(long source, long target, double relationshipPropertyValue) {
-            importer
-                .buffer()
-                .add(
-                    source,
-                    target,
-                    Double.doubleToLongBits(relationshipPropertyValue),
-                    Neo4jProxy.noPropertyReference()
-                );
-            if (importer.buffer().isFull()) {
-                flushBuffer();
-            }
-        }
-
-        void addRelationship(long source, long target, double[] relationshipPropertyValues) {
-            int nextRelationshipId = localRelationshipId++;
-            importer.buffer().add(source, target, nextRelationshipId, Neo4jProxy.noPropertyReference());
-            int[] keyIds = propertyKeyIds;
-            for (int i = 0; i < keyIds.length; i++) {
-                bufferedPropertyReader.add(nextRelationshipId, keyIds[i], relationshipPropertyValues[i]);
-            }
-            if (importer.buffer().isFull()) {
-                flushBuffer();
-            }
-        }
-
-        private void flushBuffer() {
-            importer.importRelationships();
-            importer.buffer().reset();
-            localRelationshipId = 0;
-        }
-
-        @Override
-        public void close() {
-            flushBuffer();
-        }
+        this.threadLocalRelationshipsBuilders.close();
+        return this.singleTypeRelationshipsBuilder.buildAll(mapper, drainCountConsumer);
     }
 
     public interface Relationship {

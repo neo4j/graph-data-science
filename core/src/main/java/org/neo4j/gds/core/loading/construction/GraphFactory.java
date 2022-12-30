@@ -209,6 +209,7 @@ public final class GraphFactory {
         Optional<Aggregation> aggregation,
         Optional<Boolean> validateRelationships,
         Optional<Integer> concurrency,
+        Optional<Boolean> indexInverse,
         Optional<ExecutorService> executorService
     ) {
         var loadRelationshipProperties = !propertyConfigs.isEmpty();
@@ -265,24 +266,26 @@ public final class GraphFactory {
             .typeTokenId(NO_SUCH_RELATIONSHIP_TYPE)
             .build();
 
-        var importerFactory = new SingleTypeRelationshipImporterBuilder()
+        var singleTypeRelationshipImporter = new SingleTypeRelationshipImporterBuilder()
             .importMetaData(importMetaData)
             .nodeCountSupplier(() -> nodes.rootNodeCount().orElse(0L))
             .importSizing(importSizing)
             .validateRelationships(validateRelationships.orElse(false))
             .build();
 
-        return new RelationshipsBuilder(
-            nodes,
-            Direction.fromOrientation(actualOrientation),
-            bufferSize,
-            propertyKeyIds,
-            importerFactory,
-            loadRelationshipProperties,
-            isMultiGraph,
-            finalConcurrency,
-            executorService.orElse(Pools.DEFAULT)
-        );
+        var singleTypeRelationshipsBuilder = new SingleTypeRelationshipsBuilderBuilder()
+            .idMap(nodes)
+            .importer(singleTypeRelationshipImporter)
+            .bufferSize(bufferSize)
+            .propertyKeyIds(propertyKeyIds)
+            .isMultiGraph(isMultiGraph)
+            .loadRelationshipProperty(loadRelationshipProperties)
+            .direction(Direction.fromOrientation(actualOrientation))
+            .executorService(executorService.orElse(Pools.DEFAULT))
+            .concurrency(finalConcurrency)
+            .build();
+
+        return new RelationshipsBuilder(singleTypeRelationshipsBuilder);
     }
 
     public static Relationships emptyRelationships(IdMap idMap) {
