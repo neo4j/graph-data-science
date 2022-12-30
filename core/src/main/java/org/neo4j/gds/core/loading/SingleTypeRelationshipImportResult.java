@@ -20,12 +20,15 @@
 package org.neo4j.gds.core.loading;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.ImmutableRelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.api.schema.RelationshipSchemaEntry;
 
 import java.util.Optional;
 
@@ -38,11 +41,8 @@ public interface SingleTypeRelationshipImportResult {
             .topology(Relationships.Topology.EMPTY)
             .build();
 
-
-    // TODO: remove
+    // TODO: figure out if we can remove this.
     Direction direction();
-
-    // TODO: add RelationshipSchema
 
     Relationships.Topology topology();
 
@@ -51,6 +51,28 @@ public interface SingleTypeRelationshipImportResult {
     Optional<Relationships.Topology> inverseTopology();
 
     Optional<RelationshipPropertyStore> inverseProperties();
+
+    default RelationshipSchema relationshipSchema(RelationshipType relationshipType) {
+        var schema = RelationshipSchema.empty();
+        this.updateRelationshipSchemaEntry(schema.getOrCreateRelationshipType(relationshipType, direction()));
+        return schema;
+    }
+
+    default void updateRelationshipSchemaEntry(RelationshipSchemaEntry schemaEntry) {
+        properties().ifPresent(relationshipPropertyStore -> relationshipPropertyStore
+            .relationshipProperties()
+            .forEach((propertyKey, relationshipProperty) -> {
+                schemaEntry.addProperty(
+                    propertyKey,
+                    RelationshipPropertySchema.of(propertyKey,
+                        relationshipProperty.valueType(),
+                        relationshipProperty.defaultValue(),
+                        relationshipProperty.propertyState(),
+                        relationshipProperty.aggregation()
+                    )
+                );
+            }));
+    }
 
     /**
      * Filters the relationships to include only the given property if present.

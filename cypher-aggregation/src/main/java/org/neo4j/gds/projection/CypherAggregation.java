@@ -619,30 +619,21 @@ public final class CypherAggregation {
             GraphStoreBuilder graphStoreBuilder,
             AdjacencyCompressor.ValueMapper valueMapper
         ) {
-            var relationshipSchema = RelationshipSchema.empty();
-
             var relationshipImportResultBuilder = RelationshipImportResult.builder();
+            var relationshipSchemas = new ArrayList<RelationshipSchema>();
 
             this.relImporters.forEach((relationshipType, relImporter) -> {
                 var relationships = relImporter.build(
                     Optional.of(valueMapper),
                     Optional.empty()
                 );
-                // TODO: remove, once schema is created in SingleTypeRelationshipImportResult
-                var direction = relationships.direction();
-                var relationshipSchemaEntry = relationshipSchema.getOrCreateRelationshipType(relationshipType, direction);
-                relationships.properties().ifPresent(relationshipPropertyStore -> {
-                    relationshipPropertyStore.relationshipProperties().forEach((propertyKey, relationshipProperties) -> {
-                        relationshipSchemaEntry
-                            .addProperty(
-                                propertyKey,
-                                relationshipProperties.propertySchema()
-                            );
-                    });
-                });
-
+                relationshipSchemas.add(relationships.relationshipSchema(relationshipType));
                 relationshipImportResultBuilder.putImportResult(relationshipType, relationships);
             });
+
+            var relationshipSchema = relationshipSchemas
+                .stream()
+                .reduce(RelationshipSchema.empty(), RelationshipSchema::union);
 
             graphStoreBuilder.relationshipImportResult(relationshipImportResultBuilder.build());
             this.graphSchemaBuilder.relationshipSchema(relationshipSchema);

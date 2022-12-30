@@ -407,10 +407,6 @@ public class CSRGraphStore implements GraphStore {
                     .topology(relationships.topology())
                     .direction(direction);
 
-                var relationshipSchemaEntry = schema()
-                    .relationshipSchema()
-                    .getOrCreateRelationshipType(relationshipType, direction);
-
                 if (relationshipPropertyKey.isPresent() && relationshipPropertyType.isPresent() && relationships
                     .properties()
                     .isPresent()) {
@@ -429,21 +425,15 @@ public class CSRGraphStore implements GraphStore {
                         .build();
 
                     builder.properties(properties);
-
-                    var valueType = ValueTypes.fromNumberType(relationshipPropertyType.get());
-                    relationshipSchemaEntry.addProperty(
-                        propertyKey,
-                        RelationshipPropertySchema.of(
-                            propertyKey,
-                            valueType,
-                            valueType.fallbackValue(),
-                            PropertyState.TRANSIENT,
-                            Aggregation.NONE
-                        )
-                    );
                 }
 
-                return builder.build();
+                var singleTypeRelationshipImportResult = builder.build();
+
+                singleTypeRelationshipImportResult.updateRelationshipSchemaEntry(schema()
+                    .relationshipSchema()
+                    .getOrCreateRelationshipType(relationshipType, direction));
+
+                return singleTypeRelationshipImportResult;
             });
         });
     }
