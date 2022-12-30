@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.api;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 
@@ -73,9 +72,6 @@ public interface Relationships {
     interface Topology {
         AdjacencyList adjacencyList();
 
-        @Value.Parameter(false)
-        Optional<AdjacencyList> inverseAdjacencyList();
-
         long elementCount();
 
         boolean isMultiGraph();
@@ -84,11 +80,6 @@ public interface Relationships {
             @Override
             public AdjacencyList adjacencyList() {
                 return AdjacencyList.EMPTY;
-            }
-
-            @Override
-            public Optional<AdjacencyList> inverseAdjacencyList() {
-                return Optional.empty();
             }
 
             @Override

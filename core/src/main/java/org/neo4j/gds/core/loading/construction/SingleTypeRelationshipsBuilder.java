@@ -301,15 +301,20 @@ abstract class SingleTypeRelationshipsBuilder {
 
             var relationshipCount = forwardListWithProperties.relationshipCount();
 
-            var topology = ImmutableTopology.builder()
+            var forwardTopology = ImmutableTopology.builder()
                 .isMultiGraph(isMultiGraph)
                 .adjacencyList(forwardAdjacencyList)
-                .inverseAdjacencyList(inverseAdjacencyList)
                 .elementCount(relationshipCount)
                 .build();
 
+            var inverseTopology = ImmutableTopology.builder()
+                .from(forwardTopology)
+                .adjacencyList(inverseAdjacencyList)
+                .build();
+
             var singleRelationshipTypeImportResultBuilder = SingleTypeRelationshipImportResult.builder()
-                .topology(topology)
+                .topology(forwardTopology)
+                .inverseTopology(inverseTopology)
                 .direction(this.direction);
 
             if (loadRelationshipProperty) {
