@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
@@ -34,7 +35,10 @@ public interface NodeImportResult {
 
     IdMap idMap();
 
-    NodePropertyStore properties();
+    @Value.Default
+    default NodePropertyStore properties() {
+        return NodePropertyStore.empty();
+    }
 
     static NodeImportResult of(IdMap idmap) {
         return ImmutableNodeImportResult.of(idmap, NodePropertyStore.empty());
