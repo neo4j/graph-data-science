@@ -1,4 +1,4 @@
-[[algorithms-leiden]]
+le[[algorithms-leiden]]
 [.beta]
 = Leiden
 :description: This section describes the Leiden algorithm in the Neo4j Graph Data Science library.
@@ -321,7 +321,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 6         | 14                | 561240   | 561352      | "[548 KiB \... 548 KiB]"
+| 6         | 14                | 561256   | 561368   | "[548 KiB \... 548 KiB]"
 |===
 --
 
