@@ -34,20 +34,6 @@ public interface Relationships {
     static Relationships of(
         long relationshipCount,
         boolean isMultiGraph,
-        AdjacencyList adjacencyList
-    ) {
-        return of(
-            relationshipCount,
-            isMultiGraph,
-            adjacencyList,
-            null,
-            DefaultValue.DOUBLE_DEFAULT_FALLBACK
-        );
-    }
-
-    static Relationships of(
-        long relationshipCount,
-        boolean isMultiGraph,
         AdjacencyList adjacencyList,
         @Nullable AdjacencyProperties adjacencyProperties,
         double defaultPropertyValue

@@ -92,7 +92,7 @@ public class ToUndirected extends Algorithm<SingleTypeRelationshipImportResult> 
         progressTracker.endSubTask();
 
         progressTracker.beginSubTask();
-        var relationships = relationshipsBuilder.buildAll();
+        var relationships = relationshipsBuilder.build();
         progressTracker.endSubTask();
 
         progressTracker.endSubTask();

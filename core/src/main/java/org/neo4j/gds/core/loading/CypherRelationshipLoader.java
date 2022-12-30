@@ -140,7 +140,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
     RelationshipImportResult result() {
         var relationshipsByType = loaderContext.relationshipBuildersByType.entrySet().stream().collect(Collectors.toMap(
             Map.Entry::getKey,
-            entry -> entry.getValue().buildAll()
+            entry -> entry.getValue().build()
         ));
         return RelationshipImportResult.of(relationshipsByType);
     }

@@ -323,7 +323,7 @@ public abstract class FileToGraphStoreImporter {
                 relationshipType,
                 relationshipTopologyFrom(
                     relationshipType,
-                    entry.getValue().buildAll(),
+                    entry.getValue().build(),
                     propertyStores
                 )
             );

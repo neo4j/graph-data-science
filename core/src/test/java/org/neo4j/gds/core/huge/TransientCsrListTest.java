@@ -27,7 +27,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;

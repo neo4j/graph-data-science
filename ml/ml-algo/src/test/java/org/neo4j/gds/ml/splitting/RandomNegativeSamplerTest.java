@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.splitting;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;

@@ -192,7 +192,7 @@ public final class RelationshipsFilter {
             .executor(executorService)
             .run();
 
-        var relationships = relationshipsBuilder.buildAll();
+        var relationships = relationshipsBuilder.build();
         var topology = relationships.topology();
         var properties = IntStream.range(0, propertyKeys.size())
             .boxed()

@@ -624,7 +624,7 @@ public final class CypherAggregation {
             var relationshipImportResultBuilder = RelationshipImportResult.builder();
 
             this.relImporters.forEach((relationshipType, relImporter) -> {
-                var relationships = relImporter.buildAll(
+                var relationships = relImporter.build(
                     Optional.of(valueMapper),
                     Optional.empty()
                 );

@@ -386,7 +386,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         return relationshipBuilders.entrySet()
             .stream()
             .map(entry -> {
-                var relationships = entry.getValue().buildAll();
+                var relationships = entry.getValue().build();
 
                 var topology = relationships.topology();
                 var propertyKeys = propertyKeysByRelType.get(entry.getKey());
