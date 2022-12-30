@@ -31,7 +31,6 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.DeletionResult;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
-import org.neo4j.gds.core.loading.construction.RelationshipsAndDirection;
 import org.neo4j.values.storable.NumberType;
 
 import java.time.ZonedDateTime;
@@ -156,21 +155,6 @@ public interface GraphStore {
     Set<String> relationshipPropertyKeys(RelationshipType relationshipType);
 
     RelationshipProperty relationshipPropertyValues(RelationshipType relationshipType, String propertyKey);
-
-    default void addRelationshipType(
-        RelationshipType relationshipType,
-        Optional<String> relationshipPropertyKey,
-        Optional<NumberType> relationshipPropertyType,
-        RelationshipsAndDirection relationshipsAndDirection
-    ) {
-        addRelationshipType(
-            relationshipType,
-            relationshipPropertyKey,
-            relationshipPropertyType,
-            relationshipsAndDirection.direction(),
-            relationshipsAndDirection.relationships()
-        );
-    }
 
     void addRelationshipType(
         RelationshipType relationshipType,
