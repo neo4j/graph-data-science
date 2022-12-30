@@ -23,13 +23,11 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.loading.construction.RelationshipsAndDirection;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.result.AbstractResultBuilder;
-
-import java.util.Optional;
 
 final class TraverseMutateResultConsumer {
 
@@ -50,7 +48,7 @@ final class TraverseMutateResultConsumer {
             .orientation(Orientation.NATURAL)
             .build();
 
-        RelationshipsAndDirection RelationshipsAndDirection;
+        SingleTypeRelationshipImportResult relationships;
 
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
             var source = result.get(0);
@@ -60,16 +58,10 @@ final class TraverseMutateResultConsumer {
                 source = target;
             }
 
-            RelationshipsAndDirection = relationshipsBuilder.build();
-            resultBuilder.withRelationshipsWritten(RelationshipsAndDirection.relationships().topology().elementCount());
+            relationships = relationshipsBuilder.build();
+            resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
         }
 
-        graphStore
-            .addRelationshipType(
-                mutateRelationshipType,
-                Optional.empty(),
-                Optional.empty(),
-                RelationshipsAndDirection
-            );
+        graphStore.addRelationshipType(mutateRelationshipType, relationships);
     }
 }

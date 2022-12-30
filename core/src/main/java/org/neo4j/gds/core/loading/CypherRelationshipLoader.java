@@ -92,7 +92,11 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
 
         propertyConfigs = propertyMappings
             .stream()
-            .map(mapping -> GraphFactory.PropertyConfig.of(mapping.aggregation(), mapping.defaultValue()))
+            .map(mapping -> GraphFactory.PropertyConfig.of(
+                mapping.propertyKey(),
+                mapping.aggregation(),
+                mapping.defaultValue()
+            ))
             .collect(Collectors.toList());
 
         projectionBuilder = RelationshipProjection
@@ -135,13 +139,9 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
     @Override
     RelationshipImportResult result() {
         var relationshipsByType = loaderContext.relationshipBuildersByType.entrySet().stream().collect(Collectors.toMap(
-            entry -> {
-                var projection = projectionBuilder.type(entry.getKey().name).build();
-                return RelationshipImportResult.RelationshipTypeAndProjection.of(entry.getKey(), projection);
-            },
+            Map.Entry::getKey,
             entry -> entry.getValue().buildAll()
         ));
-
         return RelationshipImportResult.of(relationshipsByType);
     }
 

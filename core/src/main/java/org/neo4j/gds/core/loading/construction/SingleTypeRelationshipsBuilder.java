@@ -22,17 +22,21 @@ package org.neo4j.gds.core.loading.construction;
 import org.immutables.builder.Builder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.ImmutableProperties;
-import org.neo4j.gds.api.ImmutableRelationships;
+import org.neo4j.gds.api.ImmutableRelationshipProperty;
 import org.neo4j.gds.api.ImmutableTopology;
 import org.neo4j.gds.api.PartialIdMap;
+import org.neo4j.gds.api.RelationshipPropertyStore;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
+import org.neo4j.gds.core.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.AdjacencyBuffer;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.function.LongConsumer;
@@ -43,6 +47,7 @@ abstract class SingleTypeRelationshipsBuilder {
     final PartialIdMap idMap;
     final int bufferSize;
     final int[] propertyKeyIds;
+    final String[] propertyKeys;
 
     final boolean isMultiGraph;
     final boolean loadRelationshipProperty;
@@ -58,6 +63,7 @@ abstract class SingleTypeRelationshipsBuilder {
         Optional<SingleTypeRelationshipImporter> reverseImporter,
         int bufferSize,
         int[] propertyKeyIds,
+        String[] propertyKeys,
         boolean isMultiGraph,
         boolean loadRelationshipProperty,
         Direction direction,
@@ -71,6 +77,7 @@ abstract class SingleTypeRelationshipsBuilder {
                 reverseImporter.get(),
                 bufferSize,
                 propertyKeyIds,
+                propertyKeys,
                 isMultiGraph,
                 loadRelationshipProperty,
                 direction,
@@ -82,6 +89,7 @@ abstract class SingleTypeRelationshipsBuilder {
                 importer,
                 bufferSize,
                 propertyKeyIds,
+                propertyKeys,
                 isMultiGraph,
                 loadRelationshipProperty,
                 direction,
@@ -94,6 +102,7 @@ abstract class SingleTypeRelationshipsBuilder {
         PartialIdMap idMap,
         int bufferSize,
         int[] propertyKeyIds,
+        String[] propertyKeys,
         boolean isMultiGraph,
         boolean loadRelationshipProperty,
         Direction direction,
@@ -103,6 +112,7 @@ abstract class SingleTypeRelationshipsBuilder {
         this.idMap = idMap;
         this.bufferSize = bufferSize;
         this.propertyKeyIds = propertyKeyIds;
+        this.propertyKeys = propertyKeys;
         this.isMultiGraph = isMultiGraph;
         this.loadRelationshipProperty = loadRelationshipProperty;
         this.direction = direction;
@@ -117,13 +127,13 @@ abstract class SingleTypeRelationshipsBuilder {
         Optional<LongConsumer> drainCountConsumer
     );
 
-    abstract List<RelationshipsAndDirection> relationshipsAndDirections();
+    abstract SingleTypeRelationshipImportResult singleTypeRelationshipImportResult();
 
     PartialIdMap partialIdMap() {
         return idMap;
     }
 
-    List<RelationshipsAndDirection> buildAll(
+    SingleTypeRelationshipImportResult buildAll(
         Optional<AdjacencyCompressor.ValueMapper> mapper,
         Optional<LongConsumer> drainCountConsumer
     ) {
@@ -135,8 +145,32 @@ abstract class SingleTypeRelationshipsBuilder {
             .executor(executorService)
             .run();
 
-        return relationshipsAndDirections();
+        return singleTypeRelationshipImportResult();
     }
+
+    RelationshipPropertyStore relationshipPropertyStore(AdjacencyListsWithProperties adjacencyListsWithProperties) {
+        var propertyStoreBuilder = RelationshipPropertyStore.builder();
+
+        var properties = adjacencyListsWithProperties.properties();
+        var relationshipCount = adjacencyListsWithProperties.relationshipCount();
+
+        for (int propertyKeyId : this.propertyKeyIds) {
+            var propertyKey = this.propertyKeys[propertyKeyId];
+            var propertyValues = ImmutableProperties.builder()
+                .propertiesList(properties.get(propertyKeyId))
+                .defaultPropertyValue(DefaultValue.DOUBLE_DEFAULT_FALLBACK)
+                .elementCount(relationshipCount)
+                .build();
+            var relationshipProperty = ImmutableRelationshipProperty.builder()
+                .values(propertyValues)
+                .propertySchema(RelationshipPropertySchema.of(propertyKey, ValueType.DOUBLE))
+                .build();
+            propertyStoreBuilder.putRelationshipProperty(propertyKey, relationshipProperty);
+        }
+
+        return propertyStoreBuilder.build();
+    }
+
 
     static class NonIndexed extends SingleTypeRelationshipsBuilder {
 
@@ -147,6 +181,7 @@ abstract class SingleTypeRelationshipsBuilder {
             SingleTypeRelationshipImporter importer,
             int bufferSize,
             int[] propertyKeyIds,
+            String[] propertyKeys,
             boolean isMultiGraph,
             boolean loadRelationshipProperty,
             Direction direction,
@@ -157,6 +192,7 @@ abstract class SingleTypeRelationshipsBuilder {
                 idMap,
                 bufferSize,
                 propertyKeyIds,
+                propertyKeys,
                 isMultiGraph,
                 loadRelationshipProperty,
                 direction,
@@ -180,7 +216,7 @@ abstract class SingleTypeRelationshipsBuilder {
         }
 
         @Override
-        List<RelationshipsAndDirection> relationshipsAndDirections() {
+        SingleTypeRelationshipImportResult singleTypeRelationshipImportResult() {
             var adjacencyListsWithProperties = importer.build();
             var adjacencyList = adjacencyListsWithProperties.adjacency();
             var relationshipCount = adjacencyListsWithProperties.relationshipCount();
@@ -191,25 +227,16 @@ abstract class SingleTypeRelationshipsBuilder {
                 .elementCount(relationshipCount)
                 .build();
 
+            var singleRelationshipTypeImportResultBuilder = SingleTypeRelationshipImportResult.builder()
+                .topology(topology)
+                .direction(this.direction);
+
             if (loadRelationshipProperty) {
-                return adjacencyListsWithProperties.properties().stream().map(compressedProperties ->
-                    {
-                        var properties = ImmutableProperties.builder()
-                            .propertiesList(compressedProperties)
-                            .defaultPropertyValue(DefaultValue.DOUBLE_DEFAULT_FALLBACK)
-                            .elementCount(relationshipCount)
-                            .build();
-                        var relationships = ImmutableRelationships.builder()
-                            .topology(topology)
-                            .properties(properties)
-                            .build();
-                        return RelationshipsAndDirection.of(relationships, direction);
-                    }
-                ).collect(Collectors.toList());
-            } else {
-                var relationships = ImmutableRelationships.builder().topology(topology).build();
-                return List.of(RelationshipsAndDirection.of(relationships, direction));
+                var properties = relationshipPropertyStore(adjacencyListsWithProperties);
+                singleRelationshipTypeImportResultBuilder.properties(properties);
             }
+
+            return singleRelationshipTypeImportResultBuilder.build();
         }
     }
 
@@ -224,6 +251,7 @@ abstract class SingleTypeRelationshipsBuilder {
             SingleTypeRelationshipImporter inverseImporter,
             int bufferSize,
             int[] propertyKeyIds,
+            String[] propertyKeys,
             boolean isMultiGraph,
             boolean loadRelationshipProperty,
             Direction direction,
@@ -234,6 +262,7 @@ abstract class SingleTypeRelationshipsBuilder {
                 idMap,
                 bufferSize,
                 propertyKeyIds,
+                propertyKeys,
                 isMultiGraph,
                 loadRelationshipProperty,
                 direction,
@@ -264,7 +293,7 @@ abstract class SingleTypeRelationshipsBuilder {
         }
 
         @Override
-        List<RelationshipsAndDirection> relationshipsAndDirections() {
+        SingleTypeRelationshipImportResult singleTypeRelationshipImportResult() {
             var forwardListWithProperties = forwardImporter.build();
             var inverseListWithProperties = inverseImporter.build();
             var forwardAdjacencyList = forwardListWithProperties.adjacency();
@@ -279,25 +308,17 @@ abstract class SingleTypeRelationshipsBuilder {
                 .elementCount(relationshipCount)
                 .build();
 
+            var singleRelationshipTypeImportResultBuilder = SingleTypeRelationshipImportResult.builder()
+                .topology(topology)
+                .direction(this.direction);
+
             if (loadRelationshipProperty) {
-                // TODO: properties for inverse
-                return forwardListWithProperties.properties().stream().map(compressedProperties -> {
-                        var properties = ImmutableProperties.builder()
-                            .propertiesList(compressedProperties)
-                            .defaultPropertyValue(DefaultValue.DOUBLE_DEFAULT_FALLBACK)
-                            .elementCount(relationshipCount)
-                            .build();
-                        var relationships = ImmutableRelationships.builder()
-                            .topology(topology)
-                            .properties(properties)
-                            .build();
-                        return RelationshipsAndDirection.of(relationships, direction);
-                    }
-                ).collect(Collectors.toList());
-            } else {
-                var relationships = ImmutableRelationships.builder().topology(topology).build();
-                return List.of(RelationshipsAndDirection.of(relationships, direction));
+                var forwardProperties = relationshipPropertyStore(forwardListWithProperties);
+                var inverseProperties = relationshipPropertyStore(inverseListWithProperties);
+                singleRelationshipTypeImportResultBuilder.properties(forwardProperties).inverseProperties(inverseProperties);
             }
+
+            return singleRelationshipTypeImportResultBuilder.build();
         }
     }
 }

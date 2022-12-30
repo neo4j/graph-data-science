@@ -24,7 +24,7 @@ import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.loading.construction.RelationshipsAndDirection;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -34,10 +34,8 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.values.storable.NumberType;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
@@ -84,30 +82,19 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
                 ComputationResult<SplitRelationships, SplitResult, SplitRelationshipsMutateConfig> computationResult,
                 ExecutionContext executionContext
             ) {
-                RelationshipsAndDirection selectedRels;
-                RelationshipsAndDirection remainingRels;
+                SingleTypeRelationshipImportResult selectedRels;
+                SingleTypeRelationshipImportResult remainingRels;
                 try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
                     GraphStore graphStore = computationResult.graphStore();
                     SplitResult splitResult = computationResult.result();
                     selectedRels = splitResult.selectedRels().build();
                     remainingRels = splitResult.remainingRels().build();
                     SplitRelationshipsBaseConfig config = computationResult.config();
-                    graphStore.addRelationshipType(
-                        config.remainingRelationshipType(),
-                        config.relationshipWeightProperty(),
-                        Optional.of(NumberType.FLOATING_POINT),
-                        remainingRels
-                    );
-
-                    graphStore.addRelationshipType(
-                        config.holdoutRelationshipType(),
-                        Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY),
-                        Optional.of(NumberType.INTEGRAL),
-                        selectedRels
-                    );
+                    graphStore.addRelationshipType(config.remainingRelationshipType(), remainingRels);
+                    graphStore.addRelationshipType(config.holdoutRelationshipType(), selectedRels);
                 }
-                long holdoutWritten = selectedRels.relationships().topology().elementCount();
-                long remainingWritten = remainingRels.relationships().topology().elementCount();
+                long holdoutWritten = selectedRels.topology().elementCount();
+                long remainingWritten = remainingRels.topology().elementCount();
                 resultBuilder.withRelationshipsWritten(holdoutWritten + remainingWritten);
             }
         };

@@ -57,31 +57,28 @@ public abstract class EdgeSplitter {
 
     public SplitResult splitPositiveExamples(
         Graph graph,
-        double holdoutFraction
+        double holdoutFraction,
+        Optional<String> remainingRelPropertyKey
     ) {
         LongPredicate isValidSourceNode = node -> sourceNodes.contains(graph.toOriginalNodeId(node));
         LongPredicate isValidTargetNode = node -> targetNodes.contains(graph.toOriginalNodeId(node));
         LongLongPredicate isValidNodePair = (s, t) -> isValidSourceNode.apply(s) && isValidTargetNode.apply(t);
 
-        RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilderWithProp(graph, Direction.DIRECTED);
+        RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilder(
+            graph,
+            Direction.DIRECTED, Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY)
+        );
 
-        Direction remainingRelOrientation = graph.schema().direction();
+        Direction remainingRelDirection = graph.schema().direction();
 
         RelationshipsBuilder remainingRelsBuilder;
         RelationshipWithPropertyConsumer remainingRelsConsumer;
-        if (graph.hasRelationshipProperty()) {
-            remainingRelsBuilder = newRelationshipsBuilderWithProp(graph, remainingRelOrientation);
-            remainingRelsConsumer = (s, t, w) -> {
-                remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t), w);
-                return true;
-            };
-        } else {
-            remainingRelsBuilder = newRelationshipsBuilder(graph, remainingRelOrientation);
-            remainingRelsConsumer = (s, t, w) -> {
-                remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t));
-                return true;
-            };
-        }
+
+        remainingRelsBuilder = newRelationshipsBuilder(graph, remainingRelDirection, remainingRelPropertyKey);
+        remainingRelsConsumer = (s, t, w) -> {
+            remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t), w);
+            return true;
+        };
 
         var validRelationshipCount = validPositiveRelationshipCandidateCount(graph, isValidNodePair);
 
@@ -140,23 +137,18 @@ public abstract class EdgeSplitter {
         return Math.min(maxSamples, wholeSamples + extraSample);
     }
 
-    private RelationshipsBuilder newRelationshipsBuilderWithProp(Graph graph, Direction direction) {
-        return newRelationshipsBuilder(graph, direction, true);
-    }
-
-    private RelationshipsBuilder newRelationshipsBuilder(Graph graph, Direction direction) {
-        return newRelationshipsBuilder(graph, direction, false);
-    }
-
-    private static RelationshipsBuilder newRelationshipsBuilder(Graph graph, Direction direction, boolean loadRelationshipProperty) {
+    private static RelationshipsBuilder newRelationshipsBuilder(
+        Graph graph,
+        Direction direction,
+        Optional<String> propertyKey
+    ) {
         return GraphFactory.initRelationshipsBuilder()
             .aggregation(Aggregation.SINGLE)
             .nodes(graph)
             .orientation(direction.toOrientation())
-            .addAllPropertyConfigs(loadRelationshipProperty
-                ? List.of(GraphFactory.PropertyConfig.of(Aggregation.SINGLE, DefaultValue.forDouble()))
-                : List.of()
-            )
+            .addAllPropertyConfigs(propertyKey
+                .map(key -> List.of(GraphFactory.PropertyConfig.of(key, Aggregation.SINGLE, DefaultValue.forDouble())))
+                .orElse(List.of()))
             .concurrency(1)
             .executorService(Pools.DEFAULT)
             .build();

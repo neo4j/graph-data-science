@@ -127,7 +127,7 @@ public final class RandomGraphGenerator {
             .nodes(idMap)
             .orientation(direction.toOrientation())
             .addAllPropertyConfigs(maybeRelationshipPropertyProducer.isPresent()
-                ? List.of(GraphFactory.PropertyConfig.of(aggregation, DefaultValue.forDouble()))
+                ? List.of(GraphFactory.PropertyConfig.of("property", aggregation, DefaultValue.forDouble()))
                 : List.of()
             )
             .aggregation(aggregation)
@@ -135,12 +135,12 @@ public final class RandomGraphGenerator {
 
         generateRelationships(relationshipsBuilder);
 
-        var relationshipsAndSchema = relationshipsBuilder.build();
+        var relationships = relationshipsBuilder.build();
         var relationshipSchema = relationshipSchema();
 
         var graphSchema = GraphSchema.of(nodePropertiesAndSchema.nodeSchema(), relationshipSchema, Map.of());
 
-        return GraphFactory.create(graphSchema, idMap, nodePropertiesAndSchema.nodeProperties(), relationshipsAndSchema.relationships());
+        return GraphFactory.create(graphSchema, idMap, nodePropertiesAndSchema.nodeProperties(), relationships);
     }
 
     private RelationshipSchema relationshipSchema() {

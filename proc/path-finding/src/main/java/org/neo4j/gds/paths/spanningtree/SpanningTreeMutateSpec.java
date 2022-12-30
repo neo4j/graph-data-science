@@ -23,9 +23,8 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.Relationships;
-import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -37,9 +36,7 @@ import org.neo4j.gds.spanningtree.SpanningGraph;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeAlgorithmFactory;
 import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
-import org.neo4j.values.storable.NumberType;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
@@ -67,7 +64,6 @@ public class SpanningTreeMutateSpec implements AlgorithmSpec<Prim, SpanningTree,
 
         return (computationResult, executionContext) -> {
             Graph graph = computationResult.graph();
-            Prim prim = computationResult.algorithm();
             SpanningTree spanningTree = computationResult.result();
             SpanningTreeMutateConfig config = computationResult.config();
 
@@ -81,7 +77,7 @@ public class SpanningTreeMutateSpec implements AlgorithmSpec<Prim, SpanningTree,
             var relationshipsBuilder = GraphFactory
                 .initRelationshipsBuilder()
                 .nodes(computationResult.graph())
-                .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
+                .addPropertyConfig(config.mutateProperty(), Aggregation.NONE, DefaultValue.forDouble())
                 .orientation(Orientation.NATURAL)
                 .build();
 
@@ -90,7 +86,7 @@ public class SpanningTreeMutateSpec implements AlgorithmSpec<Prim, SpanningTree,
             builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount());
             builder.withTotalWeight(spanningTree.totalWeight());
 
-            Relationships relationships;
+            SingleTypeRelationshipImportResult relationships;
 
             try (ProgressTimer ignored = ProgressTimer.start(builder::withMutateMillis)) {
 
@@ -107,16 +103,12 @@ public class SpanningTreeMutateSpec implements AlgorithmSpec<Prim, SpanningTree,
                 );
 
             }
-            relationships = relationshipsBuilder.build().relationships();
+            relationships = relationshipsBuilder.build();
+
             computationResult
                 .graphStore()
-                .addRelationshipType(
-                    mutateRelationshipType,
-                    Optional.of(config.mutateProperty()),
-                    Optional.of(NumberType.FLOATING_POINT),
-                    Direction.DIRECTED,
-                    relationships
-                );
+                .addRelationshipType(mutateRelationshipType, relationships);
+
             builder.withComputeMillis(computationResult.computeMillis());
             builder.withPreProcessingMillis(computationResult.preProcessingMillis());
             builder.withRelationshipsWritten(spanningTree.effectiveNodeCount() - 1);

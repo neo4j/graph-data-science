@@ -21,14 +21,23 @@ package org.neo4j.gds.core.loading;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.ImmutableRelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 
 import java.util.Optional;
 
 @ValueClass
 public interface SingleTypeRelationshipImportResult {
+
+    SingleTypeRelationshipImportResult EMPTY = SingleTypeRelationshipImportResult
+            .builder()
+            .direction(Direction.DIRECTED)
+            .topology(Relationships.Topology.EMPTY)
+            .build();
+
 
     // TODO: remove
     Direction direction();
@@ -43,6 +52,26 @@ public interface SingleTypeRelationshipImportResult {
 
     Optional<RelationshipPropertyStore> inverseProperties();
 
+    /**
+     * Filters the relationships to include only the given property if present.
+     */
+    default SingleTypeRelationshipImportResult filter(String propertyKey) {
+        var properties = properties().map(relationshipPropertyStore ->
+            relationshipPropertyStore.filter(propertyKey)
+        );
+        var inverseProperties = inverseProperties().map(relationshipPropertyStore ->
+            relationshipPropertyStore.filter(propertyKey)
+        );
+
+        return SingleTypeRelationshipImportResult.builder()
+            .topology(topology())
+            .direction(direction())
+            .inverseTopology(inverseTopology())
+            .properties(properties)
+            .inverseProperties(inverseProperties)
+            .build();
+    }
+
     @Value.Check
     default SingleTypeRelationshipImportResult normalize() {
         if (properties().map(RelationshipPropertyStore::isEmpty).orElse(false)) {
@@ -56,5 +85,26 @@ public interface SingleTypeRelationshipImportResult {
 
     static ImmutableSingleTypeRelationshipImportResult.Builder builder() {
         return ImmutableSingleTypeRelationshipImportResult.builder();
+    }
+
+    static SingleTypeRelationshipImportResult of(
+        Relationships relationships,
+        Direction direction,
+        Optional<RelationshipPropertySchema> propertySchema
+    ) {
+        return SingleTypeRelationshipImportResult.builder()
+            .direction(direction)
+            .topology(relationships.topology())
+            .properties(
+                propertySchema.map(schema -> {
+                    var relationshipProperty = ImmutableRelationshipProperty.builder()
+                        .values(relationships.properties().orElseThrow(IllegalStateException::new))
+                        .propertySchema(schema)
+                        .build();
+                    return RelationshipPropertyStore
+                        .builder()
+                        .putRelationshipProperty(schema.key(), relationshipProperty)
+                        .build();
+                })).build();
     }
 }

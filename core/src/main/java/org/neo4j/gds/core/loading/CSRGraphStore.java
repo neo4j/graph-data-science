@@ -431,8 +431,10 @@ public class CSRGraphStore implements GraphStore {
                     builder.properties(properties);
 
                     var valueType = ValueTypes.fromNumberType(relationshipPropertyType.get());
-                    relationshipSchemaEntry.addProperty(propertyKey,
-                        RelationshipPropertySchema.of(propertyKey,
+                    relationshipSchemaEntry.addProperty(
+                        propertyKey,
+                        RelationshipPropertySchema.of(
+                            propertyKey,
                             valueType,
                             valueType.fallbackValue(),
                             PropertyState.TRANSIENT,

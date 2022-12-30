@@ -386,23 +386,28 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         return relationshipBuilders.entrySet()
             .stream()
             .map(entry -> {
-                    var relationshipsAndSchemas = entry.getValue().buildAll();
+                var relationships = entry.getValue().buildAll();
 
-                    var topology = relationshipsAndSchemas.get(0).relationships().topology();
-                    var propertyKeys = propertyKeysByRelType.get(entry.getKey());
+                var topology = relationships.topology();
+                var propertyKeys = propertyKeysByRelType.get(entry.getKey());
 
-                    var properties = IntStream.range(0, propertyKeys.size())
-                        .boxed()
-                        .collect(Collectors.toMap(
-                            propertyKeys::get,
-                            idx -> relationshipsAndSchemas.get(idx).relationships().properties().get()
-                        ));
+                var properties = IntStream.range(0, propertyKeys.size())
+                    .boxed()
+                    .collect(Collectors.toMap(
+                        propertyKeys::get,
+                        idx -> relationships
+                            .properties()
+                            .map(relationshipPropertyStore -> relationshipPropertyStore
+                                .get(propertyKeys.get(idx))
+                                .values())
+                            .orElseThrow(IllegalStateException::new)
+                    ));
 
-                    return ImmutableRelationshipsLoadResult.builder()
-                        .relationshipType(entry.getKey())
-                        .topology(topology)
-                        .properties(properties)
-                        .build();
+                return ImmutableRelationshipsLoadResult.builder()
+                    .relationshipType(entry.getKey())
+                    .topology(topology)
+                    .properties(properties)
+                    .build();
                 }
             ).collect(Collectors.toList());
     }
@@ -472,7 +477,8 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                     var propertyKeys = relTypeAndProperty.getValue();
                     var propertyConfigs = propertyKeys
                         .stream()
-                        .map(key -> GraphFactory.PropertyConfig.of(
+                        .map(propertyKey -> GraphFactory.PropertyConfig.of(
+                            propertyKey,
                             graphProjectConfig.aggregation(),
                             DefaultValue.forDouble()
                         ))

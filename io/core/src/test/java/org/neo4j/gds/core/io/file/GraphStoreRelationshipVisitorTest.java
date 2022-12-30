@@ -122,10 +122,7 @@ class GraphStoreRelationshipVisitorTest {
         Map<String, RelationshipsBuilder> relationshipBuildersByType,
         long expectedImportedRelationshipsCount
     ) {
-        var actualRelationships = FileToGraphStoreImporter.relationshipTopologyAndProperties(
-            relationshipBuildersByType,
-            expectedGraph.schema().relationshipSchema()
-        );
+        var actualRelationships = FileToGraphStoreImporter.relationshipTopologyAndProperties(relationshipBuildersByType);
         assertThat(actualRelationships.importedRelationships()).isEqualTo(expectedImportedRelationshipsCount);
 
         Map<RelationshipType, RelationshipPropertyStore> propertyStores = actualRelationships.properties();

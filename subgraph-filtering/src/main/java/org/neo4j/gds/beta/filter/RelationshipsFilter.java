@@ -150,7 +150,11 @@ public final class RelationshipsFilter {
 
         var propertyConfigs = propertyKeys
             .stream()
-            .map(key -> GraphFactory.PropertyConfig.of(Aggregation.NONE, graphStore.relationshipPropertyValues(relType, key).defaultValue()))
+            .map(propertyKey -> GraphFactory.PropertyConfig.of(
+                propertyKey,
+                Aggregation.NONE,
+                graphStore.relationshipPropertyValues(relType, propertyKey).defaultValue()
+            ))
             .collect(Collectors.toList());
 
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
@@ -189,12 +193,15 @@ public final class RelationshipsFilter {
             .run();
 
         var relationships = relationshipsBuilder.buildAll();
-        var topology = relationships.get(0).relationships().topology();
+        var topology = relationships.topology();
         var properties = IntStream.range(0, propertyKeys.size())
             .boxed()
             .collect(Collectors.toMap(
                 propertyKeys::get,
-                idx -> relationships.get(idx).relationships().properties().orElseThrow(IllegalStateException::new)
+                idx -> relationships
+                    .properties()
+                    .map(relationshipPropertyStore -> relationshipPropertyStore.get(propertyKeys.get(idx)).values())
+                    .orElseThrow(IllegalStateException::new)
             ));
 
         return ImmutableFilteredRelationship.builder()

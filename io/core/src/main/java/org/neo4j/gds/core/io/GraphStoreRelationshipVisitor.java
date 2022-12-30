@@ -28,7 +28,6 @@ import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.io.file.RelationshipBuilderFromVisitor;
 import org.neo4j.gds.core.io.file.RelationshipVisitor;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.loading.construction.ImmutablePropertyConfig;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
 
@@ -59,15 +58,15 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
         // TODO: this logic should move to the RelationshipsBuilder
         var relationshipsBuilder = relationshipFromVisitorBuilders.computeIfAbsent(
                 relationshipType(),
-                (key) -> {
+                (propertyKey) -> {
                     var propertyConfigs = getPropertySchema()
                         .stream()
-                        .map(schema -> ImmutablePropertyConfig.of(schema.aggregation(), schema.defaultValue()))
+                        .map(schema -> GraphFactory.PropertyConfig.of(propertyKey, schema.aggregation(), schema.defaultValue()))
                         .collect(Collectors.toList());
                     var relBuilder = relationshipBuilderSupplier.get()
                         .propertyConfigs(propertyConfigs)
                         .build();
-                    relationshipBuilders.put(key, relBuilder);
+                    relationshipBuilders.put(propertyKey, relBuilder);
                     return RelationshipBuilderFromVisitor.of(
                         propertyConfigs.size(),
                         relBuilder,

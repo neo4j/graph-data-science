@@ -29,6 +29,7 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.huge.HugeGraph;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.extension.GdlExtension;
@@ -79,7 +80,6 @@ class GraphStoreNodeVisitorTest {
         var nodeProperties = idMapAndProperties
             .nodeProperties()
             .orElseThrow(() -> new IllegalArgumentException("Expected node properties to be present"));
-        var relationships = GraphFactory.emptyRelationships(idMap);
 
         var relationshipSchema = RelationshipSchema.empty();
         relationshipSchema.getOrCreateRelationshipType(RelationshipType.ALL_RELATIONSHIPS, Direction.UNDIRECTED);
@@ -94,7 +94,7 @@ class GraphStoreNodeVisitorTest {
             graphSchema,
             idMap,
             nodeProperties,
-            relationships
+            SingleTypeRelationshipImportResult.EMPTY
         );
         assertGraphEquals(graph, actualGraph);
     }

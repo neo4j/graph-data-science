@@ -23,12 +23,11 @@ import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.Relationships;
-import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.walking.CollapsePath;
 import org.neo4j.gds.beta.walking.CollapsePathAlgorithmFactory;
 import org.neo4j.gds.beta.walking.CollapsePathConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -39,7 +38,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
@@ -47,7 +45,7 @@ import static org.neo4j.gds.walking.CollapsePathMutateProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.beta.collapsePath.mutate", description = DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
-public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationships, CollapsePathMutateProc.MutateResult, CollapsePathConfig> {
+public class CollapsePathMutateProc extends MutateProc<CollapsePath, SingleTypeRelationshipImportResult, CollapsePathMutateProc.MutateResult, CollapsePathConfig> {
 
     static final String DESCRIPTION = "Collapse Path algorithm is a traversal algorithm capable of creating relationships between the start and end nodes of a traversal";
 
@@ -67,20 +65,17 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
     }
 
     @Override
-    public MutateComputationResultConsumer<CollapsePath, Relationships, CollapsePathConfig, MutateResult> computationResultConsumer() {
+    public MutateComputationResultConsumer<CollapsePath, SingleTypeRelationshipImportResult, CollapsePathConfig, MutateResult> computationResultConsumer() {
         return new MutateComputationResultConsumer<>(this::resultBuilder) {
             @Override
             protected void updateGraphStore(
                 AbstractResultBuilder<?> resultBuilder,
-                ComputationResult<CollapsePath, Relationships, CollapsePathConfig> computationResult,
+                ComputationResult<CollapsePath, SingleTypeRelationshipImportResult, CollapsePathConfig> computationResult,
                 ExecutionContext executionContext
             ) {
                 try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
                     computationResult.graphStore().addRelationshipType(
                         RelationshipType.of(computationResult.config().mutateRelationshipType()),
-                        Optional.empty(),
-                        Optional.empty(),
-                        Direction.DIRECTED,
                         computationResult.result()
                     );
                 }
@@ -135,7 +130,7 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<CollapsePath, Relationships, CollapsePathConfig> computeResult,
+        ComputationResult<CollapsePath, SingleTypeRelationshipImportResult, CollapsePathConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return new MutateResult.Builder();

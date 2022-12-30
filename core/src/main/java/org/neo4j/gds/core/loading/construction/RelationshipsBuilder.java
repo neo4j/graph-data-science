@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading.construction;
 
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 
 import java.util.List;
@@ -96,11 +97,11 @@ public class RelationshipsBuilder {
         );
     }
 
-    public RelationshipsAndDirection build() {
-        return buildAll().get(0);
+    public SingleTypeRelationshipImportResult build() {
+        return buildAll();
     }
 
-    public List<RelationshipsAndDirection> buildAll() {
+    public SingleTypeRelationshipImportResult buildAll() {
         return buildAll(Optional.empty(), Optional.empty());
     }
 
@@ -110,7 +111,7 @@ public class RelationshipsBuilder {
      *                           has been drained and its contents are written to the adjacency list. The consumer receives the number
      *                           of relationships that have been written. Implementations must be thread-safe.
      */
-    public List<RelationshipsAndDirection> buildAll(
+    public SingleTypeRelationshipImportResult buildAll(
         Optional<AdjacencyCompressor.ValueMapper> mapper,
         Optional<LongConsumer> drainCountConsumer
     ) {

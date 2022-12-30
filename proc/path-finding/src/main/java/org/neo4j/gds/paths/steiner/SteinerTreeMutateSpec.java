@@ -23,9 +23,8 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.Relationships;
-import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -36,9 +35,7 @@ import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
 import org.neo4j.gds.steiner.SteinerTreeAlgorithmFactory;
 import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
-import org.neo4j.values.storable.NumberType;
 
-import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -79,7 +76,7 @@ public class SteinerTreeMutateSpec implements AlgorithmSpec<ShortestPathsSteiner
             var relationshipsBuilder = GraphFactory
                 .initRelationshipsBuilder()
                 .nodes(computationResult.graph())
-                .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
+                .addPropertyConfig(config.mutateProperty(), Aggregation.NONE, DefaultValue.forDouble())
                 .orientation(Orientation.NATURAL)
                 .build();
 
@@ -90,7 +87,7 @@ public class SteinerTreeMutateSpec implements AlgorithmSpec<ShortestPathsSteiner
                 .withEffectiveNodeCount(steinerTreeResult.effectiveNodeCount());
 
 
-            Relationships relationships;
+            SingleTypeRelationshipImportResult relationships;
 
             var sourceNode = config.sourceNode();
 
@@ -112,17 +109,11 @@ public class SteinerTreeMutateSpec implements AlgorithmSpec<ShortestPathsSteiner
                     });
 
             }
-            relationships = relationshipsBuilder.build().relationships();
+            relationships = relationshipsBuilder.build();
 
             computationResult
                 .graphStore()
-                .addRelationshipType(
-                    mutateRelationshipType,
-                    Optional.of(config.mutateProperty()),
-                    Optional.of(NumberType.FLOATING_POINT),
-                    Direction.DIRECTED,
-                    relationships
-                );
+                .addRelationshipType(mutateRelationshipType, relationships);
             builder
                 .withEffectiveTargetNodeCount(steinerTreeResult.effectiveTargetNodesCount())
                 .withComputeMillis(computationResult.computeMillis())
