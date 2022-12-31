@@ -36,7 +36,6 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -301,23 +300,11 @@ public final class GraphFactory {
         var nodeSchema = NodeSchema.empty();
         idMap.availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
-        // TODO: schema should be constructed within "SingleTypeRelationshipImportResult"
-        var relationshipSchema = RelationshipSchema.empty();
-
-        var entry = relationshipSchema.getOrCreateRelationshipType(
-            RelationshipType.of("REL"),
-            relationships.direction()
-        );
-
         relationships.properties().ifPresent(relationshipPropertyStore -> {
-            if (relationshipPropertyStore.values().size() != 1) {
-                throw new IllegalStateException("Cannot instantiate graph with more than one relationship property.");
-            }
-            var propertyKey = relationshipPropertyStore.keySet().iterator().next();
-            var propertyValues = relationshipPropertyStore.values().iterator().next();
-
-            entry.addProperty(propertyKey, propertyValues.valueType(), propertyValues.propertyState());
+            assert relationshipPropertyStore.values().size() == 1: "Cannot instantiate graph with more than one relationship property.";
         });
+
+        var relationshipSchema = relationships.relationshipSchema(RelationshipType.of("REL"));
 
         return create(
             GraphSchema.of(nodeSchema, relationshipSchema, Map.of()),
@@ -337,15 +324,11 @@ public final class GraphFactory {
         var inverseTopology = relationships.inverseTopology();
 
         var properties = relationships.properties().map(relationshipPropertyStore -> {
-            if (relationshipPropertyStore.values().size() != 1) {
-                throw new IllegalStateException("Cannot instantiate graph with more than one relationship property.");
-            }
+            assert relationshipPropertyStore.values().size() == 1: "Cannot instantiate graph with more than one relationship property.";
             return relationshipPropertyStore.values().iterator().next().values();
         });
         var inverseProperties = relationships.inverseProperties().map(relationshipPropertyStore -> {
-            if (relationshipPropertyStore.values().size() != 1) {
-                throw new IllegalStateException("Cannot instantiate graph with more than one relationship property.");
-            }
+            assert relationshipPropertyStore.values().size() == 1: "Cannot instantiate graph with more than one relationship property.";
             return relationshipPropertyStore.values().iterator().next().values();
         });
 
