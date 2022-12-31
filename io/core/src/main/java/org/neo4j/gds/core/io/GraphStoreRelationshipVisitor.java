@@ -58,15 +58,15 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
         // TODO: this logic should move to the RelationshipsBuilder
         var relationshipsBuilder = relationshipFromVisitorBuilders.computeIfAbsent(
                 relationshipType(),
-                (propertyKey) -> {
+                (relationshipType) -> {
                     var propertyConfigs = getPropertySchema()
                         .stream()
-                        .map(schema -> GraphFactory.PropertyConfig.of(propertyKey, schema.aggregation(), schema.defaultValue()))
+                        .map(schema -> GraphFactory.PropertyConfig.of(schema.key(), schema.aggregation(), schema.defaultValue()))
                         .collect(Collectors.toList());
                     var relBuilder = relationshipBuilderSupplier.get()
                         .propertyConfigs(propertyConfigs)
                         .build();
-                    relationshipBuilders.put(propertyKey, relBuilder);
+                    relationshipBuilders.put(relationshipType, relBuilder);
                     return RelationshipBuilderFromVisitor.of(
                         propertyConfigs.size(),
                         relBuilder,
