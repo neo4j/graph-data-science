@@ -240,11 +240,8 @@ public final class GraphFactory {
 
         double[] defaultValues = propertyConfigs.stream().mapToDouble(c -> c.defaultValue().doubleValue()).toArray();
 
-
         int finalConcurrency = concurrency.orElse(1);
-
         var maybeRootNodeCount = nodes.rootNodeCount();
-
         var importSizing = maybeRootNodeCount.isPresent()
             ? ImportSizing.of(finalConcurrency, maybeRootNodeCount.getAsLong())
             : ImportSizing.of(finalConcurrency);
@@ -278,6 +275,7 @@ public final class GraphFactory {
             .bufferSize(bufferSize)
             .propertyKeyIds(propertyKeyIds)
             .propertyKeys(propertyKeys)
+            .aggregations(aggregations)
             .isMultiGraph(isMultiGraph)
             .loadRelationshipProperty(loadRelationshipProperties)
             .direction(Direction.fromOrientation(actualOrientation))

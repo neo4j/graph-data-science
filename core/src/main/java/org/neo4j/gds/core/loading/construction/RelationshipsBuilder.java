@@ -111,7 +111,7 @@ public class RelationshipsBuilder {
         Optional<LongConsumer> drainCountConsumer
     ) {
         this.threadLocalRelationshipsBuilders.close();
-        return this.singleTypeRelationshipsBuilder.buildAll(mapper, drainCountConsumer);
+        return this.singleTypeRelationshipsBuilder.build(mapper, drainCountConsumer);
     }
 
     public interface Relationship {

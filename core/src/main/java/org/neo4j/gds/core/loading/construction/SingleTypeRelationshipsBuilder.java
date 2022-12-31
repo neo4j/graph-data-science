@@ -25,10 +25,12 @@ import org.neo4j.gds.api.ImmutableProperties;
 import org.neo4j.gds.api.ImmutableRelationshipProperty;
 import org.neo4j.gds.api.ImmutableTopology;
 import org.neo4j.gds.api.PartialIdMap;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.api.schema.ImmutableRelationshipPropertySchema;
+import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
@@ -48,6 +50,7 @@ abstract class SingleTypeRelationshipsBuilder {
     final int bufferSize;
     final int[] propertyKeyIds;
     final String[] propertyKeys;
+    final Aggregation[] aggregations;
 
     final boolean isMultiGraph;
     final boolean loadRelationshipProperty;
@@ -64,6 +67,7 @@ abstract class SingleTypeRelationshipsBuilder {
         int bufferSize,
         int[] propertyKeyIds,
         String[] propertyKeys,
+        Aggregation[] aggregations,
         boolean isMultiGraph,
         boolean loadRelationshipProperty,
         Direction direction,
@@ -78,6 +82,7 @@ abstract class SingleTypeRelationshipsBuilder {
                 bufferSize,
                 propertyKeyIds,
                 propertyKeys,
+                aggregations,
                 isMultiGraph,
                 loadRelationshipProperty,
                 direction,
@@ -90,6 +95,7 @@ abstract class SingleTypeRelationshipsBuilder {
                 bufferSize,
                 propertyKeyIds,
                 propertyKeys,
+                aggregations,
                 isMultiGraph,
                 loadRelationshipProperty,
                 direction,
@@ -103,6 +109,7 @@ abstract class SingleTypeRelationshipsBuilder {
         int bufferSize,
         int[] propertyKeyIds,
         String[] propertyKeys,
+        Aggregation[] aggregations,
         boolean isMultiGraph,
         boolean loadRelationshipProperty,
         Direction direction,
@@ -113,6 +120,7 @@ abstract class SingleTypeRelationshipsBuilder {
         this.bufferSize = bufferSize;
         this.propertyKeyIds = propertyKeyIds;
         this.propertyKeys = propertyKeys;
+        this.aggregations = aggregations;
         this.isMultiGraph = isMultiGraph;
         this.loadRelationshipProperty = loadRelationshipProperty;
         this.direction = direction;
@@ -133,7 +141,7 @@ abstract class SingleTypeRelationshipsBuilder {
         return idMap;
     }
 
-    SingleTypeRelationshipImportResult buildAll(
+    SingleTypeRelationshipImportResult build(
         Optional<AdjacencyCompressor.ValueMapper> mapper,
         Optional<LongConsumer> drainCountConsumer
     ) {
@@ -156,15 +164,27 @@ abstract class SingleTypeRelationshipsBuilder {
 
         for (int propertyKeyId : this.propertyKeyIds) {
             var propertyKey = this.propertyKeys[propertyKeyId];
+            var aggregation = this.aggregations[propertyKeyId];
+
             var propertyValues = ImmutableProperties.builder()
                 .propertiesList(properties.get(propertyKeyId))
                 .defaultPropertyValue(DefaultValue.DOUBLE_DEFAULT_FALLBACK)
                 .elementCount(relationshipCount)
                 .build();
+
+            var relationshipPropertySchema = ImmutableRelationshipPropertySchema.builder()
+                .key(propertyKey)
+                .aggregation(aggregation)
+                .valueType(ValueType.DOUBLE)
+                .defaultValue(ValueType.DOUBLE.fallbackValue())
+                .state(PropertyState.TRANSIENT)
+                .build();
+
             var relationshipProperty = ImmutableRelationshipProperty.builder()
                 .values(propertyValues)
-                .propertySchema(RelationshipPropertySchema.of(propertyKey, ValueType.DOUBLE))
+                .propertySchema(relationshipPropertySchema)
                 .build();
+
             propertyStoreBuilder.putRelationshipProperty(propertyKey, relationshipProperty);
         }
 
@@ -182,6 +202,7 @@ abstract class SingleTypeRelationshipsBuilder {
             int bufferSize,
             int[] propertyKeyIds,
             String[] propertyKeys,
+            Aggregation[] aggregations,
             boolean isMultiGraph,
             boolean loadRelationshipProperty,
             Direction direction,
@@ -193,6 +214,7 @@ abstract class SingleTypeRelationshipsBuilder {
                 bufferSize,
                 propertyKeyIds,
                 propertyKeys,
+                aggregations,
                 isMultiGraph,
                 loadRelationshipProperty,
                 direction,
@@ -252,6 +274,7 @@ abstract class SingleTypeRelationshipsBuilder {
             int bufferSize,
             int[] propertyKeyIds,
             String[] propertyKeys,
+            Aggregation[] aggregations,
             boolean isMultiGraph,
             boolean loadRelationshipProperty,
             Direction direction,
@@ -263,6 +286,7 @@ abstract class SingleTypeRelationshipsBuilder {
                 bufferSize,
                 propertyKeyIds,
                 propertyKeys,
+                aggregations,
                 isMultiGraph,
                 loadRelationshipProperty,
                 direction,
