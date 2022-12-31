@@ -25,12 +25,10 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.huge.HugeGraph;
@@ -140,22 +138,14 @@ public final class RandomGraphGenerator {
         generateRelationships(relationshipsBuilder);
 
         var relationships = relationshipsBuilder.build();
-        var relationshipSchema = relationshipSchema();
 
-        var graphSchema = GraphSchema.of(nodePropertiesAndSchema.nodeSchema(), relationshipSchema, Map.of());
+        var graphSchema = GraphSchema.of(
+            nodePropertiesAndSchema.nodeSchema(),
+            relationships.relationshipSchema(relationshipType),
+            Map.of()
+        );
 
         return GraphFactory.create(graphSchema, idMap, nodePropertiesAndSchema.nodeProperties(), relationships);
-    }
-
-    private RelationshipSchema relationshipSchema() {
-        var relationshipSchema = RelationshipSchema.empty();
-        var entry = relationshipSchema.getOrCreateRelationshipType(relationshipType, direction);
-        maybeRelationshipPropertyProducer.ifPresent(pp -> entry.addProperty(
-            pp.getPropertyName(),
-            pp.propertyType(),
-            PropertyState.PERSISTENT
-        ));
-        return relationshipSchema;
     }
 
     public RelationshipDistribution getRelationshipDistribution() {
