@@ -46,7 +46,6 @@ import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.ImmutableNodeImportResult;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -319,25 +318,13 @@ public abstract class FileToGraphStoreImporter {
     ) {
         return relationshipBuildersByType.entrySet().stream().map(entry -> {
             var relationshipType = RelationshipType.of(entry.getKey());
-            return Map.entry(
-                relationshipType,
-                relationshipTopologyFrom(
-                    relationshipType,
-                    entry.getValue().build(),
-                    propertyStores
-                )
-            );
-        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
+            var relationships = entry.getValue().build();
 
-    private static Relationships.Topology relationshipTopologyFrom(
-        RelationshipType relationshipType,
-        SingleTypeRelationshipImportResult relationships,
-        Map<RelationshipType, RelationshipPropertyStore> propertyStores
-    ) {
-        var propertyStore = relationships.properties().orElseThrow(IllegalStateException::new);
-        propertyStores.put(relationshipType, propertyStore);
-        return relationships.topology();
+            if (relationships.properties().isPresent()) {
+                propertyStores.put(relationshipType, relationships.properties().get());
+            }
+            return Map.entry(relationshipType, relationships.topology());
+        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @ValueClass
