@@ -22,6 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.immutables.value.Value;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.api.GraphLoaderContext;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -103,7 +104,7 @@ class CypherNodeLoader extends CypherRecordLoader<NodeImportResult> {
         var nodeProperties = idMapAndProperties.nodeProperties().orElseGet(Map::of);
         var nodePropertiesWithPropertyMappings = propertiesWithPropertyMappings(nodeProperties);
 
-        return NodeImportResult.of(idMap, nodePropertiesWithPropertyMappings);
+        return NodeImportResult.of(idMap, nodePropertiesWithPropertyMappings, PropertyState.TRANSIENT);
     }
 
     @Override

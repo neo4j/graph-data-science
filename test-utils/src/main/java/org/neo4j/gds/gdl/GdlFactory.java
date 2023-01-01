@@ -39,6 +39,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
@@ -186,10 +187,14 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                         .getOrCreateLabel(label)
                         .addProperty(
                             propertyKey,
-                            nodeProperties.get(propertyKey).valueType()
-                        )
+                            PropertySchema.of(
+                                propertyKey,
+                                nodeProperties.get(propertyKey).valueType(),
+                                nodeProperties.get(propertyKey).defaultValue(),
+                                nodeProperties.get(propertyKey).propertyState()
+                            )
                     )
-                );
+                ));
             });
         // in case there were no properties add all labels
         nodeImportResult.idMap().availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
@@ -292,7 +297,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
         var idMap = nodesBuilder.build().idMap();
 
-        return NodeImportResult.of(idMap, loadNodeProperties(idMap));
+        return NodeImportResult.of(idMap, loadNodeProperties(idMap), graphProjectConfig.propertyState());
     }
 
     private Map<PropertyMapping, NodePropertyValues> loadNodeProperties(IdMap idMap) {

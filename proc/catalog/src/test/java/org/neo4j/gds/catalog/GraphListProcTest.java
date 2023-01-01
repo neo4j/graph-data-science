@@ -310,7 +310,7 @@ class GraphListProcTest extends BaseProcTest {
             map(
                 "schema", map(
                     "nodes", map("A", map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
-                    "relationships", map("REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)")),
+                    "relationships", map("REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)")),
                     "graphProperties", map()
                 )
             )
@@ -462,7 +462,7 @@ class GraphListProcTest extends BaseProcTest {
         assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
             map(
                 "schema", map(
-                    "nodes", map("A", map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
+                    "nodes", map("A", map("foo", "Integer (DefaultValue(-9223372036854775808), TRANSIENT)")),
                     "relationships", map("REL", map("bar", "Float (DefaultValue(NaN), TRANSIENT, Aggregation.NONE)")),
                     "graphProperties", map()
                 )
@@ -485,7 +485,7 @@ class GraphListProcTest extends BaseProcTest {
         assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
             map(
                 "schema", map(
-                    "nodes", map(ALL_NODES.name, map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
+                    "nodes", map(ALL_NODES.name, map("foo", "Integer (DefaultValue(-9223372036854775808), TRANSIENT)")),
                     "relationships", map(ALL_RELATIONSHIPS.name, map("bar", "Float (DefaultValue(NaN), TRANSIENT, Aggregation.NONE)")),
                     "graphProperties", map()
                 )
@@ -717,8 +717,8 @@ class GraphListProcTest extends BaseProcTest {
                         "B", map("age", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")
                     ),
                     "relationships", map(
-                        "all", map("since", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)"),
-                        "REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)")
+                        "all", map("since", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)"),
+                        "REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)")
                     ),
                     "graphProperties", map()
                 ))
@@ -742,8 +742,8 @@ class GraphListProcTest extends BaseProcTest {
                 "schema", map(
                     "nodes", map("all", map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)"), "B", map("age", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
                     "relationships",  map(
-                        "all", map("since", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)"),
-                        "REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)")),
+                        "all", map("since", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)"),
+                        "REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)")),
                     "graphProperties", map()
                 )))
         );
@@ -765,8 +765,8 @@ class GraphListProcTest extends BaseProcTest {
                 "schema", map(
                     "nodes", map("A", map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)"), "B", map("age", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
                     "relationships",  map(
-                        "LIKES", map("since", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)"),
-                        "REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)")
+                        "LIKES", map("since", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)"),
+                        "REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)")
                     ),
                     "graphProperties", map()
                 )))
