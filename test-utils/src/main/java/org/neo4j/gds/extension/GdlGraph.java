@@ -20,6 +20,7 @@
 package org.neo4j.gds.extension;
 
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.core.Aggregation;
 
 import java.lang.annotation.Repeatable;
@@ -39,6 +40,8 @@ public @interface GdlGraph {
     Orientation orientation() default Orientation.NATURAL;
 
     Aggregation aggregation() default Aggregation.NONE;
+
+    PropertyState propertyState() default PropertyState.TRANSIENT;
 
     String username() default "";
 

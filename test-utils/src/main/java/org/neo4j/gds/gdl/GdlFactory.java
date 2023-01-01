@@ -102,13 +102,11 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         Optional<LongSupplier> nodeIdFunction,
         Optional<Capabilities> graphCapabilities
     ) {
-        var config = graphProjectConfig.isEmpty()
-            ? ImmutableGraphProjectFromGdlConfig.builder()
+        var config = graphProjectConfig.orElseGet(() -> ImmutableGraphProjectFromGdlConfig.builder()
             .username(userName.orElse(Username.EMPTY_USERNAME.username()))
             .graphName(graphName.orElse("graph"))
             .gdlGraph(gdlGraph.orElse(""))
-            .build()
-            : graphProjectConfig.get();
+            .build());
 
         var nextVertexId = nodeIdFunction
             .map(supplier -> (Function<Optional<String>, Long>) (ignored) -> supplier.getAsLong())
@@ -239,7 +237,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                             RelationshipProperty.of(
                                 propertyKey,
                                 NumberType.FLOATING_POINT,
-                                PropertyState.TRANSIENT,
+                                graphProjectConfig.propertyState(),
                                 properties,
                                 DefaultValue.forDouble(),
                                 graphProjectConfig.aggregation()
