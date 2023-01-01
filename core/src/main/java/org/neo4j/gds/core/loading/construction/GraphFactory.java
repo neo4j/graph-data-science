@@ -208,7 +208,7 @@ public final class GraphFactory {
         var loadRelationshipProperties = !propertyConfigs.isEmpty();
 
         var aggregations = propertyConfigs.isEmpty()
-            ? new Aggregation[]{aggregation.orElse(Aggregation.NONE)}
+            ? new Aggregation[]{aggregation.orElse(Aggregation.DEFAULT)}
             : propertyConfigs.stream()
                 .map(GraphFactory.PropertyConfig::aggregation)
                 .map(Aggregation::resolve)

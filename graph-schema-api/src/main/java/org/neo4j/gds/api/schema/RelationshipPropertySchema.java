@@ -30,7 +30,6 @@ import org.neo4j.gds.core.Aggregation;
 @SuppressWarnings("immutables:subtype")
 public interface RelationshipPropertySchema extends PropertySchema {
 
-    @Value.Auxiliary
     Aggregation aggregation();
 
     static RelationshipPropertySchema of(String propertyKey, ValueType valueType) {
@@ -61,6 +60,18 @@ public interface RelationshipPropertySchema extends PropertySchema {
         Aggregation aggregation
     ) {
         return ImmutableRelationshipPropertySchema.of(propertyKey, valueType, defaultValue, propertyState, aggregation);
+    }
+
+    @Value.Check
+    default RelationshipPropertySchema normalize() {
+        if (aggregation() == Aggregation.DEFAULT) {
+            return ImmutableRelationshipPropertySchema
+                .builder()
+                .from(this)
+                .aggregation(Aggregation.resolve(aggregation()))
+                .build();
+        }
+        return this;
     }
 
 }

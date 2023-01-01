@@ -39,7 +39,6 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
@@ -197,28 +196,15 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         // in case there were no properties add all labels
         nodeImportResult.idMap().availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
-        var relationshipSchema = RelationshipSchema.empty();
-
-        relationshipImportResult.importResults().forEach(((relationshipType, singleTypeRelationshipImportResult) -> {
-            relationshipSchema.getOrCreateRelationshipType(
-                relationshipType,
-                singleTypeRelationshipImportResult.direction()
-            );
-            singleTypeRelationshipImportResult.properties()
-                .map(RelationshipPropertyStore::relationshipProperties)
-                .ifPresent(properties -> properties.forEach((propertyKey, propertyValues) -> relationshipSchema
-                    .getOrCreateRelationshipType(
-                        relationshipType,
-                        singleTypeRelationshipImportResult.direction()
-                    )
-                    .addProperty(propertyKey, RelationshipPropertySchema.of(
-                        propertyKey,
-                        propertyValues.valueType(),
-                        propertyValues.valueType().fallbackValue(),
-                        PropertyState.PERSISTENT,
-                        graphProjectConfig.aggregation()
-                    ))));
-        }));
+        var relationshipSchema = relationshipImportResult.importResults().entrySet().stream().reduce(
+            RelationshipSchema.empty(),
+            (unionSchema, entry) -> {
+                var relationshipType = entry.getKey();
+                var relationships = entry.getValue();
+                return unionSchema.union(relationships.relationshipSchema(relationshipType));
+            },
+            RelationshipSchema::union
+        );
 
         return GraphSchema.of(
             nodeSchema,
@@ -253,7 +239,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                             RelationshipProperty.of(
                                 propertyKey,
                                 NumberType.FLOATING_POINT,
-                                PropertyState.PERSISTENT,
+                                PropertyState.TRANSIENT,
                                 properties,
                                 DefaultValue.forDouble(),
                                 graphProjectConfig.aggregation()

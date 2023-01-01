@@ -576,7 +576,7 @@ class RandomGraphGeneratorTest {
                 Direction.DIRECTED,
                 "relProperty",
                 ValueType.DOUBLE,
-                PropertyState.PERSISTENT
+                PropertyState.TRANSIENT
             )
         ), Arguments.of("node label, node property, relationship type and relationship property",
             RandomGraphGenerator
@@ -594,7 +594,7 @@ class RandomGraphGeneratorTest {
                 Direction.DIRECTED,
                 "relProp",
                 ValueType.DOUBLE,
-                PropertyState.PERSISTENT
+                PropertyState.TRANSIENT
             )
         ), Arguments.of("relationship type, relationship property, and undirected orientation",
             RandomGraphGenerator
@@ -614,7 +614,7 @@ class RandomGraphGeneratorTest {
                     UNDIRECTED,
                     "relProp",
                     ValueType.DOUBLE,
-                    PropertyState.PERSISTENT
+                    PropertyState.TRANSIENT
                 )
         ));
     }
