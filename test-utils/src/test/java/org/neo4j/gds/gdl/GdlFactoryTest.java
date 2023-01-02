@@ -34,6 +34,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.core.loading.CollectingConsumer;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -93,6 +94,59 @@ class GdlFactoryTest {
             assertThat(targetNodeId).isEqualTo(gdlFactory.nodeId("c"));
             return true;
         });
+    }
+
+    @Test
+    void testInverseIndexedRelationshipTypes() {
+        var graphFactory = GdlFactory.builder()
+            .graphProjectConfig(ImmutableGraphProjectFromGdlConfig.builder()
+                .gdlGraph("(a)-[:REL]->(b)-[:REL]->(c),(a)-[:REL]->(c)")
+                .graphName("test")
+                .indexInverse(true)
+                .build()
+            ).build();
+
+        var graph = graphFactory.build().getGraph(RelationshipType.of("REL"));
+
+        var collectingConsumer = new CollectingConsumer();
+        graph.forEachInverseRelationship(graphFactory.nodeId("a"), collectingConsumer);
+        assertThat(new long[0]).contains(collectingConsumer.targets.toArray());
+
+        collectingConsumer.clear();
+        graph.forEachInverseRelationship(graphFactory.nodeId("b"), collectingConsumer);
+        assertThat(new long[]{graphFactory.nodeId("a")}).contains(collectingConsumer.targets.toArray());
+
+        collectingConsumer.clear();
+        graph.forEachInverseRelationship(graphFactory.nodeId("c"), collectingConsumer);
+        assertThat(new long[]{graphFactory.nodeId("b"), graphFactory.nodeId("a")}).contains(collectingConsumer.targets.toArray());
+    }
+
+    @Test
+    void testInverseIndexedWeightedRelationshipTypes() {
+        var graphFactory = GdlFactory.builder()
+            .graphProjectConfig(ImmutableGraphProjectFromGdlConfig.builder()
+                .gdlGraph("(a)-[:REL { prop: 42 }]->(b)-[:REL { prop: 1337 } ]->(c),(a)-[:REL { prop: 1984 }]->(c)")
+                .graphName("test")
+                .indexInverse(true)
+                .build()
+            ).build();
+
+        var graph = graphFactory.build().getGraph(RelationshipType.of("REL"), Optional.of("prop"));
+
+        var collectingConsumer = new CollectingConsumer();
+        graph.forEachInverseRelationship(graphFactory.nodeId("a"), 0, collectingConsumer);
+        assertThat(new long[0]).contains(collectingConsumer.targets.toArray());
+        assertThat(new double[0]).contains(collectingConsumer.properties.toArray());
+
+        collectingConsumer.clear();
+        graph.forEachInverseRelationship(graphFactory.nodeId("b"), 0, collectingConsumer);
+        assertThat(new long[]{graphFactory.nodeId("a")}).contains(collectingConsumer.targets.toArray());
+        assertThat(new double[]{42}).contains(collectingConsumer.properties.toArray());
+
+        collectingConsumer.clear();
+        graph.forEachInverseRelationship(graphFactory.nodeId("c"), 0, collectingConsumer);
+        assertThat(new long[]{graphFactory.nodeId("b"), graphFactory.nodeId("a")}).contains(collectingConsumer.targets.toArray());
+        assertThat(new double[]{1337, 1984}).contains(collectingConsumer.properties.toArray());
     }
 
     @Test
