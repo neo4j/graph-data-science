@@ -463,7 +463,7 @@ class GraphListProcTest extends BaseProcTest {
             map(
                 "schema", map(
                     "nodes", map("A", map("foo", "Integer (DefaultValue(-9223372036854775808), TRANSIENT)")),
-                    "relationships", map("REL", map("bar", "Float (DefaultValue(NaN), TRANSIENT, Aggregation.NONE)")),
+                    "relationships", map("REL", map("bar", "Float (DefaultValue(null), TRANSIENT, Aggregation.NONE)")),
                     "graphProperties", map()
                 )
             )
@@ -486,7 +486,7 @@ class GraphListProcTest extends BaseProcTest {
             map(
                 "schema", map(
                     "nodes", map(ALL_NODES.name, map("foo", "Integer (DefaultValue(-9223372036854775808), TRANSIENT)")),
-                    "relationships", map(ALL_RELATIONSHIPS.name, map("bar", "Float (DefaultValue(NaN), TRANSIENT, Aggregation.NONE)")),
+                    "relationships", map(ALL_RELATIONSHIPS.name, map("bar", "Float (DefaultValue(null), TRANSIENT, Aggregation.NONE)")),
                     "graphProperties", map()
                 )
             )

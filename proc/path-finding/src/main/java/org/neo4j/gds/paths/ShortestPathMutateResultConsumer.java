@@ -23,10 +23,8 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -60,7 +58,7 @@ public class ShortestPathMutateResultConsumer<ALGO extends Algorithm<DijkstraRes
         var relationshipsBuilder = GraphFactory
             .initRelationshipsBuilder()
             .nodes(computationResult.graph())
-            .addPropertyConfig(TOTAL_COST_KEY, Aggregation.NONE, DefaultValue.forDouble())
+            .addPropertyConfig(GraphFactory.PropertyConfig.of(TOTAL_COST_KEY))
             .orientation(Orientation.NATURAL)
             .build();
 

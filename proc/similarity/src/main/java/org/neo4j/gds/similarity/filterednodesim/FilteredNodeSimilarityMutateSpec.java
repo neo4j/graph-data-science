@@ -23,11 +23,9 @@ import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
@@ -140,7 +138,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
             RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(topKGraph)
                 .orientation(Orientation.NATURAL)
-                .addPropertyConfig(relationshipPropertyKey, Aggregation.NONE, DefaultValue.forDouble())
+                .addPropertyConfig(GraphFactory.PropertyConfig.of(relationshipPropertyKey))
                 .concurrency(1)
                 .executorService(Pools.DEFAULT)
                 .build();

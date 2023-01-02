@@ -25,12 +25,10 @@ import org.neo4j.gds.api.ImmutableProperties;
 import org.neo4j.gds.api.ImmutableRelationshipProperty;
 import org.neo4j.gds.api.ImmutableTopology;
 import org.neo4j.gds.api.PartialIdMap;
-import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.ImmutableRelationshipPropertySchema;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
@@ -39,6 +37,7 @@ import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.function.LongConsumer;
@@ -48,9 +47,7 @@ import java.util.stream.Stream;
 abstract class SingleTypeRelationshipsBuilder {
     final PartialIdMap idMap;
     final int bufferSize;
-    final int[] propertyKeyIds;
-    final String[] propertyKeys;
-    final Aggregation[] aggregations;
+    final List<GraphFactory.PropertyConfig> propertyConfigs;
 
     final boolean isMultiGraph;
     final boolean loadRelationshipProperty;
@@ -65,9 +62,7 @@ abstract class SingleTypeRelationshipsBuilder {
         SingleTypeRelationshipImporter importer,
         Optional<SingleTypeRelationshipImporter> inverseImporter,
         int bufferSize,
-        int[] propertyKeyIds,
-        String[] propertyKeys,
-        Aggregation[] aggregations,
+        List<GraphFactory.PropertyConfig> propertyConfigs,
         boolean isMultiGraph,
         boolean loadRelationshipProperty,
         Direction direction,
@@ -80,9 +75,7 @@ abstract class SingleTypeRelationshipsBuilder {
                 importer,
                 inverseImporter.get(),
                 bufferSize,
-                propertyKeyIds,
-                propertyKeys,
-                aggregations,
+                propertyConfigs,
                 isMultiGraph,
                 loadRelationshipProperty,
                 direction,
@@ -93,9 +86,7 @@ abstract class SingleTypeRelationshipsBuilder {
                 idMap,
                 importer,
                 bufferSize,
-                propertyKeyIds,
-                propertyKeys,
-                aggregations,
+                propertyConfigs,
                 isMultiGraph,
                 loadRelationshipProperty,
                 direction,
@@ -107,9 +98,7 @@ abstract class SingleTypeRelationshipsBuilder {
     SingleTypeRelationshipsBuilder(
         PartialIdMap idMap,
         int bufferSize,
-        int[] propertyKeyIds,
-        String[] propertyKeys,
-        Aggregation[] aggregations,
+        List<GraphFactory.PropertyConfig> propertyConfigs,
         boolean isMultiGraph,
         boolean loadRelationshipProperty,
         Direction direction,
@@ -118,9 +107,7 @@ abstract class SingleTypeRelationshipsBuilder {
     ) {
         this.idMap = idMap;
         this.bufferSize = bufferSize;
-        this.propertyKeyIds = propertyKeyIds;
-        this.propertyKeys = propertyKeys;
-        this.aggregations = aggregations;
+        this.propertyConfigs = propertyConfigs;
         this.isMultiGraph = isMultiGraph;
         this.loadRelationshipProperty = loadRelationshipProperty;
         this.direction = direction;
@@ -162,9 +149,8 @@ abstract class SingleTypeRelationshipsBuilder {
         var properties = adjacencyListsWithProperties.properties();
         var relationshipCount = adjacencyListsWithProperties.relationshipCount();
 
-        for (int propertyKeyId : this.propertyKeyIds) {
-            var propertyKey = this.propertyKeys[propertyKeyId];
-            var aggregation = this.aggregations[propertyKeyId];
+        for (int propertyKeyId = 0; propertyKeyId < this.propertyConfigs.size(); propertyKeyId++) {
+            var propertyConfig = this.propertyConfigs.get(propertyKeyId);
 
             var propertyValues = ImmutableProperties.builder()
                 .propertiesList(properties.get(propertyKeyId))
@@ -173,11 +159,11 @@ abstract class SingleTypeRelationshipsBuilder {
                 .build();
 
             var relationshipPropertySchema = ImmutableRelationshipPropertySchema.builder()
-                .key(propertyKey)
-                .aggregation(aggregation)
+                .key(propertyConfig.propertyKey())
+                .aggregation(propertyConfig.aggregation())
                 .valueType(ValueType.DOUBLE)
-                .defaultValue(ValueType.DOUBLE.fallbackValue())
-                .state(PropertyState.TRANSIENT)
+                .defaultValue(propertyConfig.defaultValue())
+                .state(propertyConfig.propertyState())
                 .build();
 
             var relationshipProperty = ImmutableRelationshipProperty.builder()
@@ -185,7 +171,7 @@ abstract class SingleTypeRelationshipsBuilder {
                 .propertySchema(relationshipPropertySchema)
                 .build();
 
-            propertyStoreBuilder.putRelationshipProperty(propertyKey, relationshipProperty);
+            propertyStoreBuilder.putRelationshipProperty(propertyConfig.propertyKey(), relationshipProperty);
         }
 
         return propertyStoreBuilder.build();
@@ -200,9 +186,7 @@ abstract class SingleTypeRelationshipsBuilder {
             PartialIdMap idMap,
             SingleTypeRelationshipImporter importer,
             int bufferSize,
-            int[] propertyKeyIds,
-            String[] propertyKeys,
-            Aggregation[] aggregations,
+            List<GraphFactory.PropertyConfig> propertyConfigs,
             boolean isMultiGraph,
             boolean loadRelationshipProperty,
             Direction direction,
@@ -212,9 +196,7 @@ abstract class SingleTypeRelationshipsBuilder {
             super(
                 idMap,
                 bufferSize,
-                propertyKeyIds,
-                propertyKeys,
-                aggregations,
+                propertyConfigs,
                 isMultiGraph,
                 loadRelationshipProperty,
                 direction,
@@ -226,7 +208,7 @@ abstract class SingleTypeRelationshipsBuilder {
 
         @Override
         ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder() {
-            return new ThreadLocalRelationshipsBuilder.NonIndexed(idMap, importer, bufferSize, propertyKeyIds);
+            return new ThreadLocalRelationshipsBuilder.NonIndexed(idMap, importer, bufferSize, propertyConfigs.size());
         }
 
         @Override
@@ -272,9 +254,7 @@ abstract class SingleTypeRelationshipsBuilder {
             SingleTypeRelationshipImporter forwardImporter,
             SingleTypeRelationshipImporter inverseImporter,
             int bufferSize,
-            int[] propertyKeyIds,
-            String[] propertyKeys,
-            Aggregation[] aggregations,
+            List<GraphFactory.PropertyConfig> propertyConfigs,
             boolean isMultiGraph,
             boolean loadRelationshipProperty,
             Direction direction,
@@ -284,9 +264,7 @@ abstract class SingleTypeRelationshipsBuilder {
             super(
                 idMap,
                 bufferSize,
-                propertyKeyIds,
-                propertyKeys,
-                aggregations,
+                propertyConfigs,
                 isMultiGraph,
                 loadRelationshipProperty,
                 direction,
@@ -300,8 +278,8 @@ abstract class SingleTypeRelationshipsBuilder {
         @Override
         ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder() {
             return new ThreadLocalRelationshipsBuilder.Indexed(
-                new ThreadLocalRelationshipsBuilder.NonIndexed(idMap, forwardImporter, bufferSize, propertyKeyIds),
-                new ThreadLocalRelationshipsBuilder.NonIndexed(idMap, inverseImporter, bufferSize, propertyKeyIds)
+                new ThreadLocalRelationshipsBuilder.NonIndexed(idMap, forwardImporter, bufferSize, propertyConfigs.size()),
+                new ThreadLocalRelationshipsBuilder.NonIndexed(idMap, inverseImporter, bufferSize, propertyConfigs.size())
             );
         }
 

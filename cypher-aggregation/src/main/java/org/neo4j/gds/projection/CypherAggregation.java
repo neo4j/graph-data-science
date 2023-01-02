@@ -491,9 +491,7 @@ public final class CypherAggregation {
                 if (this.relationshipPropertySchemas != null) {
                     for (var relationshipPropertySchema : this.relationshipPropertySchemas) {
                         relationshipsBuilderBuilder.addPropertyConfig(
-                            relationshipPropertySchema.key(),
-                            Aggregation.NONE,
-                            DefaultValue.forDouble()
+                            GraphFactory.PropertyConfig.of(relationshipPropertySchema.key())
                         );
                     }
                 }
