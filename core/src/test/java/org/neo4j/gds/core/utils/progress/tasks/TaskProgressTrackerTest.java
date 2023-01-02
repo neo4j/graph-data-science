@@ -79,7 +79,7 @@ public class TaskProgressTrackerTest {
         progressTracker.endSubTask();
         assertThatThrownBy(progressTracker::endSubTask)
             .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("No more running tasks");
+            .hasMessageContaining("Tried to log progress, but there are no running tasks being tracked");
     }
 
     @Test
