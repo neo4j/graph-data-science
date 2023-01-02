@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.ObjectIntScatterMap;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
+import org.neo4j.gds.ImmutableRelationshipProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
@@ -269,7 +270,7 @@ public final class GraphFactory {
             .validateRelationships(validateRelationships.orElse(false))
             .build();
 
-        var singleTypeRelationshipsBuilder = new SingleTypeRelationshipsBuilderBuilder()
+        var singleTypeRelationshipsBuilderBuilder = new SingleTypeRelationshipsBuilderBuilder()
             .idMap(nodes)
             .importer(singleTypeRelationshipImporter)
             .bufferSize(bufferSize)
@@ -280,10 +281,31 @@ public final class GraphFactory {
             .loadRelationshipProperty(loadRelationshipProperties)
             .direction(Direction.fromOrientation(actualOrientation))
             .executorService(executorService.orElse(Pools.DEFAULT))
-            .concurrency(finalConcurrency)
-            .build();
+            .concurrency(finalConcurrency);
 
-        return new RelationshipsBuilder(singleTypeRelationshipsBuilder);
+        if (indexInverse.orElse(false)) {
+            var inverseProjection = ImmutableRelationshipProjection
+                .builder()
+                .from(projection)
+                .orientation(projection.orientation().inverse())
+                .build();
+
+            var inverseImportMetaData = ImmutableImportMetaData.builder()
+                .from(importMetaData)
+                .projection(inverseProjection)
+                .build();
+
+            var inverseImporter = new SingleTypeRelationshipImporterBuilder()
+                .importMetaData(inverseImportMetaData)
+                .nodeCountSupplier(() -> nodes.rootNodeCount().orElse(0L))
+                .importSizing(importSizing)
+                .validateRelationships(validateRelationships.orElse(false))
+                .build();
+
+            singleTypeRelationshipsBuilderBuilder.inverseImporter(inverseImporter);
+        }
+
+        return new RelationshipsBuilder(singleTypeRelationshipsBuilderBuilder.build());
     }
 
     /**

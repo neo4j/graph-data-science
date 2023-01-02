@@ -63,7 +63,7 @@ abstract class SingleTypeRelationshipsBuilder {
     static SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder(
         PartialIdMap idMap,
         SingleTypeRelationshipImporter importer,
-        Optional<SingleTypeRelationshipImporter> reverseImporter,
+        Optional<SingleTypeRelationshipImporter> inverseImporter,
         int bufferSize,
         int[] propertyKeyIds,
         String[] propertyKeys,
@@ -74,11 +74,11 @@ abstract class SingleTypeRelationshipsBuilder {
         ExecutorService executorService,
         int concurrency
     ) {
-        return reverseImporter.isPresent() ?
+        return inverseImporter.isPresent() ?
             new Indexed(
                 idMap,
                 importer,
-                reverseImporter.get(),
+                inverseImporter.get(),
                 bufferSize,
                 propertyKeyIds,
                 propertyKeys,
