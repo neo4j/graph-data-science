@@ -219,49 +219,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     @Override
     public CSRGraphStore build() {
         var nodeImportResult = loadNodes();
-        var relationships = loadRelationships(nodeImportResult.idMap());
-
-        var relationshipImportResultBuilder = RelationshipImportResult.builder();
-
-        relationships.forEach(loadResult -> {
-            var singleTypeRelationshipImportBuilder = SingleTypeRelationshipImportResult.builder()
-                .direction(Direction.fromOrientation(graphProjectConfig().orientation()))
-                .topology(loadResult.topology());
-
-            if (!loadResult.properties().isEmpty()) {
-                var propertyStoreBuilder = loadResult
-                    .properties()
-                    .entrySet()
-                    .stream()
-                    .reduce(RelationshipPropertyStore.builder(), (builder, stringPropertiesEntry) -> {
-                        var propertyKey = stringPropertiesEntry.getKey();
-                        var properties = stringPropertiesEntry.getValue();
-
-                        builder.putIfAbsent(
-                            propertyKey,
-                            RelationshipProperty.of(
-                                propertyKey,
-                                NumberType.FLOATING_POINT,
-                                graphProjectConfig.propertyState(),
-                                properties,
-                                DefaultValue.forDouble(),
-                                graphProjectConfig.aggregation()
-                            )
-                        );
-                        return builder;
-                    }, (builder, __) -> builder);
-
-                singleTypeRelationshipImportBuilder.properties(propertyStoreBuilder.build());
-            }
-
-            relationshipImportResultBuilder.putImportResult(
-                loadResult.relationshipType(),
-                singleTypeRelationshipImportBuilder.build()
-            );
-        });
-
-        var relationshipImportResult = relationshipImportResultBuilder.build();
-
+        var relationshipImportResult = loadRelationships(nodeImportResult.idMap());
         var schema = computeGraphSchema(nodeImportResult, relationshipImportResult);
 
         return new GraphStoreBuilder()
@@ -356,49 +314,19 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         }
         return array;
     }
-
-    @ValueClass
-    interface RelationshipsLoadResult {
-        RelationshipType relationshipType();
-
-        Relationships.Topology topology();
-
-        Map<String, Relationships.Properties> properties();
-    }
-
-    private List<RelationshipsLoadResult> loadRelationships(IdMap idMap) {
+    
+    private RelationshipImportResult loadRelationships(IdMap idMap) {
         var propertyKeysByRelType = propertyKeysByRelType();
         var relationshipBuilders = createRelationshipBuilders(idMap, propertyKeysByRelType);
 
         importRelationships(propertyKeysByRelType, relationshipBuilders);
 
-        return relationshipBuilders.entrySet()
-            .stream()
-            .map(entry -> {
-                var relationships = entry.getValue().build();
+        var resultBuilder = RelationshipImportResult.builder();
+        relationshipBuilders.forEach((relationshipType, relationshipsBuilder) -> {
+            resultBuilder.putImportResult(relationshipType, relationshipsBuilder.build());
+        });
 
-                var topology = relationships.topology();
-                var propertyKeys = propertyKeysByRelType.get(entry.getKey());
-
-                var properties = IntStream.range(0, propertyKeys.size())
-                    .boxed()
-                    .collect(Collectors.toMap(
-                        propertyKeys::get,
-                        idx -> relationships
-                            .properties()
-                            .map(relationshipPropertyStore -> relationshipPropertyStore
-                                .get(propertyKeys.get(idx))
-                                .values())
-                            .orElseThrow(IllegalStateException::new)
-                    ));
-
-                return ImmutableRelationshipsLoadResult.builder()
-                    .relationshipType(entry.getKey())
-                    .topology(topology)
-                    .properties(properties)
-                    .build();
-                }
-            ).collect(Collectors.toList());
+        return resultBuilder.build();
     }
 
     @NotNull
