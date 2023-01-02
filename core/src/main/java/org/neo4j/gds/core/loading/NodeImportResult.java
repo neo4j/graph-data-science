@@ -48,13 +48,13 @@ public interface NodeImportResult {
         return ImmutableNodeImportResult.of(idmap, nodePropertyStore);
     }
 
-    static NodeImportResult of(IdMap idMap, Map<PropertyMapping, NodePropertyValues> properties) {
+    static NodeImportResult of(IdMap idMap, Map<PropertyMapping, NodePropertyValues> properties, PropertyState propertyState) {
         NodePropertyStore.Builder builder = NodePropertyStore.builder();
         properties.forEach((mapping, nodeProperties) -> builder.putProperty(
             mapping.propertyKey(),
             NodeProperty.of(
                 mapping.propertyKey(),
-                PropertyState.PERSISTENT,
+                propertyState,
                 nodeProperties,
                 mapping.defaultValue().isUserDefined()
                     ? mapping.defaultValue()

@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.splitting;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -72,23 +71,24 @@ class RandomNegativeSamplerTest {
         );
 
         RelationshipsBuilder testBuilder = new RelationshipsBuilderBuilder().nodes(graph).addPropertyConfig(
-            GraphFactory.PropertyConfig.of(Aggregation.SINGLE, DefaultValue.forDouble())
+            GraphFactory.PropertyConfig.of("property", Aggregation.SINGLE, DefaultValue.forDouble())
         ).build();
         RelationshipsBuilder trainBuilder = new RelationshipsBuilderBuilder().nodes(graph).addPropertyConfig(
-            GraphFactory.PropertyConfig.of(Aggregation.SINGLE, DefaultValue.forDouble())
+            GraphFactory.PropertyConfig.of("property", Aggregation.SINGLE, DefaultValue.forDouble())
         ).build();
 
         sampler.produceNegativeSamples(testBuilder, trainBuilder);
 
-        Relationships testSet = testBuilder.build().relationships();
-        Relationships trainSet = trainBuilder.build().relationships();
+        var testSet = testBuilder.build();
+        var trainSet = trainBuilder.build();
 
         assertThat(testSet.topology().elementCount()).isEqualTo(testSampleCount);
         assertThat(trainSet.topology().elementCount()).isEqualTo(trainSampleCount);
 
         assertThat(testSet.properties()).isNotEmpty();
+        var testSetProperties = testSet.properties().get().values().iterator().next().values().propertiesList();
         graph.forEachNode(nodeId -> {
-            try (var propertyCursor = testSet.properties().get().propertiesList().propertyCursor(nodeId)) {
+            try (var propertyCursor = testSetProperties.propertyCursor(nodeId)) {
                 while (propertyCursor.hasNextLong()) {
                     assertThat(Double.longBitsToDouble(propertyCursor.nextLong())).isEqualTo(NEGATIVE);
                 }

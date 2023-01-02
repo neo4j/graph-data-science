@@ -26,30 +26,23 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipIterator;
-import org.neo4j.gds.api.RelationshipProperty;
-import org.neo4j.gds.api.RelationshipPropertyStore;
-import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.loading.construction.RelationshipsAndDirection;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.values.storable.NumberType;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class ToUndirected extends Algorithm<SingleTypeRelationshipImportResult> {
     private final GraphStore graphStore;
@@ -99,18 +92,12 @@ public class ToUndirected extends Algorithm<SingleTypeRelationshipImportResult> 
         progressTracker.endSubTask();
 
         progressTracker.beginSubTask();
-        var relationships = relationshipsBuilder.buildAll();
+        var relationships = relationshipsBuilder.build();
         progressTracker.endSubTask();
-
-        SingleTypeRelationshipImportResult result = createResult(
-            propertySchemas,
-            propertyKeys,
-            relationships
-        );
 
         progressTracker.endSubTask();
 
-        return result;
+        return relationships;
     }
 
     @NotNull
@@ -123,41 +110,14 @@ public class ToUndirected extends Algorithm<SingleTypeRelationshipImportResult> 
             .validateRelationships(false);
 
         propertySchemas.forEach(propertySchema ->
-            relationshipsBuilderBuilder.addPropertyConfig(propertySchema.aggregation(), propertySchema.defaultValue())
+            relationshipsBuilderBuilder.addPropertyConfig(
+                propertySchema.key(),
+                propertySchema.aggregation(),
+                propertySchema.defaultValue()
+            )
         );
 
         return relationshipsBuilderBuilder.build();
-    }
-
-    private static SingleTypeRelationshipImportResult createResult(
-        List<RelationshipPropertySchema> propertySchemas,
-        List<String> propertyKeys,
-        List<RelationshipsAndDirection> relationships
-    ) {
-        var topology = relationships.get(0).relationships().topology();
-        var propertyValues = IntStream.range(0, propertyKeys.size())
-            .boxed()
-            .collect(Collectors.toMap(
-                propertyKeys::get,
-                idx -> RelationshipProperty.of(
-                    propertyKeys.get(idx),
-                    NumberType.FLOATING_POINT,
-                    PropertyState.TRANSIENT,
-                    relationships.get(idx).relationships().properties().orElseThrow(IllegalStateException::new),
-                    propertySchemas.get(idx).defaultValue(),
-                    propertySchemas.get(idx).aggregation()
-                )
-            ));
-
-        RelationshipPropertyStore propertyStore = RelationshipPropertyStore.builder()
-            .putAllRelationshipProperties(propertyValues)
-            .build();
-
-        return SingleTypeRelationshipImportResult.builder()
-            .topology(topology)
-            .properties(propertyStore)
-            .direction(Direction.UNDIRECTED)
-            .build();
     }
 
     @NotNull

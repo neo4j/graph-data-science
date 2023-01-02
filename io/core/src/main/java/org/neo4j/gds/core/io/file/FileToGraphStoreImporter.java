@@ -37,8 +37,6 @@ import org.neo4j.gds.api.properties.graph.LongArrayGraphPropertyValues;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.api.schema.ImmutableGraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.RelationshipPropertySchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.io.GraphStoreGraphPropertyVisitor;
@@ -50,7 +48,6 @@ import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
-import org.neo4j.gds.core.loading.construction.RelationshipsAndDirection;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -219,7 +216,7 @@ public abstract class FileToGraphStoreImporter {
 
         ParallelUtil.run(tasks, Pools.DEFAULT);
 
-        var relationships = relationshipTopologyAndProperties(relationshipBuildersByType, relationshipSchema);
+        var relationships = relationshipTopologyAndProperties(relationshipBuildersByType);
         var relationshipImportResult = RelationshipImportResult.of(
             relationships.topologies(),
             relationships.properties(),
@@ -304,15 +301,11 @@ public abstract class FileToGraphStoreImporter {
         }
     }
 
-    public static RelationshipTopologyAndProperties relationshipTopologyAndProperties(
-        Map<String, RelationshipsBuilder> relationshipBuildersByType,
-        RelationshipSchema relationshipSchema
-    ) {
+    public static RelationshipTopologyAndProperties relationshipTopologyAndProperties(Map<String, RelationshipsBuilder> relationshipBuildersByType) {
         var propertyStores = new HashMap<RelationshipType, RelationshipPropertyStore>();
         var relationshipTypeTopologyMap = relationshipTypeToTopologyMapping(
             relationshipBuildersByType,
-            propertyStores,
-            relationshipSchema
+            propertyStores
         );
 
         var importedRelationships = relationshipTypeTopologyMap.values().stream().mapToLong(Relationships.Topology::elementCount).sum();
@@ -321,32 +314,17 @@ public abstract class FileToGraphStoreImporter {
 
     private static Map<RelationshipType, Relationships.Topology> relationshipTypeToTopologyMapping(
         Map<String, RelationshipsBuilder> relationshipBuildersByType,
-        Map<RelationshipType, RelationshipPropertyStore> propertyStores,
-        RelationshipSchema relationshipSchema
+        Map<RelationshipType, RelationshipPropertyStore> propertyStores
     ) {
         return relationshipBuildersByType.entrySet().stream().map(entry -> {
             var relationshipType = RelationshipType.of(entry.getKey());
-            return Map.entry(
-                relationshipType,
-                relationshipTopologyFrom(
-                    relationshipType,
-                    entry.getValue().buildAll(),
-                    relationshipSchema.propertySchemasFor(relationshipType),
-                    propertyStores
-                )
-            );
-        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
+            var relationships = entry.getValue().build();
 
-    private static Relationships.Topology relationshipTopologyFrom(
-        RelationshipType relationshipType,
-        List<RelationshipsAndDirection> relationships,
-        List<RelationshipPropertySchema> propertySchemas,
-        Map<RelationshipType, RelationshipPropertyStore> propertyStores
-    ) {
-        var propertyStore = CSRGraphStoreUtil.buildRelationshipPropertyStore(relationships, propertySchemas);
-        propertyStores.put(relationshipType, propertyStore);
-        return relationships.get(0).relationships().topology();
+            if (relationships.properties().isPresent()) {
+                propertyStores.put(relationshipType, relationships.properties().get());
+            }
+            return Map.entry(relationshipType, relationships.topology());
+        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @ValueClass

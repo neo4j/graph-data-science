@@ -39,6 +39,10 @@ public interface RelationshipPropertyStore {
         return relationshipProperties().get(propertyKey);
     }
 
+    default RelationshipPropertyStore filter(String propertyKey) {
+        return RelationshipPropertyStore.builder().putRelationshipProperty(propertyKey, this.get(propertyKey)).build();
+    }
+
     default Set<String> keySet() {
         return relationshipProperties().keySet();
     }

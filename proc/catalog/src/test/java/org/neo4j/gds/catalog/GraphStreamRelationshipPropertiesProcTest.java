@@ -46,11 +46,9 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
-import org.neo4j.values.storable.NumberType;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -212,12 +210,12 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
             .orientation(Orientation.NATURAL)
-            .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
+            .addPropertyConfig("newRelProp3", Aggregation.NONE, DefaultValue.forDouble())
             .build();
 
         relImporter.addFromInternal(0, 1, 23D);
 
-        graphStore.addRelationshipType(RelationshipType.of("NEW_REL"), Optional.of("newRelProp3"), Optional.of(NumberType.FLOATING_POINT), relImporter.build());
+        graphStore.addRelationshipType(RelationshipType.of("NEW_REL"), relImporter.build());
 
         String graphStreamQuery = formatWithLocale(
             "CALL gds.graph.relationshipProperties.stream(" +
@@ -292,12 +290,12 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
             .orientation(Orientation.NATURAL)
-            .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
+            .addPropertyConfig("newRelProp3", Aggregation.NONE, DefaultValue.forDouble())
             .build();
 
         relImporter.addFromInternal(0, 1, 23D);
 
-        graphStore.addRelationshipType(RelationshipType.of("NEW_REL"), Optional.of("newRelProp3"), Optional.of(NumberType.FLOATING_POINT), relImporter.build());
+        graphStore.addRelationshipType(RelationshipType.of("NEW_REL"), relImporter.build());
 
         String graphStreamQuery = formatWithLocale(
             "CALL gds.graph.relationshipProperty.stream(" +

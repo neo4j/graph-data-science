@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.ObjectIntScatterMap;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
+import org.neo4j.gds.ImmutableRelationshipProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
@@ -32,14 +33,10 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PartialIdMap;
-import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.api.Relationships;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -49,6 +46,7 @@ import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImmutableImportMetaData;
 import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporterBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 
@@ -70,8 +68,6 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
     deepImmutablesDetection = true
 )
 public final class GraphFactory {
-
-    private static final String DUMMY_PROPERTY = "property";
 
     private GraphFactory() {}
 
@@ -174,6 +170,8 @@ public final class GraphFactory {
     @ValueClass
     public interface PropertyConfig {
 
+        String propertyKey();
+
         @Value.Default
         default Aggregation aggregation() {
             return Aggregation.NONE;
@@ -184,16 +182,12 @@ public final class GraphFactory {
             return DefaultValue.forDouble();
         }
 
-        static PropertyConfig withDefaults() {
-            return of(Optional.empty(), Optional.empty());
+        static PropertyConfig of(String propertyKey, Aggregation aggregation, DefaultValue defaultValue) {
+            return ImmutablePropertyConfig.of(propertyKey, aggregation, defaultValue);
         }
 
-        static PropertyConfig of(Aggregation aggregation, DefaultValue defaultValue) {
-            return ImmutablePropertyConfig.of(aggregation, defaultValue);
-        }
-
-        static PropertyConfig of(Optional<Aggregation> aggregation, Optional<DefaultValue> defaultValue) {
-            return of(aggregation.orElse(Aggregation.NONE), defaultValue.orElse(DefaultValue.forDouble()));
+        static PropertyConfig of(String propertyKey, Optional<Aggregation> aggregation, Optional<DefaultValue> defaultValue) {
+            return of(propertyKey, aggregation.orElse(Aggregation.NONE), defaultValue.orElse(DefaultValue.forDouble()));
         }
     }
 
@@ -209,12 +203,13 @@ public final class GraphFactory {
         Optional<Aggregation> aggregation,
         Optional<Boolean> validateRelationships,
         Optional<Integer> concurrency,
+        Optional<Boolean> indexInverse,
         Optional<ExecutorService> executorService
     ) {
         var loadRelationshipProperties = !propertyConfigs.isEmpty();
 
         var aggregations = propertyConfigs.isEmpty()
-            ? new Aggregation[]{aggregation.orElse(Aggregation.NONE)}
+            ? new Aggregation[]{aggregation.orElse(Aggregation.DEFAULT)}
             : propertyConfigs.stream()
                 .map(GraphFactory.PropertyConfig::aggregation)
                 .map(Aggregation::resolve)
@@ -230,8 +225,8 @@ public final class GraphFactory {
             .orientation(actualOrientation);
 
         propertyConfigs.forEach(propertyConfig -> projectionBuilder.addProperty(
-            GraphFactory.DUMMY_PROPERTY,
-            GraphFactory.DUMMY_PROPERTY,
+            propertyConfig.propertyKey(),
+            propertyConfig.propertyKey(),
             DefaultValue.of(propertyConfig.defaultValue()),
             propertyConfig.aggregation()
         ));
@@ -239,12 +234,15 @@ public final class GraphFactory {
         var projection = projectionBuilder.build();
 
         int[] propertyKeyIds = IntStream.range(0, propertyConfigs.size()).toArray();
+        String[] propertyKeys = new String[propertyConfigs.size()];
+        for (int propertyKeyId : propertyKeyIds) {
+            propertyKeys[propertyKeyId] = propertyConfigs.get(propertyKeyId).propertyKey();
+        }
+
         double[] defaultValues = propertyConfigs.stream().mapToDouble(c -> c.defaultValue().doubleValue()).toArray();
 
         int finalConcurrency = concurrency.orElse(1);
-
         var maybeRootNodeCount = nodes.rootNodeCount();
-
         var importSizing = maybeRootNodeCount.isPresent()
             ? ImportSizing.of(finalConcurrency, maybeRootNodeCount.getAsLong())
             : ImportSizing.of(finalConcurrency);
@@ -265,28 +263,49 @@ public final class GraphFactory {
             .typeTokenId(NO_SUCH_RELATIONSHIP_TYPE)
             .build();
 
-        var importerFactory = new SingleTypeRelationshipImporterBuilder()
+        var singleTypeRelationshipImporter = new SingleTypeRelationshipImporterBuilder()
             .importMetaData(importMetaData)
             .nodeCountSupplier(() -> nodes.rootNodeCount().orElse(0L))
             .importSizing(importSizing)
             .validateRelationships(validateRelationships.orElse(false))
             .build();
 
-        return new RelationshipsBuilder(
-            nodes,
-            Direction.fromOrientation(actualOrientation),
-            bufferSize,
-            propertyKeyIds,
-            importerFactory,
-            loadRelationshipProperties,
-            isMultiGraph,
-            finalConcurrency,
-            executorService.orElse(Pools.DEFAULT)
-        );
-    }
+        var singleTypeRelationshipsBuilderBuilder = new SingleTypeRelationshipsBuilderBuilder()
+            .idMap(nodes)
+            .importer(singleTypeRelationshipImporter)
+            .bufferSize(bufferSize)
+            .propertyKeyIds(propertyKeyIds)
+            .propertyKeys(propertyKeys)
+            .aggregations(aggregations)
+            .isMultiGraph(isMultiGraph)
+            .loadRelationshipProperty(loadRelationshipProperties)
+            .direction(Direction.fromOrientation(actualOrientation))
+            .executorService(executorService.orElse(Pools.DEFAULT))
+            .concurrency(finalConcurrency);
 
-    public static Relationships emptyRelationships(IdMap idMap) {
-        return initRelationshipsBuilder().nodes(idMap).build().build().relationships();
+        if (indexInverse.orElse(false)) {
+            var inverseProjection = ImmutableRelationshipProjection
+                .builder()
+                .from(projection)
+                .orientation(projection.orientation().inverse())
+                .build();
+
+            var inverseImportMetaData = ImmutableImportMetaData.builder()
+                .from(importMetaData)
+                .projection(inverseProjection)
+                .build();
+
+            var inverseImporter = new SingleTypeRelationshipImporterBuilder()
+                .importMetaData(inverseImportMetaData)
+                .nodeCountSupplier(() -> nodes.rootNodeCount().orElse(0L))
+                .importSizing(importSizing)
+                .validateRelationships(validateRelationships.orElse(false))
+                .build();
+
+            singleTypeRelationshipsBuilderBuilder.inverseImporter(inverseImporter);
+        }
+
+        return new RelationshipsBuilder(singleTypeRelationshipsBuilderBuilder.build());
     }
 
     /**
@@ -297,26 +316,21 @@ public final class GraphFactory {
      * If a relationship property is present, the default relationship property key {@code "property"}
      * will be used.
      */
-    public static HugeGraph create(IdMap idMap, RelationshipsAndDirection relationshipsAndDirection) {
+    public static HugeGraph create(IdMap idMap, SingleTypeRelationshipImportResult relationships) {
         var nodeSchema = NodeSchema.empty();
         idMap.availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
-        var relationshipSchema = RelationshipSchema.empty();
+        relationships.properties().ifPresent(relationshipPropertyStore -> {
+            assert relationshipPropertyStore.values().size() == 1: "Cannot instantiate graph with more than one relationship property.";
+        });
 
-        var entry = relationshipSchema.getOrCreateRelationshipType(
-            RelationshipType.of("REL"),
-            relationshipsAndDirection.direction()
-        );
-
-        if (relationshipsAndDirection.relationships().properties().isPresent()) {
-            entry.addProperty("property", ValueType.DOUBLE, PropertyState.PERSISTENT);
-        }
+        var relationshipSchema = relationships.relationshipSchema(RelationshipType.of("REL"));
 
         return create(
             GraphSchema.of(nodeSchema, relationshipSchema, Map.of()),
             idMap,
             Map.of(),
-            relationshipsAndDirection.relationships()
+            relationships
         );
     }
 
@@ -324,14 +338,28 @@ public final class GraphFactory {
         GraphSchema graphSchema,
         IdMap idMap,
         Map<String, NodePropertyValues> nodeProperties,
-        Relationships relationships
+        SingleTypeRelationshipImportResult relationships
     ) {
+        var topology = relationships.topology();
+        var inverseTopology = relationships.inverseTopology();
+
+        var properties = relationships.properties().map(relationshipPropertyStore -> {
+            assert relationshipPropertyStore.values().size() == 1: "Cannot instantiate graph with more than one relationship property.";
+            return relationshipPropertyStore.values().iterator().next().values();
+        });
+        var inverseProperties = relationships.inverseProperties().map(relationshipPropertyStore -> {
+            assert relationshipPropertyStore.values().size() == 1: "Cannot instantiate graph with more than one relationship property.";
+            return relationshipPropertyStore.values().iterator().next().values();
+        });
+
         return new HugeGraphBuilder()
             .nodes(idMap)
             .schema(graphSchema)
             .nodeProperties(nodeProperties)
-            .topology(relationships.topology())
-            .relationshipProperties(relationships.properties())
+            .topology(topology)
+            .inverseTopology(inverseTopology)
+            .relationshipProperties(properties)
+            .inverseRelationshipProperties(inverseProperties)
             .build();
     }
 }

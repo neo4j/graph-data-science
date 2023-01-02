@@ -87,7 +87,7 @@ public class SimilarityGraphBuilder {
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap.rootIdMap())
             .orientation(Orientation.NATURAL)
-            .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
+            .addPropertyConfig("property", Aggregation.NONE, DefaultValue.forDouble())
             .concurrency(concurrency)
             .executorService(executorService)
             .build();

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.api.schema;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
@@ -33,6 +34,7 @@ public interface PropertySchema {
 
     DefaultValue defaultValue();
 
+    @Value.Auxiliary
     PropertyState state();
 
     static PropertySchema of(String propertyKey, ValueType valueType) {

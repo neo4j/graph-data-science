@@ -25,6 +25,7 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStoreFactory;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
 
@@ -42,6 +43,11 @@ public interface GraphProjectFromGdlConfig extends GraphProjectConfig {
     @Value.Default
     default Aggregation aggregation() {
         return Aggregation.DEFAULT;
+    }
+
+    @Value.Default
+    default PropertyState propertyState() {
+        return PropertyState.TRANSIENT;
     }
 
     @Override

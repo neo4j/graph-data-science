@@ -50,11 +50,9 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.values.storable.NumberType;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
@@ -117,7 +115,11 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
                     .aggregation(Aggregation.SINGLE)
                     .nodes(graph)
                     .orientation(Orientation.UNDIRECTED)
-                    .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
+                    .addPropertyConfig(
+                        computationResult.config().mutateProperty(),
+                        Aggregation.NONE,
+                        DefaultValue.forDouble()
+                    )
                     .concurrency(concurrency)
                     .executorService(Pools.DEFAULT)
                     .build();
@@ -136,18 +138,15 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
                     })
                 );
 
-                var relationshipsAndSchema = relationshipsBuilder.build();
+                var relationships = relationshipsBuilder.build();
 
                 var config = computationResult.config();
                 try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-                    computationResult.graphStore().addRelationshipType(
-                        RelationshipType.of(config.mutateRelationshipType()),
-                        Optional.of(config.mutateProperty()),
-                        Optional.of(NumberType.FLOATING_POINT),
-                        relationshipsAndSchema
-                    );
+                    computationResult
+                        .graphStore()
+                        .addRelationshipType(RelationshipType.of(config.mutateRelationshipType()), relationships);
                 }
-                resultBuilder.withRelationshipsWritten(relationshipsAndSchema.relationships().topology().elementCount());
+                resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
             }
         };
     }

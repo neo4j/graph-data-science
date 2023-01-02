@@ -29,6 +29,7 @@ import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -107,6 +108,7 @@ abstract class BaseGdlSupportExtension {
                 .username(annotation.username())
                 .orientation(annotation.orientation())
                 .aggregation(annotation.aggregation())
+                .propertyState(annotation.propertyState())
                 .idOffset(annotation.idOffset())
                 .addToCatalog(annotation.addToCatalog())
                 .build()
@@ -123,6 +125,7 @@ abstract class BaseGdlSupportExtension {
             .gdlGraph(gdlGraphSetup.gdlGraph())
             .orientation(gdlGraphSetup.orientation())
             .aggregation(gdlGraphSetup.aggregation())
+            .propertyState(gdlGraphSetup.propertyState())
             .build();
 
         var nodeIdFunction = new TestSupport.OffsetIdSupplier(gdlGraphSetup.idOffset());
@@ -182,6 +185,9 @@ abstract class BaseGdlSupportExtension {
 
         @Value.Auxiliary
         Aggregation aggregation();
+
+        @Value.Auxiliary
+        PropertyState propertyState();
 
         @Value.Auxiliary
         long idOffset();

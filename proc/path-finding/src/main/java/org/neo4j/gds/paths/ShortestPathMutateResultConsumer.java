@@ -27,16 +27,13 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.loading.construction.RelationshipsAndDirection;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.values.storable.NumberType;
-
-import java.util.Optional;
 
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
 
@@ -63,11 +60,11 @@ public class ShortestPathMutateResultConsumer<ALGO extends Algorithm<DijkstraRes
         var relationshipsBuilder = GraphFactory
             .initRelationshipsBuilder()
             .nodes(computationResult.graph())
-            .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
+            .addPropertyConfig(TOTAL_COST_KEY, Aggregation.NONE, DefaultValue.forDouble())
             .orientation(Orientation.NATURAL)
             .build();
 
-        RelationshipsAndDirection RelationshipsAndDirection;
+        SingleTypeRelationshipImportResult relationships;
 
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
             result.forEachPath(pathResult -> {
@@ -76,16 +73,12 @@ public class ShortestPathMutateResultConsumer<ALGO extends Algorithm<DijkstraRes
                     pathResult.totalCost()
                 );
             });
-            RelationshipsAndDirection = relationshipsBuilder.build();
-            resultBuilder.withRelationshipsWritten(RelationshipsAndDirection.relationships().topology().elementCount());
+            relationships = relationshipsBuilder.build();
+            resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
         }
 
         computationResult
             .graphStore()
-            .addRelationshipType(mutateRelationshipType,
-                Optional.of(TOTAL_COST_KEY),
-                Optional.of(NumberType.FLOATING_POINT),
-                RelationshipsAndDirection
-            );
+            .addRelationshipType(mutateRelationshipType, relationships);
     }
 }

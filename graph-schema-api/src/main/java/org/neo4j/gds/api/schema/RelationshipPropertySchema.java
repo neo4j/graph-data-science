@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.api.schema;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
@@ -59,6 +60,18 @@ public interface RelationshipPropertySchema extends PropertySchema {
         Aggregation aggregation
     ) {
         return ImmutableRelationshipPropertySchema.of(propertyKey, valueType, defaultValue, propertyState, aggregation);
+    }
+
+    @Value.Check
+    default RelationshipPropertySchema normalize() {
+        if (aggregation() == Aggregation.DEFAULT) {
+            return ImmutableRelationshipPropertySchema
+                .builder()
+                .from(this)
+                .aggregation(Aggregation.resolve(aggregation()))
+                .build();
+        }
+        return this;
     }
 
 }
