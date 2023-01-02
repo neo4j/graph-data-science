@@ -194,6 +194,20 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
+    public void forEachInverseRelationship(long nodeId, RelationshipConsumer consumer) {
+        graph.forEachInverseRelationship(nodeId, consumer);
+    }
+
+    @Override
+    public void forEachInverseRelationship(
+        long nodeId,
+        double fallbackValue,
+        RelationshipWithPropertyConsumer consumer
+    ) {
+        graph.forEachInverseRelationship(nodeId, fallbackValue, consumer);
+    }
+
+    @Override
     public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
         return graph.streamRelationships(nodeId, fallbackValue);
     }

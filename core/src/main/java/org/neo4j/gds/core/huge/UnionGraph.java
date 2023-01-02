@@ -204,6 +204,24 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
+    public void forEachInverseRelationship(long nodeId, RelationshipConsumer consumer) {
+        for (Graph graph : graphs) {
+            graph.forEachInverseRelationship(nodeId, consumer);
+        }
+    }
+
+    @Override
+    public void forEachInverseRelationship(
+        long nodeId,
+        double fallbackValue,
+        RelationshipWithPropertyConsumer consumer
+    ) {
+        for (Graph graph : graphs) {
+            graph.forEachInverseRelationship(nodeId, fallbackValue, consumer);
+        }
+    }
+
+    @Override
     public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
         return graphs
             .stream()

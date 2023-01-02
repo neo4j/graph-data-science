@@ -303,6 +303,20 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
+    public void forEachInverseRelationship(long nodeId, RelationshipConsumer consumer) {
+        runForEachInverse(nodeId, consumer);
+    }
+
+    @Override
+    public void forEachInverseRelationship(
+        long nodeId,
+        double fallbackValue,
+        RelationshipWithPropertyConsumer consumer
+    ) {
+        runForEachInverse(nodeId, fallbackValue, consumer);
+    }
+
+    @Override
     public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
         var adjacencyCursor = adjacencyCursorForIteration(nodeId);
         var spliterator = !hasRelationshipProperty()
@@ -432,6 +446,21 @@ public class HugeGraph implements CSRGraph {
         }
     }
 
+    private void runForEachInverse(long sourceId, RelationshipConsumer consumer) {
+        var adjacencyCursor = inverseAdjacencyCursorForIteration(sourceId);
+        consumeAdjacentNodes(sourceId, adjacencyCursor, consumer);
+    }
+
+    private void runForEachInverse(long sourceId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
+        if (!hasRelationshipProperty()) {
+            runForEachInverse(sourceId, (s, t) -> consumer.accept(s, t, fallbackValue));
+        } else {
+            var adjacencyCursor = inverseAdjacencyCursorForIteration(sourceId);
+            var propertyCursor = inversePropertyCursorForIteration(sourceId);
+            consumeAdjacentNodesWithProperty(sourceId, adjacencyCursor, propertyCursor, consumer);
+        }
+    }
+
     private AdjacencyCursor adjacencyCursorForIteration(long sourceNodeId) {
         return adjacency.adjacencyCursor(adjacencyCursorCache, sourceNodeId);
     }
@@ -439,10 +468,31 @@ public class HugeGraph implements CSRGraph {
     private PropertyCursor propertyCursorForIteration(long sourceNodeId) {
         if (!hasRelationshipProperty() || properties == null) {
             throw new UnsupportedOperationException(
-                "Can not create property cursor on a graph without relationship property");
+                "Can not create property cursor on a graph without relationship property"
+            );
         }
 
         return properties.propertyCursor(propertyCursorCache, sourceNodeId, defaultPropertyValue);
+    }
+
+    private AdjacencyCursor inverseAdjacencyCursorForIteration(long sourceNodeId) {
+        if (inverseAdjacency == null) {
+            throw new UnsupportedOperationException(
+                "Can not create adjacency cursor on a graph without inverse indexed relationships"
+            );
+        }
+
+        return inverseAdjacency.adjacencyCursor(inverseAdjacencyCursorCache, sourceNodeId);
+    }
+
+    private PropertyCursor inversePropertyCursorForIteration(long sourceNodeId) {
+        if (!hasRelationshipProperty() || inverseProperties == null) {
+            throw new UnsupportedOperationException(
+                "Can not create property cursor on a graph without relationship property"
+            );
+        }
+
+        return inverseProperties.propertyCursor(inversePropertyCursorCache, sourceNodeId, defaultPropertyValue);
     }
 
     @Override
