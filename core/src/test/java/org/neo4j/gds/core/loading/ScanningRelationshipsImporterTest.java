@@ -126,36 +126,19 @@ class ScanningRelationshipsImporterTest extends BaseTest {
     }
 
     private int degree(String nodeVariable, AdjacencyList adjacencyList) {
-        var nodeId = idFunction.of(nodeVariable);
-        return adjacencyList.degree(nodeId);
+        return AdjacencyTestUtils.degree(idFunction.of(nodeVariable), adjacencyList);
     }
 
     private long[] targets(String nodeVariable, AdjacencyList adjacencyList) {
-        var nodeId = idFunction.of(nodeVariable);
-        var degree = adjacencyList.degree(nodeId);
-        var targets = new long[degree];
-        var cursor = adjacencyList.adjacencyCursor(nodeId);
-        int i = 0;
-        while (cursor.hasNextVLong()) {
-            targets[i++] = cursor.nextVLong();
-        }
-        return targets;
+        return AdjacencyTestUtils.targets(idFunction.of(nodeVariable), adjacencyList);
     }
 
     private double[] properties(
         String nodeVariable,
         AdjacencyProperties adjacencyProperties,
-        LongToIntFunction degrees
+        LongToIntFunction degreeFn
     ) {
-        var nodeId = idFunction.of(nodeVariable);
-        var degree = degrees.applyAsInt(nodeId);
-        var properties = new double[degree];
-        var cursor = adjacencyProperties.propertyCursor(nodeId);
-        int i = 0;
-        while (cursor.hasNextLong()) {
-            properties[i++] = Double.longBitsToDouble(cursor.nextLong());
-        }
-        return properties;
+        return AdjacencyTestUtils.properties(idFunction.of(nodeVariable), adjacencyProperties, degreeFn);
     }
 
     private long[] nodeIds(String... nodeVariables) {
