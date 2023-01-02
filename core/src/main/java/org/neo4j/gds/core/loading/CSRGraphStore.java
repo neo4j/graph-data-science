@@ -686,10 +686,7 @@ public class CSRGraphStore implements GraphStore {
 
         var inverseProperties = relationship
             .inverseProperties()
-            .map(inversePropertyStore -> maybeRelationshipProperty
-                .map(propertyKey -> inversePropertyStore.get(propertyKey).values())
-                .orElseThrow(() -> new IllegalStateException(
-                    "Relationship type is inverse indexed, but is missing property. This is a bug.")));
+            .flatMap(inversePropertyStore -> maybeRelationshipProperty.map(propertyKey -> inversePropertyStore.get(propertyKey).values()));
 
         var characteristicsBuilder = GraphCharacteristics.builder().withDirection(schema.direction());
         relationship.inverseTopology().ifPresent(__ -> characteristicsBuilder.inverseIndexed());

@@ -43,6 +43,11 @@ public @interface GdlGraph {
 
     PropertyState propertyState() default PropertyState.TRANSIENT;
 
+    /**
+     * Set to true, if the relationships in the graph should be inverse indexed.
+     */
+    boolean indexInverse() default false;
+
     String username() default "";
 
     /**

@@ -50,6 +50,9 @@ public interface GraphProjectFromGdlConfig extends GraphProjectConfig {
         return PropertyState.TRANSIENT;
     }
 
+    @Value.Default
+    default boolean indexInverse() { return false; }
+
     @Override
     default GraphStoreFactory.Supplier graphStoreFactory() {
         return loaderContext -> GdlFactory

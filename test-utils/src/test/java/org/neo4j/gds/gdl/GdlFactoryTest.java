@@ -283,6 +283,33 @@ class GdlFactoryTest {
         assertThat(importResult.nodes().highestOriginalId()).isEqualTo(44L);
     }
 
+    @Test
+    void testIndexInverse() {
+        var gdlFactory = GdlFactory.builder()
+            .graphProjectConfig(ImmutableGraphProjectFromGdlConfig
+                .builder()
+                .graphName("testGraph")
+                .gdlGraph("(a)-[:REL { foo: 42 }]->(b)")
+                .indexInverse(true)
+                .build())
+            .build();
+
+        var graph = gdlFactory.build().getGraph(RelationshipType.of("REL"));
+        var sourceNodeId = gdlFactory.nodeId("a");
+        var targetNodeId = gdlFactory.nodeId("b");
+
+        assertThat(graph.degree(sourceNodeId)).isEqualTo(1);
+        graph.forEachRelationship(sourceNodeId, (s, t) -> {
+            assertThat(t).isEqualTo(targetNodeId);
+            return true;
+        });
+        graph.forEachInverseRelationship(targetNodeId, (s, t) -> {
+            assertThat(t).isEqualTo(sourceNodeId);
+            return true;
+        });
+    }
+
+
     private void assertRelationshipProperty(
         GraphStore graphStore,
         String relType,

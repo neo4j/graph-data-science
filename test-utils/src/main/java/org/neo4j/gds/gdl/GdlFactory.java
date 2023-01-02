@@ -24,16 +24,12 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.api.RelationshipProperty;
-import org.neo4j.gds.api.RelationshipPropertyStore;
-import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
@@ -50,7 +46,6 @@ import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.NodeImportResult;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -59,7 +54,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlSupportPerMethodExtension;
-import org.neo4j.values.storable.NumberType;
 import org.neo4j.values.storable.Values;
 import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Element;
@@ -76,7 +70,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.LongSupplier;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -405,6 +398,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                         .nodes(idMap)
                         .orientation(graphProjectConfig.orientation())
                         .aggregation(graphProjectConfig.aggregation())
+                        .indexInverse(graphProjectConfig.indexInverse())
                         .addAllPropertyConfigs(propertyConfigs)
                         .executorService(loadingContext.executor())
                         .build();
