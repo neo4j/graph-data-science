@@ -31,6 +31,7 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -352,9 +353,13 @@ public final class GraphFactory {
             return relationshipPropertyStore.values().iterator().next().values();
         });
 
+        var characteristicsBuilder = GraphCharacteristics.builder().withDirection(graphSchema.direction());
+        relationships.inverseTopology().ifPresent(__ -> characteristicsBuilder.inverseIndexed());
+
         return new HugeGraphBuilder()
             .nodes(idMap)
             .schema(graphSchema)
+            .characteristics(characteristicsBuilder.build())
             .nodeProperties(nodeProperties)
             .topology(topology)
             .inverseTopology(inverseTopology)

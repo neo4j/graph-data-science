@@ -33,6 +33,8 @@ public interface Graph extends IdMap, NodePropertyContainer, Degrees, Relationsh
 
     GraphSchema schema();
 
+    GraphCharacteristics characteristics();
+
     default boolean isEmpty() {
         return nodeCount() == 0;
     }

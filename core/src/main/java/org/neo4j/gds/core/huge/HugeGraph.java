@@ -31,6 +31,7 @@ import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyCursor;
 import org.neo4j.gds.api.RelationshipConsumer;
@@ -97,6 +98,7 @@ public class HugeGraph implements CSRGraph {
     protected final IdMap idMap;
 
     protected final GraphSchema schema;
+    protected final GraphCharacteristics characteristics;
 
     protected final Map<String, NodePropertyValues> nodeProperties;
 
@@ -124,6 +126,7 @@ public class HugeGraph implements CSRGraph {
     static HugeGraph create(
         IdMap nodes,
         GraphSchema schema,
+        GraphCharacteristics characteristics,
         Map<String, NodePropertyValues> nodeProperties,
         Relationships.Topology topology,
         Optional<Relationships.Properties> relationshipProperties,
@@ -133,6 +136,7 @@ public class HugeGraph implements CSRGraph {
         return new HugeGraph(
             nodes,
             schema,
+            characteristics,
             nodeProperties,
             topology.elementCount(),
             topology.adjacencyList(),
@@ -148,6 +152,7 @@ public class HugeGraph implements CSRGraph {
     protected HugeGraph(
         IdMap idMap,
         GraphSchema schema,
+        GraphCharacteristics characteristics,
         Map<String, NodePropertyValues> nodeProperties,
         long relationshipCount,
         @NotNull AdjacencyList adjacency,
@@ -160,6 +165,7 @@ public class HugeGraph implements CSRGraph {
     ) {
         this.idMap = idMap;
         this.schema = schema;
+        this.characteristics = characteristics;
         this.isMultiGraph = isMultiGraph;
         this.nodeProperties = nodeProperties;
         this.relationshipCount = relationshipCount;
@@ -208,6 +214,11 @@ public class HugeGraph implements CSRGraph {
     @Override
     public GraphSchema schema() {
         return schema;
+    }
+
+    @Override
+    public GraphCharacteristics characteristics() {
+        return characteristics;
     }
 
     public Map<String, NodePropertyValues> nodeProperties() { return nodeProperties; }
@@ -395,6 +406,7 @@ public class HugeGraph implements CSRGraph {
         return new HugeGraph(
             idMap,
             schema,
+            characteristics,
             nodeProperties,
             relationshipCount,
             adjacency,

@@ -149,6 +149,11 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
+    public GraphCharacteristics characteristics() {
+        return graph.characteristics();
+    }
+
+    @Override
     public List<NodeLabel> nodeLabels(long mappedNodeId) {
         return graph.nodeLabels(mappedNodeId);
     }

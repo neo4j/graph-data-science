@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.RelationshipCursor;
@@ -97,6 +98,15 @@ public final class UnionGraph implements CSRGraph {
             .stream()
             .map(Graph::schema)
             .reduce(GraphSchema::union)
+            .orElseThrow(() -> new IllegalArgumentException("no graphs"));
+    }
+
+    @Override
+    public GraphCharacteristics characteristics() {
+        return graphs
+            .stream()
+            .map(Graph::characteristics)
+            .reduce(GraphCharacteristics::intersect)
             .orElseThrow(() -> new IllegalArgumentException("no graphs"));
     }
 
