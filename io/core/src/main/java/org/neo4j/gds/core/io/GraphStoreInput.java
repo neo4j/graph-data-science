@@ -303,7 +303,7 @@ public final class GraphStoreInput implements CompatInput {
         }
     }
 
-    static class GraphPropertyInputChunk implements InputChunk {
+    static class GraphPropertyInputChunk implements InputChunk, LastProgress {
 
         private String propertyName;
         private Spliterator<?> propertyValues;
@@ -325,6 +325,11 @@ public final class GraphStoreInput implements CompatInput {
         @Override
         public void close() throws IOException {
 
+        }
+
+        @Override
+        public long lastProgress() {
+            return 1;
         }
     }
 
@@ -407,7 +412,11 @@ public final class GraphStoreInput implements CompatInput {
         }
     }
 
-    abstract static class EntityChunk implements InputChunk {
+    public interface LastProgress {
+        long lastProgress();
+    }
+
+    public abstract static class EntityChunk implements InputChunk, LastProgress {
 
         final InputEntityIdVisitor.Long inputEntityIdVisitor;
 
@@ -493,12 +502,18 @@ public final class GraphStoreInput implements CompatInput {
                 visitor.property(propertyKey, value);
             }
         }
+
+        @Override
+        public long lastProgress() {
+            return 1;
+        }
     }
 
     static class RelationshipChunk extends EntityChunk {
 
         private final RelationshipStore relationshipStore;
         private final Map<RelationshipType, RelationshipConsumer> relationshipConsumers;
+        private long lastProcessed;
 
         RelationshipChunk(
             RelationshipStore relationshipStore,
@@ -526,6 +541,8 @@ public final class GraphStoreInput implements CompatInput {
 
         @Override
         public boolean next(InputEntityVisitor visitor) {
+            lastProcessed = 0;
+
             if (id < endId) {
                 for (var entry : relationshipStore.relationshipIterators.entrySet()) {
                     var relationshipType = entry.getKey();
@@ -533,12 +550,19 @@ public final class GraphStoreInput implements CompatInput {
                     var relationshipConsumer = relationshipConsumers.get(relationshipType);
                     relationshipConsumer.setVisitor(visitor);
 
+                    lastProcessed += relationshipIterator.degree(id);
+
                     relationshipIterator.forEachRelationship(id, relationshipConsumer);
                 }
                 id++;
                 return true;
             }
             return false;
+        }
+
+        @Override
+        public long lastProgress() {
+            return lastProcessed;
         }
 
         private static final class RelationshipConsumer implements CompositeRelationshipIterator.RelationshipConsumer {
