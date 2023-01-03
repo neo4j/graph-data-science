@@ -132,6 +132,7 @@ public class GraphInfoLoader {
             JsonParser parser, DeserializationContext ctxt
         ) throws IOException {
             return Arrays.stream(parser.getText().split(";"))
+                .filter(s -> !s.isEmpty())
                 .map(RelationshipType::of)
                 .collect(Collectors.toList());
         }

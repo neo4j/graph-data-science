@@ -104,6 +104,7 @@ class GraphStoreRelationshipVisitorTest {
             .withNodes(multiplePropsGraph)
             .withRelationshipSchema(multiplePropsGraph.schema().relationshipSchema())
             .withRelationshipBuildersToTypeResultMap(relationshipBuildersByType)
+            .withInverseIndexedRelationshipTypes(List.of())
             .withAllocationTracker()
             .withConcurrency(1)
             .build();
