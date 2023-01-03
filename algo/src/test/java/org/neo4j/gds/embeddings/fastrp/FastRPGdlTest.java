@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
@@ -160,6 +161,72 @@ public class FastRPGdlTest {
         l2Normalize(expected);
 
         assertThat(embeddings.get(0)).containsExactly(expected);
+    }
+
+    @Test
+    void shouldAddInitialVectors() {
+        var embeddingDimension = 6;
+        var config = FastRPBaseConfig.builder()
+                .embeddingDimension(embeddingDimension)
+                .propertyRatio(0.5)
+                .featureProperties(List.of("f1", "f2", "f3"))
+                .nodeSelfInfluence(0.6)
+                .addIterationWeight(0.0D)
+                .randomSeed(42L)
+                .build();
+
+        final var graph = scalarGraphStore.getGraph(
+                List.of(NodeLabel.of("Node1"), NodeLabel.of("Node2")),
+                List.of(RelationshipType.of("REL")),
+                Optional.empty()
+        );
+
+        FastRP fastRP = new FastRP(
+                graph,
+                config,
+                defaultFeatureExtractors(graph),
+                ProgressTracker.NULL_TRACKER
+        );
+
+        fastRP.initDegreePartition();
+        // needed to avoid NPE. the randomvectors are overwritten below.
+        fastRP.initRandomVectors();
+
+        var initialRandomVectors = fastRP.currentEmbedding(-1);
+        var initial0 = new float[embeddingDimension];
+        var initial1 = new float[embeddingDimension];
+        var initial2 = new float[embeddingDimension];
+        initial0[0] = 1.0f;
+        initial0[3] = -1.0f;
+        initial1[1] = 2.4f;
+        initial1[2] = -0.5f;
+        initial2[5] = -3.0f;
+        initial2[4] = -0.5f;
+        initialRandomVectors.set(0, initial0);
+        initialRandomVectors.set(1, initial1);
+        initialRandomVectors.set(2, initial2);
+
+        fastRP.addInitialVectorsToEmbedding();
+        fastRP.propagateEmbeddings();
+        HugeObjectArray<float[]> embeddings = fastRP.embeddings();
+
+
+        var expected0 = new float[embeddingDimension];
+        var expected1 = new float[embeddingDimension];
+        var expected2 = new float[embeddingDimension];
+        var scale0 = config.nodeSelfInfluence().floatValue() / (float) Math.sqrt(2);
+        var scale1 = config.nodeSelfInfluence().floatValue() / (float) Math.sqrt(2.4 * 2.4 + 0.5 * 0.5);
+        var scale2 = config.nodeSelfInfluence().floatValue() / (float) Math.sqrt(3.0 * 3.0 + 0.5 * 0.5);
+        expected0[0] = scale0;
+        expected0[3] = -1.0f * scale0;
+        expected1[1] = 2.4f * scale1;
+        expected1[2] = -0.5f * scale1;
+        expected2[5] = -3.0f * scale2;
+        expected2[4] = -0.5f * scale2;
+
+        assertThat(embeddings.get(0)).containsExactly(expected0, Offset.offset(1e-6f));
+        assertThat(embeddings.get(1)).containsExactly(expected1, Offset.offset(1e-6f));
+        assertThat(embeddings.get(2)).containsExactly(expected2, Offset.offset(1e-6f));
     }
 
     private HugeObjectArray<float[]> embeddings(Graph graph, List<String> properties) {
