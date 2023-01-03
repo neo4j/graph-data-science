@@ -410,6 +410,8 @@ class GraphProjectProcTest extends BaseProcTest {
     @MethodSource("relationshipProjectionVariants")
     void relationshipProjectionVariants(String description, Object relProjection, Map<String, Object> desugaredRelProjection) {
         String name = "g";
+        // We assume that a single projection projects exactly one relationship.
+        long expectedRelationshipCount = desugaredRelProjection.size();
 
         assertCypherResult(
             "CALL gds.graph.project($name, '*', $relProjection)",
@@ -419,7 +421,7 @@ class GraphProjectProcTest extends BaseProcTest {
                 NODE_PROJECTION_KEY, isA(Map.class),
                 RELATIONSHIP_PROJECTION_KEY, desugaredRelProjection,
                 "nodeCount", 2L,
-                "relationshipCount", 1L,
+                "relationshipCount", expectedRelationshipCount,
                 "projectMillis", instanceOf(Long.class)
             ))
         );
@@ -1554,6 +1556,29 @@ class GraphProjectProcTest extends BaseProcTest {
     }
 
     @Test
+    void failsForUndirectedAndIndexInverse() {
+        String name = "g";
+
+        assertThatThrownBy(() ->
+            runQuery(
+                "CALL gds.graph.project($name, '*', $relProjection)",
+                map(
+                    "name",
+                    name,
+                    "relProjection",
+                    map("CONNECTS", map("type", "REL", "orientation", "UNDIRECTED", "indexInverse", true))
+                )
+            )
+        )
+            .rootCause()
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("REL")
+            .hasMessageContaining("cannot be UNDIRECTED and inverse indexed");
+
+        assertGraphDoesNotExist(name);
+    }
+
+    @Test
     void cypherCreationShouldNotReturnProjections() {
         runQueryWithResultConsumer("CALL gds.graph.project.cypher('test', '*', '*')", result -> {
             assertFalse(result.columns().contains(NODE_PROJECTION_KEY));
@@ -1710,6 +1735,45 @@ class GraphProjectProcTest extends BaseProcTest {
                         ORIENTATION_KEY, "NATURAL",
                         AGGREGATION_KEY, "DEFAULT",
                         INDEX_INVERSE_KEY, false,
+                        PROPERTIES_KEY, emptyMap()
+                    )
+                )
+            ),
+            Arguments.of(
+                "inverse indexed rel type",
+                map("CONNECTS", map("type", "REL", "indexInverse", true)),
+                map(
+                    "CONNECTS",
+                    map(
+                        "type", "REL",
+                        ORIENTATION_KEY, "NATURAL",
+                        AGGREGATION_KEY, "DEFAULT",
+                        INDEX_INVERSE_KEY, true,
+                        PROPERTIES_KEY, emptyMap()
+                    )
+                )
+            ),
+            Arguments.of(
+                "inverse indexed and non-index rel type",
+                map(
+                    "CONNECTS", map("type", "REL", "indexInverse", false),
+                    "CONNECTS_INDEXED", map("type", "REL", "indexInverse", true)
+                ),
+                map(
+                    "CONNECTS",
+                    map(
+                        "type", "REL",
+                        ORIENTATION_KEY, "NATURAL",
+                        AGGREGATION_KEY, "DEFAULT",
+                        INDEX_INVERSE_KEY, false,
+                        PROPERTIES_KEY, emptyMap()
+                    ),
+                    "CONNECTS_INDEXED",
+                    map(
+                        "type", "REL",
+                        ORIENTATION_KEY, "NATURAL",
+                        AGGREGATION_KEY, "DEFAULT",
+                        INDEX_INVERSE_KEY, true,
                         PROPERTIES_KEY, emptyMap()
                     )
                 )
