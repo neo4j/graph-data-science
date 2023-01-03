@@ -39,6 +39,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -47,6 +48,7 @@ import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.fromGdl;
 
 @GdlExtension
 class GraphStoreRelationshipVisitorTest {
@@ -78,7 +80,7 @@ class GraphStoreRelationshipVisitorTest {
             .initRelationshipsBuilder()
             .concurrency(1)
             .nodes(graph);
-        var relationshipVisitor = new GraphStoreRelationshipVisitor(relationshipSchema, relationshipBuilderSupplier, relationshipBuildersByType);
+        var relationshipVisitor = new GraphStoreRelationshipVisitor(relationshipSchema, relationshipBuilderSupplier, relationshipBuildersByType, List.of());
 
         var relationshipTypeR = RelationshipType.of("R");
         var relationshipTypeR1 = RelationshipType.of("R1");
@@ -115,6 +117,29 @@ class GraphStoreRelationshipVisitorTest {
 
         var actualGraph = createGraph(multiplePropsGraph, relationshipBuildersByType, 1L);
         assertGraphEquals(multiplePropsGraph, actualGraph);
+    }
+
+    @Test
+    void shouldBuildRelationshipsWithInverseIndex() {
+        var expectedGraph = fromGdl("(a)-[R]->(b)");
+
+        GraphStoreRelationshipVisitor.Builder relationshipVisitorBuilder = new GraphStoreRelationshipVisitor.Builder();
+        Map<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
+        var relationshipVisitor = relationshipVisitorBuilder
+            .withNodes(expectedGraph)
+            .withRelationshipSchema(expectedGraph.schema().relationshipSchema())
+            .withRelationshipBuildersToTypeResultMap(relationshipBuildersByType)
+            .withInverseIndexedRelationshipTypes(List.of(RelationshipType.of("R")))
+            .withAllocationTracker()
+            .withConcurrency(1)
+            .build();
+
+        relationshipVisitor.type("R");
+        relationshipVisitor.startId(expectedGraph.toOriginalNodeId("a"));
+        relationshipVisitor.endId(expectedGraph.toOriginalNodeId("b"));
+        relationshipVisitor.endOfEntity();
+
+        assertThat(relationshipBuildersByType.get("R").build().inverseTopology()).isPresent();
     }
 
     private Graph createGraph(

@@ -206,7 +206,8 @@ public abstract class FileToGraphStoreImporter {
             .withNodes(nodes)
             .withConcurrency(concurrency)
             .withAllocationTracker()
-            .withRelationshipBuildersToTypeResultMap(relationshipBuildersByType);
+            .withRelationshipBuildersToTypeResultMap(relationshipBuildersByType)
+            .withInverseIndexedRelationshipTypes(fileInput.graphInfo().inverseIndexedRelationshipTypes());
 
         var relationshipsIterator = fileInput.relationships(Collector.EMPTY).iterator();
         Collection<Runnable> tasks = ParallelUtil.tasks(
