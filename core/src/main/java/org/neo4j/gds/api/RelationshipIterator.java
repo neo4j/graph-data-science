@@ -47,11 +47,12 @@ public interface RelationshipIterator extends RelationshipPredicate {
      * Calls the given consumer for every inverse relationship of a given node.
      * Inverse relationships basically mirror the relationships in that graph.
      * For example, if `Graph.forEachRelationship(42)` returns `1337` then the
-     * result of `forEachInverseRelationship(1337)` contains `42.
+     * result of `forEachInverseRelationship(1337)` contains `42. For undirected
+     * graphs, accessing the inverse relationships is never supported.
      * <p>
-     * Note, that this is an optional feature, and it is up to the implementation
-     * if this is actually supported. Check the `GraphCharacteristics` of the
-     * implementation to see if inverse index is supported.
+     * Note, that this the inverse index might not always be present. Check
+     * {@link org.neo4j.gds.api.Graph#characteristics()} before calling this
+     * method to verify that the graphs is inverse indexed.
      *
      * @param nodeId if of the node for which to iterate the inverse relationships
      * @param consumer relationship consumer function
@@ -66,11 +67,12 @@ public interface RelationshipIterator extends RelationshipPredicate {
      * <p>
      * Inverse relationships basically mirror the relationships in that graph.
      * For example, if `Graph.forEachRelationship(42)` returns `1337` then the
-     * result of `forEachInverseRelationship(1337)` contains `42.
+     * result of `forEachInverseRelationship(1337)` contains `42. For undirected
+     * graphs, accessing the inverse relationships is never supported.
      * <p>
-     * Note, that this is an optional feature, and it is up to the implementation
-     * if this is actually supported. Check {@link org.neo4j.gds.api.Graph#characteristics()}
-     * before calling this method to verify that the graphs is inverse indexed.
+     * Note, that this the inverse index might not always be present. Check
+     * {@link org.neo4j.gds.api.Graph#characteristics()} before calling this
+     * method to verify that the graphs is inverse indexed.
      *
      * @param nodeId if of the node for which to iterate the inverse relationships
      * @param fallbackValue value used as relationship property if no properties were loaded
