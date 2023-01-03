@@ -29,9 +29,14 @@ import java.util.Optional;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.StoreLoaderBuilder;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -318,6 +323,45 @@ public class FastRPGdlTest {
             assertThat(concurrentEmbeddings.get(nodeId)).containsExactly(sequentialEmbeddings.get(nodeId));
             return true;
         });
+    }
+
+    @Test
+    void shouldAverageNeighborsWeighted() {
+        final var graph = scalarGraphStore.getGraph(
+                List.of(NodeLabel.of("Node1"), NodeLabel.of("Node2")),
+                List.of(RelationshipType.of("REL")),
+                Optional.of("weight")
+        );
+
+        var weightedConfig = ImmutableFastRPBaseConfig
+                .builder()
+                .from(DEFAULT_CONFIG)
+                .relationshipWeightProperty("weight")
+                .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
+                .build();
+
+        FastRP fastRP = new FastRP(
+                graph,
+                weightedConfig,
+                defaultFeatureExtractors(graph),
+                ProgressTracker.NULL_TRACKER
+        );
+
+        fastRP.initDegreePartition();
+        fastRP.initPropertyVectors();
+        fastRP.initRandomVectors();
+        HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 3);
+        fastRP.currentEmbedding(-1).copyTo(randomVectors, 3);
+        fastRP.propagateEmbeddings();
+        HugeObjectArray<float[]> embeddings = fastRP.embeddings();
+
+        float[] expected = new float[DEFAULT_EMBEDDING_DIMENSION];
+        for (int i = 0; i < DEFAULT_EMBEDDING_DIMENSION; i++) {
+            expected[i] = (2.0f * randomVectors.get(1)[i] + randomVectors.get(2)[i]) / 2.0f;
+        }
+        l2Normalize(expected);
+
+        assertThat(embeddings.get(0)).containsExactly(expected);
     }
 
     private HugeObjectArray<float[]> embeddings(Graph graph, List<String> properties) {
