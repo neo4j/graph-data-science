@@ -36,15 +36,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.ArrayIdMap;
@@ -443,10 +440,7 @@ public class FastRPGdlTest {
     void shouldYieldEmptyEmbeddingForIsolatedNodes() {
         FastRP fastRP = new FastRP(
                 scalarGraph,
-                FastRPBaseConfig.builder()
-                        .embeddingDimension(64)
-                        .addIterationWeights(1.0D, 1.0D, 1.0D, 1.0D)
-                        .build(),
+                DEFAULT_CONFIG,
                 List.of(),
                 ProgressTracker.NULL_TRACKER
         );
@@ -507,7 +501,6 @@ public class FastRPGdlTest {
 
         var progressTask = factory.progressTask(graph, config);
         var log = Neo4jProxy.testLog();
-        ;
         var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
 
         factory
