@@ -39,8 +39,11 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class GraphInfoLoader {
     private final Path graphInfoPath;
@@ -65,6 +68,7 @@ public class GraphInfoLoader {
                 .nodeCount(line.nodeCount)
                 .maxOriginalId(line.maxOriginalId)
                 .relationshipTypeCounts(line.relTypeCounts)
+                .inverseIndexedRelationshipTypes(line.inverseIndexedRelTypes)
                 .build();
 
         } catch (IOException e) {
@@ -89,6 +93,9 @@ public class GraphInfoLoader {
 
         @JsonDeserialize(using = RelationshipTypesDeserializer.class)
         Map<RelationshipType, Long> relTypeCounts = Map.of();
+
+        @JsonDeserialize(using = InverseIndexedRelTypesDeserializer.class)
+        List<RelationshipType> inverseIndexedRelTypes = List.of();
     }
 
     static class RelationshipTypesDeserializer extends StdDeserializer<Map<RelationshipType, Long>> {
@@ -107,6 +114,26 @@ public class GraphInfoLoader {
         ) throws IOException {
             String mapString = parser.getText();
             return CsvMapUtil.fromString(mapString, RelationshipType::of, Long::parseLong);
+        }
+    }
+
+    static class InverseIndexedRelTypesDeserializer extends StdDeserializer<List<RelationshipType>> {
+
+        InverseIndexedRelTypesDeserializer() {
+            this(null);
+        }
+
+        InverseIndexedRelTypesDeserializer(Class<?> vc) {
+            super(vc);
+        }
+
+        @Override
+        public List<RelationshipType> deserialize(
+            JsonParser parser, DeserializationContext ctxt
+        ) throws IOException {
+            return Arrays.stream(parser.getText().split(";"))
+                .map(RelationshipType::of)
+                .collect(Collectors.toList());
         }
     }
 }

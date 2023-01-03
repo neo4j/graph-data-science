@@ -37,7 +37,7 @@ public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
     public static final String NODE_COUNT_COLUMN_NAME = "nodeCount";
     public static final String MAX_ORIGINAL_ID_COLUMN_NAME = "maxOriginalId";
     public static final String REL_TYPE_COUNTS_COLUMN_NAME = "relTypeCounts";
-    public static final String INVERSE_INDEXED_REL_TYPES = "inverseIndexedReTypes";
+    public static final String INVERSE_INDEXED_REL_TYPES = "inverseIndexedRelTypes";
 
     private final CsvAppender csvAppender;
 
