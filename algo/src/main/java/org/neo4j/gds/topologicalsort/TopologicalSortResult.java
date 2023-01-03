@@ -27,11 +27,11 @@ import java.util.concurrent.atomic.AtomicLong;
  * An implementation of the result with message queues instead of synchronization.
  */
 public class TopologicalSortResult {
-    private HugeLongArray sortedNodes;
-    private AtomicLong addIndex = new AtomicLong(0);
+    private final HugeLongArray sortedNodes;
+    private final AtomicLong addIndex = new AtomicLong(0);
 
     TopologicalSortResult(long nodeCount) {
-        sortedNodes = HugeLongArray.newArray(nodeCount);
+        this.sortedNodes = HugeLongArray.newArray(nodeCount);
     }
 
     public HugeLongArray value() {

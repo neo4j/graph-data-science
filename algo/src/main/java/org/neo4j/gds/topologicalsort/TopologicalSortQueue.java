@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.topologicalsort;
 
+import org.neo4j.gds.mem.BitUtil;
+
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -45,27 +47,26 @@ class TopologicalSortQueue {
     private final long rangeSize;
 
     TopologicalSortQueue(long nodeCount, int numThreads) {
-        queues = new ArrayList<>(numThreads);
+        this.queues = new ArrayList<>(numThreads);
 
-        for(int i=0; i<numThreads; ++i) {
+        for (int i=0; i<numThreads; ++i) {
             queues.add(new ConcurrentLinkedQueue<>());
         }
         this.numThreads = numThreads;
 
-        rangeSize = nodeCount / numThreads;
+        // the last thread will get a little less nodes (up to numThreads - 1) - not a big deal
+        this.rangeSize = BitUtil.ceilDiv(nodeCount, numThreads);
     }
 
     void add(long nodeId) {
         int index = (int) (nodeId / rangeSize);
-        if(index == numThreads)
-            --index;  // the last thread will get a little bit more nodes (up to numThreads - 1) - not a big deal
         queues.get(index).add(nodeId);
     }
 
     long peekBy(int threadId) {
         Long nodeId = queues.get(threadId).peek();
-        if(nodeId == null) {
-            if(isDone()) {
+        if( nodeId == null) {
+            if (isDone()) {
                 finish();
             }
             // todo: a better parallelization scheme should be used before algorithm graduation
@@ -81,8 +82,8 @@ class TopologicalSortQueue {
     }
 
     private boolean isDone() {
-        for(int i = 0; i < numThreads; ++i) {
-            if(! queues.get(i).isEmpty()) {
+        for (int i = 0; i < numThreads; ++i) {
+            if (! queues.get(i).isEmpty()) {
                 return false;
             }
         }
@@ -91,7 +92,7 @@ class TopologicalSortQueue {
 
     private void finish() {
         // adding -1 to all the queues will cause all threads to finish
-        for(int i = 0; i < numThreads; ++i) {
+        for (int i = 0; i < numThreads; ++i) {
             queues.get(i).add(-1L);
         }
     }

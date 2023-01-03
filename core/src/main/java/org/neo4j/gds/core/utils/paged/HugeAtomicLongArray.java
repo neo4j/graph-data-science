@@ -263,8 +263,7 @@ public abstract class HugeAtomicLongArray implements HugeCursorSupport<long[]> {
         return SingleHugeAtomicLongArray.of(size, pageFiller);
     }
 
-    static final class
-    SingleHugeAtomicLongArray extends HugeAtomicLongArray {
+    static final class SingleHugeAtomicLongArray extends HugeAtomicLongArray {
 
         private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(long[].class);
 

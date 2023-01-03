@@ -68,10 +68,6 @@ class TopologicalSortTest {
         assertEquals(1, fourth);
     }
 
-
-
-
-
     @GdlGraph(graphNamePrefix = "allCycle")
     private static final String allCycleQuery =
         "CREATE" +
@@ -96,8 +92,6 @@ class TopologicalSortTest {
         assertEquals(0, result.size());
     }
 
-
-
     @GdlGraph(graphNamePrefix = "selfLoop")
     private static final String selfLoopQuery =
         "CREATE" +
@@ -121,8 +115,6 @@ class TopologicalSortTest {
         assertEquals(1, result.size());
         assertEquals(0, first);
     }
-
-
 
     @GdlGraph(graphNamePrefix = "last", idOffset = 20)
     private static final String lastQuery =
@@ -195,10 +187,6 @@ class TopologicalSortTest {
         long last = nodes.get(nodeCount - 1);
         assertEquals(lastGraph.toMappedNodeId("n100"), last);
     }
-
-
-
-
 
     @GdlGraph(graphNamePrefix = "cycles")
     private static final String cyclesQuery =

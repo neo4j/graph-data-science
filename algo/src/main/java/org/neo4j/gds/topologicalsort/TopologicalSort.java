@@ -48,10 +48,10 @@ import static java.util.concurrent.TimeUnit.MICROSECONDS;
  */
 public class TopologicalSort extends Algorithm<TopologicalSortResult> {
     // Contains the sorted nodes, which is the array we iterate on during the run
-    private TopologicalSortResult result;
+    private final TopologicalSortResult result;
     // The in degree for each node in the graph. Being updated (down) as we cross out visited nodes
-    private HugeAtomicLongArray inDegrees;
-    private Graph graph;
+    private final HugeAtomicLongArray inDegrees;
+    private final Graph graph;
     private final long nodeCount;
     private final ExecutorService executor;
     private final int numThreads;
@@ -68,10 +68,10 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         this.nodeCount = graph.nodeCount();
         this.executor = executor;
         int concurrency = config.concurrency();
-        numThreads = (nodeCount < concurrency) ? 1 : concurrency;
-        result = new TopologicalSortResult(nodeCount);
-        queue = new TopologicalSortQueue(nodeCount, numThreads);
-        inDegrees = HugeAtomicLongArray.newArray(nodeCount);
+        this.numThreads = (nodeCount < concurrency) ? 1 : concurrency;
+        this.result = new TopologicalSortResult(nodeCount);
+        this.queue = new TopologicalSortQueue(nodeCount, numThreads);
+        this.inDegrees = HugeAtomicLongArray.newArray(nodeCount);
     }
 
     @Override
@@ -115,7 +115,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
 
     private void performParallelSourcesSteps() {
         Collection<WorkerThread> tasks = new ArrayList<>(numThreads);
-        for(int i = 0; i < numThreads; ++i) {
+        for (int i = 0; i < numThreads; ++i) {
             WorkerThread t = new WorkerThread(i);
             tasks.add(t);
         }
@@ -136,13 +136,13 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
 
         WorkerThread(int threadId) {
             this.threadId = threadId;
-            iter = graph.concurrentCopy();
+            this.iter = graph.concurrentCopy();
         }
 
         @Override
         public void run() {
             long sourceId = queue.peekBy(threadId);
-            while(sourceId > -1L) {
+            while (sourceId > -1L) {
                 // Because of how the queue works, it's important to first do the work, only then pop
                 performStep(iter, sourceId);
                 queue.popBy(threadId);
@@ -155,7 +155,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
             (source, target) -> {
                 long prevDegree = inDegrees.getAndAdd(target, -1L);
                 // if the previous degree was 1, this node is now a source
-                if(prevDegree == 1L) {
+                if (prevDegree == 1L) {
                     queue.add(target);
                     result.addNode((target));
                 }
