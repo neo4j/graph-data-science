@@ -133,12 +133,12 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             4
         );
 
-        EdgeSplitter.SplitResult result = splitter.splitPositiveExamples(skewedGraph, 1.0);
+        EdgeSplitter.SplitResult result = splitter.splitPositiveExamples(skewedGraph, 1.0, Optional.of("foo"));
 
         assertThat(result.selectedRelCount()).isEqualTo(5);
-        assertThat(result.selectedRels().build().relationships().topology().elementCount()).isEqualTo(5);
+        assertThat(result.selectedRels().build().topology().elementCount()).isEqualTo(5);
         assertThat(result.remainingRelCount()).isEqualTo(0);
-        assertThat(result.remainingRels().build().relationships().topology().elementCount()).isEqualTo(0);
+        assertThat(result.remainingRels().build().topology().elementCount()).isEqualTo(0);
     }
 
     @Test
@@ -150,9 +150,9 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             4
         );
 
-        EdgeSplitter.SplitResult result = splitter.splitPositiveExamples(multiGraph, 0.5);
+        EdgeSplitter.SplitResult result = splitter.splitPositiveExamples(multiGraph, 0.5, Optional.empty());
 
-        assertThat(result.selectedRels().build().relationships().topology())
+        assertThat(result.selectedRels().build().topology())
             // we always aggregate the result at the moment
             .matches(topology -> !topology.isMultiGraph())
             .matches(topology -> topology.elementCount() == 1);
@@ -169,23 +169,21 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         );
 
         // select 40%, which is 2 rels in this graph
-        var result = splitter.splitPositiveExamples(graph, .4);
+        var result = splitter.splitPositiveExamples(graph, .4, Optional.of("foo"));
 
-        var remainingRelsAndSchema = result.remainingRels().build();
-        var remainingRels = remainingRelsAndSchema.relationships();
-
+        var remainingRelationships = result.remainingRels().build();
         // 2 positive selected reduces remaining
-        assertEquals(3L, remainingRels.topology().elementCount());
-        assertEquals(Direction.DIRECTED, remainingRelsAndSchema.direction());
-        assertFalse(remainingRels.topology().isMultiGraph());
-        assertThat(remainingRels.properties()).isNotEmpty();
-        assertRelInGraph(remainingRels, graph);
+        assertEquals(3L, remainingRelationships.topology().elementCount());
+        assertEquals(Direction.DIRECTED, remainingRelationships.direction());
+        assertFalse(remainingRelationships.topology().isMultiGraph());
+        assertThat(remainingRelationships.properties()).isNotEmpty();
+        assertRelInGraph(remainingRelationships, graph);
 
-        var selectedRels = result.selectedRels().build().relationships();
+        var selectedRelationships = result.selectedRels().build();
 
-        assertRelSamplingProperties(selectedRels, graph);
-        assertThat(selectedRels.topology().elementCount()).isEqualTo(2);
-        assertFalse(selectedRels.topology().isMultiGraph());
+        assertRelSamplingProperties(selectedRelationships, graph);
+        assertThat(selectedRelationships.topology().elementCount()).isEqualTo(2);
+        assertFalse(selectedRelationships.topology().isMultiGraph());
     }
 
     @Test
@@ -202,12 +200,12 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             .generate();
 
         var splitter = new DirectedEdgeSplitter(Optional.of(42L), huuuuugeDenseGraph, huuuuugeDenseGraph, 4);
-        var splitResult = splitter.splitPositiveExamples(huuuuugeDenseGraph, 0.9);
+        var splitResult = splitter.splitPositiveExamples(huuuuugeDenseGraph, 0.9, Optional.empty());
         var graph = GraphFactory.create(
             huuuuugeDenseGraph.idMap(),
             splitResult.remainingRels().build()
         );
-        var nestedSplit = splitter.splitPositiveExamples(graph, 0.9);
+        var nestedSplit = splitter.splitPositiveExamples(graph, 0.9, Optional.empty());
         var nestedHoldout = nestedSplit.selectedRels().build();
         HugeGraph nestedHoldoutGraph = GraphFactory.create(graph, nestedHoldout);
         nestedHoldoutGraph.forEachNode(nodeId -> {
@@ -249,23 +247,23 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         );
 
         // select 60%, which is 2*0.6 rounded down to 1 rel in this graph. 3 were invalid.
-        var result = splitter.splitPositiveExamples(multiLabelGraph, .6);
+        var result = splitter.splitPositiveExamples(multiLabelGraph, .6, Optional.of("foo"));
 
-        var remainingRels = result.remainingRels().build().relationships();
+        var remainingRelationships = result.remainingRels().build();
         // 1 positive selected reduces remaining & 2 invalid
-        assertEquals(1L, remainingRels.topology().elementCount());
-        assertFalse(remainingRels.topology().isMultiGraph());
-        assertThat(remainingRels.properties()).isNotEmpty();
-        assertRelInGraph(remainingRels, multiLabelGraph);
+        assertEquals(1L, remainingRelationships.topology().elementCount());
+        assertFalse(remainingRelationships.topology().isMultiGraph());
+        assertThat(remainingRelationships.properties()).isNotEmpty();
+        assertRelInGraph(remainingRelationships, multiLabelGraph);
 
-        var selectedRels = result.selectedRels().build().relationships();
-        assertThat(selectedRels.topology()).satisfies(topology -> {
-            assertRelSamplingProperties(selectedRels, multiLabelGraph);
+        var selectedRelationships = result.selectedRels().build();
+        assertThat(selectedRelationships.topology()).satisfies(topology -> {
+            assertRelSamplingProperties(selectedRelationships, multiLabelGraph);
             assertThat(topology.elementCount()).isEqualTo(1);
             assertFalse(topology.isMultiGraph());
         });
 
-        assertNodeLabelFilter(selectedRels.topology(), sourceNodeLabels, targetNodeLabels, multiLabelGraph);
+        assertNodeLabelFilter(selectedRelationships.topology(), sourceNodeLabels, targetNodeLabels, multiLabelGraph);
 
     }
 
@@ -280,11 +278,18 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
     @Test
     void shouldPreserveRelationshipWeights() {
         var splitter = new DirectedEdgeSplitter(Optional.of(42L), graphStore.nodes(), graphStore.nodes(), 4);
-        EdgeSplitter.SplitResult split = splitter.splitPositiveExamples(graph, 0.01);
-        var maybeProp = split.remainingRels().build().relationships().properties();
+        EdgeSplitter.SplitResult split = splitter.splitPositiveExamples(graph, 0.01, Optional.of("foo"));
+        var maybeProp = split.remainingRels().build().properties();
         assertThat(maybeProp).isPresent();
         graph.forEachNode(nodeId -> {
-            PropertyCursor propertyCursor = maybeProp.get().propertiesList().propertyCursor(nodeId);
+            PropertyCursor propertyCursor = maybeProp
+                .get()
+                .values()
+                .iterator()
+                .next()
+                .values()
+                .propertiesList()
+                .propertyCursor(nodeId);
             while (propertyCursor.hasNextLong()) {
                 assertThat(Double.longBitsToDouble(propertyCursor.nextLong())).isEqualTo(5.0);
             }

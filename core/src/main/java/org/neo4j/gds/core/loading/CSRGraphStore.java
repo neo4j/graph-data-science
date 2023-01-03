@@ -22,7 +22,6 @@ package org.neo4j.gds.core.loading;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyProperties;
@@ -53,7 +52,7 @@ import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.huge.CSRCompositeRelationshipIterator;
-import org.neo4j.gds.core.huge.HugeGraph;
+import org.neo4j.gds.core.huge.HugeGraphBuilder;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.utils.TimeUtil;
@@ -107,27 +106,17 @@ public class CSRGraphStore implements GraphStore {
         DatabaseId databaseId,
         Capabilities capabilities,
         GraphSchema schema,
-        IdMap nodes,
-        @Nullable NodePropertyStore nodePropertyStore,
-        Optional<GraphPropertyStore> graphProperties,
-        Optional<NodeImportResult> nodeImportResult,
+        NodeImportResult nodeImportResult,
         RelationshipImportResult relationshipImportResult,
+        Optional<GraphPropertyStore> graphProperties,
         int concurrency
     ) {
-        // TODO: compat code to be removed
-        // The import results take precedence if they are present
-        // If they are not present, we take the information from the old input.
-        // This is just for compat and will be removed.
-        var idMap = nodeImportResult.map(NodeImportResult::idMap).orElse(nodes);
-        var nodeProps = nodeImportResult
-            .map(NodeImportResult::properties)
-            .orElseGet(() -> nodePropertyStore == null ? NodePropertyStore.empty() : nodePropertyStore);
-
-        return new CSRGraphStore(databaseId,
+        return new CSRGraphStore(
+            databaseId,
             capabilities,
             schema,
-            idMap,
-            nodeProps,
+            nodeImportResult.idMap(),
+            nodeImportResult.properties(),
             relationshipImportResult.importResults(),
             graphProperties.orElseGet(GraphPropertyStore::empty),
             concurrency
@@ -418,10 +407,6 @@ public class CSRGraphStore implements GraphStore {
                     .topology(relationships.topology())
                     .direction(direction);
 
-                var relationshipSchemaEntry = schema()
-                    .relationshipSchema()
-                    .getOrCreateRelationshipType(relationshipType, direction);
-
                 if (relationshipPropertyKey.isPresent() && relationshipPropertyType.isPresent() && relationships
                     .properties()
                     .isPresent()) {
@@ -440,19 +425,15 @@ public class CSRGraphStore implements GraphStore {
                         .build();
 
                     builder.properties(properties);
-
-                    var valueType = ValueTypes.fromNumberType(relationshipPropertyType.get());
-                    relationshipSchemaEntry.addProperty(propertyKey,
-                        RelationshipPropertySchema.of(propertyKey,
-                            valueType,
-                            valueType.fallbackValue(),
-                            PropertyState.TRANSIENT,
-                            Aggregation.NONE
-                        )
-                    );
                 }
 
-                return builder.build();
+                var singleTypeRelationshipImportResult = builder.build();
+
+                singleTypeRelationshipImportResult.updateRelationshipSchemaEntry(schema()
+                    .relationshipSchema()
+                    .getOrCreateRelationshipType(relationshipType, direction));
+
+                return singleTypeRelationshipImportResult;
             });
         });
     }
@@ -664,12 +645,12 @@ public class CSRGraphStore implements GraphStore {
 
         var graphSchema = GraphSchema.of(nodeSchema, RelationshipSchema.empty(), schema.graphProperties());
 
-        var initialGraph = HugeGraph.create(nodes,
-            graphSchema,
-            filteredNodeProperties,
-            Relationships.Topology.EMPTY,
-            Optional.empty()
-        );
+        var initialGraph = new HugeGraphBuilder()
+            .nodes(nodes)
+            .schema(graphSchema)
+            .nodeProperties(filteredNodeProperties)
+            .topology(Relationships.Topology.EMPTY)
+            .build();
 
         return filteredNodes.isPresent() ? new NodeFilteredGraph(initialGraph, filteredNodes.get()) : initialGraph;
     }
@@ -701,12 +682,22 @@ public class CSRGraphStore implements GraphStore {
             .map(props -> props.get(propertyKey).values())
             .orElseThrow(() -> new IllegalArgumentException("Relationship property key not present in graph: " + propertyKey)));
 
-        var initialGraph = HugeGraph.create(nodes,
-            graphSchema,
-            filteredNodeProperties,
-            relationship.topology(),
-            properties
-        );
+        var inverseProperties = relationship
+            .inverseProperties()
+            .map(inversePropertyStore -> maybeRelationshipProperty
+                .map(propertyKey -> inversePropertyStore.get(propertyKey).values())
+                .orElseThrow(() -> new IllegalStateException(
+                    "Relationship type is inverse indexed, but is missing property. This is a bug.")));
+
+        var initialGraph = new HugeGraphBuilder()
+            .nodes(nodes)
+            .schema(graphSchema)
+            .nodeProperties(filteredNodeProperties)
+            .topology(relationship.topology())
+            .relationshipProperties(properties)
+            .inverseTopology(relationship.inverseTopology())
+            .inverseRelationshipProperties(inverseProperties)
+            .build();
 
         return filteredNodes.isPresent() ? new NodeFilteredGraph(initialGraph, filteredNodes.get()) : initialGraph;
     }

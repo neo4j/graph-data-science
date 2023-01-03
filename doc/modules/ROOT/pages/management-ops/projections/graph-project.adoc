@@ -143,6 +143,8 @@ CALL gds.graph.project(
 )
 ----
 
+NOTE:: We also support `*` as the neo4j-label to load all nodes. However, this does not keep the label information. To retain the label, we recommend using `CALL db.labels() YIELD label YIELD label WITH collect(label) AS allLabels`.
+
 
 ==== Projecting labels with uniform node properties
 
@@ -271,6 +273,8 @@ CALL gds.graph.project(
   ['MY_TYPE', 'MY_SECOND_TYPE', 'ANOTHER_TYPE']
 )
 ----
+
+NOTE:: We also support `*` as the neo4j-type to load all relationships. However, this does not keep the type information. To retain the type, we recommend using `CALL db.relationshipTypes() YIELD type WITH collect(type) AS allTypes`.
 
 
 ==== Projecting relationship types with uniform relationship properties

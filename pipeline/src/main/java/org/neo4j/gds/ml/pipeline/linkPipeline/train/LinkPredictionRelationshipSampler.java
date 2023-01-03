@@ -40,7 +40,6 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.ExpectedSetSizes;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.ml.splitting.UndirectedEdgeSplitter;
-import org.neo4j.values.storable.NumberType;
 
 import java.util.List;
 import java.util.Optional;
@@ -141,18 +140,8 @@ public class LinkPredictionRelationshipSampler {
         negativeSampler.produceNegativeSamples(testSplitResult.selectedRels(), trainSplitResult.selectedRels());
 
         // 4. Update graphStore with (positive+negative) 'TEST' and 'TRAIN' edges
-        graphStore.addRelationshipType(
-            splitConfig.testRelationshipType(),
-            Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY),
-            Optional.of(NumberType.INTEGRAL),
-            testSplitResult.selectedRels().build()
-        );
-        graphStore.addRelationshipType(
-            splitConfig.trainRelationshipType(),
-            Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY),
-            Optional.of(NumberType.INTEGRAL),
-            trainSplitResult.selectedRels().build()
-        );
+        graphStore.addRelationshipType(splitConfig.testRelationshipType(), testSplitResult.selectedRels().build());
+        graphStore.addRelationshipType(splitConfig.trainRelationshipType(), trainSplitResult.selectedRels().build());
 
         validateTestSplit(graphStore);
         validateTrainSplit(graphStore);
@@ -174,16 +163,12 @@ public class LinkPredictionRelationshipSampler {
 
         var splitResult = splitter.splitPositiveExamples(
             graph,
-            selectedFraction
+            selectedFraction,
+            relationshipWeightProperty
         );
 
         var remainingRels = splitResult.remainingRels().build();
-        graphStore.addRelationshipType(
-            remainingRelType,
-            relationshipWeightProperty,
-            Optional.of(NumberType.FLOATING_POINT),
-            remainingRels
-        );
+        graphStore.addRelationshipType(remainingRelType, remainingRels);
 
         return splitResult;
     }

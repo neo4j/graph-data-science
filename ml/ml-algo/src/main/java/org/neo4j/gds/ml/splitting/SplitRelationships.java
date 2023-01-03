@@ -111,7 +111,8 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
 
         var splitResult =  splitter.splitPositiveExamples(
             graph,
-            config.holdoutFraction()
+            config.holdoutFraction(),
+            config.relationshipWeightProperty()
         );
 
         NegativeSampler negativeSampler = new RandomNegativeSampler(

@@ -25,9 +25,8 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.Relationships;
-import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -36,7 +35,6 @@ import org.neo4j.gds.extension.Inject;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
@@ -118,7 +116,7 @@ class CollapsePathTest {
     void testCreatingRelationships() {
         var tookRel = graphStore.getGraph(RelationshipType.of("TOOK"));
 
-        Relationships relationships = new CollapsePath(
+        var relationships = new CollapsePath(
             Collections.singletonList(new Graph[]{tookRel, tookRel}),
             false,
             2,
@@ -133,7 +131,7 @@ class CollapsePathTest {
     void testAllowCreatingSelfLoops() {
         var tookRel = graphStore.getGraph(RelationshipType.of("TOOK"));
 
-        Relationships relationships = new CollapsePath(
+        var relationships = new CollapsePath(
             Collections.singletonList(new Graph[]{tookRel, tookRel}),
             true,
             2,
@@ -146,7 +144,7 @@ class CollapsePathTest {
 
     @Test
     void runWithDifferentRelationshipTypes() {
-        Relationships relationships = new CollapsePath(
+        var relationships = new CollapsePath(
             Collections.singletonList(new Graph[]{tookGraph, takenByGraph}),
             false,
             2,
@@ -156,14 +154,8 @@ class CollapsePathTest {
         assertResultGraph(tookGraphStore, relationships, EXPECTED_WITHOUT_LOOPS);
     }
 
-    private void assertResultGraph(GraphStore graphStore, Relationships relationships, String expected) {
-        graphStore.addRelationshipType(
-            RelationshipType.of("SAME_DRUG"),
-            Optional.empty(),
-            Optional.empty(),
-            Direction.DIRECTED,
-            relationships
-        );
+    private void assertResultGraph(GraphStore graphStore, SingleTypeRelationshipImportResult relationships, String expected) {
+        graphStore.addRelationshipType(RelationshipType.of("SAME_DRUG"), relationships);
 
         assertGraphEquals(
             fromGdl(expected),
@@ -202,7 +194,7 @@ class CollapsePathTest {
             var relationships = new CollapsePathAlgorithmFactory()
                 .build(graphStore, config, ProgressTracker.NULL_TRACKER)
                 .compute();
-            graphStore.addRelationshipType(mutateRelType, Optional.empty(), Optional.empty(), Direction.DIRECTED, relationships);
+            graphStore.addRelationshipType(mutateRelType, relationships);
             var resultGraph = graphStore.getGraph(mutateRelType);
 
             // then two relationships should be created
@@ -227,7 +219,7 @@ class CollapsePathTest {
             var relationships = new CollapsePathAlgorithmFactory()
                 .build(graphStore, config, ProgressTracker.NULL_TRACKER)
                 .compute();
-            graphStore.addRelationshipType(mutateRelType, Optional.empty(), Optional.empty(), Direction.DIRECTED, relationships);
+            graphStore.addRelationshipType(mutateRelType, relationships);
             var resultGraph = graphStore.getGraph(mutateRelType);
 
             // a single relationship is created (there is no Dog)

@@ -33,7 +33,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.ImmutableGraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
@@ -47,11 +46,11 @@ import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.ImmutableNodeImportResult;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.LazyIdMapBuilder;
 import org.neo4j.gds.core.loading.ReadHelper;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
@@ -79,7 +78,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -491,8 +489,9 @@ public final class CypherAggregation {
             this.lock.lock();
             try {
                 if (this.relationshipPropertySchemas != null) {
-                    for (var ignored : this.relationshipPropertySchemas) {
+                    for (var relationshipPropertySchema : this.relationshipPropertySchemas) {
                         relationshipsBuilderBuilder.addPropertyConfig(
+                            relationshipPropertySchema.key(),
                             Aggregation.NONE,
                             DefaultValue.forDouble()
                         );
@@ -554,7 +553,9 @@ public final class CypherAggregation {
 
             var maybeNodeProperties = idMapAndProperties.nodeProperties();
 
-            graphStoreBuilder.nodes(nodes);
+            var nodesImportResultBuilder = ImmutableNodeImportResult.builder()
+                .idMap(nodes);
+
 
             var nodePropertySchema = maybeNodeProperties
                 .map(nodeProperties -> nodeSchemaWithProperties(
@@ -576,11 +577,13 @@ public final class CypherAggregation {
 
             maybeNodeProperties.ifPresent(allNodeProperties -> {
                 CSRGraphStoreUtil.extractNodeProperties(
-                    graphStoreBuilder,
+                    nodesImportResultBuilder,
                     nodePropertySchema::get,
                     allNodeProperties
                 );
             });
+
+            graphStoreBuilder.nodeImportResult(nodesImportResultBuilder.build());
 
             // Relationships are added using their intermediate node ids.
             // In order to map to the final internal ids, we need to use
@@ -616,43 +619,21 @@ public final class CypherAggregation {
             GraphStoreBuilder graphStoreBuilder,
             AdjacencyCompressor.ValueMapper valueMapper
         ) {
-            var relationshipSchema = RelationshipSchema.empty();
-
             var relationshipImportResultBuilder = RelationshipImportResult.builder();
+            var relationshipSchemas = new ArrayList<RelationshipSchema>();
 
             this.relImporters.forEach((relationshipType, relImporter) -> {
-                var allRelationships = relImporter.buildAll(
+                var relationships = relImporter.build(
                     Optional.of(valueMapper),
                     Optional.empty()
                 );
-
-                var firstRelationshipsAndDirection = allRelationships.get(0);
-                var topology = firstRelationshipsAndDirection.relationships().topology();
-                var direction = firstRelationshipsAndDirection.direction();
-
-                var propertyStore = CSRGraphStoreUtil.buildRelationshipPropertyStore(
-                    allRelationships,
-                    Objects.requireNonNullElse(this.relationshipPropertySchemas, List.of())
-                );
-
-                var relationshipSchemaEntry = relationshipSchema.getOrCreateRelationshipType(relationshipType, direction);
-                propertyStore.relationshipProperties().forEach((propertyKey, relationshipProperties) -> {
-                    relationshipSchemaEntry
-                        .addProperty(
-                            propertyKey,
-                            relationshipProperties.propertySchema()
-                        );
-                });
-
-                relationshipImportResultBuilder.putImportResult(
-                    relationshipType,
-                    SingleTypeRelationshipImportResult.builder()
-                        .topology(topology)
-                        .properties(propertyStore)
-                        .direction(Direction.DIRECTED)
-                        .build()
-                );
+                relationshipSchemas.add(relationships.relationshipSchema(relationshipType));
+                relationshipImportResultBuilder.putImportResult(relationshipType, relationships);
             });
+
+            var relationshipSchema = relationshipSchemas
+                .stream()
+                .reduce(RelationshipSchema.empty(), RelationshipSchema::union);
 
             graphStoreBuilder.relationshipImportResult(relationshipImportResultBuilder.build());
             this.graphSchemaBuilder.relationshipSchema(relationshipSchema);

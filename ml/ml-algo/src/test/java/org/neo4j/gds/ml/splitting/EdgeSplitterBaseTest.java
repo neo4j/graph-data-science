@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 
 import java.util.Collection;
 
@@ -48,11 +49,19 @@ abstract class EdgeSplitterBaseTest {
         }
     }
 
-    void assertRelSamplingProperties(Relationships selectedRels, Graph inputGraph) {
+    void assertRelSamplingProperties(SingleTypeRelationshipImportResult selectedRels, Graph inputGraph) {
         MutableInt positiveCount = new MutableInt();
         inputGraph.forEachNode(source -> {
             var targetNodeCursor = selectedRels.topology().adjacencyList().adjacencyCursor(source);
-            var propertyCursor = selectedRels.properties().get().propertiesList().propertyCursor(source);
+            var propertyCursor = selectedRels
+                .properties()
+                .get()
+                .values()
+                .iterator()
+                .next()
+                .values()
+                .propertiesList()
+                .propertyCursor(source);
             while (targetNodeCursor.hasNextVLong()) {
                 boolean edgeIsPositive = Double.longBitsToDouble(propertyCursor.nextLong()) == EdgeSplitter.POSITIVE;
                 if (edgeIsPositive) positiveCount.increment();
@@ -77,10 +86,12 @@ abstract class EdgeSplitterBaseTest {
         });
     }
 
-    void assertRelInGraph(Relationships relationships, Graph inputGraph) {
+    void assertRelInGraph(SingleTypeRelationshipImportResult relationships, Graph inputGraph) {
         inputGraph.forEachNode(source -> {
             var targetNodeCursor = relationships.topology().adjacencyList().adjacencyCursor(source);
-            var propertyCursor = relationships.properties().map(p -> p.propertiesList().propertyCursor(source));
+            var propertyCursor = relationships
+                .properties()
+                .map(p -> p.values().iterator().next().values().propertiesList().propertyCursor(source));
             while (targetNodeCursor.hasNextVLong()) {
                 var targetNode = targetNodeCursor.nextVLong();
                 assertThat(inputGraph.exists(source, targetNode)).isTrue();

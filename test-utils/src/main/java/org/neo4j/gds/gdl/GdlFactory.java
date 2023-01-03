@@ -39,7 +39,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
@@ -103,13 +103,11 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         Optional<LongSupplier> nodeIdFunction,
         Optional<Capabilities> graphCapabilities
     ) {
-        var config = graphProjectConfig.isEmpty()
-            ? ImmutableGraphProjectFromGdlConfig.builder()
+        var config = graphProjectConfig.orElseGet(() -> ImmutableGraphProjectFromGdlConfig.builder()
             .username(userName.orElse(Username.EMPTY_USERNAME.username()))
             .graphName(graphName.orElse("graph"))
             .gdlGraph(gdlGraph.orElse(""))
-            .build()
-            : graphProjectConfig.get();
+            .build());
 
         var nextVertexId = nodeIdFunction
             .map(supplier -> (Function<Optional<String>, Long>) (ignored) -> supplier.getAsLong())
@@ -189,36 +187,27 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                         .getOrCreateLabel(label)
                         .addProperty(
                             propertyKey,
-                            nodeProperties.get(propertyKey).valueType()
-                        )
+                            PropertySchema.of(
+                                propertyKey,
+                                nodeProperties.get(propertyKey).valueType(),
+                                nodeProperties.get(propertyKey).defaultValue(),
+                                nodeProperties.get(propertyKey).propertyState()
+                            )
                     )
-                );
+                ));
             });
         // in case there were no properties add all labels
         nodeImportResult.idMap().availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
-        var relationshipSchema = RelationshipSchema.empty();
-
-        relationshipImportResult.importResults().forEach(((relationshipType, singleTypeRelationshipImportResult) -> {
-            relationshipSchema.getOrCreateRelationshipType(
-                relationshipType,
-                singleTypeRelationshipImportResult.direction()
-            );
-            singleTypeRelationshipImportResult.properties()
-                .map(RelationshipPropertyStore::relationshipProperties)
-                .ifPresent(properties -> properties.forEach((propertyKey, propertyValues) -> relationshipSchema
-                    .getOrCreateRelationshipType(
-                        relationshipType,
-                        singleTypeRelationshipImportResult.direction()
-                    )
-                    .addProperty(propertyKey, RelationshipPropertySchema.of(
-                        propertyKey,
-                        propertyValues.valueType(),
-                        propertyValues.valueType().fallbackValue(),
-                        PropertyState.PERSISTENT,
-                        graphProjectConfig.aggregation()
-                    ))));
-        }));
+        var relationshipSchema = relationshipImportResult.importResults().entrySet().stream().reduce(
+            RelationshipSchema.empty(),
+            (unionSchema, entry) -> {
+                var relationshipType = entry.getKey();
+                var relationships = entry.getValue();
+                return unionSchema.union(relationships.relationshipSchema(relationshipType));
+            },
+            RelationshipSchema::union
+        );
 
         return GraphSchema.of(
             nodeSchema,
@@ -229,8 +218,8 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
     @Override
     public CSRGraphStore build() {
-        var nodes = loadNodes();
-        var relationships = loadRelationships(nodes.idMap());
+        var nodeImportResult = loadNodes();
+        var relationships = loadRelationships(nodeImportResult.idMap());
 
         var relationshipImportResultBuilder = RelationshipImportResult.builder();
 
@@ -253,7 +242,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                             RelationshipProperty.of(
                                 propertyKey,
                                 NumberType.FLOATING_POINT,
-                                PropertyState.PERSISTENT,
+                                graphProjectConfig.propertyState(),
                                 properties,
                                 DefaultValue.forDouble(),
                                 graphProjectConfig.aggregation()
@@ -273,14 +262,13 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
         var relationshipImportResult = relationshipImportResultBuilder.build();
 
-        var schema = computeGraphSchema(nodes, relationshipImportResult);
+        var schema = computeGraphSchema(nodeImportResult, relationshipImportResult);
 
         return new GraphStoreBuilder()
             .databaseId(databaseId)
             .capabilities(capabilities)
             .schema(schema)
-            .nodes(nodes.idMap())
-            .nodePropertyStore(nodes.properties())
+            .nodeImportResult(nodeImportResult)
             .relationshipImportResult(relationshipImportResult)
             .concurrency(1)
             .build();
@@ -309,7 +297,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
         var idMap = nodesBuilder.build().idMap();
 
-        return NodeImportResult.of(idMap, loadNodeProperties(idMap));
+        return NodeImportResult.of(idMap, loadNodeProperties(idMap), graphProjectConfig.propertyState());
     }
 
     private Map<PropertyMapping, NodePropertyValues> loadNodeProperties(IdMap idMap) {
@@ -387,23 +375,28 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         return relationshipBuilders.entrySet()
             .stream()
             .map(entry -> {
-                    var relationshipsAndSchemas = entry.getValue().buildAll();
+                var relationships = entry.getValue().build();
 
-                    var topology = relationshipsAndSchemas.get(0).relationships().topology();
-                    var propertyKeys = propertyKeysByRelType.get(entry.getKey());
+                var topology = relationships.topology();
+                var propertyKeys = propertyKeysByRelType.get(entry.getKey());
 
-                    var properties = IntStream.range(0, propertyKeys.size())
-                        .boxed()
-                        .collect(Collectors.toMap(
-                            propertyKeys::get,
-                            idx -> relationshipsAndSchemas.get(idx).relationships().properties().get()
-                        ));
+                var properties = IntStream.range(0, propertyKeys.size())
+                    .boxed()
+                    .collect(Collectors.toMap(
+                        propertyKeys::get,
+                        idx -> relationships
+                            .properties()
+                            .map(relationshipPropertyStore -> relationshipPropertyStore
+                                .get(propertyKeys.get(idx))
+                                .values())
+                            .orElseThrow(IllegalStateException::new)
+                    ));
 
-                    return ImmutableRelationshipsLoadResult.builder()
-                        .relationshipType(entry.getKey())
-                        .topology(topology)
-                        .properties(properties)
-                        .build();
+                return ImmutableRelationshipsLoadResult.builder()
+                    .relationshipType(entry.getKey())
+                    .topology(topology)
+                    .properties(properties)
+                    .build();
                 }
             ).collect(Collectors.toList());
     }
@@ -473,7 +466,8 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                     var propertyKeys = relTypeAndProperty.getValue();
                     var propertyConfigs = propertyKeys
                         .stream()
-                        .map(key -> GraphFactory.PropertyConfig.of(
+                        .map(propertyKey -> GraphFactory.PropertyConfig.of(
+                            propertyKey,
                             graphProjectConfig.aggregation(),
                             DefaultValue.forDouble()
                         ))

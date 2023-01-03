@@ -25,12 +25,10 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.huge.HugeGraph;
@@ -126,32 +124,28 @@ public final class RandomGraphGenerator {
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .orientation(direction.toOrientation())
-            .addAllPropertyConfigs(maybeRelationshipPropertyProducer.isPresent()
-                ? List.of(GraphFactory.PropertyConfig.of(aggregation, DefaultValue.forDouble()))
-                : List.of()
+            .addAllPropertyConfigs(maybeRelationshipPropertyProducer
+                .map(propertyProducer -> List.of(GraphFactory.PropertyConfig.of(
+                    propertyProducer.getPropertyName(),
+                    aggregation,
+                    DefaultValue.forDouble()
+                )))
+                .orElseGet(List::of)
             )
             .aggregation(aggregation)
             .build();
 
         generateRelationships(relationshipsBuilder);
 
-        var relationshipsAndSchema = relationshipsBuilder.build();
-        var relationshipSchema = relationshipSchema();
+        var relationships = relationshipsBuilder.build();
 
-        var graphSchema = GraphSchema.of(nodePropertiesAndSchema.nodeSchema(), relationshipSchema, Map.of());
+        var graphSchema = GraphSchema.of(
+            nodePropertiesAndSchema.nodeSchema(),
+            relationships.relationshipSchema(relationshipType),
+            Map.of()
+        );
 
-        return GraphFactory.create(graphSchema, idMap, nodePropertiesAndSchema.nodeProperties(), relationshipsAndSchema.relationships());
-    }
-
-    private RelationshipSchema relationshipSchema() {
-        var relationshipSchema = RelationshipSchema.empty();
-        var entry = relationshipSchema.getOrCreateRelationshipType(relationshipType, direction);
-        maybeRelationshipPropertyProducer.ifPresent(pp -> entry.addProperty(
-            pp.getPropertyName(),
-            pp.propertyType(),
-            PropertyState.PERSISTENT
-        ));
-        return relationshipSchema;
+        return GraphFactory.create(graphSchema, idMap, nodePropertiesAndSchema.nodeProperties(), relationships);
     }
 
     public RelationshipDistribution getRelationshipDistribution() {

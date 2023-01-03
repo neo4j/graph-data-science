@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
@@ -190,7 +191,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
             importPropertiesFromIndex(idMap, nodeProperties);
         }
 
-        return NodeImportResult.of(idMap, nodeProperties);
+        return NodeImportResult.of(idMap, nodeProperties, PropertyState.PERSISTENT);
     }
 
     private void importPropertiesFromIndex(

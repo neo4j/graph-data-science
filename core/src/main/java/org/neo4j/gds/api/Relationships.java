@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.api;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 
@@ -31,20 +30,6 @@ public interface Relationships {
     Topology topology();
 
     Optional<Properties> properties();
-
-    static Relationships of(
-        long relationshipCount,
-        boolean isMultiGraph,
-        AdjacencyList adjacencyList
-    ) {
-        return of(
-            relationshipCount,
-            isMultiGraph,
-            adjacencyList,
-            null,
-            DefaultValue.DOUBLE_DEFAULT_FALLBACK
-        );
-    }
 
     static Relationships of(
         long relationshipCount,
@@ -73,9 +58,6 @@ public interface Relationships {
     interface Topology {
         AdjacencyList adjacencyList();
 
-        @Value.Parameter(false)
-        Optional<AdjacencyList> inverseAdjacencyList();
-
         long elementCount();
 
         boolean isMultiGraph();
@@ -84,11 +66,6 @@ public interface Relationships {
             @Override
             public AdjacencyList adjacencyList() {
                 return AdjacencyList.EMPTY;
-            }
-
-            @Override
-            public Optional<AdjacencyList> inverseAdjacencyList() {
-                return Optional.empty();
             }
 
             @Override

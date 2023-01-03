@@ -70,7 +70,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @GdlExtension
 public class GraphStoreToCsvExporterTest extends CsvTest {
 
-    @GdlGraph(orientation = UNDIRECTED)
+    @GdlGraph(orientation = UNDIRECTED, propertyState = PropertyState.PERSISTENT)
     private static final String GDL =
         "CREATE" +
         "  (a:A:B { prop1: 0, prop2: 42, prop3: [1L, 3L, 3L, 7L]})" +
@@ -90,7 +90,7 @@ public class GraphStoreToCsvExporterTest extends CsvTest {
     @Inject
     private IdFunction idFunction;
 
-    @GdlGraph(graphNamePrefix = "concurrent", orientation = NATURAL)
+    @GdlGraph(graphNamePrefix = "concurrent", orientation = NATURAL, propertyState = PropertyState.PERSISTENT)
     private static final String GDL_FOR_CONCURRENCY =
         "CREATE" +
         "  (a)" +

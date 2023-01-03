@@ -30,6 +30,7 @@ import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.compat.CompatPropertySizeCalculator;
+import org.neo4j.gds.core.io.GraphStoreInput;
 import org.neo4j.gds.core.io.file.FileHeader;
 import org.neo4j.gds.core.io.file.FileInput;
 import org.neo4j.gds.core.io.file.GraphInfo;
@@ -254,7 +255,7 @@ final class CsvFileInput implements FileInput {
     abstract static class LineChunk<
         HEADER extends FileHeader<SCHEMA, PROPERTY_SCHEMA>,
         SCHEMA,
-        PROPERTY_SCHEMA extends PropertySchema> implements InputChunk {
+        PROPERTY_SCHEMA extends PropertySchema> implements InputChunk, GraphStoreInput.LastProgress {
 
         private final SCHEMA schema;
 
@@ -292,6 +293,11 @@ final class CsvFileInput implements FileInput {
             if (lineIterator != null) {
                 lineIterator.close();
             }
+        }
+
+        @Override
+        public long lastProgress() {
+            return 1;
         }
     }
 

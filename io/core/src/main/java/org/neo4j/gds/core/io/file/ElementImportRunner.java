@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.io.file;
 
+import org.neo4j.gds.core.io.GraphStoreInput;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
@@ -44,9 +45,12 @@ public final class ElementImportRunner<T extends InputEntityVisitor.Adapter & Fl
     @Override
     public void run() {
         try (var chunk = inputIterator.newChunk()) {
+            assert chunk instanceof GraphStoreInput.LastProgress : chunk.getClass();
+
             while (inputIterator.next(chunk)) {
                 while (chunk.next(visitor)) {
-                    progressTracker.logProgress();
+                    long progress = ((GraphStoreInput.LastProgress) chunk).lastProgress();
+                    progressTracker.logProgress(progress);
                 }
                 visitor.flush();
             }

@@ -26,7 +26,6 @@ import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -106,7 +105,7 @@ class CollapseMultiPathsTest {
             new Graph[]{train, plane, car, train, train}
         );
 
-        Relationships path = new CollapsePath(
+        var path = new CollapsePath(
             pathTemplates,
             false,
             2,
@@ -164,7 +163,7 @@ class CollapseMultiPathsTest {
         var plane = graphStore.getGraph(RelationshipType.of("PLANE"));
         var train = graphStore.getGraph(RelationshipType.of("TRAIN"));
 
-        Relationships path = new CollapsePath(
+        var path = new CollapsePath(
             List.of(
                 new Graph[]{car, car, car},
                 new Graph[]{train, train, train},

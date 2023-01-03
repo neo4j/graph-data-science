@@ -32,12 +32,10 @@ import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.ValueTypes;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.core.loading.construction.RelationshipsAndDirection;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -70,45 +68,8 @@ public interface RelationshipImportResult {
         return relationshipImportResultBuilder.build();
     }
 
-    static RelationshipImportResult of(Map<RelationshipTypeAndProjection, List<RelationshipsAndDirection>> relationshipsByType) {
-        var relationshipImportResultBuilder = RelationshipImportResult.builder();
-
-        relationshipsByType.forEach(((relationshipTypeAndProjection, relationshipsAndDirections) -> {
-            var relationshipType = relationshipTypeAndProjection.relationshipType();
-            var direction = Direction.fromOrientation(relationshipTypeAndProjection
-                .relationshipProjection()
-                .orientation());
-
-            var topology = relationshipsAndDirections.get(0).relationships().topology();
-
-            var properties = relationshipsAndDirections
-                .stream()
-                .map(RelationshipsAndDirection::relationships)
-                .map(Relationships::properties)
-                .map(props -> props.map(Relationships.Properties::propertiesList))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
-
-            var propertyStore = properties.isEmpty()
-                ? Optional.<RelationshipPropertyStore>empty()
-                : Optional.of(constructRelationshipPropertyStore(
-                    relationshipTypeAndProjection.relationshipProjection(),
-                    properties,
-                    topology.elementCount()
-                ));
-
-            relationshipImportResultBuilder.putImportResult(
-                relationshipType,
-                SingleTypeRelationshipImportResult.builder()
-                    .topology(topology)
-                    .properties(propertyStore)
-                    .direction(direction)
-                    .build()
-            );
-        }));
-
-        return relationshipImportResultBuilder.build();
+    static RelationshipImportResult of(Map<RelationshipType, SingleTypeRelationshipImportResult> relationshipsByType) {
+        return ImmutableRelationshipImportResult.builder().importResults(relationshipsByType).build();
     }
 
     /**

@@ -72,12 +72,7 @@ class CSRGraphStoreTest {
 
         relBuilder.add(gdlFactory.nodeId("a"), gdlFactory.nodeId("d"));
 
-        graphStore.addRelationshipType(
-            RelationshipType.of("NEW"),
-            Optional.empty(),
-            Optional.empty(),
-            relBuilder.build()
-        );
+        graphStore.addRelationshipType(RelationshipType.of("NEW"), relBuilder.build());
 
         assertThat(graphStore.relationshipCount()).isEqualTo(6);
         assertThat(graphStore.schema().relationshipSchema().isUndirected()).isEqualTo(true);
@@ -104,12 +99,7 @@ class CSRGraphStoreTest {
 
         relBuilder.add(gdlFactory.nodeId("a"), gdlFactory.nodeId("d"));
 
-        graphStore.addRelationshipType(
-            RelationshipType.of("NEW"),
-            Optional.empty(),
-            Optional.empty(),
-            relBuilder.build()
-        );
+        graphStore.addRelationshipType(RelationshipType.of("NEW"), relBuilder.build());
 
         assertThat(graphStore.relationshipCount()).isEqualTo(3);
         assertThat(graphStore.schema().relationshipSchema().isUndirected()).isEqualTo(false);
@@ -144,12 +134,7 @@ class CSRGraphStoreTest {
 
         relBuilder.add(gdlFactory.nodeId("a"), gdlFactory.nodeId("d"));
 
-        graphStore.addRelationshipType(
-            RelationshipType.of("NEW"),
-            Optional.empty(),
-            Optional.empty(),
-            relBuilder.build()
-        );
+        graphStore.addRelationshipType(RelationshipType.of("NEW"), relBuilder.build());
 
         assertThat(graphStore.relationshipCount()).isEqualTo(totalRelCount);
         assertThat(graphStore.schema().relationshipSchema().isUndirected()).isEqualTo(false);

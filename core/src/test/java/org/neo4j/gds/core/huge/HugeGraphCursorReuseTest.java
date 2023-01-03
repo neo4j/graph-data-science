@@ -29,8 +29,6 @@ import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.LongAdder;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,13 +54,11 @@ class HugeGraphCursorReuseTest {
             .isMultiGraph(false)
             .build();
 
-        var mockGraph = HugeGraph.create(
-            baseGraph.idMap,
-            baseGraph.schema(),
-            Map.of(),
-            mockTopology,
-            Optional.empty()
-        );
+        var mockGraph = new HugeGraphBuilder()
+            .nodes(baseGraph.idMap)
+            .schema(baseGraph.schema())
+            .topology(mockTopology)
+            .build();
 
         mockGraph.forEachNode(nodeId -> {
             mockGraph.forEachRelationship(nodeId, (source, target) -> true);

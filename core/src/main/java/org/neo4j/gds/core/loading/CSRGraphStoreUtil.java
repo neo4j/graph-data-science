@@ -41,11 +41,9 @@ import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.loading.construction.RelationshipsAndDirection;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -109,8 +107,7 @@ public final class CSRGraphStoreUtil {
             // TODO: is it correct that we only use this for generated graphs?
             .capabilities(ImmutableStaticCapabilities.of(false))
             .schema(schema)
-            .nodes(graph.idMap())
-            .nodePropertyStore(nodeProperties)
+            .nodeImportResult(NodeImportResult.of(graph.idMap(), nodeProperties))
             .relationshipImportResult(relationshipImportResult)
             .graphProperties(GraphPropertyStore.empty())
             .concurrency(concurrency)
@@ -187,7 +184,7 @@ public final class CSRGraphStoreUtil {
     }
 
     public static void extractNodeProperties(
-        GraphStoreBuilder graphStoreBuilder,
+        ImmutableNodeImportResult.Builder nodeImportResultBuilder,
         Function<String, PropertySchema> nodeSchema,
         Map<String, NodePropertyValues> nodeProperties
     ) {
@@ -204,35 +201,7 @@ public final class CSRGraphStoreUtil {
                 )
             );
         });
-        graphStoreBuilder.nodePropertyStore(propertyStoreBuilder.build());
-    }
-
-    public static RelationshipPropertyStore buildRelationshipPropertyStore(
-        List<RelationshipsAndDirection> relationships,
-        List<RelationshipPropertySchema> relationshipPropertySchemas
-    ) {
-        assert relationships.size() >= relationshipPropertySchemas.size();
-
-        var propertyStoreBuilder = RelationshipPropertyStore.builder();
-
-        for (int i = 0; i < relationshipPropertySchemas.size(); i++) {
-            var relationship = relationships.get(i);
-            var relationshipPropertySchema = relationshipPropertySchemas.get(i);
-            relationship.relationships().properties().ifPresent(properties -> {
-
-                propertyStoreBuilder.putIfAbsent(relationshipPropertySchema.key(), RelationshipProperty.of(
-                        relationshipPropertySchema.key(),
-                        NumberType.FLOATING_POINT,
-                        relationshipPropertySchema.state(),
-                        properties,
-                        relationshipPropertySchema.defaultValue(),
-                        relationshipPropertySchema.aggregation()
-                    )
-                );
-            });
-        }
-
-        return propertyStoreBuilder.build();
+        nodeImportResultBuilder.properties(propertyStoreBuilder.build());
     }
 
     public static GraphSchema computeGraphSchema(

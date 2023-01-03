@@ -27,7 +27,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -276,7 +275,7 @@ class TransientCsrListTest {
         for (long target : targets) {
             relationshipsBuilder.add(sourceNodeId, target);
         }
-        Relationships relationships = relationshipsBuilder.build().relationships();
+        var relationships = relationshipsBuilder.build();
         var mappedNodeId = idMap.toMappedNodeId(sourceNodeId);
         var adjacencyList = relationships.topology().adjacencyList();
         return adjacencyList.adjacencyCursor(mappedNodeId);
