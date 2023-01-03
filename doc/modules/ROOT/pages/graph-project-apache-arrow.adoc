@@ -211,6 +211,25 @@ Once completed, the server acknowledges the action by returning a JSON document 
 }
 ----
 
+[[arrow-abort]]
+== Aborting an import process
+
+A started import process can be aborted by sending a Flight action using the action type `ABORT`.
+This will immediately cancel the running graph or database import process and remove all temporary data.
+
+The action body is a JSON document containing the name of the graph or database that is being imported:
+
+----
+{
+    name: "my_graph",
+}
+----
+
+[NOTE]
+====
+Arrow import processes will be automatically if now data or instructions were received within a configurable timeout.
+The timeout can be configured via the `gds.arrow.abortion_timeout` setting, for more information see the xref:installation/installation-apache-arrow.adoc[installation chapter].
+====
 
 == Creating a Neo4j database
 
