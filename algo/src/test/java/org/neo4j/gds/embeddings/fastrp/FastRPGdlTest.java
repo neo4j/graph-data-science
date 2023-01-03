@@ -364,6 +364,57 @@ public class FastRPGdlTest {
         assertThat(embeddings.get(0)).containsExactly(expected);
     }
 
+    @Test
+    void shouldDistributeValuesCorrectly() {
+        final var graph = scalarGraphStore.getGraph(
+                List.of(NodeLabel.of("Node1"), NodeLabel.of("Node2")),
+                List.of(RelationshipType.of("REL")),
+                Optional.empty()
+        );
+
+        var fastRP = new FastRP(
+                graph,
+                FastRPBaseConfig.builder()
+                        .embeddingDimension(512)
+                        .addIterationWeight(1.0D)
+                        .build(),
+                List.of(),
+                ProgressTracker.NULL_TRACKER
+        );
+
+        fastRP.initPropertyVectors();
+        fastRP.initRandomVectors();
+        HugeObjectArray<float[]> randomVectors = fastRP.currentEmbedding(-1);
+
+        for (int i = 0; i < graph.nodeCount(); i++) {
+            float[] embedding = randomVectors.get(i);
+            int numZeros = 0;
+            int numPositive = 0;
+            for (int j = 0; j < 512; j++) {
+                double embeddingValue = embedding[j];
+                if (embeddingValue == 0) {
+                    numZeros++;
+                } else if (embeddingValue > 0) {
+                    numPositive++;
+                }
+            }
+
+            int numNegative = 512 - numZeros - numPositive;
+
+            double p = 1D / 6D;
+            int maxNumPositive = (int) ((p + 5D * Math.sqrt((p * (1 - p)) / 512D)) * 512D); // 1:30.000.000 chance of failing :P
+            int minNumPositive = (int) ((p - 5D * Math.sqrt((p * (1 - p)) / 512D)) * 512D);
+
+            assertThat(numPositive)
+                    .isGreaterThanOrEqualTo(minNumPositive)
+                    .isLessThanOrEqualTo(maxNumPositive);
+
+            assertThat(numNegative)
+                    .isGreaterThanOrEqualTo(minNumPositive)
+                    .isLessThanOrEqualTo(maxNumPositive);
+        }
+    }
+
     private HugeObjectArray<float[]> embeddings(Graph graph, List<String> properties) {
         var fastRPArray = new FastRP(
                 graph,
@@ -379,11 +430,9 @@ public class FastRPGdlTest {
     }
 
     private float[] takeLastElements(float[] input, int numLast) {
-        var numdrop = input.length - numLast;
+        var numDrop = input.length - numLast;
         var extractedResult = new float[numLast];
-        for (int i = 0; i < numLast; i++) {
-            extractedResult[i] = input[numdrop + i];
-        }
+        System.arraycopy(input, numDrop, extractedResult, 0, numLast);
         return extractedResult;
     }
 }
