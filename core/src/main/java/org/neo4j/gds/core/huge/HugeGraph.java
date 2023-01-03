@@ -372,6 +372,16 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
+    public int degreeInverse(long nodeId) {
+        if (inverseAdjacency == null) {
+            throw new UnsupportedOperationException(
+                "Can not get inverse degree on a graph without inverse indexed relationships"
+            );
+        }
+        return inverseAdjacency.degree(nodeId);
+    }
+
+    @Override
     public int degreeWithoutParallelRelationships(long nodeId) {
         if (!isMultiGraph()) {
             return degree(nodeId);

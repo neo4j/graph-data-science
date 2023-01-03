@@ -261,6 +261,17 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
+    public int degreeInverse(long nodeId) {
+        long degree = 0;
+
+        for (CSRGraph graph : graphs) {
+            degree += graph.degreeInverse(nodeId);
+        }
+
+        return Math.toIntExact(degree);
+    }
+
+    @Override
     public int degreeWithoutParallelRelationships(long nodeId) {
         if (!isMultiGraph()) {
             return degree(nodeId);

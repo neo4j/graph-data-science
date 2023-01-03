@@ -79,6 +79,11 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
+    public int degreeInverse(long nodeId) {
+        return graph.degreeInverse(nodeId);
+    }
+
+    @Override
     public int degreeWithoutParallelRelationships(long nodeId) {
         return graph.degreeWithoutParallelRelationships(nodeId);
     }

@@ -108,17 +108,25 @@ class GdlFactoryTest {
 
         var graph = graphFactory.build().getGraph(RelationshipType.of("REL"));
 
+        long nodeA = graphFactory.nodeId("a");
+        long nodeB = graphFactory.nodeId("b");
+        long nodeC = graphFactory.nodeId("c");
+
         var collectingConsumer = new CollectingConsumer();
-        graph.forEachInverseRelationship(graphFactory.nodeId("a"), collectingConsumer);
+
+        assertThat(graph.degreeInverse(nodeA)).isEqualTo(0);
+        graph.forEachInverseRelationship(nodeA, collectingConsumer);
         assertThat(new long[0]).contains(collectingConsumer.targets.toArray());
 
         collectingConsumer.clear();
-        graph.forEachInverseRelationship(graphFactory.nodeId("b"), collectingConsumer);
-        assertThat(new long[]{graphFactory.nodeId("a")}).contains(collectingConsumer.targets.toArray());
+        assertThat(graph.degreeInverse(nodeB)).isEqualTo(1);
+        graph.forEachInverseRelationship(nodeB, collectingConsumer);
+        assertThat(new long[]{nodeA}).contains(collectingConsumer.targets.toArray());
 
         collectingConsumer.clear();
-        graph.forEachInverseRelationship(graphFactory.nodeId("c"), collectingConsumer);
-        assertThat(new long[]{graphFactory.nodeId("b"), graphFactory.nodeId("a")}).contains(collectingConsumer.targets.toArray());
+        assertThat(graph.degreeInverse(nodeC)).isEqualTo(2);
+        graph.forEachInverseRelationship(nodeC, collectingConsumer);
+        assertThat(new long[]{nodeB, nodeA}).contains(collectingConsumer.targets.toArray());
     }
 
     @Test
