@@ -23,19 +23,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.l2Normalize;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -280,6 +276,48 @@ public class FastRPGdlTest {
                         takeLastElements(fastRP.currentEmbedding(-1).get(2), DEFAULT_CONFIG.propertyDimension()),
                         Offset.offset(1e-6f)
                 );
+    }
+
+    @Test
+    void shouldBeDeterministicInParallel() {
+        final var graph = scalarGraphStore.getGraph(
+                List.of(NodeLabel.of("Node1"), NodeLabel.of("Node2")),
+                List.of(RelationshipType.of("REL")),
+                Optional.empty()
+        );
+
+        var configBuilder = FastRPBaseConfig.builder()
+                .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
+                .propertyRatio(0.5)
+                .featureProperties(List.of("f1", "f2", "f3"))
+                .addIterationWeight(1.0D)
+                .minBatchSize(1)
+                .randomSeed(42L);
+
+        FastRP concurrentFastRP = new FastRP(
+                graph,
+                configBuilder.concurrency(4).build(),
+                defaultFeatureExtractors(graph),
+                ProgressTracker.NULL_TRACKER
+        );
+
+        concurrentFastRP.compute();
+        HugeObjectArray<float[]> concurrentEmbeddings = concurrentFastRP.embeddings();
+
+        FastRP sequentialFastRP = new FastRP(
+                graph,
+                configBuilder.concurrency(1).build(),
+                defaultFeatureExtractors(graph),
+                ProgressTracker.NULL_TRACKER
+        );
+
+        sequentialFastRP.compute();
+        HugeObjectArray<float[]> sequentialEmbeddings = sequentialFastRP.embeddings();
+
+        graph.forEachNode(nodeId -> {
+            assertThat(concurrentEmbeddings.get(nodeId)).containsExactly(sequentialEmbeddings.get(nodeId));
+            return true;
+        });
     }
 
     private HugeObjectArray<float[]> embeddings(Graph graph, List<String> properties) {
