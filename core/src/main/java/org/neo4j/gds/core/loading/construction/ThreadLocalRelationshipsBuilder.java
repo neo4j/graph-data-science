@@ -37,20 +37,19 @@ abstract class ThreadLocalRelationshipsBuilder implements AutoCloseable {
 
         private final ThreadLocalSingleTypeRelationshipImporter importer;
         private final PropertyReader.Buffered bufferedPropertyReader;
-        private final int[] propertyKeyIds;
-
+        private final int propertyCount;
         private int localRelationshipId;
 
         NonIndexed(
             PartialIdMap idMap,
             SingleTypeRelationshipImporter singleTypeRelationshipImporter,
             int bufferSize,
-            int[] propertyKeyIds
+            int propertyCount
         ) {
-            this.propertyKeyIds = propertyKeyIds;
+            this.propertyCount = propertyCount;
 
-            if (propertyKeyIds.length > 1) {
-                this.bufferedPropertyReader = PropertyReader.buffered(bufferSize, propertyKeyIds.length);
+            if (propertyCount > 1) {
+                this.bufferedPropertyReader = PropertyReader.buffered(bufferSize, propertyCount);
                 this.importer = singleTypeRelationshipImporter.threadLocalImporter(
                     idMap,
                     bufferSize,
@@ -93,9 +92,8 @@ abstract class ThreadLocalRelationshipsBuilder implements AutoCloseable {
         void addRelationship(long source, long target, double[] relationshipPropertyValues) {
             int nextRelationshipId = localRelationshipId++;
             importer.buffer().add(source, target, nextRelationshipId, Neo4jProxy.noPropertyReference());
-            int[] keyIds = propertyKeyIds;
-            for (int i = 0; i < keyIds.length; i++) {
-                bufferedPropertyReader.add(nextRelationshipId, keyIds[i], relationshipPropertyValues[i]);
+            for (int propertyKeyId = 0; propertyKeyId < this.propertyCount; propertyKeyId++) {
+                bufferedPropertyReader.add(nextRelationshipId, propertyKeyId, relationshipPropertyValues[propertyKeyId]);
             }
             if (importer.buffer().isFull()) {
                 flushBuffer();

@@ -68,7 +68,7 @@ import static org.neo4j.gds.core.io.file.csv.CsvSchemaConstants.NODE_SCHEMA_COLU
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
-public class GraphStoreToCsvExporterTest extends CsvTest {
+class GraphStoreToCsvExporterTest extends CsvTest {
 
     @GdlGraph(orientation = UNDIRECTED, propertyState = PropertyState.PERSISTENT)
     private static final String GDL =

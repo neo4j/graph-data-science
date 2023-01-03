@@ -71,6 +71,17 @@ public final class GraphCharacteristics {
         return (characteristics() & INVERSE_INDEXED) == INVERSE_INDEXED;
     }
 
+    /**
+     * Intersects the characteristics with the given one and returns a new characteristics instance.
+     * The resulting object will contain only those characteristics that are present in both inputs.
+     *
+     * @param other the characteristics to intersect with
+     * @return a new `GraphCharacteristics` object that contains the shared characteristics of the input
+     */
+    public GraphCharacteristics intersect(GraphCharacteristics other) {
+        return new GraphCharacteristics(this.characteristics & other.characteristics);
+    }
+
     private int characteristics() {
         return characteristics;
     }
@@ -116,15 +127,7 @@ public final class GraphCharacteristics {
         }
 
         public Builder withOrientation(Orientation orientation) {
-            switch (orientation) {
-                case NATURAL:
-                case REVERSE:
-                    return this.directed();
-                case UNDIRECTED:
-                    return this.undirected();
-                default:
-                    throw new UnsupportedOperationException("Unexpected orientation: " + orientation);
-            }
+            return withDirection(Direction.fromOrientation(orientation));
         }
 
         public Builder withDirection(Direction direction) {

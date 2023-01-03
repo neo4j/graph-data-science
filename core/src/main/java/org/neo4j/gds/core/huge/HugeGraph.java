@@ -31,6 +31,7 @@ import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyCursor;
 import org.neo4j.gds.api.RelationshipConsumer;
@@ -97,6 +98,7 @@ public class HugeGraph implements CSRGraph {
     protected final IdMap idMap;
 
     protected final GraphSchema schema;
+    protected final GraphCharacteristics characteristics;
 
     protected final Map<String, NodePropertyValues> nodeProperties;
 
@@ -124,6 +126,7 @@ public class HugeGraph implements CSRGraph {
     static HugeGraph create(
         IdMap nodes,
         GraphSchema schema,
+        GraphCharacteristics characteristics,
         Map<String, NodePropertyValues> nodeProperties,
         Relationships.Topology topology,
         Optional<Relationships.Properties> relationshipProperties,
@@ -133,6 +136,7 @@ public class HugeGraph implements CSRGraph {
         return new HugeGraph(
             nodes,
             schema,
+            characteristics,
             nodeProperties,
             topology.elementCount(),
             topology.adjacencyList(),
@@ -148,6 +152,7 @@ public class HugeGraph implements CSRGraph {
     protected HugeGraph(
         IdMap idMap,
         GraphSchema schema,
+        GraphCharacteristics characteristics,
         Map<String, NodePropertyValues> nodeProperties,
         long relationshipCount,
         @NotNull AdjacencyList adjacency,
@@ -160,6 +165,7 @@ public class HugeGraph implements CSRGraph {
     ) {
         this.idMap = idMap;
         this.schema = schema;
+        this.characteristics = characteristics;
         this.isMultiGraph = isMultiGraph;
         this.nodeProperties = nodeProperties;
         this.relationshipCount = relationshipCount;
@@ -208,6 +214,11 @@ public class HugeGraph implements CSRGraph {
     @Override
     public GraphSchema schema() {
         return schema;
+    }
+
+    @Override
+    public GraphCharacteristics characteristics() {
+        return characteristics;
     }
 
     public Map<String, NodePropertyValues> nodeProperties() { return nodeProperties; }
@@ -303,6 +314,20 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
+    public void forEachInverseRelationship(long nodeId, RelationshipConsumer consumer) {
+        runForEachInverse(nodeId, consumer);
+    }
+
+    @Override
+    public void forEachInverseRelationship(
+        long nodeId,
+        double fallbackValue,
+        RelationshipWithPropertyConsumer consumer
+    ) {
+        runForEachInverse(nodeId, fallbackValue, consumer);
+    }
+
+    @Override
     public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
         var adjacencyCursor = adjacencyCursorForIteration(nodeId);
         var spliterator = !hasRelationshipProperty()
@@ -347,6 +372,16 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
+    public int degreeInverse(long nodeId) {
+        if (inverseAdjacency == null) {
+            throw new UnsupportedOperationException(
+                "Can not get inverse degree on a graph without inverse indexed relationships"
+            );
+        }
+        return inverseAdjacency.degree(nodeId);
+    }
+
+    @Override
     public int degreeWithoutParallelRelationships(long nodeId) {
         if (!isMultiGraph()) {
             return degree(nodeId);
@@ -381,6 +416,7 @@ public class HugeGraph implements CSRGraph {
         return new HugeGraph(
             idMap,
             schema,
+            characteristics,
             nodeProperties,
             relationshipCount,
             adjacency,
@@ -432,6 +468,21 @@ public class HugeGraph implements CSRGraph {
         }
     }
 
+    private void runForEachInverse(long sourceId, RelationshipConsumer consumer) {
+        var adjacencyCursor = inverseAdjacencyCursorForIteration(sourceId);
+        consumeAdjacentNodes(sourceId, adjacencyCursor, consumer);
+    }
+
+    private void runForEachInverse(long sourceId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
+        if (!hasRelationshipProperty()) {
+            runForEachInverse(sourceId, (s, t) -> consumer.accept(s, t, fallbackValue));
+        } else {
+            var adjacencyCursor = inverseAdjacencyCursorForIteration(sourceId);
+            var propertyCursor = inversePropertyCursorForIteration(sourceId);
+            consumeAdjacentNodesWithProperty(sourceId, adjacencyCursor, propertyCursor, consumer);
+        }
+    }
+
     private AdjacencyCursor adjacencyCursorForIteration(long sourceNodeId) {
         return adjacency.adjacencyCursor(adjacencyCursorCache, sourceNodeId);
     }
@@ -439,10 +490,31 @@ public class HugeGraph implements CSRGraph {
     private PropertyCursor propertyCursorForIteration(long sourceNodeId) {
         if (!hasRelationshipProperty() || properties == null) {
             throw new UnsupportedOperationException(
-                "Can not create property cursor on a graph without relationship property");
+                "Can not create property cursor on a graph without relationship property"
+            );
         }
 
         return properties.propertyCursor(propertyCursorCache, sourceNodeId, defaultPropertyValue);
+    }
+
+    private AdjacencyCursor inverseAdjacencyCursorForIteration(long sourceNodeId) {
+        if (inverseAdjacency == null) {
+            throw new UnsupportedOperationException(
+                "Can not create adjacency cursor on a graph without inverse indexed relationships"
+            );
+        }
+
+        return inverseAdjacency.adjacencyCursor(inverseAdjacencyCursorCache, sourceNodeId);
+    }
+
+    private PropertyCursor inversePropertyCursorForIteration(long sourceNodeId) {
+        if (!hasRelationshipProperty() || inverseProperties == null) {
+            throw new UnsupportedOperationException(
+                "Can not create property cursor on a graph without relationship property"
+            );
+        }
+
+        return inverseProperties.propertyCursor(inversePropertyCursorCache, sourceNodeId, defaultPropertyValue);
     }
 
     @Override

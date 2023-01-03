@@ -24,16 +24,12 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.api.RelationshipProperty;
-import org.neo4j.gds.api.RelationshipPropertyStore;
-import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
@@ -50,8 +46,8 @@ import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.NodeImportResult;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.ImmutablePropertyConfig;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
@@ -59,7 +55,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlSupportPerMethodExtension;
-import org.neo4j.values.storable.NumberType;
 import org.neo4j.values.storable.Values;
 import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Element;
@@ -76,7 +71,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.LongSupplier;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -219,49 +213,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     @Override
     public CSRGraphStore build() {
         var nodeImportResult = loadNodes();
-        var relationships = loadRelationships(nodeImportResult.idMap());
-
-        var relationshipImportResultBuilder = RelationshipImportResult.builder();
-
-        relationships.forEach(loadResult -> {
-            var singleTypeRelationshipImportBuilder = SingleTypeRelationshipImportResult.builder()
-                .direction(Direction.fromOrientation(graphProjectConfig().orientation()))
-                .topology(loadResult.topology());
-
-            if (!loadResult.properties().isEmpty()) {
-                var propertyStoreBuilder = loadResult
-                    .properties()
-                    .entrySet()
-                    .stream()
-                    .reduce(RelationshipPropertyStore.builder(), (builder, stringPropertiesEntry) -> {
-                        var propertyKey = stringPropertiesEntry.getKey();
-                        var properties = stringPropertiesEntry.getValue();
-
-                        builder.putIfAbsent(
-                            propertyKey,
-                            RelationshipProperty.of(
-                                propertyKey,
-                                NumberType.FLOATING_POINT,
-                                graphProjectConfig.propertyState(),
-                                properties,
-                                DefaultValue.forDouble(),
-                                graphProjectConfig.aggregation()
-                            )
-                        );
-                        return builder;
-                    }, (builder, __) -> builder);
-
-                singleTypeRelationshipImportBuilder.properties(propertyStoreBuilder.build());
-            }
-
-            relationshipImportResultBuilder.putImportResult(
-                loadResult.relationshipType(),
-                singleTypeRelationshipImportBuilder.build()
-            );
-        });
-
-        var relationshipImportResult = relationshipImportResultBuilder.build();
-
+        var relationshipImportResult = loadRelationships(nodeImportResult.idMap());
         var schema = computeGraphSchema(nodeImportResult, relationshipImportResult);
 
         return new GraphStoreBuilder()
@@ -356,49 +308,19 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         }
         return array;
     }
-
-    @ValueClass
-    interface RelationshipsLoadResult {
-        RelationshipType relationshipType();
-
-        Relationships.Topology topology();
-
-        Map<String, Relationships.Properties> properties();
-    }
-
-    private List<RelationshipsLoadResult> loadRelationships(IdMap idMap) {
+    
+    private RelationshipImportResult loadRelationships(IdMap idMap) {
         var propertyKeysByRelType = propertyKeysByRelType();
         var relationshipBuilders = createRelationshipBuilders(idMap, propertyKeysByRelType);
 
         importRelationships(propertyKeysByRelType, relationshipBuilders);
 
-        return relationshipBuilders.entrySet()
-            .stream()
-            .map(entry -> {
-                var relationships = entry.getValue().build();
+        var resultBuilder = RelationshipImportResult.builder();
+        relationshipBuilders.forEach((relationshipType, relationshipsBuilder) -> {
+            resultBuilder.putImportResult(relationshipType, relationshipsBuilder.build());
+        });
 
-                var topology = relationships.topology();
-                var propertyKeys = propertyKeysByRelType.get(entry.getKey());
-
-                var properties = IntStream.range(0, propertyKeys.size())
-                    .boxed()
-                    .collect(Collectors.toMap(
-                        propertyKeys::get,
-                        idx -> relationships
-                            .properties()
-                            .map(relationshipPropertyStore -> relationshipPropertyStore
-                                .get(propertyKeys.get(idx))
-                                .values())
-                            .orElseThrow(IllegalStateException::new)
-                    ));
-
-                return ImmutableRelationshipsLoadResult.builder()
-                    .relationshipType(entry.getKey())
-                    .topology(topology)
-                    .properties(properties)
-                    .build();
-                }
-            ).collect(Collectors.toList());
+        return resultBuilder.build();
     }
 
     @NotNull
@@ -466,17 +388,20 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                     var propertyKeys = relTypeAndProperty.getValue();
                     var propertyConfigs = propertyKeys
                         .stream()
-                        .map(propertyKey -> GraphFactory.PropertyConfig.of(
-                            propertyKey,
-                            graphProjectConfig.aggregation(),
-                            DefaultValue.forDouble()
-                        ))
+                        .map(propertyKey -> ImmutablePropertyConfig.builder()
+                            .propertyKey(propertyKey)
+                            .aggregation(graphProjectConfig.aggregation())
+                            .propertyState(graphProjectConfig.propertyState())
+                            .defaultValue(DefaultValue.forDouble())
+                            .build()
+                        )
                         .collect(Collectors.toList());
 
                     return GraphFactory.initRelationshipsBuilder()
                         .nodes(idMap)
                         .orientation(graphProjectConfig.orientation())
                         .aggregation(graphProjectConfig.aggregation())
+                        .indexInverse(graphProjectConfig.indexInverse())
                         .addAllPropertyConfigs(propertyConfigs)
                         .executorService(loadingContext.executor())
                         .build();

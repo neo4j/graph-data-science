@@ -34,7 +34,7 @@ public interface RelationshipIterator extends RelationshipPredicate {
     /**
      * Calls the given consumer function for every relationship of a given node.
      * If the graph was loaded with a relationship property, the property value
-     * of the relationship will be passed into the consumer. Otherwise the given
+     * of the relationship will be passed into the consumer, otherwise the given
      * fallback value will be used.
      *
      * @param nodeId id of the node for which to iterate relationships
@@ -43,11 +43,46 @@ public interface RelationshipIterator extends RelationshipPredicate {
      */
     void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer);
 
+    /**
+     * Calls the given consumer for every inverse relationship of a given node.
+     * Inverse relationships basically mirror the relationships in that graph.
+     * For example, if `Graph.forEachRelationship(42)` returns `1337` then the
+     * result of `forEachInverseRelationship(1337)` contains `42.
+     * <p>
+     * Note, that this is an optional feature, and it is up to the implementation
+     * if this is actually supported. Check the `GraphCharacteristics` of the
+     * implementation to see if inverse index is supported.
+     *
+     * @param nodeId if of the node for which to iterate the inverse relationships
+     * @param consumer relationship consumer function
+     */
+    void forEachInverseRelationship(long nodeId, RelationshipConsumer consumer);
+
+    /**
+     * Calls the given consumer for every inverse relationship of a given node.
+     * If the graph was loaded with a relationship property, the property value
+     * of the relationship will be passed into the consumer, otherwise the given
+     * fallback value will be used.
+     * <p>
+     * Inverse relationships basically mirror the relationships in that graph.
+     * For example, if `Graph.forEachRelationship(42)` returns `1337` then the
+     * result of `forEachInverseRelationship(1337)` contains `42.
+     * <p>
+     * Note, that this is an optional feature, and it is up to the implementation
+     * if this is actually supported. Check {@link org.neo4j.gds.api.Graph#characteristics()}
+     * before calling this method to verify that the graphs is inverse indexed.
+     *
+     * @param nodeId if of the node for which to iterate the inverse relationships
+     * @param fallbackValue value used as relationship property if no properties were loaded
+     * @param consumer relationship consumer function
+     */
+    void forEachInverseRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer);
+
     Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue);
 
     /**
      * @return a copy of this iterator that reuses new cursors internally,
-     *         so that iterations happen independent from other iterations.
+     *         so that iterations happen independent of other iterations.
      */
     default RelationshipIterator concurrentCopy() {
         return this;

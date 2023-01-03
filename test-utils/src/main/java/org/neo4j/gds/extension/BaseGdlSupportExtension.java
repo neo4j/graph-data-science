@@ -109,6 +109,7 @@ abstract class BaseGdlSupportExtension {
                 .orientation(annotation.orientation())
                 .aggregation(annotation.aggregation())
                 .propertyState(annotation.propertyState())
+                .indexInverse(annotation.indexInverse())
                 .idOffset(annotation.idOffset())
                 .addToCatalog(annotation.addToCatalog())
                 .build()
@@ -125,6 +126,7 @@ abstract class BaseGdlSupportExtension {
             .gdlGraph(gdlGraphSetup.gdlGraph())
             .orientation(gdlGraphSetup.orientation())
             .aggregation(gdlGraphSetup.aggregation())
+            .indexInverse(gdlGraphSetup.indexInverse())
             .propertyState(gdlGraphSetup.propertyState())
             .build();
 
@@ -188,6 +190,9 @@ abstract class BaseGdlSupportExtension {
 
         @Value.Auxiliary
         PropertyState propertyState();
+
+        @Value.Auxiliary
+        boolean indexInverse();
 
         @Value.Auxiliary
         long idOffset();

@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.RelationshipCursor;
@@ -97,6 +98,15 @@ public final class UnionGraph implements CSRGraph {
             .stream()
             .map(Graph::schema)
             .reduce(GraphSchema::union)
+            .orElseThrow(() -> new IllegalArgumentException("no graphs"));
+    }
+
+    @Override
+    public GraphCharacteristics characteristics() {
+        return graphs
+            .stream()
+            .map(Graph::characteristics)
+            .reduce(GraphCharacteristics::intersect)
             .orElseThrow(() -> new IllegalArgumentException("no graphs"));
     }
 
@@ -204,6 +214,24 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
+    public void forEachInverseRelationship(long nodeId, RelationshipConsumer consumer) {
+        for (Graph graph : graphs) {
+            graph.forEachInverseRelationship(nodeId, consumer);
+        }
+    }
+
+    @Override
+    public void forEachInverseRelationship(
+        long nodeId,
+        double fallbackValue,
+        RelationshipWithPropertyConsumer consumer
+    ) {
+        for (Graph graph : graphs) {
+            graph.forEachInverseRelationship(nodeId, fallbackValue, consumer);
+        }
+    }
+
+    @Override
     public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
         return graphs
             .stream()
@@ -227,6 +255,17 @@ public final class UnionGraph implements CSRGraph {
 
         for (CSRGraph graph : graphs) {
             degree += graph.degree(nodeId);
+        }
+
+        return Math.toIntExact(degree);
+    }
+
+    @Override
+    public int degreeInverse(long nodeId) {
+        long degree = 0;
+
+        for (CSRGraph graph : graphs) {
+            degree += graph.degreeInverse(nodeId);
         }
 
         return Math.toIntExact(degree);

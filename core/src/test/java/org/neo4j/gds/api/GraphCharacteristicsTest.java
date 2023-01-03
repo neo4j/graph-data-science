@@ -60,6 +60,18 @@ class GraphCharacteristicsTest {
         assertThat(characteristics.isInverseIndexed()).isTrue();
     }
 
+    @Test
+    void intersect() {
+        var lhs = GraphCharacteristics.builder().directed().inverseIndexed().build();
+        var rhs = GraphCharacteristics.builder().directed().build();
+
+        assertThat(lhs.intersect(rhs)).satisfies(characteristics -> {
+            assertThat(characteristics.isDirected()).isTrue();
+            assertThat(characteristics.isInverseIndexed()).isFalse();
+            assertThat(characteristics.isUndirected()).isFalse();
+        });
+    }
+
     static Stream<Arguments> orientation() {
         return Stream.of(
             Arguments.of(Orientation.NATURAL, GraphCharacteristics.builder().directed().build()),

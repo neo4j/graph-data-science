@@ -34,6 +34,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.core.loading.CollectingConsumer;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -93,6 +94,67 @@ class GdlFactoryTest {
             assertThat(targetNodeId).isEqualTo(gdlFactory.nodeId("c"));
             return true;
         });
+    }
+
+    @Test
+    void testInverseIndexedRelationshipTypes() {
+        var graphFactory = GdlFactory.builder()
+            .graphProjectConfig(ImmutableGraphProjectFromGdlConfig.builder()
+                .gdlGraph("(a)-[:REL]->(b)-[:REL]->(c),(a)-[:REL]->(c)")
+                .graphName("test")
+                .indexInverse(true)
+                .build()
+            ).build();
+
+        var graph = graphFactory.build().getGraph(RelationshipType.of("REL"));
+
+        long nodeA = graphFactory.nodeId("a");
+        long nodeB = graphFactory.nodeId("b");
+        long nodeC = graphFactory.nodeId("c");
+
+        var collectingConsumer = new CollectingConsumer();
+
+        assertThat(graph.degreeInverse(nodeA)).isEqualTo(0);
+        graph.forEachInverseRelationship(nodeA, collectingConsumer);
+        assertThat(new long[0]).contains(collectingConsumer.targets.toArray());
+
+        collectingConsumer.clear();
+        assertThat(graph.degreeInverse(nodeB)).isEqualTo(1);
+        graph.forEachInverseRelationship(nodeB, collectingConsumer);
+        assertThat(new long[]{nodeA}).contains(collectingConsumer.targets.toArray());
+
+        collectingConsumer.clear();
+        assertThat(graph.degreeInverse(nodeC)).isEqualTo(2);
+        graph.forEachInverseRelationship(nodeC, collectingConsumer);
+        assertThat(new long[]{nodeB, nodeA}).contains(collectingConsumer.targets.toArray());
+    }
+
+    @Test
+    void testInverseIndexedWeightedRelationshipTypes() {
+        var graphFactory = GdlFactory.builder()
+            .graphProjectConfig(ImmutableGraphProjectFromGdlConfig.builder()
+                .gdlGraph("(a)-[:REL { prop: 42 }]->(b)-[:REL { prop: 1337 } ]->(c),(a)-[:REL { prop: 1984 }]->(c)")
+                .graphName("test")
+                .indexInverse(true)
+                .build()
+            ).build();
+
+        var graph = graphFactory.build().getGraph(RelationshipType.of("REL"), Optional.of("prop"));
+
+        var collectingConsumer = new CollectingConsumer();
+        graph.forEachInverseRelationship(graphFactory.nodeId("a"), 0, collectingConsumer);
+        assertThat(new long[0]).contains(collectingConsumer.targets.toArray());
+        assertThat(new double[0]).contains(collectingConsumer.properties.toArray());
+
+        collectingConsumer.clear();
+        graph.forEachInverseRelationship(graphFactory.nodeId("b"), 0, collectingConsumer);
+        assertThat(new long[]{graphFactory.nodeId("a")}).contains(collectingConsumer.targets.toArray());
+        assertThat(new double[]{42}).contains(collectingConsumer.properties.toArray());
+
+        collectingConsumer.clear();
+        graph.forEachInverseRelationship(graphFactory.nodeId("c"), 0, collectingConsumer);
+        assertThat(new long[]{graphFactory.nodeId("b"), graphFactory.nodeId("a")}).contains(collectingConsumer.targets.toArray());
+        assertThat(new double[]{1337, 1984}).contains(collectingConsumer.properties.toArray());
     }
 
     @Test
@@ -282,6 +344,33 @@ class GdlFactoryTest {
         assertThat(factory.dimensions().highestPossibleNodeCount()).isEqualTo(45L);
         assertThat(importResult.nodes().highestOriginalId()).isEqualTo(44L);
     }
+
+    @Test
+    void testIndexInverse() {
+        var gdlFactory = GdlFactory.builder()
+            .graphProjectConfig(ImmutableGraphProjectFromGdlConfig
+                .builder()
+                .graphName("testGraph")
+                .gdlGraph("(a)-[:REL { foo: 42 }]->(b)")
+                .indexInverse(true)
+                .build())
+            .build();
+
+        var graph = gdlFactory.build().getGraph(RelationshipType.of("REL"));
+        var sourceNodeId = gdlFactory.nodeId("a");
+        var targetNodeId = gdlFactory.nodeId("b");
+
+        assertThat(graph.degree(sourceNodeId)).isEqualTo(1);
+        graph.forEachRelationship(sourceNodeId, (s, t) -> {
+            assertThat(t).isEqualTo(targetNodeId);
+            return true;
+        });
+        graph.forEachInverseRelationship(targetNodeId, (s, t) -> {
+            assertThat(t).isEqualTo(sourceNodeId);
+            return true;
+        });
+    }
+
 
     private void assertRelationshipProperty(
         GraphStore graphStore,

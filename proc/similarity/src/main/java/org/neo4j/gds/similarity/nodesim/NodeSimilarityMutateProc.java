@@ -24,12 +24,10 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.HugeGraph;
@@ -158,7 +156,7 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
             RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(topKGraph)
                 .orientation(Orientation.NATURAL)
-                .addPropertyConfig(relationshipPropertyKey, Aggregation.NONE, DefaultValue.forDouble())
+                .addPropertyConfig(GraphFactory.PropertyConfig.of(relationshipPropertyKey))
                 .concurrency(1)
                 .executorService(Pools.DEFAULT)
                 .build();

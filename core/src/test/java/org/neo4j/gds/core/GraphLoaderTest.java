@@ -34,6 +34,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestGraphLoaderFactory;
 import org.neo4j.gds.api.Graph;
@@ -483,6 +484,24 @@ class GraphLoaderTest extends BaseTest {
             .graphStore();
 
         assertThat(graphStore.nodeLabels()).containsExactly(NodeLabel.of("AllNodes"));
+    }
+
+    @Test
+    void shouldInverseIndexRelationships() {
+        var relationshipType = RelationshipType.of("Rel");
+        var graphStore = new StoreLoaderBuilder()
+            .databaseService(db)
+            .graphName("graph")
+            .putNodeProjectionsWithIdentifier("Node", NodeProjection.all())
+            .putRelationshipProjectionsWithIdentifier(
+                relationshipType.name(),
+                RelationshipProjection.builder().type("*").indexInverse(true).build()
+            )
+            .build()
+            .graphStore();
+
+        var graph = graphStore.getGraph(relationshipType);
+        assertThat(graph.characteristics()).satisfies(c -> assertThat(c.isInverseIndexed()).isTrue());
     }
 
     static Stream<Arguments> orientationCombinations() {

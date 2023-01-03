@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -103,6 +104,42 @@ class CSRGraphStoreTest {
 
         assertThat(graphStore.relationshipCount()).isEqualTo(3);
         assertThat(graphStore.schema().relationshipSchema().isUndirected()).isEqualTo(false);
+    }
+
+    static Stream<Arguments> characteristics() {
+        return TestSupport.crossArguments(
+            () -> Stream.of(Arguments.of(true), Arguments.of(false)),
+            () -> Stream.of(Arguments.of(Orientation.NATURAL), Arguments.of(Orientation.REVERSE))
+        );
+    }
+
+    @ParameterizedTest(name = "indexInverse = {0}, orientation = {1}")
+    @MethodSource("characteristics")
+    void shouldCreateCorrectCharacteristics(boolean indexInverse, Orientation orientation) {
+        var gdlFactory = GdlFactory.builder().graphProjectConfig(
+            ImmutableGraphProjectFromGdlConfig.builder()
+                .gdlGraph("(a:A)-[:T]->(b:A), (c:A)-[:T]->(d:A)")
+                .graphName("test")
+                .indexInverse(indexInverse)
+                .orientation(orientation)
+                .build()
+        ).build();
+
+        var graphStore = gdlFactory.build();
+
+        assertThat(graphStore.relationshipCount()).isEqualTo(2);
+        assertThat(graphStore.schema().relationshipSchema().isUndirected()).isEqualTo(false);
+
+        var graph = graphStore.getGraph(RelationshipType.of("T"));
+        assertThat(graph.characteristics()).satisfies(c -> {
+            assertThat(c.isDirected()).isTrue();
+            assertThat(c.isUndirected()).isFalse();
+            if (indexInverse) {
+                assertThat(c.isInverseIndexed()).isTrue();
+            } else {
+                assertThat(c.isInverseIndexed()).isFalse();
+            }
+        });
     }
 
     static Stream<Arguments> mixedOrientation() {

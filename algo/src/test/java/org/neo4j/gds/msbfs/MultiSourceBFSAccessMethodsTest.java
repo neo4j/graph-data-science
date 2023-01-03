@@ -342,6 +342,20 @@ final class MultiSourceBFSAccessMethodsTest extends BaseTest {
             }
 
             @Override
+            public void forEachInverseRelationship(long nodeId, RelationshipConsumer consumer) {
+
+            }
+
+            @Override
+            public void forEachInverseRelationship(
+                long nodeId,
+                double fallbackValue,
+                RelationshipWithPropertyConsumer consumer
+            ) {
+
+            }
+
+            @Override
             public boolean exists(final long sourceNodeId, final long targetNodeId) {
                 return false;
             }

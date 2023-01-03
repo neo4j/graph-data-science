@@ -24,7 +24,24 @@ package org.neo4j.gds.api;
  */
 public interface Degrees {
 
+    /**
+     * Returns the number of relationships connected to that node.
+     * For undirected graphs, this includes outgoing and incoming
+     * relationships. For directed graphs, this is the number of
+     * outgoing edges.
+     */
     int degree(long nodeId);
+
+    /**
+     * Returns the number of relationships connected to that node.
+     * For directed graphs, this is the number of incoming edges.
+     * For undirected graphs, the behaviour of this method is undefined.
+     *
+     * Note, that this is an optional feature, and it is up to the implementation
+     * if this is actually supported. Check {@link org.neo4j.gds.api.Graph#characteristics()}
+     * before calling this method to verify that the graphs is inverse indexed.
+     */
+    int degreeInverse(long nodeId);
 
     /**
      * Much slower than just degree() because it may have to look up all relationships.

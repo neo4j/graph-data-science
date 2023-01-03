@@ -79,6 +79,11 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
+    public int degreeInverse(long nodeId) {
+        return graph.degreeInverse(nodeId);
+    }
+
+    @Override
     public int degreeWithoutParallelRelationships(long nodeId) {
         return graph.degreeWithoutParallelRelationships(nodeId);
     }
@@ -149,6 +154,11 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
+    public GraphCharacteristics characteristics() {
+        return graph.characteristics();
+    }
+
+    @Override
     public List<NodeLabel> nodeLabels(long mappedNodeId) {
         return graph.nodeLabels(mappedNodeId);
     }
@@ -191,6 +201,20 @@ public abstract class GraphAdapter implements Graph {
     @Override
     public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
         graph.forEachRelationship(nodeId, fallbackValue, consumer);
+    }
+
+    @Override
+    public void forEachInverseRelationship(long nodeId, RelationshipConsumer consumer) {
+        graph.forEachInverseRelationship(nodeId, consumer);
+    }
+
+    @Override
+    public void forEachInverseRelationship(
+        long nodeId,
+        double fallbackValue,
+        RelationshipWithPropertyConsumer consumer
+    ) {
+        graph.forEachInverseRelationship(nodeId, fallbackValue, consumer);
     }
 
     @Override

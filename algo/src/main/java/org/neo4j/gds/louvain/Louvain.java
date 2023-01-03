@@ -20,7 +20,6 @@
 package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipIterator;
@@ -238,7 +237,10 @@ public final class Louvain extends Algorithm<Louvain> {
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .orientation(rootGraph.schema().direction().toOrientation())
-            .addPropertyConfig("property", Aggregation.SUM, DefaultValue.forDouble())
+            .addPropertyConfig(GraphFactory.PropertyConfig.builder()
+                .propertyKey("property")
+                .aggregation(Aggregation.SUM)
+                .build())
             .executorService(executorService)
             .build();
 

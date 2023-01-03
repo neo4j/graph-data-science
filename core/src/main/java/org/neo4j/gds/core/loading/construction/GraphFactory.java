@@ -31,8 +31,10 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PartialIdMap;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -182,12 +184,25 @@ public final class GraphFactory {
             return DefaultValue.forDouble();
         }
 
-        static PropertyConfig of(String propertyKey, Aggregation aggregation, DefaultValue defaultValue) {
-            return ImmutablePropertyConfig.of(propertyKey, aggregation, defaultValue);
+        @Value.Default
+        default PropertyState propertyState() {
+            return PropertyState.TRANSIENT;
         }
 
-        static PropertyConfig of(String propertyKey, Optional<Aggregation> aggregation, Optional<DefaultValue> defaultValue) {
-            return of(propertyKey, aggregation.orElse(Aggregation.NONE), defaultValue.orElse(DefaultValue.forDouble()));
+        static ImmutablePropertyConfig.Builder builder() {
+            return ImmutablePropertyConfig.builder();
+        }
+
+        static PropertyConfig of(String propertyKey) {
+            return ImmutablePropertyConfig.builder().propertyKey(propertyKey).build();
+        }
+
+        static PropertyConfig of(String propertyKey, Aggregation aggregation, DefaultValue defaultValue) {
+            return ImmutablePropertyConfig.builder()
+                .propertyKey(propertyKey)
+                .aggregation(aggregation)
+                .defaultValue(defaultValue)
+                .build();
         }
     }
 
@@ -234,11 +249,6 @@ public final class GraphFactory {
         var projection = projectionBuilder.build();
 
         int[] propertyKeyIds = IntStream.range(0, propertyConfigs.size()).toArray();
-        String[] propertyKeys = new String[propertyConfigs.size()];
-        for (int propertyKeyId : propertyKeyIds) {
-            propertyKeys[propertyKeyId] = propertyConfigs.get(propertyKeyId).propertyKey();
-        }
-
         double[] defaultValues = propertyConfigs.stream().mapToDouble(c -> c.defaultValue().doubleValue()).toArray();
 
         int finalConcurrency = concurrency.orElse(1);
@@ -274,9 +284,7 @@ public final class GraphFactory {
             .idMap(nodes)
             .importer(singleTypeRelationshipImporter)
             .bufferSize(bufferSize)
-            .propertyKeyIds(propertyKeyIds)
-            .propertyKeys(propertyKeys)
-            .aggregations(aggregations)
+            .propertyConfigs(propertyConfigs)
             .isMultiGraph(isMultiGraph)
             .loadRelationshipProperty(loadRelationshipProperties)
             .direction(Direction.fromOrientation(actualOrientation))
@@ -352,9 +360,13 @@ public final class GraphFactory {
             return relationshipPropertyStore.values().iterator().next().values();
         });
 
+        var characteristicsBuilder = GraphCharacteristics.builder().withDirection(graphSchema.direction());
+        relationships.inverseTopology().ifPresent(__ -> characteristicsBuilder.inverseIndexed());
+
         return new HugeGraphBuilder()
             .nodes(idMap)
             .schema(graphSchema)
+            .characteristics(characteristicsBuilder.build())
             .nodeProperties(nodeProperties)
             .topology(topology)
             .inverseTopology(inverseTopology)

@@ -32,6 +32,7 @@ import org.neo4j.graphdb.Label;
 import java.util.Arrays;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInTransaction;
 
@@ -186,21 +187,52 @@ class DegreesTest extends BaseTest {
         assertEquals(2, graph.degree(nodeId("c")));
     }
 
+    @Test
+    void testIndexInverseNatural() {
+        setup(UNI_DIRECTIONAL, Orientation.NATURAL, true);
+
+        assertThat(graph.degreeInverse(nodeId("a"))).isEqualTo(0);
+        assertThat(graph.degreeInverse(nodeId("b"))).isEqualTo(1);
+        assertThat(graph.degreeInverse(nodeId("c"))).isEqualTo(2);
+    }
+
+    @Test
+    void testIndexInverseReverse() {
+        setup(UNI_DIRECTIONAL, Orientation.REVERSE, true);
+
+        assertThat(graph.degreeInverse(nodeId("a"))).isEqualTo(2);
+        assertThat(graph.degreeInverse(nodeId("b"))).isEqualTo(1);
+        assertThat(graph.degreeInverse(nodeId("c"))).isEqualTo(0);
+    }
+
     private void setup(String cypher, Orientation orientation) {
+        setup(cypher, orientation, false);
+    }
+    private void setup(String cypher, Orientation orientation, boolean indexInverse) {
         runQuery(cypher);
         GraphStore graphStore = new StoreLoaderBuilder()
             .databaseService(db)
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_OUT",
-                RelationshipProjection.of("TYPE", Orientation.NATURAL)
+                RelationshipProjection
+                    .builder()
+                    .type("TYPE")
+                    .orientation(Orientation.NATURAL)
+                    .indexInverse(indexInverse)
+                    .build()
             )
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_IN",
-                RelationshipProjection.of("TYPE", Orientation.REVERSE)
+                RelationshipProjection
+                    .builder()
+                    .type("TYPE")
+                    .orientation(Orientation.REVERSE)
+                    .indexInverse(indexInverse)
+                    .build()
             )
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_UNDIRECTED",
-                RelationshipProjection.of("TYPE", Orientation.UNDIRECTED)
+                RelationshipProjection.builder().type("TYPE").orientation(Orientation.UNDIRECTED).build()
             )
             .build()
             .graphStore();

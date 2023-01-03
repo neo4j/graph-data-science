@@ -30,6 +30,7 @@ import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyState;
@@ -648,6 +649,7 @@ public class CSRGraphStore implements GraphStore {
         var initialGraph = new HugeGraphBuilder()
             .nodes(nodes)
             .schema(graphSchema)
+            .characteristics(GraphCharacteristics.NONE)
             .nodeProperties(filteredNodeProperties)
             .topology(Relationships.Topology.EMPTY)
             .build();
@@ -684,14 +686,15 @@ public class CSRGraphStore implements GraphStore {
 
         var inverseProperties = relationship
             .inverseProperties()
-            .map(inversePropertyStore -> maybeRelationshipProperty
-                .map(propertyKey -> inversePropertyStore.get(propertyKey).values())
-                .orElseThrow(() -> new IllegalStateException(
-                    "Relationship type is inverse indexed, but is missing property. This is a bug.")));
+            .flatMap(inversePropertyStore -> maybeRelationshipProperty.map(propertyKey -> inversePropertyStore.get(propertyKey).values()));
+
+        var characteristicsBuilder = GraphCharacteristics.builder().withDirection(schema.direction());
+        relationship.inverseTopology().ifPresent(__ -> characteristicsBuilder.inverseIndexed());
 
         var initialGraph = new HugeGraphBuilder()
             .nodes(nodes)
             .schema(graphSchema)
+            .characteristics(characteristicsBuilder.build())
             .nodeProperties(filteredNodeProperties)
             .topology(relationship.topology())
             .relationshipProperties(properties)

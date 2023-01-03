@@ -149,7 +149,10 @@ class GraphAggregationPhase {
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .orientation(direction.toOrientation())
-            .addPropertyConfig("property", Aggregation.SUM, DefaultValue.forDouble())
+            .addPropertyConfig(GraphFactory.PropertyConfig.builder()
+                .propertyKey("property")
+                .aggregation(Aggregation.SUM)
+                .build())
             .executorService(executorService)
             .build();
 

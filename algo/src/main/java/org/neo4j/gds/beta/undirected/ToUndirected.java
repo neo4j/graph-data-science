@@ -113,7 +113,8 @@ public class ToUndirected extends Algorithm<SingleTypeRelationshipImportResult> 
             relationshipsBuilderBuilder.addPropertyConfig(
                 propertySchema.key(),
                 propertySchema.aggregation(),
-                propertySchema.defaultValue()
+                propertySchema.defaultValue(),
+                propertySchema.state()
             )
         );
 
