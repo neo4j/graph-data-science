@@ -130,6 +130,8 @@ public interface GraphStore {
 
     boolean hasRelationshipType(RelationshipType relationshipType);
 
+    Set<RelationshipType> inverseIndexedRelationshipTypes();
+
     // Relationship Properties
 
     boolean hasRelationshipProperty(RelationshipType relType, String propertyKey);

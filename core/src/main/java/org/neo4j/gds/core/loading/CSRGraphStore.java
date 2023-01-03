@@ -344,6 +344,16 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
+    public Set<RelationshipType> inverseIndexedRelationshipTypes() {
+        return relationships
+            .entrySet()
+            .stream()
+            .filter(entry -> entry.getValue().inverseTopology().isPresent())
+            .map(Map.Entry::getKey)
+            .collect(Collectors.toSet());
+    }
+
+    @Override
     public boolean hasRelationshipProperty(RelationshipType relType, String propertyKey) {
         return Optional
             .ofNullable(relationships.get(relType))
