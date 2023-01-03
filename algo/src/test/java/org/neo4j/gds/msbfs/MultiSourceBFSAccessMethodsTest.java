@@ -338,12 +338,12 @@ final class MultiSourceBFSAccessMethodsTest extends BaseTest {
 
             @Override
             public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
-
+                throw new UnsupportedOperationException("forEachRelationship with properties is not implemented");
             }
 
             @Override
             public void forEachInverseRelationship(long nodeId, RelationshipConsumer consumer) {
-
+                throw new UnsupportedOperationException("forEachInverseRelationship is not implemented.");
             }
 
             @Override
@@ -352,7 +352,7 @@ final class MultiSourceBFSAccessMethodsTest extends BaseTest {
                 double fallbackValue,
                 RelationshipWithPropertyConsumer consumer
             ) {
-
+                throw new UnsupportedOperationException("forEachInverseRelationship with properties is not implemented.");
             }
 
             @Override
@@ -362,7 +362,7 @@ final class MultiSourceBFSAccessMethodsTest extends BaseTest {
 
             @Override
             public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
-                throw new UnsupportedOperationException(".streamRelationships is not implemented.");
+                throw new UnsupportedOperationException("streamRelationships is not implemented.");
             }
         };
 

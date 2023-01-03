@@ -375,7 +375,7 @@ public class HugeGraph implements CSRGraph {
     public int degreeInverse(long nodeId) {
         if (inverseAdjacency == null) {
             throw new UnsupportedOperationException(
-                "Can not get inverse degree on a graph without inverse indexed relationships"
+                "Cannot get inverse degree on a graph without inverse indexed relationships"
             );
         }
         return inverseAdjacency.degree(nodeId);
@@ -490,7 +490,7 @@ public class HugeGraph implements CSRGraph {
     private PropertyCursor propertyCursorForIteration(long sourceNodeId) {
         if (!hasRelationshipProperty() || properties == null) {
             throw new UnsupportedOperationException(
-                "Can not create property cursor on a graph without relationship property"
+                "Cannot create property cursor on a graph without relationship property"
             );
         }
 
@@ -500,7 +500,7 @@ public class HugeGraph implements CSRGraph {
     private AdjacencyCursor inverseAdjacencyCursorForIteration(long sourceNodeId) {
         if (inverseAdjacency == null) {
             throw new UnsupportedOperationException(
-                "Can not create adjacency cursor on a graph without inverse indexed relationships"
+                "Cannot create adjacency cursor on a graph without inverse indexed relationships"
             );
         }
 
@@ -510,7 +510,7 @@ public class HugeGraph implements CSRGraph {
     private PropertyCursor inversePropertyCursorForIteration(long sourceNodeId) {
         if (!hasRelationshipProperty() || inverseProperties == null) {
             throw new UnsupportedOperationException(
-                "Can not create property cursor on a graph without relationship property"
+                "Cannot create property cursor on a graph without relationship property"
             );
         }
 

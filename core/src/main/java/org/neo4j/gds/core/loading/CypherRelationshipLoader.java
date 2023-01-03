@@ -28,12 +28,12 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
@@ -118,7 +118,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
                 .map(propertyColumn -> PropertyMapping.of(
                     propertyColumn,
                     propertyColumn,
-                    NodesBuilder.NO_PROPERTY_VALUE,
+                    DefaultValue.forDouble(),
                     Aggregation.NONE
                 ))
                 .collect(Collectors.toList());

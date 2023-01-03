@@ -237,7 +237,8 @@ public final class GraphFactory {
         var projectionBuilder = RelationshipProjection
             .builder()
             .type(relationshipType.name())
-            .orientation(actualOrientation);
+            .orientation(actualOrientation)
+            .indexInverse(indexInverse.orElse(false));
 
         propertyConfigs.forEach(propertyConfig -> projectionBuilder.addProperty(
             propertyConfig.propertyKey(),

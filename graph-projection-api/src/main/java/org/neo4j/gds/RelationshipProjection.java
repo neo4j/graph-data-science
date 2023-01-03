@@ -63,6 +63,16 @@ public abstract class RelationshipProjection extends ElementProjection {
         return super.properties();
     }
 
+    @Value.Check
+    protected void check() {
+        if (orientation() == Orientation.UNDIRECTED && indexInverse()) {
+            throw new IllegalArgumentException(
+                "Relationship projection `" + type() + "` cannot be UNDIRECTED and inverse indexed. " +
+                "Indexing the inverse orientation is only allowed for NATURAL and REVERSE."
+            );
+        }
+    }
+
     @Override
     public boolean projectAll() {
         return type().equals(PROJECT_ALL);

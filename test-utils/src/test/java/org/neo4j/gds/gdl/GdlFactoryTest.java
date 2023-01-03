@@ -116,17 +116,17 @@ class GdlFactoryTest {
 
         assertThat(graph.degreeInverse(nodeA)).isEqualTo(0);
         graph.forEachInverseRelationship(nodeA, collectingConsumer);
-        assertThat(new long[0]).contains(collectingConsumer.targets.toArray());
+        assertThat(collectingConsumer.targets.toArray()).isEmpty();
 
         collectingConsumer.clear();
         assertThat(graph.degreeInverse(nodeB)).isEqualTo(1);
         graph.forEachInverseRelationship(nodeB, collectingConsumer);
-        assertThat(new long[]{nodeA}).contains(collectingConsumer.targets.toArray());
+        assertThat(collectingConsumer.targets.toArray()).containsExactly(nodeA);
 
         collectingConsumer.clear();
         assertThat(graph.degreeInverse(nodeC)).isEqualTo(2);
         graph.forEachInverseRelationship(nodeC, collectingConsumer);
-        assertThat(new long[]{nodeB, nodeA}).contains(collectingConsumer.targets.toArray());
+        assertThat(collectingConsumer.targets.toArray()).containsExactlyInAnyOrder(nodeA, nodeB);
     }
 
     @Test
@@ -141,20 +141,24 @@ class GdlFactoryTest {
 
         var graph = graphFactory.build().getGraph(RelationshipType.of("REL"), Optional.of("prop"));
 
+        long nodeA = graphFactory.nodeId("a");
+        long nodeB = graphFactory.nodeId("b");
+        long nodeC = graphFactory.nodeId("c");
+
         var collectingConsumer = new CollectingConsumer();
-        graph.forEachInverseRelationship(graphFactory.nodeId("a"), 0, collectingConsumer);
-        assertThat(new long[0]).contains(collectingConsumer.targets.toArray());
-        assertThat(new double[0]).contains(collectingConsumer.properties.toArray());
+        graph.forEachInverseRelationship(nodeA, 0, collectingConsumer);
+        assertThat(collectingConsumer.targets.toArray()).isEmpty();
+        assertThat(collectingConsumer.properties.toArray()).isEmpty();
 
         collectingConsumer.clear();
-        graph.forEachInverseRelationship(graphFactory.nodeId("b"), 0, collectingConsumer);
-        assertThat(new long[]{graphFactory.nodeId("a")}).contains(collectingConsumer.targets.toArray());
-        assertThat(new double[]{42}).contains(collectingConsumer.properties.toArray());
+        graph.forEachInverseRelationship(nodeB, 0, collectingConsumer);
+        assertThat(collectingConsumer.targets.toArray()).containsExactly(nodeA);
+        assertThat(collectingConsumer.properties.toArray()).containsExactly(42);
 
         collectingConsumer.clear();
-        graph.forEachInverseRelationship(graphFactory.nodeId("c"), 0, collectingConsumer);
-        assertThat(new long[]{graphFactory.nodeId("b"), graphFactory.nodeId("a")}).contains(collectingConsumer.targets.toArray());
-        assertThat(new double[]{1337, 1984}).contains(collectingConsumer.properties.toArray());
+        graph.forEachInverseRelationship(nodeC, 0, collectingConsumer);
+        assertThat(collectingConsumer.targets.toArray()).containsExactlyInAnyOrder(nodeA, nodeB);
+        assertThat(collectingConsumer.properties.toArray()).containsExactlyInAnyOrder(1337, 1984);
     }
 
     @Test
