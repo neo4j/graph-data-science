@@ -780,6 +780,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
     public boolean isCompositeDatabase(GraphDatabaseService graphDatabaseService) {
-        return true;
+        return false;
     }
 }
