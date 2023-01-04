@@ -41,7 +41,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * @see HugeAtomicDisjointSetStruct
  * @see <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.56.8354&rep=rep1&type=pdf">the paper</a>
  * <p>
- * For the undirected case we do subgraph sampling, as introduced in [1].
+ * For undirected graphs and directed graphs with index, we use a sampling based approach, as introduced in [1].
  * <p>
  * The idea is to identify the largest component using a sampled subgraph.
  * Relationships of nodes that are already contained in the largest component are
@@ -90,7 +90,6 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
             Integer.MAX_VALUE
         );
 
-        // TODO: figure out if this still applies, especially or the sampled case
         if (ParallelUtil.threadCount(batchSize, graph.nodeCount()) > Integer.MAX_VALUE) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Too many nodes (%d) to run WCC with the given concurrency (%d) and batchSize (%d)",
@@ -111,7 +110,7 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
             ? new HugeAtomicDisjointSetStruct(nodeCount, initialComponents, config.concurrency())
             : new HugeAtomicDisjointSetStruct(nodeCount, config.concurrency());
 
-        if (graph.schema().isUndirected()) {
+        if (graph.characteristics().isUndirected() || graph.characteristics().isInverseIndexed()) {
             new SampledStrategyBuilder()
                 .graph(graph)
                 .disjointSetStruct(disjointSetStruct)

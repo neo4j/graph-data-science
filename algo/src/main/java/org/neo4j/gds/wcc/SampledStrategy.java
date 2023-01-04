@@ -37,6 +37,7 @@ import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
+import java.util.function.LongConsumer;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.utils.TerminationFlag.RUN_CHECK_NODE_COUNT;
@@ -177,7 +178,7 @@ final class SampledStrategy {
         ParallelUtil.run(tasks, executorService);
     }
 
-    static class SamplingTask implements Runnable, RelationshipConsumer{
+    static class SamplingTask implements Runnable, RelationshipConsumer {
 
         final Graph graph;
         final DisjointSetStruct components;
@@ -269,6 +270,7 @@ final class SampledStrategy {
         final DisjointSetStruct components;
         long skip;
 
+        private final RelationshipConsumer inverseConsumer;
         private final long skipComponent;
         private final Partition partition;
         private final ProgressTracker progressTracker;
@@ -288,12 +290,22 @@ final class SampledStrategy {
             this.components = components;
             this.progressTracker = progressTracker;
             this.terminationFlag = terminationFlag;
+
+            if (graph.characteristics().isInverseIndexed()) {
+                this.inverseConsumer = (sourceNodeId, targetNodeId) -> {
+                    components.union(sourceNodeId, targetNodeId);
+                    return true;
+                };
+            } else {
+                this.inverseConsumer = null;
+            }
         }
 
         @Override
         public void run() {
             var startNode = partition.startNode();
             var endNode = startNode + partition.nodeCount();
+            LongConsumer linkInverseFn = this.inverseConsumer != null ? this::linkInverse : ignored -> {};
 
             for (long node = startNode; node < endNode; node++) {
                 if (components.setIdOf(node) == skipComponent) {
@@ -309,11 +321,17 @@ final class SampledStrategy {
                         terminationFlag.assertRunning();
                     }
                 }
+                // Connect all inverse relationships for correctness.
+                linkInverseFn.accept(node);
             }
         }
 
         void link(long node) {
             graph.forEachRelationship(node, this);
+        }
+
+        void linkInverse(long node) {
+            graph.forEachInverseRelationship(node, this.inverseConsumer);
         }
 
         @Override
@@ -333,6 +351,7 @@ final class SampledStrategy {
     static final class LinkWithThresholdTask extends LinkTask implements RelationshipWithPropertyConsumer {
 
         private final double threshold;
+        private final RelationshipWithPropertyConsumer inverseConsumer;
 
         LinkWithThresholdTask(
             Graph graph,
@@ -345,11 +364,27 @@ final class SampledStrategy {
         ) {
             super(graph, partition, skipComponent, components, progressTracker, terminationFlag);
             this.threshold = threshold;
+
+            if (graph.characteristics().isInverseIndexed()) {
+                this.inverseConsumer = (sourceNodeId, targetNodeId, property) -> {
+                    if (property > threshold) {
+                        components.union(sourceNodeId, targetNodeId);
+                    }
+                    return true;
+                };
+            } else {
+                this.inverseConsumer = null;
+            }
         }
 
         @Override
         void link(long node) {
             graph.forEachRelationship(node, Wcc.defaultWeight(threshold), this);
+        }
+
+        @Override
+        void linkInverse(long node) {
+            graph.forEachInverseRelationship(node, Wcc.defaultWeight(threshold), this.inverseConsumer);
         }
 
         @Override

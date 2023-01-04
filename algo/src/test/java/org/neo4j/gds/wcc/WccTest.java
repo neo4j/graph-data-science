@@ -326,6 +326,9 @@ class WccTest {
         @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "undirected")
         private static final String UNDIRECTED = TEST_GRAPH;
 
+        @GdlGraph(orientation = Orientation.NATURAL, graphNamePrefix = "indexed")
+        private static final String INDEXED = TEST_GRAPH;
+
         @Inject
         private TestGraph naturalGraph;
 
@@ -334,6 +337,9 @@ class WccTest {
 
         @Inject
         private TestGraph undirectedGraph;
+
+        @Inject
+        private TestGraph indexedGraph;
 
         @Test
         void computeNatural() {
@@ -348,6 +354,11 @@ class WccTest {
         @Test
         void computeUndirected() {
             assertResults(undirectedGraph);
+        }
+
+        @Test
+        void computeIndexed() {
+            assertResults(indexedGraph);
         }
 
         private void assertResults(TestGraph graph) {

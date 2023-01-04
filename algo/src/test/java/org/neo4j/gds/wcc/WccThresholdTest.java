@@ -23,8 +23,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.CommunityHelper;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -73,15 +71,37 @@ class WccThresholdTest {
     @GdlGraph(orientation = UNDIRECTED, graphNamePrefix = "undirected")
     private static final String UNDIRECTED_DB = DB;
 
+    @GdlGraph(orientation = NATURAL, indexInverse = true, graphNamePrefix = "indexed")
+    private static final String DIRECTED_INDEXED_DB = DB;
+
     @Inject
     private TestGraph graph;
 
     @Inject
     private TestGraph undirectedGraph;
 
+    @Inject
+    private TestGraph indexedGraph;
+
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.wcc.WccThresholdTest#thresholdParamsAndOrientation")
-    void testThreshold(double threshold, String[][] expectedComponents, Orientation orientation) {
+    @MethodSource("org.neo4j.gds.wcc.WccThresholdTest#thresholdParams")
+    void testDirected(double threshold, String[][] expectedComponents) {
+        assertResults(threshold, graph, expectedComponents);
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.wcc.WccThresholdTest#thresholdParams")
+    void testUndirected(double threshold, String[][] expectedComponents) {
+        assertResults(threshold, undirectedGraph, expectedComponents);
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.wcc.WccThresholdTest#thresholdParams")
+    void testIndexed(double threshold, String[][] expectedComponents) {
+        assertResults(threshold, indexedGraph, expectedComponents);
+    }
+
+    private void assertResults(double threshold, TestGraph graph, String[][] expectedComponents) {
         WccStreamConfig wccConfig = ImmutableWccStreamConfig
             .builder()
             .threshold(threshold)
@@ -89,7 +109,7 @@ class WccThresholdTest {
             .build();
 
         DisjointSetStruct dss = new Wcc(
-            orientation == NATURAL ? graph: undirectedGraph,
+            graph,
             Pools.DEFAULT,
             DEFAULT_BATCH_SIZE,
             wccConfig,
@@ -103,13 +123,6 @@ class WccThresholdTest {
         });
 
         CommunityHelper.assertCommunities(communityData, ids(graph::toMappedNodeId, expectedComponents));
-    }
-
-    static Stream<Arguments> thresholdParamsAndOrientation() {
-        return TestSupport.crossArguments(
-            WccThresholdTest::thresholdParams,
-            () -> Stream.of(Arguments.of(NATURAL), Arguments.of(UNDIRECTED))
-        );
     }
 
     static Stream<Arguments> thresholdParams() {
