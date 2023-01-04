@@ -1,0 +1,26 @@
+[[alpha-algorithms-topological-sort]]
+[.alpha]
+= Topological Sort
+:description: This section describes the Topological Sort algorithm in the Neo4j Graph Data Science library.
+:entity: graph
+:result: topological sorting of the nodes
+:algorithm: Topological Sort
+
+
+include::partial$/operations-reference/alpha-note.adoc[]
+
+
+[[algorithms-topological-sort-intro]]
+== Introduction
+
+A topological sort of nodes in a graph is an ordering of the nodes in the graph where every node appears only after all the nodes pointing to it have appeared.
+For example, for a graph with 4 nodes and these relations: `a->b`, `a->c`, `b->d`, `c->d`, there are two acceptable topological sorts: `a, b, c, d` and `a, c, b, d`.
+
+Topological order of the nodes is defined only for directed acyclic graphs (DAGs). See below for the expected result for graphs with cycles.
+
+include::partial$/operations-reference/alpha-note.adoc[]
+
+
+=== Applications
+
+Topological ordering of the nodes is beneficial when you want to guarantee a node will only be consumed after its dependencies were consumed.

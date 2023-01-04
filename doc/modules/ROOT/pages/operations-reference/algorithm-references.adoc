@@ -282,6 +282,7 @@
 .2+<.^|xref:algorithms/strongly-connected-components.adoc[Strongly Connected Components]
 | `gds.alpha.scc.stream`
 | `gds.alpha.scc.write`
+| xref:algorithms/alpha/topological-sort.adoc[Topological Sort] | `gds.alpha.topologicalSort.stream`
 .2+<.^|xref:alpha-algorithms/scale-properties.adoc[Scale Properties]
 | `gds.alpha.scaleProperties.mutate`
 | `gds.alpha.scaleProperties.stream`
