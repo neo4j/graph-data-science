@@ -30,6 +30,7 @@ import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.configuration.connectors.ConnectorType;
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.dbms.systemgraph.CommunityTopologyGraphDbmsModel;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.BoltTransactionRunner;
@@ -111,6 +112,7 @@ import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
+import org.neo4j.kernel.database.DatabaseReference;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.database.NormalizedDatabaseName;
 import org.neo4j.kernel.database.TestDatabaseIdRepository;
@@ -897,5 +899,20 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         IdGenerator idGenerator = generatorFactory.get(RecordIdType.NODE);
 
         idGenerator.nextConsecutiveIdRange(size, false, cursorContext);
+    }
+
+    @Override
+    public boolean isCompositeDatabase(GraphDatabaseService graphDatabaseService) {
+        var dbms = GraphDatabaseApiProxy.resolveDependency(graphDatabaseService, DatabaseManagementService.class);
+        var systemDb = dbms.database(GraphDatabaseSettings.SYSTEM_DATABASE_NAME);
+        try (var tx = systemDb.beginTx()) {
+            var databaseTopology = new CommunityTopologyGraphDbmsModel(tx);
+            var compositeDatabases = databaseTopology.getAllCompositeDatabaseReferences()
+                .stream()
+                .map(DatabaseReference.Composite::databaseId)
+                .collect(Collectors.toSet());
+
+            return compositeDatabases.contains(GraphDatabaseApiProxy.databaseId(graphDatabaseService));
+        }
     }
 }

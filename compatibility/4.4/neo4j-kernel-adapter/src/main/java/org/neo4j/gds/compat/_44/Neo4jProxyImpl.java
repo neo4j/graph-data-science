@@ -777,4 +777,9 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
         idGenerator.nextConsecutiveIdRange(size, false, cursorContext);
     }
+
+    @Override
+    public boolean isCompositeDatabase(GraphDatabaseService graphDatabaseService) {
+        return true;
+    }
 }

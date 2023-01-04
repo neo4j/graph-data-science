@@ -19,30 +19,14 @@
  */
 package org.neo4j.gds.projection;
 
-import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.dbms.systemgraph.CommunityTopologyGraphDbmsModel;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.core.Settings;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.kernel.database.DatabaseReference;
-
-import java.util.stream.Collectors;
 
 public final class DatabaseTopologyHelper {
 
     private DatabaseTopologyHelper() {}
 
     public static boolean isCompositeDatabase(GraphDatabaseService graphDatabaseService) {
-        var dbms = GraphDatabaseApiProxy.resolveDependency(graphDatabaseService, DatabaseManagementService.class);
-        var systemDb = dbms.database(Settings.systemDatabaseName());
-        try (var tx = systemDb.beginTx()) {
-            var databaseTopology = new CommunityTopologyGraphDbmsModel(tx);
-            var compositeDatabases = databaseTopology.getAllCompositeDatabaseReferences()
-                .stream()
-                .map(DatabaseReference.Composite::databaseId)
-                .collect(Collectors.toSet());
-
-            return compositeDatabases.contains(GraphDatabaseApiProxy.databaseId(graphDatabaseService));
-        }
+        return Neo4jProxy.isCompositeDatabase(graphDatabaseService);
     }
 }
