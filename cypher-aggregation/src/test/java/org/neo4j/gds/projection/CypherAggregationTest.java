@@ -659,6 +659,23 @@ class CypherAggregationTest extends BaseProcTest {
     }
 
     @Test
+    void testRespectInverseIndexedRelTypes() {
+        runQuery(
+            "UNWIND [" +
+            " {s: 0, t: 1, type: 'INDEXED'}, " +
+            " {s: 1, t: 2, type: 'REL'} " +
+            "] as d" +
+            " RETURN gds.alpha.graph.project('g', d.s, d.t, null, {relationshipType: d.type}, {inverseIndexedRelationshipTypes: ['INDEXED']})"
+        );
+
+        assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
+        var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
+
+        assertThat(graphStore.inverseIndexedRelationshipTypes())
+            .containsExactlyInAnyOrder(org.neo4j.gds.RelationshipType.of("INDEXED"));
+    }
+
+    @Test
     void testPipelinePseudoAnonymous() {
         assertCypherResult(
             "MATCH (s:A)-[:REL]->(t:A) " +

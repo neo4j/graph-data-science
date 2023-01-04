@@ -470,10 +470,14 @@ public final class CypherAggregation {
                 ? UNDIRECTED
                 : NATURAL;
 
+            List<String> inverseIndexedRelationshipTypes = this.config.inverseIndexedRelationshipTypes();
+            boolean indexInverse = inverseIndexedRelationshipTypes.contains(relType.name) || inverseIndexedRelationshipTypes.contains("*");
+
             var relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(this.idMapBuilder)
                 .orientation(orientation)
                 .aggregation(Aggregation.NONE)
+                .indexInverse(indexInverse)
                 .concurrency(this.config.readConcurrency());
 
             // There is a potential race between initializing the relationships builder and the
@@ -733,6 +737,11 @@ public final class CypherAggregation {
 
         @org.immutables.value.Value.Default
         default List<String> undirectedRelationshipTypes() {
+            return List.of();
+        }
+
+        @org.immutables.value.Value.Default
+        default List<String> inverseIndexedRelationshipTypes() {
             return List.of();
         }
 
