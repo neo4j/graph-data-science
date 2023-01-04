@@ -115,14 +115,10 @@ public class GraphSampleConstructor {
         var filteredSchema = GraphStoreFilter.filterSchema(
             inputGraphStore.schema(),
             ImmutableFilteredNodes.of(idMap, nodePropertyStore),
-            filteredRelationships
+            filteredRelationships.keySet()
         );
 
-        var relationshipImportResult = RelationshipImportResult.of(
-            filteredRelationships.topology(),
-            filteredRelationships.propertyStores(),
-            filteredSchema.relationshipSchema().directions()
-        );
+        var relationshipImportResult = RelationshipImportResult.of(filteredRelationships);
 
         var outputGraphStore = new GraphStoreBuilder()
             .databaseId(inputGraphStore.databaseId())
