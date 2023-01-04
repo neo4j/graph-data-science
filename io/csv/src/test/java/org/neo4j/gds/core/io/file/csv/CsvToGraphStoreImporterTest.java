@@ -42,26 +42,31 @@ class CsvToGraphStoreImporterTest {
     @ValueSource(ints = {1, 4})
     void shouldImportProperties(int concurrency) throws URISyntaxException {
 
-        var exporter = new CsvToGraphStoreImporter(concurrency, importPath(), Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
-        var userGraphStore = exporter.run();
+        var importer = new CsvToGraphStoreImporter(
+            concurrency,
+            importPath(),
+            Neo4jProxy.testLog(),
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+        var userGraphStore = importer.run();
 
         var graphStore = userGraphStore.graphStore();
 
         assertThat(userGraphStore.userName()).isEqualTo("UserA");
 
         var expectedGraph = TestSupport.fromGdl(
-                                            "  (n0:A {prop1: 21, prop2: [0.1, 0.00002]})" +
-                                            ", (n1:A {prop1: 42, prop2: [0.3, -0.4]})" +
-                                            ", (n2:A {prop1: 23, prop2: [0.5]})" +
-                                            ", (n3:A {prop1: 24, prop2: NULL})" +
-                                            ", (:A { prop1: 25, prop2: [0.6, 0.7]})" +
-                                            ", (:B)" +
-                                            ", (:B)" +
-                                            ", (:B)" +
-                                            ", (:B)" +
-                                            ", (:B)" +
-                                            ", (n0)-[:REL {weight: 1.5, height: 2.2}]->(n1)-[:REL {weight: 4.0, height: 2.3}]->(n2)-[:REL {weight: 4.2, height: 2.4}]->(n3)" +
-                                            ", (n1)-[:REL1]->(n2)-[:REL1]->(n3)"
+            "  (n0:A {thisisaverylongnameintentionallytotriggerquoting: 21, prop2: [0.1, 0.00002]})" +
+            ", (n1:A {thisisaverylongnameintentionallytotriggerquoting: 42, prop2: [0.3, -0.4]})" +
+            ", (n2:A {thisisaverylongnameintentionallytotriggerquoting: 23, prop2: [0.5]})" +
+            ", (n3:A {thisisaverylongnameintentionallytotriggerquoting: 24, prop2: NULL})" +
+            ", (:A { thisisaverylongnameintentionallytotriggerquoting: 25, prop2: [0.6, 0.7]})" +
+            ", (:B)" +
+            ", (:B)" +
+            ", (:B)" +
+            ", (:B)" +
+            ", (:B)" +
+            ", (n0)-[:REL {weight: 1.5, height: 2.2}]->(n1)-[:REL {weight: 4.0, height: 2.3}]->(n2)-[:REL {weight: 4.2, height: 2.4}]->(n3)" +
+            ", (n1)-[:REL1]->(n2)-[:REL1]->(n3)"
         );
         var actualGraph = graphStore.getUnion();
         assertGraphEquals(expectedGraph, actualGraph);

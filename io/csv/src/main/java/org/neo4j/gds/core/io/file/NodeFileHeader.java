@@ -46,9 +46,8 @@ public interface NodeFileHeader extends FileHeader<NodeSchema, PropertySchema> {
         return schema.filter(nodeLabels).unionProperties();
     }
 
-    static NodeFileHeader of(String headerLine, String[] nodeLabels) {
+    static NodeFileHeader of(String[] csvColumns, String[] nodeLabels) {
         var builder = ImmutableNodeFileHeader.builder();
-        String[] csvColumns = headerLine.split(",");
         if (csvColumns.length == 0 || !csvColumns[0].equals(CsvNodeVisitor.ID_COLUMN_NAME)) {
             throw new IllegalArgumentException(StringFormatting.formatWithLocale("First column of header must be %s.", CsvNodeVisitor.ID_COLUMN_NAME));
         }

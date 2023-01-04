@@ -56,7 +56,14 @@ public final class CsvTestSupport {
             .entrySet()
             .stream()
             .sorted(Map.Entry.comparingByKey())
-            .forEach((entry) -> expectedContent.add(entry.getKey() + ":" + entry.getValue().valueType().csvName()));
+            .forEach(entry -> {
+                var propAndType = entry.getKey() + ":" + entry.getValue().valueType().csvName();
+                // magic value from CsvEncoder.MAX_QUOTE_CHECK
+                if (propAndType.length() > 24) {
+                    propAndType = "\"" + propAndType + "\"";
+                }
+                expectedContent.add(propAndType);
+            });
 
         assertThat(path.resolve(fileName)).hasContent(String.join(",", expectedContent));
     }

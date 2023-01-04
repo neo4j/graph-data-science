@@ -77,9 +77,9 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         ", (b:A:B { prop1: 1, prop2: 43})" +
         ", (c:A:C { prop1: 2, prop2: 44, prop3: [1L, 9L, 8L, 4L] })" +
         ", (d:B { prop1: 3 })" +
-        ", (a)-[:REL1 { prop1: 0, prop2: 42 }]->(a)" +
-        ", (a)-[:REL1 { prop1: 1, prop2: 43 }]->(b)" +
-        ", (b)-[:REL1 { prop1: 2, prop2: 44 }]->(a)" +
+        ", (a)-[:REL1 { averylongnamethatisgreaterthantwentyfour: 0, prop2: 42 }]->(a)" +
+        ", (a)-[:REL1 { averylongnamethatisgreaterthantwentyfour: 1, prop2: 43 }]->(b)" +
+        ", (b)-[:REL1 { averylongnamethatisgreaterthantwentyfour: 2, prop2: 44 }]->(a)" +
         ", (b)-[:REL2 { prop3: 3, prop4: 45 }]->(c)" +
         ", (c)-[:REL2 { prop3: 4, prop4: 46 }]->(d)" +
         ", (d)-[:REL2 { prop3: 5, prop4: 47 }]->(a)";
@@ -435,7 +435,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             RELATIONSHIP_SCHEMA_FILE_NAME,
             List.of(
                 CsvRelationshipSchemaVisitorTest.RELATIONSHIP_SCHEMA_COLUMNS,
-                List.of("REL1", "UNDIRECTED", "prop1", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name()),
+                List.of("REL1", "UNDIRECTED", "averylongnamethatisgreaterthantwentyfour", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name()),
                 List.of("REL1", "UNDIRECTED", "prop2", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name()),
                 List.of("REL2", "UNDIRECTED", "prop3", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name()),
                 List.of("REL2", "UNDIRECTED", "prop4", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name())
