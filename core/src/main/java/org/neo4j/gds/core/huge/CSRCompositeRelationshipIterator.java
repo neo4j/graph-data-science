@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.huge;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
@@ -30,25 +31,31 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
     public static final AdjacencyProperties[] EMPTY_PROPERTIES = new AdjacencyProperties[0];
 
     private final AdjacencyList adjacencyList;
+    @Nullable private final AdjacencyList inverseAdjacencyList;
     private final String[] propertyKeys;
     private final AdjacencyProperties[] properties;
     private final double[] propertyBuffer;
+    @Nullable private final AdjacencyProperties[] inverseProperties;
 
     private AdjacencyCursor topologyCursor;
     private final PropertyCursor[] propertyCursors;
 
     public CSRCompositeRelationshipIterator(
         AdjacencyList adjacencyList,
+        @Nullable AdjacencyList inverseAdjacencyList,
         String[] propertyKeys,
-        AdjacencyProperties[] properties
+        AdjacencyProperties[] properties,
+        @Nullable AdjacencyProperties[] inverseProperties
     ) {
         var propertyCount = propertyKeys.length;
 
         assert properties.length == propertyCount;
 
         this.adjacencyList = adjacencyList;
+        this.inverseAdjacencyList = inverseAdjacencyList;
         this.propertyKeys = propertyKeys;
         this.properties = properties;
+        this.inverseProperties = inverseProperties;
 
         this.propertyBuffer = new double[propertyCount];
         this.topologyCursor = AdjacencyCursor.empty();
@@ -66,8 +73,27 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
 
     @Override
     public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
+        forEachRelationship(nodeId, consumer, adjacencyList, properties);
+    }
+
+    @Override
+    public void forEachInverseRelationship(long nodeId, RelationshipConsumer consumer) {
+        if (inverseAdjacencyList == null) {
+            throw new UnsupportedOperationException(
+                "Cannot create composite iterator on a relationship type that is not inverse indexed"
+            );
+        }
+        forEachRelationship(nodeId, consumer, inverseAdjacencyList, inverseProperties);
+    }
+
+    private void forEachRelationship(
+        long nodeId,
+        RelationshipConsumer consumer,
+        AdjacencyList adjacency,
+        AdjacencyProperties[] props
+    ) {
         // init adjacency cursor
-        var adjacencyCursor = adjacencyList.adjacencyCursor(topologyCursor, nodeId);
+        var adjacencyCursor = adjacency.adjacencyCursor(topologyCursor, nodeId);
         if (!adjacencyCursor.hasNextVLong()) {
             return;
         }
@@ -75,7 +101,7 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
         topologyCursor = adjacencyCursor;
         var propertyCount = propertyKeys.length;
         for (int propertyIdx = 0; propertyIdx < propertyCount; propertyIdx++) {
-            propertyCursors[propertyIdx] = properties[propertyIdx].propertyCursor(nodeId);
+            propertyCursors[propertyIdx] = props[propertyIdx].propertyCursor(nodeId);
         }
 
         while (adjacencyCursor.hasNextVLong()) {
@@ -99,8 +125,10 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
     public CompositeRelationshipIterator concurrentCopy() {
         return new CSRCompositeRelationshipIterator(
             adjacencyList,
+            inverseAdjacencyList,
             propertyKeys,
-            properties
+            properties,
+            inverseProperties
         );
     }
 }

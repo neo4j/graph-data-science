@@ -565,6 +565,18 @@ public class CSRGraphStore implements GraphStore {
 
         var relationship = relationships.get(relationshipType);
         var adjacencyList = relationship.topology().adjacencyList();
+        var inverseAdjacencyList = relationship
+            .inverseTopology()
+            .map(Relationships.Topology::adjacencyList)
+            .orElse(null);
+        var inverseProperties = relationship.inverseProperties()
+            .map(propertyStore -> propertyKeys
+                .stream()
+                .map(propertyStore::get)
+                .map(RelationshipProperty::values)
+                .map(Relationships.Properties::propertiesList)
+                .toArray(AdjacencyProperties[]::new))
+            .orElse(CSRCompositeRelationshipIterator.EMPTY_PROPERTIES);
 
         var properties = propertyKeys.isEmpty() ? CSRCompositeRelationshipIterator.EMPTY_PROPERTIES : propertyKeys
             .stream()
@@ -573,7 +585,13 @@ public class CSRGraphStore implements GraphStore {
             .map(Relationships.Properties::propertiesList)
             .toArray(AdjacencyProperties[]::new);
 
-        return new CSRCompositeRelationshipIterator(adjacencyList, propertyKeys.toArray(new String[0]), properties);
+        return new CSRCompositeRelationshipIterator(
+            adjacencyList,
+            inverseAdjacencyList,
+            propertyKeys.toArray(new String[0]),
+            properties,
+            inverseProperties
+        );
     }
 
     @Override

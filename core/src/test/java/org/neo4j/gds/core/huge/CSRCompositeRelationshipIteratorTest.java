@@ -38,12 +38,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
+import java.util.function.BiConsumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
 class CSRCompositeRelationshipIteratorTest {
     @GdlGraph
+    @GdlGraph(graphNamePrefix = "inverse", indexInverse = true)
     private static final String DB =
         "  (a), (b), (c)" +
         ", (a)-[:T1 {prop1: 42.0D, prop2: 84.0D, prop3: 1337.0D}]->(b)" +
@@ -59,9 +61,13 @@ class CSRCompositeRelationshipIteratorTest {
 
     @Inject
     GraphStore graphStore;
+    @Inject
+    GraphStore inverseGraphStore;
 
     @Inject
     IdFunction idFunction;
+    @Inject
+    IdFunction inverseIdFunction;
 
     @Test
     void canIterateSingleProperty() {
@@ -89,7 +95,39 @@ class CSRCompositeRelationshipIteratorTest {
     }
 
     @Test
-    void canIterateMultipleProperty() {
+    void canInverselyIterateSingleProperty() {
+        var iterator = inverseGraphStore.getCompositeRelationshipIterator(
+            RelationshipType.of("T1"),
+            List.of("prop1")
+        );
+
+        assertInverseIteration(
+            iterator,
+            inverseIdFunction.of("a"),
+            Map.of(
+                inverseIdFunction.of("b"), List.of(1.0D)
+            )
+        );
+
+        assertInverseIteration(
+            iterator,
+            inverseIdFunction.of("b"),
+            Map.of(
+                inverseIdFunction.of("a"), List.of(42.0D)
+            )
+        );
+
+        assertInverseIteration(
+            iterator,
+            inverseIdFunction.of("c"),
+            Map.of(
+                inverseIdFunction.of("b"), List.of(4.0D)
+            )
+        );
+    }
+
+    @Test
+    void canIterateMultipleProperties() {
         var iterator = graphStore.getCompositeRelationshipIterator(
             RelationshipType.of("T1"),
             List.of("prop1", "prop2", "prop3")
@@ -109,6 +147,38 @@ class CSRCompositeRelationshipIteratorTest {
             Map.of(
                 idFunction.of("a"), List.of(1.0D, 2.0D, 3.0D),
                 idFunction.of("c"), List.of(4.0D, 5.0D, 6.0D)
+            )
+        );
+    }
+
+    @Test
+    void canInverselyIterateMultipleProperties() {
+        var iterator = inverseGraphStore.getCompositeRelationshipIterator(
+            RelationshipType.of("T1"),
+            List.of("prop1", "prop2", "prop3")
+        );
+
+        assertInverseIteration(
+            iterator,
+            inverseIdFunction.of("a"),
+            Map.of(
+                inverseIdFunction.of("b"), List.of(1.0D, 2.0D, 3.0D)
+            )
+        );
+
+        assertInverseIteration(
+            iterator,
+            inverseIdFunction.of("b"),
+            Map.of(
+                inverseIdFunction.of("a"), List.of(42.0D, 84.0D, 1337.0D)
+            )
+        );
+
+        assertInverseIteration(
+            iterator,
+            inverseIdFunction.of("c"),
+            Map.of(
+                inverseIdFunction.of("b"), List.of(4.0D, 5.0D, 6.0D)
             )
         );
     }
@@ -219,8 +289,10 @@ class CSRCompositeRelationshipIteratorTest {
         String[] propertyKeys = {"prop"};
         var iterator = new CSRCompositeRelationshipIterator(
             graph.relationshipTopology().adjacencyList(),
+            null,
             propertyKeys,
-            properties
+            properties,
+            null
         );
 
         var phaser = new Phaser(5);
@@ -241,12 +313,29 @@ class CSRCompositeRelationshipIteratorTest {
     }
 
     private void assertIteration(
-        CompositeRelationshipIterator iterator,
+        CompositeRelationshipIterator iter,
+        long nodeId,
+        Map<Long, List<Double>> expected
+    ) {
+        assertIteration(iter::forEachRelationship, nodeId, expected);
+    }
+
+    private void assertInverseIteration(
+        CompositeRelationshipIterator iter,
+        long nodeId,
+        Map<Long, List<Double>> expected
+    ) {
+        assertIteration(iter::forEachInverseRelationship, nodeId, expected);
+    }
+
+    private void assertIteration(
+        BiConsumer<Long, CompositeRelationshipIterator.RelationshipConsumer> consumer,
         long nodeId,
         Map<Long, List<Double>> expected
     ) {
         List<Long> seenTargets = new ArrayList<>();
-        iterator.forEachRelationship(nodeId, (source, target, properties) -> {
+
+        consumer.accept(nodeId, (source, target, properties) -> {
             assertThat(source).isEqualTo(nodeId);
 
             seenTargets.add(target);
