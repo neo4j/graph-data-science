@@ -415,10 +415,11 @@ class GraphListProcTest extends BaseProcTest {
                 "configuration", new Condition<>(config -> {
                     assertThat(config)
                         .asInstanceOf(stringObjectMapAssertFactory())
-                        .hasSize(3)
+                        .hasSize(4)
                         .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
                         .hasEntrySatisfying("jobId", jobId -> assertThat(jobId).isNotNull())
-                        .hasEntrySatisfying("undirectedRelationshipTypes", t -> assertThat(t).isEqualTo(List.of()));
+                        .hasEntrySatisfying("undirectedRelationshipTypes", t -> assertThat(t).isEqualTo(List.of()))
+                        .hasEntrySatisfying("inverseIndexedRelationshipTypes", t -> assertThat(t).isEqualTo(List.of()));
 
                     return true;
                 }, "Assert Cypher Aggregation `configuration` map"),
