@@ -227,7 +227,7 @@ The action body is a JSON document containing the name of the graph or database 
 
 [NOTE]
 ====
-Arrow import processes will be automatically if now data or instructions were received within a configurable timeout.
+Arrow import processes will be aborted automatically if no data or instructions were received within a configurable timeout.
 The timeout can be configured via the `gds.arrow.abortion_timeout` setting, for more information see the xref:installation/installation-apache-arrow.adoc[installation chapter].
 ====
 
