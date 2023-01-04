@@ -538,7 +538,7 @@ public class CSRGraphStore implements GraphStore {
 
     @Override
     public CompositeRelationshipIterator getCompositeRelationshipIterator(
-        RelationshipType relationshipType, List<String> propertyKeys
+        RelationshipType relationshipType, Collection<String> propertyKeys
     ) {
         if (!relationshipTypes().contains(relationshipType)) {
             throw new IllegalArgumentException(prettySuggestions(formatWithLocale("Unknown relationship type `%s`.",
