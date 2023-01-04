@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.cursors.LongIntCursor;
 import org.immutables.builder.Builder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipConsumer;
+import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
@@ -100,7 +101,15 @@ final class SampledStrategy {
     private void sampleSubgraph(DisjointSetStruct components, List<Partition> partitions) {
         var tasks = partitions
             .stream()
-            .map(partition -> new SampledStrategy.SamplingTask(
+            .map(partition -> this.threshold.isPresent()
+                ? new SamplingWithThresholdTask(
+                graph,
+                threshold.get(),
+                partition,
+                disjointSetStruct,
+                progressTracker,
+                terminationFlag
+            ) : new SamplingTask(
                 graph,
                 partition,
                 components,
@@ -147,7 +156,16 @@ final class SampledStrategy {
     private void linkRemaining(DisjointSetStruct components, List<Partition> partitions, long largestComponent) {
         var tasks = partitions
             .stream()
-            .map(partition -> new SampledStrategy.LinkTask(
+            .map(partition -> this.threshold.isPresent()
+                ? new LinkWithThresholdTask(
+                graph,
+                threshold.get(),
+                partition,
+                largestComponent,
+                components,
+                progressTracker,
+                terminationFlag
+            ) : new SampledStrategy.LinkTask(
                 graph,
                 partition,
                 largestComponent,
@@ -159,15 +177,15 @@ final class SampledStrategy {
         ParallelUtil.run(tasks, executorService);
     }
 
-    static final class SamplingTask implements Runnable, RelationshipConsumer {
+    static class SamplingTask implements Runnable, RelationshipConsumer{
 
-        private final Graph graph;
+        final Graph graph;
+        final DisjointSetStruct components;
+        long limit;
 
         private final Partition partition;
-        private final DisjointSetStruct components;
         private final ProgressTracker progressTracker;
         private final TerminationFlag terminationFlag;
-        private long limit;
 
         SamplingTask(
             Graph graph,
@@ -190,8 +208,7 @@ final class SampledStrategy {
 
             for (long node = startNode; node < endNode; node++) {
                 reset();
-                graph.forEachRelationship(node, this);
-
+                sample(node);
                 if (node % RUN_CHECK_NODE_COUNT == 0) {
                     terminationFlag.assertRunning();
                 }
@@ -199,9 +216,13 @@ final class SampledStrategy {
             }
         }
 
+        void sample(long node) {
+            graph.forEachRelationship(node, this);
+        }
+
         @Override
-        public boolean accept(long s, long t) {
-            components.union(s, t);
+        public boolean accept(long sourceNodeId, long targetNodeId) {
+            components.union(sourceNodeId, targetNodeId);
             limit--;
             return limit != 0;
         }
@@ -211,16 +232,47 @@ final class SampledStrategy {
         }
     }
 
-    static final class LinkTask implements Runnable, RelationshipConsumer {
+    static final class SamplingWithThresholdTask extends SamplingTask implements RelationshipWithPropertyConsumer {
 
-        private final Graph graph;
+        private final double threshold;
+
+        SamplingWithThresholdTask(
+            Graph graph,
+            double threshold,
+            Partition partition,
+            DisjointSetStruct components,
+            ProgressTracker progressTracker,
+            TerminationFlag terminationFlag
+        ) {
+            super(graph, partition, components, progressTracker, terminationFlag);
+            this.threshold = threshold;
+        }
+
+        @Override
+        void sample(long node) {
+            graph.forEachRelationship(node, Wcc.defaultWeight(this.threshold), this);
+        }
+
+        @Override
+        public boolean accept(long sourceNodeId, long targetNodeId, double property) {
+            if (property > this.threshold) {
+                components.union(sourceNodeId, targetNodeId);
+                limit--;
+            }
+            return limit != 0;
+        }
+    }
+
+    static class LinkTask implements Runnable, RelationshipConsumer {
+
+        final Graph graph;
+        final DisjointSetStruct components;
+        long skip;
 
         private final long skipComponent;
         private final Partition partition;
-        private final DisjointSetStruct components;
         private final ProgressTracker progressTracker;
         private final TerminationFlag terminationFlag;
-        private long skip;
 
         LinkTask(
             Graph graph,
@@ -250,7 +302,7 @@ final class SampledStrategy {
                 var degree = graph.degree(node);
                 if (degree > NEIGHBOR_ROUNDS) {
                     reset();
-                    graph.forEachRelationship(node, this);
+                    link(node);
 
                     progressTracker.logProgress(degree - NEIGHBOR_ROUNDS);
                     if (node % RUN_CHECK_NODE_COUNT == 0) {
@@ -260,17 +312,55 @@ final class SampledStrategy {
             }
         }
 
+        void link(long node) {
+            graph.forEachRelationship(node, this);
+        }
+
         @Override
-        public boolean accept(long source, long target) {
+        public boolean accept(long sourceNodeId, long targetNodeId) {
             skip++;
             if (skip > NEIGHBOR_ROUNDS) {
-                components.union(source, target);
+                components.union(sourceNodeId, targetNodeId);
             }
             return true;
         }
 
         void reset() {
             skip = 0;
+        }
+    }
+
+    static final class LinkWithThresholdTask extends LinkTask implements RelationshipWithPropertyConsumer {
+
+        private final double threshold;
+
+        LinkWithThresholdTask(
+            Graph graph,
+            double threshold,
+            Partition partition,
+            long skipComponent,
+            DisjointSetStruct components,
+            ProgressTracker progressTracker,
+            TerminationFlag terminationFlag
+        ) {
+            super(graph, partition, skipComponent, components, progressTracker, terminationFlag);
+            this.threshold = threshold;
+        }
+
+        @Override
+        void link(long node) {
+            graph.forEachRelationship(node, Wcc.defaultWeight(threshold), this);
+        }
+
+        @Override
+        public boolean accept(long sourceNodeId, long targetNodeId, double property) {
+            if (property > threshold) {
+                skip++;
+                if (skip > NEIGHBOR_ROUNDS) {
+                    components.union(sourceNodeId, targetNodeId);
+                }
+            }
+            return true;
         }
     }
 }

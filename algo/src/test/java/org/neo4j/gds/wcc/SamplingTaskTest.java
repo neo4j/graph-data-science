@@ -46,7 +46,6 @@ class SamplingTaskTest {
         ", (a)-->(d)" +
         ", (d)-->(e)";
 
-
     @Inject
     private Graph graph;
 
@@ -73,6 +72,10 @@ class SamplingTaskTest {
         CommunityHelper.assertCommunities(
             actualCommunities,
             List.of(
+                // (a)-->(b) => union
+                // (a)-->(c) => union
+                // (a)-->(d) => skipped due to NEIGHBOR_ROUNDS = 2
+                // (d)-->(e) => union
                 List.of(idFunction.of("a"), idFunction.of("b"), idFunction.of("c")),
                 List.of(idFunction.of("d"), idFunction.of("e"))
             )

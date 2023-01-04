@@ -37,17 +37,14 @@ import java.util.List;
 import static org.neo4j.gds.Orientation.NATURAL;
 
 @GdlExtension
-class LinkTaskTest {
+class SamplingWithThresholdTaskTest {
 
     @GdlGraph(orientation = NATURAL)
     static String GDL =
-        "  (a)-->(b)" +
-        ", (a)-->(c)" +
-        ", (a)-->(d)" +
-        ", (d)-->(b)" +
-        ", (d)-->(c)" +
-        ", (d)-->(e)";
-
+        "  (a)-[:REL { p: 1.0 } ]->(b)" +
+        ", (a)-[:REL { p: 0.5 } ]->(c)" +
+        ", (a)-[:REL { p: 1.0 } ]->(d)" +
+        ", (d)-[:REL { p: 1.0 } ]->(e)";
 
     @Inject
     private Graph graph;
@@ -56,14 +53,14 @@ class LinkTaskTest {
     private IdFunction idFunction;
 
     @Test
-    void shouldNotUnionNodesInSkipComponent() {
+    void shouldOnlySampleTheFirstTwoElements() {
         var components = new HugeAtomicDisjointSetStruct(graph.nodeCount(), 2);
         var partition = Partition.of(0, graph.nodeCount());
 
-        var task = new SampledStrategy.LinkTask(
+        var task = new SampledStrategy.SamplingWithThresholdTask(
             graph,
+            0.5,
             partition,
-            idFunction.of("a"),
             components,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
@@ -76,49 +73,11 @@ class LinkTaskTest {
         CommunityHelper.assertCommunities(
             actualCommunities,
             List.of(
-                // (a)-->(b) => skipped due to skipComponent = a
-                // (a)-->(c) => skipped due to skipComponent = a
-                // (a)-->(d) => skipped due to skipComponent = a
-                // (d)-->(b) => skipped due to NEIGHBOR_ROUNDS = 2
-                // (d)-->(c) => skipped due to NEIGHBOR_ROUNDS = 2
-                // (d)-->(e) => union
-                List.of(idFunction.of("a")),
-                List.of(idFunction.of("b")),
-                List.of(idFunction.of("c")),
-                List.of(idFunction.of("d"), idFunction.of("e"))
-            )
-        );
-    }
-
-    @Test
-    void shouldSkipTheFirstTwoElements() {
-        var components = new HugeAtomicDisjointSetStruct(graph.nodeCount(), 2);
-        var partition = Partition.of(0, graph.nodeCount());
-
-        var task = new SampledStrategy.LinkTask(
-            graph,
-            partition,
-            -1,
-            components,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
-        );
-
-        task.run();
-
-        var actualCommunities = new ArrayList<Long>();
-        graph.forEachNode(node -> actualCommunities.add(components.setIdOf(node)));
-        CommunityHelper.assertCommunities(
-            actualCommunities,
-            List.of(
-                // (a)-->(b) => skipped due to NEIGHBOR_ROUNDS = 2
-                // (a)-->(c) => skipped due to NEIGHBOR_ROUNDS = 2
-                // (a)-->(d) => union
-                // (d)-->(b) => skipped due to NEIGHBOR_ROUNDS = 2
-                // (d)-->(c) => skipped due to NEIGHBOR_ROUNDS = 2
-                // (d)-->(e) => union
-                List.of(idFunction.of("a"), idFunction.of("d"), idFunction.of("e")),
-                List.of(idFunction.of("b")),
+                // (a)-[:REL { p: 1.0 } ]->(b) => union
+                // (a)-[:REL { p: 0.5 } ]->(c) => skipped due to threshold = 0.5
+                // (a)-[:REL { p: 1.0 } ]->(d) => union
+                // (d)-[:REL { p: 1.0 } ]->(e) => union
+                List.of(idFunction.of("a"), idFunction.of("b"), idFunction.of("d"), idFunction.of("e")),
                 List.of(idFunction.of("c"))
             )
         );
