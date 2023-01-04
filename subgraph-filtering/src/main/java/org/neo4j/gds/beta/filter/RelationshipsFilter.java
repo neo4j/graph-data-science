@@ -20,25 +20,19 @@
 package org.neo4j.gds.beta.filter;
 
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.api.RelationshipProperty;
-import org.neo4j.gds.api.RelationshipPropertyStore;
-import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.beta.filter.expression.EvaluationContext;
 import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.values.storable.NumberType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,15 +47,7 @@ import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
 
 public final class RelationshipsFilter {
 
-    @ValueClass
-    public interface FilteredRelationships {
-
-        Map<RelationshipType, Relationships.Topology> topology();
-
-        Map<RelationshipType, RelationshipPropertyStore> propertyStores();
-    }
-
-    public static FilteredRelationships filterRelationships(
+    public static Map<RelationshipType, SingleTypeRelationshipImportResult> filterRelationships(
         GraphStore graphStore,
         Expression expression,
         IdMap inputNodes,
@@ -71,8 +57,7 @@ public final class RelationshipsFilter {
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
-        Map<RelationshipType, Relationships.Topology> topologies = new HashMap<>();
-        Map<RelationshipType, RelationshipPropertyStore> relPropertyStores = new HashMap<>();
+        Map<RelationshipType, SingleTypeRelationshipImportResult> relationshipImportResults = new HashMap<>();
 
         progressTracker.beginSubTask();
 
@@ -97,45 +82,16 @@ public final class RelationshipsFilter {
                 continue;
             }
 
-            topologies.put(relType, outputRelationships.topology());
-
-            var propertyStoreBuilder = RelationshipPropertyStore.builder();
-            outputRelationships.properties().forEach((propertyKey, properties) -> {
-                propertyStoreBuilder.putIfAbsent(
-                    propertyKey,
-                    RelationshipProperty.of(
-                        propertyKey,
-                        NumberType.FLOATING_POINT,
-                        PropertyState.PERSISTENT,
-                        properties,
-                        DefaultValue.of(properties.defaultPropertyValue()),
-                        Aggregation.NONE
-                    )
-                );
-            });
-
-            relPropertyStores.put(relType, propertyStoreBuilder.build());
+            relationshipImportResults.put(relType, outputRelationships);
             progressTracker.endSubTask();
         }
 
         progressTracker.endSubTask();
 
-        return ImmutableFilteredRelationships.builder()
-            .topology(topologies)
-            .propertyStores(relPropertyStores)
-            .build();
+        return relationshipImportResults;
     }
 
-    @ValueClass
-    public interface FilteredRelationship {
-        RelationshipType relationshipType();
-
-        Relationships.Topology topology();
-
-        Map<String, Relationships.Properties> properties();
-    }
-
-    static FilteredRelationship filterRelationshipType(
+    private static SingleTypeRelationshipImportResult filterRelationshipType(
         GraphStore graphStore,
         Expression relationshipExpr,
         IdMap inputNodes,
@@ -161,6 +117,7 @@ public final class RelationshipsFilter {
             .nodes(outputNodes)
             .concurrency(concurrency)
             .addAllPropertyConfigs(propertyConfigs)
+            .indexInverse(graphStore.inverseIndexedRelationshipTypes().contains(relType))
             .build();
 
         var compositeIterator = graphStore.getCompositeRelationshipIterator(relType, propertyKeys);
@@ -192,23 +149,7 @@ public final class RelationshipsFilter {
             .executor(executorService)
             .run();
 
-        var relationships = relationshipsBuilder.build();
-        var topology = relationships.topology();
-        var properties = IntStream.range(0, propertyKeys.size())
-            .boxed()
-            .collect(Collectors.toMap(
-                propertyKeys::get,
-                idx -> relationships
-                    .properties()
-                    .map(relationshipPropertyStore -> relationshipPropertyStore.get(propertyKeys.get(idx)).values())
-                    .orElseThrow(IllegalStateException::new)
-            ));
-
-        return ImmutableFilteredRelationship.builder()
-            .relationshipType(relType)
-            .topology(topology)
-            .properties(properties)
-            .build();
+       return relationshipsBuilder.build();
     }
 
     private RelationshipsFilter() {}

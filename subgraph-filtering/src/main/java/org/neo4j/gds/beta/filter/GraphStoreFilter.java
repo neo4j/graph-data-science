@@ -43,6 +43,7 @@ import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 public final class GraphStoreFilter {
@@ -114,18 +115,14 @@ public final class GraphStoreFilter {
                 progressTracker
             );
 
-            var filteredSchema = filterSchema(graphStore.schema(), filteredNodes, filteredRelationships);
+            var filteredSchema = filterSchema(graphStore.schema(), filteredNodes, filteredRelationships.keySet());
 
             return new GraphStoreBuilder()
                 .databaseId(graphStore.databaseId())
                 .capabilities(graphStore.capabilities())
                 .schema(filteredSchema)
                 .nodeImportResult(NodeImportResult.of(filteredNodes.idMap(), filteredNodes.propertyStores()))
-                .relationshipImportResult(RelationshipImportResult.of(
-                    filteredRelationships.topology(),
-                    filteredRelationships.propertyStores(),
-                    filteredSchema.relationshipSchema().directions()
-                ))
+                .relationshipImportResult(RelationshipImportResult.of(filteredRelationships))
                 .concurrency(config.concurrency())
                 .build();
         } finally {
@@ -176,7 +173,7 @@ public final class GraphStoreFilter {
         return filter.equals(ElementProjection.PROJECT_ALL) ? "true" : filter;
     }
 
-    public static GraphSchema filterSchema(GraphSchema inputGraphSchema, NodesFilter.FilteredNodes filteredNodes, RelationshipsFilter.FilteredRelationships filteredRelationships) {
+    public static GraphSchema filterSchema(GraphSchema inputGraphSchema, NodesFilter.FilteredNodes filteredNodes, Set<RelationshipType> filteredRelationshipTypes) {
         var nodeSchema = inputGraphSchema.nodeSchema().filter(filteredNodes.idMap().availableNodeLabels());
         if (nodeSchema.availableLabels().isEmpty()) {
             nodeSchema.addLabel(NodeLabel.ALL_NODES);
@@ -184,7 +181,7 @@ public final class GraphStoreFilter {
 
         RelationshipSchema relationshipSchema = inputGraphSchema
             .relationshipSchema()
-            .filter(filteredRelationships.topology().keySet());
+            .filter(filteredRelationshipTypes);
         if (relationshipSchema.availableTypes().isEmpty()) {
             relationshipSchema.addRelationshipType(RelationshipType.ALL_RELATIONSHIPS, Direction.DIRECTED);
         }
