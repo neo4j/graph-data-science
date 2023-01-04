@@ -37,7 +37,7 @@ import java.util.List;
 import static org.neo4j.gds.Orientation.NATURAL;
 
 @GdlExtension
-class UndirectedUnionTaskTest {
+class LinkTaskTest {
 
     @GdlGraph(orientation = NATURAL)
     static String GDL =
@@ -60,7 +60,7 @@ class UndirectedUnionTaskTest {
         var components = new HugeAtomicDisjointSetStruct(graph.nodeCount(), 2);
         var partition = Partition.of(0, graph.nodeCount());
 
-        var task = new Wcc.UndirectedUnionTask(
+        var task = new SampledStrategy.LinkTask(
             graph,
             partition,
             idFunction.of("a"),
@@ -89,7 +89,7 @@ class UndirectedUnionTaskTest {
         var components = new HugeAtomicDisjointSetStruct(graph.nodeCount(), 2);
         var partition = Partition.of(0, graph.nodeCount());
 
-        var task = new Wcc.UndirectedUnionTask(
+        var task = new SampledStrategy.LinkTask(
             graph,
             partition,
             -1,

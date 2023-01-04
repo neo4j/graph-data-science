@@ -37,7 +37,7 @@ import java.util.List;
 import static org.neo4j.gds.Orientation.NATURAL;
 
 @GdlExtension
-class UndirectedSamplingTaskTest {
+class SamplingTaskTest {
 
     @GdlGraph(orientation = NATURAL)
     static String GDL =
@@ -58,7 +58,7 @@ class UndirectedSamplingTaskTest {
         var components = new HugeAtomicDisjointSetStruct(graph.nodeCount(), 2);
         var partition = Partition.of(0, graph.nodeCount());
 
-        var task = new Wcc.UndirectedSamplingTask(
+        var task = new SampledStrategy.SamplingTask(
             graph,
             partition,
             components,
