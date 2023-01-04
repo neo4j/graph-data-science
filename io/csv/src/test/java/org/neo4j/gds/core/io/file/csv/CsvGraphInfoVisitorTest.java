@@ -20,12 +20,14 @@
 package org.neo4j.gds.core.io.file.csv;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.io.file.ImmutableGraphInfo;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.io.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
 
@@ -36,7 +38,8 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
         DatabaseId databaseId = DatabaseId.random();
         CsvGraphInfoVisitor graphInfoVisitor = new CsvGraphInfoVisitor(tempDir);
         var relationshipTypeCounts = Map.of(RelationshipType.of("REL1"), 42L, RelationshipType.of("REL2"), 1337L);
-        graphInfoVisitor.export(ImmutableGraphInfo.of(databaseId, 1337L, 19L, relationshipTypeCounts));
+        var inverseIndexedRelTypes = List.of(RelationshipType.of("REL1"),RelationshipType.of("REL2"));
+        graphInfoVisitor.export(ImmutableGraphInfo.of(databaseId, 1337L, 19L, relationshipTypeCounts, inverseIndexedRelTypes));
         graphInfoVisitor.close();
 
         assertCsvFiles(List.of(GRAPH_INFO_FILE_NAME));
@@ -48,7 +51,8 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
                     databaseId.databaseName(),
                     Long.toString(1337L),
                     Long.toString(19L),
-                    CsvMapUtil.relationshipCountsToString(relationshipTypeCounts)
+                    CsvMapUtil.relationshipCountsToString(relationshipTypeCounts),
+                    inverseIndexedRelTypes.stream().map(ElementIdentifier::name).collect(Collectors.joining(";"))
                 )
             )
         );
@@ -60,7 +64,8 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
             CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME,
             CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME,
             CsvGraphInfoVisitor.MAX_ORIGINAL_ID_COLUMN_NAME,
-            CsvGraphInfoVisitor.REL_TYPE_COUNTS_COLUMN_NAME
+            CsvGraphInfoVisitor.REL_TYPE_COUNTS_COLUMN_NAME,
+            CsvGraphInfoVisitor.INVERSE_INDEXED_REL_TYPES
         );
     }
 }

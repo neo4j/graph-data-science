@@ -21,12 +21,14 @@ package org.neo4j.gds.core.io.file.csv;
 
 import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.io.file.GraphInfo;
 import org.neo4j.gds.core.io.file.SingleRowVisitor;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.stream.Collectors;
 
 public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
 
@@ -35,6 +37,7 @@ public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
     public static final String NODE_COUNT_COLUMN_NAME = "nodeCount";
     public static final String MAX_ORIGINAL_ID_COLUMN_NAME = "maxOriginalId";
     public static final String REL_TYPE_COUNTS_COLUMN_NAME = "relTypeCounts";
+    public static final String INVERSE_INDEXED_REL_TYPES = "inverseIndexedRelTypes";
 
     private final CsvAppender csvAppender;
 
@@ -49,11 +52,18 @@ public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
 
     @Override
     public void export(GraphInfo graphInfo) {
+        String inverseIndexedRelTypesString = graphInfo
+            .inverseIndexedRelationshipTypes()
+            .stream()
+            .map(RelationshipType::name)
+            .collect(Collectors.joining(";"));
+
         try {
             this.csvAppender.appendField(graphInfo.databaseId().databaseName());
             this.csvAppender.appendField(Long.toString(graphInfo.nodeCount()));
             this.csvAppender.appendField(Long.toString(graphInfo.maxOriginalId()));
             this.csvAppender.appendField(CsvMapUtil.relationshipCountsToString(graphInfo.relationshipTypeCounts()));
+            this.csvAppender.appendField(inverseIndexedRelTypesString);
             this.csvAppender.endLine();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -75,6 +85,7 @@ public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
         this.csvAppender.appendField(NODE_COUNT_COLUMN_NAME);
         this.csvAppender.appendField(MAX_ORIGINAL_ID_COLUMN_NAME);
         this.csvAppender.appendField(REL_TYPE_COUNTS_COLUMN_NAME);
+        this.csvAppender.appendField(INVERSE_INDEXED_REL_TYPES);
         this.csvAppender.endLine();
     }
 }

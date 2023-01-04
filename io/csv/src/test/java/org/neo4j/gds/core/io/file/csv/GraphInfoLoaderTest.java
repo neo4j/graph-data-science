@@ -43,8 +43,8 @@ class GraphInfoLoaderTest {
         var databaseId = DatabaseId.from("my-database");
         var graphInfoFile = exportDir.resolve(GRAPH_INFO_FILE_NAME).toFile();
         var lines = List.of(
-            String.join(", ", "databaseName", "nodeCount", "maxOriginalId", "relTypeCounts"),
-            String.join(", ", "my-database", "19", "1337", "REL;42")
+            String.join(", ", "databaseName", "nodeCount", "maxOriginalId", "relTypeCounts", "inverseIndexedRelTypes"),
+            String.join(", ", "my-database", "19", "1337", "REL;42", "REL;REL1")
         );
         FileUtils.writeLines(graphInfoFile, lines);
 
@@ -61,6 +61,8 @@ class GraphInfoLoaderTest {
         assertThat(graphInfo.relationshipTypeCounts()).containsExactlyEntriesOf(
             Map.of(RelationshipType.of("REL"), 42L)
         );
+
+        assertThat(graphInfo.inverseIndexedRelationshipTypes()).containsExactly(RelationshipType.of("REL"), RelationshipType.of("REL1"));
     }
 
     /**
@@ -107,6 +109,21 @@ class GraphInfoLoaderTest {
         var graphInfo = graphInfoLoader.load();
 
         assertThat(graphInfo.relationshipTypeCounts()).isEmpty();
+    }
+
+    @Test
+    void shouldLoadGraphInfoWithoutInverseIndexedRelTypes(@TempDir Path exportDir) throws IOException {
+        var graphInfoFile = exportDir.resolve(GRAPH_INFO_FILE_NAME).toFile();
+        var lines = List.of(
+            String.join(", ", "databaseName", "nodeCount", "maxOriginalId", "relTypeCounts"),
+            String.join(", ", "my-database", "19", "1337", "REL;42")
+        );
+        FileUtils.writeLines(graphInfoFile, lines);
+
+        var graphInfoLoader = new GraphInfoLoader(exportDir, CSV_MAPPER);
+        var graphInfo = graphInfoLoader.load();
+
+        assertThat(graphInfo.inverseIndexedRelationshipTypes()).isEmpty();
     }
 
 }

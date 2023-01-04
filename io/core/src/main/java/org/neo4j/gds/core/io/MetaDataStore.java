@@ -47,7 +47,8 @@ public interface MetaDataStore {
             graphStore.databaseId(),
             graphStore.nodeCount(),
             graphStore.nodes().highestOriginalId(),
-            relTypeCounts
+            relTypeCounts,
+            graphStore.inverseIndexedRelationshipTypes()
         );
         var schema = graphStore.schema();
         return ImmutableMetaDataStore.of(

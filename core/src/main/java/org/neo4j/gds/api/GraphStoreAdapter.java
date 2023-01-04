@@ -191,6 +191,11 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     }
 
     @Override
+    public Set<RelationshipType> inverseIndexedRelationshipTypes() {
+        return graphStore.inverseIndexedRelationshipTypes();
+    }
+
+    @Override
     public boolean hasRelationshipProperty(RelationshipType relType, String propertyKey) {
         return graphStore.hasRelationshipProperty(relType, propertyKey);
     }

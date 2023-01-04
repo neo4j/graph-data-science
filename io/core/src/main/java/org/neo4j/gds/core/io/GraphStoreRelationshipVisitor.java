@@ -32,6 +32,7 @@ import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -40,16 +41,19 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
 
     private final Supplier<RelationshipsBuilderBuilder> relationshipBuilderSupplier;
     private final Map<String, RelationshipsBuilder> relationshipBuilders;
+    private final List<RelationshipType> inverseIndexedRelationshipTypes;
     private final Map<String, RelationshipBuilderFromVisitor> relationshipFromVisitorBuilders;
 
     public GraphStoreRelationshipVisitor(
         RelationshipSchema relationshipSchema,
         Supplier<RelationshipsBuilderBuilder> relationshipBuilderSupplier,
-        Map<String, RelationshipsBuilder> relationshipBuilders
+        Map<String, RelationshipsBuilder> relationshipBuilders,
+        List<RelationshipType> inverseIndexedRelationshipTypes
     ) {
         super(relationshipSchema);
         this.relationshipBuilderSupplier = relationshipBuilderSupplier;
         this.relationshipBuilders = relationshipBuilders;
+        this.inverseIndexedRelationshipTypes = inverseIndexedRelationshipTypes;
         relationshipFromVisitorBuilders = new HashMap<>();
     }
 
@@ -65,6 +69,7 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
                         .collect(Collectors.toList());
                     var relBuilder = relationshipBuilderSupplier.get()
                         .propertyConfigs(propertyConfigs)
+                        .indexInverse(inverseIndexedRelationshipTypes.contains(RelationshipType.of(relationshipType)))
                         .build();
                     relationshipBuilders.put(relationshipType, relBuilder);
                     return RelationshipBuilderFromVisitor.of(
@@ -82,6 +87,7 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
         Map<String, RelationshipsBuilder> relationshipBuildersByType;
         int concurrency;
         IdMap nodes;
+        List<RelationshipType> inverseIndexedRelationshipTypes;
 
         public Builder withRelationshipBuildersToTypeResultMap(Map<String, RelationshipsBuilder> relationshipBuildersByType) {
             this.relationshipBuildersByType = relationshipBuildersByType;
@@ -102,6 +108,12 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
             return this;
         }
 
+
+        public Builder withInverseIndexedRelationshipTypes(List<RelationshipType> inverseIndexedRelationshipTypes) {
+            this.inverseIndexedRelationshipTypes = inverseIndexedRelationshipTypes;
+            return this;
+        }
+
         @Override
         public Builder me() {
             return this;
@@ -116,7 +128,8 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
             return new GraphStoreRelationshipVisitor(
                 relationshipSchema,
                 relationshipBuilderSupplier,
-                relationshipBuildersByType
+                relationshipBuildersByType,
+                inverseIndexedRelationshipTypes
             );
         }
     }

@@ -23,6 +23,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DatabaseId;
 
+import java.util.List;
 import java.util.Map;
 
 @ValueClass
@@ -31,4 +32,5 @@ public interface GraphInfo {
     long nodeCount();
     long maxOriginalId();
     Map<RelationshipType, Long> relationshipTypeCounts();
+    List<RelationshipType> inverseIndexedRelationshipTypes();
 }
