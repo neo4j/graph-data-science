@@ -235,7 +235,7 @@ public interface GraphStore {
 
     CompositeRelationshipIterator getCompositeRelationshipIterator(
         RelationshipType relationshipType,
-        List<String> propertyKeys
+        Collection<String> propertyKeys
     );
 
     void canRelease(boolean canRelease);

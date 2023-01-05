@@ -32,6 +32,23 @@ public interface CompositeRelationshipIterator {
     void forEachRelationship(long nodeId, RelationshipConsumer consumer);
 
     /**
+     * Calls the given consumer for every inverse relationship of a given node.
+     * Inverse relationships basically mirror the relationships in the iterator.
+     * For example, if `forEachRelationship(42)` returns `1337` then the
+     * result of `forEachInverseRelationship(1337)` contains `42. For undirected
+     * relationships, accessing the inverse is never supported.
+     * <p>
+     * Note, that the inverse index might not always be present. Check
+     * {@link org.neo4j.gds.api.GraphStore#inverseIndexedRelationshipTypes()}
+     * before calling this method to verify that the relevant relationship type is
+     * inverse indexed.
+     *
+     * @param nodeId the node for which to iterate the inverse relationships
+     * @param consumer relationship consumer function
+     */
+    void forEachInverseRelationship(long nodeId, RelationshipConsumer consumer);
+
+    /**
      * Returns the property keys that are managed by this iterator.
      * The order is equivalent to the order of the value array in
      * {@link CompositeRelationshipIterator.RelationshipConsumer#consume(long, long, double[])}.

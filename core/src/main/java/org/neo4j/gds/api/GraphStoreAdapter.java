@@ -35,7 +35,6 @@ import org.neo4j.values.storable.NumberType;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -321,7 +320,7 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
 
     @Override
     public CompositeRelationshipIterator getCompositeRelationshipIterator(
-        RelationshipType relationshipType, List<String> propertyKeys
+        RelationshipType relationshipType, Collection<String> propertyKeys
     ) {
         return graphStore.getCompositeRelationshipIterator(relationshipType, propertyKeys);
     }
