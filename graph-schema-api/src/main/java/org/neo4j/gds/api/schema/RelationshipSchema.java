@@ -71,11 +71,15 @@ public class RelationshipSchema extends ElementSchema<RelationshipSchema, Relati
         return entries.values().stream().allMatch(RelationshipSchemaEntry::isUndirected);
     }
 
+    public boolean isUndirected(RelationshipType type) {
+        return entries.get(type).isUndirected();
+    }
+
     public RelationshipSchemaEntry getOrCreateRelationshipType(
         RelationshipType relationshipType, Direction direction
     ) {
         return this.entries.computeIfAbsent(relationshipType,
-            (__) -> new RelationshipSchemaEntry(relationshipType, direction)
+            __ -> new RelationshipSchemaEntry(relationshipType, direction)
         );
     }
 
