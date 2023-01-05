@@ -32,10 +32,6 @@ public interface CompositeRelationshipIterator {
     void forEachRelationship(long nodeId, RelationshipConsumer consumer);
 
     /**
-     * Applies the given consumer on all inverse relationships of the given node id.
-     */
-
-    /**
      * Calls the given consumer for every inverse relationship of a given node.
      * Inverse relationships basically mirror the relationships in the iterator.
      * For example, if `forEachRelationship(42)` returns `1337` then the
