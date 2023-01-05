@@ -113,7 +113,6 @@ public class HugeGraph implements CSRGraph {
 
     private AdjacencyCursor adjacencyCursorCache;
     private @Nullable AdjacencyCursor inverseAdjacencyCursorCache;
-
     private @Nullable PropertyCursor propertyCursorCache;
     private @Nullable PropertyCursor inversePropertyCursorCache;
 
@@ -534,6 +533,14 @@ public class HugeGraph implements CSRGraph {
             properties.close();
             properties = null;
         }
+        if (inverseAdjacency != null) {
+            inverseAdjacency.close();
+            inverseAdjacency = null;
+        }
+        if (inverseProperties != null) {
+            inverseProperties.close();
+            inverseProperties = null;
+        }
         if (adjacencyCursorCache != null) {
             adjacencyCursorCache.close();
             adjacencyCursorCache = null;
@@ -541,6 +548,14 @@ public class HugeGraph implements CSRGraph {
         if (propertyCursorCache != null) {
             propertyCursorCache.close();
             propertyCursorCache = null;
+        }
+        if (inverseAdjacencyCursorCache != null) {
+            inverseAdjacencyCursorCache.close();
+            inverseAdjacencyCursorCache = null;
+        }
+        if (inversePropertyCursorCache != null) {
+            inversePropertyCursorCache.close();
+            inversePropertyCursorCache = null;
         }
     }
 
