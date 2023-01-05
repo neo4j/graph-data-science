@@ -34,13 +34,14 @@ import org.neo4j.gds.extension.TestGraph;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.gds.Orientation.NATURAL;
+import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.TestSupport.ids;
 import static org.neo4j.gds.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
 
 @GdlExtension
 class WccThresholdTest {
 
-    @GdlGraph
     private static final String DB =
         "CREATE" +
         "  (a:Label {seedId: 42})" +
@@ -64,12 +65,43 @@ class WccThresholdTest {
         // {H, I}
         ", (h)-[:TYPE {cost: 10.0}]->(i)";
 
+    @GdlGraph(orientation = NATURAL)
+    private static final String DIRECTED_DB = DB;
+
+    @GdlGraph(orientation = UNDIRECTED, graphNamePrefix = "undirected")
+    private static final String UNDIRECTED_DB = DB;
+
+    @GdlGraph(orientation = NATURAL, indexInverse = true, graphNamePrefix = "indexed")
+    private static final String DIRECTED_INDEXED_DB = DB;
+
     @Inject
     private TestGraph graph;
 
+    @Inject
+    private TestGraph undirectedGraph;
+
+    @Inject
+    private TestGraph indexedGraph;
+
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.wcc.WccThresholdTest#thresholdParams")
-    void testThreshold(double threshold, String[][] expectedComponents) {
+    void testDirected(double threshold, String[][] expectedComponents) {
+        assertResults(threshold, graph, expectedComponents);
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.wcc.WccThresholdTest#thresholdParams")
+    void testUndirected(double threshold, String[][] expectedComponents) {
+        assertResults(threshold, undirectedGraph, expectedComponents);
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.wcc.WccThresholdTest#thresholdParams")
+    void testIndexed(double threshold, String[][] expectedComponents) {
+        assertResults(threshold, indexedGraph, expectedComponents);
+    }
+
+    private void assertResults(double threshold, TestGraph graph, String[][] expectedComponents) {
         WccStreamConfig wccConfig = ImmutableWccStreamConfig
             .builder()
             .threshold(threshold)

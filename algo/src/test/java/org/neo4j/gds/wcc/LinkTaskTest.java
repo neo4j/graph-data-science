@@ -37,13 +37,15 @@ import java.util.List;
 import static org.neo4j.gds.Orientation.NATURAL;
 
 @GdlExtension
-class UndirectedSamplingTaskTest {
+class LinkTaskTest {
 
     @GdlGraph(orientation = NATURAL)
     static String GDL =
         "  (a)-->(b)" +
         ", (a)-->(c)" +
         ", (a)-->(d)" +
+        ", (d)-->(b)" +
+        ", (d)-->(c)" +
         ", (d)-->(e)";
 
 
@@ -54,13 +56,14 @@ class UndirectedSamplingTaskTest {
     private IdFunction idFunction;
 
     @Test
-    void shouldOnlySampleTheFirstTwoElements() {
+    void shouldNotUnionNodesInSkipComponent() {
         var components = new HugeAtomicDisjointSetStruct(graph.nodeCount(), 2);
         var partition = Partition.of(0, graph.nodeCount());
 
-        var task = new Wcc.UndirectedSamplingTask(
+        var task = new SampledStrategy.LinkTask(
             graph,
             partition,
+            idFunction.of("a"),
             components,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
@@ -73,8 +76,50 @@ class UndirectedSamplingTaskTest {
         CommunityHelper.assertCommunities(
             actualCommunities,
             List.of(
-                List.of(idFunction.of("a"), idFunction.of("b"), idFunction.of("c")),
+                // (a)-->(b) => skipped due to skipComponent = a
+                // (a)-->(c) => skipped due to skipComponent = a
+                // (a)-->(d) => skipped due to skipComponent = a
+                // (d)-->(b) => skipped due to NEIGHBOR_ROUNDS = 2
+                // (d)-->(c) => skipped due to NEIGHBOR_ROUNDS = 2
+                // (d)-->(e) => union
+                List.of(idFunction.of("a")),
+                List.of(idFunction.of("b")),
+                List.of(idFunction.of("c")),
                 List.of(idFunction.of("d"), idFunction.of("e"))
+            )
+        );
+    }
+
+    @Test
+    void shouldSkipTheFirstTwoElements() {
+        var components = new HugeAtomicDisjointSetStruct(graph.nodeCount(), 2);
+        var partition = Partition.of(0, graph.nodeCount());
+
+        var task = new SampledStrategy.LinkTask(
+            graph,
+            partition,
+            -1,
+            components,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        task.run();
+
+        var actualCommunities = new ArrayList<Long>();
+        graph.forEachNode(node -> actualCommunities.add(components.setIdOf(node)));
+        CommunityHelper.assertCommunities(
+            actualCommunities,
+            List.of(
+                // (a)-->(b) => skipped due to NEIGHBOR_ROUNDS = 2
+                // (a)-->(c) => skipped due to NEIGHBOR_ROUNDS = 2
+                // (a)-->(d) => union
+                // (d)-->(b) => skipped due to NEIGHBOR_ROUNDS = 2
+                // (d)-->(c) => skipped due to NEIGHBOR_ROUNDS = 2
+                // (d)-->(e) => union
+                List.of(idFunction.of("a"), idFunction.of("d"), idFunction.of("e")),
+                List.of(idFunction.of("b")),
+                List.of(idFunction.of("c"))
             )
         );
     }
