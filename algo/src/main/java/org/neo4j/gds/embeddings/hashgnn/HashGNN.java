@@ -98,14 +98,13 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         var embeddingsA = HugeObjectArray.newArray(HugeAtomicBitSet.class, graph.nodeCount());
         embeddingsA.setAll(unused -> HugeAtomicBitSet.create(embeddingDimension));
 
-        double avgDegree = (graph.relationshipCount() / (double) graph.nodeCount());
+        double avgDegree = graph.relationshipCount() / (double) graph.nodeCount();
         double upperBoundNeighborExpectedBits = embeddingDimension == 0
             ? 1
             : embeddingDimension * (1 - Math.pow(
                 1 - (1.0 / embeddingDimension),
                 avgDegree
-            )
-            );
+            ));
 
         progressTracker.beginSubTask("Propagate embeddings");
 
@@ -126,7 +125,7 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
                 scaledNeighborInfluence,
                 graphs.size(),
                 config,
-                randomSeed,
+                randomSeed + config.embeddingDensity() * iteration,
                 terminationFlag,
                 progressTracker
             );
