@@ -32,15 +32,19 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
 
     public static final AdjacencyProperties[] EMPTY_PROPERTIES = new AdjacencyProperties[0];
 
-    private final AdjacencyList adjacencyList;
-    @Nullable private final AdjacencyList inverseAdjacencyList;
     private final String[] propertyKeys;
+
+    private final AdjacencyList adjacencyList;
+    @Nullable
+    private final AdjacencyList inverseAdjacencyList;
     private final AdjacencyProperties[] properties;
     private final double[] propertyBuffer;
-    @Nullable private final AdjacencyProperties[] inverseProperties;
+    private final AdjacencyProperties[] inverseProperties;
 
-    private AdjacencyCursor topologyCursor;
+    private final AdjacencyCursor adjacencyCursor;
+    private final AdjacencyCursor inverseAdjacencyCursor;
     private final PropertyCursor[] propertyCursors;
+    private final PropertyCursor[] inversePropertyCursors;
 
     public CSRCompositeRelationshipIterator(
         AdjacencyList adjacencyList,
@@ -60,11 +64,16 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
         this.inverseProperties = inverseProperties;
 
         this.propertyBuffer = new double[propertyCount];
-        this.topologyCursor = AdjacencyCursor.empty();
+        this.adjacencyCursor = adjacencyList.rawAdjacencyCursor();
+        this.inverseAdjacencyCursor = inverseAdjacencyList.map(AdjacencyList::rawAdjacencyCursor).orElse(null);
 
         this.propertyCursors = new PropertyCursor[propertyCount];
         for (int i = 0; i < propertyCount; i++) {
-            this.propertyCursors[i] = PropertyCursor.empty();
+            this.propertyCursors[i] = properties[i].rawPropertyCursor();
+        }
+        this.inversePropertyCursors = new PropertyCursor[inverseProperties.length];
+        for (int i = 0; i < inverseProperties.length; i++) {
+            this.inversePropertyCursors[i] = inverseProperties[i].rawPropertyCursor();
         }
     }
 
@@ -75,41 +84,48 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
 
     @Override
     public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
-        forEachRelationship(nodeId, consumer, adjacencyList, properties);
+        forEachRelationship(nodeId, consumer, adjacencyList, properties, adjacencyCursor, propertyCursors);
     }
 
     @Override
     public void forEachInverseRelationship(long nodeId, RelationshipConsumer consumer) {
         if (inverseAdjacencyList == null) {
             throw new UnsupportedOperationException(
-                "Cannot create composite iterator on a relationship type that is not inverse indexed"
-            );
+                "Cannot create composite iterator on a relationship type that is not inverse indexed");
         }
-        forEachRelationship(nodeId, consumer, inverseAdjacencyList, inverseProperties);
+        forEachRelationship(
+            nodeId,
+            consumer,
+            inverseAdjacencyList,
+            inverseProperties,
+            inverseAdjacencyCursor,
+            inversePropertyCursors
+        );
     }
 
     private void forEachRelationship(
         long nodeId,
         RelationshipConsumer consumer,
         AdjacencyList adjacency,
-        AdjacencyProperties[] props
+        AdjacencyProperties[] props,
+        AdjacencyCursor reuseAdjacencyCursor,
+        PropertyCursor[] reusePropertyCursors
     ) {
         // init adjacency cursor
-        var adjacencyCursor = adjacency.adjacencyCursor(topologyCursor, nodeId);
-        if (!adjacencyCursor.hasNextVLong()) {
+        adjacency.adjacencyCursor(reuseAdjacencyCursor, nodeId);
+        if (!reuseAdjacencyCursor.hasNextVLong()) {
             return;
         }
 
-        topologyCursor = adjacencyCursor;
         var propertyCount = propertyKeys.length;
         for (int propertyIdx = 0; propertyIdx < propertyCount; propertyIdx++) {
-            propertyCursors[propertyIdx] = props[propertyIdx].propertyCursor(nodeId);
+            props[propertyIdx].propertyCursor(reusePropertyCursors[propertyIdx], nodeId);
         }
 
-        while (adjacencyCursor.hasNextVLong()) {
-            var target = adjacencyCursor.nextVLong();
+        while (reuseAdjacencyCursor.hasNextVLong()) {
+            var target = reuseAdjacencyCursor.nextVLong();
             for (int propertyIdx = 0; propertyIdx < propertyCount; propertyIdx++) {
-                propertyBuffer[propertyIdx] = Double.longBitsToDouble(propertyCursors[propertyIdx].nextLong());
+                propertyBuffer[propertyIdx] = Double.longBitsToDouble(reusePropertyCursors[propertyIdx].nextLong());
             }
 
             if (!consumer.consume(nodeId, target, propertyBuffer)) {

@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CompositeAdjacencyList implements AdjacencyList {
+public final class CompositeAdjacencyList implements AdjacencyList {
 
     private final List<AdjacencyList> adjacencyLists;
     private final CompositeAdjacencyCursorFactory compositeAdjacencyCursorFactory;
