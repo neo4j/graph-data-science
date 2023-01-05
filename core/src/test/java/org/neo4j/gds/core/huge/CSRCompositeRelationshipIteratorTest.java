@@ -36,6 +36,7 @@ import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
 import java.util.function.BiConsumer;
@@ -289,10 +290,10 @@ class CSRCompositeRelationshipIteratorTest {
         String[] propertyKeys = {"prop"};
         var iterator = new CSRCompositeRelationshipIterator(
             graph.relationshipTopology().adjacencyList(),
-            null,
+            Optional.empty(),
             propertyKeys,
             properties,
-            null
+            CSRCompositeRelationshipIterator.EMPTY_PROPERTIES
         );
 
         var phaser = new Phaser(5);

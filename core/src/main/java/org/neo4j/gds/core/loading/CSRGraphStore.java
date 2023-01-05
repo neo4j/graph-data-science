@@ -538,10 +538,13 @@ public class CSRGraphStore implements GraphStore {
 
     @Override
     public CompositeRelationshipIterator getCompositeRelationshipIterator(
-        RelationshipType relationshipType, Collection<String> propertyKeys
+        RelationshipType relationshipType,
+        Collection<String> propertyKeys
     ) {
         if (!relationshipTypes().contains(relationshipType)) {
-            throw new IllegalArgumentException(prettySuggestions(formatWithLocale("Unknown relationship type `%s`.",
+            throw new IllegalArgumentException(prettySuggestions(
+                formatWithLocale(
+                    "Unknown relationship type `%s`.",
                     relationshipType
                 ),
                 relationshipType.name(),
@@ -567,8 +570,7 @@ public class CSRGraphStore implements GraphStore {
         var adjacencyList = relationship.topology().adjacencyList();
         var inverseAdjacencyList = relationship
             .inverseTopology()
-            .map(Relationships.Topology::adjacencyList)
-            .orElse(null);
+            .map(Relationships.Topology::adjacencyList);
         var inverseProperties = relationship.inverseProperties()
             .map(propertyStore -> propertyKeys
                 .stream()

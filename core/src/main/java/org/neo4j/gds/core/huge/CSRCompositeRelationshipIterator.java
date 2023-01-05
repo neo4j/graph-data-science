@@ -26,6 +26,8 @@ import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.PropertyCursor;
 
+import java.util.Optional;
+
 public class CSRCompositeRelationshipIterator implements CompositeRelationshipIterator {
 
     public static final AdjacencyProperties[] EMPTY_PROPERTIES = new AdjacencyProperties[0];
@@ -42,17 +44,17 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
 
     public CSRCompositeRelationshipIterator(
         AdjacencyList adjacencyList,
-        @Nullable AdjacencyList inverseAdjacencyList,
+        Optional<AdjacencyList> inverseAdjacencyList,
         String[] propertyKeys,
         AdjacencyProperties[] properties,
-        @Nullable AdjacencyProperties[] inverseProperties
+        AdjacencyProperties[] inverseProperties
     ) {
         var propertyCount = propertyKeys.length;
 
         assert properties.length == propertyCount;
 
         this.adjacencyList = adjacencyList;
-        this.inverseAdjacencyList = inverseAdjacencyList;
+        this.inverseAdjacencyList = inverseAdjacencyList.orElse(null);
         this.propertyKeys = propertyKeys;
         this.properties = properties;
         this.inverseProperties = inverseProperties;
@@ -125,7 +127,7 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
     public CompositeRelationshipIterator concurrentCopy() {
         return new CSRCompositeRelationshipIterator(
             adjacencyList,
-            inverseAdjacencyList,
+            Optional.ofNullable(inverseAdjacencyList),
             propertyKeys,
             properties,
             inverseProperties
