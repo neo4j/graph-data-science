@@ -28,6 +28,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.GraphDatabaseQueryService;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -182,6 +183,10 @@ public final class GraphDatabaseApiProxy {
 
     public static KernelTransaction kernelTransaction(Transaction tx) {
         return ((InternalTransaction) tx).kernelTransaction();
+    }
+
+    public static InternalTransaction beginTransaction(GraphDatabaseService db, KernelTransaction.Type type, LoginContext loginContext) {
+        return cast(db).beginTransaction(type, loginContext);
     }
 
     @TestOnly
