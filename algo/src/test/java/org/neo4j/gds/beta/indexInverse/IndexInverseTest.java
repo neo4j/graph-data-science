@@ -25,26 +25,24 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.beta.undirected.ImmutableToUndirectedConfig;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.loading.CollectingConsumer;
 import org.neo4j.gds.core.loading.CollectingMultiplePropertiesConsumer;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.gdl.GdlFactoryBuilder;
 
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.TestLog.INFO;
 
 @GdlExtension
 class IndexInverseTest {
@@ -107,5 +105,40 @@ class IndexInverseTest {
         });
 
         assertThat(consumer.seenRelationships).usingRecursiveComparison().isEqualTo(expected);
+    }
+
+    @Test
+    void logProgress() {
+        var log = Neo4jProxy.testLog();
+
+        var config = IndexInverseConfigImpl
+            .builder()
+            .concurrency(4)
+            .relationshipType("T1")
+            .mutateRelationshipType("T2")
+            .build();
+
+        new IndexInverseAlgorithmFactory().build(
+            graphStore,
+            config,
+            log,
+            EmptyTaskRegistryFactory.INSTANCE
+        ).compute();
+
+        assertThat(log.getMessages(INFO))
+            .extracting(removingThreadId())
+            .containsExactly(
+                "IndexInverse :: Start",
+                "IndexInverse :: Create inversely indexed relationships :: Start",
+                "IndexInverse :: Create inversely indexed relationships 25%",
+                "IndexInverse :: Create inversely indexed relationships 50%",
+                "IndexInverse :: Create inversely indexed relationships 75%",
+                "IndexInverse :: Create inversely indexed relationships 100%",
+                "IndexInverse :: Create inversely indexed relationships :: Finished",
+                "IndexInverse :: Build Adjacency list :: Start",
+                "IndexInverse :: Build Adjacency list 100%",
+                "IndexInverse :: Build Adjacency list :: Finished",
+                "IndexInverse :: Finished"
+            );
     }
 }

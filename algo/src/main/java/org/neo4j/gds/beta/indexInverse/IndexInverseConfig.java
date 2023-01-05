@@ -59,7 +59,7 @@ public interface IndexInverseConfig extends AlgoBaseConfig, MutateRelationshipCo
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
         if (graphStore.inverseIndexedRelationshipTypes().contains(RelationshipType.of(relationshipType()))) {
-            throw new IllegalArgumentException(String.format(Locale.US, "Inverse index already exists for '%s'.",
+            throw new UnsupportedOperationException(String.format(Locale.US, "Inverse index already exists for '%s'.",
                 relationshipType()
             ));
         }
