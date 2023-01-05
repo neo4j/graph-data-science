@@ -305,5 +305,4 @@ public interface Neo4jProxyApi {
 
     void reserveNeo4jIds(IdGeneratorFactory generatorFactory, int size, CursorContext cursorContext);
 
-    boolean isCompositeDatabase(GraphDatabaseService graphDatabaseService);
 }

@@ -19,7 +19,8 @@
  */
 package org.neo4j.gds.projection;
 
-import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.fabric.FabricDatabaseManager;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 public final class DatabaseTopologyHelper {
@@ -27,6 +28,7 @@ public final class DatabaseTopologyHelper {
     private DatabaseTopologyHelper() {}
 
     public static boolean isCompositeDatabase(GraphDatabaseService graphDatabaseService) {
-        return Neo4jProxy.isCompositeDatabase(graphDatabaseService);
+        var databaseManager = GraphDatabaseApiProxy.resolveDependency(graphDatabaseService, FabricDatabaseManager.class);
+        return databaseManager.isFabricDatabase(GraphDatabaseApiProxy.databaseId(graphDatabaseService).name());
     }
 }

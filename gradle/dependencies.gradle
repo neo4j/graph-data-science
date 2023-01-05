@@ -83,6 +83,7 @@ def neo_deps = [
     'neo4j-concurrent',
     'neo4j-configuration',
     'neo4j-diagnostics',
+    'neo4j-fabric',
     'neo4j-graphdb-api',
     'neo4j-id-generator',
     'neo4j-import-util',
