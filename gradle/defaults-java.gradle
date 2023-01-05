@@ -75,6 +75,8 @@ allprojects {
             // systemProperty "org.openjdk.java.util.stream.tripwire", "true"
             // testLogging { events "standardError" }
 
+            systemProperty "org.neo4j.gds.utils.GdsFeatureToggles.throwWhenUsingProgressTrackerWithoutTasks", "true"
+
             maxHeapSize = "4G"
             useJUnitPlatform {
                 includeEngines 'junit-jupiter'

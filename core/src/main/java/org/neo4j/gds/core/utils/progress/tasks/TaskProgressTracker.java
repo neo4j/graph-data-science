@@ -32,7 +32,10 @@ import org.neo4j.logging.Log;
 
 import java.util.Optional;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.neo4j.gds.core.utils.progress.tasks.Task.UNKNOWN_VOLUME;
+import static org.neo4j.gds.utils.GdsFeatureToggles.THROW_WHEN_USING_PROGRESS_TRACKER_WITHOUT_TASKS;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class TaskProgressTracker implements ProgressTracker {
@@ -47,6 +50,8 @@ public class TaskProgressTracker implements ProgressTracker {
     protected Optional<Task> currentTask;
     private long currentTotalSteps;
     private double progressLeftOvers;
+
+    private Runnable onError;
 
     public TaskProgressTracker(Task baseTask, Log log, int concurrency, TaskRegistryFactory taskRegistryFactory) {
         this(baseTask, log, concurrency, new JobId(), taskRegistryFactory, EmptyUserLogRegistryFactory.INSTANCE);
@@ -64,6 +69,19 @@ public class TaskProgressTracker implements ProgressTracker {
         this.progressLeftOvers = 0;
         this.nestedTasks = new Stack<>();
         this.userLogRegistry = userLogRegistryFactory.newInstance();
+        if (THROW_WHEN_USING_PROGRESS_TRACKER_WITHOUT_TASKS.isEnabled()) {
+            this.onError = () -> {
+                throw new IllegalStateException("Tried to log progress, but there are no running tasks being tracked");
+            };
+        } else {
+            AtomicBoolean didLog = new AtomicBoolean(false);
+            this.onError = () -> {
+                if (!didLog.get()) {
+                    taskProgressLogger.logError("Tried to log progress, but there are no running tasks being tracked");
+                    didLog.set(true);
+                }
+            };
+        }
     }
 
     @Override
@@ -111,11 +129,14 @@ public class TaskProgressTracker implements ProgressTracker {
 
     @Override
     public void logSteps(long steps) {
-        long volume = requireCurrentTask().getProgress().volume();
-        double progress = steps * volume / (double) currentTotalSteps + progressLeftOvers;
-        long longProgress = (long) progress;
-        progressLeftOvers = progress - longProgress;
-        logProgress(longProgress);
+        requireCurrentTask();
+        if (currentTask.isPresent()) {
+            long volume = currentTask.get().getProgress().volume();
+            double progress = steps * volume / (double) currentTotalSteps + progressLeftOvers;
+            long longProgress = (long) progress;
+            progressLeftOvers = progress - longProgress;
+            logProgress(longProgress);
+        }
     }
 
     @Override
@@ -127,14 +148,16 @@ public class TaskProgressTracker implements ProgressTracker {
 
     @Override
     public void endSubTask() {
-        var currentTask = requireCurrentTask();
-        taskProgressLogger.logEndSubTask(currentTask, parentTask());
-        currentTask.finish();
-        if (nestedTasks.isEmpty()) {
-            this.currentTask = Optional.empty();
-            release();
-        } else {
-            this.currentTask = Optional.of(nestedTasks.pop());
+        requireCurrentTask();
+        if (currentTask.isPresent()) {
+            taskProgressLogger.logEndSubTask(currentTask.get(), parentTask());
+            currentTask.get().finish();
+            if (nestedTasks.isEmpty()) {
+                this.currentTask = Optional.empty();
+                release();
+            } else {
+                this.currentTask = Optional.of(nestedTasks.pop());
+            }
         }
     }
 
@@ -146,25 +169,39 @@ public class TaskProgressTracker implements ProgressTracker {
 
     @Override
     public void logProgress(long value) {
-        requireCurrentTask().logProgress(value);
-        taskProgressLogger.logProgress(value);
+        requireCurrentTask();
+        if (currentTask.isPresent()) {
+            currentTask.get().logProgress(value);
+            taskProgressLogger.logProgress(value);
+        }
     }
 
     @Override
     public void logProgress(long value, String messageTemplate) {
-        requireCurrentTask().logProgress(value);
-        taskProgressLogger.logMessage(formatWithLocale(messageTemplate, value));
+        requireCurrentTask();
+        if (currentTask.isPresent()) {
+            currentTask.get().logProgress(value);
+            taskProgressLogger.logMessage(formatWithLocale(messageTemplate, value));
+        }
     }
 
     @Override
     public void setVolume(long volume) {
-        requireCurrentTask().setVolume(volume);
-        taskProgressLogger.reset(volume);
+        requireCurrentTask();
+        if (currentTask.isPresent()) {
+            currentTask.get().setVolume(volume);
+            taskProgressLogger.reset(volume);
+        }
     }
 
     @Override
     public long currentVolume() {
-        return requireCurrentTask().getProgress().volume();
+        requireCurrentTask();
+        if (currentTask.isPresent()) {
+            return currentTask.get().getProgress().volume();
+        } else {
+            return UNKNOWN_VOLUME;
+        }
     }
 
     @Override
@@ -194,16 +231,18 @@ public class TaskProgressTracker implements ProgressTracker {
 
     @Override
     public void endSubTaskWithFailure() {
-        var currentTask = requireCurrentTask();
-        currentTask.fail();
-        taskProgressLogger.logEndSubTaskWithFailure(currentTask, parentTask());
+        requireCurrentTask();
+        if (currentTask.isPresent()) {
+            currentTask.get().fail();
+            taskProgressLogger.logEndSubTaskWithFailure(currentTask.get(), parentTask());
 
-        if (nestedTasks.isEmpty()) {
-            this.currentTask = Optional.empty();
-            release();
-        } else {
-            this.currentTask = Optional.of(nestedTasks.pop());
-            endSubTaskWithFailure();
+            if (nestedTasks.isEmpty()) {
+                this.currentTask = Optional.empty();
+                release();
+            } else {
+                this.currentTask = Optional.of(nestedTasks.pop());
+                endSubTaskWithFailure();
+            }
         }
     }
 
@@ -215,7 +254,8 @@ public class TaskProgressTracker implements ProgressTracker {
 
     @TestOnly
     public Task currentSubTask() {
-        return requireCurrentTask();
+        requireCurrentTask();
+        return currentTask.get();
     }
 
     @Nullable
@@ -229,8 +269,10 @@ public class TaskProgressTracker implements ProgressTracker {
         }
     }
 
-    private Task requireCurrentTask() {
-        return currentTask.orElseThrow(() -> new IllegalStateException("No more running tasks"));
+    private void requireCurrentTask() {
+        if (currentTask.isEmpty()) {
+            onError.run();
+        }
     }
 
     private void validateTaskNotRunning() {
