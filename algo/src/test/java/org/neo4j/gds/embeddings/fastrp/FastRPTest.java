@@ -19,18 +19,6 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.neo4j.gds.TestSupport.assertMemoryRange;
-import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.l2Normalize;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.SplittableRandom;
-
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -62,47 +50,59 @@ import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.features.FeatureExtractor;
 import org.neo4j.gds.ml.util.ShuffleUtil;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.SplittableRandom;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.neo4j.gds.TestSupport.assertMemoryRange;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.l2Normalize;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 @GdlExtension
 public class FastRPTest {
 
     private static final int DEFAULT_EMBEDDING_DIMENSION = 128;
     private static final FastRPBaseConfig DEFAULT_CONFIG = FastRPBaseConfig.builder()
-            .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
-            .propertyRatio(0.5)
-            .featureProperties(List.of("f1", "f2", "f3"))
-            .addIterationWeight(1.0D)
-            .randomSeed(42L)
-            .build();
+        .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
+        .propertyRatio(0.5)
+        .featureProperties(List.of("f1", "f2", "f3"))
+        .addIterationWeight(1.0D)
+        .randomSeed(42L)
+        .build();
 
     @GdlGraph(graphNamePrefix = "array")
     private static final String X =
-            "CREATE" +
-                    "  (a:Node1 {f: [0.4, 1.3, 1.4]})" +
-                    ", (b:Node1 {f: [2.1, 0.5, 1.8]})" +
-                    ", (c:Node2 {f: [-0.3, 0.8, 2.8]})" +
-                    ", (d:Isolated {f: [2.5, 8.1, 1.3]})" +
-                    ", (e:Isolated {f: [0.6, 0.5, 5.2]})" +
-                    ", (a)-[:REL {weight: 2.0}]->(b)" +
-                    ", (b)-[:REL {weight: 1.0}]->(a)" +
-                    ", (a)-[:REL {weight: 1.0}]->(c)" +
-                    ", (c)-[:REL {weight: 1.0}]->(a)" +
-                    ", (b)-[:REL {weight: 1.0}]->(c)" +
-                    ", (c)-[:REL {weight: 1.0}]->(b)";
+        "CREATE" +
+        "  (a:Node1 {f: [0.4, 1.3, 1.4]})" +
+        ", (b:Node1 {f: [2.1, 0.5, 1.8]})" +
+        ", (c:Node2 {f: [-0.3, 0.8, 2.8]})" +
+        ", (d:Isolated {f: [2.5, 8.1, 1.3]})" +
+        ", (e:Isolated {f: [0.6, 0.5, 5.2]})" +
+        ", (a)-[:REL {weight: 2.0}]->(b)" +
+        ", (b)-[:REL {weight: 1.0}]->(a)" +
+        ", (a)-[:REL {weight: 1.0}]->(c)" +
+        ", (c)-[:REL {weight: 1.0}]->(a)" +
+        ", (b)-[:REL {weight: 1.0}]->(c)" +
+        ", (c)-[:REL {weight: 1.0}]->(b)";
 
     @GdlGraph(graphNamePrefix = "scalar")
     private static final String Y =
-            "CREATE" +
-                    "  (a:Node1 {f1: 0.4, f2: 1.3, f3: 1.4})" +
-                    ", (b:Node1 {f1: 2.1, f2: 0.5, f3: 1.8})" +
-                    ", (c:Node2 {f1: -0.3, f2: 0.8, f3: 2.8})" +
-                    ", (d:Isolated {f1: 2.5, f2: 8.1, f3: 1.3})" +
-                    ", (e:Isolated {f1: -0.6, f2: 0.5, f3: 5.2]})" +
-                    ", (a)-[:REL {weight: 2.0}]->(b)" +
-                    ", (b)-[:REL {weight: 1.0}]->(a)" +
-                    ", (a)-[:REL {weight: 1.0}]->(c)" +
-                    ", (c)-[:REL {weight: 1.0}]->(a)" +
-                    ", (b)-[:REL {weight: 1.0}]->(c)" +
-                    ", (c)-[:REL {weight: 1.0}]->(b)";
+        "CREATE" +
+        "  (a:Node1 {f1: 0.4, f2: 1.3, f3: 1.4})" +
+        ", (b:Node1 {f1: 2.1, f2: 0.5, f3: 1.8})" +
+        ", (c:Node2 {f1: -0.3, f2: 0.8, f3: 2.8})" +
+        ", (d:Isolated {f1: 2.5, f2: 8.1, f3: 1.3})" +
+        ", (e:Isolated {f1: -0.6, f2: 0.5, f3: 5.2]})" +
+        ", (a)-[:REL {weight: 2.0}]->(b)" +
+        ", (b)-[:REL {weight: 1.0}]->(a)" +
+        ", (a)-[:REL {weight: 1.0}]->(c)" +
+        ", (c)-[:REL {weight: 1.0}]->(a)" +
+        ", (b)-[:REL {weight: 1.0}]->(c)" +
+        ", (c)-[:REL {weight: 1.0}]->(b)";
 
     @Inject
     Graph scalarGraph;
@@ -127,17 +127,17 @@ public class FastRPTest {
 
     @Test
     void shouldSwapInitialRandomVectors() {
-        final var graph = scalarGraphStore.getGraph(
-                NodeLabel.of("Node1"),
-                RelationshipType.of("REL"),
-                Optional.empty()
+        var graph = scalarGraphStore.getGraph(
+            NodeLabel.of("Node1"),
+            RelationshipType.of("REL"),
+            Optional.empty()
         );
 
         FastRP fastRP = new FastRP(
-                graph,
-                DEFAULT_CONFIG,
-                defaultFeatureExtractors(graph),
-                ProgressTracker.NULL_TRACKER
+            graph,
+            DEFAULT_CONFIG,
+            defaultFeatureExtractors(graph),
+            ProgressTracker.NULL_TRACKER
         );
 
         fastRP.initDegreePartition();
@@ -156,17 +156,17 @@ public class FastRPTest {
 
     @Test
     void shouldAverageNeighbors() {
-        final var graph = scalarGraphStore.getGraph(
-                List.of(NodeLabel.of("Node1"), NodeLabel.of("Node2")),
-                List.of(RelationshipType.of("REL")),
-                Optional.empty()
+        var graph = scalarGraphStore.getGraph(
+            List.of(NodeLabel.of("Node1"), NodeLabel.of("Node2")),
+            List.of(RelationshipType.of("REL")),
+            Optional.empty()
         );
 
         FastRP fastRP = new FastRP(
-                graph,
-                DEFAULT_CONFIG,
-                defaultFeatureExtractors(graph),
-                ProgressTracker.NULL_TRACKER
+            graph,
+            DEFAULT_CONFIG,
+            defaultFeatureExtractors(graph),
+            ProgressTracker.NULL_TRACKER
         );
 
         fastRP.initDegreePartition();
@@ -190,25 +190,25 @@ public class FastRPTest {
     void shouldAddInitialVectors() {
         var embeddingDimension = 6;
         var config = FastRPBaseConfig.builder()
-                .embeddingDimension(embeddingDimension)
-                .propertyRatio(0.5)
-                .featureProperties(List.of("f1", "f2", "f3"))
-                .nodeSelfInfluence(0.6)
-                .addIterationWeight(0.0D)
-                .randomSeed(42L)
-                .build();
+            .embeddingDimension(embeddingDimension)
+            .propertyRatio(0.5)
+            .featureProperties(List.of("f1", "f2", "f3"))
+            .nodeSelfInfluence(0.6)
+            .addIterationWeight(0.0D)
+            .randomSeed(42L)
+            .build();
 
-        final var graph = scalarGraphStore.getGraph(
-                List.of(NodeLabel.of("Node1"), NodeLabel.of("Node2")),
-                List.of(RelationshipType.of("REL")),
-                Optional.empty()
+        var graph = scalarGraphStore.getGraph(
+            List.of(NodeLabel.of("Node1"), NodeLabel.of("Node2")),
+            List.of(RelationshipType.of("REL")),
+            Optional.empty()
         );
 
         FastRP fastRP = new FastRP(
-                graph,
-                config,
-                defaultFeatureExtractors(graph),
-                ProgressTracker.NULL_TRACKER
+            graph,
+            config,
+            defaultFeatureExtractors(graph),
+            ProgressTracker.NULL_TRACKER
         );
 
         fastRP.initDegreePartition();
@@ -254,17 +254,17 @@ public class FastRPTest {
 
     @Test
     void shouldInitialisePropertyEmbeddingsCorrectly() {
-        final var graph = scalarGraphStore.getGraph(
-                List.of(NodeLabel.of("Node1"), NodeLabel.of("Node2")),
-                List.of(RelationshipType.of("REL")),
-                Optional.empty()
+        var graph = scalarGraphStore.getGraph(
+            List.of(NodeLabel.of("Node1"), NodeLabel.of("Node2")),
+            List.of(RelationshipType.of("REL")),
+            Optional.empty()
         );
 
         FastRP fastRP = new FastRP(
-                graph,
-                DEFAULT_CONFIG,
-                defaultFeatureExtractors(graph),
-                ProgressTracker.NULL_TRACKER
+            graph,
+            DEFAULT_CONFIG,
+            defaultFeatureExtractors(graph),
+            ProgressTracker.NULL_TRACKER
         );
 
         fastRP.initPropertyVectors();
@@ -288,53 +288,53 @@ public class FastRPTest {
         var initialPropComponentOfNodeVector3 = new float[]{0.7794228599999999f, 0.06495190499999999f, -0.17320508f, 0.06495190499999999f, -0.06495190499999999f, 0.06495190499999999f, 0.6062177799999999f, 0.7794228599999999f, 0.671169685f, -0.06495190499999999f, 0.6062177799999999f, 0.10825317500000001f, -0.06495190499999999f, 0.06495190499999999f, 0.0f, 0.0f, 0.17320508f, 0.0f, -0.10825317500000001f, 0.06495190499999999f, 0.06495190499999999f, 0.0f, 0.0f, 0.06495190499999999f, -0.17320508f, 0.238156985f, -0.06495190499999999f, 0.0f, -0.238156985f, 0.06495190499999999f, 0.0f, 0.0f, 0.10825317500000001f, -0.17320508f, -0.10825317500000001f, 0.671169685f, 0.7794228599999999f, -0.17320508f, 0.0f, 0.17320508f, 0.06495190499999999f, 0.0f, -0.4330126999999999f, -0.671169685f, 0.06495190499999999f, -0.06495190499999999f, 0.0f, 0.0f, 0.0f, -0.06495190499999999f, 0.0f, 0.0f, 0.0f, 0.0f, 0.06495190499999999f, -0.6062177799999999f, 0.06495190499999999f, -0.17320508f, 0.10825317500000001f, -0.10825317500000001f, 0.0f, 0.6062177799999999f, 0.06495190499999999f, 0.0f};
 
         assertThat(initialPropComponentOfNodeVector1)
-                .contains(
-                        takeLastElements(fastRP.currentEmbedding(-1).get(0), DEFAULT_CONFIG.propertyDimension()),
-                        Offset.offset(1e-6f)
-                );
+            .contains(
+                takeLastElements(fastRP.currentEmbedding(-1).get(0), DEFAULT_CONFIG.propertyDimension()),
+                Offset.offset(1e-6f)
+            );
         assertThat(initialPropComponentOfNodeVector2)
-                .contains(
-                        takeLastElements(fastRP.currentEmbedding(-1).get(1), DEFAULT_CONFIG.propertyDimension()),
-                        Offset.offset(1e-6f)
-                );
+            .contains(
+                takeLastElements(fastRP.currentEmbedding(-1).get(1), DEFAULT_CONFIG.propertyDimension()),
+                Offset.offset(1e-6f)
+            );
         assertThat(initialPropComponentOfNodeVector3)
-                .contains(
-                        takeLastElements(fastRP.currentEmbedding(-1).get(2), DEFAULT_CONFIG.propertyDimension()),
-                        Offset.offset(1e-6f)
-                );
+            .contains(
+                takeLastElements(fastRP.currentEmbedding(-1).get(2), DEFAULT_CONFIG.propertyDimension()),
+                Offset.offset(1e-6f)
+            );
     }
 
     @Test
     void shouldBeDeterministicInParallel() {
-        final var graph = scalarGraphStore.getGraph(
-                List.of(NodeLabel.of("Node1"), NodeLabel.of("Node2")),
-                List.of(RelationshipType.of("REL")),
-                Optional.empty()
+        var graph = scalarGraphStore.getGraph(
+            List.of(NodeLabel.of("Node1"), NodeLabel.of("Node2")),
+            List.of(RelationshipType.of("REL")),
+            Optional.empty()
         );
 
         var configBuilder = FastRPBaseConfig.builder()
-                .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
-                .propertyRatio(0.5)
-                .featureProperties(List.of("f1", "f2", "f3"))
-                .addIterationWeight(1.0D)
-                .minBatchSize(1)
-                .randomSeed(42L);
+            .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
+            .propertyRatio(0.5)
+            .featureProperties(List.of("f1", "f2", "f3"))
+            .addIterationWeight(1.0D)
+            .minBatchSize(1)
+            .randomSeed(42L);
 
         FastRP concurrentFastRP = new FastRP(
-                graph,
-                configBuilder.concurrency(4).build(),
-                defaultFeatureExtractors(graph),
-                ProgressTracker.NULL_TRACKER
+            graph,
+            configBuilder.concurrency(4).build(),
+            defaultFeatureExtractors(graph),
+            ProgressTracker.NULL_TRACKER
         );
 
         concurrentFastRP.compute();
         HugeObjectArray<float[]> concurrentEmbeddings = concurrentFastRP.embeddings();
 
         FastRP sequentialFastRP = new FastRP(
-                graph,
-                configBuilder.concurrency(1).build(),
-                defaultFeatureExtractors(graph),
-                ProgressTracker.NULL_TRACKER
+            graph,
+            configBuilder.concurrency(1).build(),
+            defaultFeatureExtractors(graph),
+            ProgressTracker.NULL_TRACKER
         );
 
         sequentialFastRP.compute();
@@ -348,24 +348,24 @@ public class FastRPTest {
 
     @Test
     void shouldAverageNeighborsWeighted() {
-        final var graph = scalarGraphStore.getGraph(
-                List.of(NodeLabel.of("Node1"), NodeLabel.of("Node2")),
-                List.of(RelationshipType.of("REL")),
-                Optional.of("weight")
+        var graph = scalarGraphStore.getGraph(
+            List.of(NodeLabel.of("Node1"), NodeLabel.of("Node2")),
+            List.of(RelationshipType.of("REL")),
+            Optional.of("weight")
         );
 
         var weightedConfig = ImmutableFastRPBaseConfig
-                .builder()
-                .from(DEFAULT_CONFIG)
-                .relationshipWeightProperty("weight")
-                .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
-                .build();
+            .builder()
+            .from(DEFAULT_CONFIG)
+            .relationshipWeightProperty("weight")
+            .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
+            .build();
 
         FastRP fastRP = new FastRP(
-                graph,
-                weightedConfig,
-                defaultFeatureExtractors(graph),
-                ProgressTracker.NULL_TRACKER
+            graph,
+            weightedConfig,
+            defaultFeatureExtractors(graph),
+            ProgressTracker.NULL_TRACKER
         );
 
         fastRP.initDegreePartition();
@@ -387,20 +387,20 @@ public class FastRPTest {
 
     @Test
     void shouldDistributeValuesCorrectly() {
-        final var graph = scalarGraphStore.getGraph(
-                List.of(NodeLabel.of("Node1"), NodeLabel.of("Node2")),
-                List.of(RelationshipType.of("REL")),
-                Optional.empty()
+        var graph = scalarGraphStore.getGraph(
+            List.of(NodeLabel.of("Node1"), NodeLabel.of("Node2")),
+            List.of(RelationshipType.of("REL")),
+            Optional.empty()
         );
 
         var fastRP = new FastRP(
-                graph,
-                FastRPBaseConfig.builder()
-                        .embeddingDimension(512)
-                        .addIterationWeight(1.0D)
-                        .build(),
-                List.of(),
-                ProgressTracker.NULL_TRACKER
+            graph,
+            FastRPBaseConfig.builder()
+                .embeddingDimension(512)
+                .addIterationWeight(1.0D)
+                .build(),
+            List.of(),
+            ProgressTracker.NULL_TRACKER
         );
 
         fastRP.initPropertyVectors();
@@ -427,22 +427,22 @@ public class FastRPTest {
             int minNumPositive = (int) ((p - 5D * Math.sqrt((p * (1 - p)) / 512D)) * 512D);
 
             assertThat(numPositive)
-                    .isGreaterThanOrEqualTo(minNumPositive)
-                    .isLessThanOrEqualTo(maxNumPositive);
+                .isGreaterThanOrEqualTo(minNumPositive)
+                .isLessThanOrEqualTo(maxNumPositive);
 
             assertThat(numNegative)
-                    .isGreaterThanOrEqualTo(minNumPositive)
-                    .isLessThanOrEqualTo(maxNumPositive);
+                .isGreaterThanOrEqualTo(minNumPositive)
+                .isLessThanOrEqualTo(maxNumPositive);
         }
     }
 
     @Test
     void shouldYieldEmptyEmbeddingForIsolatedNodes() {
         FastRP fastRP = new FastRP(
-                scalarGraph,
-                DEFAULT_CONFIG,
-                List.of(),
-                ProgressTracker.NULL_TRACKER
+            scalarGraph,
+            DEFAULT_CONFIG,
+            List.of(),
+            ProgressTracker.NULL_TRACKER
         );
 
         var embeddings = fastRP.embeddings();
@@ -455,10 +455,10 @@ public class FastRPTest {
     @Test
     void testMemoryEstimationWithoutIterationWeights() {
         var config = ImmutableFastRPBaseConfig
-                .builder()
-                .addIterationWeights(1.0D, 1.0D)
-                .embeddingDimension(128)
-                .build();
+            .builder()
+            .addIterationWeights(1.0D, 1.0D)
+            .embeddingDimension(128)
+            .build();
 
         var dimensions = ImmutableGraphDimensions.builder().nodeCount(100).build();
 
@@ -469,10 +469,10 @@ public class FastRPTest {
     @Test
     void testMemoryEstimationWithIterationWeights() {
         var config = ImmutableFastRPBaseConfig
-                .builder()
-                .embeddingDimension(128)
-                .iterationWeights(List.of(1.0D, 2.0D))
-                .build();
+            .builder()
+            .embeddingDimension(128)
+            .iterationWeights(List.of(1.0D, 2.0D))
+            .build();
 
         var dimensions = ImmutableGraphDimensions.builder().nodeCount(100).build();
 
@@ -482,20 +482,20 @@ public class FastRPTest {
 
     @Test
     void shouldLogProgress() {
-        final var graph = scalarGraphStore.getGraph(
-                List.of(NodeLabel.of("Node1"), NodeLabel.of("Node2")),
-                List.of(RelationshipType.of("REL")),
-                Optional.empty()
+        var graph = scalarGraphStore.getGraph(
+            List.of(NodeLabel.of("Node1"), NodeLabel.of("Node2")),
+            List.of(RelationshipType.of("REL")),
+            Optional.empty()
         );
 
         var config = FastRPBaseConfig.builder()
-                .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
-                .propertyRatio(0.5)
-                .featureProperties(List.of("f1", "f2", "f3"))
-                .nodeSelfInfluence(0.6)
-                .addIterationWeight(0.0D)
-                .randomSeed(42L)
-                .build();
+            .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
+            .propertyRatio(0.5)
+            .featureProperties(List.of("f1", "f2", "f3"))
+            .nodeSelfInfluence(0.6)
+            .addIterationWeight(0.0D)
+            .randomSeed(42L)
+            .build();
 
         var factory = new FastRPFactory();
 
@@ -504,26 +504,26 @@ public class FastRPTest {
         var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
 
         factory
-                .build(graph, config, progressTracker)
-                .compute();
+            .build(graph, config, progressTracker)
+            .compute();
 
         assertThat(log.getMessages(TestLog.INFO))
-                .extracting(removingThreadId())
-                .contains(
-                        "FastRP :: Start",
-                        "FastRP :: Initialize random vectors :: Start",
-                        "FastRP :: Initialize random vectors 100%",
-                        "FastRP :: Initialize random vectors :: Finished",
-                        "FastRP :: Apply node self-influence :: Start",
-                        "FastRP :: Apply node self-influence 100%",
-                        "FastRP :: Apply node self-influence :: Finished",
-                        "FastRP :: Propagate embeddings :: Start",
-                        "FastRP :: Propagate embeddings :: Propagate embeddings task 1 of 1 :: Start",
-                        "FastRP :: Propagate embeddings :: Propagate embeddings task 1 of 1 100%",
-                        "FastRP :: Propagate embeddings :: Propagate embeddings task 1 of 1 :: Finished",
-                        "FastRP :: Propagate embeddings :: Finished",
-                        "FastRP :: Finished"
-                );
+            .extracting(removingThreadId())
+            .contains(
+                "FastRP :: Start",
+                "FastRP :: Initialize random vectors :: Start",
+                "FastRP :: Initialize random vectors 100%",
+                "FastRP :: Initialize random vectors :: Finished",
+                "FastRP :: Apply node self-influence :: Start",
+                "FastRP :: Apply node self-influence 100%",
+                "FastRP :: Apply node self-influence :: Finished",
+                "FastRP :: Propagate embeddings :: Start",
+                "FastRP :: Propagate embeddings :: Propagate embeddings task 1 of 1 :: Start",
+                "FastRP :: Propagate embeddings :: Propagate embeddings task 1 of 1 100%",
+                "FastRP :: Propagate embeddings :: Propagate embeddings task 1 of 1 :: Finished",
+                "FastRP :: Propagate embeddings :: Finished",
+                "FastRP :: Finished"
+            );
     }
 
     @Nested
@@ -532,14 +532,14 @@ public class FastRPTest {
 
         @GdlGraph
         private static final String DB_CYPHER =
-                "CREATE" +
-                        "  (a:N { prop: 1 })" +
-                        ", (b:N)" +
-                        ", (c:NaNRelWeight)" +
-                        ", (d:NaNRelWeight)" +
-                        ", (a)-[:REL]->(b)" +
-                        ", (c)-[:REL]->(d)" +
-                        ", (d)-[:REL {weight: 1.0}]->(d)";
+            "CREATE" +
+            "  (a:N { prop: 1 })" +
+            ", (b:N)" +
+            ", (c:NaNRelWeight)" +
+            ", (d:NaNRelWeight)" +
+            ", (a)-[:REL]->(b)" +
+            ", (c)-[:REL]->(d)" +
+            ", (d)-[:REL {weight: 1.0}]->(d)";
 
         @Inject
         GraphStore graphStore;
@@ -551,51 +551,55 @@ public class FastRPTest {
         void shouldFailWhenNodePropertiesAreMissing() {
             Graph graph = graphStore.getGraph(NodeLabel.of("N"), RelationshipType.of("REL"), Optional.empty());
             FastRP fastRP = new FastRP(
-                    graph,
-                    FastRPBaseConfig.builder()
-                            .embeddingDimension(64)
-                            .addIterationWeights(1.0D, 1.0D, 1.0D, 1.0D)
-                            .addFeatureProperty("prop")
-                            .build(),
-                    FeatureExtraction.propertyExtractors(graph, List.of("prop")),
-                    ProgressTracker.NULL_TRACKER
+                graph,
+                FastRPBaseConfig.builder()
+                    .embeddingDimension(64)
+                    .addIterationWeights(1.0D, 1.0D, 1.0D, 1.0D)
+                    .addFeatureProperty("prop")
+                    .build(),
+                FeatureExtraction.propertyExtractors(graph, List.of("prop")),
+                ProgressTracker.NULL_TRACKER
             );
 
             assertThatThrownBy(fastRP::initRandomVectors)
-                    .hasMessageContaining(
-                            formatWithLocale(
-                                    "Node with ID `%s` has invalid feature property value `NaN` for property `prop`",
-                                    idFunction.of("b")
-                            )
-                    );
+                .hasMessageContaining(
+                    formatWithLocale(
+                        "Node with ID `%s` has invalid feature property value `NaN` for property `prop`",
+                        idFunction.of("b")
+                    )
+                );
         }
 
         @Test
         void shouldFailWhenRelationshipWeightIsMissing() {
-            Graph graph = graphStore.getGraph(NodeLabel.of("NaNRelWeight"), RelationshipType.of("REL"), Optional.of("weight"));
+            Graph graph = graphStore.getGraph(
+                NodeLabel.of("NaNRelWeight"),
+                RelationshipType.of("REL"),
+                Optional.of("weight")
+            );
 
             var weightedConfig = FastRPBaseConfig.builder()
-                    .relationshipWeightProperty("weight")
-                    .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
-                    .addIterationWeight(1.0D)
-                    .randomSeed(42L)
-                    .build();
+                .relationshipWeightProperty("weight")
+                .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
+                .addIterationWeight(1.0D)
+                .randomSeed(42L)
+                .build();
 
             FastRP fastRP = new FastRP(
-                    graph,
-                    weightedConfig,
-                    List.of(),
-                    ProgressTracker.NULL_TRACKER
+                graph,
+                weightedConfig,
+                List.of(),
+                ProgressTracker.NULL_TRACKER
             );
 
             assertThatThrownBy(fastRP::compute)
-                    .hasMessageContaining(
-                            formatWithLocale(
-                                    "Missing relationship property `weight` on relationship between nodes with ids `%d` and `%d`.",
-                                    idFunction.of("c"),
-                                    idFunction.of("d")
-                            )
-                    );
+                .hasMessageContaining(
+                    formatWithLocale(
+                        "Missing relationship property `weight` on relationship between nodes with ids `%d` and `%d`.",
+                        idFunction.of("c"),
+                        idFunction.of("d")
+                    )
+                );
         }
     }
 
@@ -612,17 +616,17 @@ public class FastRPTest {
             firstOriginalToMappedBuilder.set(nodeId, nodeId);
         }
         var firstIdMap = new ArrayIdMap(
-                firstMappedToOriginal,
-                firstOriginalToMappedBuilder.build(),
-                LabelInformationBuilders.singleLabel(NodeLabel.of("hello")).build(nodeCount, firstMappedToOriginal::get),
-                nodeCount,
-                nodeCount - 1
+            firstMappedToOriginal,
+            firstOriginalToMappedBuilder.build(),
+            LabelInformationBuilders.singleLabel(NodeLabel.of("hello")).build(nodeCount, firstMappedToOriginal::get),
+            nodeCount,
+            nodeCount - 1
         );
         RelationshipsBuilder firstRelationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-                .nodes(firstIdMap)
-                .orientation(Orientation.UNDIRECTED)
-                .executorService(Pools.DEFAULT)
-                .build();
+            .nodes(firstIdMap)
+            .orientation(Orientation.UNDIRECTED)
+            .executorService(Pools.DEFAULT)
+            .build();
 
         var secondMappedToOriginal = HugeLongArray.newArray(nodeCount);
         secondMappedToOriginal.setAll(nodeId -> nodeId);
@@ -635,17 +639,17 @@ public class FastRPTest {
         }
 
         var secondIdMap = new ArrayIdMap(
-                secondMappedToOriginal,
-                secondOriginalToMappedBuilder.build(),
-                LabelInformationBuilders.singleLabel(NodeLabel.of("hello")).build(nodeCount, secondMappedToOriginal::get),
-                nodeCount,
-                nodeCount - 1
+            secondMappedToOriginal,
+            secondOriginalToMappedBuilder.build(),
+            LabelInformationBuilders.singleLabel(NodeLabel.of("hello")).build(nodeCount, secondMappedToOriginal::get),
+            nodeCount,
+            nodeCount - 1
         );
         RelationshipsBuilder secondRelationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-                .nodes(secondIdMap)
-                .orientation(Orientation.UNDIRECTED)
-                .executorService(Pools.DEFAULT)
-                .build();
+            .nodes(secondIdMap)
+            .orientation(Orientation.UNDIRECTED)
+            .executorService(Pools.DEFAULT)
+            .build();
 
         var random = new SplittableRandom(42);
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
@@ -663,24 +667,24 @@ public class FastRPTest {
         var secondGraph = GraphFactory.create(secondIdMap, secondRelationships);
 
         var config = ImmutableFastRPBaseConfig
-                .builder()
-                .embeddingDimension(embeddingDimension)
-                .concurrency(1)
-                .randomSeed(1337L)
-                .build();
+            .builder()
+            .embeddingDimension(embeddingDimension)
+            .concurrency(1)
+            .randomSeed(1337L)
+            .build();
 
         var firstEmbeddings = new FastRP(
-                firstGraph,
-                config,
-                List.of(),
-                ProgressTracker.NULL_TRACKER
+            firstGraph,
+            config,
+            List.of(),
+            ProgressTracker.NULL_TRACKER
         ).compute().embeddings();
 
         var secondEmbeddings = new FastRP(
-                secondGraph,
-                config,
-                List.of(),
-                ProgressTracker.NULL_TRACKER
+            secondGraph,
+            config,
+            List.of(),
+            ProgressTracker.NULL_TRACKER
         ).compute().embeddings();
 
         double cosineSum = 0;
@@ -695,10 +699,10 @@ public class FastRPTest {
 
     private HugeObjectArray<float[]> embeddings(Graph graph, List<String> properties) {
         var fastRPArray = new FastRP(
-                graph,
-                DEFAULT_CONFIG,
-                FeatureExtraction.propertyExtractors(graph, properties),
-                ProgressTracker.NULL_TRACKER
+            graph,
+            DEFAULT_CONFIG,
+            FeatureExtraction.propertyExtractors(graph, properties),
+            ProgressTracker.NULL_TRACKER
         );
         return fastRPArray.compute().embeddings();
     }
