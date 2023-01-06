@@ -22,8 +22,8 @@ package org.neo4j.gds.core.utils.paged;
 import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.mem.BitUtil;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.LongConsumer;
 
 public final class HugeAtomicGrowingBitSet {
@@ -34,7 +34,7 @@ public final class HugeAtomicGrowingBitSet {
     private long numBits;
     private int remainder;
 
-    private final Lock growLock = new ReentrantLock(true);
+    private final ReadWriteLock growLock = new ReentrantReadWriteLock(false);
 
     public static HugeAtomicGrowingBitSet create(long size) {
         var wordsSize = BitUtil.ceilDiv(size, NUM_BITS);
@@ -70,7 +70,13 @@ public final class HugeAtomicGrowingBitSet {
         if (index >= numBits) {
             grow(index + 1);
         }
-        HugeAtomicBitSetOps.set(bits, numBits, index);
+
+        growLock.readLock().lock();
+        try {
+            HugeAtomicBitSetOps.set(bits, numBits, index);
+        } finally {
+            growLock.readLock().unlock();
+        }
     }
 
     /**
@@ -80,7 +86,13 @@ public final class HugeAtomicGrowingBitSet {
         if (endIndex > numBits) {
             grow(endIndex);
         }
-        HugeAtomicBitSetOps.setRange(bits, numBits, startIndex, endIndex);
+
+        growLock.readLock().lock();
+        try {
+            HugeAtomicBitSetOps.setRange(bits, numBits, startIndex, endIndex);
+        } finally {
+            growLock.readLock().unlock();
+        }
     }
 
     /**
@@ -91,7 +103,13 @@ public final class HugeAtomicGrowingBitSet {
         if (index >= numBits) {
             grow(index + 1);
         }
-        return HugeAtomicBitSetOps.getAndSet(bits, numBits, index);
+
+        growLock.readLock().lock();
+        try {
+            return HugeAtomicBitSetOps.getAndSet(bits, numBits, index);
+        } finally {
+            growLock.readLock().unlock();
+        }
     }
 
     /**
@@ -101,7 +119,13 @@ public final class HugeAtomicGrowingBitSet {
         if (index >= numBits) {
             grow(index + 1);
         }
-        HugeAtomicBitSetOps.flip(bits, numBits, index);
+
+        growLock.readLock().lock();
+        try {
+            HugeAtomicBitSetOps.flip(bits, numBits, index);
+        } finally {
+            growLock.readLock().unlock();
+        }
     }
 
     /**
@@ -110,7 +134,13 @@ public final class HugeAtomicGrowingBitSet {
      * This method is not thread-safe.
      */
     public void forEachSetBit(LongConsumer consumer) {
-        HugeAtomicBitSetOps.forEachSetBit(bits, consumer);
+        growLock.readLock().lock();
+        try {
+            HugeAtomicBitSetOps.forEachSetBit(bits, consumer);
+            growLock.readLock().lock();
+        } finally {
+            growLock.readLock().unlock();
+        }
     }
 
     /**
@@ -153,18 +183,31 @@ public final class HugeAtomicGrowingBitSet {
      * Note: this method is not thread-safe.
      */
     public void clear() {
-        HugeAtomicBitSetOps.clear(bits);
+        growLock.readLock().lock();
+        try {
+            HugeAtomicBitSetOps.clear(bits);
+        } finally {
+            growLock.readLock().unlock();
+        }
     }
 
     /**
      * Resets the bit at the given index.
      */
     public void clear(long index) {
-        HugeAtomicBitSetOps.clear(bits, numBits, index);
+        growLock.readLock().lock();
+        try {
+            HugeAtomicBitSetOps.clear(bits, numBits, index);
+        } finally {
+            growLock.readLock().unlock();
+        }
     }
 
     private void grow(long minNumBits) {
-        growLock.lock();
+        if (minNumBits < numBits) {
+            return;
+        }
+        growLock.writeLock().lock();
         try {
             if (minNumBits < numBits) {
                 return;
@@ -180,7 +223,7 @@ public final class HugeAtomicGrowingBitSet {
             this.numBits = newNumBits;
             this.remainder = remainder;
         } finally {
-            growLock.unlock();
+            growLock.writeLock().unlock();
         }
     }
 }
