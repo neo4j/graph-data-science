@@ -20,6 +20,11 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
+
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,5 +63,30 @@ class HugeAtomicGrowingBitSetTest {
         assertThat(atomicBitSet.get(42_1337)).isTrue();
         assertThat(atomicBitSet.get(42_1337_1337L)).isTrue();
         assertThat(atomicBitSet.size()).isEqualTo(4_740_042_755L);
+    }
+
+    @Test
+    void writingAndGrowingShouldBeThreadSafe() {
+        int concurrency = 8;
+        int nodeCount = 1_000_000;
+
+        var bitSet = HugeAtomicGrowingBitSet.create(0);
+
+        List<Runnable> tasks = PartitionUtils.rangePartition(concurrency, nodeCount, (partition) -> () -> {
+            long startNode = partition.startNode();
+            long endNode = partition.startNode() + partition.nodeCount();
+            for (var i = startNode; i < endNode; i++) {
+                bitSet.set(i);
+            }
+        }, Optional.empty());
+
+        RunWithConcurrency
+            .builder()
+            .tasks(tasks)
+            .concurrency(concurrency)
+            .build()
+            .run();
+
+        assertThat(bitSet.cardinality()).isEqualTo(nodeCount);
     }
 }
