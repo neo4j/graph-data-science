@@ -5,7 +5,7 @@ plugins {
     id 'ch.kk7.spawn'                               version '1.0.20180924200750'    apply false
     id 'com.vanniktech.dependency.graph.generator'  version '0.5.0'
     id 'de.thetaphi.forbiddenapis'                  version '3.3'                   apply false
-    id 'com.github.spotbugs'                        version '5.0.9'                 apply false
+    id 'com.github.spotbugs'                        version '5.0.13'                 apply false
     id 'nebula.info-dependencies'                   version '9.3.0'                 apply false
     id 'com.google.protobuf'                        version '0.8.16'                apply false
     id 'me.champeau.mrjar'                          version "0.1"                   apply false
