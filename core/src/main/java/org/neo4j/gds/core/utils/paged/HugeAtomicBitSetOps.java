@@ -31,7 +31,7 @@ public final class HugeAtomicBitSetOps {
     static boolean get(HugeAtomicLongArray bits, long numBits, long index) {
         assert (index < numBits);
         long wordIndex = index / NUM_BITS;
-        int bitIndex = (int) index % NUM_BITS;
+        int bitIndex = (int) (index % NUM_BITS);
         long bitmask = 1L << bitIndex;
         return (bits.get(wordIndex) & bitmask) != 0;
     }
@@ -43,7 +43,7 @@ public final class HugeAtomicBitSetOps {
         assert (index < numBits);
 
         long wordIndex = index / NUM_BITS;
-        int bitIndex = (int) index % NUM_BITS;
+        int bitIndex = (int) (index % NUM_BITS);
         long bitmask = 1L << bitIndex;
 
         long oldWord = bits.get(wordIndex);
@@ -115,7 +115,7 @@ public final class HugeAtomicBitSetOps {
         assert (index < numBits);
 
         long wordIndex = index / NUM_BITS;
-        int bitIndex = (int) index % NUM_BITS;
+        int bitIndex = (int) (index % NUM_BITS);
         long bitmask = 1L << bitIndex;
 
         long oldWord = bits.get(wordIndex);
@@ -142,7 +142,7 @@ public final class HugeAtomicBitSetOps {
         assert (index < numBits);
 
         long wordIndex = index / NUM_BITS;
-        int bitIndex = (int) index % NUM_BITS;
+        int bitIndex = (int) (index % NUM_BITS);
         long bitmask = 1L << bitIndex;
 
         long oldWord = bits.get(wordIndex);
@@ -242,7 +242,7 @@ public final class HugeAtomicBitSetOps {
         assert (index < numBits);
 
         long wordIndex = index / NUM_BITS;
-        int bitIndex = (int) index % NUM_BITS;
+        int bitIndex = (int) (index % NUM_BITS);
         long bitmask = ~(1L << bitIndex);
 
         long oldWord = bits.get(wordIndex);
