@@ -116,13 +116,14 @@ The `modelInfo` return field has the following algorithm-specific subfields:
 .Fields of modelInfo
 [opts="header",cols="1,1,6"]
 |===
-| Name            | Type            | Description
-| modelName       | String          | The name of the trained model.
-| modelType       | String          | The type of the trained model.
-| classes         | List of Integer | Sorted list of class ids which are the distinct values of `targetProperty` over the entire graph.
-| bestParameters  | Map             | The model parameters which performed best on average on validation folds according to the primary metric.
-| metrics         | Map             | Map from metric description to evaluated metrics for the winning model over the subsets of the data, see below.
-| pipeline        | Map             | Steps to produce input features for the pipeline model.
+| Name              | Type            | Description
+| modelName         | String          | The name of the trained model.
+| modelType         | String          | The type of the trained model.
+| classes           | List of Integer | Sorted list of class ids which are the distinct values of `targetProperty` over the entire graph.
+| bestParameters    | Map             | The model parameters which performed best on average on validation folds according to the primary metric.
+| metrics           | Map             | Map from metric description to evaluated metrics for the winning model over the subsets of the data, see below.
+| nodePropertySteps | List of Map     | Algorithms that produce node properties within the pipeline.
+| featureProperties | List of String  | Node properties selected as input features to the pipeline model.
 |===
 
 The structure of `modelInfo` is:
@@ -130,19 +131,20 @@ The structure of `modelInfo` is:
 [listing]
 ----
 {
-    bestParameters: Map,        // <1>
-    pipeline: Map               // <2>
-    classes: List of Integer,   // <3>
-    metrics: {                  // <4>
-        <METRIC_NAME>: {        // <5>
-            test: Float,        // <6>
-            outerTrain: Float,  // <7>
-            train: {            // <8>
+    bestParameters: Map,                // <1>
+    nodePropertySteps: List of Map,
+    featureProperties: List of String,
+    classes: List of Integer,           // <2>
+    metrics: {                          // <3>
+        <METRIC_NAME>: {                // <4>
+            test: Float,                // <5>
+            outerTrain: Float,          // <6>
+            train: {                    // <7>
                 avg: Float,
                 max: Float,
                 min: Float,
             },
-            validation: {       // <9>
+            validation: {               // <8>
                 avg: Float,
                 max: Float,
                 min: Float,
@@ -153,20 +155,19 @@ The structure of `modelInfo` is:
 }
 ----
 <1> The best scoring model candidate configuration.
-<2> The pipeline used for the training.
-<3> Sorted list of class ids which are the distinct values of `targetProperty` over the entire graph.
-<4> The `metrics` map contains an entry for each metric description, and the corresponding results for that metric.
-<5> A metric name specified in the configuration of the procedure, e.g., `F1_MACRO` or `RECALL(class=4)`.
-<6> Numeric value for the evaluation of the winning model on the test set.
-<7> Numeric value for the evaluation of the winning model on the outer train set.
-<8> The `train` entry summarizes the metric results over the `train` set.
-<9> The `validation` entry summarizes the metric results over the `validation` set.
+<2> Sorted list of class ids which are the distinct values of `targetProperty` over the entire graph.
+<3> The `metrics` map contains an entry for each metric description, and the corresponding results for that metric.
+<4> A metric name specified in the configuration of the procedure, e.g., `F1_MACRO` or `RECALL(class=4)`.
+<5> Numeric value for the evaluation of the winning model on the test set.
+<6> Numeric value for the evaluation of the winning model on the outer train set.
+<7> The `train` entry summarizes the metric results over the `train` set.
+<8> The `validation` entry summarizes the metric results over the `validation` set.
 --
 
 [NOTE]
 ====
-In (6)-(8), if the metric is `OUT_OF_BAG_ERROR`, these statistics are not reported.
-The `OUT_OF_BAG_ERROR` is only reported in (9) as validation metric and only if the model is RandomForest.
+In (5)-(7), if the metric is `OUT_OF_BAG_ERROR`, these statistics are not reported.
+The `OUT_OF_BAG_ERROR` is only reported in (8) as validation metric and only if the model is RandomForest.
 ====
 
 include::partial$/machine-learning/pipeline-training-logging-note.adoc[]

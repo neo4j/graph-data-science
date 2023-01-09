@@ -53,7 +53,9 @@ public interface NodeClassificationPipelineModelInfo extends ToMapConvertible {
             "bestParameters", bestParameters().toMapWithTrainerMethod(),
             "classes", classes(),
             "metrics", metrics(),
-            "pipeline", pipeline().toMap()
+            "pipeline", pipeline().toMap(),
+            "nodePropertySteps", ToMapConvertible.toMap(pipeline().nodePropertySteps()),
+            "featureProperties", pipeline().featureProperties()
         );
     }
 
