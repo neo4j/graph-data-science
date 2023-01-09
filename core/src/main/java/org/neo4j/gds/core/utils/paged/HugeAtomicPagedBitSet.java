@@ -105,6 +105,32 @@ public final class HugeAtomicPagedBitSet {
         return (page.get(wordIndex) & bitMask) != 0;
     }
 
+    public boolean getAndSet(long index) {
+        long longIndex = index >>> 6;
+        int pageIndex = HugeArrays.pageIndex(longIndex, pageShift);
+        int wordIndex = HugeArrays.indexInPage(longIndex, pageMask);
+        int bitIndex = (int) (index & BIT_MASK);
+
+        var page = getPage(pageIndex);
+        long bitMask = 1L << bitIndex;
+
+        long oldWord = page.get(wordIndex);
+        while (true) {
+            long newWord = oldWord | bitMask;
+            if (newWord == oldWord) {
+                // already set
+                return true;
+            }
+            long currentWord = page.compareAndExchange(wordIndex, oldWord, newWord);
+            if (currentWord == oldWord) {
+                // CAS successful
+                return false;
+            }
+            // CAS unsuccessful, try again
+            oldWord = currentWord;
+        }
+    }
+
     public long cardinality() {
         final Pages pages = this.pages.get();
         final long pageCount = pages.length();
