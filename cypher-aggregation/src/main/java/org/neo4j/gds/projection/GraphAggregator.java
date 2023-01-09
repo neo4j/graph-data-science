@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.ReturnType;
+import org.neo4j.gds.annotation.CustomProcedure;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -54,8 +54,6 @@ import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.impl.util.ValueUtils;
 import org.neo4j.procedure.Name;
-import org.neo4j.procedure.UserAggregationResult;
-import org.neo4j.procedure.UserAggregationUpdate;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.TextValue;
@@ -109,14 +107,48 @@ public class GraphAggregator implements CompatUserAggregator {
         this.configValidator = new ConfigValidator();
     }
 
-    @UserAggregationUpdate
-    public void projectNextRelationship(
+    // NOTE: keep in sync with `CypherAggregation.FUNCTION_NAME`
+    @CustomProcedure("gds.alpha.graph.project")
+    public AggregationResult procedureSyntax(
         @Name("graphName") TextValue graphName,
         @Name("sourceNode") AnyValue sourceNode,
-        @Name(value = "targetNode", defaultValue = "null") AnyValue targetNode,
-        @Name(value = "nodesConfig", defaultValue = "null") AnyValue nodesConfig,
-        @Name(value = "relationshipConfig", defaultValue = "null") AnyValue relationshipConfig,
-        @Name(value = "configuration", defaultValue = "null") AnyValue config
+        @Name("targetNode") AnyValue targetNode,
+        @Name("nodesConfig") AnyValue nodesConfig,
+        @Name("relationshipConfig") AnyValue relationshipConfig,
+        @Name("configuration") AnyValue config
+    ) {
+        throw new UnsupportedOperationException("This method is only used to document the procedure syntax.");
+    }
+
+    @Override
+    public void update(AnyValue[] input) throws ProcedureException {
+        try {
+            this.projectNextRelationship(
+                (TextValue) input[0],
+                input[1],
+                input[2],
+                input[3],
+                input[4],
+                input[5]
+            );
+        } catch (Exception e) {
+            throw new ProcedureException(
+                Status.Procedure.ProcedureCallFailed,
+                e,
+                "Failed to invoke function `%s`: Caused by: %s",
+                CypherAggregation.FUNCTION_NAME,
+                e
+            );
+        }
+    }
+
+    void projectNextRelationship(
+        TextValue graphName,
+        AnyValue sourceNode,
+        AnyValue targetNode,
+        AnyValue nodesConfig,
+        AnyValue relationshipConfig,
+        AnyValue config
     ) {
         @Nullable MapValue sourceNodePropertyValues = null;
         @Nullable MapValue targetNodePropertyValues = null;
@@ -217,52 +249,6 @@ public class GraphAggregator implements CompatUserAggregator {
         return nodeLabelToken;
     }
 
-    @UserAggregationResult
-    @ReturnType(AggregationResult.class)
-    public @Nullable Map<String, Object> buildResult() {
-        AggregationResult result = buildGraph();
-        return result == null ? null : result.toMap();
-    }
-
-    public @Nullable AggregationResult buildGraph() {
-        var importer = this.importer;
-        if (importer == null) {
-            // Nothing aggregated
-            return null;
-        }
-
-        // Older cypher runtimes call the result method multiple times, we cache the result of the first call
-        if (this.result != null) {
-            return this.result;
-        }
-
-        this.result = importer.result(this.username, this.databaseId, this.progressTimer);
-
-        return this.result;
-    }
-
-    @Override
-    public void update(AnyValue[] input) throws ProcedureException {
-        try {
-            this.projectNextRelationship(
-                (TextValue) input[0],
-                input[1],
-                input[2],
-                input[3],
-                input[4],
-                input[5]
-            );
-        } catch (Exception e) {
-            throw new ProcedureException(
-                Status.Procedure.ProcedureCallFailed,
-                e,
-                "Failed to invoke function `%s`: Caused by: %s",
-                CypherAggregation.FUNCTION_NAME,
-                e
-            );
-        }
-    }
-
     @Override
     public AnyValue result() throws ProcedureException {
         AggregationResult result;
@@ -289,6 +275,23 @@ public class GraphAggregator implements CompatUserAggregator {
         builder.add("projectMillis", Values.longValue(result.projectMillis()));
         builder.add("configuration", ValueUtils.asAnyValue(result.configuration()));
         return builder.build();
+    }
+
+    public @Nullable AggregationResult buildGraph() {
+        var importer = this.importer;
+        if (importer == null) {
+            // Nothing aggregated
+            return null;
+        }
+
+        // Older cypher runtimes call the result method multiple times, we cache the result of the first call
+        if (this.result != null) {
+            return this.result;
+        }
+
+        this.result = importer.result(this.username, this.databaseId, this.progressTimer);
+
+        return this.result;
     }
 
     private static final class ConfigValidator {

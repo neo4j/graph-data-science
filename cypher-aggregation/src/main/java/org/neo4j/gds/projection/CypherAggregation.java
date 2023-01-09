@@ -40,6 +40,7 @@ import java.util.List;
 import static org.neo4j.internal.kernel.api.procs.DefaultParameterValue.nullValue;
 
 public class CypherAggregation implements CompatUserAggregationFunction {
+    // NOTE: keep in sync with `GraphAggregator.procedureSyntax`
     static final QualifiedName FUNCTION_NAME = new QualifiedName(
         new String[]{"gds", "alpha", "graph"},
         "project"

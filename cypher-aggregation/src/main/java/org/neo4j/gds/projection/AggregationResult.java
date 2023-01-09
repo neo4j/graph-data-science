@@ -20,25 +20,25 @@
 package org.neo4j.gds.projection;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ReturnType;
+import org.neo4j.gds.annotation.CustomProcedure;
 
 import java.util.Map;
 
 @Configuration
 public interface AggregationResult {
-    @ReturnType.Include
+    @CustomProcedure.ResultField
     String graphName();
 
-    @ReturnType.Include
+    @CustomProcedure.ResultField
     long nodeCount();
 
-    @ReturnType.Include
+    @CustomProcedure.ResultField
     long relationshipCount();
 
-    @ReturnType.Include
+    @CustomProcedure.ResultField
     long projectMillis();
 
-    @ReturnType.Include
+    @CustomProcedure.ResultField
     Map<String, Object> configuration();
 
     @Configuration.ToMap

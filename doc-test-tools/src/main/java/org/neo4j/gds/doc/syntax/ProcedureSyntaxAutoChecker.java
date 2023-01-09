@@ -25,7 +25,7 @@ import org.asciidoctor.ast.StructuralNode;
 import org.asciidoctor.ast.Table;
 import org.asciidoctor.extension.Postprocessor;
 import org.assertj.core.api.SoftAssertions;
-import org.neo4j.gds.annotation.ReturnType;
+import org.neo4j.gds.annotation.CustomProcedure;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
@@ -208,7 +208,7 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
     }
 
     private static boolean includeMethodInResult(AnnotatedElement method) {
-        return method.isAnnotationPresent(ReturnType.Include.class);
+        return method.isAnnotationPresent(CustomProcedure.ResultField.class);
     }
 
     private static boolean includeFieldInResult(Field field) {

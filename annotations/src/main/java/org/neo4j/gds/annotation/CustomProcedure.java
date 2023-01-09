@@ -25,18 +25,32 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Allows method to signal that its return type is isomorph to the type defined in this annotation.
+ * This annotation can be used to annotate a procedure in the same way as using `@Procedure` would.
+ * However, this annotation does not actually register anything with the procedure framework.
+ * We can use it to provide as quasi-equivalent method for out documentation and test tooling
+ * for procedures and functions that cannot use actual procedure framework annotations.
+ * It can also be used to pretend that `@UserAggregationFunction`s have a `@Procedure` annotation.
+ * <p>
+ * The return type of the annotated method should be a proper Java interface, not a Map,
+ * so that we can extract the schema from the fields.
+ * Only fields marked with the nested `@CustomProcedure.ResultField` annotation are included in the schema.
+ * <p>
+ * The parameters of the annotated method should be annotated with `@Name` as you would for regular `@Procedure` methods.
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ReturnType {
-    Class<?> value();
+public @interface CustomProcedure {
+
+    /**
+     * The name of the procedure.
+     */
+    String value();
 
     /**
      * Annotated methods are included in the result definition.
      */
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
-    @interface Include {
+    @interface ResultField {
     }
 }
