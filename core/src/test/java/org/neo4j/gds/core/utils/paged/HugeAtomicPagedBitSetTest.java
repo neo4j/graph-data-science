@@ -26,8 +26,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -118,6 +122,25 @@ class HugeAtomicPagedBitSetTest {
         // page 2
         atomicBitSet.set(2 * (1L << PAGE_SHIFT_BITS) + 23);
         assertThat(atomicBitSet.cardinality()).isEqualTo(3);
+    }
+
+    @ParameterizedTest
+    @MethodSource("bitsets")
+    void testForEachSetBit(HugeAtomicPagedBitSet atomicBitSet) {
+        var rng = ThreadLocalRandom.current();
+        long bound = 42 * (1L << PAGE_SHIFT_BITS) + 42;
+
+        var expected = IntStream
+            .range(0, 10_000)
+            .mapToLong(__ -> rng.nextLong(0, bound))
+            .boxed()
+            .peek(atomicBitSet::set)
+            .collect(Collectors.toSet());
+
+        var actual = new HashSet<Long>();
+        atomicBitSet.forEachSetBit(actual::add);
+
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test

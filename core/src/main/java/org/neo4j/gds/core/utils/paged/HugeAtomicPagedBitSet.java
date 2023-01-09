@@ -24,6 +24,7 @@ import org.neo4j.gds.mem.HugeArrays;
 
 import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.LongConsumer;
 
 public final class HugeAtomicPagedBitSet {
 
@@ -147,6 +148,28 @@ public final class HugeAtomicPagedBitSet {
         }
 
         return setBitCount;
+    }
+
+    public void forEachSetBit(LongConsumer consumer) {
+        final Pages pages = this.pages.get();
+        final long pageCount = pages.length();
+        final long pageSize = this.pageSize;
+
+        long base = 0;
+
+        for (int pageIndex = 0; pageIndex < pageCount; pageIndex++) {
+            var page = pages.getPage(pageIndex);
+            for (int wordIndex = 0; wordIndex < pageSize; wordIndex++) {
+                long word = page.get(wordIndex);
+
+                while (word != 0) {
+                    long next = Long.numberOfTrailingZeros(word);
+                    consumer.accept(Long.SIZE * (base + wordIndex) + next);
+                    word = word ^ Long.lowestOneBit(word);
+                }
+            }
+            base += pageSize;
+        }
     }
 
     public long capacity() {
