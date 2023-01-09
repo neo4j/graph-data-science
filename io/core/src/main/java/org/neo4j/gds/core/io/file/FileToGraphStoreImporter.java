@@ -238,7 +238,10 @@ public abstract class FileToGraphStoreImporter {
             ParallelUtil.run(tasks, Pools.DEFAULT);
             graphStoreGraphPropertyVisitor.close();
 
-            graphStoreBuilder.graphProperties(GraphPropertyStoreFromVisitorHelper.fromGraphPropertyVisitor(graphStoreGraphPropertyVisitor));
+            graphStoreBuilder.graphProperties(GraphPropertyStoreFromVisitorHelper.fromGraphPropertyVisitor(
+                graphPropertySchema,
+                graphStoreGraphPropertyVisitor
+            ));
 
             progressTracker.endSubTask();
         }

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.io.file;
 
-import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.DoubleArrayGraphPropertyValues;
 import org.neo4j.gds.api.properties.graph.DoubleGraphPropertyValues;
 import org.neo4j.gds.api.properties.graph.FloatArrayGraphPropertyValues;
@@ -28,12 +28,12 @@ import org.neo4j.gds.api.properties.graph.GraphPropertyStore;
 import org.neo4j.gds.api.properties.graph.GraphPropertyValues;
 import org.neo4j.gds.api.properties.graph.LongArrayGraphPropertyValues;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
+import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.io.GraphStoreGraphPropertyVisitor;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -42,51 +42,141 @@ final class GraphPropertyStoreFromVisitorHelper {
 
     private GraphPropertyStoreFromVisitorHelper() {}
 
-    static GraphPropertyStore fromGraphPropertyVisitor(GraphStoreGraphPropertyVisitor graphStoreGraphPropertyVisitor) {
+    static GraphPropertyStore fromGraphPropertyVisitor(Map<String, PropertySchema> graphPropertySchema, GraphStoreGraphPropertyVisitor graphStoreGraphPropertyVisitor) {
         var graphPropertyBuilder = GraphPropertyStore.builder();
-        var graphPropertyStreams = mergeStreamFractions(graphStoreGraphPropertyVisitor.streamFractions());
-        buildGraphPropertiesFromStreams(graphPropertyBuilder, graphPropertyStreams);
-
+        buildGraphPropertiesFromStreams(graphPropertyBuilder, graphPropertySchema, graphStoreGraphPropertyVisitor.streamFractions());
         return graphPropertyBuilder.build();
     }
 
     private static void buildGraphPropertiesFromStreams(
         GraphPropertyStore.Builder graphPropertyBuilder,
-        Map<String, Optional<? extends GraphStoreGraphPropertyVisitor.ReducibleStream<?>>> graphPropertyStreams
+        Map<String, PropertySchema> graphPropertySchema,
+        Map<String, List<GraphStoreGraphPropertyVisitor.StreamBuilder<?>>> streamFractions
     ) {
-        graphPropertyStreams.forEach((key, value) -> {
-            if (value.isPresent()) {
-                var graphPropertyValues = getGraphPropertyValuesFromStream(value.get());
-                graphPropertyBuilder.putProperty(key, GraphProperty.of(key, graphPropertyValues));
-            }
+        streamFractions.forEach((key, streamBuilders) -> {
+            var graphPropertyValues = getGraphPropertyValuesFromStream(graphPropertySchema.get(key).valueType(), streamBuilders);
+            graphPropertyBuilder.putProperty(key, GraphProperty.of(key, graphPropertyValues));
         });
     }
 
-    @NotNull
-    private static Map<String, Optional<? extends GraphStoreGraphPropertyVisitor.ReducibleStream<?>>> mergeStreamFractions(Map<String, List<GraphStoreGraphPropertyVisitor.StreamBuilder<?>>> streamFractions) {
-        return streamFractions.entrySet().stream().collect(Collectors.toMap(
-            Map.Entry::getKey,
-            entry -> entry.getValue()
-                .stream()
-                .map(GraphStoreGraphPropertyVisitor.StreamBuilder::build)
-                .reduce(GraphStoreGraphPropertyVisitor.ReducibleStream::reduce)
-        ));
+    private static GraphStoreGraphPropertyVisitor.ReducibleStream<?> mergeStreamFractions(Collection<GraphStoreGraphPropertyVisitor.StreamBuilder<?>> streamFractions) {
+        return streamFractions
+            .stream()
+            .map(GraphStoreGraphPropertyVisitor.StreamBuilder::build)
+            .reduce(GraphStoreGraphPropertyVisitor.ReducibleStream::reduce)
+            .orElseGet(GraphStoreGraphPropertyVisitor.ReducibleStream::empty);
     }
 
-    private static GraphPropertyValues getGraphPropertyValuesFromStream(GraphStoreGraphPropertyVisitor.ReducibleStream<?> reducibleStream) {
-        switch (reducibleStream.valueType()) {
+    private static GraphPropertyValues getGraphPropertyValuesFromStream(ValueType valueType, List<GraphStoreGraphPropertyVisitor.StreamBuilder<?>> streamBuilders) {
+        switch (valueType) {
             case LONG:
-                return LongGraphPropertyValues.ofLongStream((LongStream) reducibleStream.stream());
+                return new LongStreamBuilderGraphPropertyValues(streamBuilders);
             case DOUBLE:
-                return DoubleGraphPropertyValues.ofDoubleStream((DoubleStream) reducibleStream.stream());
+                return new DoubleStreamBuilderGraphPropertyValues(streamBuilders);
             case FLOAT_ARRAY:
-                return FloatArrayGraphPropertyValues.ofFloatArrayStream((Stream<float[]>) reducibleStream.stream());
+                return new FloatArrayStreamBuilderGraphPropertyValues(streamBuilders);
             case DOUBLE_ARRAY:
-                return DoubleArrayGraphPropertyValues.ofDoubleArrayStream((Stream<double[]>) reducibleStream.stream());
+                return new DoubleArrayStreamBuilderGraphPropertyValues(streamBuilders);
             case LONG_ARRAY:
-                return LongArrayGraphPropertyValues.ofLongArrayStream((Stream<long[]>) reducibleStream.stream());
+                return new LongArrayStreamBuilderGraphPropertyValues(streamBuilders);
             default:
                 throw new UnsupportedOperationException();
+        }
+    }
+
+    static class LongStreamBuilderGraphPropertyValues implements LongGraphPropertyValues {
+
+        private final Collection<GraphStoreGraphPropertyVisitor.StreamBuilder<?>> streamFractions;
+
+        LongStreamBuilderGraphPropertyValues(Collection<GraphStoreGraphPropertyVisitor.StreamBuilder<?>> streamFractions) {
+            this.streamFractions = streamFractions;
+        }
+
+        @Override
+        public long size() {
+            return -1;
+        }
+
+        @Override
+        public LongStream longValues() {
+            return (LongStream) mergeStreamFractions(streamFractions).stream();
+        }
+    }
+
+    static class DoubleStreamBuilderGraphPropertyValues implements DoubleGraphPropertyValues {
+
+        private final Collection<GraphStoreGraphPropertyVisitor.StreamBuilder<?>> streamFractions;
+
+        DoubleStreamBuilderGraphPropertyValues(Collection<GraphStoreGraphPropertyVisitor.StreamBuilder<?>> streamFractions) {
+            this.streamFractions = streamFractions;
+        }
+
+        @Override
+        public long size() {
+            return -1;
+        }
+
+        @Override
+        public DoubleStream doubleValues() {
+            return (DoubleStream) mergeStreamFractions(streamFractions).stream();
+        }
+    }
+
+
+    static class FloatArrayStreamBuilderGraphPropertyValues implements FloatArrayGraphPropertyValues {
+
+        private final Collection<GraphStoreGraphPropertyVisitor.StreamBuilder<?>> streamFractions;
+
+        FloatArrayStreamBuilderGraphPropertyValues(Collection<GraphStoreGraphPropertyVisitor.StreamBuilder<?>> streamFractions) {
+            this.streamFractions = streamFractions;
+        }
+
+        @Override
+        public long size() {
+            return -1;
+        }
+
+        @Override
+        public Stream<float[]> floatArrayValues() {
+            return (Stream<float[]>) mergeStreamFractions(streamFractions).stream();
+        }
+    }
+
+    static class DoubleArrayStreamBuilderGraphPropertyValues implements DoubleArrayGraphPropertyValues {
+
+        private final Collection<GraphStoreGraphPropertyVisitor.StreamBuilder<?>> streamFractions;
+
+        DoubleArrayStreamBuilderGraphPropertyValues(Collection<GraphStoreGraphPropertyVisitor.StreamBuilder<?>> streamFractions) {
+            this.streamFractions = streamFractions;
+        }
+
+        @Override
+        public long size() {
+            return -1;
+        }
+
+        @Override
+        public Stream<double[]> doubleArrayValues() {
+            return (Stream<double[]>) mergeStreamFractions(streamFractions).stream();
+        }
+    }
+
+    static class LongArrayStreamBuilderGraphPropertyValues implements LongArrayGraphPropertyValues {
+
+        private final Collection<GraphStoreGraphPropertyVisitor.StreamBuilder<?>> streamFractions;
+
+        LongArrayStreamBuilderGraphPropertyValues(Collection<GraphStoreGraphPropertyVisitor.StreamBuilder<?>> streamFractions) {
+            this.streamFractions = streamFractions;
+        }
+
+        @Override
+        public long size() {
+            return -1;
+        }
+
+        @Override
+        public Stream<long[]> longArrayValues() {
+            return (Stream<long[]>) mergeStreamFractions(streamFractions).stream();
         }
     }
 }
