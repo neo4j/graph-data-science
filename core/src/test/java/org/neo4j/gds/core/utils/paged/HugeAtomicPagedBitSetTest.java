@@ -20,49 +20,94 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.core.utils.paged.HugeAtomicPagedBitSet.PAGE_SHIFT_BITS;
 
 class HugeAtomicPagedBitSetTest {
 
-    @Test
-    void testSinglePageBitSet() {
-        var atomicBitSet = HugeAtomicPagedBitSet.create(42);
-        assertThat(atomicBitSet.get(23)).isFalse();
-        atomicBitSet.set(23);
-        assertThat(atomicBitSet.get(23)).isTrue();
+    public static Stream<Arguments> bitsets() {
+        return Stream.of(
+            // empty bit set
+            Arguments.of(HugeAtomicPagedBitSet.create(0)),
+            // bit set of 3 pages
+            Arguments.of(HugeAtomicPagedBitSet.create(2 * (1L << PAGE_SHIFT_BITS) + 42))
+        );
     }
 
-    @Test
-    void testMultiPageBitSet() {
-        long size = 2 * (1L << PAGE_SHIFT_BITS) + 42; // 3 pages
-
-        var atomicBitSet = HugeAtomicPagedBitSet.create(size);
+    @ParameterizedTest
+    @MethodSource("bitsets")
+    void testSet(HugeAtomicPagedBitSet atomicBitSet) {
         // page 0
-        assertThat(atomicBitSet.get(23)).isFalse();
-        atomicBitSet.set(23);
-        assertThat(atomicBitSet.get(23)).isTrue();
+        long index = 23;
+        assertThat(atomicBitSet.get(index)).isFalse();
+        atomicBitSet.set(index);
+        assertThat(atomicBitSet.get(index)).isTrue();
         // page 1
-        assertThat(atomicBitSet.get((1L << PAGE_SHIFT_BITS) + 23)).isFalse();
-        atomicBitSet.set((1L << PAGE_SHIFT_BITS) + 23);
-        assertThat(atomicBitSet.get((1L << PAGE_SHIFT_BITS) + 23)).isTrue();
+        index = (1L << PAGE_SHIFT_BITS) + 23;
+        assertThat(atomicBitSet.get(index)).isFalse();
+        atomicBitSet.set(index);
+        assertThat(atomicBitSet.get(index)).isTrue();
         // page 2
-        assertThat(atomicBitSet.get(2 * (1L << PAGE_SHIFT_BITS) + 23)).isFalse();
-        atomicBitSet.set(2 * (1L << PAGE_SHIFT_BITS) + 23);
-        assertThat(atomicBitSet.get(2 * (1L << PAGE_SHIFT_BITS) + 23)).isTrue();
+        index = 2 * (1L << PAGE_SHIFT_BITS) + 23;
+        assertThat(atomicBitSet.get(index)).isFalse();
+        atomicBitSet.set(index);
+        assertThat(atomicBitSet.get(index)).isTrue();
     }
 
-    @Test
-    void testCardinality() {
-        long size = 2 * (1L << PAGE_SHIFT_BITS) + 42; // 3 pages
+    @ParameterizedTest
+    @MethodSource("bitsets")
+    void testGetAndSet(HugeAtomicPagedBitSet atomicBitSet) {
+        // page 0
+        // getAndSet a bit that is currently false
+        long index = 23;
+        assertThat(atomicBitSet.get(index)).isFalse();
+        assertThat(atomicBitSet.getAndSet(index)).isFalse();
+        assertThat(atomicBitSet.get(index)).isTrue();
+        // getAndSet a bit that is currently true
+        index = 42;
+        atomicBitSet.set(index);
+        assertThat(atomicBitSet.get(index)).isTrue();
+        assertThat(atomicBitSet.getAndSet(index)).isTrue();
+        assertThat(atomicBitSet.get(index)).isTrue();
+        // page 1
+        // getAndSet a bit that is currently false
+        index = (1L << PAGE_SHIFT_BITS) + 23;
+        assertThat(atomicBitSet.get(index)).isFalse();
+        assertThat(atomicBitSet.getAndSet(index)).isFalse();
+        assertThat(atomicBitSet.get(index)).isTrue();
+        // getAndSet a bit that is currently true
+        index = (1L << PAGE_SHIFT_BITS) + 42;
+        atomicBitSet.set(index);
+        assertThat(atomicBitSet.get(index)).isTrue();
+        assertThat(atomicBitSet.getAndSet(index)).isTrue();
+        assertThat(atomicBitSet.get(index)).isTrue();
+        // page 2
+        // getAndSet a bit that is currently false
+        index = 2 * (1L << PAGE_SHIFT_BITS) + 23;
+        assertThat(atomicBitSet.get(index)).isFalse();
+        assertThat(atomicBitSet.getAndSet(index)).isFalse();
+        assertThat(atomicBitSet.get(index)).isTrue();
+        // getAndSet a bit that is currently true
+        index = 2 * (1L << PAGE_SHIFT_BITS) + 42;
+        atomicBitSet.set(index);
+        assertThat(atomicBitSet.get(index)).isTrue();
+        assertThat(atomicBitSet.getAndSet(index)).isTrue();
+        assertThat(atomicBitSet.get(index)).isTrue();
+    }
 
-        var atomicBitSet = HugeAtomicPagedBitSet.create(size);
+    @ParameterizedTest
+    @MethodSource("bitsets")
+    void testCardinality(HugeAtomicPagedBitSet atomicBitSet) {
         assertThat(atomicBitSet.cardinality()).isEqualTo(0);
         // page 0
         atomicBitSet.set(23);
