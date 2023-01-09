@@ -175,7 +175,9 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
                         Matchers.hasEntry("modelType", "LinkPrediction"),
                         Matchers.hasKey("bestParameters"),
                         Matchers.hasKey("metrics"),
-                        Matchers.hasKey("pipeline")
+                        Matchers.hasKey("pipeline"),
+                        Matchers.hasKey("nodePropertySteps"),
+                        Matchers.hasKey("featureSteps")
                     ),
                     "modelSelectionStats", Matchers.allOf(
                         Matchers.hasKey("modelCandidates"),

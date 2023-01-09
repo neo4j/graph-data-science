@@ -40,7 +40,10 @@ public interface LinkPredictionModelInfo extends ToMapConvertible {
         return Map.of(
             "bestParameters", bestParameters().toMapWithTrainerMethod(),
             "metrics", metrics(),
-            "pipeline", pipeline().toMap()
+            // we should remove this at some point; cannot deprecate a nested field in the procedure :(
+            "pipeline", pipeline().toMap(),
+            "nodePropertySteps", ToMapConvertible.toMap(pipeline().nodePropertySteps()),
+            "featureSteps", ToMapConvertible.toMap(pipeline().featureSteps())
         );
     }
 

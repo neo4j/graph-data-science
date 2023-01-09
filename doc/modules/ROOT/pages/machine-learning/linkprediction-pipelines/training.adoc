@@ -90,12 +90,13 @@ The `modelInfo` return field has the following algorithm-specific subfields:
 .Fields of modelInfo
 [opts="header",cols="1,1,6"]
 |===
-| Name             | Type   | Description
-| modelName        | String | The name of the trained model.
-| modelType        | String | The type of the trained model.
-| bestParameters   | Map    | The model parameters which performed best on average on validation folds according to the primary metric.
-| metrics          | Map    | Map from metric description to evaluated metrics for the winning model over the subsets of the data, see below.
-| pipeline         | Map    | Steps to produce input features for the pipeline model.
+| Name              | Type        | Description
+| modelName         | String      | The name of the trained model.
+| modelType         | String      | The type of the trained model.
+| bestParameters    | Map         | The model parameters which performed best on average on validation folds according to the primary metric.
+| metrics           | Map         | Map from metric description to evaluated metrics for the winning model over the subsets of the data, see below.
+| nodePropertySteps | List of Map | Algorithms that produce node properties within the pipeline.
+| linkFeatures      | List of Map | Feature steps that combine node properties from endpoint nodes to produce features for relationships (links) as input to the pipeline model.
 |===
 
 
@@ -104,18 +105,19 @@ The structure of `modelInfo` is:
 [listing]
 ----
 {
-    bestParameters: Map,        // <1>
-    pipeline: Map               // <2>
-    metrics: {                  // <3>
+    bestParameters: Map,              // <1>
+    nodePropertySteps: List of Map,
+    linkFeatures: List of Map,
+    metrics: {                        // <2>
         AUCPR: {
-            test: Float,        // <4>
-            outerTrain: Float,  // <5>
-            train: {           // <6>
+            test: Float,              // <3>
+            outerTrain: Float,        // <4>
+            train: {                  // <5>
                 avg: Float,
                 max: Float,
                 min: Float,
             },
-            validation: {      // <7>
+            validation: {             // <6>
                 avg: Float,
                 max: Float,
                 min: Float
@@ -125,18 +127,17 @@ The structure of `modelInfo` is:
 }
 ----
 <1> The best scoring model candidate configuration.
-<2> The pipeline used for the training.
-<3> The `metrics` map contains an entry for each metric description (currently only `AUCPR`) and the corresponding results for that metric.
-<4> Numeric value for the evaluation of the best model on the test set.
-<5> Numeric value for the evaluation of the best model on the outer train set.
-<6> The `train` entry summarizes the metric results over the `train` set.
-<7> The `validation` entry summarizes the metric results over the `validation` set.
+<2> The `metrics` map contains an entry for each metric description (currently only `AUCPR`) and the corresponding results for that metric.
+<3> Numeric value for the evaluation of the best model on the test set.
+<4> Numeric value for the evaluation of the best model on the outer train set.
+<5> The `train` entry summarizes the metric results over the `train` set.
+<6> The `validation` entry summarizes the metric results over the `validation` set.
 --
 
 [NOTE]
 ====
-In (4)-(6), if the metric is `OUT_OF_BAG_ERROR`, these statistics are not reported.
-The `OUT_OF_BAG_ERROR` is only reported in (7) as validation metric and only if the model is RandomForest.
+In (3)-(5), if the metric is `OUT_OF_BAG_ERROR`, these statistics are not reported.
+The `OUT_OF_BAG_ERROR` is only reported in (6) as validation metric and only if the model is RandomForest.
 ====
 
 include::partial$/machine-learning/pipeline-training-logging-note.adoc[]
