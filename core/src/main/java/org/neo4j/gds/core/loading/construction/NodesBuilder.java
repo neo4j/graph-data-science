@@ -37,7 +37,7 @@ import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.RawValues;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.core.utils.paged.HugeAtomicPagedBitSet;
+import org.neo4j.gds.core.utils.paged.HugeAtomicGrowingBitSet;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 import org.neo4j.values.storable.Value;
 
@@ -142,7 +142,7 @@ public final class NodesBuilder {
     ) {
         if (deduplicateIds) {
             if (maxOriginalId == UNKNOWN_MAX_ID) {
-                var seenIds = HugeAtomicPagedBitSet.create(0);
+                var seenIds = HugeAtomicGrowingBitSet.create(0);
                 return seenIds::getAndSet;
             } else {
                 var seenIds = HugeAtomicBitSet.create(maxOriginalId + 1);

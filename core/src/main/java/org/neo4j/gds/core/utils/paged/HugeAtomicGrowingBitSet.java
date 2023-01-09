@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongConsumer;
 
-public final class HugeAtomicPagedBitSet {
+public final class HugeAtomicGrowingBitSet {
 
     // Each page stores 2^PAGE_SHIFT_BITS entries.
     // Word-size is 64 bit (long), which means we
@@ -45,7 +45,7 @@ public final class HugeAtomicPagedBitSet {
     // new page at the same time and only once must succeed.
     private final AtomicReference<Pages> pages;
 
-    public static HugeAtomicPagedBitSet create(long bitSize) {
+    public static HugeAtomicGrowingBitSet create(long bitSize) {
         // Number of words required to represent the bit size.
         long wordSize = BitUtil.ceilDiv(bitSize, NUM_BITS);
 
@@ -59,10 +59,10 @@ public final class HugeAtomicPagedBitSet {
         // larger than the specified size.
         int pageCount = HugeArrays.numberOfPages(wordSize, pageShift, pageMask);
 
-        return new HugeAtomicPagedBitSet(pageCount, pageSize, pageShift, pageMask);
+        return new HugeAtomicGrowingBitSet(pageCount, pageSize, pageShift, pageMask);
     }
 
-    private HugeAtomicPagedBitSet(int pageCount, int pageSize, int pageShift, long pageMask) {
+    private HugeAtomicGrowingBitSet(int pageCount, int pageSize, int pageShift, long pageMask) {
         this.pageSize = pageSize;
         this.pageShift = pageShift;
         this.pageMask = pageMask;
@@ -230,7 +230,7 @@ public final class HugeAtomicPagedBitSet {
      * The current capacity of the bit set. Setting a bit at an index
      * exceeding the capacity, leads to a resize operation.
      * The cardinality is a multiple of the underling page size:
-     * 2^{@link org.neo4j.gds.core.utils.paged.HugeAtomicPagedBitSet#PAGE_SHIFT_BITS}.
+     * 2^{@link HugeAtomicGrowingBitSet#PAGE_SHIFT_BITS}.
      */
     public long capacity() {
         return pages.get().length() * (1L << pageShift);
