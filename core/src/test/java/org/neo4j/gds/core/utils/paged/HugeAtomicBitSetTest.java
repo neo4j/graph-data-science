@@ -320,7 +320,7 @@ class HugeAtomicBitSetTest {
                 };
             },
             (size) -> {
-                var habs = HugeAtomicGrowingBitSet.create(size);
+                var habs = HugeAtomicPagedBitSet.create(size);
                 return new CommonHabsOps() {
                     @Override
                     public boolean get(long index) {
