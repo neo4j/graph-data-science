@@ -304,4 +304,5 @@ public interface Neo4jProxyApi {
     long transactionId(KernelTransactionHandle kernelTransactionHandle);
 
     void reserveNeo4jIds(IdGeneratorFactory generatorFactory, int size, CursorContext cursorContext);
+
 }

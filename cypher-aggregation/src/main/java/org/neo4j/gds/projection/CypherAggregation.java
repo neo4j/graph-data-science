@@ -101,10 +101,12 @@ public final class CypherAggregation {
     @Description("Creates a named graph in the catalog for use by algorithms.")
     public GraphAggregator projectFromCypherAggregation() {
         var progressTimer = ProgressTimer.start();
+        var runsOnCompositeDatabase = DatabaseTopologyHelper.isCompositeDatabase(databaseService);
         return new GraphAggregator(
             progressTimer,
             DatabaseId.of(this.databaseService),
-            username.username()
+            username.username(),
+            !runsOnCompositeDatabase
         );
     }
 
@@ -115,6 +117,7 @@ public final class CypherAggregation {
         private final ProgressTimer progressTimer;
         private final DatabaseId databaseId;
         private final String username;
+        private final boolean canWriteToDatabase;
 
         private final ConfigValidator configValidator;
 
@@ -128,11 +131,13 @@ public final class CypherAggregation {
         GraphAggregator(
             ProgressTimer progressTimer,
             DatabaseId databaseId,
-            String username
+            String username,
+            boolean canWriteToDatabase
         ) {
             this.progressTimer = progressTimer;
             this.databaseId = databaseId;
             this.username = username;
+            this.canWriteToDatabase = canWriteToDatabase;
             this.lock = new ReentrantLock();
             this.configValidator = new ConfigValidator();
         }
@@ -219,6 +224,7 @@ public final class CypherAggregation {
                         sourceNodeLabels,
                         targetNodeLabels,
                         relationshipConfig,
+                        canWriteToDatabase,
                         this.lock
                     );
                 }
@@ -280,6 +286,7 @@ public final class CypherAggregation {
         private final LazyIdMapBuilder idMapBuilder;
         private final @Nullable List<RelationshipPropertySchema> relationshipPropertySchemas;
 
+        private final boolean canWriteToDatabase;
         private final Lock lock;
         private final Map<RelationshipType, RelationshipsBuilder> relImporters;
         private final ImmutableGraphSchema.Builder graphSchemaBuilder;
@@ -289,12 +296,14 @@ public final class CypherAggregation {
             GraphProjectFromCypherAggregationConfig config,
             LazyIdMapBuilder idMapBuilder,
             @Nullable List<RelationshipPropertySchema> relationshipPropertySchemas,
+            boolean canWriteToDatabase,
             Lock lock
         ) {
             this.graphName = graphName;
             this.config = config;
             this.idMapBuilder = idMapBuilder;
             this.relationshipPropertySchemas = relationshipPropertySchemas;
+            this.canWriteToDatabase = canWriteToDatabase;
             this.lock = lock;
             this.relImporters = new ConcurrentHashMap<>();
             this.graphSchemaBuilder = ImmutableGraphSchema.builder();
@@ -310,6 +319,7 @@ public final class CypherAggregation {
             NodeLabelToken sourceNodeLabels,
             NodeLabelToken targetNodeLabels,
             AnyValue relationshipConfig,
+            boolean canWriteToDatabase,
             Lock lock
         ) {
 
@@ -332,7 +342,14 @@ public final class CypherAggregation {
 
             var relationshipPropertySchemas = relationshipPropertySchemas(relationshipConfig);
 
-            return new LazyImporter(graphName, config, idMapBuilder, relationshipPropertySchemas, lock);
+            return new LazyImporter(
+                graphName,
+                config,
+                idMapBuilder,
+                relationshipPropertySchemas,
+                canWriteToDatabase,
+                lock
+            );
         }
 
         private static void validateGraphName(String graphName, String username, DatabaseId databaseId) {
@@ -442,7 +459,7 @@ public final class CypherAggregation {
 
             var graphStoreBuilder = new GraphStoreBuilder()
                 .concurrency(this.config.readConcurrency())
-                .capabilities(ImmutableStaticCapabilities.of(true))
+                .capabilities(ImmutableStaticCapabilities.of(canWriteToDatabase))
                 .databaseId(databaseId);
 
             var valueMapper = buildNodesWithProperties(graphStoreBuilder);
