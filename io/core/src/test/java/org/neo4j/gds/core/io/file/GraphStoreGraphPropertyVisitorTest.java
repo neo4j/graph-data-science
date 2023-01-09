@@ -38,6 +38,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -109,6 +110,23 @@ class GraphStoreGraphPropertyVisitorTest {
         var expected = LongStream.range(0, 10_000 * concurrency).boxed().toArray(Long[]::new);
 
         assertThat(actual).containsExactlyInAnyOrder(expected);
+    }
+
+    @Test
+    void shouldImportGraphPropertiesToBeRepeatedlyConsumable() throws IOException {
+        var graphPropertySchema = Map.of("prop1", PropertySchema.of("prop1", ValueType.LONG));
+        var graphPropertyVisitor = new GraphStoreGraphPropertyVisitor(graphPropertySchema);
+
+        graphPropertyVisitor.property("prop1", 42L);
+        graphPropertyVisitor.property("prop1", 43L);
+        graphPropertyVisitor.property("prop1", 44L);
+        graphPropertyVisitor.flush();
+
+        var graphPropertyStore = GraphPropertyStoreFromVisitorHelper.fromGraphPropertyVisitor(graphPropertySchema, graphPropertyVisitor);
+        var longGraphPropertyValues = graphPropertyStore.get("prop1").values();
+
+        assertThatCode(longGraphPropertyValues.longValues()::count).doesNotThrowAnyException();
+        assertThatCode(longGraphPropertyValues.longValues()::count).doesNotThrowAnyException();
     }
 
     @Test
