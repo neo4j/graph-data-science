@@ -69,6 +69,9 @@ public final class HugeAtomicPagedBitSet {
         this.pages = new AtomicReference<>(new Pages(pageCount, pageSize));
     }
 
+    /**
+     * Sets the bit at the given index to true.
+     */
     public void set(long index) {
         long longIndex = index >>> 6;
         int pageIndex = HugeArrays.pageIndex(longIndex, pageShift);
@@ -95,6 +98,9 @@ public final class HugeAtomicPagedBitSet {
         }
     }
 
+    /**
+     * Returns the state of the bit at the given index.
+     */
     public boolean get(long index) {
         long longIndex = index >>> 6;
         int pageIndex = HugeArrays.pageIndex(longIndex, pageShift);
@@ -106,6 +112,10 @@ public final class HugeAtomicPagedBitSet {
         return (page.get(wordIndex) & bitMask) != 0;
     }
 
+    /**
+     * Sets a bit and returns the previous value.
+     * The index should be less than the BitSet size.
+     */
     public boolean getAndSet(long index) {
         long longIndex = index >>> 6;
         int pageIndex = HugeArrays.pageIndex(longIndex, pageShift);
@@ -132,6 +142,13 @@ public final class HugeAtomicPagedBitSet {
         }
     }
 
+    /**
+     * Returns the number of set bits in the bit set.
+     * <p>
+     * The result of the method does not include the effects
+     * of concurrent write operations that occur while the
+     * cardinality is computed.
+     */
     public long cardinality() {
         final Pages pages = this.pages.get();
         final long pageCount = pages.length();
@@ -150,6 +167,14 @@ public final class HugeAtomicPagedBitSet {
         return setBitCount;
     }
 
+    /**
+     * Iterates the bit set in increasing index order and calls the
+     * given consumer for each index with a set bit.
+     * <p>
+     * The result of the method does not include the effects
+     * of concurrent write operations that occur while the
+     * bit set if traversed.
+     */
     public void forEachSetBit(LongConsumer consumer) {
         final Pages pages = this.pages.get();
         final long pageCount = pages.length();
@@ -172,6 +197,9 @@ public final class HugeAtomicPagedBitSet {
         }
     }
 
+    /**
+     * Resets the bit at the given index.
+     */
     public void clear(long index) {
         long longIndex = index >>> 6;
         int pageIndex = HugeArrays.pageIndex(longIndex, pageShift);
@@ -198,10 +226,20 @@ public final class HugeAtomicPagedBitSet {
         }
     }
 
+    /**
+     * The current capacity of the bit set. Setting a bit at an index
+     * exceeding the capacity, leads to a resize operation.
+     * The cardinality is a multiple of the underling page size:
+     * 2^{@link org.neo4j.gds.core.utils.paged.HugeAtomicPagedBitSet#PAGE_SHIFT_BITS}.
+     */
     public long capacity() {
         return pages.get().length() * (1L << pageShift);
     }
 
+    /**
+     * Returns the page at the given index, potentially growing the underlying pages
+     * to fit the requested page index.
+     */
     private AtomicLongArray getPage(int pageIndex) {
         var pages = this.pages.get();
 
