@@ -25,7 +25,7 @@ import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.BatchNodeIterable;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.core.utils.paged.HugeAtomicGrowingBitSet;
+import org.neo4j.gds.core.utils.paged.HugeAtomicPagedBitSet;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -155,12 +155,12 @@ public final class MultiLabelInformation implements LabelInformation {
 
     public static final class Builder implements LabelInformation.Builder {
         private final long expectedCapacity;
-        private final Map<NodeLabel, HugeAtomicGrowingBitSet> labelInformation;
+        private final Map<NodeLabel, HugeAtomicPagedBitSet> labelInformation;
         private final List<NodeLabel> starNodeLabelMappings;
 
         private Builder(
             long expectedCapacity,
-            Map<NodeLabel, HugeAtomicGrowingBitSet> labelInformation,
+            Map<NodeLabel, HugeAtomicPagedBitSet> labelInformation,
             List<NodeLabel> starNodeLabelMappings
         ) {
             this.expectedCapacity = expectedCapacity;
@@ -180,7 +180,7 @@ public final class MultiLabelInformation implements LabelInformation {
 
             var nodeLabelBitSetMap = prepareLabelMap(
                 labelTokenNodeLabelMapping,
-                () -> HugeAtomicGrowingBitSet.create(expectedCapacity)
+                () -> HugeAtomicPagedBitSet.create(expectedCapacity)
             );
 
             return new Builder(expectedCapacity, nodeLabelBitSetMap, starNodeLabelMappings);
@@ -207,7 +207,7 @@ public final class MultiLabelInformation implements LabelInformation {
             labelInformation
                 .computeIfAbsent(
                     nodeLabel,
-                    (ignored) -> HugeAtomicGrowingBitSet.create(expectedCapacity)
+                    (ignored) -> HugeAtomicPagedBitSet.create(expectedCapacity)
                 ).set(nodeId);
         }
 
