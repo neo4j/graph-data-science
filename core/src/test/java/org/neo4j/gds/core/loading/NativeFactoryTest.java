@@ -60,6 +60,63 @@ class NativeFactoryTest {
     }
 
     @Test
+    void memoryEstimationForSingleProjection() {
+        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
+            .nodeCount(100_000_000L)
+            .putRelationshipCount(RelationshipType.of("TYPE1"), 250_000_000L)
+            .build();
+
+        NodeProjections nodeProjections = NodeProjections.all();
+        RelationshipProjections relationshipProjections = ImmutableRelationshipProjections
+            .builder()
+            .putProjection(
+                RelationshipType.of("TYPE1"),
+                RelationshipProjection
+                    .builder()
+                    .type("TYPE1")
+                    .orientation(Orientation.NATURAL)
+                    .build()
+            )
+            .build();
+
+        MemoryTree estimate = NativeFactory
+            .getMemoryEstimation(nodeProjections, relationshipProjections, true)
+            .estimate(dimensions, 1);
+
+        assertEquals(6_828_526_776L, estimate.memoryUsage().min);
+        assertEquals(7_633_833_144L, estimate.memoryUsage().max);
+    }
+
+    @Test
+    void memoryEstimationForIndexedProjection() {
+        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
+            .nodeCount(100_000_000L)
+            .putRelationshipCount(RelationshipType.of("TYPE1"), 250_000_000L)
+            .build();
+
+        NodeProjections nodeProjections = NodeProjections.all();
+        RelationshipProjections relationshipProjections = ImmutableRelationshipProjections
+            .builder()
+            .putProjection(
+                RelationshipType.of("TYPE1"),
+                RelationshipProjection
+                    .builder()
+                    .type("TYPE1")
+                    .orientation(Orientation.NATURAL)
+                    .indexInverse(true)
+                    .build()
+            )
+            .build();
+
+        MemoryTree estimate = NativeFactory
+            .getMemoryEstimation(nodeProjections, relationshipProjections, true)
+            .estimate(dimensions, 1);
+
+        assertEquals(12_056_534_400L, estimate.memoryUsage().min);
+        assertEquals(13_667_147_136L, estimate.memoryUsage().max);
+    }
+
+    @Test
     void memoryEstimationForMultipleProjections() {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(100_000_000L)
