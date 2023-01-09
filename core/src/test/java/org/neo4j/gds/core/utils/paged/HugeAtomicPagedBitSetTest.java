@@ -50,18 +50,12 @@ class HugeAtomicPagedBitSetTest {
     @ParameterizedTest
     @MethodSource("bitsets")
     void testSet(HugeAtomicPagedBitSet bitSet) {
-        // page 0
-        long index = 23;
-        assertThat(bitSet.get(index)).isFalse();
-        bitSet.set(index);
-        assertThat(bitSet.get(index)).isTrue();
-        // page 1
-        index = (1L << PAGE_SHIFT_BITS) + 23;
-        assertThat(bitSet.get(index)).isFalse();
-        bitSet.set(index);
-        assertThat(bitSet.get(index)).isTrue();
-        // page 2
-        index = 2 * (1L << PAGE_SHIFT_BITS) + 23;
+        testSetAssert(bitSet, 23); // page 0
+        testSetAssert(bitSet, (1L << PAGE_SHIFT_BITS) + 23); // page 1
+        testSetAssert(bitSet, 2 * (1L << PAGE_SHIFT_BITS) + 23); // page 2
+    }
+
+    private static void testSetAssert(HugeAtomicPagedBitSet bitSet, long index) {
         assertThat(bitSet.get(index)).isFalse();
         bitSet.set(index);
         assertThat(bitSet.get(index)).isTrue();
@@ -70,57 +64,49 @@ class HugeAtomicPagedBitSetTest {
     @ParameterizedTest
     @MethodSource("bitsets")
     void testGetAndSet(HugeAtomicPagedBitSet bitSet) {
-        // page 0
+        testGetAndSetAssert(bitSet, 23, 42); // page 0
+        testGetAndSetAssert(bitSet, (1L << PAGE_SHIFT_BITS) + 23, (1L << PAGE_SHIFT_BITS) + 42); // page 1
+        testGetAndSetAssert(bitSet, 2 * (1L << PAGE_SHIFT_BITS) + 23, 2 * (1L << PAGE_SHIFT_BITS) + 42); // page 2
+    }
+
+    private static void testGetAndSetAssert(HugeAtomicPagedBitSet bitSet, long idx0, long idx1) {
         // getAndSet a bit that is currently false
-        long index = 23;
-        assertThat(bitSet.get(index)).isFalse();
-        assertThat(bitSet.getAndSet(index)).isFalse();
-        assertThat(bitSet.get(index)).isTrue();
+        assertThat(bitSet.get(idx0)).isFalse();
+        assertThat(bitSet.getAndSet(idx0)).isFalse();
+        assertThat(bitSet.get(idx0)).isTrue();
         // getAndSet a bit that is currently true
-        index = 42;
-        bitSet.set(index);
-        assertThat(bitSet.get(index)).isTrue();
-        assertThat(bitSet.getAndSet(index)).isTrue();
-        assertThat(bitSet.get(index)).isTrue();
-        // page 1
-        // getAndSet a bit that is currently false
-        index = (1L << PAGE_SHIFT_BITS) + 23;
-        assertThat(bitSet.get(index)).isFalse();
-        assertThat(bitSet.getAndSet(index)).isFalse();
-        assertThat(bitSet.get(index)).isTrue();
-        // getAndSet a bit that is currently true
-        index = (1L << PAGE_SHIFT_BITS) + 42;
-        bitSet.set(index);
-        assertThat(bitSet.get(index)).isTrue();
-        assertThat(bitSet.getAndSet(index)).isTrue();
-        assertThat(bitSet.get(index)).isTrue();
-        // page 2
-        // getAndSet a bit that is currently false
-        index = 2 * (1L << PAGE_SHIFT_BITS) + 23;
-        assertThat(bitSet.get(index)).isFalse();
-        assertThat(bitSet.getAndSet(index)).isFalse();
-        assertThat(bitSet.get(index)).isTrue();
-        // getAndSet a bit that is currently true
-        index = 2 * (1L << PAGE_SHIFT_BITS) + 42;
-        bitSet.set(index);
-        assertThat(bitSet.get(index)).isTrue();
-        assertThat(bitSet.getAndSet(index)).isTrue();
-        assertThat(bitSet.get(index)).isTrue();
+        bitSet.set(idx1);
+        assertThat(bitSet.get(idx1)).isTrue();
+        assertThat(bitSet.getAndSet(idx1)).isTrue();
+        assertThat(bitSet.get(idx1)).isTrue();
     }
 
     @ParameterizedTest
     @MethodSource("bitsets")
     void testCardinality(HugeAtomicPagedBitSet bitSet) {
         assertThat(bitSet.cardinality()).isEqualTo(0);
-        // page 0
-        bitSet.set(23);
+        bitSet.set(23); // page 0
         assertThat(bitSet.cardinality()).isEqualTo(1);
-        // page 1
-        bitSet.set((1L << PAGE_SHIFT_BITS) + 23);
+        bitSet.set((1L << PAGE_SHIFT_BITS) + 23); // page 1
         assertThat(bitSet.cardinality()).isEqualTo(2);
-        // page 2
-        bitSet.set(2 * (1L << PAGE_SHIFT_BITS) + 23);
+        bitSet.set(2 * (1L << PAGE_SHIFT_BITS) + 23); // page 2
         assertThat(bitSet.cardinality()).isEqualTo(3);
+    }
+
+    @ParameterizedTest
+    @MethodSource("bitsets")
+    void testClearAtIndex(HugeAtomicPagedBitSet bitSet) {
+        assertThat(bitSet.cardinality()).isEqualTo(0);
+        testClearAtIndexAssert(bitSet, 23); // page 0
+        testClearAtIndexAssert(bitSet, (1L << PAGE_SHIFT_BITS) + 23); // page 1
+        testClearAtIndexAssert(bitSet, 2 * (1L << PAGE_SHIFT_BITS) + 23); // page 2
+    }
+
+    private static void testClearAtIndexAssert(HugeAtomicPagedBitSet bitSet, long index) {
+        bitSet.set(index);
+        assertThat(bitSet.cardinality()).isEqualTo(1);
+        bitSet.clear(index);
+        assertThat(bitSet.cardinality()).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -129,17 +115,16 @@ class HugeAtomicPagedBitSetTest {
         var rng = ThreadLocalRandom.current();
         long bound = 42 * (1L << PAGE_SHIFT_BITS) + 42;
 
-        var expected = IntStream
-            .range(0, 10_000)
+        var expectedSetBits = IntStream.range(0, 10_000)
             .mapToLong(__ -> rng.nextLong(0, bound))
             .boxed()
             .peek(bitSet::set)
             .collect(Collectors.toSet());
 
-        var actual = new HashSet<Long>();
-        bitSet.forEachSetBit(actual::add);
+        var actualSetBits = new HashSet<Long>();
+        bitSet.forEachSetBit(actualSetBits::add);
 
-        assertThat(actual).isEqualTo(expected);
+        assertThat(actualSetBits).isEqualTo(expectedSetBits);
     }
 
     @ParameterizedTest
