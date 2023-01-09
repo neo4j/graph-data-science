@@ -33,6 +33,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.projection.CypherAggregation;
@@ -81,7 +82,7 @@ class GraphListProcTest extends BaseProcTest {
             GraphGenerateProc.class,
             GraphListProc.class
         );
-        register(db, CypherAggregation.newInstance());
+        register(db, Neo4jProxy.callableUserAggregationFunction(CypherAggregation.newInstance()));
         runQuery(DB_CYPHER);
     }
 

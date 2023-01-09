@@ -28,10 +28,10 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.compat.CompatUserAggregationFunction;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.doc.syntax.DocQuery;
 import org.neo4j.graphdb.Result;
-import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -187,7 +187,7 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
         return List.of();
     }
 
-    protected List<CallableUserAggregationFunction> aggregationFunctions() {
+    protected List<CompatUserAggregationFunction> aggregationFunctions() {
         return List.of();
     }
 

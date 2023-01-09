@@ -22,6 +22,7 @@ package org.neo4j.gds.compat;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.exceptions.KernelException;
+import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -103,6 +104,7 @@ public final class GraphDatabaseApiProxy {
         }
     }
 
+    @SuppressForbidden(reason = "We're not implementing CallableUserAggregationFunction, just passing it on")
     public static void register(GraphDatabaseService db, CallableUserAggregationFunction function) throws
         KernelException {
         GlobalProcedures procedures = resolveDependency(db, GlobalProcedures.class);

@@ -20,10 +20,10 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
+import org.neo4j.gds.compat.CompatUserAggregationFunction;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.functions.NodePropertyFunc;
 import org.neo4j.gds.projection.CypherAggregation;
-import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 
 import java.util.List;
 
@@ -34,7 +34,7 @@ class GraphProjectCypherAggregationDocTest extends SingleFileDocTestBase {
     }
 
     @Override
-    protected List<CallableUserAggregationFunction> aggregationFunctions() {
+    protected List<CompatUserAggregationFunction> aggregationFunctions() {
         return List.of(CypherAggregation.newInstance());
     }
 

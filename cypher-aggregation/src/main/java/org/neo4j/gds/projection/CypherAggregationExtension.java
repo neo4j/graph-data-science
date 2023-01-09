@@ -44,7 +44,9 @@ public final class CypherAggregationExtension extends ExtensionFactory<CypherAgg
     public Lifecycle newInstance(ExtensionContext context, CypherAggregationExtension.Dependencies dependencies) {
         return LifecycleAdapter.onInit(() -> {
             try {
-                dependencies.globalProceduresRegistry().register(CypherAggregation.newInstance());
+                dependencies
+                    .globalProceduresRegistry()
+                    .register(Neo4jProxy.callableUserAggregationFunction(CypherAggregation.newInstance()));
             } catch (ProcedureException e) {
                 var log = Neo4jProxy.getInternalLog(dependencies.logService(), getClass());
                 log.warn(formatWithLocale("`%s` is not available", CypherAggregation.FUNCTION_NAME), e);

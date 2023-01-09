@@ -31,7 +31,6 @@ import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
-import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 
@@ -46,8 +45,8 @@ public class CypherAggregation implements CompatUserAggregationFunction {
         "project"
     );
 
-    public static CallableUserAggregationFunction newInstance() {
-        return Neo4jProxy.callableUserAggregationFunction(new CypherAggregation());
+    public static CompatUserAggregationFunction newInstance() {
+        return new CypherAggregation();
     }
 
     @Override
