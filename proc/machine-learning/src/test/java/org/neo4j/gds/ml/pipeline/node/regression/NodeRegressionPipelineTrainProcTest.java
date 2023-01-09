@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline.node.regression;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.assertj.core.api.MapAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +48,7 @@ import org.neo4j.gds.model.catalog.ModelDropProc;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -187,16 +189,22 @@ class NodeRegressionPipelineTrainProcTest extends BaseProcTest {
 
             var featurePipeline = modelInfo.extractingByKey("pipeline", stringObjectMapType);
 
-            featurePipeline
+            Consumer<MapAssert<String, Object>> nodePropertyStepCheck = (MapAssert<String, Object> holder) -> holder
                 .extractingByKey("nodePropertySteps", InstanceOfAssertFactories.LIST)
                 .hasSize(1)
                 .element(0, stringObjectMapType)
                 .containsEntry("name", "gds.pageRank.mutate")
                 .containsEntry("config", Map.of("mutateProperty", "pr", "contextNodeLabels", List.of(), "contextRelationshipTypes", List.of()));
+            nodePropertyStepCheck.accept(featurePipeline);
+            nodePropertyStepCheck.accept(modelInfo);
 
             featurePipeline
                 .extractingByKey("featureProperties", InstanceOfAssertFactories.list(Map.class))
                 .extracting(map -> map.get("feature"))
+                .containsExactly("array", "scalar", "pr");
+
+            modelInfo
+                .extractingByKey("featureProperties", InstanceOfAssertFactories.list(String.class))
                 .containsExactly("array", "scalar", "pr");
 
             return true;

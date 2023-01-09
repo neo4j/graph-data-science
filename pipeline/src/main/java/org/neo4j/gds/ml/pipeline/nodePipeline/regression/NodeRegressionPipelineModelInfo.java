@@ -43,8 +43,10 @@ public interface NodeRegressionPipelineModelInfo extends ToMapConvertible {
     default Map<String, Object> toMap() {
         return Map.of(
             "bestParameters", bestCandidate().trainerConfig().toMapWithTrainerMethod(),
+            "metrics", bestCandidate().renderMetrics(testMetrics(), outerTrainMetrics()),
             "pipeline", pipeline().toMap(),
-            "metrics", bestCandidate().renderMetrics(testMetrics(), outerTrainMetrics())
+            "nodePropertySteps", ToMapConvertible.toMap(pipeline().nodePropertySteps()),
+            "featureProperties", pipeline().featureProperties()
         );
     }
 
