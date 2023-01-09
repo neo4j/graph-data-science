@@ -24,29 +24,27 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.loading.CollectingMultiplePropertiesConsumer;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
 
 @GdlExtension
 class IndexInverseTest {
     @GdlGraph(orientation = Orientation.NATURAL)
+    @GdlGraph(orientation = Orientation.REVERSE, graphNamePrefix = "inverse")
     private static final String DIRECTED =
         "  (a), (b), (c), (d)" +
         ", (a)-[:T1 {prop1: 42.0D, prop2: 84.0D, prop3: 1337.0D}]->(b)" +
@@ -58,7 +56,7 @@ class IndexInverseTest {
     GraphStore graphStore;
 
     @Inject
-    IdFunction idFunction;
+    GraphStore inverseGraphStore;
 
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
@@ -67,44 +65,27 @@ class IndexInverseTest {
             .builder()
             .concurrency(concurrency)
             .relationshipType("T1")
-            .mutateRelationshipType("T2")
             .build();
 
-        SingleTypeRelationshipImportResult indexedRelationships = new IndexInverse(
+        SingleTypeRelationshipImportResult inverseRelationships = new IndexInverse(
             graphStore,
             config,
             ProgressTracker.NULL_TRACKER,
             Pools.DEFAULT
         ).compute();
 
-        assertThat(indexedRelationships.inverseTopology()).isPresent();
+        var inverseType = RelationshipType.of(config.relationshipType());
 
-        var indexedType = RelationshipType.of(config.mutateRelationshipType());
+        // we need to use the same name for assertGraphEquals to work
+        graphStore.deleteRelationships(inverseType);
+        graphStore.addRelationshipType(inverseType, inverseRelationships);
 
-        graphStore.addRelationshipType(indexedType, indexedRelationships);
-
-        long aId = idFunction.of("a");
-        long bId = idFunction.of("b");
-        long cId = idFunction.of("c");
-
-        var expected = Map.of(
-            aId, Map.of(aId, List.of(new double[] {4.0, 5.0, 6.0}), bId, List.of(new double[] {1.0, 2.0, 3.0})),
-            bId, Map.of(aId, List.of(new double[] {42.0, 84.0, 1337.0})),
-            cId, Map.of(bId, List.of(new double[] {4.0, 5.0, 6.0}))
-        );
-
-        var consumer = new CollectingMultiplePropertiesConsumer();
-        CompositeRelationshipIterator iterator = graphStore.getCompositeRelationshipIterator(
-            indexedType,
-            List.of("prop1", "prop2", "prop3")
-        );
-
-        graphStore.nodes().forEachNode(nodeId -> {
-            iterator.forEachInverseRelationship(nodeId, consumer);
-            return true;
-        });
-
-        assertThat(consumer.seenRelationships).usingRecursiveComparison().isEqualTo(expected);
+        for (String relationshipPropertyKey : inverseGraphStore.relationshipPropertyKeys()) {
+            assertGraphEquals(
+                inverseGraphStore.getGraph(inverseType, Optional.of(relationshipPropertyKey)),
+                graphStore.getGraph(inverseType, Optional.of(relationshipPropertyKey))
+                );
+        }
     }
 
     @Test
@@ -115,7 +96,6 @@ class IndexInverseTest {
             .builder()
             .concurrency(4)
             .relationshipType("T1")
-            .mutateRelationshipType("T2")
             .build();
 
         new IndexInverseAlgorithmFactory().build(

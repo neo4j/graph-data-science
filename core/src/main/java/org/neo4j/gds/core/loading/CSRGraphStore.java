@@ -477,6 +477,22 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
+    public void addInverseIndex(
+        RelationshipType relationshipType,
+        SingleTypeRelationshipImportResult indexedRelationships
+    ) {
+        var newRelationships =
+            SingleTypeRelationshipImportResult
+                .builder()
+                .from(relationships.get(relationshipType))
+                .inverseTopology(indexedRelationships.topology())
+                .inverseProperties(indexedRelationships.properties())
+                .build();
+
+        relationships.put(relationshipType, newRelationships);
+    }
+
+    @Override
     public DeletionResult deleteRelationships(RelationshipType relationshipType) {
         return DeletionResult.of(builder -> updateGraphStore(graphStore -> {
             Optional.ofNullable(graphStore.relationships.remove(relationshipType)).ifPresentOrElse(relationship -> {

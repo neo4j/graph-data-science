@@ -19,22 +19,29 @@
  */
 package org.neo4j.gds.beta.indexInverse;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
+import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
+import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
+
 @Configuration
-public interface IndexInverseConfig extends AlgoBaseConfig, MutateRelationshipConfig {
-    @Configuration.ConvertWith(method = "validateTypeIdentifier")
+public interface IndexInverseConfig extends AlgoBaseConfig {
+    @Configuration.ConvertWith(method = "validateRelationshipTypeIdentifier")
     String relationshipType();
+
+    static @Nullable String validateRelationshipTypeIdentifier(String input) {
+        return validateNoWhiteCharacter(emptyToNull(input), "relationshipType");
+    }
 
     @Override
     @Configuration.Ignore

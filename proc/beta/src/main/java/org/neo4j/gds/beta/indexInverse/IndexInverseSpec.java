@@ -22,6 +22,7 @@ package org.neo4j.gds.beta.indexInverse;
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -72,10 +73,17 @@ public class IndexInverseSpec implements AlgorithmSpec<IndexInverse, SingleTypeR
                 ComputationResult<IndexInverse, SingleTypeRelationshipImportResult, IndexInverseConfig> computationResult,
                 ExecutionContext executionContext
             ) {
-                computationResult.graphStore().addRelationshipType(
-                    RelationshipType.of(computationResult.config().mutateRelationshipType()),
-                    computationResult.result()
-                );
+                try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
+                    var result = computationResult.result();
+                    if (result != null) {
+                        computationResult
+                            .graphStore()
+                            .addInverseIndex(
+                                RelationshipType.of(computationResult.config().relationshipType()),
+                                result
+                            );
+                    }
+                }
             }
         };
     }

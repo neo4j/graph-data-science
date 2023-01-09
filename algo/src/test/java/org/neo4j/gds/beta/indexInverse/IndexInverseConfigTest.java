@@ -51,7 +51,6 @@ class IndexInverseConfigTest {
         var config = IndexInverseConfigImpl
             .builder()
             .relationshipType("T1")
-            .mutateRelationshipType("T3")
             .build();
 
         assertThatThrownBy(() -> config.graphStoreValidation(
@@ -67,7 +66,6 @@ class IndexInverseConfigTest {
         var config = IndexInverseConfigImpl
             .builder()
             .relationshipType("X")
-            .mutateRelationshipType("T2")
             .build();
 
         assertThatThrownBy(() -> config.graphStoreValidation(

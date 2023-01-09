@@ -171,6 +171,11 @@ public interface GraphStore {
         SingleTypeRelationshipImportResult relationships
     );
 
+    void addInverseIndex(
+        RelationshipType relationshipType,
+        SingleTypeRelationshipImportResult indexedRelationships
+    );
+
     DeletionResult deleteRelationships(RelationshipType relationshipType);
 
     default Graph getGraph(RelationshipType... relationshipType) {

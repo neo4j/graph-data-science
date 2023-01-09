@@ -107,7 +107,6 @@ public class IndexInverse extends Algorithm<SingleTypeRelationshipImportResult> 
             .concurrency(config.concurrency())
             .nodes(graphStore.nodes())
             .executorService(executorService)
-            .indexInverse(true)
             .orientation(Orientation.NATURAL)
             .validateRelationships(false);
 
@@ -190,7 +189,7 @@ public class IndexInverse extends Algorithm<SingleTypeRelationshipImportResult> 
         public void run() {
             for (long i = partition.startNode(); i < partition.startNode() + partition.nodeCount(); i++) {
                 relationshipIterator.forEachRelationship(i, 0.0D, (source, target, property) -> {
-                    relationshipsBuilder.addFromInternal(source, target, property);
+                    relationshipsBuilder.addFromInternal(target, source, property);
                     return true;
                 });
                 progressTracker.logProgress();
@@ -221,7 +220,7 @@ public class IndexInverse extends Algorithm<SingleTypeRelationshipImportResult> 
         public void run() {
             for (long i = partition.startNode(); i < partition.startNode() + partition.nodeCount(); i++) {
                 relationshipIterator.forEachRelationship(i, (source, target, properties) -> {
-                    relationshipsBuilder.addFromInternal(source, target, properties);
+                    relationshipsBuilder.addFromInternal(target, source, properties);
                     return true;
                 });
                 progressTracker.logProgress();

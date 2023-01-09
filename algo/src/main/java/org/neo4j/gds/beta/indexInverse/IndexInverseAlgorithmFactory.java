@@ -62,19 +62,16 @@ public class IndexInverseAlgorithmFactory extends GraphStoreAlgorithmFactory<Ind
     public MemoryEstimation memoryEstimation(IndexInverseConfig configuration) {
         RelationshipType relationshipType = RelationshipType.of(configuration.relationshipType());
 
-        var adjacencyListEstimations = CompressedAdjacencyList.adjacencyListEstimation(relationshipType, false);
         var builder = MemoryEstimations.builder(IndexInverse.class)
-            .add("relationships", adjacencyListEstimations)
-            .add("inverse relationships", adjacencyListEstimations);
+            .add("inverse relationships", CompressedAdjacencyList.adjacencyListEstimation(relationshipType, false));
 
         builder.perGraphDimension("properties", ((graphDimensions, concurrency) -> {
-            long max = graphDimensions.relationshipPropertyTokens().keySet().stream().mapToLong(__ ->
-                UncompressedAdjacencyList
-                    .adjacencyPropertiesEstimation(relationshipType, false)
-                    .estimate(graphDimensions, concurrency)
-                    .memoryUsage().max
-            ).sum();
-            return MemoryRange.of(0, 2 * max);
+            var singlePropertyEstimation = UncompressedAdjacencyList
+                .adjacencyPropertiesEstimation(relationshipType, false)
+                .estimate(graphDimensions, concurrency)
+                .memoryUsage();
+
+            return singlePropertyEstimation.times(graphDimensions.relationshipPropertyTokens().size());
         }));
 
         return builder.build();

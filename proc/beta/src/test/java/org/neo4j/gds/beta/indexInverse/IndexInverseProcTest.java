@@ -61,7 +61,7 @@ class IndexInverseProcTest extends BaseProcTest {
 
     @Test
     void indexInverse() {
-        String query = "CALL gds.beta.graph.relationships.indexInverse('graph', {relationshipType: 'REL', mutateRelationshipType: 'REL2'})";
+        String query = "CALL gds.beta.graph.relationships.indexInverse('graph', {relationshipType: 'REL'})";
 
         assertCypherResult(query, List.of(Map.of(
             "inputRelationships", 3L,
@@ -73,12 +73,12 @@ class IndexInverseProcTest extends BaseProcTest {
         ));
 
         var gs = GraphStoreCatalog.get(getUsername(), db.databaseName(), "graph");
-        assertThat(gs.graphStore().inverseIndexedRelationshipTypes()).contains(RelationshipType.of("REL2"));
+        assertThat(gs.graphStore().inverseIndexedRelationshipTypes()).contains(RelationshipType.of("REL"));
     }
 
     @Test
     void shouldFailIfRelationshipTypeIsAlreadyIndexed() {
-        var query = "CALL gds.beta.graph.relationships.indexInverse('graph', {relationshipType: 'INDEXED_REL', mutateRelationshipType: 'REL2'})";
+        var query = "CALL gds.beta.graph.relationships.indexInverse('graph', {relationshipType: 'INDEXED_REL'})";
 
         assertThatThrownBy(() -> runQuery(query))
             .hasRootCauseInstanceOf(UnsupportedOperationException.class)
@@ -87,16 +87,16 @@ class IndexInverseProcTest extends BaseProcTest {
 
     @Test
     void memoryEstimation() {
-        String query = "CALL gds.beta.graph.relationships.indexInverse.estimate('graph', {relationshipType: 'REL', mutateRelationshipType: 'REL2'})";
+        String query = "CALL gds.beta.graph.relationships.indexInverse.estimate('graph', {relationshipType: 'REL'})";
 
         assertCypherResult(query, List.of(Map.of(
             "mapView", instanceOf(Map.class),
             "treeView", instanceOf(String.class),
-            "bytesMax", 1049232L,
+            "bytesMax", 524632L,
             "heapPercentageMin", 0.1D,
             "nodeCount", 3L,
-            "requiredMemory", "[512 KiB ... 1024 KiB]",
-            "bytesMin", 524688L,
+            "requiredMemory", "512 KiB",
+            "bytesMin", 524632L,
             "heapPercentageMax", 0.1D,
             "relationshipCount", 3L
         )));
