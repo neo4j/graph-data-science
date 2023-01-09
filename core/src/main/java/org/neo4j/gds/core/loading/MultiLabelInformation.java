@@ -24,7 +24,7 @@ import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.BatchNodeIterable;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.core.utils.paged.HugeAtomicPagedBitSet;
+import org.neo4j.gds.core.utils.paged.HugeAtomicGrowingBitSet;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -144,12 +144,12 @@ public final class MultiLabelInformation implements LabelInformation {
 
     public static final class Builder implements LabelInformation.Builder {
         private final long expectedCapacity;
-        private final Map<NodeLabel, HugeAtomicPagedBitSet> labelInformation;
+        private final Map<NodeLabel, HugeAtomicGrowingBitSet> labelInformation;
         private final Collection<NodeLabel> starNodeLabelMappings;
 
         private Builder(
             long expectedCapacity,
-            Map<NodeLabel, HugeAtomicPagedBitSet> labelInformation,
+            Map<NodeLabel, HugeAtomicGrowingBitSet> labelInformation,
             Collection<NodeLabel> starNodeLabelMappings
         ) {
             this.expectedCapacity = expectedCapacity;
@@ -169,7 +169,7 @@ public final class MultiLabelInformation implements LabelInformation {
             var nodeLabelBitSetMap = availableNodeLabels.stream().collect(
                 Collectors.toConcurrentMap(
                     nodeLabel -> nodeLabel,
-                    ignored -> HugeAtomicPagedBitSet.create(expectedCapacity)
+                    ignored -> HugeAtomicGrowingBitSet.create(expectedCapacity)
                 )
             );
             return new Builder(expectedCapacity, nodeLabelBitSetMap, starNodeLabelMappings);
@@ -179,7 +179,7 @@ public final class MultiLabelInformation implements LabelInformation {
             labelInformation
                 .computeIfAbsent(
                     nodeLabel,
-                    (ignored) -> HugeAtomicPagedBitSet.create(expectedCapacity)
+                    (ignored) -> HugeAtomicGrowingBitSet.create(expectedCapacity)
                 ).set(nodeId);
         }
 

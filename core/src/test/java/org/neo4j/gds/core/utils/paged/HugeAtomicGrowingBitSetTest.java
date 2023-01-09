@@ -34,28 +34,28 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.core.utils.paged.HugeAtomicPagedBitSet.PAGE_SHIFT_BITS;
+import static org.neo4j.gds.core.utils.paged.HugeAtomicGrowingBitSet.PAGE_SHIFT_BITS;
 
-class HugeAtomicPagedBitSetTest {
+class HugeAtomicGrowingBitSetTest {
 
     static Stream<Arguments> bitsets() {
         return Stream.of(
             // empty bit set
-            Arguments.of(HugeAtomicPagedBitSet.create(0)),
+            Arguments.of(HugeAtomicGrowingBitSet.create(0)),
             // bit set of 3 pages
-            Arguments.of(HugeAtomicPagedBitSet.create(2 * (1L << PAGE_SHIFT_BITS) + 42))
+            Arguments.of(HugeAtomicGrowingBitSet.create(2 * (1L << PAGE_SHIFT_BITS) + 42))
         );
     }
 
     @ParameterizedTest
     @MethodSource("bitsets")
-    void testSet(HugeAtomicPagedBitSet bitSet) {
+    void testSet(HugeAtomicGrowingBitSet bitSet) {
         testSetAssert(bitSet, 23); // page 0
         testSetAssert(bitSet, (1L << PAGE_SHIFT_BITS) + 23); // page 1
         testSetAssert(bitSet, 2 * (1L << PAGE_SHIFT_BITS) + 23); // page 2
     }
 
-    private static void testSetAssert(HugeAtomicPagedBitSet bitSet, long index) {
+    private static void testSetAssert(HugeAtomicGrowingBitSet bitSet, long index) {
         assertThat(bitSet.get(index)).isFalse();
         bitSet.set(index);
         assertThat(bitSet.get(index)).isTrue();
@@ -63,13 +63,13 @@ class HugeAtomicPagedBitSetTest {
 
     @ParameterizedTest
     @MethodSource("bitsets")
-    void testGetAndSet(HugeAtomicPagedBitSet bitSet) {
+    void testGetAndSet(HugeAtomicGrowingBitSet bitSet) {
         testGetAndSetAssert(bitSet, 23, 42); // page 0
         testGetAndSetAssert(bitSet, (1L << PAGE_SHIFT_BITS) + 23, (1L << PAGE_SHIFT_BITS) + 42); // page 1
         testGetAndSetAssert(bitSet, 2 * (1L << PAGE_SHIFT_BITS) + 23, 2 * (1L << PAGE_SHIFT_BITS) + 42); // page 2
     }
 
-    private static void testGetAndSetAssert(HugeAtomicPagedBitSet bitSet, long idx0, long idx1) {
+    private static void testGetAndSetAssert(HugeAtomicGrowingBitSet bitSet, long idx0, long idx1) {
         // getAndSet a bit that is currently false
         assertThat(bitSet.get(idx0)).isFalse();
         assertThat(bitSet.getAndSet(idx0)).isFalse();
@@ -83,7 +83,7 @@ class HugeAtomicPagedBitSetTest {
 
     @ParameterizedTest
     @MethodSource("bitsets")
-    void testCardinality(HugeAtomicPagedBitSet bitSet) {
+    void testCardinality(HugeAtomicGrowingBitSet bitSet) {
         assertThat(bitSet.cardinality()).isEqualTo(0);
         bitSet.set(23); // page 0
         assertThat(bitSet.cardinality()).isEqualTo(1);
@@ -95,14 +95,14 @@ class HugeAtomicPagedBitSetTest {
 
     @ParameterizedTest
     @MethodSource("bitsets")
-    void testClearAtIndex(HugeAtomicPagedBitSet bitSet) {
+    void testClearAtIndex(HugeAtomicGrowingBitSet bitSet) {
         assertThat(bitSet.cardinality()).isEqualTo(0);
         testClearAtIndexAssert(bitSet, 23); // page 0
         testClearAtIndexAssert(bitSet, (1L << PAGE_SHIFT_BITS) + 23); // page 1
         testClearAtIndexAssert(bitSet, 2 * (1L << PAGE_SHIFT_BITS) + 23); // page 2
     }
 
-    private static void testClearAtIndexAssert(HugeAtomicPagedBitSet bitSet, long index) {
+    private static void testClearAtIndexAssert(HugeAtomicGrowingBitSet bitSet, long index) {
         bitSet.set(index);
         assertThat(bitSet.cardinality()).isEqualTo(1);
         bitSet.clear(index);
@@ -111,7 +111,7 @@ class HugeAtomicPagedBitSetTest {
 
     @ParameterizedTest
     @MethodSource("bitsets")
-    void testForEachSetBit(HugeAtomicPagedBitSet bitSet) {
+    void testForEachSetBit(HugeAtomicGrowingBitSet bitSet) {
         var rng = ThreadLocalRandom.current();
         long bound = 42 * (1L << PAGE_SHIFT_BITS) + 42;
 
@@ -129,7 +129,7 @@ class HugeAtomicPagedBitSetTest {
 
     @ParameterizedTest
     @MethodSource("bitsets")
-    void testSetParallel(HugeAtomicPagedBitSet bitSet) {
+    void testSetParallel(HugeAtomicGrowingBitSet bitSet) {
         int concurrency = 8;
         int nodeCount = 1_000_000;
 

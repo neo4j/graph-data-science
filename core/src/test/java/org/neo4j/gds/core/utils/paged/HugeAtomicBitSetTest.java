@@ -263,7 +263,7 @@ class HugeAtomicBitSetTest {
     /**
      * Represents shared methods from
      * {@link org.neo4j.gds.core.utils.paged.HugeAtomicBitSet} and
-     * {@link org.neo4j.gds.core.utils.paged.HugeAtomicPagedBitSet}.
+     * {@link HugeAtomicGrowingBitSet}.
      */
     interface CommonHabsOps {
         boolean get(long index);
@@ -320,7 +320,7 @@ class HugeAtomicBitSetTest {
                 };
             },
             (size) -> {
-                var habs = HugeAtomicPagedBitSet.create(size);
+                var habs = HugeAtomicGrowingBitSet.create(size);
                 return new CommonHabsOps() {
                     @Override
                     public boolean get(long index) {
