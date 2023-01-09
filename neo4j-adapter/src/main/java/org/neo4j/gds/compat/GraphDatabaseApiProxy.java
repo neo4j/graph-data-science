@@ -106,7 +106,7 @@ public final class GraphDatabaseApiProxy {
     public static void register(GraphDatabaseService db, CallableUserAggregationFunction function) throws
         KernelException {
         GlobalProcedures procedures = resolveDependency(db, GlobalProcedures.class);
-        procedures.register(function);
+        procedures.register(function, true);
     }
 
     public static NamedDatabaseId databaseId(GraphDatabaseService db) {

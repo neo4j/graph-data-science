@@ -85,7 +85,7 @@ class CypherAggregationTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         var procedures = GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class);
-        procedures.register(CypherAggregation.newInstance());
+        procedures.register(CypherAggregation.newInstance(), true);
         registerProcedures(GraphDropProc.class, GraphListProc.class, WccStreamProc.class);
     }
 
