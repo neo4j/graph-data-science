@@ -172,6 +172,32 @@ public final class HugeAtomicPagedBitSet {
         }
     }
 
+    public void clear(long index) {
+        long longIndex = index >>> 6;
+        int pageIndex = HugeArrays.pageIndex(longIndex, pageShift);
+        int wordIndex = HugeArrays.indexInPage(longIndex, pageMask);
+        int bitIndex = (int) (index & BIT_MASK);
+
+        var page = getPage(pageIndex);
+        long bitMask = ~(1L << bitIndex);
+
+        long oldWord = page.get(wordIndex);
+        while (true) {
+            long newWord = oldWord & bitMask;
+            if (newWord == oldWord) {
+                // already cleared
+                return;
+            }
+            long currentWord = page.compareAndExchange(wordIndex, oldWord, newWord);
+            if (currentWord == oldWord) {
+                // CAS successful
+                return;
+            }
+            // CAS unsuccessful, try again
+            oldWord = currentWord;
+        }
+    }
+
     public long capacity() {
         return pages.get().length() * (1L << pageShift);
     }
