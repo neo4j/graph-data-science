@@ -23,7 +23,6 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.Messenger;
 import org.neo4j.gds.beta.pregel.NodeValue;
-import org.neo4j.gds.beta.pregel.PregelComputation;
 import org.neo4j.gds.beta.pregel.PregelConfig;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -37,7 +36,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricContext<CONFIG> {
 
-    private final PregelComputation<CONFIG> computation;
+    private final RelationshipWeightApplier relationshipWeightApplier;
     private final HugeAtomicBitSet voteBits;
 
     private final Messenger<?> messenger;
@@ -45,8 +44,8 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
     private final AtomicBoolean hasSendMessage;
 
     public ComputeContext(Graph graph,
-                          PregelComputation<CONFIG> computation,
                           CONFIG config,
+                          RelationshipWeightApplier relationshipWeightApplier,
                           NodeValue nodeValue,
                           Messenger<?> messenger,
                           HugeAtomicBitSet voteBits,
@@ -54,7 +53,7 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
                           AtomicBoolean hasSendMessage,
                           ProgressTracker progressTracker) {
         super(graph, config, nodeValue, progressTracker);
-        this.computation = computation;
+        this.relationshipWeightApplier = relationshipWeightApplier;
         this.sendMessagesFunction = config.hasRelationshipWeightProperty()
             ? this::sendToNeighborsWeighted
             : this::sendToNeighbors;
@@ -164,7 +163,7 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
 
     private void sendToNeighborsWeighted(long sourceNodeId, double message) {
         graph.forEachRelationship(sourceNodeId, 1.0, (ignored, targetNodeId, weight) -> {
-            sendTo(targetNodeId, computation.applyRelationshipWeight(message, weight));
+            sendTo(targetNodeId, relationshipWeightApplier.applyRelationshipWeight(message, weight));
             return true;
         });
     }
@@ -172,5 +171,10 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
     @FunctionalInterface
     interface SendMessagesFunction {
         void sendToNeighbors(long sourceNodeId, double message);
+    }
+
+    @FunctionalInterface
+    public interface RelationshipWeightApplier {
+        double applyRelationshipWeight(double nodeValue, double relationshipWeight);
     }
 }

@@ -62,7 +62,17 @@ public final class PartitionedComputeStep<CONFIG extends PregelConfig, ITERATOR 
         this.progressTracker = progressTracker;
         this.iteration = new MutableInt(0);
         this.hasSentMessage = new AtomicBoolean(false);
-        this.computeContext = new ComputeContext<>(graph, computation, config, nodeValue, messenger, voteBits, iteration, hasSentMessage, progressTracker);
+        this.computeContext = new ComputeContext<>(
+            graph,
+            config,
+            computation::applyRelationshipWeight,
+            nodeValue,
+            messenger,
+            voteBits,
+            iteration,
+            hasSentMessage,
+            progressTracker
+        );
         this.initContext = new InitContext<>(graph, config, nodeValue, progressTracker);
     }
 

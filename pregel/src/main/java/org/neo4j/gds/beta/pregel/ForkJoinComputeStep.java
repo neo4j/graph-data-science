@@ -75,7 +75,17 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
         this.nodeBatch = nodeBatch;
         this.nodeValue = nodeValue;
         this.messenger = messenger;
-        this.computeContext = new ComputeContext<>(graph, computation, config, nodeValue, messenger, voteBits, iteration, sentMessage, progressTracker);
+        this.computeContext = new ComputeContext<>(
+            graph,
+            config,
+            computation::applyRelationshipWeight,
+            nodeValue,
+            messenger,
+            voteBits,
+            iteration,
+            sentMessage,
+            progressTracker
+        );
         this.hasSentMessage = sentMessage;
         this.progressTracker = progressTracker;
         this.initContext = new InitContext<>(graph, config, nodeValue, progressTracker);
