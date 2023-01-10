@@ -182,7 +182,12 @@ class GraphStoreTest extends BaseTest {
         Thread.sleep(42);
         graphStore.addRelationshipType(
             RelationshipType.of("BAR"),
-            SingleTypeRelationshipImportResult.of(relationships, Direction.DIRECTED, Optional.empty())
+            SingleTypeRelationshipImportResult.of(
+                relationships.topology(),
+                Direction.DIRECTED,
+                Optional.empty(),
+                Optional.empty()
+            )
         );
         ZonedDateTime relationshipTime = graphStore.modificationTime();
 

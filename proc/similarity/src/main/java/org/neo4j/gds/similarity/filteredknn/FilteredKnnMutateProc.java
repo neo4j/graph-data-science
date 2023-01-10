@@ -129,8 +129,9 @@ public class FilteredKnnMutateProc extends AlgoBaseProc<FilteredKnn, FilteredKnn
                     .addRelationshipType(
                         RelationshipType.of(config.mutateRelationshipType()),
                         SingleTypeRelationshipImportResult.of(
-                            resultRelationships,
+                            resultRelationships.topology(),
                             similarityGraphResult.direction(),
+                            resultRelationships.properties(),
                             Optional.of(RelationshipPropertySchema.of(config.mutateProperty(), ValueType.DOUBLE))
                         )
                     );

@@ -167,8 +167,9 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
             HugeGraph similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
 
             resultRelationships = SingleTypeRelationshipImportResult.of(
-                similarityGraph.relationships(),
+                similarityGraph.relationships().topology(),
                 similarityGraph.schema().direction(),
+                similarityGraph.relationships().properties(),
                 Optional.of(RelationshipPropertySchema.of(relationshipPropertyKey, ValueType.DOUBLE))
             );
             if (shouldComputeHistogram(callContext)) {
