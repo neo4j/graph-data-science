@@ -126,6 +126,30 @@ final class MutablePathResult {
     }
 
     /**
+     * Returns true, iff this path matches the given path up until the given index (exclusive).
+     * Two paths match, if they have the same nodes as well as the same relationship ids
+     */
+    boolean matchesExactly(MutablePathResult path, int index) {
+
+        if (relationshipIds == null || path.relationshipIds == null) {
+            return matches(path, index);
+        }
+
+        for (int i = 0; i < index; i++) {
+            if (nodeIds[i] != path.nodeIds[i]) {
+                return false;
+            }
+            if (i >= 1) {
+                if (relationshipIds[i - 1] != path.relationshipIds[i - 1]) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Appends the given path to this path.
      *
      * The last node in this path, must match the first node in the given path.

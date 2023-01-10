@@ -138,7 +138,7 @@ public final class Yens extends Algorithm<DijkstraResult> {
                 for (var path : kShortestPaths) {
                     // Filter relationships that are part of the previous
                     // shortest paths which share the same root path.
-                    if (rootPath.matches(path, n + 1)) {
+                    if (rootPath.matchesExactly(path, n + 1)) {
                         var relationshipId = path.relationship(n);
 
                         var neighbors = relationshipBlackList.get(spurNode);
