@@ -31,7 +31,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class PregelComputer<CONFIG extends PregelConfig> {
     final Graph graph;
-    final PregelComputation<CONFIG> computation;
+    final BasePregelComputation<CONFIG> computation;
     final CONFIG config;
     final NodeValue nodeValues;
     final Messenger<?> messenger;
@@ -40,7 +40,7 @@ abstract class PregelComputer<CONFIG extends PregelConfig> {
 
     PregelComputer(
         Graph graph,
-        PregelComputation<CONFIG> computation,
+        BasePregelComputation<CONFIG> computation,
         CONFIG config,
         NodeValue nodeValues,
         Messenger<?> messenger,
@@ -73,7 +73,7 @@ abstract class PregelComputer<CONFIG extends PregelConfig> {
     @Builder.Factory
     static <CONFIG extends PregelConfig> PregelComputer<CONFIG> computer(
         Graph graph,
-        PregelComputation<CONFIG> computation,
+        BasePregelComputation<CONFIG> computation,
         CONFIG config,
         NodeValue nodeValues,
         Messenger<?> messenger,

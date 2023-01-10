@@ -25,11 +25,13 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator> {
+public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator, COMPUTE_CONTEXT extends ComputeContext<CONFIG>> {
 
     HugeAtomicBitSet voteBits();
 
-    PregelComputation<CONFIG> computation();
+    BasePregelComputation<CONFIG> computation();
+
+    ComputeFunction<CONFIG, COMPUTE_CONTEXT> computeFunction();
 
     NodeValue nodeValue();
 
@@ -39,10 +41,9 @@ public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messa
 
     InitContext<CONFIG> initContext();
 
-    ComputeContext<CONFIG> computeContext();
+    COMPUTE_CONTEXT computeContext();
 
     ProgressTracker progressTracker();
-
 
     default void computeBatch() {
         var messenger = messenger();
@@ -66,9 +67,14 @@ public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messa
             if (!messages.isEmpty() || !voteBits.get(nodeId)) {
                 voteBits.clear(nodeId);
                 computeContext.setNodeId(nodeId);
-                computation.compute(computeContext, messages);
+                computeFunction().compute(computeContext, messages);
             }
         });
         progressTracker().logProgress(nodeBatch.nodeCount());
+    }
+
+    @FunctionalInterface
+    interface ComputeFunction<CONFIG extends PregelConfig, COMPUTE_CONTEXT extends ComputeContext<CONFIG>> {
+        void compute(COMPUTE_CONTEXT computeContext, Messages messages);
     }
 }

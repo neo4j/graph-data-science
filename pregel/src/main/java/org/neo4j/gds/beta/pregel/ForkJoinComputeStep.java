@@ -32,21 +32,22 @@ import org.neo4j.gds.mem.BitUtil;
 import java.util.concurrent.CountedCompleter;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator>
+public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator, COMPUTE_CONTEXT extends ComputeContext<CONFIG>>
     extends CountedCompleter<Void>
-    implements ComputeStep<CONFIG, ITERATOR> {
+    implements ComputeStep<CONFIG, ITERATOR, COMPUTE_CONTEXT> {
 
     private static final int SEQUENTIAL_THRESHOLD = 1000;
 
     private final Graph graph;
+    private final ComputeFunction<CONFIG, COMPUTE_CONTEXT> computeFunction;
     private final CONFIG config;
 
     private final InitContext<CONFIG> initContext;
-    private final ComputeContext<CONFIG> computeContext;
+    private final COMPUTE_CONTEXT computeContext;
     private final NodeValue nodeValue;
     private final HugeAtomicBitSet voteBits;
     private final Messenger<ITERATOR> messenger;
-    private final PregelComputation<CONFIG> computation;
+    private final BasePregelComputation<CONFIG> computation;
 
     private Partition nodeBatch;
     private final MutableInt iteration;
@@ -55,7 +56,9 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
 
     ForkJoinComputeStep(
         Graph graph,
-        PregelComputation<CONFIG> computation,
+        BasePregelComputation<CONFIG> computation,
+        ComputeFunction<CONFIG, COMPUTE_CONTEXT> computeFunction,
+        COMPUTE_CONTEXT computeContext,
         CONFIG config,
         MutableInt iteration,
         Partition nodeBatch,
@@ -68,6 +71,7 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
     ) {
         super(parent);
         this.graph = graph;
+        this.computeFunction = computeFunction;
         this.config = config;
         this.iteration = iteration;
         this.computation = computation;
@@ -75,17 +79,7 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
         this.nodeBatch = nodeBatch;
         this.nodeValue = nodeValue;
         this.messenger = messenger;
-        this.computeContext = new ComputeContext<>(
-            graph,
-            config,
-            computation::applyRelationshipWeight,
-            nodeValue,
-            messenger,
-            voteBits,
-            iteration,
-            sentMessage,
-            progressTracker
-        );
+        this.computeContext = computeContext;
         this.hasSentMessage = sentMessage;
         this.progressTracker = progressTracker;
         this.initContext = new InitContext<>(graph, config, nodeValue, progressTracker);
@@ -109,6 +103,8 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
             var leftTask = new ForkJoinComputeStep<>(
                 graph.concurrentCopy(),
                 computation,
+                computeFunction,
+                computeContext,
                 config,
                 iteration,
                 leftBatch,
@@ -138,8 +134,13 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
     }
 
     @Override
-    public PregelComputation<CONFIG> computation() {
+    public BasePregelComputation<CONFIG> computation() {
         return computation;
+    }
+
+    @Override
+    public ComputeFunction<CONFIG, COMPUTE_CONTEXT> computeFunction() {
+        return computeFunction;
     }
 
     @Override
@@ -163,7 +164,7 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
     }
 
     @Override
-    public ComputeContext<CONFIG> computeContext() {
+    public COMPUTE_CONTEXT computeContext() {
         return computeContext;
     }
 

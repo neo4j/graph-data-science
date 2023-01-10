@@ -19,8 +19,10 @@
  */
 package org.neo4j.gds.beta.pregel;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -30,6 +32,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -38,11 +41,11 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
     private final ExecutorService executorService;
     private final int concurrency;
 
-    private List<PartitionedComputeStep<CONFIG, ?>> computeSteps;
+    private List<PartitionedComputeStep<CONFIG, ?, ?>> computeSteps;
 
     PartitionedComputer(
         Graph graph,
-        PregelComputation<CONFIG> computation,
+        BasePregelComputation<CONFIG> computation,
         CONFIG config,
         NodeValue nodeValues,
         Messenger<?> messenger,
@@ -95,17 +98,11 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
     }
 
     @NotNull
-    private List<PartitionedComputeStep<CONFIG, ?>> createComputeSteps(HugeAtomicBitSet voteBits) {
-        Function<Partition, PartitionedComputeStep<CONFIG, ?>> partitionFunction = partition -> new PartitionedComputeStep<>(
-            graph.concurrentCopy(),
-            computation,
-            config,
-            partition,
-            nodeValues,
-            messenger,
-            voteBits,
-            progressTracker
-        );
+    private List<PartitionedComputeStep<CONFIG, ?, ?>> createComputeSteps(HugeAtomicBitSet voteBits) {
+        Function<Partition, PartitionedComputeStep<CONFIG, ?, ?>> partitionFunction =
+            computation instanceof PregelComputation<CONFIG>
+                ? (partition) -> createComputeStep(graph.concurrentCopy(), voteBits, partition)
+                : (partition) -> createBidirectionalComputeSteps(graph.concurrentCopy(), voteBits, partition);
 
         switch (config.partitioning()) {
             case RANGE:
@@ -128,5 +125,79 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
                     config.partitioning()
                 ));
         }
+    }
+
+    @NotNull
+    private PartitionedComputeStep<CONFIG, ?, ComputeContext<CONFIG>> createComputeStep(
+        Graph graph,
+        HugeAtomicBitSet voteBits,
+        Partition partition
+    ) {
+        MutableInt iteration = new MutableInt(0);
+        var hasSentMessages = new AtomicBoolean(false);
+
+        var computeContext = new ComputeContext<>(
+            graph,
+            config,
+            ((PregelComputation<CONFIG>) computation)::applyRelationshipWeight,
+            nodeValues,
+            messenger,
+            voteBits,
+            iteration,
+            hasSentMessages,
+            progressTracker
+        );
+
+        return new PartitionedComputeStep<>(
+            graph,
+            computation,
+            ((PregelComputation<CONFIG>) computation)::compute,
+            computeContext,
+            config,
+            partition,
+            nodeValues,
+            messenger,
+            voteBits,
+            iteration,
+            hasSentMessages,
+            progressTracker
+        );
+    }
+
+    @NotNull
+    private PartitionedComputeStep<CONFIG, ?, ComputeContext.BidirectionalComputeContext<CONFIG>> createBidirectionalComputeSteps(
+        Graph graph,
+        HugeAtomicBitSet voteBits,
+        Partition partition
+    ) {
+        MutableInt iteration = new MutableInt(0);
+        var hasSentMessages = new AtomicBoolean(false);
+
+        var computeContext = new ComputeContext.BidirectionalComputeContext<>(
+            graph,
+            config,
+            ((BidirectionalPregelComputation<CONFIG>) computation)::applyRelationshipWeight,
+            nodeValues,
+            messenger,
+            voteBits,
+            iteration,
+            hasSentMessages,
+            progressTracker
+        );
+
+        return new PartitionedComputeStep<>(
+            graph,
+            computation,
+            ((BidirectionalPregelComputation<CONFIG>) computation)::compute,
+            computeContext,
+            config,
+            partition,
+            nodeValues,
+            messenger,
+            voteBits,
+            iteration,
+            hasSentMessages,
+            progressTracker
+        );
     }
 }

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.beta.pregel;
 
-import org.neo4j.gds.beta.pregel.context.ComputeContext;
+import org.neo4j.gds.beta.pregel.context.ComputeContext.BidirectionalComputeContext;
 
 /**
  * Main interface to express user-defined logic using the
@@ -31,7 +31,7 @@ import org.neo4j.gds.beta.pregel.context.ComputeContext;
  * @see Pregel
  * @see <a href="https://kowshik.github.io/JPregel/pregel_paper.pdf">Paper</a>
  */
-public interface PregelComputation<C extends PregelConfig> extends BasePregelComputation<C> {
+public interface BidirectionalPregelComputation<C extends PregelConfig> extends BasePregelComputation<C> {
 
     /**
      * The compute method is called individually for each node
@@ -45,5 +45,5 @@ public interface PregelComputation<C extends PregelConfig> extends BasePregelCom
      * Messages can be sent to neighbor nodes or any node if the
      * identifier is known.
      */
-    void compute(ComputeContext<C> context, Messages messages);
+    void compute(BidirectionalComputeContext<C> context, Messages messages);
 }

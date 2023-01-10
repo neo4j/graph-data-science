@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricContext<CONFIG> {
 
-    private final RelationshipWeightApplier relationshipWeightApplier;
+    final RelationshipWeightApplier relationshipWeightApplier;
     private final HugeAtomicBitSet voteBits;
 
     private final Messenger<?> messenger;
@@ -176,5 +176,64 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
     @FunctionalInterface
     public interface RelationshipWeightApplier {
         double applyRelationshipWeight(double nodeValue, double relationshipWeight);
+    }
+
+    public static final class BidirectionalComputeContext<CONFIG extends PregelConfig> extends ComputeContext<CONFIG> {
+
+        private final SendMessagesIncomingFunction sendMessagesIncomingFunction;
+
+        public BidirectionalComputeContext(
+            Graph graph,
+            CONFIG config,
+            RelationshipWeightApplier relationshipWeightApplier,
+            NodeValue nodeValue,
+            Messenger<?> messenger,
+            HugeAtomicBitSet voteBits,
+            MutableInt iteration,
+            AtomicBoolean hasSendMessage,
+            ProgressTracker progressTracker
+        ) {
+            super(
+                graph,
+                config,
+                relationshipWeightApplier,
+                nodeValue,
+                messenger,
+                voteBits,
+                iteration,
+                hasSendMessage,
+                progressTracker
+            );
+
+            this.sendMessagesIncomingFunction = config.hasRelationshipWeightProperty()
+                ? this::sendToIncomingNeighborsWeighted
+                : this::sendToIncomingNeighbors;
+        }
+
+        /**
+         * Sends the given message to all neighbors of the node.
+         */
+        public void sendToIncomingNeighbors(double message) {
+            sendMessagesIncomingFunction.sendToIncomingNeighbors(nodeId, message);
+        }
+
+        private void sendToIncomingNeighbors(long sourceNodeId, double message) {
+            graph.forEachInverseRelationship(sourceNodeId, (ignored, targetNodeId) -> {
+                sendTo(targetNodeId, message);
+                return true;
+            });
+        }
+
+        private void sendToIncomingNeighborsWeighted(long sourceNodeId, double message) {
+            graph.forEachInverseRelationship(sourceNodeId, 1.0, (ignored, targetNodeId, weight) -> {
+                sendTo(targetNodeId, relationshipWeightApplier.applyRelationshipWeight(message, weight));
+                return true;
+            });
+        }
+
+        @FunctionalInterface
+        interface SendMessagesIncomingFunction {
+            void sendToIncomingNeighbors(long sourceNodeId, double message);
+        }
     }
 }
