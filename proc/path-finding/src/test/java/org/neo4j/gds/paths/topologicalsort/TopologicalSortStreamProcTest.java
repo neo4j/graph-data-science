@@ -63,10 +63,10 @@ class TopologicalSortStreamProcTest extends BaseProcTest {
             .yields();
 
         runQueryWithResultConsumer(query, result -> {
-            assertEquals(3L, result.next().get("nodeId"));
-            assertEquals(0L, result.next().get("nodeId"));
-            assertEquals(2L, result.next().get("nodeId"));
-            assertEquals(1L, result.next().get("nodeId"));
+            assertEquals(idFunction.of("n3"), result.next().get("nodeId"));
+            assertEquals(idFunction.of("n0"), result.next().get("nodeId"));
+            assertEquals(idFunction.of("n2"), result.next().get("nodeId"));
+            assertEquals(idFunction.of("n1"), result.next().get("nodeId"));
             assertFalse(result.hasNext());
         });
     }

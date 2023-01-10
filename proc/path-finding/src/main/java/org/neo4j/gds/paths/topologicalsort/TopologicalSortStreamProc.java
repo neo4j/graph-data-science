@@ -48,15 +48,7 @@ import static org.neo4j.procedure.Mode.READ;
 @GdsCallable(name = "gds.alpha.topologicalSort.stream", description = TopologicalSortStreamProc.TOPOLOGICAL_SORT_DESCRIPTION, executionMode = STREAM)
 public class TopologicalSortStreamProc extends StreamProc<TopologicalSort, TopologicalSortResult, TopologicalSortStreamProc.StreamResult, TopologicalSortConfig> {
     static final String TOPOLOGICAL_SORT_DESCRIPTION =
-        "Returns all the nodes in the graph that are not part of a cycle sorted in a topological order";
-    @Override
-    protected StreamResult streamResult(
-        long originalNodeId,
-        long internalNodeId,
-        @Nullable NodePropertyValues nodePropertyValues
-    ) {
-        return new StreamResult(originalNodeId);
-    }
+        "Returns all the nodes in the graph that are not part of a cycle or depend on a cycle, sorted in a topological order";
 
     @Procedure(value = "gds.alpha.topologicalSort.stream", mode = READ)
     @Description(TOPOLOGICAL_SORT_DESCRIPTION)
@@ -67,9 +59,17 @@ public class TopologicalSortStreamProc extends StreamProc<TopologicalSort, Topol
         return stream(compute(graphName, configuration));
     }
 
+    @Override
+    protected StreamResult streamResult(
+        long originalNodeId,
+        long internalNodeId,
+        @Nullable NodePropertyValues nodePropertyValues
+    ) {
+        return new StreamResult(originalNodeId);
+    }
+
     /**
      * Instead of mapping each node to its properties, we simply want to return the order of the nodes
-     * @return
      */
     @Override
     public ComputationResultConsumer<TopologicalSort, TopologicalSortResult, TopologicalSortConfig, Stream<StreamResult>> computationResultConsumer() {
