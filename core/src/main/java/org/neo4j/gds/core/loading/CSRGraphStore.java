@@ -51,7 +51,6 @@ import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
-import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.huge.CSRCompositeRelationshipIterator;
@@ -457,22 +456,10 @@ public class CSRGraphStore implements GraphStore {
     ) {
         updateGraphStore(graphStore -> {
             graphStore.relationships.computeIfAbsent(relationshipType, __ -> {
-
                 var relationshipSchemaEntry = schema()
                     .relationshipSchema()
                     .getOrCreateRelationshipType(relationshipType, relationships.direction());
-
-                if (relationships.properties().isPresent()) {
-                    relationships.properties().get().relationshipProperties().forEach((propertyKey, properties) -> {
-                        relationshipSchemaEntry.addProperty(propertyKey, RelationshipPropertySchema.of(propertyKey,
-                            properties.valueType(),
-                            properties.defaultValue(),
-                            properties.propertyState(),
-                            properties.aggregation()
-                        ));
-                    });
-                }
-
+                relationships.updateRelationshipSchemaEntry(relationshipSchemaEntry);
                 return relationships;
             });
         });
