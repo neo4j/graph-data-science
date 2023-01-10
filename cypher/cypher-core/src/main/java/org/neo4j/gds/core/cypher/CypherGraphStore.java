@@ -24,18 +24,14 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.GraphStoreAdapter;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.token.TokenHolders;
-import org.neo4j.values.storable.NumberType;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpdater {
@@ -104,21 +100,6 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
         stateVisitors.forEach(stateVisitor -> stateVisitor.nodePropertyAdded(propertyKey));
     }
 
-    @Override
-    public void addRelationshipType(
-        RelationshipType relationshipType,
-        Optional<String> relationshipPropertyKey,
-        Optional<NumberType> relationshipPropertyType,
-        Direction direction,
-        Relationships relationships
-    ) {
-        super.addRelationshipType(relationshipType, relationshipPropertyKey, relationshipPropertyType,
-            direction, relationships);
-        relationshipPropertyKey.ifPresent(
-            propertyKey -> stateVisitors.forEach(stateVisitor -> stateVisitor.relationshipPropertyAdded(propertyKey))
-        );
-        stateVisitors.forEach(stateVisitor -> stateVisitor.relationshipTypeAdded(relationshipType.name()));
-    }
 
     @Override
     public void addRelationshipType(

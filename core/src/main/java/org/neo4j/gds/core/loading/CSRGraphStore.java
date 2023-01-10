@@ -37,9 +37,7 @@ import org.neo4j.gds.api.Properties;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
-import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.Topology;
-import org.neo4j.gds.api.ValueTypes;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.GraphProperty;
 import org.neo4j.gds.api.properties.graph.GraphPropertyStore;
@@ -47,12 +45,10 @@ import org.neo4j.gds.api.properties.graph.GraphPropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.huge.CSRCompositeRelationshipIterator;
 import org.neo4j.gds.core.huge.HugeGraphBuilder;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
@@ -60,7 +56,6 @@ import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.utils.TimeUtil;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StringJoining;
-import org.neo4j.values.storable.NumberType;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
@@ -402,52 +397,6 @@ public class CSRGraphStore implements GraphStore {
             .flatMap(SingleTypeRelationshipImportResult::properties)
             .map(propertyStore -> propertyStore.get(propertyKey))
             .orElseThrow(() -> new IllegalArgumentException("No relationship properties found for relationship type `" + relationshipType + "` and property key `" + propertyKey + "`."));
-    }
-
-    @Override
-    public void addRelationshipType(
-        RelationshipType relationshipType,
-        Optional<String> relationshipPropertyKey,
-        Optional<NumberType> relationshipPropertyType,
-        Direction direction,
-        Relationships relationships
-    ) {
-        updateGraphStore(graphStore -> {
-            graphStore.relationships.computeIfAbsent(relationshipType, __ -> {
-                var builder = SingleTypeRelationshipImportResult
-                    .builder()
-                    .topology(relationships.topology())
-                    .direction(direction);
-
-                if (relationshipPropertyKey.isPresent() && relationshipPropertyType.isPresent() && relationships
-                    .properties()
-                    .isPresent()) {
-                    var propertyKey = relationshipPropertyKey.get();
-                    var propertyType = relationshipPropertyType.get();
-
-                    var properties = RelationshipPropertyStore
-                        .builder()
-                        .putIfAbsent(relationshipPropertyKey.get(), RelationshipProperty.of(propertyKey,
-                            propertyType,
-                            PropertyState.TRANSIENT,
-                            relationships.properties().get(),
-                            ValueTypes.fromNumberType(propertyType).fallbackValue(),
-                            Aggregation.NONE
-                        ))
-                        .build();
-
-                    builder.properties(properties);
-                }
-
-                var singleTypeRelationshipImportResult = builder.build();
-
-                singleTypeRelationshipImportResult.updateRelationshipSchemaEntry(schema()
-                    .relationshipSchema()
-                    .getOrCreateRelationshipType(relationshipType, direction));
-
-                return singleTypeRelationshipImportResult;
-            });
-        });
     }
 
     @Override

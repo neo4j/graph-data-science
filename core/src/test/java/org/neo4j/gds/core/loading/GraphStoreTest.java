@@ -180,7 +180,10 @@ class GraphStoreTest extends BaseTest {
             42.0
         );
         Thread.sleep(42);
-        graphStore.addRelationshipType(RelationshipType.of("BAR"), Optional.empty(), Optional.empty(), Direction.DIRECTED, relationships);
+        graphStore.addRelationshipType(
+            RelationshipType.of("BAR"),
+            SingleTypeRelationshipImportResult.of(relationships, Direction.DIRECTED, Optional.empty())
+        );
         ZonedDateTime relationshipTime = graphStore.modificationTime();
 
         assertTrue(initialTime.isBefore(nodePropertyTime), "Node property update did not change modificationTime");

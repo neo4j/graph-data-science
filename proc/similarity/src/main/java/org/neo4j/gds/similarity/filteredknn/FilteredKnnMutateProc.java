@@ -23,8 +23,11 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.huge.HugeGraph;
+import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
@@ -33,7 +36,6 @@ import org.neo4j.gds.similarity.SimilarityProc;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.values.storable.NumberType;
 
 import java.util.Collections;
 import java.util.Map;
@@ -126,10 +128,11 @@ public class FilteredKnnMutateProc extends AlgoBaseProc<FilteredKnn, FilteredKnn
                     .graphStore()
                     .addRelationshipType(
                         RelationshipType.of(config.mutateRelationshipType()),
-                        Optional.of(config.mutateProperty()),
-                        Optional.of(NumberType.FLOATING_POINT),
-                        similarityGraphResult.direction(),
-                        resultRelationships
+                        SingleTypeRelationshipImportResult.of(
+                            resultRelationships,
+                            similarityGraphResult.direction(),
+                            Optional.of(RelationshipPropertySchema.of(config.mutateProperty(), ValueType.DOUBLE))
+                        )
                     );
             }
 

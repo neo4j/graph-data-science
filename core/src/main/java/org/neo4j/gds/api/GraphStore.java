@@ -26,12 +26,10 @@ import org.neo4j.gds.api.properties.graph.GraphProperty;
 import org.neo4j.gds.api.properties.graph.GraphPropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.DeletionResult;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
-import org.neo4j.values.storable.NumberType;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -157,14 +155,6 @@ public interface GraphStore {
     Set<String> relationshipPropertyKeys(RelationshipType relationshipType);
 
     RelationshipProperty relationshipPropertyValues(RelationshipType relationshipType, String propertyKey);
-
-    void addRelationshipType(
-        RelationshipType relationshipType,
-        Optional<String> relationshipPropertyKey,
-        Optional<NumberType> relationshipPropertyType,
-        Direction direction,
-        Relationships relationships
-    );
 
     void addRelationshipType(
         RelationshipType relationshipType,
