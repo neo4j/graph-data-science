@@ -21,10 +21,6 @@ package org.neo4j.gds.core.huge;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
@@ -32,6 +28,10 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -282,7 +282,7 @@ class CSRCompositeRelationshipIteratorTest {
             .build()
             .generate();
 
-        var maybeProperties = graph.relationships().properties();
+        var maybeProperties = graph.relationshipProperties();
         assertThat(maybeProperties).isPresent();
         var property = maybeProperties.get();
         var properties = new AdjacencyProperties[] { property.propertiesList() };

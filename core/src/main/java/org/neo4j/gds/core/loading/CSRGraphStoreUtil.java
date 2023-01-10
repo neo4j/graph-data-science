@@ -24,10 +24,10 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.Properties;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
-import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.ValueTypes;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.GraphPropertyStore;
@@ -83,18 +83,17 @@ public final class CSRGraphStoreUtil {
 
         var nodeProperties = constructNodePropertiesFromGraph(graph);
 
-        var relationships = graph.relationships();
         var relationshipProperties = constructRelationshipPropertiesFromGraph(
             graph,
+            relationshipType,
             relationshipPropertyKey,
-            relationships,
-            relationshipType
+            graph.relationshipProperties()
         );
 
         var relationshipImportResult = RelationshipImportResult.builder().putImportResult(
             relationshipType,
             SingleTypeRelationshipImportResult.builder()
-                .topology(relationships.topology())
+                .topology(graph.relationshipTopology())
                 .properties(relationshipProperties)
                 .direction(direction)
                 .build()
@@ -138,11 +137,11 @@ public final class CSRGraphStoreUtil {
     @NotNull
     private static Optional<RelationshipPropertyStore> constructRelationshipPropertiesFromGraph(
         Graph graph,
-        Optional<String> relationshipProperty,
-        Relationships relationships,
-        RelationshipType relationshipType
+        RelationshipType relationshipType,
+        Optional<String> relationshipPropertyKey,
+        Optional<Properties> relationshipProperties
     ) {
-        if (relationshipProperty.isEmpty() || relationships.properties().isEmpty()) {
+        if (relationshipPropertyKey.isEmpty() || relationshipProperties.isEmpty()) {
             return Optional.empty();
         }
 
@@ -165,7 +164,7 @@ public final class CSRGraphStoreUtil {
             .findFirst()
             .orElseThrow();
 
-        String propertyKey = relationshipProperty.get();
+        String propertyKey = relationshipPropertyKey.get();
 
         return Optional.of(RelationshipPropertyStore.builder().putIfAbsent(
             propertyKey,
@@ -173,7 +172,7 @@ public final class CSRGraphStoreUtil {
                 propertyKey,
                 NumberType.FLOATING_POINT,
                 relationshipPropertySchema.state(),
-                relationships.properties().orElseThrow(),
+                relationshipProperties.orElseThrow(),
                 relationshipPropertySchema.defaultValue().isUserDefined()
                     ? relationshipPropertySchema.defaultValue()
                     : ValueTypes.fromNumberType(NumberType.FLOATING_POINT).fallbackValue(),
