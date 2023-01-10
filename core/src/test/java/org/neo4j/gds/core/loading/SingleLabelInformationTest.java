@@ -242,6 +242,25 @@ class SingleLabelInformationTest {
                 ));
     }
 
+    @Test
+    void shouldDisallowAddingNodeLabel() {
+        var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
+            .build(1, LongUnaryOperator.identity());
+
+
+        assertThatExceptionOfType(UnsupportedOperationException.class)
+            .isThrownBy(() -> labelInformation.addLabel(NodeLabel.of("B")));
+    }
+
+    @Test
+    void shouldDisallowAddingNodeIdToLabel() {
+        var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
+            .build(1, LongUnaryOperator.identity());
+
+        assertThatExceptionOfType(UnsupportedOperationException.class)
+            .isThrownBy(() -> labelInformation.addNodeIdToLabel(LABEL_A, 19L));
+    }
+
     @Nested
     class BuilderTest {
         @Test

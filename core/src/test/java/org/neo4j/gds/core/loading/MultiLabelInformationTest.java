@@ -19,14 +19,18 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.BatchNodeIterable;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.LongAdder;
@@ -45,6 +49,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(SoftAssertionsExtension.class)
 class MultiLabelInformationTest {
 
     @Test
@@ -313,6 +318,80 @@ class MultiLabelInformationTest {
         nodeIterator.forEachRemaining((LongConsumer) __ -> idCounter.increment());
 
         assertThat(idCounter.longValue()).isEqualTo(2L);
+    }
+
+
+    @Test
+    void shouldAddNodeLabel(SoftAssertions assertions) {
+        // Arrange
+        var labelA = NodeLabel.of("A");
+        var labelB = NodeLabel.of("B");
+
+        var availableNodeLabels = List.of(labelA, labelB);
+
+        var builder = LabelInformationBuilders
+            .multiLabelWithCapacityAndLabelInformation(42, availableNodeLabels, Collections.emptyList());
+
+        // Act
+        var newLabel = NodeLabel.of("C");
+        var labelInformation = builder.build(42, LongUnaryOperator.identity());
+        labelInformation.addLabel(newLabel);
+
+        // Assert
+        assertions.assertThat(labelInformation.availableNodeLabels())
+            .as("The new label `C` should appear in the available node labels.")
+            .containsExactlyInAnyOrder(
+                labelA,
+                labelB,
+                newLabel
+            );
+
+        // Simply adding the node label to the information should not associate it with any nodes
+        assertions.assertThat(labelInformation.nodeCountForLabel(newLabel))
+            .as("The new label `C` should not be mapped to any nodes")
+            .isEqualTo(0L);
+    }
+
+    @Test
+    void shouldAddLabelAndAssignItToANode(SoftAssertions assertions) {
+
+        // Arrange
+        var labelA = NodeLabel.of("A");
+        var labelB = NodeLabel.of("B");
+
+        var availableNodeLabels = List.of(labelA, labelB);
+        var builder = LabelInformationBuilders
+            .multiLabelWithCapacityAndLabelInformation(42, availableNodeLabels, Collections.emptyList());
+
+        // Act
+        var newLabel = NodeLabel.of("C");
+
+        var labelInformation = builder.build(42, LongUnaryOperator.identity());
+        labelInformation.addNodeIdToLabel(newLabel, 2);
+
+        // Assert
+        assertions.assertThat(labelInformation.availableNodeLabels())
+            .containsExactlyInAnyOrder(
+                labelA,
+                labelB,
+                newLabel
+            );
+
+        // Using `builder.addNodeIdToLabel` adds the new label to the LabelInformation AND assigns the given nodeId to it.
+        assertions.assertThat(labelInformation.nodeCountForLabel(newLabel))
+            .as("The newly added label `C` should be mapped to exactly one node")
+            .isEqualTo(1L);
+
+        assertions.assertThat(labelInformation.nodeLabelsForNodeId(2))
+            .as("Node with ID `2` should be mapped to node labels `A` and the new label `C`")
+            .containsExactlyInAnyOrder(
+                // labelB, // Here we should have Label `B` because it was passed through the `labelTokenNodeLabelMappings`
+                newLabel
+            );
+
+        assertions.assertThat(labelInformation.hasLabel(2, newLabel))
+            .as("Node with ID `2` should have the new label `C`")
+            .isTrue();
     }
 
     @Nested
