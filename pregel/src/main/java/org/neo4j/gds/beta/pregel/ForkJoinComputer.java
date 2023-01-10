@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.beta.pregel;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -60,7 +61,7 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
             graph,
             computation,
             config,
-            iteration,
+            new MutableInt(iteration),
             Partition.of(0, graph.nodeCount()),
             nodeValues,
             messenger,

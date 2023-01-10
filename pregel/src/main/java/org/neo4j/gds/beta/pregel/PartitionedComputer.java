@@ -100,7 +100,6 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
             graph.concurrentCopy(),
             computation,
             config,
-            0,
             partition,
             nodeValues,
             messenger,

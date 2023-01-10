@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.beta.pregel;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
@@ -48,16 +49,15 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
     private final PregelComputation<CONFIG> computation;
 
     private Partition nodeBatch;
-    private final int iteration;
-    private boolean hasSendMessage;
-    private final AtomicBoolean sentMessage;
+    private final MutableInt iteration;
+    private final AtomicBoolean hasSentMessage;
     private final ProgressTracker progressTracker;
 
     ForkJoinComputeStep(
         Graph graph,
         PregelComputation<CONFIG> computation,
         CONFIG config,
-        int iteration,
+        MutableInt iteration,
         Partition nodeBatch,
         NodeValue nodeValue,
         Messenger<ITERATOR> messenger,
@@ -75,10 +75,10 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
         this.nodeBatch = nodeBatch;
         this.nodeValue = nodeValue;
         this.messenger = messenger;
-        this.computeContext = new ComputeContext<>(this, config, progressTracker);
-        this.sentMessage = sentMessage;
+        this.computeContext = new ComputeContext<>(graph, computation, config, nodeValue, messenger, voteBits, iteration, sentMessage, progressTracker);
+        this.hasSentMessage = sentMessage;
         this.progressTracker = progressTracker;
-        this.initContext = new InitContext<>(this, config, graph, progressTracker);
+        this.initContext = new InitContext<>(graph, config, nodeValue, progressTracker);
     }
 
     @Override
@@ -106,7 +106,7 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
                 messenger,
                 voteBits,
                 this,
-                sentMessage,
+                hasSentMessage,
                 progressTracker
             );
 
@@ -118,14 +118,8 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
             this.compute();
         } else {
             computeBatch();
-            this.sentMessage.set(hasSendMessage);
             tryComplete();
         }
-    }
-
-    @Override
-    public Graph graph() {
-        return graph;
     }
 
     @Override
@@ -166,16 +160,5 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
     @Override
     public ProgressTracker progressTracker() {
         return progressTracker;
-    }
-
-    @Override
-    public int iteration() {
-        return iteration;
-    }
-
-    @Override
-    public void sendTo(long targetNodeId, double message) {
-        messenger.sendTo(targetNodeId, message);
-        hasSendMessage = true;
     }
 }

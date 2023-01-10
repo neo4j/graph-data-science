@@ -19,19 +19,13 @@
  */
 package org.neo4j.gds.beta.pregel;
 
-import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import java.util.function.LongConsumer;
-
 public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator> {
-
-    Graph graph();
 
     HugeAtomicBitSet voteBits();
 
@@ -49,37 +43,6 @@ public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messa
 
     ProgressTracker progressTracker();
 
-    int iteration();
-
-    default boolean isMultiGraph() {
-        return graph().isMultiGraph();
-    }
-
-    default long nodeCount() {
-        return graph().nodeCount();
-    }
-
-    default long relationshipCount() {
-        return graph().relationshipCount();
-    }
-
-    default int degree(long nodeId) {
-        return graph().degree(nodeId);
-    }
-
-    default long toOriginalNodeId(long internalNodeId) {
-        return graph().toOriginalNodeId(internalNodeId);
-    }
-
-    default long toInternalNodeId(long originalNodeId) {
-        return graph().toMappedNodeId(originalNodeId);
-    }
-
-    default void voteToHalt(long nodeId) {
-        voteBits().set(nodeId);
-    }
-
-    void sendTo(long targetNodeId, double message);
 
     default void computeBatch() {
         var messenger = messenger();
@@ -107,69 +70,5 @@ public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messa
             }
         });
         progressTracker().logProgress(nodeBatch.nodeCount());
-    }
-
-    default void sendToNeighbors(long sourceNodeId, double message) {
-        graph().forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
-            sendTo(targetNodeId, message);
-            return true;
-        });
-    }
-
-    default void sendToNeighborsWeighted(long sourceNodeId, double message) {
-        graph().forEachRelationship(sourceNodeId, 1.0, (ignored, targetNodeId, weight) -> {
-            sendTo(targetNodeId, computation().applyRelationshipWeight(message, weight));
-            return true;
-        });
-    }
-
-    default void forEachNeighbor(long sourceNodeId, LongConsumer targetConsumer) {
-        graph().forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
-            targetConsumer.accept(targetNodeId);
-            return true;
-        });
-    }
-
-    default void forEachDistinctNeighbor(long sourceNodeId, LongConsumer targetConsumer) {
-        var prevTarget = new MutableLong(-1);
-        graph().forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
-            if (prevTarget.longValue() != targetNodeId) {
-                targetConsumer.accept(targetNodeId);
-                prevTarget.setValue(targetNodeId);
-            }
-            return true;
-        });
-    }
-
-    default double doubleNodeValue(String key, long nodeId) {
-        return nodeValue().doubleValue(key, nodeId);
-    }
-
-    default long longNodeValue(String key, long nodeId) {
-        return nodeValue().longValue(key, nodeId);
-    }
-
-    default long[] longArrayNodeValue(String key, long nodeId) {
-        return nodeValue().longArrayValue(key, nodeId);
-    }
-
-    default double[] doubleArrayNodeValue(String key, long nodeId) {
-        return nodeValue().doubleArrayValue(key, nodeId);
-    }
-
-    default void setNodeValue(String key, long nodeId, double value) {
-        nodeValue().set(key, nodeId, value);
-    }
-
-    default void setNodeValue(String key, long nodeId, long value) {
-        nodeValue().set(key, nodeId, value);
-    }
-
-    default void setNodeValue(String key, long nodeId, long[] value) {
-        nodeValue().set(key, nodeId, value);
-    }
-
-    default void setNodeValue(String key, long nodeId, double[] value) {
-        nodeValue().set(key, nodeId, value);
     }
 }

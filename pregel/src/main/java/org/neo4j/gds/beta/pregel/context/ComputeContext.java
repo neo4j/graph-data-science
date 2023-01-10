@@ -19,22 +19,49 @@
  */
 package org.neo4j.gds.beta.pregel.context;
 
-import org.neo4j.gds.beta.pregel.ComputeStep;
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.beta.pregel.Messenger;
+import org.neo4j.gds.beta.pregel.NodeValue;
+import org.neo4j.gds.beta.pregel.PregelComputation;
 import org.neo4j.gds.beta.pregel.PregelConfig;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A context that is used during the computation. It allows an implementation
  * to send messages to other nodes and change the state of the currently
  * processed node.
  */
-public final class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricContext<CONFIG> {
+public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricContext<CONFIG> {
 
-    public ComputeContext(ComputeStep<CONFIG, ?> computeStep, CONFIG config, ProgressTracker progressTracker) {
-        super(computeStep, config, progressTracker);
+    private final PregelComputation<CONFIG> computation;
+    private final HugeAtomicBitSet voteBits;
+
+    private final Messenger<?> messenger;
+    private final MutableInt iteration;
+    private final AtomicBoolean hasSendMessage;
+
+    public ComputeContext(Graph graph,
+                          PregelComputation<CONFIG> computation,
+                          CONFIG config,
+                          NodeValue nodeValue,
+                          Messenger<?> messenger,
+                          HugeAtomicBitSet voteBits,
+                          MutableInt iteration,
+                          AtomicBoolean hasSendMessage,
+                          ProgressTracker progressTracker) {
+        super(graph, config, nodeValue, progressTracker);
+        this.computation = computation;
         this.sendMessagesFunction = config.hasRelationshipWeightProperty()
-            ? computeStep::sendToNeighborsWeighted
-            : computeStep::sendToNeighbors;
+            ? this::sendToNeighborsWeighted
+            : this::sendToNeighbors;
+        this.messenger = messenger;
+        this.voteBits = voteBits;
+        this.iteration = iteration;
+        this.hasSendMessage = hasSendMessage;
     }
 
     private final SendMessagesFunction sendMessagesFunction;
@@ -45,7 +72,7 @@ public final class ComputeContext<CONFIG extends PregelConfig> extends NodeCentr
      * @throws IllegalArgumentException if the key does not exist or the value is not a double
      */
     public double doubleNodeValue(String key) {
-        return computeStep.doubleNodeValue(key, nodeId);
+        return nodeValue.doubleValue(key, nodeId);
     }
 
     /**
@@ -54,7 +81,7 @@ public final class ComputeContext<CONFIG extends PregelConfig> extends NodeCentr
      * @throws IllegalArgumentException if the key does not exist or the value is not a long
      */
     public long longNodeValue(String key) {
-        return computeStep.longNodeValue(key, nodeId);
+        return nodeValue.longValue(key, nodeId);
     }
 
     /**
@@ -63,7 +90,7 @@ public final class ComputeContext<CONFIG extends PregelConfig> extends NodeCentr
      * @throws IllegalArgumentException if the key does not exist or the value is not a long array
      */
     public long[] longArrayNodeValue(String key) {
-        return computeStep.longArrayNodeValue(key, nodeId);
+        return nodeValue.longArrayValue(key, nodeId);
     }
 
     /**
@@ -72,7 +99,7 @@ public final class ComputeContext<CONFIG extends PregelConfig> extends NodeCentr
      * @throws IllegalArgumentException if the key does not exist or the value is not a long array
      */
     public long[] longArrayNodeValue(String key, long id) {
-        return computeStep.longArrayNodeValue(key, id);
+        return nodeValue.longArrayValue(key, id);
     }
 
     /**
@@ -81,7 +108,7 @@ public final class ComputeContext<CONFIG extends PregelConfig> extends NodeCentr
      * @throws IllegalArgumentException if the key does not exist or the value is not a double array
      */
     public double[] doubleArrayNodeValue(String key) {
-        return computeStep.doubleArrayNodeValue(key, nodeId);
+        return nodeValue.doubleArrayValue(key, nodeId);
     }
 
     /**
@@ -93,7 +120,7 @@ public final class ComputeContext<CONFIG extends PregelConfig> extends NodeCentr
      * be ignored.
      */
     public void voteToHalt() {
-        computeStep.voteToHalt(nodeId);
+        voteBits.set(nodeId);
     }
 
     /**
@@ -107,7 +134,7 @@ public final class ComputeContext<CONFIG extends PregelConfig> extends NodeCentr
      * Returns the current superstep (0-based).
      */
     public int superstep() {
-        return computeStep.iteration();
+        return iteration.getValue();
     }
 
     /**
@@ -124,7 +151,22 @@ public final class ComputeContext<CONFIG extends PregelConfig> extends NodeCentr
      * @throws ArrayIndexOutOfBoundsException if the node is in the not in id space
      */
     public void sendTo(long targetNodeId, double message) {
-        computeStep.sendTo(targetNodeId, message);
+        messenger.sendTo(targetNodeId, message);
+        this.hasSendMessage.set(true);
+    }
+
+    private void sendToNeighbors(long sourceNodeId, double message) {
+        graph.forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
+            sendTo(targetNodeId, message);
+            return true;
+        });
+    }
+
+    private void sendToNeighborsWeighted(long sourceNodeId, double message) {
+        graph.forEachRelationship(sourceNodeId, 1.0, (ignored, targetNodeId, weight) -> {
+            sendTo(targetNodeId, computation.applyRelationshipWeight(message, weight));
+            return true;
+        });
     }
 
     @FunctionalInterface

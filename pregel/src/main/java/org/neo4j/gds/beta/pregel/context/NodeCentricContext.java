@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.beta.pregel.context;
 
-import org.neo4j.gds.beta.pregel.ComputeStep;
+import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.beta.pregel.NodeValue;
 import org.neo4j.gds.beta.pregel.PregelConfig;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -27,28 +29,31 @@ import java.util.function.LongConsumer;
 
 public abstract class NodeCentricContext<CONFIG extends PregelConfig> extends PregelContext<CONFIG> {
 
-    protected final ComputeStep<CONFIG, ?> computeStep;
+    protected final NodeValue nodeValue;
+
+    protected final Graph graph;
 
     long nodeId;
 
-    NodeCentricContext(ComputeStep<CONFIG, ?> computeStep, CONFIG config, ProgressTracker progressTracker) {
+    NodeCentricContext(Graph graph, CONFIG config, NodeValue nodeValue, ProgressTracker progressTracker) {
         super(config, progressTracker);
-        this.computeStep = computeStep;
+        this.graph = graph;
+        this.nodeValue = nodeValue;
     }
 
     @Override
     public boolean isMultiGraph() {
-        return computeStep.isMultiGraph();
+        return graph.isMultiGraph();
     }
 
     @Override
     public long nodeCount() {
-        return computeStep.nodeCount();
+        return graph.nodeCount();
     }
 
     @Override
     public long relationshipCount() {
-        return computeStep.relationshipCount();
+        return graph.relationshipCount();
     }
 
     /**
@@ -72,7 +77,7 @@ public abstract class NodeCentricContext<CONFIG extends PregelConfig> extends Pr
      * @param value property value
      */
     public void setNodeValue(String key, double value) {
-        computeStep.setNodeValue(key, nodeId, value);
+        nodeValue.set(key, nodeId, value);
     }
 
     /**
@@ -82,7 +87,7 @@ public abstract class NodeCentricContext<CONFIG extends PregelConfig> extends Pr
      * @param value property value
      */
     public void setNodeValue(String key, long value) {
-        computeStep.setNodeValue(key, nodeId, value);
+        nodeValue.set(key, nodeId, value);
     }
 
     /**
@@ -92,7 +97,7 @@ public abstract class NodeCentricContext<CONFIG extends PregelConfig> extends Pr
      * @param value property value
      */
     public void setNodeValue(String key, long[] value) {
-        computeStep.setNodeValue(key, nodeId, value);
+        nodeValue.set(key, nodeId, value);
     }
 
     /**
@@ -102,14 +107,14 @@ public abstract class NodeCentricContext<CONFIG extends PregelConfig> extends Pr
      * @param value property value
      */
     public void setNodeValue(String key, double[] value) {
-        computeStep.setNodeValue(key, nodeId, value);
+        nodeValue.set(key, nodeId, value);
     }
 
     /**
      * Returns the degree (number of relationships) of the currently processed node.
      */
     public int degree() {
-        return computeStep.degree(nodeId);
+        return graph.degree(nodeId);
     }
 
     /**
@@ -125,7 +130,7 @@ public abstract class NodeCentricContext<CONFIG extends PregelConfig> extends Pr
      * @param internalNodeId a node id in the in-memory graph
      */
     public long toOriginalId(long internalNodeId) {
-        return computeStep.toOriginalNodeId(internalNodeId);
+        return graph.toOriginalNodeId(internalNodeId);
     }
 
     /**
@@ -134,35 +139,48 @@ public abstract class NodeCentricContext<CONFIG extends PregelConfig> extends Pr
      * @param originalNodeId a node id in the original graph
      */
     public long toInternalId(long originalNodeId) {
-        return computeStep.toInternalNodeId(originalNodeId);
+        return graph.toMappedNodeId(originalNodeId);
     }
 
     /**
      * Calls the consumer for each neighbor of the currently processed node.
      */
     public void forEachNeighbor(LongConsumer targetConsumer) {
-        computeStep.forEachNeighbor(nodeId, targetConsumer);
+        graph.forEachRelationship(nodeId, (ignored, targetNodeId) -> {
+            targetConsumer.accept(targetNodeId);
+            return true;
+        });
     }
 
     /**
      * Calls the consumer for each neighbor of the given node.
      */
     public void forEachNeighbor(long nodeId, LongConsumer targetConsumer) {
-        computeStep.forEachNeighbor(nodeId, targetConsumer);
+        graph.forEachRelationship(nodeId, (ignored, targetNodeId) -> {
+            targetConsumer.accept(targetNodeId);
+            return true;
+        });
     }
 
     /**
      * Calls the consumer once for each neighbor of the currently processed node.
      */
     public void forEachDistinctNeighbor(LongConsumer targetConsumer) {
-        computeStep.forEachDistinctNeighbor(nodeId, targetConsumer);
+        forEachDistinctNeighbor(nodeId, targetConsumer);
     }
 
     /**
      * Calls the consumer once for each neighbor of the given node.
      */
     public void forEachDistinctNeighbor(long nodeId, LongConsumer targetConsumer) {
-        computeStep.forEachDistinctNeighbor(nodeId, targetConsumer);
+        var prevTarget = new MutableLong(-1);
+        graph.forEachRelationship(nodeId, (ignored, targetNodeId) -> {
+            if (prevTarget.longValue() != targetNodeId) {
+                targetConsumer.accept(targetNodeId);
+                prevTarget.setValue(targetNodeId);
+            }
+            return true;
+        });
     }
 }
 
