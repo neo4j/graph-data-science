@@ -61,6 +61,10 @@ public interface LabelInformation {
         throw new UnsupportedOperationException("Adding node id to label is not supported");
     }
 
+    boolean isSingleLabel();
+
+    LabelInformation toMultiLabel(NodeLabel nodeLabelToMutate);
+
     interface LabelInformationConsumer {
         boolean accept(NodeLabel nodeLabel, BitSet bitSet);
     }

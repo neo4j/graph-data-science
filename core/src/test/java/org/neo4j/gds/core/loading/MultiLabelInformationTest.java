@@ -53,6 +53,17 @@ import static org.mockito.Mockito.when;
 class MultiLabelInformationTest {
 
     @Test
+    void shouldNotBeSingleLabel() {
+        var labelA = NodeLabel.of("A");
+        var labelB = NodeLabel.of("B");
+        var builder = MultiLabelInformation.Builder.of(1, List.of(labelA, labelB), List.of());
+
+        var labelInformation = builder.build(1, LongUnaryOperator.identity());
+
+        assertThat(labelInformation.isSingleLabel()).isFalse();
+    }
+
+    @Test
     void shouldBeEmptyWhenThereIsNoLabelInformation() {
         var builder = MultiLabelInformation.Builder.of(19, List.of(), List.of());
         var labelInformation = builder.build(19, LongUnaryOperator.identity());
@@ -392,6 +403,28 @@ class MultiLabelInformationTest {
         assertions.assertThat(labelInformation.hasLabel(2, newLabel))
             .as("Node with ID `2` should have the new label `C`")
             .isTrue();
+    }
+
+    @Test
+    void shouldAddTheLabelAndReturnItselfWhenConvertedToMultiLabel() {
+        var labelA = NodeLabel.of("A");
+        var labelB = NodeLabel.of("B");
+        var builder = MultiLabelInformation.Builder.of(1, List.of(labelA, labelB), List.of());
+
+        var labelInformation = builder.build(1, LongUnaryOperator.identity());
+
+        var labelC = NodeLabel.of("C");
+
+        var multiLabelInformation = labelInformation.toMultiLabel(labelC);
+
+        assertThat(multiLabelInformation).isSameAs(labelInformation);
+        assertThat(multiLabelInformation.isSingleLabel()).isFalse();
+
+        assertThat(multiLabelInformation.availableNodeLabels()).containsExactlyInAnyOrder(
+            labelA,
+            labelB,
+            labelC
+        );
     }
 
     @Nested

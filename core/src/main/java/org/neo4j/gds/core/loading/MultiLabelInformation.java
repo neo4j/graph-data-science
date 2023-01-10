@@ -94,6 +94,17 @@ public final class MultiLabelInformation implements LabelInformation {
     }
 
     @Override
+    public boolean isSingleLabel() {
+        return false;
+    }
+
+    @Override
+    public LabelInformation toMultiLabel(NodeLabel nodeLabelToMutate) {
+        addLabel(nodeLabelToMutate);
+        return this;
+    }
+
+    @Override
     public boolean hasLabel(long nodeId, NodeLabel nodeLabel) {
         if (nodeLabel.equals(NodeLabel.ALL_NODES)) {
             return true;
@@ -185,11 +196,6 @@ public final class MultiLabelInformation implements LabelInformation {
             return new Builder(expectedCapacity, nodeLabelBitSetMap, starNodeLabelMappings);
         }
 
-        // The method naming is a bit misleading and doesn't fully match the semantics.
-        // The way I read it is `Add nodeId to the mapping for EXISTING NodeLabel`
-        // In reality, it also adds the `NodeLabel` to the `LabelInformation` if it wasn't already there.
-        // With the current behaviour we most likely can use this as it is without adding new methods.
-        // We'll have to keep in mind that the implementation in `SingleLabelInformation` actually throws an exception.
         public void addNodeIdToLabel(NodeLabel nodeLabel, long nodeId) {
             labelInformation
                 .computeIfAbsent(

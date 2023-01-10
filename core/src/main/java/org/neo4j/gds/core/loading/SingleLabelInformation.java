@@ -124,6 +124,18 @@ final class SingleLabelInformation implements LabelInformation {
         }
     }
 
+    @Override
+    public boolean isSingleLabel() {
+        return true;
+    }
+
+    @Override
+    public LabelInformation toMultiLabel(NodeLabel nodeLabelToMutate) {
+        return LabelInformationBuilders
+            .multiLabelWithCapacityAndLabelInformation(nodeCount, List.of(nodeLabelToMutate), availableNodeLabels())
+            .build(nodeCount, LongUnaryOperator.identity());
+    }
+
     static final class Builder implements LabelInformation.Builder {
         private final NodeLabel label;
 

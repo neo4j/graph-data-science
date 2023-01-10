@@ -727,4 +727,21 @@ public class CSRGraphStore implements GraphStore {
             });
         });
     }
+
+    @Override
+    public void prepareForAddingNodeLabel(NodeLabel newLabel) {
+        nodes.prepareForAddingNodeLabel(newLabel);
+    }
+
+    @Override
+    public void addNodeLabel(NodeLabel nodeLabel) {
+        schema().nodeSchema().addLabel(nodeLabel);
+        nodes.addNodeLabel(nodeLabel);
+    }
+
+    @Override
+    public void addNodeIdToNodeLabel(long nodeId, NodeLabel nodeLabel) {
+        schema.nodeSchema().addLabel(nodeLabel);
+        nodes.addNodeIdToLabel(nodeLabel, nodeId);
+    }
 }

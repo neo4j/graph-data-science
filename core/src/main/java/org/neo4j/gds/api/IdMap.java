@@ -119,4 +119,10 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
         boolean accept(NodeLabel nodeLabel);
 
     }
+
+    default void prepareForAddingNodeLabel(NodeLabel nodeLabelToMutate){}
+
+    default void addNodeLabel(NodeLabel nodeLabel) {}
+
+    default void addNodeIdToLabel(NodeLabel nodeLabel, long nodeId) {}
 }

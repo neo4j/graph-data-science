@@ -45,6 +45,14 @@ class SingleLabelInformationTest {
     private static final NodeLabel LABEL_A = NodeLabel.of("A");
 
     @Test
+    void shouldBeSingleLabel() {
+        var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
+            .build(1, LongUnaryOperator.identity());
+
+        assertThat(labelInformation.isSingleLabel()).isTrue();
+    }
+
+    @Test
     void shouldAlwaysBeEmpty() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
             .build(1, LongUnaryOperator.identity());
@@ -259,6 +267,25 @@ class SingleLabelInformationTest {
 
         assertThatExceptionOfType(UnsupportedOperationException.class)
             .isThrownBy(() -> labelInformation.addNodeIdToLabel(LABEL_A, 19L));
+    }
+
+
+    @Test
+    void shouldConvertToMultiLabel() {
+        var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
+            .build(1, LongUnaryOperator.identity());
+
+        var nodeLabelB = NodeLabel.of("B");
+        var multiLabelInformation = labelInformation.toMultiLabel(nodeLabelB);
+
+        assertThat(multiLabelInformation).isNotSameAs(labelInformation);
+
+        assertThat(multiLabelInformation.isSingleLabel()).isFalse();
+
+        assertThat(multiLabelInformation.availableNodeLabels()).containsExactlyInAnyOrder(
+            LABEL_A,
+            nodeLabelB
+        );
     }
 
     @Nested

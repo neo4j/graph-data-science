@@ -236,4 +236,10 @@ public interface GraphStore {
     void canRelease(boolean canRelease);
 
     void release();
+
+    default void prepareForAddingNodeLabel(NodeLabel newLabel) {}
+
+    default void addNodeLabel(NodeLabel nodeLabel) {}
+
+    default void addNodeIdToNodeLabel(long nodeId, NodeLabel nodeLabel) {}
 }
