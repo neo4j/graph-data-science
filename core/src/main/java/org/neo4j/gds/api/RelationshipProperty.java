@@ -29,7 +29,7 @@ import org.neo4j.values.storable.NumberType;
 @ValueClass
 public interface RelationshipProperty {
 
-    Relationships.Properties values();
+    Properties values();
 
     RelationshipPropertySchema propertySchema();
 
@@ -62,7 +62,7 @@ public interface RelationshipProperty {
         String key,
         NumberType type,
         PropertyState state,
-        Relationships.Properties values,
+        Properties values,
         DefaultValue defaultValue,
         Aggregation aggregation
     ) {

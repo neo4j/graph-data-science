@@ -25,6 +25,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.ImmutableRelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
@@ -38,17 +39,17 @@ public interface SingleTypeRelationshipImportResult {
     SingleTypeRelationshipImportResult EMPTY = SingleTypeRelationshipImportResult
             .builder()
             .direction(Direction.DIRECTED)
-            .topology(Relationships.Topology.EMPTY)
+            .topology(Topology.EMPTY)
             .build();
 
     // TODO: figure out if we can remove this.
     Direction direction();
 
-    Relationships.Topology topology();
+    Topology topology();
 
     Optional<RelationshipPropertyStore> properties();
 
-    Optional<Relationships.Topology> inverseTopology();
+    Optional<Topology> inverseTopology();
 
     Optional<RelationshipPropertyStore> inverseProperties();
 

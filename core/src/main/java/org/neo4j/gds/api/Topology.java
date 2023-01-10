@@ -19,18 +19,31 @@
  */
 package org.neo4j.gds.api;
 
-import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.annotation.ValueClass;
 
-import java.util.Map;
+@ValueClass
+public
+interface Topology {
+    AdjacencyList adjacencyList();
 
-/**
- * A subtype of {@link Graph} which exposes datastructures specific to the csr graph representation
- * such as {@link AdjacencyList}.
- */
-public interface CSRGraph extends Graph {
+    long elementCount();
 
-    Map<RelationshipType, Topology> relationshipTopologies();
+    boolean isMultiGraph();
 
-    @Override
-    CSRGraph concurrentCopy();
+    Topology EMPTY = new Topology() {
+        @Override
+        public AdjacencyList adjacencyList() {
+            return AdjacencyList.EMPTY;
+        }
+
+        @Override
+        public long elementCount() {
+            return 0;
+        }
+
+        @Override
+        public boolean isMultiGraph() {
+            return false;
+        }
+    };
 }

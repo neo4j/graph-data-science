@@ -29,7 +29,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.RelationshipCursor;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
-import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
@@ -53,7 +53,7 @@ public final class UnionGraph implements CSRGraph {
 
     private final CSRGraph first;
     private final List<? extends CSRGraph> graphs;
-    private final Map<RelationshipType, Relationships.Topology> relationshipTypeTopologies;
+    private final Map<RelationshipType, Topology> relationshipTypeTopologies;
 
     public static CSRGraph of(List<? extends CSRGraph> graphs) {
         if (graphs.isEmpty()) {
@@ -195,7 +195,7 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public Map<RelationshipType, Relationships.Topology> relationshipTopologies() {
+    public Map<RelationshipType, Topology> relationshipTopologies() {
         return relationshipTypeTopologies;
     }
 
@@ -352,7 +352,7 @@ public final class UnionGraph implements CSRGraph {
             .map(CSRGraph::relationshipTopologies)
             .map(Map::values)
             .flatMap(Collection::stream)
-            .map(Relationships.Topology::adjacencyList)
+            .map(Topology::adjacencyList)
             .collect(Collectors.toList());
         if (isNodeFilteredGraph()) {
             return CompositeAdjacencyList.withFilteredIdMap(adjacencies, first);

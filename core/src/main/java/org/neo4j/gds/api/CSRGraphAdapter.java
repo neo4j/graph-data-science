@@ -38,7 +38,7 @@ public abstract class CSRGraphAdapter extends GraphAdapter implements CSRGraph {
     }
 
     @Override
-    public Map<RelationshipType, Relationships.Topology> relationshipTopologies() {
+    public Map<RelationshipType, Topology> relationshipTopologies() {
         return csrGraph.relationshipTopologies();
     }
 }

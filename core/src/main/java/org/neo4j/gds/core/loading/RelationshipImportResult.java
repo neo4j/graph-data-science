@@ -29,7 +29,7 @@ import org.neo4j.gds.api.ImmutableTopology;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
-import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.ValueTypes;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.values.storable.NumberType;
@@ -50,7 +50,7 @@ public interface RelationshipImportResult {
     }
 
     static RelationshipImportResult of(
-        Map<RelationshipType, Relationships.Topology> topologies,
+        Map<RelationshipType, Topology> topologies,
         Map<RelationshipType, RelationshipPropertyStore> properties,
         Map<RelationshipType, Direction> directions
     ) {

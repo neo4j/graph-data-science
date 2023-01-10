@@ -33,10 +33,12 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.Properties;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.ValueTypes;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.GraphProperty;
@@ -587,13 +589,13 @@ public class CSRGraphStore implements GraphStore {
         var adjacencyList = relationship.topology().adjacencyList();
         var inverseAdjacencyList = relationship
             .inverseTopology()
-            .map(Relationships.Topology::adjacencyList);
+            .map(Topology::adjacencyList);
         var inverseProperties = relationship.inverseProperties()
             .map(propertyStore -> propertyKeys
                 .stream()
                 .map(propertyStore::get)
                 .map(RelationshipProperty::values)
-                .map(Relationships.Properties::propertiesList)
+                .map(Properties::propertiesList)
                 .toArray(AdjacencyProperties[]::new))
             .orElse(CSRCompositeRelationshipIterator.EMPTY_PROPERTIES);
 
@@ -601,7 +603,7 @@ public class CSRGraphStore implements GraphStore {
             .stream()
             .map(propertyKey -> relationshipPropertyValues(relationshipType, propertyKey))
             .map(RelationshipProperty::values)
-            .map(Relationships.Properties::propertiesList)
+            .map(Properties::propertiesList)
             .toArray(AdjacencyProperties[]::new);
 
         return new CSRCompositeRelationshipIterator(
@@ -698,7 +700,7 @@ public class CSRGraphStore implements GraphStore {
             .schema(graphSchema)
             .characteristics(GraphCharacteristics.NONE)
             .nodeProperties(filteredNodeProperties)
-            .topology(Relationships.Topology.EMPTY)
+            .topology(Topology.EMPTY)
             .build();
 
         return filteredNodes.isPresent() ? new NodeFilteredGraph(initialGraph, filteredNodes.get()) : initialGraph;

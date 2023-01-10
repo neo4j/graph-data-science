@@ -25,7 +25,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipPropertyStore;
-import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.schema.ImmutableGraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -253,11 +253,11 @@ public abstract class FileToGraphStoreImporter {
             propertyStores
         );
 
-        var importedRelationships = relationshipTypeTopologyMap.values().stream().mapToLong(Relationships.Topology::elementCount).sum();
+        var importedRelationships = relationshipTypeTopologyMap.values().stream().mapToLong(Topology::elementCount).sum();
         return ImmutableRelationshipTopologyAndProperties.of(relationshipTypeTopologyMap, propertyStores, importedRelationships);
     }
 
-    private static Map<RelationshipType, Relationships.Topology> relationshipTypeToTopologyMapping(
+    private static Map<RelationshipType, Topology> relationshipTypeToTopologyMapping(
         Map<String, RelationshipsBuilder> relationshipBuildersByType,
         Map<RelationshipType, RelationshipPropertyStore> propertyStores
     ) {
@@ -280,7 +280,7 @@ public abstract class FileToGraphStoreImporter {
 
     @ValueClass
     public interface RelationshipTopologyAndProperties {
-        Map<RelationshipType, Relationships.Topology> topologies();
+        Map<RelationshipType, Topology> topologies();
         Map<RelationshipType, RelationshipPropertyStore> properties();
         long importedRelationships();
     }

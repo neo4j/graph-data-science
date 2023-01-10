@@ -54,38 +54,4 @@ public interface Relationships {
         return ImmutableRelationships.of(topology, maybePropertyCSR);
     }
 
-    @ValueClass
-    interface Topology {
-        AdjacencyList adjacencyList();
-
-        long elementCount();
-
-        boolean isMultiGraph();
-
-        Topology EMPTY = new Topology() {
-            @Override
-            public AdjacencyList adjacencyList() {
-                return AdjacencyList.EMPTY;
-            }
-
-            @Override
-            public long elementCount() {
-                return 0;
-            }
-
-            @Override
-            public boolean isMultiGraph() {
-                return false;
-            }
-        };
-    }
-
-    @ValueClass
-    interface Properties {
-        AdjacencyProperties propertiesList();
-
-        long elementCount();
-
-        double defaultPropertyValue();
-    }
 }

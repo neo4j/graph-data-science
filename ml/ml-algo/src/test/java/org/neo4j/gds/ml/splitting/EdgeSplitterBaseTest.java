@@ -23,7 +23,8 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.Properties;
+import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 
 import java.util.Collection;
@@ -31,7 +32,7 @@ import java.util.Collection;
 import static org.assertj.core.api.Assertions.assertThat;
 
 abstract class EdgeSplitterBaseTest {
-    void assertRelExists(Relationships.Topology topology, long source, long... targets) {
+    void assertRelExists(Topology topology, long source, long... targets) {
         var cursor = topology.adjacencyList().adjacencyCursor(source);
         for (long target : targets) {
             assertThat(cursor.nextVLong()).isEqualTo(target);
@@ -39,7 +40,7 @@ abstract class EdgeSplitterBaseTest {
     }
 
     void assertRelProperties(
-        Relationships.Properties properties,
+        Properties properties,
         long source,
         double... values
     ) {
@@ -75,7 +76,7 @@ abstract class EdgeSplitterBaseTest {
         assertThat(selectedRels.topology().elementCount()).isEqualTo(positiveCount.longValue());
     }
 
-    void assertNodeLabelFilter(Relationships.Topology topology, Collection<NodeLabel> sourceLabels, Collection<NodeLabel> targetLabels, IdMap idmap) {
+    void assertNodeLabelFilter(Topology topology, Collection<NodeLabel> sourceLabels, Collection<NodeLabel> targetLabels, IdMap idmap) {
         idmap.forEachNode(sourceNode -> {
             var targetNodeCursor = topology.adjacencyList().adjacencyCursor(sourceNode);
             if (targetNodeCursor.hasNextVLong()) { assertThat(idmap.nodeLabels(sourceNode).stream().filter(sourceLabels::contains)).isNotEmpty(); }

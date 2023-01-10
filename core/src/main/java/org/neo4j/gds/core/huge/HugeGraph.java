@@ -33,11 +33,13 @@ import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.Properties;
 import org.neo4j.gds.api.PropertyCursor;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.RelationshipCursor;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
@@ -127,10 +129,10 @@ public class HugeGraph implements CSRGraph {
         GraphSchema schema,
         GraphCharacteristics characteristics,
         Map<String, NodePropertyValues> nodeProperties,
-        Relationships.Topology topology,
-        Optional<Relationships.Properties> relationshipProperties,
-        Optional<Relationships.Topology> inverseTopology,
-        Optional<Relationships.Properties> inverseRelationshipProperties
+        Topology topology,
+        Optional<Properties> relationshipProperties,
+        Optional<Topology> inverseTopology,
+        Optional<Properties> inverseRelationshipProperties
     ) {
         return new HugeGraph(
             nodes,
@@ -139,11 +141,11 @@ public class HugeGraph implements CSRGraph {
             nodeProperties,
             topology.elementCount(),
             topology.adjacencyList(),
-            inverseTopology.map(Relationships.Topology::adjacencyList).orElse(null),
+            inverseTopology.map(Topology::adjacencyList).orElse(null),
             relationshipProperties.isPresent(),
-            relationshipProperties.map(Relationships.Properties::defaultPropertyValue).orElse(Double.NaN),
-            relationshipProperties.map(Relationships.Properties::propertiesList).orElse(null),
-            inverseRelationshipProperties.map(Relationships.Properties::propertiesList).orElse(null),
+            relationshipProperties.map(Properties::defaultPropertyValue).orElse(Double.NaN),
+            relationshipProperties.map(Properties::propertiesList).orElse(null),
+            inverseRelationshipProperties.map(Properties::propertiesList).orElse(null),
             topology.isMultiGraph()
         );
     }
@@ -343,11 +345,11 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
-    public Map<RelationshipType, Relationships.Topology> relationshipTopologies() {
+    public Map<RelationshipType, Topology> relationshipTopologies() {
         return Map.of(relationshipType(), relationshipTopology());
     }
 
-    public Relationships.Topology relationshipTopology() {
+    public Topology relationshipTopology() {
         return relationships().topology();
     }
 
