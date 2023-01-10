@@ -31,7 +31,7 @@ public final class HugeAtomicGrowingBitSet {
     // Each page stores 2^PAGE_SHIFT_BITS entries.
     // Word-size is 64 bit (long), which means we
     // store 2^(PAGE_SHIFT_BITS - 6) words per page.
-    static final int PAGE_SHIFT_BITS = 14;
+    static final int PAGE_SHIFT_BITS = 16;
     // Number of bits per word (long).
     private static final int NUM_BITS = Long.SIZE;
     private static final int BIT_MASK = NUM_BITS - 1;
