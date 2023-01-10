@@ -22,7 +22,7 @@ package org.neo4j.gds.similarity.filteredknn;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -45,7 +45,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
-import static org.neo4j.gds.similarity.SimilarityProc.computeHistogram;
 import static org.neo4j.gds.similarity.SimilarityProc.shouldComputeHistogram;
 import static org.neo4j.procedure.Mode.READ;
 
@@ -119,19 +118,17 @@ public class FilteredKnnMutateProc extends AlgoBaseProc<FilteredKnn, FilteredKnn
 
 
             try (ProgressTimer ignored = ProgressTimer.start(mutateMillis::addAndGet)) {
-                Relationships resultRelationships = getRelationships(
-                    similarityGraphResult,
-                    resultBuilder
-                );
+                var similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
+                computeHistogram(similarityGraph, resultBuilder);
 
                 computationResult
                     .graphStore()
                     .addRelationshipType(
                         RelationshipType.of(config.mutateRelationshipType()),
                         SingleTypeRelationshipImportResult.of(
-                            resultRelationships.topology(),
+                            similarityGraph.relationshipTopology(),
                             similarityGraphResult.direction(),
-                            resultRelationships.properties(),
+                            similarityGraph.relationshipProperties(),
                             Optional.of(RelationshipPropertySchema.of(config.mutateProperty(), ValueType.DOUBLE))
                         )
                     );
@@ -143,15 +140,12 @@ public class FilteredKnnMutateProc extends AlgoBaseProc<FilteredKnn, FilteredKnn
         });
     }
 
-    private Relationships getRelationships(
-        SimilarityGraphResult similarityGraphResult,
+    private void computeHistogram(
+        Graph similarityGraph,
         FilteredKnnMutateProcResult.Builder resultBuilder
     ) {
-        HugeGraph similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
-        Relationships resultRelationships = similarityGraph.relationships();
         if (shouldComputeHistogram(callContext)) {
-            resultBuilder.withHistogram(computeHistogram(similarityGraph));
+            resultBuilder.withHistogram(SimilarityProc.computeHistogram(similarityGraph));
         }
-        return resultRelationships;
     }
 }

@@ -33,12 +33,13 @@ import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.ImmutableProperties;
+import org.neo4j.gds.api.ImmutableTopology;
 import org.neo4j.gds.api.Properties;
 import org.neo4j.gds.api.PropertyCursor;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.RelationshipCursor;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
-import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -222,7 +223,7 @@ public class HugeGraph implements CSRGraph {
         return characteristics;
     }
 
-    public Map<String, NodePropertyValues> nodeProperties() { return nodeProperties; }
+    public Map<String, NodePropertyValues> nodeProperties() {return nodeProperties;}
 
     @Override
     public long relationshipCount() {
@@ -349,12 +350,9 @@ public class HugeGraph implements CSRGraph {
         return Map.of(relationshipType(), relationshipTopology());
     }
 
-    public Topology relationshipTopology() {
-        return relationships().topology();
-    }
-
     private void assertSupportedRelationships(Set<RelationshipType> relationshipTypes) {
-        if (!relationshipTypes.isEmpty() && (relationshipTypes.size() > 1 || !relationshipTypes.contains(relationshipType()))) {
+        if (!relationshipTypes.isEmpty() && (relationshipTypes.size() > 1 || !relationshipTypes.contains(
+            relationshipType()))) {
             throw new IllegalArgumentException(formatWithLocale(
                 "One or more relationship types of %s in are not supported. This graph has a relationship of type %s.",
                 relationshipTypes,
@@ -576,19 +574,24 @@ public class HugeGraph implements CSRGraph {
         return isMultiGraph;
     }
 
-    public Relationships relationships() {
-        return Relationships.of(
-            relationshipCount,
-            isMultiGraph(),
-            adjacency,
-            properties,
-            defaultPropertyValue
-        );
-    }
-
     @Override
     public boolean hasRelationshipProperty() {
         return hasRelationshipProperty;
+    }
+
+
+    public Topology relationshipTopology() {
+        return ImmutableTopology.of(
+            adjacency,
+            relationshipCount,
+            isMultiGraph()
+        );
+    }
+
+    public Optional<Properties> relationshipProperties() {
+        return properties != null
+            ? Optional.of(ImmutableProperties.of(properties, relationshipCount, defaultPropertyValue))
+            : Optional.empty();
     }
 
     private void consumeAdjacentNodes(

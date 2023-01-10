@@ -188,9 +188,9 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
             HugeGraph similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
 
             relationships = SingleTypeRelationshipImportResult.of(
-                similarityGraph.relationships().topology(),
+                similarityGraph.relationshipTopology(),
                 similarityGraph.schema().direction(),
-                similarityGraph.relationships().properties(),
+                similarityGraph.relationshipProperties(),
                 Optional.of(RelationshipPropertySchema.of(relationshipPropertyKey, ValueType.DOUBLE))
             );
 

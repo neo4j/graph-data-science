@@ -164,12 +164,12 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
             }
             resultRelationships = relationshipsBuilder.build();
         } else {
-            HugeGraph similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
+            var similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
 
             resultRelationships = SingleTypeRelationshipImportResult.of(
-                similarityGraph.relationships().topology(),
+                similarityGraph.relationshipTopology(),
                 similarityGraph.schema().direction(),
-                similarityGraph.relationships().properties(),
+                similarityGraph.relationshipProperties(),
                 Optional.of(RelationshipPropertySchema.of(relationshipPropertyKey, ValueType.DOUBLE))
             );
             if (shouldComputeHistogram(callContext)) {

@@ -36,7 +36,7 @@ import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.ImmutableTopology;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.Aggregation;
@@ -44,8 +44,6 @@ import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.huge.CompressedAdjacencyList;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.loading.NullPropertyMap.DoubleNullPropertyMap;
-import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.time.ZonedDateTime;
@@ -172,18 +170,11 @@ class GraphStoreTest extends BaseTest {
         ZonedDateTime nodePropertyTime = graphStore.modificationTime();
 
         // add relationships
-        Relationships relationships = Relationships.of(
-            0L,
-            false,
-            new CompressedAdjacencyList(new byte[0][0], HugeIntArray.of(), HugeLongArray.of()),
-            null,
-            42.0
-        );
         Thread.sleep(42);
         graphStore.addRelationshipType(
             RelationshipType.of("BAR"),
             SingleTypeRelationshipImportResult.of(
-                relationships.topology(),
+                ImmutableTopology.of(CompressedAdjacencyList.EMPTY, 0, false),
                 Direction.DIRECTED,
                 Optional.empty(),
                 Optional.empty()
