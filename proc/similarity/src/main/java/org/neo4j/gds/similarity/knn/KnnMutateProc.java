@@ -27,7 +27,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
@@ -140,7 +140,7 @@ public class KnnMutateProc extends AlgoBaseProc<Knn, Knn.Result, KnnMutateConfig
                     .graphStore()
                     .addRelationshipType(
                         relationshipType,
-                        SingleTypeRelationshipImportResult.of(
+                        SingleTypeRelationships.of(
                             similarityGraph.relationshipTopology(),
                             similarityGraphResult.direction(),
                             similarityGraph.relationshipProperties(),

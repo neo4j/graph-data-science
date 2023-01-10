@@ -20,7 +20,7 @@
 package org.neo4j.gds.beta.undirected;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.executor.ProcedureExecutorSpec;
@@ -43,7 +43,7 @@ public class ToUndirectedProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var mutateSpec = new ToUndirectedSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<ToUndirected, SingleTypeRelationshipImportResult, ToUndirectedConfig>();
+        var pipelineSpec = new ProcedureExecutorSpec<ToUndirected, SingleTypeRelationships, ToUndirectedConfig>();
 
         return new ProcedureExecutor<>(
             mutateSpec,
@@ -59,7 +59,7 @@ public class ToUndirectedProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         var mutateSpec = new ToUndirectedSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<ToUndirected, SingleTypeRelationshipImportResult, ToUndirectedConfig>();
+        var pipelineSpec = new ProcedureExecutorSpec<ToUndirected, SingleTypeRelationships, ToUndirectedConfig>();
 
         return new MemoryEstimationExecutor<>(
             mutateSpec,

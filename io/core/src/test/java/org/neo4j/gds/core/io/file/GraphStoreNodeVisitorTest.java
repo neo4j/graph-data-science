@@ -29,7 +29,7 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.extension.GdlExtension;
@@ -92,7 +92,7 @@ class GraphStoreNodeVisitorTest {
             graphSchema,
             idMap,
             nodeProperties,
-            SingleTypeRelationshipImportResult.EMPTY
+            SingleTypeRelationships.EMPTY
         );
         assertGraphEquals(graph, actualGraph);
     }

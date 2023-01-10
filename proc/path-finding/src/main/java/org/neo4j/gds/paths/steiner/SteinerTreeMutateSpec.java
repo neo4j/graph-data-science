@@ -22,7 +22,7 @@ package org.neo4j.gds.paths.steiner;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -85,7 +85,7 @@ public class SteinerTreeMutateSpec implements AlgorithmSpec<ShortestPathsSteiner
                 .withEffectiveNodeCount(steinerTreeResult.effectiveNodeCount());
 
 
-            SingleTypeRelationshipImportResult relationships;
+            SingleTypeRelationships relationships;
 
             var sourceNode = config.sourceNode();
 

@@ -92,7 +92,7 @@ public final class CSRGraphStoreUtil {
 
         var relationshipImportResult = RelationshipImportResult.builder().putImportResult(
             relationshipType,
-            SingleTypeRelationshipImportResult.builder()
+            SingleTypeRelationships.builder()
                 .topology(graph.relationshipTopology())
                 .properties(relationshipProperties)
                 .direction(direction)

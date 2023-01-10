@@ -22,7 +22,7 @@ package org.neo4j.gds.paths.spanningtree;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -84,7 +84,7 @@ public class SpanningTreeMutateSpec implements AlgorithmSpec<Prim, SpanningTree,
             builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount());
             builder.withTotalWeight(spanningTree.totalWeight());
 
-            SingleTypeRelationshipImportResult relationships;
+            SingleTypeRelationships relationships;
 
             try (ProgressTimer ignored = ProgressTimer.start(builder::withMutateMillis)) {
 

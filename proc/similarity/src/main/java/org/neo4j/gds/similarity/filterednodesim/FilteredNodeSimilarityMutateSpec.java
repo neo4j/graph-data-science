@@ -28,7 +28,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -120,14 +120,14 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
         };
     }
 
-    private SingleTypeRelationshipImportResult getRelationships(
+    private SingleTypeRelationships getRelationships(
         ComputationResult<NodeSimilarity, NodeSimilarityResult, FilteredNodeSimilarityMutateConfig> computationResult,
         SimilarityGraphResult similarityGraphResult,
         String relationshipPropertyKey,
         SimilarityProc.SimilarityResultBuilder<SimilarityMutateResult> resultBuilder,
         ProcedureCallContext callContext
     ) {
-        SingleTypeRelationshipImportResult resultRelationships;
+        SingleTypeRelationships resultRelationships;
 
         if (similarityGraphResult.isTopKGraph()) {
             TopKGraph topKGraph = (TopKGraph) similarityGraphResult.similarityGraph();
@@ -166,7 +166,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
         } else {
             var similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
 
-            resultRelationships = SingleTypeRelationshipImportResult.of(
+            resultRelationships = SingleTypeRelationships.of(
                 similarityGraph.relationshipTopology(),
                 similarityGraph.schema().direction(),
                 similarityGraph.relationshipProperties(),

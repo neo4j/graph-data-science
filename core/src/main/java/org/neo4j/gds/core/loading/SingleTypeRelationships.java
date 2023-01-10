@@ -34,9 +34,9 @@ import org.neo4j.gds.api.schema.RelationshipSchemaEntry;
 import java.util.Optional;
 
 @ValueClass
-public interface SingleTypeRelationshipImportResult {
+public interface SingleTypeRelationships {
 
-    SingleTypeRelationshipImportResult EMPTY = SingleTypeRelationshipImportResult
+    SingleTypeRelationships EMPTY = SingleTypeRelationships
             .builder()
             .direction(Direction.DIRECTED)
             .topology(Topology.EMPTY)
@@ -78,7 +78,7 @@ public interface SingleTypeRelationshipImportResult {
     /**
      * Filters the relationships to include only the given property if present.
      */
-    default SingleTypeRelationshipImportResult filter(String propertyKey) {
+    default SingleTypeRelationships filter(String propertyKey) {
         var properties = properties().map(relationshipPropertyStore ->
             relationshipPropertyStore.filter(propertyKey)
         );
@@ -86,7 +86,7 @@ public interface SingleTypeRelationshipImportResult {
             relationshipPropertyStore.filter(propertyKey)
         );
 
-        return SingleTypeRelationshipImportResult.builder()
+        return SingleTypeRelationships.builder()
             .topology(topology())
             .direction(direction())
             .inverseTopology(inverseTopology())
@@ -96,7 +96,7 @@ public interface SingleTypeRelationshipImportResult {
     }
 
     @Value.Check
-    default SingleTypeRelationshipImportResult normalize() {
+    default SingleTypeRelationships normalize() {
         if (properties().map(RelationshipPropertyStore::isEmpty).orElse(false)) {
             return builder().from(this).properties(Optional.empty()).build();
         }
@@ -106,17 +106,17 @@ public interface SingleTypeRelationshipImportResult {
         return this;
     }
 
-    static ImmutableSingleTypeRelationshipImportResult.Builder builder() {
-        return ImmutableSingleTypeRelationshipImportResult.builder();
+    static ImmutableSingleTypeRelationships.Builder builder() {
+        return ImmutableSingleTypeRelationships.builder();
     }
 
-    static SingleTypeRelationshipImportResult of(
+    static SingleTypeRelationships of(
         Topology topology,
         Direction direction,
         Optional<Properties> properties,
         Optional<RelationshipPropertySchema> propertySchema
     ) {
-        return SingleTypeRelationshipImportResult.builder()
+        return SingleTypeRelationships.builder()
             .direction(direction)
             .topology(topology)
             .properties(

@@ -27,7 +27,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.token.TokenHolders;
 
 import java.util.ArrayList;
@@ -104,7 +104,7 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
     @Override
     public void addRelationshipType(
         RelationshipType relationshipType,
-        SingleTypeRelationshipImportResult relationships
+        SingleTypeRelationships relationships
     ) {
         innerGraphStore().addRelationshipType(relationshipType, relationships);
         relationships.properties().ifPresent(

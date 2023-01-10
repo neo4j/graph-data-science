@@ -86,7 +86,7 @@ public class CSRGraphStore implements GraphStore {
 
     private final IdMap nodes;
 
-    private final Map<RelationshipType, SingleTypeRelationshipImportResult> relationships;
+    private final Map<RelationshipType, SingleTypeRelationships> relationships;
 
     private final Set<Graph> createdGraphs;
 
@@ -126,7 +126,7 @@ public class CSRGraphStore implements GraphStore {
         GraphSchema schema,
         IdMap nodes,
         NodePropertyStore nodeProperties,
-        Map<RelationshipType, SingleTypeRelationshipImportResult> relationships,
+        Map<RelationshipType, SingleTypeRelationships> relationships,
         GraphPropertyStore graphProperties,
         int concurrency
     ) {
@@ -354,7 +354,7 @@ public class CSRGraphStore implements GraphStore {
     public boolean hasRelationshipProperty(RelationshipType relType, String propertyKey) {
         return Optional
             .ofNullable(relationships.get(relType))
-            .flatMap(SingleTypeRelationshipImportResult::properties)
+            .flatMap(SingleTypeRelationships::properties)
             .map(propertyStore -> propertyStore.containsKey(propertyKey))
             .orElse(false);
     }
@@ -385,7 +385,7 @@ public class CSRGraphStore implements GraphStore {
     public Set<String> relationshipPropertyKeys(RelationshipType relationshipType) {
         return Optional
             .ofNullable(relationships.get(relationshipType))
-            .flatMap(SingleTypeRelationshipImportResult::properties)
+            .flatMap(SingleTypeRelationships::properties)
             .map(RelationshipPropertyStore::keySet)
             .orElseGet(Set::of);
     }
@@ -394,14 +394,14 @@ public class CSRGraphStore implements GraphStore {
     public RelationshipProperty relationshipPropertyValues(RelationshipType relationshipType, String propertyKey) {
         return Optional
             .ofNullable(relationships.get(relationshipType))
-            .flatMap(SingleTypeRelationshipImportResult::properties)
+            .flatMap(SingleTypeRelationships::properties)
             .map(propertyStore -> propertyStore.get(propertyKey))
             .orElseThrow(() -> new IllegalArgumentException("No relationship properties found for relationship type `" + relationshipType + "` and property key `" + propertyKey + "`."));
     }
 
     @Override
     public void addRelationshipType(
-        RelationshipType relationshipType, SingleTypeRelationshipImportResult relationships
+        RelationshipType relationshipType, SingleTypeRelationships relationships
     ) {
         updateGraphStore(graphStore -> {
             graphStore.relationships.computeIfAbsent(relationshipType, __ -> {

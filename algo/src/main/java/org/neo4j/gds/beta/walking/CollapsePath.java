@@ -25,7 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -39,7 +39,7 @@ import java.util.function.Supplier;
  *
  * In this implementation, the list of relationship types is encoded as a list of graphs with each one having only a single relationship type.
  */
-public class CollapsePath extends Algorithm<SingleTypeRelationshipImportResult> {
+public class CollapsePath extends Algorithm<SingleTypeRelationships> {
     private final List<Graph[]> pathTemplates;
     private final long nodeCount;
     private final boolean allowSelfLoops;
@@ -61,7 +61,7 @@ public class CollapsePath extends Algorithm<SingleTypeRelationshipImportResult> 
     }
 
     @Override
-    public SingleTypeRelationshipImportResult compute() {
+    public SingleTypeRelationships compute() {
         RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
             .nodes(pathTemplates.get(0)[0]) // just need any arbitrary graph
             .orientation(Orientation.NATURAL)

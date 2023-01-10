@@ -27,7 +27,7 @@ import org.neo4j.gds.beta.filter.expression.EvaluationContext;
 import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -47,7 +47,7 @@ import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
 
 public final class RelationshipsFilter {
 
-    public static Map<RelationshipType, SingleTypeRelationshipImportResult> filterRelationships(
+    public static Map<RelationshipType, SingleTypeRelationships> filterRelationships(
         GraphStore graphStore,
         Expression expression,
         IdMap inputNodes,
@@ -57,7 +57,7 @@ public final class RelationshipsFilter {
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
-        Map<RelationshipType, SingleTypeRelationshipImportResult> relationshipImportResults = new HashMap<>();
+        Map<RelationshipType, SingleTypeRelationships> relationshipImportResults = new HashMap<>();
 
         progressTracker.beginSubTask();
 
@@ -91,7 +91,7 @@ public final class RelationshipsFilter {
         return relationshipImportResults;
     }
 
-    private static SingleTypeRelationshipImportResult filterRelationshipType(
+    private static SingleTypeRelationships filterRelationshipType(
         GraphStore graphStore,
         Expression relationshipExpr,
         IdMap inputNodes,

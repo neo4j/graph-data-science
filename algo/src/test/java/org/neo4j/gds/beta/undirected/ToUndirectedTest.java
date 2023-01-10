@@ -27,7 +27,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -75,7 +75,7 @@ class ToUndirectedTest {
             .mutateRelationshipType("T2")
             .build();
 
-        SingleTypeRelationshipImportResult undirectedRelationships = new ToUndirected(
+        SingleTypeRelationships undirectedRelationships = new ToUndirected(
             directedGraphStore,
             config,
             ProgressTracker.NULL_TRACKER,
@@ -122,7 +122,7 @@ class ToUndirectedTest {
             .mutateRelationshipType("T2")
             .build();
 
-        SingleTypeRelationshipImportResult undirectedRelationships = new ToUndirected(
+        SingleTypeRelationships undirectedRelationships = new ToUndirected(
             singleDirectedGraphStore,
             config,
             ProgressTracker.NULL_TRACKER,
@@ -167,7 +167,7 @@ class ToUndirectedTest {
             .mutateRelationshipType("T2")
             .build();
 
-        SingleTypeRelationshipImportResult undirectedRelationships = new ToUndirected(
+        SingleTypeRelationships undirectedRelationships = new ToUndirected(
             noPropertyDirectedGraphStore,
             config,
             ProgressTracker.NULL_TRACKER,

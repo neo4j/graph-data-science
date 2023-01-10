@@ -31,7 +31,7 @@ import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -396,7 +396,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertThat(result.selectedRels().build().topology().elementCount()).isEqualTo(1);
     }
 
-    private boolean relationshipsAreEqual(IdMap mapping, SingleTypeRelationshipImportResult r1, SingleTypeRelationshipImportResult r2) {
+    private boolean relationshipsAreEqual(IdMap mapping, SingleTypeRelationships r1, SingleTypeRelationships r2) {
         var fallbackValue = -0.66;
         if (r1.topology().elementCount() != r2.topology().elementCount()) {
             return false;

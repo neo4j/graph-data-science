@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 @ValueClass
 public interface RelationshipImportResult {
 
-    Map<RelationshipType, SingleTypeRelationshipImportResult> importResults();
+    Map<RelationshipType, SingleTypeRelationships> importResults();
 
     static ImmutableRelationshipImportResult.Builder builder() {
         return ImmutableRelationshipImportResult.builder();
@@ -58,7 +58,7 @@ public interface RelationshipImportResult {
 
         topologies.forEach((relationshipType, topology) -> relationshipImportResultBuilder.putImportResult(
             relationshipType,
-            SingleTypeRelationshipImportResult.builder()
+            SingleTypeRelationships.builder()
                 .topology(topology)
                 .properties(Optional.ofNullable(properties.get(relationshipType)))
                 .direction(directions.get(relationshipType))
@@ -68,7 +68,7 @@ public interface RelationshipImportResult {
         return relationshipImportResultBuilder.build();
     }
 
-    static RelationshipImportResult of(Map<RelationshipType, SingleTypeRelationshipImportResult> relationshipsByType) {
+    static RelationshipImportResult of(Map<RelationshipType, SingleTypeRelationships> relationshipsByType) {
         return ImmutableRelationshipImportResult.builder().importResults(relationshipsByType).build();
     }
 
@@ -83,7 +83,7 @@ public interface RelationshipImportResult {
      * @return a wrapper type ready to be consumed by a {@link org.neo4j.gds.api.GraphStore}
      */
     static RelationshipImportResult of(Collection<SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext> importContexts) {
-        var builders = new HashMap<RelationshipType, ImmutableSingleTypeRelationshipImportResult.Builder>(importContexts.size());
+        var builders = new HashMap<RelationshipType, ImmutableSingleTypeRelationships.Builder>(importContexts.size());
 
         importContexts.forEach((importContext) -> {
             var adjacencyListsWithProperties = importContext.singleTypeRelationshipImporter().build();
@@ -107,7 +107,7 @@ public interface RelationshipImportResult {
 
             var importResultBuilder = builders.computeIfAbsent(
                 importContext.relationshipType(),
-                relationshipType -> SingleTypeRelationshipImportResult.builder().direction(direction)
+                relationshipType -> SingleTypeRelationships.builder().direction(direction)
             );
 
             if (isInverseRelationship) {

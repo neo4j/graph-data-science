@@ -26,7 +26,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -154,7 +154,7 @@ class CollapsePathTest {
         assertResultGraph(tookGraphStore, relationships, EXPECTED_WITHOUT_LOOPS);
     }
 
-    private void assertResultGraph(GraphStore graphStore, SingleTypeRelationshipImportResult relationships, String expected) {
+    private void assertResultGraph(GraphStore graphStore, SingleTypeRelationships relationships, String expected) {
         graphStore.addRelationshipType(RelationshipType.of("SAME_DRUG"), relationships);
 
         assertGraphEquals(

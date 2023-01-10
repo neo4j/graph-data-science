@@ -23,7 +23,7 @@ import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.config.ElementTypeValidator;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -42,7 +42,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 @GdsCallable(name = "gds.beta.graph.relationships.toUndirected", executionMode = ExecutionMode.MUTATE_RELATIONSHIP, description = ToUndirectedSpec.DESCRIPTION)
-public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeRelationshipImportResult, ToUndirectedConfig, Stream<ToUndirectedSpec.MutateResult>, ToUndirectedAlgorithmFactory> {
+public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeRelationships, ToUndirectedConfig, Stream<ToUndirectedSpec.MutateResult>, ToUndirectedAlgorithmFactory> {
 
     public static final String DESCRIPTION = "The ToUndirected procedure converts directed relationships to undirected relationships";
 
@@ -62,19 +62,19 @@ public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeR
     }
 
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<ToUndirected, SingleTypeRelationshipImportResult, ToUndirectedConfig> computeResult,
+        ComputationResult<ToUndirected, SingleTypeRelationships, ToUndirectedConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return new MutateResult.Builder().withInputRelationships(computeResult.graph().relationshipCount());
     }
 
     @Override
-    public ComputationResultConsumer<ToUndirected, SingleTypeRelationshipImportResult, ToUndirectedConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<ToUndirected, SingleTypeRelationships, ToUndirectedConfig, Stream<MutateResult>> computationResultConsumer() {
         return new MutateComputationResultConsumer<>(this::resultBuilder) {
             @Override
             protected void updateGraphStore(
                 AbstractResultBuilder<?> resultBuilder,
-                ComputationResult<ToUndirected, SingleTypeRelationshipImportResult, ToUndirectedConfig> computationResult,
+                ComputationResult<ToUndirected, SingleTypeRelationships, ToUndirectedConfig> computationResult,
                 ExecutionContext executionContext
             ) {
                 computationResult.graphStore().addRelationshipType(

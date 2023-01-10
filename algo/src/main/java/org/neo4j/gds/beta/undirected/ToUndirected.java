@@ -30,7 +30,7 @@ import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
@@ -44,7 +44,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class ToUndirected extends Algorithm<SingleTypeRelationshipImportResult> {
+public class ToUndirected extends Algorithm<SingleTypeRelationships> {
     private final GraphStore graphStore;
     private final ToUndirectedConfig config;
     private final ExecutorService executorService;
@@ -63,7 +63,7 @@ public class ToUndirected extends Algorithm<SingleTypeRelationshipImportResult> 
     }
 
     @Override
-    public SingleTypeRelationshipImportResult compute() {
+    public SingleTypeRelationships compute() {
         progressTracker.beginSubTask();
 
         RelationshipType fromRelationshipType = RelationshipType.of(config.relationshipType());

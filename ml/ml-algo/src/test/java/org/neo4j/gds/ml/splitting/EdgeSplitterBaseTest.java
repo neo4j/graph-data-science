@@ -25,7 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.Properties;
 import org.neo4j.gds.api.Topology;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 
 import java.util.Collection;
 
@@ -50,7 +50,7 @@ abstract class EdgeSplitterBaseTest {
         }
     }
 
-    void assertRelSamplingProperties(SingleTypeRelationshipImportResult selectedRels, Graph inputGraph) {
+    void assertRelSamplingProperties(SingleTypeRelationships selectedRels, Graph inputGraph) {
         MutableInt positiveCount = new MutableInt();
         inputGraph.forEachNode(source -> {
             var targetNodeCursor = selectedRels.topology().adjacencyList().adjacencyCursor(source);
@@ -87,7 +87,7 @@ abstract class EdgeSplitterBaseTest {
         });
     }
 
-    void assertRelInGraph(SingleTypeRelationshipImportResult relationships, Graph inputGraph) {
+    void assertRelInGraph(SingleTypeRelationships relationships, Graph inputGraph) {
         inputGraph.forEachNode(source -> {
             var targetNodeCursor = relationships.topology().adjacencyList().adjacencyCursor(source);
             var propertyCursor = relationships

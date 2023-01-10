@@ -48,8 +48,8 @@ import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImmutableImportMetaData;
 import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporterBuilder;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 
 import java.util.Arrays;
@@ -325,7 +325,7 @@ public final class GraphFactory {
      * If a relationship property is present, the default relationship property key {@code "property"}
      * will be used.
      */
-    public static HugeGraph create(IdMap idMap, SingleTypeRelationshipImportResult relationships) {
+    public static HugeGraph create(IdMap idMap, SingleTypeRelationships relationships) {
         var nodeSchema = NodeSchema.empty();
         idMap.availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
@@ -347,7 +347,7 @@ public final class GraphFactory {
         GraphSchema graphSchema,
         IdMap idMap,
         Map<String, NodePropertyValues> nodeProperties,
-        SingleTypeRelationshipImportResult relationships
+        SingleTypeRelationships relationships
     ) {
         var topology = relationships.topology();
         var inverseTopology = relationships.inverseTopology();

@@ -29,7 +29,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.DeletionResult;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
@@ -227,7 +227,7 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     @Override
     public void addRelationshipType(
         RelationshipType relationshipType,
-        SingleTypeRelationshipImportResult relationships
+        SingleTypeRelationships relationships
     ) {
         graphStore.addRelationshipType(relationshipType, relationships);
     }

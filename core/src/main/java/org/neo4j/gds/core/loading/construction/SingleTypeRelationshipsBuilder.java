@@ -33,8 +33,8 @@ import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.AdjacencyBuffer;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 
 import java.util.Collection;
 import java.util.List;
@@ -122,13 +122,13 @@ abstract class SingleTypeRelationshipsBuilder {
         Optional<LongConsumer> drainCountConsumer
     );
 
-    abstract SingleTypeRelationshipImportResult singleTypeRelationshipImportResult();
+    abstract SingleTypeRelationships singleTypeRelationshipImportResult();
 
     PartialIdMap partialIdMap() {
         return idMap;
     }
 
-    SingleTypeRelationshipImportResult build(
+    SingleTypeRelationships build(
         Optional<AdjacencyCompressor.ValueMapper> mapper,
         Optional<LongConsumer> drainCountConsumer
     ) {
@@ -220,7 +220,7 @@ abstract class SingleTypeRelationshipsBuilder {
         }
 
         @Override
-        SingleTypeRelationshipImportResult singleTypeRelationshipImportResult() {
+        SingleTypeRelationships singleTypeRelationshipImportResult() {
             var adjacencyListsWithProperties = importer.build();
             var adjacencyList = adjacencyListsWithProperties.adjacency();
             var relationshipCount = adjacencyListsWithProperties.relationshipCount();
@@ -231,7 +231,7 @@ abstract class SingleTypeRelationshipsBuilder {
                 .elementCount(relationshipCount)
                 .build();
 
-            var singleRelationshipTypeImportResultBuilder = SingleTypeRelationshipImportResult.builder()
+            var singleRelationshipTypeImportResultBuilder = SingleTypeRelationships.builder()
                 .topology(topology)
                 .direction(this.direction);
 
@@ -295,7 +295,7 @@ abstract class SingleTypeRelationshipsBuilder {
         }
 
         @Override
-        SingleTypeRelationshipImportResult singleTypeRelationshipImportResult() {
+        SingleTypeRelationships singleTypeRelationshipImportResult() {
             var forwardListWithProperties = forwardImporter.build();
             var inverseListWithProperties = inverseImporter.build();
             var forwardAdjacencyList = forwardListWithProperties.adjacency();
@@ -314,7 +314,7 @@ abstract class SingleTypeRelationshipsBuilder {
                 .adjacencyList(inverseAdjacencyList)
                 .build();
 
-            var singleRelationshipTypeImportResultBuilder = SingleTypeRelationshipImportResult.builder()
+            var singleRelationshipTypeImportResultBuilder = SingleTypeRelationships.builder()
                 .topology(forwardTopology)
                 .inverseTopology(inverseTopology)
                 .direction(this.direction);
