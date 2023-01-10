@@ -130,8 +130,42 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
     ) {
         var duringLoadingEstimation = MemoryEstimations.builder("size during loading");
 
-        duringLoadingEstimation.add(
-            formatWithLocale("adjacency loading buffer for '%s'", relationshipType),
+        relationshipEstimationDuringLoading(
+            relationshipType,
+            relationshipProjection,
+            undirected,
+            false,
+            duringLoadingEstimation
+        );
+
+        if (relationshipProjection.indexInverse()) {
+            relationshipEstimationDuringLoading(
+                relationshipType,
+                relationshipProjection,
+                undirected,
+                true,
+                duringLoadingEstimation
+            );
+        }
+
+        return duringLoadingEstimation.build();
+    }
+
+    private static void relationshipEstimationDuringLoading(
+        RelationshipType relationshipType,
+        RelationshipProjection relationshipProjection,
+        boolean undirected,
+        boolean printIndexSuffix,
+        MemoryEstimations.Builder estimationBuilder
+    ) {
+        var indexSuffix = printIndexSuffix ? " (inverse index)" : "";
+
+        estimationBuilder.add(
+            formatWithLocale(
+                "adjacency loading buffer for '%s'%s",
+                relationshipType,
+                indexSuffix
+            ),
             AdjacencyBuffer.memoryEstimation(
                 relationshipType, (int) relationshipProjection.properties().stream().count(),
                 undirected
@@ -139,23 +173,26 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         );
 
         // Offsets and degrees are eagerly initialized and exist next to the fully populated AdjacencyBuffer
-        duringLoadingEstimation.perNode(
-            formatWithLocale("offsets for '%s'", relationshipType),
+        estimationBuilder.perNode(
+            formatWithLocale("offsets for '%s'%s", relationshipType, indexSuffix),
             HugeLongArray::memoryEstimation
         );
-        duringLoadingEstimation.perNode(
-            formatWithLocale("degrees for '%s'", relationshipType),
+        estimationBuilder.perNode(
+            formatWithLocale("degrees for '%s'%s", relationshipType, indexSuffix),
             HugeIntArray::memoryEstimation
         );
         relationshipProjection
             .properties()
             .mappings()
-            .forEach(resolvedPropertyMapping -> duringLoadingEstimation.perNode(
-                formatWithLocale("property '%s.%s'", relationshipType, resolvedPropertyMapping.propertyKey()),
+            .forEach(resolvedPropertyMapping -> estimationBuilder.perNode(
+                formatWithLocale(
+                    "property '%s.%s'%s",
+                    relationshipType,
+                    resolvedPropertyMapping.propertyKey(),
+                    indexSuffix
+                ),
                 HugeLongArray::memoryEstimation
             ));
-
-        return duringLoadingEstimation.build();
     }
 
     private static MemoryEstimation relationshipEstimationAfterLoading(
@@ -164,20 +201,53 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         boolean undirected
     ) {
         var afterLoadingEstimation = MemoryEstimations.builder("size after loading");
+
+        relationshipEstimationAfterLoading(
+            relationshipType,
+            relationshipProjection,
+            undirected,
+            false,
+            afterLoadingEstimation
+        );
+        if (relationshipProjection.indexInverse()) {
+            relationshipEstimationAfterLoading(
+                relationshipType,
+                relationshipProjection,
+                undirected,
+                true,
+                afterLoadingEstimation
+            );
+        }
+
+        return afterLoadingEstimation.build();
+    }
+
+    private static void relationshipEstimationAfterLoading(
+        RelationshipType relationshipType,
+        RelationshipProjection relationshipProjection,
+        boolean undirected,
+        boolean printIndexSuffix,
+        MemoryEstimations.Builder afterLoadingEstimation
+    ) {
+        var indexSuffix = printIndexSuffix ? " (inverse index)" : "";
+
         // adjacency list
         afterLoadingEstimation.add(
-            formatWithLocale("adjacency list for '%s'", relationshipType),
+            formatWithLocale("adjacency list for '%s'%s", relationshipType, indexSuffix),
             AdjacencyListBehavior.adjacencyListEstimation(relationshipType, undirected)
         );
         // all properties per projection
         relationshipProjection.properties().mappings().forEach(resolvedPropertyMapping -> {
             afterLoadingEstimation.add(
-                formatWithLocale("property '%s.%s", relationshipType, resolvedPropertyMapping.propertyKey()),
+                formatWithLocale(
+                    "property '%s.%s%s",
+                    relationshipType,
+                    resolvedPropertyMapping.propertyKey(),
+                    indexSuffix
+                ),
                 AdjacencyListBehavior.adjacencyPropertiesEstimation(relationshipType, undirected)
             );
         });
-
-        return afterLoadingEstimation.build();
     }
 
     @Override
