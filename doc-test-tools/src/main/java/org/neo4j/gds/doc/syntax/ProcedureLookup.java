@@ -19,21 +19,18 @@
  */
 package org.neo4j.gds.doc.syntax;
 
-import org.neo4j.gds.annotation.ReturnType;
+import org.neo4j.gds.annotation.CustomProcedure;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.procedure.UserAggregationFunction;
-import org.neo4j.procedure.UserAggregationResult;
-import org.neo4j.procedure.UserAggregationUpdate;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -42,131 +39,87 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class ProcedureLookup {
 
-    @ValueClass
-    interface AggregationMethods {
-        Method procedure();
-
-        Method update();
-
-        Method result();
-    }
-
-    private final List<Method> procedureMethods;
-    private final List<AggregationMethods> aggregationMethods;
+    private final Map<String, ProcedureSpec> procedureSpecs;
 
     public static ProcedureLookup forPackages(List<String> packages) {
-        var reflections = packages.stream()
-            .map(pkg -> new Reflections(pkg, Scanners.MethodsAnnotated))
-            .collect(Collectors.toList());
+        var procedureSpecs = packages.stream()
+            .map(pkg -> new Reflections(pkg, Scanners.MethodsAnnotated)).flatMap(r -> Stream.concat(
+                r.getMethodsAnnotatedWith(Procedure.class).stream().map(ProcedureLookup::specFromProcedure),
+                r.getMethodsAnnotatedWith(CustomProcedure.class).stream().map(ProcedureLookup::specFromCustomProcedure)
+            )).collect(Collectors.toMap(ProcedureSpec::name, s -> s, (keep, first) -> keep));
 
-        var methods = reflections.stream()
-            .flatMap(r -> r.getMethodsAnnotatedWith(Procedure.class).stream())
-            .collect(Collectors.toList());
-
-        var aggregationMethods = reflections.stream()
-            .flatMap(r -> {
-                return r.getMethodsAnnotatedWith(UserAggregationFunction.class).stream().map(procedure -> {
-                    var aggregatorType = procedure.getReturnType();
-                    var update = Arrays
-                        .stream(aggregatorType.getDeclaredMethods())
-                        .filter(m -> m.isAnnotationPresent(UserAggregationUpdate.class))
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalArgumentException(
-                            "UserAggregationFunction without a UserAggregationUpdate"));
-                    var result = Arrays
-                        .stream(aggregatorType.getDeclaredMethods())
-                        .filter(m -> m.isAnnotationPresent(UserAggregationResult.class))
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalArgumentException(
-                            "UserAggregationFunction without a UserAggregationResult"));
-                    return ImmutableAggregationMethods.of(
-                        procedure, update, result
-                    );
-                });
-            }).collect(Collectors.toList());
-
-
-        return new ProcedureLookup(methods, aggregationMethods);
+        return new ProcedureLookup(procedureSpecs);
     }
 
-    private ProcedureLookup(List<Method> procedureMethods, List<AggregationMethods> aggregationMethods) {
-        this.procedureMethods = procedureMethods;
-        this.aggregationMethods = aggregationMethods;
+    private ProcedureLookup(Map<String, ProcedureSpec> procedureSpecs) {
+        this.procedureSpecs = procedureSpecs;
     }
 
     Class<?> findResultType(String fullyQualifiedProcedureName) {
-        var method = tryFindProcedureMethod(fullyQualifiedProcedureName)
-            .or(() -> tryFindAggregationResultMethod(fullyQualifiedProcedureName))
+        var spec = tryFindProcedureSpec(fullyQualifiedProcedureName)
             .orElseThrow(() -> unknownProcedure(fullyQualifiedProcedureName));
 
-        var returnType = method.getAnnotation(ReturnType.class);
-        if (returnType != null) {
-            return returnType.value();
-        }
-
-        var resultType = (ParameterizedType) method.getGenericReturnType();
-        var actualTypeArgument = resultType.getActualTypeArguments()[0];
-        if (actualTypeArgument instanceof Class) {
-            return (Class<?>) actualTypeArgument;
-        }
-
-        throw new IllegalArgumentException(formatWithLocale(
-            "Can't find result class for %s",
-            fullyQualifiedProcedureName
-        ));
+        return spec.resultType();
     }
 
     List<String> findArgumentNames(String fullyQualifiedProcedureName) {
-        var method = tryFindProcedureMethod(fullyQualifiedProcedureName)
-            .or(() -> tryFindAggregationUpdateMethod(fullyQualifiedProcedureName))
+        var spec = tryFindProcedureSpec(fullyQualifiedProcedureName)
             .orElseThrow(() -> unknownProcedure(fullyQualifiedProcedureName));
 
-        var parameters = method.getParameters();
-        var result = new ArrayList<String>(parameters.length);
-        for (java.lang.reflect.Parameter parameter : parameters) {
-            if (parameter.isAnnotationPresent(Name.class)) {
-                result.add(parameter.getAnnotation(Name.class).value());
-            } else {
-                result.add(parameter.getName());
-            }
+        return spec.argumentNames();
+    }
+
+    private static ProcedureSpec specFromProcedure(Method method) {
+        var name = method.getAnnotation(Procedure.class).name();
+        if (name.isEmpty()) {
+            name = method.getAnnotation(Procedure.class).value();
+        }
+        if (name.isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Procedure %s.%s is missing a name.",
+                method.getDeclaringClass().getName(),
+                method.getName()
+            ));
         }
 
-        return result;
+        var resultType = method.getGenericReturnType();
+        if (resultType != void.class) {
+            if (!(resultType instanceof ParameterizedType)) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Procedure %s.%s should return a Stream<T> where T is the actual result type.",
+                    method.getDeclaringClass().getName(),
+                    method.getName()
+                ));
+            }
+            var actualResultType = ((ParameterizedType) resultType).getActualTypeArguments()[0];
+            if (!(actualResultType instanceof Class)) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Can't find result class for %s",
+                    name
+                ));
+            }
+            resultType = ((Class<?>) actualResultType);
+        }
+
+        return ImmutableProcedureSpec.of(name, (Class<?>) resultType, parameterNames(method));
     }
 
-    private Optional<Method> tryFindProcedureMethod(String fullyQualifiedProcedureName) {
-        return procedureMethods
-            .stream()
-            .filter(method -> {
-                var annotation = method.getAnnotation(Procedure.class);
-                return annotation.name().equals(fullyQualifiedProcedureName) || annotation
-                    .value()
-                    .equals(fullyQualifiedProcedureName);
-            })
-            .findFirst();
+    private static ProcedureSpec specFromCustomProcedure(Method method) {
+        var name = method.getAnnotation(CustomProcedure.class).value();
+        var resultType = method.getReturnType();
+        return ImmutableProcedureSpec.of(name, resultType, parameterNames(method));
     }
 
-    private Optional<Method> tryFindAggregationUpdateMethod(String fullyQualifiedProcedureName) {
-        return findAggregations(fullyQualifiedProcedureName)
-            .map(AggregationMethods::update)
-            .findFirst();
+    private static List<String> parameterNames(Method method) {
+        return Arrays.stream(method.getParameters())
+            .map(parameter -> parameter.isAnnotationPresent(Name.class)
+                ? parameter.getAnnotation(Name.class).value()
+                : parameter.getName())
+            .collect(Collectors.toList());
     }
 
-    private Optional<Method> tryFindAggregationResultMethod(String fullyQualifiedProcedureName) {
-        return findAggregations(fullyQualifiedProcedureName)
-            .map(AggregationMethods::result)
-            .findFirst();
-    }
-
-    private Stream<AggregationMethods> findAggregations(String fullyQualifiedProcedureName) {
-        return aggregationMethods
-            .stream()
-            .filter(aggregation -> {
-                var annotation = aggregation.procedure().getAnnotation(UserAggregationFunction.class);
-                return annotation.name().equals(fullyQualifiedProcedureName) || annotation
-                    .value()
-                    .equals(fullyQualifiedProcedureName);
-            });
+    private Optional<ProcedureSpec> tryFindProcedureSpec(String fullyQualifiedProcedureName) {
+        return Optional.ofNullable(this.procedureSpecs.get(fullyQualifiedProcedureName));
     }
 
     private IllegalArgumentException unknownProcedure(String fullyQualifiedProcedureName) {
@@ -174,5 +127,15 @@ final class ProcedureLookup {
             "Unknown procedure: `%s`",
             fullyQualifiedProcedureName
         ));
+    }
+
+    @ValueClass
+    interface ProcedureSpec {
+
+        String name();
+
+        Class<?> resultType();
+
+        List<String> argumentNames();
     }
 }

@@ -39,6 +39,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.catalog.GraphDropProc;
 import org.neo4j.gds.catalog.GraphListProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.RandomGraphTestCase;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -46,6 +47,7 @@ import org.neo4j.gds.wcc.WccStreamProc;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
+import org.neo4j.kernel.api.procedure.GlobalProcedures;
 
 import java.util.List;
 import java.util.Map;
@@ -83,7 +85,8 @@ class CypherAggregationTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerAggregationFunctions(CypherAggregation.class);
+        var procedures = GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class);
+        procedures.register(Neo4jProxy.callableUserAggregationFunction(CypherAggregation.newInstance()), true);
         registerProcedures(GraphDropProc.class, GraphListProc.class, WccStreamProc.class);
     }
 
@@ -723,7 +726,7 @@ class CypherAggregationTest extends BaseProcTest {
             (Result result) -> result.next().get("config")
         );
 
-        var config = CypherAggregation.GraphProjectFromCypherAggregationConfig.of("", "g", configMap);
+        var config = GraphProjectFromCypherAggregationConfig.of("", "g", configMap);
 
         assertThat(config.readConcurrency()).isEqualTo(2);
     }
