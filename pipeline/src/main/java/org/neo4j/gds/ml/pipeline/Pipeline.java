@@ -38,6 +38,13 @@ public interface Pipeline<FEATURE_STEP extends FeatureStep> extends ToMapConvert
 
     List<FEATURE_STEP> featureSteps();
 
+    default List<String> featureProperties() {
+        return featureSteps()
+            .stream()
+            .flatMap(step -> step.inputNodeProperties().stream())
+            .collect(Collectors.toList());
+    }
+
     default void validateBeforeExecution(GraphStore graphStore, Collection<NodeLabel> nodeLabels) {
         Set<String> invalidProperties = featurePropertiesMissingFromGraph(graphStore, nodeLabels);
 

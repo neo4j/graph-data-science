@@ -24,7 +24,6 @@ import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public abstract class NodePropertyTrainingPipeline extends TrainingPipeline<NodeFeatureStep> {
 
@@ -56,13 +55,6 @@ public abstract class NodePropertyTrainingPipeline extends TrainingPipeline<Node
 
     public NodePropertyPredictionSplitConfig splitConfig() {
         return splitConfig;
-    }
-
-    public List<String> featureProperties() {
-        return featureSteps()
-            .stream()
-            .flatMap(step -> step.inputNodeProperties().stream())
-            .collect(Collectors.toList());
     }
 
     public abstract boolean requireEagerFeatures();

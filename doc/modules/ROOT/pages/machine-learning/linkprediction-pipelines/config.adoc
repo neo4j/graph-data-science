@@ -168,7 +168,7 @@ The supported methods for obtaining features are described xref:machine-learning
 
 [.pipeline-add-feature-syntax]
 --
-.Adding a link feature to a pipeline syntax
+.Adding a link feature to a pipeline
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.addFeature(

@@ -93,10 +93,11 @@ The `modelInfo` return field has the following algorithm-specific subfields:
 .Model info fields
 [opts="header",cols="1,1,6"]
 |===
-| Name            | Type  | Description
-| bestParameters  | Map   | The model parameters which performed best on average on validation folds according to the primary metric.
-| metrics         | Map   | Map from metric description to evaluated metrics for the winning model over the subsets of the data, see below.
-| pipeline        | Map   | Steps to produce input features for the pipeline model.
+| Name              | Type           | Description
+| bestParameters    | Map            | The model parameters which performed best on average on validation folds according to the primary metric.
+| metrics           | Map            | Map from metric description to evaluated metrics for the winning model over the subsets of the data, see below.
+| nodePropertySteps | List of Map    | Algorithms that produce node properties within the pipeline.
+| featureProperties | List of String | Node properties selected as input features to the pipeline model.
 |===
 
 The structure of `modelInfo` is:
@@ -104,18 +105,19 @@ The structure of `modelInfo` is:
 [listing]
 ----
 {
-    bestParameters: Map,        // <1>
-    pipeline: Map               // <2>
-    metrics: {                  // <3>
-        <METRIC_NAME>: {        // <4>
-            test: Float,        // <5>
-            outerTrain: Float,  // <6>
-            train: {            // <7>
+    bestParameters: Map,                 // <1>
+    nodePropertySteps: List of Map,
+    featureProperties: List of String,
+    metrics: {                           // <2>
+        <METRIC_NAME>: {                 // <3>
+            test: Float,                 // <4>
+            outerTrain: Float,           // <5>
+            train: {                     // <6>
                 avg: Float,
                 max: Float,
                 min: Float,
             },
-            validation: {       // <8>
+            validation: {                // <7>
                 avg: Float,
                 max: Float,
                 min: Float,
@@ -126,13 +128,12 @@ The structure of `modelInfo` is:
 }
 ----
 <1> The best scoring model candidate configuration.
-<2> The pipeline used to generate and select the node features
-<3> The `metrics` map contains an entry for each metric description, and the corresponding results for that metric.
-<4> A metric name specified in the configuration of the procedure, e.g., `F1_MACRO` or `RECALL(class=4)`.
-<5> Numeric value for the evaluation of the winning model on the test set.
-<6> Numeric value for the evaluation of the winning model on the outer train set.
-<7> The `train` entry summarizes the metric results over the `train` set.
-<8> The `validation` entry summarizes the metric results over the `validation` set.
+<2> The `metrics` map contains an entry for each metric description, and the corresponding results for that metric.
+<3> A metric name specified in the configuration of the procedure, e.g., `F1_MACRO` or `RECALL(class=4)`.
+<4> Numeric value for the evaluation of the winning model on the test set.
+<5> Numeric value for the evaluation of the winning model on the outer train set.
+<6> The `train` entry summarizes the metric results over the `train` set.
+<7> The `validation` entry summarizes the metric results over the `validation` set.
 --
 
 include::partial$/machine-learning/pipeline-training-logging-note.adoc[]
