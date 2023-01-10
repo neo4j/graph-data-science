@@ -679,6 +679,28 @@ class CypherAggregationTest extends BaseProcTest {
     }
 
     @Test
+    void writeOperationsBlockedWhenPassingArbitraryIdsAsInput() {
+        runQuery(
+            "UNWIND [ [0, 1], [0, 2] ] as d " +
+            "RETURN gds.alpha.graph.project('g', d[0], d[1])"
+        );
+
+        var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
+        assertThat(graphStore.capabilities().canWriteToDatabase()).isFalse();
+    }
+
+    @Test
+    void writeOperationsAllowedWhenPassingArbitraryIdsAsInput() {
+        runQuery(
+            "MATCH (s:A)-[:REL]->(t:A) " +
+            "RETURN gds.alpha.graph.project('g', s, t)"
+        );
+
+        var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
+        assertThat(graphStore.capabilities().canWriteToDatabase()).isTrue();
+    }
+
+    @Test
     void testPipelinePseudoAnonymous() {
         assertCypherResult(
             "MATCH (s:A)-[:REL]->(t:A) " +
