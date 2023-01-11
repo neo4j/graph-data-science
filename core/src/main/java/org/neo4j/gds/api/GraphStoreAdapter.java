@@ -252,6 +252,14 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     }
 
     @Override
+    public void addInverseIndex(
+        RelationshipType relationshipType,
+        SingleTypeRelationshipImportResult indexedRelationships
+    ) {
+        graphStore.addInverseIndex(relationshipType, indexedRelationships);
+    }
+
+    @Override
     public DeletionResult deleteRelationships(RelationshipType relationshipType) {
         return graphStore.deleteRelationships(relationshipType);
     }
