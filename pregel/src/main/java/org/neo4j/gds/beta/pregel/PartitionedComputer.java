@@ -103,7 +103,7 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
     @NotNull
     private List<PartitionedComputeStep<CONFIG, ?, ?, ?>> createComputeSteps(HugeAtomicBitSet voteBits) {
         Function<Partition, PartitionedComputeStep<CONFIG, ?, ?, ?>> partitionFunction =
-            computation instanceof PregelComputation<CONFIG>
+            computation instanceof PregelComputation
                 ? (partition) -> createComputeStep(graph.concurrentCopy(), voteBits, partition)
                 : (partition) -> createBidirectionalComputeSteps(graph.concurrentCopy(), voteBits, partition);
 

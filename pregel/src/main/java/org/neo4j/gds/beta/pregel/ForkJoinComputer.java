@@ -66,7 +66,7 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
         MutableInt mutableIteration = new MutableInt(iteration);
         Partition partition = Partition.of(0, graph.nodeCount());
 
-        this.rootTask = computation instanceof PregelComputation<CONFIG>
+        this.rootTask = computation instanceof PregelComputation
             ? createComputeStep(mutableIteration, sentMessage, partition)
             : createBidirectionalComputeSteps(mutableIteration, sentMessage, partition);
     }
