@@ -65,6 +65,7 @@ public final class GraphProjectConfigBuilders {
         Optional<JobId> jobId,
         Optional<Orientation> globalProjection,
         Optional<Aggregation> globalAggregation,
+        Optional<Boolean> gloabelIndexInverse,
         Optional<Boolean> validateRelationships
     ) {
         // Node projections
@@ -81,10 +82,11 @@ public final class GraphProjectConfigBuilders {
         Map<String, RelationshipProjection> tempRP = new LinkedHashMap<>();
         Orientation orientation = globalProjection.orElse(Orientation.NATURAL);
         Aggregation aggregation = globalAggregation.orElse(Aggregation.DEFAULT);
+        boolean indexInverse = gloabelIndexInverse.orElse(false);
 
         relationshipTypes.forEach(relType -> tempRP.put(
             relType,
-            RelationshipProjection.of(relType, orientation, aggregation)
+            RelationshipProjection.of(relType, orientation, aggregation, indexInverse)
         ));
         relationshipProjections.forEach(rp -> tempRP.put(rp.type(), rp));
         relationshipProjectionsWithIdentifier.forEach(tempRP::put);
@@ -94,6 +96,7 @@ public final class GraphProjectConfigBuilders {
                 .type("*")
                 .orientation(orientation)
                 .aggregation(aggregation)
+                .indexInverse(indexInverse)
                 .build());
         }
 
