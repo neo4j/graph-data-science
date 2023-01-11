@@ -178,7 +178,7 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
         double applyRelationshipWeight(double nodeValue, double relationshipWeight);
     }
 
-    public static final class BidirectionalComputeContext<CONFIG extends PregelConfig> extends ComputeContext<CONFIG> {
+    public static final class BidirectionalComputeContext<CONFIG extends PregelConfig> extends ComputeContext<CONFIG> implements BidirectionalNodeCentricContext {
 
         private final SendMessagesIncomingFunction sendMessagesIncomingFunction;
 
@@ -229,6 +229,11 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
                 sendTo(targetNodeId, relationshipWeightApplier.applyRelationshipWeight(message, weight));
                 return true;
             });
+        }
+
+        @Override
+        public Graph graph() {
+            return graph;
         }
 
         @FunctionalInterface

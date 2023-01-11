@@ -33,7 +33,7 @@ import java.util.Set;
  * properties from the input graph which can be used to set initial node values
  * for the Pregel computation.
  */
-public final class InitContext<CONFIG extends PregelConfig> extends NodeCentricContext<CONFIG> {
+public class InitContext<CONFIG extends PregelConfig> extends NodeCentricContext<CONFIG> {
 
     public InitContext(
         Graph graph,
@@ -60,5 +60,22 @@ public final class InitContext<CONFIG extends PregelConfig> extends NodeCentricC
      */
     public NodePropertyValues nodeProperties(String key) {
         return this.graph.nodeProperties(key);
+    }
+
+    public static final class BidirectionalInitContext<CONFIG extends PregelConfig> extends InitContext<CONFIG> implements BidirectionalNodeCentricContext {
+
+        public BidirectionalInitContext(
+            Graph graph,
+            CONFIG config,
+            NodeValue nodeValue,
+            ProgressTracker progressTracker
+        ) {
+            super(graph, config, nodeValue, progressTracker);
+        }
+
+        @Override
+        public Graph graph() {
+            return graph;
+        }
     }
 }

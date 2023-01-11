@@ -25,11 +25,16 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator, COMPUTE_CONTEXT extends ComputeContext<CONFIG>> {
+public interface ComputeStep<
+    CONFIG extends PregelConfig,
+    ITERATOR extends Messages.MessageIterator,
+    INIT_CONTEXT extends InitContext<CONFIG>,
+    COMPUTE_CONTEXT extends ComputeContext<CONFIG>
+    > {
 
     HugeAtomicBitSet voteBits();
 
-    BasePregelComputation<CONFIG> computation();
+    InitFunction<CONFIG, INIT_CONTEXT> initFunction();
 
     ComputeFunction<CONFIG, COMPUTE_CONTEXT> computeFunction();
 
@@ -39,7 +44,7 @@ public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messa
 
     Partition nodeBatch();
 
-    InitContext<CONFIG> initContext();
+    INIT_CONTEXT initContext();
 
     COMPUTE_CONTEXT computeContext();
 
@@ -51,7 +56,6 @@ public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messa
         var messages = new Messages(messageIterator);
 
         var nodeBatch = nodeBatch();
-        var computation = computation();
         var initContext = initContext();
         var computeContext = computeContext();
         var voteBits = voteBits();
@@ -59,7 +63,7 @@ public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messa
         nodeBatch.consume(nodeId -> {
             if (computeContext.isInitialSuperstep()) {
                 initContext.setNodeId(nodeId);
-                computation.init(initContext);
+                initFunction().init(initContext);
             }
 
             messenger.initMessageIterator(messageIterator, nodeId, computeContext.isInitialSuperstep());
@@ -71,6 +75,11 @@ public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messa
             }
         });
         progressTracker().logProgress(nodeBatch.nodeCount());
+    }
+
+    @FunctionalInterface
+    interface InitFunction<CONFIG extends PregelConfig, INIT_CONTEXT extends InitContext<CONFIG>> {
+        void init(INIT_CONTEXT computeContext);
     }
 
     @FunctionalInterface

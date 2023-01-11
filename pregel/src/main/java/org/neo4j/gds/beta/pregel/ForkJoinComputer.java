@@ -23,7 +23,9 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
+import org.neo4j.gds.beta.pregel.context.ComputeContext.BidirectionalComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext;
+import org.neo4j.gds.beta.pregel.context.InitContext.BidirectionalInitContext;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -37,7 +39,7 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
     private final ForkJoinPool forkJoinPool;
 
     private AtomicBoolean sentMessage;
-    private ForkJoinComputeStep<CONFIG, ?, ?> rootTask;
+    private ForkJoinComputeStep<CONFIG, ?, ?, ?> rootTask;
 
     ForkJoinComputer(
         Graph graph,
@@ -86,12 +88,19 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
     }
 
     @NotNull
-    private ForkJoinComputeStep<CONFIG, ?, ComputeContext<CONFIG>> createComputeStep(
+    private ForkJoinComputeStep<CONFIG, ?, InitContext<CONFIG>, ComputeContext<CONFIG>> createComputeStep(
         MutableInt iteration,
         AtomicBoolean hasSentMessages,
         Partition partition
     ) {
-        Supplier<ComputeContext<CONFIG>>  computeContext = () -> new ComputeContext<>(
+        Supplier<InitContext<CONFIG>> initContext = () -> new InitContext<>(
+            graph.concurrentCopy(),
+            config,
+            nodeValues,
+            progressTracker
+        );
+
+        Supplier<ComputeContext<CONFIG>> computeContext = () -> new ComputeContext<>(
             graph.concurrentCopy(),
             config,
             ((PregelComputation<CONFIG>) computation)::applyRelationshipWeight,
@@ -104,11 +113,10 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
         );
 
         return new ForkJoinComputeStep<>(
-            computation,
+            ((PregelComputation<CONFIG>) computation)::init,
             ((PregelComputation<CONFIG>) computation)::compute,
+            initContext,
             computeContext,
-            new InitContext<>(graph, config, nodeValues, progressTracker),
-            config,
             iteration,
             partition,
             nodeValues,
@@ -121,12 +129,19 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
     }
 
     @NotNull
-    private ForkJoinComputeStep<CONFIG, ?, ComputeContext.BidirectionalComputeContext<CONFIG>> createBidirectionalComputeSteps(
+    private ForkJoinComputeStep<CONFIG, ?, BidirectionalInitContext<CONFIG>, BidirectionalComputeContext<CONFIG>> createBidirectionalComputeSteps(
         MutableInt iteration,
         AtomicBoolean hasSentMessages,
         Partition partition
     ) {
-        Supplier<ComputeContext.BidirectionalComputeContext<CONFIG>> computeContext = () -> new ComputeContext.BidirectionalComputeContext<>(
+        Supplier<BidirectionalInitContext<CONFIG>> initContext = () -> new BidirectionalInitContext<>(
+            graph.concurrentCopy(),
+            config,
+            nodeValues,
+            progressTracker
+        );
+
+        Supplier<BidirectionalComputeContext<CONFIG>> computeContext = () -> new BidirectionalComputeContext<>(
             graph.concurrentCopy(),
             config,
             ((BidirectionalPregelComputation<CONFIG>) computation)::applyRelationshipWeight,
@@ -139,11 +154,10 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
         );
 
         return new ForkJoinComputeStep<>(
-            computation,
+            ((BidirectionalPregelComputation<CONFIG>) computation)::init,
             ((BidirectionalPregelComputation<CONFIG>) computation)::compute,
+            initContext,
             computeContext,
-            new InitContext<>(graph, config, nodeValues, progressTracker),
-            config,
             iteration,
             partition,
             nodeValues,

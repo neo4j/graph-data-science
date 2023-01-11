@@ -182,6 +182,58 @@ public abstract class NodeCentricContext<CONFIG extends PregelConfig> extends Pr
             return true;
         });
     }
+
+    interface BidirectionalNodeCentricContext {
+        Graph graph();
+
+        long nodeId();
+
+        default int incommingDegree() {
+            return graph().degreeInverse(nodeId());
+        }
+
+        /**
+         * Calls the consumer for each incoming neighbor of the currently processed node.
+         */
+        default void forEachIncomingNeighbor(LongConsumer targetConsumer) {
+            graph().forEachInverseRelationship(nodeId(), (ignored, targetNodeId) -> {
+                targetConsumer.accept(targetNodeId);
+                return true;
+            });
+        }
+
+        /**
+         * Calls the consumer for each incoming neighbor of the given node.
+         */
+        default void forEachIncomingNeighbor(long nodeId, LongConsumer targetConsumer) {
+            graph().forEachInverseRelationship(nodeId, (ignored, targetNodeId) -> {
+                targetConsumer.accept(targetNodeId);
+                return true;
+            });
+        }
+
+        /**
+         * Calls the consumer once for each incoming neighbor of the currently processed node.
+         */
+        default void forEachDistinctIncomingNeighbor(LongConsumer targetConsumer) {
+            forEachDistinctIncomingNeighbor(nodeId(), targetConsumer);
+        }
+
+        /**
+         * Calls the consumer once for each incoming neighbor of the given node.
+         */
+        default void forEachDistinctIncomingNeighbor(long nodeId, LongConsumer targetConsumer) {
+            var prevTarget = new MutableLong(-1);
+            graph().forEachInverseRelationship(nodeId, (ignored, targetNodeId) -> {
+                if (prevTarget.longValue() != targetNodeId) {
+                    targetConsumer.accept(targetNodeId);
+                    prevTarget.setValue(targetNodeId);
+                }
+                return true;
+            });
+        }
+
+    }
 }
 
 

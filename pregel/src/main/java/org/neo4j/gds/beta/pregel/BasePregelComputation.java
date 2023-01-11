@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.beta.pregel;
 
-import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 
 import java.util.Optional;
@@ -45,16 +44,6 @@ public interface BasePregelComputation<C extends PregelConfig> {
      * @see PregelSchema
      */
     PregelSchema schema(C config);
-
-    /**
-     * The init method is called in the beginning of the first
-     * superstep (iteration) of the Pregel computation and allows
-     * initializing node values.
-     * <br>
-     * The context parameter provides access to node properties of
-     * the in-memory graph and the algorithm configuration.
-     */
-    default void init(InitContext<C> context) {}
 
     /**
      * The masterCompute method is called exactly once after every superstep.

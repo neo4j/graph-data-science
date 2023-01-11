@@ -20,6 +20,7 @@
 package org.neo4j.gds.beta.pregel;
 
 import org.neo4j.gds.beta.pregel.context.ComputeContext.BidirectionalComputeContext;
+import org.neo4j.gds.beta.pregel.context.InitContext.BidirectionalInitContext;
 
 /**
  * Main interface to express user-defined logic using the
@@ -28,10 +29,23 @@ import org.neo4j.gds.beta.pregel.context.ComputeContext.BidirectionalComputeCont
  * other nodes, change its state and send messages to other
  * nodes in each iteration (superstep).
  *
+ * In contrast to {{@link org.neo4j.gds.beta.pregel.PregelComputation}} this interface ensures and grants access
+ * to the inverse index of each configured relationship type.
+ *
  * @see Pregel
  * @see <a href="https://kowshik.github.io/JPregel/pregel_paper.pdf">Paper</a>
  */
 public interface BidirectionalPregelComputation<C extends PregelConfig> extends BasePregelComputation<C> {
+
+    /**
+     * The init method is called in the beginning of the first
+     * superstep (iteration) of the Pregel computation and allows
+     * initializing node values.
+     * <br>
+     * The context parameter provides access to node properties of
+     * the in-memory graph and the algorithm configuration.
+     */
+    default void init(BidirectionalInitContext<C> context) {}
 
     /**
      * The compute method is called individually for each node
@@ -42,7 +56,7 @@ public interface BidirectionalPregelComputation<C extends PregelConfig> extends 
      * communicate with other nodes via messages. In each super-
      * step, a node receives messages via the input parameter
      * and can send new messages via the context parameter.
-     * Messages can be sent to neighbor nodes or any node if the
+     * Messages can be sent to neighbor nodes, outgoing and incoming, or any node if the
      * identifier is known.
      */
     void compute(BidirectionalComputeContext<C> context, Messages messages);

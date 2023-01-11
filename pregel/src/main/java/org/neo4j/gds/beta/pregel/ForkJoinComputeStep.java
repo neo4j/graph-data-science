@@ -32,33 +32,32 @@ import java.util.concurrent.CountedCompleter;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator, COMPUTE_CONTEXT extends ComputeContext<CONFIG>>
-    extends CountedCompleter<Void>
-    implements ComputeStep<CONFIG, ITERATOR, COMPUTE_CONTEXT> {
+public final class ForkJoinComputeStep<
+    CONFIG extends PregelConfig,
+    ITERATOR extends Messages.MessageIterator,
+    INIT_CONTEXT extends InitContext<CONFIG>,
+    COMPUTE_CONTEXT extends ComputeContext<CONFIG>
+    > extends CountedCompleter<Void> implements ComputeStep<CONFIG, ITERATOR, INIT_CONTEXT, COMPUTE_CONTEXT> {
 
     private static final int SEQUENTIAL_THRESHOLD = 1000;
 
+    private final InitFunction<CONFIG, INIT_CONTEXT> initFunction;
     private final ComputeFunction<CONFIG, COMPUTE_CONTEXT> computeFunction;
-    private final CONFIG config;
-
-    private final InitContext<CONFIG> initContext;
+    private final Supplier<INIT_CONTEXT> initContext;
     private final Supplier<COMPUTE_CONTEXT> computeContext;
     private final NodeValue nodeValue;
     private final HugeAtomicBitSet voteBits;
     private final Messenger<ITERATOR> messenger;
-    private final BasePregelComputation<CONFIG> computation;
-
     private Partition nodeBatch;
     private final MutableInt iteration;
     private final AtomicBoolean hasSentMessage;
     private final ProgressTracker progressTracker;
 
     ForkJoinComputeStep(
-        BasePregelComputation<CONFIG> computation,
+        InitFunction<CONFIG, INIT_CONTEXT> initFunction,
         ComputeFunction<CONFIG, COMPUTE_CONTEXT> computeFunction,
+        Supplier<INIT_CONTEXT> initContext,
         Supplier<COMPUTE_CONTEXT> computeContext,
-        InitContext<CONFIG> initContext,
-        CONFIG config,
         MutableInt iteration,
         Partition nodeBatch,
         NodeValue nodeValue,
@@ -69,18 +68,17 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
         ProgressTracker progressTracker
     ) {
         super(parent);
+        this.initFunction = initFunction;
         this.computeFunction = computeFunction;
-        this.config = config;
+        this.initContext = initContext;
+        this.computeContext = computeContext;
         this.iteration = iteration;
-        this.computation = computation;
         this.voteBits = voteBits;
         this.nodeBatch = nodeBatch;
         this.nodeValue = nodeValue;
         this.messenger = messenger;
-        this.computeContext = computeContext;
         this.hasSentMessage = sentMessage;
         this.progressTracker = progressTracker;
-        this.initContext = initContext;
     }
 
     @Override
@@ -99,11 +97,10 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
             var leftBatch = Partition.of(startNode, pivot);
 
             var leftTask = new ForkJoinComputeStep<>(
-                computation,
+                initFunction,
                 computeFunction,
-                computeContext,
                 initContext,
-                config,
+                computeContext,
                 iteration,
                 leftBatch,
                 nodeValue,
@@ -132,8 +129,8 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
     }
 
     @Override
-    public BasePregelComputation<CONFIG> computation() {
-        return computation;
+    public InitFunction<CONFIG, INIT_CONTEXT> initFunction() {
+        return initFunction;
     }
 
     @Override
@@ -157,8 +154,8 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
     }
 
     @Override
-    public InitContext<CONFIG> initContext() {
-        return initContext;
+    public INIT_CONTEXT initContext() {
+        return initContext.get();
     }
 
     @Override
