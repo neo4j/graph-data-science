@@ -75,4 +75,59 @@ include::partial$/algorithms/common-configuration/common-configuration-jobid-con
 The current result implementation contains only the node IDs, streamed in a topological order.
 ====
 
+== Examples
 
+:algorithm-name: Topological Sort
+:graph-description: supply chain
+:image-file: dependencies.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+       (n0:Part {name: 'Cement'}),
+       (n1:Part {name: 'Base'}),
+       (n2:Part {name: 'Skeleton'}),
+       (n3:Part {name: 'Steel'}),
+       (n4:Part {name: 'Support'}),
+       (n5:Part {name: 'Door'}),
+       (n6:Part {name: 'House'}),
+
+       (n0)-[:REQUIRED]->(n1),
+       (n1)-[:REQUIRED]->(n2),
+       (n3)-[:REQUIRED]->(n4),
+       (n4)-[:REQUIRED]->(n2),
+       (n2)-[:REQUIRED]->(n5),
+       (n5)-[:REQUIRED]->(n6)
+----
+
+This graph describes a simplified supply chain of building a house. Each part of the house cannot be ready before its dependencies are ready. For example, we cannot build support before we get the steel, the skeleton is not ready until  both support and base are ready, and the house in the bottom is only ready when all the other things are done.
+
+=== Stream
+The stream procedure streams the nodes in the graph ordered by a valid topological order. The nodes can then be processed one by one, guaranteeing that each node is processed only after its dependencies were processed.
+
+For more details on the stream mode in general, see xref:common-usage/running-algos.adoc#running-algos-stream[Stream].
+
+[role=query-example]
+--
+.The following will run the Topological Sort algorithm in `stream` mode.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.topologicalSort.stream("construction") YIELD nodeId RETURN gds.util.asNode(nodeId).name
+----
+We use the utility function asNode to return the name of node instead of its ID to make results more readable.
+
+.Results
+[opts="header"]
+|===
+| gds.util.asNode(nodeId).name
+|"Steel"
+|"Cement"
+|"Support"
+|"Base"
+|"Skeleton"
+|"Door"
+|"House"
+|===
+--
