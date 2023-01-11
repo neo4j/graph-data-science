@@ -19,50 +19,60 @@
  */
 package org.neo4j.gds.beta.pregel;
 
-import org.neo4j.gds.api.Graph;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public final class PartitionedComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator>
-    implements Runnable, ComputeStep<CONFIG, ITERATOR> {
+import java.util.concurrent.atomic.AtomicBoolean;
 
-    private final InitContext<CONFIG> initContext;
-    private final ComputeContext<CONFIG> computeContext;
+public final class PartitionedComputeStep<
+    CONFIG extends PregelConfig,
+    ITERATOR extends Messages.MessageIterator,
+    INIT_CONTEXT extends InitContext<CONFIG>,
+    COMPUTE_CONTEXT extends ComputeContext<CONFIG>
+    > implements Runnable, ComputeStep<CONFIG, ITERATOR, INIT_CONTEXT, COMPUTE_CONTEXT> {
+
+    private final InitFunction<CONFIG, INIT_CONTEXT> initFunction;
+    private final ComputeFunction<CONFIG, COMPUTE_CONTEXT> computeFunction;
+    private final INIT_CONTEXT initContext;
+    private final COMPUTE_CONTEXT computeContext;
     private final ProgressTracker progressTracker;
     private final Partition nodeBatch;
     private final HugeAtomicBitSet voteBits;
     private final Messenger<ITERATOR> messenger;
-    private final PregelComputation<CONFIG> computation;
 
-    private final Graph graph;
-    private int iteration;
+    private final MutableInt iteration;
+    private final AtomicBoolean hasSentMessage;
     private final NodeValue nodeValue;
-    private boolean hasSentMessage;
 
     PartitionedComputeStep(
-        Graph graph,
-        PregelComputation<CONFIG> computation,
-        CONFIG config,
-        int iteration,
+        InitFunction<CONFIG, INIT_CONTEXT> initFunction,
+        ComputeFunction<CONFIG, COMPUTE_CONTEXT> computeFunction,
+        INIT_CONTEXT initContext,
+        COMPUTE_CONTEXT computeContext,
         Partition nodeBatch,
         NodeValue nodeValue,
         Messenger<ITERATOR> messenger,
         HugeAtomicBitSet voteBits,
+        MutableInt iteration,
+        AtomicBoolean hasSentMessage,
         ProgressTracker progressTracker
     ) {
-        this.graph = graph;
-        this.iteration = iteration;
+        this.initFunction = initFunction;
+        this.computeFunction = computeFunction;
+        this.initContext = initContext;
+        this.computeContext = computeContext;
         this.nodeValue = nodeValue;
-        this.computation = computation;
         this.voteBits = voteBits;
         this.nodeBatch = nodeBatch;
         this.messenger = messenger;
-        this.computeContext = new ComputeContext<>(this, config, progressTracker);
         this.progressTracker = progressTracker;
-        this.initContext = new InitContext<>(this, config, graph, progressTracker);
+        this.iteration = iteration;
+        this.hasSentMessage = hasSentMessage;
+
     }
 
     @Override
@@ -71,18 +81,18 @@ public final class PartitionedComputeStep<CONFIG extends PregelConfig, ITERATOR 
     }
 
     @Override
-    public Graph graph() {
-        return graph;
-    }
-
-    @Override
     public HugeAtomicBitSet voteBits() {
         return voteBits;
     }
 
     @Override
-    public PregelComputation<CONFIG> computation() {
-        return computation;
+    public InitFunction<CONFIG, INIT_CONTEXT> initFunction() {
+        return initFunction;
+    }
+
+    @Override
+    public ComputeFunction<CONFIG, COMPUTE_CONTEXT> computeFunction() {
+        return computeFunction;
     }
 
     @Override
@@ -101,12 +111,12 @@ public final class PartitionedComputeStep<CONFIG extends PregelConfig, ITERATOR 
     }
 
     @Override
-    public InitContext<CONFIG> initContext() {
+    public INIT_CONTEXT initContext() {
         return initContext;
     }
 
     @Override
-    public ComputeContext<CONFIG> computeContext() {
+    public COMPUTE_CONTEXT computeContext() {
         return computeContext;
     }
 
@@ -115,23 +125,12 @@ public final class PartitionedComputeStep<CONFIG extends PregelConfig, ITERATOR 
         return progressTracker;
     }
 
-    @Override
-    public int iteration() {
-        return iteration;
-    }
-
-    @Override
-    public void sendTo(long targetNodeId, double message) {
-        messenger.sendTo(targetNodeId, message);
-        hasSentMessage = true;
-    }
-
     void init(int iteration) {
-        this.iteration = iteration;
-        this.hasSentMessage = false;
+        this.iteration.setValue(iteration);
+        this.hasSentMessage.set(false);
     }
 
     boolean hasSentMessage() {
-        return hasSentMessage;
+        return hasSentMessage.get();
     }
 }

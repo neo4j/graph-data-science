@@ -32,7 +32,7 @@ public final class Messages implements Iterable<Double> {
         return iterator;
     }
 
-    interface MessageIterator extends PrimitiveIterator.OfDouble {
+    public interface MessageIterator extends PrimitiveIterator.OfDouble {
         boolean isEmpty();
     }
 

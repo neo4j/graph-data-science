@@ -19,24 +19,31 @@
  */
 package org.neo4j.gds.beta.pregel;
 
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.beta.pregel.context.ComputeContext;
+import org.neo4j.gds.beta.pregel.context.ComputeContext.BidirectionalComputeContext;
+import org.neo4j.gds.beta.pregel.context.InitContext;
+import org.neo4j.gds.beta.pregel.context.InitContext.BidirectionalInitContext;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelComputer<CONFIG> {
 
     private final ForkJoinPool forkJoinPool;
 
     private AtomicBoolean sentMessage;
-    private ForkJoinComputeStep<CONFIG, ?> rootTask;
+    private ForkJoinComputeStep<CONFIG, ?, ?, ?> rootTask;
 
     ForkJoinComputer(
         Graph graph,
-        PregelComputation<CONFIG> computation,
+        BasePregelComputation<CONFIG> computation,
         CONFIG config,
         NodeValue nodeValues,
         Messenger<?> messenger,
@@ -56,19 +63,12 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
     @Override
     public void initIteration(int iteration) {
         this.sentMessage = new AtomicBoolean(false);
-        this.rootTask = new ForkJoinComputeStep<>(
-            graph,
-            computation,
-            config,
-            iteration,
-            Partition.of(0, graph.nodeCount()),
-            nodeValues,
-            messenger,
-            voteBits,
-            null,
-            sentMessage,
-            progressTracker
-        );
+        MutableInt mutableIteration = new MutableInt(iteration);
+        Partition partition = Partition.of(0, graph.nodeCount());
+
+        this.rootTask = computation instanceof PregelComputation
+            ? createComputeStep(mutableIteration, sentMessage, partition)
+            : createBidirectionalComputeSteps(mutableIteration, sentMessage, partition);
     }
 
     @Override
@@ -85,5 +85,87 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
     void release() {
         forkJoinPool.shutdown();
         computation.close();
+    }
+
+    @NotNull
+    private ForkJoinComputeStep<CONFIG, ?, InitContext<CONFIG>, ComputeContext<CONFIG>> createComputeStep(
+        MutableInt iteration,
+        AtomicBoolean hasSentMessages,
+        Partition partition
+    ) {
+        Supplier<InitContext<CONFIG>> initContext = () -> new InitContext<>(
+            graph.concurrentCopy(),
+            config,
+            nodeValues,
+            progressTracker
+        );
+
+        Supplier<ComputeContext<CONFIG>> computeContext = () -> new ComputeContext<>(
+            graph.concurrentCopy(),
+            config,
+            ((PregelComputation<CONFIG>) computation)::applyRelationshipWeight,
+            nodeValues,
+            messenger,
+            voteBits,
+            iteration,
+            hasSentMessages,
+            progressTracker
+        );
+
+        return new ForkJoinComputeStep<>(
+            ((PregelComputation<CONFIG>) computation)::init,
+            ((PregelComputation<CONFIG>) computation)::compute,
+            initContext,
+            computeContext,
+            iteration,
+            partition,
+            nodeValues,
+            messenger,
+            voteBits,
+            null,
+            hasSentMessages,
+            progressTracker
+        );
+    }
+
+    @NotNull
+    private ForkJoinComputeStep<CONFIG, ?, BidirectionalInitContext<CONFIG>, BidirectionalComputeContext<CONFIG>> createBidirectionalComputeSteps(
+        MutableInt iteration,
+        AtomicBoolean hasSentMessages,
+        Partition partition
+    ) {
+        Supplier<BidirectionalInitContext<CONFIG>> initContext = () -> new BidirectionalInitContext<>(
+            graph.concurrentCopy(),
+            config,
+            nodeValues,
+            progressTracker
+        );
+
+        Supplier<BidirectionalComputeContext<CONFIG>> computeContext = () -> new BidirectionalComputeContext<>(
+            graph.concurrentCopy(),
+            config,
+            ((BidirectionalPregelComputation<CONFIG>) computation)::applyRelationshipWeight,
+            nodeValues,
+            messenger,
+            voteBits,
+            iteration,
+            hasSentMessages,
+            progressTracker
+        );
+
+        return new ForkJoinComputeStep<>(
+            ((BidirectionalPregelComputation<CONFIG>) computation)::init,
+            ((BidirectionalPregelComputation<CONFIG>) computation)::compute,
+            initContext,
+            computeContext,
+            iteration,
+            partition,
+            nodeValues,
+            messenger,
+            voteBits,
+            null,
+            hasSentMessages,
+            progressTracker
+        );
     }
 }

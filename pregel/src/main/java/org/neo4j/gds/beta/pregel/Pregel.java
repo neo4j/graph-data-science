@@ -39,7 +39,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     private final CONFIG config;
 
-    private final PregelComputation<CONFIG> computation;
+    private final BasePregelComputation<CONFIG> computation;
 
     private final Graph graph;
 
@@ -57,7 +57,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
     public static <CONFIG extends PregelConfig> Pregel<CONFIG> create(
         Graph graph,
         CONFIG config,
-        PregelComputation<CONFIG> computation,
+        BasePregelComputation<CONFIG> computation,
         ExecutorService executor,
         ProgressTracker progressTracker
     ) {
@@ -119,7 +119,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
     private Pregel(
         final Graph graph,
         final CONFIG config,
-        final PregelComputation<CONFIG> computation,
+        final BasePregelComputation<CONFIG> computation,
         final NodeValue initialNodeValue,
         final ExecutorService executor,
         final ProgressTracker progressTracker

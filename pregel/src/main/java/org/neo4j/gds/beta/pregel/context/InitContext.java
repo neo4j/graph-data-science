@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.beta.pregel.context;
 
-import org.neo4j.gds.api.properties.nodes.NodePropertyContainer;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.beta.pregel.ComputeStep;
+import org.neo4j.gds.beta.pregel.NodeValue;
 import org.neo4j.gds.beta.pregel.PregelConfig;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -33,17 +33,15 @@ import java.util.Set;
  * properties from the input graph which can be used to set initial node values
  * for the Pregel computation.
  */
-public final class InitContext<CONFIG extends PregelConfig> extends NodeCentricContext<CONFIG> {
-    private final NodePropertyContainer nodePropertyContainer;
+public class InitContext<CONFIG extends PregelConfig> extends NodeCentricContext<CONFIG> {
 
     public InitContext(
-        ComputeStep<CONFIG, ?> computeStep,
+        Graph graph,
         CONFIG config,
-        NodePropertyContainer nodePropertyContainer,
+        NodeValue nodeValue,
         ProgressTracker progressTracker
     ) {
-        super(computeStep, config, progressTracker);
-        this.nodePropertyContainer = nodePropertyContainer;
+        super(graph, config, nodeValue, progressTracker);
     }
 
     /**
@@ -52,7 +50,7 @@ public final class InitContext<CONFIG extends PregelConfig> extends NodeCentricC
      * or part of node projections when creating the graph.
      */
     public Set<String> nodePropertyKeys() {
-        return this.nodePropertyContainer.availableNodeProperties();
+        return this.graph.availableNodeProperties();
     }
 
     /**
@@ -61,6 +59,23 @@ public final class InitContext<CONFIG extends PregelConfig> extends NodeCentricC
      * property values by using their node identifier.
      */
     public NodePropertyValues nodeProperties(String key) {
-        return this.nodePropertyContainer.nodeProperties(key);
+        return this.graph.nodeProperties(key);
+    }
+
+    public static final class BidirectionalInitContext<CONFIG extends PregelConfig> extends InitContext<CONFIG> implements BidirectionalNodeCentricContext {
+
+        public BidirectionalInitContext(
+            Graph graph,
+            CONFIG config,
+            NodeValue nodeValue,
+            ProgressTracker progressTracker
+        ) {
+            super(graph, config, nodeValue, progressTracker);
+        }
+
+        @Override
+        public Graph graph() {
+            return graph;
+        }
     }
 }
