@@ -21,7 +21,6 @@ package org.neo4j.gds.impl.spanningtree;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
@@ -32,20 +31,17 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.spanningtree.Prim;
-import org.neo4j.gds.spanningtree.SpanningTree;
 
 import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
- *          1
- *  (x) >(a)---(d)    (x)  (a)   (d)
- *      /3 \2 /3   =>     /     /
- *    (b)---(c)         (b)   (c)
- *        1
+ *           1
+ *  (x), (a)---(d)    (x)  (a)   (d)
+ *       /3 \2 /3   =>     /     /
+ *     (b)---(c)         (b)   (c)
+ *         1
  */
 @GdlExtension
 class KSpanningTreeTest {
@@ -71,6 +67,14 @@ class KSpanningTreeTest {
     @Inject
     private IdFunction idFunction;
 
+    private static final int OFFSET = 5;
+
+    @GdlGraph(idOffset = OFFSET, orientation = Orientation.UNDIRECTED, graphNamePrefix = "offset")
+    private static final String DB_CYPHER_WITH_OFFSET = DB_CYPHER;
+
+    @Inject
+    private Graph offsetGraph;
+
     private int a, b, c, d, x;
 
     @BeforeEach
@@ -84,50 +88,35 @@ class KSpanningTreeTest {
 
     @Test
     void testMaximumKSpanningTree() {
-        final SpanningTree spanningTree = new KSpanningTree(
-            graph,
-            Prim.MAX_OPERATOR,
-            a,
-            2,
-            ProgressTracker.NULL_TRACKER
-        )
+        var spanningTree = new KSpanningTree(graph, Prim.MAX_OPERATOR, a, 2, ProgressTracker.NULL_TRACKER)
             .compute();
 
-        assertEquals(spanningTree.head(a), spanningTree.head(b));
-        assertEquals(spanningTree.head(c), spanningTree.head(d));
-        assertNotEquals(spanningTree.head(a), spanningTree.head(c));
-        assertNotEquals(spanningTree.head(a), spanningTree.head(x));
-        assertNotEquals(spanningTree.head(c), spanningTree.head(x));
+        assertThat(spanningTree.head(a)).isEqualTo(spanningTree.head(b));
+        assertThat(spanningTree.head(c)).isEqualTo(spanningTree.head(d));
+        assertThat(spanningTree.head(a)).isNotEqualTo(spanningTree.head(c));
+        assertThat(spanningTree.head(a)).isNotEqualTo(spanningTree.head(x));
+        assertThat(spanningTree.head(c)).isNotEqualTo(spanningTree.head(x));
     }
 
     @Test
     void testMinimumKSpanningTree() {
-        final SpanningTree spanningTree = new KSpanningTree(
-            graph,
-            Prim.MIN_OPERATOR,
-            a,
-            2,
-            ProgressTracker.NULL_TRACKER
-        )
+        var spanningTree = new KSpanningTree(graph, Prim.MIN_OPERATOR, a, 2, ProgressTracker.NULL_TRACKER)
             .compute();
 
-        assertEquals(spanningTree.head(a), spanningTree.head(d));
-        assertEquals(spanningTree.head(b), spanningTree.head(c));
-        assertNotEquals(spanningTree.head(a), spanningTree.head(b));
-        assertNotEquals(spanningTree.head(a), spanningTree.head(x));
-        assertNotEquals(spanningTree.head(b), spanningTree.head(x));
+        assertThat(spanningTree.head(a)).isEqualTo(spanningTree.head(d));
+        assertThat(spanningTree.head(b)).isEqualTo(spanningTree.head(c));
+        assertThat(spanningTree.head(a)).isNotEqualTo(spanningTree.head(b));
+        assertThat(spanningTree.head(a)).isNotEqualTo(spanningTree.head(x));
+        assertThat(spanningTree.head(b)).isNotEqualTo(spanningTree.head(x));
     }
 
     @Test
-    @Disabled("Need to extend GdlGraph to generate offset node IDs and fix the test")
     void testNeoIdsWithOffset() {
-        SpanningTree spanningTree = new KSpanningTree(graph, Prim.MIN_OPERATOR, 0, 2, ProgressTracker.NULL_TRACKER)
-            .compute();
+        var spanningTree = new KSpanningTree(graph, Prim.MIN_OPERATOR, 0, 2, ProgressTracker.NULL_TRACKER).compute();
+        var otherSpanningTree = new KSpanningTree(offsetGraph, Prim.MIN_OPERATOR, OFFSET, 2, ProgressTracker.NULL_TRACKER).compute();
 
-        SpanningTree otherSpanningTree = new KSpanningTree(graph, Prim.MIN_OPERATOR, 5, 2, ProgressTracker.NULL_TRACKER)
-            .compute();
-
-        assertEquals(spanningTree, otherSpanningTree);
+        assertThat(spanningTree.parentArray().toArray())
+            .containsExactly(otherSpanningTree.parentArray().toArray());
     }
 
     @Test
