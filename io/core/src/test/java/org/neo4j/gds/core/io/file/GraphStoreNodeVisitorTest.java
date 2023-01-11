@@ -75,11 +75,9 @@ class GraphStoreNodeVisitorTest {
             return true;
         });
 
-        var idMapAndProperties = nodesBuilder.build();
-        var idMap = idMapAndProperties.idMap();
-        var nodeProperties = idMapAndProperties
-            .nodeProperties()
-            .orElseThrow(() -> new IllegalArgumentException("Expected node properties to be present"));
+        var nodes = nodesBuilder.build();
+        var idMap = nodes.idMap();
+        var nodeProperties = nodes.properties().propertyValues();
 
         var relationshipSchema = RelationshipSchema.empty();
         relationshipSchema.getOrCreateRelationshipType(RelationshipType.ALL_RELATIONSHIPS, Direction.UNDIRECTED);

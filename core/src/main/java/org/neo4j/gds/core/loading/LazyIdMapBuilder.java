@@ -114,10 +114,10 @@ public final class LazyIdMapBuilder implements PartialIdMap {
     }
 
     public HighLimitIdMapAndProperties build() {
-        var idMapAndProperties = this.nodesBuilder.build();
+        var nodes = this.nodesBuilder.build();
         var intermediateIdMap = this.intermediateIdMapBuilder.build();
         // The implementation of this map depends on either CE/EE or a feature toggle.
-        var internalIdMap = idMapAndProperties.idMap();
+        var internalIdMap = nodes.idMap();
 
         var idMap = new HighLimitIdMap(intermediateIdMap, internalIdMap);
 
@@ -141,7 +141,7 @@ public final class LazyIdMapBuilder implements PartialIdMap {
             .builder()
             .idMap(idMap)
             .intermediateIdMap(partialIdMap)
-            .nodeProperties(idMapAndProperties.nodeProperties())
+            .nodeProperties(nodes.properties().propertyValues())
             .build();
     }
 }

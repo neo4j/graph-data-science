@@ -178,21 +178,20 @@ public abstract class FileToGraphStoreImporter {
 
         ParallelUtil.run(tasks, Pools.DEFAULT);
 
-        var idMapAndProperties = nodesBuilder.build();
-        var nodeImportResultBuilder = ImmutableNodeImportResult.builder()
-            .idMap(idMapAndProperties.idMap());
+        var nodes = nodesBuilder.build();
+        var nodeImportResultBuilder = ImmutableNodeImportResult.builder().idMap(nodes.idMap());
 
         var schemaProperties = nodeSchema.unionProperties();
         CSRGraphStoreUtil.extractNodeProperties(
             nodeImportResultBuilder,
             schemaProperties::get,
-            idMapAndProperties.nodeProperties().orElse(Map.of())
+            nodes.properties().propertyValues()
         );
 
         graphStoreBuilder.nodeImportResult(nodeImportResultBuilder.build());
 
         progressTracker.endSubTask();
-        return idMapAndProperties.idMap();
+        return nodes.idMap();
     }
 
     private void importRelationships(FileInput fileInput, IdMap nodes) {

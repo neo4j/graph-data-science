@@ -99,9 +99,9 @@ class CypherNodeLoader extends CypherRecordLoader<NodeImportResult> {
 
     @Override
     NodeImportResult result() {
-        var idMapAndProperties = nodesBuilder.build(highestNodeId);
-        var idMap = idMapAndProperties.idMap();
-        var nodeProperties = idMapAndProperties.nodeProperties().orElseGet(Map::of);
+        var nodes = nodesBuilder.build(highestNodeId);
+        var idMap = nodes.idMap();
+        var nodeProperties = nodes.properties().propertyValues();
         var nodePropertiesWithPropertyMappings = propertiesWithPropertyMappings(nodeProperties);
 
         return NodeImportResult.of(idMap, nodePropertiesWithPropertyMappings, PropertyState.TRANSIENT);

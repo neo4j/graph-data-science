@@ -26,12 +26,18 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.properties.nodes.ImmutableNodeProperty;
+import org.neo4j.gds.api.properties.nodes.NodeProperty;
+import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.compat.LongPropertyReference;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.IdMapBuilder;
+import org.neo4j.gds.core.loading.ImmutableNodeImportResult;
 import org.neo4j.gds.core.loading.LabelInformation;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
+import org.neo4j.gds.core.loading.NodeImportResult;
 import org.neo4j.gds.core.loading.NodeImporter;
 import org.neo4j.gds.core.loading.NodesBatchBuffer;
 import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
@@ -199,11 +205,11 @@ public final class NodesBuilder {
         return this.importedNodes.sum();
     }
 
-    public IdMapAndProperties build() {
+    public NodeImportResult build() {
         return build(maxOriginalId);
     }
 
-    public IdMapAndProperties build(long highestNeoId) {
+    public NodeImportResult build(long highestNeoId) {
         // Flush remaining buffer contents
         this.threadLocalBuilder.forEach(ThreadLocalBuilder::flush);
         // Clean up resources held by local builders
@@ -211,18 +217,27 @@ public final class NodesBuilder {
 
         var idMap = this.idMapBuilder.build(labelInformationBuilder, highestNeoId, concurrency);
 
-        Optional<Map<String, NodePropertyValues>> nodeProperties = Optional.empty();
+        var nodeImportResultBuilder = ImmutableNodeImportResult.builder().idMap(idMap);
         if (hasProperties) {
-            nodeProperties = Optional.of(buildProperties(idMap));
+            var nodeProperties = buildProperties(idMap);
+            nodeImportResultBuilder.properties(NodePropertyStore.builder().properties(nodeProperties).build());
         }
-        return ImmutableIdMapAndProperties.of(idMap, nodeProperties);
+        return nodeImportResultBuilder.build();
     }
 
-    private Map<String, NodePropertyValues> buildProperties(IdMap idMap) {
+    private Map<String, NodeProperty> buildProperties(IdMap idMap) {
         return propertyBuildersByPropertyKey.entrySet().stream().collect(toMap(
             Map.Entry::getKey,
-            e -> e.getValue().build(idMap)
+            entry -> entryToNodeProperty(entry, idMap)
         ));
+    }
+
+    private static NodeProperty entryToNodeProperty(Map.Entry<String, NodePropertiesFromStoreBuilder> entry, IdMap idMap) {
+        var nodePropertyValues = entry.getValue().build(idMap);
+        return ImmutableNodeProperty.builder()
+            .values(nodePropertyValues)
+            .propertySchema(PropertySchema.of(entry.getKey(), nodePropertyValues.valueType()))
+            .build();
     }
 
     /**
