@@ -372,7 +372,7 @@ ORDER BY score DESC
 
 NOTE: The above example requires all given properties to be present on at least one node projection, and the properties will be streamed for all such projections.
 
-
+[[catalog-graph-stream-node-labels-example]]
 ==== NodeLabels
 
 The procedure can be configured to stream just the properties for specific node labels.
@@ -485,6 +485,54 @@ YIELD propertiesWritten
 --
 If the `nodeLabels` parameter is specified, it is required that _all_ given node labels have _all_ of the given properties.
 --
+
+
+[[catalog-graph-mutate-node-label-example]]
+=== Mutate Node Label
+
+To mutate the in-memory graph by adding a new node label for nodes with score higher than `0`, we use the following query:
+
+[role=query-example, group=mutate-label]
+--
+.Add the `Reader` node label to the in-memory graph:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.graph.nodeLabel.mutate('socialGraph', 'Reader', { nodeFilter: 'n.score > 0.0' })
+YIELD graphName, nodeLabel, nodeLabelsWritten, nodeCount
+----
+
+.Results
+[opts="header"]
+|===
+| graphName     | nodeLabel | nodeLabelsWritten | nodeCount
+| "socialGraph" | "Reader"  | 2                 | 4
+|===
+--
+
+As we can see from the result there were two nodes that matched the specified filter and they received the node label `Reader`.
+We can inspect the result by streaming back the `score` property of the `Reader` node label, we can do that using the following query:
+
+[role=query-example, group=mutate-label]
+--
+.Stream the `score` property for `Reader` nodes:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.nodeProperty.stream('socialGraph', 'score', ['Reader'])
+YIELD nodeId, propertyValue
+RETURN gds.util.asNode(nodeId).name AS name, propertyValue AS score
+ORDER BY score DESC
+----
+
+.Results
+[opts="header"]
+|===
+| name        | score
+| "Florentin" | 2.0
+| "Adam"      | 1.0
+|===
+--
+
+If we compare the result to the one from the <<catalog-graph-stream-node-labels-example, NodeLabels>> example we can see that `Veselin` has not been labelled as a `Reader` because the `score` property for that node is `0`.
 
 
 [[catalog-graph-write-node-label-example]]

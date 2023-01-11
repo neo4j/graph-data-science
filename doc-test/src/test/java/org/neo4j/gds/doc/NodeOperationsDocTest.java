@@ -20,6 +20,7 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphDropNodePropertiesProc;
+import org.neo4j.gds.catalog.GraphMutateNodeLabelProc;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.catalog.GraphWriteNodeLabelProc;
@@ -40,7 +41,8 @@ final class NodeOperationsDocTest extends SingleFileDocTestBase {
             GraphStreamNodePropertiesProc.class,
             GraphWriteNodePropertiesProc.class,
             GraphDropNodePropertiesProc.class,
-            GraphWriteNodeLabelProc.class
+            GraphWriteNodeLabelProc.class,
+            GraphMutateNodeLabelProc.class
         );
     }
 
