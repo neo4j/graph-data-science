@@ -20,7 +20,6 @@
 package org.neo4j.gds.pregel;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -38,8 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @GdlExtension
 class HitsTest {
 
-    @GdlGraph
-    @GdlGraph(orientation = Orientation.REVERSE, graphNamePrefix = "reverse")
+    @GdlGraph(indexInverse = true)
     private static final String GDL =
         "(a), (b), (c), (d), (e), (f), (g), (h)" +
         ", (a)-->(d)" +
@@ -59,9 +57,6 @@ class HitsTest {
 
     @Inject
     private TestGraph graph;
-
-    @Inject
-    private TestGraph reversegraph;
 
     @Inject
     private IdFunction idFunction;
@@ -132,7 +127,7 @@ class HitsTest {
                 norm = 0;
                 for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
                     auths[nodeId] = 0.0D;
-                    reversegraph.forEachRelationship(nodeId, (s, t) -> {
+                    graph.forEachInverseRelationship(nodeId, (s, t) -> {
                         auths[(int) s] += hubs[(int) t];
                         return true;
                     });
