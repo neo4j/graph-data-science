@@ -24,8 +24,10 @@ import org.neo4j.values.SequenceValue;
 import org.neo4j.values.storable.IntegralValue;
 import org.neo4j.values.virtual.VirtualNodeValue;
 
-enum ExtractNodeId implements PartialValueMapper<Long> {
-    INSTANCE;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+final class ExtractNodeId implements PartialValueMapper<Long> {
+    private final AtomicBoolean hasSeenArbitraryIds = new AtomicBoolean(false);
 
     @Override
     public Long unsupported(AnyValue value) {
@@ -44,10 +46,15 @@ enum ExtractNodeId implements PartialValueMapper<Long> {
 
     @Override
     public Long mapIntegral(IntegralValue value) {
+        this.hasSeenArbitraryIds.lazySet(true);
         return value.longValue();
     }
 
     private static IllegalArgumentException invalidNodeType(String typeName) {
         return new IllegalArgumentException("The node has to be either a NODE or an INTEGER, but got " + typeName);
+    }
+
+    boolean hasSeenArbitraryIds() {
+        return hasSeenArbitraryIds.get();
     }
 }

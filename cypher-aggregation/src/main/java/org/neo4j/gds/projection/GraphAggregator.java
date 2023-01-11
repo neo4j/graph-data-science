@@ -332,6 +332,7 @@ public class GraphAggregator implements CompatUserAggregator {
         private final @Nullable List<RelationshipPropertySchema> relationshipPropertySchemas;
 
         private final boolean canWriteToDatabase;
+        private final ExtractNodeId extractNodeId;
         private final Lock lock;
         private final Map<RelationshipType, RelationshipsBuilder> relImporters;
         private final ImmutableGraphSchema.Builder graphSchemaBuilder;
@@ -352,6 +353,7 @@ public class GraphAggregator implements CompatUserAggregator {
             this.lock = lock;
             this.relImporters = new ConcurrentHashMap<>();
             this.graphSchemaBuilder = ImmutableGraphSchema.builder();
+            this.extractNodeId = new ExtractNodeId();
         }
 
         static GraphImporter of(
@@ -502,9 +504,11 @@ public class GraphAggregator implements CompatUserAggregator {
 
             this.idMapBuilder.prepareForFlush();
 
+            var canWriteToDatabase = this.canWriteToDatabase && !this.extractNodeId.hasSeenArbitraryIds();
+
             var graphStoreBuilder = new GraphStoreBuilder()
                 .concurrency(this.config.readConcurrency())
-                .capabilities(ImmutableStaticCapabilities.of(this.canWriteToDatabase))
+                .capabilities(ImmutableStaticCapabilities.of(canWriteToDatabase))
                 .databaseId(databaseId);
 
             var valueMapper = buildNodesWithProperties(graphStoreBuilder);
@@ -745,8 +749,8 @@ public class GraphAggregator implements CompatUserAggregator {
             ));
         }
 
-        private static long extractNodeId(@NotNull AnyValue node) {
-            return node.map(ExtractNodeId.INSTANCE);
+        private long extractNodeId(@NotNull AnyValue node) {
+            return node.map(this.extractNodeId);
         }
     }
 }
