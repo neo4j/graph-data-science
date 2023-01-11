@@ -36,7 +36,7 @@ import java.util.OptionalLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
+public class LongNodePropertiesBuilder implements InnerNodePropertiesBuilder {
 
     // Value is changed with a VarHandle and needs to be non final for that
     // even though our favourite IDE/OS doesn't pick that up
@@ -80,11 +80,6 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         return new LongNodePropertiesBuilder(builder, defaultLongValue, concurrency);
     }
 
-    @Override
-    protected Class<?> valueClass() {
-        return long.class;
-    }
-
     public void set(long neoNodeId, long value) {
         builder.set(neoNodeId, value);
         updateMaxValue(value);
@@ -94,11 +89,6 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     public void setValue(long neoNodeId, Value value) {
         var longValue = Neo4jValueConversion.getLongValue(value);
         set(neoNodeId, longValue);
-    }
-
-    @Override
-    public NodePropertyValues buildDirect(long size) {
-        return new LongStoreNodePropertyValues(builder.build(), size, OptionalLong.empty());
     }
 
     @Override

@@ -23,7 +23,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.HugeSparseLongArrayArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -34,7 +33,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
+public class LongArrayNodePropertiesBuilder implements InnerNodePropertiesBuilder {
 
     private final HugeSparseLongArrayArray.Builder builder;
     private final long[] defaultValue;
@@ -54,22 +53,12 @@ public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     }
 
     @Override
-    protected Class<?> valueClass() {
-        return long[].class;
-    }
-
-    @Override
     public void setValue(long neoNodeId, Value value) {
         set(neoNodeId, Neo4jValueConversion.getLongArray(value));
     }
 
     public void setValue(long nodeId, long[] value) {
         builder.set(nodeId, value);
-    }
-
-    @Override
-    public NodePropertyValues buildDirect(long size) {
-        return new LongArrayStoreNodePropertyValues(builder.build(), size);
     }
 
     @Override

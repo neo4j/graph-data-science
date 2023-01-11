@@ -23,24 +23,13 @@ import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.values.storable.Value;
 
-public abstract class InnerNodePropertiesBuilder {
-    protected abstract Class<?> valueClass();
+public interface InnerNodePropertiesBuilder {
 
-    public abstract void setValue(long neoNodeId, Value value);
-
-    /**
-     * Builds the underlying node properties as-is.
-     *
-     * Note:
-     * The method expects the underlying node properties to be indexed
-     * by internal ids, i.e., ids ranging from 0 to node count.
-     * Violating the constraint is undefined behaviour.
-     */
-    public abstract NodePropertyValues buildDirect(long size);
+    void setValue(long neoNodeId, Value value);
 
     /**
      * Builds the underlying node properties and performs a remapping
      * to the internal id space using the given id map.
      */
-    public abstract NodePropertyValues build(long size, PartialIdMap idMap, long highestOriginalId);
+    NodePropertyValues build(long size, PartialIdMap idMap, long highestOriginalId);
 }

@@ -39,7 +39,7 @@ import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.loading.ImmutableNodeImportResult;
+import org.neo4j.gds.core.loading.ImmutableNodes;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.LazyIdMapBuilder;
 import org.neo4j.gds.core.loading.ReadHelper;
@@ -622,7 +622,7 @@ public class GraphAggregator implements CompatUserAggregator {
 
             var maybeNodeProperties = idMapAndProperties.nodeProperties();
 
-            var nodesImportResultBuilder = ImmutableNodeImportResult.builder().idMap(nodes);
+            var nodesBuilder = ImmutableNodes.builder().idMap(nodes);
 
             var nodePropertySchema = maybeNodeProperties
                 .map(nodeProperties -> nodeSchemaWithProperties(
@@ -644,13 +644,13 @@ public class GraphAggregator implements CompatUserAggregator {
 
             maybeNodeProperties.ifPresent(allNodeProperties -> {
                 CSRGraphStoreUtil.extractNodeProperties(
-                    nodesImportResultBuilder,
+                    nodesBuilder,
                     nodePropertySchema::get,
                     allNodeProperties
                 );
             });
 
-            graphStoreBuilder.nodeImportResult(nodesImportResultBuilder.build());
+            graphStoreBuilder.nodes(nodesBuilder.build());
 
             // Relationships are added using their intermediate node ids.
             // In order to map to the final internal ids, we need to use

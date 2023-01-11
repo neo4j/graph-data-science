@@ -43,7 +43,7 @@ import org.neo4j.gds.core.io.GraphStoreGraphPropertyVisitor;
 import org.neo4j.gds.core.io.GraphStoreRelationshipVisitor;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
-import org.neo4j.gds.core.loading.ImmutableNodeImportResult;
+import org.neo4j.gds.core.loading.ImmutableNodes;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -178,21 +178,20 @@ public abstract class FileToGraphStoreImporter {
 
         ParallelUtil.run(tasks, Pools.DEFAULT);
 
-        var idMapAndProperties = nodesBuilder.build();
-        var nodeImportResultBuilder = ImmutableNodeImportResult.builder()
-            .idMap(idMapAndProperties.idMap());
+        var nodes = nodesBuilder.build();
+        var nodeImportResultBuilder = ImmutableNodes.builder().idMap(nodes.idMap());
 
         var schemaProperties = nodeSchema.unionProperties();
         CSRGraphStoreUtil.extractNodeProperties(
             nodeImportResultBuilder,
             schemaProperties::get,
-            idMapAndProperties.nodeProperties().orElse(Map.of())
+            nodes.properties().propertyValues()
         );
 
-        graphStoreBuilder.nodeImportResult(nodeImportResultBuilder.build());
+        graphStoreBuilder.nodes(nodeImportResultBuilder.build());
 
         progressTracker.endSubTask();
-        return idMapAndProperties.idMap();
+        return nodes.idMap();
     }
 
     private void importRelationships(FileInput fileInput, IdMap nodes) {

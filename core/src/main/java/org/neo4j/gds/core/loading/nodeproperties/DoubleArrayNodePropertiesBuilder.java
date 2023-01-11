@@ -23,7 +23,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.HugeSparseDoubleArrayArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -34,7 +33,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
+public class DoubleArrayNodePropertiesBuilder implements InnerNodePropertiesBuilder {
 
     private final HugeSparseDoubleArrayArray.Builder builder;
     private final double[] defaultValue;
@@ -56,18 +55,8 @@ public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder
     }
 
     @Override
-    protected Class<?> valueClass() {
-        return double[].class;
-    }
-
-    @Override
     public void setValue(long neoNodeId, Value value) {
         set(neoNodeId, Neo4jValueConversion.getDoubleArray(value));
-    }
-
-    @Override
-    public NodePropertyValues buildDirect(long size) {
-        return new DoubleArrayStoreNodePropertyValues(builder.build(), size);
     }
 
     @Override

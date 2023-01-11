@@ -23,7 +23,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.HugeSparseDoubleArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -36,7 +35,7 @@ import java.util.OptionalDouble;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
+public class DoubleNodePropertiesBuilder implements InnerNodePropertiesBuilder {
 
     // Value is changed with a VarHandle and needs to be non final for that
     // even though our favourite IDE/OS doesn't pick that up
@@ -73,11 +72,6 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         );
     }
 
-    @Override
-    protected Class<?> valueClass() {
-        return double.class;
-    }
-
     public void set(long neoNodeId, double value) {
         builder.set(neoNodeId, value);
         updateMaxValue(value);
@@ -87,11 +81,6 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     public void setValue(long neoNodeId, Value value) {
         double doubleValue = Neo4jValueConversion.getDoubleValue(value);
         set(neoNodeId, doubleValue);
-    }
-
-    @Override
-    public NodePropertyValues buildDirect(long size) {
-        return new DoubleStoreNodePropertyValues(builder.build(), size, OptionalDouble.empty());
     }
 
     @Override

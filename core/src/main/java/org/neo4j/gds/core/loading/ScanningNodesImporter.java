@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference, NodeImportResult> {
+public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference, Nodes> {
 
     private final IndexPropertyMappings.LoadablePropertyMappings propertyMappings;
     private final TerminationFlag terminationFlag;
@@ -176,7 +176,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
     }
 
     @Override
-    public NodeImportResult build() {
+    public Nodes build() {
         var idMap = idMapBuilder.build(
             labelInformationBuilder,
             Math.max(dimensions.highestPossibleNodeCount() - 1, 0),
@@ -191,7 +191,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
             importPropertiesFromIndex(idMap, nodeProperties);
         }
 
-        return NodeImportResult.of(idMap, nodeProperties, PropertyState.PERSISTENT);
+        return Nodes.of(idMap, nodeProperties, PropertyState.PERSISTENT);
     }
 
     private void importPropertiesFromIndex(
