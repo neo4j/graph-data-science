@@ -21,7 +21,6 @@ package org.neo4j.gds.beta.undirected;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -31,7 +30,6 @@ import java.util.List;
 import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
 
-@ValueClass
 @Configuration
 public interface ToUndirectedConfig extends AlgoBaseConfig, MutateRelationshipConfig {
     @Configuration.ConvertWith(method = "validateRelationshipTypeIdentifier")
