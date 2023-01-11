@@ -30,6 +30,7 @@ class GraphCatalogNodeOperationsSyntaxTest extends SyntaxTestBase {
             SyntaxModeMeta.of(SyntaxMode.STREAM_SINGLE_PROPERTY),
             SyntaxModeMeta.of(SyntaxMode.WRITE),
             SyntaxModeMeta.of(SyntaxMode.WRITE_NODE_LABEL),
+            SyntaxModeMeta.of(SyntaxMode.MUTATE_NODE_LABEL),
             SyntaxModeMeta.of(SyntaxMode.REMOVE)
         );
     }

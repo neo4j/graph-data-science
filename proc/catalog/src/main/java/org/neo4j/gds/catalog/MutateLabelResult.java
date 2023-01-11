@@ -26,39 +26,42 @@ import java.util.Map;
 public final class MutateLabelResult {
 
     public final long mutateMillis;
+    public final String graphName;
     public final String nodeLabel;
     public final long nodeLabelsWritten;
-    public final long computeMillis;
     public final long nodeCount;
     public final Map<String, Object> configuration;
 
     private MutateLabelResult(
         long mutateMillis,
+        String graphName,
         String nodeLabel,
         long nodeLabelsWritten,
-        long computeMillis,
         long nodeCount,
         Map<String, Object> configuration
     ) {
         this.mutateMillis = mutateMillis;
+        this.graphName = graphName;
         this.nodeLabel = nodeLabel;
         this.nodeLabelsWritten = nodeLabelsWritten;
-        this.computeMillis = computeMillis;
         this.nodeCount = nodeCount;
         this.configuration = configuration;
     }
 
-    public static Builder builder(String nodeLabel) {
-        return new Builder(nodeLabel);
+    public static Builder builder(String graphName, String nodeLabel) {
+        return new Builder(graphName, nodeLabel);
     }
 
     public static class Builder extends AbstractResultBuilder<MutateLabelResult> {
 
         private long nodeLabelsWritten;
         private Map<String, Object> configuration;
+        private final String graphName;
         private final String nodeLabel;
 
-        public Builder(String nodeLabel) {this.nodeLabel = nodeLabel;}
+        public Builder(String graphName, String nodeLabel) {
+            this.graphName = graphName;
+            this.nodeLabel = nodeLabel;}
 
         Builder withNodeLabelsWritten(long propertiesWritten) {
             this.nodeLabelsWritten = propertiesWritten;
@@ -73,9 +76,9 @@ public final class MutateLabelResult {
         public MutateLabelResult build() {
             return new MutateLabelResult(
                 mutateMillis,
+                graphName,
                 nodeLabel,
                 nodeLabelsWritten,
-                computeMillis,
                 nodeCount,
                 configuration
             );
