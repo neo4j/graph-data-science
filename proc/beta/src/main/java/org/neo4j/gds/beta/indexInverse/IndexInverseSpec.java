@@ -21,7 +21,7 @@ package org.neo4j.gds.beta.indexInverse;
 
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 @GdsCallable(name = IndexInverseSpec.CALLABLE_NAME, executionMode = ExecutionMode.MUTATE_RELATIONSHIP, description = IndexInverseSpec.DESCRIPTION)
-public class IndexInverseSpec implements AlgorithmSpec<InverseRelationships, SingleTypeRelationshipImportResult, InverseRelationshipsConfig, Stream<IndexInverseSpec.MutateResult>, InverseRelationshipsAlgorithmFactory> {
+public class IndexInverseSpec implements AlgorithmSpec<InverseRelationships, SingleTypeRelationships, InverseRelationshipsConfig, Stream<IndexInverseSpec.MutateResult>, InverseRelationshipsAlgorithmFactory> {
 
     public static final String DESCRIPTION = "The IndexInverse procedure indexes directed relationships to allow an efficient inverse access for other algorithms.";
     static final String CALLABLE_NAME = "gds.beta.graph.relationships.indexInverse";
@@ -57,19 +57,19 @@ public class IndexInverseSpec implements AlgorithmSpec<InverseRelationships, Sin
     }
 
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<InverseRelationships, SingleTypeRelationshipImportResult, InverseRelationshipsConfig> computeResult,
+        ComputationResult<InverseRelationships, SingleTypeRelationships, InverseRelationshipsConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return new MutateResult.Builder().withInputRelationships(computeResult.graph().relationshipCount());
     }
 
     @Override
-    public ComputationResultConsumer<InverseRelationships, SingleTypeRelationshipImportResult, InverseRelationshipsConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<InverseRelationships, SingleTypeRelationships, InverseRelationshipsConfig, Stream<MutateResult>> computationResultConsumer() {
         return new MutateComputationResultConsumer<>(this::resultBuilder) {
             @Override
             protected void updateGraphStore(
                 AbstractResultBuilder<?> resultBuilder,
-                ComputationResult<InverseRelationships, SingleTypeRelationshipImportResult, InverseRelationshipsConfig> computationResult,
+                ComputationResult<InverseRelationships, SingleTypeRelationships, InverseRelationshipsConfig> computationResult,
                 ExecutionContext executionContext
             ) {
                 var result = computationResult.result();
@@ -78,8 +78,7 @@ public class IndexInverseSpec implements AlgorithmSpec<InverseRelationships, Sin
                         .graphStore()
                         .addInverseIndex(
                             RelationshipType.of(computationResult.config().relationshipType()),
-                            result.topology(),
-                            result.properties()
+                            result
                         );
                 }
             }

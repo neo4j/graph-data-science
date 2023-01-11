@@ -20,7 +20,7 @@
 package org.neo4j.gds.beta.indexInverse;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.executor.ProcedureExecutorSpec;
@@ -45,7 +45,7 @@ public class IndexInverseProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var mutateSpec = new IndexInverseSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<InverseRelationships, SingleTypeRelationshipImportResult, InverseRelationshipsConfig>();
+        var pipelineSpec = new ProcedureExecutorSpec<InverseRelationships, SingleTypeRelationships, InverseRelationshipsConfig>();
 
         return new ProcedureExecutor<>(
             mutateSpec,
@@ -62,7 +62,7 @@ public class IndexInverseProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         var mutateSpec = new IndexInverseSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<InverseRelationships, SingleTypeRelationshipImportResult, InverseRelationshipsConfig>();
+        var pipelineSpec = new ProcedureExecutorSpec<InverseRelationships, SingleTypeRelationships, InverseRelationshipsConfig>();
 
         return new MemoryEstimationExecutor<>(
             mutateSpec,

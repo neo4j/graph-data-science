@@ -27,7 +27,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -67,7 +67,7 @@ class InverseRelationshipsTest {
             .relationshipType("T1")
             .build();
 
-        SingleTypeRelationshipImportResult inverseRelationships = new InverseRelationships(
+        SingleTypeRelationships inverseRelationships = new InverseRelationships(
             graphStore,
             config,
             ProgressTracker.NULL_TRACKER,
