@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -66,6 +67,14 @@ public final class Pregel<CONFIG extends PregelConfig> {
         // Creating a copy of the user config triggers the
         // concurrency validations.
         ImmutablePregelConfig.copyOf(config);
+
+        if (computation instanceof BidirectionalPregelComputation && !graph.supportsInverseIteration()) {
+            throw new UnsupportedOperationException(String.format(
+                "The Pregel algorithm %s requires inverse indexes for all configured relationships %s",
+                computation.getClass().getSimpleName(),
+                StringJoining.join(config.relationshipTypes())
+            ));
+        }
 
         return new Pregel<>(
             graph,
