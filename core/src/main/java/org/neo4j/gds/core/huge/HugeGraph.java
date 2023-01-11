@@ -306,6 +306,11 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
+    public boolean supportsInverseIteration() {
+        return inverseAdjacency != null;
+    }
+
+    @Override
     public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
         runForEach(nodeId, consumer);
     }

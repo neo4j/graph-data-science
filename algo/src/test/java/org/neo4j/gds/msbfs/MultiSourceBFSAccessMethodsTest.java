@@ -342,6 +342,11 @@ final class MultiSourceBFSAccessMethodsTest extends BaseTest {
             }
 
             @Override
+            public boolean supportsInverseIteration() {
+                return false;
+            }
+
+            @Override
             public void forEachInverseRelationship(long nodeId, RelationshipConsumer consumer) {
                 throw new UnsupportedOperationException("forEachInverseRelationship is not implemented.");
             }
