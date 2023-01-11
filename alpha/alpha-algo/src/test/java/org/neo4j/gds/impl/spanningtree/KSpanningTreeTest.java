@@ -91,8 +91,7 @@ class KSpanningTreeTest {
         var spanningTree = new KSpanningTree(graph, Prim.MAX_OPERATOR, a, 2, ProgressTracker.NULL_TRACKER)
             .compute();
 
-        assertThat(spanningTree.head(a)).isEqualTo(spanningTree.head(b));
-        assertThat(spanningTree.head(c)).isEqualTo(spanningTree.head(d));
+        assertThat(spanningTree).matches(tree -> tree.head(a) == tree.head(b) ^ tree.head(c) == tree.head(d));
         assertThat(spanningTree.head(a)).isNotEqualTo(spanningTree.head(c));
         assertThat(spanningTree.head(a)).isNotEqualTo(spanningTree.head(x));
         assertThat(spanningTree.head(c)).isNotEqualTo(spanningTree.head(x));
@@ -103,8 +102,7 @@ class KSpanningTreeTest {
         var spanningTree = new KSpanningTree(graph, Prim.MIN_OPERATOR, a, 2, ProgressTracker.NULL_TRACKER)
             .compute();
 
-        assertThat(spanningTree.head(a)).isEqualTo(spanningTree.head(d));
-        assertThat(spanningTree.head(b)).isEqualTo(spanningTree.head(c));
+        assertThat(spanningTree).matches(tree -> tree.head(a) == tree.head(d) ^ tree.head(b) == tree.head(c));
         assertThat(spanningTree.head(a)).isNotEqualTo(spanningTree.head(b));
         assertThat(spanningTree.head(a)).isNotEqualTo(spanningTree.head(x));
         assertThat(spanningTree.head(b)).isNotEqualTo(spanningTree.head(x));
