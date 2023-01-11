@@ -65,6 +65,7 @@
 *** xref:algorithms/alpha/approx-max-k-cut.adoc[]
 *** xref:algorithms/alpha/conductance.adoc[]
 *** xref:algorithms/alpha/modularity.adoc[]
+*** xref:algorithms/alpha/topological-sort.adoc[]
 *** xref:algorithms/kmeans.adoc[]
 *** xref:algorithms/leiden.adoc[]
 ** xref:algorithms/similarity.adoc[]
