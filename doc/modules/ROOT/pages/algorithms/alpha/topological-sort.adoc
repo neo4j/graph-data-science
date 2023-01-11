@@ -10,22 +10,14 @@
 include::partial$/operations-reference/alpha-note.adoc[]
 
 
-[[algorithms-topological-sort-intro]]
 == Introduction
 
 A topological sorting of nodes in a graph is an ordering of the nodes in the graph where every node appears only after all the nodes pointing to it have appeared.
 For example, for a graph with 4 nodes and these relations: `a->b`, `a->c`, `b->d`, `c->d`, there are two acceptable topological sorts: `a, b, c, d` and `a, c, b, d`.
 
-Topological order of the nodes is defined only for directed acyclic graphs (DAGs). See below for the expected result for graphs with cycles.
+Topological order of the nodes is defined only for directed acyclic graphs (DAGs). See xref:#topological-sort-cycles[below] for the expected result for graphs with cycles.
 
-include::partial$/operations-reference/alpha-note.adoc[]
-
-
-=== Applications
-
-Topological ordering of the nodes is beneficial when you want to guarantee a node will only be consumed after its dependencies were consumed.
-
-
+[[topological-sort-cycles]]
 === Cycles
 
 Running the algorithm on a graph with cycles will cause the omitting of part of the nodes from the sorting. The omitted nodes are:
@@ -35,3 +27,52 @@ Running the algorithm on a graph with cycles will cause the omitting of part of 
 2. Nodes that are dependent on a cycle. It means nodes that are reachable from another node which is part of a cycle
 
 All the other nodes in the graph will be ordered in a valid topological order.
+
+=== Usage
+
+Topological ordering of the nodes is beneficial when you want to guarantee a node will only be processed after its dependencies were processed. This is very useful for dependency related tasks such as scheduling or calculations that derive values from their dependencies.
+
+The algorithm can also be used to determine if the graph contains a cycle or not. If all the nodes in the graph appear in the sorting, there is no cycle in the graph. If some of the nodes are missing from the sorting, there is a cycle. It does not tell which nodes constitute the cycle, but it does give a clue, as described in the xref:#topological-sort-cycles[cycles] section.
+
+
+== Syntax
+
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.Topological Sort syntax per mode
+[.tabbed-example]
+====
+[.include-with-stream]
+======
+.Run Topological Sort in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.topologicalSort.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+  nodeId: Integer
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-configuration-jobid-concurrency-entries.adoc[]
+|===
+
+.Results
+[opts="header"]
+|===
+| Name          | Type    | Description
+| nodeId        | Integer | The ID of the current node in the ordering
+====
+
+[NOTE]
+====
+The current result implementation contains only the node IDs, streamed in a topological order.
+====
+
+
