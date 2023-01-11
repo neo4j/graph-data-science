@@ -28,7 +28,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
-import org.neo4j.gds.core.loading.NodeImportResult;
+import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 
 import java.util.List;
@@ -48,7 +48,7 @@ class WriteConfigTest {
             .databaseId(DatabaseId.from("neo4j"))
             .capabilities(ImmutableStaticCapabilities.of(isBackedByDatabase))
             .schema(GraphSchema.empty())
-            .nodeImportResult(NodeImportResult.of(new DirectIdMap(0)))
+            .nodes(Nodes.of(new DirectIdMap(0)))
             .relationshipImportResult(RelationshipImportResult.of(Map.of()))
             .concurrency(1)
             .build();

@@ -34,11 +34,11 @@ import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.compat.LongPropertyReference;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.IdMapBuilder;
-import org.neo4j.gds.core.loading.ImmutableNodeImportResult;
+import org.neo4j.gds.core.loading.ImmutableNodes;
 import org.neo4j.gds.core.loading.LabelInformation;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
-import org.neo4j.gds.core.loading.NodeImportResult;
 import org.neo4j.gds.core.loading.NodeImporter;
+import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.NodesBatchBuffer;
 import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
@@ -205,11 +205,11 @@ public final class NodesBuilder {
         return this.importedNodes.sum();
     }
 
-    public NodeImportResult build() {
+    public Nodes build() {
         return build(maxOriginalId);
     }
 
-    public NodeImportResult build(long highestNeoId) {
+    public Nodes build(long highestNeoId) {
         // Flush remaining buffer contents
         this.threadLocalBuilder.forEach(ThreadLocalBuilder::flush);
         // Clean up resources held by local builders
@@ -217,7 +217,7 @@ public final class NodesBuilder {
 
         var idMap = this.idMapBuilder.build(labelInformationBuilder, highestNeoId, concurrency);
 
-        var nodeImportResultBuilder = ImmutableNodeImportResult.builder().idMap(idMap);
+        var nodeImportResultBuilder = ImmutableNodes.builder().idMap(idMap);
         if (hasProperties) {
             var nodeProperties = buildProperties(idMap);
             nodeImportResultBuilder.properties(NodePropertyStore.builder().properties(nodeProperties).build());

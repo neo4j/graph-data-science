@@ -44,7 +44,7 @@ import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
-import org.neo4j.gds.core.loading.NodeImportResult;
+import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.ImmutablePropertyConfig;
@@ -164,8 +164,8 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     }
 
     @Override
-    protected GraphSchema computeGraphSchema(NodeImportResult nodeImportResult, RelationshipImportResult relationshipImportResult) {
-        var nodeProperties = nodeImportResult.properties();
+    protected GraphSchema computeGraphSchema(Nodes nodes, RelationshipImportResult relationshipImportResult) {
+        var nodeProperties = nodes.properties();
         var nodeSchema = NodeSchema.empty();
         gdlHandler
             .getVertices()
@@ -191,7 +191,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                 ));
             });
         // in case there were no properties add all labels
-        nodeImportResult.idMap().availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
+        nodes.idMap().availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
         var relationshipSchema = relationshipImportResult.importResults().entrySet().stream().reduce(
             RelationshipSchema.empty(),
@@ -212,21 +212,21 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
     @Override
     public CSRGraphStore build() {
-        var nodeImportResult = loadNodes();
-        var relationshipImportResult = loadRelationships(nodeImportResult.idMap());
-        var schema = computeGraphSchema(nodeImportResult, relationshipImportResult);
+        var nodes = loadNodes();
+        var relationshipImportResult = loadRelationships(nodes.idMap());
+        var schema = computeGraphSchema(nodes, relationshipImportResult);
 
         return new GraphStoreBuilder()
             .databaseId(databaseId)
             .capabilities(capabilities)
             .schema(schema)
-            .nodeImportResult(nodeImportResult)
+            .nodes(nodes)
             .relationshipImportResult(relationshipImportResult)
             .concurrency(1)
             .build();
     }
 
-    private NodeImportResult loadNodes() {
+    private Nodes loadNodes() {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(dimensions.highestPossibleNodeCount() - 1)
             .hasLabelInformation(true)
@@ -249,7 +249,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
         var idMap = nodesBuilder.build().idMap();
 
-        return NodeImportResult.of(idMap, loadNodeProperties(idMap), graphProjectConfig.propertyState());
+        return Nodes.of(idMap, loadNodeProperties(idMap), graphProjectConfig.propertyState());
     }
 
     private Map<PropertyMapping, NodePropertyValues> loadNodeProperties(IdMap idMap) {

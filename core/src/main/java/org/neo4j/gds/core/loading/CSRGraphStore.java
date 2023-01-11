@@ -107,7 +107,7 @@ public class CSRGraphStore implements GraphStore {
         DatabaseId databaseId,
         Capabilities capabilities,
         GraphSchema schema,
-        NodeImportResult nodeImportResult,
+        Nodes nodes,
         RelationshipImportResult relationshipImportResult,
         Optional<GraphPropertyStore> graphProperties,
         int concurrency
@@ -116,8 +116,8 @@ public class CSRGraphStore implements GraphStore {
             databaseId,
             capabilities,
             schema,
-            nodeImportResult.idMap(),
-            nodeImportResult.properties(),
+            nodes.idMap(),
+            nodes.properties(),
             relationshipImportResult.importResults(),
             graphProperties.orElseGet(GraphPropertyStore::empty),
             concurrency

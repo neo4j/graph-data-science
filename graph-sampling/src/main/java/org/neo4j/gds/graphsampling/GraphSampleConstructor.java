@@ -33,7 +33,7 @@ import org.neo4j.gds.config.GraphSampleAlgoConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
-import org.neo4j.gds.core.loading.NodeImportResult;
+import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
@@ -124,7 +124,7 @@ public class GraphSampleConstructor {
             .databaseId(inputGraphStore.databaseId())
             .capabilities(inputGraphStore.capabilities())
             .schema(filteredSchema)
-            .nodeImportResult(NodeImportResult.of(idMap, nodePropertyStore))
+            .nodes(Nodes.of(idMap, nodePropertyStore))
             .relationshipImportResult(relationshipImportResult)
             .concurrency(config.concurrency())
             .build();

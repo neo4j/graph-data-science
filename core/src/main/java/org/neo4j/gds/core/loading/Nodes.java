@@ -31,7 +31,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import java.util.Map;
 
 @ValueClass
-public interface NodeImportResult {
+public interface Nodes {
 
     IdMap idMap();
 
@@ -40,15 +40,15 @@ public interface NodeImportResult {
         return NodePropertyStore.empty();
     }
 
-    static NodeImportResult of(IdMap idmap) {
-        return ImmutableNodeImportResult.of(idmap, NodePropertyStore.empty());
+    static Nodes of(IdMap idmap) {
+        return ImmutableNodes.of(idmap, NodePropertyStore.empty());
     }
 
-    static NodeImportResult of(IdMap idmap, NodePropertyStore nodePropertyStore) {
-        return ImmutableNodeImportResult.of(idmap, nodePropertyStore);
+    static Nodes of(IdMap idmap, NodePropertyStore nodePropertyStore) {
+        return ImmutableNodes.of(idmap, nodePropertyStore);
     }
 
-    static NodeImportResult of(IdMap idMap, Map<PropertyMapping, NodePropertyValues> properties, PropertyState propertyState) {
+    static Nodes of(IdMap idMap, Map<PropertyMapping, NodePropertyValues> properties, PropertyState propertyState) {
         NodePropertyStore.Builder builder = NodePropertyStore.builder();
         properties.forEach((mapping, nodeProperties) -> builder.putProperty(
             mapping.propertyKey(),
@@ -61,6 +61,6 @@ public interface NodeImportResult {
                     : nodeProperties.valueType().fallbackValue()
             )
         ));
-        return ImmutableNodeImportResult.of(idMap, builder.build());
+        return ImmutableNodes.of(idMap, builder.build());
     }
 }

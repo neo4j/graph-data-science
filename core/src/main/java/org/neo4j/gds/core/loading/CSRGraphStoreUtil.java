@@ -107,7 +107,7 @@ public final class CSRGraphStoreUtil {
             // TODO: is it correct that we only use this for generated graphs?
             .capabilities(ImmutableStaticCapabilities.of(false))
             .schema(schema)
-            .nodeImportResult(NodeImportResult.of(graph.idMap(), nodeProperties))
+            .nodes(Nodes.of(graph.idMap(), nodeProperties))
             .relationshipImportResult(relationshipImportResult)
             .graphProperties(GraphPropertyStore.empty())
             .concurrency(concurrency)
@@ -184,7 +184,7 @@ public final class CSRGraphStoreUtil {
     }
 
     public static void extractNodeProperties(
-        ImmutableNodeImportResult.Builder nodeImportResultBuilder,
+        ImmutableNodes.Builder nodeImportResultBuilder,
         Function<String, PropertySchema> nodeSchema,
         Map<String, NodePropertyValues> nodeProperties
     ) {
@@ -205,14 +205,14 @@ public final class CSRGraphStoreUtil {
     }
 
     public static GraphSchema computeGraphSchema(
-        NodeImportResult nodeImportResult,
+        Nodes nodes,
         Function<NodeLabel, Collection<String>> propertiesByLabel,
         RelationshipImportResult relationshipImportResult
     ) {
-        var nodeProperties = nodeImportResult.properties().properties();
+        var nodeProperties = nodes.properties().properties();
 
         var nodeSchema = NodeSchema.empty();
-        for (var label : nodeImportResult.idMap().availableNodeLabels()) {
+        for (var label : nodes.idMap().availableNodeLabels()) {
             var entry = nodeSchema.getOrCreateLabel(label);
             for (var propertyKey : propertiesByLabel.apply(label)) {
                 entry.addProperty(
@@ -221,7 +221,7 @@ public final class CSRGraphStoreUtil {
                 );
             }
         }
-        nodeImportResult.idMap().availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
+        nodes.idMap().availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
         var relationshipSchema = RelationshipSchema.empty();
 
