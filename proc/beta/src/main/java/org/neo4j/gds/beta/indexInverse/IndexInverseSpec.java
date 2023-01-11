@@ -80,7 +80,8 @@ public class IndexInverseSpec implements AlgorithmSpec<IndexInverse, SingleTypeR
                             .graphStore()
                             .addInverseIndex(
                                 RelationshipType.of(computationResult.config().relationshipType()),
-                                result
+                                result.topology(),
+                                result.properties()
                             );
                     }
                 }

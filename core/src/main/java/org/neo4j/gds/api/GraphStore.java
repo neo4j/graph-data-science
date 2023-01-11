@@ -173,7 +173,8 @@ public interface GraphStore {
 
     void addInverseIndex(
         RelationshipType relationshipType,
-        SingleTypeRelationshipImportResult indexedRelationships
+        Relationships.Topology topology,
+        Optional<RelationshipPropertyStore> properties
     );
 
     DeletionResult deleteRelationships(RelationshipType relationshipType);
