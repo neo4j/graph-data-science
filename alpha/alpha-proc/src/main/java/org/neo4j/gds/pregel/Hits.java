@@ -24,55 +24,50 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.beta.pregel.BidirectionalPregelComputation;
 import org.neo4j.gds.beta.pregel.Messages;
-import org.neo4j.gds.beta.pregel.PregelComputation;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelSchema;
 import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
-import org.neo4j.gds.beta.pregel.context.ComputeContext;
-import org.neo4j.gds.beta.pregel.context.InitContext;
+import org.neo4j.gds.beta.pregel.context.ComputeContext.BidirectionalComputeContext;
+import org.neo4j.gds.beta.pregel.context.InitContext.BidirectionalInitContext;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.StringIdentifierValidations;
 
 import java.util.concurrent.atomic.DoubleAdder;
-import java.util.stream.StreamSupport;
 
 @PregelProcedure(
     name = "gds.alpha.hits",
     description = "Hyperlink-Induced Topic Search (HITS) is a link analysis algorithm that rates nodes"
 )
-public class Hits implements PregelComputation<Hits.HitsConfig> {
-
-    private static final String NEIGHBOR_IDS = "neighborIds";
+public class Hits implements BidirectionalPregelComputation<Hits.HitsConfig> {
 
     // Global norm aggregator shared by all workers
     private final DoubleAdder globalNorm = new DoubleAdder();
-    private HitsState state = HitsState.SEND_IDS;
+    private HitsState state = HitsState.INIT;
 
     @Override
     public PregelSchema schema(Hits.HitsConfig config) {
         return new PregelSchema.Builder()
             .add(config.authProperty(), ValueType.DOUBLE)
             .add(config.hubProperty(), ValueType.DOUBLE)
-            .add(NEIGHBOR_IDS, ValueType.LONG_ARRAY, PregelSchema.Visibility.PRIVATE)
             .build();
     }
 
     @Override
-    public void init(InitContext<HitsConfig> context) {
-        context.setNodeValue(context.config().authProperty(), 1D);
+    public void init(BidirectionalInitContext<HitsConfig> context) {
         context.setNodeValue(context.config().hubProperty(), 1D);
+        context.setNodeValue(context.config().authProperty(), 1D);
     }
 
     @Override
-    public void compute(ComputeContext<HitsConfig> context, Messages messages) {
+    public void compute(BidirectionalComputeContext<HitsConfig> context, Messages messages) {
         switch (state) {
-            case SEND_IDS:
-                context.sendToNeighbors(context.nodeId());
-                break;
-            case RECEIVE_IDS:
-                receiveIds(context, messages);
+            case INIT:
+                var auth = (double) context.incommingDegree();
+                context.setNodeValue(context.config().authProperty(), auth);
+                updateGlobalNorm(auth);
                 break;
             case CALCULATE_AUTHS:
                 calculateValue(context, messages, context.config().authProperty());
@@ -91,7 +86,7 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
 
     @Override
     public boolean masterCompute(MasterComputeContext<HitsConfig> context) {
-        if (state == HitsState.RECEIVE_IDS || state == HitsState.CALCULATE_AUTHS || state == HitsState.CALCULATE_HUBS) {
+        if (state == HitsState.INIT || state == HitsState.CALCULATE_AUTHS || state == HitsState.CALCULATE_HUBS) {
             var norm = globalNorm.sumThenReset();
             globalNorm.add(Math.sqrt(norm));
         } else if (state == HitsState.NORMALIZE_AUTHS || state == HitsState.NORMALIZE_HUBS) {
@@ -102,21 +97,11 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
         return false;
     }
 
-    private void receiveIds(ComputeContext<HitsConfig> context, Messages messages) {
-        // will only work with directed graphs
-        var neighborIds = StreamSupport
-            .stream(messages.spliterator(), false)
-            .mapToLong(Double::longValue)
-            .toArray();
-        context.setNodeValue(NEIGHBOR_IDS, neighborIds);
-
-        // compute auths
-        var auth = neighborIds.length;
-        context.setNodeValue(context.config().authProperty(), (double) auth);
-        updateGlobalNorm(auth);
-    }
-
-    private void calculateValue(ComputeContext<HitsConfig> context, Messages messages, String authProperty) {
+    private void calculateValue(
+        BidirectionalComputeContext<HitsConfig> context,
+        Messages messages,
+        String authProperty
+    ) {
         var auth = 0D;
         for (Double message : messages) {
             auth += message;
@@ -125,27 +110,26 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
         updateGlobalNorm(auth);
     }
 
-    private void normalizeHubValue(ComputeContext<HitsConfig> context) {
+    private void normalizeHubValue(BidirectionalComputeContext<HitsConfig> context) {
         // normalise hub
         var normalizedValue = normalize(context, context.config().hubProperty());
         // send normalised hubs to outgoing neighbors
         context.sendToNeighbors(normalizedValue);
     }
 
-    private void normalizeAuthValue(ComputeContext<HitsConfig> context) {
+    private void normalizeAuthValue(BidirectionalComputeContext<HitsConfig> context) {
         // normalise auth
         var normalizedValue = normalize(context, context.config().authProperty());
         // send normalised auths to incoming neighbors
-        for (long neighbor : context.longArrayNodeValue(NEIGHBOR_IDS)) {
-            context.sendTo(neighbor, normalizedValue);
-        }
+
+        context.sendToIncomingNeighbors(normalizedValue);
     }
 
     private void updateGlobalNorm(double value) {
         globalNorm.add(Math.pow(value, 2));
     }
 
-    private double normalize(ComputeContext<HitsConfig> context, String property) {
+    private double normalize(BidirectionalComputeContext<HitsConfig> context, String property) {
         var value = context.doubleNodeValue(property);
         var norm = globalNorm.sum();
         var normalizedValue = value / norm;
@@ -164,7 +148,7 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
         @Value.Derived
         @Configuration.Ignore
         default int maxIterations() {
-            return hitsIterations() * 4 + 1;
+            return hitsIterations() * 4;
         }
 
         @Override
@@ -200,18 +184,13 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
     }
 
     private enum HitsState {
-        SEND_IDS {
-            @Override
-            HitsState advance() {
-                return RECEIVE_IDS;
-            }
-        },
-        RECEIVE_IDS {
+        INIT {
             @Override
             HitsState advance() {
                 return NORMALIZE_AUTHS;
             }
         },
+
         CALCULATE_AUTHS {
             @Override
             HitsState advance() {
