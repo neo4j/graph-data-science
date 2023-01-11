@@ -17,6 +17,9 @@ The `authority` score estimates the importance of the node within the network.
 The `hub` score estimates the value of its relationships to other nodes.
 The GDS implementation is based on the http://www.cs.cornell.edu/home/kleinber/auth.pdf[Authoritative Sources in a Hyperlinked Environment] publication by Jon M. Kleinberg.
 
+[NOTE]
+The HITS algorithm requires the invese index for each relationship type.
+
 [[algorithms-hits-syntax]]
 == Syntax
 
@@ -245,7 +248,7 @@ In the example, we will use the HITS algorithm to calculate the authority and hu
 CALL gds.graph.project(
   'myGraph',
   'Website',
-  'LINK'
+  {LINK: {indexInverse: true}}
 );
 ----
 
