@@ -45,18 +45,4 @@ public interface DoubleGraphPropertyValues extends GraphPropertyValues {
     default ValueType valueType() {
         return ValueType.DOUBLE;
     }
-
-    static DoubleGraphPropertyValues ofDoubleStream(DoubleStream doubleStream) {
-        return new DoubleGraphPropertyValues() {
-            @Override
-            public DoubleStream doubleValues() {
-                return doubleStream;
-            }
-
-            @Override
-            public long size() {
-                return -1;
-            }
-        };
-    }
 }
