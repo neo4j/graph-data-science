@@ -35,7 +35,6 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -136,11 +135,9 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
                 var relationships = relationshipsBuilder.build();
 
                 var config = computationResult.config();
-                try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-                    computationResult
-                        .graphStore()
-                        .addRelationshipType(RelationshipType.of(config.mutateRelationshipType()), relationships);
-                }
+                computationResult
+                    .graphStore()
+                    .addRelationshipType(RelationshipType.of(config.mutateRelationshipType()), relationships);
                 resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
             }
         };

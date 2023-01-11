@@ -25,7 +25,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
@@ -50,17 +49,15 @@ final class TraverseMutateResultConsumer {
 
         SingleTypeRelationshipImportResult relationships;
 
-        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-            var source = result.get(0);
-            for (long i = 1; i < result.size(); i++) {
-                var target = result.get(i);
-                relationshipsBuilder.addFromInternal(source, target);
-                source = target;
-            }
-
-            relationships = relationshipsBuilder.build();
-            resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
+        var source = result.get(0);
+        for (long i = 1; i < result.size(); i++) {
+            var target = result.get(i);
+            relationshipsBuilder.addFromInternal(source, target);
+            source = target;
         }
+
+        relationships = relationshipsBuilder.build();
+        resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
 
         graphStore.addRelationshipType(mutateRelationshipType, relationships);
     }

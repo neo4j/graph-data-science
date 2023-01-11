@@ -27,7 +27,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
@@ -64,16 +63,15 @@ public class ShortestPathMutateResultConsumer<ALGO extends Algorithm<DijkstraRes
 
         SingleTypeRelationshipImportResult relationships;
 
-        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-            result.forEachPath(pathResult -> {
-                relationshipsBuilder.addFromInternal(pathResult.sourceNode(),
-                    pathResult.targetNode(),
-                    pathResult.totalCost()
-                );
-            });
-            relationships = relationshipsBuilder.build();
-            resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
-        }
+        result.forEachPath(pathResult -> {
+            relationshipsBuilder.addFromInternal(
+                pathResult.sourceNode(),
+                pathResult.targetNode(),
+                pathResult.totalCost()
+            );
+        });
+        relationships = relationshipsBuilder.build();
+        resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
 
         computationResult
             .graphStore()

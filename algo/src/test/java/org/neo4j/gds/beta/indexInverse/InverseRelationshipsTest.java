@@ -42,7 +42,7 @@ import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
 
 @GdlExtension
-class IndexInverseTest {
+class InverseRelationshipsTest {
     @GdlGraph(orientation = Orientation.NATURAL)
     @GdlGraph(orientation = Orientation.REVERSE, graphNamePrefix = "inverse")
     private static final String DIRECTED =
@@ -61,13 +61,13 @@ class IndexInverseTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void shouldCreateIndexedRelationships(int concurrency) {
-        var config = IndexInverseConfigImpl
+        var config = InverseRelationshipsConfigImpl
             .builder()
             .concurrency(concurrency)
             .relationshipType("T1")
             .build();
 
-        SingleTypeRelationshipImportResult inverseRelationships = new IndexInverse(
+        SingleTypeRelationshipImportResult inverseRelationships = new InverseRelationships(
             graphStore,
             config,
             ProgressTracker.NULL_TRACKER,
@@ -92,13 +92,13 @@ class IndexInverseTest {
     void logProgress() {
         var log = Neo4jProxy.testLog();
 
-        var config = IndexInverseConfigImpl
+        var config = InverseRelationshipsConfigImpl
             .builder()
             .concurrency(4)
             .relationshipType("T1")
             .build();
 
-        new IndexInverseAlgorithmFactory().build(
+        new InverseRelationshipsAlgorithmFactory().build(
             graphStore,
             config,
             log,
@@ -109,12 +109,12 @@ class IndexInverseTest {
             .extracting(removingThreadId())
             .containsExactly(
                 "IndexInverse :: Start",
-                "IndexInverse :: Create inversely indexed relationships :: Start",
-                "IndexInverse :: Create inversely indexed relationships 25%",
-                "IndexInverse :: Create inversely indexed relationships 50%",
-                "IndexInverse :: Create inversely indexed relationships 75%",
-                "IndexInverse :: Create inversely indexed relationships 100%",
-                "IndexInverse :: Create inversely indexed relationships :: Finished",
+                "IndexInverse :: Create inverse relationships :: Start",
+                "IndexInverse :: Create inverse relationships 25%",
+                "IndexInverse :: Create inverse relationships 50%",
+                "IndexInverse :: Create inverse relationships 75%",
+                "IndexInverse :: Create inverse relationships 100%",
+                "IndexInverse :: Create inverse relationships :: Finished",
                 "IndexInverse :: Build Adjacency list :: Start",
                 "IndexInverse :: Build Adjacency list 100%",
                 "IndexInverse :: Build Adjacency list :: Finished",

@@ -35,7 +35,7 @@ import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
 
 @Configuration
-public interface IndexInverseConfig extends AlgoBaseConfig {
+public interface InverseRelationshipsConfig extends AlgoBaseConfig {
     @Configuration.ConvertWith(method = "validateRelationshipTypeIdentifier")
     String relationshipType();
 
@@ -55,8 +55,8 @@ public interface IndexInverseConfig extends AlgoBaseConfig {
         return List.of("*");
     }
 
-    static IndexInverseConfig of(CypherMapWrapper configuration) {
-        return new IndexInverseConfigImpl(configuration);
+    static InverseRelationshipsConfig of(CypherMapWrapper configuration) {
+        return new InverseRelationshipsConfigImpl(configuration);
     }
 
     @Configuration.GraphStoreValidationCheck

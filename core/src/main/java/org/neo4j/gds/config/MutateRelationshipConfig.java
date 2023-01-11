@@ -35,11 +35,11 @@ public interface MutateRelationshipConfig extends MutateConfig {
 
     String MUTATE_RELATIONSHIP_TYPE_KEY = "mutateRelationshipType";
 
-    @Configuration.ConvertWith(method = "validateTypeIdentifier")
+    @Configuration.ConvertWith(method = "validateMutateRelationshipTypeIdentifier")
     String mutateRelationshipType();
 
-    static @Nullable String validateTypeIdentifier(String input) {
-        return validateNoWhiteCharacter(emptyToNull(input), "mutateRelationshipType");
+    static @Nullable String validateMutateRelationshipTypeIdentifier(String input) {
+        return validateNoWhiteCharacter(emptyToNull(input), MUTATE_RELATIONSHIP_TYPE_KEY);
     }
 
     @Configuration.GraphStoreValidationCheck

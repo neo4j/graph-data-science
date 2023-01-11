@@ -22,7 +22,6 @@ package org.neo4j.gds.beta.indexInverse;
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -37,7 +36,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 @GdsCallable(name = IndexInverseSpec.CALLABLE_NAME, executionMode = ExecutionMode.MUTATE_RELATIONSHIP, description = IndexInverseSpec.DESCRIPTION)
-public class IndexInverseSpec implements AlgorithmSpec<IndexInverse, SingleTypeRelationshipImportResult, IndexInverseConfig, Stream<IndexInverseSpec.MutateResult>, IndexInverseAlgorithmFactory> {
+public class IndexInverseSpec implements AlgorithmSpec<InverseRelationships, SingleTypeRelationshipImportResult, InverseRelationshipsConfig, Stream<IndexInverseSpec.MutateResult>, InverseRelationshipsAlgorithmFactory> {
 
     public static final String DESCRIPTION = "The IndexInverse procedure indexes directed relationships to allow an efficient inverse access for other algorithms.";
     static final String CALLABLE_NAME = "gds.beta.graph.relationships.indexInverse";
@@ -48,41 +47,40 @@ public class IndexInverseSpec implements AlgorithmSpec<IndexInverse, SingleTypeR
     }
 
     @Override
-    public IndexInverseAlgorithmFactory algorithmFactory() {
-        return new IndexInverseAlgorithmFactory();
+    public InverseRelationshipsAlgorithmFactory algorithmFactory() {
+        return new InverseRelationshipsAlgorithmFactory();
     }
 
     @Override
-    public NewConfigFunction<IndexInverseConfig> newConfigFunction() {
-        return ((__, config) -> IndexInverseConfig.of(config));
+    public NewConfigFunction<InverseRelationshipsConfig> newConfigFunction() {
+        return ((__, config) -> InverseRelationshipsConfig.of(config));
     }
 
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<IndexInverse, SingleTypeRelationshipImportResult, IndexInverseConfig> computeResult,
+        ComputationResult<InverseRelationships, SingleTypeRelationshipImportResult, InverseRelationshipsConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return new MutateResult.Builder().withInputRelationships(computeResult.graph().relationshipCount());
     }
 
     @Override
-    public ComputationResultConsumer<IndexInverse, SingleTypeRelationshipImportResult, IndexInverseConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<InverseRelationships, SingleTypeRelationshipImportResult, InverseRelationshipsConfig, Stream<MutateResult>> computationResultConsumer() {
         return new MutateComputationResultConsumer<>(this::resultBuilder) {
             @Override
             protected void updateGraphStore(
                 AbstractResultBuilder<?> resultBuilder,
-                ComputationResult<IndexInverse, SingleTypeRelationshipImportResult, IndexInverseConfig> computationResult,
+                ComputationResult<InverseRelationships, SingleTypeRelationshipImportResult, InverseRelationshipsConfig> computationResult,
                 ExecutionContext executionContext
             ) {
-                try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-                    var result = computationResult.result();
-                    if (result != null) {
-                        computationResult
-                            .graphStore()
-                            .addInverseIndex(
-                                RelationshipType.of(computationResult.config().relationshipType()),
-                                result
-                            );
-                    }
+                var result = computationResult.result();
+                if (result != null) {
+                    computationResult
+                        .graphStore()
+                        .addInverseIndex(
+                            RelationshipType.of(computationResult.config().relationshipType()),
+                            result.topology(),
+                            result.properties()
+                        );
                 }
             }
         };

@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -49,10 +50,13 @@ public abstract class MutateComputationResultConsumer<ALGO extends Algorithm<ALG
                 .withNodeCount(computationResult.graph().nodeCount())
                 .withConfig(config);
 
-            if (!computationResult.isGraphEmpty()) {
-                updateGraphStore(builder, computationResult, executionContext);
-                computationResult.graph().releaseProperties();
+            try (ProgressTimer ignored = ProgressTimer.start(builder::withMutateMillis)) {
+                if (!computationResult.isGraphEmpty()) {
+                    updateGraphStore(builder, computationResult, executionContext);
+                    computationResult.graph().releaseProperties();
+                }
             }
+
             return Stream.of(builder.build());
         });
     }

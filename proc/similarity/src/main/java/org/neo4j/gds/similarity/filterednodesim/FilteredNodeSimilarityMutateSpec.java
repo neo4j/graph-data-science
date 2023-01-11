@@ -31,7 +31,6 @@ import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -102,23 +101,21 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
             ) {
                 var config = computationResult.config();
 
-                try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-                    var relationships = getRelationships(
-                        computationResult,
-                        computationResult.result().graphResult(),
-                        config.mutateProperty(),
-                        (SimilarityProc.SimilarityResultBuilder<SimilarityMutateResult>) resultBuilder,
-                        executionContext.callContext()
-                    );
+                var relationships = getRelationships(
+                    computationResult,
+                    computationResult.result().graphResult(),
+                    config.mutateProperty(),
+                    (SimilarityProc.SimilarityResultBuilder<SimilarityMutateResult>) resultBuilder,
+                    executionContext.callContext()
+                );
 
-                    var relationshipType = RelationshipType.of(config.mutateRelationshipType());
+                var relationshipType = RelationshipType.of(config.mutateRelationshipType());
 
-                    computationResult
-                        .graphStore()
-                        .addRelationshipType(relationshipType, relationships);
+                computationResult
+                    .graphStore()
+                    .addRelationshipType(relationshipType, relationships);
 
-                    resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
-                }
+                resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
             }
         };
     }

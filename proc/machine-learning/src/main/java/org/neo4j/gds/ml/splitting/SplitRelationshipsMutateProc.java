@@ -22,10 +22,7 @@ package org.neo4j.gds.ml.splitting;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -82,17 +79,15 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
                 ComputationResult<SplitRelationships, SplitResult, SplitRelationshipsMutateConfig> computationResult,
                 ExecutionContext executionContext
             ) {
-                SingleTypeRelationshipImportResult selectedRels;
-                SingleTypeRelationshipImportResult remainingRels;
-                try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-                    GraphStore graphStore = computationResult.graphStore();
-                    SplitResult splitResult = computationResult.result();
-                    selectedRels = splitResult.selectedRels().build();
-                    remainingRels = splitResult.remainingRels().build();
-                    SplitRelationshipsBaseConfig config = computationResult.config();
-                    graphStore.addRelationshipType(config.remainingRelationshipType(), remainingRels);
-                    graphStore.addRelationshipType(config.holdoutRelationshipType(), selectedRels);
-                }
+                var graphStore = computationResult.graphStore();
+                var splitResult = computationResult.result();
+                var selectedRels = splitResult.selectedRels().build();
+                var remainingRels = splitResult.remainingRels().build();
+                var config = computationResult.config();
+
+                graphStore.addRelationshipType(config.remainingRelationshipType(), remainingRels);
+                graphStore.addRelationshipType(config.holdoutRelationshipType(), selectedRels);
+
                 long holdoutWritten = selectedRels.topology().elementCount();
                 long remainingWritten = remainingRels.topology().elementCount();
                 resultBuilder.withRelationshipsWritten(holdoutWritten + remainingWritten);

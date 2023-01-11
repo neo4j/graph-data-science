@@ -28,7 +28,6 @@ import org.neo4j.gds.beta.walking.CollapsePathAlgorithmFactory;
 import org.neo4j.gds.beta.walking.CollapsePathConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImportResult;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -73,12 +72,10 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, SingleTypeR
                 ComputationResult<CollapsePath, SingleTypeRelationshipImportResult, CollapsePathConfig> computationResult,
                 ExecutionContext executionContext
             ) {
-                try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-                    computationResult.graphStore().addRelationshipType(
-                        RelationshipType.of(computationResult.config().mutateRelationshipType()),
-                        computationResult.result()
-                    );
-                }
+                computationResult.graphStore().addRelationshipType(
+                    RelationshipType.of(computationResult.config().mutateRelationshipType()),
+                    computationResult.result()
+                );
 
                 resultBuilder.withRelationshipsWritten(computationResult.result().topology().elementCount());
             }

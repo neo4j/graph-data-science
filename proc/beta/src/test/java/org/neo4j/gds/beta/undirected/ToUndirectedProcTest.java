@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -84,9 +85,9 @@ class ToUndirectedProcTest extends BaseProcTest {
 
         assertCypherResult(query, List.of(Map.of("inputRelationships", 3L,
             "relationshipsWritten", 6L,
-            "mutateMillis", instanceOf(Long.class),
-            "preProcessingMillis",instanceOf(Long.class),
-            "computeMillis",instanceOf(Long.class),
+            "mutateMillis", greaterThanOrEqualTo(0L),
+            "preProcessingMillis",greaterThanOrEqualTo(0L),
+            "computeMillis",greaterThanOrEqualTo(0L),
             "postProcessingMillis",instanceOf(Long.class),
             "configuration", instanceOf(Map.class))
         ));

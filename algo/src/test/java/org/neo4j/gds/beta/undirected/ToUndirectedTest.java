@@ -68,7 +68,7 @@ class ToUndirectedTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void shouldCreateUndirectedRelationships(int concurrency) {
-        var config = ImmutableToUndirectedConfig
+        var config = ToUndirectedConfigImpl
             .builder()
             .concurrency(concurrency)
             .relationshipType("T1")
@@ -115,7 +115,7 @@ class ToUndirectedTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void shouldCreateUndirectedRelationshipsWithSingleRelationshipProperty(int concurrency) {
-        var config = ImmutableToUndirectedConfig
+        var config = ToUndirectedConfigImpl
             .builder()
             .concurrency(concurrency)
             .relationshipType("T1")
@@ -160,7 +160,7 @@ class ToUndirectedTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void shouldCreateUndirectedRelationshipsWithNoRelationshipProperty(int concurrency) {
-        var config = ImmutableToUndirectedConfig
+        var config = ToUndirectedConfigImpl
             .builder()
             .concurrency(concurrency)
             .relationshipType("T1")
@@ -186,7 +186,7 @@ class ToUndirectedTest {
     void shouldLogProgress() {
         var log = Neo4jProxy.testLog();
 
-        var config = ImmutableToUndirectedConfig
+        var config = ToUndirectedConfigImpl
             .builder()
             .concurrency(4)
             .relationshipType("T1")
