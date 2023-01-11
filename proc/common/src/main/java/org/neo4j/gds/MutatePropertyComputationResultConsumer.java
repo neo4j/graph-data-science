@@ -22,7 +22,6 @@ package org.neo4j.gds;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.huge.FilteredNodePropertyValues;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -35,8 +34,8 @@ import java.util.stream.Collectors;
 public class MutatePropertyComputationResultConsumer<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig, RESULT>
     extends MutateComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, RESULT> {
 
-    public interface MutateNodePropertyListFunction<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig>
-        extends NodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> {}
+    public interface MutateNodePropertyListFunction<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends MutatePropertyConfig> extends NodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> {
+    }
 
     private final MutateNodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertyListFunction;
 
@@ -59,31 +58,29 @@ public class MutatePropertyComputationResultConsumer<ALGO extends Algorithm<ALGO
 
         final var nodeProperties = this.nodePropertyListFunction.apply(computationResult);
 
-        var maybeTranslatedProperties = graph.asNodeFilteredGraph()
-            .map(filteredGraph -> nodeProperties.stream()
-                .map(nodeProperty ->
-                    ImmutableNodeProperty.of(
-                        nodeProperty.propertyKey(),
-                        new FilteredNodePropertyValues.OriginalToFilteredNodePropertyValues(
-                            nodeProperty.properties(),
-                            filteredGraph
-                        )
+        var maybeTranslatedProperties = graph
+            .asNodeFilteredGraph()
+            .map(filteredGraph -> nodeProperties
+                .stream()
+                .map(nodeProperty -> ImmutableNodeProperty.of(nodeProperty.propertyKey(),
+                    new FilteredNodePropertyValues.OriginalToFilteredNodePropertyValues(nodeProperty.properties(),
+                        filteredGraph
                     )
-                ).collect(Collectors.toList())
-            ).orElse(nodeProperties);
+                ))
+                .collect(Collectors.toList()))
+            .orElse(nodeProperties);
 
-        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-            executionContext.log().debug("Updating in-memory graph store");
-            GraphStore graphStore = computationResult.graphStore();
-            Collection<NodeLabel> labelsToUpdate = mutatePropertyConfig.nodeLabelIdentifiers(graphStore);
+        executionContext.log().debug("Updating in-memory graph store");
+        GraphStore graphStore = computationResult.graphStore();
+        Collection<NodeLabel> labelsToUpdate = mutatePropertyConfig.nodeLabelIdentifiers(graphStore);
 
-            maybeTranslatedProperties.forEach(nodeProperty -> graphStore.addNodeProperty(
-                new HashSet<>(labelsToUpdate),
-                nodeProperty.propertyKey(),
-                nodeProperty.properties()
-            ));
+        maybeTranslatedProperties.forEach(nodeProperty -> graphStore.addNodeProperty(new HashSet<>(labelsToUpdate),
+            nodeProperty.propertyKey(),
+            nodeProperty.properties()
+        ));
 
-            resultBuilder.withNodePropertiesWritten(maybeTranslatedProperties.size() * computationResult.graph().nodeCount());
-        }
+        resultBuilder.withNodePropertiesWritten(maybeTranslatedProperties.size() * computationResult
+            .graph()
+            .nodeCount());
     }
 }
