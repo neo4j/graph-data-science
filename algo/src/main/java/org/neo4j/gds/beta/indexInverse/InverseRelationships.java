@@ -38,13 +38,15 @@ import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class InverseRelationships extends Algorithm<SingleTypeRelationships> {
+public class InverseRelationships extends Algorithm<Map<RelationshipType, SingleTypeRelationships>> {
     private final GraphStore graphStore;
     private final InverseRelationshipsConfig config;
     private final ExecutorService executorService;
@@ -63,42 +65,47 @@ public class InverseRelationships extends Algorithm<SingleTypeRelationships> {
     }
 
     @Override
-    public SingleTypeRelationships compute() {
+    public Map<RelationshipType, SingleTypeRelationships> compute() {
         progressTracker.beginSubTask();
 
-        RelationshipType fromRelationshipType = RelationshipType.of(config.relationshipType());
+        var fromRelationshipTypes = config.internalRelationshipTypes(graphStore);
 
+        var relationshipsPerType = new HashMap<RelationshipType, SingleTypeRelationships>();
 
-        var propertySchemas = graphStore
-            .schema()
-            .relationshipSchema()
-            .propertySchemasFor(fromRelationshipType);
-        var propertyKeys = propertySchemas.stream().map(PropertySchema::key).collect(Collectors.toList());
+        for (RelationshipType fromRelationshipType : fromRelationshipTypes) {
+            var propertySchemas = graphStore
+                .schema()
+                .relationshipSchema()
+                .propertySchemasFor(fromRelationshipType);
+            var propertyKeys = propertySchemas.stream().map(PropertySchema::key).collect(Collectors.toList());
 
-        var relationshipsBuilder = initializeRelationshipsBuilder(propertySchemas);
+            var relationshipsBuilder = initializeRelationshipsBuilder(propertySchemas);
 
-        var tasks = createTasks(fromRelationshipType, propertyKeys, relationshipsBuilder);
+            var tasks = createTasks(fromRelationshipType, propertyKeys, relationshipsBuilder);
 
-        progressTracker.beginSubTask();
+            progressTracker.beginSubTask();
 
-        RunWithConcurrency.
-            builder()
-            .tasks(tasks)
-            .concurrency(config.concurrency())
-            .executor(executorService)
-            .terminationFlag(terminationFlag)
-            .build()
-            .run();
+            RunWithConcurrency.
+                builder()
+                .tasks(tasks)
+                .concurrency(config.concurrency())
+                .executor(executorService)
+                .terminationFlag(terminationFlag)
+                .build()
+                .run();
+
+            progressTracker.endSubTask();
+
+            progressTracker.beginSubTask();
+            var relationships = relationshipsBuilder.build();
+            progressTracker.endSubTask();
+
+            relationshipsPerType.put(fromRelationshipType, relationships);
+        }
 
         progressTracker.endSubTask();
 
-        progressTracker.beginSubTask();
-        var relationships = relationshipsBuilder.build();
-        progressTracker.endSubTask();
-
-        progressTracker.endSubTask();
-
-        return relationships;
+        return relationshipsPerType;
     }
 
     @NotNull

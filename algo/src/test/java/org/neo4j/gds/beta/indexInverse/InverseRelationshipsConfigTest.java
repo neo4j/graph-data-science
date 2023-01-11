@@ -26,6 +26,9 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @GdlExtension
@@ -35,7 +38,7 @@ class InverseRelationshipsConfigTest {
         "  (a), (b), (c), (d)" +
         ", (a)-[:T1]->(b)" +
         ", (b)-[:T1]->(a)" +
-        ", (b)-[:T1]->(c)" +
+        ", (b)-[:T2]->(c)" +
         ", (a)-[:T1]->(a)";
 
     @GdlGraph(graphNamePrefix = "undirected", orientation = Orientation.UNDIRECTED)
@@ -47,10 +50,32 @@ class InverseRelationshipsConfigTest {
     GraphStore undirectedGraphStore;
 
     @Test
+    void supportString() {
+        String input = "*";
+        var config = InverseRelationshipsConfigImpl
+            .builder()
+            .relationshipTypes(input)
+            .build();
+
+        assertThat(config.relationshipTypes()).containsExactly(input);
+    }
+
+    @Test
+    void supportList() {
+        var input = List.of("T1", "T2");
+        var config = InverseRelationshipsConfigImpl
+            .builder()
+            .relationshipTypes(input)
+            .build();
+
+        assertThat(config.relationshipTypes()).isEqualTo(input);
+    }
+
+    @Test
     void failIfAlreadyIndexed() {
         var config = InverseRelationshipsConfigImpl
             .builder()
-            .relationshipType("T1")
+            .relationshipTypes("T1")
             .build();
 
         assertThatThrownBy(() -> config.graphStoreValidation(
@@ -58,14 +83,14 @@ class InverseRelationshipsConfigTest {
             config.nodeLabelIdentifiers(graphStore),
             config.internalRelationshipTypes(graphStore)
         ))
-            .hasMessageMatching("Inverse index already exists for 'T1'.");
+            .hasMessage("Inverse index already exists for ['T1'].");
     }
 
     @Test
     void failOnUndirectedInput() {
         var config = InverseRelationshipsConfigImpl
             .builder()
-            .relationshipType("X")
+            .relationshipTypes("X")
             .build();
 
         assertThatThrownBy(() -> config.graphStoreValidation(
@@ -73,6 +98,6 @@ class InverseRelationshipsConfigTest {
             config.nodeLabelIdentifiers(undirectedGraphStore),
             config.internalRelationshipTypes(undirectedGraphStore)
         ))
-            .hasMessage("Creating an inverse index for undirected relationships is not supported.");
+            .hasMessage("Creating an inverse index for undirected relationships is not supported. Undirected relationship types are ['X'].");
     }
 }

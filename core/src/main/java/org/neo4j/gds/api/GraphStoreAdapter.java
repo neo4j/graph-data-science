@@ -235,9 +235,10 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     @Override
     public void addInverseIndex(
         RelationshipType relationshipType,
-        SingleTypeRelationships indexedRelationships
+        Topology topology,
+        Optional<RelationshipPropertyStore> properties
     ) {
-        graphStore.addInverseIndex(relationshipType, indexedRelationships);
+        graphStore.addInverseIndex(relationshipType, topology, properties);
     }
 
     @Override
