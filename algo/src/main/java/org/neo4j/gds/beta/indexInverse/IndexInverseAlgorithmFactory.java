@@ -22,9 +22,8 @@ package org.neo4j.gds.beta.indexInverse;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.huge.CompressedAdjacencyList;
-import org.neo4j.gds.core.huge.UncompressedAdjacencyList;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -62,10 +61,10 @@ public class IndexInverseAlgorithmFactory extends GraphStoreAlgorithmFactory<Ind
         RelationshipType relationshipType = RelationshipType.of(configuration.relationshipType());
 
         var builder = MemoryEstimations.builder(IndexInverse.class)
-            .add("inverse relationships", CompressedAdjacencyList.adjacencyListEstimation(relationshipType, false));
+            .add("inverse relationships", AdjacencyListBehavior.adjacencyListEstimation(relationshipType, false));
 
         builder.perGraphDimension("properties", ((graphDimensions, concurrency) -> {
-            var singlePropertyEstimation = UncompressedAdjacencyList
+            var singlePropertyEstimation = AdjacencyListBehavior
                 .adjacencyPropertiesEstimation(relationshipType, false)
                 .estimate(graphDimensions, concurrency)
                 .memoryUsage();
