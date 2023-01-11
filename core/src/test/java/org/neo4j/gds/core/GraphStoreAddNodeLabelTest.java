@@ -77,10 +77,9 @@ class GraphStoreAddNodeLabelTest {
         var newLabel = NodeLabel.of("Test");
 
         // Act
-        graphStore.prepareForAddingNodeLabel(newLabel);
         graphStore.addNodeLabel(newLabel);
-        graphStore.addNodeIdToNodeLabel(b, newLabel);
-        graphStore.addNodeIdToNodeLabel(c, newLabel);
+        graphStore.nodes().addNodeIdToLabel(b, newLabel);
+        graphStore.nodes().addNodeIdToLabel(c, newLabel);
 
         // Assert
         // the node schema should have the node label

@@ -266,10 +266,8 @@ class SingleLabelInformationTest {
             .build(1, LongUnaryOperator.identity());
 
         assertThatExceptionOfType(UnsupportedOperationException.class)
-            .isThrownBy(() -> labelInformation.addNodeIdToLabel(LABEL_A, 19L));
+            .isThrownBy(() -> labelInformation.addNodeIdToLabel(19L, LABEL_A));
     }
-
-
     @Test
     void shouldConvertToMultiLabel() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
@@ -284,6 +282,23 @@ class SingleLabelInformationTest {
 
         assertThat(multiLabelInformation.availableNodeLabels()).containsExactlyInAnyOrder(
             LABEL_A,
+            nodeLabelB
+        );
+    }
+    @Test
+    void shouldConvertStarProjectionToMultiLabel() {
+        var labelInformation = LabelInformationBuilders.allNodes()
+            .build(1, LongUnaryOperator.identity());
+
+        var nodeLabelB = NodeLabel.of("B");
+        var multiLabelInformation = labelInformation.toMultiLabel(nodeLabelB);
+
+        assertThat(multiLabelInformation).isNotSameAs(labelInformation);
+
+        assertThat(multiLabelInformation.isSingleLabel()).isFalse();
+
+        assertThat(multiLabelInformation.availableNodeLabels()).containsExactlyInAnyOrder(
+            NodeLabel.ALL_NODES,
             nodeLabelB
         );
     }

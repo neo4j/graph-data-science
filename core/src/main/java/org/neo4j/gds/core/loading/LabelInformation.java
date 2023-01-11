@@ -53,13 +53,9 @@ public interface LabelInformation {
 
     PrimitiveIterator.OfLong nodeIterator(Collection<NodeLabel> labels, long nodeCount);
 
-    default void addLabel(NodeLabel nodeLabel) {
-        throw new UnsupportedOperationException("Adding labels is not supported");
-    }
+    void addLabel(NodeLabel nodeLabel);
 
-    default void addNodeIdToLabel(NodeLabel nodeLabel, long nodeId) {
-        throw new UnsupportedOperationException("Adding node id to label is not supported");
-    }
+    void addNodeIdToLabel(long nodeId, NodeLabel nodeLabel);
 
     boolean isSingleLabel();
 

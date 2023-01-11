@@ -125,8 +125,17 @@ public abstract class IdMapAdapter implements IdMap {
         return idMap.hasLabel(mappedNodeId, label);
     }
 
+    public void addNodeLabel(NodeLabel nodeLabel) {
+        idMap.addNodeLabel(nodeLabel);
+    }
+
+    public void addNodeIdToLabel(long nodeId, NodeLabel nodeLabel) {
+        idMap.addNodeIdToLabel(nodeId, nodeLabel);
+    }
+
     @Override
     public Optional<FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         return idMap.withFilteredLabels(nodeLabels, concurrency);
     }
+
 }

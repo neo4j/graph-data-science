@@ -89,8 +89,8 @@ public final class MultiLabelInformation implements LabelInformation {
     }
 
     @Override
-    public void addNodeIdToLabel(NodeLabel nodeLabel, long nodeId) {
-        labelInformation.computeIfAbsent(nodeLabel, (ignored) -> new BitSet()).set(nodeId);
+    public void addNodeIdToLabel(long nodeId, NodeLabel nodeLabel) {
+        labelInformation.get(nodeLabel).set(nodeId);
     }
 
     @Override

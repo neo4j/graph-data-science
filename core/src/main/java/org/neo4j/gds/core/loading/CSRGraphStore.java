@@ -245,6 +245,28 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
+    public void addNodeLabel(NodeLabel nodeLabel) {
+        updateGraphStore(graphStore -> {
+            nodes.addNodeLabel(nodeLabel);
+            graphStore.schema.nodeSchema().addLabel(nodeLabel);
+            graphStore.nodeProperties.propertyValues().forEach((key, value) -> {
+                schema()
+                    .nodeSchema()
+                    .get(nodeLabel)
+                    .addProperty(
+                        key,
+                        PropertySchema.of(
+                            key,
+                            value.valueType(),
+                            value.valueType().fallbackValue(),
+                            PropertyState.TRANSIENT
+                        )
+                    );
+            });
+        });
+    }
+
+    @Override
     public Set<String> nodePropertyKeys(NodeLabel label) {
         return schema().nodeSchema().allProperties(label);
     }
@@ -726,22 +748,5 @@ public class CSRGraphStore implements GraphStore {
                 }
             });
         });
-    }
-
-    @Override
-    public void prepareForAddingNodeLabel(NodeLabel newLabel) {
-        nodes.prepareForAddingNodeLabel(newLabel);
-    }
-
-    @Override
-    public void addNodeLabel(NodeLabel nodeLabel) {
-        schema().nodeSchema().addLabel(nodeLabel);
-        nodes.addNodeLabel(nodeLabel);
-    }
-
-    @Override
-    public void addNodeIdToNodeLabel(long nodeId, NodeLabel nodeLabel) {
-        schema.nodeSchema().addLabel(nodeLabel);
-        nodes.addNodeIdToLabel(nodeLabel, nodeId);
     }
 }

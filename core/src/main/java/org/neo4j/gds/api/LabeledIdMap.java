@@ -103,19 +103,22 @@ public abstract class LabeledIdMap implements IdMap {
         return labelInformation.hasLabel(mappedNodeId, label);
     }
 
-    public void prepareForAddingNodeLabel(NodeLabel nodeLabelToMutate) {
-        if (labelInformation.isSingleLabel()) {
-            labelInformation = labelInformation.toMultiLabel(nodeLabelToMutate);
-        }
-    }
-
     @Override
-    public final void addNodeLabel(NodeLabel nodeLabel) {
+    public void addNodeLabel(NodeLabel nodeLabel) {
+        prepareForAddingNodeLabel(nodeLabel);
         labelInformation.addLabel(nodeLabel);
     }
 
     @Override
-    public final void addNodeIdToLabel(NodeLabel nodeLabel, long nodeId) {
-        labelInformation.addNodeIdToLabel(nodeLabel, nodeId);
+    public void addNodeIdToLabel(long nodeId, NodeLabel nodeLabel) {
+        prepareForAddingNodeLabel(nodeLabel);
+        labelInformation.addNodeIdToLabel(nodeId, nodeLabel);
     }
+
+    private void prepareForAddingNodeLabel(NodeLabel nodeLabel) {
+        if (labelInformation.isSingleLabel()) {
+            labelInformation = labelInformation.toMultiLabel(nodeLabel);
+        }
+    }
+
 }

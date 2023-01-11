@@ -364,7 +364,7 @@ class MultiLabelInformationTest {
     }
 
     @Test
-    void shouldAddLabelAndAssignItToANode(SoftAssertions assertions) {
+    void shouldAssignNodeLabelToNodes(SoftAssertions assertions) {
 
         // Arrange
         var labelA = NodeLabel.of("A");
@@ -374,29 +374,22 @@ class MultiLabelInformationTest {
         var builder = LabelInformationBuilders
             .multiLabelWithCapacityAndLabelInformation(42, availableNodeLabels, Collections.emptyList());
 
-        // Act
-        var newLabel = NodeLabel.of("C");
-
         var labelInformation = builder.build(42, LongUnaryOperator.identity());
-        labelInformation.addNodeIdToLabel(newLabel, 2);
+        var newLabel = NodeLabel.of("C");
+        labelInformation.addLabel(newLabel);
+
+        // Act
+        labelInformation.addNodeIdToLabel(2, newLabel);
 
         // Assert
-        assertions.assertThat(labelInformation.availableNodeLabels())
-            .containsExactlyInAnyOrder(
-                labelA,
-                labelB,
-                newLabel
-            );
 
-        // Using `builder.addNodeIdToLabel` adds the new label to the LabelInformation AND assigns the given nodeId to it.
         assertions.assertThat(labelInformation.nodeCountForLabel(newLabel))
             .as("The newly added label `C` should be mapped to exactly one node")
             .isEqualTo(1L);
 
         assertions.assertThat(labelInformation.nodeLabelsForNodeId(2))
-            .as("Node with ID `2` should be mapped to node labels `A` and the new label `C`")
+            .as("Node with ID `2` should be mapped to the new label `C`")
             .containsExactlyInAnyOrder(
-                // labelB, // Here we should have Label `B` because it was passed through the `labelTokenNodeLabelMappings`
                 newLabel
             );
 

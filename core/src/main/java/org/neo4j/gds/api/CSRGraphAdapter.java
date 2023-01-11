@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.api;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 
 import java.util.Map;
@@ -40,5 +41,13 @@ public abstract class CSRGraphAdapter extends GraphAdapter implements CSRGraph {
     @Override
     public Map<RelationshipType, Topology> relationshipTopologies() {
         return csrGraph.relationshipTopologies();
+    }
+
+    public void addNodeLabel(NodeLabel nodeLabel) {
+        csrGraph.addNodeLabel(nodeLabel);
+    }
+
+    public void addNodeIdToLabel(long nodeId, NodeLabel nodeLabel) {
+        csrGraph.addNodeIdToLabel(nodeId, nodeLabel);
     }
 }

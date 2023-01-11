@@ -130,4 +130,12 @@ public class DirectIdMap implements IdMap {
     public PrimitiveIterator.OfLong nodeIterator(Set<NodeLabel> labels) {
         return nodeIterator();
     }
+
+    public void addNodeLabel(NodeLabel nodeLabel) {
+        throw new UnsupportedOperationException("Adding Node labels is not supported");
+    }
+
+    public void addNodeIdToLabel(long nodeId, NodeLabel nodeLabel) {
+        throw new UnsupportedOperationException("Assigning Node labels to nodes is not supported");
+    }
 }

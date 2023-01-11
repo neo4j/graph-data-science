@@ -97,4 +97,14 @@ public class FilteredLabeledIdMap extends LabeledIdMap implements FilteredIdMap 
     public boolean hasLabel(long filteredNodeId, NodeLabel label) {
         return originalToRootIdMap.hasLabel(rootToFilteredIdMap.toOriginalNodeId(filteredNodeId), label);
     }
+
+    @Override
+    public void addNodeLabel(NodeLabel nodeLabel) {
+        originalToRootIdMap.addNodeLabel(nodeLabel);
+    }
+
+    @Override
+    public final void addNodeIdToLabel(long filteredNodeId, NodeLabel nodeLabel) {
+        originalToRootIdMap.addNodeIdToLabel(rootToFilteredIdMap.toOriginalNodeId(filteredNodeId), nodeLabel);
+    }
 }

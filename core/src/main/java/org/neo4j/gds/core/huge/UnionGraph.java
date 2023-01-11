@@ -401,4 +401,12 @@ public final class UnionGraph implements CSRGraph {
             return Math.toIntExact(visited.cardinality());
         }
     }
+
+    public void addNodeLabel(NodeLabel nodeLabel) {
+        throw new UnsupportedOperationException("Adding Node labels is not supported");
+    }
+
+    public void addNodeIdToLabel(long nodeId, NodeLabel nodeLabel) {
+        throw new UnsupportedOperationException("Assigning Node labels to nodes is not supported");
+    }
 }

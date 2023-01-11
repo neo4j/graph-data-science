@@ -156,6 +156,24 @@ class FilteredLabeledIdMapTest {
     }
 
     @Test
+    void addNodeIdToLabel() {
+        var aLabel = NodeLabel.of("A");
+        var bLabel = NodeLabel.of("B");
+        var cLabel = NodeLabel.of("C");
+
+        var originalToRootIdMap = TestIdMap.builder()
+            .add(42, 0, aLabel)
+            .add(43, 1, bLabel)
+            .build();
+        var rootToFilteredIdMap = idMap(0, 0, 2, 1);
+
+        var idMap = new FilteredLabeledIdMap(originalToRootIdMap, rootToFilteredIdMap);
+        idMap.addNodeLabel(cLabel);
+        idMap.addNodeIdToLabel(1, cLabel);
+        assertThat(idMap.hasLabel(1, cLabel)).isTrue();
+    }
+
+    @Test
     void forEachNodeLabel() {
         var aLabel = NodeLabel.of("A");
         var bLabel = NodeLabel.of("B");

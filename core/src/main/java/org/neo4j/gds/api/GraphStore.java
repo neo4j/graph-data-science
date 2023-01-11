@@ -81,6 +81,13 @@ public interface GraphStore {
 
     Set<NodeLabel> nodeLabels();
 
+    /**
+     * Add a new Node label to the Graph Store.
+     *
+     * @param nodeLabel the Node label to add
+     */
+    void addNodeLabel(NodeLabel nodeLabel);
+
     // Node Properties
 
     Set<String> nodePropertyKeys(NodeLabel label);
@@ -236,10 +243,4 @@ public interface GraphStore {
     void canRelease(boolean canRelease);
 
     void release();
-
-    default void prepareForAddingNodeLabel(NodeLabel newLabel) {}
-
-    default void addNodeLabel(NodeLabel nodeLabel) {}
-
-    default void addNodeIdToNodeLabel(long nodeId, NodeLabel nodeLabel) {}
 }

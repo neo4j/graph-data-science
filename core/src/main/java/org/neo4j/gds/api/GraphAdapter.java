@@ -268,4 +268,12 @@ public abstract class GraphAdapter implements Graph {
         // it would never go from fulfilled to not fulfilled however, so this is safe
         return graph.isMultiGraph();
     }
+
+    public void addNodeLabel(NodeLabel nodeLabel) {
+        graph.addNodeLabel(nodeLabel);
+    }
+
+    public void addNodeIdToLabel(long nodeId, NodeLabel nodeLabel) {
+        graph.addNodeIdToLabel(nodeId, nodeLabel);
+    }
 }
