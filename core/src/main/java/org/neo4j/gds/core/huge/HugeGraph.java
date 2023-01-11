@@ -579,7 +579,6 @@ public class HugeGraph implements CSRGraph {
         return hasRelationshipProperty;
     }
 
-
     public Topology relationshipTopology() {
         return ImmutableTopology.of(
             adjacency,
@@ -588,10 +587,24 @@ public class HugeGraph implements CSRGraph {
         );
     }
 
+    public Optional<Topology> inverseRelationshipTopology() {
+        return Optional.ofNullable(inverseAdjacency).map(adjacencyList -> ImmutableTopology.of(
+            adjacency,
+            relationshipCount,
+            isMultiGraph()
+        ));
+    }
+
     public Optional<Properties> relationshipProperties() {
-        return properties != null
-            ? Optional.of(ImmutableProperties.of(properties, relationshipCount, defaultPropertyValue))
-            : Optional.empty();
+        return Optional
+            .ofNullable(properties)
+            .map(properties -> ImmutableProperties.of(properties, relationshipCount, defaultPropertyValue));
+    }
+
+    public Optional<Properties> inverseRelationshipProperties() {
+        return Optional
+            .ofNullable(inverseProperties)
+            .map(properties -> ImmutableProperties.of(properties, relationshipCount, defaultPropertyValue));
     }
 
     private void consumeAdjacentNodes(
