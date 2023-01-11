@@ -75,8 +75,9 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         SpanningTree spanningTree = prim.compute();
         HugeLongArray parent = spanningTree.parentArray();
         long parentSize = parent.size();
-        HugeLongPriorityQueue priorityQueue = minMax == Prim.MAX_OPERATOR ? HugeLongPriorityQueue.min(parentSize) : HugeLongPriorityQueue.max(
-            parentSize);
+        HugeLongPriorityQueue priorityQueue = minMax == Prim.MAX_OPERATOR
+            ? HugeLongPriorityQueue.min(parentSize)
+            : HugeLongPriorityQueue.max(parentSize);
         progressTracker.beginSubTask(parentSize);
         for (long i = 0; i < parentSize && terminationFlag.running(); i++) {
             long p = parent.get(i);
@@ -88,8 +89,8 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         }
         progressTracker.endSubTask();
         progressTracker.beginSubTask(k - 1);
-        // remove k-1 relationships
-        for (long i = 0; i < k - 1 && terminationFlag.running(); i++) {
+        // remove until there are k-1 relationships
+        for (long i = 0; i < spanningTree.effectiveNodeCount() - k && terminationFlag.running(); i++) {
             long cutNode = priorityQueue.pop();
             parent.set(cutNode, -1);
             progressTracker.logProgress();
