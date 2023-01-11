@@ -182,7 +182,7 @@ public abstract class RelationshipProjections extends AbstractProjections<Relati
     private static void validateIdentifierName(String identifier) {
         if (identifier.equals(ALL_RELATIONSHIPS.name())) {
             throw new IllegalArgumentException(StringFormatting.formatWithLocale(
-                "%s is a reserved node label and may not be used",
+                "%s is a reserved relationship type and may not be used",
                 ALL_RELATIONSHIPS.name()
             ));
         }
