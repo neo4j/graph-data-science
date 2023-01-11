@@ -588,3 +588,67 @@ YIELD nodePropertiesWritten, componentCount;
 If the `seedProperty` configuration parameter has the same value as `writeProperty`, the algorithm only writes properties for nodes where the component ID has changed.
 If they differ, the algorithm writes properties for all nodes.
 ====
+
+
+[[algorithms-wcc-inverse-index]]
+=== Graph Sampling optimization
+
+The WCC implementation provides two compute strategies:
+
+* The unsampled strategy as described in https://dl.acm.org/doi/pdf/10.1145/103418.103458[Wait-free Parallel Algorithms for the Union-Find Problem^].
+* The sampled strategy as described in https://ieeexplore.ieee.org/document/8425156[Optimizing Parallel Graph Connectivity Computation via Subgraph Sampling^]
+
+While both strategies provide very good performance, the sampled strategy is usually the faster one.
+The decision, which strategy to use, depends on the input graph.
+If the relationships of the graph are ...
+
+* ... undirected, the algorithm picks the sampled strategy.
+* ... directed, the algorithm picks the unsampled strategy.
+* ... directed and _inverse indexed_, the algorithm picks the sampled strategy.
+
+The direction of a relationship is defined by the `orientation` which can be set during a graph projection.
+While `NATURAL` and `REVERSE` orientation result in a directed graph, the `UNDIRECTED` orientation leads to undirected relationships.
+In order to create a directed graph with inverse indexed relationships, one can use the `indexInverse` parameter as part of the relationship projection.
+An inverse index allows the algorithm to traverse the relationships of a node according to the opposite orientation.
+If the graph is projected using a `NATURAL` orientation, the inverse index represents the `REVERSE` orientation and vice versa.
+
+
+.The following statement will project the above example graph using a native projection with inverse index  and store it in the graph catalog under the name `myIndexedGraph`.
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+  'myIndexedGraph',
+  'User',
+  {LINK: {orientation: 'NATURAL', indexInverse: true }}
+)
+----
+
+The following query is identical to the stream example in the xref:algorithms/wcc.adoc#algorithms-wcc-examples-seeding[previous section].
+This time, we execute WCC on `myIndexedGraph` which will allow the algorithm to use the sampled strategy.
+
+[role=query-example]
+--
+.The following will run the algorithm with sampled strategy and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.wcc.stream('myIndexedGraph')
+YIELD nodeId, componentId
+RETURN gds.util.asNode(nodeId).name AS name, componentId
+ORDER BY componentId, name
+----
+
+.Results
+[opts="header"]
+|===
+| name      | componentId
+| "Alice"   | 0
+| "Bridget" | 0
+| "Charles" | 0
+| "Doug"    | 3
+| "Mark"    | 3
+| "Michael" | 3
+|===
+--
+
+As expected, the results are the same as before.
+However, on larger graphs, there will be a notable improvement in compute time.
