@@ -17,7 +17,7 @@ Our heuristic processes the result found by the Prim algorithm for the Minimum W
 
 [[algorithms-k-spanning]]
 == Considerations
-The minimum weight k-Spanning Tree is NP-Hard. The algorithm in the Neo4j GDS Library is therefore not guaranteed to find the optimal answer, but should return good approxima
+The minimum weight k-Spanning Tree is NP-Hard. The algorithm in the Neo4j GDS Library is therefore not guaranteed to find the optimal answer, but should return good approximation in practice.
 [[algorithms-minimum-k-weight-spanning-tree-syntax]]
 == Syntax
 
