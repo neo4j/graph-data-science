@@ -16,21 +16,19 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 [[algorithms-wcc-intro]]
 == Introduction
 
-The WCC algorithm finds sets of connected nodes in an undirected graph, where all nodes in the same set form a connected component.
+The Weakly Connected Components (WCC) algorithm finds sets of connected nodes in directed and undirected graphs.
+Two nodes are connected, if there exists a path between them.
+The set of all nodes that are connected with each other form a component.
+In contrast to Strongly Connected Components (SCC), the direction of relationships on the path between two nodes is not considered.
+For example, in a directed graph `(a)-->(b)`, `a` and `b` will be in the same component, even if there is no directed relationship from `b` to `a`.
+
 WCC is often used early in an analysis to understand the structure of a graph.
 Using WCC to understand the graph structure enables running other algorithms independently on an identified cluster.
-As a preprocessing step for directed graphs, it helps quickly identify disconnected groups.
 
-For more information on this algorithm, see:
+The implementation of the algorithm is based on the following papers:
 
-* http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.28.8405["An efficient domain-independent algorithm for detecting approximately duplicate database records"^].
-* One study uses WCC to work out how well connected the network is, and then to see whether the connectivity remains if 'hub' or 'authority' nodes are moved from the graph: https://link.springer.com/article/10.1007%2Fs10115-003-0128-3["Characterizing and Mining Citation Graph of Computer Science Literature"^]
-
-[NOTE]
-====
-Running this algorithm requires sufficient memory availability.
-Before running this algorithm, we recommend that you read xref:common-usage/memory-estimation.adoc[Memory Estimation].
-====
+* https://dl.acm.org/doi/pdf/10.1145/103418.103458[Wait-free Parallel Algorithms for the Union-Find Problem^]
+* https://ieeexplore.ieee.org/document/8425156[Optimizing Parallel Graph Connectivity Computation via Subgraph Sampling^]
 
 
 [[algorithms-wcc-syntax]]
