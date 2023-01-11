@@ -23,12 +23,14 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
+import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelComputer<CONFIG> {
 
@@ -63,8 +65,8 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
         Partition partition = Partition.of(0, graph.nodeCount());
 
         this.rootTask = computation instanceof PregelComputation<CONFIG>
-            ? createComputeStep(graph.concurrentCopy(), mutableIteration, sentMessage, partition)
-            : createBidirectionalComputeSteps(graph.concurrentCopy(), mutableIteration, sentMessage, partition);
+            ? createComputeStep(mutableIteration, sentMessage, partition)
+            : createBidirectionalComputeSteps(mutableIteration, sentMessage, partition);
     }
 
     @Override
@@ -85,13 +87,12 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
 
     @NotNull
     private ForkJoinComputeStep<CONFIG, ?, ComputeContext<CONFIG>> createComputeStep(
-        Graph graph,
         MutableInt iteration,
         AtomicBoolean hasSentMessages,
         Partition partition
     ) {
-        var computeContext = new ComputeContext<>(
-            graph,
+        Supplier<ComputeContext<CONFIG>>  computeContext = () -> new ComputeContext<>(
+            graph.concurrentCopy(),
             config,
             ((PregelComputation<CONFIG>) computation)::applyRelationshipWeight,
             nodeValues,
@@ -103,10 +104,10 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
         );
 
         return new ForkJoinComputeStep<>(
-            graph,
             computation,
             ((PregelComputation<CONFIG>) computation)::compute,
             computeContext,
+            new InitContext<>(graph, config, nodeValues, progressTracker),
             config,
             iteration,
             partition,
@@ -121,13 +122,12 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
 
     @NotNull
     private ForkJoinComputeStep<CONFIG, ?, ComputeContext.BidirectionalComputeContext<CONFIG>> createBidirectionalComputeSteps(
-        Graph graph,
         MutableInt iteration,
         AtomicBoolean hasSentMessages,
         Partition partition
     ) {
-        var computeContext = new ComputeContext.BidirectionalComputeContext<>(
-            graph,
+        Supplier<ComputeContext.BidirectionalComputeContext<CONFIG>> computeContext = () -> new ComputeContext.BidirectionalComputeContext<>(
+            graph.concurrentCopy(),
             config,
             ((BidirectionalPregelComputation<CONFIG>) computation)::applyRelationshipWeight,
             nodeValues,
@@ -139,10 +139,10 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
         );
 
         return new ForkJoinComputeStep<>(
-            graph,
             computation,
             ((BidirectionalPregelComputation<CONFIG>) computation)::compute,
             computeContext,
+            new InitContext<>(graph, config, nodeValues, progressTracker),
             config,
             iteration,
             partition,

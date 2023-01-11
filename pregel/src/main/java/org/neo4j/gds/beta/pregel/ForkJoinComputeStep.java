@@ -21,7 +21,6 @@ package org.neo4j.gds.beta.pregel;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
@@ -31,6 +30,7 @@ import org.neo4j.gds.mem.BitUtil;
 
 import java.util.concurrent.CountedCompleter;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator, COMPUTE_CONTEXT extends ComputeContext<CONFIG>>
     extends CountedCompleter<Void>
@@ -38,12 +38,11 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
 
     private static final int SEQUENTIAL_THRESHOLD = 1000;
 
-    private final Graph graph;
     private final ComputeFunction<CONFIG, COMPUTE_CONTEXT> computeFunction;
     private final CONFIG config;
 
     private final InitContext<CONFIG> initContext;
-    private final COMPUTE_CONTEXT computeContext;
+    private final Supplier<COMPUTE_CONTEXT> computeContext;
     private final NodeValue nodeValue;
     private final HugeAtomicBitSet voteBits;
     private final Messenger<ITERATOR> messenger;
@@ -55,10 +54,10 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
     private final ProgressTracker progressTracker;
 
     ForkJoinComputeStep(
-        Graph graph,
         BasePregelComputation<CONFIG> computation,
         ComputeFunction<CONFIG, COMPUTE_CONTEXT> computeFunction,
-        COMPUTE_CONTEXT computeContext,
+        Supplier<COMPUTE_CONTEXT> computeContext,
+        InitContext<CONFIG> initContext,
         CONFIG config,
         MutableInt iteration,
         Partition nodeBatch,
@@ -70,7 +69,6 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
         ProgressTracker progressTracker
     ) {
         super(parent);
-        this.graph = graph;
         this.computeFunction = computeFunction;
         this.config = config;
         this.iteration = iteration;
@@ -82,7 +80,7 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
         this.computeContext = computeContext;
         this.hasSentMessage = sentMessage;
         this.progressTracker = progressTracker;
-        this.initContext = new InitContext<>(graph, config, nodeValue, progressTracker);
+        this.initContext = initContext;
     }
 
     @Override
@@ -101,10 +99,10 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
             var leftBatch = Partition.of(startNode, pivot);
 
             var leftTask = new ForkJoinComputeStep<>(
-                graph.concurrentCopy(),
                 computation,
                 computeFunction,
                 computeContext,
+                initContext,
                 config,
                 iteration,
                 leftBatch,
@@ -165,7 +163,7 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
 
     @Override
     public COMPUTE_CONTEXT computeContext() {
-        return computeContext;
+        return computeContext.get();
     }
 
     @Override
