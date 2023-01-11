@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class IndexInverseAlgorithmFactoryTest {
+class InverseRelationshipsAlgorithmFactoryTest {
 
     public static Stream<Arguments> compressions() {
         TestMethodRunner compressedRunner = TestMethodRunner::runCompressedOrdered;
@@ -45,8 +45,8 @@ class IndexInverseAlgorithmFactoryTest {
     @ParameterizedTest
     @MethodSource("compressions")
     void memoryEstimationWithUncompressedFeatureToggle(TestMethodRunner runner, MemoryRange expected) {
-        IndexInverseAlgorithmFactory factory = new IndexInverseAlgorithmFactory();
-        var config = IndexInverseConfigImpl.builder().relationshipType("T1").build();
+        InverseRelationshipsAlgorithmFactory factory = new InverseRelationshipsAlgorithmFactory();
+        var config = InverseRelationshipsConfigImpl.builder().relationshipType("T1").build();
 
         GraphDimensions graphDimensions = GraphDimensions.of(100_000, 100_000);
 

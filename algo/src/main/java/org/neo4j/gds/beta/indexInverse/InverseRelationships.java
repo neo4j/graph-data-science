@@ -44,14 +44,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class IndexInverse extends Algorithm<SingleTypeRelationshipImportResult> {
+public class InverseRelationships extends Algorithm<SingleTypeRelationshipImportResult> {
     private final GraphStore graphStore;
-    private final IndexInverseConfig config;
+    private final InverseRelationshipsConfig config;
     private final ExecutorService executorService;
 
-    protected IndexInverse(
+    protected InverseRelationships(
         GraphStore graphStore,
-        IndexInverseConfig config,
+        InverseRelationshipsConfig config,
         ProgressTracker progressTracker,
         ExecutorService executorService
     ) {
@@ -108,6 +108,7 @@ public class IndexInverse extends Algorithm<SingleTypeRelationshipImportResult> 
             .nodes(graphStore.nodes())
             .executorService(executorService)
             .orientation(Orientation.NATURAL)
+            .indexInverse(false)
             .validateRelationships(false);
 
         propertySchemas.forEach(propertySchema ->

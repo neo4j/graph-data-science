@@ -45,7 +45,7 @@ public class IndexInverseProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var mutateSpec = new IndexInverseSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<IndexInverse, SingleTypeRelationshipImportResult, IndexInverseConfig>();
+        var pipelineSpec = new ProcedureExecutorSpec<InverseRelationships, SingleTypeRelationshipImportResult, InverseRelationshipsConfig>();
 
         return new ProcedureExecutor<>(
             mutateSpec,
@@ -62,7 +62,7 @@ public class IndexInverseProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         var mutateSpec = new IndexInverseSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<IndexInverse, SingleTypeRelationshipImportResult, IndexInverseConfig>();
+        var pipelineSpec = new ProcedureExecutorSpec<InverseRelationships, SingleTypeRelationshipImportResult, InverseRelationshipsConfig>();
 
         return new MemoryEstimationExecutor<>(
             mutateSpec,

@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 @GdsCallable(name = IndexInverseSpec.CALLABLE_NAME, executionMode = ExecutionMode.MUTATE_RELATIONSHIP, description = IndexInverseSpec.DESCRIPTION)
-public class IndexInverseSpec implements AlgorithmSpec<IndexInverse, SingleTypeRelationshipImportResult, IndexInverseConfig, Stream<IndexInverseSpec.MutateResult>, IndexInverseAlgorithmFactory> {
+public class IndexInverseSpec implements AlgorithmSpec<InverseRelationships, SingleTypeRelationshipImportResult, InverseRelationshipsConfig, Stream<IndexInverseSpec.MutateResult>, InverseRelationshipsAlgorithmFactory> {
 
     public static final String DESCRIPTION = "The IndexInverse procedure indexes directed relationships to allow an efficient inverse access for other algorithms.";
     static final String CALLABLE_NAME = "gds.beta.graph.relationships.indexInverse";
@@ -47,29 +47,29 @@ public class IndexInverseSpec implements AlgorithmSpec<IndexInverse, SingleTypeR
     }
 
     @Override
-    public IndexInverseAlgorithmFactory algorithmFactory() {
-        return new IndexInverseAlgorithmFactory();
+    public InverseRelationshipsAlgorithmFactory algorithmFactory() {
+        return new InverseRelationshipsAlgorithmFactory();
     }
 
     @Override
-    public NewConfigFunction<IndexInverseConfig> newConfigFunction() {
-        return ((__, config) -> IndexInverseConfig.of(config));
+    public NewConfigFunction<InverseRelationshipsConfig> newConfigFunction() {
+        return ((__, config) -> InverseRelationshipsConfig.of(config));
     }
 
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<IndexInverse, SingleTypeRelationshipImportResult, IndexInverseConfig> computeResult,
+        ComputationResult<InverseRelationships, SingleTypeRelationshipImportResult, InverseRelationshipsConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return new MutateResult.Builder().withInputRelationships(computeResult.graph().relationshipCount());
     }
 
     @Override
-    public ComputationResultConsumer<IndexInverse, SingleTypeRelationshipImportResult, IndexInverseConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<InverseRelationships, SingleTypeRelationshipImportResult, InverseRelationshipsConfig, Stream<MutateResult>> computationResultConsumer() {
         return new MutateComputationResultConsumer<>(this::resultBuilder) {
             @Override
             protected void updateGraphStore(
                 AbstractResultBuilder<?> resultBuilder,
-                ComputationResult<IndexInverse, SingleTypeRelationshipImportResult, IndexInverseConfig> computationResult,
+                ComputationResult<InverseRelationships, SingleTypeRelationshipImportResult, InverseRelationshipsConfig> computationResult,
                 ExecutionContext executionContext
             ) {
                 var result = computationResult.result();

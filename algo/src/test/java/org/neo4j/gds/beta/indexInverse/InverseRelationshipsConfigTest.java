@@ -29,7 +29,7 @@ import org.neo4j.gds.extension.Inject;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @GdlExtension
-class IndexInverseConfigTest {
+class InverseRelationshipsConfigTest {
     @GdlGraph(orientation = Orientation.NATURAL, indexInverse = true)
     private static final String DIRECTED =
         "  (a), (b), (c), (d)" +
@@ -48,7 +48,7 @@ class IndexInverseConfigTest {
 
     @Test
     void failIfAlreadyIndexed() {
-        var config = IndexInverseConfigImpl
+        var config = InverseRelationshipsConfigImpl
             .builder()
             .relationshipType("T1")
             .build();
@@ -63,7 +63,7 @@ class IndexInverseConfigTest {
 
     @Test
     void failOnUndirectedInput() {
-        var config = IndexInverseConfigImpl
+        var config = InverseRelationshipsConfigImpl
             .builder()
             .relationshipType("X")
             .build();

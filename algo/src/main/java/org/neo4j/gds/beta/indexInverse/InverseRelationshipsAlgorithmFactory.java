@@ -30,15 +30,15 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-public class IndexInverseAlgorithmFactory extends GraphStoreAlgorithmFactory<IndexInverse, IndexInverseConfig> {
+public class InverseRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFactory<InverseRelationships, InverseRelationshipsConfig> {
 
     @Override
-    public IndexInverse build(
+    public InverseRelationships build(
         GraphStore graphStore,
-        IndexInverseConfig configuration,
+        InverseRelationshipsConfig configuration,
         ProgressTracker progressTracker
     ) {
-        return new IndexInverse(graphStore, configuration, progressTracker, Pools.DEFAULT);
+        return new InverseRelationships(graphStore, configuration, progressTracker, Pools.DEFAULT);
     }
 
     @Override
@@ -47,20 +47,20 @@ public class IndexInverseAlgorithmFactory extends GraphStoreAlgorithmFactory<Ind
     }
 
     @Override
-    public Task progressTask(GraphStore graphStore, IndexInverseConfig config) {
+    public Task progressTask(GraphStore graphStore, InverseRelationshipsConfig config) {
         long nodeCount = graphStore.nodeCount();
         return Tasks.task(
             taskName(),
-            Tasks.leaf("Create inversely indexed relationships", nodeCount),
+            Tasks.leaf("Create inverse relationships", nodeCount),
             Tasks.leaf("Build Adjacency list")
         );
     }
 
     @Override
-    public MemoryEstimation memoryEstimation(IndexInverseConfig configuration) {
+    public MemoryEstimation memoryEstimation(InverseRelationshipsConfig configuration) {
         RelationshipType relationshipType = RelationshipType.of(configuration.relationshipType());
 
-        var builder = MemoryEstimations.builder(IndexInverse.class)
+        var builder = MemoryEstimations.builder(InverseRelationships.class)
             .add("inverse relationships", AdjacencyListBehavior.adjacencyListEstimation(relationshipType, false));
 
         builder.perGraphDimension("properties", ((graphDimensions, concurrency) -> {
