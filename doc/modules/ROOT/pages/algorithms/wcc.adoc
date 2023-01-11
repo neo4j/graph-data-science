@@ -20,7 +20,7 @@ The Weakly Connected Components (WCC) algorithm finds sets of connected nodes in
 Two nodes are connected, if there exists a path between them.
 The set of all nodes that are connected with each other form a component.
 In contrast to Strongly Connected Components (SCC), the direction of relationships on the path between two nodes is not considered.
-For example, in a directed graph `(a)-->(b)`, `a` and `b` will be in the same component, even if there is no directed relationship from `b` to `a`.
+For example, in a directed graph `(a)->(b)`, `a` and `b` will be in the same component, even if there is no directed relationship `(b)->(a)`.
 
 WCC is often used early in an analysis to understand the structure of a graph.
 Using WCC to understand the graph structure enables running other algorithms independently on an identified cluster.
