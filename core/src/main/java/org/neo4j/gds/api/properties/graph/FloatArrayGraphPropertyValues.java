@@ -61,18 +61,4 @@ public interface FloatArrayGraphPropertyValues extends GraphPropertyValues {
     default ValueType valueType() {
         return ValueType.FLOAT_ARRAY;
     }
-
-    static FloatArrayGraphPropertyValues ofFloatArrayStream(Stream<float[]> floatArrayStream) {
-        return new FloatArrayGraphPropertyValues() {
-            @Override
-            public Stream<float[]> floatArrayValues() {
-                return floatArrayStream;
-            }
-
-            @Override
-            public long size() {
-                return -1;
-            }
-        };
-    }
 }
