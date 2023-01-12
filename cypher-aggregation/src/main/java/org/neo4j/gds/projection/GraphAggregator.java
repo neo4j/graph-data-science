@@ -155,6 +155,7 @@ public class GraphAggregator implements CompatUserAggregator {
         NodeLabelToken sourceNodeLabels = NodeLabelTokens.missing();
         NodeLabelToken targetNodeLabels = NodeLabelTokens.missing();
 
+        this.configValidator.validateConfigs(nodesConfig, relationshipConfig);
         if (nodesConfig instanceof MapValue) {
             sourceNodePropertyValues = GraphImporter.propertiesConfig("sourceNodeProperties", (MapValue) nodesConfig);
             sourceNodeLabels = labelsConfig("sourceNodeLabels", (MapValue) nodesConfig);
@@ -166,8 +167,6 @@ public class GraphAggregator implements CompatUserAggregator {
                 );
                 targetNodeLabels = labelsConfig("targetNodeLabels", (MapValue) nodesConfig);
             }
-
-            this.configValidator.validateNodesConfig((MapValue) nodesConfig);
         }
 
         var data = initGraphData(
@@ -307,18 +306,27 @@ public class GraphAggregator implements CompatUserAggregator {
             "relationshipType"
         );
 
-        private final AtomicBoolean validateNodes = new AtomicBoolean(true);
-        private final AtomicBoolean validateRelationships = new AtomicBoolean(true);
 
-        void validateNodesConfig(MapValue nodesConfig) {
-            if (this.validateNodes.getAndSet(false)) {
-                ConfigKeyValidation.requireOnlyKeysFrom(NODES_CONFIG_KEYS, nodesConfig.keySet());
-            }
-        }
+        private final AtomicBoolean validate = new AtomicBoolean(true);
 
-        void validateRelationshipsConfig(MapValue relationshipConfig) {
-            if (this.validateRelationships.getAndSet(false)) {
-                ConfigKeyValidation.requireOnlyKeysFrom(RELATIONSHIPS_CONFIG_KEYS, relationshipConfig.keySet());
+        void validateConfigs(AnyValue nodesConfig, AnyValue relationshipConfig) {
+            if (nodesConfig instanceof MapValue || relationshipConfig instanceof MapValue) {
+                if (this.validate.get()) {
+                    if (this.validate.getAndSet(false)) {
+                        if (nodesConfig instanceof MapValue) {
+                            ConfigKeyValidation.requireOnlyKeysFrom(
+                                NODES_CONFIG_KEYS,
+                                ((MapValue) nodesConfig).keySet()
+                            );
+                        }
+                        if (relationshipConfig instanceof MapValue) {
+                            ConfigKeyValidation.requireOnlyKeysFrom(
+                                NODES_CONFIG_KEYS,
+                                ((MapValue) relationshipConfig).keySet()
+                            );
+                        }
+                    }
+                }
             }
         }
     }
@@ -463,8 +471,6 @@ public class GraphAggregator implements CompatUserAggregator {
             if (relationshipConfig instanceof MapValue) {
                 relationshipProperties = propertiesConfig("properties", (MapValue) relationshipConfig);
                 relationshipType = typeConfig("relationshipType", (MapValue) relationshipConfig);
-
-                configValidator.validateRelationshipsConfig((MapValue) relationshipConfig);
             }
 
             var intermediateSourceId = loadNode(sourceNode, sourceNodeLabels, sourceNodePropertyValues);
@@ -716,6 +722,7 @@ public class GraphAggregator implements CompatUserAggregator {
             @NotNull MapValue propertiesConfig
         ) {
             var nodeProperties = propertiesConfig.get(propertyKey);
+
             if (nodeProperties instanceof MapValue) {
                 return (MapValue) nodeProperties;
             }
