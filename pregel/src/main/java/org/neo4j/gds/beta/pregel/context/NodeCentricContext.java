@@ -188,7 +188,10 @@ public abstract class NodeCentricContext<CONFIG extends PregelConfig> extends Pr
 
         long nodeId();
 
-        default int incommingDegree() {
+        /**
+         * Returns the incoming degree (number of relationships) of the currently processed node.
+         */
+        default int incomingDegree() {
             return graph().degreeInverse(nodeId());
         }
 
