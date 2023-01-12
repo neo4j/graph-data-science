@@ -403,10 +403,10 @@ public final class UnionGraph implements CSRGraph {
     }
 
     public void addNodeLabel(NodeLabel nodeLabel) {
-        throw new UnsupportedOperationException("Adding Node labels is not supported");
+        first.addNodeLabel(nodeLabel);
     }
 
-    public void addNodeIdToLabel(long nodeId, NodeLabel nodeLabel) {
-        throw new UnsupportedOperationException("Assigning Node labels to nodes is not supported");
+    public void addNodeIdToLabel(long mappedNodeId, NodeLabel nodeLabel) {
+        first.addNodeIdToLabel(toOriginalNodeId(mappedNodeId), nodeLabel);
     }
 }
