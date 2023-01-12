@@ -220,10 +220,14 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
 
     @Override
     public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
+        if (! filteredIdMap.containsRootNodeId(filteredIdMap.toRootNodeId(nodeId))) {
+            return Stream.empty();
+        }
+
         return super.streamRelationships(filteredIdMap.toRootNodeId(nodeId), fallbackValue)
-            .filter(rel -> filteredIdMap.containsRootNodeId(rel.sourceId()) && filteredIdMap.containsRootNodeId(rel.targetId()))
+            .filter(rel -> filteredIdMap.containsRootNodeId(rel.targetId()))
             .map(rel -> ((ModifiableRelationshipCursor) rel)
-                .setSourceId(filteredIdMap.toFilteredNodeId(rel.sourceId()))
+                .setSourceId(nodeId)
                 .setTargetId(filteredIdMap.toFilteredNodeId(rel.targetId()))
             );
     }
