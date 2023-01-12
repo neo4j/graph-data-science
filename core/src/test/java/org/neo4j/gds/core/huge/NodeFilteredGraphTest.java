@@ -31,9 +31,10 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -129,9 +130,18 @@ class NodeFilteredGraphTest {
 
         Function<String, Long> filteredIdFunction = (variable) -> graph.toMappedNodeId(idFunction.of(variable));
 
-        assertThat(graph.streamRelationships(filteredIdFunction.apply("a"), Double.NaN).mapToLong(RelationshipCursor::targetId)).containsExactlyInAnyOrder(Stream.of("b").map(filteredIdFunction).toArray(Long[]::new));
-        assertThat(graph.streamRelationships(filteredIdFunction.apply("b"), Double.NaN).mapToLong(RelationshipCursor::targetId)).containsExactlyInAnyOrder(Stream.of("c", "d").map(filteredIdFunction).toArray(Long[]::new));
-        assertThat(graph.streamRelationships(filteredIdFunction.apply("c"), Double.NaN).mapToLong(RelationshipCursor::targetId)).isEmpty();
+        var expected = Map.<Long, List<String>>of(
+            filteredIdFunction.apply("a"), List.of("b"),
+            filteredIdFunction.apply("b"), List.of("c", "d"),
+            filteredIdFunction.apply("c"), List.of()
+        );
+
+        expected.forEach((source, targets) -> {
+            assertThat(graph.streamRelationships(source, Double.NaN)
+                .mapToLong(RelationshipCursor::targetId)).containsExactlyInAnyOrder(targets.stream()
+                .map(filteredIdFunction)
+                .toArray(Long[]::new));
+        });
     }
 
     @Test
