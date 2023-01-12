@@ -35,6 +35,7 @@ import org.neo4j.gds.topologicalsort.TopologicalSortConfigImpl;
 import org.neo4j.gds.topologicalsort.TopologicalSortFactory;
 import org.neo4j.gds.topologicalsort.TopologicalSortResult;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -51,6 +52,7 @@ public class TopologicalSortStreamProc extends StreamProc<TopologicalSort, Topol
         "Returns all the nodes in the graph that are not part of a cycle or depend on a cycle, sorted in a topological order";
 
     @Procedure(value = "gds.alpha.topologicalSort.stream", mode = READ)
+    @Internal
     @Description(TOPOLOGICAL_SORT_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
