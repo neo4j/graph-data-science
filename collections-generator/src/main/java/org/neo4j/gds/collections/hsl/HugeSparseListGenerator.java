@@ -39,6 +39,8 @@ import java.util.Arrays;
 import static org.neo4j.gds.collections.EqualityUtils.DEFAULT_VALUES;
 import static org.neo4j.gds.collections.EqualityUtils.isEqual;
 import static org.neo4j.gds.collections.EqualityUtils.isNotEqual;
+import static org.neo4j.gds.collections.hsl.HugeSparseListStreamHelper.flatMapFunction;
+import static org.neo4j.gds.collections.hsl.HugeSparseListStreamHelper.getStreamTypeName;
 
 final class HugeSparseListGenerator implements CollectionStep.Generator<HugeSparseListValidation.Spec> {
 
@@ -88,6 +90,7 @@ final class HugeSparseListGenerator implements CollectionStep.Generator<HugeSpar
         builder.addMethod(drainingIteratorMethod(valueType, pages, pageSize));
         builder.addMethod(forAllMethod(valueType, forAllConsumerType, pages, pageShift, defaultValue));
         builder.addMethod(setMethod(valueType, pageShift, pageMask));
+        builder.addMethod(streamMethod(valueType, pages));
         if (valueType.isPrimitive()) {
             builder.addMethod(setIfAbsentMethod(valueType, pageShift, pageMask, defaultValue));
             builder.addMethod(addToMethod(valueType, pageShift, pageMask));
@@ -455,6 +458,18 @@ final class HugeSparseListGenerator implements CollectionStep.Generator<HugeSpar
             .addStatement("int indexInPage = $T.indexInPage(index, $N)", PAGE_UTIL, pageMask)
             .addStatement("$T page = getPage(pageIndex)", ArrayTypeName.of(valueType))
             .addStatement("page[indexInPage] += value")
+            .build();
+    }
+
+    private static MethodSpec streamMethod(
+        TypeName valueType,
+        FieldSpec pages
+    ) {
+        return MethodSpec.methodBuilder("stream")
+            .addAnnotation(Override.class)
+            .addModifiers(Modifier.PUBLIC)
+            .returns(getStreamTypeName(valueType))
+            .addStatement("return Arrays.stream(this.$N)." + flatMapFunction(valueType) + "(Arrays::stream)", pages)
             .build();
     }
 }

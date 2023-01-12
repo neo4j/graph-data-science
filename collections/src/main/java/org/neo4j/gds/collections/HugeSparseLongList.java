@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.collections;
 
+import java.util.stream.LongStream;
+
 /**
  * A long-indexable version of a primitive long list that can
  * contain more than 2bn. elements and is growable.
@@ -86,5 +88,7 @@ public interface HugeSparseLongList {
      * the default value for each index.
      */
     DrainingIterator<long[]> drainingIterator();
+
+    LongStream stream();
 
 }

@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.collections;
 
+import java.util.stream.DoubleStream;
+
 /**
  * A long-indexable version of a primitive double list that can
  * contain more than 2bn. elements and is growable.
@@ -87,4 +89,5 @@ public interface HugeSparseDoubleList {
      */
     DrainingIterator<double[]> drainingIterator();
 
+    DoubleStream stream();
 }
