@@ -31,16 +31,14 @@ import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.HashMap;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class KSpanningTreeWriteProcTest extends BaseProcTest {
 
-    private static String GRAPH_NAME = "graph";
+    private static final String GRAPH_NAME = "graph";
 
     @Neo4jGraph
-    static final String DB_CYPHER =
+    private static final String DB_CYPHER =
         "CREATE (a:Node {name:'a'})\n" +
         "CREATE (b:Node {name:'b'})\n" +
         "CREATE (c:Node {name:'c'})\n" +
@@ -54,7 +52,7 @@ class KSpanningTreeWriteProcTest extends BaseProcTest {
         " (d)-[:TYPE {w:3.0}]->(c)";
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     @BeforeEach
     void setupGraph() throws Exception {
@@ -80,9 +78,9 @@ class KSpanningTreeWriteProcTest extends BaseProcTest {
             .yields("preProcessingMillis", "computeMillis", "writeMillis");
 
         runQueryWithRowConsumer(query, row -> {
-            assertTrue(row.getNumber("preProcessingMillis").longValue() >= 0);
-            assertTrue(row.getNumber("writeMillis").longValue() >= 0);
-            assertTrue(row.getNumber("computeMillis").longValue() >= 0);
+            assertThat(row.getNumber("preProcessingMillis").longValue() >= 0).isTrue();
+            assertThat(row.getNumber("writeMillis").longValue() >= 0).isTrue();
+            assertThat(row.getNumber("computeMillis").longValue() >= 0).isTrue();
         });
 
         final HashMap<String, Long> communities = new HashMap<>();
@@ -93,9 +91,8 @@ class KSpanningTreeWriteProcTest extends BaseProcTest {
             communities.put(name, p);
         });
 
-        assertEquals(communities.get("a"), communities.get("b"));
-        assertEquals(communities.get("d"), communities.get("c"));
-        assertNotEquals(communities.get("a"), communities.get("c"));
+        assertThat(communities).matches(c -> c.get("a").equals(c.get("b")) ^ c.get("c").equals(c.get("d")));
+        assertThat(communities.get("a")).isNotEqualTo(communities.get("c"));
     }
 
     @Test
@@ -109,11 +106,10 @@ class KSpanningTreeWriteProcTest extends BaseProcTest {
             .addParameter("writeProperty", "partition")
             .yields("preProcessingMillis", "computeMillis", "writeMillis");
 
-
         runQueryWithRowConsumer(query, row -> {
-            assertTrue(row.getNumber("preProcessingMillis").longValue() >= 0);
-            assertTrue(row.getNumber("writeMillis").longValue() >= 0);
-            assertTrue(row.getNumber("computeMillis").longValue() >= 0);
+            assertThat(row.getNumber("preProcessingMillis").longValue() >= 0).isTrue();
+            assertThat(row.getNumber("writeMillis").longValue() >= 0).isTrue();
+            assertThat(row.getNumber("computeMillis").longValue() >= 0).isTrue();
         });
 
         final HashMap<String, Integer> communities = new HashMap<>();
@@ -124,9 +120,7 @@ class KSpanningTreeWriteProcTest extends BaseProcTest {
             communities.put(name, p);
         });
 
-        assertEquals(communities.get("a"), communities.get("d"));
-        assertEquals(communities.get("b"), communities.get("c"));
-        assertNotEquals(communities.get("a"), communities.get("b"));
+        assertThat(communities).matches(c -> c.get("a").equals(c.get("d")) ^ c.get("b").equals(c.get("c")));
+        assertThat(communities.get("a")).isNotEqualTo(communities.get("b"));
     }
-
 }
