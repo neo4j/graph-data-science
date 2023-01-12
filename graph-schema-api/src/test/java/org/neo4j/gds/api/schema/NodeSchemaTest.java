@@ -191,7 +191,7 @@ class NodeSchemaTest {
     }
 
     @Test
-    void shouldCopyUnionPropertiesToNodeLabel() {
+    void shouldAddNodeLabelWithNodeProperties() {
         var label = NodeLabel.of("Foo");
 
         var nodeSchema = NodeSchema.empty()
@@ -199,8 +199,7 @@ class NodeSchemaTest {
             .addProperty(label, "baz", PropertySchema.of("baz", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT))
             .addProperty(label, "bar", ValueType.LONG_ARRAY);
 
-        nodeSchema.addLabel(NodeLabel.of("Test"));
-        nodeSchema.copyUnionPropertiesToLabel(NodeLabel.of("Test"));
+        nodeSchema.addLabel(NodeLabel.of("Test"), nodeSchema.unionProperties());
         var propertySchemas = nodeSchema.propertySchemasFor(NodeLabel.of("Test"));
         assertThat(propertySchemas).containsExactlyInAnyOrder(
             PropertySchema.of("foo", ValueType.DOUBLE),

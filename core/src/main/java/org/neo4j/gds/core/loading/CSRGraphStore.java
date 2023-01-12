@@ -249,8 +249,7 @@ public class CSRGraphStore implements GraphStore {
         updateGraphStore(graphStore -> {
             nodes.addNodeLabel(nodeLabel);
             var nodeSchema = schema.nodeSchema();
-            nodeSchema.addLabel(nodeLabel);
-            nodeSchema.copyUnionPropertiesToLabel(nodeLabel);
+            schema.nodeSchema().addLabel(nodeLabel, nodeSchema.unionProperties());
         });
     }
 

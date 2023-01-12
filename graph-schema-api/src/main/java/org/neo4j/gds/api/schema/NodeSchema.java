@@ -78,6 +78,12 @@ public final class NodeSchema extends ElementSchema<NodeSchema, NodeLabel, NodeS
         return this;
     }
 
+    public NodeSchema addLabel(NodeLabel nodeLabel, Map<String, PropertySchema> nodeProperties) {
+        var nodeSchemaEntry = getOrCreateLabel(nodeLabel);
+        nodeProperties.forEach(nodeSchemaEntry::addProperty);
+        return this;
+    }
+
     public NodeSchema addProperty(NodeLabel nodeLabel, String propertyName, PropertySchema propertySchema) {
         getOrCreateLabel(nodeLabel).addProperty(propertyName, propertySchema);
         return this;
@@ -86,11 +92,5 @@ public final class NodeSchema extends ElementSchema<NodeSchema, NodeLabel, NodeS
     public NodeSchema addProperty(NodeLabel nodeLabel, String propertyKey, ValueType valueType) {
         getOrCreateLabel(nodeLabel).addProperty(propertyKey, valueType);
         return this;
-    }
-
-    public void copyUnionPropertiesToLabel(NodeLabel nodeLabel) {
-        assert availableLabels().contains(nodeLabel) : "The node label should be in the schema before we can add properties to it";
-        var nodeSchemaEntry = get(nodeLabel);
-        unionProperties().forEach(nodeSchemaEntry::addProperty);
     }
 }
