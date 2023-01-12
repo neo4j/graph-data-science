@@ -23,7 +23,6 @@ import org.immutables.value.Value;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -36,9 +35,8 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@ValueClass
 @Configuration
-public interface GraphStreamRelationshipsConfig extends BaseConfig {
+public interface GraphStreamRelationshipsConfig extends BaseConfig, ConcurrencyConfig  {
 
     @Configuration.Parameter
     Optional<String> graphName();
@@ -47,11 +45,6 @@ public interface GraphStreamRelationshipsConfig extends BaseConfig {
     @Value.Default
     default List<String> relationshipTypes() {
         return Collections.singletonList(ElementProjection.PROJECT_ALL);
-    }
-
-    @Value.Default
-    default int concurrency() {
-        return ConcurrencyConfig.DEFAULT_CONCURRENCY;
     }
 
     @Configuration.Ignore

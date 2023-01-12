@@ -133,7 +133,7 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
         runQuery("CALL gds.beta.graph.generate('generatedGraph', 10000, 5)");
 
         var actualRelationships = new ArrayList<TopologyResult>();
-        runQueryWithRowConsumer("CALL gds.beta.graph.relationships.stream('generatedGraph', ['*'], { concurrency: 4 })", row -> actualRelationships.add(
+        runQueryWithRowConsumer("CALL gds.beta.graph.relationships.stream('generatedGraph', ['*'], { concurrency: 10 })", row -> actualRelationships.add(
             relationship(
                 row.getNumber("sourceNodeId").longValue(),
                 row.getNumber("targetNodeId").longValue(),
