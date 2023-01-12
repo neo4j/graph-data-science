@@ -55,7 +55,7 @@ public class GraphMutateNodeLabelProc extends CatalogProc {
         var filter = ExpressionParser.parse(procedureConfig.nodeFilter(), Map.of());
         var nodeLabelToMutate = NodeLabel.of(nodeLabel);
 
-        var resultBuilder = MutateLabelResult.builder(graphName, nodeLabel).withConfig(configuration);
+        var resultBuilder = MutateLabelResult.builder(graphName, nodeLabel).withConfig(procedureConfig.toMap());
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
             var filteredNodes = NodesFilter.filterNodes(
                 graphStore,

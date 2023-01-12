@@ -65,13 +65,23 @@ class GraphWriteNodeLabelProcTest extends BaseProcTest {
         );
 
         runQuery(
-            "CALL gds.alpha.graph.nodeLabel.write('graph', 'TestLabel', { nodeFilter: 'n:A AND n.p > 1.0' }) YIELD nodeLabelsWritten",
+            "CALL gds.alpha.graph.nodeLabel.write('graph', 'TestLabel', { nodeFilter: 'n:A AND n.p > 1.0' }) YIELD nodeCount, nodeLabel, nodeLabelsWritten",
             result -> {
                 assertThat(result.hasNext()).isTrue();
 
                 var row = result.next();
+                assertThat(row.get("nodeCount"))
+                    .as("Total number of nodes in the graph should be four, including the nodes that didn't get the new label")
+                    .isEqualTo(4L);
+
+                assertThat(row.get("nodeLabel"))
+                    .as("The specified node label should be present in the result")
+                    .isEqualTo("TestLabel");
+
                 assertThat(row.get("nodeLabelsWritten"))
+                    .as("There should be two nodes having the new label written back to Neo4j")
                     .isEqualTo(2L);
+
 
                 assertThat(result.hasNext()).isFalse();
                 return false;

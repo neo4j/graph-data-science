@@ -60,7 +60,8 @@ public class GraphWriteNodeLabelProc extends CatalogProc {
         var graphStore = graphStoreFromCatalog(graphName).graphStore();
         var filter = ExpressionParser.parse(procedureConfig.nodeFilter(), Map.of());
 
-        WriteLabelResult.Builder resultBuilder = new WriteLabelResult.Builder(graphName, nodeLabel);
+        var resultBuilder = WriteLabelResult.builder(graphName, nodeLabel)
+            .withConfig(procedureConfig.toMap());
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
             var filteredNodes = NodesFilter.filterNodes(
                 graphStore,
@@ -82,7 +83,9 @@ public class GraphWriteNodeLabelProc extends CatalogProc {
                 () -> nodeLabelExporter.write(nodeLabel)
             );
 
-            resultBuilder.withNodeLabelsWritten(nodeLabelExporter.nodeLabelsWritten());
+            resultBuilder
+                .withNodeLabelsWritten(nodeLabelExporter.nodeLabelsWritten())
+                .withNodeCount(graphStore.nodeCount());
         }
 
 

@@ -174,7 +174,9 @@ YIELD
     writeMillis: Integer,
     nodeLabelsWritten: Integer,
     nodeLabel: String,
-    graphName: String
+    graphName: String,
+    nodeCount: Integer,
+    configuration: Map
 ----
 
 .Parameters
@@ -202,6 +204,8 @@ YIELD
 | nodeLabelsWritten | Integer                  | Number of node labels written.
 | graphName         | String                   | The name of a graph stored in the catalog.
 | nodeLabel         | String                   | The written node label.
+| nodeCount         | Integer                  | The total number of nodes in the graph.
+| configuration     | Map                      | The configuration used to run the procedure.
 |===
 ======
 
@@ -545,14 +549,14 @@ To write a new node label to the database for nodes with score higher than `0`, 
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.graph.nodeLabel.write('socialGraph', 'Reader', { nodeFilter: 'n.score > 0.0' })
-YIELD nodeLabelsWritten
+YIELD graphName, nodeCount, nodeLabel, nodeLabelsWritten
 ----
 
 .Results
 [opts="header"]
 |===
-| nodeLabelsWritten
-| 2
+| graphName     | nodeCount | nodeLabel | nodeLabelsWritten
+| "socialGraph" | 4         | "Reader"  | 2
 |===
 --
 
