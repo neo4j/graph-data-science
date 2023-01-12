@@ -37,19 +37,21 @@ import org.neo4j.gds.topologicalsort.TopologicalSortResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
+import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.alpha.topologicalSort.stream", description = TopologicalSortStreamProc.TOPOLOGICAL_SORT_DESCRIPTION, executionMode = STREAM)
 public class TopologicalSortStreamProc extends StreamProc<TopologicalSort, TopologicalSortResult, TopologicalSortStreamProc.StreamResult, TopologicalSortConfig> {
     static final String TOPOLOGICAL_SORT_DESCRIPTION =
         "Returns all the nodes in the graph that are not part of a cycle or depend on a cycle, sorted in a topological order";
 
-    // @Procedure(value = "gds.alpha.topologicalSort.stream", mode = READ)
+    @Procedure(value = "gds.alpha.topologicalSort.stream", mode = READ)
     @Internal
     @Description(TOPOLOGICAL_SORT_DESCRIPTION)
     public Stream<StreamResult> stream(
