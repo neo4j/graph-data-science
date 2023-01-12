@@ -65,7 +65,7 @@ public class Hits implements BidirectionalPregelComputation<Hits.HitsConfig> {
     public void compute(BidirectionalComputeContext<HitsConfig> context, Messages messages) {
         switch (state) {
             case INIT:
-                var auth = (double) context.incommingDegree();
+                var auth = (double) context.incomingDegree();
                 context.setNodeValue(context.config().authProperty(), auth);
                 updateGlobalNorm(auth);
                 break;

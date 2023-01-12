@@ -140,10 +140,6 @@ public abstract class RelationshipProjection extends ElementProjection {
         return RelationshipProjection.builder().type(type).aggregation(aggregation).orientation(orientation).build();
     }
 
-    public static RelationshipProjection of(String type, Orientation orientation, Aggregation aggregation, boolean indexInverse) {
-        return RelationshipProjection.builder().type(type).aggregation(aggregation).orientation(orientation).indexInverse(indexInverse).build();
-    }
-
     public boolean isMultiGraph() {
         boolean somePropertyIsNotAggregated = properties()
             .mappings()
