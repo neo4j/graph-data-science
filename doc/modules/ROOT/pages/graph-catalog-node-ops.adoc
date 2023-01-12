@@ -191,8 +191,7 @@ YIELD
 |===
 | Name                   | Type                  | Default           | Description
 | nodeFilter             | String                | n/a               | A Cypher predicate for filtering nodes in the input graph. See xref:management-ops/projections/graph-project-subgraph.adoc[Projecting a subgraph].
-| concurrency            | Integer               | 4                 | The number of concurrent threads used for running the procedure. Also provides the default value for `writeConcurrency`
-| writeConcurrency       | Integer               | 'concurrency'     | The number of concurrent threads used for writing the node properties.
+| concurrency            | Integer               | 4                 | The number of concurrent threads used for running the procedure.
 |===
 
 .Results
