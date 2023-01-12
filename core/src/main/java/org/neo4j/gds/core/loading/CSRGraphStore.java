@@ -417,14 +417,15 @@ public class CSRGraphStore implements GraphStore {
     @Override
     public void addInverseIndex(
         RelationshipType relationshipType,
-        SingleTypeRelationships indexedRelationships
+        Topology topology,
+        Optional<RelationshipPropertyStore> properties
     ) {
         var newRelationships =
             SingleTypeRelationships
                 .builder()
                 .from(relationships.get(relationshipType))
-                .inverseTopology(indexedRelationships.topology())
-                .inverseProperties(indexedRelationships.properties())
+                .inverseTopology(topology)
+                .inverseProperties(properties)
                 .build();
 
         relationships.put(relationshipType, newRelationships);

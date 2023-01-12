@@ -19,13 +19,17 @@
  */
 package org.neo4j.gds.beta.indexInverse;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.mem.MemoryTree;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,16 +41,16 @@ class InverseRelationshipsAlgorithmFactoryTest {
         TestMethodRunner uncompressedRunner = TestMethodRunner::runUncompressedOrdered;
 
         return Stream.of(
-            Arguments.of(compressedRunner, MemoryRange.of(1_462_320, 1_462_320)),
-            Arguments.of(uncompressedRunner, MemoryRange.of(2_248_808, 2_248_808))
+            Arguments.of(compressedRunner, MemoryRange.of(1_462_320)),
+            Arguments.of(uncompressedRunner, MemoryRange.of(2_248_808))
         );
     }
 
     @ParameterizedTest
     @MethodSource("compressions")
     void memoryEstimationWithUncompressedFeatureToggle(TestMethodRunner runner, MemoryRange expected) {
-        InverseRelationshipsAlgorithmFactory factory = new InverseRelationshipsAlgorithmFactory();
-        var config = InverseRelationshipsConfigImpl.builder().relationshipType("T1").build();
+        var factory = new InverseRelationshipsAlgorithmFactory();
+        var config = InverseRelationshipsConfigImpl.builder().relationshipTypes("T1").build();
 
         GraphDimensions graphDimensions = GraphDimensions.of(100_000, 100_000);
 
@@ -57,6 +61,32 @@ class InverseRelationshipsAlgorithmFactoryTest {
                 .estimate(graphDimensions, config.concurrency())
                 .memoryUsage()).isEqualTo(expected);
         });
+    }
+
+    @Test
+    void memoryEstimationWithMultipleTypes() {
+        var factory = new InverseRelationshipsAlgorithmFactory();
+        var config = InverseRelationshipsConfigImpl.builder().relationshipTypes(List.of("T1", "T2")).build();
+
+        GraphDimensions graphDimensions = GraphDimensions
+            .builder()
+            .nodeCount(100_000)
+            .putRelationshipCount(RelationshipType.of("T1"), 10_000)
+            .putRelationshipCount(RelationshipType.of("T2"), 90_000)
+            .build();
+
+        var memoryEstimation = factory.memoryEstimation(config);
+
+        MemoryTree memoryTree = memoryEstimation
+            .estimate(graphDimensions, config.concurrency());
+
+        assertThat(memoryTree.components().stream().map(MemoryTree::description)).containsExactly(
+            "this.instance",
+            "Inverse 'T1'",
+            "Inverse 'T2'"
+        );
+
+        assertThat(memoryTree.memoryUsage()).isEqualTo(MemoryRange.of(2_924_608));
     }
 
 }

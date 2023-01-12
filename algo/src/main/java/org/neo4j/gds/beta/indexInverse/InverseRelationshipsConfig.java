@@ -24,30 +24,44 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
 public interface InverseRelationshipsConfig extends AlgoBaseConfig {
-    @Configuration.ConvertWith(method = "validateRelationshipTypeIdentifier")
-    String relationshipType();
+    static @Nullable List<String> parseRelTypes(Object input) {
+        if (input instanceof String) {
+            var strInput = ((String) input);
+            validateNoWhiteCharacter(emptyToNull(strInput), "relationshipType");
 
-    static @Nullable String validateRelationshipTypeIdentifier(String input) {
-        return validateNoWhiteCharacter(emptyToNull(input), "relationshipType");
+            return List.of(strInput);
+        }
+
+        if (input instanceof List) {
+            return ((List<?>) input).stream().flatMap(i -> parseRelTypes(i).stream()).collect(Collectors.toList());
+        }
+
+        throw new IllegalArgumentException(formatWithLocale(
+            "Expected relationship type to be a String. Got %s.",
+            input.getClass().getSimpleName()
+        ));
     }
 
     @Override
-    @Configuration.Ignore
-    default List<String> relationshipTypes() {
-        return List.of(relationshipType());
-    }
+    @Configuration.ConvertWith(method = "parseRelTypes")
+    List<String> relationshipTypes();
 
     @Override
     @Configuration.Ignore
@@ -65,9 +79,16 @@ public interface InverseRelationshipsConfig extends AlgoBaseConfig {
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        if (graphStore.inverseIndexedRelationshipTypes().contains(RelationshipType.of(relationshipType()))) {
-            throw new UnsupportedOperationException(String.format(Locale.US, "Inverse index already exists for '%s'.",
-                relationshipType()
+        Set<RelationshipType> indexTypes = graphStore.inverseIndexedRelationshipTypes();
+        var alreadyIndexedTypes = selectedRelationshipTypes
+            .stream()
+            .filter(indexTypes::contains)
+            .map(RelationshipType::name)
+            .collect(Collectors.toList());
+
+        if (!alreadyIndexedTypes.isEmpty()) {
+            throw new UnsupportedOperationException(String.format(Locale.US, "Inverse index already exists for %s.",
+                StringJoining.join(alreadyIndexedTypes)
             ));
         }
     }
@@ -78,9 +99,21 @@ public interface InverseRelationshipsConfig extends AlgoBaseConfig {
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        if (graphStore.schema().relationshipSchema().isUndirected(RelationshipType.of(relationshipType()))) {
-            throw new UnsupportedOperationException(
-                "Creating an inverse index for undirected relationships is not supported.");
+        Set<RelationshipType> indexTypes = graphStore.inverseIndexedRelationshipTypes();
+        RelationshipSchema relationshipSchema = graphStore.schema().relationshipSchema();
+
+        var undirectedTypes = selectedRelationshipTypes
+            .stream()
+            .filter(relationshipSchema::isUndirected)
+            .map(RelationshipType::name)
+            .collect(Collectors.toList());
+
+        if (!undirectedTypes.isEmpty()) {
+            throw new UnsupportedOperationException(String.format(
+                Locale.US,
+                "Creating an inverse index for undirected relationships is not supported. Undirected relationship types are %s.",
+                StringJoining.join(undirectedTypes)
+            ));
         }
     }
 }

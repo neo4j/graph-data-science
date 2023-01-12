@@ -43,6 +43,7 @@ class IndexInverseProcTest extends BaseProcTest {
                                     " (a:A) ,(b:B) ,(c:C) " +
                                     ",(a)-[:REL {prop1: 1.0}]->(b)" +
                                     ",(a)-[:REL {prop1: 2.0}]->(c)" +
+                                    ",(a)-[:REL2 {prop1: 2.5}]->(c)" +
                                     ",(b)-[:REL {prop1: 3.0}]->(c)";
 
     @BeforeEach
@@ -53,6 +54,7 @@ class IndexInverseProcTest extends BaseProcTest {
             .graphProject()
             .withAnyLabel()
             .withRelationshipType("REL")
+            .withRelationshipType("REL2")
             .withRelationshipType("INDEXED_REL", RelationshipProjection.builder().type("REL").indexInverse(true).build())
             .withRelationshipProperty("prop1")
             .yields()
@@ -61,10 +63,10 @@ class IndexInverseProcTest extends BaseProcTest {
 
     @Test
     void indexInverse() {
-        String query = "CALL gds.beta.graph.relationships.indexInverse('graph', {relationshipType: 'REL'})";
+        String query = "CALL gds.beta.graph.relationships.indexInverse('graph', {relationshipTypes: ['REL', 'REL2']})";
 
         assertCypherResult(query, List.of(Map.of(
-            "inputRelationships", 3L,
+            "inputRelationships", 4L,
             "mutateMillis", instanceOf(Long.class),
             "preProcessingMillis",instanceOf(Long.class),
             "computeMillis",instanceOf(Long.class),
@@ -73,21 +75,21 @@ class IndexInverseProcTest extends BaseProcTest {
         ));
 
         var gs = GraphStoreCatalog.get(getUsername(), db.databaseName(), "graph");
-        assertThat(gs.graphStore().inverseIndexedRelationshipTypes()).contains(RelationshipType.of("REL"));
+        assertThat(gs.graphStore().inverseIndexedRelationshipTypes()).contains(RelationshipType.of("REL"), RelationshipType.of("REL2"));
     }
 
     @Test
     void shouldFailIfRelationshipTypeIsAlreadyIndexed() {
-        var query = "CALL gds.beta.graph.relationships.indexInverse('graph', {relationshipType: 'INDEXED_REL'})";
+        var query = "CALL gds.beta.graph.relationships.indexInverse('graph', {relationshipTypes: 'INDEXED_REL'})";
 
         assertThatThrownBy(() -> runQuery(query))
             .hasRootCauseInstanceOf(UnsupportedOperationException.class)
-            .hasRootCauseMessage("Inverse index already exists for 'INDEXED_REL'.");
+            .hasRootCauseMessage("Inverse index already exists for ['INDEXED_REL'].");
     }
 
     @Test
     void memoryEstimation() {
-        String query = "CALL gds.beta.graph.relationships.indexInverse.estimate('graph', {relationshipType: 'REL'})";
+        String query = "CALL gds.beta.graph.relationships.indexInverse.estimate('graph', {relationshipTypes: 'REL'})";
 
         assertCypherResult(query, List.of(Map.of(
             "mapView", instanceOf(Map.class),
