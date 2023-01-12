@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -110,6 +111,15 @@ class ToUndirectedProcTest extends BaseProcTest {
             "Relationship type `REL` already exists in the in-memory graph."
         );
         assertEquals(expectedMessage, throwable.getMessage());
+    }
+
+    @Test
+    void shouldFailIfForStarRelationshipType() {
+        String query = "CALL gds.beta.graph.relationships.toUndirected('graph', {relationshipType: '*', mutateRelationshipType: 'REL'})";
+
+        assertThatThrownBy(() -> runQuery(query)).hasMessageContaining(
+            "`relationshipType` cannot be `*`. Please specify the concrete relationship type."
+        );
     }
 
     @Test

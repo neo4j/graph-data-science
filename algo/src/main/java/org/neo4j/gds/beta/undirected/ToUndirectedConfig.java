@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.beta.undirected;
 
+import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
@@ -49,6 +51,13 @@ public interface ToUndirectedConfig extends AlgoBaseConfig, MutateRelationshipCo
 
     static ToUndirectedConfig of(CypherMapWrapper configuration) {
         return new ToUndirectedConfigImpl(configuration);
+    }
+
+    @Value.Check
+    default void validateRelationshipTypeNotStar() {
+        if (relationshipType().equals(ElementProjection.PROJECT_ALL)) {
+            throw new UnsupportedOperationException("`relationshipType` cannot be `*`. Please specify the concrete relationship type.");
+        }
     }
 
     static @Nullable String validateRelationshipTypeIdentifier(String input) {
