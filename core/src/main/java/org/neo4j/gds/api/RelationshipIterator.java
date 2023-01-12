@@ -23,6 +23,8 @@ import java.util.stream.Stream;
 
 public interface RelationshipIterator extends RelationshipPredicate {
 
+    boolean supportsInverseIteration();
+
     /**
      * Calls the given consumer function for every relationship of a given node.
      *

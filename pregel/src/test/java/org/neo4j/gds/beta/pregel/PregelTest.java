@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.beta.pregel;
 
+import org.assertj.core.api.ThrowableAssert;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -37,6 +38,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
+import org.neo4j.gds.beta.pregel.context.ComputeContext.BidirectionalComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -63,6 +65,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -813,6 +816,33 @@ class PregelTest {
                     assertThat(messages).isEmpty();
                 }
             }
+        }
+    }
+
+    @Test
+    void throwIfBidirectionalWithoutInverseIndex() {
+        ThrowableAssert.ThrowingCallable pregelCreate = () -> Pregel.create(
+            graph,
+            ImmutablePregelConfig.builder().maxIterations(4).build(),
+            new Bidirectional(),
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        assertThatThrownBy(pregelCreate)
+            .isInstanceOf(UnsupportedOperationException.class)
+            .hasMessage("The Pregel algorithm Bidirectional requires inverse indexes for all configured relationships ['*']");
+    }
+
+    static class Bidirectional implements BidirectionalPregelComputation<PregelConfig> {
+        @Override
+        public PregelSchema schema(PregelConfig config) {
+            return new PregelSchema.Builder().build();
+        }
+
+        @Override
+        public void compute(BidirectionalComputeContext<PregelConfig> context, Messages messages) {
+
         }
     }
 }
