@@ -245,6 +245,15 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
+    public void addNodeLabel(NodeLabel nodeLabel) {
+        updateGraphStore(graphStore -> {
+            nodes.addNodeLabel(nodeLabel);
+            var nodeSchema = schema.nodeSchema();
+            schema.nodeSchema().addLabel(nodeLabel, nodeSchema.unionProperties());
+        });
+    }
+
+    @Override
     public Set<String> nodePropertyKeys(NodeLabel label) {
         return schema().nodeSchema().allProperties(label);
     }

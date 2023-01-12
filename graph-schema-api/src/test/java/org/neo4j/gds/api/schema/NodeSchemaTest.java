@@ -189,4 +189,22 @@ class NodeSchemaTest {
     void shouldKnowIfPropertiesArePresent(NodeSchema nodeSchema, boolean hasProperties) {
         assertThat(nodeSchema.hasProperties()).isEqualTo(hasProperties);
     }
+
+    @Test
+    void shouldAddNodeLabelWithNodeProperties() {
+        var label = NodeLabel.of("Foo");
+
+        var nodeSchema = NodeSchema.empty()
+            .addProperty(label, "foo", ValueType.DOUBLE)
+            .addProperty(label, "baz", PropertySchema.of("baz", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT))
+            .addProperty(label, "bar", ValueType.LONG_ARRAY);
+
+        nodeSchema.addLabel(NodeLabel.of("Test"), nodeSchema.unionProperties());
+        var propertySchemas = nodeSchema.propertySchemasFor(NodeLabel.of("Test"));
+        assertThat(propertySchemas).containsExactlyInAnyOrder(
+            PropertySchema.of("foo", ValueType.DOUBLE),
+            PropertySchema.of("baz", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            PropertySchema.of("bar", ValueType.LONG_ARRAY)
+        );
+    }
 }

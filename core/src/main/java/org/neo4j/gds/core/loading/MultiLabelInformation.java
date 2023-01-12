@@ -84,6 +84,27 @@ public final class MultiLabelInformation implements LabelInformation {
     }
 
     @Override
+    public void addLabel(NodeLabel nodeLabel) {
+        labelInformation.computeIfAbsent(nodeLabel, (ignored) -> new BitSet());
+    }
+
+    @Override
+    public void addNodeIdToLabel(long nodeId, NodeLabel nodeLabel) {
+        labelInformation.get(nodeLabel).set(nodeId);
+    }
+
+    @Override
+    public boolean isSingleLabel() {
+        return false;
+    }
+
+    @Override
+    public LabelInformation toMultiLabel(NodeLabel nodeLabelToMutate) {
+        addLabel(nodeLabelToMutate);
+        return this;
+    }
+
+    @Override
     public boolean hasLabel(long nodeId, NodeLabel nodeLabel) {
         if (nodeLabel.equals(NodeLabel.ALL_NODES)) {
             return true;

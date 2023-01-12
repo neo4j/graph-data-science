@@ -32,7 +32,7 @@ import java.util.function.LongPredicate;
 
 public abstract class LabeledIdMap implements IdMap {
 
-    protected final LabelInformation labelInformation;
+    protected LabelInformation labelInformation;
     private final long nodeCount;
 
     public LabeledIdMap(LabelInformation labelInformation, long nodeCount) {
@@ -103,5 +103,22 @@ public abstract class LabeledIdMap implements IdMap {
         return labelInformation.hasLabel(mappedNodeId, label);
     }
 
+    @Override
+    public void addNodeLabel(NodeLabel nodeLabel) {
+        prepareForAddingNodeLabel(nodeLabel);
+        labelInformation.addLabel(nodeLabel);
+    }
+
+    @Override
+    public void addNodeIdToLabel(long nodeId, NodeLabel nodeLabel) {
+        prepareForAddingNodeLabel(nodeLabel);
+        labelInformation.addNodeIdToLabel(nodeId, nodeLabel);
+    }
+
+    private void prepareForAddingNodeLabel(NodeLabel nodeLabel) {
+        if (labelInformation.isSingleLabel()) {
+            labelInformation = labelInformation.toMultiLabel(nodeLabel);
+        }
+    }
 
 }

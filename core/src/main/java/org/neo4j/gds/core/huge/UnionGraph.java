@@ -401,4 +401,12 @@ public final class UnionGraph implements CSRGraph {
             return Math.toIntExact(visited.cardinality());
         }
     }
+
+    public void addNodeLabel(NodeLabel nodeLabel) {
+        first.addNodeLabel(nodeLabel);
+    }
+
+    public void addNodeIdToLabel(long mappedNodeId, NodeLabel nodeLabel) {
+        first.addNodeIdToLabel(toOriginalNodeId(mappedNodeId), nodeLabel);
+    }
 }

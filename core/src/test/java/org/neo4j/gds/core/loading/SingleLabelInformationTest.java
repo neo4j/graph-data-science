@@ -45,6 +45,14 @@ class SingleLabelInformationTest {
     private static final NodeLabel LABEL_A = NodeLabel.of("A");
 
     @Test
+    void shouldBeSingleLabel() {
+        var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
+            .build(1, LongUnaryOperator.identity());
+
+        assertThat(labelInformation.isSingleLabel()).isTrue();
+    }
+
+    @Test
     void shouldAlwaysBeEmpty() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
             .build(1, LongUnaryOperator.identity());
@@ -240,6 +248,59 @@ class SingleLabelInformationTest {
                     ),
                     1
                 ));
+    }
+
+    @Test
+    void shouldDisallowAddingNodeLabel() {
+        var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
+            .build(1, LongUnaryOperator.identity());
+
+
+        assertThatExceptionOfType(UnsupportedOperationException.class)
+            .isThrownBy(() -> labelInformation.addLabel(NodeLabel.of("B")));
+    }
+
+    @Test
+    void shouldDisallowAddingNodeIdToLabel() {
+        var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
+            .build(1, LongUnaryOperator.identity());
+
+        assertThatExceptionOfType(UnsupportedOperationException.class)
+            .isThrownBy(() -> labelInformation.addNodeIdToLabel(19L, LABEL_A));
+    }
+    @Test
+    void shouldConvertToMultiLabel() {
+        var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
+            .build(1, LongUnaryOperator.identity());
+
+        var nodeLabelB = NodeLabel.of("B");
+        var multiLabelInformation = labelInformation.toMultiLabel(nodeLabelB);
+
+        assertThat(multiLabelInformation).isNotSameAs(labelInformation);
+
+        assertThat(multiLabelInformation.isSingleLabel()).isFalse();
+
+        assertThat(multiLabelInformation.availableNodeLabels()).containsExactlyInAnyOrder(
+            LABEL_A,
+            nodeLabelB
+        );
+    }
+    @Test
+    void shouldConvertStarProjectionToMultiLabel() {
+        var labelInformation = LabelInformationBuilders.allNodes()
+            .build(1, LongUnaryOperator.identity());
+
+        var nodeLabelB = NodeLabel.of("B");
+        var multiLabelInformation = labelInformation.toMultiLabel(nodeLabelB);
+
+        assertThat(multiLabelInformation).isNotSameAs(labelInformation);
+
+        assertThat(multiLabelInformation.isSingleLabel()).isFalse();
+
+        assertThat(multiLabelInformation.availableNodeLabels()).containsExactlyInAnyOrder(
+            NodeLabel.ALL_NODES,
+            nodeLabelB
+        );
     }
 
     @Nested

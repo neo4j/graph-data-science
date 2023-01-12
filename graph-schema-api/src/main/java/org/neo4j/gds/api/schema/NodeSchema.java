@@ -78,6 +78,12 @@ public final class NodeSchema extends ElementSchema<NodeSchema, NodeLabel, NodeS
         return this;
     }
 
+    public NodeSchema addLabel(NodeLabel nodeLabel, Map<String, PropertySchema> nodeProperties) {
+        var nodeSchemaEntry = getOrCreateLabel(nodeLabel);
+        nodeProperties.forEach(nodeSchemaEntry::addProperty);
+        return this;
+    }
+
     public NodeSchema addProperty(NodeLabel nodeLabel, String propertyName, PropertySchema propertySchema) {
         getOrCreateLabel(nodeLabel).addProperty(propertyName, propertySchema);
         return this;
@@ -87,5 +93,4 @@ public final class NodeSchema extends ElementSchema<NodeSchema, NodeLabel, NodeS
         getOrCreateLabel(nodeLabel).addProperty(propertyKey, valueType);
         return this;
     }
-
 }

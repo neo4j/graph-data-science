@@ -43,7 +43,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @GdlExtension
@@ -199,4 +199,28 @@ class UnionGraphTest {
         assertThat(unionGraph.rootNodeCount().getAsLong()).isEqualTo(graphStore.nodeCount());
     }
 
+    @Test
+    void shouldAddNodeIdToNodeLabel() {
+        var graphStore = GdlFactory.of(
+            "CREATE " +
+            "  (a:A)" +
+            ", (b:B)" +
+            ", (a)-[:R1]->(b)" +
+            ", (b)-[:R2]->(a)"
+        ).build();
+
+        var unionGraph = graphStore.getGraph(
+            List.of(NodeLabel.of("B")),
+            List.of(RelationshipType.of("R1"), RelationshipType.of("R2")),
+            Optional.empty()
+        );
+
+        unionGraph.addNodeLabel(NodeLabel.of("Test"));
+        unionGraph.addNodeIdToLabel(0, NodeLabel.of("Test"));
+        assertThat(unionGraph.nodeLabels(0))
+            .containsExactlyInAnyOrder(
+                NodeLabel.of("B"),
+                NodeLabel.of("Test")
+            );
+    }
 }

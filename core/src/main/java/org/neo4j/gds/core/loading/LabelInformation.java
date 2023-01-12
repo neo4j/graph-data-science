@@ -53,6 +53,14 @@ public interface LabelInformation {
 
     PrimitiveIterator.OfLong nodeIterator(Collection<NodeLabel> labels, long nodeCount);
 
+    void addLabel(NodeLabel nodeLabel);
+
+    void addNodeIdToLabel(long nodeId, NodeLabel nodeLabel);
+
+    boolean isSingleLabel();
+
+    LabelInformation toMultiLabel(NodeLabel nodeLabelToMutate);
+
     interface LabelInformationConsumer {
         boolean accept(NodeLabel nodeLabel, BitSet bitSet);
     }

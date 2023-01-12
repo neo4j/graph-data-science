@@ -124,6 +124,28 @@ final class SingleLabelInformation implements LabelInformation {
         }
     }
 
+    @Override
+    public void addLabel(NodeLabel nodeLabel) {
+        throw new UnsupportedOperationException("Adding labels is not supported");
+    }
+
+    @Override
+    public void addNodeIdToLabel(long nodeId, NodeLabel nodeLabel) {
+        throw new UnsupportedOperationException("Adding node id to label is not supported");
+    }
+
+    @Override
+    public boolean isSingleLabel() {
+        return true;
+    }
+
+    @Override
+    public LabelInformation toMultiLabel(NodeLabel nodeLabelToMutate) {
+        return LabelInformationBuilders
+            .multiLabelWithCapacityAndLabelInformation(nodeCount, List.of(nodeLabelToMutate), availableNodeLabels())
+            .build(nodeCount, LongUnaryOperator.identity());
+    }
+
     static final class Builder implements LabelInformation.Builder {
         private final NodeLabel label;
 

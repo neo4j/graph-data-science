@@ -680,4 +680,12 @@ public class HugeGraph implements CSRGraph {
             return true;
         }
     }
+
+    public void addNodeLabel(NodeLabel nodeLabel) {
+        idMap.addNodeLabel(nodeLabel);
+    }
+
+    public void addNodeIdToLabel(long nodeId, NodeLabel nodeLabel) {
+        idMap.addNodeIdToLabel(nodeId, nodeLabel);
+    }
 }

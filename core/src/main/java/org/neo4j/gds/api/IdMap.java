@@ -104,6 +104,22 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
     boolean hasLabel(long mappedNodeId, NodeLabel label);
 
     /**
+     * Adds new node label to the available node labels.
+     * The labels is not assigned to any nodes at this point.
+     *
+     * @param nodeLabel the node label to add
+     */
+    void addNodeLabel(NodeLabel nodeLabel);
+
+    /**
+     * Assigns a node to the given node label.
+     *
+     * @param nodeId the node id to assign
+     * @param nodeLabel the node label to which the node will be assigned to
+     */
+    void addNodeIdToLabel(long nodeId, NodeLabel nodeLabel);
+
+    /**
      * Returns the original node mapping if the current node mapping is filtered, otherwise
      * it returns itself.
      */

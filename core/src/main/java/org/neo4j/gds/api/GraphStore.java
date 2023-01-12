@@ -81,6 +81,13 @@ public interface GraphStore {
 
     Set<NodeLabel> nodeLabels();
 
+    /**
+     * Add a new Node label to the Graph Store.
+     *
+     * @param nodeLabel the Node label to add
+     */
+    void addNodeLabel(NodeLabel nodeLabel);
+
     // Node Properties
 
     Set<String> nodePropertyKeys(NodeLabel label);
