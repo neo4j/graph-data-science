@@ -40,7 +40,6 @@ class Neo4jVersionTest {
         "4.4.14, V_4_4",
         "5.1.0, V_5_1",
         "5.2.0, V_5_2",
-        "5.4.0, V_Dev",
         "5.1.0-dev, V_5_1",
         "5.2.0-dev, V_5_2",
         "5.2.0, V_5_2",
@@ -54,6 +53,7 @@ class Neo4jVersionTest {
     @CsvSource({
         "dev",
         "4.3", // EOL
+        "5.4.0", // was dev at cutoff point
         "5.dev",
         "dev.5",
         "5.0", // 5.0 was never released to the public
