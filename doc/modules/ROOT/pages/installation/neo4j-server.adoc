@@ -3,12 +3,6 @@
 
 The GDS library is intended to be used on a standalone Neo4j server.
 
-[NOTE]
-====
-Running the GDS library on a core member of a Neo4j cluster is not supported.
-Read more about how to use GDS in conjunction with Neo4j cluster deployment xref:installation/installation-neo4j-cluster.adoc[below].
-====
-
 On a standalone Neo4j Server, the library will need to be installed and configured manually.
 
 1. Download `neo4j-graph-data-science-[version].jar` from the https://neo4j.com/download-center/#algorithms[Neo4j Download Center] and copy it into the `$NEO4J_HOME/plugins` directory.
