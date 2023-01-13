@@ -33,7 +33,6 @@ public class AdamOptimizer implements Updater {
 
     private static final double CLIP_MAX = 5.0;
     private static final double CLIP_MIN = -5.0;
-    private static final double DEFAULT_ALPHA = 0.001;
 
     // TODO: Pass these via config???
     private final double alpha;
@@ -53,10 +52,6 @@ public class AdamOptimizer implements Updater {
         return sizeOfInstance(AdamOptimizer.class) +
                 2 * termSize + // fields
                 2 * termSize; // working memory: mCap, vCap
-    }
-
-    public AdamOptimizer(List<Weights<? extends Tensor<?>>> weights) {
-        this(weights, DEFAULT_ALPHA);
     }
 
     public AdamOptimizer(

@@ -60,7 +60,7 @@ class AdamOptimizerTest {
             3
         ));
 
-        AdamOptimizer adam = new AdamOptimizer(List.of(weights));
+        AdamOptimizer adam = new AdamOptimizer(List.of(weights), 0.001);
         Variable<Matrix> difference = new MatrixSum(List.of(
             weights, new ConstantScale<>(optimum, -1)
         ));
@@ -136,7 +136,7 @@ class AdamOptimizerTest {
             3,
             3
         ));
-        var optimizer = new AdamOptimizer(List.of(weights));
+        var optimizer = new AdamOptimizer(List.of(weights), 0.001);
 
         assertThat(optimizer.momentumTerms.get(0)).isNotSameAs(optimizer.velocityTerms.get(0));
     }
