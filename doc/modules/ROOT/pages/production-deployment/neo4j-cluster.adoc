@@ -38,7 +38,7 @@ Note that the link points to the latest Neo4j version documentation and the conf
 ** A valid GDS Enterprise Edition license must be installed and configured on the _Secondary_.
 ** The driver connection to operated GDS should be made using the `bolt://` protocol to the _Secondary_ instance.
 
-For more information on setting up, configuring and managing a Neo4j clustering, please refer to https://neo4j.com/docs/operations-manual/current/clustering/[the documentation].
+For more information on setting up, configuring and managing a Neo4j cluster, please refer to https://neo4j.com/docs/operations-manual/current/clustering/[the documentation].
 
 [NOTE]
 ======
