@@ -115,7 +115,7 @@ class TrainingTest {
 
             return new Sigmoid<>(new ElementSum(
                 List.of(
-                    new Constant<>(weights.data().elementwiseProduct(nodeVector)),
+                    new Constant<>(elementwiseProduct(weights.data(), nodeVector)),
                     new Constant<>(expectedValue),
                     weights
                 )
@@ -134,5 +134,13 @@ class TrainingTest {
         static ImmutableTestTrainingConfig.Builder builder() {
             return ImmutableTestTrainingConfig.builder();
         }
+    }
+
+    private static Vector elementwiseProduct(Vector a, Vector b) {
+        var result = a.createWithSameDimensions();
+        for (int i = 0; i < a.data().length; i++) {
+            result.data()[i] = a.data()[i] * b.data()[i];
+        }
+        return result;
     }
 }
