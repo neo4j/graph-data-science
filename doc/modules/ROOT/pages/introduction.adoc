@@ -97,7 +97,7 @@ The Neo4j Graph Data Science library is available in two editions.
 * The Neo4j Graph Data Science library Enterprise Edition:
 ** Can run on an unlimited amount of CPU cores.
 ** Supports the role-based access control system (RBAC) from Neo4j Enterprise Edition.
-** Support running GDS as part of a xref::production-deployment/causal-cluster.adoc[cluster deployment].
+** Support running GDS as part of a xref::production-deployment/neo4j-cluster.adoc[Neo4j cluster deployment].
 ** Includes capacity and load xref::common-usage/monitoring-system.adoc[monitoring].
 ** Supports various additional graph catalog features, including:
 *** Graph xref::management-ops/backup-restore.adoc[backup and restore].
