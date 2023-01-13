@@ -29,7 +29,7 @@ The introduction of a new Pregel algorithm can be separated in two main steps.
 First, we need to implement the algorithm using the Pregel Java API.
 Second, we need to expose the algorithm via a Cypher procedure to make use of it.
 
-For an example on how to expose a custom Pregel computation via a Neo4j procedure, have a look at the https://github.com/neo4j/graph-data-science/tree/master/examples/pregel-example/src/main/java/org/neo4j/gds/beta/pregel[Pregel examples].
+For an example on how to expose a custom Pregel computation via a Neo4j procedure, have a look at the https://github.com/neo4j/graph-data-science/tree/2.3/examples/pregel-example/src/main/java/org/neo4j/gds/beta/pregel[Pregel examples].
 
 [[algorithms-pregel-api-java]]
 == Pregel Java API
@@ -510,7 +510,7 @@ For more details, please refer to the xref:algorithms/pregel-api.adoc#algorithms
 === Building and installing a Neo4j plugin
 
 In order to use a Pregel algorithm in Neo4j via a procedure, we need to package it as Neo4j plugin.
-The https://github.com/neo4j/graph-data-science/tree/master/examples/pregel-bootstrap[pregel-bootstrap] project is a good starting point.
+The https://github.com/neo4j/graph-data-science/tree/2.3/examples/pregel-bootstrap[pregel-bootstrap] project is a good starting point.
 The `build.gradle` file within the project contains all the dependencies necessary to implement a Pregel algorithm and to generate corresponding procedures.
 
 Make sure to change the `gdsVersion` and `neo4jVersion` according to your setup.
@@ -541,7 +541,7 @@ NOTE: Before `Neo4j 4.2`, the configuration setting is called `dbms.security.pro
 [[algorithms-pregel-api-example]]
 == Examples
 
-The https://github.com/neo4j/graph-data-science/tree/master/examples/pregel-example[pregel-examples] module contains a set of examples for Pregel algorithms.
+The https://github.com/neo4j/graph-data-science/tree/2.3/examples/pregel-example[pregel-examples] module contains a set of examples for Pregel algorithms.
 The algorithm implementations demonstrate the usage of the Pregel API.
 Along with each example, we provide test classes that can be used as a guideline on how to write tests for custom algorithms.
 To play around, we recommend copying one of the algorithms into the `pregel-bootstrap` project, build it and setup the plugin in Neo4j.
