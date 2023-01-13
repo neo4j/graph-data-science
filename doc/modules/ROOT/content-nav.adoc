@@ -6,7 +6,7 @@
 ** xref:installation/neo4j-server.adoc[]
 ** xref:installation/installation-enterprise-edition.adoc[]
 ** xref:installation/installation-docker.adoc[]
-** xref:installation/installation-causal-cluster.adoc[]
+** xref:installation/installation-neo4j-cluster.adoc[]
 ** xref:installation/installation-apache-arrow.adoc[]
 ** xref:installation/additional-config-parameters.adoc[]
 ** xref:installation/System-requirements.adoc[]
@@ -147,7 +147,7 @@
 * xref:production-deployment/index.adoc[]
 ** xref:production-deployment/transaction-handling.adoc[]
 ** xref:production-deployment/fabric.adoc[]
-** xref:production-deployment/causal-cluster.adoc[]
+** xref:production-deployment/neo4j-cluster.adoc[]
 ** xref:production-deployment/feature-toggles.adoc[]
 * xref:python-client/index.adoc[]
 * Appendix

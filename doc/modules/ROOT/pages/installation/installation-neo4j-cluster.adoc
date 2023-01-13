@@ -1,0 +1,11 @@
+[[installation-neo4j-cluster]]
+= Neo4j cluster
+
+include::partial$/common-usage/not-on-aurads-note.adoc[]
+
+In a Neo4j cluster, GDS should only be installed on a server that is not essential for handling transactional load. This is because the compute-intensive OLAP workloads in GDS might interfere with the smooth operation of the OLTP system that is Neo4j cluster.
+
+In order to install the GDS library you can follow the steps from xref:installation/neo4j-server.adoc[Neo4j Server].
+Additionally, the Neo4j cluster must be configured to use https://neo4j.com/docs/operations-manual/current/clustering/setup/routing/#clustering-routing[server-side routing].
+
+For more details, see xref:production-deployment/neo4j-cluster.adoc[GDS with Neo4j cluster].
