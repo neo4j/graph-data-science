@@ -1,9 +1,9 @@
 name: graph-data-science
 title: Neo4j Graph Data Science
-version: '2.3-preview'
+version: '2.4-preview'
 start_page: ROOT:index.adoc
 nav:
 - modules/ROOT/content-nav.adoc
 asciidoc:
   attributes:
-    docs-version: '2.3'
+    docs-version: '2.4'
