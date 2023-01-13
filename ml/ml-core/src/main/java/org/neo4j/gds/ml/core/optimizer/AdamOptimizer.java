@@ -104,9 +104,6 @@ public class AdamOptimizer implements Updater {
         if (value > CLIP_MAX) {
             return CLIP_MAX;
         }
-        if (value < CLIP_MIN) {
-            return CLIP_MIN;
-        }
-        return value;
+        return Math.max(value, CLIP_MIN);
     }
 }
