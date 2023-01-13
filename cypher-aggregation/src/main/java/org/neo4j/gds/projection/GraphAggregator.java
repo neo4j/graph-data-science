@@ -323,7 +323,7 @@ public class GraphAggregator implements CompatUserAggregator {
                         }
                         if (relationshipConfig instanceof MapValue) {
                             ConfigKeyValidation.requireOnlyKeysFrom(
-                                NODES_CONFIG_KEYS,
+                                RELATIONSHIPS_CONFIG_KEYS,
                                 ((MapValue) relationshipConfig).keySet()
                             );
                         }
