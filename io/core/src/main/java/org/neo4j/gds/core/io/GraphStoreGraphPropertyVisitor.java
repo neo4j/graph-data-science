@@ -123,19 +123,14 @@ public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
 
     public interface ReducibleStream<T extends BaseStream<?, T>> {
         T stream();
-        ValueType valueType();
+
         ReducibleStream<T> reduce(ReducibleStream<T> other);
 
         static <T extends BaseStream<?, T>> ReducibleStream<T> empty() {
-            return new ReducibleStream<T>() {
+            return new ReducibleStream<>() {
                 @Override
                 public T stream() {
                     return (T) Stream.empty();
-                }
-
-                @Override
-                public ValueType valueType() {
-                    return ValueType.UNKNOWN;
                 }
 
                 @Override
@@ -181,11 +176,6 @@ public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
         }
 
         @Override
-        public ValueType valueType() {
-            return ValueType.LONG;
-        }
-
-        @Override
         public ReducibleStream<LongStream> reduce(ReducibleStream<LongStream> other) {
             return new ReducibleLongStream(LongStream.concat(stream(), other.stream()));
         }
@@ -226,11 +216,6 @@ public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
         }
 
         @Override
-        public ValueType valueType() {
-            return ValueType.DOUBLE;
-        }
-
-        @Override
         public ReducibleStream<DoubleStream> reduce(ReducibleStream<DoubleStream> other) {
             return new ReducibleDoubleStream(DoubleStream.concat(stream(), other.stream()));
         }
@@ -239,11 +224,9 @@ public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
     static class ObjectStreamBuilder<T> implements StreamBuilder<Stream<T>> {
 
         private final HugeSparseObjectArrayList<T, ?> objectList;
-        private final ValueType valueType;
         private long index;
 
         ObjectStreamBuilder(ValueType valueType) {
-            this.valueType = valueType;
             this.objectList = createArrayList(valueType);
             this.index = 0;
         }
@@ -255,7 +238,7 @@ public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
 
         @Override
         public ReducibleStream<Stream<T>> build() {
-            return new ReducibleObjectStream<>(this.objectList.stream().limit(index), valueType);
+            return new ReducibleObjectStream<>(this.objectList.stream().limit(index));
         }
 
         private HugeSparseObjectArrayList<T, ?> createArrayList(ValueType valueType) {
@@ -275,11 +258,9 @@ public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
     static class ReducibleObjectStream<T> implements ReducibleStream<Stream<T>> {
 
         private final Stream<T> stream;
-        private final ValueType valueType;
 
-        ReducibleObjectStream(Stream<T> stream, ValueType valueType) {
+        ReducibleObjectStream(Stream<T> stream) {
             this.stream = stream;
-            this.valueType = valueType;
         }
 
         @Override
@@ -288,13 +269,8 @@ public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
         }
 
         @Override
-        public ValueType valueType() {
-            return this.valueType;
-        }
-
-        @Override
         public ReducibleStream<Stream<T>> reduce(ReducibleStream<Stream<T>> other) {
-            return new ReducibleObjectStream<>(Stream.concat(stream(), other.stream()), valueType);
+            return new ReducibleObjectStream<>(Stream.concat(stream(), other.stream()));
         }
     }
 }
