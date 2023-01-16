@@ -50,7 +50,10 @@ final class PregelValidation {
     private final Elements elementUtils;
 
     // Represents the PregelComputation interface
-    private final TypeMirror pregelComputation;
+    private final TypeMirror basePregelComputation;
+
+    private final TypeMirror bidirectionalPregelComputation;
+
     // Represents the PregelProcedureConfig interface
     private final TypeMirror pregelProcedureConfig;
 
@@ -58,8 +61,11 @@ final class PregelValidation {
         this.messager = messager;
         this.typeUtils = typeUtils;
         this.elementUtils = elementUtils;
-        this.pregelComputation = MoreTypes.asDeclared(
+        this.basePregelComputation = MoreTypes.asDeclared(
             typeUtils.erasure(elementUtils.getTypeElement(BasePregelComputation.class.getName()).asType())
+        );
+        this.bidirectionalPregelComputation = MoreTypes.asDeclared(
+            typeUtils.erasure(elementUtils.getTypeElement(BidirectionalPregelComputation.class.getName()).asType())
         );
         this.pregelProcedureConfig = MoreTypes.asDeclared(elementUtils
             .getTypeElement(PregelProcedureConfig.class.getName())
@@ -69,7 +75,7 @@ final class PregelValidation {
     Optional<Spec> validate(Element pregelElement) {
         if (
             !isClass(pregelElement) ||
-            !isPregelComputation(pregelElement) ||
+            !isBasePregelComputation(pregelElement) ||
             !isPregelProcedureConfig(pregelElement) ||
             !hasEmptyConstructor(pregelElement) ||
             !configHasFactoryMethod(pregelElement)
@@ -92,7 +98,8 @@ final class PregelValidation {
             configTypeName,
             procedure.name(),
             procedure.modes(),
-            maybeDescription
+            maybeDescription,
+            requiresInverseIndex(pregelElement)
         ));
     }
 
@@ -108,17 +115,17 @@ final class PregelValidation {
         return isClass;
     }
 
-    private Optional<DeclaredType> pregelComputation(Element pregelElement) {
+    private Optional<DeclaredType> pregelComputation(Element pregelElement, TypeMirror computationInterface) {
         // TODO: this check needs to bubble up the inheritance tree
         return MoreElements.asType(pregelElement).getInterfaces().stream()
             .map(MoreTypes::asDeclared)
-            .filter(declaredType -> typeUtils.isSubtype(declaredType, pregelComputation))
+            .filter(declaredType -> typeUtils.isSubtype(declaredType, computationInterface))
             .findFirst();
     }
 
-    private boolean isPregelComputation(Element pregelElement) {
+    private boolean isBasePregelComputation(Element pregelElement) {
         var pregelTypeElement = MoreElements.asType(pregelElement);
-        var maybeInterface = pregelComputation(pregelElement);
+        var maybeInterface = pregelComputation(pregelElement, basePregelComputation);
         boolean isPregelComputation = maybeInterface.isPresent();
 
         if (!isPregelComputation) {
@@ -129,6 +136,11 @@ final class PregelValidation {
             );
         }
         return isPregelComputation;
+    }
+
+    private boolean requiresInverseIndex(Element pregelElement) {
+        var maybeInterface = pregelComputation(pregelElement, bidirectionalPregelComputation);
+        return maybeInterface.isPresent();
     }
 
     private boolean isPregelProcedureConfig(Element pregelElement) {
@@ -198,7 +210,7 @@ final class PregelValidation {
     }
 
     private TypeMirror config(Element pregelElement) {
-        return pregelComputation(pregelElement)
+        return pregelComputation(pregelElement, basePregelComputation)
             .map(declaredType -> declaredType.getTypeArguments().get(0))
             .orElseThrow(() -> new IllegalStateException("Could not find a pregel computation"));
     }
@@ -218,6 +230,8 @@ final class PregelValidation {
         GDSMode[] procedureModes();
 
         Optional<String> description();
+
+        boolean requiresInverseIndex();
     }
 
 }
