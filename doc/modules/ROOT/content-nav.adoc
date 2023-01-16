@@ -146,7 +146,7 @@
 ** xref:end-to-end-examples/fastrp-knn-example.adoc[]
 * xref:production-deployment/index.adoc[]
 ** xref:production-deployment/transaction-handling.adoc[]
-** xref:production-deployment/fabric.adoc[]
+** xref:production-deployment/composite.adoc[]
 ** xref:production-deployment/neo4j-cluster.adoc[]
 ** xref:production-deployment/feature-toggles.adoc[]
 * xref:python-client/index.adoc[]
