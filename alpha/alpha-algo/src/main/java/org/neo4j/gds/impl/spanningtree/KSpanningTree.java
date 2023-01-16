@@ -20,9 +20,12 @@
 package org.neo4j.gds.impl.spanningtree;
 
 import com.carrotsearch.hppc.BitSet;
+import org.apache.commons.lang3.mutable.MutableDouble;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
@@ -46,8 +49,6 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
     private final DoubleUnaryOperator minMax;
     private final long startNodeId;
     private final long k;
-
-    private SpanningTree spanningTree;
 
     public KSpanningTree(
         Graph graph,
@@ -76,42 +77,18 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
 
         prim.setTerminationFlag(getTerminationFlag());
         SpanningTree spanningTree = prim.compute();
-        HugeLongArray parent = spanningTree.parentArray();
-        long parentSize = parent.size();
-        HugeLongPriorityQueue priorityQueue = createPriorityQueue(parentSize, true);
-
-        progressTracker.beginSubTask(parentSize);
-        for (long i = 0; i < parentSize && terminationFlag.running(); i++) {
-            long p = parent.get(i);
-            if (p == -1) {
-                continue;
-            }
-            priorityQueue.add(i, spanningTree.costToParent(i));
-            progressTracker.logProgress();
-        }
-        progressTracker.endSubTask();
-        progressTracker.beginSubTask(k - 1);
-        // remove until there are k-1 relationships
-        long numberOfDeletions = spanningTree.effectiveNodeCount() - k;
-        for (long i = 0; i < numberOfDeletions && terminationFlag.running(); i++) {
-            long cutNode = priorityQueue.pop();
-            parent.set(cutNode, -1);
-            progressTracker.logProgress();
-        }
-        progressTracker.endSubTask();
-        this.spanningTree = prim.getSpanningTree();
-        progressTracker.endSubTask();
-        return this.spanningTree;
+        return combineApproach(spanningTree);
     }
 
     @NotNull
-    private HugeLongPriorityQueue createPriorityQueue(long parentSize, boolean reverse) {
-        //TODO: Don't forget to check this (something is wrong now but will fix tomorrowo)
-        boolean condition = minMax == Prim.MAX_OPERATOR;
-        if (reverse) {
-            condition = !condition;
+    private HugeLongPriorityQueue createPriorityQueue(long parentSize, boolean pruning) {
+        boolean minQueue = minMax == Prim.MIN_OPERATOR;
+        //if pruning, we remove the worst (max if it's a minimization problem)
+        //therefore we flip the priority queue
+        if (pruning) {
+            minQueue = !minQueue;
         }
-        HugeLongPriorityQueue priorityQueue = condition
+        HugeLongPriorityQueue priorityQueue = minQueue
             ? HugeLongPriorityQueue.min(parentSize)
             : HugeLongPriorityQueue.max(parentSize);
         return priorityQueue;
@@ -120,7 +97,15 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
     @Override
     public void release() {
         graph = null;
-        spanningTree = null;
+    }
+
+    private double init(HugeLongArray parent, HugeDoubleArray costToParent, SpanningTree spanningTree) {
+        graph.forEachNode((nodeId) -> {
+            parent.set(nodeId, spanningTree.parent(nodeId));
+            costToParent.set(nodeId, spanningTree.costToParent(nodeId));
+            return true;
+        });
+        return spanningTree.totalWeight();
     }
 
     private SpanningTree cutLeafApproach(SpanningTree spanningTree) {
@@ -128,84 +113,116 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         //so we can just cut the most expensive leaf at each step
         var priorityQueue = createPriorityQueue(graph.nodeCount(), true);
         HugeLongArray degree = HugeLongArray.newArray(graph.nodeCount());
-        double startNodeRelationshipCost = -1.0;
-        long startNodeSingleChild = -1;
-        HugeLongArray parent = spanningTree.parentArray();
+        long root = startNodeId;
+        double rootCost = -1.0;
+        long rootChild = -1;
 
+        HugeLongArray parent = HugeLongArray.newArray(graph.nodeCount());
+        HugeDoubleArray costToParent = HugeDoubleArray.newArray(graph.nodeCount());
+
+        double totalCost = init(parent, costToParent, spanningTree);
+
+        //calculate degree of each node in MST
         for (long nodeId = 0; nodeId < graph.nodeCount(); ++nodeId) {
-            var nodeParent = spanningTree.parent(nodeId);
+            var nodeParent = parent.get(nodeId);
             if (nodeParent != -1) {
                 degree.set(nodeParent, degree.get(nodeParent) + 1);
-                if (nodeParent == startNodeId) { //start-node needs special care because it's parent is -1
-                    startNodeSingleChild = nodeId;
-                    startNodeRelationshipCost = spanningTree.costToParent(nodeId);
-                }
                 degree.set(nodeId, degree.get(nodeId) + 1);
+
+                if (nodeParent == root) { //root nodes needs special care because parent is -1
+                    rootChild = nodeId;
+                    rootCost = costToParent.get(nodeId);
+                }
             }
         }
-
+        //add all leafs in priority queue
         for (long nodeId = 0; nodeId < graph.nodeCount(); ++nodeId) {
             if (degree.get(nodeId) == 1) {
-                double relevantCost = (nodeId == startNodeId) ?
-                    startNodeRelationshipCost : spanningTree.costToParent(nodeId);
+                double relevantCost = (nodeId == root) ?
+                    rootCost :
+                    costToParent.get(nodeId);
                 priorityQueue.add(nodeId, relevantCost);
             }
         }
-        long numberOfDeletions = spanningTree.effectiveNodeCount() - k;
 
+        long numberOfDeletions = spanningTree.effectiveNodeCount() - k;
         for (long i = 0; i < numberOfDeletions; ++i) {
             var nextNode = priorityQueue.pop();
-            long affectedNode = -1;
-            if (nextNode == startNodeId) {
-                parent.set(startNodeSingleChild, -1);
-                affectedNode = startNodeSingleChild;
-                //TODO: should also upd costArray
+            long affectedNode;
+            
+            if (nextNode == root) {
+                affectedNode = rootChild;
+                totalCost -= rootCost;
+                clearNode(rootChild, parent, costToParent);
+                root = affectedNode;
             } else {
                 affectedNode = parent.get(nextNode);
-                parent.set(nextNode, -1);
-                //TODO: should also upd costArray
+                totalCost -= costToParent.get(nextNode);
+                clearNode(nextNode, parent, costToParent);
             }
+
             degree.set(affectedNode, degree.get(affectedNode) - 1);
+            double associatedCost = -1;
             if (degree.get(affectedNode) == 1) {
-                if (affectedNode != startNodeId) {
-                    priorityQueue.add(affectedNode, spanningTree.costToParent(affectedNode));
-                } else {
-                    //this can only happen once so the O(n) cost is not a big overhead
-                    for (long nodeId = 0; nodeId < graph.nodeCount(); ++nodeId) {
-                        if (parent.get(nodeId) == startNodeId) {
-                            priorityQueue.add(startNodeId, spanningTree.costToParent(nodeId));
-                            startNodeSingleChild = nodeId;
-                            break;
+                if (affectedNode == root) {
+                    //if it is root, we loop at its neighbors to find its single alive child
+                    MutableDouble mutRootCost = new MutableDouble();
+                    MutableLong mutRootChild = new MutableLong();
+                    graph.forEachRelationship(root, (s, t) -> {
+                        if (parent.get(t) == s) {
+                            mutRootChild.setValue(t);
+                            mutRootCost.setValue(costToParent.get(t));
+                            return false;
                         }
-                    }
+                        return true;
+                    });
+                    rootChild = mutRootChild.longValue();
+                    rootCost = mutRootCost.doubleValue();
+                    associatedCost = rootCost;
+                } else {
+                    //otherwise we just get the info from parent
+                    associatedCost = costToParent.get(affectedNode);
                 }
+                priorityQueue.add(affectedNode, associatedCost);
+
             }
         }
-        return spanningTree;
+        return new SpanningTree(-1, graph.nodeCount(), k, parent, costToParent, totalCost);
     }
 
     private SpanningTree growApproach(SpanningTree spanningTree) {
 
         //this approach grows gradually the MST found in the previous step
         //when it is about to get larger than K, we crop the current worst leaf if the new value to be added
-        // is actually any smaller
-
+        // is actually better
 
         //TODO: Handle to be able to delete startNode as well (not much different from above approach)
 
         HugeLongArray outDegree = HugeLongArray.newArray(graph.nodeCount());
 
-        HugeLongArray parent = spanningTree.parentArray();
+        HugeLongArray parent = HugeLongArray.newArray(graph.nodeCount());
+        HugeDoubleArray costToParent = HugeDoubleArray.newArray(graph.nodeCount());
 
+        init(parent, costToParent, spanningTree);
+        double totalCost = 0;
         var priorityQueue = createPriorityQueue(graph.nodeCount(), false);
         var toTrim = createPriorityQueue(graph.nodeCount(), true);
 
+        //priority-queue does not have a remove method so we need something to know if a node is still a leaf or not
         BitSet exterior = new BitSet(graph.nodeCount());
+        //at any point, the tree has a root we mark its neighbors in this bitset to avoid looping to find them
+        BitSet rootNodeAdjacent = new BitSet(graph.nodeCount());
+        //we just save which nodes are in the final output and not (just to do clean-up; probably be avoided)
+        BitSet included = new BitSet(graph.nodeCount());
+
         priorityQueue.add(startNodeId, 0);
+        long root = startNodeId; //current root is startNodeId
         long nodesInTree = 0;
-        while (true) {
-            long node = priorityQueue.pop();
-            long nodeParent = spanningTree.parent(node);
+        while (!priorityQueue.isEmpty()) {
+            long node = priorityQueue.top();
+            double associatedCost = priorityQueue.cost(node);
+            priorityQueue.pop();
+            long nodeParent = parent.get(node);
 
             boolean nodeAdded = false;
             if (nodesInTree < k) { //if we are smaller, we can just add it no problemo
@@ -213,36 +230,90 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
                 nodeAdded = true;
             } else {
                 while (!exterior.get(toTrim.top())) { //not valid frontier nodes anymore, just ignore
-                    toTrim.pop();
+                    toTrim.pop(); //as we said, pq does not have a direct remove method
                 }
-                boolean shouldMove = moveMakesSense(priorityQueue.cost(node), toTrim.cost(toTrim.top()), minMax);
+                var nodeToTrim = toTrim.top(); //a leaf node with worst cost
+                if (parent.get(node) == nodeToTrim) {
+                    //we cannot add it, if we're supposed to remove its parent
+                    //TODO: should be totally feasible to consider the 2nd worst then.
+                    continue;
+                }
 
-                if (shouldMove && nodeParent != toTrim.top()) {
-                    //we cannot add it, if it's parent is the one who we're going to kill next, right?
+                boolean shouldMove = moveMakesSense(associatedCost, toTrim.cost(nodeToTrim), minMax);
+
+                if (shouldMove) {
                     nodeAdded = true;
-                    long popped = toTrim.pop();
-                    long poppedPopps = parent.get(popped);
-                    parent.set(popped, -1); //this guy bites the dust completely...
-                    if (poppedPopps != -1) {
-                        if (outDegree.get(poppedPopps) == 0) { //...and his parent might become open to deletion soon
-                            toTrim.add(poppedPopps, spanningTree.costToParent(poppedPopps));
-                            exterior.set(poppedPopps); //if so add it to the reverse p.q
+
+                    double value = toTrim.cost(nodeToTrim);
+                    toTrim.pop();
+
+                    long parentOfTrimmed = parent.get(nodeToTrim);
+                    included.clear(nodeToTrim); //nodeToTrim is removed from the answer
+                    clearNode(nodeToTrim, parent, costToParent);
+                    totalCost -= value; //as well as its cost from the solution
+
+                    if (parentOfTrimmed != -1) { //we are not removing the actual root
+                        //reduce degree of parent
+                        outDegree.set(parentOfTrimmed, outDegree.get(parentOfTrimmed) - 1);
+                        long affectedNode = -1;
+                        double affectedCost = -1;
+                        long parentDegree = outDegree.get(parentOfTrimmed);
+                        if (parentOfTrimmed == root) {
+                            rootNodeAdjacent.clear(nodeToTrim);
+                            if (parentDegree == 1) { //it is a leaf
+                                assert rootNodeAdjacent.cardinality() == 1;
+                                var rootChild = rootNodeAdjacent.nextSetBit(0);
+                                affectedNode = root;
+                                affectedCost = costToParent.get(rootChild);
+                            }
+                        } else {
+                            if (parentDegree == 0) {
+                                affectedNode = parentOfTrimmed;
+                                affectedCost = costToParent.get(parentOfTrimmed);
+                            }
+                        }
+                        if (affectedNode != -1) {
+                            toTrim.add(affectedNode, affectedCost);
+                            exterior.set(affectedNode);
+                        }
+                    } else {
+                        //the root is removed, long live the new root!
+                        assert rootNodeAdjacent.cardinality() == 1;
+                        var newRoot = rootNodeAdjacent.nextSetBit(0);
+                        rootNodeAdjacent.clear(); //empty everything
+                        graph.forEachRelationship(newRoot, (s, t) -> {
+                            if (parent.get(t) == s) {
+                                rootNodeAdjacent.set(t);
+                            }
+                            return true;
+                        });
+                        root = newRoot;
+                        clearNode(root, parent, costToParent);
+                        //see if root is a degree-1 to add to exterior
+                        if (outDegree.get(root) == 1) {
+                            var rootChild = rootNodeAdjacent.nextSetBit(0);
+                            priorityQueue.add(rootChild, costToParent.get(rootChild));
+                            exterior.set(root);
                         }
                     }
-
                 }
             }
             if (nodeAdded) {
-
-                outDegree.set(nodeParent, outDegree.get(nodeParent) + 1);
-                exterior.clear(nodeParent);
+                included.set(node);
+                totalCost += associatedCost;
+                if (nodeParent == root) {
+                    rootNodeAdjacent.set(node);
+                }
+                if (node != root) {
+                    outDegree.set(nodeParent, outDegree.get(nodeParent) + 1);
+                    exterior.clear(nodeParent);
+                }
+                toTrim.add(node, associatedCost);
+                exterior.set(node);
 
                 graph.forEachRelationship(node, 1.0, (s, t, w) -> {
                     if (parent.get(t) == s) {
-                        //TODO:  doing this only on the tree for now for simplicity
-                        //cause its 18h and I do not want to think more :D
-                        //might be able to work on all graph edges not just for those in the tree
-
+                        //TODO: work's only on mst edges for now (should be doable to re-find an k-MST from whole graph)
                         if (!priorityQueue.containsElement(t)) {
                             priorityQueue.add(t, spanningTree.costToParent(t));
                         }
@@ -250,9 +321,26 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
                     }
                     return true;
                 });
+            } else {
+                clearNode(node, parent, costToParent);
+
             }
         }
+        //post-processing step: anything not touched is reset to -1
+        graph.forEachNode(nodeId -> {
+            if (!included.get(nodeId)) {
+                clearNode(nodeId, parent, costToParent);
+            }
+            return true;
+        });
 
+        return new SpanningTree(-1, graph.nodeCount(), k, parent, costToParent, totalCost);
+
+    }
+
+    private void clearNode(long node, HugeLongArray parent, HugeDoubleArray costToParent) {
+        parent.set(node, -1);
+        costToParent.set(node, -1);
     }
 
     private boolean moveMakesSense(double cost1, double cost2, DoubleUnaryOperator minMax) {
@@ -271,24 +359,20 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
          * Teh first approach just cuts leaves from the final MST
          * The second approach grows the MST  step-by-step and cuts leaves when it needs to trim an edge
          *
-         * Neither of this approach is the best by itself (the approach of cutting arbitrary heavy nodes is also
-         * plagued by a lot of mistakes)
+         * Neither of this approach is the best by itself
+         * (the approach of cutting the heaviest also has its shares of issues ofc)
+         *
          * but it is not hard to construct situations where one works well and the other does not.
-         * So I thought of combining the two get the best.
+         * So I thought of combining the two and return the best
          *
-         * I think we can have this ready for a 2.3.1 patch-release  (let's not rush it for thursday; it's alpha after all)
-         * and for 2.4 we can try do write some more sophisticated methods (to get the optimal answer for a given
-         * tree you need O(nk^2) time i think so it's maybe not doable*2)
-         *
-         * *1: we can modify the LinkCutTree so that we can check size of resulting sub trees after a cut, but for that
-         * need to relearn the code :)
-         * *2: and that is not guaranteed to be the optimal answer in general just for that particular tree :)
-         *
+         * This is supposed to be a quick fix to eliminate the bug asap. When we work next time on k-MST,
+         * we can come up with something more sophisticated (there's optimal algorithms for dealing with subtree;
+         * but they take O(nk^2) so maybe not good). Otherwise, it's np-complete so...
          */
-        var spanningTree1 = cutLeafApproach(tree); //should clone 'tree'
+        var spanningTree1 = cutLeafApproach(tree);
         var spanningTree2 = growApproach(tree);
+        System.out.println(spanningTree1.totalWeight() + " " + spanningTree2.totalWeight());
 
-        //TODO: Update totalWeight in the two methods
         if (spanningTree1.totalWeight() > spanningTree2.totalWeight()) {
             return (minMax == Prim.MAX_OPERATOR) ? spanningTree1 : spanningTree2;
         } else {
