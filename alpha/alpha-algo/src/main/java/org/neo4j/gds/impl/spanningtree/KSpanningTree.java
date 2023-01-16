@@ -264,7 +264,27 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
     }
 
     private SpanningTree combineApproach(SpanningTree tree) {
-
+        /*
+         * these are quick and fast techniques of returning a k-Tree without having to worry about not
+         * ending up with a tree of k nodes *1, which was the main reason why the existing algorithm did not work.
+         *
+         * Teh first approach just cuts leaves from the final MST
+         * The second approach grows the MST  step-by-step and cuts leaves when it needs to trim an edge
+         *
+         * Neither of this approach is the best by itself (the approach of cutting arbitrary heavy nodes is also
+         * plagued by a lot of mistakes)
+         * but it is not hard to construct situations where one works well and the other does not.
+         * So I thought of combining the two get the best.
+         *
+         * I think we can have this ready for a 2.3.1 patch-release  (let's not rush it for thursday; it's alpha after all)
+         * and for 2.4 we can try do write some more sophisticated methods (to get the optimal answer for a given
+         * tree you need O(nk^2) time i think so it's maybe not doable*2)
+         *
+         * *1: we can modify the LinkCutTree so that we can check size of resulting sub trees after a cut, but for that
+         * need to relearn the code :)
+         * *2: and that is not guaranteed to be the optimal answer in general just for that particular tree :)
+         *
+         */
         var spanningTree1 = cutLeafApproach(tree); //should clone 'tree'
         var spanningTree2 = growApproach(tree);
 
