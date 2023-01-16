@@ -1,7 +1,7 @@
 {
   "name": "graph-data-science",
-  "version": "2.3.0-preview",
-  "description": "Neo4j Graph Data Science Library",
+  "version": "2.4.0-preview",
+  "description": "Neo4j Graph Data Science",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
