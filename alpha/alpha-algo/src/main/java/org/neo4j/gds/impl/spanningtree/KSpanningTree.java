@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.impl.spanningtree;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -71,13 +72,12 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
             startNodeId,
             progressTracker
         );
+
         prim.setTerminationFlag(getTerminationFlag());
         SpanningTree spanningTree = prim.compute();
         HugeLongArray parent = spanningTree.parentArray();
         long parentSize = parent.size();
-        HugeLongPriorityQueue priorityQueue = minMax == Prim.MAX_OPERATOR
-            ? HugeLongPriorityQueue.min(parentSize)
-            : HugeLongPriorityQueue.max(parentSize);
+        HugeLongPriorityQueue priorityQueue = createPriorityQueue(parentSize);
         progressTracker.beginSubTask(parentSize);
         for (long i = 0; i < parentSize && terminationFlag.running(); i++) {
             long p = parent.get(i);
@@ -90,7 +90,8 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         progressTracker.endSubTask();
         progressTracker.beginSubTask(k - 1);
         // remove until there are k-1 relationships
-        for (long i = 0; i < spanningTree.effectiveNodeCount() - k && terminationFlag.running(); i++) {
+        long numberOfDeletions = spanningTree.effectiveNodeCount() - k;
+        for (long i = 0; i < numberOfDeletions && terminationFlag.running(); i++) {
             long cutNode = priorityQueue.pop();
             parent.set(cutNode, -1);
             progressTracker.logProgress();
@@ -99,6 +100,14 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         this.spanningTree = prim.getSpanningTree();
         progressTracker.endSubTask();
         return this.spanningTree;
+    }
+
+    @NotNull
+    private HugeLongPriorityQueue createPriorityQueue(long parentSize) {
+        HugeLongPriorityQueue priorityQueue = minMax == Prim.MAX_OPERATOR
+            ? HugeLongPriorityQueue.min(parentSize)
+            : HugeLongPriorityQueue.max(parentSize);
+        return priorityQueue;
     }
 
     @Override
