@@ -262,6 +262,21 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
             return cost1 < cost2;
         }
     }
+
+    private SpanningTree combineApproach(SpanningTree tree) {
+
+        var spanningTree1 = cutLeafApproach(tree); //should clone 'tree'
+        var spanningTree2 = growApproach(tree);
+
+        //TODO: Update totalWeight in the two methods
+        if (spanningTree1.totalWeight() > spanningTree2.totalWeight()) {
+            return (minMax == Prim.MAX_OPERATOR) ? spanningTree1 : spanningTree2;
+        } else {
+            return (minMax == Prim.MAX_OPERATOR) ? spanningTree2 : spanningTree1;
+
+        }
+
+    }
 }
 
 
