@@ -22,6 +22,8 @@ package org.neo4j.gds.impl.spanningtree;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -154,8 +156,9 @@ class KSpanningTreeTest {
         assertThat(nodesInTree.size()).isEqualTo(k);
     }
 
-    @Test
-    void shouldProduceSingleTreeWithKMinusOneEdges() {
+    @ParameterizedTest
+    @CsvSource({"2,1.0", "3,2.0"})
+    void shouldProduceSingleTreeWithKMinusOneEdges(int k, double expected) {
         var factory = GdlFactory.of("CREATE" +
                                     "  (a:Node)" +
                                     ", (b:Node)" +
@@ -172,13 +175,12 @@ class KSpanningTreeTest {
         var graph = factory.build().getUnion();
         var startNode = factory.nodeId("a");
 
-        var k = 2;
 
         var spanningTree = new KSpanningTree(
             graph,
             Prim.MIN_OPERATOR,
             startNode,
-            2,
+            k,
             ProgressTracker.NULL_TRACKER
         ).compute();
 
@@ -189,5 +191,99 @@ class KSpanningTreeTest {
         });
 
         assertThat(counter.getValue()).isEqualTo(k - 1);
+
+        assertThat(spanningTree.totalWeight()).isEqualTo(expected);
     }
+
+    @Test
+    void worstCaseForCuttingHeaviest() {
+        var factory = GdlFactory.of("CREATE" +
+                                    "  (a:Node)" +
+                                    ", (b:Node)" +
+                                    ", (c:Node)" +
+                                    ", (d:Node)" +
+                                    ", (e:Node)" +
+                                    ", (f:Node)" +
+                                    ", (g:Node)" +
+                                    ", (h:Node)" +
+                                    ", (a)-[:TYPE {cost: 9.0}]->(b)" +
+                                    ", (b)-[:TYPE {cost: 9.0}]->(c)" +
+                                    ", (c)-[:TYPE {cost: 0.0}]->(d)" +
+                                    ", (d)-[:TYPE {cost: 10.0}]->(e)" +
+                                    ", (e)-[:TYPE {cost: 0.0}]->(f)" +
+                                    ", (f)-[:TYPE {cost: 9.0}]->(g)" +
+                                    ", (g)-[:TYPE {cost: 9.0}]->(h)"
+
+        );
+        var graph = factory.build().getUnion();
+        var startNode = factory.nodeId("a");
+
+
+        var spanningTree = new KSpanningTree(
+            graph,
+            Prim.MIN_OPERATOR,
+            startNode,
+            4,
+            ProgressTracker.NULL_TRACKER
+        ).compute();
+
+        var counter = new MutableLong(0);
+        spanningTree.forEach((__, ___, ____) -> {
+            counter.add(1);
+            return true;
+        });
+
+        assertThat(counter.getValue()).isEqualTo(4 - 1);
+        assertThat(spanningTree.totalWeight()).isEqualTo(10.0);
+        //here a 'cut-heaviest'  approach would begin by cutting edge 10.
+        //this would prune the tree into two smaller subtrees of 4 nodes each
+        //adn thus return a 18 despite the optimal being 10.
+        //this is one of the many situations where cut-heavy-fails
+
+    }
+
+    @Test
+    void worstCaseForPruningLeaves() {
+        var factory = GdlFactory.of("CREATE" +
+                                    "  (a:Node)" +
+                                    ", (b:Node)" +
+                                    ", (c:Node)" +
+                                    ", (d:Node)" +
+                                    ", (e:Node)" +
+                                    ", (f:Node)" +
+                                    ", (g:Node)" +
+                                    ", (a)-[:TYPE {cost: 9.0}]->(b)" +
+                                    ", (b)-[:TYPE {cost: 0.0}]->(c)" +
+                                    ", (c)-[:TYPE {cost: 0.0}]->(d)" +
+                                    ", (a)-[:TYPE {cost: 1.0}]->(e)" +
+                                    ", (e)-[:TYPE {cost: 1.0}]->(f)" +
+                                    ", (f)-[:TYPE {cost: 1.0}]->(g)"
+
+        );
+        var graph = factory.build().getUnion();
+        var startNode = factory.nodeId("a");
+
+
+        var spanningTree = new KSpanningTree(
+            graph,
+            Prim.MIN_OPERATOR,
+            startNode,
+            4,
+            ProgressTracker.NULL_TRACKER
+        ).compute();
+
+        var counter = new MutableLong(0);
+        spanningTree.forEach((__, ___, ____) -> {
+            counter.add(1);
+            return true;
+        });
+
+        assertThat(counter.getValue()).isEqualTo(4 - 1);
+        assertThat(spanningTree.totalWeight()).isEqualTo(3.0);
+        //here a bad case for pruning just leaves
+        /// edge weight should be eliminated for the final solution but it is not because
+        //its leaves are not good.
+
+    }
+
 }
