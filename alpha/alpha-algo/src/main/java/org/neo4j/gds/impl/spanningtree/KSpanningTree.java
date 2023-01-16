@@ -116,4 +116,65 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         graph = null;
         spanningTree = null;
     }
+
+    private SpanningTree cutLeafApproach(SpanningTree spanningTree) {
+        //this approach cuts a leaf at each step (remaining graph is always corrected)
+        //so we can just cut the most expensive leaf at each step
+        var priorityQueue = createPriorityQueue(graph.nodeCount());
+        HugeLongArray degree = HugeLongArray.newArray(graph.nodeCount());
+        double startNodeRelationshipCost = -1.0;
+        long startNodeSingleChild = -1;
+        HugeLongArray parent = spanningTree.parentArray();
+
+        for (long nodeId = 0; nodeId < graph.nodeCount(); ++nodeId) {
+            var nodeParent = spanningTree.parent(nodeId);
+            if (nodeParent != -1) {
+                degree.set(nodeParent, degree.get(nodeParent) + 1);
+                if (nodeParent == startNodeId) { //start-node needs special care because it's parent is -1
+                    startNodeSingleChild = nodeId;
+                    startNodeRelationshipCost = spanningTree.costToParent(nodeId);
+                }
+                degree.set(nodeId, degree.get(nodeId) + 1);
+            }
+        }
+
+        for (long nodeId = 0; nodeId < graph.nodeCount(); ++nodeId) {
+            if (degree.get(nodeId) == 1) {
+                double relevantCost = (nodeId == startNodeId) ?
+                    startNodeRelationshipCost : spanningTree.costToParent(nodeId);
+                priorityQueue.add(nodeId, relevantCost);
+            }
+        }
+        long numberOfDeletions = spanningTree.effectiveNodeCount() - k;
+
+        for (long i = 0; i < numberOfDeletions; ++i) {
+            var nextNode = priorityQueue.pop();
+            long affectedNode = -1;
+            if (nextNode == startNodeId) {
+                parent.set(startNodeSingleChild, -1);
+                affectedNode = startNodeSingleChild;
+                //should also upd costArray
+            } else {
+                affectedNode = parent.get(nextNode);
+                parent.set(nextNode, -1);
+                //should also upd costArray
+            }
+            degree.set(affectedNode, degree.get(affectedNode) - 1);
+            if (degree.get(affectedNode) == 1) {
+                if (affectedNode != startNodeId) {
+                    priorityQueue.add(affectedNode, spanningTree.costToParent(affectedNode));
+                } else {
+                    //this can only happen once so the O(n) cost is not a big overhead
+                    for (long nodeId = 0; nodeId < graph.nodeCount(); ++nodeId) {
+                        if (parent.get(nodeId) == startNodeId) {
+                            priorityQueue.add(startNodeId, spanningTree.costToParent(nodeId));
+                            startNodeSingleChild = nodeId;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return spanningTree;
+    }
 }
