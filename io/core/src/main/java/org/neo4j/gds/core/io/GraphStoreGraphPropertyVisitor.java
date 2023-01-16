@@ -163,7 +163,7 @@ public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
 
         @Override
         public ReducibleStream<LongStream> build() {
-            return new ReducibleLongStream(this.longList.stream());
+            return new ReducibleLongStream(this.longList.stream().limit(index));
         }
     }
 
@@ -208,7 +208,7 @@ public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
 
         @Override
         public ReducibleStream<DoubleStream> build() {
-            return new ReducibleDoubleStream(this.doubleList.stream());
+            return new ReducibleDoubleStream(this.doubleList.stream().limit(index));
         }
     }
 
@@ -255,7 +255,7 @@ public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
 
         @Override
         public ReducibleStream<Stream<T>> build() {
-            return new ReducibleObjectStream<>(this.objectList.stream(), valueType);
+            return new ReducibleObjectStream<>(this.objectList.stream().limit(index), valueType);
         }
 
         private HugeSparseObjectArrayList<T, ?> createArrayList(ValueType valueType) {
