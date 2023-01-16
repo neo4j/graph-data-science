@@ -15,9 +15,24 @@ image::memory-usage.png[width=600]
 === Heap size
 
 The heap space is used for storing graph projections in the graph catalog and algorithm state.
+
+[.tabbed-example, caption = ]
+====
+
+[.include-with-neo4j-5x]
+=====
+When writing algorithm results back to Neo4j, heap space is also used for handling transaction state (see https://neo4j.com/docs/operations-manual/5/reference/configuration-settings/#config_db.tx_state.memory_allocation[dbms.tx_state.memory_allocation]).
+For purely analytical workloads, a general recommendation is to set the heap space to about 90% of the available main memory.
+This can be done via https://neo4j.com/docs/operations-manual/5/reference/configuration-settings/#config_server.memory.heap.initial_size[server.memory.heap.initial_size] and https://neo4j.com/docs/operations-manual/5/reference/configuration-settings/#config_server.memory.heap.max_size[server.memory.heap.max_size].
+=====
+
+[.include-with-neo4j-4x]
+=====
 When writing algorithm results back to Neo4j, heap space is also used for handling transaction state (see https://neo4j.com/docs/operations-manual/{neo4j-docs-link-version}/reference/configuration-settings/#config_dbms.tx_state.memory_allocation[dbms.tx_state.memory_allocation]).
 For purely analytical workloads, a general recommendation is to set the heap space to about 90% of the available main memory.
 This can be done via https://neo4j.com/docs/operations-manual/{neo4j-docs-link-version}/reference/configuration-settings/#config_dbms.memory.heap.initial_size[dbms.memory.heap.initial_size] and https://neo4j.com/docs/operations-manual/{neo4j-docs-link-version}/reference/configuration-settings/#config_dbms.memory.heap.max_size[dbms.memory.heap.max_size].
+=====
+====
 
 To better estimate the heap space required to project graphs and run algorithms, consider the xref:common-usage/memory-estimation.adoc[Memory Estimation] feature.
 The feature estimates the memory consumption of all involved data structures using information about number of nodes and relationships from the Neo4j count store.
@@ -26,7 +41,24 @@ The feature estimates the memory consumption of all involved data structures usi
 
 The page cache is used to cache the Neo4j data and will help to avoid costly disk access.
 
-For purely analytical workloads including xref:management-ops/projections/graph-project.adoc[native projections], it is recommended to decrease https://neo4j.com/docs/operations-manual/{neo4j-docs-link-version}/reference/configuration-settings/#config_dbms.memory.pagecache.size[dbms.memory.pagecache.size] in favor of an increased heap size.
+For purely analytical workloads including xref:management-ops/projections/graph-project.adoc[native projections], it is recommended to decrease the configured PageCache in favor of an increased heap size.
+
+[.tabbed-example, caption = ]
+====
+
+[.include-with-neo4j-5x]
+=====
+To configure the PageCache size you can use the following  Neo4j configuration property
+https://neo4j.com/docs/operations-manual/5/reference/configuration-settings/#config_server.memory.pagecache.size[server.memory.pagecache.size]
+=====
+
+[.include-with-neo4j-4x]
+=====
+To configure the PageCache size you can use the following  Neo4j configuration property
+https://neo4j.com/docs/operations-manual/{neo4j-docs-link-version}/reference/configuration-settings/#config_dbms.memory.pagecache.size[dbms.memory.pagecache.size]
+=====
+====
+
 However, setting a minimum page cache size is still important when projecting graphs:
 
 * For xref:management-ops/projections/graph-project.adoc[native projections], the minimum page cache size for projecting a graph can be roughly estimated by `8KB * 100 * readConcurrency`.
