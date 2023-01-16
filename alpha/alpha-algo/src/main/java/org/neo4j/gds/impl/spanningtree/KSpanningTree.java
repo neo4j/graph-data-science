@@ -78,13 +78,14 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         HugeLongArray parent = spanningTree.parentArray();
         long parentSize = parent.size();
         HugeLongPriorityQueue priorityQueue = createPriorityQueue(parentSize);
+
         progressTracker.beginSubTask(parentSize);
         for (long i = 0; i < parentSize && terminationFlag.running(); i++) {
             long p = parent.get(i);
             if (p == -1) {
                 continue;
             }
-            priorityQueue.add(i, graph.relationshipProperty(p, i, 0.0D));
+            priorityQueue.add(i, spanningTree.costToParent(i));
             progressTracker.logProgress();
         }
         progressTracker.endSubTask();
