@@ -89,7 +89,8 @@ public final class GraphFactory {
         Optional<Boolean> hasLabelInformation,
         Optional<Boolean> hasProperties,
         Optional<Boolean> deduplicateIds,
-        Optional<Integer> concurrency
+        Optional<Integer> concurrency,
+        Optional<PropertyState> propertyStateOverride
     ) {
         boolean labelInformation = nodeSchema
             .map(schema -> !(schema.availableLabels().isEmpty() && schema.containsOnlyAllNodesLabel()))
@@ -124,7 +125,8 @@ public final class GraphFactory {
             idMapBuilder,
             labelInformation,
             hasProperties.orElse(false),
-            deduplicate
+            deduplicate,
+            __ -> propertyStateOverride.orElse(PropertyState.PERSISTENT)
         ));
     }
 
@@ -163,7 +165,8 @@ public final class GraphFactory {
             idMapBuilder,
             hasLabelInformation,
             nodeSchema.hasProperties(),
-            deduplicateIds
+            deduplicateIds,
+            propertyKey -> nodeSchema.unionProperties().get(propertyKey).state()
         );
     }
 

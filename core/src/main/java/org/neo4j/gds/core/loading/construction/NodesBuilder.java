@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.ImmutableNodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
@@ -67,6 +68,7 @@ public final class NodesBuilder {
     private final int concurrency;
 
     private final IdMapBuilder idMapBuilder;
+    private final Function<String, PropertyState> propertyStates;
     private final LabelInformation.Builder labelInformationBuilder;
 
     private final LongAdder importedNodes;
@@ -85,11 +87,13 @@ public final class NodesBuilder {
         IdMapBuilder idMapBuilder,
         boolean hasLabelInformation,
         boolean hasProperties,
-        boolean deduplicateIds
+        boolean deduplicateIds,
+        Function<String, PropertyState> propertyStates
     ) {
         this.maxOriginalId = maxOriginalId;
         this.concurrency = concurrency;
         this.idMapBuilder = idMapBuilder;
+        this.propertyStates = propertyStates;
         this.labelInformationBuilder = !hasLabelInformation
             ? LabelInformationBuilders.allNodes()
             : LabelInformationBuilders.multiLabelWithCapacity(maxOriginalId + 1);
@@ -208,15 +212,16 @@ public final class NodesBuilder {
     private Map<String, NodeProperty> buildProperties(IdMap idMap) {
         return propertyBuildersByPropertyKey.entrySet().stream().collect(toMap(
             Map.Entry::getKey,
-            entry -> entryToNodeProperty(entry, idMap)
+            entry -> entryToNodeProperty(entry, propertyStates.apply(entry.getKey()), idMap)
         ));
     }
 
-    private static NodeProperty entryToNodeProperty(Map.Entry<String, NodePropertiesFromStoreBuilder> entry, IdMap idMap) {
+    private static NodeProperty entryToNodeProperty(Map.Entry<String, NodePropertiesFromStoreBuilder> entry, PropertyState propertyState, IdMap idMap) {
         var nodePropertyValues = entry.getValue().build(idMap);
+        var valueType = nodePropertyValues.valueType();
         return ImmutableNodeProperty.builder()
             .values(nodePropertyValues)
-            .propertySchema(PropertySchema.of(entry.getKey(), nodePropertyValues.valueType()))
+            .propertySchema(PropertySchema.of(entry.getKey(), valueType, valueType.fallbackValue(), propertyState))
             .build();
     }
 
