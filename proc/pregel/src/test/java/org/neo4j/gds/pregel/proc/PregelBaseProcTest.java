@@ -41,11 +41,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @GdlExtension
 class PregelBaseProcTest {
 
-
     @GdlGraph
     @GdlGraph(graphNamePrefix = "undirected", orientation = Orientation.UNDIRECTED)
-    public static String GDL = "CREATE " + "   ()-[:REL]->()," + "   ()-[:REL2]->(),";
-
+    public static String GDL =
+        "CREATE " +
+        " ()-[:REL]->()," +
+        " ()-[:REL2]->(),";
 
     @Inject
     GraphStore graphStore;

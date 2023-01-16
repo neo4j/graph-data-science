@@ -75,7 +75,7 @@ final class PregelValidation {
     Optional<Spec> validate(Element pregelElement) {
         if (
             !isClass(pregelElement) ||
-            !isPregelComputation(pregelElement) ||
+            !isBasePregelComputation(pregelElement) ||
             !isPregelProcedureConfig(pregelElement) ||
             !hasEmptyConstructor(pregelElement) ||
             !configHasFactoryMethod(pregelElement)
@@ -123,7 +123,7 @@ final class PregelValidation {
             .findFirst();
     }
 
-    private boolean isPregelComputation(Element pregelElement) {
+    private boolean isBasePregelComputation(Element pregelElement) {
         var pregelTypeElement = MoreElements.asType(pregelElement);
         var maybeInterface = pregelComputation(pregelElement, basePregelComputation);
         boolean isPregelComputation = maybeInterface.isPresent();
