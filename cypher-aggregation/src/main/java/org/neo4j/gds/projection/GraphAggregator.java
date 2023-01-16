@@ -26,10 +26,12 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.CustomProcedure;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.ImmutableGraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.compat.CompatUserAggregator;
@@ -668,7 +670,12 @@ public class GraphAggregator implements CompatUserAggregator {
                 propertyMap.forEach((propertyName, nodeProperties) -> {
                     nodeSchema.getOrCreateLabel(nodeLabel).addProperty(
                         propertyName,
-                        nodeProperties.valueType()
+                        PropertySchema.of(
+                            propertyName,
+                            nodeProperties.valueType(),
+                            nodeProperties.valueType().fallbackValue(),
+                            PropertyState.TRANSIENT
+                        )
                     );
                 });
             });
