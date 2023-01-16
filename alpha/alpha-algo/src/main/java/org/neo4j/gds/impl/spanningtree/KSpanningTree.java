@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.impl.spanningtree;
 
+import com.carrotsearch.hppc.BitSet;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
@@ -77,7 +78,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         SpanningTree spanningTree = prim.compute();
         HugeLongArray parent = spanningTree.parentArray();
         long parentSize = parent.size();
-        HugeLongPriorityQueue priorityQueue = createPriorityQueue(parentSize);
+        HugeLongPriorityQueue priorityQueue = createPriorityQueue(parentSize, true);
 
         progressTracker.beginSubTask(parentSize);
         for (long i = 0; i < parentSize && terminationFlag.running(); i++) {
@@ -104,8 +105,13 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
     }
 
     @NotNull
-    private HugeLongPriorityQueue createPriorityQueue(long parentSize) {
-        HugeLongPriorityQueue priorityQueue = minMax == Prim.MAX_OPERATOR
+    private HugeLongPriorityQueue createPriorityQueue(long parentSize, boolean reverse) {
+        //TODO: Don't forget to check this (something is wrong now but will fix tomorrowo)
+        boolean condition = minMax == Prim.MAX_OPERATOR;
+        if (reverse) {
+            condition = !condition;
+        }
+        HugeLongPriorityQueue priorityQueue = condition
             ? HugeLongPriorityQueue.min(parentSize)
             : HugeLongPriorityQueue.max(parentSize);
         return priorityQueue;
@@ -120,7 +126,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
     private SpanningTree cutLeafApproach(SpanningTree spanningTree) {
         //this approach cuts a leaf at each step (remaining graph is always corrected)
         //so we can just cut the most expensive leaf at each step
-        var priorityQueue = createPriorityQueue(graph.nodeCount());
+        var priorityQueue = createPriorityQueue(graph.nodeCount(), true);
         HugeLongArray degree = HugeLongArray.newArray(graph.nodeCount());
         double startNodeRelationshipCost = -1.0;
         long startNodeSingleChild = -1;
@@ -153,11 +159,11 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
             if (nextNode == startNodeId) {
                 parent.set(startNodeSingleChild, -1);
                 affectedNode = startNodeSingleChild;
-                //should also upd costArray
+                //TODO: should also upd costArray
             } else {
                 affectedNode = parent.get(nextNode);
                 parent.set(nextNode, -1);
-                //should also upd costArray
+                //TODO: should also upd costArray
             }
             degree.set(affectedNode, degree.get(affectedNode) - 1);
             if (degree.get(affectedNode) == 1) {
@@ -177,4 +183,85 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         }
         return spanningTree;
     }
+
+    private SpanningTree growApproach(SpanningTree spanningTree) {
+
+        //this approach grows gradually the MST found in the previous step
+        //when it is about to get larger than K, we crop the current worst leaf if the new value to be added
+        // is actually any smaller
+
+
+        //TODO: Handle to be able to delete startNode as well (not much different from above approach)
+
+        HugeLongArray outDegree = HugeLongArray.newArray(graph.nodeCount());
+
+        HugeLongArray parent = spanningTree.parentArray();
+
+        var priorityQueue = createPriorityQueue(graph.nodeCount(), false);
+        var toTrim = createPriorityQueue(graph.nodeCount(), true);
+
+        BitSet exterior = new BitSet(graph.nodeCount());
+        priorityQueue.add(startNodeId, 0);
+        long nodesInTree = 0;
+        while (true) {
+            long node = priorityQueue.pop();
+            long nodeParent = spanningTree.parent(node);
+
+            boolean nodeAdded = false;
+            if (nodesInTree < k) { //if we are smaller, we can just add it no problemo
+                nodesInTree++;
+                nodeAdded = true;
+            } else {
+                while (!exterior.get(toTrim.top())) { //not valid frontier nodes anymore, just ignore
+                    toTrim.pop();
+                }
+                boolean shouldMove = moveMakesSense(priorityQueue.cost(node), toTrim.cost(toTrim.top()), minMax);
+
+                if (shouldMove && nodeParent != toTrim.top()) {
+                    //we cannot add it, if it's parent is the one who we're going to kill next, right?
+                    nodeAdded = true;
+                    long popped = toTrim.pop();
+                    long poppedPopps = parent.get(popped);
+                    parent.set(popped, -1); //this guy bites the dust completely...
+                    if (poppedPopps != -1) {
+                        if (outDegree.get(poppedPopps) == 0) { //...and his parent might become open to deletion soon
+                            toTrim.add(poppedPopps, spanningTree.costToParent(poppedPopps));
+                            exterior.set(poppedPopps); //if so add it to the reverse p.q
+                        }
+                    }
+
+                }
+            }
+            if (nodeAdded) {
+
+                outDegree.set(nodeParent, outDegree.get(nodeParent) + 1);
+                exterior.clear(nodeParent);
+
+                graph.forEachRelationship(node, 1.0, (s, t, w) -> {
+                    if (parent.get(t) == s) {
+                        //TODO:  doing this only on the tree for now for simplicity
+                        //cause its 18h and I do not want to think more :D
+                        //might be able to work on all graph edges not just for those in the tree
+
+                        if (!priorityQueue.containsElement(t)) {
+                            priorityQueue.add(t, spanningTree.costToParent(t));
+                        }
+
+                    }
+                    return true;
+                });
+            }
+        }
+
+    }
+
+    private boolean moveMakesSense(double cost1, double cost2, DoubleUnaryOperator minMax) {
+        if (minMax == Prim.MAX_OPERATOR) {
+            return cost1 > cost2;
+        } else {
+            return cost1 < cost2;
+        }
+    }
 }
+
+
