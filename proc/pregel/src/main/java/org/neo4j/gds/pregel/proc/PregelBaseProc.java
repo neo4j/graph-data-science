@@ -95,9 +95,7 @@ public final class PregelBaseProc {
             });
     }
 
-    static void ensureDirectedRelationships(
-        GraphStore graphStore, Collection<RelationshipType> relationshipTypes
-    ) {
+    static void ensureDirectedRelationships(GraphStore graphStore, Collection<RelationshipType> relationshipTypes) {
         var relationshipSchema = graphStore.schema().relationshipSchema();
         var undirectedTypes = relationshipTypes
             .stream()
@@ -137,22 +135,17 @@ public final class PregelBaseProc {
                         nodePropertyValues = compositeNodeValue.doubleProperties(propertyKey).asNodeProperties();
                         break;
                     case LONG_ARRAY:
-                        nodePropertyValues = new HugeObjectArrayLongArrayPropertyValues(compositeNodeValue.longArrayProperties(
-                            propertyKey));
+                        nodePropertyValues = new HugeObjectArrayLongArrayPropertyValues(compositeNodeValue.longArrayProperties(propertyKey));
                         break;
                     case DOUBLE_ARRAY:
-                        nodePropertyValues = new HugeObjectArrayDoubleArrayPropertyValues(compositeNodeValue.doubleArrayProperties(
-                            propertyKey));
+                        nodePropertyValues = new HugeObjectArrayDoubleArrayPropertyValues(compositeNodeValue.doubleArrayProperties(propertyKey));
                         break;
                     default:
                         throw new IllegalArgumentException("Unsupported property type: " + element.propertyType());
                 }
 
-                return ImmutableNodeProperty.of(formatWithLocale("%s%s", propertyPrefix, propertyKey),
-                    nodePropertyValues
-                );
-            })
-            .collect(Collectors.toList());
+                return ImmutableNodeProperty.of(formatWithLocale("%s%s", propertyPrefix, propertyKey), nodePropertyValues);
+            }).collect(Collectors.toList());
     }
 
     private PregelBaseProc() {}
