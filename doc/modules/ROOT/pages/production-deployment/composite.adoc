@@ -1,0 +1,149 @@
+[[composite]]
+// Putting "Fabric" in the header might help with searching for the
+// case that users are not familiar with composite databases yet
+= Using GDS and composite databases (formerly known as Fabric)
+:description: This section describes how the Neo4j Graph Data Science library can be used in a Neo4j composite database deployment.
+
+
+include::partial$/common-usage/not-on-aurads-note.adoc[]
+
+Neo4j composite databases are a way to store and retrieve data in multiple databases, whether they are on the same Neo4j DBMS or in multiple DBMSs, using a single Cypher query.
+For more information about Composite databases/Fabric itself, please visit the
+
+[.tabbed-example, caption = ]
+====
+
+[.include-with-neo4j-4.x]
+=====
+https://neo4j.com/docs/operations-manual/4.4/fabric/introduction/[Fabric documentation].
+=====
+
+[.include-with-neo4j-5.x]
+=====
+https://neo4j.com/docs/operations-manual/current/composite-databases/[Composite databases documentation].
+=====
+
+====
+
+NOTE: For simplicity this documentation page further only mentions composite databases which are available from Neo4j 5.0 on. As GDS supports 4.x and 5.x Neo4j versions this documentation can be also applied to Fabric setups using the exact same queries and examples as shown below.
+
+A typical Neo4j composite setup consists of two components: one or more shards (constituents) that hold the data and one composite database that coordinates the distributed queries.
+There are two ways of running the Neo4j Graph Data Science library in a composite deployment, both of which are covered in this section:
+
+ . Running GDS on a Composite <<composite-shard, _shard_>>
+ . Running GDS on a Composite <<composite-proxy, _database_>>
+
+[[composite-shard]]
+== Running GDS on the Shards
+
+In this mode of using GDS in a composite environment, the GDS operations are executed on the shards.
+The graph projections and algorithms are then executed on each shard individually, and the results can be combined via the composite database.
+This scenario is useful, if the graph is partitioned into disjoint subgraphs across shards, i.e. there is no logical relationship between nodes on different shards.
+Another use case is to replicate the graph's topology across multiple shards, where some shards act as operational and others as analytical databases.
+
+[[composite-shard-setup]]
+=== Setup
+
+In this scenario we need to set up the shards to run the Neo4j Graph Data Science library.
+
+Every shard that will run the Graph Data Science library should be configured just as a standalone GDS database would be, for more information see xref:installation/index.adoc[Installation].
+
+The composite database does not require any special configuration, i.e., the GDS library plugin does not need to be installed.
+However, the Composite database should be configured to handle the amount of data received from the shards.
+
+[[composite-shard-examples]]
+=== Examples
+
+Let's assume we have a composite setup with two shards.
+One shard functions as the operational database and holds a graph with the schema `(Person)-[KNOWS]->(Person)`.
+Every `Person` node also stores an identifying property `id` and the persons `name` and possibly other properties.
+
+The other shard, the analytical database, stores a graph with the same data, except that the only property is the unique identifier.
+
+First we need to project a named graph on the analytical database shard.
+
+[source, cypher, role=noplay]
+----
+CALL {
+  USE COMPOSITE_DB_NAME.ANALYTICS_DB
+  CALL gds.graph.project('graph', 'Person', 'KNOWS')
+  YIELD graphName
+  RETURN graphName
+}
+RETURN graphName
+----
+
+Using the composite database, we can now calculate the PageRank score for each Person and join the results with the name of that Person.
+
+[source, cypher, role=noplay]
+----
+CALL {
+  USE COMPOSITE_DB_NAME.ANALYTICS_DB
+  CALL gds.pagerank.stream('graph', {})
+  YIELD nodeId, score AS pageRank
+  RETURN gds.util.asNode(nodeId).id AS personId, pageRank
+}
+CALL {
+  USE COMPOSITE_DB_NAME.OPERATIONAL_DB
+  WITH personId
+  MATCH (p {id: personId})
+  RETURN p.name AS name
+}
+RETURN name, personId, pageRank
+----
+
+The query first connects to the analytical database where the PageRank algorithm computes the rank for each node of an anonymous graph.
+The algorithm results are streamed to the proxy, together with the unique node id.
+For every row returned by the first subquery, the operational database is then queried for the persons name, again using the unique node id to identify the `Person` node across the shards.
+
+
+[[composite-proxy]]
+== Running GDS on the Composite database
+
+In this mode of using GDS in a composite environment, the GDS operations are executed on the Fabric proxy server.
+The graph projections are then using the data stored on the shards to construct the in-memory graph.
+
+NOTE: Currently only xref:management-ops/projections/graph-project-cypher-aggregation.adoc[Cypher Aggregation] is supported for projecting in-memory graphs on a Composite database.
+
+Graph algorithms can then be executed on the composite database, similar to a single machine setup.
+This scenario is useful, if a graph that logically represents a single graph is distributed to different Composite shards.
+
+[[composite-proxy-setup]]
+=== Setup
+
+In this scenario we need to set up the proxy to run the Neo4j Graph Data Science library.
+
+The dbms that manages the composite database needs to have the GDS plugin installed and configured.
+For more information see xref:installation/index.adoc[Installation].
+The proxy node should also be configured to handle the amount of data received from the shards as well as executing graph projections and algorithms.
+
+Fabric shards do not need any special configuration, i.e., the GDS library plugin does not need to be installed.
+
+[[composite-proxy-examples]]
+=== Examples
+
+Let's assume we have a composite setup with two shards.
+Both shards function as the operational databases and hold graphs with the schema `(Person)-[KNOWS]->(Person)`.
+
+We now need to query the shards in order to drive the import process on the proxy node.
+
+[source, cypher, role=noplay]
+----
+CALL {
+  USE COMPOSITE_DB_NAME.COMPOSITE_SHARD_0_NAME
+  MATCH (p:Person) OPTIONAL MATCH (p)-[:KNOWS]->(n:Person)
+  RETURN p, n
+  UNION
+  USE COMPOSITE_DB_NAME.COMPOSITE_SHARD_1_NAME
+  MATCH (p:Person) OPTIONAL MATCH (p)-[:KNOWS]->(n:Person)
+  RETURN p, n
+}
+WITH gds.alpha.graph.project('graph', p, n) AS graph
+RETURN
+  graph.graphName AS graphName,
+  graph.nodeCount AS nodeCount,
+  graph.relationshipCount AS relationshipCount
+----
+
+We have now projected a graph with 5 nodes and 4 relationships.
+This graph can now be used like any standalone GDS database.
