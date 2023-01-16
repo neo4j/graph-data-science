@@ -1,11 +1,9 @@
 [[System-requirements]]
 = System Requirements
 
-:neo4j-docs-link-version: 4.4
-
 == Main Memory
 
-The GDS library runs within a Neo4j instance and is therefore subject to the general https://neo4j.com/docs/operations-manual/{neo4j-docs-link-version}/performance/memory-configuration/[Neo4j memory configuration].
+The GDS library runs within a Neo4j instance and is therefore subject to the general https://neo4j.com/docs/operations-manual/4.4/performance/memory-configuration/[Neo4j memory configuration].
 
 .GDS heap memory usage
 image::memory-usage.png[width=600]
@@ -14,7 +12,7 @@ image::memory-usage.png[width=600]
 [[heap-size]]
 === Heap size
 
-The heap space is used for storing graph projections in the graph catalog and algorithm state.
+The heap space is used for storing graph projections in the graph catalog, and algorithm state.
 
 [.tabbed-example, caption = ]
 ====
@@ -28,9 +26,9 @@ This can be done via https://neo4j.com/docs/operations-manual/5/reference/config
 
 [.include-with-neo4j-4x]
 =====
-When writing algorithm results back to Neo4j, heap space is also used for handling transaction state (see https://neo4j.com/docs/operations-manual/{neo4j-docs-link-version}/reference/configuration-settings/#config_dbms.tx_state.memory_allocation[dbms.tx_state.memory_allocation]).
+When writing algorithm results back to Neo4j, heap space is also used for handling transaction state (see https://neo4j.com/docs/operations-manual/4.4/reference/configuration-settings/#config_dbms.tx_state.memory_allocation[dbms.tx_state.memory_allocation]).
 For purely analytical workloads, a general recommendation is to set the heap space to about 90% of the available main memory.
-This can be done via https://neo4j.com/docs/operations-manual/{neo4j-docs-link-version}/reference/configuration-settings/#config_dbms.memory.heap.initial_size[dbms.memory.heap.initial_size] and https://neo4j.com/docs/operations-manual/{neo4j-docs-link-version}/reference/configuration-settings/#config_dbms.memory.heap.max_size[dbms.memory.heap.max_size].
+This can be done via https://neo4j.com/docs/operations-manual/4.4/reference/configuration-settings/#config_dbms.memory.heap.initial_size[dbms.memory.heap.initial_size] and https://neo4j.com/docs/operations-manual/4.4/reference/configuration-settings/#config_dbms.memory.heap.max_size[dbms.memory.heap.max_size].
 =====
 ====
 
@@ -55,7 +53,7 @@ https://neo4j.com/docs/operations-manual/5/reference/configuration-settings/#con
 [.include-with-neo4j-4x]
 =====
 To configure the PageCache size you can use the following  Neo4j configuration property
-https://neo4j.com/docs/operations-manual/{neo4j-docs-link-version}/reference/configuration-settings/#config_dbms.memory.pagecache.size[dbms.memory.pagecache.size]
+https://neo4j.com/docs/operations-manual/4.4/reference/configuration-settings/#config_dbms.memory.pagecache.size[dbms.memory.pagecache.size]
 =====
 ====
 
@@ -71,7 +69,7 @@ Ideally, if the xref:common-usage/memory-estimation.adoc[memory estimation] feat
 [NOTE]
 ====
 Decreasing the page cache size in favor of heap size is *not* recommended if the Neo4j instance runs both, operational and analytical workloads at the same time.
-See https://neo4j.com/docs/operations-manual/{neo4j-docs-link-version}/performance/memory-configuration/[Neo4j memory configuration] for general information about page cache sizing.
+See https://neo4j.com/docs/operations-manual/4.4/performance/memory-configuration/[Neo4j memory configuration] for general information about page cache sizing.
 ====
 
 [[system-requirements-cpu]]
