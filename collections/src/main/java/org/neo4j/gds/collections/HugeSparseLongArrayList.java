@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.collections;
 
-import java.util.stream.Stream;
-
 /**
  * A long-indexable version of a list of long arrays that can
  * contain more than 2bn. elements and is growable.
@@ -36,7 +34,7 @@ import java.util.stream.Stream;
     valueType = long[].class,
     forAllConsumerType = LongLongArrayConsumer.class
 )
-public interface HugeSparseLongArrayList {
+public interface HugeSparseLongArrayList extends HugeSparseObjectArrayList<long[], LongLongArrayConsumer> {
 
     static HugeSparseLongArrayList of(long[] defaultValue) {
         return of(defaultValue, 0);
@@ -45,43 +43,4 @@ public interface HugeSparseLongArrayList {
     static HugeSparseLongArrayList of(long[] defaultValue, long initialCapacity) {
         return new HugeSparseLongArrayListSon(defaultValue, initialCapacity);
     }
-
-    /**
-     * @return the current maximum number of values that can be stored in the list
-     */
-    long capacity();
-
-    /**
-     * @return true, iff the value at the given index is not the default value
-     */
-    boolean contains(long index);
-
-    /**
-     * @return the long array at the given index
-     */
-    long[] get(long index);
-
-    /**
-     * Sets the value at the given index.
-     */
-    void set(long index, long[] value);
-
-    /**
-     * Applies to given consumer to all non-default values stored in the list.
-     */
-    void forAll(LongLongArrayConsumer consumer);
-
-    /**
-     * Returns an iterator that consumes the underlying pages of this list.
-     * Once the iterator has been consumed, the list is empty and will return
-     * the default value for each index.
-     */
-    DrainingIterator<long[][]> drainingIterator();
-
-    /**
-     * Returns a stream of the underlying data.
-     * The stream will skip over null pages and will otherwise stream over
-     * the full page, potentially containing default values.
-     */
-    Stream<long[]> stream();
 }

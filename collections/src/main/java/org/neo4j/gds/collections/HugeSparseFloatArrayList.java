@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.collections;
 
-import java.util.stream.Stream;
-
 /**
  * A long-indexable version of a list of float arrays that can
  * contain more than 2bn. elements and is growable.
@@ -36,7 +34,7 @@ import java.util.stream.Stream;
     valueType = float[].class,
     forAllConsumerType = LongFloatArrayConsumer.class
 )
-public interface HugeSparseFloatArrayList {
+public interface HugeSparseFloatArrayList extends HugeSparseObjectArrayList<float[], LongFloatArrayConsumer> {
 
     static HugeSparseFloatArrayList of(float[] defaultValue) {
         return of(defaultValue, 0);
@@ -45,43 +43,4 @@ public interface HugeSparseFloatArrayList {
     static HugeSparseFloatArrayList of(float[] defaultValue, long initialCapacity) {
         return new HugeSparseFloatArrayListSon(defaultValue, initialCapacity);
     }
-
-    /**
-     * @return the current maximum number of values that can be stored in the list
-     */
-    long capacity();
-
-    /**
-     * @return true, iff the value at the given index is not the default value
-     */
-    boolean contains(long index);
-
-    /**
-     * @return the long array at the given index
-     */
-    float[] get(long index);
-
-    /**
-     * Sets the value at the given index.
-     */
-    void set(long index, float[] value);
-
-    /**
-     * Applies to given consumer to all non-default values stored in the list.
-     */
-    void forAll(LongFloatArrayConsumer consumer);
-
-    /**
-     * Returns an iterator that consumes the underlying pages of this list.
-     * Once the iterator has been consumed, the list is empty and will return
-     * the default value for each index.
-     */
-    DrainingIterator<float[][]> drainingIterator();
-
-    /**
-     * Returns a stream of the underlying data.
-     * The stream will skip over null pages and will otherwise stream over
-     * the full page, potentially containing default values.
-     */
-    Stream<float[]> stream();
 }
