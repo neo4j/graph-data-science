@@ -77,22 +77,30 @@ public final class PregelBaseProc {
         Log log,
         TaskRegistryFactory taskRegistryFactory
     ) {
-        relationshipTypes
+        var relationshipTypesWithoutIndex = relationshipTypes
             .stream()
             .filter(relType -> !graphStore.inverseIndexedRelationshipTypes().contains(relType))
-            .forEach(relType -> {
-                var inverseConfig = InverseRelationshipsConfigImpl
-                    .builder()
-                    .concurrency(concurrency)
-                    .relationshipType(relType.name)
-                    .build();
+            .map(RelationshipType::name)
+            .collect(Collectors.toList());
 
-                var inverseIndex = new InverseRelationshipsAlgorithmFactory()
-                    .build(graphStore, inverseConfig, log, taskRegistryFactory)
-                    .compute();
+        if (relationshipTypesWithoutIndex.isEmpty()) {
+            return;
+        }
 
-                graphStore.addInverseIndex(relType, inverseIndex);
-            });
+        var inverseConfig = InverseRelationshipsConfigImpl
+            .builder()
+            .concurrency(concurrency)
+            .relationshipTypes(relationshipTypesWithoutIndex)
+            .build();
+
+        new InverseRelationshipsAlgorithmFactory()
+            .build(graphStore, inverseConfig, log, taskRegistryFactory)
+            .compute()
+            .forEach((relationshipType, inverseIndex) -> graphStore.addInverseIndex(
+                relationshipType,
+                inverseIndex.topology(),
+                inverseIndex.properties()
+            ));
     }
 
     static void ensureDirectedRelationships(GraphStore graphStore, Collection<RelationshipType> relationshipTypes) {
