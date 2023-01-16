@@ -56,7 +56,7 @@ public interface RelationshipIterator extends RelationshipPredicate {
      * {@link org.neo4j.gds.api.Graph#characteristics()} before calling this
      * method to verify that the graphs is inverse indexed.
      *
-     * @param nodeId if of the node for which to iterate the inverse relationships
+     * @param nodeId id of the node for which to iterate the inverse relationships
      * @param consumer relationship consumer function
      */
     void forEachInverseRelationship(long nodeId, RelationshipConsumer consumer);
@@ -76,12 +76,24 @@ public interface RelationshipIterator extends RelationshipPredicate {
      * {@link org.neo4j.gds.api.Graph#characteristics()} before calling this
      * method to verify that the graphs is inverse indexed.
      *
-     * @param nodeId if of the node for which to iterate the inverse relationships
+     * @param nodeId id of the node for which to iterate the inverse relationships
      * @param fallbackValue value used as relationship property if no properties were loaded
      * @param consumer relationship consumer function
      */
     void forEachInverseRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer);
 
+    /**
+     * Returns a stream which returns every relationship in the graph starting
+     * from the given node id. The id space returned for source and target nodes is the
+     * internal id space with respect to the graph this method was called on.
+     * <p>
+     * The object returned by the stream is a single instance of {@link org.neo4j.gds.api.RelationshipCursor}.
+     * The same instance is used for every element in the stream and should thus not be
+     * stored for later use but instead be consumed directly before consuming the next element of the stream.
+     *
+     * @param nodeId        id of the node for which to stream the relationships
+     * @param fallbackValue value used as relationship property if no properties were loaded
+     */
     Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue);
 
     /**
