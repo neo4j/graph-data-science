@@ -77,7 +77,10 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
 
         prim.setTerminationFlag(getTerminationFlag());
         SpanningTree spanningTree = prim.compute();
-        return combineApproach(spanningTree);
+
+        var outputTree = combineApproach(spanningTree);
+        progressTracker.endSubTask();
+        return outputTree;
     }
 
     @NotNull
@@ -121,7 +124,9 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         HugeDoubleArray costToParent = HugeDoubleArray.newArray(graph.nodeCount());
 
         double totalCost = init(parent, costToParent, spanningTree);
+        long numberOfDeletions = spanningTree.effectiveNodeCount() - k;
 
+        progressTracker.beginSubTask(numberOfDeletions);
         //calculate degree of each node in MST
         for (long nodeId = 0; nodeId < graph.nodeCount(); ++nodeId) {
             var nodeParent = parent.get(nodeId);
@@ -145,7 +150,6 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
             }
         }
 
-        long numberOfDeletions = spanningTree.effectiveNodeCount() - k;
         for (long i = 0; i < numberOfDeletions; ++i) {
             var nextNode = priorityQueue.pop();
             long affectedNode;
@@ -184,9 +188,10 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
                     associatedCost = costToParent.get(affectedNode);
                 }
                 priorityQueue.add(affectedNode, associatedCost);
-
             }
+            progressTracker.logProgress();
         }
+        progressTracker.endSubTask();
         return new SpanningTree(-1, graph.nodeCount(), k, parent, costToParent, totalCost);
     }
 
@@ -218,8 +223,10 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         priorityQueue.add(startNodeId, 0);
         long root = startNodeId; //current root is startNodeId
         long nodesInTree = 0;
+        progressTracker.beginSubTask(graph.nodeCount());
         while (!priorityQueue.isEmpty()) {
             long node = priorityQueue.top();
+            progressTracker.logProgress();
             double associatedCost = priorityQueue.cost(node);
             priorityQueue.pop();
             long nodeParent = parent.get(node);
@@ -333,7 +340,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
             }
             return true;
         });
-
+        progressTracker.endSubTask();
         return new SpanningTree(-1, graph.nodeCount(), k, parent, costToParent, totalCost);
 
     }
