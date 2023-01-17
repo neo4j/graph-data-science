@@ -45,14 +45,14 @@ public enum Neo4jVersion {
             case V_5_3:
                 return "5.3";
             case V_RC:
-                return "RC";
+                return "5.4";
             default:
                 throw new IllegalArgumentException("Unexpected value: " + this.name() + " (sad java 😞)");
         }
     }
 
     public MajorMinorVersion semanticVersion() {
-         String version = toString();
+        String version = toString();
         var subVersions = version.split("\\.");
 
         if (subVersions.length < 2) {
