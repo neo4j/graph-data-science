@@ -36,6 +36,8 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.pregel.proc.PregelBaseProc;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -98,6 +100,11 @@ abstract class ProcedureGenerator extends PregelGenerator {
         typeSpecBuilder.addMethod(procResultMethod());
         typeSpecBuilder.addMethod(newConfigMethod());
         typeSpecBuilder.addMethod(algorithmFactoryMethod(algorithmClassName));
+
+        if (pregelSpec.requiresInverseIndex()) {
+            typeSpecBuilder.addMethod(validationConfigMethod());
+        }
+
         return typeSpecBuilder.build();
     }
 
@@ -279,6 +286,18 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 pregelSpec.configTypeName()
             ))
             .addStatement("return $L", anonymousFactoryType)
+            .build();
+    }
+
+    private MethodSpec validationConfigMethod() {
+        return MethodSpec.methodBuilder("validationConfig")
+            .addAnnotation(Override.class)
+            .addModifiers(Modifier.PUBLIC)
+            .returns(ParameterizedTypeName.get(
+                ClassName.get(ValidationConfiguration.class),
+                pregelSpec.configTypeName()
+            ))
+            .addStatement("return $T.ensureIndexValidation(log, taskRegistryFactory)", PregelBaseProc.class)
             .build();
     }
 }

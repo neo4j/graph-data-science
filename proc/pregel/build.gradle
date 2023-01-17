@@ -20,7 +20,7 @@ dependencies {
     implementation project(':executor')
     implementation project(':proc-common')
     implementation project(':string-formatting')
-
+    implementation project(':graph-schema-api')
     api project(':pregel')
 
     testAnnotationProcessor project(':annotations')

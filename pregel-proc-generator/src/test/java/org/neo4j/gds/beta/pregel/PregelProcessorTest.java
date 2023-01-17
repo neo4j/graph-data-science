@@ -62,6 +62,22 @@ class PregelProcessorTest {
             );
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "BidirectionalComputation"
+    })
+    void positiveBiTest(String className) {
+        assertAbout(javaSource())
+            .that(forResource(String.format("positive/%s.java", className)))
+            .processedWith(new PregelProcessor())
+            .compilesWithoutError()
+            .and()
+            .generatesSources(
+                loadExpectedFile(formatWithLocale("expected/%sStreamProc.java", className)),
+                loadExpectedFile(formatWithLocale("expected/%sAlgorithm.java", className))
+            );
+    }
+
     @Test
     void baseClassMustBeAClass() {
         runNegativeTest(
