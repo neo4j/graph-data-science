@@ -89,6 +89,11 @@ public interface HugeSparseLongList {
      */
     DrainingIterator<long[]> drainingIterator();
 
+    /**
+     * Returns a stream of the underlying data.
+     * The stream will skip over null pages and will otherwise stream over
+     * the full page, potentially containing default values.
+     */
     LongStream stream();
 
 }
