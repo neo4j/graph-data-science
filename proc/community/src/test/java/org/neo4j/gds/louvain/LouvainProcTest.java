@@ -49,8 +49,8 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<Louvain, CONFIG, Louvain>,
-    MemoryEstimateTest<Louvain, CONFIG, Louvain> {
+    AlgoBaseProcTest<Louvain, CONFIG, LouvainResult>,
+    MemoryEstimateTest<Louvain, CONFIG, LouvainResult> {
 
     @TestFactory
     final Stream<DynamicTest> configTests() {
@@ -161,9 +161,12 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
     }
 
     @Override
-    public void assertResultEquals(Louvain result1, Louvain result2) {
-        assertEquals(result1.levels(), result2.levels());
-        assertEquals(result1.modularities()[result1.levels() - 1], result2.modularities()[result2.levels() - 1]);
-        assertArrayEquals(result1.finalDendrogram().toArray(), result2.finalDendrogram().toArray());
+    public void assertResultEquals(LouvainResult result1, LouvainResult result2) {
+        assertEquals(result1.ranLevels(), result2.ranLevels());
+        assertEquals(result1.modularities()[result1.ranLevels() - 1], result2.modularities()[result2.ranLevels() - 1]);
+        assertArrayEquals(
+            result1.dendrogramManager().getCurrent().toArray(),
+            result2.dendrogramManager().getCurrent().toArray()
+        );
     }
 }

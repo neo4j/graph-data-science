@@ -29,7 +29,6 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.OriginalIdNodePropertyValues;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -45,7 +44,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.neo4j.gds.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
 
-public final class Louvain extends Algorithm<Louvain> {
+public final class Louvain extends Algorithm<LouvainResult> {
 
     private final Graph rootGraph;
     private final NodePropertyValues seedingValues;
@@ -94,7 +93,7 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     @Override
-    public Louvain compute() {
+    public LouvainResult compute() {
         progressTracker.beginSubTask();
 
         Graph workingGraph = rootGraph;
@@ -145,7 +144,13 @@ public final class Louvain extends Algorithm<Louvain> {
             resizeResultArrays();
         }
         progressTracker.endSubTask();
-        return this;
+        return LouvainResult.of(
+            dendrogramManager.getCurrent(),
+            levels(),
+            dendrogramManager,
+            modularities,
+            modularities[levels() - 1]
+        );
     }
 
     private void resizeResultArrays() {
@@ -274,30 +279,8 @@ public final class Louvain extends Algorithm<Louvain> {
         return !(currentModularity > previousModularity && Math.abs(currentModularity - previousModularity) > tolerance);
     }
 
-    public HugeLongArray[] dendrograms() {
-        return this.dendrogramManager.getAllDendrograms();
-    }
-
-
-    public HugeLongArray finalDendrogram() {
-        return dendrogramManager.getCurrent();
-    }
-
-    public long getCommunity(long nodeId) {
-        return dendrogramManager.getCommunity(nodeId);
-    }
-
-    public long[] getCommunities(long nodeId) {
-        return dendrogramManager.getIntermediateCommunitiesForNode(nodeId);
-
-    }
-
-    public int levels() {
+    private int levels() {
         return this.ranLevels == 0 ? 1 : this.ranLevels;
-    }
-
-    public double[] modularities() {
-        return this.modularities;
     }
 
     @Override

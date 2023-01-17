@@ -42,7 +42,7 @@ import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
 public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> implements
-    MutateNodePropertyTest<Louvain, LouvainMutateConfig, Louvain> {
+    MutateNodePropertyTest<Louvain, LouvainMutateConfig, LouvainResult> {
 
     @Override
     public String mutateProperty() {
@@ -106,7 +106,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Louvain, Louvain, LouvainMutateConfig, ?>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Louvain, LouvainResult, LouvainMutateConfig, ?>> getProcedureClazz() {
         return LouvainMutateProc.class;
     }
 

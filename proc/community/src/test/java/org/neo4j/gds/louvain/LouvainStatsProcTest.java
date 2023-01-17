@@ -42,7 +42,7 @@ import static org.neo4j.gds.assertj.ConditionFactory.containsExactlyInAnyOrderEn
 class LouvainStatsProcTest extends LouvainProcTest<LouvainStatsConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<Louvain, Louvain, LouvainStatsConfig, ?>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Louvain, LouvainResult, LouvainStatsConfig, ?>> getProcedureClazz() {
         return LouvainStatsProc.class;
     }
 

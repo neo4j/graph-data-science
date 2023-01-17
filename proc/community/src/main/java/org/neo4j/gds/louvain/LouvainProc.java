@@ -35,32 +35,32 @@ final class LouvainProc {
     private LouvainProc() {}
 
     static <CONFIG extends LouvainBaseConfig> NodePropertyValues nodeProperties(
-        ComputationResult<Louvain, Louvain, CONFIG> computationResult,
+        ComputationResult<Louvain, LouvainResult, CONFIG> computationResult,
         String resultProperty
     ) {
         var config = computationResult.config();
         var includeIntermediateCommunities = config.includeIntermediateCommunities();
 
+        var result = computationResult.result();
+
         if (!includeIntermediateCommunities) {
             return CommunityProcCompanion.nodeProperties(
                 computationResult.config(),
                 resultProperty,
-                computationResult.result().finalDendrogram().asNodeProperties(),
+                result.dendrogramManager().getCurrent().asNodeProperties(),
                 () -> computationResult.graphStore().nodeProperty(config.seedProperty())
             );
         } else {
             var size = computationResult.graph().nodeCount();
-            var communityResult = computationResult.result();
 
             return new LongArrayNodePropertyValues() {
                 @Override
                 public long size() {
                     return size;
                 }
-
                 @Override
                 public long[] longArrayValue(long nodeId) {
-                    return communityResult.getCommunities(nodeId);
+                    return result.getIntermediateCommunities(nodeId);
                 }
             };
         }
@@ -68,14 +68,14 @@ final class LouvainProc {
 
     static <PROC_RESULT, CONFIG extends LouvainBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         LouvainResultBuilder<PROC_RESULT> procResultBuilder,
-        ComputationResult<Louvain, Louvain, CONFIG> computeResult
+        ComputationResult<Louvain, LouvainResult, CONFIG> computeResult
     ) {
-        Louvain result = computeResult.result();
+        var result = computeResult.result();
         boolean nonEmpty = !computeResult.isGraphEmpty();
 
         return procResultBuilder
-            .withLevels(nonEmpty ? result.levels() : 0)
-            .withModularity(nonEmpty ? result.modularities()[result.levels() - 1] : 0)
+            .withLevels(nonEmpty ? result.ranLevels() : 0)
+            .withModularity(nonEmpty ? result.modularity() : 0)
             .withModularities(nonEmpty ? result.modularities() : new double[0])
             .withCommunityFunction(nonEmpty ? result::getCommunity : null);
     }
