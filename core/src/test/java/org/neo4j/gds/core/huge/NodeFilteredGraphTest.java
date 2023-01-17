@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.huge;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
@@ -30,6 +31,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -163,6 +165,41 @@ class NodeFilteredGraphTest {
 
         assertThat(personGraph.nodeCount()).isEqualTo(personGraph.nodeCount(personLabel));
         assertThat(personGraph.nodeCount(personLabel)).isEqualTo(4);
+    }
+
+    @Test
+    void shouldStreamRelationshipsCorrectly() {
+        var ids = new MutableLong(42);
+        String gdl = " (a:A)," +
+                     " (b:B)," +
+                     " (a2:A)," +
+                     " (a)-[:REL]->(b)," +
+                     " (a)-[:REL]->(a2)," +
+                     " (a2)-[:REL]->(a)" +
+                     " (a2)-[:REL]->(b)" +
+                     " (a2)-[:REL]->(a2)";
+
+        var graphStore = GdlFactory.builder()
+            .graphName("test")
+            .gdlGraph(gdl)
+            .nodeIdFunction(ids::getAndIncrement)
+            .build()
+            .build();
+
+        var nodeFilteredGraph = graphStore.getGraph(NodeLabel.of("A"), RelationshipType.of("REL"), Optional.empty());
+
+        nodeFilteredGraph.forEachNode(id -> {
+            var degree = nodeFilteredGraph.degree(id);
+
+            MutableLong degree_from_stream_relationship = new MutableLong();
+            nodeFilteredGraph.streamRelationships(id, 0).forEach(rel -> {
+                degree_from_stream_relationship.increment();
+            });
+            assertThat(degree_from_stream_relationship.longValue()).isEqualTo(degree);
+
+            return true;
+        });
+
     }
 
     Function<String, Long> filteredIdFunction(Graph graph) {
