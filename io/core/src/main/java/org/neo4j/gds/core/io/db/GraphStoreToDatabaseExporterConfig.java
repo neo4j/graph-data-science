@@ -107,7 +107,7 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
             exportConfig.writeConcurrency(),
             exportConfig.pageCacheMemory(),
             exportConfig.highIO(),
-            IndexConfig.DEFAULT.withLabelIndex()
+            IndexConfig.DEFAULT.withLabelIndex().withRelationshipTypeIndex()
         );
     }
 }
