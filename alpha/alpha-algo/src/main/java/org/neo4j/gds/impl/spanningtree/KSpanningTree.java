@@ -359,26 +359,9 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
     }
 
     private SpanningTree combineApproach(SpanningTree tree) {
-        /*
-         * these are quick and fast techniques of returning a k-Tree without having to worry about not
-         * ending up with a tree of k nodes *1, which was the main reason why the existing algorithm did not work.
-         *
-         * Teh first approach just cuts leaves from the final MST
-         * The second approach grows the MST  step-by-step and cuts leaves when it needs to trim an edge
-         *
-         * Neither of this approach is the best by itself
-         * (the approach of cutting the heaviest also has its shares of issues ofc)
-         *
-         * but it is not hard to construct situations where one works well and the other does not.
-         * So I thought of combining the two and return the best
-         *
-         * This is supposed to be a quick fix to eliminate the bug asap. When we work next time on k-MST,
-         * we can come up with something more sophisticated (there's optimal algorithms for dealing with subtree;
-         * but they take O(nk^2) so maybe not good). Otherwise, it's np-complete so...
-         */
+
         var spanningTree1 = cutLeafApproach(tree);
         var spanningTree2 = growApproach(tree);
-        System.out.println(spanningTree1.totalWeight() + " " + spanningTree2.totalWeight());
 
         if (spanningTree1.totalWeight() > spanningTree2.totalWeight()) {
             return (minMax == Prim.MAX_OPERATOR) ? spanningTree1 : spanningTree2;
