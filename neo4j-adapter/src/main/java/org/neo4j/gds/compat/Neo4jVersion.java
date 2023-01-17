@@ -30,7 +30,8 @@ public enum Neo4jVersion {
     V_4_4,
     V_5_1,
     V_5_2,
-    V_5_3;
+    V_5_3,
+    V_RC;
 
     @Override
     public String toString() {
@@ -43,6 +44,8 @@ public enum Neo4jVersion {
                 return "5.2";
             case V_5_3:
                 return "5.3";
+            case V_RC:
+                return "RC";
             default:
                 throw new IllegalArgumentException("Unexpected value: " + this.name() + " (sad java 😞)");
         }
@@ -115,6 +118,8 @@ public enum Neo4jVersion {
                 return Neo4jVersion.V_5_2;
             } else if (minorVersion == 3) {
                 return Neo4jVersion.V_5_3;
+            } else if (minorVersion == 4) {
+                return Neo4jVersion.V_RC;
             }
         }
 
