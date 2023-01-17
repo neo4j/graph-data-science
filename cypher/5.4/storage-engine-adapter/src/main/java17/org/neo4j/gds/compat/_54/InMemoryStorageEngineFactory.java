@@ -55,6 +55,7 @@ import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
+import org.neo4j.kernel.KernelVersionRepository;
 import org.neo4j.kernel.api.index.IndexProvidersAccess;
 import org.neo4j.kernel.impl.api.index.IndexProviderMap;
 import org.neo4j.kernel.impl.locking.Locks;
@@ -101,6 +102,7 @@ import java.io.PrintStream;
 import java.io.UncheckedIOException;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.time.Clock;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -114,6 +116,16 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
 
     static final String IN_MEMORY_STORAGE_ENGINE_NAME = "in-memory-54";
 
+    // Record storage = 0, Freki = 1
+    // Let's leave some room for future storage engines
+    // This arbitrary seems quite future-proof
+
+    public static final byte ID = 42;
+    @Override
+    public byte id() {
+        return ID;
+    }
+
     @Override
     public boolean storageExists(FileSystemAbstraction fileSystem, DatabaseLayout databaseLayout) {
         return false;
@@ -122,6 +134,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
     @Override
     public StorageEngine instantiate(
         FileSystemAbstraction fs,
+        Clock clock,
         DatabaseLayout databaseLayout,
         Config config,
         PageCache pageCache,
@@ -136,6 +149,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
         InternalLogProvider userLogProvider,
         RecoveryCleanupWorkCollector recoveryCleanupWorkCollector,
         LogTailMetadata logTailMetadata,
+        KernelVersionRepository kernelVersionRepository,
         MemoryTracker memoryTracker,
         CursorContextFactory cursorContextFactory,
         PageCacheTracer pageCacheTracer

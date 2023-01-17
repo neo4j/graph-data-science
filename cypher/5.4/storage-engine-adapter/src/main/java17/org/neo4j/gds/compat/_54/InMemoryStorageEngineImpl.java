@@ -183,8 +183,11 @@ public final class InMemoryStorageEngineImpl implements StorageEngine {
     }
 
     @Override
-    public List<StorageCommand> createUpgradeCommands(KernelVersion kernelVersion) {
-        return null;
+    public List<StorageCommand> createUpgradeCommands(
+        KernelVersion versionToUpgradeFrom,
+        KernelVersion versionToUpgradeTo
+    ) {
+        return List.of();
     }
 
     @Override

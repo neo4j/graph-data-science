@@ -20,6 +20,8 @@
 package org.neo4j.gds.compat._54;
 
 import org.neo4j.io.pagecache.context.CursorContext;
+import org.neo4j.kernel.KernelVersion;
+import org.neo4j.kernel.KernelVersionProvider;
 import org.neo4j.lock.LockTracer;
 import org.neo4j.lock.ResourceLocker;
 import org.neo4j.storageengine.api.CommandCreationContext;
@@ -86,13 +88,19 @@ public class InMemoryCommandCreationContextImpl implements CommandCreationContex
 
     @Override
     public void initialize(
+        KernelVersionProvider kernelVersionProvider,
         CursorContext cursorContext,
         StoreCursors storeCursors,
         Supplier<Long> oldestActiveTransactionSequenceNumber,
-        long currentTransactionSequenceNumber,
         ResourceLocker locks,
         Supplier<LockTracer> lockTracer
     ) {
 
+    }
+
+    @Override
+    public KernelVersion kernelVersion() {
+        // NOTE: Double-check if this is still correct when you copy this into a new compat layer
+        return KernelVersion.LATEST;
     }
 }

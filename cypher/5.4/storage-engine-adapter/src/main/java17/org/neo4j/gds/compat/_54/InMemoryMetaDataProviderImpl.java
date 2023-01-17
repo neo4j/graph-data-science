@@ -21,7 +21,6 @@ package org.neo4j.gds.compat._54;
 
 import org.neo4j.internal.recordstorage.InMemoryLogVersionRepository;
 import org.neo4j.io.pagecache.context.CursorContext;
-import org.neo4j.kernel.KernelVersion;
 import org.neo4j.storageengine.api.ClosedTransactionMetadata;
 import org.neo4j.storageengine.api.ExternalStoreId;
 import org.neo4j.storageengine.api.MetadataProvider;
@@ -137,10 +136,6 @@ public class InMemoryMetaDataProviderImpl implements MetadataProvider {
     }
 
     @Override
-    public void setKernelVersion(KernelVersion kernelVersion) {
-    }
-
-    @Override
     public void close() throws IOException {
     }
 
@@ -177,11 +172,6 @@ public class InMemoryMetaDataProviderImpl implements MetadataProvider {
     @Override
     public long getLastClosedTransactionId() {
         return this.transactionIdStore.getLastClosedTransactionId();
-    }
-
-    @Override
-    public KernelVersion kernelVersion() {
-        return KernelVersion.LATEST;
     }
 
     @Override
