@@ -25,7 +25,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -37,6 +41,8 @@ import org.neo4j.gds.spanningtree.Prim;
 import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 /**
  *           1
@@ -284,6 +290,43 @@ class KSpanningTreeTest {
         /// edge weight should be eliminated for the final solution but it is not because
         //its leaves are not good.
 
+    }
+
+    @Test
+    void shouldLogProgress() {
+        var config = KSpanningTreeBaseConfigImpl.builder().sourceNode(idFunction.of("a")).k(2).build();
+        var factory = new KSpanningTreeAlgorithmFactory<>();
+        var log = Neo4jProxy.testLog();
+        var progressTracker = new TestProgressTracker(
+            factory.progressTask(graph, config),
+            log,
+            1,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+        factory.build(graph, config, progressTracker).compute();
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "KSpanningTree :: Start",
+                "KSpanningTree :: SpanningTree :: Start",
+                "KSpanningTree :: SpanningTree 30%",
+                "KSpanningTree :: SpanningTree 50%",
+                "KSpanningTree :: SpanningTree 80%",
+                "KSpanningTree :: SpanningTree 100%",
+                "KSpanningTree :: SpanningTree :: Finished",
+                "KSpanningTree :: Remove relationships 1 :: Start",
+                "KSpanningTree :: Remove relationships 1 50%",
+                "KSpanningTree :: Remove relationships 1 100%",
+                "KSpanningTree :: Remove relationships 1 :: Finished",
+                "KSpanningTree :: Remove relationships 2 :: Start",
+                "KSpanningTree :: Remove relationships 2 20%",
+                "KSpanningTree :: Remove relationships 2 40%",
+                "KSpanningTree :: Remove relationships 2 60%",
+                "KSpanningTree :: Remove relationships 2 100%",
+                "KSpanningTree :: Remove relationships 2 :: Finished",
+                "KSpanningTree :: Finished"
+            );
     }
 
 }
