@@ -69,7 +69,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         // concurrency validations.
         ImmutablePregelConfig.copyOf(config);
 
-        if (computation instanceof BidirectionalPregelComputation && !graph.supportsInverseIteration()) {
+        if (computation instanceof BidirectionalPregelComputation && !graph.characteristics().isInverseIndexed()) {
             throw new UnsupportedOperationException(String.format(
                 Locale.US,
                 "The Pregel algorithm %s requires inverse indexes for all configured relationships %s",

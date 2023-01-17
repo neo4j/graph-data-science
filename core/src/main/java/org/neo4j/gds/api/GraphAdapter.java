@@ -194,11 +194,6 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public boolean supportsInverseIteration() {
-        return graph.supportsInverseIteration();
-    }
-
-    @Override
     public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
         graph.forEachRelationship(nodeId, consumer);
     }

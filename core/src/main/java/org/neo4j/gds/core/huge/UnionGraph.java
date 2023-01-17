@@ -214,15 +214,6 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public boolean supportsInverseIteration() {
-        boolean b = true;
-        for (Graph graph : graphs) {
-            b &= graph.supportsInverseIteration();
-        }
-        return b;
-    }
-
-    @Override
     public void forEachInverseRelationship(long nodeId, RelationshipConsumer consumer) {
         for (Graph graph : graphs) {
             graph.forEachInverseRelationship(nodeId, consumer);
