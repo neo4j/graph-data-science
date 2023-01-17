@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat.rc;
+package org.neo4j.gds.compat._54;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.gds.compat.Neo4jVersion;
@@ -34,11 +34,11 @@ public final class SettingProxyFactoryImpl implements SettingProxyFactory {
 
     @Override
     public SettingProxyApi load() {
-        throw new UnsupportedOperationException("rc compatibility requires JDK17");
+        throw new UnsupportedOperationException("5.4 compatibility requires JDK17");
     }
 
     @Override
     public String description() {
-        return "Neo4j Settings RC (placeholder)";
+        return "Neo4j Settings 5.4 (placeholder)";
     }
 }
