@@ -129,6 +129,9 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
         }
         subscriber.initialize(subscription.fieldNames(), propertyDefaultValueByName);
         CypherLoadingUtils.consume(subscription);
+        subscriber.error().ifPresent(e -> {
+            throw e;
+        });
         progressTracker.endSubTask("Relationships");
         return new BatchLoadResult(subscriber.rows(), -1L);
     }
