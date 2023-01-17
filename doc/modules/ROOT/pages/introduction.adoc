@@ -1,7 +1,7 @@
 [[introduction]]
 = Introduction
 :description: This chapter provides a brief introduction of the main concepts in the Neo4j Graph Data Science library.
-
+:keywords: alpha, beta, Production-quality, api tiers
 
 The Neo4j Graph Data Science (GDS) library provides efficiently implemented, parallel versions of common graph algorithms, exposed as Cypher procedures.
 Additionally, GDS includes machine learning pipelines to train predictive supervised models to solve graph problems, such as predicting missing relationships.
