@@ -74,8 +74,8 @@ public class SpanningTree {
 
     public void forEach(RelationshipWithPropertyConsumer consumer) {
         for (int i = 0; i < nodeCount; i++) {
-            final long parent = this.parent.get(i);
-            final double cost = this.costToParent(i);
+            long parent = this.parent.get(i);
+            double cost = this.costToParent(i);
             if (parent == -1) {
                 continue;
             }

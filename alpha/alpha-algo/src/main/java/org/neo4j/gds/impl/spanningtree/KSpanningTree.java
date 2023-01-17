@@ -99,6 +99,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
 
     @Override
     public void release() {
+        graph.release();
         graph = null;
     }
 
@@ -153,13 +154,14 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         for (long i = 0; i < numberOfDeletions; ++i) {
             var nextNode = priorityQueue.pop();
             long affectedNode;
-            
-            if (nextNode == root) {
+
+            if (nextNode == root) { //the affecte node is its single child
                 affectedNode = rootChild;
                 totalCost -= rootCost;
                 clearNode(rootChild, parent, costToParent);
+                clearNode(root, parent, costToParent);
                 root = affectedNode;
-            } else {
+            } else { //the affected node is its paret
                 affectedNode = parent.get(nextNode);
                 totalCost -= costToParent.get(nextNode);
                 clearNode(nextNode, parent, costToParent);
@@ -167,7 +169,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
 
             degree.set(affectedNode, degree.get(affectedNode) - 1);
             double associatedCost = -1;
-            if (degree.get(affectedNode) == 1) {
+            if (degree.get(affectedNode) == 1) { //it becomes a leaf
                 if (affectedNode == root) {
                     //if it is root, we loop at its neighbors to find its single alive child
                     MutableDouble mutRootCost = new MutableDouble();
@@ -192,7 +194,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
             progressTracker.logProgress();
         }
         progressTracker.endSubTask();
-        return new SpanningTree(-1, graph.nodeCount(), k, parent, costToParent, totalCost);
+        return new SpanningTree(root, graph.nodeCount(), k, parent, costToParent, totalCost);
     }
 
     private SpanningTree growApproach(SpanningTree spanningTree) {
@@ -200,8 +202,6 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         //this approach grows gradually the MST found in the previous step
         //when it is about to get larger than K, we crop the current worst leaf if the new value to be added
         // is actually better
-
-        //TODO: Handle to be able to delete startNode as well (not much different from above approach)
 
         HugeLongArray outDegree = HugeLongArray.newArray(graph.nodeCount());
 
@@ -213,11 +213,12 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         var priorityQueue = createPriorityQueue(graph.nodeCount(), false);
         var toTrim = createPriorityQueue(graph.nodeCount(), true);
 
-        //priority-queue does not have a remove method so we need something to know if a node is still a leaf or not
+        //priority-queue does not have a remove method
+        // so we need something to know if a node is still a leaf or not
         BitSet exterior = new BitSet(graph.nodeCount());
         //at any point, the tree has a root we mark its neighbors in this bitset to avoid looping to find them
         BitSet rootNodeAdjacent = new BitSet(graph.nodeCount());
-        //we just save which nodes are in the final output and not (just to do clean-up; probably be avoided)
+        //we just save which nodes are in the final output and not (just to do clean-up; probably can be avoided)
         BitSet included = new BitSet(graph.nodeCount());
 
         priorityQueue.add(startNodeId, 0);
@@ -259,66 +260,75 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
                     clearNode(nodeToTrim, parent, costToParent);
                     totalCost -= value; //as well as its cost from the solution
 
-                    if (parentOfTrimmed != -1) { //we are not removing the actual root
+                    if (root != nodeToTrim) { //we are not removing the actual root
                         //reduce degree of parent
                         outDegree.set(parentOfTrimmed, outDegree.get(parentOfTrimmed) - 1);
                         long affectedNode = -1;
                         double affectedCost = -1;
-                        long parentDegree = outDegree.get(parentOfTrimmed);
-                        if (parentOfTrimmed == root) {
-                            rootNodeAdjacent.clear(nodeToTrim);
-                            if (parentDegree == 1) { //it is a leaf
+                        long parentOutDegree = outDegree.get(parentOfTrimmed);
+                        if (parentOfTrimmed == root) { //if its parent is the root
+                            rootNodeAdjacent.clear(nodeToTrim); //remove the trimmed child
+                            if (parentOutDegree == 1) { //root becomes a leaf
                                 assert rootNodeAdjacent.cardinality() == 1;
+                                //get the single sole child of root
                                 var rootChild = rootNodeAdjacent.nextSetBit(0);
                                 affectedNode = root;
                                 affectedCost = costToParent.get(rootChild);
                             }
                         } else {
-                            if (parentDegree == 0) {
+                            if (parentOutDegree == 0) { //if parent is a leaf
                                 affectedNode = parentOfTrimmed;
                                 affectedCost = costToParent.get(parentOfTrimmed);
                             }
                         }
-                        if (affectedNode != -1) {
-                            toTrim.add(affectedNode, affectedCost);
-                            exterior.set(affectedNode);
+                        if (affectedNode != -1) { //if a node has been converted to a leaf
+                            toTrim.add(affectedNode, affectedCost); //add it to pq
+                            exterior.set(affectedNode); //and mark it in the exterior
                         }
                     } else {
                         //the root is removed, long live the new root!
                         assert rootNodeAdjacent.cardinality() == 1;
+                        //the new root is the single sole child of old root
                         var newRoot = rootNodeAdjacent.nextSetBit(0);
                         rootNodeAdjacent.clear(); //empty everything
+                        //find the children of the new root (this can happen once per node)
                         graph.forEachRelationship(newRoot, (s, t) -> {
-                            if (parent.get(t) == s) {
+                            //relevant are only those nodes which are currently
+                            //in the k-tree
+                            if (parent.get(t) == s && included.get(t)) {
                                 rootNodeAdjacent.set(t);
                             }
                             return true;
                         });
                         root = newRoot;
+                        //set it as root
                         clearNode(root, parent, costToParent);
-                        //see if root is a degree-1 to add to exterior
+                        //check if root is a degree-1 to add to exterior
                         if (outDegree.get(root) == 1) {
+                            //get single child
                             var rootChild = rootNodeAdjacent.nextSetBit(0);
-                            priorityQueue.add(rootChild, costToParent.get(rootChild));
+                            priorityQueue.add(root, costToParent.get(rootChild));
                             exterior.set(root);
                         }
                     }
                 }
             }
             if (nodeAdded) {
-                included.set(node);
-                totalCost += associatedCost;
-                if (nodeParent == root) {
+                included.set(node); // include it in the solution (for now!)
+                totalCost += associatedCost; //add its associated cost to the weight of tree
+                if (nodeParent == root) { //if it's parent is the root, update the bitset
                     rootNodeAdjacent.set(node);
                 }
-                if (node != root) {
+                if (node != root) { //this only happens for startNode to be fair
+                    //the node's parent gets an update in degree
                     outDegree.set(nodeParent, outDegree.get(nodeParent) + 1);
-                    exterior.clear(nodeParent);
+                    exterior.clear(nodeParent); //and remoed from exterior if included
                 }
+                //then the node  (being a leaf) is added to the trimming priority queu
                 toTrim.add(node, associatedCost);
-                exterior.set(node);
+                exterior.set(node); //and the exterior
 
-                graph.forEachRelationship(node, 1.0, (s, t, w) -> {
+                graph.forEachRelationship(node, (s, t) -> {
                     if (parent.get(t) == s) {
                         //TODO: work's only on mst edges for now (should be doable to re-find an k-MST from whole graph)
                         if (!priorityQueue.containsElement(t)) {
@@ -341,7 +351,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
             return true;
         });
         progressTracker.endSubTask();
-        return new SpanningTree(-1, graph.nodeCount(), k, parent, costToParent, totalCost);
+        return new SpanningTree(root, graph.nodeCount(), k, parent, costToParent, totalCost);
 
     }
 
