@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.collections;
 
+import java.util.stream.IntStream;
+
 /**
  * A long-indexable version of a primitive int list that can
  * contain more than 2bn. elements and is growable.
@@ -87,4 +89,10 @@ public interface HugeSparseIntList {
      */
     DrainingIterator<int[]> drainingIterator();
 
+    /**
+     * Returns a stream of the underlying data.
+     * The stream will skip over null pages and will otherwise stream over
+     * the full page, potentially containing default values.
+     */
+    IntStream stream();
 }

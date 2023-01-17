@@ -82,6 +82,8 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
                 return validateSetMethod(e, elementType);
             case "forAll":
                 return validateForAllMethod(e);
+            case "stream":
+                return validateStreamMethod(e);
             case "setIfAbsent":
                 if (isArrayType) {
                     messager.printMessage(
@@ -213,5 +215,11 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
                && hasParameterCount(e, 2, messager)
                && hasTypeKindAtIndex(e, 0, elementType.getKind(), messager)
                && hasTypeKindAtIndex(e, 1, TypeKind.LONG, messager);
+    }
+
+    private boolean validateStreamMethod(ExecutableElement e) {
+        return hasNoParameters(e, messager)
+            && doesNotThrow(e, messager)
+            && hasParameterCount(e, 0, messager);
     }
 }

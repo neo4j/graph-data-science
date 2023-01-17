@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.collections;
 
+import java.util.stream.Stream;
+
 /**
  * A long-indexable version of a list of long arrays that can
  * contain more than 2bn. elements and is growable.
@@ -76,4 +78,10 @@ public interface HugeSparseLongArrayList {
      */
     DrainingIterator<long[][]> drainingIterator();
 
+    /**
+     * Returns a stream of the underlying data.
+     * The stream will skip over null pages and will otherwise stream over
+     * the full page, potentially containing default values.
+     */
+    Stream<long[]> stream();
 }
