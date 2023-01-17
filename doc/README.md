@@ -235,8 +235,8 @@ And hence, you would not be able to illustrate any procedures requiring administ
 
 ## Preparing for a major/minor release
 
-* In the branch that you publish from (which is master) publish.yml should list all the branches that contain content you want to publish, so adding 2.3 is right.
-* In each branch that appears in that list, the antora.yml file specifies the version of GDS that is published from that branch, (so the version in the 2.3 branch  will need updating from 2.3-preview to 2.3
-* In the branch that you publish from (master) you will need to update the sitemap_version  in the publish playbook to whatever the new 'current' version will be, which is 2.3.
+* In the branch that you publish from (which is `master`), `publish.yml` should list all the branches that contain content you want to publish, so make sure that new branches are added there.
+* In each branch that appears in that list, the `antora.yml` file specifies the version of GDS that is published from that branch. The version in `antora.yml` in the new branch needs updating from `x.y-preview` to `x.y` just before doing the release.
+* In the branch that you publish from (`master`) you will need to update the `sitemap_version` in `publish.yml` to whatever the new 'current' version will be.
 * The current/preview mapping is updated in https://github.com/neo-technology/neo4j-manual-modeling-antora/blob/70a42018c4c6dbe1c5b1a625aea9e7f4061207a7/docs-versions/versions.json#L21 (in dev and cherry-pick to master)
-* Once the docs have been published (ie you've verified that neo4j.com/docs/graph-data-science/2.3/ resolves to the 2.3 docs) we need to run the Publish docs versions json build https://live.neo4j-build.io/project/Documentation_Release_Versions?mode=builds (if you also publish to staging you can run the 'publish staging versions json' build to test for /current there)
+* Once the docs have been published (ie you've verified that neo4j.com/docs/graph-data-science/x.y/ resolves to the x.y docs) we need to run the Publish docs versions json build https://live.neo4j-build.io/project/Documentation_Release_Versions?mode=builds (if you also publish to staging you can run the 'publish staging versions json' build to test for /current there)
