@@ -21,6 +21,14 @@ package org.neo4j.gds.collections;
 
 import java.util.stream.Stream;
 
+/**
+ * A common super interface for non-primitive huge sparse array lists.
+ * It should be used for convenience reasons only, as using this interface
+ * as a reference type will result in dynamic dispatch of its methods
+ * that cannot be inlined by C2.
+ * It is therefore recommended to reference the individual implementations
+ * directly for best performance.
+ */
 public interface HugeSparseObjectArrayList<OBJ, CONSUMER> {
 
     /**
