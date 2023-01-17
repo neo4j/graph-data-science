@@ -404,6 +404,45 @@ public class CustomComputation implements PregelComputation<CustomConfig> {
 }
 ----
 
+[[algorithms-pregel-api-bidirectional]]
+=== Traversing incoming relationships
+
+Some algorithms implemented in Pregel might require or benefit from the ability to access and send messages to all incoming relationships of the current context node.
+GDS supports the creation of inverse indexes for relationship types, which enables the traversal of incoming relationships for directed relationship types.
+
+A Pregel algorithm can access this index by implementing the `org.neo4j.gds.beta.pregel.BidirectionalPregelComputation` interface instead of the `PregelComputation` interface.
+Implementing this interface has the following consequences:
+
+* The Pregel framework will make sure that all relationships passed into the algorithm are inverse indexed.
+  If no such index exists, an error will be thrown.
+* The signature of the `init` and `compute` functions now accept a `org.neo4j.gds.beta.pregel.context.InitContext.BidirectionalInitContext` and `org.neo4j.gds.beta.pregel.context.ComputeContext.BidirectionalComputeContext` respectively.
+* Algorithms annotated with the `@PregelProcedure` annotation will automatically create all required inverse indexes.
+
+The `BidirectionalInitContext` and `BidirectionalComputeContexts` expose the following new methods in addition to the methods defined by `InitContext` and `ComputeContext`:
+
+[source, java]
+----
+//Returns the incoming degree (number of relationships) of the currently processed node.
+public int incomingDegree();
+// Calls the consumer for each incoming neighbor of the currently processed node.
+public void forEachIncomingNeighbor(LongConsumer targetConsumer);
+// Calls the consumer for each incoming neighbor of the given node.
+public void forEachIncomingNeighbor(long nodeId, LongConsumer targetConsumer);
+// Calls the consumer once for each incoming neighbor of the currently processed node.
+public void forEachDistinctIncomingNeighbor(LongConsumer targetConsumer);
+// Calls the consumer once for each incoming neighbor of the given node.
+public void forEachDistinctIncomingNeighbor(long nodeId, LongConsumer targetConsumer);
+----
+
+In addition, the `BidirectionalComputeContext` also exposes the following function:
+
+[source, java]
+----
+// Sends the given message to all neighbors of the node.
+public void sendToIncomingNeighbors(double message);
+----
+
+
 [[algorithms-pregel-api-logging]]
 === Logging
 
