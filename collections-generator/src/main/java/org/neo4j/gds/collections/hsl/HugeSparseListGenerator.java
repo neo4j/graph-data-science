@@ -469,7 +469,11 @@ final class HugeSparseListGenerator implements CollectionStep.Generator<HugeSpar
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
             .returns(getStreamTypeName(valueType))
-            .addStatement("return Arrays.stream(this.$N).filter(obj -> !(obj == null))." + flatMapFunction(valueType) + "(Arrays::stream)", pages)
+            .addStatement(
+                "return Arrays.stream(this.$N).filter(obj -> !(obj == null)).$L(Arrays::stream)",
+                pages,
+                flatMapFunction(valueType)
+            )
             .build();
     }
 }
