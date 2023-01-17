@@ -66,7 +66,12 @@ class SysInfoProcTest extends BaseProcTest {
         "Neo4j 5.3",
         "Neo4j 5.3 (placeholder)",
         "Neo4j Settings 5.3",
-        "Neo4j Settings 5.3 (placeholder)"
+        "Neo4j Settings 5.3 (placeholder)",
+
+        "Neo4j 5.4",
+        "Neo4j 5.4 (placeholder)",
+        "Neo4j Settings 5.4",
+        "Neo4j Settings 5.4 (placeholder)"
     );
 
     @BeforeEach
@@ -145,6 +150,7 @@ class SysInfoProcTest extends BaseProcTest {
                     "Neo4j 5.3 (placeholder)",
                     "Neo4j 5.3"
                 );
+                break;
             case V_5_4:
                 expectedCompatibilities = Set.of(
                     "Neo4j Settings 5.4 (placeholder)",
