@@ -25,6 +25,7 @@ import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.MapValue;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 public abstract class PropertyValues {
@@ -32,6 +33,8 @@ public abstract class PropertyValues {
     public abstract void forEach(BiConsumer<String, Value> consumer);
 
     public abstract boolean isEmpty();
+
+    public abstract Iterable<String> propertyKeys();
 
     public static PropertyValues of(MapValue mapValue) {
         return new CypherPropertyValues(mapValue);
@@ -57,6 +60,11 @@ public abstract class PropertyValues {
         public boolean isEmpty() {
             return this.properties.isEmpty();
         }
+
+        @Override
+        public Set<String> propertyKeys() {
+            return this.properties.keySet();
+        }
     }
 
     private static final class CypherPropertyValues extends PropertyValues {
@@ -78,6 +86,11 @@ public abstract class PropertyValues {
         @Override
         public boolean isEmpty() {
             return this.properties.isEmpty();
+        }
+
+        @Override
+        public Iterable<String> propertyKeys() {
+            return this.properties.keySet();
         }
     }
 }
