@@ -17,16 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.centrality;
+package org.neo4j.gds.impl.harmonic;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.impl.closeness.HarmonicCentralityConfig;
-import org.neo4j.gds.impl.harmonic.HarmonicCentrality;
 
-class HarmonicCentralityAlgorithmFactory extends GraphAlgorithmFactory<HarmonicCentrality, HarmonicCentralityConfig> {
+public class HarmonicCentralityAlgorithmFactory extends GraphAlgorithmFactory<HarmonicCentrality, HarmonicCentralityConfig> {
     @Override
     public String taskName() {
         return "HarmonicCentrality";

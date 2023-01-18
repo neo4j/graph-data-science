@@ -70,13 +70,13 @@ public class HarmonicCentralityTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        harmonicCentrality.compute();
+        var result = harmonicCentrality.compute();
 
-        assertThat(harmonicCentrality.getCentralityScore(idFunction.of("a"))).isEqualTo(0.375, within(0.1));
-        assertThat(harmonicCentrality.getCentralityScore(idFunction.of("b"))).isEqualTo(0.5, within(0.1));
-        assertThat(harmonicCentrality.getCentralityScore(idFunction.of("c"))).isEqualTo(0.375, within(0.1));
-        assertThat(harmonicCentrality.getCentralityScore(idFunction.of("d"))).isEqualTo(0.25, within(0.1));
-        assertThat(harmonicCentrality.getCentralityScore(idFunction.of("e"))).isEqualTo(0.25, within(0.1));
+        assertThat(result.getCentralityScore(idFunction.of("a"))).isEqualTo(0.375, within(0.1));
+        assertThat(result.getCentralityScore(idFunction.of("b"))).isEqualTo(0.5, within(0.1));
+        assertThat(result.getCentralityScore(idFunction.of("c"))).isEqualTo(0.375, within(0.1));
+        assertThat(result.getCentralityScore(idFunction.of("d"))).isEqualTo(0.25, within(0.1));
+        assertThat(result.getCentralityScore(idFunction.of("e"))).isEqualTo(0.25, within(0.1));
     }
 
     @Test
