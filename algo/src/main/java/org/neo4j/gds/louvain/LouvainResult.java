@@ -34,7 +34,7 @@ public interface LouvainResult {
 
     int ranLevels();
 
-    @Nullable LouvainDendrogramManager dendrogramManager();
+     LouvainDendrogramManager dendrogramManager();
 
     double[] modularities();
 
