@@ -67,7 +67,7 @@ class CypherNodeLoader extends CypherRecordLoader<Nodes> {
             .maxOriginalId(NodesBuilder.UNKNOWN_MAX_ID)
             .hasLabelInformation(hasLabelInformation)
             .hasProperties(!propertyColumns.isEmpty())
-            .propertyStateOverride(PropertyState.TRANSIENT)
+            .propertyState(PropertyState.TRANSIENT)
             .build();
 
         nodeSubscriber.initialize(subscription.fieldNames(), this.nodesBuilder);

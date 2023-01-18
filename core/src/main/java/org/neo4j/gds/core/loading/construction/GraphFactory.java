@@ -90,7 +90,7 @@ public final class GraphFactory {
         Optional<Boolean> hasProperties,
         Optional<Boolean> deduplicateIds,
         Optional<Integer> concurrency,
-        Optional<PropertyState> propertyStateOverride
+        Optional<PropertyState> propertyState
     ) {
         boolean labelInformation = nodeSchema
             .map(schema -> !(schema.availableLabels().isEmpty() && schema.containsOnlyAllNodesLabel()))
@@ -126,7 +126,7 @@ public final class GraphFactory {
             labelInformation,
             hasProperties.orElse(false),
             deduplicate,
-            __ -> propertyStateOverride.orElse(PropertyState.PERSISTENT)
+            __ -> propertyState.orElse(PropertyState.PERSISTENT)
         ));
     }
 
