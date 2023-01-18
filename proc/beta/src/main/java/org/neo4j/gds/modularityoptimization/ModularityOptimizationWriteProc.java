@@ -41,7 +41,7 @@ import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 @GdsCallable(name = "gds.beta.modularityOptimization.write", description = ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimization, ModularityOptimization, ModularityOptimizationWriteProc.WriteResult, ModularityOptimizationWriteConfig> {
+public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationWriteProc.WriteResult, ModularityOptimizationWriteConfig> {
 
     @Procedure(name = "gds.beta.modularityOptimization.write", mode = WRITE)
     @Description(ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION)
@@ -72,13 +72,13 @@ public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimiz
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationWriteConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationWriteConfig> computationResult) {
         return ModularityOptimizationProc.nodeProperties(computationResult);
     }
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationWriteConfig> computeResult,
+        ComputationResult<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return ModularityOptimizationProc.resultBuilder(
