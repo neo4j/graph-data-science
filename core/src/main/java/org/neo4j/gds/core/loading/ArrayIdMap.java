@@ -61,8 +61,8 @@ public class ArrayIdMap extends LabeledIdMap {
 
     private final long highestNeoId;
 
-    private final HugeLongArray graphIds;
-    private final HugeSparseLongArray nodeToGraphIds;
+    private final HugeLongArray internalToOriginalIds;
+    private final HugeSparseLongArray originalToInternalIds;
 
     public static MemoryEstimation memoryEstimation() {
         return ESTIMATION;
@@ -72,26 +72,26 @@ public class ArrayIdMap extends LabeledIdMap {
      * initialize the map with pre-built sub arrays
      */
     public ArrayIdMap(
-        HugeLongArray graphIds,
-        HugeSparseLongArray nodeToGraphIds,
+        HugeLongArray internalToOriginalIds,
+        HugeSparseLongArray originalToInternalIds,
         LabelInformation labelInformation,
         long nodeCount,
         long highestNeoId
     ) {
         super(labelInformation, nodeCount);
-        this.graphIds = graphIds;
-        this.nodeToGraphIds = nodeToGraphIds;
+        this.internalToOriginalIds = internalToOriginalIds;
+        this.originalToInternalIds = originalToInternalIds;
         this.highestNeoId = highestNeoId;
     }
 
     @Override
     public long toMappedNodeId(long originalNodeId) {
-        return nodeToGraphIds.get(originalNodeId);
+        return originalToInternalIds.get(originalNodeId);
     }
 
     @Override
     public long toOriginalNodeId(long mappedNodeId) {
-        return graphIds.get(mappedNodeId);
+        return internalToOriginalIds.get(mappedNodeId);
     }
 
     @Override
@@ -106,7 +106,7 @@ public class ArrayIdMap extends LabeledIdMap {
 
     @Override
     public boolean contains(final long originalNodeId) {
-        return nodeToGraphIds.contains(originalNodeId);
+        return originalToInternalIds.contains(originalNodeId);
     }
 
     @Override
@@ -141,7 +141,7 @@ public class ArrayIdMap extends LabeledIdMap {
 
         HugeSparseLongArray newNodeToGraphIds = ArrayIdMapBuilderOps.buildSparseIdMap(
             newNodeCount,
-            nodeToGraphIds.capacity(),
+            originalToInternalIds.capacity(),
             concurrency,
             newGraphIds
         );
