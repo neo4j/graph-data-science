@@ -64,7 +64,7 @@ abstract class NodeLabelTokenToPropertyKeys {
         Map<String, PropertySchema> importPropertySchemas
     );
 
-    static class Fixed extends NodeLabelTokenToPropertyKeys {
+    private static class Fixed extends NodeLabelTokenToPropertyKeys {
 
         private final NodeSchema nodeSchema;
 
@@ -98,7 +98,7 @@ abstract class NodeLabelTokenToPropertyKeys {
         }
     }
 
-    static class Lazy extends NodeLabelTokenToPropertyKeys {
+    private static class Lazy extends NodeLabelTokenToPropertyKeys {
 
         private final ConcurrentHashMap<NodeLabelToken, Set<String>> labelToPropertyKeys;
 
