@@ -148,7 +148,6 @@ public final class GraphStoreCatalog {
     }
 
     private static void set(GraphProjectConfig config, GraphStore graphStore, boolean overwrite) {
-        graphStore.canRelease(false);
         userCatalogs.compute(config.username(), (user, userCatalog) -> {
             if (userCatalog == null) {
                 userCatalog = new UserCatalog();
@@ -290,7 +289,6 @@ public final class GraphStoreCatalog {
                 ));
             }
             graphsByName.put(userCatalogKey, graphStoreWithConfig);
-            graphStore.canRelease(false);
         }
 
         private void setDegreeDistribution(UserCatalogKey userCatalogKey, Map<String, Object> degreeDistribution) {
@@ -352,7 +350,6 @@ public final class GraphStoreCatalog {
             return Optional.ofNullable(get(userCatalogKey, failOnMissing))
                 .map(graphStoreWithConfig -> {
                     removedGraphConsumer.accept(graphStoreWithConfig);
-                    graphStoreWithConfig.graphStore().canRelease(true);
                     graphStoreWithConfig.graphStore().release();
                     removeDegreeDistribution(userCatalogKey);
                     graphsByName.remove(userCatalogKey);

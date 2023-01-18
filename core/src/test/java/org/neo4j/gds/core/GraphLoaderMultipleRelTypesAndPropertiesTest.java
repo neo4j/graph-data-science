@@ -699,8 +699,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         Graph rel1Graph = graphStore.getGraph(RelationshipType.of("REL1"));
         Graph unionGraph = graphStore.getUnion();
 
-        graphStore.canRelease(true);
-
         rel1Graph.release();
 
         assertThrows(NullPointerException.class, () -> rel1Graph.forEachNode(n -> {

@@ -29,7 +29,6 @@ import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.FilteredIdMap;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
@@ -88,8 +87,6 @@ public class CSRGraphStore implements GraphStore {
 
     private final Map<RelationshipType, SingleTypeRelationships> relationships;
 
-    private final Set<Graph> createdGraphs;
-
     private GraphSchema schema;
 
     private GraphPropertyStore graphProperties;
@@ -144,7 +141,6 @@ public class CSRGraphStore implements GraphStore {
         this.relationships = new HashMap<>(relationships);
 
         this.concurrency = concurrency;
-        this.createdGraphs = new HashSet<>();
         this.modificationTime = TimeUtil.now();
     }
 
@@ -496,11 +492,6 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public void canRelease(boolean canRelease) {
-        createdGraphs.forEach(graph -> graph.canRelease(canRelease));
-    }
-
-    @Override
     public CompositeRelationshipIterator getCompositeRelationshipIterator(
         RelationshipType relationshipType,
         Collection<String> propertyKeys
@@ -562,11 +553,6 @@ public class CSRGraphStore implements GraphStore {
 
     @Override
     public void release() {
-        createdGraphs.forEach(Graph::release);
-        releaseInternals();
-    }
-
-    private void releaseInternals() {
         var closeables = Stream.<AutoCloseable>builder();
         if (this.nodes instanceof AutoCloseable) {
             closeables.accept((AutoCloseable) this.nodes);
@@ -629,7 +615,6 @@ public class CSRGraphStore implements GraphStore {
             .collect(Collectors.toList());
 
         filteredGraphs.forEach(graph -> graph.canRelease(false));
-        createdGraphs.addAll(filteredGraphs);
         return UnionGraph.of(filteredGraphs);
     }
 

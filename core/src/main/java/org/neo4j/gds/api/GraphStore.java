@@ -241,7 +241,5 @@ public interface GraphStore {
         Collection<String> propertyKeys
     );
 
-    void canRelease(boolean canRelease);
-
     void release();
 }
