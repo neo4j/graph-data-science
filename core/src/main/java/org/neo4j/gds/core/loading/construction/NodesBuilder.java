@@ -323,7 +323,7 @@ public final class NodesBuilder {
 
             long[] labelIds = new long[nodeLabels.size()];
             for (int i = 0; i < labelIds.length; i++) {
-                labelIds[i] = tokenToNodeLabelMap.getTokenForNodeNodeLabel(nodeLabels.get(i));
+                labelIds[i] = tokenToNodeLabelMap.getTokenForNodeLabel(nodeLabels.get(i));
             }
 
             return labelIds;
@@ -379,7 +379,7 @@ public final class NodesBuilder {
         private long[] anyLabelArray() {
             var anyLabelArray = this.anyLabelArray;
             if (anyLabelArray[0] == NOT_INITIALIZED) {
-                anyLabelArray[0] = tokenToNodeLabelMap.getTokenForNodeNodeLabel(NodeLabel.ALL_NODES);
+                anyLabelArray[0] = tokenToNodeLabelMap.getTokenForNodeLabel(NodeLabel.ALL_NODES);
             }
             return anyLabelArray;
         }

@@ -60,7 +60,7 @@ public abstract class TokenToNodeLabelMap {
         return this.labelTokenNodeLabelMapping;
     }
 
-    public abstract int getTokenForNodeNodeLabel(NodeLabel nodeLabel);
+    public abstract int getTokenForNodeLabel(NodeLabel nodeLabel);
 
     static class FixedTokenToNodeLabelMap extends TokenToNodeLabelMap {
 
@@ -72,7 +72,7 @@ public abstract class TokenToNodeLabelMap {
         }
 
         @Override
-        public int getTokenForNodeNodeLabel(NodeLabel nodeLabel) {
+        public int getTokenForNodeLabel(NodeLabel nodeLabel) {
             if (!elementIdentifierLabelTokenMapping.containsKey(nodeLabel)) {
                 throw new IllegalArgumentException(formatWithLocale("No token was specified for node label %s", nodeLabel));
             }
@@ -92,7 +92,7 @@ public abstract class TokenToNodeLabelMap {
         }
 
         @Override
-        public int getTokenForNodeNodeLabel(NodeLabel nodeLabel) {
+        public int getTokenForNodeLabel(NodeLabel nodeLabel) {
             var token = elementIdentifierLabelTokenMapping.getOrDefault(nodeLabel, NO_SUCH_LABEL);
             if (token == NO_SUCH_LABEL) {
                 lock.lock();
