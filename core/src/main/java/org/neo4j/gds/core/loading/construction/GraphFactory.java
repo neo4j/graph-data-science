@@ -119,8 +119,7 @@ public final class GraphFactory {
         )).orElseGet(() -> new NodesBuilder(
             maxOriginalId,
             threadCount,
-            new ObjectIntScatterMap<>(),
-            new IntObjectHashMap<>(),
+            TokenToNodeLabelMap.lazy(),
             new ConcurrentHashMap<>(),
             idMapBuilder,
             labelInformation,
@@ -159,8 +158,7 @@ public final class GraphFactory {
         return new NodesBuilder(
             maxOriginalId,
             concurrency,
-            elementIdentifierLabelTokenMapping,
-            labelTokenNodeLabelMapping,
+            TokenToNodeLabelMap.fixed(elementIdentifierLabelTokenMapping, labelTokenNodeLabelMapping),
             new ConcurrentHashMap<>(propertyBuildersByPropertyKey),
             idMapBuilder,
             hasLabelInformation,
