@@ -150,6 +150,14 @@ class SysInfoProcTest extends BaseProcTest {
                     "Neo4j 5.3"
                 );
                 break;
+            case V_RC:
+                expectedCompatibilities = Set.of(
+                    "Neo4j Settings RC (placeholder)",
+                    "Neo4j Settings RC",
+                    "Neo4j RC (placeholder)",
+                    "Neo4j RC"
+                );
+                break;
             default:
                 throw new IllegalStateException("Unexpected Neo4j version: " + neo4jVersion);
         }
