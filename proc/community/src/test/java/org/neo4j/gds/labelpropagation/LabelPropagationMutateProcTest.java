@@ -48,7 +48,7 @@ import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
 public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<LabelPropagationMutateConfig> implements
-    MutateNodePropertyTest<LabelPropagation, LabelPropagationMutateConfig, LabelPropagation> {
+    MutateNodePropertyTest<LabelPropagation, LabelPropagationMutateConfig, LabelPropagationResult> {
 
     @Override
     public String mutateProperty() {
@@ -78,7 +78,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagation, LabelPropagationMutateConfig, ?>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig, ?>> getProcedureClazz() {
         return LabelPropagationMutateProc.class;
     }
 

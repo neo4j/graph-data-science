@@ -41,7 +41,7 @@ import java.util.concurrent.ExecutorService;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_LABEL;
 
-public class LabelPropagation extends Algorithm<LabelPropagation> {
+public class LabelPropagation extends Algorithm<LabelPropagationResult> {
 
     private final long nodeCount;
     private final NodePropertyValues nodePropertyValues;
@@ -52,8 +52,6 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
     private Graph graph;
     private HugeLongArray labels;
     private final long maxLabelId;
-    private long ranIterations;
-    private boolean didConverge;
     private int batchSize;
 
     public LabelPropagation(
@@ -95,20 +93,8 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         graph = null;
     }
 
-    public long ranIterations() {
-        return ranIterations;
-    }
-
-    public boolean didConverge() {
-        return didConverge;
-    }
-
-    public HugeLongArray labels() {
-        return labels;
-    }
-
     @Override
-    public LabelPropagation compute() {
+    public LabelPropagationResult compute() {
         if (config.maxIterations() <= 0L) {
             throw new IllegalArgumentException("Must iterate at least 1 time");
         }
@@ -119,8 +105,8 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             labels = HugeLongArray.newArray(nodeCount);
         }
 
-        ranIterations = 0L;
-        didConverge = false;
+        long ranIterations = 0L;
+        boolean didConverge = false;
 
         List<StepRunner> stepRunners = stepRunners();
 
@@ -146,7 +132,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         stepRunners.forEach(StepRunner::release);
         progressTracker.endSubTask();
 
-        return this;
+        return new LabelPropagationResult(labels, didConverge, ranIterations);
     }
 
     private List<StepRunner> stepRunners() {

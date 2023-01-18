@@ -65,7 +65,7 @@ class NonStabilizingLabelPropagationTest {
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
-        LabelPropagation compute = labelPropagation.compute();
+        LabelPropagationResult compute = labelPropagation.compute();
         compute.labels();
         assertTrue(compute.didConverge(), "Should converge");
     }

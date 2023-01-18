@@ -41,7 +41,7 @@ import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 @GdsCallable(name = "gds.labelPropagation.write", description = LabelPropagationProc.LABEL_PROPAGATION_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, LabelPropagation, LabelPropagationWriteProc.WriteResult, LabelPropagationWriteConfig> {
+public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, LabelPropagationResult, LabelPropagationWriteProc.WriteResult, LabelPropagationWriteConfig> {
 
     @Procedure(value = "gds.labelPropagation.write", mode = WRITE)
     @Description(LabelPropagationProc.LABEL_PROPAGATION_DESCRIPTION)
@@ -62,7 +62,7 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationWriteConfig> computationResult) {
         return LabelPropagationProc.nodeProperties(
             computationResult,
             computationResult.config().writeProperty()
@@ -71,7 +71,7 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> computeResult,
+        ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return LabelPropagationProc.resultBuilder(

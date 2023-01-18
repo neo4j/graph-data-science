@@ -24,18 +24,12 @@ import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -48,13 +42,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
@@ -157,14 +149,14 @@ class LabelPropagationTest {
             ProgressTracker.NULL_TRACKER
         );
         lp.withBatchSize(batchSize);
-        lp.compute();
-        HugeLongArray labels = lp.labels();
+        var result = lp.compute();
+        HugeLongArray labels = result.labels();
         assertNotNull(labels);
         IntObjectMap<IntArrayList> cluster = groupByPartitionInt(labels);
         assertNotNull(cluster);
 
-        assertTrue(lp.didConverge());
-        assertTrue(2L <= lp.ranIterations(), "expected at least 2 iterations, got " + lp.ranIterations());
+        assertTrue(result.didConverge());
+        assertTrue(2L <= result.ranIterations(), "expected at least 2 iterations, got " + result.ranIterations());
         assertEquals(2L, cluster.size());
         for (IntObjectCursor<IntArrayList> cursor : cluster) {
             int[] ids = cursor.value.toArray();
@@ -195,39 +187,6 @@ class LabelPropagationTest {
         return cluster;
     }
 
-    static Stream<Arguments> expectedMemoryEstimation() {
-        return Stream.of(
-            Arguments.of(1, 800_480L, 4_994_656L),
-            Arguments.of(4, 801_560L, 17_578_264L),
-            Arguments.of(42, 815_240L, 176_970_632L)
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("org.neo4j.gds.labelpropagation.LabelPropagationTest#expectedMemoryEstimation")
-    void shouldComputeMemoryEstimation(int concurrency, long expectedMinBytes, long expectedMaxBytes) {
-        assertMemoryEstimation(
-            () -> new LabelPropagationFactory<>().memoryEstimation(DEFAULT_CONFIG),
-            100_000L,
-            concurrency,
-            MemoryRange.of(expectedMinBytes, expectedMaxBytes)
-        );
-    }
-
-    @Test
-    void shouldBoundMemEstimationToMaxSupportedDegree() {
-        var labelPropagationFactory = new LabelPropagationFactory<>();
-        GraphDimensions largeDimensions = ImmutableGraphDimensions.builder()
-            .nodeCount((long) Integer.MAX_VALUE + (long) Integer.MAX_VALUE)
-            .build();
-
-        // test for no failure and no overflow
-        assertTrue(0 < labelPropagationFactory
-            .memoryEstimation(ImmutableLabelPropagationStreamConfig.builder().build())
-            .estimate(largeDimensions, 1)
-            .memoryUsage().max);
-    }
-
     @Test
     void shouldLogProgress() {
         var progressTask = new LabelPropagationFactory<>().progressTask(graph, DEFAULT_CONFIG);
@@ -246,16 +205,16 @@ class LabelPropagationTest {
             testTracker
         );
 
-        lp.compute();
+        var result = lp.compute();
 
         List<AtomicLong> progresses = testTracker.getProgresses();
 
         // Should log progress for every iteration + init step
-        assertEquals(lp.ranIterations() + 3, progresses.size());
+        assertEquals(result.ranIterations() + 3, progresses.size());
         progresses.forEach(progress -> assertTrue(progress.get() <= graph.relationshipCount()));
 
         assertTrue(log.containsMessage(TestLog.INFO, ":: Start"));
-        LongStream.range(1, lp.ranIterations() + 1).forEach(iteration -> {
+        LongStream.range(1, result.ranIterations() + 1).forEach(iteration -> {
             assertTrue(log.containsMessage(TestLog.INFO, formatWithLocale("Iteration %d of %d :: Start", iteration, DEFAULT_CONFIG.maxIterations())));
             assertTrue(log.containsMessage(TestLog.INFO, formatWithLocale("Iteration %d of %d :: Start", iteration, DEFAULT_CONFIG.maxIterations())));
         });

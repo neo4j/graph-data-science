@@ -41,7 +41,7 @@ import static org.neo4j.gds.labelpropagation.LabelPropagationProc.LABEL_PROPAGAT
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.labelPropagation.mutate", description = LABEL_PROPAGATION_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagation, LabelPropagation, LabelPropagationMutateProc.MutateResult, LabelPropagationMutateConfig> {
+public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagation, LabelPropagationResult, LabelPropagationMutateProc.MutateResult, LabelPropagationMutateConfig> {
 
     @Procedure(value = "gds.labelPropagation.mutate", mode = READ)
     @Description(LABEL_PROPAGATION_DESCRIPTION)
@@ -72,7 +72,7 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationMutateConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig> computationResult) {
         return LabelPropagationProc.nodeProperties(
             computationResult,
             computationResult.config().mutateProperty()
@@ -81,7 +81,7 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationMutateConfig> computeResult,
+        ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return LabelPropagationProc.resultBuilder(
