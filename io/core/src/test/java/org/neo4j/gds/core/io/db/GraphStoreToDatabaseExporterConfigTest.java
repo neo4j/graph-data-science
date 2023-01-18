@@ -43,6 +43,8 @@ class GraphStoreToDatabaseExporterConfigTest {
         assertThat(pbiConfig.pageCacheMemory()).isEqualTo(100_000L);
         assertThat(pbiConfig.highIO()).isTrue();
         assertThat(Neo4jProxy.writeConcurrency(pbiConfig)).isEqualTo(42);
+        assertThat(pbiConfig.indexConfig().createLabelIndex()).isTrue();
+        assertThat(pbiConfig.indexConfig().createRelationshipIndex()).isTrue();
     }
 
 }
