@@ -28,7 +28,7 @@ import org.neo4j.gds.msbfs.MultiSourceBFSAccessMethods;
 
 import java.util.concurrent.ExecutorService;
 
-public class HarmonicCentrality extends Algorithm<HarmonicCentrality> {
+public class HarmonicCentrality extends Algorithm<HarmonicResult> {
 
     private final int concurrency;
     private final long nodeCount;
@@ -52,7 +52,7 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality> {
     }
 
     @Override
-    public HarmonicCentrality compute() {
+    public HarmonicResult compute() {
         progressTracker.beginSubTask();
 
         final BfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {
@@ -68,7 +68,7 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality> {
 
         progressTracker.endSubTask();
 
-        return this;
+        return ImmutableHarmonicResult.of(inverseFarness, graph.nodeCount());
     }
 
     @Override
@@ -76,7 +76,5 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality> {
         graph = null;
     }
 
-    public double getCentralityScore(long nodeId) {
-        return inverseFarness.get(nodeId) / (double) (nodeCount - 1);
-    }
+
 }

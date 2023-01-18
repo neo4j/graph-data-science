@@ -24,8 +24,10 @@ import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.closeness.HarmonicCentralityConfig;
 import org.neo4j.gds.impl.harmonic.HarmonicCentrality;
+import org.neo4j.gds.impl.harmonic.HarmonicCentralityAlgorithmFactory;
+import org.neo4j.gds.impl.harmonic.HarmonicResult;
 
-public abstract class HarmonicCentralityProc<PROC_RESULT> extends NodePropertiesWriter<HarmonicCentrality, HarmonicCentrality, HarmonicCentralityConfig, PROC_RESULT> {
+public abstract class HarmonicCentralityProc<PROC_RESULT> extends NodePropertiesWriter<HarmonicCentrality, HarmonicResult, HarmonicCentralityConfig, PROC_RESULT> {
     protected static final String DESCRIPTION =
         "Harmonic centrality is a way of detecting nodes that are " +
         "able to spread information very efficiently through a graph.";

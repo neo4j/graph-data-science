@@ -23,6 +23,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.impl.closeness.HarmonicCentralityConfig;
 import org.neo4j.gds.impl.harmonic.HarmonicCentrality;
+import org.neo4j.gds.impl.harmonic.HarmonicResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -49,9 +50,9 @@ public class HarmonicCentralityStreamProc extends HarmonicCentralityProc<Harmoni
     }
 
     @Override
-    public ComputationResultConsumer<HarmonicCentrality, HarmonicCentrality, HarmonicCentralityConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, HarmonicCentralityConfig, Stream<StreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            var algorithm = computationResult.algorithm();
+            var result = computationResult.result();
             var graph = computationResult.graph();
 
             if (graph.isEmpty()) {
@@ -61,7 +62,7 @@ public class HarmonicCentralityStreamProc extends HarmonicCentralityProc<Harmoni
 
             return LongStream.range(0, graph.nodeCount())
                 .boxed()
-                .map(nodeId -> new StreamResult(graph.toOriginalNodeId(nodeId), algorithm.getCentralityScore(nodeId)));
+                .map(nodeId -> new StreamResult(graph.toOriginalNodeId(nodeId), result.getCentralityScore(nodeId)));
         };
     }
 

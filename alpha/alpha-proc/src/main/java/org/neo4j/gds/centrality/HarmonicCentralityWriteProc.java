@@ -28,6 +28,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.impl.closeness.HarmonicCentralityConfig;
 import org.neo4j.gds.impl.harmonic.HarmonicCentrality;
+import org.neo4j.gds.impl.harmonic.HarmonicResult;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -54,13 +55,17 @@ public class HarmonicCentralityWriteProc extends HarmonicCentralityProc<Centrali
     }
 
     @Override
-    public ComputationResultConsumer<HarmonicCentrality, HarmonicCentrality, HarmonicCentralityConfig, Stream<CentralityScore.Stats>> computationResultConsumer() {
+    public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, HarmonicCentralityConfig, Stream<CentralityScore.Stats>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
+            var result = computationResult.result();
             var algorithm = computationResult.algorithm();
             var config = computationResult.config();
             var graph = computationResult.graph();
 
-            AbstractCentralityResultBuilder<CentralityScore.Stats> builder = new CentralityScore.Stats.Builder(callContext, config.concurrency());
+            AbstractCentralityResultBuilder<CentralityScore.Stats> builder = new CentralityScore.Stats.Builder(
+                callContext,
+                config.concurrency()
+            );
 
             builder
                 .withNodeCount(graph.nodeCount())
@@ -98,7 +103,7 @@ public class HarmonicCentralityWriteProc extends HarmonicCentralityProc<Centrali
 
                     @Override
                     public double doubleValue(long nodeId) {
-                        return computationResult.result().getCentralityScore(nodeId);
+                        return result.getCentralityScore(nodeId);
                     }
                 };
 
