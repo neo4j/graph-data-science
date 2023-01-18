@@ -151,10 +151,10 @@ class LouvainTest {
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
-        algorithm.compute();
+        var result = algorithm.compute();
 
-        final HugeLongArray[] dendrogram = algorithm.dendrograms();
-        final double[] modularities = algorithm.modularities();
+        final HugeLongArray[] dendrogram = result.dendrogramManager().getAllDendrograms();
+        final double[] modularities = result.modularities();
 
         assertCommunities(
             dendrogram[0],
@@ -171,7 +171,7 @@ class LouvainTest {
             ids(idFunction, "j", "k", "l", "m", "n")
         );
 
-        assertEquals(2, algorithm.levels());
+        assertEquals(2, result.ranLevels());
         assertEquals(0.38, modularities[modularities.length - 1], 0.01);
     }
 
@@ -197,10 +197,10 @@ class LouvainTest {
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
-        algorithm.compute();
+        var result = algorithm.compute();
 
-        final HugeLongArray[] dendrogram = algorithm.dendrograms();
-        final double[] modularities = algorithm.modularities();
+        final HugeLongArray[] dendrogram = result.dendrogramManager().getAllDendrograms();
+        final double[] modularities = result.modularities();
 
         assertCommunities(
             dendrogram[0],
@@ -217,7 +217,7 @@ class LouvainTest {
             ids(idFunction, "h", "i", "j", "k", "l", "m", "n")
         );
 
-        assertEquals(2, algorithm.levels());
+        assertEquals(2, result.ranLevels());
         assertEquals(0.37, modularities[modularities.length - 1], 0.01);
     }
 
@@ -244,10 +244,10 @@ class LouvainTest {
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
-        algorithm.compute();
+        var result = algorithm.compute();
 
-        final HugeLongArray[] dendrogram = algorithm.dendrograms();
-        final double[] modularities = algorithm.modularities();
+        final HugeLongArray[] dendrogram = result.dendrogramManager().getAllDendrograms();
+        final double[] modularities = result.modularities();
 
         var expectedCommunitiesWithLabels = Map.of(
             1L, ids(idFunction, "a", "b", "c", "d", "e", "f", "x"),
@@ -260,7 +260,7 @@ class LouvainTest {
             expectedCommunitiesWithLabels
         );
 
-        assertEquals(1, algorithm.levels());
+        assertEquals(1, result.ranLevels());
         assertEquals(0.38, modularities[modularities.length - 1], 0.01);
     }
 
@@ -295,9 +295,9 @@ class LouvainTest {
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
-        algorithm.compute();
-
-        assertEquals(1, algorithm.levels());
+        var result = algorithm.compute();
+        
+        assertEquals(1, result.ranLevels());
     }
 
     @Test
@@ -330,9 +330,8 @@ class LouvainTest {
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
-        algorithm.compute();
-
-        assertEquals(1, algorithm.levels());
+        var result = algorithm.compute();
+        assertEquals(1, result.ranLevels());
     }
 
     static Stream<Arguments> memoryEstimationTuples() {

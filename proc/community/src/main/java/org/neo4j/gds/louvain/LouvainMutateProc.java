@@ -43,7 +43,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.louvain.mutate", description = LouvainProc.LOUVAIN_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class LouvainMutateProc extends MutatePropertyProc<Louvain, Louvain, LouvainMutateProc.MutateResult, LouvainMutateConfig> {
+public class LouvainMutateProc extends MutatePropertyProc<Louvain, LouvainResult, LouvainMutateProc.MutateResult, LouvainMutateConfig> {
 
     @Procedure(value = "gds.louvain.mutate", mode = READ)
     @Description(LouvainProc.LOUVAIN_DESCRIPTION)
@@ -74,7 +74,7 @@ public class LouvainMutateProc extends MutatePropertyProc<Louvain, Louvain, Louv
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<Louvain, Louvain, LouvainMutateConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<Louvain, LouvainResult, LouvainMutateConfig> computationResult) {
         return LouvainProc.nodeProperties(
             computationResult,
             computationResult.config().mutateProperty()
@@ -83,7 +83,7 @@ public class LouvainMutateProc extends MutatePropertyProc<Louvain, Louvain, Louv
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<Louvain, Louvain, LouvainMutateConfig> computeResult,
+        ComputationResult<Louvain, LouvainResult, LouvainMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return LouvainProc.resultBuilder(

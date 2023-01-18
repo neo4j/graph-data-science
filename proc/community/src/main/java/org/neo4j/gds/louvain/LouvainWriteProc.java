@@ -44,7 +44,7 @@ import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 @GdsCallable(name = "gds.louvain.write", description = LouvainProc.LOUVAIN_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWriteProc.WriteResult, LouvainWriteConfig> {
+public class LouvainWriteProc extends WriteProc<Louvain, LouvainResult, LouvainWriteProc.WriteResult, LouvainWriteConfig> {
 
     @Procedure(value = "gds.louvain.write", mode = WRITE)
     @Description(LouvainProc.LOUVAIN_DESCRIPTION)
@@ -65,7 +65,7 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<Louvain, Louvain, LouvainWriteConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<Louvain, LouvainResult, LouvainWriteConfig> computationResult) {
         return LouvainProc.nodeProperties(
             computationResult,
             computationResult.config().writeProperty()
@@ -74,7 +74,7 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<Louvain, Louvain, LouvainWriteConfig> computeResult,
+        ComputationResult<Louvain, LouvainResult, LouvainWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return LouvainProc.resultBuilder(new WriteResult.Builder(

@@ -44,7 +44,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.louvain.stream", description = LouvainProc.LOUVAIN_DESCRIPTION, executionMode = STREAM)
-public class LouvainStreamProc extends StreamProc<Louvain, Louvain, LouvainStreamProc.StreamResult, LouvainStreamConfig> {
+public class LouvainStreamProc extends StreamProc<Louvain, LouvainResult, LouvainStreamProc.StreamResult, LouvainStreamConfig> {
 
     @Procedure(value = "gds.louvain.stream", mode = READ)
     @Description(LouvainProc.LOUVAIN_DESCRIPTION)
@@ -75,7 +75,7 @@ public class LouvainStreamProc extends StreamProc<Louvain, Louvain, LouvainStrea
     }
 
     @Override
-    protected Stream<StreamResult> stream(ComputationResult<Louvain, Louvain, LouvainStreamConfig> computationResult) {
+    protected Stream<StreamResult> stream(ComputationResult<Louvain, LouvainResult, LouvainStreamConfig> computationResult) {
         return runWithExceptionLogging("Graph streaming failed", () -> {
             Graph graph = computationResult.graph();
 
@@ -85,6 +85,8 @@ public class LouvainStreamProc extends StreamProc<Louvain, Louvain, LouvainStrea
 
             var nodeProperties = (computationResult.isGraphEmpty() || !consecutiveIds) ? null : nodeProperties((computationResult));
 
+            var louvain = computationResult.result();
+
             return LongStream
                 .range(0, graph.nodeCount())
                 .boxed()
@@ -93,8 +95,7 @@ public class LouvainStreamProc extends StreamProc<Louvain, Louvain, LouvainStrea
                         .config()
                         .includeIntermediateCommunities();
 
-                    Louvain louvain = computationResult.result();
-                    long[] communities = includeIntermediateCommunities ? louvain.getCommunities(nodeId) : null;
+                    long[] communities = includeIntermediateCommunities ? louvain.getIntermediateCommunities(nodeId) : null;
                     long communityId = consecutiveIds ? nodeProperties.longValue(
                         nodeId) : louvain.getCommunity(nodeId);
                     return new StreamResult(
@@ -107,7 +108,7 @@ public class LouvainStreamProc extends StreamProc<Louvain, Louvain, LouvainStrea
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<Louvain, Louvain, LouvainStreamConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<Louvain, LouvainResult, LouvainStreamConfig> computationResult) {
         return LouvainProc.nodeProperties(computationResult, UUID.randomUUID().toString());
     }
 

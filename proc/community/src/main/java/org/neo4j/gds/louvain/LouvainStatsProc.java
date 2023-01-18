@@ -44,7 +44,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STATS;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.louvain.stats", description = STATS_DESCRIPTION, executionMode = STATS)
-public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsProc.StatsResult, LouvainStatsConfig> {
+public class LouvainStatsProc extends StatsProc<Louvain, LouvainResult, LouvainStatsProc.StatsResult, LouvainStatsConfig> {
 
     @Procedure(value = "gds.louvain.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
@@ -66,7 +66,7 @@ public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsPr
 
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(
-        ComputationResult<Louvain, Louvain, LouvainStatsConfig> computeResult,
+        ComputationResult<Louvain, LouvainResult, LouvainStatsConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return LouvainProc.resultBuilder(
