@@ -55,8 +55,8 @@ import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<LabelPropagation, CONFIG, LabelPropagation>,
-    MemoryEstimateTest<LabelPropagation, CONFIG, LabelPropagation> {
+    AlgoBaseProcTest<LabelPropagation, CONFIG, LabelPropagationResult>,
+    MemoryEstimateTest<LabelPropagation, CONFIG, LabelPropagationResult> {
 
     @TestFactory
     final Stream<DynamicTest> configTests() {
@@ -155,7 +155,7 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
     }
 
     @Override
-    public void assertResultEquals(LabelPropagation result1, LabelPropagation result2) {
+    public void assertResultEquals(LabelPropagationResult result1, LabelPropagationResult result2) {
         assertArrayEquals(result1.labels().toArray(), result2.labels().toArray());
         assertEquals(result1.didConverge(), result2.didConverge());
         assertEquals(result1.ranIterations(), result2.ranIterations());

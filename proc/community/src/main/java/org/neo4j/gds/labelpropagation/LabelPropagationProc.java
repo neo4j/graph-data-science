@@ -34,7 +34,7 @@ final class LabelPropagationProc {
     private LabelPropagationProc() {}
 
     static <CONFIG extends LabelPropagationBaseConfig> NodePropertyValues nodeProperties(
-        ComputationResult<LabelPropagation, LabelPropagation, CONFIG> computationResult,
+        ComputationResult<LabelPropagation, LabelPropagationResult, CONFIG> computationResult,
         String resultProperty
     ) {
         var config = computationResult.config();
@@ -49,7 +49,7 @@ final class LabelPropagationProc {
 
     static <PROC_RESULT, CONFIG extends LabelPropagationBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         LabelPropagationResultBuilder<PROC_RESULT> procResultBuilder,
-        ComputationResult<LabelPropagation, LabelPropagation, CONFIG> computeResult
+        ComputationResult<LabelPropagation, LabelPropagationResult, CONFIG> computeResult
     ) {
         return procResultBuilder
             .didConverge(!computeResult.isGraphEmpty() ? computeResult.result().didConverge() : false)

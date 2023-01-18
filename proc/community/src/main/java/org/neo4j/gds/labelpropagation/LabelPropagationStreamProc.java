@@ -38,7 +38,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.labelPropagation.stream", description = LabelPropagationProc.LABEL_PROPAGATION_DESCRIPTION, executionMode = STREAM)
-public class LabelPropagationStreamProc extends StreamProc<LabelPropagation, LabelPropagation, LabelPropagationStreamProc.StreamResult, LabelPropagationStreamConfig> {
+public class LabelPropagationStreamProc extends StreamProc<LabelPropagation, LabelPropagationResult, LabelPropagationStreamProc.StreamResult, LabelPropagationStreamConfig> {
 
     @Procedure(value = "gds.labelPropagation.stream", mode = READ)
     @Description(LabelPropagationProc.LABEL_PROPAGATION_DESCRIPTION)
@@ -76,7 +76,7 @@ public class LabelPropagationStreamProc extends StreamProc<LabelPropagation, Lab
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationStreamConfig> computationResult) {
         return LabelPropagationProc.nodeProperties(
             computationResult,
             UUID.randomUUID().toString()

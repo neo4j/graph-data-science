@@ -41,7 +41,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STATS;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.labelPropagation.stats", description = STATS_DESCRIPTION, executionMode = STATS)
-public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, LabelPropagation, LabelPropagationStatsProc.StatsResult, LabelPropagationStatsConfig> {
+public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, LabelPropagationResult, LabelPropagationStatsProc.StatsResult, LabelPropagationStatsConfig> {
 
     @Procedure(value = "gds.labelPropagation.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
@@ -63,7 +63,7 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
 
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(
-        ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStatsConfig> computeResult,
+        ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationStatsConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return LabelPropagationProc.resultBuilder(

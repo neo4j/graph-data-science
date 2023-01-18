@@ -40,7 +40,7 @@ import static org.neo4j.gds.assertj.ConditionFactory.containsExactlyInAnyOrderEn
 class LabelPropagationStatsProcTest extends LabelPropagationProcTest<LabelPropagationStatsConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagation, LabelPropagationStatsConfig, ?>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagationResult, LabelPropagationStatsConfig, ?>> getProcedureClazz() {
         return LabelPropagationStatsProc.class;
     }
 

@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropagationStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig, ?>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagationResult, LabelPropagationStreamConfig, ?>> getProcedureClazz() {
         return LabelPropagationStreamProc.class;
     }
 
@@ -73,8 +73,8 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
         assertCypherResult(query, Arrays.asList(MapUtil.map(
             "nodeCount", 12L,
             "relationshipCount", 10L,
-            "bytesMin", 1656L,
-            "bytesMax", 2168L
+            "bytesMin", 1640L,
+            "bytesMax", 2152L
         )));
     }
 

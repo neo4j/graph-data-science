@@ -61,7 +61,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig, ?>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagationResult, LabelPropagationWriteConfig, ?>> getProcedureClazz() {
         return LabelPropagationWriteProc.class;
     }
 
@@ -409,8 +409,8 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
         assertCypherResult(query, Arrays.asList(MapUtil.map(
             "nodeCount", 12L,
             "relationshipCount", 10L,
-            "bytesMin", 1656L,
-            "bytesMax", 2168L
+            "bytesMin", 1640L,
+            "bytesMax", 2152L
         )));
     }
 
