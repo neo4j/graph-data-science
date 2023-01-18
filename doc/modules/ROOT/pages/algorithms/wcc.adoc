@@ -626,12 +626,12 @@ CALL gds.graph.project(
 The following query is identical to the stream example in the xref:algorithms/wcc.adoc#algorithms-wcc-examples-seeding[previous section].
 This time, we execute WCC on `myIndexedGraph` which will allow the algorithm to use the sampled strategy.
 
-[role=query-example]
+[role=query-example, no-result=true]
 --
 .The following will run the algorithm with sampled strategy and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.wcc.stream('myIndexedGraph', { consecutiveIds: true })
+CALL gds.wcc.stream('myIndexedGraph')
 YIELD nodeId, componentId
 RETURN gds.util.asNode(nodeId).name AS name, componentId
 ORDER BY componentId, name
@@ -644,11 +644,14 @@ ORDER BY componentId, name
 | "Alice"   | 0
 | "Bridget" | 0
 | "Charles" | 0
-| "Doug"    | 1
-| "Mark"    | 1
-| "Michael" | 1
+| "Doug"    | 3
+| "Mark"    | 3
+| "Michael" | 3
 |===
 --
 
-Here we also demonstrate the use of `conscutiveIds: true`, the results are semantically the same as before.
-However, on larger graphs, there will be a notable improvement in compute time.
+[NOTE]
+====
+Because of the randomness in the Graph sampling optimization, running it another time might yield a different componentIds.
+For our case here it would be equally plausible to get the inverse solution, f.i. when our community `0` nodes are mapped to community `3` instead, and vice versa.
+====
