@@ -1,13 +1,13 @@
 plugins {
     id 'com.github.hierynomus.license'              version '0.16.2-37dde1f'        apply false
     id 'com.github.johnrengelman.shadow'            version '7.0.0'                 apply false
-    id 'de.undercouch.download'                     version '4.1.1'                 apply false
+    // FIXME do we need this?
+    id 'de.undercouch.download'                     version '5.3.0'                 apply false
     id 'ch.kk7.spawn'                               version '1.0.20180924200750'    apply false
-    id 'com.vanniktech.dependency.graph.generator'  version '0.5.0'
-    id 'de.thetaphi.forbiddenapis'                  version '3.3'                   apply false
+    id 'de.thetaphi.forbiddenapis'                  version '3.4'                   apply false
     id 'com.github.spotbugs'                        version '5.0.13'                 apply false
-    id 'nebula.info-dependencies'                   version '9.3.0'                 apply false
-    id 'com.google.protobuf'                        version '0.8.16'                apply false
+    id 'nebula.info-dependencies'                   version '11.4.1'                 apply false
+    id 'com.google.protobuf'                        version '0.9.2'                apply false
     id 'me.champeau.mrjar'                          version "0.1"                   apply false
 }
 
