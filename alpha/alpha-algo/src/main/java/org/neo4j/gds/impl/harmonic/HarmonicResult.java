@@ -26,12 +26,12 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 @ValueClass
 public interface HarmonicResult {
 
-     HugeAtomicDoubleArray inverseFarness();
+    HugeAtomicDoubleArray inverseFarness();
+
     long nodeCount();
+
     @Value.Derived
     default double getCentralityScore(long nodeId) {
         return inverseFarness().get(nodeId) / (double) (nodeCount() - 1);
     }
-
-
 }
