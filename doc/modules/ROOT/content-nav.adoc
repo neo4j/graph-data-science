@@ -150,6 +150,7 @@
 ** xref:production-deployment/neo4j-cluster.adoc[]
 ** xref:production-deployment/feature-toggles.adoc[]
 * xref:python-client/index.adoc[]
+* link:https://neo4j.com/docs/bloom-user-guide/current/bloom-tutorial/gds-integration/[Bloom visualization]
 * Appendix
 ** xref:operations-reference/appendix-a.adoc[]
 *** xref:operations-reference/graph-operation-references.adoc[]
