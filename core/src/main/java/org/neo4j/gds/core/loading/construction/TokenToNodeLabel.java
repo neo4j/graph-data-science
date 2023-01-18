@@ -32,23 +32,23 @@ import java.util.concurrent.locks.ReentrantLock;
 import static org.neo4j.gds.core.GraphDimensions.NO_SUCH_LABEL;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public abstract class TokenToNodeLabelMap {
+abstract class TokenToNodeLabel {
 
     final ObjectIntMap<NodeLabel> elementIdentifierLabelTokenMapping;
     final IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
-    public static TokenToNodeLabelMap fixed(
+    static TokenToNodeLabel fixed(
         ObjectIntMap<NodeLabel> elementIdentifierLabelTokenMapping,
         IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping
     ) {
-        return new FixedTokenToNodeLabelMap(elementIdentifierLabelTokenMapping, labelTokenNodeLabelMapping);
+        return new FixedTokenToNodeLabel(elementIdentifierLabelTokenMapping, labelTokenNodeLabelMapping);
     }
 
-    public static TokenToNodeLabelMap lazy() {
-        return new LazyTokenToNodeLabelMap();
+    static TokenToNodeLabel lazy() {
+        return new LazyTokenToNodeLabel();
     }
 
-    TokenToNodeLabelMap(
+    TokenToNodeLabel(
         ObjectIntMap<NodeLabel> elementIdentifierLabelTokenMapping,
         IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping
     ) {
@@ -60,11 +60,11 @@ public abstract class TokenToNodeLabelMap {
         return this.labelTokenNodeLabelMapping;
     }
 
-    public abstract int getTokenForNodeLabel(NodeLabel nodeLabel);
+    abstract int getOrCreateToken(NodeLabel nodeLabel);
 
-    static class FixedTokenToNodeLabelMap extends TokenToNodeLabelMap {
+    private static class FixedTokenToNodeLabel extends TokenToNodeLabel {
 
-        FixedTokenToNodeLabelMap(
+        FixedTokenToNodeLabel(
             ObjectIntMap<NodeLabel> elementIdentifierLabelTokenMapping,
             IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping
         ) {
@@ -72,7 +72,7 @@ public abstract class TokenToNodeLabelMap {
         }
 
         @Override
-        public int getTokenForNodeLabel(NodeLabel nodeLabel) {
+        public int getOrCreateToken(NodeLabel nodeLabel) {
             if (!elementIdentifierLabelTokenMapping.containsKey(nodeLabel)) {
                 throw new IllegalArgumentException(formatWithLocale("No token was specified for node label %s", nodeLabel));
             }
@@ -80,19 +80,19 @@ public abstract class TokenToNodeLabelMap {
         }
     }
 
-    static class LazyTokenToNodeLabelMap extends TokenToNodeLabelMap {
+    private static class LazyTokenToNodeLabel extends TokenToNodeLabel {
 
         private final Lock lock;
         private int nextLabelId;
 
-        LazyTokenToNodeLabelMap() {
+        LazyTokenToNodeLabel() {
             super(new ObjectIntScatterMap<>(), new IntObjectHashMap<>());
             this.lock = new ReentrantLock(true);
             this.nextLabelId = 0;
         }
 
         @Override
-        public int getTokenForNodeLabel(NodeLabel nodeLabel) {
+        public int getOrCreateToken(NodeLabel nodeLabel) {
             var token = elementIdentifierLabelTokenMapping.getOrDefault(nodeLabel, NO_SUCH_LABEL);
             if (token == NO_SUCH_LABEL) {
                 lock.lock();
