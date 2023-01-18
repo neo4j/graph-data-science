@@ -71,6 +71,9 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.database.NamedDatabaseId;
+import org.neo4j.kernel.impl.coreapi.InternalTransaction;
+import org.neo4j.kernel.impl.query.TransactionalContext;
+import org.neo4j.kernel.impl.query.TransactionalContextFactory;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
@@ -79,6 +82,7 @@ import org.neo4j.logging.internal.LogService;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.ssl.config.SslPolicyLoader;
+import org.neo4j.values.virtual.MapValue;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -459,6 +463,14 @@ public final class Neo4jProxy {
 
     public static void reserveNeo4jIds(IdGeneratorFactory generatorFactory, int size, CursorContext cursorContext) {
         IMPL.reserveNeo4jIds(generatorFactory, size, cursorContext);
+    }
+    public static TransactionalContext newQueryContext(
+        TransactionalContextFactory contextFactory,
+        InternalTransaction tx,
+        String queryText,
+        MapValue queryParameters
+    ) {
+        return IMPL.newQueryContext(contextFactory, tx, queryText, queryParameters);
     }
 
     private Neo4jProxy() {

@@ -106,7 +106,10 @@ import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.database.NormalizedDatabaseName;
 import org.neo4j.kernel.database.TestDatabaseIdRepository;
+import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
+import org.neo4j.kernel.impl.query.TransactionalContext;
+import org.neo4j.kernel.impl.query.TransactionalContextFactory;
 import org.neo4j.kernel.impl.store.MetaDataStore;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
@@ -122,6 +125,7 @@ import org.neo4j.ssl.config.SslPolicyLoader;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.values.storable.ValueCategory;
 import org.neo4j.values.storable.ValueGroup;
+import org.neo4j.values.virtual.MapValue;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -776,5 +780,15 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         IdGenerator idGenerator = generatorFactory.get(RecordIdType.NODE);
 
         idGenerator.nextConsecutiveIdRange(size, false, cursorContext);
+    }
+
+    @Override
+    public TransactionalContext newQueryContext(
+        TransactionalContextFactory contextFactory,
+        InternalTransaction tx,
+        String queryText,
+        MapValue queryParameters
+    ) {
+        return contextFactory.newContext(tx, queryText, queryParameters);
     }
 }
