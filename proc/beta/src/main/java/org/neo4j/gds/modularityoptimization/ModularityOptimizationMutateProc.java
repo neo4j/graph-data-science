@@ -40,7 +40,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.beta.modularityOptimization.mutate", description = ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class ModularityOptimizationMutateProc extends MutatePropertyProc<ModularityOptimization, ModularityOptimization, ModularityOptimizationMutateProc.MutateResult, ModularityOptimizationMutateConfig> {
+public class ModularityOptimizationMutateProc extends MutatePropertyProc<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationMutateProc.MutateResult, ModularityOptimizationMutateConfig> {
 
     @Procedure(value = "gds.beta.modularityOptimization.mutate", mode = READ)
     @Description(ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION)
@@ -62,14 +62,14 @@ public class ModularityOptimizationMutateProc extends MutatePropertyProc<Modular
 
     @Override
     protected NodePropertyValues nodeProperties(
-        ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationMutateConfig> computationResult
+        ComputationResult<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationMutateConfig> computationResult
     ) {
         return ModularityOptimizationProc.nodeProperties(computationResult);
     }
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationMutateConfig> computeResult,
+        ComputationResult<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return ModularityOptimizationProc.resultBuilder(

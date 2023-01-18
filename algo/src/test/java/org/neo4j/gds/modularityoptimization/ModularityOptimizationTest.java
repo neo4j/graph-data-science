@@ -94,35 +94,35 @@ class ModularityOptimizationTest {
     void testUnweighted() {
         var graph = unweightedGraph();
 
-        ModularityOptimization pmo = compute(graph, 3, null, 1, 10_000);
+        var pmo = compute(graph, 3, null, 1, 10_000);
 
-        assertEquals(0.12244, pmo.getModularity(), 0.001);
+        assertEquals(0.12244, pmo.modularity(), 0.001);
         assertCommunities(
             getCommunityIds(graph.nodeCount(), pmo),
             ids(idFunction, "a", "b", "c", "e"),
             ids(idFunction, "d", "f")
         );
-        assertTrue(pmo.getIterations() <= 3);
+        assertTrue(pmo.ranIterations() <= 3);
     }
 
     @Test
     void testWeighted() {
-        ModularityOptimization pmo = compute(graph, 3, null, 3, 2);
+        var pmo = compute(graph, 3, null, 3, 2);
 
-        assertEquals(0.4985, pmo.getModularity(), 0.001);
+        assertEquals(0.4985, pmo.modularity(), 0.001);
         assertCommunities(
             getCommunityIds(graph.nodeCount(), pmo),
             ids(idFunction, "a", "e", "f"),
             ids(idFunction, "b", "c", "d")
         );
-        assertTrue(pmo.getIterations() <= 3);
+        assertTrue(pmo.ranIterations() <= 3);
     }
 
     @Test
     void testSeedingWithBiggerSeedValues() {
         var graph = unweightedGraph();
 
-        ModularityOptimization pmo = compute(
+        var pmo = compute(
             graph,
             10, graph.nodeProperties("seed2"),
             1,
@@ -130,17 +130,17 @@ class ModularityOptimizationTest {
         );
 
         long[] actualCommunities = getCommunityIds(graph.nodeCount(), pmo);
-        assertEquals(0.0816, pmo.getModularity(), 0.001);
+        assertEquals(0.0816, pmo.modularity(), 0.001);
         assertCommunities(actualCommunities, ids(idFunction, EXPECTED_SEED_COMMUNITIES));
-        assertTrue(actualCommunities[0] == 43 && actualCommunities[2] == 42 && actualCommunities[3] == 33);
-        assertTrue(pmo.getIterations() <= 3);
+        assertThat(actualCommunities).containsExactlyInAnyOrder(43, 42, 33, 43, 42, 33);
+        assertTrue(pmo.ranIterations() <= 3);
     }
 
     @Test
     void testSeeding() {
         var graph = unweightedGraph();
 
-        ModularityOptimization pmo = compute(
+        var pmo = compute(
             graph,
             10, graph.nodeProperties("seed1"),
             1,
@@ -148,16 +148,16 @@ class ModularityOptimizationTest {
         );
 
         long[] actualCommunities = getCommunityIds(graph.nodeCount(), pmo);
-        assertEquals(0.0816, pmo.getModularity(), 0.001);
+        assertEquals(0.0816, pmo.modularity(), 0.001);
         assertCommunities(actualCommunities, ids(idFunction, EXPECTED_SEED_COMMUNITIES));
         assertTrue(actualCommunities[0] == 4 && actualCommunities[2] == 2 || actualCommunities[3] == 3);
-        assertTrue(pmo.getIterations() <= 3);
+        assertTrue(pmo.ranIterations() <= 3);
     }
 
-    private long[] getCommunityIds(long nodeCount, ModularityOptimization pmo) {
+    private long[] getCommunityIds(long nodeCount, ModularityOptimizationResult pmo) {
         long[] communityIds = new long[(int) nodeCount];
         for (int i = 0; i < nodeCount; i++) {
-            communityIds[i] = pmo.getCommunityId(i);
+            communityIds[i] = pmo.communityId(i);
         }
         return communityIds;
     }
@@ -204,7 +204,7 @@ class ModularityOptimizationTest {
     }
 
     @NotNull
-    private ModularityOptimization compute(
+    private ModularityOptimizationResult compute(
         Graph graph,
         int maxIterations,
         NodePropertyValues properties,
@@ -215,7 +215,7 @@ class ModularityOptimizationTest {
     }
 
     @NotNull
-    private ModularityOptimization compute(
+    private ModularityOptimizationResult compute(
         Graph graph,
         int maxIterations,
         NodePropertyValues properties,

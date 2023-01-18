@@ -37,7 +37,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.beta.modularityOptimization.stream", description = ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION, executionMode = STREAM)
-public class ModularityOptimizationStreamProc extends StreamProc<ModularityOptimization, ModularityOptimization, ModularityOptimizationStreamProc.StreamResult, ModularityOptimizationStreamConfig> {
+public class ModularityOptimizationStreamProc extends StreamProc<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationStreamProc.StreamResult, ModularityOptimizationStreamConfig> {
 
     @Procedure(name = "gds.beta.modularityOptimization.stream", mode = READ)
     @Description(ModularityOptimizationProc.MODULARITY_OPTIMIZATION_DESCRIPTION)
@@ -69,7 +69,7 @@ public class ModularityOptimizationStreamProc extends StreamProc<ModularityOptim
 
     @Override
     protected NodePropertyValues nodeProperties(
-        ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationStreamConfig> computationResult
+        ComputationResult<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationStreamConfig> computationResult
     ) {
         return ModularityOptimizationProc.nodeProperties(computationResult);
     }

@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.GdsCypher.ExecutionModes.MUTATE;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 
-class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTest implements MutateNodePropertyTest<ModularityOptimization, ModularityOptimizationMutateConfig, ModularityOptimization> {
+class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTest implements MutateNodePropertyTest<ModularityOptimization, ModularityOptimizationMutateConfig, ModularityOptimizationResult> {
 
     private static final String TEST_GRAPH_NAME = "myGraph";
 
@@ -179,7 +179,7 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<ModularityOptimization, ModularityOptimization, ModularityOptimizationMutateConfig, ?>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationMutateConfig, ?>> getProcedureClazz() {
         return ModularityOptimizationMutateProc.class;
     }
 
@@ -195,10 +195,10 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
 
     @Override
     public void assertResultEquals(
-        ModularityOptimization result1, ModularityOptimization result2
+        ModularityOptimizationResult result1, ModularityOptimizationResult result2
     ) {
-        assertEquals(result1.getModularity(), result2.getModularity());
-        assertEquals(result1.getIterations(), result2.getIterations());
+        assertEquals(result1.modularity(), result2.modularity());
+        assertEquals(result1.ranIterations(), result2.ranIterations());
     }
 
     GdsCypher.ModeBuildStage explicitAlgoBuildStage() {

@@ -26,7 +26,6 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIterator;
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.beta.k1coloring.ImmutableK1ColoringStreamConfig;
 import org.neo4j.gds.beta.k1coloring.K1Coloring;
@@ -57,7 +56,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * Parallel Computing 47 (2015): 19-37.
  * https://arxiv.org/pdf/1410.1237.pdf
  */
-public final class ModularityOptimization extends Algorithm<ModularityOptimization> {
+public final class ModularityOptimization extends Algorithm<ModularityOptimizationResult> {
 
     public static final int K1COLORING_MAX_ITERATIONS = 5;
     private final int concurrency;
@@ -114,7 +113,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     }
 
     @Override
-    public ModularityOptimization compute() {
+    public ModularityOptimizationResult compute() {
         progressTracker.beginSubTask("ModularityOptimization");
 
 
@@ -153,7 +152,13 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         progressTracker.endSubTask();
 
         progressTracker.endSubTask();
-        return this;
+        return new ModularityOptimizationResult(
+            this::getCommunityId,
+            modularity,
+            iterationCounter,
+            didConverge,
+            nodeCount
+        );
     }
 
     private void computeColoring() {
@@ -301,6 +306,14 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         }
     }
 
+    @Override
+    public void release() {
+        this.nextCommunities.release();
+        this.communityWeightUpdates.release();
+        this.cumulativeNodeWeights.release();
+        modularityColorArray.release();
+    }
+
     private long optimizeColor(long currentStandingPosition) {
         // run optimization tasks for every node
 
@@ -380,45 +393,10 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         return modularityManager.calculateModularity();
     }
 
-    @Override
-    public void release() {
-        this.nextCommunities.release();
-        this.communityWeightUpdates.release();
-        this.cumulativeNodeWeights.release();
-        modularityColorArray.release();
-
-    }
-
-    public long getCommunityId(long nodeId) {
+    private long getCommunityId(long nodeId) {
         if (seedProperty == null || reverseSeedCommunityMapping == null) {
             return currentCommunities.get(nodeId);
         }
         return reverseSeedCommunityMapping.get(currentCommunities.get(nodeId));
-    }
-
-    public int getIterations() {
-        return this.iterationCounter;
-    }
-
-    public double getModularity() {
-        return this.modularity;
-    }
-
-    public boolean didConverge() {
-        return this.didConverge;
-    }
-
-    public LongNodePropertyValues asNodeProperties() {
-        return new LongNodePropertyValues() {
-            @Override
-            public long longValue(long nodeId) {
-                return getCommunityId(nodeId);
-            }
-
-            @Override
-            public long size() {
-                return currentCommunities.size();
-            }
-        };
     }
 }

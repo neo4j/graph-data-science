@@ -35,6 +35,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.modularityoptimization.ImmutableModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimization;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 
 import java.util.Optional;
@@ -106,22 +107,21 @@ public final class Louvain extends Algorithm<LouvainResult> {
 
             terminationFlag.assertRunning();
 
-            ModularityOptimization modularityOptimization = runModularityOptimization(
+            var modularityOptimizationResult = runModularityOptimization(
                 workingGraph,
                 nextSeedingValues
             );
-            modularityOptimization.release();
 
-            modularities[ranLevels] = modularityOptimization.getModularity();
+            modularities[ranLevels] = modularityOptimizationResult.modularity();
             dendrogramManager.prepareNextLevel(ranLevels);
 
             long maxCommunityId = buildDendrogram(
                 workingGraph,
                 ranLevels,
-                modularityOptimization
+                modularityOptimizationResult
             );
 
-            workingGraph = summarizeGraph(workingGraph, modularityOptimization, maxCommunityId);
+            workingGraph = summarizeGraph(workingGraph, modularityOptimizationResult, maxCommunityId);
             nextSeedingValues = new OriginalIdNodePropertyValues(workingGraph) {
                 @Override
                 public OptionalLong getMaxLongPropertyValue() {
@@ -167,7 +167,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
     private long buildDendrogram(
         Graph workingGraph,
         int level,
-        ModularityOptimization modularityOptimization
+        ModularityOptimizationResult modularityOptimizationResult
     ) {
         AtomicLong maxCommunityId = new AtomicLong(0L);
         ParallelUtil.parallelForEachNode(rootGraph, concurrency, (nodeId) -> {
@@ -175,7 +175,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
                 ? nodeId
                 : workingGraph.toMappedNodeId(dendrogramManager.getPrevious(nodeId));
 
-            long communityId = modularityOptimization.getCommunityId(prevId);
+            long communityId = modularityOptimizationResult.communityId(prevId);
 
             boolean updatedMaxCurrentId;
             do {
@@ -193,7 +193,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
         return maxCommunityId.get();
     }
 
-    private ModularityOptimization runModularityOptimization(Graph louvainGraph, NodePropertyValues seed) {
+    private ModularityOptimizationResult runModularityOptimization(Graph louvainGraph, NodePropertyValues seed) {
         ModularityOptimizationStreamConfig modularityOptimizationConfig = ImmutableModularityOptimizationStreamConfig
             .builder()
             .maxIterations(maxIterations)
@@ -211,14 +211,14 @@ public final class Louvain extends Algorithm<LouvainResult> {
             );
         modularityOptimization.setTerminationFlag(terminationFlag);
 
-        modularityOptimization.compute();
-
-        return modularityOptimization;
+        var modularityOptimizationResult = modularityOptimization.compute();
+        modularityOptimization.release();
+        return modularityOptimizationResult;
     }
 
     private Graph summarizeGraph(
         Graph workingGraph,
-        ModularityOptimization modularityOptimization,
+        ModularityOptimizationResult modularityOptimizationResult,
         long maxCommunityId
     ) {
         var nodesBuilder = GraphFactory.initNodesBuilder()
@@ -229,7 +229,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
         terminationFlag.assertRunning();
 
         workingGraph.forEachNode((nodeId) -> {
-            nodesBuilder.addNode(modularityOptimization.getCommunityId(nodeId));
+            nodesBuilder.addNode(modularityOptimizationResult.communityId(nodeId));
             return true;
         });
 
@@ -256,7 +256,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
             partition ->
                 new RelationshipCreator(
                     relationshipsBuilder,
-                    modularityOptimization,
+                    modularityOptimizationResult,
                     workingGraph.concurrentCopy(),
                     finalScaleCoefficient,
                     partition
@@ -292,7 +292,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
 
         private final RelationshipsBuilder relationshipsBuilder;
 
-        private final ModularityOptimization modularityOptimization;
+        private final ModularityOptimizationResult modularityOptimizationResult;
 
         private final RelationshipIterator relationshipIterator;
 
@@ -303,13 +303,13 @@ public final class Louvain extends Algorithm<LouvainResult> {
 
         private RelationshipCreator(
             RelationshipsBuilder relationshipsBuilder,
-            ModularityOptimization modularityOptimization,
+            ModularityOptimizationResult modularityOptimizationResult,
             RelationshipIterator relationshipIterator,
             double scaleCoefficient,
             Partition partition
         ) {
             this.relationshipsBuilder = relationshipsBuilder;
-            this.modularityOptimization = modularityOptimization;
+            this.modularityOptimizationResult = modularityOptimizationResult;
             this.relationshipIterator = relationshipIterator;
             this.partition = partition;
             this.scaleCoefficient = scaleCoefficient;
@@ -318,16 +318,16 @@ public final class Louvain extends Algorithm<LouvainResult> {
         @Override
         public void run() {
             partition.consume(nodeId -> {
-                long communityId = modularityOptimization.getCommunityId(nodeId);
+                long communityId = modularityOptimizationResult.communityId(nodeId);
                 relationshipIterator.forEachRelationship(nodeId, 1.0, (source, target, property) -> {
                     // In the case of undirected graphs, we need scaling as otherwise we'd have double the value in these edges
                     // see GraphAggregationPhase.java for the equivalent in Leiden; and the corresponding test
                     if (source == target) {
-                        relationshipsBuilder.add(communityId, modularityOptimization.getCommunityId(target), property);
+                        relationshipsBuilder.add(communityId, modularityOptimizationResult.communityId(target), property);
                     } else {
                         relationshipsBuilder.add(
                             communityId,
-                            modularityOptimization.getCommunityId(target),
+                            modularityOptimizationResult.communityId(target),
                             property * scaleCoefficient
                         );
 

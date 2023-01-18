@@ -32,21 +32,21 @@ final class ModularityOptimizationProc {
 
     static <PROC_RESULT, CONFIG extends ModularityOptimizationConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         ModularityOptimizationResultBuilder<PROC_RESULT> procResultBuilder,
-        ComputationResult<ModularityOptimization, ModularityOptimization, CONFIG> computeResult
+        ComputationResult<ModularityOptimization, ModularityOptimizationResult, CONFIG> computeResult
     ) {
-        ModularityOptimization result = computeResult.result();
+        var result = computeResult.result();
 
         return procResultBuilder
-            .withModularity(result.getModularity())
-            .withRanIterations(result.getIterations())
+            .withModularity(result.modularity())
+            .withRanIterations(result.ranIterations())
             .didConverge(result.didConverge())
-            .withCommunityFunction(result::getCommunityId)
+            .withCommunityFunction(result::communityId)
             .withConfig(computeResult.config());
 
     }
 
     static <CONFIG extends ModularityOptimizationConfig> NodePropertyValues nodeProperties(
-        ComputationResult<ModularityOptimization, ModularityOptimization, CONFIG> computationResult
+        ComputationResult<ModularityOptimization, ModularityOptimizationResult, CONFIG> computationResult
     ) {
         LongNodePropertyValues resultCommunities = computationResult.result().asNodeProperties();
         if (computationResult.config().consecutiveIds()) {

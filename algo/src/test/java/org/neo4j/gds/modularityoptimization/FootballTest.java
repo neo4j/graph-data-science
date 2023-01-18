@@ -79,11 +79,11 @@ class FootballTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 2, 3})
     void test(int iterations) {
-        ModularityOptimization pmo = compute(graph, iterations, null, 3, 2);
-        double modularity1 = pmo.getModularity();
+        var pmo = compute(graph, iterations, null, 3, 2);
+        double modularity1 = pmo.modularity();
         HugeLongArray communities = HugeLongArray.newArray(graph.nodeCount());
         graph.forEachNode(nodeId -> {
-                communities.set(nodeId, pmo.getCommunityId(nodeId));
+                communities.set(nodeId, pmo.communityId(nodeId));
                 return true;
             }
         );
@@ -92,7 +92,7 @@ class FootballTest {
     }
 
     @NotNull
-    private ModularityOptimization compute(
+    private ModularityOptimizationResult compute(
         Graph graph,
         int maxIterations,
         NodePropertyValues properties,
@@ -103,7 +103,7 @@ class FootballTest {
     }
 
     @NotNull
-    private ModularityOptimization compute(
+    private ModularityOptimizationResult compute(
         Graph graph,
         int maxIterations,
         NodePropertyValues properties,
