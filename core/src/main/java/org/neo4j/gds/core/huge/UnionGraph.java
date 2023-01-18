@@ -313,13 +313,6 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public void canRelease(boolean canRelease) {
-        for (Graph graph : graphs) {
-            graph.canRelease(canRelease);
-        }
-    }
-
-    @Override
     public void releaseTopology() {
         for (Graph graph : graphs) {
             graph.releaseTopology();

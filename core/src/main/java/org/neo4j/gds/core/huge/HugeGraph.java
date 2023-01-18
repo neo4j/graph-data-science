@@ -119,8 +119,6 @@ public class HugeGraph implements CSRGraph {
     private @Nullable PropertyCursor propertyCursorCache;
     private @Nullable PropertyCursor inversePropertyCursorCache;
 
-    private boolean canRelease = true;
-
     protected final boolean hasRelationshipProperty;
     protected final boolean isMultiGraph;
 
@@ -517,14 +515,7 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
-    public void canRelease(boolean canRelease) {
-        this.canRelease = canRelease;
-    }
-
-    @Override
     public void releaseTopology() {
-        if (!canRelease) return;
-
         if (adjacency != null) {
             adjacency.close();
             adjacency = null;
@@ -561,10 +552,8 @@ public class HugeGraph implements CSRGraph {
 
     @Override
     public void releaseProperties() {
-        if (canRelease) {
-            for (NodePropertyValues idMap : nodeProperties.values()) {
-                idMap.release();
-            }
+        for (NodePropertyValues idMap : nodeProperties.values()) {
+            idMap.release();
         }
     }
 

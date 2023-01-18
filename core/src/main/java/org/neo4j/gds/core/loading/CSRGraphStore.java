@@ -614,7 +614,6 @@ public class CSRGraphStore implements GraphStore {
             ))
             .collect(Collectors.toList());
 
-        filteredGraphs.forEach(graph -> graph.canRelease(false));
         return UnionGraph.of(filteredGraphs);
     }
 

@@ -59,11 +59,6 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public void canRelease(boolean canRelease) {
-        graph.canRelease(canRelease);
-    }
-
-    @Override
     public Optional<NodeFilteredGraph> asNodeFilteredGraph() {
         return graph.asNodeFilteredGraph();
     }

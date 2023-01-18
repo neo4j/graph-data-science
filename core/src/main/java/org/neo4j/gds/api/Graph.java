@@ -73,8 +73,6 @@ public interface Graph extends IdMap, NodePropertyContainer, Degrees, Relationsh
 
     boolean hasRelationshipProperty();
 
-    void canRelease(boolean canRelease);
-
     @Override
     Graph concurrentCopy();
 
