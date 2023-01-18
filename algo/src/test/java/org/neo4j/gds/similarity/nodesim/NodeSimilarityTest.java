@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -645,22 +643,6 @@ final class NodeSimilarityTest {
         nodeSimilarity.release();
 
         assertEquals(orientation == REVERSE ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
-    }
-
-    @Disabled("Unsure how to proceed with direction BOTH")
-    @ParameterizedTest(name = "concurrency = {0}")
-    @MethodSource("concurrencies")
-    void shouldThrowForDirectionBoth(int concurrency) {
-        IllegalArgumentException ex = Assertions.assertThrows(
-            IllegalArgumentException.class,
-            () -> NodeSimilarity.create(
-                undirectedGraph,
-                configBuilder().concurrency(concurrency).build(),
-                Pools.DEFAULT,
-                ProgressTracker.NULL_TRACKER
-            ).computeToStream()
-        );
-        assertThat(ex.getMessage()).contains("Direction BOTH is not supported");
     }
 
     @ParameterizedTest(name = "topK = {0}")

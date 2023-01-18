@@ -20,7 +20,6 @@
 package org.neo4j.gds.impl.spanningtree;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
@@ -111,17 +110,5 @@ class KSpanningTreeTest {
         assertNotEquals(spanningTree.head(a), spanningTree.head(b));
         assertNotEquals(spanningTree.head(a), spanningTree.head(x));
         assertNotEquals(spanningTree.head(b), spanningTree.head(x));
-    }
-
-    @Test
-    @Disabled("Need to extend GdlGraph to generate offset node IDs and fix the test")
-    void testNeoIdsWithOffset() {
-        SpanningTree spanningTree = new KSpanningTree(graph, Prim.MIN_OPERATOR, 0, 2, ProgressTracker.NULL_TRACKER)
-            .compute();
-
-        SpanningTree otherSpanningTree = new KSpanningTree(graph, Prim.MIN_OPERATOR, 5, 2, ProgressTracker.NULL_TRACKER)
-            .compute();
-
-        assertEquals(spanningTree, otherSpanningTree);
     }
 }
