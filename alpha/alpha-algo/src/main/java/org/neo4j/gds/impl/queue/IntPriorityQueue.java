@@ -114,9 +114,9 @@ public abstract class IntPriorityQueue {
      * @return the least element of the queue in constant time.
      */
     public final int top() {
-        // We don't need to check size here: if maxSize is 0,
-        // then heap is length 2 array with both entries null.
-        // If size is 0 then heap[1] is already null.
+        if (isEmpty()) {
+            throw new IndexOutOfBoundsException("Priority Queue is empty");
+        }
         return heap.get(1);
     }
 

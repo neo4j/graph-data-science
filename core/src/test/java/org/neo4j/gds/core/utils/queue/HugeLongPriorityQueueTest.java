@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import static io.qala.datagen.RandomShortApi.integer;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,6 +42,8 @@ class HugeLongPriorityQueueTest {
         var capacity = integer(10, 20);
         var queue = HugeLongPriorityQueue.min(capacity);
         assertEquals(queue.size(), 0);
+        assertThatThrownBy(() -> queue.top()
+        ).hasMessageContaining("empty");
     }
 
     @Test

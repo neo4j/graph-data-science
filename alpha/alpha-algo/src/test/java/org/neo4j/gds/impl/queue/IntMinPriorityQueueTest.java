@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.qala.datagen.RandomShortApi.integer;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,6 +45,8 @@ final class IntMinPriorityQueueTest {
         final int capacity = integer(10, 20);
         final IntPriorityQueue queue = IntPriorityQueue.min(capacity);
         assertEquals(queue.size(), 0);
+        assertThatThrownBy(() -> queue.top()
+        ).hasMessageContaining("empty");
     }
 
     @Test
