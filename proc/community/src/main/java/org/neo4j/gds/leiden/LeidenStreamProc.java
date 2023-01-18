@@ -45,7 +45,7 @@ public class LeidenStreamProc extends BaseProc {
         return new ProcedureExecutor<>(
             new LeidenStreamSpec(),
             executionContext()
-        ).compute(graphName, configuration, true, true);
+        ).compute(graphName, configuration, true);
     }
 
     @Procedure(value = "gds.beta.leiden.stream.estimate", mode = READ)

@@ -56,7 +56,7 @@ public class KmeansStreamProc extends AlgoBaseProc<
         return new ProcedureExecutor<>(
             streamSpec,
             executionContext()
-        ).compute(graphName, configuration, true, true);
+        ).compute(graphName, configuration, true);
     }
 
     @Procedure(value = "gds.beta.kmeans.stream.estimate", mode = READ)

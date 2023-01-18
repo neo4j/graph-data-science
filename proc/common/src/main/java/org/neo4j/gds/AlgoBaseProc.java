@@ -81,7 +81,7 @@ public abstract class AlgoBaseProc<
         boolean releaseAlgorithm,
         boolean releaseTopology
     ) {
-        return procedureExecutor().compute(graphName, configuration, releaseAlgorithm, releaseTopology);
+        return procedureExecutor().compute(graphName, configuration, releaseAlgorithm);
     }
 
     /**

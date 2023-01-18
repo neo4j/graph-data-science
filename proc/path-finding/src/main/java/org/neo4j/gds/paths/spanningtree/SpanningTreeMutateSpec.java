@@ -68,7 +68,6 @@ public class SpanningTreeMutateSpec implements AlgorithmSpec<Prim, SpanningTree,
             MutateResult.Builder builder = new MutateResult.Builder();
 
             if (graph.isEmpty()) {
-                graph.release();
                 return Stream.of(builder.build());
             }
 

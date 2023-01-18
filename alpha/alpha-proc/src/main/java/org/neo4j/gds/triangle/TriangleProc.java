@@ -84,7 +84,6 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
             Graph graph = computationResult.graph();
 
             if (graph.isEmpty()) {
-                graph.release();
                 return Stream.empty();
             }
 

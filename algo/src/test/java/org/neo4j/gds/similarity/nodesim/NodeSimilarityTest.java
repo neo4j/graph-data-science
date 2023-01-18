@@ -549,7 +549,6 @@ final class NodeSimilarityTest {
             resultGraph
         );
         nodeSimilarity.release();
-        resultGraph.release();
     }
 
     @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
@@ -590,7 +589,6 @@ final class NodeSimilarityTest {
         });
 
         nodeSimilarity.release();
-        resultGraph.release();
     }
 
     @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")

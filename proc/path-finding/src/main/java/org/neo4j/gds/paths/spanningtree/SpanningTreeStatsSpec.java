@@ -63,7 +63,6 @@ public class SpanningTreeStatsSpec implements AlgorithmSpec<Prim, SpanningTree, 
             StatsResult.Builder builder = new StatsResult.Builder();
 
             if (graph.isEmpty()) {
-                graph.release();
                 return Stream.of(builder.build());
             }
 

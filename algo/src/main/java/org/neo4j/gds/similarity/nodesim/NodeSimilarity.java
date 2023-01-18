@@ -124,7 +124,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
     @Override
     public void release() {
-        graph.release();
     }
 
     @Override

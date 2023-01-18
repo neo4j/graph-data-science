@@ -691,30 +691,6 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
     }
 
     @AllGraphStoreFactoryTypesTest
-    void graphCanBeReleased(GraphFactoryTestSupport.FactoryType factoryType) {
-        GraphStore graphStore = TestGraphLoaderFactory.graphLoader(db, factoryType)
-            .withRelationshipTypes("REL1", "REL2")
-            .graphStore();
-
-        Graph rel1Graph = graphStore.getGraph(RelationshipType.of("REL1"));
-        Graph unionGraph = graphStore.getUnion();
-
-        rel1Graph.release();
-
-        assertThrows(NullPointerException.class, () -> rel1Graph.forEachNode(n -> {
-            rel1Graph.forEachRelationship(n, (s, t) -> true);
-            return true;
-        }), "Graph should release");
-
-        unionGraph.release();
-
-        assertThrows(NullPointerException.class, () -> unionGraph.forEachNode(n -> {
-            unionGraph.forEachRelationship(n, (s, t) -> true);
-            return true;
-        }), "UnionGraph should release");
-    }
-
-    @AllGraphStoreFactoryTypesTest
     void graphsStoreGivesCorrectElementCounts(GraphFactoryTestSupport.FactoryType factoryType) {
         GraphStore graphStore = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withRelationshipTypes("REL1", "REL2", "REL3")

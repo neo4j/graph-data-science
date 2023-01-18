@@ -243,21 +243,6 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public void release() {
-        graph.release();
-    }
-
-    @Override
-    public void releaseTopology() {
-        graph.releaseTopology();
-    }
-
-    @Override
-    public void releaseProperties() {
-        graph.releaseProperties();
-    }
-
-    @Override
     public boolean isMultiGraph() {
         // by filtering out elements the guarantee could become fulfilled, but we don't know
         // it would never go from fulfilled to not fulfilled however, so this is safe

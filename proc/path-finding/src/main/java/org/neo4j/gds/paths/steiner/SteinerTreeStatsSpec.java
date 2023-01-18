@@ -64,7 +64,6 @@ public class SteinerTreeStatsSpec implements AlgorithmSpec<ShortestPathsSteinerA
             var builder = new StatsResult.Builder();
 
             if (graph.isEmpty()) {
-                graph.release();
                 return Stream.of(builder.build());
             }
 

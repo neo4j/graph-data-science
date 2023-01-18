@@ -45,24 +45,6 @@ public interface Graph extends IdMap, NodePropertyContainer, Degrees, Relationsh
     long relationshipCount();
 
     /**
-     * Release all resources which are not part of the result or IdMap
-     */
-    default void release() {
-        releaseTopology();
-        releaseProperties();
-    }
-
-    /**
-     * Release only the topological data associated with that graph.
-     */
-    default void releaseTopology() { }
-
-    /**
-     * Release only the properties associated with that graph.
-     */
-    default void releaseProperties() { }
-
-    /**
      * Whether the graph is guaranteed to have no parallel relationships.
      * If this returns {@code false} it still may be parallel-free, but we do not know.
      * @return {@code true} iff the graph has maximum one relationship between each pair of nodes.

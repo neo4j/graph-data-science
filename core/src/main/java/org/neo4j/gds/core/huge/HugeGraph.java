@@ -514,49 +514,6 @@ public class HugeGraph implements CSRGraph {
         return inverseProperties.propertyCursor(inversePropertyCursorCache, sourceNodeId, defaultPropertyValue);
     }
 
-    @Override
-    public void releaseTopology() {
-        if (adjacency != null) {
-            adjacency.close();
-            adjacency = null;
-        }
-        if (properties != null) {
-            properties.close();
-            properties = null;
-        }
-        if (inverseAdjacency != null) {
-            inverseAdjacency.close();
-            inverseAdjacency = null;
-        }
-        if (inverseProperties != null) {
-            inverseProperties.close();
-            inverseProperties = null;
-        }
-        if (adjacencyCursorCache != null) {
-            adjacencyCursorCache.close();
-            adjacencyCursorCache = null;
-        }
-        if (propertyCursorCache != null) {
-            propertyCursorCache.close();
-            propertyCursorCache = null;
-        }
-        if (inverseAdjacencyCursorCache != null) {
-            inverseAdjacencyCursorCache.close();
-            inverseAdjacencyCursorCache = null;
-        }
-        if (inversePropertyCursorCache != null) {
-            inversePropertyCursorCache.close();
-            inversePropertyCursorCache = null;
-        }
-    }
-
-    @Override
-    public void releaseProperties() {
-        for (NodePropertyValues idMap : nodeProperties.values()) {
-            idMap.release();
-        }
-    }
-
 
     @Override
     public boolean isMultiGraph() {

@@ -99,7 +99,6 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
     public ComputationResultConsumer<MSBFSASPAlgorithm, Stream<AllShortestPathsStream.Result>, AllShortestPathsConfig, Stream<AllShortestPathsStream.Result>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             if (computationResult.isGraphEmpty()) {
-                computationResult.graph().release();
                 return Stream.empty();
             }
 

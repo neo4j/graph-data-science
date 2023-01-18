@@ -44,7 +44,7 @@ public class SteinerTreeMutateProc extends BaseProc {
         return new ProcedureExecutor<>(
             new SteinerTreeMutateSpec(),
             executionContext()
-        ).compute(graphName, configuration, true, true);
+        ).compute(graphName, configuration, true);
     }
 
 }

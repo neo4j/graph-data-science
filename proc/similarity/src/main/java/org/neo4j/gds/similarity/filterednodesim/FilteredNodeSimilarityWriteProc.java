@@ -54,7 +54,7 @@ public class FilteredNodeSimilarityWriteProc extends BaseProc {
         return new ProcedureExecutor<>(
             new FilteredNodeSimilarityWriteSpec(),
             executionContext()
-        ).compute(graphName, configuration, true, true);
+        ).compute(graphName, configuration, true);
     }
 
     @Procedure(value = "gds.alpha.nodeSimilarity.filtered.write.estimate", mode = READ)

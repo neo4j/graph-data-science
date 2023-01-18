@@ -82,7 +82,6 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
     public ComputationResultConsumer<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineStreamConfig, Stream<Result>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             if (computationResult.isGraphEmpty()) {
-                computationResult.graph().release();
                 return Stream.empty();
             }
 

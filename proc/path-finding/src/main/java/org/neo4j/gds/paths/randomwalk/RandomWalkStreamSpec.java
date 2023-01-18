@@ -63,7 +63,6 @@ public class RandomWalkStreamSpec implements AlgorithmSpec<RandomWalk, Stream<lo
         return (computationResult, executionContext) -> {
             var graph = computationResult.graph();
             if (graph.isEmpty()) {
-                graph.release();
                 return Stream.empty();
             }
 

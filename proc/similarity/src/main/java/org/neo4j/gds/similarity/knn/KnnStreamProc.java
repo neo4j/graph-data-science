@@ -84,7 +84,6 @@ public class KnnStreamProc extends StreamProc<Knn, Knn.Result, SimilarityResult,
             Graph graph = computationResult.graph();
 
             if (computationResult.isGraphEmpty()) {
-                graph.release();
                 return Stream.empty();
             }
 
