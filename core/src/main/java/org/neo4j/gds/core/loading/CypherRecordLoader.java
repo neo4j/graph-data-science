@@ -21,24 +21,27 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.query.QueryExecution;
 import org.neo4j.kernel.impl.query.QueryExecutionEngine;
+import org.neo4j.kernel.impl.query.QueryExecutionKernelException;
 import org.neo4j.kernel.impl.query.QuerySubscriber;
 import org.neo4j.kernel.impl.query.TransactionalContextFactory;
+import org.neo4j.kernel.impl.util.ValueUtils;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class CypherRecordLoader<R> {
@@ -146,4 +149,22 @@ abstract class CypherRecordLoader<R> {
             ));
         }
     }
+
+    private static QueryExecution runQueryWithoutClosingTheResult(
+        InternalTransaction tx,
+        String query,
+        Map<String, Object> params,
+        TransactionalContextFactory contextFactory,
+        QueryExecutionEngine executionEngine,
+        QuerySubscriber subscriber
+    ) {
+        var convertedParams = ValueUtils.asMapValue(params);
+        var context = Neo4jProxy.newQueryContext(contextFactory, tx, query, convertedParams);
+        try {
+            return executionEngine.executeQuery(query, convertedParams, context, false, subscriber);
+        } catch (QueryExecutionKernelException e) {
+            throw e.asUserException();
+        }
+    }
+
 }
