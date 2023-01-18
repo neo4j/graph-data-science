@@ -69,8 +69,8 @@ public final class ArrayIdMapBuilder implements IdMapBuilder {
     ) {
         adders.close();
         long nodeCount = this.size();
-        var graphIds = this.array();
-        return ArrayIdMapBuilderOps.build(graphIds, nodeCount, labelInformationBuilder, highestNodeId, concurrency);
+        HugeLongArray internalToOriginalIds = this.array();
+        return ArrayIdMapBuilderOps.build(internalToOriginalIds, nodeCount, labelInformationBuilder, highestNodeId, concurrency);
     }
 
     public HugeLongArray array() {
