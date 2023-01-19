@@ -58,7 +58,7 @@ public interface GraphProjectConfigSupport {
         return ImmutableGraphProjectFromStoreConfig.of(
             userName,
             graphName,
-            AbstractNodeProjections.create(singletonMap(
+            NodeProjections.create(singletonMap(
                 ALL_NODES,
                 ImmutableNodeProjection.of(PROJECT_ALL, PropertyMappings.of(propertyMappings))
             )),
