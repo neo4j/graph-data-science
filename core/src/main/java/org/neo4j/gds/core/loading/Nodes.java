@@ -71,15 +71,23 @@ public interface Nodes {
             } else {
                 propertyMappings.mappings().forEach(propertyMapping -> {
                     var nodePropertyValues = properties.get(propertyMapping);
+                    // The default value is either overridden by the user
+                    // or inferred from the actual property value.
+                    var defaultValue = propertyMapping.defaultValue().equals(DefaultValue.DEFAULT)
+                        ? DefaultValue.of(nodePropertyValues.valueType())
+                        : propertyMapping.defaultValue();
                     var propertySchema = ImmutablePropertySchema.builder()
                         .key(propertyMapping.propertyKey())
                         .valueType(nodePropertyValues.valueType())
-                        .defaultValue(DefaultValue.of(nodePropertyValues.valueType()))
+                        .defaultValue(defaultValue)
                         .state(propertyState)
                         .build();
 
                     nodeSchema.addProperty(nodeLabel, propertySchema.key(), propertySchema);
-                    nodePropertyStoreBuilder.putProperty(propertySchema.key(), ImmutableNodeProperty.of(nodePropertyValues, propertySchema));
+                    nodePropertyStoreBuilder.putProperty(
+                        propertySchema.key(),
+                        ImmutableNodeProperty.of(nodePropertyValues, propertySchema)
+                    );
                 });
             }
         }));
