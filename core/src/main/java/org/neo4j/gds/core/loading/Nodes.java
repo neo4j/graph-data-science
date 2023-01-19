@@ -24,6 +24,7 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.properties.nodes.ImmutableNodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -52,6 +53,23 @@ public interface Nodes {
 
     static Nodes of(IdMap idmap, NodePropertyStore nodePropertyStore) {
         return ImmutableNodes.of(NodeSchema.empty(), idmap, nodePropertyStore);
+    }
+
+    static Nodes of(IdMap idMap, NodeSchema nodeSchema, Map<String, NodePropertyValues> properties, PropertyState propertyState) {
+        var nodePropertyStoreBuilder = NodePropertyStore.builder();
+
+        nodeSchema.availableLabels().forEach(nodeLabel -> {
+            var propertiesForLabel = nodeSchema.get(nodeLabel).properties();
+            propertiesForLabel.forEach((propertyKey, propertySchema) -> nodePropertyStoreBuilder.putProperty(propertyKey,
+                ImmutableNodeProperty
+                    .builder()
+                    .propertySchema(propertySchema)
+                    .values(properties.get(propertyKey))
+                    .build()
+            ));
+        });
+
+        return ImmutableNodes.of(nodeSchema, idMap, nodePropertyStoreBuilder.build());
     }
 
     static Nodes of(IdMap idMap, Map<PropertyMapping, NodePropertyValues> properties, PropertyState propertyState) {
