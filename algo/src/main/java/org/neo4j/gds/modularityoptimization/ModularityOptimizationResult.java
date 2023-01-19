@@ -32,7 +32,8 @@ public class ModularityOptimizationResult {
     private final long nodeCount;
 
     public ModularityOptimizationResult(
-        LongUnaryOperator communityIdLookup, double modularity,
+        LongUnaryOperator communityIdLookup,
+        double modularity,
         int ranIterations,
         boolean didConverge,
         long nodeCount
