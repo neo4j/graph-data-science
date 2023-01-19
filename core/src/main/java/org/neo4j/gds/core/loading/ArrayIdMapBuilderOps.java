@@ -31,28 +31,28 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 public final class ArrayIdMapBuilderOps {
 
     static ArrayIdMap build(
-        HugeLongArray graphIds,
+        HugeLongArray internalToOriginalIds,
         long nodeCount,
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
         int concurrency
     ) {
         if (highestNodeId == NodesBuilder.UNKNOWN_MAX_ID) {
-            highestNodeId = graphIds.asNodeProperties().getMaxLongPropertyValue().orElse(NodesBuilder.UNKNOWN_MAX_ID);
+            highestNodeId = internalToOriginalIds.asNodeProperties().getMaxLongPropertyValue().orElse(NodesBuilder.UNKNOWN_MAX_ID);
         }
 
-        HugeSparseLongArray nodeToGraphIds = buildSparseIdMap(
+        HugeSparseLongArray originalToInternalIds = buildSparseIdMap(
             nodeCount,
             highestNodeId,
             concurrency,
-            graphIds
+            internalToOriginalIds
         );
 
-        var labelInformation = labelInformationBuilder.build(nodeCount, nodeToGraphIds::get);
+        var labelInformation = labelInformationBuilder.build(nodeCount, originalToInternalIds::get);
 
         return new ArrayIdMap(
-            graphIds,
-            nodeToGraphIds,
+            internalToOriginalIds,
+            originalToInternalIds,
             labelInformation,
             nodeCount,
             highestNodeId

@@ -27,11 +27,17 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.schema.NodeSchema;
 
 import java.util.Map;
 
 @ValueClass
 public interface Nodes {
+
+    @Value.Default
+    default NodeSchema schema() {
+        return NodeSchema.empty();
+    }
 
     IdMap idMap();
 
@@ -41,11 +47,11 @@ public interface Nodes {
     }
 
     static Nodes of(IdMap idmap) {
-        return ImmutableNodes.of(idmap, NodePropertyStore.empty());
+        return ImmutableNodes.of(NodeSchema.empty(), idmap, NodePropertyStore.empty());
     }
 
     static Nodes of(IdMap idmap, NodePropertyStore nodePropertyStore) {
-        return ImmutableNodes.of(idmap, nodePropertyStore);
+        return ImmutableNodes.of(NodeSchema.empty(), idmap, nodePropertyStore);
     }
 
     static Nodes of(IdMap idMap, Map<PropertyMapping, NodePropertyValues> properties, PropertyState propertyState) {
@@ -61,6 +67,6 @@ public interface Nodes {
                     : nodeProperties.valueType().fallbackValue()
             )
         ));
-        return ImmutableNodes.of(idMap, builder.build());
+        return ImmutableNodes.of(NodeSchema.empty(), idMap, builder.build());
     }
 }
