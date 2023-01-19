@@ -100,22 +100,23 @@ abstract class ReroutingAlgorithm implements Rerouter {
         long target,
         long parentTarget
     ) {
-        //we want to check if the edge source->target causes a loop
-        //i.e.,  target is a predecessor of source
-        //just checking if source is connected to target is not valid (this is a spanning tree all are connected)
-        //we use the LinkCutTree and cut the  target's parent. If the two are connected still, we'll have a loop
-        //Example:
-        //    pp->target-> a->b->->source
-        // after cutting pp->target
-        //  pp  target-> a->b->source
-        // We have loop ==> so source->target is not a viable replacement
+         //we want to check if the edge source->target causes a loop
+         //i.e.,  target is a predecessor of source
+         //just checking if source is connected to target is not valid (this is a spanning tree all are connected)
+         //we use the LinkCutTree and cut the  target's parent. If the two are connected still, we'll have a loop
+         //Example:
+         //    pp->target-> a->b->->source
+         // after cutting pp->target
+         //  pp  target-> a->b->source
+         // We have loop ==> so source->target is not a viable replacement
 
-        //Otherwise, assuming no loop,  there is a root-source path not involving target. So by  setting source->target
-        //all terminals with  target as predecessor can still reach be reached by source.
-        tree.delete(parentTarget, target);
-        return !tree.connected(source, target);
-    }
-     void reconnect(
+         //Otherwise, assuming no loop,  there is a root-source path not involving target. So by  setting source->target
+         //all terminals with  target as predecessor can still reach be reached by source.
+         tree.delete(parentTarget, target);
+         return !tree.connected(source, target);
+     }
+
+    void reconnect(
         LinkCutTree tree,
         HugeLongArray parent,
         HugeDoubleArray parentCost,
@@ -129,5 +130,21 @@ abstract class ReroutingAlgorithm implements Rerouter {
         parentCost.set(target, weight);
         totalCost.add(-edgeCostOft + weight); //remove old cost, add new cost due to relinking
         tree.link(source, target); // update tree
+    }
+
+    static ReroutingAlgorithm createRerouter(
+        Graph graph,
+        long sourceId,
+        List<Long> terminals,
+        BitSet isTerminal,
+        int concurrency,
+        ProgressTracker progressTracker
+    ) {
+
+        if (graph.characteristics().isInverseIndexed() && !graph.characteristics().isUndirected()) {
+            return new ExtendedRerouter(graph, sourceId, terminals, isTerminal, concurrency, progressTracker);
+        } else {
+            return new SimpleRerouter(graph, sourceId, terminals, concurrency, progressTracker);
+        }
     }
 }
