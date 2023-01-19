@@ -140,5 +140,25 @@ class NodeLabelTokenToPropertyKeysTest {
             .hasMessageContaining("Incompatible value types between input schema and input data.")
             .hasMessageContaining("['foo']");
     }
+
+    @Test
+    void testDuplicatePropertyKeys() {
+        var mapping = NodeLabelTokenToPropertyKeys.lazy();
+        mapping.add(NodeLabelTokens.ofStrings("A", "B"), List.of("foo", "bar"));
+        mapping.add(NodeLabelTokens.ofStrings("A"), List.of("foo"));
+        mapping.add(NodeLabelTokens.ofStrings("B"), List.of("bar"));
+        var importPropertySchemas = Map.of(
+            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
+        );
+        assertThat(mapping.propertySchemas(NodeLabel.of("A"), importPropertySchemas)).isEqualTo(Map.of(
+            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
+        ));
+        assertThat(mapping.propertySchemas(NodeLabel.of("B"), importPropertySchemas)).isEqualTo(Map.of(
+            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
+        ));
+    }
 }
 
