@@ -86,22 +86,6 @@ public interface Nodes {
         return ImmutableNodes.of(nodeSchema, idMap, nodePropertyStoreBuilder.build());
     }
 
-    static Nodes of(IdMap idMap, Map<PropertyMapping, NodePropertyValues> properties, PropertyState propertyState) {
-        NodePropertyStore.Builder builder = NodePropertyStore.builder();
-        properties.forEach((mapping, nodeProperties) -> builder.putProperty(
-            mapping.propertyKey(),
-            NodeProperty.of(
-                mapping.propertyKey(),
-                propertyState,
-                nodeProperties,
-                mapping.defaultValue().isUserDefined()
-                    ? mapping.defaultValue()
-                    : nodeProperties.valueType().fallbackValue()
-            )
-        ));
-        return ImmutableNodes.of(NodeSchema.empty(), idMap, builder.build());
-    }
-
     static Nodes of(NodeSchema nodeSchema, IdMap idMap, Map<PropertyMapping, NodePropertyValues> properties, PropertyState propertyState) {
         NodePropertyStore.Builder builder = NodePropertyStore.builder();
         properties.forEach((mapping, nodeProperties) -> builder.putProperty(
