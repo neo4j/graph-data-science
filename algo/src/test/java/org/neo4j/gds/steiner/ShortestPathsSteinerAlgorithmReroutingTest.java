@@ -43,51 +43,141 @@ import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 class ShortestPathsSteinerAlgorithmReroutingTest {
+
+    static String getTwoReroutesQuery = "CREATE " +
+                                        "  (a0:Node)," +
+                                        "  (a1:Node)," +
+                                        "  (a2:Node)," +
+                                        "  (a3:Node)," +
+                                        "  (a4:Node)," +
+                                        "  (a5:Node)," +
+                                        "  (a6:Node)," +
+                                        "  (a7:Node)," +
+
+
+                                        "  (a0)-[:R {weight: 1.0}]->(a1)," +
+                                        "  (a0)-[:R {weight: 10.0}]->(a4)," +
+                                        "  (a0)-[:R {weight: 10.0}]->(a7)," +
+
+                                        "  (a1)-[:R {weight: 1.0}]->(a2)," +
+                                        "  (a2)-[:R {weight: 1.0}]->(a3)," +
+
+                                        "  (a4)-[:R {weight: 1.0}]->(a3)," +
+
+                                        "  (a3)-[:R {weight: 1.0}]->(a5)," +
+                                        "  (a5)-[:R {weight: 1.0}]->(a6)," +
+
+                                        "  (a4)-[:R {weight: 1.0}]->(a6) ";
+
+    static String getGraphQuery = "CREATE " +
+                                  "  (a0:Node)," +
+                                  "  (a1:Node)," +
+                                  "  (a2:Node)," +
+                                  "  (a3:Node)," +
+                                  "  (a4:Node)," +
+                                  " (a5:Node)," +
+
+                                  "  (a0)-[:R {weight: 1.0}]->(a1)," +
+                                  "  (a0)-[:R {weight: 4.0}]->(a4)," +
+
+                                  "  (a1)-[:R {weight: 1.0}]->(a2)," +
+                                  "  (a2)-[:R {weight: 1.0}]->(a3)," +
+
+                                  "  (a4)-[:R {weight: 0.0}]->(a3)";
+
+    static String getNoRerouteQuery = "CREATE " +
+                                      "  (a0:Node)," +
+                                      "  (a1:Node)," +
+                                      "  (a2:Node)," +
+                                      "  (a3:Node)," +
+                                      "  (a0)-[:R {weight: 1.0}]->(a1)," +
+                                      "  (a1)-[:R {weight: 1.0}]->(a2)," +
+                                      "  (a2)-[:R {weight: 1.0}]->(a3)," +
+                                      "  (a3)-[:R {weight: 0.5}]->(a1),";
+
+    static String getCrossRoadQuery = "CREATE " +
+                                      "  (a0:Node)," +
+                                      "  (a1:Node)," +
+
+                                      "  (a2:Node)," +
+                                      "  (a3:Node)," +
+
+                                      "  (a4:Node)," +
+                                      "  (a5:Node)," +
+
+                                      "  (a6:Node)," +
+
+                                      "  (a0)-[:R {weight: 10.0}]->(a1)," +
+                                      "  (a0)-[:R {weight: 100.0}]->(a6)," +
+
+                                      "  (a1)-[:R {weight: 10.0}]->(a2)," +
+                                      "  (a1)-[:R {weight: 20.0}]->(a4)," +
+
+                                      "  (a2)-[:R {weight: 10.0}]->(a3)," +
+
+                                      "  (a4)-[:R {weight: 20.0}]->(a5)," +
+
+                                      "  (a6)-[:R {weight: 1.0}]->(a3)";
+
     @GdlGraph(orientation = Orientation.NATURAL)
-    private static final String DB_CYPHER =
-        "CREATE " +
-        "  (a0:Node)," +
-        "  (a1:Node)," +
-        "  (a2:Node)," +
-        "  (a3:Node)," +
-        "  (a4:Node)," +
-        " (a5:Node)," +
-
-        "  (a0)-[:R {weight: 1.0}]->(a1)," +
-        "  (a0)-[:R {weight: 4.0}]->(a4)," +
-
-        "  (a1)-[:R {weight: 1.0}]->(a2)," +
-        "  (a2)-[:R {weight: 1.0}]->(a3)," +
-
-        "  (a4)-[:R {weight: 0.0}]->(a3)";
-    
+    private static final String DB_CYPHER = getGraphQuery;
     @Inject
     private TestGraph graph;
-
     @Inject
     private IdFunction idFunction;
 
+    @GdlGraph(orientation = Orientation.NATURAL, graphNamePrefix = "inv", indexInverse = true)
+    private static final String invDB_CYPHER = getGraphQuery;
+    @Inject
+    private TestGraph invGraph;
+    @Inject
+    private IdFunction invIdFunction;
+    //////////////
     @GdlGraph(graphNamePrefix = "noReroute")
-    private static final String nodeCreateQuery =
-        "CREATE " +
-        "  (a0:Node)," +
-        "  (a1:Node)," +
-        "  (a2:Node)," +
-        "  (a3:Node)," +
-        "  (a0)-[:R {weight: 1.0}]->(a1)," +
-        "  (a1)-[:R {weight: 1.0}]->(a2)," +
-        "  (a2)-[:R {weight: 1.0}]->(a3)," +
-        "  (a3)-[:R {weight: 0.5}]->(a1),";
-
+    private static final String nodeCreateQuery = getNoRerouteQuery;
     @Inject
     private TestGraph noRerouteGraph;
-
     @Inject
     private IdFunction noRerouteIdFunction;
 
+    @GdlGraph(graphNamePrefix = "invnoReroute", indexInverse = true)
+    private static final String invnodeCreateQuery = getNoRerouteQuery;
+    @Inject
+    private TestGraph invnoRerouteGraph;
+    @Inject
+    private IdFunction invnoRerouteIdFunction;
+    ///////////
+    @GdlGraph(graphNamePrefix = "twoReroutes")
+    private static final String twoReroutesQuery = getTwoReroutesQuery;
+    @Inject
+    private TestGraph twoReroutesGraph;
+    @Inject
+    private IdFunction twoReroutesIdFunction;
+
+    @GdlGraph(graphNamePrefix = "invtwoReroutes", indexInverse = true)
+    private static final String invtwoReroutesQuery = getTwoReroutesQuery;
+    @Inject
+    private TestGraph invtwoReroutesGraph;
+    @Inject
+    private IdFunction invtwoReroutesIdFunction;
+    ////////
+
+    @GdlGraph(graphNamePrefix = "crossRoad")
+    private static final String crossRoadQuery = getCrossRoadQuery;
+    @Inject
+    private TestGraph crossRoadGraph;
+    @Inject
+    private IdFunction crossRoadIdFunction;
+    @GdlGraph(graphNamePrefix = "invcrossRoad", indexInverse = true)
+    private static final String invcrossRoadQuery = getCrossRoadQuery;
+    @Inject
+    private TestGraph invcrossRoadGraph;
+    @Inject
+    private IdFunction invcrossRoadIdFunction;
 
     @Test
     void shouldPruneUnusedIfRerouting() {
+
         var steinerResult = new ShortestPathsSteinerAlgorithm(
             graph,
             idFunction.of("a0"),
@@ -118,7 +208,22 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
     }
 
-
+    @Test
+    void shouldPruneUnusedIfReroutingOnInvertedInde() {
+        var steinerResultWithReroute = new ShortestPathsSteinerAlgorithm(
+            invGraph,
+            invIdFunction.of("a0"),
+            List.of(invIdFunction.of("a3"), invIdFunction.of("a4")),
+            2.0,
+            1,
+            true,
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        ).compute();
+        assertThat(steinerResultWithReroute.totalCost()).isEqualTo(4.0);
+        assertThat(steinerResultWithReroute.effectiveNodeCount()).isEqualTo(3);
+        assertThat(steinerResultWithReroute.effectiveTargetNodesCount()).isEqualTo(2);
+    }
 
     @Test
     void rerouteShouldNotCreateLoops() {
@@ -138,6 +243,29 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
         assertThat(parent[(int) idFunction.of("a1")]).isEqualTo(idFunction.of("a0"));
         assertThat(parent[(int) idFunction.of("a2")]).isEqualTo(idFunction.of("a1"));
         assertThat(parent[(int) idFunction.of("a3")]).isEqualTo(idFunction.of("a2"));
+
+        assertThat(steinerResult.totalCost()).isEqualTo(3);
+
+    }
+
+    @Test
+    void rerouteShouldNotCreateLoopsOnInvertedIndex() {
+        var steinerResult = new ShortestPathsSteinerAlgorithm(
+            invnoRerouteGraph,
+            invnoRerouteIdFunction.of("a0"),
+            List.of(invnoRerouteIdFunction.of("a3")),
+            2.0,
+            1,
+            true,
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        ).compute();
+        var parent = steinerResult.parentArray().toArray();
+
+        assertThat(parent[(int) invnoRerouteIdFunction.of("a0")]).isEqualTo(ShortestPathsSteinerAlgorithm.ROOT_NODE);
+        assertThat(parent[(int) invnoRerouteIdFunction.of("a1")]).isEqualTo(invnoRerouteIdFunction.of("a0"));
+        assertThat(parent[(int) invnoRerouteIdFunction.of("a2")]).isEqualTo(invnoRerouteIdFunction.of("a1"));
+        assertThat(parent[(int) invnoRerouteIdFunction.of("a3")]).isEqualTo(invnoRerouteIdFunction.of("a2"));
 
         assertThat(steinerResult.totalCost()).isEqualTo(3);
 
@@ -270,4 +398,77 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             );
     }
 
+    @Test
+    void shouldNotGetOptimalWithoutBetterRerouting() {
+
+        var steinerResultWithReroute = new ShortestPathsSteinerAlgorithm(
+            twoReroutesGraph,
+            twoReroutesIdFunction.of("a0"),
+            List.of(
+                twoReroutesIdFunction.of("a3"),
+                twoReroutesIdFunction.of("a4"),
+                twoReroutesIdFunction.of("a6"),
+                twoReroutesIdFunction.of("a7")
+            ),
+            2.0,
+            1,
+            true,
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        ).compute();
+        assertThat(steinerResultWithReroute.totalCost()).isEqualTo(25.0);
+        assertThat(steinerResultWithReroute.effectiveNodeCount()).isEqualTo(8);
+        assertThat(steinerResultWithReroute.effectiveTargetNodesCount()).isEqualTo(4);
+
+    }
+
+    @Test
+    void shouldHandleMultiplePruningsOnSameTreeAndGetBetter() {
+
+        var steinerResultWithReroute = new ShortestPathsSteinerAlgorithm(
+            invtwoReroutesGraph,
+            invtwoReroutesIdFunction.of("a0"),
+            List.of(
+                invtwoReroutesIdFunction.of("a3"),
+                invtwoReroutesIdFunction.of("a4"),
+                invtwoReroutesIdFunction.of("a6"),
+                invtwoReroutesIdFunction.of("a7")
+            ),
+            2.0,
+            1,
+            true,
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        ).compute();
+        assertThat(steinerResultWithReroute.totalCost()).isEqualTo(22.0);
+        assertThat(steinerResultWithReroute.effectiveNodeCount()).isEqualTo(5);
+        assertThat(steinerResultWithReroute.effectiveTargetNodesCount()).isEqualTo(4);
+
+    }
+
+    @Test
+    void shouldNotPruneUnprunableNodes() {
+
+        var steinerResultWithReroute = new ShortestPathsSteinerAlgorithm(
+            invcrossRoadGraph,
+            invcrossRoadIdFunction.of("a0"),
+            List.of(
+                invcrossRoadIdFunction.of("a3"),
+                invcrossRoadIdFunction.of("a5"),
+                invcrossRoadIdFunction.of("a6")
+            ),
+            2.0,
+            1,
+            true,
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        ).compute();
+        assertThat(steinerResultWithReroute.totalCost()).isEqualTo(170.0 - 19);
+        assertThat(steinerResultWithReroute.effectiveNodeCount()).isEqualTo(6);
+        assertThat(steinerResultWithReroute.effectiveTargetNodesCount()).isEqualTo(3);
+
+    }
+
 }
+
+
