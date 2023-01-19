@@ -119,6 +119,20 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
                                       "  (a6)-[:R {weight: 1.0}]->(a3)";
 
+    static String getDocsExampleQuery = "CREATE (a0:Node)," +
+                                        "(a1: Node)" +
+                                        "(a2: Node)" +
+                                        "(a3: Node)" +
+                                        "(a4: Node)" +
+                                        "(a5: Node)" +
+                                        "(a0)-[:R {weight:10}]->(a5)," +
+                                        "(a0)-[:R {weight:1}]->(a1)," +
+                                        "(a0)-[:R {weight:7}]->(a4)," +
+                                        "(a1)-[:R {weight:1}]->(a2)," +
+                                        "(a2)-[:R {weight:4}]->(a3)," +
+                                        "(a2)-[:R {weight:6}]->(a4)," +
+                                        "(a5)-[:R {weight:3}]->(a3)";
+
     @GdlGraph(orientation = Orientation.NATURAL)
     private static final String DB_CYPHER = getGraphQuery;
     @Inject
@@ -174,6 +188,13 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
     private TestGraph invcrossRoadGraph;
     @Inject
     private IdFunction invcrossRoadIdFunction;
+
+    @GdlGraph(graphNamePrefix = "docs", indexInverse = true)
+    private static final String docs = getDocsExampleQuery;
+    @Inject
+    private TestGraph docsGraph;
+    @Inject
+    private IdFunction docsIdFunction;
 
     @Test
     void shouldPruneUnusedIfRerouting() {
@@ -466,6 +487,26 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
         assertThat(steinerResultWithReroute.totalCost()).isEqualTo(170.0 - 19);
         assertThat(steinerResultWithReroute.effectiveNodeCount()).isEqualTo(6);
         assertThat(steinerResultWithReroute.effectiveTargetNodesCount()).isEqualTo(3);
+
+    }
+
+    @Test
+    void shouldTakeAdvantageOfNewSingleParents() {
+        var steinerResultWithReroute = new ShortestPathsSteinerAlgorithm(
+            docsGraph,
+            docsIdFunction.of("a0"),
+            List.of(
+                docsIdFunction.of("a3"),
+                docsIdFunction.of("a4"),
+                docsIdFunction.of("a5")
+            ),
+            2.0,
+            1,
+            true,
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        ).compute();
+        assertThat(steinerResultWithReroute.totalCost()).isEqualTo(20);
 
     }
 

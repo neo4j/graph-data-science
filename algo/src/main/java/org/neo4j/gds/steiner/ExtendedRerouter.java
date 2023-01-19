@@ -65,7 +65,11 @@ public class ExtendedRerouter extends ReroutingAlgorithm {
         LongAdder effectiveNodeCount
     ) {
         LinkCutTree linkCutTree = createLinkCutTree(parent);
-        ReroutingChildrenManager childrenManager = new ReroutingChildrenManager(graph.nodeCount(), isTerminal);
+        ReroutingChildrenManager childrenManager = new ReroutingChildrenManager(
+            graph.nodeCount(),
+            isTerminal,
+            sourceId
+        );
         initializeChildrenManager(childrenManager, parent);
         HugeLongPriorityQueue priorityQueue = HugeLongPriorityQueue.max(graph.nodeCount());
         HugeLongArray wipArray = HugeLongArray.newArray(graph.nodeCount());
@@ -135,13 +139,28 @@ public class ExtendedRerouter extends ReroutingAlgorithm {
         long stopPruningNode = -1;
         double pruningGain = 0;
         System.out.println("segment: ");
+
+        long curr = examinationQueue.peek();
+        while (childrenManager.prunable(parent.get(curr))) {
+            var nextCurr = parent.get(curr);
+            var nextCost = parentCost.get(nextCurr);
+            System.out.println(curr + "'s parent " + nextCurr + " is  prunable: " + childrenManager.prunable(nextCurr));
+            pruningGain += nextCost;
+            System.out.println("increase with: " + nextCost);
+            curr = nextCurr;
+        }
+        if (curr == 4) {
+            int y = 3;
+        }
+        System.out.println("wip prune cost: " + pruningGain);
         while (!examinationQueue.isEmpty()) {
             long nodeId = examinationQueue.remove();
+
             System.out.print(nodeId + " ");
             var parentId = parent.get(nodeId);
 
             if (stopPruningNode == -1) {
-                stopPruningNode = parentId;
+                stopPruningNode = parent.get(curr);
             }
             pruningGain += parentCost.get(nodeId);
             pruningArray.set(nodeId, 0);
@@ -214,7 +233,9 @@ public class ExtendedRerouter extends ReroutingAlgorithm {
                 return true;
             }
             System.out.println("    looking at : " + nodeId + " -->" + t + "[" + finalPruningGain + "]" + " " + w);
-
+            if (nodeId == 4) {
+                int x = 3;
+            }
             //  t must still be alive, in addition if we prune, we should be able to get a benefit from it
             if (t != PRUNED && (finalPruningGain - w) > bestGain.doubleValue()) {
                 //now we must check that t is not a descendant of s.
@@ -249,6 +270,7 @@ public class ExtendedRerouter extends ReroutingAlgorithm {
     ) {
         double pruned = 0;
         long current = node;
+        System.out.println(stopPruningNode + " is  reached");
         while (stopPruningNode != current) {
             long nextCurrent = parent.get(current);
             childrenManager.cut(current);

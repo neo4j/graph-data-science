@@ -22,18 +22,20 @@ package org.neo4j.gds.steiner;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
-public class ReroutingChildrenManager {
+ class ReroutingChildrenManager {
 
-    private HugeObjectArray<LinkedNode> nodes;
-    private BitSet isTerminal;
+     private HugeObjectArray<LinkedNode> nodes;
+     private BitSet isTerminal;
+     private long sourceId;
 
-    ReroutingChildrenManager(long nodeCount, BitSet isTerminal) {
-        nodes = HugeObjectArray.newArray(LinkedNode.class, nodeCount);
-        for (long nodeId = 0; nodeId < nodeCount; ++nodeId) {
-            nodes.set(nodeId, LinkedNode.createChild(nodeId));
-        }
-        this.isTerminal = isTerminal;
-    }
+     ReroutingChildrenManager(long nodeCount, BitSet isTerminal, long sourceId) {
+         nodes = HugeObjectArray.newArray(LinkedNode.class, nodeCount);
+         for (long nodeId = 0; nodeId < nodeCount; ++nodeId) {
+             nodes.set(nodeId, LinkedNode.createChild(nodeId));
+         }
+         this.sourceId = sourceId;
+         this.isTerminal = isTerminal;
+     }
 
     void cut(long index) {
         LinkedNode node = nodes.get(index);
@@ -73,7 +75,9 @@ public class ReroutingChildrenManager {
     }
 
     boolean prunable(long index) {
-        return !isTerminal.get(index) && !hasAtLeastTwoChildren(index);
+        return sourceId != index &&
+               !isTerminal.get(index) &&
+               !hasAtLeastTwoChildren(index);
     }
 
 }
