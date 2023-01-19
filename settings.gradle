@@ -197,19 +197,19 @@ include('proc-pipeline-catalog')
 project(':proc-pipeline-catalog').projectDir = file('proc/pipeline-catalog')
 
 include('storage-engine-adapter')
-project(':storage-engine-adapter').projectDir = file('cypher/common/storage-engine-adapter')
+project(':storage-engine-adapter').projectDir = file('compatibility/common/storage-engine-adapter')
 
 include('storage-engine-adapter-4.4')
-project(':storage-engine-adapter-4.4').projectDir = file('cypher/4.4/storage-engine-adapter')
+project(':storage-engine-adapter-4.4').projectDir = file('compatibility/4.4/storage-engine-adapter')
 
 include('storage-engine-adapter-5.1')
-project(':storage-engine-adapter-5.1').projectDir = file('cypher/5.1/storage-engine-adapter')
+project(':storage-engine-adapter-5.1').projectDir = file('compatibility/5.1/storage-engine-adapter')
 
 include('storage-engine-adapter-5.2')
-project(':storage-engine-adapter-5.2').projectDir = file('cypher/5.2/storage-engine-adapter')
+project(':storage-engine-adapter-5.2').projectDir = file('compatibility/5.2/storage-engine-adapter')
 
 include('storage-engine-adapter-api')
-project(':storage-engine-adapter-api').projectDir = file('cypher/api/storage-engine-adapter')
+project(':storage-engine-adapter-api').projectDir = file('compatibility/api/storage-engine-adapter')
 
 include('string-formatting')
 project(':string-formatting').projectDir = file('string-formatting')
