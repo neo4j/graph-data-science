@@ -49,9 +49,4 @@ public final class BidirectionalComputationAlgorithm extends Algorithm<PregelRes
     public PregelResult compute() {
         return pregelJob.run();
     }
-
-    @Override
-    public void release() {
-        pregelJob.release();
-    }
 }

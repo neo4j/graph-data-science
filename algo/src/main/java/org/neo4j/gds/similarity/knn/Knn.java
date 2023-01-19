@@ -203,10 +203,6 @@ public class Knn extends Algorithm<Knn.Result> {
         }
     }
 
-    @Override
-    public void release() {
-
-    }
     private @Nullable HugeObjectArray<NeighborList> initializeRandomNeighbors() {
         var k = this.config.topK();
         // (int) is safe since it is at most k, which is an int

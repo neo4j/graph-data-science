@@ -44,7 +44,7 @@ public class CELFStatsProc extends BaseProc {
         return new ProcedureExecutor<>(
             new CELFStatsSpec(),
             executionContext()
-        ).compute(graphName, configuration, true);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.beta.influenceMaximization.celf.stats.estimate", mode = READ)

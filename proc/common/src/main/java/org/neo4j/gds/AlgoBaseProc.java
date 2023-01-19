@@ -71,16 +71,7 @@ public abstract class AlgoBaseProc<
         String graphName,
         Map<String, Object> configuration
     ) {
-        ProcPreconditions.check();
-        return compute(graphName, configuration, true);
-    }
-
-    protected ComputationResult<ALGO, ALGO_RESULT, CONFIG> compute(
-        String graphName,
-        Map<String, Object> configuration,
-        boolean releaseAlgorithm
-    ) {
-        return procedureExecutor().compute(graphName, configuration, releaseAlgorithm);
+        return procedureExecutor().compute(graphName, configuration);
     }
 
     /**

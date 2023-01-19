@@ -114,11 +114,6 @@ public abstract class PipelineExecutor<
 
     protected abstract Set<RelationshipType> getAvailableRelTypesForNodePropertySteps();
 
-    @Override
-    public void release() {
-
-    }
-
     protected void additionalGraphStoreCleanup(Map<DatasetSplits, PipelineGraphFilter> datasets) {
     }
 

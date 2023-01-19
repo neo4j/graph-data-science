@@ -69,9 +69,4 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
             trainResult.metrics()
         );
     }
-
-    @Override
-    public void release() {
-
-    }
 }

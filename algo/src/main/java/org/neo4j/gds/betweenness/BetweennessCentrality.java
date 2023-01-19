@@ -78,12 +78,6 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
         return centrality;
     }
 
-    @Override
-    public void release() {
-        centrality = null;
-        selectionStrategy = null;
-    }
-
     final class BCTask implements Runnable {
         private final HugeObjectArray<LongArrayList> predecessors;
         private final HugeCursor<LongArrayList[]> predecessorsCursor;

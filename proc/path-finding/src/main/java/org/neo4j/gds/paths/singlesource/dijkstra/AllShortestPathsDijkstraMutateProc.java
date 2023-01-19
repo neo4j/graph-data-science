@@ -52,7 +52,7 @@ public class AllShortestPathsDijkstraMutateProc extends BaseProc {
             mutateSpec,
             pipelineSpec,
             executionContext()
-        ).compute(graphName, configuration, false);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.mutate.estimate", mode = READ)

@@ -185,10 +185,6 @@ public class CELF extends Algorithm<LongDoubleScatterMap> {
         progressTracker.endSubTask();
     }
 
-    @Override
-    public void release() {
-    }
-
     public Stream<InfluenceMaximizationResult> resultStream() {
         return LongStream.of(seedSetNodes.keys().toArray())
             .mapToObj(node -> new InfluenceMaximizationResult(

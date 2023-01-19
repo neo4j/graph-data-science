@@ -52,7 +52,7 @@ public class KSpanningWriteTreeProc extends BaseProc {
         return new ProcedureExecutor<>(
             new KSpanningTreeWriteSpec(),
             executionContext()
-        ).compute(graphName, configuration, true);
+        ).compute(graphName, configuration);
     }
 
     @Override

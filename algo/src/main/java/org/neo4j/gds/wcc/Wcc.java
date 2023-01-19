@@ -139,11 +139,6 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
         return disjointSetStruct;
     }
 
-    @Override
-    public void release() {
-        graph = null;
-    }
-
     static double defaultWeight(double threshold) {
         return threshold + 1;
     }

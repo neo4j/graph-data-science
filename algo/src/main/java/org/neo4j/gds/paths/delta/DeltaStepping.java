@@ -204,11 +204,6 @@ public final class DeltaStepping extends Algorithm<DijkstraResult> {
         return new DijkstraResult(pathResults(distances, startNode, concurrency), progressTracker::endSubTask);
     }
 
-    @Override
-    public void release() {
-
-    }
-
     enum Phase {
         RELAX,
         SYNC

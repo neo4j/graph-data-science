@@ -53,7 +53,7 @@ public class CELFWriteProc extends BaseProc {
         return new ProcedureExecutor<>(
             new CELFWriteSpec(),
             executionContext()
-        ).compute(graphName, configuration, true);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.beta.influenceMaximization.celf.write.estimate", mode = READ)

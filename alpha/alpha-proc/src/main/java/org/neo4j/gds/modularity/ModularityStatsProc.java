@@ -42,7 +42,7 @@ public class ModularityStatsProc extends BaseProc {
         return new ProcedureExecutor<>(
             new ModularityStatsSpec(),
             executionContext()
-        ).compute(graphName, configuration, true);
+        ).compute(graphName, configuration);
     }
 
 }

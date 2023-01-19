@@ -315,14 +315,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         }
     }
 
-    @Override
-    public void release() {
-        this.nextCommunities.release();
-        this.communityWeightUpdates.release();
-        this.cumulativeNodeWeights.release();
-        modularityColorArray.release();
-    }
-
     private long optimizeColor(long currentStandingPosition) {
         // run optimization tasks for every node
 

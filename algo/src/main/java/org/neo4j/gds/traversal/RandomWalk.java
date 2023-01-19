@@ -120,9 +120,6 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         ).compute();
     }
 
-    @Override
-    public void release() {}
-
     private void startWalkers(
         TerminationFlag terminationFlag,
         RandomWalkSampler.CumulativeWeightSupplier cumulativeWeightSupplier,
@@ -155,7 +152,6 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
             Pools.DEFAULT_SINGLE_THREAD_POOL
         ).whenComplete((__, ___) -> {
             progressTracker.endSubTask("RandomWalk");
-            release();
         });
     }
 

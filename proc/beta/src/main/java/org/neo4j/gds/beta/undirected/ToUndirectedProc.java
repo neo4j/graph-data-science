@@ -49,7 +49,7 @@ public class ToUndirectedProc extends BaseProc {
             mutateSpec,
             pipelineSpec,
             executionContext()
-        ).compute(graphName, configuration, true);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.graph.relationships.toUndirected.estimate", mode = READ)

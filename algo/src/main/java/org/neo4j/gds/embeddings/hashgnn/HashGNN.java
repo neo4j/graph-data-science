@@ -194,11 +194,6 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
         }
     }
 
-    @Override
-    public void release() {
-
-    }
-
     public static class HashGNNResult {
         private final HugeObjectArray<double[]> embeddings;
 

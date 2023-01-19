@@ -49,9 +49,4 @@ public final class ComputationAlgorithm extends Algorithm<PregelResult> {
     public PregelResult compute() {
         return pregelJob.run();
     }
-
-    @Override
-    public void release() {
-        pregelJob.release();
-    }
 }

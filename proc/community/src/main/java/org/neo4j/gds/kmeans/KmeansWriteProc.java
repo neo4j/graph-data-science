@@ -55,7 +55,7 @@ public class KmeansWriteProc extends BaseProc {
         return new ProcedureExecutor<>(
             writeSpec,
             executionContext()
-        ).compute(graphName, configuration, true);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.kmeans.write.estimate", mode = READ)

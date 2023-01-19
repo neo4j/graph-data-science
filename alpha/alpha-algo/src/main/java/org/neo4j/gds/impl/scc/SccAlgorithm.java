@@ -94,20 +94,6 @@ public class SccAlgorithm extends Algorithm<HugeLongArray> {
     }
 
     /**
-     * release inner data structures
-     */
-    @Override
-    public void release() {
-        graph = null;
-        index = null;
-        visited = null;
-        connectedComponents = null;
-        stack = null;
-        boundaries = null;
-        todo = null;
-    }
-
-    /**
      * number of connected components in the graph
      */
     public long getSetCount() {

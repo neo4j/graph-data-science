@@ -189,8 +189,4 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut.CutResult> {
         return CutResult.of(candidateSolutions[bestIdx], costs[bestIdx].get());
     }
 
-    @Override
-    public void release() {
-        graph = null;
-    }
 }

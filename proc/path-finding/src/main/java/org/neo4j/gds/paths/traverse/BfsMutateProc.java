@@ -46,7 +46,7 @@ public class BfsMutateProc extends BaseProc {
         return new ProcedureExecutor<>(
             mutateSpec,
             executionContext()
-        ).compute(graphName, configuration, false);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.bfs.mutate.estimate", mode = READ)

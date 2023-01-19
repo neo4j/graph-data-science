@@ -99,6 +99,4 @@ public class ModularityCalculator extends Algorithm<ModularityResult> {
         return ModularityResult.of(totalModularity.doubleValue(), communityCount, communityModularities);
     }
 
-    @Override
-    public void release() {}
 }

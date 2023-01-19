@@ -286,13 +286,6 @@ public final class Dijkstra extends Algorithm<DijkstraResult> {
             .build();
     }
 
-    @Override
-    public void release() {
-        // We do not release, since the result
-        // is lazily computed when the consumer
-        // iterates over the stream.
-    }
-
     enum TraversalState {
         EMIT_AND_STOP,
         EMIT_AND_CONTINUE,

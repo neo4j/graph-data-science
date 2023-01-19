@@ -33,12 +33,6 @@ public abstract class Algorithm<RESULT> {
 
     public abstract RESULT compute();
 
-    /**
-     * Release internal data structures used by the algorithm.
-     *
-     */
-    public abstract void release();
-
     public void setTerminationFlag(TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
     }

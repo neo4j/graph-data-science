@@ -105,13 +105,6 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
             .filter(result -> result.distance != Double.POSITIVE_INFINITY);
     }
 
-    @Override
-    public void release() {
-        graph = null;
-        counter = null;
-        resultQueue = null;
-    }
-
     /**
      * Dijkstra Task. Takes one element of the counter at a time
      * and starts dijkstra on it. It starts emitting results to the

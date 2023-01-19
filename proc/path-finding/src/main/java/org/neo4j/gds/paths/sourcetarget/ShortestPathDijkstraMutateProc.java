@@ -48,7 +48,7 @@ public class ShortestPathDijkstraMutateProc extends ShortestPathMutateProc<Dijks
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(compute(graphName, configuration, false));
+        return mutate(compute(graphName, configuration));
     }
 
     @Procedure(name = "gds.shortestPath.dijkstra.mutate.estimate", mode = READ)

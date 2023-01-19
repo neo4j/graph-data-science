@@ -150,7 +150,7 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
             algorithmSpec,
             new ProcedureExecutorSpec<>(),
             executionContext
-        ).compute(graphName, configCopy, false);
+        ).compute(graphName, configCopy);
     }
 
     private AlgorithmSpec<Algorithm<Object>, Object, AlgoBaseConfig, Object, AlgorithmFactory<?, Algorithm<Object>, AlgoBaseConfig>> getAlgorithmSpec(ModelCatalog modelCatalog) {

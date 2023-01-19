@@ -49,7 +49,7 @@ public class ShortestPathYensWriteProc extends ShortestPathWriteProc<Yens, Short
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphName, configuration, false));
+        return write(compute(graphName, configuration));
     }
 
     @Procedure(name = "gds.shortestPath.yens.write.estimate", mode = READ)

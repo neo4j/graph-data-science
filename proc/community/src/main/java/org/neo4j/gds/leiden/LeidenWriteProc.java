@@ -52,7 +52,7 @@ public class LeidenWriteProc extends BaseProc {
         return new ProcedureExecutor<>(
             new LeidenWriteSpec(),
             executionContext()
-        ).compute(graphName, configuration, true);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.leiden.write.estimate", mode = READ)

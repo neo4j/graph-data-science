@@ -72,8 +72,4 @@ public abstract class PipelineTrainAlgorithm<
         return toCatalogModelConverter.toModel(pipelineTrainResult, originalSchema);
     }
 
-    @Override
-    public void release() {
-
-    }
 }

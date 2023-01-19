@@ -212,7 +212,6 @@ public final class Louvain extends Algorithm<LouvainResult> {
         modularityOptimization.setTerminationFlag(terminationFlag);
 
         var modularityOptimizationResult = modularityOptimization.compute();
-        modularityOptimization.release();
         return modularityOptimizationResult;
     }
 
@@ -281,10 +280,6 @@ public final class Louvain extends Algorithm<LouvainResult> {
 
     private int levels() {
         return this.ranLevels == 0 ? 1 : this.ranLevels;
-    }
-
-    @Override
-    public void release() {
     }
 
     static final class RelationshipCreator implements Runnable {

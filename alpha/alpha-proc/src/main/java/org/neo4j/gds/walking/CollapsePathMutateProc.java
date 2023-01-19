@@ -54,7 +54,7 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, SingleTypeR
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(graphName, configuration, true);
+        var computationResult = compute(graphName, configuration);
         return computationResultConsumer().consume(computationResult, executionContext());
     }
 

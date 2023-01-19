@@ -49,7 +49,7 @@ public class SteinerTreeWriteProc extends BaseProc {
         return new ProcedureExecutor<>(
             new SteinerTreeWriteSpec(),
             executionContext()
-        ).compute(graphName, configuration, true);
+        ).compute(graphName, configuration);
     }
 
     @Override

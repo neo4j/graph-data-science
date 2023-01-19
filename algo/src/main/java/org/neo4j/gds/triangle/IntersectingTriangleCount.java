@@ -111,13 +111,6 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
     }
 
     @Override
-    public void release() {
-        executorService = null;
-        graph = null;
-        globalTriangleCounter = null;
-    }
-
-    @Override
     public TriangleCountResult compute() {
         progressTracker.beginSubTask();
         queue.set(0);

@@ -160,11 +160,6 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
         );
     }
 
-    @Override
-    public void release() {
-
-    }
-
     private static final class ToUndirectedTaskWithSingleProperty implements Runnable {
 
         private final RelationshipsBuilder relationshipsBuilder;

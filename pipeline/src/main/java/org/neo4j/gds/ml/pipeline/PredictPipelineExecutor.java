@@ -87,8 +87,4 @@ public abstract class PredictPipelineExecutor<
         }
     }
 
-    @Override
-    public void release() {
-
-    }
 }

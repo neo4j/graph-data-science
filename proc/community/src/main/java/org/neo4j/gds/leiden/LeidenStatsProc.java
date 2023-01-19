@@ -44,7 +44,7 @@ public class LeidenStatsProc extends BaseProc {
         return new ProcedureExecutor<>(
             new LeidenStatsSpec(),
             executionContext()
-        ).compute(graphName, configuration, true);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.leiden.stats.estimate", mode = READ)

@@ -85,8 +85,6 @@ class FilteredNodeSimilarityTest {
             .filter(res -> !sourceNodeFilter.contains(res.node2))
             .count();
         assertThat(noOfResultsWithTargetNodeOutSideOfFilter).isGreaterThan(0);
-
-        nodeSimilarity.release();
     }
 
     @Test
@@ -117,8 +115,6 @@ class FilteredNodeSimilarityTest {
             .filter(res -> !sourceNodeFilter.contains(res.node2))
             .count();
         assertThat(noOfResultsWithTargetNodeOutSideOfFilter).isGreaterThan(0);
-
-        nodeSimilarity.release();
     }
 
     @Test
@@ -151,7 +147,5 @@ class FilteredNodeSimilarityTest {
             .filter(res -> !sourceNodeFilter.contains(res.node2))
             .count();
         assertThat(noOfResultsWithTargetNodeOutSideOfFilter).isGreaterThan(0);
-
-        nodeSimilarity.release();
     }
 }

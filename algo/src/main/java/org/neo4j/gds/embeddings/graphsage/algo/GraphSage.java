@@ -89,11 +89,6 @@ public class GraphSage extends Algorithm<GraphSage.GraphSageResult> {
         return GraphSageResult.of(embeddings);
     }
 
-    @Override
-    public void release() {
-
-    }
-
     @ValueClass
     public
     interface GraphSageResult {
