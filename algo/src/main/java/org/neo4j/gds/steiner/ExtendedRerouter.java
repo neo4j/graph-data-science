@@ -46,13 +46,15 @@ public class ExtendedRerouter extends ReroutingAlgorithm {
         long sourceId,
         List<Long> terminals,
         BitSet isTerminal,
+        HugeLongArray examinationQueue,
+        LongAdder indexQueue,
         int concurrency,
         ProgressTracker progressTracker
     ) {
         super(graph, sourceId, terminals, concurrency, progressTracker);
         this.isTerminal = isTerminal;
-        this.examinationQueue = HugeLongArray.newArray(graph.nodeCount() + terminals.size());
-        this.indexQueue = new LongAdder();
+        this.examinationQueue = examinationQueue;
+        this.indexQueue = indexQueue;
     }
 
     @Override
@@ -116,7 +118,7 @@ public class ExtendedRerouter extends ReroutingAlgorithm {
         });
     }
 
-    void optimizeSegment(
+    private void optimizeSegment(
         ReroutingChildrenManager childrenManager,
         HugeLongArrayQueue examinationQueue,
         HugeLongPriorityQueue priorityQueue,

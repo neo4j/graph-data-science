@@ -48,6 +48,8 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
     private final double delta;
     private final ExecutorService executorService;
     private final int binSizeThreshold;
+    private final HugeLongArray examinationQueue;
+    private final LongAdder indexQueue;
 
     public ShortestPathsSteinerAlgorithm(
         Graph graph,
@@ -69,6 +71,8 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         this.applyRerouting = applyRerouting;
         this.executorService = executorService;
         this.binSizeThreshold = SteinerBasedDeltaStepping.BIN_SIZE_THRESHOLD;
+        this.examinationQueue = createExaminationQueue(graph, applyRerouting, terminals.size());
+        this.indexQueue = new LongAdder();
     }
 
     @TestOnly
@@ -93,6 +97,10 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         this.applyRerouting = applyRerouting;
         this.executorService = executorService;
         this.binSizeThreshold = binSizeThreshold;
+        this.examinationQueue = createExaminationQueue(graph, applyRerouting, terminals.size());
+        this.indexQueue = new LongAdder();
+
+
     }
 
     private BitSet createTerminals() {
@@ -140,6 +148,8 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
                 sourceId,
                 terminals,
                 isTerminal,
+                examinationQueue,
+                indexQueue,
                 concurrency,
                 progressTracker
             );
@@ -184,9 +194,12 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
                     cost -= costs[j - 1];
                 }
                 parent.set(nodeId, parentId);
+                handleNextNode(nodeId);
                 parentCost.set(nodeId, cost);
                 effectiveNodeCount.increment();
             }
+            handleNextNode(PRUNED);
+
         }
     }
 
@@ -205,6 +218,25 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         return steinerBasedDelta.compute();
     }
 
+    private HugeLongArray createExaminationQueue(Graph graph, boolean applyRerouting, long numberOfTerminals) {
+        if (!applyRerouting || graph.characteristics().isUndirected() || !graph.characteristics().isInverseIndexed()) {
+            return null;
+        }
+        return HugeLongArray.newArray(graph.nodeCount() + numberOfTerminals);
+
+    }
+
+    private long nextQueuePosition() {
+        var toReturn = indexQueue.longValue();
+        indexQueue.increment();
+        return toReturn;
+    }
+
+    private void handleNextNode(long value) {
+        if (examinationQueue != null) {
+            examinationQueue.set(nextQueuePosition(), value);
+        }
+    }
 
 
 }

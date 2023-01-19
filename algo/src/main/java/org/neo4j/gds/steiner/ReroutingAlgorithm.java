@@ -137,12 +137,23 @@ abstract class ReroutingAlgorithm implements Rerouter {
         long sourceId,
         List<Long> terminals,
         BitSet isTerminal,
+        HugeLongArray examinationQueue,
+        LongAdder indexQueue,
         int concurrency,
         ProgressTracker progressTracker
     ) {
 
         if (graph.characteristics().isInverseIndexed() && !graph.characteristics().isUndirected()) {
-            return new ExtendedRerouter(graph, sourceId, terminals, isTerminal, concurrency, progressTracker);
+            return new ExtendedRerouter(
+                graph,
+                sourceId,
+                terminals,
+                isTerminal,
+                examinationQueue,
+                indexQueue,
+                concurrency,
+                progressTracker
+            );
         } else {
             return new SimpleRerouter(graph, sourceId, terminals, concurrency, progressTracker);
         }
