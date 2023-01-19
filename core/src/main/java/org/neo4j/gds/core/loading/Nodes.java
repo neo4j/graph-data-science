@@ -34,7 +34,10 @@ import java.util.Map;
 @ValueClass
 public interface Nodes {
 
-    NodeSchema schema();
+    @Value.Default
+    default NodeSchema schema() {
+        return NodeSchema.empty();
+    }
 
     IdMap idMap();
 
