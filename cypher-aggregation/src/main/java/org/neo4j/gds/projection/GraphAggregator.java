@@ -21,24 +21,18 @@ package org.neo4j.gds.projection;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.CustomProcedure;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.ImmutableGraphSchema;
-import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.compat.CompatUserAggregator;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.ConfigKeyValidation;
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
-import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.ImmutableNodes;
@@ -188,8 +182,7 @@ public class GraphAggregator implements CompatUserAggregator {
             targetNodePropertyValues,
             sourceNodeLabels,
             targetNodeLabels,
-            relationshipConfig,
-            this.configValidator
+            relationshipConfig
         );
     }
 
@@ -334,7 +327,6 @@ public class GraphAggregator implements CompatUserAggregator {
     }
 
     // Does the actual importing work once we can initialize it with the first row
-    @SuppressWarnings("CodeBlock2Expr")
     private static final class GraphImporter {
         private final String graphName;
         private final GraphProjectFromCypherAggregationConfig config;
@@ -464,8 +456,7 @@ public class GraphAggregator implements CompatUserAggregator {
             @Nullable MapValue targetNodePropertyValues,
             NodeLabelToken sourceNodeLabels,
             NodeLabelToken targetNodeLabels,
-            AnyValue relationshipConfig,
-            ConfigValidator configValidator
+            AnyValue relationshipConfig
         ) {
             MapValue relationshipProperties = null;
             RelationshipType relationshipType = RelationshipType.ALL_RELATIONSHIPS;
@@ -624,75 +615,27 @@ public class GraphAggregator implements CompatUserAggregator {
         }
 
         private AdjacencyCompressor.ValueMapper buildNodesWithProperties(GraphStoreBuilder graphStoreBuilder) {
-
             var idMapAndProperties = this.idMapBuilder.build();
-            var nodes = idMapAndProperties.idMap();
 
-            var maybeNodeProperties = idMapAndProperties.nodeProperties();
-
-            var nodesBuilder = ImmutableNodes.builder().idMap(nodes);
-
-            var nodePropertySchema = maybeNodeProperties
-                .map(nodeProperties -> nodeSchemaWithProperties(
-                    nodes.availableNodeLabels(),
-                    nodeProperties
-                ))
-                .orElseGet(() -> nodeSchemaWithoutProperties(nodes.availableNodeLabels()))
-                .unionProperties();
-
-            NodeSchema nodeSchema = NodeSchema.empty();
-            nodes.availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
-            nodePropertySchema.forEach((propertyKey, propertySchema) -> {
-                nodes.availableNodeLabels().forEach(label -> {
-                    nodeSchema.getOrCreateLabel(label).addProperty(propertySchema.key(), propertySchema);
-                });
-            });
+            var idMap = idMapAndProperties.idMap();
+            var nodeSchema = idMapAndProperties.schema();
 
             this.graphSchemaBuilder.nodeSchema(nodeSchema);
 
-            maybeNodeProperties.ifPresent(allNodeProperties -> {
-                CSRGraphStoreUtil.extractNodeProperties(
-                    nodesBuilder,
-                    nodePropertySchema::get,
-                    allNodeProperties
-                );
-            });
+            var nodes = ImmutableNodes
+                .builder()
+                .idMap(idMap)
+                .schema(nodeSchema)
+                .properties(idMapAndProperties.propertyStore())
+                .build();
 
-            graphStoreBuilder.nodes(nodesBuilder.schema(nodeSchema).build());
+            // graphStoreBuilder.nodes(nodesBuilder.schema(nodeSchema).build());
+            graphStoreBuilder.nodes(nodes);
 
             // Relationships are added using their intermediate node ids.
             // In order to map to the final internal ids, we need to use
             // the mapping function of the wrapped id map.
-            return nodes.rootIdMap()::toMappedNodeId;
-        }
-
-        private static NodeSchema nodeSchemaWithProperties(
-            Iterable<NodeLabel> nodeLabels,
-            Map<String, NodePropertyValues> propertyMap
-        ) {
-            var nodeSchema = NodeSchema.empty();
-
-            nodeLabels.forEach((nodeLabel) -> {
-                propertyMap.forEach((propertyName, nodeProperties) -> {
-                    nodeSchema.getOrCreateLabel(nodeLabel).addProperty(
-                        propertyName,
-                        PropertySchema.of(
-                            propertyName,
-                            nodeProperties.valueType(),
-                            nodeProperties.valueType().fallbackValue(),
-                            PropertyState.TRANSIENT
-                        )
-                    );
-                });
-            });
-
-            return nodeSchema;
-        }
-
-        private static NodeSchema nodeSchemaWithoutProperties(Iterable<NodeLabel> nodeLabels) {
-            var nodeSchema = NodeSchema.empty();
-            nodeLabels.forEach(nodeSchema::getOrCreateLabel);
-            return nodeSchema;
+            return idMap.rootIdMap()::toMappedNodeId;
         }
 
         private void buildRelationshipsWithProperties(
