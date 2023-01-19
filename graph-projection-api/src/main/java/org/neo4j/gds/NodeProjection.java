@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.annotation.DataClass;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.ConfigKeyValidation;
 import org.neo4j.gds.utils.StringFormatting;
 
@@ -29,10 +29,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-@DataClass
-public abstract class AbstractNodeProjection extends ElementProjection {
+@ValueClass
+public abstract class NodeProjection extends ElementProjection {
 
-    private static final NodeProjection ALL = of(PROJECT_ALL);
+    private static final NodeProjection ALL = fromString(PROJECT_ALL);
 
     public abstract String label();
 
@@ -50,7 +50,7 @@ public abstract class AbstractNodeProjection extends ElementProjection {
     public static final String LABEL_KEY = "label";
 
     public static NodeProjection of(String label) {
-        return NodeProjection.of(label, PropertyMappings.of());
+        return ImmutableNodeProjection.of(label, PropertyMappings.of());
     }
 
     public static NodeProjection all() {
@@ -85,7 +85,7 @@ public abstract class AbstractNodeProjection extends ElementProjection {
     public static NodeProjection fromMap(Map<String, Object> map, NodeLabel nodeLabel) {
         validateConfigKeys(map);
         String label = String.valueOf(map.getOrDefault(LABEL_KEY, nodeLabel.name));
-        return create(map, properties -> NodeProjection.of(label, properties));
+        return create(map, properties -> ImmutableNodeProjection.of(label, properties));
     }
 
     @Override
@@ -102,9 +102,9 @@ public abstract class AbstractNodeProjection extends ElementProjection {
     public NodeProjection withAdditionalPropertyMappings(PropertyMappings mappings) {
         PropertyMappings newMappings = properties().mergeWith(mappings);
         if (newMappings == properties()) {
-            return (NodeProjection) this;
+            return this;
         }
-        return ((NodeProjection) this).withProperties(newMappings);
+        return ((ImmutableNodeProjection) this).withProperties(newMappings);
     }
 
     public static Builder builder() {
@@ -116,7 +116,7 @@ public abstract class AbstractNodeProjection extends ElementProjection {
     }
 
     @org.immutables.builder.Builder.AccessibleFields
-    public static final class Builder extends NodeProjection.Builder implements InlineProperties<Builder> {
+    public static final class Builder extends ImmutableNodeProjection.Builder implements InlineProperties<Builder> {
 
         private InlinePropertiesBuilder propertiesBuilder;
 

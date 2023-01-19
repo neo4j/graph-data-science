@@ -323,7 +323,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
                 loadedGraphName,
                 NodeProjections.of(
                     Map.of(
-                        NodeLabel.of("X"), NodeProjection.of("X", PropertyMappings.of(propertyMappings))
+                        NodeLabel.of("X"), ImmutableNodeProjection.of("X", PropertyMappings.of(propertyMappings))
                     )
                 ),
                 relationshipProjections()

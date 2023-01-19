@@ -60,11 +60,11 @@ public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<RESULT>, CON
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
             .databaseService(graphDb())
             .graphName(graphName)
-            .addNodeProjection(NodeProjection.of(
+            .addNodeProjection(ImmutableNodeProjection.of(
                 "A",
                 PropertyMappings.of(nodeProperties().stream().map(PropertyMapping::of).collect(Collectors.toList()))
             ))
-            .addNodeProjection(NodeProjection.of(
+            .addNodeProjection(ImmutableNodeProjection.of(
                 "B",
                 PropertyMappings.of(nodeProperties().stream().map(PropertyMapping::of).collect(Collectors.toList()))
             ));
