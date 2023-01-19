@@ -38,7 +38,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STATS;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.testProc.write", description = STATS_DESCRIPTION, executionMode = STATS)
-public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestResult, TestWriteConfig> {
+public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithmResult, TestResult, TestWriteConfig> {
 
     @Procedure(value = "gds.testProc.write", mode = READ)
     @Description(STATS_DESCRIPTION)
@@ -46,7 +46,7 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestResult
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<TestAlgorithm, TestAlgorithm, TestWriteConfig> computationResult = compute(
+        ComputationResult<TestAlgorithm, TestAlgorithmResult, TestWriteConfig> computationResult = compute(
             graphName,
             configuration
         );
@@ -64,7 +64,7 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestResult
 
     @Override
     protected TestResult.TestResultBuilder resultBuilder(
-        ComputationResult<TestAlgorithm, TestAlgorithm, TestWriteConfig> computeResult,
+        ComputationResult<TestAlgorithm, TestAlgorithmResult, TestWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return new TestResult.TestResultBuilder().withRelationshipCount(computeResult.result().relationshipCount());

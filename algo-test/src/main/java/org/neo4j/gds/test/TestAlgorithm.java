@@ -23,10 +23,9 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public class TestAlgorithm extends Algorithm<TestAlgorithm> {
+public class TestAlgorithm extends Algorithm<TestAlgorithmResult> {
 
     private final Graph graph;
-    private long relationshipCount = 0;
     private final boolean throwInCompute;
 
     public TestAlgorithm(
@@ -40,23 +39,18 @@ public class TestAlgorithm extends Algorithm<TestAlgorithm> {
     }
 
     @Override
-    public TestAlgorithm compute() {
+    public TestAlgorithmResult compute() {
         progressTracker.beginSubTask();
 
         if (throwInCompute) {
             throw new IllegalStateException("boo");
         }
-        relationshipCount = graph.relationshipCount();
 
         progressTracker.endSubTask();
 
-        return this;
+        return new TestAlgorithmResult(graph.relationshipCount());
     }
 
     @Override
     public void release() {}
-
-    public long relationshipCount() {
-        return relationshipCount;
-    }
 }

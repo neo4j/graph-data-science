@@ -45,6 +45,7 @@ import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.test.ImmutableTestMutateConfig;
 import org.neo4j.gds.test.TestAlgoResultBuilder;
 import org.neo4j.gds.test.TestAlgorithm;
+import org.neo4j.gds.test.TestAlgorithmResult;
 import org.neo4j.gds.test.TestMutateConfig;
 import org.neo4j.gds.test.TestResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -63,7 +64,7 @@ class MutatePropertyComputationResultConsumerTest {
     @Inject
     private GraphStore graphStore;
 
-    private MutatePropertyComputationResultConsumer<TestAlgorithm, TestAlgorithm, TestMutateConfig, TestResult> mutateResultConsumer;
+    private MutatePropertyComputationResultConsumer<TestAlgorithm, TestAlgorithmResult, TestMutateConfig, TestResult> mutateResultConsumer;
 
     private final ExecutionContext executionContext = ImmutableExecutionContext
         .builder()
@@ -138,7 +139,7 @@ class MutatePropertyComputationResultConsumerTest {
     }
 
     @NotNull
-    private ComputationResult<TestAlgorithm, TestAlgorithm, TestMutateConfig> getComputationResult(
+    private ComputationResult<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> getComputationResult(
         GraphStore graphStore,
         Graph graph,
         TestMutateConfig config
@@ -149,12 +150,12 @@ class MutatePropertyComputationResultConsumerTest {
             false
         );
 
-        ImmutableComputationResult.Builder<TestAlgorithm, TestAlgorithm, TestMutateConfig> builder = ImmutableComputationResult.builder();
+        ImmutableComputationResult.Builder<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> builder = ImmutableComputationResult.builder();
 
         return builder
             .algorithm(algorithm)
             .config(config)
-            .result(algorithm)
+            .result(algorithm.compute())
             .graph(graph)
             .graphStore(graphStore)
             .preProcessingMillis(0)

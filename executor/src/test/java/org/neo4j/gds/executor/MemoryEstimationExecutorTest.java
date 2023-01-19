@@ -36,6 +36,7 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.gdl.GdlGraphs;
 import org.neo4j.gds.test.TestAlgorithm;
+import org.neo4j.gds.test.TestAlgorithmResult;
 import org.neo4j.gds.test.TestMutateConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
@@ -51,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class MemoryEstimationExecutorTest extends BaseTest {
 
     private ExecutionContext executionContext;
-    private MemoryEstimationExecutor<TestAlgorithm, TestAlgorithm, TestMutateConfig> memoryEstimationExecutor;
+    private MemoryEstimationExecutor<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> memoryEstimationExecutor;
 
     @BeforeEach
     void setup() throws Exception {
