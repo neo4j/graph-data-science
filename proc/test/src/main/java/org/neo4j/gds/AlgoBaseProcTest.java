@@ -248,8 +248,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             proc.compute(
                 loadedGraphName,
                 configMap,
-                releaseAlgorithm(),
-                true
+                releaseAlgorithm()
             );
 
             assertThat(taskStore.seenJobIds).containsExactly(someJobId);
@@ -295,14 +294,12 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         var resultRun1 = proc.compute(
             loadedGraphName,
             configMap,
-            releaseAlgorithm(),
-            true
+            releaseAlgorithm()
         );
         var resultRun2 = proc.compute(
             loadedGraphName,
             configMap,
-            releaseAlgorithm(),
-            true
+            releaseAlgorithm()
         );
 
         assertResultEquals(resultRun1.result(), resultRun2.result());
