@@ -25,7 +25,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
 
-public interface RerouteAlgorithm {
+public interface Rerouter {
 
     void reroute(
         HugeLongArray parent,
