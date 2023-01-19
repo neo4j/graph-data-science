@@ -104,7 +104,7 @@ public final class CSRGraphStoreUtil {
             // TODO: is it correct that we only use this for generated graphs?
             .capabilities(ImmutableStaticCapabilities.of(false))
             .schema(schema)
-            .nodes(Nodes.of(graph.idMap(), nodeProperties))
+            .nodes(ImmutableNodes.of(schema.nodeSchema(), graph.idMap(), nodeProperties))
             .relationshipImportResult(relationshipImportResult)
             .graphProperties(GraphPropertyStore.empty())
             .concurrency(concurrency)

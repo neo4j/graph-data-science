@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
@@ -50,12 +51,9 @@ public interface Nodes {
         return NodePropertyStore.empty();
     }
 
+    @TestOnly
     static Nodes of(IdMap idmap) {
         return ImmutableNodes.of(NodeSchema.empty(), idmap, NodePropertyStore.empty());
-    }
-
-    static Nodes of(IdMap idmap, NodePropertyStore nodePropertyStore) {
-        return ImmutableNodes.of(NodeSchema.empty(), idmap, nodePropertyStore);
     }
 
     static Nodes of(
