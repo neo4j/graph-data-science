@@ -58,23 +58,6 @@ public interface Nodes {
         return ImmutableNodes.of(NodeSchema.empty(), idmap, nodePropertyStore);
     }
 
-    static Nodes of(IdMap idMap, NodeSchema nodeSchema, Map<String, NodePropertyValues> properties, PropertyState propertyState) {
-        var nodePropertyStoreBuilder = NodePropertyStore.builder();
-
-        nodeSchema.availableLabels().forEach(nodeLabel -> {
-            var propertiesForLabel = nodeSchema.get(nodeLabel).properties();
-            propertiesForLabel.forEach((propertyKey, propertySchema) -> nodePropertyStoreBuilder.putProperty(propertyKey,
-                ImmutableNodeProperty
-                    .builder()
-                    .propertySchema(propertySchema)
-                    .values(properties.get(propertyKey))
-                    .build()
-            ));
-        });
-
-        return ImmutableNodes.of(nodeSchema, idMap, nodePropertyStoreBuilder.build());
-    }
-
     static Nodes of(
         IdMap idMap,
         Map<NodeLabel, PropertyMappings> propertyMappingsByLabel,
@@ -119,5 +102,21 @@ public interface Nodes {
             )
         ));
         return ImmutableNodes.of(NodeSchema.empty(), idMap, builder.build());
+    }
+
+    static Nodes of(NodeSchema nodeSchema, IdMap idMap, Map<PropertyMapping, NodePropertyValues> properties, PropertyState propertyState) {
+        NodePropertyStore.Builder builder = NodePropertyStore.builder();
+        properties.forEach((mapping, nodeProperties) -> builder.putProperty(
+            mapping.propertyKey(),
+            NodeProperty.of(
+                mapping.propertyKey(),
+                propertyState,
+                nodeProperties,
+                mapping.defaultValue().isUserDefined()
+                    ? mapping.defaultValue()
+                    : nodeProperties.valueType().fallbackValue()
+            )
+        ));
+        return ImmutableNodes.of(nodeSchema, idMap, builder.build());
     }
 }
