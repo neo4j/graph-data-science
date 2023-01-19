@@ -130,7 +130,9 @@ public class ProcedureExecutor<
                     algo.getProgressTracker().endSubTaskWithFailure();
                     throw e;
                 } finally {
-                    algo.getProgressTracker().release();
+                    if (algoSpec.releaseProgressTask()) {
+                        algo.getProgressTracker().release();
+                    }
                 }
             }
         );

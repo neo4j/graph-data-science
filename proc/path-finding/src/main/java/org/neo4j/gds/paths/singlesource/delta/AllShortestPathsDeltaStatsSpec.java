@@ -62,4 +62,9 @@ public class AllShortestPathsDeltaStatsSpec implements AlgorithmSpec<DeltaSteppi
                 computationResult.config().toMap()
             ));
     }
+
+@Override
+    public boolean releaseProgressTask() {
+        return false;
+    }
 }

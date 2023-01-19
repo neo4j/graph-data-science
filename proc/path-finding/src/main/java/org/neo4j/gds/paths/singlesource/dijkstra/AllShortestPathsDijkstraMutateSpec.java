@@ -56,4 +56,9 @@ public class AllShortestPathsDijkstraMutateSpec implements AlgorithmSpec<Dijkstr
     public ComputationResultConsumer<Dijkstra, DijkstraResult, AllShortestPathsDijkstraMutateConfig, Stream<MutateResult>> computationResultConsumer() {
         return new ShortestPathMutateResultConsumer<>();
     }
+
+@Override
+    public boolean releaseProgressTask() {
+        return false;
+    }
 }

@@ -114,6 +114,7 @@ public abstract class AlgoBaseProc<
         var factory = algorithmFactory();
         var configFunction = newConfigFunction();
         var validationConfig = validationConfig();
+        var releaseProgressTask = releaseProgressTask();
         var algoSpec = new AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ComputationResult<ALGO, ALGO_RESULT, CONFIG>, AlgorithmFactory<?, ALGO, CONFIG>>() {
             @Override
             public String name() {
@@ -138,6 +139,11 @@ public abstract class AlgoBaseProc<
             @Override
             public ValidationConfiguration<CONFIG> validationConfig() {
                 return validationConfig;
+            }
+
+            @Override
+            public boolean releaseProgressTask() {
+                return releaseProgressTask;
             }
         };
 

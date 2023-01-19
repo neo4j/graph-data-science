@@ -47,4 +47,9 @@ public abstract class ShortestPathMutateProc<ALGO extends Algorithm<DijkstraResu
             .withConfig(computeResult.config());
     }
 
+@Override
+    public boolean releaseProgressTask() {
+        return false;
+    }
+
 }
