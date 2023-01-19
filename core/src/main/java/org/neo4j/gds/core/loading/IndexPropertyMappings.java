@@ -46,6 +46,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
 import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 
+// TODO: should be named LoadablePropertyMappings
 final class IndexPropertyMappings {
 
     static LoadablePropertyMappings prepareProperties(
@@ -64,6 +65,20 @@ final class IndexPropertyMappings {
             ));
 
         return prepareLoadableProperties(graphDimensions, transaction, storeLoadedProperties);
+    }
+
+    static Map<NodeLabel, PropertyMappings> propertyMappingsByLabel(GraphProjectFromStoreConfig graphProjectConfig) {
+        return graphProjectConfig
+            .nodeProjections()
+            .projections()
+            .entrySet()
+            .stream()
+            .collect(toMap(
+                Map.Entry::getKey,
+                entry -> entry
+                    .getValue()
+                    .properties()
+            ));
     }
 
     private static LoadablePropertyMappings prepareLoadableProperties(

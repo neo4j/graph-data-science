@@ -21,7 +21,9 @@ package org.neo4j.gds.core.loading;
 
 import org.immutables.builder.Builder;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyState;
@@ -50,6 +52,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference, Nodes> {
 
     private final IndexPropertyMappings.LoadablePropertyMappings propertyMappings;
+    private final Map<NodeLabel, PropertyMappings> propertyMappingsByLabel;
     private final TerminationFlag terminationFlag;
     private final IdMapBuilder idMapBuilder;
     private final LabelInformation.Builder labelInformationBuilder;
@@ -93,6 +96,8 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
             loadingContext.transactionContext()
         );
 
+        var propertyMappingsByLabel = IndexPropertyMappings.propertyMappingsByLabel(graphProjectConfig);
+
         var nodePropertyImporter = initializeNodePropertyImporter(
             propertyMappings,
             dimensions,
@@ -106,6 +111,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
             progressTracker,
             concurrency,
             propertyMappings,
+            propertyMappingsByLabel,
             nodePropertyImporter,
             idMapBuilder,
             labelInformationBuilder
@@ -119,6 +125,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
         ProgressTracker progressTracker,
         int concurrency,
         IndexPropertyMappings.LoadablePropertyMappings propertyMappings,
+        Map<NodeLabel, PropertyMappings> propertyMappingsByLabel,
         @Nullable NativeNodePropertyImporter nodePropertyImporter,
         IdMapBuilder idMapBuilder,
         LabelInformation.Builder labelInformationBuilder
@@ -133,6 +140,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
 
         this.terminationFlag = loadingContext.terminationFlag();
         this.propertyMappings = propertyMappings;
+        this.propertyMappingsByLabel = propertyMappingsByLabel;
         this.nodePropertyImporter = nodePropertyImporter;
         this.idMapBuilder = idMapBuilder;
         this.labelInformationBuilder = labelInformationBuilder;
@@ -191,7 +199,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
             importPropertiesFromIndex(idMap, nodeProperties);
         }
 
-        return Nodes.of(idMap, nodeProperties, PropertyState.PERSISTENT);
+        return Nodes.of(idMap, propertyMappingsByLabel, nodeProperties, PropertyState.PERSISTENT);
     }
 
     private void importPropertiesFromIndex(
