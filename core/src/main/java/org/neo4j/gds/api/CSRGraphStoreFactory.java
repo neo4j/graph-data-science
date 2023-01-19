@@ -42,10 +42,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
         super(graphProjectConfig, capabilities, loadingContext, dimensions);
     }
 
-    protected CSRGraphStore createGraphStore(
-        Nodes nodes,
-        RelationshipImportResult relationshipImportResult
-    ) {
+    protected CSRGraphStore createGraphStore(Nodes nodes, RelationshipImportResult relationshipImportResult) {
         return new GraphStoreBuilder()
             .databaseId(DatabaseId.of(loadingContext.graphDatabaseService()))
             .capabilities(capabilities)
