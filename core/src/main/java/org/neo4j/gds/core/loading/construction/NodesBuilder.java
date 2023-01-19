@@ -50,6 +50,7 @@ import org.neo4j.values.storable.Value;
 import org.neo4j.values.virtual.MapValue;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -223,9 +224,18 @@ public final class NodesBuilder {
             .stream()
             .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().propertySchema()));
 
-        idMap.availableNodeLabels().forEach(label -> {
-            nodeSchema.addLabel(label, this.nodeLabelTokenToPropertyKeys.propertySchemas(label, importPropertySchemas));
+        // consider node labels without properties
+        var nodeLabels = new HashSet<>(idMap.availableNodeLabels());
+        // and also node labels with associated properties
+        nodeLabels.addAll(nodeLabelTokenToPropertyKeys.nodeLabels());
+
+        nodeLabels.forEach(nodeLabel -> {
+            nodeSchema.addLabel(
+                nodeLabel,
+                this.nodeLabelTokenToPropertyKeys.propertySchemas(nodeLabel, importPropertySchemas)
+            );
         });
+
         return nodeSchema;
     }
 

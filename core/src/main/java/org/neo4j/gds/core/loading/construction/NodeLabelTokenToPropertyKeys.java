@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 abstract class NodeLabelTokenToPropertyKeys {
 
@@ -58,6 +59,11 @@ abstract class NodeLabelTokenToPropertyKeys {
     abstract void add(NodeLabelToken nodeLabelToken, Iterable<String> propertyKeys);
 
     /**
+     * Returns all node labels in this mapping.
+     */
+    abstract Set<NodeLabel> nodeLabels();
+
+    /**
      * Return the property schemas for the given node label.
      */
     abstract Map<String, PropertySchema> propertySchemas(
@@ -76,6 +82,11 @@ abstract class NodeLabelTokenToPropertyKeys {
         @Override
         void add(NodeLabelToken nodeLabelToken, Iterable<String> propertyKeys) {
             // silence is golden
+        }
+
+        @Override
+        Set<NodeLabel> nodeLabels() {
+            return nodeSchema.availableLabels();
         }
 
         @Override
@@ -120,7 +131,6 @@ abstract class NodeLabelTokenToPropertyKeys {
                 );
             }
 
-
             return userDefinedPropertySchemas;
         }
     }
@@ -140,7 +150,16 @@ abstract class NodeLabelTokenToPropertyKeys {
                 propertyKeys.forEach(keys::add);
                 return keys;
             });
+        }
 
+        @Override
+        Set<NodeLabel> nodeLabels() {
+            return labelToPropertyKeys
+                .keySet()
+                .stream()
+                .map(nodeLabelToken -> nodeLabelToken.isEmpty() ? NodeLabelTokens.ofNodeLabel(NodeLabel.ALL_NODES) : nodeLabelToken)
+                .flatMap(nodeLabelToken -> IntStream.range(0, nodeLabelToken.size()).mapToObj(nodeLabelToken::get))
+                .collect(Collectors.toSet());
         }
 
         @Override
@@ -150,7 +169,11 @@ abstract class NodeLabelTokenToPropertyKeys {
         ) {
             return labelToPropertyKeys.keySet().stream()
                 .filter(nodeLabelToken -> {
-                    for (int i = 0; i < nodeLabelToken.size(); i++) {
+                    if (nodeLabelToken.isEmpty() && nodeLabel == NodeLabel.ALL_NODES) {
+                        return true;
+                    }
+                    var nodeLabelTokenCount = nodeLabelToken.size();
+                    for (int i = 0; i < nodeLabelTokenCount; i++) {
                         if (nodeLabelToken.get(i).equals(nodeLabel)) {
                             return true;
                         }
@@ -162,7 +185,7 @@ abstract class NodeLabelTokenToPropertyKeys {
                     propertyKey -> propertyKey,
                     importPropertySchemas::get,
                     (lhs, rhs) -> lhs
-                    ));
+                ));
         }
     }
 }

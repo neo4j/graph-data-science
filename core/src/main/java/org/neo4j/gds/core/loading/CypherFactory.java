@@ -148,7 +148,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
                 progressTracker
             ).load(ktx.internalTransaction());
 
-            var relationshipsAndProperties = new CypherRelationshipLoader(
+            var relationshipImportResult = new CypherRelationshipLoader(
                 relationshipQuery(),
                 nodes.idMap(),
                 cypherConfig,
@@ -158,7 +158,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
 
             var graphStore = createGraphStore(
                 nodes,
-                relationshipsAndProperties
+                relationshipImportResult
             );
 
             progressTracker.endSubTask("Loading");
