@@ -158,7 +158,11 @@ abstract class NodeLabelTokenToPropertyKeys {
                     return false;
                 })
                 .flatMap(nodeLabelToken -> this.labelToPropertyKeys.get(nodeLabelToken).stream())
-                .collect(Collectors.toMap(propertyKey -> propertyKey, importPropertySchemas::get));
+                .collect(Collectors.toMap(
+                    propertyKey -> propertyKey,
+                    importPropertySchemas::get,
+                    (lhs, rhs) -> lhs
+                    ));
         }
     }
 }
