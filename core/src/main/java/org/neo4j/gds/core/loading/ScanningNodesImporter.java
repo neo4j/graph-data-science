@@ -90,16 +90,16 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
             );
         }
 
-        var propertyMappings = IndexPropertyMappings.prepareProperties(
+        var propertyMappings = IndexPropertyMappings.propertyMappings(graphProjectConfig);
+
+        var loadablePropertyMappings = IndexPropertyMappings.prepareProperties(
             graphProjectConfig,
             dimensions,
             loadingContext.transactionContext()
         );
 
-        var propertyMappingsByLabel = IndexPropertyMappings.propertyMappingsByLabel(graphProjectConfig);
-
         var nodePropertyImporter = initializeNodePropertyImporter(
-            propertyMappings,
+            loadablePropertyMappings,
             dimensions,
             concurrency
         );
@@ -111,7 +111,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
             progressTracker,
             concurrency,
             propertyMappings,
-            propertyMappingsByLabel,
+            loadablePropertyMappings,
             nodePropertyImporter,
             idMapBuilder,
             labelInformationBuilder
@@ -124,8 +124,8 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
         int concurrency,
-        IndexPropertyMappings.LoadablePropertyMappings propertyMappings,
         Map<NodeLabel, PropertyMappings> propertyMappingsByLabel,
+        IndexPropertyMappings.LoadablePropertyMappings propertyMappings,
         @Nullable NativeNodePropertyImporter nodePropertyImporter,
         IdMapBuilder idMapBuilder,
         LabelInformation.Builder labelInformationBuilder

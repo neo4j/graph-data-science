@@ -49,25 +49,7 @@ import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 // TODO: should be named LoadablePropertyMappings
 final class IndexPropertyMappings {
 
-    static LoadablePropertyMappings prepareProperties(
-        GraphProjectFromStoreConfig graphProjectConfig,
-        GraphDimensions graphDimensions,
-        TransactionContext transaction
-    ) {
-        Map<NodeLabel, PropertyMappings> storeLoadedProperties = graphProjectConfig
-            .nodeProjections()
-            .projections()
-            .entrySet()
-            .stream()
-            .collect(toMap(
-                Map.Entry::getKey,
-                entry -> entry.getValue().properties()
-            ));
-
-        return prepareLoadableProperties(graphDimensions, transaction, storeLoadedProperties);
-    }
-
-    static Map<NodeLabel, PropertyMappings> propertyMappingsByLabel(GraphProjectFromStoreConfig graphProjectConfig) {
+    static Map<NodeLabel, PropertyMappings> propertyMappings(GraphProjectFromStoreConfig graphProjectConfig) {
         return graphProjectConfig
             .nodeProjections()
             .projections()
@@ -79,6 +61,14 @@ final class IndexPropertyMappings {
                     .getValue()
                     .properties()
             ));
+    }
+
+    static LoadablePropertyMappings prepareProperties(
+        GraphProjectFromStoreConfig graphProjectConfig,
+        GraphDimensions graphDimensions,
+        TransactionContext transaction
+    ) {
+        return prepareLoadableProperties(graphDimensions, transaction, propertyMappings(graphProjectConfig));
     }
 
     private static LoadablePropertyMappings prepareLoadableProperties(
