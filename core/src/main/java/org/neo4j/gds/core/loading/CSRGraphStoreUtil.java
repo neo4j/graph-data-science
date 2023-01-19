@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
@@ -43,7 +42,6 @@ import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.values.storable.NumberType;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -203,25 +201,12 @@ public final class CSRGraphStoreUtil {
         nodeImportResultBuilder.properties(propertyStoreBuilder.build());
     }
 
+    // TODO: remove this method
     public static GraphSchema computeGraphSchema(
         Nodes nodes,
-        Function<NodeLabel, Collection<String>> propertiesByLabel,
         RelationshipImportResult relationshipImportResult
     ) {
-        var nodeProperties = nodes.properties().properties();
-
-        var nodeSchema = NodeSchema.empty();
-        for (var label : nodes.idMap().availableNodeLabels()) {
-            var entry = nodeSchema.getOrCreateLabel(label);
-            for (var propertyKey : propertiesByLabel.apply(label)) {
-                entry.addProperty(
-                    propertyKey,
-                    nodeProperties.get(propertyKey).propertySchema()
-                );
-            }
-        }
-        nodes.idMap().availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
-
+        var nodeSchema = nodes.schema();
         var relationshipSchema = RelationshipSchema.empty();
 
         relationshipImportResult.importResults().forEach(((relationshipType, singleTypeRelationshipImportResult) -> {
