@@ -86,7 +86,6 @@ public abstract class FileToGraphStoreImporter {
         this.graphSchemaBuilder = ImmutableGraphSchema.builder();
         this.graphStoreBuilder = new GraphStoreBuilder()
             .concurrency(concurrency)
-            // TODO: we need to export and import this flag: https://trello.com/c/2cEMPZ9L
             .capabilities(ImmutableStaticCapabilities.of(true));
         this.log = log;
         this.taskRegistryFactory = taskRegistryFactory;
