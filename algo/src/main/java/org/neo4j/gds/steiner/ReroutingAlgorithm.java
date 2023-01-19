@@ -38,7 +38,7 @@ abstract class ReroutingAlgorithm implements Rerouter {
 
     protected final Graph graph;
     protected final long sourceId;
-    protected  final List<Long> terminals;
+    private final List<Long> terminals;
     protected final int concurrency;
     protected final ProgressTracker progressTracker;
 
