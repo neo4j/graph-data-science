@@ -99,20 +99,46 @@ class NodeLabelTokenToPropertyKeysTest {
     }
 
     @Test
-    void shouldFailOnInconsistentPropertySchemas() {
+    void shouldFailForMissingProperties() {
         var nodeSchema = NodeSchema.empty()
             .addLabel(NodeLabel.of("A"), Map.of(
-                "foo", PropertySchema.of("foo", ValueType.LONG)
+                "foo", PropertySchema.of("foo", ValueType.LONG),
+                "baz", PropertySchema.of("baz", ValueType.LONG)
             ));
 
         var fixed = NodeLabelTokenToPropertyKeys.fixed(nodeSchema);
 
         assertThatThrownBy(() -> fixed.propertySchemas(
             NodeLabel.of("A"),
-            Map.of("bar", PropertySchema.of("bar", ValueType.DOUBLE))
+            Map.of(
+                "foo", PropertySchema.of("foo", ValueType.LONG)
+            )
         ))
             .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("Property schemas inferred from loading do not match input property schema.");
+            .hasMessageContaining("Missing node properties during import.")
+            .hasMessageContaining("['baz']");
+    }
+
+    @Test
+    void shouldFailForIncompatibleTypes() {
+        var nodeSchema = NodeSchema.empty()
+            .addLabel(NodeLabel.of("A"), Map.of(
+                "foo", PropertySchema.of("foo", ValueType.LONG),
+                "baz", PropertySchema.of("baz", ValueType.LONG)
+            ));
+
+        var fixed = NodeLabelTokenToPropertyKeys.fixed(nodeSchema);
+
+        assertThatThrownBy(() -> fixed.propertySchemas(
+            NodeLabel.of("A"),
+            Map.of(
+                "foo", PropertySchema.of("foo", ValueType.DOUBLE),
+                "baz", PropertySchema.of("baz", ValueType.LONG)
+            )
+        ))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Incompatible value types between input schema and input data.")
+            .hasMessageContaining("['foo']");
     }
 }
 

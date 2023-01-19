@@ -22,6 +22,7 @@ package org.neo4j.gds.core.loading.construction;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -82,19 +83,45 @@ abstract class NodeLabelTokenToPropertyKeys {
             NodeLabel nodeLabel,
             Map<String, PropertySchema> importPropertySchemas
         ) {
-            var inputPropertySchemas = nodeSchema.get(nodeLabel).properties();
-            var loadPropertySchemas = importPropertySchemas
-                .entrySet()
-                .stream()
-                .filter(entry -> inputPropertySchemas.containsKey(entry.getKey()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            var userDefinedPropertySchemas = nodeSchema.get(nodeLabel).properties();
 
-            if (!inputPropertySchemas.equals(loadPropertySchemas)) {
-                throw new IllegalStateException(
-                    "Property schemas inferred from loading do not match input property schema.");
+            // We validate that the property schemas we read during import have
+            // at least a matching key and a matching type. We cannot do an
+            // equality check because we cannot infer the default value or the
+            // property state from just looking at the values.
+            var overlap = importPropertySchemas
+                .keySet()
+                .stream()
+                .filter(userDefinedPropertySchemas::containsKey)
+                .collect(Collectors.toSet());
+
+            if (overlap.size() < userDefinedPropertySchemas.size()) {
+                var keySet = new HashSet<>(userDefinedPropertySchemas.keySet());
+                keySet.removeAll(overlap);
+                throw new IllegalStateException("Missing node properties during import. " +
+                                                "The following keys were part of the schema, " +
+                                                "but not contained in the input data: " +
+                                                StringJoining.join(keySet)
+                );
             }
 
-            return inputPropertySchemas;
+            // We got the same keys and can check the types.
+            var keysWithIncompatibleTypes = overlap.stream()
+                .filter(propertyKey -> userDefinedPropertySchemas
+                                           .get(propertyKey)
+                                           .valueType() != importPropertySchemas
+                                           .get(propertyKey)
+                                           .valueType()).collect(Collectors.toSet());
+
+            if (!keysWithIncompatibleTypes.isEmpty()) {
+                throw new IllegalStateException("Incompatible value types between input schema and input data. " +
+                                                "The following keys have incompatible types: " +
+                                                StringJoining.join(keysWithIncompatibleTypes)
+                );
+            }
+
+
+            return userDefinedPropertySchemas;
         }
     }
 
