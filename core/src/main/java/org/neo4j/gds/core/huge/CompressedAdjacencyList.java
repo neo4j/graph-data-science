@@ -110,13 +110,6 @@ public final class CompressedAdjacencyList implements AdjacencyList {
     }
 
     @Override
-    public void close() {
-        pages = null;
-        degrees = null;
-        offsets = null;
-    }
-
-    @Override
     public int degree(long node) {
         return degrees.get(node);
     }
@@ -253,11 +246,6 @@ public final class CompressedAdjacencyList implements AdjacencyList {
             var value = decompress.advanceBy(n, targetsLeftToBeDecoded, this);
             this.currentPosition += this.value;
             return value;
-        }
-
-        @Override
-        public void close() {
-            pages = null;
         }
     }
 }

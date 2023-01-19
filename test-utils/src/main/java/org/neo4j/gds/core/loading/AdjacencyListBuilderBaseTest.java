@@ -86,18 +86,16 @@ public abstract class AdjacencyListBuilderBaseTest {
         LongConsumer drainCountConsumer = drainCount -> assertThat(drainCount).isGreaterThan(0);
         adjacencyBuffer.adjacencyListBuilderTasks(mapper, Optional.of(drainCountConsumer)).forEach(Runnable::run);
 
-        try (var adjacencyList = adjacencyCompressorFactory.build().adjacency()) {
-            for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-                try (var cursor = adjacencyList.adjacencyCursor(toMapped.map(nodeId))) {
-                    while (cursor.hasNextVLong()) {
-                        long target = cursor.nextVLong();
-                        var expected = toMapped.map(relationships.remove(nodeId));
-                        assertEquals(expected, target);
-                    }
-                }
+        var adjacencyList = adjacencyCompressorFactory.build().adjacency();
+        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+            var cursor = adjacencyList.adjacencyCursor(toMapped.map(nodeId));
+            while (cursor.hasNextVLong()) {
+                long target = cursor.nextVLong();
+                var expected = toMapped.map(relationships.remove(nodeId));
+                assertEquals(expected, target);
             }
-            assertThat(relationships).isEmpty();
         }
+        assertThat(relationships).isEmpty();
     }
 
     void testAdjacencyList() {

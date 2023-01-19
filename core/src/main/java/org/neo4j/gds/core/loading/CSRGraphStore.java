@@ -53,7 +53,6 @@ import org.neo4j.gds.core.huge.HugeGraphBuilder;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.utils.TimeUtil;
-import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.time.ZonedDateTime;
@@ -549,24 +548,6 @@ public class CSRGraphStore implements GraphStore {
             properties,
             inverseProperties
         );
-    }
-
-    @Override
-    public void release() {
-        var closeables = Stream.<AutoCloseable>builder();
-        if (this.nodes instanceof AutoCloseable) {
-            closeables.accept((AutoCloseable) this.nodes);
-        }
-        this.relationships.values().forEach(relationship -> {
-            closeables.add(relationship.topology().adjacencyList());
-            relationship
-                .properties()
-                .stream()
-                .flatMap(properties -> properties.values().stream())
-                .forEach(property -> closeables.add(property.values().propertiesList()));
-        });
-
-        ExceptionUtil.closeAll(ExceptionUtil.RETHROW_UNCHECKED, closeables.build().distinct());
     }
 
     @Override

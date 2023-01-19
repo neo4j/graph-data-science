@@ -350,7 +350,6 @@ public final class GraphStoreCatalog {
             return Optional.ofNullable(get(userCatalogKey, failOnMissing))
                 .map(graphStoreWithConfig -> {
                     removedGraphConsumer.accept(graphStoreWithConfig);
-                    graphStoreWithConfig.graphStore().release();
                     removeDegreeDistribution(userCatalogKey);
                     graphsByName.remove(userCatalogKey);
                     return Boolean.TRUE;

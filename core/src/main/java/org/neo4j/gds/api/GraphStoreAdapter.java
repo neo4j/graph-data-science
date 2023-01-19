@@ -319,9 +319,4 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     ) {
         return graphStore.getCompositeRelationshipIterator(relationshipType, propertyKeys);
     }
-
-    @Override
-    public void release() {
-        graphStore.release();
-    }
 }

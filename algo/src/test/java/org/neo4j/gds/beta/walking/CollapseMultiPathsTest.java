@@ -124,37 +124,36 @@ class CollapseMultiPathsTest {
         long losangeles = idFunction.of("losangeles");
         long chicago = idFunction.of("chicago");
 
-        try (AdjacencyList adjacencyList = path.topology().adjacencyList()) {
-            AdjacencyCursor adjacencyCursor = adjacencyList.adjacencyCursor(manhattan);
+        AdjacencyList adjacencyList = path.topology().adjacencyList();
+        AdjacencyCursor adjacencyCursor = adjacencyList.adjacencyCursor(manhattan);
 
-            assertTrue(adjacencyCursor.hasNextVLong());
-            long targetOfCollapsedPathFromManhattan1 = adjacencyCursor.nextVLong();
-            assertTrue(adjacencyCursor.hasNextVLong());
-            long targetOfCollapsedPathFromManhattan2 = adjacencyCursor.nextVLong();
-            assertFalse(adjacencyCursor.hasNextVLong());
+        assertTrue(adjacencyCursor.hasNextVLong());
+        long targetOfCollapsedPathFromManhattan1 = adjacencyCursor.nextVLong();
+        assertTrue(adjacencyCursor.hasNextVLong());
+        long targetOfCollapsedPathFromManhattan2 = adjacencyCursor.nextVLong();
+        assertFalse(adjacencyCursor.hasNextVLong());
 
-            assertThat(Set.of(lasallevanburen, statenisland))
-                .containsExactlyInAnyOrder(
-                    targetOfCollapsedPathFromManhattan1,
-                    targetOfCollapsedPathFromManhattan2
-                );
+        assertThat(Set.of(lasallevanburen, statenisland))
+            .containsExactlyInAnyOrder(
+                targetOfCollapsedPathFromManhattan1,
+                targetOfCollapsedPathFromManhattan2
+            );
 
-            // notice how this is a collapsed relationship per route
-            // Silver Streak route and Airplane! route
-            adjacencyCursor = adjacencyList.adjacencyCursor(losangeles);
+        // notice how this is a collapsed relationship per route
+        // Silver Streak route and Airplane! route
+        adjacencyCursor = adjacencyList.adjacencyCursor(losangeles);
 
-            assertTrue(adjacencyCursor.hasNextVLong());
-            long targetOfCollapsedPathFromLosAngeles1 = adjacencyCursor.nextVLong();
-            assertTrue(adjacencyCursor.hasNextVLong());
-            long targetOfCollapsedPathFromLosAngeles2 = adjacencyCursor.nextVLong();
-            assertFalse(adjacencyCursor.hasNextVLong());
+        assertTrue(adjacencyCursor.hasNextVLong());
+        long targetOfCollapsedPathFromLosAngeles1 = adjacencyCursor.nextVLong();
+        assertTrue(adjacencyCursor.hasNextVLong());
+        long targetOfCollapsedPathFromLosAngeles2 = adjacencyCursor.nextVLong();
+        assertFalse(adjacencyCursor.hasNextVLong());
 
-            assertThat(List.of(chicago, chicago))
-                .containsExactlyInAnyOrder(
-                    targetOfCollapsedPathFromLosAngeles1,
-                    targetOfCollapsedPathFromLosAngeles2
-                );
-        }
+        assertThat(List.of(chicago, chicago))
+            .containsExactlyInAnyOrder(
+                targetOfCollapsedPathFromLosAngeles1,
+                targetOfCollapsedPathFromLosAngeles2
+            );
     }
 
     @Test
@@ -179,21 +178,21 @@ class CollapseMultiPathsTest {
         long washington = idFunction.of("washington");
         long newyork = idFunction.of("newyork");
 
-        try (AdjacencyList adjacencyList = path.topology().adjacencyList()) {
-            AdjacencyCursor adjacencyCursor = adjacencyList.adjacencyCursor(washington);
+        AdjacencyList adjacencyList = path.topology().adjacencyList();
 
-            assertTrue(adjacencyCursor.hasNextVLong());
-            long targetOfCollapsedPathFromWashington1 = adjacencyCursor.nextVLong();
-            assertTrue(adjacencyCursor.hasNextVLong());
-            long targetOfCollapsedPathFromWashington2 = adjacencyCursor.nextVLong();
-            assertTrue(adjacencyCursor.hasNextVLong());
-            long targetOfCollapsedPathFromWashington3 = adjacencyCursor.nextVLong();
-            assertFalse(adjacencyCursor.hasNextVLong());
+        AdjacencyCursor adjacencyCursor = adjacencyList.adjacencyCursor(washington);
 
-            // train, plane, automobile
-            assertThat(newyork).isEqualTo(targetOfCollapsedPathFromWashington1);
-            assertThat(newyork).isEqualTo(targetOfCollapsedPathFromWashington2);
-            assertThat(newyork).isEqualTo(targetOfCollapsedPathFromWashington3);
-        }
+        assertTrue(adjacencyCursor.hasNextVLong());
+        long targetOfCollapsedPathFromWashington1 = adjacencyCursor.nextVLong();
+        assertTrue(adjacencyCursor.hasNextVLong());
+        long targetOfCollapsedPathFromWashington2 = adjacencyCursor.nextVLong();
+        assertTrue(adjacencyCursor.hasNextVLong());
+        long targetOfCollapsedPathFromWashington3 = adjacencyCursor.nextVLong();
+        assertFalse(adjacencyCursor.hasNextVLong());
+
+        // train, plane, automobile
+        assertThat(newyork).isEqualTo(targetOfCollapsedPathFromWashington1);
+        assertThat(newyork).isEqualTo(targetOfCollapsedPathFromWashington2);
+        assertThat(newyork).isEqualTo(targetOfCollapsedPathFromWashington3);
     }
 }

@@ -29,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
  * One particular change could be that properties will be returned from {@link AdjacencyCursor}s
  * instead from separate {@link PropertyCursor}s.
  */
-public interface AdjacencyList extends AutoCloseable {
+public interface AdjacencyList {
 
     /**
      * Returns the degree of a node.
@@ -97,9 +97,6 @@ public interface AdjacencyList extends AutoCloseable {
      */
     AdjacencyCursor rawAdjacencyCursor();
 
-    @Override
-    void close();
-
     AdjacencyList EMPTY = new AdjacencyList() {
         @Override
         public int degree(long node) {
@@ -116,9 +113,5 @@ public interface AdjacencyList extends AutoCloseable {
             return AdjacencyCursor.empty();
         }
 
-        @Override
-        public void close() {
-
-        }
     };
 }
