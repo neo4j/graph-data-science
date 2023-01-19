@@ -85,7 +85,10 @@ public interface ConfigurableSeedConfigTest<ALGORITHM extends Algorithm<RESULT>,
         GraphProjectFromStoreConfig graphProjectConfig = ImmutableGraphProjectFromStoreConfig.of(
             "",
             graphName,
-            NodeProjections.single(NodeLabel.of("A"), ImmutableNodeProjection.of("A", PropertyMappings.of(nodeProperties))),
+            NodeProjections.single(
+                NodeLabel.of("A"),
+                ImmutableNodeProjection.of("A", ImmutablePropertyMappings.of(nodeProperties))
+            ),
             allRelationshipsProjection()
         );
 
