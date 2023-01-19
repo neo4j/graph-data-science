@@ -2,12 +2,12 @@ plugins {
     // Apply the java plugin to add support for Java
     id 'java'
     // Used for building a standalone jar
-    id 'com.github.johnrengelman.shadow' version '4.0.4'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 ext {
     // Make sure these are the same as your installation of GDS and Neo4j
-    gdsVersion = '2.3.0-alpha05'
+    gdsVersion = '2.3.0'
     neo4jVersion = '5.1.0'
 
     // Necessary to generate value classes for Pregel configs
