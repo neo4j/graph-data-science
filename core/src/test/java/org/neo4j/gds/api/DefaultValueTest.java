@@ -180,14 +180,36 @@ class DefaultValueTest {
         assertThat(fn.apply(defaultValue)).isEqualTo(expectedValue);
     }
 
+    @Test
+    void initFromValueType() {
+        assertThat(DefaultValue.of(ValueType.DOUBLE)).isEqualTo(DefaultValue.forDouble());
+        assertThat(DefaultValue.of(ValueType.LONG)).isEqualTo(DefaultValue.forLong());
+        assertThat(DefaultValue.of(ValueType.LONG_ARRAY)).isEqualTo(DefaultValue.forLongArray());
+        assertThat(DefaultValue.of(ValueType.FLOAT_ARRAY)).isEqualTo(DefaultValue.forFloatArray());
+        assertThat(DefaultValue.of(ValueType.DOUBLE_ARRAY)).isEqualTo(DefaultValue.forDoubleArray());
+        assertThat(DefaultValue.of(ValueType.STRING)).isEqualTo(DefaultValue.of(DEFAULT));
+    }
+
     private static Stream<Arguments> values() {
         return Stream.of(
             Arguments.of(42, (Function<DefaultValue, ?>) DefaultValue::longValue, 42L),
             Arguments.of(42, (Function<DefaultValue, ?>) DefaultValue::doubleValue, 42D),
             Arguments.of(13.37, (Function<DefaultValue, ?>) DefaultValue::doubleValue, 13.37D),
-            Arguments.of(List.of(13.37, 42), (Function<DefaultValue, ?>) DefaultValue::doubleArrayValue, new double[] {13.37D, 42D}),
-            Arguments.of(List.of(1337L, 42L), (Function<DefaultValue, ?>) DefaultValue::longArrayValue, new long[] {1337L, 42L}),
-            Arguments.of(List.of(1337, 42), (Function<DefaultValue, ?>) DefaultValue::longArrayValue, new long[] {1337L, 42L})
+            Arguments.of(
+                List.of(13.37, 42),
+                (Function<DefaultValue, ?>) DefaultValue::doubleArrayValue,
+                new double[]{13.37D, 42D}
+            ),
+            Arguments.of(
+                List.of(1337L, 42L),
+                (Function<DefaultValue, ?>) DefaultValue::longArrayValue,
+                new long[]{1337L, 42L}
+            ),
+            Arguments.of(
+                List.of(1337, 42),
+                (Function<DefaultValue, ?>) DefaultValue::longArrayValue,
+                new long[]{1337L, 42L}
+            )
         );
     }
 

@@ -25,6 +25,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.ImmutableNodeProperty;
@@ -73,7 +74,7 @@ public interface Nodes {
                     var propertySchema = ImmutablePropertySchema.builder()
                         .key(propertyMapping.propertyKey())
                         .valueType(nodePropertyValues.valueType())
-                        .defaultValue(propertyMapping.defaultValue())
+                        .defaultValue(DefaultValue.of(nodePropertyValues.valueType()))
                         .state(propertyState)
                         .build();
 

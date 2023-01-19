@@ -84,6 +84,23 @@ public final class DefaultValue {
         }
     }
 
+    public static DefaultValue of(ValueType type) {
+        switch (type) {
+            case LONG:
+                return DefaultValue.forLong();
+            case DOUBLE:
+                return DefaultValue.forDouble();
+            case DOUBLE_ARRAY:
+                return DefaultValue.forDoubleArray();
+            case FLOAT_ARRAY:
+                return DefaultValue.forFloatArray();
+            case LONG_ARRAY:
+                return DefaultValue.forLongArray();
+            default:
+                return DefaultValue.of(type.fallbackValue());
+        }
+    }
+
     private static DefaultValue ofFallBackValue(@Nullable Object defaultValue) {
         return of(defaultValue, false);
     }
