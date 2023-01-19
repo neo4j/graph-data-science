@@ -60,7 +60,7 @@ public interface GraphProjectConfigSupport {
             graphName,
             NodeProjections.create(singletonMap(
                 ALL_NODES,
-                ImmutableNodeProjection.of(PROJECT_ALL, PropertyMappings.of(propertyMappings))
+                ImmutableNodeProjection.of(PROJECT_ALL, ImmutablePropertyMappings.of(propertyMappings))
             )),
             rels
         );

@@ -662,8 +662,8 @@ public abstract class GdsCypher {
             .graphName(graphName.orElse(""))
             .nodeProjections(NodeProjections.create(nodeProjections))
             .relationshipProjections(ImmutableRelationshipProjections.builder().putAllProjections(relProjections).build())
-            .nodeProperties(PropertyMappings.of(nodeProperties))
-            .relationshipProperties(PropertyMappings.of(relProperties))
+            .nodeProperties(ImmutablePropertyMappings.of(nodeProperties))
+            .relationshipProperties(ImmutablePropertyMappings.of(relProperties))
             .build();
     }
 
@@ -881,7 +881,7 @@ public abstract class GdsCypher {
     }
 
     private static MinimalObject toMinimalObject(
-        AbstractPropertyMappings propertyMappings,
+        PropertyMappings propertyMappings,
         boolean includeAggregation
     ) {
         List<PropertyMapping> mappings = propertyMappings.mappings();

@@ -126,7 +126,7 @@ public final class GraphProjectConfigBuilders {
             .graphName(graphName.orElse(""))
             .nodeProjections(np)
             .relationshipProjections(rp)
-            .nodeProperties(PropertyMappings.of(nodeProperties))
+            .nodeProperties(ImmutablePropertyMappings.of(nodeProperties))
             .relationshipProperties(relationshipPropertyMappings)
             .readConcurrency(concurrency.orElse(ConcurrencyConfig.DEFAULT_CONCURRENCY))
             .jobId(jobId.orElse(new JobId()))

@@ -27,7 +27,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.AbstractPropertyMappings.fromObject;
+import static org.neo4j.gds.PropertyMappings.fromObject;
 
 @ValueClass
 @SuppressWarnings("immutables:subtype")
