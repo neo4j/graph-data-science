@@ -70,7 +70,7 @@ public final class GraphProjectConfigBuilders {
     ) {
         // Node projections
         Map<String, NodeProjection> tempNP = new LinkedHashMap<>();
-        nodeLabels.forEach(label -> tempNP.put(label, NodeProjection.of(label, PropertyMappings.of())));
+        nodeLabels.forEach(label -> tempNP.put(label, NodeProjection.of(label)));
         nodeProjections.forEach(np -> tempNP.put(np.label(), np));
         nodeProjectionsWithIdentifier.forEach(tempNP::put);
 

@@ -39,9 +39,9 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.AbstractNodeProjection.LABEL_KEY;
 import static org.neo4j.gds.ElementProjection.PROPERTIES_KEY;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
+import static org.neo4j.gds.NodeProjection.LABEL_KEY;
 
 class NodeProjectionsTest {
 
