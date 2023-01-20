@@ -33,7 +33,6 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -50,10 +49,10 @@ class NodeProjectionsTest {
     void syntacticSugars(Object argument) {
         NodeProjections actual = NodeProjections.fromObject(argument);
 
-        NodeProjections expected = NodeProjections.builder().projections(singletonMap(
+        NodeProjections expected = NodeProjections.single(
             NodeLabel.of("A"),
             NodeProjection.builder().label("A").properties(PropertyMappings.of()).build()
-        )).build();
+        );
 
         assertThat(
             actual,
@@ -73,19 +72,17 @@ class NodeProjectionsTest {
             )
         ));
 
-        NodeProjections expected = NodeProjections.builder().projections(singletonMap(
+        NodeProjections expected = NodeProjections.single(
             NodeLabel.of("MY_LABEL"),
             NodeProjection
                 .builder()
                 .label("A")
-                .properties(PropertyMappings
-                    .builder()
-                    .addMapping(PropertyMapping.of("prop1", DefaultValue.DEFAULT))
-                    .addMapping(PropertyMapping.of("prop2", DefaultValue.DEFAULT))
-                    .build()
+                .addProperties(
+                    PropertyMapping.of("prop1", DefaultValue.DEFAULT),
+                    PropertyMapping.of("prop2", DefaultValue.DEFAULT)
                 )
                 .build()
-        )).build();
+        );
 
         assertThat(
             actual,
@@ -98,10 +95,10 @@ class NodeProjectionsTest {
     void shouldParseMultipleLabels() {
         NodeProjections actual = NodeProjections.fromObject(Arrays.asList("A", "B"));
 
-        NodeProjections expected = NodeProjections.builder()
-            .putProjection(NodeLabel.of("A"), NodeProjection.builder().label("A").build())
-            .putProjection(NodeLabel.of("B"), NodeProjection.builder().label("B").build())
-            .build();
+        NodeProjections expected = NodeProjections.create(Map.of(
+            NodeLabel.of("A"), NodeProjection.builder().label("A").build(),
+            NodeLabel.of("B"), NodeProjection.builder().label("B").build()
+        ));
 
         assertThat(actual, equalTo(expected));
         assertThat(actual.labelProjection(), equalTo("A, B"));
@@ -111,14 +108,14 @@ class NodeProjectionsTest {
     void shouldSupportStar() {
         NodeProjections actual = NodeProjections.fromObject("*");
 
-        NodeProjections expected = NodeProjections.builder().projections(singletonMap(
+        NodeProjections expected = NodeProjections.single(
             ALL_NODES,
             NodeProjection
                 .builder()
                 .label("*")
                 .properties(PropertyMappings.of())
                 .build()
-        )).build();
+        );
 
         assertThat(
             actual,
@@ -190,21 +187,19 @@ class NodeProjectionsTest {
         PropertyMapping second,
         String... messages
     ) {
-        var builder = NodeProjections.builder().projections(Map.of(
+        var builder = ImmutableNodeProjections.builder().projections(Map.of(
             NodeLabel.of("A"),
             NodeProjection
                 .builder()
                 .label("A")
                 .addProperty(first)
                 .build(),
-
             NodeLabel.of("B"),
             NodeProjection
                 .builder()
                 .label("B")
                 .addProperty(second)
                 .build()
-
         ));
 
         var throwableAssert = assertThatThrownBy(builder::build)
@@ -225,19 +220,17 @@ class NodeProjectionsTest {
             )
         ));
 
-        NodeProjections expected = NodeProjections.builder().projections(singletonMap(
+        NodeProjections expected = NodeProjections.single(
             NodeLabel.of("MY_LABEL"),
             NodeProjection
                 .builder()
                 .label("A")
-                .properties(PropertyMappings
-                    .builder()
-                    .addMapping(PropertyMapping.of("prop1", DefaultValue.DEFAULT))
-                    .addMapping(PropertyMapping.of("prop2", DefaultValue.DEFAULT))
-                    .build()
+                .addProperties(
+                    PropertyMapping.of("prop1", DefaultValue.DEFAULT),
+                    PropertyMapping.of("prop2", DefaultValue.DEFAULT)
                 )
                 .build()
-        )).build();
+        );
 
         assertThat(
             actual,
