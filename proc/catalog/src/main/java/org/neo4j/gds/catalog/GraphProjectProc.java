@@ -21,7 +21,6 @@ package org.neo4j.gds.catalog;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeProjections;
-import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.filter.GraphStoreFilter;
@@ -41,6 +40,7 @@ import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.FictitiousGraphStoreLoader;
 import org.neo4j.gds.executor.GraphStoreCreator;
 import org.neo4j.gds.executor.GraphStoreFromDatabaseLoader;
+import org.neo4j.gds.executor.ProcPreconditions;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.procedure.Description;

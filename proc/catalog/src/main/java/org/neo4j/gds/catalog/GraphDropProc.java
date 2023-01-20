@@ -20,9 +20,9 @@
 package org.neo4j.gds.catalog;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
+import org.neo4j.gds.executor.ProcPreconditions;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

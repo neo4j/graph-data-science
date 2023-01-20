@@ -21,6 +21,7 @@ dependencies {
     implementation project(':transaction')
     implementation project(':string-formatting')
     implementation project(':defaults-and-limits-configuration')
+    implementation project(':licensing')
 
     implementation group: 'org.reflections',  name: 'reflections',  version: ver.doc.'reflections'
 

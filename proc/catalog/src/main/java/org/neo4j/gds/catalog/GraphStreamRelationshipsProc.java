@@ -20,12 +20,12 @@
 package org.neo4j.gds.catalog;
 
 import org.eclipse.collections.impl.tuple.Tuples;
-import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphStreamRelationshipsConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.executor.ProcPreconditions;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

@@ -65,6 +65,8 @@ public class ProcedureExecutor<
         String graphName,
         Map<String, Object> configuration
     ) {
+        ProcPreconditions.check();
+
         ImmutableComputationResult.Builder<ALGO, ALGO_RESULT, CONFIG> builder = ImmutableComputationResult.builder();
 
         CONFIG config = executorSpec.configParser(algoSpec.newConfigFunction(), executionContext).processInput(configuration);
