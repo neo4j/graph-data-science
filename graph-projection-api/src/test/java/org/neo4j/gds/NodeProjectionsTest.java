@@ -144,27 +144,69 @@ class NodeProjectionsTest {
             .hasMessage("Duplicate property key `prop`");
     }
 
-    @Test
-    void shouldFailOnAmbiguousNodePropertyDefinition() {
+    static Stream<Arguments> ambiguousPropertyMappings() {
+        return Stream.of(
+            Arguments.of(
+                "different neo key",
+                PropertyMapping.of("foo", "bar", DefaultValue.DEFAULT),
+                PropertyMapping.of("foo", "baz", DefaultValue.DEFAULT),
+                new String[]{
+                    "Specifying multiple neoPropertyKeys for the same property is not allowed, found propertyKey: `foo` with conflicting neoPropertyKeys:",
+                    "`bar`",
+                    "`baz`"
+                }
+            ),
+            Arguments.of(
+                "different default value types",
+                PropertyMapping.of("foo", "baz", DefaultValue.forLong()),
+                PropertyMapping.of("foo", "baz", DefaultValue.forDouble()),
+                new String[]{
+                    "Specifying different default values for the same property with identical neoPropertyKey is not allowed, found propertyKey: `foo` with conflicting default values:",
+                    "`-9223372036854775808`",
+                    "`NaN`",
+                }
+            ),
+            Arguments.of(
+                "different default values",
+                PropertyMapping.of("foo", "baz", DefaultValue.of(42)),
+                PropertyMapping.of("foo", "baz", DefaultValue.of(1337)),
+                new String[]{
+                    "Specifying different default values for the same property with identical neoPropertyKey is not allowed, found propertyKey: `foo` with conflicting default values:",
+                    "`42`",
+                    "`1337`",
+                }
+            )
+        );
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("ambiguousPropertyMappings")
+    void shouldFailOnAmbiguousNodePropertyDefinition(
+        String ignore,
+        PropertyMapping first,
+        PropertyMapping second,
+        String... messages
+    ) {
         var builder = ImmutableNodeProjections.builder().projections(Map.of(
             NodeLabel.of("A"),
             NodeProjection
                 .builder()
                 .label("A")
-                .addProperty(PropertyMapping.of("foo", "bar", DefaultValue.DEFAULT))
+                .addProperty(first)
                 .build(),
             NodeLabel.of("B"),
             NodeProjection
                 .builder()
                 .label("B")
-                .addProperty(PropertyMapping.of("foo", "baz", DefaultValue.DEFAULT))
+                .addProperty(second)
                 .build()
         ));
 
-        assertThatThrownBy(builder::build)
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining(
-                "Specifying multiple neoPropertyKeys for the same property is not allowed, found propertyKey: foo, neoPropertyKeys");
+        var throwableAssert = assertThatThrownBy(builder::build)
+            .isInstanceOf(IllegalArgumentException.class);
+        for (var message : messages) {
+            throwableAssert.hasMessageContaining(message);
+        }
     }
 
     @Test
