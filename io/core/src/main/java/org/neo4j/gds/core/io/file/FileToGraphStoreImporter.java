@@ -32,10 +32,9 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.io.GraphStoreGraphPropertyVisitor;
 import org.neo4j.gds.core.io.GraphStoreRelationshipVisitor;
-import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
-import org.neo4j.gds.core.loading.ImmutableNodes;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
+import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
@@ -137,11 +136,11 @@ public abstract class FileToGraphStoreImporter {
         graphStoreBuilder.capabilities(fileInput.capabilities());
 
         var nodes = importNodes(fileInput);
-        importRelationships(fileInput, nodes);
+        importRelationships(fileInput, nodes.idMap());
         importGraphProperties(fileInput);
     }
 
-    private IdMap importNodes(FileInput fileInput) {
+    private Nodes importNodes(FileInput fileInput) {
         progressTracker.beginSubTask();
         NodeSchema nodeSchema = fileInput.nodeSchema();
         graphSchemaBuilder.nodeSchema(nodeSchema);
@@ -164,19 +163,12 @@ public abstract class FileToGraphStoreImporter {
         ParallelUtil.run(tasks, Pools.DEFAULT);
 
         var nodes = nodesBuilder.build();
-        var nodeImportResultBuilder = ImmutableNodes.builder().idMap(nodes.idMap());
 
-        var schemaProperties = nodeSchema.unionProperties();
-        CSRGraphStoreUtil.extractNodeProperties(
-            nodeImportResultBuilder,
-            schemaProperties::get,
-            nodes.properties().propertyValues()
-        );
+        this.graphStoreBuilder.nodes(nodes);
 
-        graphStoreBuilder.nodes(nodeImportResultBuilder.build());
+        this.progressTracker.endSubTask();
 
-        progressTracker.endSubTask();
-        return nodes.idMap();
+        return nodes;
     }
 
     private void importRelationships(FileInput fileInput, IdMap nodes) {
