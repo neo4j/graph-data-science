@@ -19,10 +19,14 @@
  */
 package org.neo4j.gds.core.io;
 
-import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
-import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.collections.HugeSparseDoubleArrayList;
+import org.neo4j.gds.collections.HugeSparseDoubleList;
+import org.neo4j.gds.collections.HugeSparseFloatArrayList;
+import org.neo4j.gds.collections.HugeSparseLongArrayList;
+import org.neo4j.gds.collections.HugeSparseLongList;
+import org.neo4j.gds.collections.HugeSparseObjectArrayList;
 import org.neo4j.gds.core.io.file.GraphPropertyVisitor;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
@@ -36,6 +40,8 @@ import java.util.stream.BaseStream;
 import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
 
@@ -117,19 +123,14 @@ public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
 
     public interface ReducibleStream<T extends BaseStream<?, T>> {
         T stream();
-        ValueType valueType();
+
         ReducibleStream<T> reduce(ReducibleStream<T> other);
 
         static <T extends BaseStream<?, T>> ReducibleStream<T> empty() {
-            return new ReducibleStream<T>() {
+            return new ReducibleStream<>() {
                 @Override
                 public T stream() {
                     return (T) Stream.empty();
-                }
-
-                @Override
-                public ValueType valueType() {
-                    return ValueType.UNKNOWN;
                 }
 
                 @Override
@@ -142,20 +143,22 @@ public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
 
     static class LongStreamBuilder implements StreamBuilder<LongStream> {
 
-        private final LongArrayList longList;
+        private final HugeSparseLongList longList;
+        private long index;
 
         LongStreamBuilder() {
-            this.longList = new LongArrayList();
+            this.longList = HugeSparseLongList.of(-1L);
+            this.index = 0;
         }
 
         @Override
         public void add(Object value) {
-            this.longList.add((Long) value);
+            this.longList.set(index++, (long) value);
         }
 
         @Override
         public ReducibleStream<LongStream> build() {
-            return new ReducibleLongStream(this.longList.primitiveStream());
+            return new ReducibleLongStream(this.longList.stream().limit(index));
         }
     }
 
@@ -173,11 +176,6 @@ public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
         }
 
         @Override
-        public ValueType valueType() {
-            return ValueType.LONG;
-        }
-
-        @Override
         public ReducibleStream<LongStream> reduce(ReducibleStream<LongStream> other) {
             return new ReducibleLongStream(LongStream.concat(stream(), other.stream()));
         }
@@ -185,20 +183,22 @@ public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
 
     static class DoubleStreamBuilder implements StreamBuilder<DoubleStream> {
 
-        private final DoubleArrayList doubleList;
+        private final HugeSparseDoubleList doubleList;
+        private long index;
 
         DoubleStreamBuilder() {
-            this.doubleList = new DoubleArrayList();
+            this.doubleList = HugeSparseDoubleList.of(Double.NaN);
+            this.index = 0;
         }
 
         @Override
         public void add(Object value) {
-            this.doubleList.add((double) value);
+            this.doubleList.set(index++, (double) value);
         }
 
         @Override
         public ReducibleStream<DoubleStream> build() {
-            return new ReducibleDoubleStream(this.doubleList.primitiveStream());
+            return new ReducibleDoubleStream(this.doubleList.stream().limit(index));
         }
     }
 
@@ -216,11 +216,6 @@ public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
         }
 
         @Override
-        public ValueType valueType() {
-            return ValueType.DOUBLE;
-        }
-
-        @Override
         public ReducibleStream<DoubleStream> reduce(ReducibleStream<DoubleStream> other) {
             return new ReducibleDoubleStream(DoubleStream.concat(stream(), other.stream()));
         }
@@ -228,33 +223,44 @@ public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
 
     static class ObjectStreamBuilder<T> implements StreamBuilder<Stream<T>> {
 
-        private final List<T> objectList;
-        private final ValueType valueType;
+        private final HugeSparseObjectArrayList<T, ?> objectList;
+        private long index;
 
         ObjectStreamBuilder(ValueType valueType) {
-            this.valueType = valueType;
-            this.objectList = new ArrayList<>();
+            this.objectList = createArrayList(valueType);
+            this.index = 0;
         }
 
         @Override
         public void add(Object value) {
-            this.objectList.add((T) value);
+            this.objectList.set(index++, (T) value);
         }
 
         @Override
         public ReducibleStream<Stream<T>> build() {
-            return new ReducibleObjectStream<>(this.objectList.stream(), valueType);
+            return new ReducibleObjectStream<>(this.objectList.stream().limit(index));
+        }
+
+        private HugeSparseObjectArrayList<T, ?> createArrayList(ValueType valueType) {
+            switch (valueType) {
+                case LONG_ARRAY:
+                    return (HugeSparseObjectArrayList<T, ?>) HugeSparseLongArrayList.of(valueType.fallbackValue().longArrayValue());
+                case DOUBLE_ARRAY:
+                    return (HugeSparseObjectArrayList<T, ?>) HugeSparseDoubleArrayList.of(valueType.fallbackValue().doubleArrayValue());
+                case FLOAT_ARRAY:
+                    return (HugeSparseObjectArrayList<T, ?>) HugeSparseFloatArrayList.of(valueType.fallbackValue().floatArrayValue());
+                default:
+                    throw new IllegalArgumentException(formatWithLocale("Unsupported object stream type %s", valueType));
+            }
         }
     }
 
     static class ReducibleObjectStream<T> implements ReducibleStream<Stream<T>> {
 
         private final Stream<T> stream;
-        private final ValueType valueType;
 
-        ReducibleObjectStream(Stream<T> stream, ValueType valueType) {
+        ReducibleObjectStream(Stream<T> stream) {
             this.stream = stream;
-            this.valueType = valueType;
         }
 
         @Override
@@ -263,13 +269,8 @@ public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
         }
 
         @Override
-        public ValueType valueType() {
-            return this.valueType;
-        }
-
-        @Override
         public ReducibleStream<Stream<T>> reduce(ReducibleStream<Stream<T>> other) {
-            return new ReducibleObjectStream<>(Stream.concat(stream(), other.stream()), valueType);
+            return new ReducibleObjectStream<>(Stream.concat(stream(), other.stream()));
         }
     }
 }
