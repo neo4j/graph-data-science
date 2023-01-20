@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
@@ -29,21 +28,13 @@ import org.neo4j.gds.api.schema.NodeSchema;
 @ValueClass
 public interface Nodes {
 
-    @Value.Default
-    default NodeSchema schema() {
-        return NodeSchema.empty();
-    }
+    NodeSchema schema();
 
     IdMap idMap();
 
     @Value.Default
     default NodePropertyStore properties() {
         return NodePropertyStore.empty();
-    }
-
-    @TestOnly
-    static Nodes of(IdMap idmap) {
-        return ImmutableNodes.of(NodeSchema.empty(), idmap, NodePropertyStore.empty());
     }
 
 }
