@@ -102,7 +102,7 @@ public abstract class ElementProjection {
         ) {
             inlineBuilder()
                 .propertiesBuilder()
-                .addMapping(propertyKey, neoPropertyKey, defaultValue, aggregation);
+                .addMapping(PropertyMapping.of(propertyKey, neoPropertyKey, defaultValue, aggregation));
             return (Self) this;
         }
 
@@ -126,7 +126,7 @@ public abstract class ElementProjection {
     static final class InlinePropertiesBuilder {
         private final Supplier<PropertyMappings> getProperties;
         private final Consumer<PropertyMappings> setProperties;
-        private AbstractPropertyMappings.Builder propertiesBuilder;
+        private PropertyMappings.Builder propertiesBuilder;
 
         InlinePropertiesBuilder(
             Supplier<PropertyMappings> getProperties,
@@ -151,9 +151,9 @@ public abstract class ElementProjection {
             }
         }
 
-        private AbstractPropertyMappings.Builder propertiesBuilder() {
+        private PropertyMappings.Builder propertiesBuilder() {
             if (propertiesBuilder == null) {
-                propertiesBuilder = AbstractPropertyMappings.builder();
+                propertiesBuilder = PropertyMappings.builder();
                 PropertyMappings properties = getProperties.get();
                 if (properties != null) {
                     propertiesBuilder.from(properties);

@@ -662,8 +662,8 @@ public abstract class GdsCypher {
             .graphName(graphName.orElse(""))
             .nodeProjections(NodeProjections.create(nodeProjections))
             .relationshipProjections(ImmutableRelationshipProjections.builder().putAllProjections(relProjections).build())
-            .nodeProperties(PropertyMappings.of(nodeProperties))
-            .relationshipProperties(PropertyMappings.of(relProperties))
+            .nodeProperties(ImmutablePropertyMappings.of(nodeProperties))
+            .relationshipProperties(ImmutablePropertyMappings.of(relProperties))
             .build();
     }
 
@@ -817,8 +817,8 @@ public abstract class GdsCypher {
         ElementProjection projection,
         ElementIdentifier identifier
     ) {
-        if (projection instanceof AbstractNodeProjection) {
-            return toMinimalObject(((AbstractNodeProjection) projection), identifier);
+        if (projection instanceof NodeProjection) {
+            return toMinimalObject(((NodeProjection) projection), identifier);
         }
         if (projection instanceof RelationshipProjection) {
             return toMinimalObject(((RelationshipProjection) projection), identifier);
@@ -827,7 +827,7 @@ public abstract class GdsCypher {
     }
 
     private static MinimalObject toMinimalObject(
-        AbstractNodeProjection projection,
+        NodeProjection projection,
         ElementIdentifier identifier
     ) {
         MinimalObject properties = toMinimalObject(projection.properties(), false);
@@ -836,12 +836,12 @@ public abstract class GdsCypher {
         }
 
         Map<String, Object> value = new LinkedHashMap<>();
-        value.put(AbstractNodeProjection.LABEL_KEY, projection.label());
+        value.put(NodeProjection.LABEL_KEY, projection.label());
         properties.toObject().ifPresent(o -> value.put(PROPERTIES_KEY, o));
         return MinimalObject.map(value);
     }
 
-    private static boolean matchesLabel(String label, AbstractNodeProjection projection) {
+    private static boolean matchesLabel(String label, NodeProjection projection) {
         return Objects.equals(projection.label(), label);
     }
 
@@ -881,7 +881,7 @@ public abstract class GdsCypher {
     }
 
     private static MinimalObject toMinimalObject(
-        AbstractPropertyMappings propertyMappings,
+        PropertyMappings propertyMappings,
         boolean includeAggregation
     ) {
         List<PropertyMapping> mappings = propertyMappings.mappings();

@@ -29,7 +29,6 @@ import org.neo4j.gds.GraphFactoryTestSupport;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
-import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
@@ -89,25 +88,14 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
     @Test
     void nodeProjectionsWithExclusiveProperties() {
         GraphStore graphStore = new StoreLoaderBuilder()
-            .putNodeProjectionsWithIdentifier(
-                "N1",
-                NodeProjection.of(
-                    "Node1",
-                    PropertyMappings.builder().addMapping(PropertyMapping.of("prop1", 0.0D)).build()
-                )
-            ).putNodeProjectionsWithIdentifier(
-                "N2",
-                NodeProjection.of(
-                    "Node1",
-                    PropertyMappings.of()
-                )
-            ).putNodeProjectionsWithIdentifier(
-                "N3",
-                NodeProjection.of(
-                    "Node2",
-                    PropertyMappings.builder().addMapping(PropertyMapping.of("prop2", 1.0D)).build()
-                )
-            ).graphName("myGraph")
+            .putNodeProjectionsWithIdentifier("N1",
+                NodeProjection.builder().label("Node1").addProperty(PropertyMapping.of("prop1", 0.0D)).build()
+            )
+            .putNodeProjectionsWithIdentifier("N2", NodeProjection.of("Node1"))
+            .putNodeProjectionsWithIdentifier("N3",
+                NodeProjection.builder().label("Node2").addProperty(PropertyMapping.of("prop2", 1.0D)).build()
+            )
+            .graphName("myGraph")
             .databaseService(db)
             .build()
             .graphStore();
@@ -134,19 +122,14 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         GraphStore graphStore = new StoreLoaderBuilder()
             .putNodeProjectionsWithIdentifier(
                 allIdentifier.name(),
-                NodeProjection.of(
-                    "*",
-                    PropertyMappings.builder()
-                        .addMapping(PropertyMapping.of("prop1", 42.0D))
-                        .addMapping(PropertyMapping.of("prop2", 8.0D))
-                        .build()
-                )
+                NodeProjection
+                    .builder()
+                    .label("*")
+                    .addProperties(PropertyMapping.of("prop1", 42.0D), PropertyMapping.of("prop2", 8.0D))
+                    .build()
             ).putNodeProjectionsWithIdentifier(
                 node2Identifier.name(),
-                NodeProjection.of(
-                    "Node2",
-                    PropertyMappings.builder().addMapping(PropertyMapping.of("prop2", 8.0D)).build()
-                )
+                NodeProjection.builder().label("Node2").addProperty(PropertyMapping.of("prop2", 8.0D)).build()
             ).graphName("myGraph")
             .databaseService(db)
             .build()

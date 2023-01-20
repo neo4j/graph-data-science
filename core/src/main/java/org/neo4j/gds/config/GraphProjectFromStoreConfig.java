@@ -52,8 +52,8 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
     String RELATIONSHIP_PROPERTIES_KEY = "relationshipProperties";
 
     @Key(NODE_PROJECTION_KEY)
-    @ConvertWith(method = "org.neo4j.gds.AbstractNodeProjections#fromObject")
-    @Configuration.ToMapValue("org.neo4j.gds.AbstractNodeProjections#toObject")
+    @ConvertWith(method = "org.neo4j.gds.NodeProjections#fromObject")
+    @Configuration.ToMapValue("org.neo4j.gds.NodeProjections#toObject")
     NodeProjections nodeProjections();
 
     @Key(RELATIONSHIP_PROJECTION_KEY)
@@ -63,16 +63,16 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
 
     @Value.Default
     @Value.Parameter(false)
-    @Configuration.ConvertWith(method = "org.neo4j.gds.AbstractPropertyMappings#fromObject")
-    @Configuration.ToMapValue("org.neo4j.gds.AbstractPropertyMappings#toObject")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.PropertyMappings#fromObject")
+    @Configuration.ToMapValue("org.neo4j.gds.PropertyMappings#toObject")
     default PropertyMappings nodeProperties() {
         return PropertyMappings.of();
     }
 
     @Value.Default
     @Value.Parameter(false)
-    @Configuration.ConvertWith(method = "org.neo4j.gds.AbstractPropertyMappings#fromObject")
-    @Configuration.ToMapValue("org.neo4j.gds.AbstractPropertyMappings#toObject")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.PropertyMappings#fromObject")
+    @Configuration.ToMapValue("org.neo4j.gds.PropertyMappings#toObject")
     default PropertyMappings relationshipProperties() {
         return PropertyMappings.of();
     }
