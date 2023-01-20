@@ -22,15 +22,6 @@ package org.neo4j.gds.compat._54;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.systemgraph.TopologyGraphDbmsModel;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
-import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
-import org.neo4j.internal.kernel.api.security.LoginContext;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.api.exceptions.Status;
-import org.neo4j.kernel.impl.coreapi.InternalTransaction;
-import org.neo4j.kernel.impl.coreapi.TransactionExceptionMapper;
-
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 final class CompatGraphDatabaseAPIImpl extends GdsGraphDatabaseAPI {
 
@@ -49,26 +40,5 @@ final class CompatGraphDatabaseAPIImpl extends GdsGraphDatabaseAPI {
         //   1) We never did this before
         //   2) We only use this for tests and benchmarks
         return TopologyGraphDbmsModel.HostedOnMode.SINGLE;
-    }
-
-    @Override
-    public InternalTransaction beginTransaction(
-        KernelTransaction.Type type,
-        LoginContext loginContext,
-        ClientConnectionInfo clientInfo,
-        long timeout,
-        TimeUnit unit,
-        Consumer<Status> terminationCallback,
-        TransactionExceptionMapper transactionExceptionMapper
-    ) {
-        return api.beginTransaction(
-            type,
-            loginContext,
-            clientInfo,
-            timeout,
-            unit,
-            terminationCallback,
-            transactionExceptionMapper
-        );
     }
 }
