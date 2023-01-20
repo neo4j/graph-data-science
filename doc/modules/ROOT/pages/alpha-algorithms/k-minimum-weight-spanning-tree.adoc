@@ -21,6 +21,14 @@ The minimum weight k-Spanning Tree is NP-Hard. The algorithm in the Neo4j GDS Li
 [[algorithms-minimum-k-weight-spanning-tree-syntax]]
 == Syntax
 
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.K Spanning Tree syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-write]
+======
 .The following will run the k-spanning tree algorithms and write back results:
 [source, cypher, role=noplay]
 ----
@@ -31,19 +39,19 @@ CALL gds.alpha.kSpanningTree.write(
 YIELD effectiveNodeCount: Integer,
       preProcessingMillis: Integer,
       computeMillis: Integer,
+      postProcessingMillis: Integer,
       writeMillis: Integer,
       configuration: Map
 ----
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name                                                                             | Type    | Default | Optional  | Description
-| k                                                                                | Integer | null    | no        | The result is a tree with `k` nodes and `k − 1` relationships.
-| sourceNode                                                                      | Integer | null    | no        | The start node ID.
-| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes       | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
-| writeProperty                                                                    | String  | n/a   | no       | The partition that a node belongs to.
-| objective  | String | 'minimum'  | yes      | If specified, the parameter dictates whether to try and find the minimum or the maximum  k-spanning tree. By default, the algorithm looks for the minimum one. Permitted values are 'minimum' and 'maximum'.
+| Name                                                                             | Type    | Default   | Optional  | Description
+include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+include::partial$/algorithms/k-spanning-tree/specific-configuration.adoc[]
+
 |===
 
 .Results
@@ -53,8 +61,13 @@ YIELD effectiveNodeCount: Integer,
 | effectiveNodeCount  | Integer | The number of visited nodes.
 | preProcessingMillis | Integer | Milliseconds for preprocessing the data.
 | computeMillis       | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis | Integer | Milliseconds for postprocessing results of the algorithm.
 | writeMillis         | Integer | Milliseconds for writing result data back.
+| configuration         | Map       | The configuration used for running the algorithm.
+
 |===
+======
+====
 
 [[algorithms-minimum-weight-spanning-tree-sample]]
 == Minimum Weight k-Spanning Tree algorithm examples
