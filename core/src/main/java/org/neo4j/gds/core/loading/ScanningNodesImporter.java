@@ -27,7 +27,11 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.properties.nodes.ImmutableNodeProperty;
+import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.schema.ImmutablePropertySchema;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
@@ -199,7 +203,37 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
             importPropertiesFromIndex(idMap, nodeProperties);
         }
 
-        return Nodes.of(idMap, propertyMappingsByLabel, nodeProperties, PropertyState.PERSISTENT);
+        var nodeSchema = NodeSchema.empty();
+        var nodePropertyStoreBuilder = NodePropertyStore.builder();
+
+        this.propertyMappingsByLabel.forEach(((nodeLabel, mappings) -> {
+            if (mappings.mappings().isEmpty()) {
+                nodeSchema.addLabel(nodeLabel);
+            } else {
+                mappings.mappings().forEach(propertyMapping -> {
+                    var nodePropertyValues = nodeProperties.get(propertyMapping);
+                    // The default value is either overridden by the user
+                    // or inferred from the actual property value.
+                    var defaultValue = propertyMapping.defaultValue().isUserDefined()
+                        ? propertyMapping.defaultValue()
+                        : nodePropertyValues.valueType().fallbackValue();
+                    var propertySchema = ImmutablePropertySchema.builder()
+                        .key(propertyMapping.propertyKey())
+                        .valueType(nodePropertyValues.valueType())
+                        .defaultValue(defaultValue)
+                        .state(PropertyState.PERSISTENT)
+                        .build();
+
+                    nodeSchema.addProperty(nodeLabel, propertySchema.key(), propertySchema);
+                    nodePropertyStoreBuilder.putProperty(
+                        propertySchema.key(),
+                        ImmutableNodeProperty.of(nodePropertyValues, propertySchema)
+                    );
+                });
+            }
+        }));
+
+        return ImmutableNodes.of(nodeSchema, idMap, nodePropertyStoreBuilder.build());
     }
 
     private void importPropertiesFromIndex(
