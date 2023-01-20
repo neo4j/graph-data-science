@@ -222,9 +222,10 @@ public final class GraphFactory {
         Optional<Boolean> validateRelationships,
         Optional<Integer> concurrency,
         Optional<Boolean> indexInverse,
-        Optional<ExecutorService> executorService
+        Optional<ExecutorService> executorService,
+        Optional<Boolean> loadRelationshipProperties
     ) {
-        var loadRelationshipProperties = !propertyConfigs.isEmpty();
+        var doLoadRelationshipProperties = loadRelationshipProperties.orElse(!propertyConfigs.isEmpty());
 
         var aggregations = propertyConfigs.isEmpty()
             ? new Aggregation[]{aggregation.orElse(Aggregation.DEFAULT)}
@@ -290,7 +291,7 @@ public final class GraphFactory {
             .bufferSize(bufferSize)
             .propertyConfigs(propertyConfigs)
             .isMultiGraph(isMultiGraph)
-            .loadRelationshipProperty(loadRelationshipProperties)
+            .loadRelationshipProperty(doLoadRelationshipProperties)
             .direction(Direction.fromOrientation(actualOrientation))
             .executorService(executorService.orElse(Pools.DEFAULT))
             .concurrency(finalConcurrency);
