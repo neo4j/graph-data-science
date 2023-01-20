@@ -369,7 +369,9 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
     }
 
     private SpanningTree combineApproach(SpanningTree tree) {
-
+        if (tree.effectiveNodeCount() < k) {
+            return tree;
+        }
         var spanningTree1 = cutLeafApproach(tree);
         var spanningTree2 = growApproach(tree);
 
