@@ -154,7 +154,6 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
             messenger,
             voteBits,
             iteration,
-            hasSentMessages,
             progressTracker
         );
 
@@ -197,7 +196,6 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
             messenger,
             voteBits,
             iteration,
-            hasSentMessages,
             progressTracker
         );
 

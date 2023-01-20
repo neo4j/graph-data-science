@@ -108,7 +108,6 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
             messenger,
             voteBits,
             iteration,
-            hasSentMessages,
             progressTracker
         );
 
@@ -149,7 +148,6 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
             messenger,
             voteBits,
             iteration,
-            hasSentMessages,
             progressTracker
         );
 

@@ -28,8 +28,6 @@ import org.neo4j.gds.beta.pregel.PregelConfig;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
  * A context that is used during the computation. It allows an implementation
  * to send messages to other nodes and change the state of the currently
@@ -41,7 +39,8 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
 
     private final Messenger<?> messenger;
     private final MutableInt iteration;
-    private final AtomicBoolean hasSendMessage;
+    private boolean hasSendMessage;
+
     protected BasePregelComputation<CONFIG> computation;
 
     public ComputeContext(Graph graph,
@@ -51,7 +50,6 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
                           Messenger<?> messenger,
                           HugeAtomicBitSet voteBits,
                           MutableInt iteration,
-                          AtomicBoolean hasSendMessage,
                           ProgressTracker progressTracker) {
         super(graph, config, nodeValue, progressTracker);
         this.computation = computation;
@@ -61,7 +59,7 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
         this.messenger = messenger;
         this.voteBits = voteBits;
         this.iteration = iteration;
-        this.hasSendMessage = hasSendMessage;
+        this.hasSendMessage = false;
     }
 
     private final SendMessagesFunction sendMessagesFunction;
@@ -152,7 +150,7 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
      */
     public void sendTo(long targetNodeId, double message) {
         messenger.sendTo(targetNodeId, message);
-        this.hasSendMessage.set(true);
+        this.hasSendMessage = true;
     }
 
     private void sendToNeighbors(long sourceNodeId, double message) {
@@ -167,6 +165,10 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
             sendTo(targetNodeId, computation.applyRelationshipWeight(message, weight));
             return true;
         });
+    }
+
+    public boolean hasSentMessage() {
+        return hasSendMessage;
     }
 
     @FunctionalInterface
@@ -186,7 +188,6 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
             Messenger<?> messenger,
             HugeAtomicBitSet voteBits,
             MutableInt iteration,
-            AtomicBoolean hasSendMessage,
             ProgressTracker progressTracker
         ) {
             super(
@@ -197,7 +198,6 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
                 messenger,
                 voteBits,
                 iteration,
-                hasSendMessage,
                 progressTracker
             );
 

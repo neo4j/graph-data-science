@@ -78,6 +78,7 @@ public final class PartitionedComputeStep<
     @Override
     public void run() {
         computeBatch();
+        hasSentMessage.set(computeContext().hasSentMessage());
     }
 
     @Override
