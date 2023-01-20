@@ -95,9 +95,14 @@ public interface Nodes {
         return ImmutableNodes.of(nodeSchema, idMap, nodePropertyStoreBuilder.build());
     }
 
-    static Nodes of(NodeSchema nodeSchema, IdMap idMap, Map<PropertyMapping, NodePropertyValues> properties, PropertyState propertyState) {
-        NodePropertyStore.Builder builder = NodePropertyStore.builder();
-        properties.forEach((mapping, nodeProperties) -> builder.putProperty(
+    static Nodes of(
+        NodeSchema nodeSchema,
+        IdMap idMap,
+        Map<PropertyMapping, NodePropertyValues> properties,
+        PropertyState propertyState
+    ) {
+        var propertyStoreBuilder = NodePropertyStore.builder();
+        properties.forEach((mapping, nodeProperties) -> propertyStoreBuilder.putProperty(
             mapping.propertyKey(),
             NodeProperty.of(
                 mapping.propertyKey(),
@@ -108,6 +113,7 @@ public interface Nodes {
                     : nodeProperties.valueType().fallbackValue()
             )
         ));
-        return ImmutableNodes.of(nodeSchema, idMap, builder.build());
+
+        return ImmutableNodes.of(nodeSchema, idMap, propertyStoreBuilder.build());
     }
 }
