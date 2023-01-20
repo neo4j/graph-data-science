@@ -3,7 +3,7 @@
 = Minimum Weight k-Spanning Tree
 :description: This section describes the Minimum Weight k-Spanning Tree algorithm in the Neo4j Graph Data Science library.
 :entity: node
-:result: spanning tree edge
+:result: spanning tree
 :algorithm: k-Spanning Tree heuristic
 
 include::partial$/operations-reference/alpha-note.adoc[]
@@ -11,13 +11,18 @@ include::partial$/operations-reference/alpha-note.adoc[]
 
 == Introduction
 
-Sometimes,  we want to limit the size of our spanning tree result, as we are only interested in finding a smaller tree within the graph, and not one that necessarily spans across all nodes.
+Sometimes, we might require a spanning tree(a tree where its nodes are connected with each via a single path) that does not necessarily span all nodes in the graph.
 The K-Spanning tree heuristic algorithm returns a tree with `k` nodes and `k − 1` relationships.
-Our heuristic processes the result found by the Prim algorithm for the Minimum Weight Spanning Tree problem.
+Our heuristic processes the result found by Prim's algorithm for the  xref:algorithms/minimum-weight-spanning-tree.adoc[Minimum Weight Spanning Tree] problem.
+Like Prim, it starts from a given source node, finds a spanning tree for all nodes and then removes nodes using heuristics to produce a tree with 'k' nodes.
+Note that the source node will not be necessarily included in the final output as the heuristic tries to find a globally good tree.
 
 [[algorithms-k-spanning]]
 == Considerations
-The minimum weight k-Spanning Tree is NP-Hard. The algorithm in the Neo4j GDS Library is therefore not guaranteed to find the optimal answer, but should return good approximation in practice.
+The Minimum weight k-Spanning Tree is NP-Hard. The algorithm in the Neo4j GDS Library is therefore not guaranteed to find the optimal answer, but should hopefully return a good approximation in practice.
+
+Like Prim algorithm, the algorithm focuses only on the component of the source node. If that component has fewer than `k` nodes, it will not look into other components, but will instead return the component.
+
 [[algorithms-minimum-k-weight-spanning-tree-syntax]]
 == Syntax
 
@@ -46,7 +51,7 @@ YIELD effectiveNodeCount: Integer,
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
 .Configuration
-[opts="header",cols="1,1,1,1,4"]
+[opts="header",cols="3,2,3m,2,8"]
 |===
 | Name                                                                             | Type    | Default   | Optional  | Description
 include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
@@ -72,7 +77,10 @@ include::partial$/algorithms/k-spanning-tree/specific-configuration.adoc[]
 [[algorithms-minimum-weight-spanning-tree-sample]]
 == Minimum Weight k-Spanning Tree algorithm examples
 
-image::mst.png[]
+:algorithm-name: {algorithm}
+:graph-description: road network
+:image-file: spanning-tree-graph.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
 
 .The following will create the sample graph depicted in the figure:
 [source, cypher, role=noplay setup-query]
@@ -113,8 +121,8 @@ CALL gds.graph.project(
 
 === Minimum K-Spanning Tree example
 
-In our sample graph we have 5 nodes.
-By setting the `k=3`, we define that we want to get returned a 3-minimum spanning tree that covers 3 nodes and has 2 relationships.
+In our sample graph we have 7 nodes.
+By setting the `k=3`, we define that we want to find a 3-minimum spanning tree that covers 3 nodes and has 2 relationships.
 
 .The following will run the k-minimum spanning tree algorithm and write back results:
 [role=query-example, no-result=true, group=write-example]
@@ -199,4 +207,4 @@ RETURN n.id As Place, p as Partition
 | "E"     | 3
 |===
 --
-Nodes C, D, and E are the result 3-maximum spanning tree of our graph.
+Nodes C, D, and E form a 3-maximum spanning tree of our graph.
