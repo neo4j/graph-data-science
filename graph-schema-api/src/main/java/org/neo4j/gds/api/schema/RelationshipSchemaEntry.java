@@ -65,7 +65,7 @@ public class RelationshipSchemaEntry extends ElementSchemaEntry<RelationshipSche
     }
 
     @Override
-    RelationshipSchemaEntry union(RelationshipSchemaEntry other) {
+    public RelationshipSchemaEntry union(RelationshipSchemaEntry other) {
         if (!other.identifier().equals(this.identifier())) {
             throw new UnsupportedOperationException(
                 formatWithLocale(
