@@ -29,7 +29,6 @@ import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
-import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -165,18 +164,14 @@ abstract class GraphSageBaseProcTest extends BaseProcTest {
             Arguments.of(
                 ImmutableGraphProjectFromStoreConfig.builder()
                     .graphName("implicitWeightedGraph")
-                    .nodeProjections(NodeProjections
-                        .builder()
-                        .putProjection(
-                            NodeLabel.of("King"),
-                            NodeProjection.of(
-                                "King",
-                                PropertyMappings.of(
-                                    PropertyMapping.of("age")
-                                )
-                            )
-                        )
-                        .build())
+                    .nodeProjections(NodeProjections.single(
+                        NodeLabel.of("King"),
+                        NodeProjection.builder()
+                            .label("King")
+                            .addProperty(
+                                PropertyMapping.of("age")
+                            ).build()
+                    ))
                     .relationshipProjections(RelationshipProjections.fromString("REL")
                     ).build(),
                 List.of("birth_year", "death_year"),
@@ -186,19 +181,15 @@ abstract class GraphSageBaseProcTest extends BaseProcTest {
             Arguments.of(
                 ImmutableGraphProjectFromStoreConfig.builder()
                     .graphName("implicitWeightedGraph")
-                    .nodeProjections(NodeProjections
-                        .builder()
-                        .putProjection(
-                            NodeLabel.of("King"),
-                            NodeProjection.of(
-                                "King",
-                                PropertyMappings.of(
-                                    PropertyMapping.of("age"),
-                                    PropertyMapping.of("birth_year")
-                                )
-                            )
-                        )
-                        .build())
+                    .nodeProjections(NodeProjections.single(
+                        NodeLabel.of("King"),
+                        NodeProjection.builder()
+                            .label("King")
+                            .addProperties(
+                                PropertyMapping.of("age"),
+                                PropertyMapping.of("birth_year")
+                            ).build()
+                    ))
                     .relationshipProjections(RelationshipProjections.fromString("REL")
                     ).build(),
                 List.of("death_year"),

@@ -23,23 +23,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.ImmutableRelationshipProjections;
 import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
-import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
+import org.neo4j.gds.config.GraphProjectFromStoreConfigImpl;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -206,21 +205,20 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
     }
 
     static String graphProjectQuery() {
-        GraphProjectFromStoreConfig config = ImmutableGraphProjectFromStoreConfig
+        GraphProjectFromStoreConfig config = GraphProjectFromStoreConfigImpl
             .builder()
             .graphName("")
-            .nodeProjections(NodeProjections.of())
+            .username("")
+            .nodeProjections(NodeProjections.all())
             .nodeProperties(PropertyMappings.fromObject(Arrays.asList("seed1", "seed2")))
-            .relationshipProjections(ImmutableRelationshipProjections.builder()
-                .putProjection(
+            .relationshipProjections(RelationshipProjections.single(
                     ALL_RELATIONSHIPS,
                     RelationshipProjection.builder()
                         .type("TYPE")
                         .orientation(Orientation.UNDIRECTED)
-                        .properties(PropertyMappings.of(
-                            Collections.singletonList(PropertyMapping.of("weight", 1D))))
+                        .addProperty(PropertyMapping.of("weight", 1D))
                         .build()
-                ).build()
+                )
             ).build();
 
         return GdsCypher
