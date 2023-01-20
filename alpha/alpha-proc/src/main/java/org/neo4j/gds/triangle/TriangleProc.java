@@ -50,7 +50,7 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(graphName, configuration, false, false);
+        var computationResult = compute(graphName, configuration, false);
         return computationResultConsumer().consume(computationResult, executionContext());
     }
 
@@ -84,7 +84,6 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
             Graph graph = computationResult.graph();
 
             if (graph.isEmpty()) {
-                graph.release();
                 return Stream.empty();
             }
 

@@ -74,7 +74,6 @@ public class HarmonicCentralityWriteProc extends HarmonicCentralityProc<Centrali
                 .withPreProcessingMillis(computationResult.preProcessingMillis());
 
             if (graph.isEmpty()) {
-                graph.release();
                 return Stream.of(builder.build());
             }
 

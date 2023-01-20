@@ -240,8 +240,4 @@ public interface GraphStore {
         RelationshipType relationshipType,
         Collection<String> propertyKeys
     );
-
-    void canRelease(boolean canRelease);
-
-    void release();
 }

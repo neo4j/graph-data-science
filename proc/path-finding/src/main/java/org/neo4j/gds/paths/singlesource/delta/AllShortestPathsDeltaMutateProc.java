@@ -52,7 +52,7 @@ public class AllShortestPathsDeltaMutateProc extends BaseProc {
             mutateSpec,
             pipelineSpec,
             executionContext()
-        ).compute(graphName, configuration, false, false);
+        ).compute(graphName, configuration, false);
     }
 
     @Procedure(name = "gds.allShortestPaths.delta.mutate.estimate", mode = READ)

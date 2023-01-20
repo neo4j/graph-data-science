@@ -140,8 +140,4 @@ public final class CompositeAdjacencyList implements AdjacencyList {
         return compositeAdjacencyCursorFactory.create(cursors);
     }
 
-    @Override
-    public void close() {
-        adjacencyLists.forEach(AdjacencyList::close);
-    }
 }

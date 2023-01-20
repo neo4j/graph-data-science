@@ -47,7 +47,7 @@ public class AllShortestPathsDeltaStatsProc extends BaseProc {
         return new ProcedureExecutor<>(
             statsSpec,
             executionContext()
-        ).compute(graphName, configuration, false, false);
+        ).compute(graphName, configuration, false);
     }
 
     @Procedure(name = "gds.allShortestPaths.delta.stats.estimate", mode = READ)

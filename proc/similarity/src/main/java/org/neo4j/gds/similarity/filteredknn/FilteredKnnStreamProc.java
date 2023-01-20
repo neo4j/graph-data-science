@@ -72,7 +72,6 @@ public class FilteredKnnStreamProc extends StreamProc<FilteredKnn, FilteredKnnRe
             Graph graph = computationResult.graph();
 
             if (computationResult.isGraphEmpty()) {
-                graph.release();
                 return Stream.empty();
             }
 

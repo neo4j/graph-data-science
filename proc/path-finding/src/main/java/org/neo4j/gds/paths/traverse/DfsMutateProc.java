@@ -46,7 +46,7 @@ public class DfsMutateProc extends BaseProc {
         return new ProcedureExecutor<>(
             mutateSpec,
             executionContext()
-        ).compute(graphName, configuration, false, false);
+        ).compute(graphName, configuration, false);
     }
 
     @Procedure(name = "gds.dfs.mutate.estimate", mode = READ)

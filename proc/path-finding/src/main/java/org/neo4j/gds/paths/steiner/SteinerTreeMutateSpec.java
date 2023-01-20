@@ -67,7 +67,6 @@ public class SteinerTreeMutateSpec implements AlgorithmSpec<ShortestPathsSteiner
             MutateResult.Builder builder = new MutateResult.Builder();
 
             if (graph.isEmpty()) {
-                graph.release();
                 return Stream.of(builder.build());
             }
 

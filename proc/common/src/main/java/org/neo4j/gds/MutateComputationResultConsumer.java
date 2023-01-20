@@ -53,7 +53,6 @@ public abstract class MutateComputationResultConsumer<ALGO extends Algorithm<ALG
             try (ProgressTimer ignored = ProgressTimer.start(builder::withMutateMillis)) {
                 if (!computationResult.isGraphEmpty()) {
                     updateGraphStore(builder, computationResult, executionContext);
-                    computationResult.graph().releaseProperties();
                 }
             }
 

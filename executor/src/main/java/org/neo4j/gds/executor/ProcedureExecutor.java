@@ -64,8 +64,7 @@ public class ProcedureExecutor<
     public RESULT compute(
         String graphName,
         Map<String, Object> configuration,
-        boolean releaseAlgorithm,
-        boolean releaseTopology
+        boolean releaseAlgorithm
     ) {
         ImmutableComputationResult.Builder<ALGO, ALGO_RESULT, CONFIG> builder = ImmutableComputationResult.builder();
 
@@ -106,7 +105,7 @@ public class ProcedureExecutor<
 
         algo.getProgressTracker().setEstimatedResourceFootprint(memoryEstimationInBytes, config.concurrency());
 
-        ALGO_RESULT result = executeAlgorithm(releaseAlgorithm, releaseTopology, builder, graph, algo);
+        ALGO_RESULT result = executeAlgorithm(releaseAlgorithm, builder, algo);
 
         var computationResult = builder
             .graph(graph)
@@ -121,9 +120,7 @@ public class ProcedureExecutor<
 
     private ALGO_RESULT executeAlgorithm(
         boolean releaseAlgorithm,
-        boolean releaseTopology,
         ImmutableComputationResult.Builder<ALGO, ALGO_RESULT, CONFIG> builder,
-        Graph graph,
         ALGO algo
     ) {
         return runWithExceptionLogging(
@@ -138,9 +135,6 @@ public class ProcedureExecutor<
                     if (releaseAlgorithm) {
                         algo.getProgressTracker().release();
                         algo.release();
-                    }
-                    if (releaseTopology) {
-                        graph.releaseTopology();
                     }
                 }
             }

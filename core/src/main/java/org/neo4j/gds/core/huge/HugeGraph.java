@@ -119,8 +119,6 @@ public class HugeGraph implements CSRGraph {
     private @Nullable PropertyCursor propertyCursorCache;
     private @Nullable PropertyCursor inversePropertyCursorCache;
 
-    private boolean canRelease = true;
-
     protected final boolean hasRelationshipProperty;
     protected final boolean isMultiGraph;
 
@@ -514,58 +512,6 @@ public class HugeGraph implements CSRGraph {
         }
 
         return inverseProperties.propertyCursor(inversePropertyCursorCache, sourceNodeId, defaultPropertyValue);
-    }
-
-    @Override
-    public void canRelease(boolean canRelease) {
-        this.canRelease = canRelease;
-    }
-
-    @Override
-    public void releaseTopology() {
-        if (!canRelease) return;
-
-        if (adjacency != null) {
-            adjacency.close();
-            adjacency = null;
-        }
-        if (properties != null) {
-            properties.close();
-            properties = null;
-        }
-        if (inverseAdjacency != null) {
-            inverseAdjacency.close();
-            inverseAdjacency = null;
-        }
-        if (inverseProperties != null) {
-            inverseProperties.close();
-            inverseProperties = null;
-        }
-        if (adjacencyCursorCache != null) {
-            adjacencyCursorCache.close();
-            adjacencyCursorCache = null;
-        }
-        if (propertyCursorCache != null) {
-            propertyCursorCache.close();
-            propertyCursorCache = null;
-        }
-        if (inverseAdjacencyCursorCache != null) {
-            inverseAdjacencyCursorCache.close();
-            inverseAdjacencyCursorCache = null;
-        }
-        if (inversePropertyCursorCache != null) {
-            inversePropertyCursorCache.close();
-            inversePropertyCursorCache = null;
-        }
-    }
-
-    @Override
-    public void releaseProperties() {
-        if (canRelease) {
-            for (NodePropertyValues idMap : nodeProperties.values()) {
-                idMap.release();
-            }
-        }
     }
 
 

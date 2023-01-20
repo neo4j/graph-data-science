@@ -93,11 +93,6 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
     }
 
     @Override
-    public void close() {
-        cursors.forEach(AdjacencyCursor::close);
-    }
-
-    @Override
     public long skipUntil(long target) {
         for (var cursor : cursors) {
             cursorQueue.remove(cursor);

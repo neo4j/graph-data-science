@@ -48,7 +48,7 @@ public class ShortestPathAStarStreamProc extends ShortestPathStreamProc<AStar, S
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphName, configuration, false, true));
+        return stream(compute(graphName, configuration, false));
     }
 
     @Procedure(name = "gds.shortestPath.astar.stream.estimate", mode = READ)

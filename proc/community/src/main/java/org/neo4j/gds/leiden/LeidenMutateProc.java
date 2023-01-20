@@ -44,7 +44,7 @@ public class LeidenMutateProc extends BaseProc {
         return new ProcedureExecutor<>(
             new LeidenMutateSpec(),
             executionContext()
-        ).compute(graphName, configuration, true, true);
+        ).compute(graphName, configuration, true);
     }
 
     @Procedure(value = "gds.beta.leiden.mutate.estimate", mode = READ)

@@ -29,7 +29,6 @@ import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.FilteredIdMap;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
@@ -54,7 +53,6 @@ import org.neo4j.gds.core.huge.HugeGraphBuilder;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.utils.TimeUtil;
-import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.time.ZonedDateTime;
@@ -87,8 +85,6 @@ public class CSRGraphStore implements GraphStore {
     private final IdMap nodes;
 
     private final Map<RelationshipType, SingleTypeRelationships> relationships;
-
-    private final Set<Graph> createdGraphs;
 
     private GraphSchema schema;
 
@@ -144,7 +140,6 @@ public class CSRGraphStore implements GraphStore {
         this.relationships = new HashMap<>(relationships);
 
         this.concurrency = concurrency;
-        this.createdGraphs = new HashSet<>();
         this.modificationTime = TimeUtil.now();
     }
 
@@ -496,11 +491,6 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public void canRelease(boolean canRelease) {
-        createdGraphs.forEach(graph -> graph.canRelease(canRelease));
-    }
-
-    @Override
     public CompositeRelationshipIterator getCompositeRelationshipIterator(
         RelationshipType relationshipType,
         Collection<String> propertyKeys
@@ -561,29 +551,6 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public void release() {
-        createdGraphs.forEach(Graph::release);
-        releaseInternals();
-    }
-
-    private void releaseInternals() {
-        var closeables = Stream.<AutoCloseable>builder();
-        if (this.nodes instanceof AutoCloseable) {
-            closeables.accept((AutoCloseable) this.nodes);
-        }
-        this.relationships.values().forEach(relationship -> {
-            closeables.add(relationship.topology().adjacencyList());
-            relationship
-                .properties()
-                .stream()
-                .flatMap(properties -> properties.values().stream())
-                .forEach(property -> closeables.add(property.values().propertiesList()));
-        });
-
-        ExceptionUtil.closeAll(ExceptionUtil.RETHROW_UNCHECKED, closeables.build().distinct());
-    }
-
-    @Override
     public long nodeCount() {
         return nodes.nodeCount();
     }
@@ -628,8 +595,6 @@ public class CSRGraphStore implements GraphStore {
             ))
             .collect(Collectors.toList());
 
-        filteredGraphs.forEach(graph -> graph.canRelease(false));
-        createdGraphs.addAll(filteredGraphs);
         return UnionGraph.of(filteredGraphs);
     }
 

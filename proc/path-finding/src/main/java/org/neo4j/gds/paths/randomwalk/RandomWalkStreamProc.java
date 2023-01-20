@@ -48,7 +48,7 @@ public class RandomWalkStreamProc extends BaseProc {
         return new ProcedureExecutor<>(
             new RandomWalkStreamSpec(),
             executionContext()
-        ).compute(graphName, configuration, false, true);
+        ).compute(graphName, configuration, false);
     }
 
 

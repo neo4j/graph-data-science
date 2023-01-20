@@ -56,7 +56,6 @@ public class HarmonicCentralityStreamProc extends HarmonicCentralityProc<Harmoni
             var graph = computationResult.graph();
 
             if (graph.isEmpty()) {
-                graph.release();
                 return Stream.empty();
             }
 

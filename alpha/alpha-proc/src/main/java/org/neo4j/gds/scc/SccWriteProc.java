@@ -79,7 +79,6 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
                 .withComputeMillis(computationResult.computeMillis());
 
             if (graph.isEmpty()) {
-                graph.release();
                 return Stream.of(writeBuilder.build());
             }
 
@@ -117,7 +116,6 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
                 writeBuilder.withNodePropertiesWritten(exporter.propertiesWritten());
             }
 
-            graph.release();
             return Stream.of(writeBuilder.build());
         };
     }

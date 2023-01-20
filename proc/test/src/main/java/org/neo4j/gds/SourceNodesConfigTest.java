@@ -94,7 +94,7 @@ public interface SourceNodesConfigTest<ALGORITHM extends Algorithm<RESULT>, CONF
         var mapWrapper = CypherMapWrapper.create(MapUtil.map("sourceNodes", sourceNodes));
         var config = createMinimalConfig(mapWrapper).toMap();
 
-        applyOnProcedure(proc -> proc.compute(graphName, config, false, false));
+        applyOnProcedure(proc -> proc.compute(graphName, config, false));
     }
 
     @Test

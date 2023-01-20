@@ -39,7 +39,6 @@ public final class ShortestPathStreamResultConsumer<ALGO extends Algorithm<Dijks
         var graph = computationResult.graph();
 
         if (computationResult.isGraphEmpty()) {
-            graph.release();
             return Stream.empty();
         }
 

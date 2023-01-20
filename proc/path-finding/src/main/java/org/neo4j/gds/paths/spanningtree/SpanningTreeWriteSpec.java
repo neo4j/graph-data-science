@@ -66,7 +66,6 @@ public class SpanningTreeWriteSpec implements AlgorithmSpec<Prim, SpanningTree, 
             WriteResult.Builder builder = new WriteResult.Builder();
 
             if (graph.isEmpty()) {
-                graph.release();
                 return Stream.of(builder.build());
             }
 

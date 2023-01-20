@@ -21,12 +21,12 @@ package org.neo4j.gds.paths.sourcetarget;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.paths.ShortestPathStreamProc;
 import org.neo4j.gds.paths.StreamResult;
 import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.YensFactory;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
-import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -35,8 +35,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.sourcetarget.ShortestPathYensProc.YENS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
+import static org.neo4j.gds.paths.sourcetarget.ShortestPathYensProc.YENS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.shortestPath.yens.stream", description = YENS_DESCRIPTION, executionMode = STREAM)
@@ -48,7 +48,7 @@ public class ShortestPathYensStreamProc extends ShortestPathStreamProc<Yens, Sho
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphName, configuration, false, true));
+        return stream(compute(graphName, configuration, false));
     }
 
     @Procedure(name = "gds.shortestPath.yens.stream.estimate", mode = READ)

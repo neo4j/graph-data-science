@@ -47,7 +47,7 @@ public class SteinerTreeStatsProc extends BaseProc {
         return new ProcedureExecutor<>(
             new SteinerTreeStatsSpec(),
             executionContext()
-        ).compute(graphName, configuration, true, true);
+        ).compute(graphName, configuration, true);
     }
 
 }

@@ -46,7 +46,7 @@ public class BfsStatsProc extends BaseProc {
         return new ProcedureExecutor<>(
             statsSpec,
             executionContext()
-        ).compute(graphName, configuration, false, false);
+        ).compute(graphName, configuration, false);
     }
 
     @Procedure(name = "gds.bfs.stats.estimate", mode = READ)

@@ -285,7 +285,6 @@ public final class Louvain extends Algorithm<LouvainResult> {
 
     @Override
     public void release() {
-        this.rootGraph.releaseTopology();
     }
 
     static final class RelationshipCreator implements Runnable {

@@ -50,7 +50,7 @@ public class FilteredNodeSimilarityStreamProc extends BaseProc {
         return new ProcedureExecutor<>(
             new FilteredNodeSimilarityStreamSpec(),
             executionContext()
-        ).compute(graphName, configuration, true, true);
+        ).compute(graphName, configuration, true);
     }
 
     @Procedure(value = "gds.alpha.nodeSimilarity.filtered.stream.estimate", mode = READ)

@@ -47,7 +47,7 @@ public class KmeansStatsProc extends AlgoBaseProc<Kmeans, KmeansResult, KmeansSt
         return new ProcedureExecutor<>(
             statsSpec,
             executionContext()
-        ).compute(graphName, configuration, true, true);
+        ).compute(graphName, configuration, true);
     }
 
     @Procedure(value = "gds.beta.kmeans.stats.estimate", mode = READ)

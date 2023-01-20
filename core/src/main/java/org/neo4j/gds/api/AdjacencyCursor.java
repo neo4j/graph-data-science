@@ -28,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
  * Better iteration methods and defined access patterns will be added under the continuation of
  * Adjacency Compression III – Return of the Iterator
  */
-public interface AdjacencyCursor extends AutoCloseable {
+public interface AdjacencyCursor {
 
     /**
      * Special ID value that could be returned to indicate that no valid value can be produced
@@ -102,9 +102,6 @@ public interface AdjacencyCursor extends AutoCloseable {
      */
     @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination);
 
-    @Override
-    void close();
-
     /**
      * Returns a cursor that is always empty.
      */
@@ -162,10 +159,6 @@ public interface AdjacencyCursor extends AutoCloseable {
         @Override
         public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
             return INSTANCE;
-        }
-
-        @Override
-        public void close() {
         }
     }
 }
