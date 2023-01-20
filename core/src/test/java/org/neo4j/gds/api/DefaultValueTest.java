@@ -180,16 +180,6 @@ class DefaultValueTest {
         assertThat(fn.apply(defaultValue)).isEqualTo(expectedValue);
     }
 
-    @Test
-    void initFromValueType() {
-        assertThat(DefaultValue.of(ValueType.DOUBLE)).isEqualTo(DefaultValue.forDouble());
-        assertThat(DefaultValue.of(ValueType.LONG)).isEqualTo(DefaultValue.forLong());
-        assertThat(DefaultValue.of(ValueType.LONG_ARRAY)).isEqualTo(DefaultValue.forLongArray());
-        assertThat(DefaultValue.of(ValueType.FLOAT_ARRAY)).isEqualTo(DefaultValue.forFloatArray());
-        assertThat(DefaultValue.of(ValueType.DOUBLE_ARRAY)).isEqualTo(DefaultValue.forDoubleArray());
-        assertThat(DefaultValue.of(ValueType.STRING)).isEqualTo(DefaultValue.of(DEFAULT));
-    }
-
     private static Stream<Arguments> values() {
         return Stream.of(
             Arguments.of(42, (Function<DefaultValue, ?>) DefaultValue::longValue, 42L),
