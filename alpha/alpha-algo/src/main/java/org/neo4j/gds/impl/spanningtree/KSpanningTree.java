@@ -99,7 +99,6 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
 
     @Override
     public void release() {
-        graph.release();
         graph = null;
     }
 
@@ -276,7 +275,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
                                 affectedCost = costToParent.get(rootChild);
                             }
                         } else {
-                            if (parentOutDegree == 0) { //if parent is a leaf
+                            if (parentOutDegree == 0) { //if parent becomes a leaf
                                 affectedNode = parentOfTrimmed;
                                 affectedCost = costToParent.get(parentOfTrimmed);
                             }
