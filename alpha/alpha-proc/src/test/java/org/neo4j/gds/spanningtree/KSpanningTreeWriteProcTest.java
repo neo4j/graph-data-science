@@ -30,6 +30,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -83,16 +84,20 @@ class KSpanningTreeWriteProcTest extends BaseProcTest {
             assertThat(row.getNumber("computeMillis").longValue() >= 0).isTrue();
         });
 
-        final HashMap<String, Long> communities = new HashMap<>();
+        final HashMap<String, Integer> communities = new HashMap<>();
+        final HashSet<Integer> distinctCommunities = new HashSet<>();
 
         runQueryWithRowConsumer("MATCH (n) WHERE n.partition IS NOT NULL RETURN n.name as name, n.partition as p", row -> {
             final String name = row.getString("name");
-            final long p = row.getNumber("p").longValue();
+            final int p = row.getNumber("p").intValue();
             communities.put(name, p);
+            distinctCommunities.add(p);
+
         });
 
         assertThat(communities).matches(c -> c.get("a").equals(c.get("b")) ^ c.get("c").equals(c.get("d")));
         assertThat(communities.get("a")).isNotEqualTo(communities.get("c"));
+        assertThat(distinctCommunities.size()).isEqualTo(3);
     }
 
     @Test
@@ -113,14 +118,15 @@ class KSpanningTreeWriteProcTest extends BaseProcTest {
         });
 
         final HashMap<String, Integer> communities = new HashMap<>();
-
+        final HashSet<Integer> distinctCommunities = new HashSet<>();
         runQueryWithRowConsumer("MATCH (n) WHERE n.partition IS NOT NULL RETURN n.name as name, n.partition as p", row -> {
             final String name = row.getString("name");
             final int p = row.getNumber("p").intValue();
             communities.put(name, p);
+            distinctCommunities.add(p);
         });
 
         assertThat(communities).matches(c -> c.get("a").equals(c.get("d")) ^ c.get("b").equals(c.get("c")));
-        assertThat(communities.get("a")).isNotEqualTo(communities.get("b"));
+        assertThat(distinctCommunities.size()).isEqualTo(3);
     }
 }
