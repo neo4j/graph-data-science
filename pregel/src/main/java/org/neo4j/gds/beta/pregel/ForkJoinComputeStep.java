@@ -121,7 +121,7 @@ public final class ForkJoinComputeStep<
             this.compute();
         } else {
             computeBatch();
-            hasSentMessage.set(computeContext.hasSentMessage());
+            hasSentMessage.compareAndSet(false, computeContext.hasSentMessage());
             tryComplete();
         }
     }

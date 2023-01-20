@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -108,6 +109,7 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
             messenger,
             voteBits,
             iteration,
+            Optional.empty(),
             progressTracker
         );
 
@@ -148,6 +150,7 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
             messenger,
             voteBits,
             iteration,
+            Optional.empty(),
             progressTracker
         );
 

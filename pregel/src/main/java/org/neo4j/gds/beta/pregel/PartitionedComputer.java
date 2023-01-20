@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.beta.pregel;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
@@ -35,7 +36,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -137,7 +137,7 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
         Partition partition
     ) {
         MutableInt iteration = new MutableInt(0);
-        var hasSentMessages = new AtomicBoolean(false);
+        var hasSentMessages = new MutableBoolean(false);
 
         var initContext = new InitContext<>(
             graph,
@@ -154,6 +154,7 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
             messenger,
             voteBits,
             iteration,
+            Optional.of(hasSentMessages),
             progressTracker
         );
 
@@ -179,7 +180,7 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
         Partition partition
     ) {
         MutableInt iteration = new MutableInt(0);
-        var hasSentMessages = new AtomicBoolean(false);
+        var hasSentMessages = new MutableBoolean(false);
 
         var initContext = new BidirectionalInitContext<>(
             graph,
@@ -196,6 +197,7 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
             messenger,
             voteBits,
             iteration,
+            Optional.of(hasSentMessages),
             progressTracker
         );
 
