@@ -293,6 +293,35 @@ class KSpanningTreeTest {
     }
 
     @Test
+    void shouldWorkForComponentSmallerThanK() {
+        var factory = GdlFactory.of("CREATE" +
+                                    "  (a:Node)" +
+                                    ", (b:Node)" +
+                                    ", (c:Node)" +
+                                    ", (d:Node)" +
+                                    ", (e:Node)" +
+                                    ", (f:Node)" +
+                                    ", (g:Node)" +
+                                    ", (a)-[:TYPE {cost: 1.0}]->(b)" +
+                                    ", (b)-[:TYPE {cost: 1.0}]->(c)" +
+                                    ", (c)-[:TYPE {cost: 1.0}]->(d)");
+
+        var graph = factory.build().getUnion();
+        var startNode = factory.nodeId("a");
+
+        var spanningTree = new KSpanningTree(
+            graph,
+            Prim.MIN_OPERATOR,
+            startNode,
+            5,
+            ProgressTracker.NULL_TRACKER
+        ).compute();
+
+        assertThat(spanningTree.effectiveNodeCount()).isEqualTo(4);
+
+    }
+
+    @Test
     void shouldLogProgress() {
         var config = KSpanningTreeBaseConfigImpl.builder().sourceNode(idFunction.of("a")).k(2).build();
         var factory = new KSpanningTreeAlgorithmFactory<>();
