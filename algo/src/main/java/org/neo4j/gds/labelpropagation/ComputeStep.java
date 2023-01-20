@@ -20,7 +20,6 @@
 package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -32,7 +31,6 @@ final class ComputeStep implements Step {
 
     private static final double DEFAULT_WEIGHT = 1.0;
 
-    private final RelationshipIterator localRelationshipIterator;
     private final HugeLongArray existingLabels;
     private final PrimitiveLongIterable nodes;
     private final ProgressTracker progressTracker;
@@ -49,8 +47,7 @@ final class ComputeStep implements Step {
             PrimitiveLongIterable nodes) {
         this.existingLabels = existingLabels;
         this.progressTracker = progressTracker;
-        this.graph = graph;
-        this.localRelationshipIterator = graph.concurrentCopy();
+        this.graph = graph.concurrentCopy();
         this.nodes = nodes;
         this.consumer = new ComputeStepConsumer(nodeWeights, existingLabels);
     }
@@ -83,7 +80,7 @@ final class ComputeStep implements Step {
     private boolean compute(long nodeId, boolean didChange) {
         consumer.clearVotes();
         long label = existingLabels.get(nodeId);
-        localRelationshipIterator.forEachRelationship(nodeId, DEFAULT_WEIGHT, consumer);
+        graph.forEachRelationship(nodeId, DEFAULT_WEIGHT, consumer);
         long newLabel = consumer.tallyVotes(label);
         if (newLabel != label) {
             existingLabels.set(nodeId, newLabel);
