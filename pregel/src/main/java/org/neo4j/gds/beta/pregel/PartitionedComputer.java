@@ -149,7 +149,7 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
         var computeContext = new ComputeContext<>(
             graph,
             config,
-            ((PregelComputation<CONFIG>) computation)::applyRelationshipWeight,
+            computation,
             nodeValues,
             messenger,
             voteBits,
@@ -192,7 +192,7 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
         var computeContext = new BidirectionalComputeContext<>(
             graph,
             config,
-            ((BidirectionalPregelComputation<CONFIG>) computation)::applyRelationshipWeight,
+            computation,
             nodeValues,
             messenger,
             voteBits,
