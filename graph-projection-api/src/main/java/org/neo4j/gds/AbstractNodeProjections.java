@@ -27,6 +27,7 @@ import org.neo4j.gds.utils.StringFormatting;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
@@ -175,23 +176,39 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
 
     @Value.Check
     public void validatePropertyKeyMappings() {
-        var mapping = new HashMap<String, String>();
+        var seenMappings = new HashMap<String, PropertyMapping>();
 
         projections().values().stream()
             .flatMap(nodeProjection -> nodeProjection.properties().stream())
             .forEach(propertyMapping -> {
                 var propertyKey = propertyMapping.propertyKey();
-                var neoKey = propertyMapping.neoPropertyKey();
 
-                if (mapping.containsKey(propertyKey) && !mapping.get(propertyKey).equals(neoKey)) {
-                    throw new IllegalArgumentException(formatWithLocale(
-                        "Specifying multiple neoPropertyKeys for the same property is not allowed, found propertyKey: %s, neoPropertyKeys: %s, %s.",
-                        propertyKey,
-                        neoKey,
-                        mapping.get(propertyKey)
-                    ));
+                if (seenMappings.containsKey(propertyKey)) {
+                    // we have another mapping with the same GDS key
+                    var seenMapping = seenMappings.get(propertyKey);
+
+                    if (!Objects.equals(seenMapping.neoPropertyKey(), propertyMapping.neoPropertyKey())) {
+                        throw new IllegalArgumentException(formatWithLocale(
+                            "Specifying multiple neoPropertyKeys for the same property is not allowed, " +
+                            "found propertyKey: `%s` with conflicting neoPropertyKeys: `%s`, `%s`.",
+                            propertyKey,
+                            propertyMapping.neoPropertyKey(),
+                            seenMapping.neoPropertyKey()
+                        ));
+                    }
+
+                    if (!Objects.equals(seenMapping.defaultValue(), propertyMapping.defaultValue())) {
+                        throw new IllegalArgumentException(formatWithLocale(
+                            "Specifying different default values for the same property with identical neoPropertyKey is not allowed, " +
+                            "found propertyKey: `%s` with conflicting default values: `%s`, `%s`.",
+                            propertyKey,
+                            propertyMapping.defaultValue().getObject(),
+                            seenMapping.defaultValue().getObject()
+                        ));
+                    }
                 }
-                mapping.put(propertyKey, neoKey);
+
+                seenMappings.put(propertyKey, propertyMapping);
             });
     }
 }
