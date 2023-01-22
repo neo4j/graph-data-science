@@ -237,7 +237,7 @@ public class ExtendedRerouter extends ReroutingAlgorithm {
                 int x = 3;
             }
             //  t must still be alive, in addition if we prune, we should be able to get a benefit from it
-            if (t != PRUNED && (finalPruningGain - w) > bestGain.doubleValue()) {
+            if (parent.get(t) != PRUNED && (finalPruningGain - w) > bestGain.doubleValue()) {
                 //now we must check that t is not a descendant of s.
                 boolean canReconnect = checkIfRerouteIsValid(linkCutTree, t, nodeId, parentId);
                 if (canReconnect) {
