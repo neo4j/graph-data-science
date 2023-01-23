@@ -86,14 +86,14 @@ public class GraphSageModelTrainer {
         this.randomSeed = config.randomSeed().orElseGet(() -> ThreadLocalRandom.current().nextLong());
     }
 
-    public static List<Task> progressTasks(GraphSageTrainConfig config) {
+    public static List<Task> progressTasks(GraphSageTrainConfig config, long nodeCount) {
         return List.of(
-            Tasks.leaf("Prepare batches"),
+            Tasks.leaf("Prepare batches", config.batchesPerIteration(nodeCount)),
             Tasks.iterativeDynamic(
                 "Train model",
                 () -> List.of(Tasks.iterativeDynamic(
                     "Epoch",
-                    () -> List.of(Tasks.leaf("Iteration")),
+                    () -> List.of(Tasks.leaf("Iteration", config.batchesPerIteration(nodeCount))),
                     config.maxIterations()
                 )),
                 config.epochs()
