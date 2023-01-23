@@ -417,9 +417,7 @@ public class GraphAggregator implements CompatUserAggregator {
             @Nullable MapValue targetNodeProperties,
             int readConcurrency
         ) {
-            boolean hasLabelInformation = !(sourceNodeLabels.isMissing() && targetNodeLabels.isMissing());
-            boolean hasProperties = !(sourceNodeProperties == null && targetNodeProperties == null);
-            return new LazyIdMapBuilder(readConcurrency, hasLabelInformation, hasProperties);
+            return new LazyIdMapBuilder(readConcurrency, true, true);
         }
 
         private static @Nullable List<RelationshipPropertySchema> relationshipPropertySchemas(AnyValue relationshipConfigValue) {
