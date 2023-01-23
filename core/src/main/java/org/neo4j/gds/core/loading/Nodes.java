@@ -20,13 +20,16 @@
 package org.neo4j.gds.core.loading;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.api.properties.nodes.NodeProperty;
+import org.neo4j.gds.api.properties.nodes.ImmutableNodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.schema.ImmutablePropertySchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 
 import java.util.Map;
@@ -34,10 +37,7 @@ import java.util.Map;
 @ValueClass
 public interface Nodes {
 
-    @Value.Default
-    default NodeSchema schema() {
-        return NodeSchema.empty();
-    }
+    NodeSchema schema();
 
     IdMap idMap();
 
@@ -46,27 +46,42 @@ public interface Nodes {
         return NodePropertyStore.empty();
     }
 
-    static Nodes of(IdMap idmap) {
-        return ImmutableNodes.of(NodeSchema.empty(), idmap, NodePropertyStore.empty());
-    }
+    static Nodes of(
+        IdMap idMap,
+        Map<NodeLabel, PropertyMappings> propertyMappings,
+        Map<PropertyMapping, NodePropertyValues> propertyValues,
+        PropertyState propertyState
+    ) {
+        var nodeSchema = NodeSchema.empty();
+        var nodePropertyStoreBuilder = NodePropertyStore.builder();
 
-    static Nodes of(IdMap idmap, NodePropertyStore nodePropertyStore) {
-        return ImmutableNodes.of(NodeSchema.empty(), idmap, nodePropertyStore);
-    }
+        propertyMappings.forEach(((nodeLabel, mappings) -> {
+            if (mappings.mappings().isEmpty()) {
+                nodeSchema.addLabel(nodeLabel);
+            } else {
+                mappings.mappings().forEach(propertyMapping -> {
+                    var nodePropertyValues = propertyValues.get(propertyMapping);
+                    // The default value is either overridden by the user
+                    // or inferred from the actual property value.
+                    var defaultValue = propertyMapping.defaultValue().isUserDefined()
+                        ? propertyMapping.defaultValue()
+                        : nodePropertyValues.valueType().fallbackValue();
+                    var propertySchema = ImmutablePropertySchema.builder()
+                        .key(propertyMapping.propertyKey())
+                        .valueType(nodePropertyValues.valueType())
+                        .defaultValue(defaultValue)
+                        .state(propertyState)
+                        .build();
 
-    static Nodes of(IdMap idMap, Map<PropertyMapping, NodePropertyValues> properties, PropertyState propertyState) {
-        NodePropertyStore.Builder builder = NodePropertyStore.builder();
-        properties.forEach((mapping, nodeProperties) -> builder.putProperty(
-            mapping.propertyKey(),
-            NodeProperty.of(
-                mapping.propertyKey(),
-                propertyState,
-                nodeProperties,
-                mapping.defaultValue().isUserDefined()
-                    ? mapping.defaultValue()
-                    : nodeProperties.valueType().fallbackValue()
-            )
-        ));
-        return ImmutableNodes.of(NodeSchema.empty(), idMap, builder.build());
+                    nodeSchema.addProperty(nodeLabel, propertySchema.key(), propertySchema);
+                    nodePropertyStoreBuilder.putProperty(
+                        propertySchema.key(),
+                        ImmutableNodeProperty.of(nodePropertyValues, propertySchema)
+                    );
+                });
+            }
+        }));
+
+        return ImmutableNodes.of(nodeSchema, idMap, nodePropertyStoreBuilder.build());
     }
 }

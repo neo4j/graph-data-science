@@ -124,7 +124,6 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
     ) {
         return CSRGraphStoreUtil.computeGraphSchema(
             nodes,
-            (__) -> nodes.properties().keySet(),
             relationshipImportResult
         );
     }
@@ -141,7 +140,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
             ).load(ktx.internalTransaction());
 
             progressTracker.beginSubTask("Loading");
-            var idMapAndProperties = new CypherNodeLoader(
+            var nodes = new CypherNodeLoader(
                 nodeQuery(),
                 nodeCount.rows(),
                 cypherConfig,
@@ -149,17 +148,17 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
                 progressTracker
             ).load(ktx.internalTransaction());
 
-            var relationshipsAndProperties = new CypherRelationshipLoader(
+            var relationshipImportResult = new CypherRelationshipLoader(
                 relationshipQuery(),
-                idMapAndProperties.idMap(),
+                nodes.idMap(),
                 cypherConfig,
                 loadingContext,
                 progressTracker
             ).load(ktx.internalTransaction());
 
             var graphStore = createGraphStore(
-                idMapAndProperties,
-                relationshipsAndProperties
+                nodes,
+                relationshipImportResult
             );
 
             progressTracker.endSubTask("Loading");

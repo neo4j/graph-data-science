@@ -658,7 +658,7 @@ public class GraphAggregator implements CompatUserAggregator {
                 );
             });
 
-            graphStoreBuilder.nodes(nodesBuilder.build());
+            graphStoreBuilder.nodes(nodesBuilder.schema(nodeSchema).build());
 
             // Relationships are added using their intermediate node ids.
             // In order to map to the final internal ids, we need to use

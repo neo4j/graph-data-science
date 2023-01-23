@@ -185,9 +185,21 @@ class DefaultValueTest {
             Arguments.of(42, (Function<DefaultValue, ?>) DefaultValue::longValue, 42L),
             Arguments.of(42, (Function<DefaultValue, ?>) DefaultValue::doubleValue, 42D),
             Arguments.of(13.37, (Function<DefaultValue, ?>) DefaultValue::doubleValue, 13.37D),
-            Arguments.of(List.of(13.37, 42), (Function<DefaultValue, ?>) DefaultValue::doubleArrayValue, new double[] {13.37D, 42D}),
-            Arguments.of(List.of(1337L, 42L), (Function<DefaultValue, ?>) DefaultValue::longArrayValue, new long[] {1337L, 42L}),
-            Arguments.of(List.of(1337, 42), (Function<DefaultValue, ?>) DefaultValue::longArrayValue, new long[] {1337L, 42L})
+            Arguments.of(
+                List.of(13.37, 42),
+                (Function<DefaultValue, ?>) DefaultValue::doubleArrayValue,
+                new double[]{13.37D, 42D}
+            ),
+            Arguments.of(
+                List.of(1337L, 42L),
+                (Function<DefaultValue, ?>) DefaultValue::longArrayValue,
+                new long[]{1337L, 42L}
+            ),
+            Arguments.of(
+                List.of(1337, 42),
+                (Function<DefaultValue, ?>) DefaultValue::longArrayValue,
+                new long[]{1337L, 42L}
+            )
         );
     }
 

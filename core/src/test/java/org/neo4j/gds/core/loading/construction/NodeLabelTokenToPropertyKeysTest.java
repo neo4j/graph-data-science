@@ -140,5 +140,74 @@ class NodeLabelTokenToPropertyKeysTest {
             .hasMessageContaining("Incompatible value types between input schema and input data.")
             .hasMessageContaining("['foo']");
     }
+
+    @Test
+    void testDuplicatePropertyKeys() {
+        var mapping = NodeLabelTokenToPropertyKeys.lazy();
+        mapping.add(NodeLabelTokens.ofStrings("A", "B"), List.of("foo", "bar"));
+        mapping.add(NodeLabelTokens.ofStrings("A"), List.of("foo"));
+        mapping.add(NodeLabelTokens.ofStrings("B"), List.of("bar"));
+        var importPropertySchemas = Map.of(
+            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
+        );
+        assertThat(mapping.propertySchemas(NodeLabel.of("A"), importPropertySchemas)).isEqualTo(Map.of(
+            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
+        ));
+        assertThat(mapping.propertySchemas(NodeLabel.of("B"), importPropertySchemas)).isEqualTo(Map.of(
+            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
+        ));
+    }
+
+    @Test
+    void testEmptyNodeLabelTokenResolvesToAllNodes() {
+        var mapping = NodeLabelTokenToPropertyKeys.lazy();
+        mapping.add(NodeLabelTokens.empty(), List.of("foo", "bar"));
+
+        var importPropertySchemas = Map.of(
+            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
+        );
+
+        assertThat(mapping.propertySchemas(NodeLabel.ALL_NODES, importPropertySchemas)).isEqualTo(Map.of(
+            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
+        ));
+    }
+
+    @Test
+    void testNodeLabelsLazily() {
+        var mapping = NodeLabelTokenToPropertyKeys.lazy();
+        mapping.add(NodeLabelTokens.empty(), List.of("foo"));
+        mapping.add(NodeLabelTokens.of("A"), List.of("bar"));
+        mapping.add(NodeLabelTokens.ofStrings("A", "B"), List.of("baz"));
+        mapping.add(NodeLabelTokens.ofStrings("B", "C"), List.of("buz"));
+
+        assertThat(mapping.nodeLabels()).containsExactlyInAnyOrder(
+            NodeLabel.ALL_NODES,
+            NodeLabel.of("A"),
+            NodeLabel.of("B"),
+            NodeLabel.of("C")
+        );
+    }
+
+    @Test
+    void testNodeLabelsFixed() {
+        var mapping = NodeLabelTokenToPropertyKeys.fixed(NodeSchema.empty()
+            .addLabel(NodeLabel.ALL_NODES)
+            .addLabel(NodeLabel.of("A"))
+            .addLabel(NodeLabel.of("B"))
+            .addLabel(NodeLabel.of("C"))
+        );
+
+        assertThat(mapping.nodeLabels()).containsExactlyInAnyOrder(
+            NodeLabel.ALL_NODES,
+            NodeLabel.of("A"),
+            NodeLabel.of("B"),
+            NodeLabel.of("C")
+        );
+    }
 }
 
