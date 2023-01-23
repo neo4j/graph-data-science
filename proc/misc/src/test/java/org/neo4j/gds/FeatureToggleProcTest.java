@@ -187,39 +187,6 @@ class FeatureToggleProcTest extends BaseProcTest {
     }
 
     @Test
-    void toggleMaxArrayLengthShift() {
-        var maxArrayLengthShift = GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get();
-        runQuery("CALL gds.features.maxArrayLengthShift($value)", Map.of("value", maxArrayLengthShift + 1));
-        assertEquals(maxArrayLengthShift + 1, GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get());
-        runQuery("CALL gds.features.maxArrayLengthShift($value)", Map.of("value", maxArrayLengthShift));
-        assertEquals(maxArrayLengthShift, GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get());
-    }
-
-    @Test
-    void toggleMaxArrayLengthShiftValidation() {
-        var maxArrayLengthShift = GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get();
-        var exception = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery("CALL gds.features.maxArrayLengthShift($value)", Map.of("value", 42))
-        );
-        assertThat(exception)
-            .hasRootCauseInstanceOf(IllegalArgumentException.class)
-            .hasRootCauseMessage("Invalid value for maxArrayLengthShift, must be in (0, 32)");
-        assertEquals(maxArrayLengthShift, GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get());
-    }
-
-    @Test
-    void resetMaxArrayLengthShift() {
-        var defaultValue = GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT_DEFAULT_SETTING;
-        GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.set(defaultValue + 1);
-        assertCypherResult(
-            "CALL gds.features.maxArrayLengthShift.reset()",
-            List.of(Map.of("value", (long) defaultValue))
-        );
-        assertEquals(defaultValue, GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get());
-    }
-
-    @Test
     void togglePagesPerThread() {
         var pagesPerThread = GdsFeatureToggles.PAGES_PER_THREAD.get();
         runQuery("CALL gds.features.pagesPerThread($value)", Map.of("value", pagesPerThread + 1));
