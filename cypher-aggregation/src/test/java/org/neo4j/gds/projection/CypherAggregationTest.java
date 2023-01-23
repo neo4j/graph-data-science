@@ -182,13 +182,10 @@ class CypherAggregationTest extends BaseProcTest {
 
         var graph = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore().getUnion();
 
-        // these fail to separate the property schemas
         assertThat(graph.schema().nodeSchema().get(NodeLabel.of("a")).properties().keySet()).isEmpty();
         assertThat(graph.schema().nodeSchema().get(NodeLabel.of("b")).properties().keySet()).containsExactly("x");
         assertThat(graph.schema().nodeSchema().get(NodeLabel.of("c")).properties().keySet()).containsExactly("y");
 
-        // these also fail like that, but if one of them has no props (like rel does) no properties are retained at all
-        // so 2 problems to fix
         assertThat(graph
             .schema()
             .relationshipSchema()
