@@ -281,7 +281,12 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
                             }
                         }
                         if (affectedNode != -1) { //if a node has been converted to a leaf
-                            toTrim.add(affectedNode, affectedCost); //add it to pq
+                            if (!toTrim.containsElement(affectedNode)) {
+                                toTrim.add(affectedNode, affectedCost); //add it to pq
+                            } else {
+                                //it is still in the queue, but it is not a leaf anymore, so it's value is obsolete
+                                toTrim.set(affectedNode, affectedCost);
+                            }
                             exterior.set(affectedNode); //and mark it in the exterior
                         }
                     } else {
@@ -373,7 +378,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         }
         var spanningTree1 = cutLeafApproach(tree);
         var spanningTree2 = growApproach(tree);
-
+        System.out.println("Prune Leaf: " + spanningTree1.totalWeight() + " Grow Mst:" + spanningTree2.totalWeight());
         if (spanningTree1.totalWeight() > spanningTree2.totalWeight()) {
             return (minMax == Prim.MAX_OPERATOR) ? spanningTree1 : spanningTree2;
         } else {
