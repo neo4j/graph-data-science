@@ -60,4 +60,9 @@ public class RandomWalkStatsSpec implements AlgorithmSpec<RandomWalk, Stream<lon
                 computationResult.config().toMap()
             ));
     }
+
+    @Override
+    public boolean releaseProgressTask() {
+        return false;
+    }
 }

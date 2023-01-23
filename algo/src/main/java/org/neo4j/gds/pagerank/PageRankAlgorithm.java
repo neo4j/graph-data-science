@@ -107,8 +107,4 @@ public class PageRankAlgorithm extends Algorithm<PageRankResult> {
             .run();
     }
 
-    @Override
-    public void release() {
-        this.pregelJob.release();
-    }
 }

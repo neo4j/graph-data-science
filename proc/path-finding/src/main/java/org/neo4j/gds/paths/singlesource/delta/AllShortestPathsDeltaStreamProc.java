@@ -52,7 +52,7 @@ public class AllShortestPathsDeltaStreamProc extends BaseProc {
             deltaSteppingStreamSpec,
             pipelineSpec,
             executionContext()
-        ).compute(graphName, configuration, false);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.allShortestPaths.delta.stream.estimate", mode = READ)

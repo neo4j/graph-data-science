@@ -56,4 +56,9 @@ public class AllShortestPathsDijkstraStreamSpec implements AlgorithmSpec<Dijkstr
     public ComputationResultConsumer<Dijkstra, DijkstraResult, AllShortestPathsDijkstraStreamConfig, Stream<StreamResult>> computationResultConsumer() {
         return new ShortestPathStreamResultConsumer<>();
     }
+
+@Override
+    public boolean releaseProgressTask() {
+        return false;
+    }
 }

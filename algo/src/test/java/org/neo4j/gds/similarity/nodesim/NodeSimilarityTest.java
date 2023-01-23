@@ -296,7 +296,6 @@ final class NodeSimilarityTest {
             .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        nodeSimilarity.release();
 
         assertEquals(orientation == REVERSE ? EXPECTED_WEIGHTED_INCOMING : EXPECTED_WEIGHTED_OUTGOING, result);
     }
@@ -317,7 +316,6 @@ final class NodeSimilarityTest {
             .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        nodeSimilarity.release();
 
         assertEquals(orientation == REVERSE ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
     }
@@ -338,7 +336,6 @@ final class NodeSimilarityTest {
             .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        nodeSimilarity.release();
 
         assertEquals(orientation == REVERSE ? EXPECTED_INCOMING_TOP_N_1 : EXPECTED_OUTGOING_TOP_N_1, result);
     }
@@ -381,7 +378,6 @@ final class NodeSimilarityTest {
             .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        nodeSimilarity.release();
 
         assertEquals(orientation == REVERSE ? EXPECTED_INCOMING_TOP_K_1 : EXPECTED_OUTGOING_TOP_K_1, result);
     }
@@ -436,7 +432,6 @@ final class NodeSimilarityTest {
             .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        nodeSimilarity.release();
 
         assertEquals(
             orientation == REVERSE ? EXPECTED_INCOMING_SIMILARITY_CUTOFF : EXPECTED_OUTGOING_SIMILARITY_CUTOFF,
@@ -460,7 +455,6 @@ final class NodeSimilarityTest {
             .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        nodeSimilarity.release();
 
         assertEquals(
             orientation == REVERSE ? EXPECTED_INCOMING_DEGREE_CUTOFF : EXPECTED_OUTGOING_DEGREE_CUTOFF,
@@ -478,7 +472,6 @@ final class NodeSimilarityTest {
             ProgressTracker.NULL_TRACKER
         );
         Set<SimilarityResult> result = nodeSimilarity.computeToStream().collect(Collectors.toSet());
-        nodeSimilarity.release();
         assertNotEquals(Collections.emptySet(), result);
     }
 
@@ -548,7 +541,6 @@ final class NodeSimilarityTest {
                           ", (:Item), (:Item), (:Item), (:Item)"),
             resultGraph
         );
-        nodeSimilarity.release();
     }
 
     @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
@@ -588,7 +580,6 @@ final class NodeSimilarityTest {
             return true;
         });
 
-        nodeSimilarity.release();
     }
 
     @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
@@ -610,7 +601,6 @@ final class NodeSimilarityTest {
             .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        nodeSimilarity.release();
 
         assertEquals(orientation == REVERSE ? EXPECTED_INCOMING_TOP_N_1 : EXPECTED_OUTGOING_TOP_N_1, result);
     }
@@ -638,7 +628,6 @@ final class NodeSimilarityTest {
             .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        nodeSimilarity.release();
 
         assertEquals(orientation == REVERSE ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
     }

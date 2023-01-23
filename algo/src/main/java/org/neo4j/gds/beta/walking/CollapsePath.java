@@ -86,9 +86,4 @@ public class CollapsePath extends Algorithm<SingleTypeRelationships> {
 
         return relImporter.build();
     }
-
-    @Override
-    public void release() {
-
-    }
 }

@@ -30,7 +30,6 @@ import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
 import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
@@ -84,9 +83,6 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         this.progressTracker.endSubTask("TopologicalSort");
         return result;
     }
-
-    @Override
-    public void release() {}
 
     private void initializeInDegrees() {
         try (var concurrentCopy = CloseableThreadLocal.withInitial(() -> graph.concurrentCopy())) {

@@ -91,8 +91,4 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         return result;
     }
 
-    @Override
-    public void release() {
-
-    }
 }

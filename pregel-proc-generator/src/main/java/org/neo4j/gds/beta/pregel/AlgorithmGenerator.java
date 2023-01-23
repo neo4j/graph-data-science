@@ -62,7 +62,6 @@ class AlgorithmGenerator extends PregelGenerator {
         typeSpecBuilder.addMethod(constructor());
         typeSpecBuilder.addMethod(setTerminatonFlag());
         typeSpecBuilder.addMethod(computeMethod());
-        typeSpecBuilder.addMethod(releaseMethod());
 
         return typeSpecBuilder.build();
     }
@@ -125,15 +124,6 @@ class AlgorithmGenerator extends PregelGenerator {
             .addModifiers(Modifier.PUBLIC)
             .addStatement("super.setTerminationFlag(terminationFlag)")
             .addStatement("pregelJob.setTerminationFlag(terminationFlag)")
-            .build();
-    }
-
-
-    private MethodSpec releaseMethod() {
-        return MethodSpec.methodBuilder("release")
-            .addAnnotation(Override.class)
-            .addModifiers(Modifier.PUBLIC)
-            .addStatement("pregelJob.release()")
             .build();
     }
 }

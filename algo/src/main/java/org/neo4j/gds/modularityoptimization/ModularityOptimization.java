@@ -44,6 +44,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.function.LongUnaryOperator;
 import java.util.stream.LongStream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -152,8 +153,16 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         progressTracker.endSubTask();
 
         progressTracker.endSubTask();
+
+        // make sure that the result does not capture the whole algorithm instance.
+        var currentCommunities = this.currentCommunities;
+        var reverseSeedCommunities = this.reverseSeedCommunityMapping;
+        LongUnaryOperator communityIdLookup = seedProperty == null || reverseSeedCommunityMapping == null
+            ? currentCommunities::get
+            : (long nodeId) -> reverseSeedCommunities.get(currentCommunities.get(nodeId));
+
         return new ModularityOptimizationResult(
-            this::getCommunityId,
+            communityIdLookup,
             modularity,
             iterationCounter,
             didConverge,
@@ -304,14 +313,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         double localSum() {
             return localSum;
         }
-    }
-
-    @Override
-    public void release() {
-        this.nextCommunities.release();
-        this.communityWeightUpdates.release();
-        this.cumulativeNodeWeights.release();
-        modularityColorArray.release();
     }
 
     private long optimizeColor(long currentStandingPosition) {

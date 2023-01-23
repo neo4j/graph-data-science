@@ -52,7 +52,7 @@ public class SpanningTreeStatsProc extends BaseProc {
         return new ProcedureExecutor<>(
             new SpanningTreeStatsSpec(),
             executionContext()
-        ).compute(graphName, configuration, true);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = procedure + ".estimate", mode = READ)

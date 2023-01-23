@@ -123,10 +123,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     }
 
     @Override
-    public void release() {
-    }
-
-    @Override
     public NodeSimilarityResult compute() {
         progressTracker.beginSubTask();
         if (config.computeToStream()) {

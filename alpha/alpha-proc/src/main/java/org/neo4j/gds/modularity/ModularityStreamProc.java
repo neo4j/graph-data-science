@@ -43,7 +43,7 @@ public class ModularityStreamProc extends BaseProc {
         return new ProcedureExecutor<>(
             new ModularityStreamSpec(),
             executionContext()
-        ).compute(graphName, configuration, true);
+        ).compute(graphName, configuration);
 
     }
 

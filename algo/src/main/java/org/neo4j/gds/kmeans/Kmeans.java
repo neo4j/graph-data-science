@@ -294,11 +294,6 @@ public class Kmeans extends Algorithm<KmeansResult> {
         clusterManager.normalizeClusters();
     }
 
-    @Override
-    public void release() {
-
-    }
-
     @NotNull
     private static SplittableRandom getSplittableRandom(Optional<Long> randomSeed) {
         return randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);

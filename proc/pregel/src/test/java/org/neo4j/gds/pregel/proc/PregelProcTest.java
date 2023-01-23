@@ -522,9 +522,5 @@ public class PregelProcTest extends BaseProcTest {
             return pregelJob.run();
         }
 
-        @Override
-        public void release() {
-
-        }
     }
 }

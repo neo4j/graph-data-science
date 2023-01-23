@@ -92,12 +92,6 @@ public final class TriangleStream extends Algorithm<Stream<TriangleStream.Result
         this.queue = new AtomicInteger();
     }
 
-    /**
-     * This algorithm computes a stream, therefore we must not release before consumption.
-     */
-    @Override
-    public void release() { }
-
     @Override
     public Stream<Result> compute() {
         progressTracker.beginSubTask(graph.nodeCount());

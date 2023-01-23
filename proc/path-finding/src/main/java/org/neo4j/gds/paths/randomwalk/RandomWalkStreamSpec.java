@@ -97,4 +97,8 @@ public class RandomWalkStreamSpec implements AlgorithmSpec<RandomWalk, Stream<lo
 
     }
 
+    @Override
+    public boolean releaseProgressTask() {
+        return false;
+    }
 }

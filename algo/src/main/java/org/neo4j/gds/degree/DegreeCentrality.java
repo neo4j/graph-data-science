@@ -184,11 +184,6 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality.DegreeFunction>
         return degrees::get;
     }
 
-    @Override
-    public void release() {
-        graph = null;
-    }
-
     private static class NaturalWeightedDegreeTask implements Runnable {
 
         private final HugeDoubleArray result;

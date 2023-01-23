@@ -42,4 +42,9 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<DijkstraResul
     public ComputationResultConsumer<ALGO, DijkstraResult, CONFIG, Stream<StandardWriteRelationshipsResult>> computationResultConsumer() {
         return new ShortestPathWriteResultConsumer<>();
     }
+
+@Override
+    public boolean releaseProgressTask() {
+        return false;
+    }
 }

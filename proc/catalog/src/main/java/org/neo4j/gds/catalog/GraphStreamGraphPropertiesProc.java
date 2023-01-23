@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphAccessGraphPropertiesConfig;
 import org.neo4j.gds.config.GraphStreamGraphPropertiesConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.executor.ProcPreconditions;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

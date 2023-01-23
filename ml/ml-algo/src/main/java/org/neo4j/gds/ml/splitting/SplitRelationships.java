@@ -130,8 +130,4 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
         return splitResult;
     }
 
-    @Override
-    public void release() {
-
-    }
 }

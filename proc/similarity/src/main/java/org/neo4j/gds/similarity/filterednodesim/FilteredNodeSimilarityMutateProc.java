@@ -45,7 +45,7 @@ public class FilteredNodeSimilarityMutateProc  extends BaseProc {
         return new ProcedureExecutor<>(
             new FilteredNodeSimilarityMutateSpec(),
             executionContext()
-        ).compute(graphName, configuration, true);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.alpha.nodeSimilarity.filtered.mutate.estimate", mode = READ)

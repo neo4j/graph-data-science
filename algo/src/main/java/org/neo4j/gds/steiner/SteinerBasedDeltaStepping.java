@@ -329,11 +329,6 @@ public final class SteinerBasedDeltaStepping extends Algorithm<DijkstraResult> {
         return new DijkstraResult(paths.stream());
     }
 
-    @Override
-    public void release() {
-
-    }
-
     enum Phase {
         RELAX,
         SYNC

@@ -44,7 +44,7 @@ public class CELFMutateProc extends BaseProc {
         return new ProcedureExecutor<>(
             new CELFMutateSpec(),
             executionContext()
-        ).compute(graphName, configuration, true);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.beta.influenceMaximization.celf.mutate.estimate", mode = READ)

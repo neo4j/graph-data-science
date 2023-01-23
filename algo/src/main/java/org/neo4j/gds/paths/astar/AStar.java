@@ -88,11 +88,6 @@ public final class AStar extends Algorithm<DijkstraResult> {
         return dijkstra.compute();
     }
 
-    @Override
-    public void release() {
-        dijkstra.release();
-    }
-
     public static class HaversineHeuristic implements Dijkstra.HeuristicFunction {
 
         static final double DEFAULT_DISTANCE = Double.NaN;

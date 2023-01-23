@@ -52,7 +52,7 @@ public class IndexInverseProc extends BaseProc {
             mutateSpec,
             pipelineSpec,
             executionContext()
-        ).compute(graphName, configuration, true);
+        ).compute(graphName, configuration);
     }
 
     @Internal // waiting for PM decision

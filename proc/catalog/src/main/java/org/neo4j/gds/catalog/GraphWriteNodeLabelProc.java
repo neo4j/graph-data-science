@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.beta.filter.NodesFilter;
 import org.neo4j.gds.beta.filter.expression.ExpressionParser;
 import org.neo4j.gds.config.WriteLabelConfig;
@@ -29,6 +28,7 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.write.NodeLabelExporter;
 import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
+import org.neo4j.gds.executor.ProcPreconditions;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;

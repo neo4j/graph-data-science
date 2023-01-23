@@ -103,11 +103,6 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
         );
     }
 
-    @Override
-    public void release() {
-        delegate.release();
-    }
-
     long nodeCount() {
         return delegate.nodeCount();
     }

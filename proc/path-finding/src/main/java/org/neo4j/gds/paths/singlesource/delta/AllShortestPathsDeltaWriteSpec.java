@@ -56,4 +56,9 @@ public class AllShortestPathsDeltaWriteSpec implements AlgorithmSpec<DeltaSteppi
     public ComputationResultConsumer<DeltaStepping, DijkstraResult, AllShortestPathsDeltaWriteConfig, Stream<StandardWriteRelationshipsResult>> computationResultConsumer() {
         return new ShortestPathWriteResultConsumer<>();
     }
+
+@Override
+    public boolean releaseProgressTask() {
+        return false;
+    }
 }

@@ -139,11 +139,6 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
         Assertions.assertEquals(result1.pathSet(), result2.pathSet());
     }
 
-    @Override
-    public boolean releaseAlgorithm() {
-        return false;
-    }
-
     @Test
     @Disabled
     @Override

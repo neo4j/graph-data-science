@@ -51,4 +51,8 @@ public interface AlgorithmSpec<
     default ProcedureExecutorSpec<ALGO, ALGO_RESULT, CONFIG> createDefaultExecutorSpec() {
         return new ProcedureExecutorSpec<>();
     }
+
+    default boolean releaseProgressTask() {
+        return true;
+    }
 }

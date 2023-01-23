@@ -50,7 +50,4 @@ public class TestAlgorithm extends Algorithm<TestAlgorithmResult> {
 
         return new TestAlgorithmResult(graph.relationshipCount());
     }
-
-    @Override
-    public void release() {}
 }

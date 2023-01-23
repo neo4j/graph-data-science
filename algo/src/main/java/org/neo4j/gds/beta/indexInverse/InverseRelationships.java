@@ -169,11 +169,6 @@ public class InverseRelationships extends Algorithm<Map<RelationshipType, Single
         );
     }
 
-    @Override
-    public void release() {
-
-    }
-
     private static final class IndexInverseTaskWithSingleProperty implements Runnable {
 
         private final RelationshipsBuilder relationshipsBuilder;

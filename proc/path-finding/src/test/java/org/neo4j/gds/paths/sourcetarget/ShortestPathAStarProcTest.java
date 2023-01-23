@@ -202,11 +202,6 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
         );
     }
 
-    @Override
-    public boolean releaseAlgorithm() {
-        return false;
-    }
-
     @Test
     @Disabled
     @Override

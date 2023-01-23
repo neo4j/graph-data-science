@@ -247,8 +247,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.create(mapWithJobId)).toMap();
             proc.compute(
                 loadedGraphName,
-                configMap,
-                releaseAlgorithm()
+                configMap
             );
 
             assertThat(taskStore.seenJobIds).containsExactly(someJobId);
@@ -261,10 +260,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
 
     default boolean requiresUndirected() {
         return false;
-    }
-
-    default boolean releaseAlgorithm() {
-        return true;
     }
 
     default List<String> nodeProperties() {
@@ -293,13 +288,11 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         var configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
         var resultRun1 = proc.compute(
             loadedGraphName,
-            configMap,
-            releaseAlgorithm()
+            configMap
         );
         var resultRun2 = proc.compute(
             loadedGraphName,
-            configMap,
-            releaseAlgorithm()
+            configMap
         );
 
         assertResultEquals(resultRun1.result(), resultRun2.result());

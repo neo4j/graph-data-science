@@ -61,7 +61,7 @@ public class AllShortestPathsDijkstraWriteProc extends BaseProc {
             writeSpec,
             pipelineSpec,
             executionContext()
-        ).compute(graphName, configuration, false);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.write.estimate", mode = READ)

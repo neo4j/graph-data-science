@@ -52,7 +52,7 @@ public class AllShortestPathsDijkstraStreamProc extends BaseProc {
             deltaStreamSpec,
             pipelineSpec,
             executionContext()
-        ).compute(graphName, configuration, false);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.stream.estimate", mode = READ)

@@ -144,12 +144,6 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
         return new FastRPResult(embeddings);
     }
 
-    @Override
-    public void release() {
-        this.embeddingA.release();
-        this.embeddingB.release();
-    }
-
     public void initDegreePartition() {
         this.partitions = PartitionUtils.degreePartition(
             graph,

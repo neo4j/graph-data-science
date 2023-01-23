@@ -55,7 +55,7 @@ public class BfsStreamProc extends AlgoBaseProc<BFS, HugeLongArray, BfsStreamCon
         return new ProcedureExecutor<>(
             streamSpec,
             executionContext()
-        ).compute(graphName, configuration, true);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.bfs.stream.estimate", mode = READ)

@@ -61,7 +61,7 @@ public class AllShortestPathsDeltaWriteProc extends BaseProc {
             writeSpec,
             pipelineSpec,
             executionContext()
-        ).compute(graphName, configuration, false);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.allShortestPaths.delta.write.estimate", mode = READ)

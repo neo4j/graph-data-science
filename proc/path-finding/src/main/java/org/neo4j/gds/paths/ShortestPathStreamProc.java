@@ -41,4 +41,9 @@ public abstract class ShortestPathStreamProc<
     public ComputationResultConsumer<ALGO, DijkstraResult, CONFIG, Stream<StreamResult>> computationResultConsumer() {
         return new ShortestPathStreamResultConsumer<>();
     }
+
+    @Override
+    public boolean releaseProgressTask() {
+        return false;
+    }
 }

@@ -100,9 +100,4 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         return this.spanningTree;
     }
 
-    @Override
-    public void release() {
-        graph = null;
-        spanningTree = null;
-    }
 }

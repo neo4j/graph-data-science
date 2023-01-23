@@ -131,12 +131,6 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         return triangles * 2 / (degree * (degree - 1));
     }
 
-    @Override
-    public void release() {
-        localClusteringCoefficients = null;
-        graph = null;
-    }
-
     @ValueClass
     interface Result {
 

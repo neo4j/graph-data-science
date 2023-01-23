@@ -48,7 +48,7 @@ public class ShortestPathDijkstraStreamProc extends ShortestPathStreamProc<Dijks
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphName, configuration, false));
+        return stream(compute(graphName, configuration));
     }
 
     @Procedure(name = "gds.shortestPath.dijkstra.stream.estimate", mode = READ)

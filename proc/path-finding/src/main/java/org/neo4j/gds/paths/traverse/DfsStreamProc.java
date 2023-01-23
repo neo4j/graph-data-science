@@ -56,7 +56,7 @@ public class DfsStreamProc extends AlgoBaseProc<DFS, HugeLongArray, DfsStreamCon
         return new ProcedureExecutor<>(
             streamSpec,
             executionContext()
-        ).compute(graphName, configuration, true);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.dfs.stream.estimate", mode = READ)

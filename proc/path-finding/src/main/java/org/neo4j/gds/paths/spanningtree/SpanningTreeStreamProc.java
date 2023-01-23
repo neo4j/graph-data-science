@@ -51,7 +51,7 @@ public class SpanningTreeStreamProc extends BaseProc {
         return new ProcedureExecutor<>(
             new SpanningTreeStreamSpec(),
             executionContext()
-        ).compute(graphName, configuration, true);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = procedure + ".estimate", mode = READ)

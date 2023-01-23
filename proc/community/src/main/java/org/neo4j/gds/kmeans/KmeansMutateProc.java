@@ -49,7 +49,7 @@ public class KmeansMutateProc extends AlgoBaseProc<Kmeans, KmeansResult, KmeansM
         return new ProcedureExecutor<>(
             mutateSpec,
             executionContext()
-        ).compute(graphName, configuration, true);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.kmeans.mutate.estimate", mode = READ)

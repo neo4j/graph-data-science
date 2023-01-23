@@ -55,7 +55,7 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         ComputationResult<MSBFSASPAlgorithm, Stream<AllShortestPathsStream.Result>, AllShortestPathsConfig> computationResult =
-            compute(graphName, configuration, false);
+            compute(graphName, configuration);
         return computationResultConsumer().consume(computationResult, executionContext());
     }
 
