@@ -39,8 +39,12 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -49,6 +53,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.api.schema.Direction.DIRECTED;
 import static org.neo4j.gds.api.schema.Direction.UNDIRECTED;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -610,12 +615,60 @@ class RandomGraphGeneratorTest {
             NodeSchema.empty().addLabel(NodeLabel.of("A")),
             RelationshipSchema
                 .empty()
-                .addProperty(RelationshipType.of("FOOBAR"),
+                .addProperty(
+                    RelationshipType.of("FOOBAR"),
                     UNDIRECTED,
                     "relProp",
                     ValueType.DOUBLE,
                     PropertyState.TRANSIENT
                 )
         ));
+    }
+
+    @Test
+    void shouldCreateInverseIndex() {
+        var randomGraph = RandomGraphGenerator
+            .builder()
+            .inverseIndex(true)
+            .direction(DIRECTED)
+            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+            .nodeCount(4)
+            .averageDegree(2)
+            .build()
+            .generate();
+        HashMap<Long, Set<Long>> neighbors = new HashMap<>();
+        LongAdder relationships = new LongAdder();
+        randomGraph.forEachNode(nodeId -> {
+            neighbors.put(nodeId, new HashSet<>());
+            randomGraph.forEachRelationship(nodeId, (s, t) -> {
+                neighbors.get(s).add(t);
+                relationships.increment();
+                return true;
+            });
+            return true;
+        });
+        LongAdder inverseRelationships = new LongAdder();
+        randomGraph.forEachNode(nodeId -> {
+            randomGraph.forEachInverseRelationship(nodeId, (s, t) -> {
+                assertThat(neighbors.get(t)).contains(s);
+                inverseRelationships.increment();
+                return true;
+            });
+            return true;
+        });
+        assertThat(inverseRelationships.longValue()).isEqualTo(relationships.longValue());
+    }
+
+    @Test
+    void shouldComplainWithInverseIndexAndUndirected() {
+        assertThatThrownBy(() -> RandomGraphGenerator
+            .builder()
+            .inverseIndex(true)
+            .direction(UNDIRECTED)
+            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+            .nodeCount(4)
+            .averageDegree(2)
+            .build()
+            .generate()).hasMessageContaining("inverse");
     }
 }

@@ -68,6 +68,7 @@ public final class RandomGraphGenerator {
     private final Aggregation aggregation;
     private final Direction direction;
     private final AllowSelfLoops allowSelfLoops;
+    private final boolean inverseIndex;
 
     private final Optional<NodeLabelProducer> maybeNodeLabelProducer;
     private final Optional<PropertyProducer<double[]>> maybeRelationshipPropertyProducer;
@@ -87,7 +88,8 @@ public final class RandomGraphGenerator {
         Aggregation aggregation,
         Direction direction,
         AllowSelfLoops allowSelfLoops,
-        boolean forceDag
+        boolean forceDag,
+        boolean inverseIndex
     ) {
         this.relationshipType = relationshipType;
         this.relationshipDistribution = relationshipDistribution;
@@ -104,6 +106,7 @@ public final class RandomGraphGenerator {
         long actualSeed = seed != null ? seed : 1;
         this.random.setSeed(actualSeed);
         this.randomDagMapping = generateRandomMapping(actualSeed);
+        this.inverseIndex = inverseIndex;
     }
 
     public static RandomGraphGeneratorBuilder builder() {
@@ -135,7 +138,7 @@ public final class RandomGraphGenerator {
                     DefaultValue.forDouble()
                 )))
                 .orElseGet(List::of)
-            )
+            ).indexInverse(inverseIndex)
             .aggregation(aggregation)
             .build();
 
