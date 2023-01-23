@@ -70,23 +70,27 @@ abstract class NodeLabelTokenToPropertyKeys {
         Map<String, PropertySchema> importPropertySchemas
     );
 
-    static NodeLabelTokenToPropertyKeys merge(
+    /**
+     * Computes the union of the two given mappings without
+     * changing the contents of the mappings themselves.
+     */
+    static NodeLabelTokenToPropertyKeys union(
         NodeLabelTokenToPropertyKeys left,
         NodeLabelTokenToPropertyKeys right,
         Map<String, PropertySchema> importPropertySchemas
     ) {
-        var merge = NodeLabelTokenToPropertyKeys.lazy();
+        var union = NodeLabelTokenToPropertyKeys.lazy();
 
         left.nodeLabels().forEach(nodeLabel -> {
             var propertyKeys = left.propertySchemas(nodeLabel, importPropertySchemas).keySet();
-            merge.add(NodeLabelTokens.ofNodeLabel(nodeLabel), propertyKeys);
+            union.add(NodeLabelTokens.ofNodeLabel(nodeLabel), propertyKeys);
         });
         right.nodeLabels().forEach(nodeLabel -> {
             var propertyKeys = right.propertySchemas(nodeLabel, importPropertySchemas).keySet();
-            merge.add(NodeLabelTokens.ofNodeLabel(nodeLabel), propertyKeys);
+            union.add(NodeLabelTokens.ofNodeLabel(nodeLabel), propertyKeys);
         });
 
-        return merge;
+        return union;
     }
 
     private static class Fixed extends NodeLabelTokenToPropertyKeys {

@@ -199,17 +199,11 @@ public final class NodesBuilder {
     }
 
     public Nodes build(long highestNeoId) {
-        // Flush remaining buffer contents
-        this.threadLocalBuilder.forEach(ThreadLocalBuilder::flush);
-        // Collect token to property keys for final merge
-        var nodeLabelTokenToPropertyKeysList = new ArrayList<NodeLabelTokenToPropertyKeys>();
-        this.threadLocalBuilder.forEach(tlb -> nodeLabelTokenToPropertyKeysList.add(tlb.nodeLabelTokenToPropertyKeys));
-        // Clean up resources held by local builders
-        this.threadLocalBuilder.close();
+        var localLabelTokenToPropertyKeys = closeThreadLocalBuilders();
 
         var idMap = this.idMapBuilder.build(labelInformationBuilder, highestNeoId, concurrency);
         var nodeProperties = buildProperties(idMap);
-        var nodeSchema = buildNodeSchema(idMap, nodeLabelTokenToPropertyKeysList, nodeProperties);
+        var nodeSchema = buildNodeSchema(idMap, localLabelTokenToPropertyKeys, nodeProperties);
         var nodePropertyStore = NodePropertyStore.builder().properties(nodeProperties).build();
 
         return ImmutableNodes.builder()
@@ -219,37 +213,53 @@ public final class NodesBuilder {
             .build();
     }
 
+    private List<NodeLabelTokenToPropertyKeys> closeThreadLocalBuilders() {
+        // Flush remaining buffer contents
+        this.threadLocalBuilder.forEach(ThreadLocalBuilder::flush);
+        // Collect token to property keys for final union
+        var labelTokenToPropertyKeys = new ArrayList<NodeLabelTokenToPropertyKeys>();
+        this.threadLocalBuilder.forEach(tlb -> labelTokenToPropertyKeys.add(tlb.nodeLabelTokenToPropertyKeys));
+        // Clean up resources held by local builders
+        this.threadLocalBuilder.close();
+
+        return labelTokenToPropertyKeys;
+    }
+
     private NodeSchema buildNodeSchema(
         IdMap idMap,
-        Collection<NodeLabelTokenToPropertyKeys> localNodeLabelTokenToPropertyKeys,
+        Collection<NodeLabelTokenToPropertyKeys> localLabelTokenToPropertyKeys,
         Map<String, NodeProperty> nodeProperties
     ) {
-        var nodeSchema = NodeSchema.empty();
-        var importPropertySchemas = nodeProperties
+
+        // Collect the property schemas from the imported property values.
+        var propertyKeysToSchema = nodeProperties
             .entrySet()
             .stream()
             .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().propertySchema()));
-
-        // consider node labels without properties
-        var nodeLabels = new HashSet<>(idMap.availableNodeLabels());
-        // and also node labels with associated properties
-        localNodeLabelTokenToPropertyKeys.forEach(mapping -> nodeLabels.addAll(mapping.nodeLabels()));
-        // merge into a global mapping
-        var globalNodeLabelTokenToPropertyKeys = localNodeLabelTokenToPropertyKeys
+        // Union the label to property key mappings from each import thread.
+        var globalLabelTokenToPropertyKeys = localLabelTokenToPropertyKeys
             .stream()
             .reduce(
                 NodeLabelTokenToPropertyKeys.lazy(),
-                (left, right) -> NodeLabelTokenToPropertyKeys.merge(left, right, importPropertySchemas)
+                (left, right) -> NodeLabelTokenToPropertyKeys.union(left, right, propertyKeysToSchema)
             );
-        // and construct final node property schema
-        nodeLabels.forEach(nodeLabel -> {
-            nodeSchema.addLabel(
-                nodeLabel,
-                globalNodeLabelTokenToPropertyKeys.propertySchemas(nodeLabel, importPropertySchemas)
-            );
-        });
+        // Collect node labels without properties from the id map
+        // as they are not stored in the above union mapping.
+        var nodeLabels = new HashSet<>(idMap.availableNodeLabels());
+        // Add labels that actually have node properties attached.
+        localLabelTokenToPropertyKeys.forEach(localMapping -> nodeLabels.addAll(localMapping.nodeLabels()));
 
-        return nodeSchema;
+        // Use all labels and the global label to property
+        // key mapping to construct the final node schema.
+        return nodeLabels.stream()
+            .reduce(
+                NodeSchema.empty(),
+                (unionSchema, nodeLabel) -> unionSchema.addLabel(
+                    nodeLabel,
+                    globalLabelTokenToPropertyKeys.propertySchemas(nodeLabel, propertyKeysToSchema)
+                ),
+                (lhs, rhs) -> lhs
+            );
     }
 
     private Map<String, NodeProperty> buildProperties(IdMap idMap) {
@@ -342,10 +352,6 @@ public final class NodesBuilder {
                 .build();
             this.nodeImporter = nodeImporter;
             this.batchNodeProperties = new ArrayList<>(buffer.capacity());
-        }
-
-        NodeLabelTokenToPropertyKeys nodeLabelTokenToPropertyKeys() {
-            return this.nodeLabelTokenToPropertyKeys;
         }
 
         public void addNode(long originalId, NodeLabelToken nodeLabels) {
