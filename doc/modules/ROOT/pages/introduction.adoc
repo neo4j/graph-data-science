@@ -107,6 +107,6 @@ The Neo4j Graph Data Science library is available in two editions.
 *** Sharing of models between users, by xref:model-catalog/publish.adoc[publishing it].
 *** Model xref:model-catalog/store.adoc#model-catalog-store-ops[persistence to disk].
 ** Supports an xref:production-deployment/feature-toggles.adoc#bit-id-map-feature-toggle[optimized graph implementation].
-** Allows the configuration of xref:management-ops/defaults-and-limits.adoc[defaults and limits].
+** Allows the configuration of xref:production-deployment/defaults-and-limits.adoc[defaults and limits].
 
 For more information see xref:installation/System-requirements.adoc#system-requirements-cpu[System Requirements - CPU].
