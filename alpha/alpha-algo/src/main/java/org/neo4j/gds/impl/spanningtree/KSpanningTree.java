@@ -20,8 +20,6 @@
 package org.neo4j.gds.impl.spanningtree;
 
 import com.carrotsearch.hppc.BitSet;
-import org.apache.commons.lang3.mutable.MutableDouble;
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
@@ -78,7 +76,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         prim.setTerminationFlag(getTerminationFlag());
         SpanningTree spanningTree = prim.compute();
 
-        var outputTree = combineApproach(spanningTree);
+        var outputTree = growApproach(spanningTree);
         progressTracker.endSubTask();
         return outputTree;
     }
@@ -111,97 +109,15 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         return spanningTree.totalWeight();
     }
 
-    private SpanningTree cutLeafApproach(SpanningTree spanningTree) {
-        //this approach cuts a leaf at each step (remaining graph is always corrected)
-        //so we can just cut the most expensive leaf at each step
-        var priorityQueue = createPriorityQueue(graph.nodeCount(), true);
-        HugeLongArray degree = HugeLongArray.newArray(graph.nodeCount());
-        long root = startNodeId;
-        double rootCost = -1.0;
-        long rootChild = -1;
-
-        HugeLongArray parent = HugeLongArray.newArray(graph.nodeCount());
-        HugeDoubleArray costToParent = HugeDoubleArray.newArray(graph.nodeCount());
-
-        double totalCost = init(parent, costToParent, spanningTree);
-        long numberOfDeletions = spanningTree.effectiveNodeCount() - k;
-
-        progressTracker.beginSubTask(numberOfDeletions);
-        //calculate degree of each node in MST
-        for (long nodeId = 0; nodeId < graph.nodeCount(); ++nodeId) {
-            var nodeParent = parent.get(nodeId);
-            if (nodeParent != -1) {
-                degree.set(nodeParent, degree.get(nodeParent) + 1);
-                degree.set(nodeId, degree.get(nodeId) + 1);
-
-                if (nodeParent == root) { //root nodes needs special care because parent is -1
-                    rootChild = nodeId;
-                    rootCost = costToParent.get(nodeId);
-                }
-            }
-        }
-        //add all leafs in priority queue
-        for (long nodeId = 0; nodeId < graph.nodeCount(); ++nodeId) {
-            if (degree.get(nodeId) == 1) {
-                double relevantCost = (nodeId == root) ?
-                    rootCost :
-                    costToParent.get(nodeId);
-                priorityQueue.add(nodeId, relevantCost);
-            }
-        }
-
-        for (long i = 0; i < numberOfDeletions; ++i) {
-            var nextNode = priorityQueue.pop();
-            long affectedNode;
-
-            if (nextNode == root) { //the affecte node is its single child
-                affectedNode = rootChild;
-                totalCost -= rootCost;
-                clearNode(rootChild, parent, costToParent);
-                clearNode(root, parent, costToParent);
-                root = affectedNode;
-            } else { //the affected node is its paret
-                affectedNode = parent.get(nextNode);
-                totalCost -= costToParent.get(nextNode);
-                clearNode(nextNode, parent, costToParent);
-            }
-
-            degree.set(affectedNode, degree.get(affectedNode) - 1);
-            double associatedCost = -1;
-            if (degree.get(affectedNode) == 1) { //it becomes a leaf
-                if (affectedNode == root) {
-                    //if it is root, we loop at its neighbors to find its single alive child
-                    MutableDouble mutRootCost = new MutableDouble();
-                    MutableLong mutRootChild = new MutableLong();
-                    graph.forEachRelationship(root, (s, t) -> {
-                        if (parent.get(t) == s) {
-                            mutRootChild.setValue(t);
-                            mutRootCost.setValue(costToParent.get(t));
-                            return false;
-                        }
-                        return true;
-                    });
-                    rootChild = mutRootChild.longValue();
-                    rootCost = mutRootCost.doubleValue();
-                    associatedCost = rootCost;
-                } else {
-                    //otherwise we just get the info from parent
-                    associatedCost = costToParent.get(affectedNode);
-                }
-                priorityQueue.add(affectedNode, associatedCost);
-            }
-            progressTracker.logProgress();
-        }
-        progressTracker.endSubTask();
-        return new SpanningTree(root, graph.nodeCount(), k, parent, costToParent, totalCost);
-    }
 
     private SpanningTree growApproach(SpanningTree spanningTree) {
 
         //this approach grows gradually the MST found in the previous step
         //when it is about to get larger than K, we crop the current worst leaf if the new value to be added
         // is actually better
-
+        if (spanningTree.effectiveNodeCount() < k)
+            return spanningTree;
+        
         HugeLongArray outDegree = HugeLongArray.newArray(graph.nodeCount());
 
         HugeLongArray parent = HugeLongArray.newArray(graph.nodeCount());
@@ -372,21 +288,6 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         }
     }
 
-    private SpanningTree combineApproach(SpanningTree tree) {
-        if (tree.effectiveNodeCount() < k) {
-            return tree;
-        }
-        var spanningTree1 = cutLeafApproach(tree);
-        var spanningTree2 = growApproach(tree);
-        System.out.println("Prune Leaf: " + spanningTree1.totalWeight() + " Grow Mst:" + spanningTree2.totalWeight());
-        if (spanningTree1.totalWeight() > spanningTree2.totalWeight()) {
-            return (minMax == Prim.MAX_OPERATOR) ? spanningTree1 : spanningTree2;
-        } else {
-            return (minMax == Prim.MAX_OPERATOR) ? spanningTree2 : spanningTree1;
-
-        }
-
-    }
 }
 
 

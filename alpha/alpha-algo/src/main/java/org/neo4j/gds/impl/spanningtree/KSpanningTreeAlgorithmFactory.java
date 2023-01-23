@@ -53,9 +53,7 @@ public class KSpanningTreeAlgorithmFactory<CONFIG extends KSpanningTreeBaseConfi
             return Tasks.task(
                 taskName(),
                 Tasks.leaf("SpanningTree", graph.relationshipCount()),
-                Tasks.leaf("Remove relationships 1"),
-                Tasks.leaf("Remove relationships 2")
-
+                Tasks.leaf("Remove relationships")
             );
         }
 

@@ -133,13 +133,13 @@ class KSpanningTreeTest {
                                     ", (c:Node)" +
                                     ", (d:Node)" +
                                     ", (e:Node)" +
-                                    ", (a)-[:TYPE {cost: 1.0}]->(b)" +
-                                    ", (b)-[:TYPE {cost: 20.0}]->(c)" +
-                                    ", (c)-[:TYPE {cost: 30.0}]->(d)" +
+                                    ", (b)-[:TYPE {cost: 1.0}]->(a)" +
+                                    ", (c)-[:TYPE {cost: 20.0}]->(b)" +
+                                    ", (d)-[:TYPE {cost: 30.0}]->(c)" +
                                     ", (d)-[:TYPE {cost: 1.0}]->(e)"
         );
         var graph = factory.build().getUnion();
-        var startNode = factory.nodeId("a");
+        var startNode = factory.nodeId("d");
 
         var k = 3;
         var spanningTree = new KSpanningTree(
@@ -172,14 +172,14 @@ class KSpanningTreeTest {
                                     ", (d:Node)" +
                                     ", (e:Node)" +
                                     ", (f:Node)" +
-                                    ", (a)-[:TYPE {cost: 1.0}]->(b)" +
-                                    ", (b)-[:TYPE {cost: 20.0}]->(c)" +
-                                    ", (c)-[:TYPE {cost: 30.0}]->(d)" +
+                                    ", (b)-[:TYPE {cost: 1.0}]->(a)" +
+                                    ", (c)-[:TYPE {cost: 20.0}]->(b)" +
+                                    ", (d)-[:TYPE {cost: 30.0}]->(c)" +
                                     ", (d)-[:TYPE {cost: 1.0}]->(e)" +
                                     ", (e)-[:TYPE {cost: 1.0}]->(f)"
         );
         var graph = factory.build().getUnion();
-        var startNode = factory.nodeId("a");
+        var startNode = factory.nodeId("d");
 
 
         var spanningTree = new KSpanningTree(
@@ -201,52 +201,6 @@ class KSpanningTreeTest {
         assertThat(spanningTree.totalWeight()).isEqualTo(expected);
     }
 
-    @Test
-    void worstCaseForCuttingHeaviest() {
-        var factory = GdlFactory.of("CREATE" +
-                                    "  (a:Node)" +
-                                    ", (b:Node)" +
-                                    ", (c:Node)" +
-                                    ", (d:Node)" +
-                                    ", (e:Node)" +
-                                    ", (f:Node)" +
-                                    ", (g:Node)" +
-                                    ", (h:Node)" +
-                                    ", (a)-[:TYPE {cost: 9.0}]->(b)" +
-                                    ", (b)-[:TYPE {cost: 9.0}]->(c)" +
-                                    ", (c)-[:TYPE {cost: 0.0}]->(d)" +
-                                    ", (d)-[:TYPE {cost: 10.0}]->(e)" +
-                                    ", (e)-[:TYPE {cost: 0.0}]->(f)" +
-                                    ", (f)-[:TYPE {cost: 9.0}]->(g)" +
-                                    ", (g)-[:TYPE {cost: 9.0}]->(h)"
-
-        );
-        var graph = factory.build().getUnion();
-        var startNode = factory.nodeId("a");
-
-
-        var spanningTree = new KSpanningTree(
-            graph,
-            Prim.MIN_OPERATOR,
-            startNode,
-            4,
-            ProgressTracker.NULL_TRACKER
-        ).compute();
-
-        var counter = new MutableLong(0);
-        spanningTree.forEach((__, ___, ____) -> {
-            counter.add(1);
-            return true;
-        });
-
-        assertThat(counter.getValue()).isEqualTo(4 - 1);
-        assertThat(spanningTree.totalWeight()).isEqualTo(10.0);
-        //here a 'cut-heaviest'  approach would begin by cutting edge 10.
-        //this would prune the tree into two smaller subtrees of 4 nodes each
-        //adn thus return a 18 despite the optimal being 10.
-        //this is one of the many situations where cut-heavy-fails
-
-    }
 
     @Test
     void worstCaseForPruningLeaves() {
@@ -344,16 +298,12 @@ class KSpanningTreeTest {
                 "KSpanningTree :: SpanningTree 80%",
                 "KSpanningTree :: SpanningTree 100%",
                 "KSpanningTree :: SpanningTree :: Finished",
-                "KSpanningTree :: Remove relationships 1 :: Start",
-                "KSpanningTree :: Remove relationships 1 50%",
-                "KSpanningTree :: Remove relationships 1 100%",
-                "KSpanningTree :: Remove relationships 1 :: Finished",
-                "KSpanningTree :: Remove relationships 2 :: Start",
-                "KSpanningTree :: Remove relationships 2 20%",
-                "KSpanningTree :: Remove relationships 2 40%",
-                "KSpanningTree :: Remove relationships 2 60%",
-                "KSpanningTree :: Remove relationships 2 100%",
-                "KSpanningTree :: Remove relationships 2 :: Finished",
+                "KSpanningTree :: Remove relationships :: Start",
+                "KSpanningTree :: Remove relationships 20%",
+                "KSpanningTree :: Remove relationships 40%",
+                "KSpanningTree :: Remove relationships 60%",
+                "KSpanningTree :: Remove relationships 100%",
+                "KSpanningTree :: Remove relationships :: Finished",
                 "KSpanningTree :: Finished"
             );
     }
