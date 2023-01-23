@@ -117,7 +117,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         // is actually better
         if (spanningTree.effectiveNodeCount() < k)
             return spanningTree;
-        
+
         HugeLongArray outDegree = HugeLongArray.newArray(graph.nodeCount());
 
         HugeLongArray parent = HugeLongArray.newArray(graph.nodeCount());
@@ -152,10 +152,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
                 nodesInTree++;
                 nodeAdded = true;
             } else {
-                while (!exterior.get(toTrim.top())) { //not valid frontier nodes anymore, just ignore
-                    toTrim.pop(); //as we said, pq does not have a direct remove method
-                }
-                var nodeToTrim = toTrim.top(); //a leaf node with worst cost
+                var nodeToTrim = findNextValidLeaf(toTrim, exterior); //a leaf node with currently theworst cost
                 if (parent.get(node) == nodeToTrim) {
                     //we cannot add it, if we're supposed to remove its parent
                     //TODO: should be totally feasible to consider the 2nd worst then.
@@ -197,13 +194,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
                             }
                         }
                         if (affectedNode != -1) { //if a node has been converted to a leaf
-                            if (!toTrim.containsElement(affectedNode)) {
-                                toTrim.add(affectedNode, affectedCost); //add it to pq
-                            } else {
-                                //it is still in the queue, but it is not a leaf anymore, so it's value is obsolete
-                                toTrim.set(affectedNode, affectedCost);
-                            }
-                            exterior.set(affectedNode); //and mark it in the exterior
+                            updateExterior(affectedNode, affectedCost, toTrim, exterior);
                         }
                     } else {
                         //the root is removed, long live the new root!
@@ -212,14 +203,9 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
                         var newRoot = rootNodeAdjacent.nextSetBit(0);
                         rootNodeAdjacent.clear(); //empty everything
                         //find the children of the new root (this can happen once per node)
-                        graph.forEachRelationship(newRoot, (s, t) -> {
-                            //relevant are only those nodes which are currently
-                            //in the k-tree
-                            if (parent.get(t) == s && included.get(t)) {
-                                rootNodeAdjacent.set(t);
-                            }
-                            return true;
-                        });
+
+                        fillChildren(newRoot, rootNodeAdjacent, parent, included);
+
                         root = newRoot;
                         //set it as root
                         clearNode(root, parent, costToParent);
@@ -247,32 +233,26 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
                 //then the node  (being a leaf) is added to the trimming priority queu
                 toTrim.add(node, associatedCost);
                 exterior.set(node); //and the exterior
+                relaxNode(node, priorityQueue, parent, spanningTree);
 
-                graph.forEachRelationship(node, (s, t) -> {
-                    if (parent.get(t) == s) {
-                        //TODO: work's only on mst edges for now (should be doable to re-find an k-MST from whole graph)
-                        if (!priorityQueue.containsElement(t)) {
-                            priorityQueue.add(t, spanningTree.costToParent(t));
-                        }
-
-                    }
-                    return true;
-                });
             } else {
                 clearNode(node, parent, costToParent);
-
             }
         }
         //post-processing step: anything not touched is reset to -1
+        pruneUntouchedNodes(parent, costToParent, included);
+        progressTracker.endSubTask();
+        return new SpanningTree(root, graph.nodeCount(), k, parent, costToParent, totalCost);
+
+    }
+
+    private void pruneUntouchedNodes(HugeLongArray parent, HugeDoubleArray costToParent, BitSet included) {
         graph.forEachNode(nodeId -> {
             if (!included.get(nodeId)) {
                 clearNode(nodeId, parent, costToParent);
             }
             return true;
         });
-        progressTracker.endSubTask();
-        return new SpanningTree(root, graph.nodeCount(), k, parent, costToParent, totalCost);
-
     }
 
     private void clearNode(long node, HugeLongArray parent, HugeDoubleArray costToParent) {
@@ -286,6 +266,52 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         } else {
             return cost1 < cost2;
         }
+    }
+
+    private void updateExterior(long affectedNode, double affectedCost, HugeLongPriorityQueue toTrim, BitSet exterior) {
+        if (!toTrim.containsElement(affectedNode)) {
+            toTrim.add(affectedNode, affectedCost); //add it to pq
+        } else {
+            //it is still in the queue, but it is not a leaf anymore, so it's value is obsolete
+            toTrim.set(affectedNode, affectedCost);
+        }
+        exterior.set(affectedNode); //and mark it in the exterior
+    }
+
+    private long findNextValidLeaf(HugeLongPriorityQueue toTrim, BitSet exterior) {
+        while (!exterior.get(toTrim.top())) { //not valid frontier nodes anymore, just ignore
+            toTrim.pop(); //as we said, pq does not have a direct remove method
+        }
+        return toTrim.top();
+    }
+
+    private void fillChildren(long newRoot, BitSet rootNodeAdjacent, HugeLongArray parent, BitSet included) {
+        graph.forEachRelationship(newRoot, (s, t) -> {
+            //relevant are only those nodes which are currently
+            //in the k-tree
+            if (parent.get(t) == s && included.get(t)) {
+                rootNodeAdjacent.set(t);
+            }
+            return true;
+        });
+    }
+
+    private void relaxNode(
+        long node,
+        HugeLongPriorityQueue priorityQueue,
+        HugeLongArray parent,
+        SpanningTree spanningTree
+    ) {
+        graph.forEachRelationship(node, (s, t) -> {
+            if (parent.get(t) == s) {
+                //TODO: work's only on mst edges for now (should be doable to re-find an k-MST from whole graph)
+                if (!priorityQueue.containsElement(t)) {
+                    priorityQueue.add(t, spanningTree.costToParent(t));
+                }
+
+            }
+            return true;
+        });
     }
 
 }
