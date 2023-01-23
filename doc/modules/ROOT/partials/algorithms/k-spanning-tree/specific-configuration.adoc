@@ -1,0 +1,4 @@
+| k         | Number  | n/a         | no      | The  size of the tree to be returned
+| sourceNode | Integer | null      | n/a        | The starting source node ID.
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null      | yes       | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
+| objective  | String | 'minimum'  | yes      | If specified, the parameter dictates whether to seek a minimum or the maximum weight k-spanning tree. By default, the procedure looks for a minimum weight k-spanning tree. Permitted values are 'minimum' and 'maximum'.
