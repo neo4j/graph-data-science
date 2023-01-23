@@ -58,8 +58,10 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
 
     protected void logLoadingSummary(GraphStore graphStore) {
         var sizeInBytes = MemoryUsage.sizeOf(graphStore);
-        var memoryUsage = MemoryUsage.humanReadable(sizeInBytes);
-        progressTracker.logInfo(formatWithLocale("Actual memory usage of the loaded graph: %s", memoryUsage));
+        if (sizeInBytes >= 0) {
+            var memoryUsage = MemoryUsage.humanReadable(sizeInBytes);
+            progressTracker.logInfo(formatWithLocale("Actual memory usage of the loaded graph: %s", memoryUsage));
+        }
     }
 
     protected abstract GraphSchema computeGraphSchema(
