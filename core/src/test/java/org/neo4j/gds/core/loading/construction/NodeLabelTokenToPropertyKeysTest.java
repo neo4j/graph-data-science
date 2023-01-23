@@ -209,5 +209,29 @@ class NodeLabelTokenToPropertyKeysTest {
             NodeLabel.of("C")
         );
     }
+
+    @Test
+    void testMerge() {
+        var importPropertySchemas = Map.of(
+            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
+        );
+
+        var left = NodeLabelTokenToPropertyKeys.lazy();
+        left.add(NodeLabelTokens.ofStrings("A"), List.of("foo"));
+
+        var right = NodeLabelTokenToPropertyKeys.lazy();
+        right.add(NodeLabelTokens.ofStrings("B"), List.of("bar"));
+
+        var mapping = NodeLabelTokenToPropertyKeys.merge(left, right, importPropertySchemas);
+
+        assertThat(mapping.nodeLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"));
+        assertThat(mapping.propertySchemas(NodeLabel.of("A"), importPropertySchemas)).isEqualTo(Map.of(
+            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT)
+        ));
+        assertThat(mapping.propertySchemas(NodeLabel.of("B"), importPropertySchemas)).isEqualTo(Map.of(
+            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
+        ));
+    }
 }
 
