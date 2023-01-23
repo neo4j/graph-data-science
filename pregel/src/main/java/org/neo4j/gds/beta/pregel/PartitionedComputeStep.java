@@ -19,14 +19,13 @@
  */
 package org.neo4j.gds.beta.pregel;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class PartitionedComputeStep<
     CONFIG extends PregelConfig,
@@ -45,7 +44,7 @@ public final class PartitionedComputeStep<
     private final Messenger<ITERATOR> messenger;
 
     private final MutableInt iteration;
-    private final AtomicBoolean hasSentMessage;
+    private final MutableBoolean hasSentMessage;
     private final NodeValue nodeValue;
 
     PartitionedComputeStep(
@@ -58,7 +57,7 @@ public final class PartitionedComputeStep<
         Messenger<ITERATOR> messenger,
         HugeAtomicBitSet voteBits,
         MutableInt iteration,
-        AtomicBoolean hasSentMessage,
+        MutableBoolean hasSentMessage,
         ProgressTracker progressTracker
     ) {
         this.initFunction = initFunction;
@@ -127,10 +126,10 @@ public final class PartitionedComputeStep<
 
     void init(int iteration) {
         this.iteration.setValue(iteration);
-        this.hasSentMessage.set(false);
+        hasSentMessage.setValue(false);
     }
 
     boolean hasSentMessage() {
-        return hasSentMessage.get();
+        return hasSentMessage.getValue();
     }
 }

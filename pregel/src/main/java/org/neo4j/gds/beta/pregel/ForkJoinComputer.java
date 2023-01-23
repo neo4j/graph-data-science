@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -103,12 +104,12 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
         Supplier<ComputeContext<CONFIG>> computeContext = () -> new ComputeContext<>(
             graph.concurrentCopy(),
             config,
-            ((PregelComputation<CONFIG>) computation)::applyRelationshipWeight,
+            computation,
             nodeValues,
             messenger,
             voteBits,
             iteration,
-            hasSentMessages,
+            Optional.empty(),
             progressTracker
         );
 
@@ -144,12 +145,12 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
         Supplier<BidirectionalComputeContext<CONFIG>> computeContext = () -> new BidirectionalComputeContext<>(
             graph.concurrentCopy(),
             config,
-            ((BidirectionalPregelComputation<CONFIG>) computation)::applyRelationshipWeight,
+            computation,
             nodeValues,
             messenger,
             voteBits,
             iteration,
-            hasSentMessages,
+            Optional.empty(),
             progressTracker
         );
 
