@@ -23,7 +23,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
@@ -31,7 +30,6 @@ import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.utils.paged.ShardedLongLongMap;
 
-import java.util.Map;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -114,10 +112,6 @@ public final class LazyIdMapBuilder implements PartialIdMap {
         NodeSchema schema();
 
         NodePropertyStore propertyStore();
-
-        default Map<String, NodePropertyValues> properties() {
-            return propertyStore().propertyValues();
-        }
     }
 
     public HighLimitIdMapAndProperties build() {
