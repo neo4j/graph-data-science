@@ -518,7 +518,6 @@ public class GraphAggregator implements CompatUserAggregator {
                 .properties(idMapAndProperties.propertyStore())
                 .build();
 
-            // graphStoreBuilder.nodes(nodesBuilder.schema(nodeSchema).build());
             graphStoreBuilder.nodes(nodes);
 
             // Relationships are added using their intermediate node ids.

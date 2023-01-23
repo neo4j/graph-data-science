@@ -32,11 +32,9 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.GraphPropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.huge.HugeGraph;
@@ -44,7 +42,6 @@ import org.neo4j.values.storable.NumberType;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -178,27 +175,6 @@ public final class CSRGraphStoreUtil {
             )
         ).build());
 
-    }
-
-    public static void extractNodeProperties(
-        ImmutableNodes.Builder nodeImportResultBuilder,
-        Function<String, PropertySchema> nodeSchema,
-        Map<String, NodePropertyValues> nodeProperties
-    ) {
-        NodePropertyStore.Builder propertyStoreBuilder = NodePropertyStore.builder();
-        nodeProperties.forEach((propertyKey, propertyValues) -> {
-            var propertySchema = nodeSchema.apply(propertyKey);
-            propertyStoreBuilder.putIfAbsent(
-                propertyKey,
-                NodeProperty.of(
-                    propertyKey,
-                    propertySchema.state(),
-                    propertyValues,
-                    propertySchema.defaultValue()
-                )
-            );
-        });
-        nodeImportResultBuilder.properties(propertyStoreBuilder.build());
     }
 
     // TODO: remove this method
