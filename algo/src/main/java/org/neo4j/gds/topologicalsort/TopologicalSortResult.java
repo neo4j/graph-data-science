@@ -42,6 +42,10 @@ public class TopologicalSortResult {
     }
 
     void addNode(long nodeId) {
-        sortedNodes.set(addIndex.getAndIncrement(), nodeId);
+        long andIncrement = addIndex.getAndIncrement();
+//        if (andIncrement > 10000) {
+//            System.out.println("");
+//        }
+        sortedNodes.set(andIncrement, nodeId);
     }
 }

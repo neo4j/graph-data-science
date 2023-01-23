@@ -21,7 +21,6 @@ package org.neo4j.gds.topologicalsort;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 public class TopologicalSortFactory<CONFIG extends TopologicalSortConfig> extends GraphAlgorithmFactory<TopologicalSort, CONFIG> {
@@ -30,7 +29,6 @@ public class TopologicalSortFactory<CONFIG extends TopologicalSortConfig> extend
         return new TopologicalSort(
             graph,
             configuration,
-            Pools.DEFAULT,
             progressTracker
         );
     }

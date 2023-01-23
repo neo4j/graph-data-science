@@ -22,7 +22,6 @@ package org.neo4j.gds.topologicalsort;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -39,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class TopologicalSortTest {
     //set concurrecny to 1 (tests are concurrency related; that will remove flakiness)
     //TODO: updated when fixing bug
-    private static TopologicalSortConfig CONFIG = new TopologicalSortConfigImpl.Builder().concurrency(1).build();
+    private static TopologicalSortConfig CONFIG = new TopologicalSortConfigImpl.Builder().concurrency(4).build();
 
     @GdlGraph(graphNamePrefix = "basic")
     private static final String basicQuery =
@@ -58,7 +57,7 @@ class TopologicalSortTest {
 
     @Test
     void shouldSortRight() {
-        TopologicalSort ts = new TopologicalSort(basicGraph, CONFIG, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
+        TopologicalSort ts = new TopologicalSort(basicGraph, CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
         HugeLongArray nodes = result.value();
 
@@ -90,7 +89,7 @@ class TopologicalSortTest {
 
     @Test
     void allCycleShouldGiveEmptySorting() {
-        TopologicalSort ts = new TopologicalSort(allCycleGraph, CONFIG, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
+        TopologicalSort ts = new TopologicalSort(allCycleGraph, CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
         HugeLongArray nodes = result.value();
 
@@ -112,7 +111,7 @@ class TopologicalSortTest {
 
     @Test
     void ShouldExcludeSelfLoops() {
-        TopologicalSort ts = new TopologicalSort(selfLoopGraph, CONFIG, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
+        TopologicalSort ts = new TopologicalSort(selfLoopGraph, CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
         HugeLongArray nodes = result.value();
 
@@ -184,7 +183,7 @@ class TopologicalSortTest {
 
         // Despite all nodes have relations to node 100 (therefore it is in "risk" of being handled not in order), this node must be the last in sorting
         long nodeCount = lastGraph.nodeCount();
-        TopologicalSort ts = new TopologicalSort(lastGraph, CONFIG, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
+        TopologicalSort ts = new TopologicalSort(lastGraph, CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
         HugeLongArray nodes = result.value();
 
@@ -224,7 +223,7 @@ class TopologicalSortTest {
 
     @Test
     void shouldNotIncludeCycles() {
-        TopologicalSort ts = new TopologicalSort(cyclesGraph, CONFIG, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
+        TopologicalSort ts = new TopologicalSort(cyclesGraph, CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
         HugeLongArray nodes = result.value();
 
@@ -246,11 +245,33 @@ class TopologicalSortTest {
             .relationshipDistribution(RelationshipDistribution.RANDOM)
             .seed(rand.nextInt())
             .forceDag(true)
+
             .build()
             .generate();
 
-        TopologicalSort ts = new TopologicalSort(graph, CONFIG, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
+        TopologicalSort ts = new TopologicalSort(graph, CONFIG, ProgressTracker.NULL_TRACKER);
         TopologicalSortResult result = ts.compute();
         assertEquals(100, result.size());
+    }
+
+    @Test
+    void foo() {
+        var graph = RandomGraphGenerator.builder()
+            .nodeCount(1000_000)
+            .averageDegree(10)
+            .relationshipDistribution(RelationshipDistribution.RANDOM)
+            .seed(42)
+            .forceDag(true)
+            .build()
+            .generate();
+
+        TopologicalSort ts = new TopologicalSortFactory<>().build(
+            graph,
+            TopologicalSortConfigImpl.builder().concurrency(4).build(),
+            ProgressTracker.NULL_TRACKER
+        );
+
+        TopologicalSortResult res = ts.compute();
+        res.size();
     }
 }
