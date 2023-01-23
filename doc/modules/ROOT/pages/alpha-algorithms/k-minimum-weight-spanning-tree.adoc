@@ -129,7 +129,7 @@ By setting the `k=3`, we define that we want to find a 3-minimum spanning tree t
 --
 [source, cypher, role=noplay]
 ----
-MATCH (n:Place{id: 'D'})
+MATCH (n:Place{id: 'A'})
 CALL gds.alpha.kSpanningTree.write('graph', {
   k: 3,
   sourceNode: id(n),
@@ -159,12 +159,12 @@ RETURN n.id As Place, p as Partition
 [opts="header",cols="1,1"]
 |===
 | Place | Partition
-| "A"     | 1
-| "B"     | 1
-| "C"     | 1
+| "A"     | 0
+| "B"     | 0
+| "C"     | 0
 |===
 --
-Nodes A, B, and C are the result 3-minimum spanning tree of our graph.
+Nodes A, B, and C form the discovered 3-minimum spanning tree of our graph.
 
 === Maximum K-Spanning Tree example
 
