@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 abstract class NodeLabelTokenToPropertyKeys {
 
@@ -158,7 +157,7 @@ abstract class NodeLabelTokenToPropertyKeys {
                 .keySet()
                 .stream()
                 .map(nodeLabelToken -> nodeLabelToken.isEmpty() ? NodeLabelTokens.ofNodeLabel(NodeLabel.ALL_NODES) : nodeLabelToken)
-                .flatMap(nodeLabelToken -> IntStream.range(0, nodeLabelToken.size()).mapToObj(nodeLabelToken::get))
+                .flatMap(NodeLabelToken::nodeLabels)
                 .collect(Collectors.toSet());
         }
 
