@@ -25,8 +25,8 @@
 | xref:common-usage/monitoring-system.adoc[Get an overview of the system's workload and available resources] | `gds.alpha.systemMonitor`
 | Back-up graphs and models to disk             | `gds.alpha.backup`
 | Restore persisted graphs and models to memory | `gds.alpha.restore`
-| xref:management-ops/defaults-and-limits.adoc[List configured defaults] | `gds.alpha.config.defaults.list`
-| xref:management-ops/defaults-and-limits.adoc[Configure a default] | `gds.alpha.config.defaults.set`
-| xref:management-ops/defaults-and-limits.adoc#_limits_on_configuration_values[List configured limits] | `gds.alpha.config.limits.list`
-| xref:management-ops/defaults-and-limits.adoc#_limits_on_configuration_values[Configure a limit] | `gds.alpha.config.limits.set`
+| xref:production-deployment/defaults-and-limits.adoc[List configured defaults] | `gds.alpha.config.defaults.list`
+| xref:production-deployment/defaults-and-limits.adoc[Configure a default] | `gds.alpha.config.defaults.set`
+| xref:production-deployment/defaults-and-limits.adoc#_limits_on_configuration_values[List configured limits] | `gds.alpha.config.limits.list`
+| xref:production-deployment/defaults-and-limits.adoc#_limits_on_configuration_values[Configure a limit] | `gds.alpha.config.limits.set`
 |===
