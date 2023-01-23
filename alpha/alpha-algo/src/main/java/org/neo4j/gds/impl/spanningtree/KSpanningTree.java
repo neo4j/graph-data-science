@@ -94,12 +94,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
             : HugeLongPriorityQueue.max(parentSize);
         return priorityQueue;
     }
-
-    @Override
-    public void release() {
-        graph = null;
-    }
-
+    
     private double init(HugeLongArray parent, HugeDoubleArray costToParent, SpanningTree spanningTree) {
         graph.forEachNode((nodeId) -> {
             parent.set(nodeId, spanningTree.parent(nodeId));
