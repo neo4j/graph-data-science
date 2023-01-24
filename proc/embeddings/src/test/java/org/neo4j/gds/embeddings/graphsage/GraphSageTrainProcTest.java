@@ -27,7 +27,7 @@ import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -233,7 +233,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         );
         var model = Model.of(
             GraphSage.MODEL_TYPE,
-            GraphSchema.empty(),
+            MutableGraphSchema.empty(),
             42,
             config,
             GraphSageModelTrainer.GraphSageTrainMetrics.empty()

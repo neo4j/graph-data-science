@@ -32,7 +32,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
@@ -119,7 +119,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
     }
 
     @Override
-    protected GraphSchema computeGraphSchema(
+    protected MutableGraphSchema computeGraphSchema(
         Nodes nodes, RelationshipImportResult relationshipImportResult
     ) {
         return CSRGraphStoreUtil.computeGraphSchema(

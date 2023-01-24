@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline.node.regression.predict;
 
-import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -53,7 +53,7 @@ final class NodeRegressionModelTestUtil {
     ) {
         return Model.of(
             NodeRegressionTrainingPipeline.MODEL_TYPE,
-            GraphSchema.empty(),
+            MutableGraphSchema.empty(),
             data,
             NodeRegressionPipelineTrainConfigImpl.builder()
                .modelUser(username)

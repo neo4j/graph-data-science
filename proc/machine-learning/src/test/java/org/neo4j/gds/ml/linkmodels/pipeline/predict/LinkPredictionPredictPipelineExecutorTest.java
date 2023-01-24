@@ -26,7 +26,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -355,7 +355,7 @@ class LinkPredictionPredictPipelineExecutorTest {
 
         Model.of(
             MODEL_TYPE,
-            GraphSchema.empty(),
+            MutableGraphSchema.empty(),
             modelData,
             LinkPredictionTrainConfigImpl.builder()
                 .modelUser(username)

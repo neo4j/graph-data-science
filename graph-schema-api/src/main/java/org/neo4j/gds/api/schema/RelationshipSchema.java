@@ -24,7 +24,7 @@ import org.neo4j.gds.RelationshipType;
 import java.util.Map;
 import java.util.Set;
 
-public interface RelationshipSchema extends ElementSchema<MutableRelationshipSchema, RelationshipType, MutableRelationshipSchemaEntry, RelationshipPropertySchema> {
+public interface RelationshipSchema extends ElementSchema<RelationshipSchema, RelationshipType, MutableRelationshipSchemaEntry, RelationshipPropertySchema> {
     Set<RelationshipType> availableTypes();
 
     boolean isUndirected();

@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
@@ -191,7 +191,7 @@ class LinkPredictionTrainingPipelineTest {
         String modelName = "myModel";
         modelCatalog.set(Model.of(
             "myAlgo",
-            GraphSchema.empty(),
+            MutableGraphSchema.empty(),
             1L,
             TestWeightedTrainConfigImpl.builder()
                 .modelUser("")
@@ -223,7 +223,7 @@ class LinkPredictionTrainingPipelineTest {
         String modelName = "myModel";
         modelCatalog.set(Model.of(
             "myAlgo",
-            GraphSchema.empty(),
+            MutableGraphSchema.empty(),
             1L,
             TestTrainConfigImpl.builder()
                 .modelUser("")
