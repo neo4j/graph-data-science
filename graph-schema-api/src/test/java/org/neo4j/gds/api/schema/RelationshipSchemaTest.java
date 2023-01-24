@@ -44,10 +44,6 @@ class RelationshipSchemaTest {
         assertThat(MutableRelationshipSchema.empty().isUndirected()).isTrue();
 
         RelationshipType type = RelationshipType.of("TYPE");
-        var propertySchema = Map.of(
-            type,
-            Map.of("prop", RelationshipPropertySchema.of("prop", ValueType.DOUBLE))
-        );
 
         var undirectedSchema = MutableRelationshipSchema.empty();
         undirectedSchema.getOrCreateRelationshipType(type, Direction.UNDIRECTED);

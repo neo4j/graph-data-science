@@ -156,4 +156,19 @@ public class MutableRelationshipSchema implements RelationshipSchema {
         getOrCreateRelationshipType(relationshipType, direction).addProperty(propertyKey, valueType, propertyState);
         return this;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MutableRelationshipSchema that = (MutableRelationshipSchema) o;
+
+        return entries.equals(that.entries);
+    }
+
+    @Override
+    public int hashCode() {
+        return entries.hashCode();
+    }
 }

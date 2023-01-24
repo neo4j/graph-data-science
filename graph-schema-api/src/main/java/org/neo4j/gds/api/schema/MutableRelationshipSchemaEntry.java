@@ -131,4 +131,24 @@ public class MutableRelationshipSchemaEntry implements RelationshipSchemaEntry {
         this.properties.put(propertyKey, propertySchema);
         return this;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MutableRelationshipSchemaEntry that = (MutableRelationshipSchemaEntry) o;
+
+        if (!relationshipType.equals(that.relationshipType)) return false;
+        if (direction != that.direction) return false;
+        return properties.equals(that.properties);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = relationshipType.hashCode();
+        result = 31 * result + direction.hashCode();
+        result = 31 * result + properties.hashCode();
+        return result;
+    }
 }
