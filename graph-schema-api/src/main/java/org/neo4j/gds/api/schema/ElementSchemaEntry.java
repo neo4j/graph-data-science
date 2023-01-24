@@ -28,29 +28,17 @@ import java.util.stream.Stream;
 
 import static java.lang.String.format;
 
-public abstract class ElementSchemaEntry<SELF extends ElementSchemaEntry<SELF, ELEMENT_IDENTIFIER, PROPERTY_SCHEMA>, ELEMENT_IDENTIFIER extends ElementIdentifier, PROPERTY_SCHEMA extends PropertySchema> {
+public interface ElementSchemaEntry<SELF extends ElementSchemaEntry<SELF, ELEMENT_IDENTIFIER, PROPERTY_SCHEMA>, ELEMENT_IDENTIFIER extends ElementIdentifier, PROPERTY_SCHEMA extends PropertySchema> {
 
-    public final ELEMENT_IDENTIFIER identifier;
-    public final Map<String, PROPERTY_SCHEMA> properties;
+    ELEMENT_IDENTIFIER identifier();
 
-    public ElementSchemaEntry(ELEMENT_IDENTIFIER identifier, Map<String, PROPERTY_SCHEMA> properties) {
-        this.identifier = identifier;
-        this.properties = properties;
-    }
+    Map<String, PROPERTY_SCHEMA> properties();
 
-    public ELEMENT_IDENTIFIER identifier() {
-        return identifier;
-    }
+    SELF union(SELF other);
 
-    public Map<String, PROPERTY_SCHEMA> properties() {
-        return properties;
-    }
+    Map<String, Object> toMap();
 
-    abstract SELF union(SELF other);
-
-    abstract Map<String, Object> toMap();
-
-    protected Map<String, PROPERTY_SCHEMA> unionProperties(Map<String, PROPERTY_SCHEMA> rightProperties) {
+    default Map<String, PROPERTY_SCHEMA> unionProperties(Map<String, PROPERTY_SCHEMA> rightProperties) {
         return Stream
             .concat(properties().entrySet().stream(), rightProperties.entrySet().stream())
             .collect(Collectors.toMap(
@@ -58,7 +46,7 @@ public abstract class ElementSchemaEntry<SELF extends ElementSchemaEntry<SELF, E
                     if (leftType.valueType() != rightType.valueType()) {
                         throw new IllegalArgumentException(format(Locale.ENGLISH,
                             "Combining schema entries with value type %s and %s is not supported.",
-                            properties
+                            properties()
                                 .entrySet()
                                 .stream()
                                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().valueType())),
@@ -71,28 +59,5 @@ public abstract class ElementSchemaEntry<SELF extends ElementSchemaEntry<SELF, E
                         return leftType;
                     }
                 }));
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        ElementSchemaEntry<?, ?, ?> that = (ElementSchemaEntry<?, ?, ?>) o;
-
-        if (!identifier.equals(that.identifier)) return false;
-        return properties.equals(that.properties);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = identifier.hashCode();
-        result = 31 * result + properties.hashCode();
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return toMap().toString();
     }
 }
