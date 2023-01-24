@@ -21,24 +21,17 @@ package org.neo4j.gds.projection;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.CustomProcedure;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.ImmutableGraphSchema;
-import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
-import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.api.schema.RelationshipSchemaEntry;
 import org.neo4j.gds.compat.CompatUserAggregator;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.ConfigKeyValidation;
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
-import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.ImmutableNodes;
@@ -47,6 +40,7 @@ import org.neo4j.gds.core.loading.LazyIdMapBuilder;
 import org.neo4j.gds.core.loading.ReadHelper;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.ImmutablePropertyConfig;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
@@ -63,8 +57,7 @@ import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.MapValue;
 import org.neo4j.values.virtual.MapValueBuilder;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -152,12 +145,15 @@ public class GraphAggregator implements CompatUserAggregator {
         AnyValue relationshipConfig,
         AnyValue config
     ) {
+        this.configValidator.validateConfigs(nodesConfig, relationshipConfig);
+
+        var data = initGraphData(graphName, config);
+
         @Nullable MapValue sourceNodePropertyValues = null;
         @Nullable MapValue targetNodePropertyValues = null;
         NodeLabelToken sourceNodeLabels = NodeLabelTokens.missing();
         NodeLabelToken targetNodeLabels = NodeLabelTokens.missing();
 
-        this.configValidator.validateConfigs(nodesConfig, relationshipConfig);
         if (nodesConfig instanceof MapValue) {
             sourceNodePropertyValues = GraphImporter.propertiesConfig("sourceNodeProperties", (MapValue) nodesConfig);
             sourceNodeLabels = labelsConfig("sourceNodeLabels", (MapValue) nodesConfig);
@@ -171,16 +167,6 @@ public class GraphAggregator implements CompatUserAggregator {
             }
         }
 
-        var data = initGraphData(
-            graphName,
-            config,
-            targetNodePropertyValues,
-            sourceNodePropertyValues,
-            targetNodeLabels,
-            sourceNodeLabels,
-            relationshipConfig
-        );
-
         data.update(
             sourceNode,
             targetNode,
@@ -188,20 +174,11 @@ public class GraphAggregator implements CompatUserAggregator {
             targetNodePropertyValues,
             sourceNodeLabels,
             targetNodeLabels,
-            relationshipConfig,
-            this.configValidator
+            relationshipConfig
         );
     }
 
-    private GraphImporter initGraphData(
-        TextValue graphName,
-        AnyValue config,
-        @Nullable MapValue sourceNodePropertyValues,
-        @Nullable MapValue targetNodePropertyValues,
-        NodeLabelToken sourceNodeLabels,
-        NodeLabelToken targetNodeLabels,
-        AnyValue relationshipConfig
-    ) {
+    private GraphImporter initGraphData(TextValue graphName, AnyValue config) {
         var data = this.importer;
         if (data != null) {
             return data;
@@ -216,13 +193,7 @@ public class GraphAggregator implements CompatUserAggregator {
                     this.username,
                     this.databaseId,
                     config,
-                    sourceNodePropertyValues,
-                    targetNodePropertyValues,
-                    sourceNodeLabels,
-                    targetNodeLabels,
-                    relationshipConfig,
-                    this.canWriteToDatabase,
-                    this.lock
+                    this.canWriteToDatabase
                 );
             }
             return data;
@@ -334,16 +305,13 @@ public class GraphAggregator implements CompatUserAggregator {
     }
 
     // Does the actual importing work once we can initialize it with the first row
-    @SuppressWarnings("CodeBlock2Expr")
     private static final class GraphImporter {
         private final String graphName;
         private final GraphProjectFromCypherAggregationConfig config;
         private final LazyIdMapBuilder idMapBuilder;
-        private final @Nullable List<RelationshipPropertySchema> relationshipPropertySchemas;
 
         private final boolean canWriteToDatabase;
         private final ExtractNodeId extractNodeId;
-        private final Lock lock;
         private final Map<RelationshipType, RelationshipsBuilder> relImporters;
         private final ImmutableGraphSchema.Builder graphSchemaBuilder;
 
@@ -351,16 +319,12 @@ public class GraphAggregator implements CompatUserAggregator {
             String graphName,
             GraphProjectFromCypherAggregationConfig config,
             LazyIdMapBuilder idMapBuilder,
-            @Nullable List<RelationshipPropertySchema> relationshipPropertySchemas,
-            boolean canWriteToDatabase,
-            Lock lock
+            boolean canWriteToDatabase
         ) {
             this.graphName = graphName;
             this.config = config;
             this.idMapBuilder = idMapBuilder;
-            this.relationshipPropertySchemas = relationshipPropertySchemas;
             this.canWriteToDatabase = canWriteToDatabase;
-            this.lock = lock;
             this.relImporters = new ConcurrentHashMap<>();
             this.graphSchemaBuilder = ImmutableGraphSchema.builder();
             this.extractNodeId = new ExtractNodeId();
@@ -371,13 +335,7 @@ public class GraphAggregator implements CompatUserAggregator {
             String username,
             DatabaseId databaseId,
             AnyValue configMap,
-            @Nullable MapValue sourceNodePropertyValues,
-            @Nullable MapValue targetNodePropertyValues,
-            NodeLabelToken sourceNodeLabels,
-            NodeLabelToken targetNodeLabels,
-            AnyValue relationshipConfig,
-            boolean canWriteToDatabase,
-            Lock lock
+            boolean canWriteToDatabase
         ) {
 
             var graphName = graphNameValue.stringValue();
@@ -389,24 +347,9 @@ public class GraphAggregator implements CompatUserAggregator {
                 (configMap instanceof MapValue) ? (MapValue) configMap : MapValue.EMPTY
             );
 
-            var idMapBuilder = idMapBuilder(
-                sourceNodeLabels,
-                sourceNodePropertyValues,
-                targetNodeLabels,
-                targetNodePropertyValues,
-                config.readConcurrency()
-            );
+            var idMapBuilder = idMapBuilder(config.readConcurrency());
 
-            var relationshipPropertySchemas = relationshipPropertySchemas(relationshipConfig);
-
-            return new GraphImporter(
-                graphName,
-                config,
-                idMapBuilder,
-                relationshipPropertySchemas,
-                canWriteToDatabase,
-                lock
-            );
+            return new GraphImporter(graphName, config, idMapBuilder, canWriteToDatabase);
         }
 
         private static void validateGraphName(String graphName, String username, DatabaseId databaseId) {
@@ -415,46 +358,8 @@ public class GraphAggregator implements CompatUserAggregator {
             }
         }
 
-        private static LazyIdMapBuilder idMapBuilder(
-            NodeLabelToken sourceNodeLabels,
-            @Nullable MapValue sourceNodeProperties,
-            NodeLabelToken targetNodeLabels,
-            @Nullable MapValue targetNodeProperties,
-            int readConcurrency
-        ) {
-            boolean hasLabelInformation = !(sourceNodeLabels.isMissing() && targetNodeLabels.isMissing());
-            boolean hasProperties = !(sourceNodeProperties == null && targetNodeProperties == null);
-            return new LazyIdMapBuilder(readConcurrency, hasLabelInformation, hasProperties);
-        }
-
-        private static @Nullable List<RelationshipPropertySchema> relationshipPropertySchemas(AnyValue relationshipConfigValue) {
-            if (!(relationshipConfigValue instanceof MapValue)) {
-                return null;
-            }
-
-            //noinspection PatternVariableCanBeUsed
-            var relationshipConfig = (MapValue) relationshipConfigValue;
-
-            var relationshipPropertySchemas = new ArrayList<RelationshipPropertySchema>();
-
-            // We need to do this before extracting the `relationshipProperties`, because
-            // we remove the original entry from the map during converting; also we remove null keys
-            // so we could not create a schema entry for properties that are absent on the current relationship
-            var relationshipPropertyKeys = relationshipConfig.get("properties");
-            if (relationshipPropertyKeys instanceof MapValue) {
-                for (var propertyKey : ((MapValue) relationshipPropertyKeys).keySet()) {
-                    relationshipPropertySchemas.add(RelationshipPropertySchema.of(
-                        propertyKey,
-                        ValueType.DOUBLE
-                    ));
-                }
-            }
-
-            if (relationshipPropertySchemas.isEmpty()) {
-                return null;
-            }
-
-            return relationshipPropertySchemas;
+        private static LazyIdMapBuilder idMapBuilder(int readConcurrency) {
+            return new LazyIdMapBuilder(readConcurrency, true, true);
         }
 
         void update(
@@ -464,8 +369,7 @@ public class GraphAggregator implements CompatUserAggregator {
             @Nullable MapValue targetNodePropertyValues,
             NodeLabelToken sourceNodeLabels,
             NodeLabelToken targetNodeLabels,
-            AnyValue relationshipConfig,
-            ConfigValidator configValidator
+            AnyValue relationshipConfig
         ) {
             MapValue relationshipProperties = null;
             RelationshipType relationshipType = RelationshipType.ALL_RELATIONSHIPS;
@@ -478,23 +382,34 @@ public class GraphAggregator implements CompatUserAggregator {
             var intermediateSourceId = loadNode(sourceNode, sourceNodeLabels, sourceNodePropertyValues);
 
             if (targetNode != NoValue.NO_VALUE) {
-                var relImporter = this.relImporters.computeIfAbsent(relationshipType, this::newRelImporter);
+                RelationshipsBuilder relImporter;
+                // we do the check before to avoid having to create a new lambda instance on every call
+                if (this.relImporters.containsKey(relationshipType)) {
+                    relImporter = this.relImporters.get(relationshipType);
+                } else {
+                    var finalRelationshipProperties = relationshipProperties;
+                    relImporter = this.relImporters.computeIfAbsent(
+                        relationshipType,
+                        type -> newRelImporter(type, finalRelationshipProperties)
+                    );
+                }
+
                 var intermediateTargetId = loadNode(targetNode, targetNodeLabels, targetNodePropertyValues);
 
-                if (this.relationshipPropertySchemas != null) {
-                    assert relationshipProperties != null;
-                    if (this.relationshipPropertySchemas.size() == 1) {
-                        var relationshipProperty = this.relationshipPropertySchemas.get(0).key();
-                        double propertyValue = loadOneRelationshipProperty(
-                            relationshipProperties,
-                            relationshipProperty
-                        );
-                        relImporter.addFromInternal(intermediateSourceId, intermediateTargetId, propertyValue);
+                if (relationshipProperties != null) {
+                    if (relationshipProperties.size() == 1) {
+                        relationshipProperties.foreach((key, value) -> {
+                            var property = ReadHelper.extractValue(value, DefaultValue.DOUBLE_DEFAULT_FALLBACK);
+                            relImporter.addFromInternal(intermediateSourceId, intermediateTargetId, property);
+                        });
                     } else {
-                        var propertyValues = loadMultipleRelationshipProperties(
-                            relationshipProperties,
-                            this.relationshipPropertySchemas
-                        );
+                        var propertyValues = new double[relationshipProperties.size()];
+                        int[] index = {0};
+                        relationshipProperties.foreach((key, value) -> {
+                            var property = ReadHelper.extractValue(value, DefaultValue.DOUBLE_DEFAULT_FALLBACK);
+                            var i = index[0]++;
+                            propertyValues[i] = property;
+                        });
                         relImporter.addFromInternal(intermediateSourceId, intermediateTargetId, propertyValues);
                     }
                 } else {
@@ -537,8 +452,7 @@ public class GraphAggregator implements CompatUserAggregator {
                 .build();
         }
 
-        private RelationshipsBuilder newRelImporter(RelationshipType relType) {
-
+        private RelationshipsBuilder newRelImporter(RelationshipType relType, @Nullable MapValue properties) {
             var undirectedTypes = this.config.undirectedRelationshipTypes();
             var orientation = undirectedTypes.contains(relType.name) || undirectedTypes.contains("*")
                 ? UNDIRECTED
@@ -555,27 +469,12 @@ public class GraphAggregator implements CompatUserAggregator {
                 .indexInverse(indexInverse)
                 .concurrency(this.config.readConcurrency());
 
-            // There is a potential race between initializing the relationships builder and the
-            // relationship property schemas. Both happen under lock, but under different ones.
-            // Relationship builders are initialized as part of computeIfAbsent which uses the
-            // lock inside ConcurrentHashMap, while `this.relationshipPropertySchemas` is initialized
-            // using the lock in this class.
-            //
-            // We have to ensure that the property schemas field is fully initialized, before we
-            // create the relationships builder. This can only be achieved by using the same lock
-            // for both actions. This should not affect performance, as we are doing this inside of
-            // computeIfAbsent which is only called once.
-            this.lock.lock();
-            try {
-                if (this.relationshipPropertySchemas != null) {
-                    for (var relationshipPropertySchema : this.relationshipPropertySchemas) {
-                        relationshipsBuilderBuilder.addPropertyConfig(
-                            GraphFactory.PropertyConfig.of(relationshipPropertySchema.key())
-                        );
-                    }
+            if (properties != null) {
+                for (String propertyKey : properties.keySet()) {
+                    relationshipsBuilderBuilder.addPropertyConfig(
+                        ImmutablePropertyConfig.builder().propertyKey(propertyKey).build()
+                    );
                 }
-            } finally {
-                this.lock.unlock();
             }
 
             return relationshipsBuilderBuilder.build();
@@ -603,96 +502,27 @@ public class GraphAggregator implements CompatUserAggregator {
                 );
         }
 
-        private static double loadOneRelationshipProperty(
-            @NotNull MapValue relationshipProperties,
-            String relationshipPropertyKey
-        ) {
-            var propertyValue = relationshipProperties.get(relationshipPropertyKey);
-            return ReadHelper.extractValue(propertyValue, DefaultValue.DOUBLE_DEFAULT_FALLBACK);
-        }
-
-        private static double[] loadMultipleRelationshipProperties(
-            @NotNull MapValue relationshipProperties,
-            List<RelationshipPropertySchema> relationshipPropertyKeys
-        ) {
-            var propertyValues = new double[relationshipPropertyKeys.size()];
-            Arrays.setAll(propertyValues, i -> {
-                var relationshipPropertyKey = relationshipPropertyKeys.get(i).key();
-                return loadOneRelationshipProperty(relationshipProperties, relationshipPropertyKey);
-            });
-            return propertyValues;
-        }
-
         private AdjacencyCompressor.ValueMapper buildNodesWithProperties(GraphStoreBuilder graphStoreBuilder) {
-
             var idMapAndProperties = this.idMapBuilder.build();
-            var nodes = idMapAndProperties.idMap();
 
-            var maybeNodeProperties = idMapAndProperties.nodeProperties();
-
-            var nodesBuilder = ImmutableNodes.builder().idMap(nodes);
-
-            var nodePropertySchema = maybeNodeProperties
-                .map(nodeProperties -> nodeSchemaWithProperties(
-                    nodes.availableNodeLabels(),
-                    nodeProperties
-                ))
-                .orElseGet(() -> nodeSchemaWithoutProperties(nodes.availableNodeLabels()))
-                .unionProperties();
-
-            NodeSchema nodeSchema = NodeSchema.empty();
-            nodes.availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
-            nodePropertySchema.forEach((propertyKey, propertySchema) -> {
-                nodes.availableNodeLabels().forEach(label -> {
-                    nodeSchema.getOrCreateLabel(label).addProperty(propertySchema.key(), propertySchema);
-                });
-            });
+            var idMap = idMapAndProperties.idMap();
+            var nodeSchema = idMapAndProperties.schema();
 
             this.graphSchemaBuilder.nodeSchema(nodeSchema);
 
-            maybeNodeProperties.ifPresent(allNodeProperties -> {
-                CSRGraphStoreUtil.extractNodeProperties(
-                    nodesBuilder,
-                    nodePropertySchema::get,
-                    allNodeProperties
-                );
-            });
+            var nodes = ImmutableNodes
+                .builder()
+                .idMap(idMap)
+                .schema(nodeSchema)
+                .properties(idMapAndProperties.propertyStore())
+                .build();
 
-            graphStoreBuilder.nodes(nodesBuilder.schema(nodeSchema).build());
+            graphStoreBuilder.nodes(nodes);
 
             // Relationships are added using their intermediate node ids.
             // In order to map to the final internal ids, we need to use
             // the mapping function of the wrapped id map.
-            return nodes.rootIdMap()::toMappedNodeId;
-        }
-
-        private static NodeSchema nodeSchemaWithProperties(
-            Iterable<NodeLabel> nodeLabels,
-            Map<String, NodePropertyValues> propertyMap
-        ) {
-            var nodeSchema = NodeSchema.empty();
-
-            nodeLabels.forEach((nodeLabel) -> {
-                propertyMap.forEach((propertyName, nodeProperties) -> {
-                    nodeSchema.getOrCreateLabel(nodeLabel).addProperty(
-                        propertyName,
-                        PropertySchema.of(
-                            propertyName,
-                            nodeProperties.valueType(),
-                            nodeProperties.valueType().fallbackValue(),
-                            PropertyState.TRANSIENT
-                        )
-                    );
-                });
-            });
-
-            return nodeSchema;
-        }
-
-        private static NodeSchema nodeSchemaWithoutProperties(Iterable<NodeLabel> nodeLabels) {
-            var nodeSchema = NodeSchema.empty();
-            nodeLabels.forEach(nodeSchema::getOrCreateLabel);
-            return nodeSchema;
+            return idMap.rootIdMap()::toMappedNodeId;
         }
 
         private void buildRelationshipsWithProperties(
@@ -700,20 +530,19 @@ public class GraphAggregator implements CompatUserAggregator {
             AdjacencyCompressor.ValueMapper valueMapper
         ) {
             var relationshipImportResultBuilder = RelationshipImportResult.builder();
-            var relationshipSchemas = new ArrayList<RelationshipSchema>();
+            var relationshipSchemas = new HashMap<RelationshipType, RelationshipSchemaEntry>();
 
             this.relImporters.forEach((relationshipType, relImporter) -> {
                 var relationships = relImporter.build(
                     Optional.of(valueMapper),
                     Optional.empty()
                 );
-                relationshipSchemas.add(relationships.relationshipSchema(relationshipType));
+                var schema = relationships.relationshipSchema(relationshipType);
+                relationshipSchemas.put(relationshipType, schema.get(relationshipType));
                 relationshipImportResultBuilder.putImportResult(relationshipType, relationships);
             });
 
-            var relationshipSchema = relationshipSchemas
-                .stream()
-                .reduce(RelationshipSchema.empty(), RelationshipSchema::union);
+            var relationshipSchema = new RelationshipSchema(relationshipSchemas);
 
             graphStoreBuilder.relationshipImportResult(relationshipImportResultBuilder.build());
             this.graphSchemaBuilder.relationshipSchema(relationshipSchema);
@@ -731,8 +560,13 @@ public class GraphAggregator implements CompatUserAggregator {
             var nodeProperties = propertiesConfig.get(propertyKey);
 
             if (nodeProperties instanceof MapValue) {
-                return (MapValue) nodeProperties;
+                var mapProperties = (MapValue) nodeProperties;
+                if (mapProperties.isEmpty()) {
+                    return null;
+                }
+                return mapProperties;
             }
+
             if (nodeProperties == NoValue.NO_VALUE) {
                 return null;
             }
