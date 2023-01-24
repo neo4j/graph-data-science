@@ -209,5 +209,45 @@ class NodeLabelTokenToPropertyKeysTest {
             NodeLabel.of("C")
         );
     }
+
+    @Test
+    void testMerge() {
+        var importPropertySchemas = Map.of(
+            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT),
+            "baz", PropertySchema.of("baz", ValueType.LONG_ARRAY, DefaultValue.forLongArray(), PropertyState.PERSISTENT)
+        );
+
+        var aLabel = NodeLabel.of("A");
+        var bLabel = NodeLabel.of("B");
+        var cLabel = NodeLabel.of("C");
+
+        var mapping0 = NodeLabelTokenToPropertyKeys.lazy();
+        mapping0.add(NodeLabelTokens.ofNodeLabels(aLabel), List.of("foo"));
+        mapping0.add(NodeLabelTokens.ofNodeLabels(cLabel), List.of("bar"));
+
+        var mapping1 = NodeLabelTokenToPropertyKeys.lazy();
+        mapping1.add(NodeLabelTokens.ofNodeLabels(bLabel), List.of("bar"));
+
+        var mapping2 = NodeLabelTokenToPropertyKeys.lazy();
+        mapping2.add(NodeLabelTokens.ofNodeLabels(aLabel, cLabel), List.of("baz"));
+
+        var union = NodeLabelTokenToPropertyKeys.union(mapping0, mapping1, importPropertySchemas);
+        union = NodeLabelTokenToPropertyKeys.union(union, mapping2, importPropertySchemas);
+
+        assertThat(union.nodeLabels()).containsExactlyInAnyOrder(aLabel, bLabel, cLabel);
+
+        assertThat(union.propertySchemas(aLabel, importPropertySchemas)).isEqualTo(Map.of(
+            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "baz", PropertySchema.of("baz", ValueType.LONG_ARRAY, DefaultValue.forLongArray(), PropertyState.PERSISTENT)
+        ));
+        assertThat(union.propertySchemas(bLabel, importPropertySchemas)).isEqualTo(Map.of(
+            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
+        ));
+        assertThat(union.propertySchemas(cLabel, importPropertySchemas)).isEqualTo(Map.of(
+            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT),
+            "baz", PropertySchema.of("baz", ValueType.LONG_ARRAY, DefaultValue.forLongArray(), PropertyState.PERSISTENT)
+        ));
+    }
 }
 

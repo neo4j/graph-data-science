@@ -24,10 +24,10 @@ import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.utils.StringJoining;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 abstract class NodeLabelTokenToPropertyKeys {
@@ -69,6 +69,29 @@ abstract class NodeLabelTokenToPropertyKeys {
         NodeLabel nodeLabelToken,
         Map<String, PropertySchema> importPropertySchemas
     );
+
+    /**
+     * Computes the union of the two given mappings without
+     * changing the contents of the mappings themselves.
+     */
+    static NodeLabelTokenToPropertyKeys union(
+        NodeLabelTokenToPropertyKeys left,
+        NodeLabelTokenToPropertyKeys right,
+        Map<String, PropertySchema> importPropertySchemas
+    ) {
+        var union = NodeLabelTokenToPropertyKeys.lazy();
+
+        left.nodeLabels().forEach(nodeLabel -> {
+            var propertyKeys = left.propertySchemas(nodeLabel, importPropertySchemas).keySet();
+            union.add(NodeLabelTokens.ofNodeLabel(nodeLabel), propertyKeys);
+        });
+        right.nodeLabels().forEach(nodeLabel -> {
+            var propertyKeys = right.propertySchemas(nodeLabel, importPropertySchemas).keySet();
+            union.add(NodeLabelTokens.ofNodeLabel(nodeLabel), propertyKeys);
+        });
+
+        return union;
+    }
 
     private static class Fixed extends NodeLabelTokenToPropertyKeys {
 
@@ -136,10 +159,10 @@ abstract class NodeLabelTokenToPropertyKeys {
 
     private static class Lazy extends NodeLabelTokenToPropertyKeys {
 
-        private final ConcurrentHashMap<NodeLabelToken, Set<String>> labelToPropertyKeys;
+        private final Map<NodeLabelToken, Set<String>> labelToPropertyKeys;
 
         Lazy() {
-            this.labelToPropertyKeys = new ConcurrentHashMap<>();
+            this.labelToPropertyKeys = new HashMap<>();
         }
 
         @Override
