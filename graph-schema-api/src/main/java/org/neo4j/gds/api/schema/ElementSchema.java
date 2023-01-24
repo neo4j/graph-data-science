@@ -46,7 +46,12 @@ public interface ElementSchema<
 
     ENTRY get(ELEMENT_IDENTIFIER identifier);
 
-    Set<String> allProperties();
+    default Set<String> allProperties() {
+        return entries()
+            .stream()
+            .flatMap(entry -> entry.properties().keySet().stream())
+            .collect(Collectors.toSet());
+    }
 
     default Set<String> allProperties(ELEMENT_IDENTIFIER elementIdentifier) {
         return entries()

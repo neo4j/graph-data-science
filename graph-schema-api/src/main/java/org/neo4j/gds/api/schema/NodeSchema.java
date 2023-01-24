@@ -22,7 +22,6 @@ package org.neo4j.gds.api.schema;
 import org.neo4j.gds.NodeLabel;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel, MutableNodeSchemaEntry, PropertySchema> {
     Set<NodeLabel> availableLabels() ;
@@ -30,12 +29,4 @@ public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel, Mutable
     boolean containsOnlyAllNodesLabel();
 
     NodeSchema filter(Set<NodeLabel> labelsToKeep);
-
-    @Override
-    default Set<String> allProperties() {
-        return entries()
-            .stream()
-            .flatMap(entry -> entry.properties().keySet().stream())
-            .collect(Collectors.toSet());
-    }
 }
