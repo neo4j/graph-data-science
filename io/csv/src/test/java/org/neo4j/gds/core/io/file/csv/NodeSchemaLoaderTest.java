@@ -26,7 +26,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.NodeSchemaEntry;
+import org.neo4j.gds.api.schema.MutableNodeSchemaEntry;
 import org.neo4j.gds.api.schema.PropertySchema;
 
 import java.io.IOException;
@@ -61,7 +61,7 @@ class NodeSchemaLoaderTest {
 
         var labelAProperties = nodeSchema.get(NodeLabel.of("A"));
         assertThat(labelAProperties)
-            .isEqualTo(new NodeSchemaEntry(
+            .isEqualTo(new MutableNodeSchemaEntry(
                 NodeLabel.of("A"),
                 Map.of(
                     "prop1",
@@ -76,7 +76,7 @@ class NodeSchemaLoaderTest {
 
         var labelBProperties = nodeSchema.get(NodeLabel.of("B"));
         assertThat(labelBProperties)
-            .isEqualTo(new NodeSchemaEntry(
+            .isEqualTo(new MutableNodeSchemaEntry(
                 NodeLabel.of("B"),
                 Map.of(
                     "prop2",
@@ -126,7 +126,7 @@ class NodeSchemaLoaderTest {
 
         var labelAProperties = nodeSchema.get(NodeLabel.of("A"));
         assertThat(labelAProperties)
-            .isEqualTo(new NodeSchemaEntry(
+            .isEqualTo(new MutableNodeSchemaEntry(
                 NodeLabel.of("A"),
                 Map.of(
                     "prop1",
@@ -141,7 +141,7 @@ class NodeSchemaLoaderTest {
 
         var labelBProperties = nodeSchema.get(NodeLabel.of("B"));
         assertThat(labelBProperties)
-            .isEqualTo(new NodeSchemaEntry(NodeLabel.of("B"), Map.of()));
+            .isEqualTo(new MutableNodeSchemaEntry(NodeLabel.of("B"), Map.of()));
     }
 
 }

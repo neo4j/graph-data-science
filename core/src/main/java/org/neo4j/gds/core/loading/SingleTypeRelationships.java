@@ -27,9 +27,9 @@ import org.neo4j.gds.api.Properties;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
-import org.neo4j.gds.api.schema.RelationshipSchemaEntry;
 
 import java.util.Optional;
 
@@ -53,13 +53,13 @@ public interface SingleTypeRelationships {
 
     Optional<RelationshipPropertyStore> inverseProperties();
 
-    default RelationshipSchema relationshipSchema(RelationshipType relationshipType) {
-        var schema = RelationshipSchema.empty();
+    default MutableRelationshipSchema relationshipSchema(RelationshipType relationshipType) {
+        var schema = MutableRelationshipSchema.empty();
         this.updateRelationshipSchemaEntry(schema.getOrCreateRelationshipType(relationshipType, direction()));
         return schema;
     }
 
-    default void updateRelationshipSchemaEntry(RelationshipSchemaEntry schemaEntry) {
+    default void updateRelationshipSchemaEntry(MutableRelationshipSchemaEntry schemaEntry) {
         properties().ifPresent(relationshipPropertyStore -> relationshipPropertyStore
             .relationshipProperties()
             .forEach((propertyKey, relationshipProperty) -> {

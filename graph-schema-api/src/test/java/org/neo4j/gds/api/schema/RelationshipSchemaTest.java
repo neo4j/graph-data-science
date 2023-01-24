@@ -41,7 +41,7 @@ class RelationshipSchemaTest {
 
     @Test
     void inAndOutUndirected() {
-        assertThat(RelationshipSchema.empty().isUndirected()).isTrue();
+        assertThat(MutableRelationshipSchema.empty().isUndirected()).isTrue();
 
         RelationshipType type = RelationshipType.of("TYPE");
         var propertySchema = Map.of(
@@ -49,23 +49,23 @@ class RelationshipSchemaTest {
             Map.of("prop", RelationshipPropertySchema.of("prop", ValueType.DOUBLE))
         );
 
-        var undirectedSchema = RelationshipSchema.empty();
+        var undirectedSchema = MutableRelationshipSchema.empty();
         undirectedSchema.getOrCreateRelationshipType(type, Direction.UNDIRECTED);
         assertThat(undirectedSchema.isUndirected()).isTrue();
 
-        var directedSchema = RelationshipSchema.empty();
+        var directedSchema = MutableRelationshipSchema.empty();
         directedSchema.getOrCreateRelationshipType(type, Direction.DIRECTED);
         assertThat(directedSchema.isUndirected()).isFalse();
     }
 
     @Test
     void emptyIsUndirected() {
-        assertThat(RelationshipSchema.empty().isUndirected()).isTrue();
+        assertThat(MutableRelationshipSchema.empty().isUndirected()).isTrue();
     }
 
     @Test
     void handlesOutsideOfSchemaRequests() {
-        var empty = RelationshipSchema.empty();
+        var empty = MutableRelationshipSchema.empty();
         assertThat(empty.hasProperty(RelationshipType.of("NotInSchema"), "notInSchemaEither")).isFalse();
     }
 
@@ -77,7 +77,7 @@ class RelationshipSchemaTest {
         Aggregation aggregation = Aggregation.COUNT;
         PropertyState propertyState = PropertyState.PERSISTENT;
         String propertyName = "baz";
-        var relationshipSchema = RelationshipSchema.empty()
+        var relationshipSchema = MutableRelationshipSchema.empty()
             .addProperty(
                 relType,
                 Direction.DIRECTED,
@@ -115,14 +115,14 @@ class RelationshipSchemaTest {
         var label1 = RelationshipType.of("Foo");
         var label2 = RelationshipType.of("Bar");
 
-        var relationshipSchema = RelationshipSchema.empty()
+        var relationshipSchema = MutableRelationshipSchema.empty()
             .addProperty(label1, orientation, "bar", ValueType.DOUBLE, PropertyState.PERSISTENT)
             .addProperty(label1, orientation, "baz", ValueType.DOUBLE, PropertyState.PERSISTENT)
             .addProperty(label2, orientation, "baz", ValueType.DOUBLE, PropertyState.PERSISTENT);
 
         assertThat(relationshipSchema.filter(Set.of(label1, label2))).isEqualTo(relationshipSchema);
 
-        var expected = RelationshipSchema.empty()
+        var expected = MutableRelationshipSchema.empty()
             .addProperty(label1, orientation, "bar", ValueType.DOUBLE, PropertyState.PERSISTENT)
             .addProperty(label1, orientation, "baz", ValueType.DOUBLE, PropertyState.PERSISTENT);
 
@@ -135,9 +135,9 @@ class RelationshipSchemaTest {
         var directedType = RelationshipType.of("D");
         var undirectedType = RelationshipType.of("U");
 
-        var directed = RelationshipSchema.empty()
+        var directed = MutableRelationshipSchema.empty()
             .addProperty(directedType, Direction.DIRECTED, "bar", ValueType.DOUBLE, PropertyState.PERSISTENT);
-        var undirected = RelationshipSchema.empty()
+        var undirected = MutableRelationshipSchema.empty()
             .addProperty(undirectedType, Direction.UNDIRECTED, "flob", ValueType.DOUBLE, PropertyState.PERSISTENT);
         var mixed = directed.union(undirected);
 
@@ -164,13 +164,13 @@ class RelationshipSchemaTest {
         var type1 = RelationshipType.of("Foo");
         var type2 = RelationshipType.of("Bar");
 
-        var relationshipSchema1 = RelationshipSchema.empty()
+        var relationshipSchema1 = MutableRelationshipSchema.empty()
             .addProperty(type1, direction1, "bar", ValueType.DOUBLE, PropertyState.PERSISTENT);
 
-        var relationshipSchema2 = RelationshipSchema.empty()
+        var relationshipSchema2 = MutableRelationshipSchema.empty()
             .addProperty(type2, direction2, "bar", ValueType.DOUBLE, PropertyState.PERSISTENT);
 
-        var expected = RelationshipSchema.empty()
+        var expected = MutableRelationshipSchema.empty()
             .addProperty(type1, direction1, "bar", ValueType.DOUBLE, PropertyState.PERSISTENT)
             .addProperty(type2, direction2, "bar", ValueType.DOUBLE, PropertyState.PERSISTENT);
 
@@ -184,11 +184,11 @@ class RelationshipSchemaTest {
 
     @Test
     void unionOnSameTypesFailsOnDirectionMismatch() {
-        var schema1 = RelationshipSchema.empty()
+        var schema1 = MutableRelationshipSchema.empty()
             .addRelationshipType(RelationshipType.of("X"), Direction.DIRECTED)
             .addRelationshipType(RelationshipType.of("Y"), Direction.UNDIRECTED);
 
-        var schema2 = RelationshipSchema.empty()
+        var schema2 = MutableRelationshipSchema.empty()
             .addRelationshipType(RelationshipType.of("X"), Direction.UNDIRECTED)
             .addRelationshipType(RelationshipType.of("Y"), Direction.UNDIRECTED);
 
@@ -199,7 +199,7 @@ class RelationshipSchemaTest {
 
     @Test
     void unionOnSameTypeSamePropertyDifferentValueTypeFails() {
-        var schema1 = RelationshipSchema
+        var schema1 = MutableRelationshipSchema
             .empty()
             .addProperty(RelationshipType.of("X"), Direction.DIRECTED, "x", ValueType.DOUBLE, PropertyState.PERSISTENT)
             .addProperty(RelationshipType.of("Y"),
@@ -209,7 +209,7 @@ class RelationshipSchemaTest {
                 PropertyState.PERSISTENT
             );
 
-        var schema2 = RelationshipSchema
+        var schema2 = MutableRelationshipSchema
             .empty()
             .addProperty(RelationshipType.of("X"), Direction.DIRECTED, "x", ValueType.LONG, PropertyState.PERSISTENT)
             .addProperty(RelationshipType.of("Y"),
@@ -229,13 +229,15 @@ class RelationshipSchemaTest {
 
     static Stream<Arguments> schemaAndHasProperties() {
         return Stream.of(
-            Arguments.of(RelationshipSchema.empty().addRelationshipType(RelationshipType.of("A"), Direction.DIRECTED),
+            Arguments.of(
+                MutableRelationshipSchema.empty().addRelationshipType(RelationshipType.of("A"), Direction.DIRECTED),
                 false
             ),
-            Arguments.of(RelationshipSchema.empty().addRelationshipType(RelationshipType.of("A"), Direction.UNDIRECTED),
+            Arguments.of(
+                MutableRelationshipSchema.empty().addRelationshipType(RelationshipType.of("A"), Direction.UNDIRECTED),
                 false
             ),
-            Arguments.of(RelationshipSchema
+            Arguments.of(MutableRelationshipSchema
                 .empty()
                 .addProperty(RelationshipType.of("A"),
                     Direction.DIRECTED,
@@ -243,7 +245,7 @@ class RelationshipSchemaTest {
                     ValueType.LONG,
                     PropertyState.PERSISTENT
                 ), true),
-            Arguments.of(RelationshipSchema
+            Arguments.of(MutableRelationshipSchema
                 .empty()
                 .addProperty(RelationshipType.of("A"),
                     Direction.UNDIRECTED,
@@ -256,13 +258,13 @@ class RelationshipSchemaTest {
 
     @ParameterizedTest
     @MethodSource("schemaAndHasProperties")
-    void shouldKnowIfPropertiesArePresent(RelationshipSchema relationshipSchema, boolean hasProperties) {
+    void shouldKnowIfPropertiesArePresent(MutableRelationshipSchema relationshipSchema, boolean hasProperties) {
         assertThat(relationshipSchema.hasProperties()).isEqualTo(hasProperties);
     }
 
     @Test
     void testBuildRelTypes() {
-        var schema = RelationshipSchema.empty();
+        var schema = MutableRelationshipSchema.empty();
 
         schema.addRelationshipType(RelationshipType.of("X"), Direction.UNDIRECTED);
         schema.addRelationshipType(RelationshipType.of("Y"), Direction.DIRECTED);
@@ -276,7 +278,7 @@ class RelationshipSchemaTest {
 
     @Test
     void testBuildProperties() {
-        RelationshipSchema relationshipSchema = RelationshipSchema.empty()
+        MutableRelationshipSchema relationshipSchema = MutableRelationshipSchema.empty()
             .addProperty(RelationshipType.of("X"), Direction.UNDIRECTED, "x", ValueType.DOUBLE,
                 PropertyState.PERSISTENT
             );
@@ -316,7 +318,7 @@ class RelationshipSchemaTest {
     @Test
     void shouldCreateDeepCopiesWhenFiltering() {
         var relType = RelationshipType.of("A");
-        var relationshipSchema = RelationshipSchema.empty();
+        var relationshipSchema = MutableRelationshipSchema.empty();
         relationshipSchema.getOrCreateRelationshipType(relType, Direction.DIRECTED).addProperty("prop", ValueType.LONG,
             PropertyState.PERSISTENT
         );

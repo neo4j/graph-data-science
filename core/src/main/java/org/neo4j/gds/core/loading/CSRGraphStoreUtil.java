@@ -33,10 +33,10 @@ import org.neo4j.gds.api.properties.graph.GraphPropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.values.storable.NumberType;
 
@@ -57,7 +57,7 @@ public final class CSRGraphStoreUtil {
         var relationshipType = RelationshipType.of(relationshipTypeString);
         Direction direction = graph.schema().isUndirected() ? Direction.UNDIRECTED : Direction.DIRECTED;
 
-        var relationshipSchema = RelationshipSchema.empty();
+        var relationshipSchema = MutableRelationshipSchema.empty();
         var entry = relationshipSchema.getOrCreateRelationshipType(relationshipType, direction);
 
         relationshipPropertyKey.ifPresent(property -> {
@@ -94,7 +94,7 @@ public final class CSRGraphStoreUtil {
                 .build()
         ).build();
 
-        var schema = GraphSchema.of(NodeSchema.from(graph.schema().nodeSchema()), relationshipSchema, Map.of());
+        var schema = MutableGraphSchema.of(MutableNodeSchema.from(graph.schema().nodeSchema()), relationshipSchema, Map.of());
 
         return new GraphStoreBuilder()
             .databaseId(databaseId)
@@ -178,12 +178,12 @@ public final class CSRGraphStoreUtil {
     }
 
     // TODO: remove this method
-    public static GraphSchema computeGraphSchema(
+    public static MutableGraphSchema computeGraphSchema(
         Nodes nodes,
         RelationshipImportResult relationshipImportResult
     ) {
         var nodeSchema = nodes.schema();
-        var relationshipSchema = RelationshipSchema.empty();
+        var relationshipSchema = MutableRelationshipSchema.empty();
 
         relationshipImportResult.importResults().forEach(((relationshipType, singleTypeRelationshipImportResult) -> {
             relationshipSchema.getOrCreateRelationshipType(
@@ -200,7 +200,7 @@ public final class CSRGraphStoreUtil {
                     .addProperty(propertyKey, propertyValues.propertySchema())));
         }));
 
-        return GraphSchema.of(
+        return MutableGraphSchema.of(
             nodeSchema,
             relationshipSchema,
             Map.of()

@@ -21,8 +21,8 @@ package org.neo4j.gds.core.io.file;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.io.file.csv.CsvRelationshipVisitor;
 import org.neo4j.gds.utils.StringFormatting;
 
@@ -30,11 +30,11 @@ import java.util.Map;
 import java.util.Set;
 
 @ValueClass
-public interface RelationshipFileHeader extends FileHeader<RelationshipSchema, RelationshipPropertySchema> {
+public interface RelationshipFileHeader extends FileHeader<MutableRelationshipSchema, RelationshipPropertySchema> {
     String relationshipType();
 
     @Override
-    default Map<String, RelationshipPropertySchema> schemaForIdentifier(RelationshipSchema schema) {
+    default Map<String, RelationshipPropertySchema> schemaForIdentifier(MutableRelationshipSchema schema) {
         return schema.filter(Set.of(RelationshipType.of(relationshipType()))).unionProperties();
     }
 

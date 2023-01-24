@@ -30,7 +30,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.io.schema.RelationshipSchemaBuilderVisitor;
 
@@ -53,7 +53,7 @@ public class RelationshipSchemaLoader {
         objectReader = csvMapper.readerFor(SchemaLine.class).with(schema);
     }
 
-    RelationshipSchema load() {
+    MutableRelationshipSchema load() {
         var schemaBuilder = new RelationshipSchemaBuilderVisitor();
 
         try (var reader = new BufferedReader(new FileReader(relationshipSchemaPath.toFile(), StandardCharsets.UTF_8))) {

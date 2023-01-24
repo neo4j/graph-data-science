@@ -22,7 +22,7 @@ package org.neo4j.gds.core.io.file.csv;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporter;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
@@ -59,7 +59,7 @@ public final class GraphStoreToCsvExporter {
         var nodeSchema = graphStore.schema().nodeSchema();
         var relationshipSchema = graphStore.schema().relationshipSchema();
 
-        var neoNodeSchema = NodeSchema.empty();
+        var neoNodeSchema = MutableNodeSchema.empty();
 
         // Add additional properties to each label present in the graph store.
         neoNodeProperties.ifPresent(additionalProps -> additionalProps
