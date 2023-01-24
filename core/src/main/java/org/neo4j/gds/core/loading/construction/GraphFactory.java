@@ -89,7 +89,8 @@ public final class GraphFactory {
         Optional<Boolean> hasLabelInformation,
         Optional<Boolean> hasProperties,
         Optional<Boolean> deduplicateIds,
-        Optional<Integer> concurrency
+        Optional<Integer> concurrency,
+        Optional<PropertyState> propertyState
     ) {
         boolean labelInformation = nodeSchema
             .map(schema -> !(schema.availableLabels().isEmpty() && schema.containsOnlyAllNodesLabel()))
@@ -119,13 +120,14 @@ public final class GraphFactory {
         )).orElseGet(() -> new NodesBuilder(
             maxOriginalId,
             threadCount,
-            new ObjectIntScatterMap<>(),
-            new IntObjectHashMap<>(),
+            TokenToNodeLabel.lazy(),
+            NodeLabelTokenToPropertyKeys.lazy(),
             new ConcurrentHashMap<>(),
             idMapBuilder,
             labelInformation,
             hasProperties.orElse(false),
-            deduplicate
+            deduplicate,
+            __ -> propertyState.orElse(PropertyState.PERSISTENT)
         ));
     }
 
@@ -159,13 +161,14 @@ public final class GraphFactory {
         return new NodesBuilder(
             maxOriginalId,
             concurrency,
-            elementIdentifierLabelTokenMapping,
-            labelTokenNodeLabelMapping,
+            TokenToNodeLabel.fixed(elementIdentifierLabelTokenMapping, labelTokenNodeLabelMapping),
+            NodeLabelTokenToPropertyKeys.fixed(nodeSchema),
             new ConcurrentHashMap<>(propertyBuildersByPropertyKey),
             idMapBuilder,
             hasLabelInformation,
             nodeSchema.hasProperties(),
-            deduplicateIds
+            deduplicateIds,
+            propertyKey -> nodeSchema.unionProperties().get(propertyKey).state()
         );
     }
 

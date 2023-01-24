@@ -20,19 +20,15 @@
 package org.neo4j.gds.core.loading;
 
 import org.immutables.value.Value;
-import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Value.Enclosing
 class CypherNodeLoader extends CypherRecordLoader<Nodes> {
@@ -71,6 +67,7 @@ class CypherNodeLoader extends CypherRecordLoader<Nodes> {
             .maxOriginalId(NodesBuilder.UNKNOWN_MAX_ID)
             .hasLabelInformation(hasLabelInformation)
             .hasProperties(!propertyColumns.isEmpty())
+            .propertyState(PropertyState.TRANSIENT)
             .build();
 
         nodeSubscriber.initialize(subscription.fieldNames(), this.nodesBuilder);
@@ -99,12 +96,7 @@ class CypherNodeLoader extends CypherRecordLoader<Nodes> {
 
     @Override
     Nodes result() {
-        var nodes = nodesBuilder.build(highestNodeId);
-        var idMap = nodes.idMap();
-        var nodeProperties = nodes.properties().propertyValues();
-        var nodePropertiesWithPropertyMappings = propertiesWithPropertyMappings(nodeProperties);
-
-        return Nodes.of(idMap, nodePropertiesWithPropertyMappings, PropertyState.TRANSIENT);
+        return nodesBuilder.build(highestNodeId);
     }
 
     @Override
@@ -120,17 +112,5 @@ class CypherNodeLoader extends CypherRecordLoader<Nodes> {
     @Override
     QueryType queryType() {
         return QueryType.NODE;
-    }
-
-    private static Map<PropertyMapping, NodePropertyValues> propertiesWithPropertyMappings(Map<String, NodePropertyValues> properties) {
-        return properties.entrySet()
-            .stream()
-            .collect(Collectors.toMap(
-                propertiesByKey -> PropertyMapping.of(
-                    propertiesByKey.getKey(),
-                    propertiesByKey.getValue().valueType().fallbackValue()
-                ),
-                Map.Entry::getValue
-            ));
     }
 }
