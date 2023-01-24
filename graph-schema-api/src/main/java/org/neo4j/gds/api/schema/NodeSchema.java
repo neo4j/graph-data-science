@@ -20,77 +20,22 @@
 package org.neo4j.gds.api.schema;
 
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public final class NodeSchema extends ElementSchema<NodeSchema, NodeLabel, NodeSchemaEntry, PropertySchema> {
+public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel, MutableNodeSchemaEntry, PropertySchema> {
+    Set<NodeLabel> availableLabels() ;
 
-    public static NodeSchema empty() {
-        return new NodeSchema(new LinkedHashMap<>());
-    }
+    boolean containsOnlyAllNodesLabel();
 
-    private NodeSchema(Map<NodeLabel, NodeSchemaEntry> entries) {
-        super(entries);
-    }
-
-    public static NodeSchema from(NodeSchema fromSchema) {
-        var nodeSchema = NodeSchema.empty();
-        fromSchema.entries().forEach(fromEntry -> nodeSchema.set(NodeSchemaEntry.from(fromEntry)));
-
-        return nodeSchema;
-    }
-
-    public Set<NodeLabel> availableLabels() {
-        return entries.keySet();
-    }
-
-    public boolean containsOnlyAllNodesLabel() {
-        return availableLabels().size() == 1 && availableLabels().contains(NodeLabel.ALL_NODES);
-    }
-
-    public NodeSchema filter(Set<NodeLabel> labelsToKeep) {
-        return new NodeSchema(entries
-            .entrySet()
-            .stream()
-            .filter(e -> labelsToKeep.contains(e.getKey()))
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                entry -> NodeSchemaEntry.from(entry.getValue())
-            )));
-    }
+    NodeSchema filter(Set<NodeLabel> labelsToKeep);
 
     @Override
-    public NodeSchema union(NodeSchema other) {
-        return new NodeSchema(unionEntries(other));
-    }
-
-
-    public NodeSchemaEntry getOrCreateLabel(NodeLabel key) {
-        return this.entries.computeIfAbsent(key, (__) -> new NodeSchemaEntry(key));
-    }
-
-    public NodeSchema addLabel(NodeLabel nodeLabel) {
-        getOrCreateLabel(nodeLabel);
-        return this;
-    }
-
-    public NodeSchema addLabel(NodeLabel nodeLabel, Map<String, PropertySchema> nodeProperties) {
-        var nodeSchemaEntry = getOrCreateLabel(nodeLabel);
-        nodeProperties.forEach(nodeSchemaEntry::addProperty);
-        return this;
-    }
-
-    public NodeSchema addProperty(NodeLabel nodeLabel, String propertyName, PropertySchema propertySchema) {
-        getOrCreateLabel(nodeLabel).addProperty(propertyName, propertySchema);
-        return this;
-    }
-
-    public NodeSchema addProperty(NodeLabel nodeLabel, String propertyKey, ValueType valueType) {
-        getOrCreateLabel(nodeLabel).addProperty(propertyKey, valueType);
-        return this;
+    default Set<String> allProperties() {
+        return entries()
+            .stream()
+            .flatMap(entry -> entry.properties().keySet().stream())
+            .collect(Collectors.toSet());
     }
 }
