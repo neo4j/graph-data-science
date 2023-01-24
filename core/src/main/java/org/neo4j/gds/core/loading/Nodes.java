@@ -31,14 +31,13 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.ImmutablePropertySchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
-import org.neo4j.gds.api.schema.NodeSchema;
 
 import java.util.Map;
 
 @ValueClass
 public interface Nodes {
 
-    NodeSchema schema();
+    MutableNodeSchema schema();
 
     IdMap idMap();
 

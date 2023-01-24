@@ -21,7 +21,7 @@ package org.neo4j.gds.core.io.file;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.io.file.csv.CsvNodeVisitor;
 import org.neo4j.gds.utils.StringFormatting;
@@ -33,11 +33,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @ValueClass
-public interface NodeFileHeader extends FileHeader<NodeSchema, PropertySchema> {
+public interface NodeFileHeader extends FileHeader<MutableNodeSchema, PropertySchema> {
     String[] nodeLabels();
 
     @Override
-    default Map<String, PropertySchema> schemaForIdentifier(NodeSchema schema) {
+    default Map<String, PropertySchema> schemaForIdentifier(MutableNodeSchema schema) {
         var labelStream = Arrays.stream(nodeLabels()).map(NodeLabel::of);
         if (nodeLabels().length == 0) {
             labelStream = Stream.of(NodeLabel.ALL_NODES);

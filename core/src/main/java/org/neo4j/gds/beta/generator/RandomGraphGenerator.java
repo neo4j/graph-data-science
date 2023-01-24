@@ -27,8 +27,8 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.huge.HugeGraph;
@@ -143,7 +143,7 @@ public final class RandomGraphGenerator {
 
         var relationships = relationshipsBuilder.build();
 
-        var graphSchema = GraphSchema.of(
+        var graphSchema = MutableGraphSchema.of(
             nodePropertiesAndSchema.nodeSchema(),
             relationships.relationshipSchema(relationshipType),
             Map.of()
@@ -226,14 +226,14 @@ public final class RandomGraphGenerator {
 
     @ValueClass
     interface NodePropertiesAndSchema {
-        NodeSchema nodeSchema();
+        MutableNodeSchema nodeSchema();
 
         Map<String, NodePropertyValues> nodeProperties();
     }
 
     private NodePropertiesAndSchema generateNodeProperties(IdMap idMap) {
         if (this.nodePropertyProducers.isEmpty()) {
-            var nodeSchema = NodeSchema.empty();
+            var nodeSchema = MutableNodeSchema.empty();
             idMap.availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
             return ImmutableNodePropertiesAndSchema.builder()
                 .nodeSchema(nodeSchema)
@@ -284,7 +284,7 @@ public final class RandomGraphGenerator {
         ));
 
         // Create a corresponding node schema
-        var nodeSchema = NodeSchema.empty();
+        var nodeSchema = MutableNodeSchema.empty();
         generatedProperties.forEach((propertyKey, property) -> propertyNameToLabels
             .get(propertyKey)
             .forEach(nodeLabel -> {

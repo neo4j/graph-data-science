@@ -25,7 +25,7 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.ImmutableNodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
-import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.compat.LongPropertyReference;
 import org.neo4j.gds.compat.PropertyReference;
@@ -214,7 +214,7 @@ public final class NodesBuilder {
         return labelTokenToPropertyKeys;
     }
 
-    private NodeSchema buildNodeSchema(
+    private MutableNodeSchema buildNodeSchema(
         IdMap idMap,
         Collection<NodeLabelTokenToPropertyKeys> localLabelTokenToPropertyKeys,
         Map<String, NodeProperty> nodeProperties
@@ -241,7 +241,7 @@ public final class NodesBuilder {
         // key mapping to construct the final node schema.
         return nodeLabels.stream()
             .reduce(
-                NodeSchema.empty(),
+                MutableNodeSchema.empty(),
                 (unionSchema, nodeLabel) -> unionSchema.addLabel(
                     nodeLabel,
                     globalLabelTokenToPropertyKeys.propertySchemas(nodeLabel, propertyKeysToSchema)

@@ -29,7 +29,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.core.io.schema.NodeSchemaBuilderVisitor;
 
 import java.io.BufferedReader;
@@ -51,7 +51,7 @@ public class NodeSchemaLoader {
         objectReader = csvMapper.readerFor(SchemaLine.class).with(schema);
     }
 
-    NodeSchema load() {
+    MutableNodeSchema load() {
         NodeSchemaBuilderVisitor schemaBuilder = new NodeSchemaBuilderVisitor();
 
         try(var reader = new BufferedReader(new FileReader(nodeSchemaPath.toFile(), StandardCharsets.UTF_8))) {

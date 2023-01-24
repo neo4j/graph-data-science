@@ -25,10 +25,10 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.compat.CompatPropertySizeCalculator;
 import org.neo4j.gds.core.io.GraphStoreInput;
 import org.neo4j.gds.core.io.file.FileHeader;
@@ -79,8 +79,8 @@ final class CsvFileInput implements FileInput {
     private final Path importPath;
     private final String userName;
     private final GraphInfo graphInfo;
-    private final NodeSchema nodeSchema;
-    private final RelationshipSchema relationshipSchema;
+    private final MutableNodeSchema nodeSchema;
+    private final MutableRelationshipSchema relationshipSchema;
     private final Map<String, PropertySchema> graphPropertySchema;
     private final Capabilities capabilities;
 
@@ -153,12 +153,12 @@ final class CsvFileInput implements FileInput {
     }
 
     @Override
-    public NodeSchema nodeSchema() {
+    public MutableNodeSchema nodeSchema() {
         return nodeSchema;
     }
 
     @Override
-    public RelationshipSchema relationshipSchema() {
+    public MutableRelationshipSchema relationshipSchema() {
         return relationshipSchema;
     }
 
@@ -206,11 +206,11 @@ final class CsvFileInput implements FileInput {
         }
     }
 
-    static class NodeImporter extends FileImporter<NodeFileHeader, NodeSchema, PropertySchema> {
+    static class NodeImporter extends FileImporter<NodeFileHeader, MutableNodeSchema, PropertySchema> {
 
         NodeImporter(
             Map<NodeFileHeader, List<Path>> headerToDataFilesMapping,
-            NodeSchema nodeSchema
+            MutableNodeSchema nodeSchema
         ) {
             super(headerToDataFilesMapping, nodeSchema);
         }
@@ -221,11 +221,11 @@ final class CsvFileInput implements FileInput {
         }
     }
 
-    static class RelationshipImporter extends FileImporter<RelationshipFileHeader, RelationshipSchema, RelationshipPropertySchema> {
+    static class RelationshipImporter extends FileImporter<RelationshipFileHeader, MutableRelationshipSchema, RelationshipPropertySchema> {
 
         RelationshipImporter(
             Map<RelationshipFileHeader, List<Path>> headerToDataFilesMapping,
-            RelationshipSchema relationshipSchema
+            MutableRelationshipSchema relationshipSchema
         ) {
             super(headerToDataFilesMapping, relationshipSchema);
         }
@@ -301,9 +301,9 @@ final class CsvFileInput implements FileInput {
         }
     }
 
-    static class NodeLineChunk extends LineChunk<NodeFileHeader, NodeSchema, PropertySchema> {
+    static class NodeLineChunk extends LineChunk<NodeFileHeader, MutableNodeSchema, PropertySchema> {
 
-        NodeLineChunk(NodeSchema nodeSchema) {
+        NodeLineChunk(MutableNodeSchema nodeSchema) {
             super(nodeSchema);
         }
 
@@ -318,9 +318,9 @@ final class CsvFileInput implements FileInput {
         }
     }
 
-    static class RelationshipLineChunk extends LineChunk<RelationshipFileHeader, RelationshipSchema, RelationshipPropertySchema> {
+    static class RelationshipLineChunk extends LineChunk<RelationshipFileHeader, MutableRelationshipSchema, RelationshipPropertySchema> {
 
-        RelationshipLineChunk(RelationshipSchema relationshipSchema) {
+        RelationshipLineChunk(MutableRelationshipSchema relationshipSchema) {
             super(relationshipSchema);
         }
 

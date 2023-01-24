@@ -42,7 +42,7 @@ class NodeSchemaTest {
 
     @Test
     void handlesOutsideOfSchemaRequests() {
-        NodeSchema empty = NodeSchema.empty();
+        MutableNodeSchema empty = MutableNodeSchema.empty();
         assertFalse(empty.hasProperty(NodeLabel.of("NotInSchema"), "notInSchemaEither"));
     }
 
@@ -52,7 +52,7 @@ class NodeSchemaTest {
 
         DefaultValue defaultValue = DefaultValue.of(42.0D);
         String propertyName = "baz";
-        var nodeSchema = NodeSchema.empty();
+        var nodeSchema = MutableNodeSchema.empty();
         nodeSchema
             .getOrCreateLabel(label)
             .addProperty(
@@ -70,13 +70,13 @@ class NodeSchemaTest {
         var label1 = NodeLabel.of("Foo");
         var label2 = NodeLabel.of("Bar");
 
-        var nodeSchema = NodeSchema.empty();
+        var nodeSchema = MutableNodeSchema.empty();
         nodeSchema.getOrCreateLabel(label1).addProperty("bar", ValueType.DOUBLE).addProperty("baz", ValueType.DOUBLE);
         nodeSchema.getOrCreateLabel(label2).addProperty("baz", ValueType.DOUBLE);
 
         assertEquals(nodeSchema, nodeSchema.filter(Set.of(label1, label2)));
 
-        var expected = NodeSchema.empty();
+        var expected = MutableNodeSchema.empty();
         expected.getOrCreateLabel(label1).addProperty("bar", ValueType.DOUBLE).addProperty("baz", ValueType.DOUBLE);
 
         assertEquals(expected, nodeSchema.filter(Set.of(label1)));
@@ -87,13 +87,13 @@ class NodeSchemaTest {
         var label1 = NodeLabel.of("Foo");
         var label2 = NodeLabel.of("Bar");
 
-        var nodeSchema1 = NodeSchema.empty();
+        var nodeSchema1 = MutableNodeSchema.empty();
         nodeSchema1.getOrCreateLabel(label1).addProperty("bar", ValueType.DOUBLE);
 
-        var nodeSchema2 = NodeSchema.empty();
+        var nodeSchema2 = MutableNodeSchema.empty();
         nodeSchema2.getOrCreateLabel(label2).addProperty("bar", ValueType.DOUBLE);
 
-        var expected = NodeSchema.empty();
+        var expected = MutableNodeSchema.empty();
         expected.getOrCreateLabel(label1).addProperty("bar", ValueType.DOUBLE);
         expected.getOrCreateLabel(label2).addProperty("bar", ValueType.DOUBLE);
 
@@ -105,15 +105,15 @@ class NodeSchemaTest {
         var label1 = NodeLabel.of("Foo");
         var label2 = NodeLabel.of("Bar");
 
-        var nodeSchema1 = NodeSchema.empty();
+        var nodeSchema1 = MutableNodeSchema.empty();
         nodeSchema1.getOrCreateLabel(label1).addProperty("bar", ValueType.DOUBLE);
         nodeSchema1.getOrCreateLabel(label2);
 
-        var nodeSchema2 = NodeSchema.empty();
+        var nodeSchema2 = MutableNodeSchema.empty();
         nodeSchema2.getOrCreateLabel(label1).addProperty("baz", ValueType.DOUBLE);
         nodeSchema2.getOrCreateLabel(label2).addProperty("baz", ValueType.DOUBLE);
 
-        var expected = NodeSchema.empty();
+        var expected = MutableNodeSchema.empty();
         expected.getOrCreateLabel(label1).addProperty("bar", ValueType.DOUBLE).addProperty("baz", ValueType.DOUBLE);
         expected.getOrCreateLabel(label2).addProperty("baz", ValueType.DOUBLE);
 
@@ -124,10 +124,10 @@ class NodeSchemaTest {
     void testUnionOfIncompatibleProperties() {
         var label1 = NodeLabel.of("Foo");
 
-        var nodeSchema1 = NodeSchema.empty()
+        var nodeSchema1 = MutableNodeSchema.empty()
             .getOrCreateLabel(label1).addProperty("bar", ValueType.DOUBLE);
 
-        var nodeSchema2 = NodeSchema.empty()
+        var nodeSchema2 = MutableNodeSchema.empty()
             .getOrCreateLabel(label1).addProperty("bar", ValueType.LONG);
 
         var ex = assertThrows(IllegalArgumentException.class, () -> nodeSchema1.union(nodeSchema2));
@@ -141,7 +141,7 @@ class NodeSchemaTest {
         var label1 = NodeLabel.of("Foo");
         var label2 = NodeLabel.of("Bar");
 
-        var nodeSchema = NodeSchema.empty()
+        var nodeSchema = MutableNodeSchema.empty()
             .addProperty(label1, "foo", ValueType.DOUBLE)
             .addProperty(label1, "baz", ValueType.LONG)
             .addProperty(label2, "bar", ValueType.LONG_ARRAY)
@@ -164,7 +164,7 @@ class NodeSchemaTest {
     @Test
     void shouldCreateDeepCopiesWhenFiltering() {
         var nodeLabel = NodeLabel.of("A");
-        var nodeSchema = NodeSchema.empty();
+        var nodeSchema = MutableNodeSchema.empty();
         nodeSchema.getOrCreateLabel(nodeLabel).addProperty("prop", ValueType.LONG);
         var filteredNodeSchema = nodeSchema.filter(Set.of(nodeLabel));
         filteredNodeSchema
@@ -176,17 +176,17 @@ class NodeSchemaTest {
     }
 
     static Stream<Arguments> schemaAndHasProperties() {
-        NodeSchema.empty();
+        MutableNodeSchema.empty();
 
         return Stream.of(
-            Arguments.of(NodeSchema.empty().addLabel(NodeLabel.of("A")), false),
-            Arguments.of(NodeSchema.empty().addProperty(NodeLabel.of("A"), "foo", ValueType.LONG), true)
+            Arguments.of(MutableNodeSchema.empty().addLabel(NodeLabel.of("A")), false),
+            Arguments.of(MutableNodeSchema.empty().addProperty(NodeLabel.of("A"), "foo", ValueType.LONG), true)
         );
     }
 
     @ParameterizedTest
     @MethodSource("schemaAndHasProperties")
-    void shouldKnowIfPropertiesArePresent(NodeSchema nodeSchema, boolean hasProperties) {
+    void shouldKnowIfPropertiesArePresent(MutableNodeSchema nodeSchema, boolean hasProperties) {
         assertThat(nodeSchema.hasProperties()).isEqualTo(hasProperties);
     }
 
@@ -194,7 +194,7 @@ class NodeSchemaTest {
     void shouldAddNodeLabelWithNodeProperties() {
         var label = NodeLabel.of("Foo");
 
-        var nodeSchema = NodeSchema.empty()
+        var nodeSchema = MutableNodeSchema.empty()
             .addProperty(label, "foo", ValueType.DOUBLE)
             .addProperty(label, "baz", PropertySchema.of("baz", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT))
             .addProperty(label, "bar", ValueType.LONG_ARRAY);

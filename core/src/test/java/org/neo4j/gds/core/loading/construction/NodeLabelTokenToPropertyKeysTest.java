@@ -24,7 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 
 import java.util.List;
@@ -65,7 +65,7 @@ class NodeLabelTokenToPropertyKeysTest {
 
     @Test
     void testPropertySchemasFixed() {
-        var nodeSchema = NodeSchema.empty()
+        var nodeSchema = MutableNodeSchema.empty()
             .addLabel(NodeLabel.of("A"), Map.of(
                 "foo", PropertySchema.of("foo", ValueType.LONG),
                 "bar", PropertySchema.of("bar", ValueType.DOUBLE),
@@ -100,7 +100,7 @@ class NodeLabelTokenToPropertyKeysTest {
 
     @Test
     void shouldFailForMissingProperties() {
-        var nodeSchema = NodeSchema.empty()
+        var nodeSchema = MutableNodeSchema.empty()
             .addLabel(NodeLabel.of("A"), Map.of(
                 "foo", PropertySchema.of("foo", ValueType.LONG),
                 "baz", PropertySchema.of("baz", ValueType.LONG)
@@ -121,7 +121,7 @@ class NodeLabelTokenToPropertyKeysTest {
 
     @Test
     void shouldFailForIncompatibleTypes() {
-        var nodeSchema = NodeSchema.empty()
+        var nodeSchema = MutableNodeSchema.empty()
             .addLabel(NodeLabel.of("A"), Map.of(
                 "foo", PropertySchema.of("foo", ValueType.LONG),
                 "baz", PropertySchema.of("baz", ValueType.LONG)
@@ -195,9 +195,19 @@ class NodeLabelTokenToPropertyKeysTest {
 
     @Test
     void testNodeLabelsFixed() {
-        var mapping = NodeLabelTokenToPropertyKeys.fixed(NodeSchema.empty().addLabel(NodeLabel.ALL_NODES).addLabel(NodeLabel.of("A")).addLabel(NodeLabel.of("B")).addLabel(NodeLabel.of("C")));
+        var mapping = NodeLabelTokenToPropertyKeys.fixed(MutableNodeSchema
+            .empty()
+            .addLabel(NodeLabel.ALL_NODES)
+            .addLabel(NodeLabel.of("A"))
+            .addLabel(NodeLabel.of("B"))
+            .addLabel(NodeLabel.of("C")));
 
-        assertThat(mapping.nodeLabels()).containsExactlyInAnyOrder(NodeLabel.ALL_NODES, NodeLabel.of("A"), NodeLabel.of("B"), NodeLabel.of("C"));
+        assertThat(mapping.nodeLabels()).containsExactlyInAnyOrder(
+            NodeLabel.ALL_NODES,
+            NodeLabel.of("A"),
+            NodeLabel.of("B"),
+            NodeLabel.of("C")
+        );
     }
 
     @Test

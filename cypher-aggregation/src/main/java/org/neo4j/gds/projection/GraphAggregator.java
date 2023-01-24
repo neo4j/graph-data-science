@@ -25,9 +25,10 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.CustomProcedure;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.schema.ImmutableGraphSchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
-import org.neo4j.gds.api.schema.RelationshipSchemaEntry;
+import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
 import org.neo4j.gds.compat.CompatUserAggregator;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.ConfigKeyValidation;
@@ -314,7 +315,7 @@ public class GraphAggregator implements CompatUserAggregator {
         private final boolean canWriteToDatabase;
         private final ExtractNodeId extractNodeId;
         private final Map<RelationshipType, RelationshipsBuilder> relImporters;
-        private final ImmutableGraphSchema.Builder graphSchemaBuilder;
+        private final ImmutableMutableGraphSchema.Builder graphSchemaBuilder;
 
         private GraphImporter(
             String graphName,
@@ -327,7 +328,7 @@ public class GraphAggregator implements CompatUserAggregator {
             this.idMapBuilder = idMapBuilder;
             this.canWriteToDatabase = canWriteToDatabase;
             this.relImporters = new ConcurrentHashMap<>();
-            this.graphSchemaBuilder = ImmutableGraphSchema.builder();
+            this.graphSchemaBuilder = MutableGraphSchema.builder();
             this.extractNodeId = new ExtractNodeId();
         }
 
@@ -531,7 +532,7 @@ public class GraphAggregator implements CompatUserAggregator {
             AdjacencyCompressor.ValueMapper valueMapper
         ) {
             var relationshipImportResultBuilder = RelationshipImportResult.builder();
-            var relationshipSchemas = new HashMap<RelationshipType, RelationshipSchemaEntry>();
+            var relationshipSchemas = new HashMap<RelationshipType, MutableRelationshipSchemaEntry>();
 
             this.relImporters.forEach((relationshipType, relImporter) -> {
                 var relationships = relImporter.build(
@@ -543,7 +544,7 @@ public class GraphAggregator implements CompatUserAggregator {
                 relationshipImportResultBuilder.putImportResult(relationshipType, relationships);
             });
 
-            var relationshipSchema = new RelationshipSchema(relationshipSchemas);
+            var relationshipSchema = new MutableRelationshipSchema(relationshipSchemas);
 
             graphStoreBuilder.relationshipImportResult(relationshipImportResultBuilder.build());
             this.graphSchemaBuilder.relationshipSchema(relationshipSchema);
