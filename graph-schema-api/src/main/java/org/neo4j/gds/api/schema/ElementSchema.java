@@ -54,10 +54,9 @@ public interface ElementSchema<
     }
 
     default Set<String> allProperties(ELEMENT_IDENTIFIER elementIdentifier) {
-        return entries()
-            .stream()
-            .flatMap(entry -> entry.properties().keySet().stream())
-            .collect(Collectors.toSet());
+        return Optional.ofNullable(get(elementIdentifier))
+            .map(entry -> entry.properties().keySet())
+            .orElse(Set.of());
     }
 
     default boolean hasProperties() {
