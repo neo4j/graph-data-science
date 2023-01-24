@@ -190,7 +190,7 @@ class NodeProjectionsTest {
         PropertyMapping second,
         String... messages
     ) {
-        var builder = ImmutableNodeProjections.builder().projections(Map.of(
+        var builder = NodeProjections.builder().projections(Map.of(
             NodeLabel.of("A"),
             NodeProjection
                 .builder()
