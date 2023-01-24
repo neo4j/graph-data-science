@@ -661,6 +661,7 @@ ORDER BY source ASC, target ASC
 
 NOTE: The properties we want to stream must exist for each specified relationship type.
 
+[[catalog-graph-relationship-to-undirected-example]]
 === Convert to undirected
 
 Some algorithms such as Triangle Count and Link Prediction expect undirected relationships. The following shows how to convert the relationships of type `LIKES` in the graph from directed to undirected by creating an undirected relationship of new type `INTERACTS`.

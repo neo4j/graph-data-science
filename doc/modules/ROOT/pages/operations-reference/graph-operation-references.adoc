@@ -59,7 +59,7 @@
 | `gds.beta.graph.export.csv`
 | `gds.beta.graph.export.csv.estimate`
 |xref:graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-topology-example[Stream relationship topologies to the procedure caller] | `gds.beta.graph.relationships.stream`
-.2+<.^|Convert directed relationships to undirected
+.2+<.^|xref:graph-catalog-relationship-ops.adoc#catalog-graph-relationship-to-undirected-example[Convert directed relationships to undirected]
 | `gds.beta.graph.relationships.toUndirected`
 | `gds.beta.graph.relationships.toUndirected.estimate`
 
@@ -75,7 +75,7 @@
 |Description                                       | Operation
 |Drop a graph property from a named graph          | `gds.alpha.graph.graphProperty.drop`
 |Stream a graph property to the procedure caller   | `gds.alpha.graph.graphProperty.stream`
-|Sample a subgraph using random walk with restarts | `gds.alpha.graph.sample.rwr`
-|Add node labels to the in-memory graph            | `gds.alpha.graph.nodeLabel.mutate`
-|Write node labels to the database                 | `gds.alpha.graph.nodeLabel.write`
+|xref:management-ops/projections/rwr.adoc[Sample a subgraph using random walk with restarts] | `gds.alpha.graph.sample.rwr`
+|xref:graph-catalog-node-ops.adoc#catalog-graph-mutate-node-label-example[Add node labels to the in-memory graph]   | `gds.alpha.graph.nodeLabel.mutate`
+|xref:graph-catalog-node-ops.adoc#catalog-graph-write-node-label-example[Write node labels to the database]         | `gds.alpha.graph.nodeLabel.write`
 |===
