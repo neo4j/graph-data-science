@@ -27,116 +27,68 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class ElementSchema<
-        SELF extends ElementSchema<SELF, ELEMENT_IDENTIFIER, ENTRY, PROPERTY_SCHEMA>,
-        ELEMENT_IDENTIFIER extends ElementIdentifier,
-        ENTRY extends ElementSchemaEntry<ENTRY, ELEMENT_IDENTIFIER, PROPERTY_SCHEMA>,
-        PROPERTY_SCHEMA extends PropertySchema
-    > {
+public interface ElementSchema<
+    SELF extends ElementSchema<SELF, ELEMENT_IDENTIFIER, ENTRY, PROPERTY_SCHEMA>,
+    ELEMENT_IDENTIFIER extends ElementIdentifier,
+    ENTRY extends ElementSchemaEntry<ENTRY, ELEMENT_IDENTIFIER, PROPERTY_SCHEMA>,
+    PROPERTY_SCHEMA extends PropertySchema> {
 
-    protected final Map<ELEMENT_IDENTIFIER, ENTRY> entries;
 
-    ElementSchema(Map<ELEMENT_IDENTIFIER, ENTRY> entries) {
-        this.entries = entries;
-    }
+    SELF filter(Set<ELEMENT_IDENTIFIER> elementIdentifiersToKeep);
 
-    abstract SELF filter(Set<ELEMENT_IDENTIFIER> elementIdentifiersToKeep);
+    SELF union(SELF other);
 
-    abstract SELF union(SELF other);
+    Collection<ENTRY> entries();
 
-    public Collection<ENTRY> entries() {
-        return this.entries.values();
-    }
+    ENTRY get(ELEMENT_IDENTIFIER identifier);
 
-    public void set(ENTRY entry) {
-        entries.put(entry.identifier(), entry);
-    }
-    public ENTRY get(ELEMENT_IDENTIFIER identifier) {
-        return entries.get(identifier);
-    }
+    Set<String> allProperties();
 
-    public void remove(ELEMENT_IDENTIFIER identifier) {
-        entries.remove(identifier);
-    }
-
-    public Set<String> allProperties() {
-        return this.entries
-            .values()
+    default Set<String> allProperties(ELEMENT_IDENTIFIER elementIdentifier) {
+        return entries()
             .stream()
             .flatMap(entry -> entry.properties().keySet().stream())
             .collect(Collectors.toSet());
     }
 
-    public Set<String> allProperties(ELEMENT_IDENTIFIER elementIdentifier) {
-        return Optional.ofNullable(this.entries.get(elementIdentifier))
-            .map(entry -> entry.properties().keySet())
-            .orElse(Set.of());
+    default boolean hasProperties() {
+        return entries().stream().anyMatch(entry -> !entry.properties().isEmpty());
     }
 
-    public boolean hasProperties() {
-        return entries.values().stream().anyMatch(entry -> !entry.properties().isEmpty());
+    default boolean hasProperty(ELEMENT_IDENTIFIER elementIdentifier, String propertyKey) {
+        return Optional.ofNullable(get(elementIdentifier))
+            .map(entry -> entry.properties().containsKey(propertyKey))
+            .orElse(false);
     }
 
-    public boolean hasProperty(ELEMENT_IDENTIFIER elementIdentifier, String propertyKey) {
-        return entries.containsKey(elementIdentifier) && entries
-            .get(elementIdentifier)
-            .properties()
-            .containsKey(propertyKey);
-    }
-
-    public List<PROPERTY_SCHEMA> propertySchemasFor(ELEMENT_IDENTIFIER elementIdentifier) {
+    default List<PROPERTY_SCHEMA> propertySchemasFor(ELEMENT_IDENTIFIER elementIdentifier) {
         return Optional
-            .ofNullable(entries.get(elementIdentifier))
+            .ofNullable(get(elementIdentifier))
             .map(entry -> entry.properties().values())
             .map(ArrayList::new)
             .orElse(new ArrayList<>());
     }
 
-    /**
-     * Returns a union of all properties in the given schema.
-     */
-    public Map<String, PROPERTY_SCHEMA> unionProperties() {
-        return entries
-            .values()
+    default Map<String, PROPERTY_SCHEMA> unionProperties() {
+        return entries()
             .stream()
             .flatMap(e -> e.properties().entrySet().stream())
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (leftSchema, rightSchema) -> leftSchema));
     }
 
-
-    public Map<String, Object> toMap() {
-        return entries
-            .entrySet()
+    default Map<String, Object> toMap() {
+        return entries()
             .stream()
-            .collect(Collectors.toMap(entry -> entry.getKey().name, entry -> entry.getValue().toMap()));
+            .collect(Collectors.toMap(entry -> entry.identifier().name, ElementSchemaEntry::toMap));
     }
 
-    Map<ELEMENT_IDENTIFIER, ENTRY> unionEntries(SELF other) {
+    default Map<ELEMENT_IDENTIFIER, ENTRY> unionEntries(SELF other) {
         return Stream
-            .concat(entries.entrySet().stream(), other.entries.entrySet().stream())
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, ElementSchemaEntry::union));
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        ElementSchema<?, ?, ?, ?> that = (ElementSchema<?, ?, ?, ?>) o;
-
-        return entries.equals(that.entries);
-    }
-
-    @Override
-    public int hashCode() {
-        return entries.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return toMap().toString();
+            .concat(entries().stream(), other.entries().stream())
+            .collect(Collectors.toMap(e -> e.identifier(), Function.identity(), ElementSchemaEntry::union));
     }
 }
