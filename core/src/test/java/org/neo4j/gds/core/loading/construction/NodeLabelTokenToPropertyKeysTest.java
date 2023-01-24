@@ -195,19 +195,9 @@ class NodeLabelTokenToPropertyKeysTest {
 
     @Test
     void testNodeLabelsFixed() {
-        var mapping = NodeLabelTokenToPropertyKeys.fixed(NodeSchema.empty()
-            .addLabel(NodeLabel.ALL_NODES)
-            .addLabel(NodeLabel.of("A"))
-            .addLabel(NodeLabel.of("B"))
-            .addLabel(NodeLabel.of("C"))
-        );
+        var mapping = NodeLabelTokenToPropertyKeys.fixed(NodeSchema.empty().addLabel(NodeLabel.ALL_NODES).addLabel(NodeLabel.of("A")).addLabel(NodeLabel.of("B")).addLabel(NodeLabel.of("C")));
 
-        assertThat(mapping.nodeLabels()).containsExactlyInAnyOrder(
-            NodeLabel.ALL_NODES,
-            NodeLabel.of("A"),
-            NodeLabel.of("B"),
-            NodeLabel.of("C")
-        );
+        assertThat(mapping.nodeLabels()).containsExactlyInAnyOrder(NodeLabel.ALL_NODES, NodeLabel.of("A"), NodeLabel.of("B"), NodeLabel.of("C"));
     }
 }
 
