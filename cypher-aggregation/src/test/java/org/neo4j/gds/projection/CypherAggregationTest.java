@@ -684,7 +684,7 @@ class CypherAggregationTest extends BaseProcTest {
             .relationshipSchema()
             .entries()
             .forEach(entry -> {
-                var expectedDirection = expectedUndirectedTypes.contains(entry.identifier.name) ? org.neo4j.gds.api.schema.Direction.UNDIRECTED : org.neo4j.gds.api.schema.Direction.DIRECTED;
+                var expectedDirection = expectedUndirectedTypes.contains(entry.identifier().name) ? org.neo4j.gds.api.schema.Direction.UNDIRECTED : org.neo4j.gds.api.schema.Direction.DIRECTED;
                 assertThat(entry.direction()).isEqualTo(expectedDirection);
             });
     }

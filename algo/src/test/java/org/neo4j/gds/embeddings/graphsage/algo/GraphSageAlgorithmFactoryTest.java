@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.model.InjectModelCatalog;
@@ -279,7 +279,7 @@ class GraphSageAlgorithmFactoryTest {
 
         var model = Model.of(
             "graphSage",
-            GraphSchema.empty(),
+            MutableGraphSchema.empty(),
             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
             trainConfig,
             GraphSageModelTrainer.GraphSageTrainMetrics.empty()
@@ -335,7 +335,7 @@ class GraphSageAlgorithmFactoryTest {
 
         var model = Model.of(
             "graphSage",
-            GraphSchema.empty(),
+            MutableGraphSchema.empty(),
             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
             trainConfig,
             GraphSageModelTrainer.GraphSageTrainMetrics.empty()
@@ -508,7 +508,7 @@ class GraphSageAlgorithmFactoryTest {
 
                                         var model = Model.of(
                                             "graphSage",
-                                            GraphSchema.empty(),
+                                            MutableGraphSchema.empty(),
                                             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
                                             trainConfig,
                                             GraphSageModelTrainer.GraphSageTrainMetrics.empty()
@@ -555,7 +555,7 @@ class GraphSageAlgorithmFactoryTest {
 
         var model = Model.of(
             "graphSage",
-            GraphSchema.empty(),
+            MutableGraphSchema.empty(),
             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
             trainConfig,
             GraphSageModelTrainer.GraphSageTrainMetrics.empty()

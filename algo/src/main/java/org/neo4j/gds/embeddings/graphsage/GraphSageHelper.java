@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.api.schema.NodeSchemaEntry;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -278,7 +279,7 @@ public final class GraphSageHelper {
             .nodeSchema()
             .entries()
             .stream()
-            .collect(Collectors.toMap(e -> e.identifier, e -> e.properties().keySet()));
+            .collect(Collectors.toMap(NodeSchemaEntry::identifier, e -> e.properties().keySet()));
     }
 
     private static Map<NodeLabel, Set<String>> filteredPropertyKeysPerNodeLabel(Graph graph, GraphSageTrainConfig config) {

@@ -94,6 +94,6 @@ public interface ElementSchema<
     default Map<ELEMENT_IDENTIFIER, ENTRY> unionEntries(SELF other) {
         return Stream
             .concat(entries().stream(), other.entries().stream())
-            .collect(Collectors.toMap(e -> e.identifier(), Function.identity(), ElementSchemaEntry::union));
+            .collect(Collectors.toMap(ElementSchemaEntry::identifier, Function.identity(), ElementSchemaEntry::union));
     }
 }

@@ -30,6 +30,7 @@ import org.neo4j.gds.api.properties.nodes.ImmutableNodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.ImmutablePropertySchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 
 import java.util.Map;
@@ -52,7 +53,7 @@ public interface Nodes {
         Map<PropertyMapping, NodePropertyValues> propertyValues,
         PropertyState propertyState
     ) {
-        var nodeSchema = NodeSchema.empty();
+        var nodeSchema = MutableNodeSchema.empty();
         var nodePropertyStoreBuilder = NodePropertyStore.builder();
 
         propertyMappings.forEach(((nodeLabel, mappings) -> {

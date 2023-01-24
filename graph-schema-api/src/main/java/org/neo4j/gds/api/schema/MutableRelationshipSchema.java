@@ -58,7 +58,7 @@ public class MutableRelationshipSchema implements RelationshipSchema {
     }
 
     @Override
-    public MutableRelationshipSchema union(MutableRelationshipSchema other) {
+    public MutableRelationshipSchema union(RelationshipSchema other) {
         return new MutableRelationshipSchema(unionEntries(other));
     }
 

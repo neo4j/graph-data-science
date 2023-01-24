@@ -28,7 +28,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
@@ -296,7 +296,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
     }
 
     @Override
-    protected GraphSchema computeGraphSchema(
+    protected MutableGraphSchema computeGraphSchema(
         Nodes nodes, RelationshipImportResult relationshipImportResult
     ) {
         return CSRGraphStoreUtil.computeGraphSchema(
