@@ -24,7 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import java.util.Set;
 
 public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel, MutableNodeSchemaEntry, PropertySchema> {
-    Set<NodeLabel> availableLabels() ;
+    Set<NodeLabel> availableLabels();
 
     boolean containsOnlyAllNodesLabel();
 
