@@ -20,6 +20,7 @@
 package org.neo4j.gds.beta.indexInverse;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -99,7 +100,6 @@ public interface InverseRelationshipsConfig extends AlgoBaseConfig {
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        Set<RelationshipType> indexTypes = graphStore.inverseIndexedRelationshipTypes();
         RelationshipSchema relationshipSchema = graphStore.schema().relationshipSchema();
 
         var undirectedTypes = selectedRelationshipTypes
@@ -113,6 +113,27 @@ public interface InverseRelationshipsConfig extends AlgoBaseConfig {
                 Locale.US,
                 "Creating an inverse index for undirected relationships is not supported. Undirected relationship types are %s.",
                 StringJoining.join(undirectedTypes)
+            ));
+        }
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateStarFilterIsNotAmbiguous(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        Set<RelationshipType> availableTypes = graphStore.relationshipTypes();
+
+        boolean selectedStar = relationshipTypes().contains(ElementProjection.PROJECT_ALL);
+        boolean projectedStar = availableTypes.contains(RelationshipType.ALL_RELATIONSHIPS);
+        boolean notOnlyStar = availableTypes.size() > 1;
+
+        if (selectedStar && projectedStar && notOnlyStar) {
+            throw new IllegalArgumentException(String.format(
+                "The 'relationshipTypes' parameter is ambiguous. It is not clear whether all relationships types or only the star projection should be used. " +
+                "Please explicitly enumerate the requested types. Available types are %s.",
+                StringJoining.join(availableTypes.stream().map(RelationshipType::name))
             ));
         }
     }

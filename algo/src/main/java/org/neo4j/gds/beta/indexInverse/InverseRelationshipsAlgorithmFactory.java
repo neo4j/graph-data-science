@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.beta.indexInverse;
 
+import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
@@ -73,7 +74,10 @@ public class InverseRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFac
         var builder = MemoryEstimations.builder(InverseRelationships.class);
 
         for (String typeName : relationshipTypes) {
-            var relationshipType = RelationshipType.of(typeName);
+            // FIXME this is incorrect as * should unroll to all relationship types in the graphStore
+            var relationshipType = typeName.equals(ElementProjection.PROJECT_ALL)
+                ? RelationshipType.ALL_RELATIONSHIPS
+                : RelationshipType.of(typeName);
             var builderForType = MemoryEstimations.builder();
 
             builderForType.add(
