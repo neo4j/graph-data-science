@@ -35,6 +35,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.gdl.GdlGraphs;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestAlgorithmResult;
 import org.neo4j.gds.test.TestMutateConfig;
@@ -42,6 +43,7 @@ import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -107,6 +109,24 @@ class MemoryEstimationExecutorTest extends BaseTest {
             assertThat(row.mapView).isNotNull();
             assertThat(row.treeView).isNotEmpty();
         });
+    }
+
+    @Test
+    void testMemoryEstimationWithInvalidRelationshipFilter() {
+        var graphName = "memoryEstimateGraph";
+        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("", graphName), GdlGraphs.EMPTY_GRAPH_STORE);
+        runQuery(GdsCypher.call(graphName)
+            .graphProject()
+            .loadEverything()
+            .yields());
+
+        Stream<MemoryEstimateResult> result = memoryEstimationExecutor.computeEstimate(
+            graphName,
+            Map.of("mutateProperty", "foo", "relationshipTypes", List.of("INVALID"))
+        );
+        GraphStoreCatalog.removeAllLoadedGraphs();
+
+        assertThat(result).hasSize(1).allMatch(row -> row.nodeCount == 0);
     }
 
     @Test
