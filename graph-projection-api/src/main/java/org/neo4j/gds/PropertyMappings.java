@@ -19,12 +19,10 @@
  */
 package org.neo4j.gds;
 
-import org.eclipse.collections.api.tuple.primitive.IntObjectPair;
 import org.immutables.builder.Builder.AccessibleFields;
 import org.immutables.value.Value;
-import org.neo4j.gds.annotation.DataClass;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.utils.CollectionUtil;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -40,17 +38,17 @@ import java.util.stream.Stream;
 import static java.util.Collections.singletonMap;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@DataClass
+@ValueClass
 @Value.Immutable(singleton = true)
-public abstract class AbstractPropertyMappings implements Iterable<PropertyMapping> {
+public abstract class PropertyMappings implements Iterable<PropertyMapping> {
 
     public abstract List<PropertyMapping> mappings();
 
     public static PropertyMappings of(PropertyMapping... mappings) {
         if (mappings == null) {
-            return PropertyMappings.of();
+            return ImmutablePropertyMappings.of();
         }
-        return PropertyMappings.of(Arrays.asList(mappings));
+        return ImmutablePropertyMappings.of(Arrays.asList(mappings));
     }
 
     public static PropertyMappings fromObject(Object relPropertyMapping) {
@@ -58,9 +56,9 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
     }
 
     public static PropertyMappings fromObject(Object relPropertyMapping, Aggregation defaultAggregation) {
-        if (relPropertyMapping instanceof PropertyMappings) {
-            PropertyMappings properties = (PropertyMappings) relPropertyMapping;
-            return PropertyMappings.builder().from(properties).withDefaultAggregation(defaultAggregation).build();
+        if (relPropertyMapping instanceof ImmutablePropertyMappings) {
+            ImmutablePropertyMappings properties = (ImmutablePropertyMappings) relPropertyMapping;
+            return ImmutablePropertyMappings.builder().from(properties).withDefaultAggregation(defaultAggregation).build();
         }
         if (relPropertyMapping instanceof String) {
             String propertyMapping = (String) relPropertyMapping;
@@ -95,7 +93,7 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
         }
     }
 
-    public static Map<String, Object> toObject(AbstractPropertyMappings propertyMappings) {
+    public static Map<String, Object> toObject(PropertyMappings propertyMappings) {
         return propertyMappings.toObject(true);
     }
 
@@ -110,10 +108,6 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
     @Override
     public Iterator<PropertyMapping> iterator() {
         return mappings().iterator();
-    }
-
-    public Stream<IntObjectPair<PropertyMapping>> enumerate() {
-        return CollectionUtil.enumerate(mappings());
     }
 
     public boolean hasMappings() {
@@ -144,7 +138,7 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
             return other;
         }
         if (!other.hasMappings()) {
-            return PropertyMappings.copyOf(this);
+            return ImmutablePropertyMappings.copyOf(this);
         }
         Builder builder = PropertyMappings.builder();
         builder.addMappings(Stream.concat(stream(), other.stream()).distinct());
@@ -168,7 +162,7 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
     }
 
     @AccessibleFields
-    public static final class Builder extends PropertyMappings.Builder {
+    public static final class Builder extends ImmutablePropertyMappings.Builder {
 
         private Aggregation aggregation;
 

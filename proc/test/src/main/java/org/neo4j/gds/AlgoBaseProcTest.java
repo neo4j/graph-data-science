@@ -321,9 +321,9 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             GraphProjectConfig graphProjectConfig = withNameAndProjections(
                 "",
                 loadedGraphName,
-                NodeProjections.of(
+                ImmutableNodeProjections.of(
                     Map.of(
-                        NodeLabel.of("X"), NodeProjection.of("X", PropertyMappings.of(propertyMappings))
+                        NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of(propertyMappings))
                     )
                 ),
                 relationshipProjections()

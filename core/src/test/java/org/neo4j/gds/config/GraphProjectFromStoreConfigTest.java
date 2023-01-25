@@ -25,6 +25,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
@@ -32,7 +33,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.core.Aggregation;
 
-import java.util.Collections;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -46,13 +46,17 @@ class GraphProjectFromStoreConfigTest {
 
     @Test
     void testThrowOnOverlappingNodeProperties() {
-        PropertyMappings propertyMappings = PropertyMappings.builder()
-            .addMapping("duplicate", "foo", DefaultValue.of(0.0), Aggregation.NONE)
-            .build();
-
-        NodeProjections nodeProjections = NodeProjections.create(Collections.singletonMap(
-            NodeLabel.of("A"), NodeProjection.of("A", propertyMappings)
+        PropertyMappings propertyMappings = PropertyMappings.of(PropertyMapping.of(
+            "duplicate",
+            "foo",
+            DefaultValue.of(0.0),
+            Aggregation.NONE
         ));
+
+        var nodeProjections = NodeProjections.single(
+            NodeLabel.of("A"),
+            NodeProjection.builder().label("A").properties(propertyMappings).build()
+        );
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
             ImmutableGraphProjectFromStoreConfig.builder()
@@ -68,9 +72,12 @@ class GraphProjectFromStoreConfigTest {
 
     @Test
     void testThrowOnOverlappingRelProperties() {
-        PropertyMappings propertyMappings = PropertyMappings.builder()
-            .addMapping("duplicate", "foo", DefaultValue.of(0.0), Aggregation.NONE)
-            .build();
+        var propertyMappings = PropertyMappings.of(PropertyMapping.of(
+            "duplicate",
+            "foo",
+            DefaultValue.of(0.0),
+            Aggregation.NONE
+        ));
 
         RelationshipProjections relProjections = ImmutableRelationshipProjections.single(
             RelationshipType.of("A"),
@@ -95,17 +102,25 @@ class GraphProjectFromStoreConfigTest {
 
     @Test
     void testMergingOfNodePropertiesAndProjections() {
-        PropertyMappings propertyMappings1 = PropertyMappings.builder()
-            .addMapping("foo", "foo", DefaultValue.of(0.0), Aggregation.NONE)
-            .build();
+        var propertyMappings1 = PropertyMappings.of(PropertyMapping.of(
+                "foo",
+                "foo",
+                DefaultValue.of(0.0),
+                Aggregation.NONE
+            )
+        );
 
-        PropertyMappings propertyMappings2 = PropertyMappings.builder()
-            .addMapping("bar", "foo", DefaultValue.of(0.0), Aggregation.NONE)
-            .build();
-
-        NodeProjections nodeProjections = NodeProjections.create(Collections.singletonMap(
-            NodeLabel.of("A"), NodeProjection.of("A", propertyMappings2)
+        var propertyMappings2 = PropertyMappings.of(PropertyMapping.of(
+            "bar",
+            "foo",
+            DefaultValue.of(0.0),
+            Aggregation.NONE
         ));
+
+        var nodeProjections = NodeProjections.single(
+            NodeLabel.of("A"),
+            NodeProjection.builder().label("A").properties(propertyMappings2).build()
+        );
 
         GraphProjectFromStoreConfig graphProjectConfig = ImmutableGraphProjectFromStoreConfig.builder()
             .graphName("graph")
@@ -122,13 +137,14 @@ class GraphProjectFromStoreConfigTest {
 
     @Test
     void testMergingOfRelationshipPropertiesAndProjections() {
-        PropertyMappings propertyMappings1 = PropertyMappings.builder()
-            .addMapping("foo", "foo", DefaultValue.of(0.0), Aggregation.NONE)
-            .build();
+        var propertyMappings1 = PropertyMappings.of(PropertyMapping.of("foo", "foo", DefaultValue.of(0.0), Aggregation.NONE));
 
-        PropertyMappings propertyMappings2 = PropertyMappings.builder()
-            .addMapping("bar", "foo", DefaultValue.of(0.0), Aggregation.NONE)
-            .build();
+        var propertyMappings2 = PropertyMappings.of(PropertyMapping.of(
+            "bar",
+            "foo",
+            DefaultValue.of(0.0),
+            Aggregation.NONE
+        ));
 
         RelationshipProjections relProjections = ImmutableRelationshipProjections.single(
             RelationshipType.of("A"),

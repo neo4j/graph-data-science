@@ -31,7 +31,6 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
-import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -109,19 +108,21 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
         runQuery(GdsCypher.call(TEST_GRAPH_DIFFERENT_PROPERTIES)
             .graphProject()
-            .withNodeLabel("A", NodeProjection.of(
-                "A",
-                PropertyMappings.of().withMappings(
+            .withNodeLabel("A", NodeProjection.builder()
+                .label("A")
+                .addProperties(
                     PropertyMapping.of("newNodeProp1", "nodeProp1", 1337),
                     PropertyMapping.of("newNodeProp2", "nodeProp2", 1337)
-                )
-            ))
-            .withNodeLabel("B", NodeProjection.of(
+                ).build()
+            )
+            .withNodeLabel(
                 "B",
-                PropertyMappings.of().withMappings(
-                    PropertyMapping.of("newNodeProp1", "nodeProp1", 1337)
-                )
-            ))
+                NodeProjection
+                    .builder()
+                    .label("B")
+                    .addProperty(PropertyMapping.of("newNodeProp1", "nodeProp1", 1337))
+                    .build()
+            )
             .withAnyRelationshipType()
             .yields()
         );

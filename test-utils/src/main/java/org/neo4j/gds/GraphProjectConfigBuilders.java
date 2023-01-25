@@ -70,7 +70,7 @@ public final class GraphProjectConfigBuilders {
     ) {
         // Node projections
         Map<String, NodeProjection> tempNP = new LinkedHashMap<>();
-        nodeLabels.forEach(label -> tempNP.put(label, NodeProjection.of(label, PropertyMappings.of())));
+        nodeLabels.forEach(label -> tempNP.put(label, NodeProjection.of(label)));
         nodeProjections.forEach(np -> tempNP.put(np.label(), np));
         nodeProjectionsWithIdentifier.forEach(tempNP::put);
 
@@ -111,7 +111,7 @@ public final class GraphProjectConfigBuilders {
             .withDefaultAggregation(aggregation)
             .build();
 
-        NodeProjections np = NodeProjections.of(tempNP.entrySet().stream().collect(Collectors.toMap(
+        NodeProjections np = ImmutableNodeProjections.of(tempNP.entrySet().stream().collect(Collectors.toMap(
             e -> NodeLabel.of(e.getKey()),
             Map.Entry::getValue
         )));
@@ -126,7 +126,7 @@ public final class GraphProjectConfigBuilders {
             .graphName(graphName.orElse(""))
             .nodeProjections(np)
             .relationshipProjections(rp)
-            .nodeProperties(PropertyMappings.of(nodeProperties))
+            .nodeProperties(ImmutablePropertyMappings.of(nodeProperties))
             .relationshipProperties(relationshipPropertyMappings)
             .readConcurrency(concurrency.orElse(ConcurrencyConfig.DEFAULT_CONCURRENCY))
             .jobId(jobId.orElse(new JobId()))

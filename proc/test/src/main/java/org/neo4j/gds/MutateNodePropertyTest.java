@@ -30,7 +30,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -60,13 +59,13 @@ public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<RESULT>, CON
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
             .databaseService(graphDb())
             .graphName(graphName)
-            .addNodeProjection(NodeProjection.of(
+            .addNodeProjection(ImmutableNodeProjection.of(
                 "A",
-                PropertyMappings.of(nodeProperties().stream().map(PropertyMapping::of).collect(Collectors.toList()))
+                PropertyMappings.fromObject(nodeProperties())
             ))
-            .addNodeProjection(NodeProjection.of(
+            .addNodeProjection(ImmutableNodeProjection.of(
                 "B",
-                PropertyMappings.of(nodeProperties().stream().map(PropertyMapping::of).collect(Collectors.toList()))
+                PropertyMappings.fromObject(nodeProperties())
             ));
 
 

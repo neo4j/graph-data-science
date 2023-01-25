@@ -103,7 +103,7 @@ public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<RESULT>, CON
             .orElse(Orientation.NATURAL);
         GraphStore graphStore = new TestNativeGraphLoader(graphDb())
             .withLabels("A", "B")
-            .withNodeProperties(PropertyMappings.of(nodeProperties()
+            .withNodeProperties(ImmutablePropertyMappings.of(nodeProperties()
                 .stream()
                 .map(PropertyMapping::of)
                 .collect(Collectors.toList())))

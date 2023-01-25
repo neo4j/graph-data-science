@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.annotation.DataClass;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.HashMap;
@@ -37,9 +37,9 @@ import static java.util.stream.Collectors.toMap;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@DataClass
+@ValueClass
 @Value.Immutable(singleton = true)
-public abstract class AbstractNodeProjections extends AbstractProjections<NodeLabel, NodeProjection> {
+public abstract class NodeProjections extends AbstractProjections<NodeLabel, NodeProjection> {
 
     public static final NodeProjections ALL = create(singletonMap(ALL_NODES, NodeProjection.all()));
 
@@ -112,11 +112,11 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
                 "An empty node projection was given; at least one node label must be projected."
             );
         }
-        return NodeProjections.of(unmodifiableMap(projections));
+        return ImmutableNodeProjections.of(unmodifiableMap(projections));
     }
 
     public static NodeProjections single(NodeLabel label, NodeProjection projection) {
-        return NodeProjections.of(Map.of(label, projection));
+        return ImmutableNodeProjections.of(Map.of(label, projection));
     }
 
     public static NodeProjections all() {
@@ -125,7 +125,7 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
 
     public NodeProjections addPropertyMappings(PropertyMappings mappings) {
         if (!mappings.hasMappings()) {
-            return NodeProjections.copyOf(this);
+            return ImmutableNodeProjections.copyOf(this);
         }
         Map<NodeLabel, NodeProjection> newProjections = projections().entrySet().stream().collect(toMap(
             Map.Entry::getKey,
@@ -150,7 +150,7 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
     }
 
     public boolean isEmpty() {
-        return this == NodeProjections.of();
+        return this == ImmutableNodeProjections.of();
     }
 
     public Map<String, Object> toObject() {
@@ -161,7 +161,7 @@ public abstract class AbstractNodeProjections extends AbstractProjections<NodeLa
         return value;
     }
 
-    public static Map<String, Object> toObject(AbstractNodeProjections nodeProjections) {
+    public static Map<String, Object> toObject(NodeProjections nodeProjections) {
         return nodeProjections.toObject();
     }
 
