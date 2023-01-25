@@ -23,6 +23,7 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
     implementation project(':neo4j-adapter')
+    implementation project(':neo4j-api')
     implementation project(':open-licensing')
     implementation project(':pregel')
     implementation project(':transaction')

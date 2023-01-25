@@ -175,7 +175,7 @@ public abstract class AlgoBaseProc<
                     config,
                     executionContext.username(),
                     executionContext.databaseId(),
-                    executionContext.isGdsAdmin()
+                    executionContext.transactionApi().isGdsAdmin()
                 ),
                 new MemoryUsageValidator(executionContext.log(), executionContext.databaseService())
             );

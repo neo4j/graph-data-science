@@ -21,6 +21,7 @@ dependencies {
     implementation project(':graph-schema-api')
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
+    implementation project(':neo4j-api')
     implementation project(':open-model-catalog')
     implementation project(':open-write-services')
     implementation project(':string-formatting')

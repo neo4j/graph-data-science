@@ -48,7 +48,7 @@ class DfsStreamComputationResultConsumer implements ComputationResultConsumer<DF
             executionContext.containsOutputField("path"),
             pathFactoryFacade,
             DfsStreamProc.NEXT,
-            executionContext.internalTransaction()
+            executionContext.transactionApi()::getNodeById
         );
     }
 }

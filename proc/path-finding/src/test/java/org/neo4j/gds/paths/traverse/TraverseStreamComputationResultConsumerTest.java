@@ -48,7 +48,7 @@ class TraverseStreamComputationResultConsumerTest {
             false,
             pathFactoryFacadeMock,
             RelationshipType.withName("TEST"),
-            mock(InternalTransaction.class)
+            mock(InternalTransaction.class)::getNodeById
         );
 
         verifyNoInteractions(pathFactoryFacadeMock);
@@ -75,7 +75,7 @@ class TraverseStreamComputationResultConsumerTest {
             true,
             pathFactoryFacadeMock,
             RelationshipType.withName("TEST"),
-            mock(InternalTransaction.class)
+            mock(InternalTransaction.class)::getNodeById
         );
 
         assertThat(result)

@@ -25,7 +25,6 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
@@ -87,7 +86,7 @@ public class MemoryEstimationExecutor<
                     .log(executionContext.log())
                     .taskRegistryFactory(executionContext.taskRegistryFactory())
                     .userLogRegistryFactory(executionContext.userLogRegistryFactory())
-                    .terminationFlag(TerminationFlag.wrap(executionContext.transaction()))
+                    .terminationFlag(executionContext.transactionApi().terminationFlag())
                     .transactionContext(TransactionContext.of(
                         executionContext.databaseService(),
                         executionContext.procedureTransaction()
@@ -107,7 +106,7 @@ public class MemoryEstimationExecutor<
                 algoConfig,
                 executionContext.username(),
                 executionContext.databaseId(),
-                executionContext.isGdsAdmin()
+                executionContext.transactionApi().isGdsAdmin()
             ).graphDimensions();
             maybeGraphEstimation = Optional.empty();
         } else {

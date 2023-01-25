@@ -48,7 +48,7 @@ class BfsStreamComputationResultConsumer implements ComputationResultConsumer<BF
             executionContext.containsOutputField("path"),
             pathFactoryFacade,
             BfsStreamProc.NEXT,
-            executionContext.internalTransaction()
+            executionContext.transactionApi()::getNodeById
         );
     }
 }

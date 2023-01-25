@@ -23,6 +23,7 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.GdsTransactionApi;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -37,8 +38,6 @@ import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
 
@@ -60,13 +59,7 @@ public interface ExecutionContext {
     @Nullable
     Transaction procedureTransaction();
 
-    @Nullable
-    KernelTransaction transaction();
-
-    @Value.Lazy
-    default InternalTransaction internalTransaction() {
-        return transaction().internalTransaction();
-    }
+    GdsTransactionApi transactionApi();
 
     ProcedureCallContext callContext();
 
@@ -96,18 +89,6 @@ public interface ExecutionContext {
     default boolean containsOutputField(String fieldName) {
         return callContext().outputFields()
             .anyMatch(field -> toLowerCaseWithLocale(field).equals(fieldName));
-    }
-
-    @Value.Lazy
-    default boolean isGdsAdmin() {
-        if (transaction() == null) {
-            // No transaction available (likely we're in a test), no-one is admin here
-            return false;
-        }
-        // this should be the same as the predefined role from enterprise-security
-        // com.neo4j.server.security.enterprise.auth.plugin.api.PredefinedRoles.ADMIN
-        String PREDEFINED_ADMIN_ROLE = "admin";
-        return transaction().securityContext().roles().contains(PREDEFINED_ADMIN_ROLE);
     }
 
     default ExecutionContext withNodePropertyExporterBuilder(NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder) {
@@ -156,8 +137,8 @@ public interface ExecutionContext {
         }
 
         @Override
-        public @Nullable KernelTransaction transaction() {
-            return null;
+        public GdsTransactionApi transactionApi() {
+            return GdsTransactionApi.EMPTY;
         }
 
         @Override

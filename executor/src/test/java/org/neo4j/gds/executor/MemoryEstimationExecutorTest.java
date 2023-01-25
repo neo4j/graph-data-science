@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.Neo4jTransactionWrapper;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -70,7 +71,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .username("")
             .procedureTransaction(procedureTransaction)
-            .transaction(transaction)
+            .transactionApi(new Neo4jTransactionWrapper(transaction))
             .build();
 
         memoryEstimationExecutor = new MemoryEstimationExecutor<>(

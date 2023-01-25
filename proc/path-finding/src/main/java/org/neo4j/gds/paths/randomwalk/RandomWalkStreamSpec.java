@@ -72,7 +72,7 @@ public class RandomWalkStreamSpec implements AlgorithmSpec<RandomWalk, Stream<lo
 
             Function<List<Long>, Path> pathCreator = returnPath
                 ? (List<Long> nodes) -> PathFactory.create(
-                executionContext.procedureTransaction(),
+                executionContext.transactionApi()::getNodeById,
                 nodes,
                 RelationshipType.withName("NEXT")
             )
