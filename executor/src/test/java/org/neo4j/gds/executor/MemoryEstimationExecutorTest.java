@@ -39,6 +39,8 @@ import org.neo4j.gds.gdl.GdlGraphs;
 import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestAlgorithmResult;
 import org.neo4j.gds.test.TestMutateConfig;
+import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.List;
@@ -52,17 +54,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MemoryEstimationExecutorTest extends BaseTest {
 
-    private ExecutionContext executionContext;
+    private Transaction procedureTransaction;
     private MemoryEstimationExecutor<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> memoryEstimationExecutor;
 
     @BeforeEach
     void setup() throws Exception {
-        var procedureTransaction = db.beginTx();
+        procedureTransaction = db.beginTx();
         var transaction = GraphDatabaseApiProxy.kernelTransaction(procedureTransaction);
 
         GraphDatabaseApiProxy.registerProcedures(db, GraphProjectProc.class);
 
-        executionContext = ImmutableExecutionContext
+        var executionContext = ImmutableExecutionContext
             .builder()
             .databaseService(db)
             .callContext(new ProcedureCallContext(42, new String[0], false, "neo4j", false))
@@ -70,7 +72,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .username("")
-            .procedureTransaction(procedureTransaction)
+            .transactionContext(TransactionContext.of(db, procedureTransaction))
             .transactionApi(new Neo4jTransactionWrapper(transaction))
             .build();
 
@@ -83,7 +85,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
 
     @AfterEach
     void tearDown() {
-        executionContext.procedureTransaction().close();
+        procedureTransaction.close();
     }
 
     @Test

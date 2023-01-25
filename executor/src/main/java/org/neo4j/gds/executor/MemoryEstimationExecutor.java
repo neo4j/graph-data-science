@@ -30,7 +30,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.Map;
 import java.util.Optional;
@@ -87,10 +86,7 @@ public class MemoryEstimationExecutor<
                     .taskRegistryFactory(executionContext.taskRegistryFactory())
                     .userLogRegistryFactory(executionContext.userLogRegistryFactory())
                     .terminationFlag(executionContext.transactionApi().terminationFlag())
-                    .transactionContext(TransactionContext.of(
-                        executionContext.databaseService(),
-                        executionContext.procedureTransaction()
-                    )).build();
+                    .transactionContext(executionContext.transactionContext()).build();
 
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(executionContext.username());
             var graphProjectConfig = memoryEstimationGraphConfigParser.processInput(graphNameOrConfiguration);

@@ -35,8 +35,8 @@ import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
+import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
@@ -57,7 +57,7 @@ public interface ExecutionContext {
     Log log();
 
     @Nullable
-    Transaction procedureTransaction();
+    TransactionContext transactionContext();
 
     GdsTransactionApi transactionApi();
 
@@ -132,7 +132,7 @@ public interface ExecutionContext {
         }
 
         @Override
-        public @Nullable Transaction procedureTransaction() {
+        public TransactionContext transactionContext() {
             return null;
         }
 
