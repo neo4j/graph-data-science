@@ -20,9 +20,6 @@
 package org.neo4j.gds.beta.undirected;
 
 import org.neo4j.gds.MutateComputationResultConsumer;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -31,13 +28,9 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.executor.validation.AfterLoadValidation;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.StandardMutateResult;
 
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -79,36 +72,6 @@ public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeR
             ) {
                 computationResult.graphStore().addRelationshipType(computationResult.result());
                 resultBuilder.withRelationshipsWritten(computationResult.result().topology().elementCount());
-            }
-        };
-    }
-
-    @Override
-    public ValidationConfiguration<ToUndirectedConfig> validationConfig(ExecutionContext executionContext) {
-        return new ValidationConfiguration<>() {
-            @Override
-            public List<AfterLoadValidation<ToUndirectedConfig>> afterLoadValidations() {
-                return List.of(
-                    (graphStore, graphProjectConfig, config) -> {
-                        var relationshipType = RelationshipType.of(config.relationshipType());
-                        ElementTypeValidator.validateTypes(graphStore, List.of(relationshipType), "`relationshipType`");
-                    },
-                    (graphStore, graphProjectConfig, config) -> {
-                        var relationshipType = RelationshipType.of(config.relationshipType());
-                        Direction direction = graphStore
-                            .schema()
-                            .relationshipSchema()
-                            .get(relationshipType)
-                            .direction();
-                        if (direction == Direction.UNDIRECTED) {
-                            throw new UnsupportedOperationException(String.format(
-                                Locale.US,
-                                "The specified relationship type `%s` is already undirected.",
-                                relationshipType.name
-                            ));
-                        }
-                    }
-                );
             }
         };
     }

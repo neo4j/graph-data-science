@@ -66,7 +66,7 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
     public SingleTypeRelationships compute() {
         progressTracker.beginSubTask();
 
-        RelationshipType fromRelationshipType = RelationshipType.of(config.relationshipType());
+        RelationshipType fromRelationshipType = config.internalRelationshipType();
 
         var propertySchemas = graphStore
             .schema()

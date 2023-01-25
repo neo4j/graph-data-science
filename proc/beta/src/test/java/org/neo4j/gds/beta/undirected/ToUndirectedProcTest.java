@@ -114,24 +114,40 @@ class ToUndirectedProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldFailIfForStarRelationshipType() {
+    void shouldAllowStarIfStarWasProjected() {
+        runQuery(GdsCypher.call("star_graph")
+            .graphProject()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withRelationshipType("REL")
+            .withRelationshipProperty("prop1")
+            .yields()
+        );
+
+        assertCypherResult(
+            "CALL gds.beta.graph.relationships.toUndirected('star_graph', {relationshipType: '*', mutateRelationshipType: 'UNDIRECTED'}) YIELD relationshipsWritten",
+            List.of(Map.of("relationshipsWritten", 6L))
+        );
+    }
+
+    @Test
+    void shouldFailForStarRelationshipTypeIfNotStarProjected() {
         String query = "CALL gds.beta.graph.relationships.toUndirected('graph', {relationshipType: '*', mutateRelationshipType: 'REL'})";
 
         assertThatThrownBy(() -> runQuery(query)).hasMessageContaining(
-            "`relationshipType` cannot be `*`. Please specify the concrete relationship type."
+            "The 'relationshipType' parameter can only be '*' if '*' was projected. Available types are ['REL']."
         );
     }
 
     @Test
     void shouldFailIfRelationshipTypeDoesNotExists() {
-        String query = "CALL gds.beta.graph.relationships.toUndirected('graph', {relationshipType: 'REL2', mutateRelationshipType: 'REL2'})";
+        String query = "CALL gds.beta.graph.relationships.toUndirected('graph', {relationshipType: 'REL2', mutateRelationshipType: 'OTHER_REL'})";
 
-        Throwable throwable = rootCause(assertThrows(QueryExecutionException.class, () -> runQuery(query)));
-        assertEquals(IllegalArgumentException.class, throwable.getClass());
-        String expectedMessage = formatWithLocale(
-            "Could not find the specified `relationshipType` of ['REL2']. Available relationship types are ['REL']."
-        );
-        assertEquals(expectedMessage, throwable.getMessage());
+        assertThatThrownBy(() -> runQuery(query))
+            .isInstanceOf(QueryExecutionException.class)
+            .hasRootCauseInstanceOf(IllegalArgumentException.class)
+            .hasRootCauseMessage(
+                "Could not find the specified `relationshipType` of ['REL2']. Available relationship types are ['REL'].");
     }
 
     @Test

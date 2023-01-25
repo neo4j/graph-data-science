@@ -19,15 +19,22 @@
  */
 package org.neo4j.gds.beta.undirected;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.ElementProjection;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.utils.StringJoining;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
@@ -37,10 +44,17 @@ public interface ToUndirectedConfig extends AlgoBaseConfig, MutateRelationshipCo
     @Configuration.ConvertWith(method = "validateRelationshipTypeIdentifier")
     String relationshipType();
 
+    @Configuration.Ignore
+    default RelationshipType internalRelationshipType() {
+        return relationshipType().equals(ElementProjection.PROJECT_ALL)
+            ? RelationshipType.ALL_RELATIONSHIPS
+            : RelationshipType.of(relationshipType());
+    }
+
     @Override
     @Configuration.Ignore
     default List<String> relationshipTypes() {
-        return List.of("*");
+        return List.of(relationshipType());
     }
 
     @Override
@@ -53,11 +67,49 @@ public interface ToUndirectedConfig extends AlgoBaseConfig, MutateRelationshipCo
         return new ToUndirectedConfigImpl(configuration);
     }
 
-    @Value.Check
-    default void validateRelationshipTypeNotStar() {
-        if (relationshipType().equals(ElementProjection.PROJECT_ALL)) {
-            throw new UnsupportedOperationException("`relationshipType` cannot be `*`. Please specify the concrete relationship type.");
+    @Configuration.GraphStoreValidationCheck
+    default void validateTargetRelIsUndirected(
+        GraphStore graphStore,
+        Collection<NodeLabel> ignored,
+        Collection<RelationshipType> ignored_types
+    ) {
+        RelationshipType type = internalRelationshipType();
+        if (graphStore.relationshipTypes().contains(type) && graphStore.schema().relationshipSchema().isUndirected(type)) {
+            throw new UnsupportedOperationException(String.format(
+                Locale.US,
+                "The specified relationship type `%s` is already undirected.",
+                type.name
+            ));
         }
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateStarFilterIsNotAmbiguous(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        Set<RelationshipType> availableTypes = graphStore.relationshipTypes();
+
+        boolean selectedStar = relationshipType().equals(ElementProjection.PROJECT_ALL);
+        boolean projectedStar = availableTypes.contains(RelationshipType.ALL_RELATIONSHIPS);
+
+        if (selectedStar && !projectedStar) {
+            throw new IllegalArgumentException(String.format(
+                "The 'relationshipType' parameter can only be '*' if '*' was projected. Available types are %s.",
+                StringJoining.join(availableTypes.stream().map(RelationshipType::name))
+            ));
+        }
+    }
+
+    @Override
+    @Configuration.GraphStoreValidationCheck
+    default void validateRelationshipTypes(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        ElementTypeValidator.validateTypes(graphStore, selectedRelationshipTypes, "`relationshipType`");
     }
 
     static @Nullable String validateRelationshipTypeIdentifier(String input) {
