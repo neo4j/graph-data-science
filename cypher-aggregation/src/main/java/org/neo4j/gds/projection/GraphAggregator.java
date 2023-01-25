@@ -29,6 +29,8 @@ import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
+import org.neo4j.gds.api.schema.ImmutableGraphSchema;
+import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.compat.CompatUserAggregator;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.ConfigKeyValidation;
@@ -58,7 +60,6 @@ import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.MapValue;
 import org.neo4j.values.virtual.MapValueBuilder;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -532,19 +533,16 @@ public class GraphAggregator implements CompatUserAggregator {
             AdjacencyCompressor.ValueMapper valueMapper
         ) {
             var relationshipImportResultBuilder = RelationshipImportResult.builder();
-            var relationshipSchemas = new HashMap<RelationshipType, MutableRelationshipSchemaEntry>();
 
+            var relationshipSchema = RelationshipSchema.empty();
             this.relImporters.forEach((relationshipType, relImporter) -> {
                 var relationships = relImporter.build(
                     Optional.of(valueMapper),
                     Optional.empty()
                 );
-                var schema = relationships.relationshipSchema(relationshipType);
-                relationshipSchemas.put(relationshipType, schema.get(relationshipType));
+                relationshipSchema.set(relationships.relationshipSchemaEntry());
                 relationshipImportResultBuilder.putImportResult(relationshipType, relationships);
             });
-
-            var relationshipSchema = new MutableRelationshipSchema(relationshipSchemas);
 
             graphStoreBuilder.relationshipImportResult(relationshipImportResultBuilder.build());
             this.graphSchemaBuilder.relationshipSchema(relationshipSchema);

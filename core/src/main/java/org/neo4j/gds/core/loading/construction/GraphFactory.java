@@ -307,7 +307,8 @@ public final class GraphFactory {
             assert relationshipPropertyStore.values().size() == 1: "Cannot instantiate graph with more than one relationship property.";
         });
 
-        var relationshipSchema = relationships.relationshipSchema(RelationshipType.of("REL"));
+        RelationshipSchema relationshipSchema = RelationshipSchema.empty();
+        relationshipSchema.set(relationships.relationshipSchemaEntry());
 
         return create(
             MutableGraphSchema.of(nodeSchema, relationshipSchema, Map.of()),
