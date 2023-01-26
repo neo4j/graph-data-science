@@ -1,4 +1,4 @@
-le[[algorithms-leiden]]
+[[algorithms-leiden]]
 [.beta]
 = Leiden
 :description: This section describes the Leiden algorithm in the Neo4j Graph Data Science library.
