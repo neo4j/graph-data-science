@@ -105,7 +105,7 @@ public class SpanningTreeMutateSpec implements AlgorithmSpec<Prim, SpanningTree,
 
             computationResult
                 .graphStore()
-                .addRelationshipType(mutateRelationshipType, relationships);
+                .addRelationshipType(relationships);
 
             builder.withComputeMillis(computationResult.computeMillis());
             builder.withPreProcessingMillis(computationResult.preProcessingMillis());

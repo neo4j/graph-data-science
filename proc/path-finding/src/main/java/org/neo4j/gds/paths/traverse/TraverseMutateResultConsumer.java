@@ -60,6 +60,6 @@ final class TraverseMutateResultConsumer {
         relationships = relationshipsBuilder.build();
         resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
 
-        graphStore.addRelationshipType(mutateRelationshipType, relationships);
+        graphStore.addRelationshipType(relationships);
     }
 }

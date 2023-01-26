@@ -115,7 +115,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
 
                 computationResult
                     .graphStore()
-                    .addRelationshipType(relationshipType, relationships);
+                    .addRelationshipType(relationships);
 
                 resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
             }

@@ -158,7 +158,7 @@ class CollapsePathTest {
     }
 
     private void assertResultGraph(GraphStore graphStore, SingleTypeRelationships relationships, String expected) {
-        graphStore.addRelationshipType(RelationshipType.of("SAME_DRUG"), relationships);
+        graphStore.addRelationshipType(relationships);
 
         assertGraphEquals(
             fromGdl(expected),
@@ -197,7 +197,7 @@ class CollapsePathTest {
             var relationships = new CollapsePathAlgorithmFactory()
                 .build(graphStore, config, ProgressTracker.NULL_TRACKER)
                 .compute();
-            graphStore.addRelationshipType(mutateRelType, relationships);
+            graphStore.addRelationshipType(relationships);
             var resultGraph = graphStore.getGraph(mutateRelType);
 
             // then two relationships should be created
@@ -222,7 +222,7 @@ class CollapsePathTest {
             var relationships = new CollapsePathAlgorithmFactory()
                 .build(graphStore, config, ProgressTracker.NULL_TRACKER)
                 .compute();
-            graphStore.addRelationshipType(mutateRelType, relationships);
+            graphStore.addRelationshipType(relationships);
             var resultGraph = graphStore.getGraph(mutateRelType);
 
             // a single relationship is created (there is no Dog)

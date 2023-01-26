@@ -156,8 +156,8 @@ public class LinkPredictionRelationshipSampler {
         negativeSampler.produceNegativeSamples(testSplitResult.selectedRels(), trainSplitResult.selectedRels());
 
         // 4. Update graphStore with (positive+negative) 'TEST' and 'TRAIN' edges
-        graphStore.addRelationshipType(splitConfig.testRelationshipType(), testSplitResult.selectedRels().build());
-        graphStore.addRelationshipType(splitConfig.trainRelationshipType(), trainSplitResult.selectedRels().build());
+        graphStore.addRelationshipType(testSplitResult.selectedRels().build());
+        graphStore.addRelationshipType(trainSplitResult.selectedRels().build());
 
         validateTestSplit(graphStore);
         validateTrainSplit(graphStore);
@@ -194,7 +194,7 @@ public class LinkPredictionRelationshipSampler {
         );
 
         var remainingRels = splitResult.remainingRels().build();
-        graphStore.addRelationshipType(remainingRelType, remainingRels);
+        graphStore.addRelationshipType(remainingRels);
 
         return splitResult;
     }

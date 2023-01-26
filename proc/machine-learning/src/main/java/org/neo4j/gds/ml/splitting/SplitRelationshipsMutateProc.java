@@ -85,8 +85,8 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
                 var remainingRels = splitResult.remainingRels().build();
                 var config = computationResult.config();
 
-                graphStore.addRelationshipType(config.remainingRelationshipType(), remainingRels);
-                graphStore.addRelationshipType(config.holdoutRelationshipType(), selectedRels);
+                graphStore.addRelationshipType(remainingRels);
+                graphStore.addRelationshipType(selectedRels);
 
                 long holdoutWritten = selectedRels.topology().elementCount();
                 long remainingWritten = remainingRels.topology().elementCount();

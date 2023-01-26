@@ -111,7 +111,7 @@ public class SteinerTreeMutateSpec implements AlgorithmSpec<ShortestPathsSteiner
 
             computationResult
                 .graphStore()
-                .addRelationshipType(mutateRelationshipType, relationships);
+                .addRelationshipType(relationships);
             builder
                 .withEffectiveTargetNodeCount(steinerTreeResult.effectiveTargetNodesCount())
                 .withComputeMillis(computationResult.computeMillis())

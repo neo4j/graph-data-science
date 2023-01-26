@@ -76,6 +76,6 @@ public class ShortestPathMutateResultConsumer<ALGO extends Algorithm<DijkstraRes
 
         computationResult
             .graphStore()
-            .addRelationshipType(mutateRelationshipType, relationships);
+            .addRelationshipType(relationships);
     }
 }
