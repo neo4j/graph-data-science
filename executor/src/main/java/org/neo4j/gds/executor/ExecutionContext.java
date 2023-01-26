@@ -81,6 +81,15 @@ public interface ExecutionContext {
     NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder();
 
     @Value.Lazy
+    default boolean isGdsAdmin() {
+        var transactionContext = transactionContext();
+        if (transactionContext == null) {
+            return false;
+        }
+        return transactionContext.isGdsAdmin();
+    }
+
+    @Value.Lazy
     default DatabaseId databaseId() {
         return DatabaseId.of(databaseService());
     }

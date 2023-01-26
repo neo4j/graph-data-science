@@ -94,6 +94,16 @@ public final class TransactionContext {
     }
 
     /**
+     * @return `true` if the user that started the transaction has admin rights
+     */
+    public boolean isGdsAdmin() {
+        // this should be the same as the predefined role from enterprise-security
+        // com.neo4j.server.security.enterprise.auth.plugin.api.PredefinedRoles.ADMIN
+        String PREDEFINED_ADMIN_ROLE = "admin";
+        return securityContext.roles().contains(PREDEFINED_ADMIN_ROLE);
+    }
+
+    /**
      * Run some code within a <strong>new</strong> {@code Transaction} under the managed {@code SecurityContext}.
      * The new transaction is closed afterwards and any resource that is tied to the lifecycle of that transaction
      * will throw a {@link org.neo4j.graphdb.NotInTransactionException} upon access.

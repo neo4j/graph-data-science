@@ -32,8 +32,6 @@ public interface GdsTransactionApi {
 
     <CONFIG extends BaseConfig> void setAlgorithmMetaData(CONFIG algoConfig);
 
-    boolean isGdsAdmin();
-
     TerminationFlag terminationFlag();
 
     Node getNodeById(long id);
@@ -47,11 +45,6 @@ public interface GdsTransactionApi {
         @Override
         public <CONFIG extends BaseConfig> void setAlgorithmMetaData(CONFIG algoConfig) {
 
-        }
-
-        @Override
-        public boolean isGdsAdmin() {
-            return false;
         }
 
         @Override

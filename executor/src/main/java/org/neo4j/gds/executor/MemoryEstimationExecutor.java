@@ -102,7 +102,7 @@ public class MemoryEstimationExecutor<
                 algoConfig,
                 executionContext.username(),
                 executionContext.databaseId(),
-                executionContext.transactionApi().isGdsAdmin()
+                executionContext.isGdsAdmin()
             ).graphDimensions();
             maybeGraphEstimation = Optional.empty();
         } else {
