@@ -67,7 +67,7 @@ import static java.util.stream.Collectors.toMap;
 
 public final class NodesBuilder {
 
-    public static final DefaultValue NO_PROPERTY_VALUE = DefaultValue.DEFAULT;
+    private static final DefaultValue NO_PROPERTY_VALUE = DefaultValue.DEFAULT;
     public static final long UNKNOWN_MAX_ID = -1L;
 
     private final long maxOriginalId;
@@ -87,7 +87,7 @@ public final class NodesBuilder {
     NodesBuilder(
         long maxOriginalId,
         int concurrency,
-        TokenToNodeLabel tokenToNodeLabel,
+        Supplier<TokenToNodeLabels> tokenToNodeLabelSupplier,
         Supplier<NodeLabelTokenToPropertyKeys> nodeLabelTokenToPropertyKeysSupplier,
         ConcurrentMap<String, NodePropertiesFromStoreBuilder> propertyBuildersByPropertyKey,
         IdMapBuilder idMapBuilder,
@@ -126,7 +126,7 @@ public final class NodesBuilder {
                 seenNodeIdPredicate,
                 hasLabelInformation,
                 hasProperties,
-                tokenToNodeLabel,
+                tokenToNodeLabelSupplier.get(),
                 nodeLabelTokenToPropertyKeysSupplier.get(),
                 propertyBuilderFn
             )
@@ -286,7 +286,7 @@ public final class NodesBuilder {
      * Closes the NodesBuilder without flushing the internal buffers.
      * The given exception is thrown, once the thread local builders
      * are closed.
-     *
+     * <p>
      * This method must be called in case of an error while using the
      * NodesBuilder.
      */
@@ -320,7 +320,7 @@ public final class NodesBuilder {
 
         private final LongAdder importedNodes;
         private final LongPredicate seenNodeIdPredicate;
-        private final TokenToNodeLabel tokenToNodeLabel;
+        private final TokenToNodeLabels tokenToNodeLabels;
         private final NodeLabelTokenToPropertyKeys nodeLabelTokenToPropertyKeys;
         private final NodesBatchBuffer buffer;
         private final Function<String, NodePropertiesFromStoreBuilder> propertyBuilderFn;
@@ -334,13 +334,13 @@ public final class NodesBuilder {
             LongPredicate seenNodeIdPredicate,
             boolean hasLabelInformation,
             boolean hasProperties,
-            TokenToNodeLabel tokenToNodeLabel,
+            TokenToNodeLabels tokenToNodeLabels,
             NodeLabelTokenToPropertyKeys nodeLabelTokenToPropertyKeys,
             Function<String, NodePropertiesFromStoreBuilder> propertyBuilderFn
         ) {
             this.importedNodes = importedNodes;
             this.seenNodeIdPredicate = seenNodeIdPredicate;
-            this.tokenToNodeLabel = tokenToNodeLabel;
+            this.tokenToNodeLabels = tokenToNodeLabels;
             this.nodeLabelTokenToPropertyKeys = nodeLabelTokenToPropertyKeys;
             this.propertyBuilderFn = propertyBuilderFn;
 
@@ -389,7 +389,7 @@ public final class NodesBuilder {
 
             long[] labelIds = new long[nodeLabels.size()];
             for (int i = 0; i < labelIds.length; i++) {
-                labelIds[i] = tokenToNodeLabel.getOrCreateToken(nodeLabels.get(i));
+                labelIds[i] = this.tokenToNodeLabels.getOrCreateToken(nodeLabels.get(i));
             }
 
             return labelIds;
@@ -402,7 +402,8 @@ public final class NodesBuilder {
 
         private void flushBuffer() {
             var importedNodesAndProperties = this.nodeImporter.importNodes(
-                buffer,
+                this.buffer,
+                this.tokenToNodeLabels.labelTokenNodeLabelMapping(),
                 (nodeReference, labelIds, propertiesReference) -> {
                     if (!propertiesReference.isEmpty()) {
                         var propertyValueIndex = (int) ((LongPropertyReference) propertiesReference).id;
@@ -445,7 +446,7 @@ public final class NodesBuilder {
         private long[] anyLabelArray() {
             var anyLabelArray = this.anyLabelArray;
             if (anyLabelArray[0] == NOT_INITIALIZED) {
-                anyLabelArray[0] = tokenToNodeLabel.getOrCreateToken(NodeLabel.ALL_NODES);
+                anyLabelArray[0] = tokenToNodeLabels.getOrCreateToken(NodeLabel.ALL_NODES);
             }
             return anyLabelArray;
         }
