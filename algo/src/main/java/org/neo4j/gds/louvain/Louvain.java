@@ -229,10 +229,7 @@ public final class Louvain extends Algorithm<Louvain> {
         });
 
         terminationFlag.assertRunning();
-        double scaleCoefficient = 1.0;
-        if (workingGraph.schema().isUndirected()) {
-            scaleCoefficient /= 2.0;
-        }
+
         IdMap idMap = nodesBuilder.build().idMap();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
@@ -244,7 +241,6 @@ public final class Louvain extends Algorithm<Louvain> {
             .executorService(executorService)
             .build();
 
-        double finalScaleCoefficient = scaleCoefficient;
         var relationshipCreators = PartitionUtils.rangePartition(
             concurrency,
             workingGraph.nodeCount(),
@@ -253,7 +249,6 @@ public final class Louvain extends Algorithm<Louvain> {
                     relationshipsBuilder,
                     modularityOptimization,
                     workingGraph.concurrentCopy(),
-                    finalScaleCoefficient,
                     partition
                 ),
             Optional.empty()
@@ -315,21 +310,16 @@ public final class Louvain extends Algorithm<Louvain> {
 
         private final Partition partition;
 
-        private final double scaleCoefficient;
-
-
         private RelationshipCreator(
             RelationshipsBuilder relationshipsBuilder,
             ModularityOptimization modularityOptimization,
             RelationshipIterator relationshipIterator,
-            double scaleCoefficient,
             Partition partition
         ) {
             this.relationshipsBuilder = relationshipsBuilder;
             this.modularityOptimization = modularityOptimization;
             this.relationshipIterator = relationshipIterator;
             this.partition = partition;
-            this.scaleCoefficient = scaleCoefficient;
         }
 
         @Override
@@ -337,18 +327,13 @@ public final class Louvain extends Algorithm<Louvain> {
             partition.consume(nodeId -> {
                 long communityId = modularityOptimization.getCommunityId(nodeId);
                 relationshipIterator.forEachRelationship(nodeId, 1.0, (source, target, property) -> {
-                    // In the case of undirected graphs, we need scaling as otherwise we'd have double the value in these edges
-                    // see GraphAggregationPhase.java for the equivalent in Leiden; and the corresponding test
-                    if (source == target) {
-                        relationshipsBuilder.add(communityId, modularityOptimization.getCommunityId(target), property);
-                    } else {
+                    //ignore scaling alltogether
                         relationshipsBuilder.add(
                             communityId,
                             modularityOptimization.getCommunityId(target),
-                            property * scaleCoefficient
+                            property
                         );
 
-                    }
 
                     return true;
                 });
