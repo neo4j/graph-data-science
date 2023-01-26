@@ -42,13 +42,13 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.features.FeatureExtractor;
-import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
 
 import java.util.List;
 import java.util.Optional;
@@ -624,6 +624,7 @@ public class FastRPTest {
         );
         RelationshipsBuilder firstRelationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(firstIdMap)
+            .relationshipType(RelationshipType.of("REL"))
             .orientation(Orientation.UNDIRECTED)
             .executorService(Pools.DEFAULT)
             .build();
@@ -647,6 +648,7 @@ public class FastRPTest {
         );
         RelationshipsBuilder secondRelationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(secondIdMap)
+            .relationshipType(RelationshipType.of("REL"))
             .orientation(Orientation.UNDIRECTED)
             .executorService(Pools.DEFAULT)
             .build();

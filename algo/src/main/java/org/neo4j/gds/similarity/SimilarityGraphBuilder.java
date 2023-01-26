@@ -20,6 +20,7 @@
 package org.neo4j.gds.similarity;
 
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.compress.AdjacencyListBehavior;
@@ -84,6 +85,7 @@ public class SimilarityGraphBuilder {
     public Graph build(Stream<SimilarityResult> stream) {
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap.rootIdMap())
+            .relationshipType(RelationshipType.of("REL"))
             .orientation(Orientation.NATURAL)
             .addPropertyConfig(GraphFactory.PropertyConfig.of("property"))
             .concurrency(concurrency)

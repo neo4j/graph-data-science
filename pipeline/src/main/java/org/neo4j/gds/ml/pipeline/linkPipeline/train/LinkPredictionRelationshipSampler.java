@@ -110,7 +110,15 @@ public class LinkPredictionRelationshipSampler {
         // Relationship sets: test, train, feature-input, test-complement. The nodes are always the same.
         // 1. Split base graph into test, test-complement
         terminationFlag.assertRunning();
-        var testSplitResult = split(sourceNodes, targetNodes, graph, relationshipWeightProperty, splitConfig.testComplementRelationshipType(), splitConfig.testFraction());
+        var testSplitResult = split(
+            sourceNodes,
+            targetNodes,
+            graph,
+            relationshipWeightProperty,
+            splitConfig.testRelationshipType(),
+            splitConfig.testComplementRelationshipType(),
+            splitConfig.testFraction()
+        );
         // 2. Split test-complement into (labeled) train and feature-input.
         var testComplementGraph = graphStore.getGraph(
             trainConfig.nodeLabelIdentifiers(graphStore),
@@ -119,7 +127,15 @@ public class LinkPredictionRelationshipSampler {
         );
 
         terminationFlag.assertRunning();
-        var trainSplitResult = split(sourceNodes, targetNodes, testComplementGraph, relationshipWeightProperty, splitConfig.featureInputRelationshipType(), splitConfig.trainFraction());
+        var trainSplitResult = split(
+            sourceNodes,
+            targetNodes,
+            testComplementGraph,
+            relationshipWeightProperty,
+            splitConfig.trainRelationshipType(),
+            splitConfig.featureInputRelationshipType(),
+            splitConfig.trainFraction()
+        );
 
         // 3. add negative examples to test and train
         NegativeSampler negativeSampler = NegativeSampler.of(
@@ -150,7 +166,15 @@ public class LinkPredictionRelationshipSampler {
         progressTracker.endSubTask("Split relationships");
     }
 
-    private EdgeSplitter.SplitResult split(IdMap sourceNodes, IdMap targetNodes, Graph graph, Optional<String> relationshipWeightProperty, RelationshipType remainingRelType, double selectedFraction) {
+    private EdgeSplitter.SplitResult split(
+        IdMap sourceNodes,
+        IdMap targetNodes,
+        Graph graph,
+        Optional<String> relationshipWeightProperty,
+        RelationshipType selectedRelType,
+        RelationshipType remainingRelType,
+        double selectedFraction
+    ) {
         if (!graph.schema().isUndirected()) {
             throw new IllegalArgumentException("EdgeSplitter requires graph to be UNDIRECTED");
         }
@@ -158,6 +182,8 @@ public class LinkPredictionRelationshipSampler {
             trainConfig.randomSeed(),
             sourceNodes,
             targetNodes,
+            selectedRelType,
+            remainingRelType,
             ConcurrencyConfig.DEFAULT_CONCURRENCY
         );
 

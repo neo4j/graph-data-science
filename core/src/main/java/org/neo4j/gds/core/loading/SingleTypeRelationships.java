@@ -39,6 +39,7 @@ public interface SingleTypeRelationships {
 
     SingleTypeRelationships EMPTY = SingleTypeRelationships
             .builder()
+            .relationshipSchemaEntry(new RelationshipSchemaEntry(RelationshipType.of("REL"), Direction.DIRECTED))
             .direction(Direction.DIRECTED)
             .topology(Topology.EMPTY)
             .build();
