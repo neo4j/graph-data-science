@@ -127,7 +127,6 @@ public interface RelationshipImportResult {
                 importContext.relationshipType(),
                 relationshipType -> SingleTypeRelationships
                     .builder()
-                    .direction(direction)
                     .relationshipSchemaEntry(schemaEntry)
             );
 

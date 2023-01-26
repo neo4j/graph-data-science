@@ -181,7 +181,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var remainingRelationships = result.remainingRels().build();
         // 2 positive selected reduces remaining
         assertEquals(3L, remainingRelationships.topology().elementCount());
-        assertEquals(Direction.DIRECTED, remainingRelationships.direction());
+        assertEquals(Direction.DIRECTED, remainingRelationships.relationshipSchemaEntry().direction());
         assertFalse(remainingRelationships.topology().isMultiGraph());
         assertThat(remainingRelationships.properties()).isNotEmpty();
         assertRelInGraph(remainingRelationships, graph);

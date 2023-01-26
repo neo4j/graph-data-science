@@ -39,12 +39,8 @@ public interface SingleTypeRelationships {
     SingleTypeRelationships EMPTY = SingleTypeRelationships
             .builder()
             .relationshipSchemaEntry(new MutableRelationshipSchemaEntry(RelationshipType.of("REL"), Direction.DIRECTED))
-            .direction(Direction.DIRECTED)
             .topology(Topology.EMPTY)
             .build();
-
-    // TODO: figure out if we can remove this.
-    Direction direction();
 
     Topology topology();
 
@@ -75,7 +71,6 @@ public interface SingleTypeRelationships {
         return SingleTypeRelationships.builder()
             .topology(topology())
             .relationshipSchemaEntry(filteredEntry)
-            .direction(direction())
             .inverseTopology(inverseTopology())
             .properties(properties)
             .inverseProperties(inverseProperties)
@@ -108,7 +103,6 @@ public interface SingleTypeRelationships {
         propertySchema.ifPresent(schema -> schemaEntry.addProperty(schema.key(), schema));
 
         return SingleTypeRelationships.builder()
-            .direction(direction)
             .topology(topology)
             .relationshipSchemaEntry(schemaEntry)
             .properties(
