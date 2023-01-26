@@ -39,12 +39,8 @@ import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.factory.DbmsInfo;
 import org.neo4j.kernel.impl.query.Neo4jTransactionalContextFactory;
-import org.neo4j.kernel.impl.query.QueryExecution;
 import org.neo4j.kernel.impl.query.QueryExecutionEngine;
-import org.neo4j.kernel.impl.query.QueryExecutionKernelException;
-import org.neo4j.kernel.impl.query.QuerySubscriber;
 import org.neo4j.kernel.impl.query.TransactionalContextFactory;
-import org.neo4j.kernel.impl.util.ValueUtils;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
@@ -140,23 +136,6 @@ public final class GraphDatabaseApiProxy {
 
     public static Result runQueryWithoutClosingTheResult(Transaction tx, String query, Map<String, Object> params) {
         return tx.execute(query, params);
-    }
-
-    public static QueryExecution runQueryWithoutClosingTheResult(
-        InternalTransaction tx,
-        String query,
-        Map<String, Object> params,
-        TransactionalContextFactory contextFactory,
-        QueryExecutionEngine executionEngine,
-        QuerySubscriber subscriber
-    ) {
-        var convertedParams = ValueUtils.asMapValue(params);
-        var context = contextFactory.newContext(tx, query, convertedParams);
-        try {
-            return executionEngine.executeQuery(query, convertedParams, context, false, subscriber);
-        } catch (QueryExecutionKernelException e) {
-            throw e.asUserException();
-        }
     }
 
     public static Result runQueryWithoutClosingTheResult(
