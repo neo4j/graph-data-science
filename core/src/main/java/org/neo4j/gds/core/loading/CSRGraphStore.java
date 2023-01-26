@@ -366,24 +366,14 @@ public class CSRGraphStore implements GraphStore {
 
     @Override
     public ValueType relationshipPropertyType(String propertyKey) {
-        return relationships
-            .values()
-            .stream()
-            .flatMap(relationship -> relationship.properties().stream())
-            .filter(propertyStore -> propertyStore.containsKey(propertyKey))
-            .map(propertyStore -> propertyStore.get(propertyKey).valueType())
-            .findFirst()
+        return Optional.ofNullable(schema().relationshipSchema().unionProperties().get(propertyKey))
+            .map(PropertySchema::valueType)
             .orElse(ValueType.UNKNOWN);
     }
 
     @Override
     public Set<String> relationshipPropertyKeys() {
-        return relationships
-            .values()
-            .stream()
-            .flatMap(relationship -> relationship.properties().stream())
-            .flatMap(propertyStore -> propertyStore.keySet().stream())
-            .collect(Collectors.toSet());
+        return schema().relationshipSchema().allProperties();
     }
 
     @Override
