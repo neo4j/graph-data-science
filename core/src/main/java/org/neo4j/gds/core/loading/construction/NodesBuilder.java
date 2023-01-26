@@ -38,6 +38,7 @@ import org.neo4j.gds.core.loading.ImmutableNodes;
 import org.neo4j.gds.core.loading.LabelInformation;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
 import org.neo4j.gds.core.loading.NodeImporter;
+import org.neo4j.gds.core.loading.NodeImporterBuilder;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.NodesBatchBuffer;
 import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
@@ -104,12 +105,11 @@ public final class NodesBuilder {
             : LabelInformationBuilders.multiLabelWithCapacity(maxOriginalId + 1);
         this.propertyBuildersByPropertyKey = propertyBuildersByPropertyKey;
         this.importedNodes = new LongAdder();
-        this.nodeImporter = new NodeImporter(
-            idMapBuilder,
-            labelInformationBuilder,
-            tokenToNodeLabel.labelTokenNodeLabelMapping(),
-            hasProperties
-        );
+        this.nodeImporter = new NodeImporterBuilder()
+            .idMapBuilder(idMapBuilder)
+            .labelInformationBuilder(labelInformationBuilder)
+            .importProperties(hasProperties)
+            .build();
 
         Function<String, NodePropertiesFromStoreBuilder> propertyBuilderFn = propertyBuildersByPropertyKey.isEmpty()
             ? this::getOrCreatePropertyBuilder
