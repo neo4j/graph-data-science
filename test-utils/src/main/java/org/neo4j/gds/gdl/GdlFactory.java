@@ -31,7 +31,6 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
@@ -158,24 +157,6 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     @Override
     protected ProgressTracker initProgressTracker() {
         return ProgressTracker.NULL_TRACKER;
-    }
-
-    @Override
-    protected MutableGraphSchema computeGraphSchema(Nodes nodes, RelationshipImportResult relationshipImportResult) {
-        var relationshipSchema = relationshipImportResult.importResults().values().stream().reduce(
-            MutableRelationshipSchema.empty(),
-            (unionSchema, relationships) -> {
-                unionSchema.set(relationships.relationshipSchemaEntry());
-                return unionSchema;
-            },
-            MutableRelationshipSchema::union
-        );
-
-        return MutableGraphSchema.of(
-            nodes.schema(),
-            relationshipSchema,
-            Map.of()
-        );
     }
 
     @Override

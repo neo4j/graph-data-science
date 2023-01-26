@@ -47,6 +47,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class CSRGraphStoreUtil {
 
+    // TODO remove rel type?
     public static CSRGraphStore createFromGraph(
         DatabaseId databaseId,
         HugeGraph graph,
@@ -176,26 +177,6 @@ public final class CSRGraphStoreUtil {
         ).build());
 
     }
-
-    // TODO: remove this method
-    public static MutableGraphSchema computeGraphSchema(
-        Nodes nodes,
-        RelationshipImportResult relationshipImportResult
-    ) {
-        var nodeSchema = nodes.schema();
-        var relationshipSchema = MutableRelationshipSchema.empty();
-
-        relationshipImportResult
-            .importResults()
-            .forEach((__, relationships) -> relationshipSchema.set(relationships.relationshipSchemaEntry()));
-
-        return MutableGraphSchema.of(
-            nodeSchema,
-            relationshipSchema,
-            Map.of()
-        );
-    }
-
 
     private CSRGraphStoreUtil() {}
 }
