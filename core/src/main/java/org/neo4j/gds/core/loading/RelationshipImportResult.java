@@ -117,11 +117,9 @@ public interface RelationshipImportResult {
                 direction
             );
 
-            properties.ifPresent(props ->{
-                props.relationshipProperties().forEach((key, prop) -> {
-                    schemaEntry.addProperty(key, prop.valueType(), prop.propertyState());
-                });
-            });
+            properties.ifPresent(props -> props
+                .relationshipProperties()
+                .forEach((key, prop) -> schemaEntry.addProperty(key, prop.propertySchema())));
 
             var importResultBuilder = builders.computeIfAbsent(
                 importContext.relationshipType(),
