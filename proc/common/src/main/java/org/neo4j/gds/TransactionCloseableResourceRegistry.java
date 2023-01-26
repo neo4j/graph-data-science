@@ -19,33 +19,22 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.api.GdsTransactionApi;
-import org.neo4j.gds.config.BaseConfig;
-import org.neo4j.gds.executor.AlgorithmMetaData;
-import org.neo4j.graphdb.Node;
+import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.kernel.api.KernelTransaction;
 
-public class Neo4jTransactionWrapper implements GdsTransactionApi {
+public class TransactionCloseableResourceRegistry implements CloseableResourceRegistry {
 
     private final KernelTransaction kernelTransaction;
 
-    public Neo4jTransactionWrapper(KernelTransaction kernelTransaction) {
+    public TransactionCloseableResourceRegistry(KernelTransaction kernelTransaction) {
         this.kernelTransaction = kernelTransaction;
     }
 
     @Override
-    public <CONFIG extends BaseConfig> void setAlgorithmMetaData(CONFIG algoConfig) {
-        if (kernelTransaction == null) {
-            return;
+    public void register(AutoCloseable resource, Runnable action) {
+        try(var statement = kernelTransaction.acquireStatement()) {
+            statement.registerCloseableResource(resource);
+            action.run();
         }
-        var metaData = kernelTransaction.getMetaData();
-        if (metaData instanceof AlgorithmMetaData) {
-            ((AlgorithmMetaData) metaData).set(algoConfig);
-        }
-    }
-
-    @Override
-    public Node getNodeById(long id) {
-        return kernelTransaction.internalTransaction().getNodeById(id);
     }
 }

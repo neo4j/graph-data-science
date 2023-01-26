@@ -54,7 +54,7 @@ public final class ShortestPathStreamResultConsumer<ALGO extends Algorithm<Dijks
 
         // this is necessary in order to close the result stream which triggers
         // the progress tracker to close its root task
-        executionContext.transactionApi().registerCloseableResource(resultStream);
+        executionContext.closeableResourceRegistry().register(resultStream);
 
         return resultStream;
     }

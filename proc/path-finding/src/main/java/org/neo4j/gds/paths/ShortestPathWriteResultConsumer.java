@@ -93,7 +93,7 @@ public class ShortestPathWriteResultConsumer<ALGO extends Algorithm<DijkstraResu
 
             // this is necessary in order to close the relationship stream which triggers
             // the progress tracker to close its root task
-            executionContext.transactionApi().registerCloseableResource(relationshipStream, () -> {
+            executionContext.closeableResourceRegistry().register(relationshipStream, () -> {
                 var exporter = executionContext.relationshipStreamExporterBuilder()
                     .withIdMappingOperator(computationResult.graph()::toOriginalNodeId)
                     .withRelationships(relationshipStream)

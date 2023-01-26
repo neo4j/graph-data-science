@@ -169,6 +169,7 @@ public abstract class BaseProc {
             .taskRegistryFactory(taskRegistryFactory)
             .username(username())
             .terminationMonitor(new TransactionTerminationMonitor(transaction))
+            .closeableResourceRegistry(new TransactionCloseableResourceRegistry(transaction))
             .build();
     }
 

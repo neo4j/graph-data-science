@@ -22,6 +22,7 @@ package org.neo4j.gds.executor;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GdsTransactionApi;
 import org.neo4j.gds.api.TerminationMonitor;
@@ -63,6 +64,8 @@ public interface ExecutionContext {
     GdsTransactionApi transactionApi();
 
     TerminationMonitor terminationMonitor();
+
+    CloseableResourceRegistry closeableResourceRegistry();
 
     @Nullable
     ProcedureCallContext callContext();
@@ -157,6 +160,11 @@ public interface ExecutionContext {
         @Override
         public TerminationMonitor terminationMonitor() {
             return TerminationMonitor.EMPTY;
+        }
+
+        @Override
+        public CloseableResourceRegistry closeableResourceRegistry() {
+            return CloseableResourceRegistry.EMPTY;
         }
 
         @Override

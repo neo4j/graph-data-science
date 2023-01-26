@@ -19,25 +19,20 @@
  */
 package org.neo4j.gds.api;
 
-import org.neo4j.gds.config.BaseConfig;
-import org.neo4j.graphdb.Node;
+@FunctionalInterface
+public interface CloseableResourceRegistry {
+    void register(AutoCloseable resource, Runnable action);
 
-public interface GdsTransactionApi {
+    default void register(AutoCloseable resource) {
+        register(resource, () -> {});
+    }
 
-    <CONFIG extends BaseConfig> void setAlgorithmMetaData(CONFIG algoConfig);
-
-    Node getNodeById(long id);
-
-    GdsTransactionApi EMPTY = new GdsTransactionApi() {
-
-        @Override
-        public <CONFIG extends BaseConfig> void setAlgorithmMetaData(CONFIG algoConfig) {
-
+    CloseableResourceRegistry EMPTY = ((resource, action) -> {
+        action.run();
+        try {
+            resource.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
-        @Override
-        public Node getNodeById(long id) {
-            return null;
-        }
-    };
+    });
 }
