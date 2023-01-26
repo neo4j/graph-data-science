@@ -29,7 +29,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.huge.HugeGraph;
@@ -145,7 +145,7 @@ public final class RandomGraphGenerator {
 
         var relationships = relationshipsBuilder.build();
 
-        RelationshipSchema relationshipSchema = RelationshipSchema.empty();
+        var relationshipSchema = MutableRelationshipSchema.empty();
         relationshipSchema.set(relationships.relationshipSchemaEntry());
 
         var graphSchema = MutableGraphSchema.of(

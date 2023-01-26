@@ -24,7 +24,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.core.io.GraphStoreRelationshipVisitor;
@@ -161,11 +160,11 @@ class GraphStoreRelationshipVisitorTest {
 
         var nodes = ImmutableNodes.builder()
             .idMap(expectedGraph)
-            .schema(expectedGraph.schema().nodeSchema())
+            .schema(MutableNodeSchema.from(expectedGraph.schema().nodeSchema()))
             .build();
 
         return new GraphStoreBuilder()
-            .schema(expectedGraph.schema())
+            .schema(MutableGraphSchema.from(expectedGraph.schema()))
             .capabilities(ImmutableStaticCapabilities.of(true))
             .nodes(nodes)
             .relationshipImportResult(actualRelationships)

@@ -27,7 +27,6 @@ import org.neo4j.gds.api.Properties;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchemaEntry;
@@ -39,7 +38,7 @@ public interface SingleTypeRelationships {
 
     SingleTypeRelationships EMPTY = SingleTypeRelationships
             .builder()
-            .relationshipSchemaEntry(new RelationshipSchemaEntry(RelationshipType.of("REL"), Direction.DIRECTED))
+            .relationshipSchemaEntry(new MutableRelationshipSchemaEntry(RelationshipType.of("REL"), Direction.DIRECTED))
             .direction(Direction.DIRECTED)
             .topology(Topology.EMPTY)
             .build();
@@ -49,7 +48,7 @@ public interface SingleTypeRelationships {
 
     Topology topology();
 
-    RelationshipSchemaEntry relationshipSchemaEntry();
+    MutableRelationshipSchemaEntry relationshipSchemaEntry();
 
     Optional<RelationshipPropertyStore> properties();
 
@@ -70,7 +69,7 @@ public interface SingleTypeRelationships {
 
 
         RelationshipSchemaEntry entry = relationshipSchemaEntry();
-        var filteredEntry = new RelationshipSchemaEntry(entry.identifier(), entry.direction())
+        var filteredEntry = new MutableRelationshipSchemaEntry(entry.identifier(), entry.direction())
             .addProperty(propertyKey, entry.properties().get(propertyKey));
 
         return SingleTypeRelationships.builder()
@@ -105,7 +104,7 @@ public interface SingleTypeRelationships {
         Optional<Properties> properties,
         Optional<RelationshipPropertySchema> propertySchema
     ) {
-        var schemaEntry = new RelationshipSchemaEntry(relationshipType, direction);
+        var schemaEntry = new MutableRelationshipSchemaEntry(relationshipType, direction);
         propertySchema.ifPresent(schema -> schemaEntry.addProperty(schema.key(), schema));
 
         return SingleTypeRelationships.builder()

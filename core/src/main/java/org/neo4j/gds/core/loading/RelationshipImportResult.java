@@ -32,7 +32,7 @@ import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.ValueTypes;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.api.schema.RelationshipSchemaEntry;
+import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.Collection;
@@ -59,7 +59,7 @@ public interface RelationshipImportResult {
 
         topologies.forEach((relationshipType, topology) -> {
             Direction direction = directions.get(relationshipType);
-            var schemaEntry = new RelationshipSchemaEntry(relationshipType, direction);
+            var schemaEntry = new MutableRelationshipSchemaEntry(relationshipType, direction);
 
 
             relationshipImportResultBuilder.putImportResult(
@@ -112,7 +112,7 @@ public interface RelationshipImportResult {
                     adjacencyListsWithProperties.relationshipCount()
                 ));
 
-            RelationshipSchemaEntry schemaEntry = new RelationshipSchemaEntry(
+            var schemaEntry = new MutableRelationshipSchemaEntry(
                 importContext.relationshipType(),
                 direction
             );

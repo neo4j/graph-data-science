@@ -25,4 +25,11 @@ public interface RelationshipSchemaEntry extends ElementSchemaEntry<MutableRelat
     Direction direction();
 
     boolean isUndirected();
+
+    static RelationshipSchemaEntry empty(
+        RelationshipType relationshipType,
+        Direction direction
+    ) {
+        return new MutableRelationshipSchemaEntry(relationshipType, direction);
+    }
 }
