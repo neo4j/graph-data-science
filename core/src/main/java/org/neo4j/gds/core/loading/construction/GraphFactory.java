@@ -46,17 +46,14 @@ import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporterBuilder;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.IntStream;
 
-import static java.util.stream.Collectors.toMap;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
 
 @Value.Style(
@@ -115,9 +112,7 @@ public final class GraphFactory {
         )).orElseGet(() -> new NodesBuilder(
             maxOriginalId,
             threadCount,
-            TokenToNodeLabels::lazy,
-            NodeLabelTokenToPropertyKeys::lazy,
-            new ConcurrentHashMap<>(),
+            NodesBuilderContext.lazy(threadCount),
             idMapBuilder,
             labelInformation,
             hasProperties.orElse(false),
@@ -134,17 +129,10 @@ public final class GraphFactory {
         boolean hasLabelInformation,
         boolean deduplicateIds
     ) {
-        var propertyBuildersByPropertyKey = nodeSchema.unionProperties().entrySet().stream().collect(toMap(
-            Map.Entry::getKey,
-            e -> NodePropertiesFromStoreBuilder.of(e.getValue().defaultValue(), concurrency)
-        ));
-
         return new NodesBuilder(
             maxOriginalId,
             concurrency,
-            () -> TokenToNodeLabels.fixed(nodeSchema.availableLabels()),
-            () -> NodeLabelTokenToPropertyKeys.fixed(nodeSchema),
-            new ConcurrentHashMap<>(propertyBuildersByPropertyKey),
+            NodesBuilderContext.fixed(nodeSchema, concurrency),
             idMapBuilder,
             hasLabelInformation,
             nodeSchema.hasProperties(),
