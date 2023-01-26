@@ -148,7 +148,7 @@ public abstract class BaseProc {
             .log(log)
             .taskRegistryFactory(taskRegistryFactory)
             .userLogRegistryFactory(userLogRegistryFactory)
-            .terminationFlag(TerminationFlag.wrap(transaction))
+            .terminationFlag(TerminationFlag.wrap(new TransactionTerminationMonitor(transaction)))
             .build();
     }
 
@@ -168,6 +168,7 @@ public abstract class BaseProc {
             .userLogRegistryFactory(userLogRegistryFactory)
             .taskRegistryFactory(taskRegistryFactory)
             .username(username())
+            .terminationMonitor(new TransactionTerminationMonitor(transaction))
             .build();
     }
 

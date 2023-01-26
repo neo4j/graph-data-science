@@ -21,7 +21,6 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.api.GdsTransactionApi;
 import org.neo4j.gds.config.BaseConfig;
-import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.executor.AlgorithmMetaData;
 import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -51,11 +50,6 @@ public class Neo4jTransactionWrapper implements GdsTransactionApi {
         if (metaData instanceof AlgorithmMetaData) {
             ((AlgorithmMetaData) metaData).set(algoConfig);
         }
-    }
-
-    @Override
-    public TerminationFlag terminationFlag() {
-        return TerminationFlag.wrap(kernelTransaction);
     }
 
     @Override

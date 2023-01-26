@@ -41,7 +41,7 @@ public class TerminateProcedure {
         @Name(value = "config", defaultValue = "{}") Map<String, Object> config
     ) {
 
-        final TerminationFlag flag = TerminationFlag.wrap(transaction);
+        final TerminationFlag flag = TerminationFlag.wrap(new TransactionTerminationMonitor(transaction));
         while (flag.running()) {
             // simulate long running algorithm
             try {

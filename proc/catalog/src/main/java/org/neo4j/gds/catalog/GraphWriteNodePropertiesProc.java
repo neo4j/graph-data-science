@@ -163,7 +163,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
 
                 var exporter = nodePropertyExporterBuilder
                     .withIdMap(subGraph)
-                    .withTerminationFlag(TerminationFlag.wrap(transaction))
+                    .withTerminationFlag(TerminationFlag.wrap(executionContext().terminationMonitor()))
                     .parallel(Pools.DEFAULT, config.writeConcurrency())
                     .withProgressTracker(progressTracker)
                     .build();

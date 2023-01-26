@@ -25,6 +25,7 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
     implementation project(':neo4j-adapter')
+    implementation project(':neo4j-api')
     implementation project(':string-formatting')
     implementation project(':subgraph-filtering')
     implementation project(':graph-sampling')

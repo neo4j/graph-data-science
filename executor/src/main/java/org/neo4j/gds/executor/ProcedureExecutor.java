@@ -145,7 +145,7 @@ public class ProcedureExecutor<
         GraphStore graphStore,
         CONFIG config
     ) {
-        TerminationFlag terminationFlag = executionContext.transactionApi().terminationFlag();
+        TerminationFlag terminationFlag = TerminationFlag.wrap(executionContext.terminationMonitor());
         ALGO algorithm = algoSpec.algorithmFactory()
             .accept(new AlgorithmFactory.Visitor<>() {
                 @Override

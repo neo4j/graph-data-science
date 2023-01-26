@@ -20,7 +20,6 @@
 package org.neo4j.gds.api;
 
 import org.neo4j.gds.config.BaseConfig;
-import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.graphdb.Node;
 
 public interface GdsTransactionApi {
@@ -31,8 +30,6 @@ public interface GdsTransactionApi {
     }
 
     <CONFIG extends BaseConfig> void setAlgorithmMetaData(CONFIG algoConfig);
-
-    TerminationFlag terminationFlag();
 
     Node getNodeById(long id);
 
@@ -45,11 +42,6 @@ public interface GdsTransactionApi {
         @Override
         public <CONFIG extends BaseConfig> void setAlgorithmMetaData(CONFIG algoConfig) {
 
-        }
-
-        @Override
-        public TerminationFlag terminationFlag() {
-            return null;
         }
 
         @Override

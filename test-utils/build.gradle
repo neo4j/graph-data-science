@@ -24,6 +24,7 @@ dependencies {
     implementation project(':neo4j-api')
     implementation project(':open-model-catalog')
     implementation project(':open-write-services')
+    implementation project(':proc-common')
     implementation project(':string-formatting')
     implementation project(':transaction')
 

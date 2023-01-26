@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GdsTransactionApi;
+import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -61,6 +62,9 @@ public interface ExecutionContext {
 
     GdsTransactionApi transactionApi();
 
+    TerminationMonitor terminationMonitor();
+
+    @Nullable
     ProcedureCallContext callContext();
 
     @Nullable
@@ -148,6 +152,11 @@ public interface ExecutionContext {
         @Override
         public GdsTransactionApi transactionApi() {
             return GdsTransactionApi.EMPTY;
+        }
+
+        @Override
+        public TerminationMonitor terminationMonitor() {
+            return TerminationMonitor.EMPTY;
         }
 
         @Override

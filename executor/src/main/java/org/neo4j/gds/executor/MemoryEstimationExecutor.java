@@ -23,8 +23,10 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
@@ -85,7 +87,7 @@ public class MemoryEstimationExecutor<
                     .log(executionContext.log())
                     .taskRegistryFactory(executionContext.taskRegistryFactory())
                     .userLogRegistryFactory(executionContext.userLogRegistryFactory())
-                    .terminationFlag(executionContext.transactionApi().terminationFlag())
+                    .terminationFlag(TerminationFlag.wrap(TerminationMonitor.EMPTY))
                     .transactionContext(executionContext.transactionContext()).build();
 
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(executionContext.username());
