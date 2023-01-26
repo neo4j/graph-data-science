@@ -102,7 +102,6 @@ final class GraphInfoTest {
         var graphStore = CSRGraphStoreUtil.createFromGraph(
             DatabaseId.from("test"),
             graph,
-            "TY",
             Optional.empty(),
             1
         );

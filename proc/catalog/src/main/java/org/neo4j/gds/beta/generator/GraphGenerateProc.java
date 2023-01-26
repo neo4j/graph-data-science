@@ -98,7 +98,6 @@ public final class GraphGenerateProc extends BaseProc {
             GraphStore graphStore = CSRGraphStoreUtil.createFromGraph(
                 DatabaseId.of(databaseService),
                 graph,
-                config.relationshipType().name,
                 relationshipProperty,
                 config.readConcurrency()
             );
