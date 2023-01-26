@@ -56,7 +56,6 @@ class CSRGraphStoreUtilTest {
         var convertedGraphStore = CSRGraphStoreUtil.createFromGraph(
             DatabaseId.from("dummy"),
             (HugeGraph) graph,
-            "REL1",
             Optional.of("prop1"),
             1
         );
@@ -73,7 +72,6 @@ class CSRGraphStoreUtilTest {
             CSRGraphStoreUtil.createFromGraph(
                 DatabaseId.from("dummy"),
                 (HugeGraph) graph.innerGraph(),
-                "REL",
                 Optional.of("prop1"),
                 1
             );

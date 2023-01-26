@@ -24,20 +24,15 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.Properties;
-import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.ValueTypes;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.GraphPropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
-import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.api.schema.MutableGraphSchema;
-import org.neo4j.gds.api.schema.MutableNodeSchema;
-import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.huge.HugeGraph;
+import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.Map;
@@ -47,20 +42,12 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class CSRGraphStoreUtil {
 
-    // TODO remove rel type?
     public static CSRGraphStore createFromGraph(
         DatabaseId databaseId,
         HugeGraph graph,
-        String relationshipTypeString,
         Optional<String> relationshipPropertyKey,
         int concurrency
     ) {
-        var relationshipType = RelationshipType.of(relationshipTypeString);
-        Direction direction = graph.schema().isUndirected() ? Direction.UNDIRECTED : Direction.DIRECTED;
-
-        var relationshipSchema = MutableRelationshipSchema.empty();
-        var entry = relationshipSchema.getOrCreateRelationshipType(relationshipType, direction);
-
         relationshipPropertyKey.ifPresent(property -> {
 
             if (!graph.hasRelationshipProperty()) {
@@ -69,13 +56,18 @@ public final class CSRGraphStoreUtil {
                     property
                 ));
             }
-
-            entry.addProperty(
-                property,
-                ValueType.DOUBLE,
-                PropertyState.PERSISTENT
-            );
         });
+
+        var schema = graph.schema();
+        var relationshipSchema = schema.relationshipSchema();
+
+        if (relationshipSchema.availableTypes().size() != 1) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The supplied graph has more than one relationship type: %s",
+                StringJoining.join(relationshipSchema.availableTypes().stream().map(e -> e.name))
+            ));
+        }
+        var relationshipType = relationshipSchema.availableTypes().iterator().next();
 
         var nodeProperties = constructNodePropertiesFromGraph(graph);
 
@@ -89,13 +81,12 @@ public final class CSRGraphStoreUtil {
         var relationshipImportResult = RelationshipImportResult.builder().putImportResult(
             relationshipType,
             SingleTypeRelationships.builder()
-                .relationshipSchemaEntry(entry)
+                .relationshipSchemaEntry(relationshipSchema.get(relationshipType))
                 .topology(graph.relationshipTopology())
                 .properties(relationshipProperties)
                 .build()
         ).build();
 
-        var schema = MutableGraphSchema.of(MutableNodeSchema.from(graph.schema().nodeSchema()), relationshipSchema, Map.of());
 
         return new GraphStoreBuilder()
             .databaseId(databaseId)
