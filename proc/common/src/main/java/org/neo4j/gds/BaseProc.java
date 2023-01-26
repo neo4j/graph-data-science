@@ -163,7 +163,6 @@ public abstract class BaseProc {
             .modelCatalog(internalModelCatalog)
             .log(log)
             .transactionContext(TransactionContext.of(databaseService, procedureTransaction))
-            .transactionApi(new Neo4jTransactionWrapper(transaction))
             .callContext(procedureCallContextOrDefault(callContext))
             .userLogRegistryFactory(userLogRegistryFactory)
             .taskRegistryFactory(taskRegistryFactory)

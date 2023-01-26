@@ -25,7 +25,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.GdsTransactionApi;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -62,8 +61,6 @@ public interface ExecutionContext {
 
     @Nullable
     TransactionContext transactionContext();
-
-    GdsTransactionApi transactionApi();
 
     TerminationMonitor terminationMonitor();
 
@@ -156,11 +153,6 @@ public interface ExecutionContext {
         @Override
         public TransactionContext transactionContext() {
             return null;
-        }
-
-        @Override
-        public GdsTransactionApi transactionApi() {
-            return GdsTransactionApi.EMPTY;
         }
 
         @Override

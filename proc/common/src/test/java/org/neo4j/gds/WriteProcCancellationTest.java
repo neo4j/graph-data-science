@@ -110,7 +110,6 @@ class WriteProcCancellationTest extends BaseTest {
                 .username("")
                 .log(Neo4jProxy.testLog())
                 .callContext(ProcedureCallContext.EMPTY)
-                .transactionApi(GdsTransactionApi.EMPTY)
                 .build();
 
             assertThatThrownBy(() -> resultConsumer.consume(computationResult, executionContext))
