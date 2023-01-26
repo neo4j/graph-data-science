@@ -32,7 +32,7 @@ import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.schema.MutableGraphSchema;
+import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -421,7 +421,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
         Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model = Model.of(
             NodeClassificationTrainingPipeline.MODEL_TYPE,
-            MutableGraphSchema.empty(),
+            GraphSchema.empty(),
             modelData,
             NodeClassificationPipelineTrainConfigImpl.builder()
                 .modelUser(getUsername())

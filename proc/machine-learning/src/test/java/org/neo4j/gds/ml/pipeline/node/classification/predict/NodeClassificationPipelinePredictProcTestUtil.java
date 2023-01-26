@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.junit.jupiter.params.provider.Arguments;
-import org.neo4j.gds.api.schema.MutableGraphSchema;
+import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -100,7 +100,7 @@ final class NodeClassificationPipelinePredictProcTestUtil {
         var modelData = createClassifierData(weights.data(), bias.data());
         return Model.of(
             NodeClassificationTrainingPipeline.MODEL_TYPE,
-            MutableGraphSchema.empty(),
+            GraphSchema.empty(),
             modelData,
             NodeClassificationPipelineTrainConfigImpl.builder()
                 .modelUser(username)

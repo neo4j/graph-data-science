@@ -71,6 +71,14 @@ public interface GraphSchema {
         return relationshipSchema().isUndirected() ? Direction.UNDIRECTED : Direction.DIRECTED;
     }
 
+    static GraphSchema empty() {
+        return MutableGraphSchema.empty();
+    }
+
+    static MutableGraphSchema mutable() {
+        return MutableGraphSchema.empty();
+    }
+
     static <PS extends PropertySchema> String forPropertySchema(PS propertySchema) {
         if (propertySchema instanceof RelationshipPropertySchema) {
             return String.format(

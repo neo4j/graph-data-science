@@ -31,8 +31,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @ValueClass
-public
-interface MutableGraphSchema extends GraphSchema {
+public interface MutableGraphSchema extends GraphSchema {
     @Override
     MutableNodeSchema nodeSchema();
 

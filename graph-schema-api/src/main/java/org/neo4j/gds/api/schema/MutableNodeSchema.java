@@ -87,6 +87,7 @@ public final class MutableNodeSchema implements NodeSchema {
     public void set(MutableNodeSchemaEntry entry) {
         entries.put(entry.identifier(), entry);
     }
+
     public void remove(NodeLabel identifier) {
         entries.remove(identifier);
     }
