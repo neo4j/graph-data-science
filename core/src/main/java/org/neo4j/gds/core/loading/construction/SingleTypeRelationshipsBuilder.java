@@ -30,8 +30,8 @@ import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.ImmutableRelationshipPropertySchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
-import org.neo4j.gds.api.schema.RelationshipSchemaEntry;
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
@@ -152,8 +152,8 @@ abstract class SingleTypeRelationshipsBuilder {
         return singleTypeRelationshipImportResult();
     }
 
-    RelationshipSchemaEntry relationshipSchemaEntry(Optional<RelationshipPropertyStore> properties) {
-        RelationshipSchemaEntry entry = new RelationshipSchemaEntry(
+    MutableRelationshipSchemaEntry relationshipSchemaEntry(Optional<RelationshipPropertyStore> properties) {
+        var entry = new MutableRelationshipSchemaEntry(
             relationshipType,
             direction
         );

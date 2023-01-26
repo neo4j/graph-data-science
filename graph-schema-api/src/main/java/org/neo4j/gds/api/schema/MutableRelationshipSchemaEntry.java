@@ -37,7 +37,7 @@ public class MutableRelationshipSchemaEntry implements RelationshipSchemaEntry {
     private final Direction direction;
     private final Map<String, RelationshipPropertySchema> properties;
 
-    MutableRelationshipSchemaEntry(RelationshipType identifier, Direction direction) {
+    public MutableRelationshipSchemaEntry(RelationshipType identifier, Direction direction) {
         this(identifier, direction, new LinkedHashMap<>());
     }
 
@@ -51,7 +51,7 @@ public class MutableRelationshipSchemaEntry implements RelationshipSchemaEntry {
         this.properties = properties;
     }
 
-    static MutableRelationshipSchemaEntry from(RelationshipSchemaEntry fromEntry) {
+    public static MutableRelationshipSchemaEntry from(RelationshipSchemaEntry fromEntry) {
         return new MutableRelationshipSchemaEntry(
             fromEntry.identifier(),
             fromEntry.direction(),

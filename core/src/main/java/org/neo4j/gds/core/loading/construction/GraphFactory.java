@@ -36,8 +36,8 @@ import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -309,7 +309,7 @@ public final class GraphFactory {
             assert relationshipPropertyStore.values().size() == 1: "Cannot instantiate graph with more than one relationship property.";
         });
 
-        RelationshipSchema relationshipSchema = RelationshipSchema.empty();
+        var relationshipSchema = MutableRelationshipSchema.empty();
         relationshipSchema.set(relationships.relationshipSchemaEntry());
 
         return create(

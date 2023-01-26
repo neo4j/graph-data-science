@@ -28,9 +28,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
-import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
-import org.neo4j.gds.api.schema.ImmutableGraphSchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.compat.CompatUserAggregator;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.ConfigKeyValidation;
@@ -534,7 +531,7 @@ public class GraphAggregator implements CompatUserAggregator {
         ) {
             var relationshipImportResultBuilder = RelationshipImportResult.builder();
 
-            var relationshipSchema = RelationshipSchema.empty();
+            var relationshipSchema = MutableRelationshipSchema.empty();
             this.relImporters.forEach((relationshipType, relImporter) -> {
                 var relationships = relImporter.build(
                     Optional.of(valueMapper),

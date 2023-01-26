@@ -410,7 +410,7 @@ public class CSRGraphStore implements GraphStore {
     ) {
         updateGraphStore(graphStore -> {
             graphStore.relationships.computeIfAbsent(relationshipType, __ -> {
-                schema().relationshipSchema().set(relationships.relationshipSchemaEntry());
+                schema.relationshipSchema().set(relationships.relationshipSchemaEntry());
                 return relationships;
             });
         });
