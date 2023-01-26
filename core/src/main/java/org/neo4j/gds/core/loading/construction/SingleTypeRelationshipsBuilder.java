@@ -264,9 +264,7 @@ abstract class SingleTypeRelationshipsBuilder {
                 .elementCount(relationshipCount)
                 .build();
 
-            var singleRelationshipTypeImportResultBuilder = SingleTypeRelationships.builder()
-                .topology(topology)
-                .direction(this.direction);
+            var singleRelationshipTypeImportResultBuilder = SingleTypeRelationships.builder().topology(topology);
 
             RelationshipPropertyStore properties = null;
             if (loadRelationshipProperty) {
@@ -355,8 +353,7 @@ abstract class SingleTypeRelationshipsBuilder {
 
             var singleRelationshipTypeImportResultBuilder = SingleTypeRelationships.builder()
                 .topology(forwardTopology)
-                .inverseTopology(inverseTopology)
-                .direction(this.direction);
+                .inverseTopology(inverseTopology);
 
             RelationshipPropertyStore forwardProperties = null;
             if (loadRelationshipProperty) {

@@ -108,7 +108,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var remainingRelationships = result.remainingRels().build();
         // 1 positive selected reduces remaining
         assertEquals(8L, remainingRelationships.topology().elementCount());
-        assertEquals(Direction.UNDIRECTED, remainingRelationships.direction());
+        assertEquals(Direction.UNDIRECTED, remainingRelationships.relationshipSchemaEntry().direction());
         assertFalse(remainingRelationships.topology().isMultiGraph());
         assertThat(remainingRelationships.properties()).isNotEmpty();
 
@@ -116,7 +116,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertThat(selectedRelationships.topology()).satisfies(topology -> {
             assertRelSamplingProperties(selectedRelationships, graph);
             assertThat(topology.elementCount()).isEqualTo(1);
-            assertEquals(Direction.DIRECTED, selectedRelationships.direction());
+            assertEquals(Direction.DIRECTED, selectedRelationships.relationshipSchemaEntry().direction());
             assertFalse(topology.isMultiGraph());
         });
     }
@@ -310,7 +310,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var remainingRelationships = result.remainingRels().build();
         // 1 positive selected reduces remaining & 4 invalid relationships
         assertEquals(4L, remainingRelationships.topology().elementCount());
-        assertEquals(Direction.UNDIRECTED, remainingRelationships.direction());
+        assertEquals(Direction.UNDIRECTED, remainingRelationships.relationshipSchemaEntry().direction());
         assertFalse(remainingRelationships.topology().isMultiGraph());
         assertThat(remainingRelationships.properties()).isNotEmpty();
 
@@ -318,7 +318,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertThat(selectedRelationships.topology()).satisfies(topology -> {
             assertRelSamplingProperties(selectedRelationships, graph);
             assertThat(topology.elementCount()).isEqualTo(1);
-            assertEquals(Direction.DIRECTED, selectedRelationships.direction());
+            assertEquals(Direction.DIRECTED, selectedRelationships.relationshipSchemaEntry().direction());
             assertFalse(topology.isMultiGraph());
         });
 
@@ -345,7 +345,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var remainingRelationships = result.remainingRels().build();
         // 2 positive selected reduces remaining & 4 invalid relationships
         assertEquals(2L, remainingRelationships.topology().elementCount());
-        assertEquals(Direction.UNDIRECTED, remainingRelationships.direction());
+        assertEquals(Direction.UNDIRECTED, remainingRelationships.relationshipSchemaEntry().direction());
         assertFalse(remainingRelationships.topology().isMultiGraph());
         assertThat(remainingRelationships.properties()).isNotEmpty();
         assertRelInGraph(remainingRelationships, multiLabelGraph);
@@ -354,7 +354,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertThat(selectedRelationships.topology()).satisfies(topology -> {
             assertRelSamplingProperties(selectedRelationships, multiLabelGraph);
             assertThat(topology.elementCount()).isEqualTo(2);
-            assertEquals(Direction.DIRECTED, selectedRelationships.direction());
+            assertEquals(Direction.DIRECTED, selectedRelationships.relationshipSchemaEntry().direction());
             assertFalse(topology.isMultiGraph());
         });
 
@@ -429,7 +429,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             return false;
         }
 
-        if (r1.direction() != r2.direction()) {
+        if (r1.relationshipSchemaEntry().direction() != r2.relationshipSchemaEntry().direction()) {
             return false;
         }
 
