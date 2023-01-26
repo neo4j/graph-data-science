@@ -25,7 +25,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.schema.MutableGraphSchema;
+import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphListProc;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.model.Model;
@@ -103,7 +103,7 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
 
         modelCatalog.set(Model.of(
             MODEL_TYPE,
-            MutableGraphSchema.empty(),
+            GraphSchema.empty(),
             modelData,
             LinkPredictionTrainConfigImpl.builder()
                 .modelUser(getUsername())

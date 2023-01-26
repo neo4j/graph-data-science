@@ -23,7 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.schema.MutableGraphSchema;
+import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.huge.DirectIdMap;
@@ -53,7 +53,7 @@ class WriteConfigTest {
         var testGraphStore = new GraphStoreBuilder()
             .databaseId(DatabaseId.from("neo4j"))
             .capabilities(ImmutableStaticCapabilities.of(isBackedByDatabase))
-            .schema(MutableGraphSchema.empty())
+            .schema(GraphSchema.mutable())
             .nodes(nodes)
             .relationshipImportResult(RelationshipImportResult.of(Map.of()))
             .concurrency(1)

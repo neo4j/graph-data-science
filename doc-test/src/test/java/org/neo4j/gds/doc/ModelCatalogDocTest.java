@@ -21,7 +21,7 @@ package org.neo4j.gds.doc;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.neo4j.gds.api.schema.MutableGraphSchema;
+import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
@@ -43,7 +43,7 @@ abstract class ModelCatalogDocTest extends SingleFileDocTestBase {
     void loadModel() {
         modelCatalog.set(Model.of(
             GraphSage.MODEL_TYPE,
-            MutableGraphSchema.empty(),
+            GraphSchema.empty(),
             ModelData.of(new Layer[0], new SingleLabelFeatureFunction()),
             ImmutableGraphSageTrainConfig
                 .builder()
