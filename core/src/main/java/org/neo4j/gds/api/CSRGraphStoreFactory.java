@@ -20,6 +20,7 @@
 package org.neo4j.gds.api;
 
 import org.neo4j.gds.api.schema.MutableGraphSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.CSRGraphStore;
@@ -28,6 +29,8 @@ import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.mem.MemoryUsage;
+
+import java.util.Map;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -61,8 +64,21 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
         }
     }
 
-    protected abstract MutableGraphSchema computeGraphSchema(
+    protected MutableGraphSchema computeGraphSchema(
         Nodes nodes,
         RelationshipImportResult relationshipImportResult
-    );
+    ) {
+        var nodeSchema = nodes.schema();
+        var relationshipSchema = MutableRelationshipSchema.empty();
+
+        relationshipImportResult
+            .importResults()
+            .forEach((__, relationships) -> relationshipSchema.set(relationships.relationshipSchemaEntry()));
+
+        return MutableGraphSchema.of(
+            nodeSchema,
+            relationshipSchema,
+            Map.of()
+        );
+    }
 }
