@@ -543,8 +543,8 @@ class LouvainTest {
             ImmutableLouvainStreamConfig.builder().build(),
             false,
             10,
-            10
-            , TOLERANCE_DEFAULT,
+            10,
+            TOLERANCE_DEFAULT,
             4,
             ProgressTracker.NULL_TRACKER,
             Pools.DEFAULT
