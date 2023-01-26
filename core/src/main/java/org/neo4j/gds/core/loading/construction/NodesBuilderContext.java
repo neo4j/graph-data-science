@@ -117,12 +117,10 @@ final class NodesBuilderContext {
     static class ThreadLocalContext {
 
         private static final long NOT_INITIALIZED = -42L;
+
         private final long[] anyLabelArray = {NOT_INITIALIZED};
-
         private final TokenToNodeLabels tokenToNodeLabels;
-
         private final NodeLabelTokenToPropertyKeys nodeLabelTokenToPropertyKeys;
-
         private final Function<String, NodePropertiesFromStoreBuilder> propertyBuilderFn;
 
         ThreadLocalContext(
