@@ -19,21 +19,14 @@
  */
 package org.neo4j.gds.api;
 
-import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.graphdb.Node;
 
 public interface GdsTransactionApi {
 
-    <CONFIG extends BaseConfig> void setAlgorithmMetaData(CONFIG algoConfig);
 
     Node getNodeById(long id);
 
     GdsTransactionApi EMPTY = new GdsTransactionApi() {
-
-        @Override
-        public <CONFIG extends BaseConfig> void setAlgorithmMetaData(CONFIG algoConfig) {
-
-        }
 
         @Override
         public Node getNodeById(long id) {

@@ -19,20 +19,27 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.api.GdsTransactionApi;
-import org.neo4j.graphdb.Node;
+import org.neo4j.gds.api.AlgorithmMetaDataSetter;
+import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.executor.AlgorithmMetaData;
 import org.neo4j.kernel.api.KernelTransaction;
 
-public class Neo4jTransactionWrapper implements GdsTransactionApi {
+public class TransactionAlgorithmMetaDataSetter implements AlgorithmMetaDataSetter {
 
     private final KernelTransaction kernelTransaction;
 
-    public Neo4jTransactionWrapper(KernelTransaction kernelTransaction) {
+    public TransactionAlgorithmMetaDataSetter(KernelTransaction kernelTransaction) {
         this.kernelTransaction = kernelTransaction;
     }
 
     @Override
-    public Node getNodeById(long id) {
-        return kernelTransaction.internalTransaction().getNodeById(id);
+    public <CONFIG extends BaseConfig> void set(CONFIG algoConfig) {
+        if (kernelTransaction == null) {
+            return;
+        }
+        var metaData = kernelTransaction.getMetaData();
+        if (metaData instanceof AlgorithmMetaData) {
+            ((AlgorithmMetaData) metaData).set(algoConfig);
+        }
     }
 }

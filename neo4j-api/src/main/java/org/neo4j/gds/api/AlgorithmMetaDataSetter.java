@@ -17,22 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.api;
 
-import org.neo4j.gds.api.GdsTransactionApi;
-import org.neo4j.graphdb.Node;
-import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.gds.config.BaseConfig;
 
-public class Neo4jTransactionWrapper implements GdsTransactionApi {
+@FunctionalInterface
+public interface AlgorithmMetaDataSetter {
+    <CONFIG extends BaseConfig> void set(CONFIG algoConfig);
 
-    private final KernelTransaction kernelTransaction;
+    AlgorithmMetaDataSetter EMPTY = new AlgorithmMetaDataSetter() {
+        @Override
+        public <CONFIG extends BaseConfig> void set(CONFIG algoConfig) {
 
-    public Neo4jTransactionWrapper(KernelTransaction kernelTransaction) {
-        this.kernelTransaction = kernelTransaction;
-    }
-
-    @Override
-    public Node getNodeById(long id) {
-        return kernelTransaction.internalTransaction().getNodeById(id);
-    }
+        }
+    };
 }

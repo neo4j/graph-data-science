@@ -22,6 +22,7 @@ package org.neo4j.gds.executor;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GdsTransactionApi;
@@ -66,6 +67,8 @@ public interface ExecutionContext {
     TerminationMonitor terminationMonitor();
 
     CloseableResourceRegistry closeableResourceRegistry();
+
+    AlgorithmMetaDataSetter algorithmMetaDataSetter();
 
     @Nullable
     ProcedureCallContext callContext();
@@ -155,6 +158,11 @@ public interface ExecutionContext {
         @Override
         public GdsTransactionApi transactionApi() {
             return GdsTransactionApi.EMPTY;
+        }
+
+        @Override
+        public AlgorithmMetaDataSetter algorithmMetaDataSetter() {
+            return AlgorithmMetaDataSetter.EMPTY;
         }
 
         @Override

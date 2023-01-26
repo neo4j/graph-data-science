@@ -71,7 +71,7 @@ public class ProcedureExecutor<
 
         CONFIG config = executorSpec.configParser(algoSpec.newConfigFunction(), executionContext).processInput(configuration);
 
-        executionContext.transactionApi().setAlgorithmMetaData(config);
+        executionContext.algorithmMetaDataSetter().set(config);
 
         var graphCreation = executorSpec.graphCreationFactory(executionContext).create(config, graphName);
 
