@@ -685,7 +685,7 @@ YIELD
 [opts="header"]
 |===
 | inputRelationships      | relationshipsWritten
-| 19                       | 18
+| 9                       | 18
 |===
 --
 

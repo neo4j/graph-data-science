@@ -65,7 +65,9 @@ public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeR
         ComputationResult<ToUndirected, SingleTypeRelationships, ToUndirectedConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        return new MutateResult.Builder().withInputRelationships(computeResult.graph().relationshipCount());
+        return new MutateResult.Builder().withInputRelationships(computeResult
+            .graphStore()
+            .relationshipCount(RelationshipType.of(computeResult.config().relationshipType())));
     }
 
     @Override
