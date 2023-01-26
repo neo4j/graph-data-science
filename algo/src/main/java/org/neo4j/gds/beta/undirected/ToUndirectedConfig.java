@@ -96,6 +96,7 @@ public interface ToUndirectedConfig extends AlgoBaseConfig, MutateRelationshipCo
 
         if (selectedStar && !projectedStar) {
             throw new IllegalArgumentException(String.format(
+                Locale.US,
                 "The 'relationshipType' parameter can only be '*' if '*' was projected. Available types are %s.",
                 StringJoining.join(availableTypes.stream().map(RelationshipType::name))
             ));

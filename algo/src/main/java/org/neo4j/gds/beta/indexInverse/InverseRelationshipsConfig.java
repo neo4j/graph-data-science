@@ -131,6 +131,7 @@ public interface InverseRelationshipsConfig extends AlgoBaseConfig {
 
         if (selectedStar && projectedStar && notOnlyStar) {
             throw new IllegalArgumentException(String.format(
+                Locale.US,
                 "The 'relationshipTypes' parameter is ambiguous. It is not clear whether all relationships types or only the star projection should be used. " +
                 "Please explicitly enumerate the requested types. Available types are %s.",
                 StringJoining.join(availableTypes.stream().map(RelationshipType::name))
