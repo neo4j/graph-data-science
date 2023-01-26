@@ -77,10 +77,7 @@ public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeR
                 ComputationResult<ToUndirected, SingleTypeRelationships, ToUndirectedConfig> computationResult,
                 ExecutionContext executionContext
             ) {
-                computationResult.graphStore().addRelationshipType(
-                    RelationshipType.of(computationResult.config().mutateRelationshipType()),
-                    computationResult.result()
-                );
+                computationResult.graphStore().addRelationshipType(computationResult.result());
                 resultBuilder.withRelationshipsWritten(computationResult.result().topology().elementCount());
             }
         };

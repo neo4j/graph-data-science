@@ -136,10 +136,7 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
 
                 computationResult
                     .graphStore()
-                    .addRelationshipType(
-                        relationshipType,
-                        resultRelationships
-                    );
+                    .addRelationshipType(resultRelationships);
             }
             return Stream.of(resultBuilder.build());
         });

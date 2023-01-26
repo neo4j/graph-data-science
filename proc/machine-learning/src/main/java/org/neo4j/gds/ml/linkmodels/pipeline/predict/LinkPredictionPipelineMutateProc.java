@@ -142,7 +142,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
 
                 computationResult
                     .graphStore()
-                    .addRelationshipType(mutateRelationshipType, relationships);
+                    .addRelationshipType(relationships);
                 resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
             }
         };

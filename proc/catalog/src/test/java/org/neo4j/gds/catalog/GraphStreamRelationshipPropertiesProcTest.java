@@ -203,19 +203,18 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
     @Test
     void streamMutatedRelationshipProperties() {
-        var relType = RelationshipType.of("NEW_REL");
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), TEST_GRAPH_SAME_PROPERTIES).graphStore();
 
         RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
-            .relationshipType(relType)
+            .relationshipType(RelationshipType.of("NEW_REL"))
             .orientation(Orientation.NATURAL)
             .addPropertyConfig(GraphFactory.PropertyConfig.of("newRelProp3"))
             .build();
 
         relImporter.addFromInternal(0, 1, 23D);
 
-        graphStore.addRelationshipType(relType, relImporter.build());
+        graphStore.addRelationshipType(relImporter.build());
 
         String graphStreamQuery = formatWithLocale(
             "CALL gds.graph.relationshipProperties.stream(" +
@@ -285,20 +284,19 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
     @Test
     void streamMutatedNodeProperty() {
-        var relType = RelationshipType.of("NEW_REL");
 
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), TEST_GRAPH_SAME_PROPERTIES).graphStore();
 
         RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
-            .relationshipType(relType)
+            .relationshipType(RelationshipType.of("NEW_REL"))
             .orientation(Orientation.NATURAL)
             .addPropertyConfig(GraphFactory.PropertyConfig.of("newRelProp3"))
             .build();
 
         relImporter.addFromInternal(0, 1, 23D);
 
-        graphStore.addRelationshipType(relType, relImporter.build());
+        graphStore.addRelationshipType(relImporter.build());
 
         String graphStreamQuery = formatWithLocale(
             "CALL gds.graph.relationshipProperty.stream(" +

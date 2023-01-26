@@ -125,7 +125,6 @@ public class FilteredKnnMutateProc extends AlgoBaseProc<FilteredKnn, FilteredKnn
                 computationResult
                     .graphStore()
                     .addRelationshipType(
-                        relationshipType,
                         SingleTypeRelationships.of(
                             relationshipType,
                             similarityGraph.relationshipTopology(),

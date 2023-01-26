@@ -173,7 +173,6 @@ class GraphStoreTest extends BaseTest {
         Thread.sleep(42);
         RelationshipType bar = RelationshipType.of("BAR");
         graphStore.addRelationshipType(
-            bar,
             SingleTypeRelationships.of(
                 bar,
                 ImmutableTopology.of(CompressedAdjacencyList.EMPTY, 0, false),

@@ -86,7 +86,7 @@ class InverseRelationshipsTest {
 
         // we need to use the same name for assertGraphEquals to work
         graphStore.deleteRelationships(relationshipType);
-        graphStore.addRelationshipType(relationshipType, inverseRelationshipsPerType.get(relationshipType));
+        graphStore.addRelationshipType(inverseRelationshipsPerType.get(relationshipType));
 
         for (String relationshipPropertyKey : inverseGraphStore.relationshipPropertyKeys()) {
             assertGraphEquals(
@@ -118,7 +118,7 @@ class InverseRelationshipsTest {
         internalTypes.forEach(internalType -> {
             // we need to use the same name for assertGraphEquals to work
             graphStore.deleteRelationships(internalType);
-            graphStore.addRelationshipType(internalType, inverseRelationshipsPerType.get(internalType));
+            graphStore.addRelationshipType(inverseRelationshipsPerType.get(internalType));
         });
 
         for (String relationshipPropertyKey : inverseGraphStore.relationshipPropertyKeys()) {

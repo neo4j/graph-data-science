@@ -230,11 +230,8 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     }
 
     @Override
-    public void addRelationshipType(
-        RelationshipType relationshipType,
-        SingleTypeRelationships relationships
-    ) {
-        graphStore.addRelationshipType(relationshipType, relationships);
+    public void addRelationshipType(SingleTypeRelationships relationships) {
+        graphStore.addRelationshipType(relationships);
     }
 
     @Override

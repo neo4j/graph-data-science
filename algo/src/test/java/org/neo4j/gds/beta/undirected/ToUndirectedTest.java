@@ -82,7 +82,7 @@ class ToUndirectedTest {
             Pools.DEFAULT
         ).compute();
 
-        directedGraphStore.addRelationshipType(RelationshipType.of(config.mutateRelationshipType()), undirectedRelationships);
+        directedGraphStore.addRelationshipType(undirectedRelationships);
 
         for (String relationshipPropertyKey : undirectedGraphStore.relationshipPropertyKeys()) {
             assertGraphEquals(
@@ -129,7 +129,7 @@ class ToUndirectedTest {
             Pools.DEFAULT
         ).compute();
 
-        singleDirectedGraphStore.addRelationshipType(RelationshipType.of(config.mutateRelationshipType()), undirectedRelationships);
+        singleDirectedGraphStore.addRelationshipType(undirectedRelationships);
 
         assertGraphEquals(
             singleUndirectedGraphStore.getGraph(RelationshipType.of("T2"), Optional.of("prop1")),
@@ -174,7 +174,7 @@ class ToUndirectedTest {
             Pools.DEFAULT
         ).compute();
 
-        noPropertyDirectedGraphStore.addRelationshipType(RelationshipType.of(config.mutateRelationshipType()), undirectedRelationships);
+        noPropertyDirectedGraphStore.addRelationshipType(undirectedRelationships);
 
         assertGraphEquals(
             noPropertyUndirectedGraphStore.getGraph(RelationshipType.of("T2")),

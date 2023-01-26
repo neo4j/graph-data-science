@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.cypher;
 
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.GraphStoreAdapter;
 import org.neo4j.gds.api.IdMap;
@@ -102,18 +101,17 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
 
 
     @Override
-    public void addRelationshipType(
-        RelationshipType relationshipType,
-        SingleTypeRelationships relationships
-    ) {
-        innerGraphStore().addRelationshipType(relationshipType, relationships);
+    public void addRelationshipType(SingleTypeRelationships relationships) {
+        innerGraphStore().addRelationshipType(relationships);
         relationships.properties().ifPresent(
             properties -> properties
                 .keySet()
                 .forEach(propertyKey -> stateVisitors.forEach(stateVisitor -> stateVisitor.relationshipPropertyAdded(
                     propertyKey)))
         );
-        stateVisitors.forEach(stateVisitor -> stateVisitor.relationshipTypeAdded(relationshipType.name()));
+
+        var relType = relationships.relationshipSchemaEntry().identifier();
+        stateVisitors.forEach(stateVisitor -> stateVisitor.relationshipTypeAdded(relType.name));
     }
 
     public RelationshipIds relationshipIds() {
