@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.loading.construction;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyState;
@@ -351,6 +350,11 @@ public final class NodesBuilder {
             reset();
         }
 
+        private void reset() {
+            buffer.reset();
+            batchNodeProperties.clear();
+        }
+
         private void flushBuffer() {
             var importedNodesAndProperties = this.nodeImporter.importNodes(
                 this.buffer,
@@ -361,36 +365,23 @@ public final class NodesBuilder {
             this.importedNodes.add(importedNodes);
         }
 
-        private void reset() {
-            buffer.reset();
-            batchNodeProperties.clear();
+        private int importProperties(long nodeReference, long[] labelIds, PropertyReference propertiesReference) {
+            if (!propertiesReference.isEmpty()) {
+                var propertyValueIndex = (int) ((LongPropertyReference) propertiesReference).id;
+                var properties = this.batchNodeProperties.get(propertyValueIndex);
+
+                properties.forEach((propertyKey, propertyValue) -> {
+                    var nodePropertyBuilder = this.threadLocalContext.nodePropertyBuilder(propertyKey);
+                    assert nodePropertyBuilder != null : "observed property key that is not present in schema";
+                    nodePropertyBuilder.set(nodeReference, propertyValue);
+
+                });
+                return properties.size();
+            }
+            return 0;
         }
 
         @Override
         public void close() {}
-
-        private int importProperties(long nodeReference, long[] labelIds, PropertyReference propertiesReference) {
-            if (!propertiesReference.isEmpty()) {
-                var propertyValueIndex = (int) ((LongPropertyReference) propertiesReference).id;
-                var properties = batchNodeProperties.get(propertyValueIndex);
-                var importedProperties = new MutableInt(0);
-                properties.forEach((propertyKey, propertyValue) -> importedProperties.add(importProperty(
-                    nodeReference,
-                    propertyKey,
-                    propertyValue
-                )));
-                return importedProperties.intValue();
-            }
-            return 0;
-        }
-
-        private int importProperty(long neoNodeId, String propertyKey, Value value) {
-            var nodePropertyBuilder = this.threadLocalContext.nodePropertyBuilder(propertyKey);
-            if (nodePropertyBuilder != null) {
-                nodePropertyBuilder.set(neoNodeId, value);
-                return 1;
-            }
-            return 0;
-        }
     }
 }
