@@ -187,7 +187,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
-include::partial$/algorithms/triangle-count/specific-configuration.adoc[]
+include::partial$/algorithms/triangle-count/specific-configuration-write.adoc[]
 |===
 
 .Results
