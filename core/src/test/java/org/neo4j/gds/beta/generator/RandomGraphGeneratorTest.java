@@ -31,8 +31,8 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
@@ -470,8 +470,8 @@ class RandomGraphGeneratorTest {
     void shouldProduceCorrectSchema(
         String name,
         RandomGraphGenerator generator,
-        NodeSchema expectedNodeSchema,
-        RelationshipSchema expectedRelationshipSchema
+        MutableNodeSchema expectedNodeSchema,
+        MutableRelationshipSchema expectedRelationshipSchema
     ) {
         var graph = generator.generate();
 
@@ -523,8 +523,8 @@ class RandomGraphGeneratorTest {
                 .averageDegree(1)
                 .relationshipDistribution(RelationshipDistribution.RANDOM)
                 .build(),
-            NodeSchema.empty().addLabel(NodeLabel.ALL_NODES),
-            RelationshipSchema.empty().addRelationshipType(RelationshipType.of("REL"), Direction.DIRECTED)
+            MutableNodeSchema.empty().addLabel(NodeLabel.ALL_NODES),
+            MutableRelationshipSchema.empty().addRelationshipType(RelationshipType.of("REL"), Direction.DIRECTED)
         ), Arguments.of("node label",
             RandomGraphGenerator
                 .builder()
@@ -533,8 +533,8 @@ class RandomGraphGeneratorTest {
                 .nodeLabelProducer(nodeId -> NodeLabelTokens.ofNodeLabels(NodeLabel.of("A")))
                 .relationshipDistribution(RelationshipDistribution.RANDOM)
                 .build(),
-            NodeSchema.empty().addLabel(NodeLabel.of("A")),
-            RelationshipSchema.empty().addRelationshipType(RelationshipType.of("REL"), Direction.DIRECTED)
+            MutableNodeSchema.empty().addLabel(NodeLabel.of("A")),
+            MutableRelationshipSchema.empty().addRelationshipType(RelationshipType.of("REL"), Direction.DIRECTED)
         ), Arguments.of("relationship type",
             RandomGraphGenerator
                 .builder()
@@ -543,8 +543,8 @@ class RandomGraphGeneratorTest {
                 .relationshipType(RelationshipType.of("FOOBAR"))
                 .relationshipDistribution(RelationshipDistribution.RANDOM)
                 .build(),
-            NodeSchema.empty().addLabel(NodeLabel.ALL_NODES),
-            RelationshipSchema.empty().addRelationshipType(RelationshipType.of("FOOBAR"), Direction.DIRECTED)
+            MutableNodeSchema.empty().addLabel(NodeLabel.ALL_NODES),
+            MutableRelationshipSchema.empty().addRelationshipType(RelationshipType.of("FOOBAR"), Direction.DIRECTED)
         ), Arguments.of("node label and relationship type",
             RandomGraphGenerator
                 .builder()
@@ -554,8 +554,8 @@ class RandomGraphGeneratorTest {
                 .relationshipType(RelationshipType.of("FOOBAR"))
                 .relationshipDistribution(RelationshipDistribution.RANDOM)
                 .build(),
-            NodeSchema.empty().addLabel(NodeLabel.of("A")),
-            RelationshipSchema.empty().addRelationshipType(RelationshipType.of("FOOBAR"), Direction.DIRECTED)
+            MutableNodeSchema.empty().addLabel(NodeLabel.of("A")),
+            MutableRelationshipSchema.empty().addRelationshipType(RelationshipType.of("FOOBAR"), Direction.DIRECTED)
         ), Arguments.of("node label and node property",
             RandomGraphGenerator
                 .builder()
@@ -565,8 +565,8 @@ class RandomGraphGeneratorTest {
                 .nodePropertyProducer(PropertyProducer.randomLong("nodeProp", 0, 42))
                 .relationshipDistribution(RelationshipDistribution.RANDOM)
                 .build(),
-            NodeSchema.empty().addLabel(NodeLabel.of("A")).addProperty(NodeLabel.of("A"), "nodeProp", ValueType.LONG),
-            RelationshipSchema.empty().addRelationshipType(RelationshipType.of("REL"), Direction.DIRECTED)
+            MutableNodeSchema.empty().addLabel(NodeLabel.of("A")).addProperty(NodeLabel.of("A"), "nodeProp", ValueType.LONG),
+            MutableRelationshipSchema.empty().addRelationshipType(RelationshipType.of("REL"), Direction.DIRECTED)
         ), Arguments.of("relationship type and node property",
             RandomGraphGenerator
                 .builder()
@@ -576,8 +576,8 @@ class RandomGraphGeneratorTest {
                 .relationshipPropertyProducer(PropertyProducer.randomDouble("relProperty", 0, 42))
                 .relationshipDistribution(RelationshipDistribution.RANDOM)
                 .build(),
-            NodeSchema.empty().addLabel(NodeLabel.ALL_NODES),
-            RelationshipSchema.empty().addProperty(RelationshipType.of("FOOBAR"),
+            MutableNodeSchema.empty().addLabel(NodeLabel.ALL_NODES),
+            MutableRelationshipSchema.empty().addProperty(RelationshipType.of("FOOBAR"),
                 Direction.DIRECTED,
                 "relProperty",
                 ValueType.DOUBLE,
@@ -594,8 +594,8 @@ class RandomGraphGeneratorTest {
                 .relationshipPropertyProducer(PropertyProducer.randomDouble("relProp", 0, 42))
                 .relationshipDistribution(RelationshipDistribution.RANDOM)
                 .build(),
-            NodeSchema.empty().addLabel(NodeLabel.of("A")).addProperty(NodeLabel.of("A"), "nodeProp", ValueType.LONG),
-            RelationshipSchema.empty().addProperty(RelationshipType.of("FOOBAR"),
+            MutableNodeSchema.empty().addLabel(NodeLabel.of("A")).addProperty(NodeLabel.of("A"), "nodeProp", ValueType.LONG),
+            MutableRelationshipSchema.empty().addProperty(RelationshipType.of("FOOBAR"),
                 Direction.DIRECTED,
                 "relProp",
                 ValueType.DOUBLE,
@@ -612,8 +612,8 @@ class RandomGraphGeneratorTest {
                 .relationshipDistribution(RelationshipDistribution.RANDOM)
                 .direction(UNDIRECTED)
                 .build(),
-            NodeSchema.empty().addLabel(NodeLabel.of("A")),
-            RelationshipSchema
+            MutableNodeSchema.empty().addLabel(NodeLabel.of("A")),
+            MutableRelationshipSchema
                 .empty()
                 .addProperty(
                     RelationshipType.of("FOOBAR"),

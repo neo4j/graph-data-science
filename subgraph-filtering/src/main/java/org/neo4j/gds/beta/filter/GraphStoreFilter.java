@@ -27,7 +27,9 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.beta.filter.expression.ExpressionParser;
 import org.neo4j.gds.beta.filter.expression.SemanticErrors;
@@ -173,20 +175,22 @@ public final class GraphStoreFilter {
         return filter.equals(ElementProjection.PROJECT_ALL) ? "true" : filter;
     }
 
-    public static GraphSchema filterSchema(GraphSchema inputGraphSchema, NodesFilter.FilteredNodes filteredNodes, Set<RelationshipType> filteredRelationshipTypes) {
-        var nodeSchema = inputGraphSchema.nodeSchema().filter(filteredNodes.idMap().availableNodeLabels());
+    public static MutableGraphSchema filterSchema(GraphSchema inputGraphSchema, NodesFilter.FilteredNodes filteredNodes, Set<RelationshipType> filteredRelationshipTypes) {
+        var nodeSchema = MutableNodeSchema.from(inputGraphSchema.nodeSchema().filter(filteredNodes.idMap().availableNodeLabels()));
         if (nodeSchema.availableLabels().isEmpty()) {
             nodeSchema.addLabel(NodeLabel.ALL_NODES);
         }
 
-        RelationshipSchema relationshipSchema = inputGraphSchema
-            .relationshipSchema()
-            .filter(filteredRelationshipTypes);
+        var relationshipSchema = MutableRelationshipSchema.from(
+            inputGraphSchema
+                .relationshipSchema()
+                .filter(filteredRelationshipTypes)
+        );
         if (relationshipSchema.availableTypes().isEmpty()) {
             relationshipSchema.addRelationshipType(RelationshipType.ALL_RELATIONSHIPS, Direction.DIRECTED);
         }
 
-        return GraphSchema.of(nodeSchema, relationshipSchema, Map.of());
+        return MutableGraphSchema.of(nodeSchema, relationshipSchema, Map.of());
     }
 
     private GraphStoreFilter() {}

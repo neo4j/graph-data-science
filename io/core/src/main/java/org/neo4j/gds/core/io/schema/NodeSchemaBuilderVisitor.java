@@ -19,15 +19,15 @@
  */
 package org.neo4j.gds.core.io.schema;
 
-import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 
 public class NodeSchemaBuilderVisitor extends NodeSchemaVisitor {
 
-    private final NodeSchema nodeSchema;
+    private final MutableNodeSchema nodeSchema;
 
     public NodeSchemaBuilderVisitor() {
-        nodeSchema = NodeSchema.empty();
+        nodeSchema = MutableNodeSchema.empty();
     }
 
     @Override
@@ -42,7 +42,7 @@ public class NodeSchemaBuilderVisitor extends NodeSchemaVisitor {
         }
     }
 
-    public NodeSchema schema() {
+    public MutableNodeSchema schema() {
         return nodeSchema;
     }
 }

@@ -25,14 +25,14 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.api.schema.ImmutableGraphSchema;
-import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.EvaluationScores;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
@@ -94,9 +94,10 @@ class NodeClassificationToModelConverterTest {
             .build();
         var converter = new NodeClassificationToModelConverter(pipeline, config);
 
-        var originalSchema = ImmutableGraphSchema.builder()
-            .nodeSchema(NodeSchema.empty().addLabel(NodeLabel.of("M")))
-            .relationshipSchema(RelationshipSchema.empty().addRelationshipType(RelationshipType.of("R"), Direction.UNDIRECTED))
+        var originalSchema = MutableGraphSchema.builder()
+            .nodeSchema(MutableNodeSchema.empty().addLabel(NodeLabel.of("M")))
+            .relationshipSchema(MutableRelationshipSchema
+                .empty().addRelationshipType(RelationshipType.of("R"), Direction.UNDIRECTED))
             .putGraphProperty("array", PropertySchema.of("array", ValueType.DOUBLE_ARRAY))
             .putGraphProperty("scalar", PropertySchema.of("scalar", ValueType.DOUBLE))
             .build();

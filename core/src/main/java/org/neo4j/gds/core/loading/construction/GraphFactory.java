@@ -38,6 +38,8 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
@@ -329,7 +331,7 @@ public final class GraphFactory {
      * will be used.
      */
     public static HugeGraph create(IdMap idMap, SingleTypeRelationships relationships) {
-        var nodeSchema = NodeSchema.empty();
+        var nodeSchema = MutableNodeSchema.empty();
         idMap.availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
         relationships.properties().ifPresent(relationshipPropertyStore -> {
@@ -339,7 +341,7 @@ public final class GraphFactory {
         var relationshipSchema = relationships.relationshipSchema(RelationshipType.of("REL"));
 
         return create(
-            GraphSchema.of(nodeSchema, relationshipSchema, Map.of()),
+            MutableGraphSchema.of(nodeSchema, relationshipSchema, Map.of()),
             idMap,
             Map.of(),
             relationships

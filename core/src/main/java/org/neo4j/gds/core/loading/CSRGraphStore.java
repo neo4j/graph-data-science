@@ -45,9 +45,10 @@ import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.huge.CSRCompositeRelationshipIterator;
 import org.neo4j.gds.core.huge.HugeGraphBuilder;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
@@ -86,7 +87,7 @@ public class CSRGraphStore implements GraphStore {
 
     private final Map<RelationshipType, SingleTypeRelationships> relationships;
 
-    private GraphSchema schema;
+    private MutableGraphSchema schema;
 
     private GraphPropertyStore graphProperties;
 
@@ -98,7 +99,7 @@ public class CSRGraphStore implements GraphStore {
     public static CSRGraphStore of(
         DatabaseId databaseId,
         Capabilities capabilities,
-        GraphSchema schema,
+        MutableGraphSchema schema,
         Nodes nodes,
         RelationshipImportResult relationshipImportResult,
         Optional<GraphPropertyStore> graphProperties,
@@ -119,7 +120,7 @@ public class CSRGraphStore implements GraphStore {
     private CSRGraphStore(
         DatabaseId databaseId,
         Capabilities capabilities,
-        GraphSchema schema,
+        MutableGraphSchema schema,
         IdMap nodes,
         NodePropertyStore nodeProperties,
         Map<RelationshipType, SingleTypeRelationships> relationships,
@@ -208,7 +209,7 @@ public class CSRGraphStore implements GraphStore {
             var newGraphPropertySchema = new HashMap<>(schema().graphProperties());
             newGraphPropertySchema.put(propertyKey, PropertySchema.of(propertyKey, propertyValues.valueType()));
 
-            this.schema = GraphSchema.of(schema().nodeSchema(), schema().relationshipSchema(), newGraphPropertySchema);
+            this.schema = MutableGraphSchema.of(schema.nodeSchema(), schema.relationshipSchema(), newGraphPropertySchema);
         });
     }
 
@@ -224,7 +225,7 @@ public class CSRGraphStore implements GraphStore {
             var newGraphPropertySchema = new HashMap<>(schema().graphProperties());
             newGraphPropertySchema.remove(propertyKey);
 
-            this.schema = GraphSchema.of(schema().nodeSchema(), schema().relationshipSchema(), newGraphPropertySchema);
+            this.schema = MutableGraphSchema.of(schema.nodeSchema(), schema.relationshipSchema(), newGraphPropertySchema);
         });
     }
 
@@ -409,7 +410,7 @@ public class CSRGraphStore implements GraphStore {
     ) {
         updateGraphStore(graphStore -> {
             graphStore.relationships.computeIfAbsent(relationshipType, __ -> {
-                var relationshipSchemaEntry = schema()
+                var relationshipSchemaEntry = schema
                     .relationshipSchema()
                     .getOrCreateRelationshipType(relationshipType, relationships.direction());
                 relationships.updateRelationshipSchemaEntry(relationshipSchemaEntry);
@@ -447,7 +448,7 @@ public class CSRGraphStore implements GraphStore {
                             property.values().elementCount()
                         ));
                 });
-                schema().relationshipSchema().remove(relationshipType);
+                schema.relationshipSchema().remove(relationshipType);
             }, () -> builder.deletedRelationships(0));
         }));
     }
@@ -565,7 +566,7 @@ public class CSRGraphStore implements GraphStore {
     ) {
         var filteredNodes = getFilteredIdMap(nodeLabels);
         Map<String, NodePropertyValues> filteredNodeProperties = filterNodeProperties(nodeLabels);
-        var nodeSchema = schema().nodeSchema().filter(new HashSet<>(nodeLabels));
+        var nodeSchema = schema.nodeSchema().filter(new HashSet<>(nodeLabels));
         return createGraphFromRelationshipType(filteredNodes,
             filteredNodeProperties,
             nodeSchema,
@@ -581,7 +582,7 @@ public class CSRGraphStore implements GraphStore {
     ) {
         var filteredNodes = getFilteredIdMap(filteredLabels);
         Map<String, NodePropertyValues> filteredNodeProperties = filterNodeProperties(filteredLabels);
-        var nodeSchema = schema().nodeSchema().filter(new HashSet<>(filteredLabels));
+        var nodeSchema = schema.nodeSchema().filter(new HashSet<>(filteredLabels));
 
         List<CSRGraph> filteredGraphs = relationships
             .keySet()
@@ -601,9 +602,9 @@ public class CSRGraphStore implements GraphStore {
     private CSRGraph createNodeOnlyGraph(Collection<NodeLabel> nodeLabels) {
         var filteredNodes = getFilteredIdMap(nodeLabels);
         var filteredNodeProperties = filterNodeProperties(nodeLabels);
-        var nodeSchema = schema().nodeSchema().filter(new HashSet<>(nodeLabels));
+        var nodeSchema = schema.nodeSchema().filter(new HashSet<>(nodeLabels));
 
-        var graphSchema = GraphSchema.of(nodeSchema, RelationshipSchema.empty(), schema.graphProperties());
+        var graphSchema = MutableGraphSchema.of(nodeSchema, MutableRelationshipSchema.empty(), schema.graphProperties());
 
         var initialGraph = new HugeGraphBuilder()
             .nodes(nodes)
@@ -628,12 +629,12 @@ public class CSRGraphStore implements GraphStore {
     private CSRGraph createGraphFromRelationshipType(
         Optional<? extends FilteredIdMap> filteredNodes,
         Map<String, NodePropertyValues> filteredNodeProperties,
-        NodeSchema nodeSchema,
+        MutableNodeSchema nodeSchema,
         RelationshipType relationshipType,
         Optional<String> maybeRelationshipProperty
     ) {
-        var graphSchema = GraphSchema.of(nodeSchema,
-            schema().relationshipSchema().filter(Set.of(relationshipType)),
+        var graphSchema = MutableGraphSchema.of(nodeSchema,
+            schema.relationshipSchema().filter(Set.of(relationshipType)),
             schema.graphProperties()
         );
 

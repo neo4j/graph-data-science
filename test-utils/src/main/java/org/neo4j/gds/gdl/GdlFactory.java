@@ -31,8 +31,8 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.Username;
@@ -161,18 +161,18 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     }
 
     @Override
-    protected GraphSchema computeGraphSchema(Nodes nodes, RelationshipImportResult relationshipImportResult) {
+    protected MutableGraphSchema computeGraphSchema(Nodes nodes, RelationshipImportResult relationshipImportResult) {
         var relationshipSchema = relationshipImportResult.importResults().entrySet().stream().reduce(
-            RelationshipSchema.empty(),
+            MutableRelationshipSchema.empty(),
             (unionSchema, entry) -> {
                 var relationshipType = entry.getKey();
                 var relationships = entry.getValue();
                 return unionSchema.union(relationships.relationshipSchema(relationshipType));
             },
-            RelationshipSchema::union
+            MutableRelationshipSchema::union
         );
 
-        return GraphSchema.of(
+        return MutableGraphSchema.of(
             nodes.schema(),
             relationshipSchema,
             Map.of()
@@ -284,7 +284,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         var propertyKeysByRelType = new HashMap<RelationshipType, List<String>>();
 
         Direction orientation = Direction.fromOrientation(graphProjectConfig.orientation());
-        var relationshipSchema = RelationshipSchema.empty();
+        var relationshipSchema = MutableRelationshipSchema.empty();
         gdlHandler.getEdges().forEach(edge -> {
             var relType = RelationshipType.of(edge.getLabel());
             var entry = relationshipSchema.getOrCreateRelationshipType(relType, orientation);

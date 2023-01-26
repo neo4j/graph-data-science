@@ -23,7 +23,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
-import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
@@ -109,7 +109,7 @@ public final class LazyIdMapBuilder implements PartialIdMap {
 
         PartialIdMap intermediateIdMap();
 
-        NodeSchema schema();
+        MutableNodeSchema schema();
 
         NodePropertyStore propertyStore();
     }

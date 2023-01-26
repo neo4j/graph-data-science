@@ -24,7 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.NodeSchemaEntry;
+import org.neo4j.gds.api.schema.MutableNodeSchemaEntry;
 import org.neo4j.gds.api.schema.PropertySchema;
 
 import java.util.Map;
@@ -62,7 +62,7 @@ class NodeSchemaBuilderVisitorTest {
         var labelAEntry = builtSchema.get(NodeLabel.of("A"));
         assertThat(labelAEntry)
             .isEqualTo(
-                new NodeSchemaEntry(
+                new MutableNodeSchemaEntry(
                     NodeLabel.of("A"),
                     Map.of(
                         "prop1",
@@ -79,7 +79,7 @@ class NodeSchemaBuilderVisitorTest {
         var labelBEntry = builtSchema.get(NodeLabel.of("B"));
         assertThat(labelBEntry)
             .isEqualTo(
-                new NodeSchemaEntry(
+                new MutableNodeSchemaEntry(
                     NodeLabel.of("B"),
                     Map.of(
                         "prop2",

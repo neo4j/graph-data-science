@@ -19,15 +19,15 @@
  */
 package org.neo4j.gds.core.io.schema;
 
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
 
 public class RelationshipSchemaBuilderVisitor extends RelationshipSchemaVisitor {
 
-    private final RelationshipSchema schema;
+    private final MutableRelationshipSchema schema;
 
     public RelationshipSchemaBuilderVisitor() {
-        this.schema = RelationshipSchema.empty();
+        this.schema = MutableRelationshipSchema.empty();
     }
 
     @Override
@@ -41,7 +41,7 @@ public class RelationshipSchemaBuilderVisitor extends RelationshipSchemaVisitor 
         }
     }
 
-    public RelationshipSchema schema() {
+    public MutableRelationshipSchema schema() {
         return schema;
     }
 }

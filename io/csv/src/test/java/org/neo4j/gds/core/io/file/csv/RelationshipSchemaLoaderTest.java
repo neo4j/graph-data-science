@@ -27,8 +27,8 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
-import org.neo4j.gds.api.schema.RelationshipSchemaEntry;
 import org.neo4j.gds.core.Aggregation;
 
 import java.io.IOException;
@@ -59,7 +59,7 @@ class RelationshipSchemaLoaderTest {
 
         var rel1Properties = loadedRelationshipSchema.get(RelationshipType.of("REL1"));
         assertThat(rel1Properties)
-            .isEqualTo(new RelationshipSchemaEntry(
+            .isEqualTo(new MutableRelationshipSchemaEntry(
                 RelationshipType.of("REL1"),
                 Direction.DIRECTED,
                 Map.of(
@@ -76,7 +76,7 @@ class RelationshipSchemaLoaderTest {
 
         var rel2Properties = loadedRelationshipSchema.get(RelationshipType.of("REL2"));
         assertThat(rel2Properties)
-            .isEqualTo(new RelationshipSchemaEntry(
+            .isEqualTo(new MutableRelationshipSchemaEntry(
                 RelationshipType.of("REL2"),
                 Direction.UNDIRECTED,
                 Map.of(
@@ -125,7 +125,7 @@ class RelationshipSchemaLoaderTest {
 
         var rel1Properties = loadedRelationshipSchema.get(RelationshipType.of("REL1"));
         assertThat(rel1Properties)
-            .isEqualTo(new RelationshipSchemaEntry(
+            .isEqualTo(new MutableRelationshipSchemaEntry(
                 RelationshipType.of("REL1"),
                 Direction.DIRECTED,
                 Map.of(
@@ -142,7 +142,7 @@ class RelationshipSchemaLoaderTest {
 
         var rel3Properties = loadedRelationshipSchema.get(RelationshipType.of("REL3"));
         assertThat(rel3Properties)
-            .isEqualTo(new RelationshipSchemaEntry(
+            .isEqualTo(new MutableRelationshipSchemaEntry(
                 RelationshipType.of("REL3"),
                 Direction.UNDIRECTED,
                 Map.of()
@@ -166,7 +166,7 @@ class RelationshipSchemaLoaderTest {
 
         var rel1Properties = loadedRelationshipSchema.get(RelationshipType.of("REL1"));
         assertThat(rel1Properties)
-            .isEqualTo(new RelationshipSchemaEntry(
+            .isEqualTo(new MutableRelationshipSchemaEntry(
                 RelationshipType.of("REL1"),
                 Direction.DIRECTED,
                 Map.of(
@@ -183,7 +183,7 @@ class RelationshipSchemaLoaderTest {
 
         var rel3Properties = loadedRelationshipSchema.get(RelationshipType.of("REL3"));
         assertThat(rel3Properties)
-            .isEqualTo(new RelationshipSchemaEntry(
+            .isEqualTo(new MutableRelationshipSchemaEntry(
                 RelationshipType.of("REL3"),
                 Direction.DIRECTED,
                 Map.of()

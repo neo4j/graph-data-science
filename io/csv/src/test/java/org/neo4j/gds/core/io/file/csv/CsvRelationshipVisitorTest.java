@@ -24,7 +24,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 
 import java.util.Collections;
 import java.util.List;
@@ -37,7 +37,7 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
 
     @Test
     void visitRelationshipsWithTypes() {
-        var relationshipVisitor = new CsvRelationshipVisitor(tempDir, RelationshipSchema.empty());
+        var relationshipVisitor = new CsvRelationshipVisitor(tempDir, MutableRelationshipSchema.empty());
 
         relationshipVisitor.startId(0L);
         relationshipVisitor.endId(1L);
@@ -80,7 +80,7 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
         var aType = RelationshipType.of("A");
         var bType = RelationshipType.of("B");
 
-        var relationshipSchema = RelationshipSchema.empty();
+        var relationshipSchema = MutableRelationshipSchema.empty();
         relationshipSchema.getOrCreateRelationshipType(aType, Direction.DIRECTED)
             .addProperty("foo", ValueType.LONG, PropertyState.PERSISTENT)
             .addProperty("bar", ValueType.LONG, PropertyState.PERSISTENT);
