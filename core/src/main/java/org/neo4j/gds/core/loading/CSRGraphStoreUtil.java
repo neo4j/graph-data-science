@@ -91,7 +91,6 @@ public final class CSRGraphStoreUtil {
                 .relationshipSchemaEntry(entry)
                 .topology(graph.relationshipTopology())
                 .properties(relationshipProperties)
-                .direction(direction)
                 .build()
         ).build();
 
@@ -186,20 +185,9 @@ public final class CSRGraphStoreUtil {
         var nodeSchema = nodes.schema();
         var relationshipSchema = MutableRelationshipSchema.empty();
 
-        relationshipImportResult.importResults().forEach(((relationshipType, singleTypeRelationshipImportResult) -> {
-            relationshipSchema.getOrCreateRelationshipType(
-                relationshipType,
-                singleTypeRelationshipImportResult.direction()
-            );
-            singleTypeRelationshipImportResult.properties()
-                .map(RelationshipPropertyStore::relationshipProperties)
-                .ifPresent(properties -> properties.forEach((propertyKey, propertyValues) -> relationshipSchema
-                    .getOrCreateRelationshipType(
-                        relationshipType,
-                        singleTypeRelationshipImportResult.direction()
-                    )
-                    .addProperty(propertyKey, propertyValues.propertySchema())));
-        }));
+        relationshipImportResult
+            .importResults()
+            .forEach((__, relationships) -> relationshipSchema.set(relationships.relationshipSchemaEntry()));
 
         return MutableGraphSchema.of(
             nodeSchema,
