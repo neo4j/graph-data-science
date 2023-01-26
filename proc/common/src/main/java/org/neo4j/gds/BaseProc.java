@@ -171,6 +171,7 @@ public abstract class BaseProc {
             .terminationMonitor(new TransactionTerminationMonitor(transaction))
             .closeableResourceRegistry(new TransactionCloseableResourceRegistry(transaction))
             .algorithmMetaDataSetter(new TransactionAlgorithmMetaDataSetter(transaction))
+            .nodeLookup(new TransactionNodeLookup(transaction))
             .build();
     }
 

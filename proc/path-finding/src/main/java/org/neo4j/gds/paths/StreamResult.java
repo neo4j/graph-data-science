@@ -21,14 +21,13 @@ package org.neo4j.gds.paths;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.graphdb.Node;
+import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.LongFunction;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.paths.PathFactory.create;
@@ -73,9 +72,9 @@ public final class StreamResult {
 
     public static class Builder {
         private final IdMap idMap;
-        private final LongFunction<Node> nodeLookup;
+        private final NodeLookup nodeLookup;
 
-        public Builder(IdMap idMap, LongFunction<Node> nodeLookup) {
+        public Builder(IdMap idMap, NodeLookup nodeLookup) {
             this.idMap = idMap;
             this.nodeLookup = nodeLookup;
         }

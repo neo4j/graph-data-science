@@ -26,6 +26,7 @@ import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GdsTransactionApi;
+import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -69,6 +70,8 @@ public interface ExecutionContext {
     CloseableResourceRegistry closeableResourceRegistry();
 
     AlgorithmMetaDataSetter algorithmMetaDataSetter();
+
+    NodeLookup nodeLookup();
 
     @Nullable
     ProcedureCallContext callContext();
@@ -173,6 +176,11 @@ public interface ExecutionContext {
         @Override
         public CloseableResourceRegistry closeableResourceRegistry() {
             return CloseableResourceRegistry.EMPTY;
+        }
+
+        @Override
+        public NodeLookup nodeLookup() {
+            return NodeLookup.EMPTY;
         }
 
         @Override

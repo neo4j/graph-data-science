@@ -20,29 +20,28 @@
 package org.neo4j.gds.paths;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphalgo.impl.util.PathImpl;
-import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.LongFunction;
 
 public final class PathFactory {
 
     private PathFactory() {}
 
     public static Path create(
-        LongFunction<Node> nodeLookup,
+        NodeLookup nodeLookup,
         long[] nodeIds,
         double[] costs,
         RelationshipType relationshipType,
         String costPropertyName
     ) {
         var firstNodeId = nodeIds[0];
-        var pathBuilder = new PathImpl.Builder(nodeLookup.apply(firstNodeId));
+        var pathBuilder = new PathImpl.Builder(nodeLookup.getNodeById(firstNodeId));
 
         for (int i = 0; i < nodeIds.length - 1; i++) {
             long sourceNodeId = nodeIds[i];
@@ -50,8 +49,8 @@ public final class PathFactory {
 
             var relationship = Neo4jProxy.virtualRelationship(
                 RelationshipIds.next(),
-                nodeLookup.apply(sourceNodeId),
-                nodeLookup.apply(targetNodeId),
+                nodeLookup.getNodeById(sourceNodeId),
+                nodeLookup.getNodeById(targetNodeId),
                 relationshipType
             );
             var costDifference = costs[i + 1] - costs[i];
@@ -63,12 +62,12 @@ public final class PathFactory {
     }
 
     public static Path create(
-        LongFunction<Node> nodeLookup,
+        NodeLookup nodeLookup,
         List<Long> nodeIds,
         RelationshipType relationshipType
     ) {
         var firstNodeId = nodeIds.get(0);
-        var pathBuilder = new PathImpl.Builder(nodeLookup.apply(firstNodeId));
+        var pathBuilder = new PathImpl.Builder(nodeLookup.getNodeById(firstNodeId));
 
         for (int i = 0; i < nodeIds.size() - 1; i++) {
             long sourceNodeId = nodeIds.get(i);
@@ -76,8 +75,8 @@ public final class PathFactory {
 
             var relationship = Neo4jProxy.virtualRelationship(
                 RelationshipIds.next(),
-                nodeLookup.apply(sourceNodeId),
-                nodeLookup.apply(targetNodeId),
+                nodeLookup.getNodeById(sourceNodeId),
+                nodeLookup.getNodeById(targetNodeId),
                 relationshipType
             );
             pathBuilder = pathBuilder.push(relationship);

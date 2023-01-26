@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.neo4j.gds.api.GdsTransactionApi;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -60,7 +60,7 @@ class DfsStreamComputationResultConsumerTest {
         when(computationResultMock.config()).thenReturn(configMock);
 
         doReturn(false).when(executionContextMock).containsOutputField("path");
-        doReturn(GdsTransactionApi.EMPTY).when(executionContextMock).transactionApi();
+        doReturn(NodeLookup.EMPTY).when(executionContextMock).nodeLookup();
 
         var consumer = new DfsStreamComputationResultConsumer(pathFactoryFacadeMock);
 
@@ -89,7 +89,7 @@ class DfsStreamComputationResultConsumerTest {
         when(computationResultMock.config()).thenReturn(configMock);
 
         doReturn(true).when(executionContextMock).containsOutputField("path");
-        doReturn(GdsTransactionApi.EMPTY).when(executionContextMock).transactionApi();
+        doReturn(NodeLookup.EMPTY).when(executionContextMock).nodeLookup();
 
         doReturn(mock(Path.class)).when(pathFactoryFacadeMock).createPath(any(), any(), any());
 
