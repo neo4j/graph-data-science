@@ -70,14 +70,14 @@ public class SteinerTreeMutateSpec implements AlgorithmSpec<ShortestPathsSteiner
                 return Stream.of(builder.build());
             }
 
+            var mutateRelationshipType = RelationshipType.of(config.mutateRelationshipType());
             var relationshipsBuilder = GraphFactory
                 .initRelationshipsBuilder()
                 .nodes(computationResult.graph())
+                .relationshipType(mutateRelationshipType)
                 .addPropertyConfig(GraphFactory.PropertyConfig.of(config.mutateProperty()))
                 .orientation(Orientation.NATURAL)
                 .build();
-
-            var mutateRelationshipType = RelationshipType.of(config.mutateRelationshipType());
 
             builder
                 .withTotalWeight(steinerTreeResult.totalCost())

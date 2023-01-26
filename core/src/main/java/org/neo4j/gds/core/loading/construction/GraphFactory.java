@@ -37,6 +37,7 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -187,6 +188,7 @@ public final class GraphFactory {
     @Builder.Factory
     static RelationshipsBuilder relationshipsBuilder(
         PartialIdMap nodes,
+        RelationshipType relationshipType,
         Optional<Orientation> orientation,
         List<PropertyConfig> propertyConfigs,
         Optional<Aggregation> aggregation,
@@ -204,7 +206,6 @@ public final class GraphFactory {
                 .map(Aggregation::resolve)
                 .toArray(Aggregation[]::new);
 
-        var relationshipType = RelationshipType.ALL_RELATIONSHIPS;
         var isMultiGraph = Arrays.stream(aggregations).allMatch(Aggregation::equivalentToNone);
 
         var actualOrientation = orientation.orElse(Orientation.NATURAL);
@@ -259,6 +260,7 @@ public final class GraphFactory {
             .idMap(nodes)
             .importer(singleTypeRelationshipImporter)
             .bufferSize(bufferSize)
+            .relationshipType(relationshipType)
             .propertyConfigs(propertyConfigs)
             .isMultiGraph(isMultiGraph)
             .loadRelationshipProperty(loadRelationshipProperties)

@@ -100,12 +100,16 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
             config.randomSeed(),
             sourceNodes,
             targetNodes,
+            config.holdoutRelationshipType(),
+            config.remainingRelationshipType(),
             config.concurrency()
         )
             : new DirectedEdgeSplitter(
                 config.randomSeed(),
                 sourceNodes,
                 targetNodes,
+                config.holdoutRelationshipType(),
+                config.remainingRelationshipType(),
                 config.concurrency()
             );
 

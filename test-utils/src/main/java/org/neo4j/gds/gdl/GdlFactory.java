@@ -354,6 +354,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
                     return GraphFactory.initRelationshipsBuilder()
                         .nodes(idMap)
+                        .relationshipType(relTypeAndProperty.getKey())
                         .orientation(graphProjectConfig.orientation())
                         .aggregation(graphProjectConfig.aggregation())
                         .indexInverse(graphProjectConfig.indexInverse())

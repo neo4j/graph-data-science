@@ -100,8 +100,10 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
                 ExecutionContext executionContext
             ) {
                 var config = computationResult.config();
+                var relationshipType = RelationshipType.of(config.mutateRelationshipType());
 
                 var relationships = getRelationships(
+                    relationshipType,
                     computationResult,
                     computationResult.result().graphResult(),
                     config.mutateProperty(),
@@ -109,7 +111,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
                     executionContext.callContext()
                 );
 
-                var relationshipType = RelationshipType.of(config.mutateRelationshipType());
+
 
                 computationResult
                     .graphStore()
@@ -121,6 +123,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
     }
 
     private SingleTypeRelationships getRelationships(
+        RelationshipType relationshipType,
         ComputationResult<NodeSimilarity, NodeSimilarityResult, FilteredNodeSimilarityMutateConfig> computationResult,
         SimilarityGraphResult similarityGraphResult,
         String relationshipPropertyKey,
@@ -129,11 +132,13 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
     ) {
         SingleTypeRelationships resultRelationships;
 
+
         if (similarityGraphResult.isTopKGraph()) {
             TopKGraph topKGraph = (TopKGraph) similarityGraphResult.similarityGraph();
 
             RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(topKGraph)
+                .relationshipType(relationshipType)
                 .orientation(Orientation.NATURAL)
                 .addPropertyConfig(GraphFactory.PropertyConfig.of(relationshipPropertyKey))
                 .concurrency(1)
@@ -167,6 +172,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
             var similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
 
             resultRelationships = SingleTypeRelationships.of(
+                relationshipType,
                 similarityGraph.relationshipTopology(),
                 similarityGraph.schema().direction(),
                 similarityGraph.relationshipProperties(),

@@ -119,6 +119,7 @@ class CollapsePathTest {
         var relationships = new CollapsePath(
             Collections.singletonList(new Graph[]{tookRel, tookRel}),
             false,
+            RelationshipType.of("SAME_DRUG"),
             2,
             Pools.DEFAULT
 
@@ -134,6 +135,7 @@ class CollapsePathTest {
         var relationships = new CollapsePath(
             Collections.singletonList(new Graph[]{tookRel, tookRel}),
             true,
+            RelationshipType.of("SAME_DRUG"),
             2,
             Pools.DEFAULT
 
@@ -147,6 +149,7 @@ class CollapsePathTest {
         var relationships = new CollapsePath(
             Collections.singletonList(new Graph[]{tookGraph, takenByGraph}),
             false,
+            RelationshipType.of("SAME_DRUG"),
             2,
             Pools.DEFAULT
         ).compute();

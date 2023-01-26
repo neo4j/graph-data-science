@@ -36,6 +36,7 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
@@ -53,10 +54,10 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig.EmbeddingInitializer;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
-import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
 
 import java.util.List;
 import java.util.Optional;
@@ -277,6 +278,7 @@ class Node2VecTest extends BaseTest {
         );
         RelationshipsBuilder firstRelationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(firstIdMap)
+            .relationshipType(RelationshipType.of("REL"))
             .orientation(Orientation.UNDIRECTED)
             .executorService(Pools.DEFAULT)
             .build();
@@ -298,6 +300,7 @@ class Node2VecTest extends BaseTest {
         );
         RelationshipsBuilder secondRelationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(secondIdMap)
+            .relationshipType(RelationshipType.of("REL"))
             .orientation(Orientation.UNDIRECTED)
             .executorService(Pools.DEFAULT)
             .build();

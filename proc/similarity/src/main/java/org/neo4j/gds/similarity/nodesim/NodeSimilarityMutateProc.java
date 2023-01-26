@@ -124,7 +124,10 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
                 SimilarityProc.withGraphsizeAndTimings(new SimilarityMutateResult.Builder(), computationResult, NodeSimilarityResult::graphResult);
 
             try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
+                RelationshipType relationshipType = RelationshipType.of(config.mutateRelationshipType());
+
                 var resultRelationships = getRelationships(
+                    relationshipType,
                     computationResult,
                     computationResult.result().graphResult(),
                     config.mutateProperty(),
@@ -134,7 +137,7 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
                 computationResult
                     .graphStore()
                     .addRelationshipType(
-                        RelationshipType.of(config.mutateRelationshipType()),
+                        relationshipType,
                         resultRelationships
                     );
             }
@@ -143,7 +146,7 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
     }
 
     private SingleTypeRelationships getRelationships(
-        ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computationResult,
+        RelationshipType relationshipType, ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computationResult,
         SimilarityGraphResult similarityGraphResult,
         String relationshipPropertyKey,
         SimilarityProc.SimilarityResultBuilder<SimilarityMutateResult> resultBuilder
@@ -155,6 +158,7 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
 
             RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(topKGraph)
+                .relationshipType(relationshipType)
                 .orientation(Orientation.NATURAL)
                 .addPropertyConfig(GraphFactory.PropertyConfig.of(relationshipPropertyKey))
                 .concurrency(1)
@@ -188,6 +192,7 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
             HugeGraph similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
 
             relationships = SingleTypeRelationships.of(
+                relationshipType,
                 similarityGraph.relationshipTopology(),
                 similarityGraph.schema().direction(),
                 similarityGraph.relationshipProperties(),

@@ -466,6 +466,7 @@ public class GraphAggregator implements CompatUserAggregator {
 
             var relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(this.idMapBuilder)
+                .relationshipType(relType)
                 .orientation(orientation)
                 .aggregation(Aggregation.NONE)
                 .indexInverse(indexInverse)

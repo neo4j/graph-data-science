@@ -179,6 +179,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
         private RelationshipsBuilder createRelationshipsBuilder(RelationshipType relationshipType) {
             return GraphFactory.initRelationshipsBuilder()
                 .nodes(idMap)
+                .relationshipType(relationshipType)
                 .concurrency(cypherConfig.readConcurrency())
                 .propertyConfigs(propertyConfigs)
                 .orientation(Orientation.NATURAL)
