@@ -57,6 +57,9 @@ public final class TransactionContext {
      * Creates a new {@code TransactionContext} with the same {@link SecurityContext} as the provided {@link Transaction}.
      */
     public static TransactionContext of(GraphDatabaseService databaseService, Transaction top) {
+        if (top == null) {
+            return of(databaseService, SecurityContext.AUTH_DISABLED);
+        }
         var internalTransaction = (InternalTransaction) top;
         return of(databaseService, internalTransaction);
     }

@@ -25,16 +25,13 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.executor.AlgorithmMetaData;
 import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
 public class Neo4jTransactionWrapper implements GdsTransactionApi {
 
     private final KernelTransaction kernelTransaction;
-    private final InternalTransaction internalTransaction;
 
     public Neo4jTransactionWrapper(KernelTransaction kernelTransaction) {
         this.kernelTransaction = kernelTransaction;
-        this.internalTransaction = kernelTransaction.internalTransaction();
     }
 
     @Override
@@ -63,6 +60,6 @@ public class Neo4jTransactionWrapper implements GdsTransactionApi {
 
     @Override
     public Node getNodeById(long id) {
-        return internalTransaction.getNodeById(id);
+        return kernelTransaction.internalTransaction().getNodeById(id);
     }
 }

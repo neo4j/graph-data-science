@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.GdsTransactionApi;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
@@ -72,6 +73,7 @@ class MutatePropertyComputationResultConsumerTest {
         .log(Neo4jProxy.testLog())
         .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
         .username("")
+        .transactionApi(GdsTransactionApi.EMPTY)
         .build();
 
     @BeforeEach

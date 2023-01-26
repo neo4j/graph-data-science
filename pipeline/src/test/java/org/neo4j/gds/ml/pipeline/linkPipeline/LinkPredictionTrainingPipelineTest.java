@@ -173,6 +173,7 @@ class LinkPredictionTrainingPipelineTest {
         var executionContext = ImmutableExecutionContext.builder()
             .username("")
             .callContext(ProcedureCallContext.EMPTY)
+            .transactionApi(GdsTransactionApi.EMPTY)
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -206,6 +207,7 @@ class LinkPredictionTrainingPipelineTest {
             .username("")
             .modelCatalog(modelCatalog)
             .callContext(ProcedureCallContext.EMPTY)
+            .transactionApi(GdsTransactionApi.EMPTY)
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -239,6 +241,7 @@ class LinkPredictionTrainingPipelineTest {
             .username("")
             .modelCatalog(modelCatalog)
             .callContext(ProcedureCallContext.EMPTY)
+            .transactionApi(GdsTransactionApi.EMPTY)
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
