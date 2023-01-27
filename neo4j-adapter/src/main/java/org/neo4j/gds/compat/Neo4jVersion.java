@@ -55,6 +55,9 @@ public enum Neo4jVersion {
     }
 
     public MajorMinorVersion semanticVersion() {
+        if (this == V_RC) {
+            return ImmutableMajorMinorVersion.of(5, 5);
+        }
         String version = toString();
         var subVersions = version.split("\\.");
 
