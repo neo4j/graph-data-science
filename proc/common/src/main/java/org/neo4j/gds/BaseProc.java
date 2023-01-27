@@ -22,6 +22,7 @@ package org.neo4j.gds;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.Username;
@@ -152,13 +153,14 @@ public abstract class BaseProc {
     }
 
     public MemoryUsageValidator memoryUsageValidator() {
-        return new MemoryUsageValidator(log, databaseService);
+        return new MemoryUsageValidator(log, GraphDatabaseApiProxy.dependencyResolver(databaseService));
     }
 
     public ExecutionContext executionContext() {
         return ImmutableExecutionContext
             .builder()
-            .databaseService(databaseService)
+            .databaseId(databaseId())
+            .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
             .modelCatalog(internalModelCatalog)
             .log(log)
             .transactionContext(TransactionContext.of(databaseService, procedureTransaction))

@@ -27,6 +27,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
@@ -109,7 +110,8 @@ class WriteProcCancellationTest extends BaseTest {
 
             var executionContext = ImmutableExecutionContext
                 .builder()
-                .databaseService(db)
+                .databaseId(DatabaseId.of(db))
+                .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
                 .taskRegistryFactory(jobId -> new TaskRegistry("", taskStore, jobId))
                 .username("")
                 .log(Neo4jProxy.testLog())

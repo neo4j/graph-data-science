@@ -21,6 +21,7 @@ package org.neo4j.gds.executor;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
@@ -39,7 +40,6 @@ import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
@@ -51,7 +51,10 @@ import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 public interface ExecutionContext {
 
     @Nullable
-    GraphDatabaseService databaseService();
+    DatabaseId databaseId();
+
+    @Nullable
+    DependencyResolver dependencyResolver();
 
     @Nullable
     ModelCatalog modelCatalog();
@@ -100,11 +103,6 @@ public interface ExecutionContext {
     }
 
     @Value.Lazy
-    default DatabaseId databaseId() {
-        return DatabaseId.of(databaseService());
-    }
-
-    @Value.Lazy
     default boolean containsOutputField(String fieldName) {
         return callContext().outputFields()
             .anyMatch(field -> toLowerCaseWithLocale(field).equals(fieldName));
@@ -135,8 +133,14 @@ public interface ExecutionContext {
     }
 
     ExecutionContext EMPTY = new ExecutionContext() {
+
         @Override
-        public @Nullable GraphDatabaseService databaseService() {
+        public DatabaseId databaseId() {
+            return null;
+        }
+
+        @Override
+        public DependencyResolver dependencyResolver() {
             return null;
         }
 

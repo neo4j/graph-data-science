@@ -28,6 +28,7 @@ import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -64,13 +65,13 @@ class MemoryEstimationExecutorTest extends BaseTest {
     @BeforeEach
     void setup() throws Exception {
         procedureTransaction = db.beginTx();
-        var transaction = GraphDatabaseApiProxy.kernelTransaction(procedureTransaction);
 
         GraphDatabaseApiProxy.registerProcedures(db, GraphProjectProc.class);
 
         var executionContext = ImmutableExecutionContext
             .builder()
-            .databaseService(db)
+            .databaseId(DatabaseId.of(db))
+            .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
             .callContext(new ProcedureCallContext(42, new String[0], false, "neo4j", false))
             .log(Neo4jProxy.testLog())
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
