@@ -168,7 +168,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 | xref:common-usage/running-algos.adoc#common-configuration-write-concurrency[writeConcurrency]  | Integer  | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
 | xref:common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations]        | Integer  | 10                     | yes      | The maximum number of iterations of K1 Coloring to run.
 | xref:common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]        | String   | n/a                    | no       | The node property this procedure writes the color to.
-| xref:common-usage/running-algos.adoc#common-configuration-write-property[minCommunitySize]     | Integer  | 0                      | yes      | Only community ids of communities with a size greater than or equal to the given value are written to Neo4j.
+| minCommunitySize                                                                               | Integer  | 0                      | yes      | Only community ids of communities with a size greater than or equal to the given value are written to Neo4j.
 |===
 
 .Results
