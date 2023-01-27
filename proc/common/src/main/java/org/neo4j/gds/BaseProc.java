@@ -144,6 +144,8 @@ public abstract class BaseProc {
 
     protected GraphLoaderContext graphLoaderContext() {
         return ImmutableGraphLoaderContext.builder()
+            .databaseId(DatabaseId.of(databaseService))
+            .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
             .transactionContext(TransactionContext.of(databaseService, procedureTransaction))
             .log(log)
             .taskRegistryFactory(taskRegistryFactory)

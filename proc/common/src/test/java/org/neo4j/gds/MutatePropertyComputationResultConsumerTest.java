@@ -22,9 +22,11 @@ package org.neo4j.gds;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.common.EmptyDependencyResolver;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CloseableResourceRegistry;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -72,6 +74,8 @@ class MutatePropertyComputationResultConsumerTest {
 
     private final ExecutionContext executionContext = ImmutableExecutionContext
         .builder()
+        .databaseId(DatabaseId.from(""))
+        .dependencyResolver(EmptyDependencyResolver.EMPTY_RESOLVER)
         .callContext(new ProcedureCallContext(42, new String[0], false, "neo4j", false))
         .log(Neo4jProxy.testLog())
         .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)

@@ -22,7 +22,9 @@ package org.neo4j.gds;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
@@ -189,6 +191,8 @@ public final class GraphLoaderBuilders {
     ) {
         return ImmutableGraphLoader.builder()
             .context(ImmutableGraphLoaderContext.builder()
+                .databaseId(DatabaseId.of(databaseService))
+                .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
                 .transactionContext(transactionContext.orElseGet(() -> TestSupport.fullAccessTransaction(databaseService)))
                 .executor(executorService.orElse(Pools.DEFAULT))
                 .terminationFlag(terminationFlag.orElse(TerminationFlag.RUNNING_TRUE))

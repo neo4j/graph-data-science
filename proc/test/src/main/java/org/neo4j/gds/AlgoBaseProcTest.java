@@ -28,6 +28,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
@@ -430,6 +431,8 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         return ImmutableGraphLoader
             .builder()
             .context(ImmutableGraphLoaderContext.builder()
+                .databaseId(DatabaseId.of(db))
+                .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
                 .transactionContext(TestSupport.fullAccessTransaction(db))
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
                 .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
