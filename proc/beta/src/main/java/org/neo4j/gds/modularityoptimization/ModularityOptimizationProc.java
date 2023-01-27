@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.modularityoptimization;
 
+import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
@@ -54,6 +55,19 @@ final class ModularityOptimizationProc {
         } else {
             return resultCommunities;
         }
+    }
+
+    static <CONFIG extends ModularityOptimizationConfig> NodePropertyValues nodeProperties(
+            ComputationResult<ModularityOptimization, ModularityOptimizationResult, CONFIG> computationResult,
+            String resultProperty
+    ) {
+        var config = computationResult.config();
+        return CommunityProcCompanion.nodeProperties(
+                config,
+                resultProperty,
+                computationResult.result().asNodeProperties(),
+                () -> computationResult.graphStore().nodeProperty(config.seedProperty())
+        );
     }
 
     abstract static class ModularityOptimizationResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {
