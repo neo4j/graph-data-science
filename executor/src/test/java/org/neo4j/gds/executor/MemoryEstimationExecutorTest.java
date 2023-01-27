@@ -26,6 +26,10 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
+import org.neo4j.gds.api.AlgorithmMetaDataSetter;
+import org.neo4j.gds.api.CloseableResourceRegistry;
+import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -72,6 +76,10 @@ class MemoryEstimationExecutorTest extends BaseTest {
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .username("")
             .transactionContext(TransactionContext.of(db, procedureTransaction))
+            .terminationMonitor(TerminationMonitor.EMPTY)
+            .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
+            .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
+            .nodeLookup(NodeLookup.EMPTY)
             .build();
 
         memoryEstimationExecutor = new MemoryEstimationExecutor<>(

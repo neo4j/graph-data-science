@@ -21,7 +21,11 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProcTest.InvocationCountingTaskStore;
+import org.neo4j.gds.api.AlgorithmMetaDataSetter;
+import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -109,6 +113,10 @@ class WriteProcCancellationTest extends BaseTest {
                 .taskRegistryFactory(jobId -> new TaskRegistry("", taskStore, jobId))
                 .username("")
                 .log(Neo4jProxy.testLog())
+                .terminationMonitor(TerminationMonitor.EMPTY)
+                .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
+                .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
+                .nodeLookup(NodeLookup.EMPTY)
                 .callContext(ProcedureCallContext.EMPTY)
                 .build();
 
