@@ -33,7 +33,6 @@ import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.GraphDimensions;
@@ -74,7 +73,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
             new GraphDimensionsCypherReader(
                 loadingContext.transactionContext().withRestrictedAccess(READ),
                 graphProjectConfig,
-                GraphDatabaseApiProxy.resolveDependency(loadingContext.graphDatabaseService(), IdGeneratorFactory.class)
+                loadingContext.dependencyResolver().resolveDependency(IdGeneratorFactory.class)
             ).call()
         );
     }

@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.utils.StringJoining;
@@ -75,8 +74,8 @@ abstract class CypherRecordLoader<R> {
         this.recordCount = recordCount;
         this.cypherConfig = cypherConfig;
         this.loadingContext = loadingContext;
-        this.executionEngine =  GraphDatabaseApiProxy.executionEngine(loadingContext.graphDatabaseService());
-        this.contextFactory = GraphDatabaseApiProxy.contextFactory(loadingContext.graphDatabaseService());
+        this.executionEngine = loadingContext.dependencyResolver().resolveDependency(QueryExecutionEngine.class);
+        this.contextFactory = loadingContext.dependencyResolver().resolveDependency(TransactionalContextFactory.class);
     }
 
     final R load(InternalTransaction transaction) {

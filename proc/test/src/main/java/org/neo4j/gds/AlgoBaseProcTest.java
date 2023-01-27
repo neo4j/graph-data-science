@@ -433,7 +433,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
                 .transactionContext(TestSupport.fullAccessTransaction(db))
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
                 .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-                .graphDatabaseService(db)
                 .log(Neo4jProxy.testLog())
                 .build())
             .username("")
