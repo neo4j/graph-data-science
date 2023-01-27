@@ -124,7 +124,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
     }
 
     @Test
-    void failONMemoryEstimationWithInvalidRelationshipFilterOnExplicitGraphStore() {
+    void failOnMemoryEstimationWithInvalidRelationshipFilterOnExplicitGraphStore() {
         var graphName = "memoryEstimateGraph";
         GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("", graphName), GdlGraphs.EMPTY_GRAPH_STORE);
         runQuery(GdsCypher.call(graphName)

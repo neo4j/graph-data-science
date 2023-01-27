@@ -88,7 +88,7 @@ class IndexInverseProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldSupportStar() {
+    void shouldSupportStarFilterOverMultipleNonStarProjections() {
         runQuery(GdsCypher.call("other_graph")
             .graphProject()
             .withAnyLabel()
