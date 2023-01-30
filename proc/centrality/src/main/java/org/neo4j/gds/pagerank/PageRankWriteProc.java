@@ -78,7 +78,7 @@ public class PageRankWriteProc extends WriteProc<PageRankAlgorithm, PageRankResu
         ExecutionContext executionContext
     ) {
         return PageRankProc.resultBuilder(
-            new WriteResult.Builder(callContext, computeResult.config().concurrency()),
+            new WriteResult.Builder(executionContext.callContext(), computeResult.config().concurrency()),
             computeResult
         );
     }

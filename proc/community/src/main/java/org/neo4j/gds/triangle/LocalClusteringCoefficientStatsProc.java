@@ -75,7 +75,7 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
     ) {
         return LocalClusteringCoefficientCompanion.resultBuilder(
             new LocalClusteringCoefficientStatsBuilder(
-                callContext,
+                executionContext.callContext(),
                 computeResult.config().concurrency()
             ),
             computeResult

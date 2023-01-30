@@ -91,7 +91,7 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
         ExecutionContext executionContext
     ) {
         return WccProc.resultBuilder(
-            new WriteResult.Builder(callContext, computeResult.config().concurrency()),
+            new WriteResult.Builder(executionContext.callContext(), computeResult.config().concurrency()),
             computeResult
         );
     }

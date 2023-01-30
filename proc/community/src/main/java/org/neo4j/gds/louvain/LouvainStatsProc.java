@@ -70,7 +70,7 @@ public class LouvainStatsProc extends StatsProc<Louvain, LouvainResult, LouvainS
         ExecutionContext executionContext
     ) {
         return LouvainProc.resultBuilder(
-            new StatsResult.Builder(callContext, computeResult.config().concurrency()),
+            new StatsResult.Builder(executionContext.callContext(), computeResult.config().concurrency()),
             computeResult
         );
     }

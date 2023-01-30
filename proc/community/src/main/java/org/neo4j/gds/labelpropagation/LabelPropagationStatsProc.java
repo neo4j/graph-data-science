@@ -67,7 +67,7 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
         ExecutionContext executionContext
     ) {
         return LabelPropagationProc.resultBuilder(
-            new StatsResult.Builder(callContext, computeResult.config().concurrency()),
+            new StatsResult.Builder(executionContext.callContext(), computeResult.config().concurrency()),
             computeResult
         );
     }

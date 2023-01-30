@@ -163,7 +163,7 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
 
             IdMap idMap = computationResult.graph();
 
-            if (shouldComputeHistogram(callContext)) {
+            if (shouldComputeHistogram(executionContext().callContext())) {
                 DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
                 topKGraph.forEachNode(nodeId -> {
                     topKGraph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, property) -> {
@@ -194,7 +194,7 @@ public class NodeSimilarityMutateProc extends AlgoBaseProc<NodeSimilarity, NodeS
                 Optional.of(RelationshipPropertySchema.of(relationshipPropertyKey, ValueType.DOUBLE))
             );
 
-            if (shouldComputeHistogram(callContext)) {
+            if (shouldComputeHistogram(executionContext().callContext())) {
                 resultBuilder.withHistogram(computeHistogram(similarityGraph));
             }
         }

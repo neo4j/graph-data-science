@@ -67,7 +67,7 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
             Graph graph = computationResult.graph();
 
             AbstractResultBuilder<SccResult> writeBuilder = new SccResultBuilder(
-                callContext,
+                executionContext.callContext(),
                 config.concurrency()
             )
                 .buildCommunityCount(true)

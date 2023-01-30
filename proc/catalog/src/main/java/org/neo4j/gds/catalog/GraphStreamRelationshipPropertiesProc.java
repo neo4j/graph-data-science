@@ -160,7 +160,7 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
                 .map(propertyKey -> Triple.of(relType, propertyKey, graphStore.getGraph(relType, Optional.of(propertyKey))))
             )
             .collect(Collectors.toList());
-        var usesPropertyNameColumn = callContext.outputFields().anyMatch(field -> field.equals("relationshipProperty"));
+        var usesPropertyNameColumn = executionContext().callContext().outputFields().anyMatch(field -> field.equals("relationshipProperty"));
 
         var task = Tasks.leaf(
             "Graph :: RelationshipProperties :: Stream",

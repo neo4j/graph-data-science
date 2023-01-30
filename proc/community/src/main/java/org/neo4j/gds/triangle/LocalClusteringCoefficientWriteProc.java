@@ -92,7 +92,7 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
     ) {
         return LocalClusteringCoefficientCompanion.resultBuilder(
             new LocalClusteringCoefficientWriteResultBuilder(
-                callContext,
+                executionContext.callContext(),
                 computeResult.config().concurrency()
             ),
             computeResult

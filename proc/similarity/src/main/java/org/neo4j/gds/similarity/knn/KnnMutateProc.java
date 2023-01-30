@@ -159,7 +159,7 @@ public class KnnMutateProc extends AlgoBaseProc<Knn, Knn.Result, KnnMutateConfig
         Graph similarityGraph,
         Result.Builder resultBuilder
     ) {
-        if (shouldComputeHistogram(callContext)) {
+        if (shouldComputeHistogram(executionContext().callContext())) {
             resultBuilder.withHistogram(SimilarityProc.computeHistogram(similarityGraph));
         }
     }
