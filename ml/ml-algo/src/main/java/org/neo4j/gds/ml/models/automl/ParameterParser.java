@@ -176,7 +176,7 @@ final class ParameterParser {
             return DoubleParameter.of((Double) value);
         }
         throw new IllegalArgumentException(formatWithLocale(
-            "Parameter `%s` must be numeric or a map of the form {range: {min, max}}.",
+            "Parameter `%s` must be numeric or a map of the form {range: [min, max]}.",
             key
         ));
     }
