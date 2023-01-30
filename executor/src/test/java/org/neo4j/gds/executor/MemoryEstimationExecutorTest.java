@@ -123,6 +123,8 @@ class MemoryEstimationExecutorTest extends BaseTest {
             Map.of("mutateProperty", "foo", "relationshipTypes", List.of("INVALID"))
         )).hasMessage(
             "Could not find the specified `relationshipTypes` of ['INVALID']. Available relationship types are ['__ALL__'].");
+
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     @Test
