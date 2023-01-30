@@ -19,9 +19,13 @@
  */
 package org.neo4j.gds.leiden;
 
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -31,13 +35,11 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.HashSet;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
-import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
-import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
-import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
+import static org.assertj.core.api.InstanceOfAssertFactories.*;
 
 class LeidenWriteProcTest extends BaseProcTest {
 
@@ -124,7 +126,6 @@ class LeidenWriteProcTest extends BaseProcTest {
             return true;
         });
         assertThat(communitySet).containsExactly(0L, 1L);
-
     }
 
     void assertLeidenQuery(String query) {
@@ -232,5 +233,32 @@ class LeidenWriteProcTest extends BaseProcTest {
                     "   includeIntermediateCommunities: true" +
                     "})";
         assertThatNoException().isThrownBy(() -> runQuery(query));
+    }
+
+    static Stream<Arguments> communitySizeInputs() {
+        return Stream.of(
+                Arguments.of(1, new Long[]{3L, 6L}),
+                Arguments.of(10, new Long[]{})
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("communitySizeInputs")
+    void writeWithMinCommunitySize(int minCommunitySize, Long[] expectedCommunityIds) {
+        var query = "CALL gds.beta.leiden.write('leiden', {" +
+                "   writeProperty: 'communityId'," +
+                "   minCommunitySize: " + minCommunitySize +
+                "})";
+
+        runQuery(query);
+
+        runQueryWithRowConsumer(
+                "MATCH (n) RETURN collect(DISTINCT n.communityId) AS communityId ",
+                row -> {
+                    Assertions.assertThat(row.get("communityId"))
+                            .asList()
+                            .containsExactlyInAnyOrder(expectedCommunityIds);
+                }
+        );
     }
 }
