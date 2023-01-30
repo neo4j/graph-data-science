@@ -164,12 +164,12 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
         ImportSizing sizing,
         StoreScanner<NodeReference> storeScanner
     ) {
-        var nodeImporter = new NodeImporter(
-            idMapBuilder,
-            labelInformationBuilder,
-            dimensions.tokenNodeLabelMapping(),
-            nodePropertyImporter != null
-        );
+        var nodeImporter = new NodeImporterBuilder()
+            .idMapBuilder(idMapBuilder)
+            .labelInformationBuilder(labelInformationBuilder)
+            .labelTokenNodeLabelMapping(dimensions.tokenNodeLabelMapping())
+            .importProperties(nodePropertyImporter != null)
+            .build();
 
         return NodesScannerTask.factory(
             transaction,
