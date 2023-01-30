@@ -132,7 +132,7 @@ public class MemoryEstimationExecutor<
 
     protected MemoryTreeWithDimensions procedureMemoryEstimation(
         GraphDimensions dimensions,
-        Optional<MemoryEstimation> maybeEstimation,
+        Optional<MemoryEstimation> maybeGraphEstimation,
         AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory,
         CONFIG config
     ) {
@@ -140,7 +140,7 @@ public class MemoryEstimationExecutor<
 
         GraphDimensions extendedDimension = algorithmFactory.estimatedGraphDimensionTransformer(dimensions, config);
 
-        maybeEstimation.ifPresent(graphMemoryEstimation -> estimationBuilder.add("graph", graphMemoryEstimation));
+        maybeGraphEstimation.ifPresent(graphMemoryEstimation -> estimationBuilder.add("graph", graphMemoryEstimation));
         estimationBuilder.add("algorithm", algorithmFactory.memoryEstimation(config));
 
         MemoryTree memoryTree = estimationBuilder.build().estimate(extendedDimension, config.concurrency());
