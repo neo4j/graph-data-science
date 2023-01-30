@@ -68,7 +68,6 @@ public interface ExecutionContext {
         return transaction().internalTransaction();
     }
 
-    @Nullable
     ProcedureCallContext callContext();
 
     @Nullable
@@ -162,7 +161,7 @@ public interface ExecutionContext {
         }
 
         @Override
-        public @Nullable ProcedureCallContext callContext() {
+        public ProcedureCallContext callContext() {
             return ProcedureCallContext.EMPTY;
         }
 
