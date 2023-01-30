@@ -42,7 +42,7 @@ For more information on setting up, configuring and managing a Neo4j cluster, pl
 
 [NOTE]
 ======
-When working with cluster configuration you should beware https://neo4j.com/docs/operations-manual/current/reference/configuration-settings/#config_dbms.config.strict_validation[strict config validation] in Neo4j.
+When working with cluster configuration you should beware https://neo4j.com/docs/operations-manual/current/reference/configuration-settings/#config_server.config.strict_validation.enabled[strict config validation] in Neo4j.
 
 When configuring GDS for a Read Replica you will introduce GDS-specific configuration into `neo4j.conf` - and that is fine because with the GDS plugin installed, Neo4j will happily validate those configuration items.
 
