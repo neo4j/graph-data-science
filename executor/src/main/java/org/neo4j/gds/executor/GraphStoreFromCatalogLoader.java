@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.executor;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
@@ -33,6 +34,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -73,21 +75,15 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
     @Override
     public GraphDimensions graphDimensions() {
         var graphStore = graphStore();
-        var availableLabels = graphStore.nodeLabels();
-        var availableTypes = graphStore.relationshipTypes();
 
-        // the config is not validated against the graphStore yet.
-        // As we do not know the original parameter names we will just ignore invalid ones here
-        var labelFilter = ElementTypeValidator
-            .resolve(graphStore, config.nodeLabels())
-            .stream()
-            .filter(availableLabels::contains)
-            .collect(Collectors.toList());
-        var typeFilter = ElementTypeValidator
-            .resolveTypes(graphStore, config.relationshipTypes())
-            .stream()
-            .filter(availableTypes::contains)
-            .collect(Collectors.toList());
+        Collection<NodeLabel> labelFilter = ElementTypeValidator.resolve(graphStore, config.nodeLabels());
+        Collection<RelationshipType> typeFilter = ElementTypeValidator.resolveTypes(
+            graphStore,
+            config.relationshipTypes()
+        );
+
+        // validate the filters here as well as the other validation happens after the memory estimation
+        config.graphStoreValidation(graphStore, labelFilter, typeFilter);
 
         Graph filteredGraph = graphStore.getGraph(labelFilter, typeFilter, Optional.empty());
         long relCount = filteredGraph.relationshipCount();

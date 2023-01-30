@@ -35,7 +35,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.gdl.GdlGraphs;
-import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestAlgorithmResult;
 import org.neo4j.gds.test.TestMutateConfig;
@@ -43,9 +42,9 @@ import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -112,7 +111,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
     }
 
     @Test
-    void testMemoryEstimationWithInvalidRelationshipFilter() {
+    void failONMemoryEstimationWithInvalidRelationshipFilterOnExplicitGraphStore() {
         var graphName = "memoryEstimateGraph";
         GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("", graphName), GdlGraphs.EMPTY_GRAPH_STORE);
         runQuery(GdsCypher.call(graphName)
@@ -120,13 +119,10 @@ class MemoryEstimationExecutorTest extends BaseTest {
             .loadEverything()
             .yields());
 
-        Stream<MemoryEstimateResult> result = memoryEstimationExecutor.computeEstimate(
-            graphName,
+        assertThatThrownBy(() -> memoryEstimationExecutor.computeEstimate(graphName,
             Map.of("mutateProperty", "foo", "relationshipTypes", List.of("INVALID"))
-        );
-        GraphStoreCatalog.removeAllLoadedGraphs();
-
-        assertThat(result).hasSize(1).allMatch(row -> row.nodeCount == 0);
+        )).hasMessage(
+            "Could not find the specified `relationshipTypes` of ['INVALID']. Available relationship types are ['__ALL__'].");
     }
 
     @Test
