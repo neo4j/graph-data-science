@@ -23,7 +23,6 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -57,18 +56,7 @@ public class KSpanningWriteTreeProc extends BaseProc {
 
     @Override
     public ExecutionContext executionContext() {
-        return ImmutableExecutionContext
-            .builder()
-            .databaseService(databaseService)
-            .log(log)
-            .procedureTransaction(procedureTransaction)
-            .transaction(transaction)
-            .callContext(callContext)
-            .userLogRegistryFactory(userLogRegistryFactory)
-            .taskRegistryFactory(taskRegistryFactory)
-            .username(username())
-            .nodePropertyExporterBuilder(nodePropertyExporterBuilder)
-            .build();
+        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
     }
 
 }

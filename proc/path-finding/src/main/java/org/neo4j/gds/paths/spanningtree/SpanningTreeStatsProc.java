@@ -23,7 +23,6 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -70,18 +69,6 @@ public class SpanningTreeStatsProc extends BaseProc {
 
     @Override
     public ExecutionContext executionContext() {
-        return ImmutableExecutionContext
-            .builder()
-            .databaseService(databaseService)
-            .log(log)
-            .procedureTransaction(procedureTransaction)
-            .transaction(transaction)
-            .callContext(callContext)
-            .userLogRegistryFactory(userLogRegistryFactory)
-            .taskRegistryFactory(taskRegistryFactory)
-            .username(username())
-            .relationshipExporterBuilder(relationshipExporterBuilder)
-            .build();
+        return super.executionContext().withRelationshipExporterBuilder(relationshipExporterBuilder);
     }
-
 }

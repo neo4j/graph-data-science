@@ -111,6 +111,30 @@ public interface ExecutionContext {
         return transaction().securityContext().roles().contains(PREDEFINED_ADMIN_ROLE);
     }
 
+    default ExecutionContext withNodePropertyExporterBuilder(NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder) {
+        return ImmutableExecutionContext
+            .builder()
+            .from(this)
+            .nodePropertyExporterBuilder(nodePropertyExporterBuilder)
+            .build();
+    }
+
+    default ExecutionContext withRelationshipStreamExporterBuilder(RelationshipStreamExporterBuilder<? extends RelationshipStreamExporter> relationshipStreamExporterBuilder) {
+        return ImmutableExecutionContext
+            .builder()
+            .from(this)
+            .relationshipStreamExporterBuilder(relationshipStreamExporterBuilder)
+            .build();
+    }
+
+    default ExecutionContext withRelationshipExporterBuilder(RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder) {
+        return ImmutableExecutionContext
+            .builder()
+            .from(this)
+            .relationshipExporterBuilder(relationshipExporterBuilder)
+            .build();
+    }
+
     ExecutionContext EMPTY = new ExecutionContext() {
         @Override
         public @Nullable GraphDatabaseService databaseService() {
