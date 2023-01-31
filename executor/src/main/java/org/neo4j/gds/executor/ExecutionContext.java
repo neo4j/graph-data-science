@@ -60,7 +60,6 @@ public interface ExecutionContext {
     @Nullable
     ModelCatalog modelCatalog();
 
-    @Nullable
     Log log();
 
     @Nullable
