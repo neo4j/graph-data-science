@@ -61,7 +61,7 @@ public class GraphSampleProc extends CatalogProc {
             var randomWalkWithRestarts = new RandomWalkWithRestarts(rwrConfig);
             var progressTracker = new TaskProgressTracker(
                 GraphSampleConstructor.progressTask(fromGraphStore.graphStore(), randomWalkWithRestarts),
-                log,
+                executionContext().log(),
                 rwrConfig.concurrency(),
                 rwrConfig.jobId(),
                 executionContext().taskRegistryFactory(),

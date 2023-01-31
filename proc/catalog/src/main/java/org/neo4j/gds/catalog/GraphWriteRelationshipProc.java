@@ -104,7 +104,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
 
         var progressTracker = new TaskProgressTracker(
             RelationshipExporter.baseTask("Graph", relationshipCount),
-            log,
+            executionContext().log(),
             RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
             config.jobId(),
             executionContext().taskRegistryFactory(),

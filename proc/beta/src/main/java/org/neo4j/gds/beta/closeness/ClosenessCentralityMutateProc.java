@@ -66,7 +66,7 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
     }
 
     @Override
-    public ValidationConfiguration<ClosenessCentralityMutateConfig> validationConfig() {
+    public ValidationConfiguration<ClosenessCentralityMutateConfig> validationConfig(ExecutionContext executionContext) {
         return ClosenessCentralityProc.getValidationConfig();
     }
 

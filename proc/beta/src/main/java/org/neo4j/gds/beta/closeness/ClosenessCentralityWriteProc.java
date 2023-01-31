@@ -66,7 +66,7 @@ public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality,
     }
 
     @Override
-    public ValidationConfiguration<ClosenessCentralityWriteConfig> validationConfig() {
+    public ValidationConfiguration<ClosenessCentralityWriteConfig> validationConfig(ExecutionContext executionContext) {
         return ClosenessCentralityProc.getValidationConfig();
     }
 

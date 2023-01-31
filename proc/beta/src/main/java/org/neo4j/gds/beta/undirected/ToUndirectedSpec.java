@@ -87,7 +87,7 @@ public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeR
     }
 
     @Override
-    public ValidationConfiguration<ToUndirectedConfig> validationConfig() {
+    public ValidationConfiguration<ToUndirectedConfig> validationConfig(ExecutionContext executionContext) {
         return new ValidationConfiguration<>() {
             @Override
             public List<AfterLoadValidation<ToUndirectedConfig>> afterLoadValidations() {

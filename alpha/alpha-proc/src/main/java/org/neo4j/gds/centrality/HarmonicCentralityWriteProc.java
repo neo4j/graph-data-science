@@ -83,7 +83,7 @@ public class HarmonicCentralityWriteProc extends HarmonicCentralityProc<Centrali
                 var writeConcurrency = computationResult.config().writeConcurrency();
                 var progressTracker = new TaskProgressTracker(
                     NodePropertyExporter.baseTask("HarmonicCentrality", graph.nodeCount()),
-                    log,
+                    executionContext.log(),
                     writeConcurrency,
                     executionContext.taskRegistryFactory()
                 );

@@ -112,7 +112,7 @@ public final class BidirectionalComputationStreamProc extends PregelStreamProc<B
     }
 
     @Override
-    public ValidationConfiguration<PregelProcedureConfig> validationConfig() {
-        return PregelBaseProc.ensureIndexValidation(log, executionContext().taskRegistryFactory());
+    public ValidationConfiguration<PregelProcedureConfig> validationConfig(executionContext) {
+        return PregelBaseProc.ensureIndexValidation(executionContext.log(), executionContext.taskRegistryFactory());
     }
 }

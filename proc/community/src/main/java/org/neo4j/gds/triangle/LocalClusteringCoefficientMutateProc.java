@@ -73,8 +73,8 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
     }
 
     @Override
-    public ValidationConfiguration<LocalClusteringCoefficientMutateConfig> validationConfig() {
-        return LocalClusteringCoefficientCompanion.getValidationConfig(log);
+    public ValidationConfiguration<LocalClusteringCoefficientMutateConfig> validationConfig(ExecutionContext executionContext) {
+        return LocalClusteringCoefficientCompanion.getValidationConfig(executionContext.log());
     }
 
     @Override

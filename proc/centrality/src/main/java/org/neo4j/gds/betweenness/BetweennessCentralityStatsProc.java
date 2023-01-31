@@ -72,7 +72,7 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
     }
 
     @Override
-    public ValidationConfiguration<BetweennessCentralityStatsConfig> validationConfig() {
+    public ValidationConfiguration<BetweennessCentralityStatsConfig> validationConfig(ExecutionContext executionContext) {
         return BetweennessCentralityProc.getValidationConfig();
     }
 

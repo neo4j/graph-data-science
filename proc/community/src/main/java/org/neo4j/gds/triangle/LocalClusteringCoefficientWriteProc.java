@@ -74,8 +74,8 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
     }
 
     @Override
-    public ValidationConfiguration<LocalClusteringCoefficientWriteConfig> validationConfig() {
-        return LocalClusteringCoefficientCompanion.getValidationConfig(log);
+    public ValidationConfiguration<LocalClusteringCoefficientWriteConfig> validationConfig(ExecutionContext executionContext) {
+        return LocalClusteringCoefficientCompanion.getValidationConfig(executionContext.log());
     }
 
     @Override

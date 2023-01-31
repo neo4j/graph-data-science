@@ -92,7 +92,7 @@ public class GraphDropNodePropertiesProc extends CatalogProc {
         var task = Tasks.leaf("Graph :: NodeProperties :: Drop", config.nodeProperties().size());
         var progressTracker = new TaskProgressTracker(
             task,
-            log,
+            executionContext().log(),
             1,
             new JobId(),
             executionContext().taskRegistryFactory(),

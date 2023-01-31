@@ -27,6 +27,7 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.model.ModelConfig;
@@ -65,7 +66,7 @@ public abstract class TrainProc<
     }
 
     @Override
-    public ValidationConfiguration<TRAIN_CONFIG> validationConfig() {
+    public ValidationConfiguration<TRAIN_CONFIG> validationConfig(ExecutionContext executionContext) {
         return new ValidationConfiguration<>() {
             @Override
             public List<BeforeLoadValidation<TRAIN_CONFIG>> beforeLoadValidations() {
