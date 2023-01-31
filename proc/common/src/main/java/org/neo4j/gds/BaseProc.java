@@ -87,12 +87,14 @@ public abstract class BaseProc {
         return username.username();
     }
 
-    protected DatabaseId databaseId() {
-        return DatabaseId.of(databaseService);
-    }
-
     protected GraphStoreWithConfig graphStoreFromCatalog(String graphName, BaseConfig config) {
-        return GraphStoreFromCatalogLoader.graphStoreFromCatalog(graphName, config, username(), databaseId(), isGdsAdmin());
+        return GraphStoreFromCatalogLoader.graphStoreFromCatalog(
+            graphName,
+            config,
+            username(),
+            databaseId(),
+            isGdsAdmin()
+        );
     }
 
     public boolean isGdsAdmin() {
@@ -144,7 +146,7 @@ public abstract class BaseProc {
 
     protected GraphLoaderContext graphLoaderContext() {
         return ImmutableGraphLoaderContext.builder()
-            .databaseId(DatabaseId.of(databaseService))
+            .databaseId(databaseId())
             .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
             .transactionContext(TransactionContext.of(databaseService, procedureTransaction))
             .log(log)
@@ -159,22 +161,24 @@ public abstract class BaseProc {
     }
 
     public ExecutionContext executionContext() {
-        return ImmutableExecutionContext
-            .builder()
-            .databaseId(databaseId())
-            .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
-            .modelCatalog(internalModelCatalog)
-            .log(log)
-            .transactionContext(TransactionContext.of(databaseService, procedureTransaction))
-            .callContext(procedureCallContextOrDefault(callContext))
-            .userLogRegistryFactory(userLogRegistryFactory)
-            .taskRegistryFactory(taskRegistryFactory)
-            .username(username())
-            .terminationMonitor(new TransactionTerminationMonitor(transaction))
-            .closeableResourceRegistry(new TransactionCloseableResourceRegistry(transaction))
-            .algorithmMetaDataSetter(new TransactionAlgorithmMetaDataSetter(transaction))
-            .nodeLookup(new TransactionNodeLookup(transaction))
-            .build();
+        return databaseService == null
+            ? ExecutionContext.EMPTY
+            : ImmutableExecutionContext
+                .builder()
+                .databaseId(databaseId())
+                .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
+                .modelCatalog(internalModelCatalog)
+                .log(log)
+                .transactionContext(TransactionContext.of(databaseService, procedureTransaction))
+                .callContext(procedureCallContextOrDefault(callContext))
+                .userLogRegistryFactory(userLogRegistryFactory)
+                .taskRegistryFactory(taskRegistryFactory)
+                .username(username())
+                .terminationMonitor(new TransactionTerminationMonitor(transaction))
+                .closeableResourceRegistry(new TransactionCloseableResourceRegistry(transaction))
+                .algorithmMetaDataSetter(new TransactionAlgorithmMetaDataSetter(transaction))
+                .nodeLookup(new TransactionNodeLookup(transaction))
+                .build();
     }
 
     public ModelCatalog modelCatalog() {
@@ -192,5 +196,9 @@ public abstract class BaseProc {
 
     private static ProcedureCallContext procedureCallContextOrDefault(ProcedureCallContext procedureCallContext) {
         return Objects.requireNonNullElse(procedureCallContext, ProcedureCallContext.EMPTY);
+    }
+
+    private DatabaseId databaseId() {
+        return DatabaseId.of(databaseService);
     }
 }
