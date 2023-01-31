@@ -24,7 +24,9 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
+import org.neo4j.kernel.GraphDatabaseQueryService;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
+import org.neo4j.kernel.impl.query.Neo4jTransactionalContextFactory;
 import org.neo4j.kernel.impl.query.QueryExecution;
 import org.neo4j.kernel.impl.query.QueryExecutionEngine;
 import org.neo4j.kernel.impl.query.QueryExecutionKernelException;
@@ -74,8 +76,9 @@ abstract class CypherRecordLoader<R> {
         this.recordCount = recordCount;
         this.cypherConfig = cypherConfig;
         this.loadingContext = loadingContext;
-        this.executionEngine = loadingContext.dependencyResolver().resolveDependency(QueryExecutionEngine.class);
-        this.contextFactory = loadingContext.dependencyResolver().resolveDependency(TransactionalContextFactory.class);
+        var dependencyResolver = loadingContext.dependencyResolver();
+        this.executionEngine = dependencyResolver.resolveDependency(QueryExecutionEngine.class);
+        this.contextFactory = Neo4jTransactionalContextFactory.create(dependencyResolver.resolveDependency(GraphDatabaseQueryService.class));
     }
 
     final R load(InternalTransaction transaction) {
