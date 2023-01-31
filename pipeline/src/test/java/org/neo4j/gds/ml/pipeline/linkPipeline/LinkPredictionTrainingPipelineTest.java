@@ -45,6 +45,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.model.catalog.TestTrainConfigImpl;
 import org.neo4j.gds.model.catalog.TestWeightedTrainConfigImpl;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Collection;
 import java.util.List;
@@ -171,6 +172,7 @@ class LinkPredictionTrainingPipelineTest {
     void deriveRelationshipWeightProperty() {
         var executionContext = ImmutableExecutionContext.builder()
             .username("")
+            .callContext(ProcedureCallContext.EMPTY)
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -203,6 +205,7 @@ class LinkPredictionTrainingPipelineTest {
         var executionContext = ImmutableExecutionContext.builder()
             .username("")
             .modelCatalog(modelCatalog)
+            .callContext(ProcedureCallContext.EMPTY)
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -235,6 +238,7 @@ class LinkPredictionTrainingPipelineTest {
         var executionContext = ImmutableExecutionContext.builder()
             .username("")
             .modelCatalog(modelCatalog)
+            .callContext(ProcedureCallContext.EMPTY)
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
