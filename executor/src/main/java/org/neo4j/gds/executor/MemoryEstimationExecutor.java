@@ -21,6 +21,7 @@ package org.neo4j.gds.executor;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.api.EmptyDependencyResolver;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.TerminationMonitor;
@@ -78,8 +79,8 @@ public class MemoryEstimationExecutor<
         Optional<MemoryEstimation> maybeGraphEstimation;
 
         if (graphNameOrConfiguration instanceof Map) {
-            // if the dependency resolver is null, we are probably using EstimationCli
-            var graphLoaderContext = (executionContext.dependencyResolver() == null)
+            // if the dependency resolver is empty, we are probably using EstimationCli
+            var graphLoaderContext = (executionContext.dependencyResolver() == EmptyDependencyResolver.INSTANCE)
                 ? GraphLoaderContext.NULL_CONTEXT
                 : ImmutableGraphLoaderContext
                     .builder()
