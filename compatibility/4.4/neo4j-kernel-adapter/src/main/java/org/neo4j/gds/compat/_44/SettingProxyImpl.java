@@ -77,4 +77,9 @@ public class SettingProxyImpl implements SettingProxyApi {
         }
         config.set(GraphDatabaseSettings.mode, mode);
     }
+
+    @Override
+    public String secondaryModeName() {
+        return "Read Replica";
+    }
 }

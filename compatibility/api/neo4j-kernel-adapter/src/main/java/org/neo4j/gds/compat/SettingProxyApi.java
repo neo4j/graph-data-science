@@ -31,4 +31,6 @@ public interface SettingProxyApi {
 
     @TestOnly
     void setDatabaseMode(Config config, DatabaseMode databaseMode, GraphDatabaseService databaseService);
+
+    String secondaryModeName();
 }

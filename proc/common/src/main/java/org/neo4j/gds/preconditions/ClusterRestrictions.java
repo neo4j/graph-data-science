@@ -35,7 +35,7 @@ public final class ClusterRestrictions {
         if (neo4jMode != DatabaseMode.SINGLE) {
             throw new IllegalStateException(
                 "The requested operation (" + detail +
-                ") is not available while running Neo4j Graph Data Science library on a Neo4j Causal Cluster.");
+                ") is not available while running Neo4j Graph Data Science library on a Neo4j Cluster.");
         }
     }
 }
