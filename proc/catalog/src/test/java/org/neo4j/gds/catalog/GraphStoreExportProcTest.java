@@ -344,7 +344,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
             .hasMessageContaining("The requested operation")
             .hasMessageContaining("(Export a graph to Neo4j database)")
             .hasMessageContaining(
-                "is not available while running Neo4j Graph Data Science library on a Neo4j Causal Cluster."
+                "is not available while running Neo4j Graph Data Science library on a Neo4j Cluster."
             );
 
     }
