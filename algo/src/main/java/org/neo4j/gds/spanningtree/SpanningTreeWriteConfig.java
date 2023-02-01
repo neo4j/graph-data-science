@@ -27,6 +27,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
+@SuppressWarnings("immutables:subtype")
 public interface SpanningTreeWriteConfig extends SpanningTreeBaseConfig, WritePropertyConfig, WriteRelationshipConfig {
     
     static SpanningTreeWriteConfig of(CypherMapWrapper userInput) {

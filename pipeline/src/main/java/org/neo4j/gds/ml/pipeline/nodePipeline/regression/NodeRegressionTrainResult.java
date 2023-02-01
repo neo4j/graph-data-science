@@ -30,6 +30,7 @@ public interface NodeRegressionTrainResult {
     TrainingStatistics trainingStatistics();
 
     @ValueClass
+    @SuppressWarnings("immutables:subtype")
     interface NodeRegressionTrainPipelineResult extends CatalogModelContainer<Regressor.RegressorData, NodeRegressionPipelineTrainConfig, NodeRegressionPipelineModelInfo> {
         TrainingStatistics trainingStatistics();
     }

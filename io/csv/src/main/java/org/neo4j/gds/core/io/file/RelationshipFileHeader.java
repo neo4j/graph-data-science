@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 
 @ValueClass
+@SuppressWarnings("immutables:subtype")
 public interface RelationshipFileHeader extends FileHeader<MutableRelationshipSchema, RelationshipPropertySchema> {
     String relationshipType();
 

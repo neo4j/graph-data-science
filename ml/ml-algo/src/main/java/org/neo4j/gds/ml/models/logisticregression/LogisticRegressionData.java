@@ -34,6 +34,7 @@ import org.neo4j.gds.ml.models.TrainingMethod;
 import java.io.Serializable;
 
 @ValueClass
+@SuppressWarnings("immutables:subtype")
 public interface LogisticRegressionData extends Classifier.ClassifierData, Serializable {
 
     Weights<Matrix> weights();

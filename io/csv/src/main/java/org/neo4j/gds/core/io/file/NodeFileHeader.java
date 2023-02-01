@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @ValueClass
+@SuppressWarnings("immutables:subtype")
 public interface NodeFileHeader extends FileHeader<MutableNodeSchema, PropertySchema> {
     String[] nodeLabels();
 

@@ -29,6 +29,7 @@ import org.neo4j.gds.config.TargetNodesConfig;
 
 @ValueClass
 @Configuration
+@SuppressWarnings("immutables:subtype")
 public interface SteinerTreeBaseConfig extends AlgoBaseConfig, SourceNodeConfig, TargetNodesConfig, RelationshipWeightConfig {
 
     @Value.Default

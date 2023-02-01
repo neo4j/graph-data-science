@@ -32,6 +32,7 @@ import java.util.Random;
 import java.util.SplittableRandom;
 
 @ValueClass
+@SuppressWarnings("immutables:subtype")
 public interface MLPClassifierData extends Classifier.ClassifierData {
 
     List<Weights<Matrix>> weights();
