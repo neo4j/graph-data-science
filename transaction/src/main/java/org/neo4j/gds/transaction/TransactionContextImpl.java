@@ -38,7 +38,7 @@ public final class TransactionContextImpl implements TransactionContext {
      */
     public static TransactionContext of(GraphDatabaseService databaseService, Transaction top) {
         if (top == null) {
-            return of(databaseService, SecurityContext.AUTH_DISABLED);
+            return withFullAccess(databaseService);
         }
         var internalTransaction = (InternalTransaction) top;
         return of(databaseService, internalTransaction);
@@ -48,14 +48,14 @@ public final class TransactionContextImpl implements TransactionContext {
      * Creates a new {@code TransactionContext} with the same {@link org.neo4j.internal.kernel.api.security.SecurityContext} as the provided {@link org.neo4j.kernel.impl.coreapi.InternalTransaction}.
      */
     public static TransactionContext of(GraphDatabaseService databaseService, InternalTransaction top) {
-        return of(databaseService, top.securityContext());
+        return new TransactionContextImpl(databaseService, top.securityContext());
     }
 
     /**
      * Creates a new {@code TransactionContext} with the provided {@link org.neo4j.internal.kernel.api.security.SecurityContext}.
      */
-    public static TransactionContext of(GraphDatabaseService databaseService, SecurityContext securityContext) {
-        return new TransactionContextImpl(databaseService, securityContext);
+    public static TransactionContext withFullAccess(GraphDatabaseService databaseService) {
+        return new TransactionContextImpl(databaseService, SecurityContext.AUTH_DISABLED);
     }
 
     private final GraphDatabaseService databaseService;

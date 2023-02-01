@@ -82,6 +82,7 @@ public interface ExecutionContext {
 
     boolean isGdsAdmin();
 
+    @Nullable
     RelationshipStreamExporterBuilder<? extends RelationshipStreamExporter> relationshipStreamExporterBuilder();
 
     @Nullable
@@ -140,11 +141,6 @@ public interface ExecutionContext {
         @Override
         public @Nullable Log log() {
             return NullLog.getInstance();
-        }
-
-        @Override
-        public TransactionContext transactionContext() {
-            return null;
         }
 
         @Override

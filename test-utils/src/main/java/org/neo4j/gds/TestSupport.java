@@ -48,7 +48,6 @@ import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.transaction.TransactionContextImpl;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.TransactionTerminatedException;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.exceptions.Status;
 
 import java.util.ArrayList;
@@ -475,7 +474,7 @@ public final class TestSupport {
     }
 
     public static TransactionContext fullAccessTransaction(GraphDatabaseService databaseService) {
-        return TransactionContextImpl.of(databaseService, SecurityContext.AUTH_DISABLED);
+        return TransactionContextImpl.withFullAccess(databaseService);
     }
 
     public static IdMap idMap(long nodeCount) {
