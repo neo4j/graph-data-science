@@ -162,12 +162,11 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
     @Override
     protected MutableGraphSchema computeGraphSchema(Nodes nodes, RelationshipImportResult relationshipImportResult) {
-        var relationshipSchema = relationshipImportResult.importResults().entrySet().stream().reduce(
+        var relationshipSchema = relationshipImportResult.importResults().values().stream().reduce(
             MutableRelationshipSchema.empty(),
-            (unionSchema, entry) -> {
-                var relationshipType = entry.getKey();
-                var relationships = entry.getValue();
-                return unionSchema.union(relationships.relationshipSchema(relationshipType));
+            (unionSchema, relationships) -> {
+                unionSchema.set(relationships.relationshipSchemaEntry());
+                return unionSchema;
             },
             MutableRelationshipSchema::union
         );
@@ -355,6 +354,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
                     return GraphFactory.initRelationshipsBuilder()
                         .nodes(idMap)
+                        .relationshipType(relTypeAndProperty.getKey())
                         .orientation(graphProjectConfig.orientation())
                         .aggregation(graphProjectConfig.aggregation())
                         .indexInverse(graphProjectConfig.indexInverse())

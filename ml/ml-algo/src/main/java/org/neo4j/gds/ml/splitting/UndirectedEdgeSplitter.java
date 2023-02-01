@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.splitting;
 
 import com.carrotsearch.hppc.predicates.LongLongPredicate;
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
@@ -46,9 +47,11 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
         Optional<Long> maybeSeed,
         IdMap sourceNodes,
         IdMap targetNodes,
+        RelationshipType selectedRelationshipType,
+        RelationshipType remainingRelationshipType,
         int concurrency
     ) {
-        super(maybeSeed, sourceNodes, targetNodes, concurrency);
+        super(maybeSeed, sourceNodes, targetNodes, selectedRelationshipType, remainingRelationshipType, concurrency);
     }
 
     @Override

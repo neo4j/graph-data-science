@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.IdMap;
@@ -202,6 +203,7 @@ class TransientCsrListTest {
 
             var relsBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(nodes.idMap())
+                .relationshipType(RelationshipType.of("REL"))
                 .orientation(Orientation.UNDIRECTED)
                 .build();
 
@@ -254,7 +256,6 @@ class TransientCsrListTest {
         });
     }
 
-
     static AdjacencyCursor adjacencyCursorFromTargets(long[] targets) {
         long sourceNodeId = targets[0];
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
@@ -268,6 +269,7 @@ class TransientCsrListTest {
 
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
+            .relationshipType(RelationshipType.of("REL"))
             .concurrency(1)
             .executorService(Pools.DEFAULT)
             .build();

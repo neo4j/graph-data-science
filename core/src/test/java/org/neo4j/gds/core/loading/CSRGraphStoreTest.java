@@ -68,6 +68,7 @@ class CSRGraphStoreTest {
 
         RelationshipsBuilder relBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
+            .relationshipType(RelationshipType.of("REL"))
             .orientation(Orientation.UNDIRECTED)
             .build();
 
@@ -95,6 +96,7 @@ class CSRGraphStoreTest {
 
         RelationshipsBuilder relBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
+            .relationshipType(RelationshipType.of("NEW"))
             .orientation(Orientation.NATURAL)
             .build();
 
@@ -166,6 +168,7 @@ class CSRGraphStoreTest {
 
         RelationshipsBuilder relBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
+            .relationshipType(RelationshipType.of("REL"))
             .orientation(addedOrientation)
             .build();
 
