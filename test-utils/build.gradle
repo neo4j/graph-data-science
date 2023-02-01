@@ -15,6 +15,7 @@ dependencies {
     compileOnly group: 'org.immutables',          name: 'builder',     version: ver.'immutables'
     compileOnly group: 'org.jetbrains',           name: 'annotations', version: ver.'jetbrains-annotations'
 
+    implementation project(':algo-common')
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')

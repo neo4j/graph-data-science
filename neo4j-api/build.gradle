@@ -5,69 +5,11 @@ description = 'Neo4j Graph Data Science :: Neo4j API'
 group = 'org.neo4j.gds'
 
 dependencies {
-    annotationProcessor project(':annotations')
-    annotationProcessor project(':config-generator')
-    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
-    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
-    annotationProcessor group: 'org.neo4j',                name: 'annotations',        version: ver.'neo4j'
-
-    compileOnly         group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
-    compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
-    compileOnly         group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
-    compileOnly         group: 'com.github.spotbugs',      name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
-
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
             transitive = false
         }
     }
 
-    implementation project(':annotations')
     implementation project(':config-api')
-    implementation project(':licensing')
-    implementation project(':graph-schema-api')
-    implementation project(':memory-usage')
-    implementation project(':open-licensing')
-    implementation project(':string-formatting')
-    implementation project(':collections')
-    implementation project(':collections-memory-estimation')
-    implementation project(':transaction')
-
-    implementation project(':concurrency-validation-api')
-
-    api(
-        project(':neo4j-kernel-adapter'),
-        project(':graph-projection-api'),
-        project(':graph-dimensions'),
-        project(':collections'),
-        [group: 'org.apache.commons',      name: 'commons-text',             version: ver.'commons-text'],
-        [group: 'org.eclipse.collections', name: 'eclipse-collections-api',  version: ver.'eclipse-collections'],
-        [group: 'org.eclipse.collections', name: 'eclipse-collections',      version: ver.'eclipse-collections'],
-        [group: 'com.carrotsearch',        name: 'hppc',                     version: ver.'hppc'],
-    )
-
-
-    // TEST DEPENDENCIES
-
-    testCompileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
-
-    testAnnotationProcessor project(':annotations')
-    testAnnotationProcessor project(':config-generator')
-    testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
-
-    testImplementation project(':test-graph-loaders')
-    testImplementation project(':test-utils')
-    testImplementation project(':edition-api')
-
-    testImplementation group: 'net.jqwik',       name: 'jqwik',               version: ver.'jqwik'
-    testImplementation group: 'io.qala.datagen', name: 'qala-datagen-junit5', version: ver.'qala-datagen'
-    testImplementation group: 'org.roaringbitmap', name: 'RoaringBitmap', version: ver.'RoaringBitmap'
-}
-
-afterEvaluate {
-    if (ver.'neo4j'.startsWith('5.')) {
-        dependencies {
-            testImplementation group: 'org.neo4j', name: 'neo4j-record-storage-engine', version: ver.'neo4j'
-        }
-    }
 }
