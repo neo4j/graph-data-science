@@ -153,7 +153,7 @@ class ListProgressDetailProcTest extends BaseProgressTest {
                 Tasks.leaf("leaf", 3)
             );
 
-            var taskProgressTracker = new TaskProgressTracker(task, Neo4jProxy.testLog(), 1, taskRegistryFactory);
+            var taskProgressTracker = new TaskProgressTracker(task, Neo4jProxy.testLog(), 1, executionContext().taskRegistryFactory());
 
             taskProgressTracker.beginSubTask(); // root
             taskProgressTracker.beginSubTask(); // iterative

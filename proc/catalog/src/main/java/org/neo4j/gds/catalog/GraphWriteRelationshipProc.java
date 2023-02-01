@@ -107,8 +107,8 @@ public class GraphWriteRelationshipProc extends CatalogProc {
             log,
             RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
             config.jobId(),
-            taskRegistryFactory,
-            userLogRegistryFactory
+            executionContext().taskRegistryFactory(),
+            executionContext().userLogRegistryFactory()
         );
 
         deprecationWarning.ifPresent(progressTracker::logWarning);

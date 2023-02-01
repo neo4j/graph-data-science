@@ -85,7 +85,7 @@ public class HarmonicCentralityWriteProc extends HarmonicCentralityProc<Centrali
                     NodePropertyExporter.baseTask("HarmonicCentrality", graph.nodeCount()),
                     log,
                     writeConcurrency,
-                    taskRegistryFactory
+                    executionContext.taskRegistryFactory()
                 );
                 NodePropertyExporter exporter =  nodePropertyExporterBuilder
                     .withIdMap(graph)
