@@ -23,7 +23,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.procedure.Context;
 
 public abstract class StreamOfRelationshipsWriter<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig, PROC_RESULT>
@@ -34,17 +33,6 @@ public abstract class StreamOfRelationshipsWriter<ALGO extends Algorithm<ALGO_RE
 
     @Override
     public ExecutionContext executionContext() {
-        return ImmutableExecutionContext
-            .builder()
-            .databaseService(databaseService)
-            .log(log)
-            .procedureTransaction(procedureTransaction)
-            .transaction(transaction)
-            .callContext(callContext)
-            .userLogRegistryFactory(userLogRegistryFactory)
-            .taskRegistryFactory(taskRegistryFactory)
-            .username(username())
-            .relationshipStreamExporterBuilder(relationshipStreamExporterBuilder)
-            .build();
+        return super.executionContext().withRelationshipStreamExporterBuilder(relationshipStreamExporterBuilder);
     }
 }
