@@ -26,7 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.gds.transaction.TransactionContextImpl;
 import org.neo4j.graphdb.Label;
 import org.roaringbitmap.longlong.Roaring64Bitmap;
 
@@ -62,7 +62,7 @@ class NodeLabelIndexBasedScannerTest extends BaseTest {
         });
 
         try (var transactions = GraphDatabaseApiProxy.newKernelTransaction(db)) {
-            var txContext = TransactionContext.of(db, transactions.tx());
+            var txContext = TransactionContextImpl.of(db, transactions.tx());
             var ktx = transactions.ktx();
 
             var labelAToken = ktx.tokenRead().nodeLabel(labelA.name());
@@ -137,7 +137,7 @@ class NodeLabelIndexBasedScannerTest extends BaseTest {
         });
 
         try (var transactions = GraphDatabaseApiProxy.newKernelTransaction(db)) {
-            var txContext = TransactionContext.of(db, transactions.tx());
+            var txContext = TransactionContextImpl.of(db, transactions.tx());
             var ktx = transactions.ktx();
             var labelToken = ktx.tokenRead().nodeLabel(label.name());
 

@@ -39,7 +39,7 @@ import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.preconditions.ClusterRestrictions;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.gds.transaction.TransactionContextImpl;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -183,7 +183,7 @@ public class GraphStoreExportProc extends BaseProc {
     ) {
         return NeoNodeProperties.of(
             graphStore,
-            TransactionContext.of(databaseService, procedureTransaction),
+            TransactionContextImpl.of(databaseService, procedureTransaction),
             exportConfig.additionalNodeProperties(),
             executionContext().log()
         );

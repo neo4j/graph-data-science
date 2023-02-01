@@ -37,6 +37,7 @@ import org.neo4j.gds.executor.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.executor.MemoryUsageValidator;
 import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.gds.transaction.TransactionContextImpl;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -182,7 +183,7 @@ public abstract class BaseProc {
     }
 
     public TransactionContext transactionContext() {
-        return TransactionContext.of(databaseService, procedureTransaction);
+        return TransactionContextImpl.of(databaseService, procedureTransaction);
     }
 
     public ModelCatalog modelCatalog() {

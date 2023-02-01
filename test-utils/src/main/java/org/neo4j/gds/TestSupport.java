@@ -45,6 +45,7 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
 import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.gds.transaction.TransactionContextImpl;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
@@ -474,7 +475,7 @@ public final class TestSupport {
     }
 
     public static TransactionContext fullAccessTransaction(GraphDatabaseService databaseService) {
-        return TransactionContext.of(databaseService, SecurityContext.AUTH_DISABLED);
+        return TransactionContextImpl.of(databaseService, SecurityContext.AUTH_DISABLED);
     }
 
     public static IdMap idMap(long nodeCount) {
