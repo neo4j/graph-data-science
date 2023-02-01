@@ -36,7 +36,6 @@ import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
-import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -233,14 +232,14 @@ public abstract class FileToGraphStoreImporter {
     }
 
     public static RelationshipImportResult relationshipImportResult(Map<String, RelationshipsBuilder> relationshipBuildersByType) {
-        Map<RelationshipType, SingleTypeRelationships> foo = relationshipBuildersByType.entrySet()
+        var relationshipsByType = relationshipBuildersByType.entrySet()
             .stream()
             .collect(Collectors.toMap(
                 e -> RelationshipType.of(e.getKey()),
                 e -> e.getValue().build()
             ));
 
-        return RelationshipImportResult.builder().importResults(foo).build();
+        return RelationshipImportResult.builder().importResults(relationshipsByType).build();
     }
 
     @ValueClass
