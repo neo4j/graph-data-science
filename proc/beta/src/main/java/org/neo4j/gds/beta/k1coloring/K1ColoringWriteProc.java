@@ -76,8 +76,8 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
         ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        WriteResult.Builder builder = new WriteResult.Builder(callContext, computeResult.config().concurrency());
-        return K1ColoringProc.resultBuilder(builder, computeResult, callContext);
+        WriteResult.Builder builder = new WriteResult.Builder(executionContext.callContext(), computeResult.config().concurrency());
+        return K1ColoringProc.resultBuilder(builder, computeResult, executionContext.callContext());
     }
 
     @Override

@@ -56,11 +56,11 @@ public class GraphListProc extends CatalogProc {
         return graphEntries.map(e -> {
             GraphProjectConfig graphProjectConfig = e.getKey();
             GraphStore graphStore = e.getValue();
-            boolean computeDegreeDistribution = callContext
+            boolean computeDegreeDistribution = executionContext().callContext()
                 .outputFields()
                 .anyMatch(s -> s.equalsIgnoreCase("degreeDistribution"));
 
-            boolean computeGraphSize = callContext
+            boolean computeGraphSize = executionContext().callContext()
                 .outputFields()
                 .anyMatch(s -> s.equalsIgnoreCase("memoryUsage") || s.equalsIgnoreCase("sizeInBytes"));
 

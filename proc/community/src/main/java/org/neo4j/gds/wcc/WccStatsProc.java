@@ -73,7 +73,7 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
         ExecutionContext executionContext
     ) {
         return WccProc.resultBuilder(
-            new StatsResult.Builder(callContext, computeResult.config().concurrency()),
+            new StatsResult.Builder(executionContext.callContext(), computeResult.config().concurrency()),
             computeResult
         );
     }

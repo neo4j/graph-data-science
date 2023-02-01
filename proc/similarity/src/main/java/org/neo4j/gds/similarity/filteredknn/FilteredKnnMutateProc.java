@@ -144,7 +144,7 @@ public class FilteredKnnMutateProc extends AlgoBaseProc<FilteredKnn, FilteredKnn
         Graph similarityGraph,
         FilteredKnnMutateProcResult.Builder resultBuilder
     ) {
-        if (shouldComputeHistogram(callContext)) {
+        if (shouldComputeHistogram(executionContext().callContext())) {
             resultBuilder.withHistogram(SimilarityProc.computeHistogram(similarityGraph));
         }
     }

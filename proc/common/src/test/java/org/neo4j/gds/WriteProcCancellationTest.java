@@ -40,6 +40,7 @@ import org.neo4j.gds.test.TestAlgorithmResult;
 import org.neo4j.gds.test.TestResult;
 import org.neo4j.gds.test.TestWriteConfig;
 import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.List;
 import java.util.Map;
@@ -108,6 +109,7 @@ class WriteProcCancellationTest extends BaseTest {
                 .taskRegistryFactory(jobId -> new TaskRegistry("", taskStore, jobId))
                 .username("")
                 .log(Neo4jProxy.testLog())
+                .callContext(ProcedureCallContext.EMPTY)
                 .build();
 
             assertThatThrownBy(() -> resultConsumer.consume(computationResult, executionContext))

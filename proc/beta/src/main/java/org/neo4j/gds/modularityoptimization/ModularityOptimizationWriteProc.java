@@ -82,7 +82,7 @@ public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimiz
         ExecutionContext executionContext
     ) {
         return ModularityOptimizationProc.resultBuilder(
-            new WriteResult.Builder(callContext, computeResult.config().concurrency()),
+            new WriteResult.Builder(executionContext.callContext(), computeResult.config().concurrency()),
             computeResult
         );
     }

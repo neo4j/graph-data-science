@@ -92,7 +92,7 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
         ExecutionContext executionContext
     ) {
         return BetweennessCentralityProc.resultBuilder(new StatsResult.Builder(
-            callContext,
+            executionContext.callContext(),
             computeResult.config().concurrency()
         ), computeResult);
     }

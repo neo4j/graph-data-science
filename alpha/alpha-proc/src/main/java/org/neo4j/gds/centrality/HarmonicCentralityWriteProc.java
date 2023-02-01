@@ -63,7 +63,7 @@ public class HarmonicCentralityWriteProc extends HarmonicCentralityProc<Centrali
             var graph = computationResult.graph();
 
             AbstractCentralityResultBuilder<CentralityScore.Stats> builder = new CentralityScore.Stats.Builder(
-                callContext,
+                executionContext.callContext(),
                 config.concurrency()
             );
 

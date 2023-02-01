@@ -86,7 +86,7 @@ public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality,
         ExecutionContext executionContext
     ) {
         return ClosenessCentralityProc.resultBuilder(
-            new WriteResult.Builder(callContext, computeResult.config().concurrency()).withWriteProperty(computeResult
+            new WriteResult.Builder(executionContext.callContext(), computeResult.config().concurrency()).withWriteProperty(computeResult
                 .config()
                 .writeProperty()),
             computeResult
