@@ -17,26 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.traverse;
+package org.neo4j.gds;
 
-import org.neo4j.gds.api.NodeLookup;
-import org.neo4j.gds.paths.PathFactory;
-import org.neo4j.graphdb.Path;
-import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.gds.api.CloseableResourceRegistry;
+import org.neo4j.kernel.api.KernelTransaction;
 
-import java.util.List;
+public class TransactionCloseableResourceRegistry implements CloseableResourceRegistry {
 
-class PathFactoryFacade {
+    private final KernelTransaction kernelTransaction;
 
-    Path createPath(
-        NodeLookup nodeLookup,
-        List<Long> nodeList,
-        RelationshipType relationshipType
-    ) {
-        return PathFactory.create(
-            nodeLookup,
-            nodeList,
-            relationshipType
-        );
+    public TransactionCloseableResourceRegistry(KernelTransaction kernelTransaction) {
+        this.kernelTransaction = kernelTransaction;
+    }
+
+    @Override
+    public void register(AutoCloseable resource, Runnable action) {
+        try(var statement = kernelTransaction.acquireStatement()) {
+            statement.registerCloseableResource(resource);
+            action.run();
+        }
     }
 }

@@ -148,7 +148,7 @@ public abstract class BaseProc {
             .log(log)
             .taskRegistryFactory(taskRegistryFactory)
             .userLogRegistryFactory(userLogRegistryFactory)
-            .terminationFlag(TerminationFlag.wrap(transaction))
+            .terminationFlag(TerminationFlag.wrap(new TransactionTerminationMonitor(transaction)))
             .build();
     }
 
@@ -162,12 +162,15 @@ public abstract class BaseProc {
             .databaseService(databaseService)
             .modelCatalog(internalModelCatalog)
             .log(log)
-            .procedureTransaction(procedureTransaction)
-            .transaction(transaction)
+            .transactionContext(TransactionContext.of(databaseService, procedureTransaction))
             .callContext(procedureCallContextOrDefault(callContext))
             .userLogRegistryFactory(userLogRegistryFactory)
             .taskRegistryFactory(taskRegistryFactory)
             .username(username())
+            .terminationMonitor(new TransactionTerminationMonitor(transaction))
+            .closeableResourceRegistry(new TransactionCloseableResourceRegistry(transaction))
+            .algorithmMetaDataSetter(new TransactionAlgorithmMetaDataSetter(transaction))
+            .nodeLookup(new TransactionNodeLookup(transaction))
             .build();
     }
 

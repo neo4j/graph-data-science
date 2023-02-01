@@ -17,26 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.traverse;
+package org.neo4j.gds.api;
 
-import org.neo4j.gds.api.NodeLookup;
-import org.neo4j.gds.paths.PathFactory;
-import org.neo4j.graphdb.Path;
-import org.neo4j.graphdb.RelationshipType;
+@FunctionalInterface
+public interface TerminationMonitor {
+    boolean isTerminated();
 
-import java.util.List;
-
-class PathFactoryFacade {
-
-    Path createPath(
-        NodeLookup nodeLookup,
-        List<Long> nodeList,
-        RelationshipType relationshipType
-    ) {
-        return PathFactory.create(
-            nodeLookup,
-            nodeList,
-            relationshipType
-        );
-    }
+    TerminationMonitor EMPTY = () -> false;
 }

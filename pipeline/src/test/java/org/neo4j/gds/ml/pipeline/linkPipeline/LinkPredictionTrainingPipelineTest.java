@@ -24,6 +24,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.AlgorithmMetaDataSetter;
+import org.neo4j.gds.api.CloseableResourceRegistry;
+import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -172,6 +176,10 @@ class LinkPredictionTrainingPipelineTest {
     void deriveRelationshipWeightProperty() {
         var executionContext = ImmutableExecutionContext.builder()
             .username("")
+            .terminationMonitor(TerminationMonitor.EMPTY)
+            .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
+            .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
+            .nodeLookup(NodeLookup.EMPTY)
             .callContext(ProcedureCallContext.EMPTY)
             .build();
 
@@ -205,6 +213,10 @@ class LinkPredictionTrainingPipelineTest {
         var executionContext = ImmutableExecutionContext.builder()
             .username("")
             .modelCatalog(modelCatalog)
+            .terminationMonitor(TerminationMonitor.EMPTY)
+            .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
+            .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
+            .nodeLookup(NodeLookup.EMPTY)
             .callContext(ProcedureCallContext.EMPTY)
             .build();
 
@@ -238,6 +250,10 @@ class LinkPredictionTrainingPipelineTest {
         var executionContext = ImmutableExecutionContext.builder()
             .username("")
             .modelCatalog(modelCatalog)
+            .terminationMonitor(TerminationMonitor.EMPTY)
+            .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
+            .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
+            .nodeLookup(NodeLookup.EMPTY)
             .callContext(ProcedureCallContext.EMPTY)
             .build();
 

@@ -71,7 +71,7 @@ public class ProcedureExecutor<
 
         CONFIG config = executorSpec.configParser(algoSpec.newConfigFunction(), executionContext).processInput(configuration);
 
-        setAlgorithmMetaDataToTransaction(config);
+        executionContext.algorithmMetaDataSetter().set(config);
 
         var graphCreation = executorSpec.graphCreationFactory(executionContext).create(config, graphName);
 
@@ -145,7 +145,7 @@ public class ProcedureExecutor<
         GraphStore graphStore,
         CONFIG config
     ) {
-        TerminationFlag terminationFlag = TerminationFlag.wrap(executionContext.transaction());
+        TerminationFlag terminationFlag = TerminationFlag.wrap(executionContext.terminationMonitor());
         ALGO algorithm = algoSpec.algorithmFactory()
             .accept(new AlgorithmFactory.Visitor<>() {
                 @Override
@@ -173,16 +173,6 @@ public class ProcedureExecutor<
         algorithm.setTerminationFlag(terminationFlag);
 
         return algorithm;
-    }
-
-    private void setAlgorithmMetaDataToTransaction(CONFIG algoConfig) {
-        if (executionContext.transaction() == null) {
-            return;
-        }
-        var metaData = executionContext.transaction().getMetaData();
-        if (metaData instanceof AlgorithmMetaData) {
-            ((AlgorithmMetaData) metaData).set(algoConfig);
-        }
     }
 
     private <R> R runWithExceptionLogging(String message, Supplier<R> supplier) {

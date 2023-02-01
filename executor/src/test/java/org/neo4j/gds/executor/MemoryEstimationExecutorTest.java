@@ -26,6 +26,10 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
+import org.neo4j.gds.api.AlgorithmMetaDataSetter;
+import org.neo4j.gds.api.CloseableResourceRegistry;
+import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -38,6 +42,8 @@ import org.neo4j.gds.gdl.GdlGraphs;
 import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestAlgorithmResult;
 import org.neo4j.gds.test.TestMutateConfig;
+import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.List;
@@ -52,17 +58,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MemoryEstimationExecutorTest extends BaseTest {
 
-    private ExecutionContext executionContext;
+    private Transaction procedureTransaction;
     private MemoryEstimationExecutor<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> memoryEstimationExecutor;
 
     @BeforeEach
     void setup() throws Exception {
-        var procedureTransaction = db.beginTx();
+        procedureTransaction = db.beginTx();
         var transaction = GraphDatabaseApiProxy.kernelTransaction(procedureTransaction);
 
         GraphDatabaseApiProxy.registerProcedures(db, GraphProjectProc.class);
 
-        executionContext = ImmutableExecutionContext
+        var executionContext = ImmutableExecutionContext
             .builder()
             .databaseService(db)
             .callContext(new ProcedureCallContext(42, new String[0], false, "neo4j", false))
@@ -70,8 +76,11 @@ class MemoryEstimationExecutorTest extends BaseTest {
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .username("")
-            .procedureTransaction(procedureTransaction)
-            .transaction(transaction)
+            .transactionContext(TransactionContext.of(db, procedureTransaction))
+            .terminationMonitor(TerminationMonitor.EMPTY)
+            .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
+            .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
+            .nodeLookup(NodeLookup.EMPTY)
             .build();
 
         memoryEstimationExecutor = new MemoryEstimationExecutor<>(
@@ -83,7 +92,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
 
     @AfterEach
     void tearDown() {
-        executionContext.procedureTransaction().close();
+        procedureTransaction.close();
     }
 
     @Test

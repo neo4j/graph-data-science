@@ -22,7 +22,11 @@ package org.neo4j.gds.executor;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.AlgorithmMetaDataSetter;
+import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -34,11 +38,9 @@ import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
+import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
 
@@ -58,16 +60,17 @@ public interface ExecutionContext {
     Log log();
 
     @Nullable
-    Transaction procedureTransaction();
+    TransactionContext transactionContext();
+
+    TerminationMonitor terminationMonitor();
+
+    CloseableResourceRegistry closeableResourceRegistry();
+
+    AlgorithmMetaDataSetter algorithmMetaDataSetter();
+
+    NodeLookup nodeLookup();
 
     @Nullable
-    KernelTransaction transaction();
-
-    @Value.Lazy
-    default InternalTransaction internalTransaction() {
-        return transaction().internalTransaction();
-    }
-
     ProcedureCallContext callContext();
 
     @Nullable
@@ -88,6 +91,15 @@ public interface ExecutionContext {
     NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder();
 
     @Value.Lazy
+    default boolean isGdsAdmin() {
+        var transactionContext = transactionContext();
+        if (transactionContext == null) {
+            return false;
+        }
+        return transactionContext.isGdsAdmin();
+    }
+
+    @Value.Lazy
     default DatabaseId databaseId() {
         return DatabaseId.of(databaseService());
     }
@@ -96,18 +108,6 @@ public interface ExecutionContext {
     default boolean containsOutputField(String fieldName) {
         return callContext().outputFields()
             .anyMatch(field -> toLowerCaseWithLocale(field).equals(fieldName));
-    }
-
-    @Value.Lazy
-    default boolean isGdsAdmin() {
-        if (transaction() == null) {
-            // No transaction available (likely we're in a test), no-one is admin here
-            return false;
-        }
-        // this should be the same as the predefined role from enterprise-security
-        // com.neo4j.server.security.enterprise.auth.plugin.api.PredefinedRoles.ADMIN
-        String PREDEFINED_ADMIN_ROLE = "admin";
-        return transaction().securityContext().roles().contains(PREDEFINED_ADMIN_ROLE);
     }
 
     default ExecutionContext withNodePropertyExporterBuilder(NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder) {
@@ -151,13 +151,28 @@ public interface ExecutionContext {
         }
 
         @Override
-        public @Nullable Transaction procedureTransaction() {
+        public TransactionContext transactionContext() {
             return null;
         }
 
         @Override
-        public @Nullable KernelTransaction transaction() {
-            return null;
+        public AlgorithmMetaDataSetter algorithmMetaDataSetter() {
+            return AlgorithmMetaDataSetter.EMPTY;
+        }
+
+        @Override
+        public TerminationMonitor terminationMonitor() {
+            return TerminationMonitor.EMPTY;
+        }
+
+        @Override
+        public CloseableResourceRegistry closeableResourceRegistry() {
+            return CloseableResourceRegistry.EMPTY;
+        }
+
+        @Override
+        public NodeLookup nodeLookup() {
+            return NodeLookup.EMPTY;
         }
 
         @Override

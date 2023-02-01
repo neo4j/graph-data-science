@@ -69,7 +69,7 @@ class ShortestPathAStarStreamProcTest extends ShortestPathAStarProcTest<Shortest
         GraphDatabaseApiProxy.runInTransaction(db, tx -> {
             PathFactory.RelationshipIds.set(0);
             var expectedPath = PathFactory.create(
-                tx,
+                tx::getNodeById,
                 ids0,
                 costs0,
                 RelationshipType.withName(formatWithLocale("PATH_0")), StreamResult.COST_PROPERTY_NAME

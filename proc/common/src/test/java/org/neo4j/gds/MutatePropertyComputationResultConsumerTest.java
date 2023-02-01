@@ -22,11 +22,15 @@ package org.neo4j.gds;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CSRGraph;
+import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -72,6 +76,10 @@ class MutatePropertyComputationResultConsumerTest {
         .log(Neo4jProxy.testLog())
         .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
         .username("")
+        .terminationMonitor(TerminationMonitor.EMPTY)
+        .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
+        .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
+        .nodeLookup(NodeLookup.EMPTY)
         .build();
 
     @BeforeEach
