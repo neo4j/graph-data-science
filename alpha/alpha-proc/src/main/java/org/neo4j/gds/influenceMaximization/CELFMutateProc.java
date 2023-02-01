@@ -57,7 +57,8 @@ public class CELFMutateProc extends BaseProc {
 
         return new MemoryEstimationExecutor<>(
             mutateSpec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

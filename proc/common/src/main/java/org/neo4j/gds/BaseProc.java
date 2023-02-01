@@ -42,7 +42,6 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.logging.Log;
-import org.neo4j.logging.NullLog;
 import org.neo4j.procedure.Context;
 
 import java.util.Collection;
@@ -149,8 +148,8 @@ public abstract class BaseProc {
         return ImmutableGraphLoaderContext.builder()
             .databaseId(databaseId())
             .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
-            .transactionContext(TransactionContext.of(databaseService, procedureTransaction))
-            .log(logOrDefault(log))
+            .transactionContext(transactionContext())
+            .log(log)
             .taskRegistryFactory(taskRegistryFactory)
             .userLogRegistryFactory(userLogRegistryFactory)
             .terminationFlag(TerminationFlag.wrap(new TransactionTerminationMonitor(transaction)))
@@ -169,8 +168,7 @@ public abstract class BaseProc {
                 .databaseId(databaseId())
                 .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
                 .modelCatalog(internalModelCatalog)
-                .log(logOrDefault(log))
-                .transactionContext(TransactionContext.of(databaseService, procedureTransaction))
+                .log(log)
                 .callContext(procedureCallContextOrDefault(callContext))
                 .userLogRegistryFactory(userLogRegistryFactory)
                 .taskRegistryFactory(taskRegistryFactory)
@@ -179,7 +177,12 @@ public abstract class BaseProc {
                 .closeableResourceRegistry(new TransactionCloseableResourceRegistry(transaction))
                 .algorithmMetaDataSetter(new TransactionAlgorithmMetaDataSetter(transaction))
                 .nodeLookup(new TransactionNodeLookup(transaction))
+                .isGdsAdmin(isGdsAdmin())
                 .build();
+    }
+
+    public TransactionContext transactionContext() {
+        return TransactionContext.of(databaseService, procedureTransaction);
     }
 
     public ModelCatalog modelCatalog() {
@@ -197,10 +200,6 @@ public abstract class BaseProc {
 
     private static ProcedureCallContext procedureCallContextOrDefault(ProcedureCallContext procedureCallContext) {
         return Objects.requireNonNullElse(procedureCallContext, ProcedureCallContext.EMPTY);
-    }
-
-    private static Log logOrDefault(Log log) {
-        return Objects.requireNonNullElse(log, NullLog.getInstance());
     }
 
     private DatabaseId databaseId() {

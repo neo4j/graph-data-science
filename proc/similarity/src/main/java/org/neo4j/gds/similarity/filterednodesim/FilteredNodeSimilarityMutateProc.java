@@ -56,7 +56,8 @@ public class FilteredNodeSimilarityMutateProc  extends BaseProc {
     ) {
         return new MemoryEstimationExecutor<>(
             new FilteredNodeSimilarityMutateSpec(),
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

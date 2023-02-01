@@ -77,7 +77,6 @@ class MemoryEstimationExecutorTest extends BaseTest {
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .username("")
-            .transactionContext(TransactionContext.of(db, procedureTransaction))
             .terminationMonitor(TerminationMonitor.EMPTY)
             .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
             .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
@@ -87,7 +86,8 @@ class MemoryEstimationExecutorTest extends BaseTest {
         memoryEstimationExecutor = new MemoryEstimationExecutor<>(
             new TestMutateSpec(),
             new ProcedureExecutorSpec<>(),
-            executionContext
+            executionContext,
+            TransactionContext.of(db, procedureTransaction)
         );
     }
 

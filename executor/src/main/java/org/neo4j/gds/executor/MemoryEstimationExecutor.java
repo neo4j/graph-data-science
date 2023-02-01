@@ -33,6 +33,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.Map;
 import java.util.Optional;
@@ -49,22 +50,26 @@ public class MemoryEstimationExecutor<
     private final AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ?, ?> algoSpec;
     private final ExecutorSpec<ALGO, ALGO_RESULT, CONFIG> executorSpec;
     private final ExecutionContext executionContext;
+    private final TransactionContext transactionContext;
 
     public MemoryEstimationExecutor(
         AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ?, ?> algoSpec,
         ExecutorSpec<ALGO, ALGO_RESULT, CONFIG> executorSpec,
-        ExecutionContext executionContext
+        ExecutionContext executionContext,
+        TransactionContext transactionContext
     ) {
         this.algoSpec = algoSpec;
         this.executorSpec = executorSpec;
         this.executionContext = executionContext;
+        this.transactionContext = transactionContext;
     }
 
     public MemoryEstimationExecutor(
         AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ?, ?> algoSpec,
-        ExecutionContext executionContext
+        ExecutionContext executionContext,
+        TransactionContext transactionContext
     ) {
-        this(algoSpec, algoSpec.createDefaultExecutorSpec(), executionContext);
+        this(algoSpec, algoSpec.createDefaultExecutorSpec(), executionContext, transactionContext);
     }
 
 
@@ -90,7 +95,7 @@ public class MemoryEstimationExecutor<
                     .taskRegistryFactory(executionContext.taskRegistryFactory())
                     .userLogRegistryFactory(executionContext.userLogRegistryFactory())
                     .terminationFlag(TerminationFlag.wrap(TerminationMonitor.EMPTY))
-                    .transactionContext(executionContext.transactionContext()).build();
+                    .transactionContext(transactionContext).build();
 
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(executionContext.username());
             var graphProjectConfig = memoryEstimationGraphConfigParser.processInput(graphNameOrConfiguration);

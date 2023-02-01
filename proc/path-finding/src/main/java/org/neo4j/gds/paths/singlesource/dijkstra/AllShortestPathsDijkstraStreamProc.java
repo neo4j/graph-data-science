@@ -67,7 +67,8 @@ public class AllShortestPathsDijkstraStreamProc extends BaseProc {
         return new MemoryEstimationExecutor<>(
             deltaStreamSpec,
             pipelineSpec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

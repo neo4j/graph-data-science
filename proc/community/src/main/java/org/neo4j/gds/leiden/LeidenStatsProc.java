@@ -57,7 +57,8 @@ public class LeidenStatsProc extends BaseProc {
 
         return new MemoryEstimationExecutor<>(
             spec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphName, configuration);
     }
 }

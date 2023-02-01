@@ -70,7 +70,8 @@ public class WccMutateProc extends AlgoBaseProc<Wcc, DisjointSetStruct, WccMutat
         return new MemoryEstimationExecutor<>(
             mutateSpec,
             pipelineSpec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 

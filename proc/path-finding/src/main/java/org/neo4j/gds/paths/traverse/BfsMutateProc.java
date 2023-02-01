@@ -59,7 +59,8 @@ public class BfsMutateProc extends BaseProc {
 
         return new MemoryEstimationExecutor<>(
             mutateSpec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

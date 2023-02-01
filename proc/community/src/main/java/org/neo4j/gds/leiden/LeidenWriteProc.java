@@ -64,7 +64,8 @@ public class LeidenWriteProc extends BaseProc {
 
         return new MemoryEstimationExecutor<>(
             spec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphName, configuration);
     }
 

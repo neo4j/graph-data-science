@@ -65,7 +65,8 @@ public class CELFWriteProc extends BaseProc {
 
         return new MemoryEstimationExecutor<>(
             writeSpec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 

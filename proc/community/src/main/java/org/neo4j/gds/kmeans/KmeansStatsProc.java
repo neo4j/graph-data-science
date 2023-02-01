@@ -60,7 +60,8 @@ public class KmeansStatsProc extends AlgoBaseProc<Kmeans, KmeansResult, KmeansSt
 
         return new MemoryEstimationExecutor<>(
             writeSpec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphName, configuration);
     }
 

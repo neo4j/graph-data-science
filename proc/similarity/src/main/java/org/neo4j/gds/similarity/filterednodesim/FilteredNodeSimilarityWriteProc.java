@@ -64,7 +64,8 @@ public class FilteredNodeSimilarityWriteProc extends BaseProc {
     ) {
         return new MemoryEstimationExecutor<>(
             new FilteredNodeSimilarityWriteSpec(),
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
