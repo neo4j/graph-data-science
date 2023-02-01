@@ -55,15 +55,20 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory
     ) {
-        var progressTask = progressTask(graphOrGraphStore, configuration);
-        var progressTracker = new TaskProgressTracker(
-            progressTask,
-            log,
-            configuration.concurrency(),
-            configuration.jobId(),
-            taskRegistryFactory,
-            userLogRegistryFactory
-        );
+        ProgressTracker progressTracker;
+        if (configuration.logProgress()) {
+            var progressTask = progressTask(graphOrGraphStore, configuration);
+            progressTracker = new TaskProgressTracker(
+                progressTask,
+                log,
+                configuration.concurrency(),
+                configuration.jobId(),
+                taskRegistryFactory,
+                userLogRegistryFactory
+            );
+        } else {
+            progressTracker = ProgressTracker.NULL_TRACKER;
+        }
         return build(graphOrGraphStore, configuration, progressTracker);
     }
 

@@ -250,47 +250,51 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
 
     @Override
     protected ProgressTracker initProgressTracker() {
-        long relationshipCount = graphProjectConfig
-            .relationshipProjections()
-            .projections()
-            .entrySet()
-            .stream()
-            .map(entry -> {
-                long relCount = entry.getKey().name.equals("*")
-                    ? dimensions.relationshipCounts().values().stream().reduce(Long::sum).orElse(0L)
-                    : dimensions.relationshipCounts().getOrDefault(entry.getKey(), 0L);
+        if (graphProjectConfig.logProgress()) {
+            long relationshipCount = graphProjectConfig
+                .relationshipProjections()
+                .projections()
+                .entrySet()
+                .stream()
+                .map(entry -> {
+                    long relCount = entry.getKey().name.equals("*")
+                        ? dimensions.relationshipCounts().values().stream().reduce(Long::sum).orElse(0L)
+                        : dimensions.relationshipCounts().getOrDefault(entry.getKey(), 0L);
 
-                return entry.getValue().orientation() == Orientation.UNDIRECTED
-                    ? relCount * 2
-                    : relCount;
-            }).mapToLong(Long::longValue).sum();
+                    return entry.getValue().orientation() == Orientation.UNDIRECTED
+                        ? relCount * 2
+                        : relCount;
+                }).mapToLong(Long::longValue).sum();
 
-        var properties = IndexPropertyMappings.prepareProperties(
-            graphProjectConfig,
-            dimensions,
-            loadingContext.transactionContext()
-        );
-
-        List<Task> nodeTasks = properties.indexedProperties().isEmpty()
-            ? List.of(Tasks.leaf("Store Scan", dimensions.nodeCount()))
-            : List.of(
-                Tasks.leaf("Store Scan", dimensions.nodeCount()),
-                Tasks.leaf("Property Index Scan", properties.indexedProperties().size() * dimensions.nodeCount())
+            var properties = IndexPropertyMappings.prepareProperties(
+                graphProjectConfig,
+                dimensions,
+                loadingContext.transactionContext()
             );
 
-        var task = Tasks.task(
-            "Loading",
-            Tasks.task("Nodes", nodeTasks),
-            Tasks.task("Relationships", Tasks.leaf("Store Scan", relationshipCount))
-        );
-        return new TaskProgressTracker(
-            task,
-            loadingContext.log(),
-            graphProjectConfig.readConcurrency(),
-            graphProjectConfig.jobId(),
-            loadingContext.taskRegistryFactory(),
-            EmptyUserLogRegistryFactory.INSTANCE
-        );
+            List<Task> nodeTasks = properties.indexedProperties().isEmpty()
+                ? List.of(Tasks.leaf("Store Scan", dimensions.nodeCount()))
+                : List.of(
+                    Tasks.leaf("Store Scan", dimensions.nodeCount()),
+                    Tasks.leaf("Property Index Scan", properties.indexedProperties().size() * dimensions.nodeCount())
+                );
+
+            var task = Tasks.task(
+                "Loading",
+                Tasks.task("Nodes", nodeTasks),
+                Tasks.task("Relationships", Tasks.leaf("Store Scan", relationshipCount))
+            );
+            return new TaskProgressTracker(
+                task,
+                loadingContext.log(),
+                graphProjectConfig.readConcurrency(),
+                graphProjectConfig.jobId(),
+                loadingContext.taskRegistryFactory(),
+                EmptyUserLogRegistryFactory.INSTANCE
+            );
+        }
+
+        return ProgressTracker.NULL_TRACKER;
     }
 
     @Override
