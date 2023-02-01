@@ -47,7 +47,6 @@ import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 
 import java.util.Collection;
-import java.util.Objects;
 import java.util.function.Supplier;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -171,7 +170,7 @@ public abstract class BaseProc {
                 .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
                 .modelCatalog(internalModelCatalog)
                 .log(log)
-                .callContext(procedureCallContextOrDefault(callContext))
+                .callContext(callContext)
                 .userLogRegistryFactory(userLogRegistryFactory)
                 .taskRegistryFactory(taskRegistryFactory)
                 .username(username())
@@ -179,7 +178,7 @@ public abstract class BaseProc {
                 .closeableResourceRegistry(new TransactionCloseableResourceRegistry(transaction))
                 .algorithmMetaDataSetter(new TransactionAlgorithmMetaDataSetter(transaction))
                 .nodeLookup(new TransactionNodeLookup(transaction))
-                .isGdsAdmin(isGdsAdmin())
+                .isGdsAdmin(transactionContext().isGdsAdmin())
                 .build();
     }
 
@@ -200,10 +199,6 @@ public abstract class BaseProc {
 
     public void setModelCatalog(ModelCatalog modelCatalog) {
         this.internalModelCatalog = modelCatalog;
-    }
-
-    private static ProcedureCallContext procedureCallContextOrDefault(ProcedureCallContext procedureCallContext) {
-        return Objects.requireNonNullElse(procedureCallContext, ProcedureCallContext.EMPTY);
     }
 
     private DatabaseId databaseId() {

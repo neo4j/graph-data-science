@@ -38,6 +38,7 @@ dependencies {
     testImplementation project(':algo-test')
     testImplementation project(':test-utils')
     testImplementation project(':proc-catalog')
+    testImplementation project(':open-model-catalog')
 
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor project(':config-generator')

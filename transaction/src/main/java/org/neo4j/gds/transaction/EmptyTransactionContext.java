@@ -24,7 +24,6 @@ import org.neo4j.internal.kernel.api.security.AccessMode;
 public enum EmptyTransactionContext implements TransactionContext {
     INSTANCE;
 
-
     @Override
     public String username() {
         throw new UnsupportedOperationException();
@@ -32,7 +31,7 @@ public enum EmptyTransactionContext implements TransactionContext {
 
     @Override
     public boolean isGdsAdmin() {
-        throw new UnsupportedOperationException();
+        return false;
     }
 
     @Override

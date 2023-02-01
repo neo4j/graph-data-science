@@ -51,6 +51,7 @@ dependencies {
     testImplementation project(':algo-test')
     testImplementation project(':proc-test')
     testImplementation project(':graph-schema-api')
+    testImplementation project(':open-model-catalog')
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'

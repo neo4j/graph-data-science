@@ -30,8 +30,10 @@ import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.executor.ImmutableComputationResult;
@@ -113,6 +115,7 @@ class WriteProcCancellationTest extends BaseTest {
                 .databaseId(DatabaseId.of(db))
                 .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
                 .taskRegistryFactory(jobId -> new TaskRegistry("", taskStore, jobId))
+                .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
                 .username("")
                 .log(Neo4jProxy.testLog())
                 .terminationMonitor(TerminationMonitor.EMPTY)
@@ -120,6 +123,7 @@ class WriteProcCancellationTest extends BaseTest {
                 .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
                 .nodeLookup(NodeLookup.EMPTY)
                 .callContext(ProcedureCallContext.EMPTY)
+                .modelCatalog(new OpenModelCatalog())
                 .isGdsAdmin(false)
                 .build();
 
