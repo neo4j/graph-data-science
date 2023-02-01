@@ -297,7 +297,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 ClassName.get(ValidationConfiguration.class),
                 pregelSpec.configTypeName()
             ))
-            .addStatement("return $T.ensureIndexValidation(log, taskRegistryFactory)", PregelBaseProc.class)
+            .addStatement("return $T.ensureIndexValidation(log, executionContext().taskRegistryFactory())", PregelBaseProc.class)
             .build();
     }
 }

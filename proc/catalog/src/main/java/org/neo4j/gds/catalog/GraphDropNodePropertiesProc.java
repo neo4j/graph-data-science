@@ -95,7 +95,7 @@ public class GraphDropNodePropertiesProc extends CatalogProc {
             log,
             1,
             new JobId(),
-            taskRegistryFactory,
+            executionContext().taskRegistryFactory(),
             userLogRegistryFactory
         );
 

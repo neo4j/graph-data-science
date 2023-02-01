@@ -64,7 +64,7 @@ public class GraphSampleProc extends CatalogProc {
                 log,
                 rwrConfig.concurrency(),
                 rwrConfig.jobId(),
-                taskRegistryFactory,
+                executionContext().taskRegistryFactory(),
                 EmptyUserLogRegistryFactory.INSTANCE
             );
             var graphSampleConstructor = new GraphSampleConstructor(

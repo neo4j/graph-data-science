@@ -107,7 +107,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
             log,
             RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
             config.jobId(),
-            taskRegistryFactory,
+            executionContext().taskRegistryFactory(),
             userLogRegistryFactory
         );
 

@@ -125,7 +125,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
             log,
             config.writeConcurrency(),
             new JobId(),
-            taskRegistryFactory,
+            executionContext().taskRegistryFactory(),
             userLogRegistryFactory
         );
 

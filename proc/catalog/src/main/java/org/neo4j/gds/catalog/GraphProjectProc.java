@@ -222,7 +222,7 @@ public class GraphProjectProc extends CatalogProc {
             log,
             config.concurrency(),
             config.jobId(),
-            taskRegistryFactory,
+            executionContext().taskRegistryFactory(),
             EmptyUserLogRegistryFactory.INSTANCE
         );
 

@@ -87,7 +87,7 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
                     NodePropertyExporter.baseTask("Scc", graph.nodeCount()),
                     log,
                     config.writeConcurrency(),
-                    taskRegistryFactory
+                    executionContext.taskRegistryFactory()
                 );
                 NodePropertyExporter exporter = nodePropertyExporterBuilder
                     .withIdMap(graph)

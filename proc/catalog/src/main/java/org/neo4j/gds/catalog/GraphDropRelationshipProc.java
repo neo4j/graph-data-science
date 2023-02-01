@@ -77,7 +77,7 @@ public class GraphDropRelationshipProc extends CatalogProc {
             log,
             1,
             new JobId(),
-            taskRegistryFactory,
+            executionContext().taskRegistryFactory(),
             userLogRegistryFactory
         );
 

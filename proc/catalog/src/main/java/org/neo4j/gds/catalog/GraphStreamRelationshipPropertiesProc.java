@@ -167,7 +167,14 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
             graphStore.nodeCount() * relationshipPropertyKeysAndValues.size()
         );
 
-        var taskProgressTracker = new TaskProgressTracker(task, log, config.concurrency(), new JobId(), taskRegistryFactory, userLogRegistryFactory);
+        var taskProgressTracker = new TaskProgressTracker(
+            task,
+            log,
+            config.concurrency(),
+            new JobId(),
+            executionContext().taskRegistryFactory(),
+            userLogRegistryFactory
+        );
         taskProgressTracker.beginSubTask();
 
         deprecationWarning.ifPresent(taskProgressTracker::logWarning);

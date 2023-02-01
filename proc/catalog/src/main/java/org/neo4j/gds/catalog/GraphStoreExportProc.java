@@ -82,7 +82,7 @@ public class GraphStoreExportProc extends BaseProc {
                     log,
                     exportConfig.writeConcurrency(),
                     exportConfig.jobId(),
-                    taskRegistryFactory,
+                    executionContext().taskRegistryFactory(),
                     userLogRegistryFactory
                 );
 
@@ -135,7 +135,7 @@ public class GraphStoreExportProc extends BaseProc {
             exportLocation(neo4jConfig, exportConfig),
             exportConfig,
             neoNodeProperties(exportConfig, graphStore),
-            taskRegistryFactory,
+            executionContext().taskRegistryFactory(),
             log
         );
 
