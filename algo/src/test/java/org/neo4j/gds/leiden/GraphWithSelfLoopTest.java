@@ -104,8 +104,8 @@ class GraphWithSelfLoopTest {
         assertGraphEquals(
             fromGdl(
                 "(c1), (c2), " +
-                "(c1)-[:REL {w: 1.0}]->(c2), " +
-                "(c2)-[:REL {w: 1.0}]->(c1)"
+                "(c1)-[:_IGNORED_ {w: 1.0}]->(c2), " +
+                "(c2)-[:_IGNORED_ {w: 1.0}]->(c1)"
             ),
             aggregatedGraph
         );
