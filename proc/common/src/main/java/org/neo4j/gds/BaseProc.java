@@ -22,6 +22,7 @@ package org.neo4j.gds;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.Username;
@@ -86,12 +87,14 @@ public abstract class BaseProc {
         return username.username();
     }
 
-    protected DatabaseId databaseId() {
-        return DatabaseId.of(databaseService);
-    }
-
     protected GraphStoreWithConfig graphStoreFromCatalog(String graphName, BaseConfig config) {
-        return GraphStoreFromCatalogLoader.graphStoreFromCatalog(graphName, config, username(), databaseId(), isGdsAdmin());
+        return GraphStoreFromCatalogLoader.graphStoreFromCatalog(
+            graphName,
+            config,
+            username(),
+            databaseId(),
+            isGdsAdmin()
+        );
     }
 
     public boolean isGdsAdmin() {
@@ -143,8 +146,9 @@ public abstract class BaseProc {
 
     protected GraphLoaderContext graphLoaderContext() {
         return ImmutableGraphLoaderContext.builder()
+            .databaseId(databaseId())
+            .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
             .transactionContext(TransactionContext.of(databaseService, procedureTransaction))
-            .graphDatabaseService(databaseService)
             .log(log)
             .taskRegistryFactory(taskRegistryFactory)
             .userLogRegistryFactory(userLogRegistryFactory)
@@ -153,25 +157,28 @@ public abstract class BaseProc {
     }
 
     public MemoryUsageValidator memoryUsageValidator() {
-        return new MemoryUsageValidator(log, databaseService);
+        return new MemoryUsageValidator(log, GraphDatabaseApiProxy.dependencyResolver(databaseService));
     }
 
     public ExecutionContext executionContext() {
-        return ImmutableExecutionContext
-            .builder()
-            .databaseService(databaseService)
-            .modelCatalog(internalModelCatalog)
-            .log(log)
-            .transactionContext(TransactionContext.of(databaseService, procedureTransaction))
-            .callContext(procedureCallContextOrDefault(callContext))
-            .userLogRegistryFactory(userLogRegistryFactory)
-            .taskRegistryFactory(taskRegistryFactory)
-            .username(username())
-            .terminationMonitor(new TransactionTerminationMonitor(transaction))
-            .closeableResourceRegistry(new TransactionCloseableResourceRegistry(transaction))
-            .algorithmMetaDataSetter(new TransactionAlgorithmMetaDataSetter(transaction))
-            .nodeLookup(new TransactionNodeLookup(transaction))
-            .build();
+        return databaseService == null
+            ? ExecutionContext.EMPTY
+            : ImmutableExecutionContext
+                .builder()
+                .databaseId(databaseId())
+                .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
+                .modelCatalog(internalModelCatalog)
+                .log(log)
+                .transactionContext(TransactionContext.of(databaseService, procedureTransaction))
+                .callContext(procedureCallContextOrDefault(callContext))
+                .userLogRegistryFactory(userLogRegistryFactory)
+                .taskRegistryFactory(taskRegistryFactory)
+                .username(username())
+                .terminationMonitor(new TransactionTerminationMonitor(transaction))
+                .closeableResourceRegistry(new TransactionCloseableResourceRegistry(transaction))
+                .algorithmMetaDataSetter(new TransactionAlgorithmMetaDataSetter(transaction))
+                .nodeLookup(new TransactionNodeLookup(transaction))
+                .build();
     }
 
     public ModelCatalog modelCatalog() {
@@ -189,5 +196,9 @@ public abstract class BaseProc {
 
     private static ProcedureCallContext procedureCallContextOrDefault(ProcedureCallContext procedureCallContext) {
         return Objects.requireNonNullElse(procedureCallContext, ProcedureCallContext.EMPTY);
+    }
+
+    private DatabaseId databaseId() {
+        return DatabaseId.of(databaseService);
     }
 }

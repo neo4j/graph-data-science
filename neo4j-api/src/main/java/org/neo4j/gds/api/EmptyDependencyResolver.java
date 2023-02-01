@@ -17,24 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.api;
 
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.executor.ProcPreconditions;
-import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Name;
-import org.neo4j.procedure.UserFunction;
+import org.neo4j.common.DependencyResolver;
 
-public class GraphExistsFunc extends CatalogProc {
+public final class EmptyDependencyResolver extends DependencyResolver.Adapter {
 
-    private static final String DESCRIPTION = "Checks if a graph exists in the catalog.";
+    public static final EmptyDependencyResolver INSTANCE = new EmptyDependencyResolver();
 
-    @UserFunction("gds.graph.exists")
-    @Description(DESCRIPTION)
-    public boolean existsFunction(@Name(value = "graphName") String graphName) {
-        ProcPreconditions.check();
-        validateGraphName(graphName);
-        return GraphStoreCatalog.exists(username(), executionContext().databaseId(), graphName);
+    private EmptyDependencyResolver() {}
+
+    @Override
+    public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
+        return null;
     }
 
+    @Override
+    public boolean containsDependency(Class<?> type) {
+        return false;
+    }
 }

@@ -31,16 +31,12 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.kernel.GraphDatabaseQueryService;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.factory.DbmsInfo;
-import org.neo4j.kernel.impl.query.Neo4jTransactionalContextFactory;
-import org.neo4j.kernel.impl.query.QueryExecutionEngine;
-import org.neo4j.kernel.impl.query.TransactionalContextFactory;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
@@ -67,6 +63,10 @@ public final class GraphDatabaseApiProxy {
 
     public static <T> T resolveDependency(DependencyResolver resolver, Class<T> dependency) {
         return resolver.resolveDependency(dependency, DependencyResolver.SelectionStrategy.SINGLE);
+    }
+
+    public static DependencyResolver dependencyResolver(GraphDatabaseService db) {
+        return cast(db).getDependencyResolver();
     }
 
     public static void registerProcedures(GraphDatabaseService db, Class<?>... procedureClasses) throws
@@ -144,14 +144,6 @@ public final class GraphDatabaseApiProxy {
         Map<String, Object> params
     ) {
         return tx.internalTransaction().execute(query, params);
-    }
-
-    public static QueryExecutionEngine executionEngine(GraphDatabaseService db) {
-        return resolveDependency(db, QueryExecutionEngine.class);
-    }
-
-    public static TransactionalContextFactory contextFactory(GraphDatabaseService db) {
-        return Neo4jTransactionalContextFactory.create(resolveDependency(db, GraphDatabaseQueryService.class));
     }
 
     public static void runInTransaction(GraphDatabaseService db, Consumer<Transaction> block) {

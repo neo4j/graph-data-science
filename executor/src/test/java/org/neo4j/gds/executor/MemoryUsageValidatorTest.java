@@ -22,6 +22,7 @@ package org.neo4j.gds.executor;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -42,7 +43,7 @@ class MemoryUsageValidatorTest extends BaseTest {
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = MemoryTree.empty();
 
-        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator(Neo4jProxy.testLog(), db)
+        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator(Neo4jProxy.testLog(), GraphDatabaseApiProxy.dependencyResolver(db))
             .tryValidateMemoryUsage(
                 TestConfig.empty(),
                 (config) -> new MemoryTreeWithDimensions(memoryTree, dimensions),
@@ -55,7 +56,7 @@ class MemoryUsageValidatorTest extends BaseTest {
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = new TestTree("test", MemoryRange.of(42));
 
-        assertThatThrownBy(() -> new MemoryUsageValidator(Neo4jProxy.testLog(), db)
+        assertThatThrownBy(() -> new MemoryUsageValidator(Neo4jProxy.testLog(), GraphDatabaseApiProxy.dependencyResolver(db))
             .tryValidateMemoryUsage(
                 TestConfig.empty(),
                 (config) -> new MemoryTreeWithDimensions(memoryTree, dimensions),
@@ -70,7 +71,7 @@ class MemoryUsageValidatorTest extends BaseTest {
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = new TestTree("test", MemoryRange.of(42));
 
-        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator(Neo4jProxy.testLog(), db)
+        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator(Neo4jProxy.testLog(), GraphDatabaseApiProxy.dependencyResolver(db))
             .tryValidateMemoryUsage(
                 TestConfig.of(CypherMapWrapper.empty().withBoolean("sudo", true)),
                 (config) -> new MemoryTreeWithDimensions(memoryTree, dimensions),
@@ -83,7 +84,7 @@ class MemoryUsageValidatorTest extends BaseTest {
         var log = Neo4jProxy.testLog();
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = new TestTree("test", MemoryRange.of(42));
-        var memoryUsageValidator = new MemoryUsageValidator(log, db);
+        var memoryUsageValidator = new MemoryUsageValidator(log, GraphDatabaseApiProxy.dependencyResolver(db));
         try {
             memoryUsageValidator.tryValidateMemoryUsage(
                 TestConfig.of(CypherMapWrapper.empty()),

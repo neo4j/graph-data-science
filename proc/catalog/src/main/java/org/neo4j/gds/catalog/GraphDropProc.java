@@ -72,7 +72,7 @@ public class GraphDropProc extends CatalogProc {
 
         var config = GraphDropConfig.of(failIfMissing, dbName, username);
         var request = ImmutableCatalogRequest.of(
-            config.databaseName().orElseGet(databaseId()::databaseName),
+            config.databaseName().orElseGet(executionContext().databaseId()::databaseName),
             username(),
             config.catalogUser(),
             isGdsAdmin()

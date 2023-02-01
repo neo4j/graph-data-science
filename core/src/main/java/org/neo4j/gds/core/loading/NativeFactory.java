@@ -29,7 +29,6 @@ import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.GraphDimensionsStoreReader;
@@ -67,7 +66,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
             new GraphDimensionsStoreReader(
                 loadingContext.transactionContext(),
                 graphProjectConfig,
-                GraphDatabaseApiProxy.resolveDependency(loadingContext.graphDatabaseService(), IdGeneratorFactory.class)
+                loadingContext.dependencyResolver().resolveDependency(IdGeneratorFactory.class)
             ).call()
         );
     }

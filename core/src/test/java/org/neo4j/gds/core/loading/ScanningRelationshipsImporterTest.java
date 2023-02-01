@@ -29,6 +29,7 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
@@ -151,13 +152,14 @@ class ScanningRelationshipsImporterTest extends BaseTest {
 
     private GraphLoaderContext graphLoaderContext() {
         return ImmutableGraphLoaderContext.builder()
-            .graphDatabaseService(db)
             .executor(Pools.DEFAULT)
             .log(NullLog.getInstance())
             .terminationFlag(TerminationFlag.RUNNING_TRUE)
             .transactionContext(TransactionContext.of(db, db.beginTx()))
             .taskRegistryFactory(TaskRegistryFactory.empty())
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+            .databaseId(DatabaseId.of(db))
+            .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
             .build();
     }
 
@@ -168,7 +170,7 @@ class ScanningRelationshipsImporterTest extends BaseTest {
         return new GraphDimensionsStoreReader(
             graphLoaderContext.transactionContext(),
             graphProjectConfig,
-            GraphDatabaseApiProxy.resolveDependency(graphLoaderContext.graphDatabaseService(), IdGeneratorFactory.class)
+            graphLoaderContext.dependencyResolver().resolveDependency(IdGeneratorFactory.class)
         ).call();
     }
 }

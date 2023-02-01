@@ -26,6 +26,8 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.EmptyDependencyResolver;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -175,6 +177,8 @@ class LinkPredictionTrainingPipelineTest {
     @Test
     void deriveRelationshipWeightProperty() {
         var executionContext = ImmutableExecutionContext.builder()
+            .databaseId(DatabaseId.from(""))
+            .dependencyResolver(EmptyDependencyResolver.INSTANCE)
             .username("")
             .terminationMonitor(TerminationMonitor.EMPTY)
             .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
@@ -211,6 +215,8 @@ class LinkPredictionTrainingPipelineTest {
         ));
 
         var executionContext = ImmutableExecutionContext.builder()
+            .databaseId(DatabaseId.from(""))
+            .dependencyResolver(EmptyDependencyResolver.INSTANCE)
             .username("")
             .modelCatalog(modelCatalog)
             .terminationMonitor(TerminationMonitor.EMPTY)
@@ -248,6 +254,8 @@ class LinkPredictionTrainingPipelineTest {
         ));
 
         var executionContext = ImmutableExecutionContext.builder()
+            .databaseId(DatabaseId.from(""))
+            .dependencyResolver(EmptyDependencyResolver.INSTANCE)
             .username("")
             .modelCatalog(modelCatalog)
             .terminationMonitor(TerminationMonitor.EMPTY)

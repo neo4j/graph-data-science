@@ -37,7 +37,7 @@ public abstract class CatalogProc extends BaseProc {
 
     GraphStoreWithConfig graphStoreFromCatalog(String graphName) {
         var catalogRequest = ImmutableCatalogRequest.of(
-            databaseId().databaseName(),
+            executionContext().databaseId().databaseName(),
             username(),
             Optional.empty(),
             isGdsAdmin()
