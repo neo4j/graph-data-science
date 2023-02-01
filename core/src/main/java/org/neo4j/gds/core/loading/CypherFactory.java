@@ -160,19 +160,23 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
 
     @Override
     protected ProgressTracker initProgressTracker() {
-        var task = Tasks.task(
-            "Loading",
-            Tasks.leaf("Nodes"),
-            Tasks.leaf("Relationships", dimensions.relCountUpperBound())
-        );
-        return new TaskProgressTracker(
-            task,
-            loadingContext.log(),
-            graphProjectConfig.readConcurrency(),
-            graphProjectConfig.jobId(),
-            loadingContext.taskRegistryFactory(),
-            EmptyUserLogRegistryFactory.INSTANCE
-        );
+        if (graphProjectConfig.logProgress()) {
+            var task = Tasks.task(
+                "Loading",
+                Tasks.leaf("Nodes"),
+                Tasks.leaf("Relationships", dimensions.relCountUpperBound())
+            );
+            return new TaskProgressTracker(
+                task,
+                loadingContext.log(),
+                graphProjectConfig.readConcurrency(),
+                graphProjectConfig.jobId(),
+                loadingContext.taskRegistryFactory(),
+                EmptyUserLogRegistryFactory.INSTANCE
+            );
+        }
+
+        return ProgressTracker.NULL_TRACKER;
     }
 
     private String nodeQuery() {
