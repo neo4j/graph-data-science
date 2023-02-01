@@ -30,6 +30,7 @@ import org.neo4j.gds.api.ValueTypes;
 import org.neo4j.gds.api.properties.graph.GraphPropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.utils.StringJoining;
@@ -58,7 +59,7 @@ public final class CSRGraphStoreUtil {
             }
         });
 
-        var schema = graph.schema();
+        var schema = MutableGraphSchema.from(graph.schema());
         var relationshipSchema = schema.relationshipSchema();
 
         if (relationshipSchema.availableTypes().size() != 1) {

@@ -400,11 +400,9 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public void addRelationshipType(
-        RelationshipType relationshipType, SingleTypeRelationships relationships
-    ) {
+    public void addRelationshipType(SingleTypeRelationships relationships) {
         updateGraphStore(graphStore -> {
-            graphStore.relationships.computeIfAbsent(relationshipType, __ -> {
+            graphStore.relationships.computeIfAbsent(relationships.relationshipSchemaEntry().identifier(), __ -> {
                 schema.relationshipSchema().set(relationships.relationshipSchemaEntry());
                 return relationships;
             });
