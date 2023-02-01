@@ -126,7 +126,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
             config.writeConcurrency(),
             new JobId(),
             executionContext().taskRegistryFactory(),
-            userLogRegistryFactory
+            executionContext().userLogRegistryFactory()
         );
 
         deprecationWarning.ifPresent(progressTracker::logWarning);

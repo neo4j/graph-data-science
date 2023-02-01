@@ -83,7 +83,7 @@ public class GraphStoreExportProc extends BaseProc {
                     exportConfig.writeConcurrency(),
                     exportConfig.jobId(),
                     executionContext().taskRegistryFactory(),
-                    userLogRegistryFactory
+                    executionContext().userLogRegistryFactory()
                 );
 
                 var exporter = GraphStoreToDatabaseExporter.of(

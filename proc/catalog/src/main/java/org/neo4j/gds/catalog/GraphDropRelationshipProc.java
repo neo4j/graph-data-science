@@ -78,7 +78,7 @@ public class GraphDropRelationshipProc extends CatalogProc {
             1,
             new JobId(),
             executionContext().taskRegistryFactory(),
-            userLogRegistryFactory
+            executionContext().userLogRegistryFactory()
         );
 
         deprecationWarning.ifPresent(progressTracker::logWarning);

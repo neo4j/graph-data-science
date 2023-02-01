@@ -173,7 +173,7 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
             config.concurrency(),
             new JobId(),
             executionContext().taskRegistryFactory(),
-            userLogRegistryFactory
+            executionContext().userLogRegistryFactory()
         );
         taskProgressTracker.beginSubTask();
 
