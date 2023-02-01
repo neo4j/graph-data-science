@@ -276,7 +276,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             .algo("gds.beta.graphSage")
             .trainEstimation()
             .addParameter("modelName", modelName)
-            .addParameter("featureProperties", List.of("a"))
+            .addParameter("featureProperties", List.of("age"))
             .yields("requiredMemory");
 
         assertCypherResult(query, List.of(Map.of(

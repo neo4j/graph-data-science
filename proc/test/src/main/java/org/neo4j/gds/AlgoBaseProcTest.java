@@ -371,6 +371,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             GdsCypher.call(graphName)
                 .graphProject()
                 .loadEverything(orientation)
+                .withNodeProperties(nodeProperties(), DefaultValue.DEFAULT)
                 .yields()
         );
     }
