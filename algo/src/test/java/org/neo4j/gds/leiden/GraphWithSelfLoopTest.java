@@ -30,7 +30,6 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
@@ -53,17 +52,17 @@ class GraphWithSelfLoopTest {
     @Inject
     private TestGraph graph;
 
-    @Inject
-    private IdFunction idFunction;
-
     @Test
     void shouldCalculateModularityCorrectly() {
+
         var localCommunities = HugeLongArray.of(0, 0, 2);
         var communityVolumes = HugeDoubleArray.newArray(graph.nodeCount());
+
         graph.forEachNode(v -> {
             communityVolumes.addTo(localCommunities.get(v), graph.degree(v));
             return true;
         });
+
         double modularity = ModularityComputer.compute(
             graph,
             localCommunities,
@@ -74,10 +73,12 @@ class GraphWithSelfLoopTest {
             Pools.DEFAULT,
             ProgressTracker.EmptyProgressTracker.NULL_TRACKER
         );
+
         assertThat(modularity).isCloseTo(-0.0555555, Offset.offset(1e-4));
     }
     @Test
     void shouldAggregateCorrectly(){
+
         var communities = HugeLongArray.of(0, 0, 2);
 
         var aggregationPhase = new GraphAggregationPhase(
@@ -111,8 +112,10 @@ class GraphWithSelfLoopTest {
     }
     @Test
     void shouldMaintainPartition() {
+
         var localCommunities = HugeLongArray.of(0, 0, 2);
         var refinedCommunities = HugeLongArray.of(0, 0, 2);
+
         var aggregationPhase = new GraphAggregationPhase(
             graph,
             Direction.UNDIRECTED,
@@ -123,9 +126,13 @@ class GraphWithSelfLoopTest {
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
+
         var nodeCount = graph.nodeCount();
+
         HugeDoubleArray refinedVolumes = HugeDoubleArray.of(5, 0, 1);
+
         var workingGraph = aggregationPhase.run();
+
         var maintainResult = Leiden.maintainPartition(
             workingGraph,
             localCommunities,
@@ -143,12 +150,15 @@ class GraphWithSelfLoopTest {
 
     @Test
     void shouldCalculateModularityInSummaryGraph() {
+
         var localCommunities = HugeLongArray.of(0, 0, 2);
         var communityVolumes = HugeDoubleArray.newArray(graph.nodeCount());
+
         graph.forEachNode(v -> {
             communityVolumes.addTo(localCommunities.get(v), graph.degree(v));
             return true;
         });
+
         var aggregateGraph = new GraphAggregationPhase(
             graph,
             Direction.UNDIRECTED,
@@ -159,8 +169,10 @@ class GraphWithSelfLoopTest {
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         ).run();
+
         var localCommunitiesCondensed = HugeLongArray.of(0, 1);
         var communityVolumes2 = HugeDoubleArray.of(communityVolumes.get(0), communityVolumes.get(2));
+
         double modularity = ModularityComputer.compute(
             aggregateGraph,
             localCommunitiesCondensed,
@@ -171,6 +183,7 @@ class GraphWithSelfLoopTest {
             Pools.DEFAULT,
             ProgressTracker.EmptyProgressTracker.NULL_TRACKER
         );
+        
         assertThat(modularity).isCloseTo(-0.0555555, Offset.offset(1e-4));
     }
 }
