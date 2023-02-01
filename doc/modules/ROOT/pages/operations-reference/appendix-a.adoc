@@ -11,3 +11,4 @@ This chapter contains a full listing of all operations in the Neo4j Graph Data S
 * xref:operations-reference/algorithm-references.adoc[Graph Algorithms]
 * xref:operations-reference/machine-learning-references.adoc[Machine Learning]
 * xref:operations-reference/additional-operation-references.adoc[Additional Operations]
+* xref:operations-reference/configuration-settings.adoc[Configuration Settings]

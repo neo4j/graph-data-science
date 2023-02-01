@@ -1,0 +1,115 @@
+[[configuration-settings]]
+= GDS Configuration Settings
+:description: This section describes the available configuration settings in the Neo4j Graph Data Science library.
+
+
+This page describes the available configuration settings in GDS.
+Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4j-conf/#neo4j-conf[neo4j.conf] file for details on how to use configuration settings.
+
+
+[.enterprise-edition]
+== GDS and Arrow
+
+`gds.arrow.abortion_timeout`
+
+* The maximum time to wait for the next command before aborting the import process.
+* defaultValue: `10m`
+* validValues: a duration (Valid units are: `ns`, `μs`, `ms`, `s`, `m`, `h` and `d` default unit is `s`)
+* dynamic: `false`
+
+`gds.arrow.advertised_listen_address`
+
+* Address that clients should use to connect to the GDS Arrow Flight Server.
+* defaultValue: `:8491`
+* validValues: a socket address in the format `hostname:port`, `hostname` or `:port`. If missing port or hostname it is acquired from `gds.arrow.listen_address`
+* dynamic: `false`
+
+`gds.arrow.batch_size`
+
+* The batch size used for arrow property export.
+* defaultValue: `10000`
+* validValues: an integer
+* dynamic: `true`
+
+`gds.arrow.enabled`
+
+* Enable the GDS Arrow Flight Server.
+* defaultValue: `false`
+* validValues: a boolean
+* dynamic: `false`
+
+`gds.arrow.encryption.never`
+
+* Never activate server-side encryption for the GDS Arrow Flight Server.
+* defaultValue: `false`
+* validValues: a boolean
+* dynamic: `false`
+
+`gds.arrow.listen_address`
+
+* The maximum time to wait for the next command before aborting the import process.
+* defaultValue: `10m`
+* validValues: a duration (Valid units are: `ns`, `μs`, `ms`, `s`, `m`, `h` and `d` default unit is `s`)
+* dynamic: `false`
+
+
+[.enterprise-edition]
+== Neo4j Cluster
+
+`gds.cluster.tx.max.size`
+
+* Set the maximum transaction size for GDS write back when running in Neo4j Cluster.
+* defaultValue: `100000`
+* validValues: an integer, must be set greater than or equal to the value of `gds.cluster.tx.min.size`
+* dynamic: `false`
+
+`gds.cluster.tx.min.size`
+
+* Set the minimum transaction size for GDS write back when running in Neo4j Cluster.
+* defaultValue: `10000`
+* validValues: an integer
+* dynamic: `false`
+
+
+== GDS Enterprise Edition
+
+`gds.enterprise.license_file`
+
+* Sets the location of the file that contains the Neo4j Graph Data Science library license key.
+* defaultValue: `No Value`
+* validValues: an absolute path
+* dynamic: `false`
+
+
+== GDS Export
+
+`gds.export.location`
+
+* Sets the export location for file based exports.
+* defaultValue: `No Value`
+* validValues: an absolute path
+* dynamic: `false`
+
+`gds.model.store_location` label:enterprise-edition[Enterprise Edition]
+
+* Sets the location where persisted models are stored.
+* defaultValue: `No Value`
+* validValues: an absolute path
+* dynamic: `false`
+
+
+== Miscellaneous
+
+`gds.progress_tracking_enabled`
+
+* Enable progress logging tracking.
+* defaultValue: `true`
+* validValues: a boolean
+* dynamic: `false`
+
+`gds.validate_using_max_memory_estimation`
+
+* Use maximum memory estimation in procedure memory guard.
+* defaultValue: `false`
+* validValues: a boolean
+* dynamic: `false`
