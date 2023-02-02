@@ -187,6 +187,7 @@ class LinkPredictionTrainingPipelineTest {
             .nodeLookup(NodeLookup.EMPTY)
             .callContext(ProcedureCallContext.EMPTY)
             .log(NullLog.getInstance())
+            .isGdsAdmin(false)
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -227,6 +228,7 @@ class LinkPredictionTrainingPipelineTest {
             .nodeLookup(NodeLookup.EMPTY)
             .callContext(ProcedureCallContext.EMPTY)
             .log(NullLog.getInstance())
+            .isGdsAdmin(false)
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -267,6 +269,7 @@ class LinkPredictionTrainingPipelineTest {
             .nodeLookup(NodeLookup.EMPTY)
             .callContext(ProcedureCallContext.EMPTY)
             .log(NullLog.getInstance())
+            .isGdsAdmin(false)
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();

@@ -120,6 +120,7 @@ class WriteProcCancellationTest extends BaseTest {
                 .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
                 .nodeLookup(NodeLookup.EMPTY)
                 .callContext(ProcedureCallContext.EMPTY)
+                .isGdsAdmin(false)
                 .build();
 
             assertThatThrownBy(() -> resultConsumer.consume(computationResult, executionContext))
