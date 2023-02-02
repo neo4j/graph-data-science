@@ -47,23 +47,7 @@ public final class CommunityProcCompanion {
         LongNodePropertyValues nodeProperties,
         Supplier<NodeProperty> seedPropertySupplier
     ) {
-
-        var consecutiveIds = config.consecutiveIds();
-        var isIncremental = config.isIncremental();
-        var resultPropertyEqualsSeedProperty = isIncremental && resultProperty.equals(config.seedProperty());
-
-        LongNodePropertyValues result;
-
-        if (resultPropertyEqualsSeedProperty && !consecutiveIds) {
-            result = LongIfChangedNodePropertyValues.of(seedPropertySupplier.get(), nodeProperties);
-        } else if (consecutiveIds && !isIncremental) {
-            result = new ConsecutiveLongNodePropertyValues(
-                nodeProperties,
-                nodeProperties.size()
-            );
-        } else {
-            result = nodeProperties;
-        }
+        LongNodePropertyValues result = getLongNodePropertyValues(config, resultProperty, nodeProperties, seedPropertySupplier);
 
         if (config instanceof CommunitySizeConfig) {
             var finalResult = result;
@@ -80,6 +64,28 @@ public final class CommunityProcCompanion {
         }
 
         return result;
+    }
+
+    private static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> LongNodePropertyValues getLongNodePropertyValues(
+            CONFIG config,
+            String resultProperty,
+            LongNodePropertyValues nodeProperties,
+            Supplier<NodeProperty> seedPropertySupplier
+    ) {
+        var consecutiveIds = config.consecutiveIds();
+        var isIncremental = config.isIncremental();
+        var resultPropertyEqualsSeedProperty = isIncremental && resultProperty.equals(config.seedProperty());
+
+        if (resultPropertyEqualsSeedProperty && !consecutiveIds) {
+            return LongIfChangedNodePropertyValues.of(seedPropertySupplier.get(), nodeProperties);
+        } else if (consecutiveIds && !isIncremental) {
+            return new ConsecutiveLongNodePropertyValues(
+                    nodeProperties,
+                nodeProperties.size()
+            );
+        }
+
+        return nodeProperties;
     }
 
     private static LongNodePropertyValues applySizeFilter(
