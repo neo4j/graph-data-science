@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
@@ -32,6 +33,7 @@ import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.ValueTypes;
 import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
 import org.neo4j.values.storable.NumberType;
 
@@ -45,6 +47,15 @@ import java.util.stream.Collectors;
 public interface RelationshipImportResult {
 
     Map<RelationshipType, SingleTypeRelationships> importResults();
+
+    @Value.Lazy
+    default MutableRelationshipSchema relationshipSchema() {
+        var relationshipSchema = MutableRelationshipSchema.empty();
+
+        importResults().forEach((__, relationships) -> relationshipSchema.set(relationships.relationshipSchemaEntry()));
+
+        return relationshipSchema;
+    }
 
     static ImmutableRelationshipImportResult.Builder builder() {
         return ImmutableRelationshipImportResult.builder();

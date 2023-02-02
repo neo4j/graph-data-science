@@ -20,7 +20,6 @@
 package org.neo4j.gds.api;
 
 import org.neo4j.gds.api.schema.MutableGraphSchema;
-import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.CSRGraphStore;
@@ -46,10 +45,16 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
     }
 
     protected CSRGraphStore createGraphStore(Nodes nodes, RelationshipImportResult relationshipImportResult) {
+        var schema = MutableGraphSchema.of(
+            nodes.schema(),
+            relationshipImportResult.relationshipSchema(),
+            Map.of()
+        );
+
         return new GraphStoreBuilder()
             .databaseId(loadingContext.databaseId())
             .capabilities(capabilities)
-            .schema(computeGraphSchema(nodes, relationshipImportResult))
+            .schema(schema)
             .nodes(nodes)
             .relationshipImportResult(relationshipImportResult)
             .concurrency(graphProjectConfig.readConcurrency())
@@ -62,23 +67,5 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
             var memoryUsage = MemoryUsage.humanReadable(sizeInBytes);
             progressTracker.logInfo(formatWithLocale("Actual memory usage of the loaded graph: %s", memoryUsage));
         }
-    }
-
-    protected MutableGraphSchema computeGraphSchema(
-        Nodes nodes,
-        RelationshipImportResult relationshipImportResult
-    ) {
-        var nodeSchema = nodes.schema();
-        var relationshipSchema = MutableRelationshipSchema.empty();
-
-        relationshipImportResult
-            .importResults()
-            .forEach((__, relationships) -> relationshipSchema.set(relationships.relationshipSchemaEntry()));
-
-        return MutableGraphSchema.of(
-            nodeSchema,
-            relationshipSchema,
-            Map.of()
-        );
     }
 }
