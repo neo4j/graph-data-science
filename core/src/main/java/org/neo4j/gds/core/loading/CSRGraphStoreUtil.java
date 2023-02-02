@@ -62,32 +62,37 @@ public final class CSRGraphStoreUtil {
         var schema = MutableGraphSchema.from(graph.schema());
         var relationshipSchema = schema.relationshipSchema();
 
-        if (relationshipSchema.availableTypes().size() != 1) {
+        if (relationshipSchema.availableTypes().size() > 1) {
             throw new IllegalArgumentException(formatWithLocale(
                 "The supplied graph has more than one relationship type: %s",
                 StringJoining.join(relationshipSchema.availableTypes().stream().map(e -> e.name))
             ));
         }
-        var relationshipType = relationshipSchema.availableTypes().iterator().next();
 
         var nodeProperties = constructNodePropertiesFromGraph(graph);
 
-        var relationshipProperties = constructRelationshipPropertiesFromGraph(
-            graph,
-            relationshipType,
-            relationshipPropertyKey,
-            graph.relationshipProperties()
-        );
+        RelationshipImportResult relationshipImportResult;
+        if (relationshipSchema.availableTypes().isEmpty()) {
+            relationshipImportResult = RelationshipImportResult.builder().build();
+        } else {
+            var relationshipType = relationshipSchema.availableTypes().iterator().next();
 
-        var relationshipImportResult = RelationshipImportResult.builder().putImportResult(
-            relationshipType,
-            SingleTypeRelationships.builder()
-                .relationshipSchemaEntry(relationshipSchema.get(relationshipType))
-                .topology(graph.relationshipTopology())
-                .properties(relationshipProperties)
-                .build()
-        ).build();
+            var relationshipProperties = constructRelationshipPropertiesFromGraph(
+                graph,
+                relationshipType,
+                relationshipPropertyKey,
+                graph.relationshipProperties()
+            );
 
+             relationshipImportResult = RelationshipImportResult.builder().putImportResult(
+                relationshipType,
+                SingleTypeRelationships.builder()
+                    .relationshipSchemaEntry(relationshipSchema.get(relationshipType))
+                    .topology(graph.relationshipTopology())
+                    .properties(relationshipProperties)
+                    .build()
+            ).build();
+        }
 
         return new GraphStoreBuilder()
             .databaseId(databaseId)
