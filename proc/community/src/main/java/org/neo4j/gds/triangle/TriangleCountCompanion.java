@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.triangle;
 
+import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.executor.ComputationResult;
@@ -34,7 +35,8 @@ final class TriangleCountCompanion {
 
 
     static <CONFIG extends TriangleCountBaseConfig> NodePropertyValues nodePropertyTranslator(ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, CONFIG> computeResult) {
-        return computeResult.result().asNodeProperties();
+        var config = computeResult.config();
+        return CommunityProcCompanion.getNodePropertyValues(config, computeResult.result().asNodeProperties());
     }
 
     static <PROC_RESULT, CONFIG extends TriangleCountBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(

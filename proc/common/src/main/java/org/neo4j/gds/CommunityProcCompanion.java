@@ -48,21 +48,23 @@ public final class CommunityProcCompanion {
         Supplier<NodeProperty> seedPropertySupplier
     ) {
         LongNodePropertyValues result = getLongNodePropertyValues(config, resultProperty, nodeProperties, seedPropertySupplier);
+        return getNodePropertyValues(config, result);
+    }
 
+    public static <CONFIG extends ConcurrencyConfig> LongNodePropertyValues getNodePropertyValues(CONFIG config, LongNodePropertyValues result) {
         if (config instanceof CommunitySizeConfig) {
             var finalResult = result;
             result = ((CommunitySizeConfig) config)
-                .minCommunitySize()
-                .map(size -> applySizeFilter(finalResult, size, config.concurrency()))
-                .orElse(result);
+                    .minCommunitySize()
+                    .map(size -> applySizeFilter(finalResult, size, config.concurrency()))
+                    .orElse(result);
         } else if (config instanceof ComponentSizeConfig) {
             var finalResult = result;
             result = ((ComponentSizeConfig) config)
-                .minComponentSize()
-                .map(size -> applySizeFilter(finalResult, size, config.concurrency()))
-                .orElse(result);
+                    .minComponentSize()
+                    .map(size -> applySizeFilter(finalResult, size, config.concurrency()))
+                    .orElse(result);
         }
-
         return result;
     }
 
