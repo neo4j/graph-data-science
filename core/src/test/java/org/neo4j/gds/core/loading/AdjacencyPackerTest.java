@@ -26,8 +26,10 @@ import org.neo4j.gds.core.Aggregation;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Random;
+import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 
 class AdjacencyPackerTest {
 

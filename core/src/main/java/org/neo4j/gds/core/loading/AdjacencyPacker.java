@@ -63,17 +63,21 @@ public final class AdjacencyPacker {
             allBits[blockIdx++] = (byte) bits;
         }
 
+        return compress(values, offset, length, allBits, bytes);
+    }
+
+    private static Compressed compress(long[] values, int offset, int length, byte[] blocks, long bytes) {
         bytes = BitUtil.align(bytes, Long.BYTES);
         long mem = UnsafeUtil.allocateMemory(bytes, EmptyMemoryTracker.INSTANCE);
         long ptr = mem;
 
-        i = offset;
-        for (byte bits : allBits) {
+        int i = offset;
+        for (byte bits : blocks) {
             ptr = AdjacencyPacking.pack(bits, values, i, ptr);
             i += AdjacencyPacking.BLOCK_SIZE;
         }
 
-        return new Compressed(mem, bytes, allBits);
+        return new Compressed(mem, bytes, blocks, length);
     }
 
     public static long[] decompressAndPrefixSum(Compressed compressed) {
@@ -91,6 +95,9 @@ public final class AdjacencyPacker {
             offset += AdjacencyPacking.BLOCK_SIZE;
         }
 
+        if (values.length > compressed.length()) {
+            values = Arrays.copyOf(values, compressed.length());
+        }
 
         return values;
     }
@@ -104,6 +111,10 @@ public final class AdjacencyPacker {
         for (byte bits : blocks) {
             ptr = AdjacencyPacking.unpack(bits, values, offset, ptr);
             offset += AdjacencyPacking.BLOCK_SIZE;
+        }
+
+        if (values.length > compressed.length()) {
+            values = Arrays.copyOf(values, compressed.length());
         }
 
         return values;

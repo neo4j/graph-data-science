@@ -32,13 +32,16 @@ public final class Compressed {
 
     private volatile long address;
     private final long bytes;
+
+    private final int length;
     private final byte[] blocks;
 
-    public Compressed(long address, long bytes, byte[] blocks) {
-        requirePointerIsValid(address);
-        ADDRESS.set(this, address);
+    public Compressed(long address, long bytes, byte[] blocks, int length) {
         this.bytes = bytes;
         this.blocks = blocks;
+        this.length = length;
+        requirePointerIsValid(address);
+        ADDRESS.set(this, address);
     }
 
     public long bytesUsed() {
@@ -64,6 +67,10 @@ public final class Compressed {
 
     byte[] blocks() {
         return blocks;
+    }
+
+    int length() {
+        return length;
     }
 
     private static void requirePointerIsValid(long address) {
