@@ -31,6 +31,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
@@ -163,7 +164,11 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     public CSRGraphStore build() {
         var nodes = loadNodes();
         var relationshipImportResult = loadRelationships(nodes.idMap());
-        var schema = computeGraphSchema(nodes, relationshipImportResult);
+        var schema = MutableGraphSchema.of(
+            nodes.schema(),
+            relationshipImportResult.relationshipSchema(),
+            Map.of()
+        );
 
         return new GraphStoreBuilder()
             .databaseId(databaseId)
