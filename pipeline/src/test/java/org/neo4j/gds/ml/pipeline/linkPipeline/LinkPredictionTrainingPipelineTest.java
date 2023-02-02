@@ -52,6 +52,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.model.catalog.TestTrainConfigImpl;
 import org.neo4j.gds.model.catalog.TestWeightedTrainConfigImpl;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+import org.neo4j.logging.NullLog;
 
 import java.util.Collection;
 import java.util.List;
@@ -185,6 +186,7 @@ class LinkPredictionTrainingPipelineTest {
             .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
             .nodeLookup(NodeLookup.EMPTY)
             .callContext(ProcedureCallContext.EMPTY)
+            .log(NullLog.getInstance())
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -224,6 +226,7 @@ class LinkPredictionTrainingPipelineTest {
             .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
             .nodeLookup(NodeLookup.EMPTY)
             .callContext(ProcedureCallContext.EMPTY)
+            .log(NullLog.getInstance())
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -263,6 +266,7 @@ class LinkPredictionTrainingPipelineTest {
             .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
             .nodeLookup(NodeLookup.EMPTY)
             .callContext(ProcedureCallContext.EMPTY)
+            .log(NullLog.getInstance())
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();

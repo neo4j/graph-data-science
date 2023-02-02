@@ -40,7 +40,7 @@ public interface AlgorithmSpec<
 
     ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, RESULT> computationResultConsumer();
 
-    default ValidationConfiguration<CONFIG> validationConfig() {
+    default ValidationConfiguration<CONFIG> validationConfig(ExecutionContext executionContext) {
         return ValidationConfiguration.empty();
     }
 

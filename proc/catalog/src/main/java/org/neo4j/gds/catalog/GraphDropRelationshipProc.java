@@ -74,7 +74,7 @@ public class GraphDropRelationshipProc extends CatalogProc {
         var task = Tasks.leaf("Graph :: Relationships :: Drop", 1);
         var progressTracker = new TaskProgressTracker(
             task,
-            log,
+            executionContext().log(),
             1,
             new JobId(),
             executionContext().taskRegistryFactory(),

@@ -70,7 +70,7 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
     }
 
     @Override
-    public ValidationConfiguration<BetweennessCentralityMutateConfig> validationConfig() {
+    public ValidationConfiguration<BetweennessCentralityMutateConfig> validationConfig(ExecutionContext executionContext) {
         return BetweennessCentralityProc.getValidationConfig();
     }
 

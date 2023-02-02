@@ -122,7 +122,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         );
         var progressTracker = new TaskProgressTracker(
             task,
-            log,
+            executionContext().log(),
             config.writeConcurrency(),
             new JobId(),
             executionContext().taskRegistryFactory(),

@@ -24,6 +24,7 @@ import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.procedure.Description;
@@ -74,7 +75,7 @@ public class ClosenessCentralityStreamProc extends StreamProc<ClosenessCentralit
     }
 
     @Override
-    public ValidationConfiguration<ClosenessCentralityStreamConfig> validationConfig() {
+    public ValidationConfiguration<ClosenessCentralityStreamConfig> validationConfig(ExecutionContext executionContext) {
         return ClosenessCentralityProc.getValidationConfig();
     }
 

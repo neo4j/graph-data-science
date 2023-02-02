@@ -169,7 +169,7 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
 
         var taskProgressTracker = new TaskProgressTracker(
             task,
-            log,
+            executionContext().log(),
             config.concurrency(),
             new JobId(),
             executionContext().taskRegistryFactory(),

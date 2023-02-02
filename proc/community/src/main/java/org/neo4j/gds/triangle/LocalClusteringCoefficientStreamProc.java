@@ -25,6 +25,7 @@ import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -83,8 +84,8 @@ public class LocalClusteringCoefficientStreamProc extends StreamProc<
     }
 
     @Override
-    public ValidationConfiguration<LocalClusteringCoefficientStreamConfig> validationConfig() {
-        return LocalClusteringCoefficientCompanion.getValidationConfig(log);
+    public ValidationConfiguration<LocalClusteringCoefficientStreamConfig> validationConfig(ExecutionContext executionContext) {
+        return LocalClusteringCoefficientCompanion.getValidationConfig(executionContext.log());
     }
 
     @Override

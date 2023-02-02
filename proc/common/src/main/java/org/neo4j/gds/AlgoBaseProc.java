@@ -103,7 +103,7 @@ public abstract class AlgoBaseProc<
     }
 
     @Override
-    public ValidationConfiguration<CONFIG> validationConfig() {
+    public ValidationConfiguration<CONFIG> validationConfig(ExecutionContext executionContext) {
         return ValidationConfiguration.empty();
     }
 
@@ -111,9 +111,10 @@ public abstract class AlgoBaseProc<
         var pipelineSpec = new AlgoBaseExecutorSpec();
 
         var name = name();
+        var executionContext = executionContext();
         var factory = algorithmFactory();
         var configFunction = newConfigFunction();
-        var validationConfig = validationConfig();
+        var validationConfig = validationConfig(executionContext);
         var releaseProgressTask = releaseProgressTask();
         var algoSpec = new AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ComputationResult<ALGO, ALGO_RESULT, CONFIG>, AlgorithmFactory<?, ALGO, CONFIG>>() {
             @Override
@@ -137,7 +138,7 @@ public abstract class AlgoBaseProc<
             }
 
             @Override
-            public ValidationConfiguration<CONFIG> validationConfig() {
+            public ValidationConfiguration<CONFIG> validationConfig(ExecutionContext executionContext) {
                 return validationConfig;
             }
 
@@ -150,7 +151,7 @@ public abstract class AlgoBaseProc<
         return new ProcedureExecutor<>(
             algoSpec,
             pipelineSpec,
-            executionContext()
+            executionContext
         );
     }
 

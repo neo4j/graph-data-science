@@ -26,6 +26,7 @@ import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -83,7 +84,7 @@ public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentr
     }
 
     @Override
-    public ValidationConfiguration<BetweennessCentralityStreamConfig> validationConfig() {
+    public ValidationConfiguration<BetweennessCentralityStreamConfig> validationConfig(ExecutionContext executionContext) {
         return BetweennessCentralityProc.getValidationConfig();
     }
 

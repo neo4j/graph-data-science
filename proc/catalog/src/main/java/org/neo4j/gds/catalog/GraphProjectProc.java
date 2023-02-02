@@ -219,7 +219,7 @@ public class GraphProjectProc extends CatalogProc {
 
         var progressTracker = new TaskProgressTracker(
             GraphStoreFilter.progressTask(fromGraphStore),
-            log,
+            executionContext().log(),
             config.concurrency(),
             config.jobId(),
             executionContext().taskRegistryFactory(),

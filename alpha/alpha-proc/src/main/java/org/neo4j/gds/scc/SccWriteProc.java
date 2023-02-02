@@ -85,7 +85,7 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
             try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
                 var progressTracker = new TaskProgressTracker(
                     NodePropertyExporter.baseTask("Scc", graph.nodeCount()),
-                    log,
+                    executionContext.log(),
                     config.writeConcurrency(),
                     executionContext.taskRegistryFactory()
                 );
