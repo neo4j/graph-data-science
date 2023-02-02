@@ -65,6 +65,28 @@ class CSRGraphStoreUtilTest {
     }
 
     @Test
+    void fromGraphWithNoRelationships() {
+        String GDL =
+            "  CREATE" +
+            "  (a:A { foo: 42, bar: 1337 })" +
+            ", (b:A { foo: 84, bar: 1234 })" +
+            ", (c:B { foo: 23 })";
+
+        var gdlGraphStore = TestSupport.graphStoreFromGDL(GDL);
+        var gdlGraph = gdlGraphStore.getUnion();
+
+        var convertedGraphStore = CSRGraphStoreUtil.createFromGraph(
+            DatabaseId.from("dummy"),
+            (HugeGraph) gdlGraph,
+            Optional.empty(),
+            1
+        );
+
+        assertThat(convertedGraphStore.schema()).isEqualTo(gdlGraphStore.schema());
+        assertGraphEquals(gdlGraphStore.getUnion(), convertedGraphStore.getUnion());
+    }
+
+    @Test
     void shouldValidateRelationshipPropertyKey() {
         var graph = TestSupport.fromGdl("()-[:REL]->()");
 
