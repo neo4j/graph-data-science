@@ -29,7 +29,8 @@ import java.util.Random;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class AdjacencyPackerTest {
 
@@ -83,7 +84,7 @@ class AdjacencyPackerTest {
         var data = LongStream.range(0, AdjacencyPacking.BLOCK_SIZE).toArray();
         var compressed = AdjacencyPacker.compress(data, 0, data.length);
         assertThatCode(compressed::free).doesNotThrowAnyException();
-        assertThatCode(compressed::free)
+        assertThatThrownBy(compressed::free)
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("This compressed memory has already been freed.");
     }
@@ -93,7 +94,7 @@ class AdjacencyPackerTest {
         var data = LongStream.range(0, AdjacencyPacking.BLOCK_SIZE).toArray();
         var compressed = AdjacencyPacker.compress(data, 0, data.length);
         assertThatCode(compressed::free).doesNotThrowAnyException();
-        assertThatCode(() -> AdjacencyPacker.decompress(compressed))
+        assertThatThrownBy(() -> AdjacencyPacker.decompress(compressed))
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("This compressed memory has already been freed.");
     }

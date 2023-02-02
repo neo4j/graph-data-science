@@ -22,55 +22,133 @@ package org.neo4j.gds.core.loading;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 import org.neo4j.memory.EmptyMemoryTracker;
 
+import java.lang.ref.Cleaner;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 
-public final class Compressed {
-    private static final AtomicLongFieldUpdater<Compressed> ADDRESS = AtomicLongFieldUpdater.newUpdater(
-        Compressed.class,
+/**
+ * Represents a slice of compressed memory that lives off-heap.
+ */
+public final class Compressed implements AutoCloseable {
+
+    private static final Cleaner CLEANER = Cleaner.create();
+
+    private final Address address;
+    private final Cleaner.Cleanable cleanable;
+
+    // number of compressed values
+    private final int length;
+    // header of compression blocks
+    private final byte[] blocks;
+
+    public Compressed(long address, long bytes, byte[] blocks, int length) {
+        this.address = new Address(address, bytes);
+        this.cleanable = CLEANER.register(this, this.address);
+        this.blocks = blocks;
+        this.length = length;
+    }
+
+    @Override
+    public String toString() {
+        return "Compressed{address=" + this.address.address() + ", bytes=" + this.address.bytes() + ", blocks=" + blocks.length + '}';
+    }
+
+    /**
+     * Free the underlying memory.
+     *
+     * @see {@link #free()}.
+     */
+    @Override
+    public void close() throws Exception {
+        this.free();
+    }
+
+    /**
+     * Free the underlying memory.
+     * <p>
+     * The memory must not have been already freed.
+     *
+     * @throws IllegalStateException if the memory has already been freed.
+     */
+    public void free() {
+        // make sure that the address is valid
+        // We already prevent double-free because the cleanable has
+        // exactly-once semantics, but additional calls to clean would just
+        // do nothing, and we want to throw an exception instead.
+        this.address.address();
+        this.cleanable.clean();
+    }
+
+    /**
+     * @return number of bytes to represent the data in compressed format.
+     */
+    public long bytesUsed() {
+        return this.address.bytes() + this.blocks.length;
+    }
+
+    /**
+     * @return a valid (non zero) address.
+     * @throws IllegalStateException if the address is NULL.
+     */
+    long address() {
+        return this.address.address();
+    }
+
+    /**
+     * @return the headers of compression blocks
+     */
+    byte[] blocks() {
+        return this.blocks;
+    }
+
+    /**
+     * @return number of compressed values
+     */
+    int length() {
+        return this.length;
+    }
+}
+
+
+/**
+ * An address to some off-heap memory.
+ * <p>
+ * Separated address state to register with the {@link java.lang.ref.Cleaner}.
+ * This is an auxiliary class to prevent accidental access to private members.
+ */
+final class Address implements Runnable {
+    private static final AtomicLongFieldUpdater<Address> ADDRESS = AtomicLongFieldUpdater.newUpdater(
+        Address.class,
         "address"
     );
 
     private volatile long address;
     private final long bytes;
 
-    private final int length;
-    private final byte[] blocks;
-
-    public Compressed(long address, long bytes, byte[] blocks, int length) {
-        this.bytes = bytes;
-        this.blocks = blocks;
-        this.length = length;
+    Address(long address, long bytes) {
         requirePointerIsValid(address);
-        ADDRESS.set(this, address);
+        this.address = address;
+        this.bytes = bytes;
     }
 
-    public long bytesUsed() {
-        return bytes + blocks.length;
-    }
-
-    public void free() {
+    @Override
+    public void run() {
         long address = ADDRESS.getAndSet(this, 0L);
         requirePointerIsValid(address);
         UnsafeUtil.free(address, bytes, EmptyMemoryTracker.INSTANCE);
     }
 
-    @Override
-    public String toString() {
-        return "Compressed{address=" + ADDRESS.get(this) + ", bytes=" + bytes + ", blocks=" + blocks.length + '}';
-    }
-
+    /**
+     * @return a valid (non zero) address.
+     * @throws IllegalStateException if the address is NULL.
+     */
     long address() {
         var address = ADDRESS.get(this);
         requirePointerIsValid(address);
         return address;
     }
 
-    byte[] blocks() {
-        return blocks;
-    }
-
-    int length() {
-        return length;
+    long bytes() {
+        return this.bytes;
     }
 
     private static void requirePointerIsValid(long address) {
