@@ -30,7 +30,7 @@ import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
@@ -123,7 +123,7 @@ class WriteProcCancellationTest extends BaseTest {
                 .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
                 .nodeLookup(NodeLookup.EMPTY)
                 .callContext(ProcedureCallContext.EMPTY)
-                .modelCatalog(new OpenModelCatalog())
+                .modelCatalog(ModelCatalog.EMPTY)
                 .isGdsAdmin(false)
                 .build();
 

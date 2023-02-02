@@ -188,7 +188,7 @@ class LinkPredictionTrainingPipelineTest {
             .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
             .nodeLookup(NodeLookup.EMPTY)
             .callContext(ProcedureCallContext.EMPTY)
-            .modelCatalog(new OpenModelCatalog())
+            .modelCatalog(ModelCatalog.EMPTY)
             .isGdsAdmin(false)
             .log(NullLog.getInstance())
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)

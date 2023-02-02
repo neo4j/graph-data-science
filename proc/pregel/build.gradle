@@ -34,7 +34,6 @@ dependencies {
     testImplementation project(':memory-usage')
     testImplementation project(':licensing')
     testImplementation project(':open-licensing')
-    testImplementation project(':open-model-catalog')
     testImplementation project(':test-utils')
     testImplementation project(':proc-catalog')
 }
