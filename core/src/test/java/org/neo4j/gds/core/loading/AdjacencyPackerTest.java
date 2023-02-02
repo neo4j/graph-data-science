@@ -75,4 +75,24 @@ class AdjacencyPackerTest {
             .isLessThanOrEqualTo(requiredBytes);
     }
 
+
+    @Test
+    void preventDoubleFree() {
+        var data = LongStream.range(0, AdjacencyPacking.BLOCK_SIZE).toArray();
+        var compressed = AdjacencyPacker.compress(data, 0, data.length);
+        assertThatCode(compressed::free).doesNotThrowAnyException();
+        assertThatCode(compressed::free)
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("This compressed memory has already been freed.");
+    }
+
+    @Test
+    void preventUseAfterFree() {
+        var data = LongStream.range(0, AdjacencyPacking.BLOCK_SIZE).toArray();
+        var compressed = AdjacencyPacker.compress(data, 0, data.length);
+        assertThatCode(compressed::free).doesNotThrowAnyException();
+        assertThatCode(() -> AdjacencyPacker.decompress(compressed))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("This compressed memory has already been freed.");
+    }
 }
