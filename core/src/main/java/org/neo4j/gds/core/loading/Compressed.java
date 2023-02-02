@@ -58,7 +58,7 @@ public final class Compressed implements AutoCloseable {
      * @see org.neo4j.gds.core.loading.Compressed#free()
      */
     @Override
-    public void close() throws Exception {
+    public void close() {
         this.free();
     }
 
