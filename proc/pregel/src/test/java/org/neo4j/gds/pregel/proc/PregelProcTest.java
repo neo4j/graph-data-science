@@ -46,6 +46,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
@@ -57,6 +58,7 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.NullLog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -207,6 +209,8 @@ public class PregelProcTest extends BaseProcTest {
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
             proc.log = NullLog.getInstance();
+            proc.internalModelCatalog = new OpenModelCatalog();
+            proc.callContext = ProcedureCallContext.EMPTY;
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,
                 "throwInCompute", true
@@ -230,8 +234,9 @@ public class PregelProcTest extends BaseProcTest {
             proc.databaseService = db;
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
-
             proc.log = NullLog.getInstance();
+            proc.internalModelCatalog = new OpenModelCatalog();
+            proc.callContext = ProcedureCallContext.EMPTY;
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,
                 "throwInCompute", true
@@ -255,6 +260,8 @@ public class PregelProcTest extends BaseProcTest {
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
             proc.log = NullLog.getInstance();
+            proc.internalModelCatalog = new OpenModelCatalog();
+            proc.callContext = ProcedureCallContext.EMPTY;
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,
                 "throwInCompute", true

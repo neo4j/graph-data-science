@@ -117,8 +117,8 @@ public interface ExecutionContext {
     ExecutionContext EMPTY = new ExecutionContext() {
 
         @Override
-        public @Nullable DatabaseId databaseId() {
-            return null;
+        public DatabaseId databaseId() {
+            return DatabaseId.EMPTY;
         }
 
         @Override
@@ -127,8 +127,8 @@ public interface ExecutionContext {
         }
 
         @Override
-        public @Nullable ModelCatalog modelCatalog() {
-            return null;
+        public ModelCatalog modelCatalog() {
+            return ModelCatalog.EMPTY;
         }
 
         @Override

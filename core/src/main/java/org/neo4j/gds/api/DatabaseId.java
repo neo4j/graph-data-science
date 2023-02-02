@@ -28,6 +28,8 @@ import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 
 public final class DatabaseId {
 
+    public static final DatabaseId EMPTY = new DatabaseId("");
+
     public static DatabaseId of(GraphDatabaseService databaseService) {
         return new DatabaseId(normalizeDatabseName(databaseService.databaseName()));
     }
