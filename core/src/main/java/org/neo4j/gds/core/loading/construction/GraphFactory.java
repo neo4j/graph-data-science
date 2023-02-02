@@ -19,13 +19,9 @@
  */
 package org.neo4j.gds.core.loading.construction;
 
-import com.carrotsearch.hppc.IntObjectHashMap;
-import com.carrotsearch.hppc.ObjectIntScatterMap;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.neo4j.gds.ImmutableRelationshipProjection;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
@@ -50,18 +46,14 @@ import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporterBuilder;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.IntStream;
 
-import static java.util.stream.Collectors.toMap;
-import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
 
 @Value.Style(
@@ -120,9 +112,7 @@ public final class GraphFactory {
         )).orElseGet(() -> new NodesBuilder(
             maxOriginalId,
             threadCount,
-            TokenToNodeLabel.lazy(),
-            NodeLabelTokenToPropertyKeys::lazy,
-            new ConcurrentHashMap<>(),
+            NodesBuilderContext.lazy(threadCount),
             idMapBuilder,
             labelInformation,
             hasProperties.orElse(false),
@@ -139,31 +129,10 @@ public final class GraphFactory {
         boolean hasLabelInformation,
         boolean deduplicateIds
     ) {
-        var nodeLabels = nodeSchema.availableLabels();
-
-        var elementIdentifierLabelTokenMapping = new ObjectIntScatterMap<NodeLabel>();
-        var labelTokenNodeLabelMapping = new IntObjectHashMap<List<NodeLabel>>();
-        var labelTokenCounter = new MutableInt(0);
-        nodeLabels.forEach(nodeLabel -> {
-            int labelToken = nodeLabel == NodeLabel.ALL_NODES
-                ? ANY_LABEL
-                : labelTokenCounter.getAndIncrement();
-
-            elementIdentifierLabelTokenMapping.put(nodeLabel, labelToken);
-            labelTokenNodeLabelMapping.put(labelToken, List.of(nodeLabel));
-        });
-
-        var propertyBuildersByPropertyKey = nodeSchema.unionProperties().entrySet().stream().collect(toMap(
-            Map.Entry::getKey,
-            e -> NodePropertiesFromStoreBuilder.of(e.getValue().defaultValue(), concurrency)
-        ));
-
         return new NodesBuilder(
             maxOriginalId,
             concurrency,
-            TokenToNodeLabel.fixed(elementIdentifierLabelTokenMapping, labelTokenNodeLabelMapping),
-            () -> NodeLabelTokenToPropertyKeys.fixed(nodeSchema),
-            new ConcurrentHashMap<>(propertyBuildersByPropertyKey),
+            NodesBuilderContext.fixed(nodeSchema, concurrency),
             idMapBuilder,
             hasLabelInformation,
             nodeSchema.hasProperties(),

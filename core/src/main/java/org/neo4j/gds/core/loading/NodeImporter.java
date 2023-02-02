@@ -20,12 +20,14 @@
 package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.IntObjectMap;
+import org.immutables.builder.Builder;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.utils.RawValues;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class NodeImporter {
 
@@ -35,13 +37,14 @@ public class NodeImporter {
 
     private final IdMapBuilder idMapBuilder;
     private final LabelInformation.Builder labelInformationBuilder;
-    private final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
+    private final Optional<IntObjectMap<List<NodeLabel>>> labelTokenNodeLabelMapping;
     private final boolean importProperties;
 
-    public NodeImporter(
+    @Builder.Constructor
+    NodeImporter(
         IdMapBuilder idMapBuilder,
         LabelInformation.Builder labelInformationBuilder,
-        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
+        Optional<IntObjectMap<List<NodeLabel>>> labelTokenNodeLabelMapping,
         boolean importProperties
     ) {
         this.idMapBuilder = idMapBuilder;
@@ -51,6 +54,13 @@ public class NodeImporter {
     }
 
     public long importNodes(NodesBatchBuffer buffer, PropertyReader reader) {
+        var tokenToLabelMap = this.labelTokenNodeLabelMapping.orElseThrow(
+            () -> new IllegalStateException("Missing Token-to-NodeLabel mapping")
+        );
+        return importNodes(buffer, tokenToLabelMap, reader);
+    }
+
+    public long importNodes(NodesBatchBuffer buffer, IntObjectMap<List<NodeLabel>> tokenToNodeLabelsMap, PropertyReader reader) {
         int batchLength = buffer.length();
         if (batchLength == 0) {
             return 0;
@@ -84,7 +94,8 @@ public class NodeImporter {
                 batch,
                 batchLength,
                 labelIds,
-                (nodeIds, pos) -> nodeIds[pos]
+                (nodeIds, pos) -> nodeIds[pos],
+                tokenToNodeLabelsMap
             );
         }
 
@@ -96,19 +107,22 @@ public class NodeImporter {
         return RawValues.combineIntInt(batchLength, importedProperties);
     }
 
-    private void setNodeLabelInformation(long[] batch, int batchLength, long[][] labelIds, IdFunction idFunction) {
+    private void setNodeLabelInformation(
+        long[] batch,
+        int batchLength,
+        long[][] labelIds,
+        IdFunction idFunction,
+        IntObjectMap<List<NodeLabel>> tokenToNodeLabelsMap
+    ) {
         int cappedBatchLength = Math.min(labelIds.length, batchLength);
         for (int i = 0; i < cappedBatchLength; i++) {
             long nodeId = idFunction.apply(batch, i);
-            long[] labelIdsForNode = labelIds[i];
+            long[] labelTokensForNode = labelIds[i];
 
-            for (long labelId : labelIdsForNode) {
-                var elementIdentifiers = labelTokenNodeLabelMapping.getOrDefault(
-                    (int) labelId,
-                    Collections.emptyList()
-                );
-                for (NodeLabel elementIdentifier : elementIdentifiers) {
-                    labelInformationBuilder.addNodeIdToLabel(elementIdentifier, nodeId);
+            for (long token : labelTokensForNode) {
+                var nodeLabels = tokenToNodeLabelsMap.getOrDefault((int) token, Collections.emptyList());
+                for (NodeLabel nodeLabel : nodeLabels) {
+                    this.labelInformationBuilder.addNodeIdToLabel(nodeLabel, nodeId);
                 }
             }
         }
