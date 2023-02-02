@@ -130,7 +130,7 @@ public final class CommunityProcCompanion {
 
         /**
          * Returning null indicates that the value is not written to Neo4j.
-         *
+         * <p>
          * The filter is applied in the latest stage before writing to Neo4j.
          * Since the wrapped node properties may have additional logic in value(),
          * we need to check if they already filtered the value. Only in the case
