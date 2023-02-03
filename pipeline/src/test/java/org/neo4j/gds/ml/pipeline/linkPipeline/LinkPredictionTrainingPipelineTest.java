@@ -35,6 +35,8 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
@@ -186,7 +188,11 @@ class LinkPredictionTrainingPipelineTest {
             .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
             .nodeLookup(NodeLookup.EMPTY)
             .callContext(ProcedureCallContext.EMPTY)
+            .modelCatalog(ModelCatalog.EMPTY)
+            .isGdsAdmin(false)
             .log(NullLog.getInstance())
+            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .isGdsAdmin(false)
             .build();
 
@@ -227,7 +233,10 @@ class LinkPredictionTrainingPipelineTest {
             .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
             .nodeLookup(NodeLookup.EMPTY)
             .callContext(ProcedureCallContext.EMPTY)
+            .isGdsAdmin(false)
             .log(NullLog.getInstance())
+            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .isGdsAdmin(false)
             .build();
 
@@ -268,7 +277,10 @@ class LinkPredictionTrainingPipelineTest {
             .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
             .nodeLookup(NodeLookup.EMPTY)
             .callContext(ProcedureCallContext.EMPTY)
+            .isGdsAdmin(false)
             .log(NullLog.getInstance())
+            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .isGdsAdmin(false)
             .build();
 

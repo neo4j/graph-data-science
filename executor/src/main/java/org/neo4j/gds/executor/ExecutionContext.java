@@ -46,17 +46,13 @@ import org.neo4j.logging.NullLog;
 
 import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 
-// TODO Remove the @Nullable annotations once the EstimationCli uses ProcedureExecutors
 @ValueClass
 public interface ExecutionContext {
 
-    @Nullable
     DatabaseId databaseId();
 
-    @Nullable
     DependencyResolver dependencyResolver();
 
-    @Nullable
     ModelCatalog modelCatalog();
 
     Log log();
@@ -69,13 +65,10 @@ public interface ExecutionContext {
 
     NodeLookup nodeLookup();
 
-    @Nullable
     ProcedureCallContext callContext();
 
-    @Nullable
     TaskRegistryFactory taskRegistryFactory();
 
-    @Nullable
     UserLogRegistryFactory userLogRegistryFactory();
 
     String username();
@@ -125,7 +118,7 @@ public interface ExecutionContext {
 
         @Override
         public DatabaseId databaseId() {
-            return null;
+            return DatabaseId.EMPTY;
         }
 
         @Override
@@ -134,12 +127,12 @@ public interface ExecutionContext {
         }
 
         @Override
-        public @Nullable ModelCatalog modelCatalog() {
-            return null;
+        public ModelCatalog modelCatalog() {
+            return ModelCatalog.EMPTY;
         }
 
         @Override
-        public @Nullable Log log() {
+        public Log log() {
             return NullLog.getInstance();
         }
 
@@ -169,13 +162,12 @@ public interface ExecutionContext {
         }
 
         @Override
-        public @Nullable TaskRegistryFactory taskRegistryFactory() {
+        public TaskRegistryFactory taskRegistryFactory() {
             return EmptyTaskRegistryFactory.INSTANCE;
         }
 
         @Override
-        public @Nullable
-        UserLogRegistryFactory userLogRegistryFactory() {
+        public UserLogRegistryFactory userLogRegistryFactory() {
             return EmptyUserLogRegistryFactory.INSTANCE;
         }
 

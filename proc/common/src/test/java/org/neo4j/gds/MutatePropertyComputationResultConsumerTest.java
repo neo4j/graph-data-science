@@ -37,8 +37,10 @@ import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.CSRGraphStore;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -79,11 +81,13 @@ class MutatePropertyComputationResultConsumerTest {
         .callContext(new ProcedureCallContext(42, new String[0], false, "neo4j", false))
         .log(Neo4jProxy.testLog())
         .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+        .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
         .username("")
         .terminationMonitor(TerminationMonitor.EMPTY)
         .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
         .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
         .nodeLookup(NodeLookup.EMPTY)
+        .modelCatalog(ModelCatalog.EMPTY)
         .isGdsAdmin(false)
         .build();
 

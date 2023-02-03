@@ -61,4 +61,82 @@ public interface ModelCatalog {
     void removeAllLoadedModels();
 
     void verifyModelCanBeStored(String username, String modelName, String modelType);
+
+    ModelCatalog EMPTY = new ModelCatalog() {
+        @Override
+        public void set(Model<?, ?, ?> model) {
+
+        }
+
+        @Override
+        public <D, C extends ModelConfig, I extends ToMapConvertible> Model<D, C, I> get(
+            String username,
+            String modelName,
+            Class<D> dataClass,
+            Class<C> configClass,
+            Class<I> infoClass
+        ) {
+            return null;
+        }
+
+        @Override
+        public Model<?, ?, ?> getUntypedOrThrow(String username, String modelName) {
+            return null;
+        }
+
+        @Override
+        public @Nullable Model<?, ?, ?> getUntyped(String username, String modelName) {
+            return null;
+        }
+
+        @Override
+        public Stream<Model<?, ?, ?>> getAllModels() {
+            return null;
+        }
+
+        @Override
+        public long modelCount() {
+            return 0;
+        }
+
+        @Override
+        public boolean exists(String username, String modelName) {
+            return false;
+        }
+
+        @Override
+        public Model<?, ?, ?> dropOrThrow(String username, String modelName) {
+            return null;
+        }
+
+        @Override
+        public @Nullable Model<?, ?, ?> drop(String username, String modelName) {
+            return null;
+        }
+
+        @Override
+        public Collection<Model<?, ?, ?>> list(String username) {
+            return null;
+        }
+
+        @Override
+        public Model<?, ?, ?> publish(String username, String modelName) {
+            return null;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
+
+        @Override
+        public void removeAllLoadedModels() {
+
+        }
+
+        @Override
+        public void verifyModelCanBeStored(String username, String modelName, String modelType) {
+
+        }
+    };
 }
