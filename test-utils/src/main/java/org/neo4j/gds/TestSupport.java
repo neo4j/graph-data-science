@@ -44,8 +44,8 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
+import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.gds.transaction.TransactionContextImpl;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.kernel.api.exceptions.Status;
@@ -474,7 +474,7 @@ public final class TestSupport {
     }
 
     public static TransactionContext fullAccessTransaction(GraphDatabaseService databaseService) {
-        return TransactionContextImpl.withFullAccess(databaseService);
+        return DatabaseTransactionContext.withFullAccess(databaseService);
     }
 
     public static IdMap idMap(long nodeCount) {

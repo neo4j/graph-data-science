@@ -33,7 +33,7 @@ import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.transaction.TransactionContextImpl;
+import org.neo4j.gds.transaction.DatabaseTransactionContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -118,7 +118,7 @@ class HarmonicCentralityProcTest extends BaseProcTest {
 
             proc.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore, jobId));
             proc.nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(
-                TransactionContextImpl.of(proc.databaseService, proc.procedureTransaction)
+                DatabaseTransactionContext.of(proc.databaseService, proc.procedureTransaction)
             );
 
             proc.write(

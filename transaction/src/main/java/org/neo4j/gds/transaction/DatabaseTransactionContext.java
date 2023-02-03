@@ -31,7 +31,7 @@ import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 /**
  * Manage transactions by making sure that the correct {@link org.neo4j.internal.kernel.api.security.SecurityContext} is applied.
  */
-public final class TransactionContextImpl implements TransactionContext {
+public final class DatabaseTransactionContext implements TransactionContext {
 
     /**
      * Creates a new {@code TransactionContext} with the same {@link org.neo4j.internal.kernel.api.security.SecurityContext} as the provided {@link org.neo4j.graphdb.Transaction}.
@@ -48,20 +48,20 @@ public final class TransactionContextImpl implements TransactionContext {
      * Creates a new {@code TransactionContext} with the same {@link org.neo4j.internal.kernel.api.security.SecurityContext} as the provided {@link org.neo4j.kernel.impl.coreapi.InternalTransaction}.
      */
     public static TransactionContext of(GraphDatabaseService databaseService, InternalTransaction top) {
-        return new TransactionContextImpl(databaseService, top.securityContext());
+        return new DatabaseTransactionContext(databaseService, top.securityContext());
     }
 
     /**
      * Creates a new {@code TransactionContext} with the provided {@link org.neo4j.internal.kernel.api.security.SecurityContext}.
      */
     public static TransactionContext withFullAccess(GraphDatabaseService databaseService) {
-        return new TransactionContextImpl(databaseService, SecurityContext.AUTH_DISABLED);
+        return new DatabaseTransactionContext(databaseService, SecurityContext.AUTH_DISABLED);
     }
 
     private final GraphDatabaseService databaseService;
     private final SecurityContext securityContext;
 
-    private TransactionContextImpl(
+    private DatabaseTransactionContext(
         GraphDatabaseService databaseService,
         SecurityContext securityContext
     ) {
@@ -109,7 +109,7 @@ public final class TransactionContextImpl implements TransactionContext {
     public TransactionContext withRestrictedAccess(AccessMode.Static accessMode) {
         var restrictedMode = new RestrictedAccessMode(securityContext.mode(), accessMode);
         var newContext = securityContext.withMode(restrictedMode);
-        return new TransactionContextImpl(databaseService, newContext);
+        return new DatabaseTransactionContext(databaseService, newContext);
     }
 
     @Override

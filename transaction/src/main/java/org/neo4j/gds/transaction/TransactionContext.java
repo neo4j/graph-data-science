@@ -61,16 +61,16 @@ public interface TransactionContext {
      * The new transaction is closed afterwards and any resource that is tied to the lifecycle of that transaction
      * will throw a {@link org.neo4j.graphdb.NotInTransactionException} upon access.
      */
-    <T, E extends Exception> T apply(TransactionContextImpl.TxFunction<T, E> block) throws E;
+    <T, E extends Exception> T apply(TransactionContext.TxFunction<T, E> block) throws E;
 
     /**
      * Run some code within a <strong>new</strong> {@code Transaction} under the managed {@code SecurityContext}.
      * The new transaction is closed afterwards.
      */
-    <E extends Exception> void accept(TransactionContextImpl.TxConsumer<E> block) throws E;
+    <E extends Exception> void accept(TransactionContext.TxConsumer<E> block) throws E;
 
     /**
-     * Returns a <strong>new</strong> {@link org.neo4j.gds.transaction.TransactionContextImpl} restricted by the provided {@link org.neo4j.internal.kernel.api.security.AccessMode}.
+     * Returns a <strong>new</strong> {@link TransactionContext} restricted by the provided {@link org.neo4j.internal.kernel.api.security.AccessMode}.
      * The mode only restricts but does not override the given {@code SecurityContext}, i.e. you cannot grant more access.
      * <p>
      * One use-case is to restrict the access to {@link org.neo4j.internal.kernel.api.security.AccessMode.Static#READ} to make sure that only read-only
@@ -81,16 +81,16 @@ public interface TransactionContext {
     TransactionContext withRestrictedAccess(AccessMode.Static accessMode);
 
     /**
-     * Return a new {@link org.neo4j.gds.transaction.TransactionContextImpl.SecureTransaction} that owns a newly created top-level {@code Transaction}.
+     * Return a new {@link TransactionContext.SecureTransaction} that owns a newly created top-level {@code Transaction}.
      * The returned instance will operate under the {@code SecurityContext} as provided by this {@code TransactionContext}.
      * <p>
-     * For shorter tasks, consider using {@link #accept(org.neo4j.gds.transaction.TransactionContextImpl.TxConsumer)} or {@link #apply(org.neo4j.gds.transaction.TransactionContextImpl.TxFunction)}
+     * For shorter tasks, consider using {@link #accept(TransactionContext.TxConsumer)} or {@link #apply(TransactionContext.TxFunction)}
      * which make sure that the created transaction is closed.
      * <p>
      * This is intended for when you need to keep track of a new transaction for a longer time, in which case you can
-     * use {@link org.neo4j.gds.transaction.TransactionContextImpl.SecureTransaction#kernelTransaction()} to get the underlying transaction.
+     * use {@link TransactionContext.SecureTransaction#kernelTransaction()} to get the underlying transaction.
      */
-    TransactionContextImpl.SecureTransaction fork();
+    TransactionContext.SecureTransaction fork();
 
     final class SecureTransaction implements AutoCloseable {
         private final InternalTransaction tx;

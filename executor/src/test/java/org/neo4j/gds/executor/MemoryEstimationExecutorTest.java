@@ -43,7 +43,7 @@ import org.neo4j.gds.gdl.GdlGraphs;
 import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestAlgorithmResult;
 import org.neo4j.gds.test.TestMutateConfig;
-import org.neo4j.gds.transaction.TransactionContextImpl;
+import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
@@ -88,7 +88,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
             new TestMutateSpec(),
             new ProcedureExecutorSpec<>(),
             executionContext,
-            TransactionContextImpl.of(db, procedureTransaction)
+            DatabaseTransactionContext.of(db, procedureTransaction)
         );
     }
 

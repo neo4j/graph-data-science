@@ -43,7 +43,7 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryExtension;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.degree.DegreeCentralityMutateProc;
 import org.neo4j.gds.pagerank.PageRankMutateProc;
-import org.neo4j.gds.transaction.TransactionContextImpl;
+import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
@@ -301,7 +301,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             GraphWriteNodePropertiesProc.class,
             log,
             proc -> {
-                proc.nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(TransactionContextImpl.of(proc.databaseService, proc.procedureTransaction));
+                proc.nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(DatabaseTransactionContext.of(proc.databaseService, proc.procedureTransaction));
                 proc.run(TEST_GRAPH_SAME_PROPERTIES, List.of("newNodeProp1", "newNodeProp2"), List.of("*"), Map.of());
             }
         );

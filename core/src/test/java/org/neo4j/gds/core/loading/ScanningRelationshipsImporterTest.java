@@ -46,7 +46,7 @@ import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.transaction.TransactionContextImpl;
+import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.logging.NullLog;
 
@@ -155,7 +155,7 @@ class ScanningRelationshipsImporterTest extends BaseTest {
             .executor(Pools.DEFAULT)
             .log(NullLog.getInstance())
             .terminationFlag(TerminationFlag.RUNNING_TRUE)
-            .transactionContext(TransactionContextImpl.of(db, db.beginTx()))
+            .transactionContext(DatabaseTransactionContext.of(db, db.beginTx()))
             .taskRegistryFactory(TaskRegistryFactory.empty())
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .databaseId(DatabaseId.of(db))
