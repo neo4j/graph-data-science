@@ -74,27 +74,43 @@ public class InverseRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFac
         var builder = MemoryEstimations.builder(InverseRelationships.class);
 
         for (String typeName : relationshipTypes) {
-            // FIXME this is incorrect as * should unroll to all relationship types in the graphStore
-            var relationshipType = typeName.equals(ElementProjection.PROJECT_ALL)
-                ? RelationshipType.ALL_RELATIONSHIPS
-                : RelationshipType.of(typeName);
             var builderForType = MemoryEstimations.builder();
+            if (typeName.equals(ElementProjection.PROJECT_ALL)) {
+                builderForType.add(
+                    "All relationships",
+                    AdjacencyListBehavior.adjacencyListsFromStarEstimation(false)
+                );
 
-            builderForType.add(
-                "relationships",
-                AdjacencyListBehavior.adjacencyListEstimation(relationshipType, false)
-            );
+                builderForType.perGraphDimension("All properties", ((graphDimensions, concurrency) -> {
+                    var singlePropertyEstimation = AdjacencyListBehavior
+                        .adjacencyPropertiesFromStarEstimation( false)
+                        .estimate(graphDimensions, concurrency)
+                        .memoryUsage();
 
-            builderForType.perGraphDimension("properties", ((graphDimensions, concurrency) -> {
-                var singlePropertyEstimation = AdjacencyListBehavior
-                    .adjacencyPropertiesEstimation(relationshipType, false)
-                    .estimate(graphDimensions, concurrency)
-                    .memoryUsage();
+                    return singlePropertyEstimation.times(graphDimensions.relationshipPropertyTokens().size());
+                }));
 
-                return singlePropertyEstimation.times(graphDimensions.relationshipPropertyTokens().size());
-            }));
+                builder.add(String.format(Locale.US, "Inverse '%s'", typeName), builderForType.build());
+            } else {
+                var relationshipType = RelationshipType.of(typeName);
 
-            builder.add(String.format(Locale.US, "Inverse '%s'", typeName), builderForType.build());
+                builderForType.add(
+                    "relationships",
+                    AdjacencyListBehavior.adjacencyListEstimation(relationshipType, false)
+                );
+
+
+                builderForType.perGraphDimension("properties", ((graphDimensions, concurrency) -> {
+                    var singlePropertyEstimation = AdjacencyListBehavior
+                        .adjacencyPropertiesEstimation(relationshipType, false)
+                        .estimate(graphDimensions, concurrency)
+                        .memoryUsage();
+
+                    return singlePropertyEstimation.times(graphDimensions.relationshipPropertyTokens().size());
+                }));
+
+                builder.add(String.format(Locale.US, "Inverse '%s'", typeName), builderForType.build());
+            }
         }
 
         return builder.build();
