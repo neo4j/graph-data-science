@@ -131,8 +131,14 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
 
         deprecationWarning.ifPresent(progressTracker::logWarning);
 
+        var allNodeProperties = config
+            .nodeProperties()
+            .stream()
+            .map(v -> v.nodeProperty())
+            .collect(
+                Collectors.toList());
         // writing
-        Result.Builder builder = new Result.Builder(graphName, config.nodeProperties());
+        Result.Builder builder = new Result.Builder(graphName, allNodeProperties);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
             long propertiesWritten = runWithExceptionLogging(
                 "Node property writing failed",
@@ -160,7 +166,6 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
                     graphStore.relationshipTypes(),
                     Optional.empty()
                 );
-
                 var exporter = nodePropertyExporterBuilder
                     .withIdMap(subGraph)
                     .withTerminationFlag(TerminationFlag.wrap(executionContext().terminationMonitor()))
@@ -172,8 +177,8 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
                     config.nodeProperties().stream()
                         .map(nodePropertyKey ->
                             ImmutableNodeProperty.of(
-                                nodePropertyKey,
-                                subGraph.nodeProperties(nodePropertyKey)
+                                nodePropertyKey.writeProperty(),
+                                subGraph.nodeProperties(nodePropertyKey.nodeProperty())
                             )
                         )
                         .collect(Collectors.toList());
