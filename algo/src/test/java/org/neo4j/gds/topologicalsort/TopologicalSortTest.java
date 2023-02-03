@@ -36,8 +36,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @GdlExtension
 class TopologicalSortTest {
-    //set concurrecny to 1 (tests are concurrency related; that will remove flakiness)
-    //TODO: updated when fixing bug
     private static TopologicalSortConfig CONFIG = new TopologicalSortConfigImpl.Builder().concurrency(4).build();
 
     @GdlGraph(graphNamePrefix = "basic")
@@ -237,7 +235,8 @@ class TopologicalSortTest {
     }
 
     @Test
-    void shouldContainAllNodesOnDag() {
+    void randomShouldContainAllNodesOnDag() {
+        // this is also testing the RGG forceDag flag, as running topo sort is the best way to test it
         Random rand = new Random();
         var graph = RandomGraphGenerator.builder()
             .nodeCount(100)
@@ -245,7 +244,6 @@ class TopologicalSortTest {
             .relationshipDistribution(RelationshipDistribution.RANDOM)
             .seed(rand.nextInt())
             .forceDag(true)
-
             .build()
             .generate();
 
@@ -255,7 +253,7 @@ class TopologicalSortTest {
     }
 
     @Test
-    void foo() {
+    void stableShouldContainAllNodesOnDag() {
         var graph = RandomGraphGenerator.builder()
             .nodeCount(1000_000)
             .averageDegree(10)
@@ -265,13 +263,8 @@ class TopologicalSortTest {
             .build()
             .generate();
 
-        TopologicalSort ts = new TopologicalSortFactory<>().build(
-            graph,
-            TopologicalSortConfigImpl.builder().concurrency(4).build(),
-            ProgressTracker.NULL_TRACKER
-        );
-
-        TopologicalSortResult res = ts.compute();
-        res.size();
+        TopologicalSort ts = new TopologicalSortFactory<>().build(graph, CONFIG, ProgressTracker.NULL_TRACKER);
+        TopologicalSortResult result = ts.compute();
+        assertEquals(1000_000, result.size());
     }
 }

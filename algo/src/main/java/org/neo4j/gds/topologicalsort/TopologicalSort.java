@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.topologicalsort;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -84,7 +85,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
                 nodeId -> concurrentCopy.get().forEachRelationship(
                     nodeId,
                     (source, target) -> {
-                        inDegrees.getAndAdd(target,1);
+                        inDegrees.getAndAdd(target,1L);
                         return true;
                     }
                 )
@@ -108,6 +109,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
                forkJoinPool.submit(task);
         }
 
+        // calling join makes sure the pool waits for all the tasks to complete before shutting down
         tasks.forEach(ForkJoinTask::join);
         forkJoinPool.shutdown();
     }
@@ -116,10 +118,9 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         private final long sourceId;
         private final Graph graph;
         private final TopologicalSortResult result;
-
         private final HugeAtomicLongArray inDegrees;
 
-        TraversalTask(TraversalTask parent, long sourceId, Graph graph, TopologicalSortResult result, HugeAtomicLongArray inDegrees) {
+        TraversalTask(@Nullable TraversalTask parent, long sourceId, Graph graph, TopologicalSortResult result, HugeAtomicLongArray inDegrees) {
             super(parent);
             this.sourceId = sourceId;
             this.graph = graph;
