@@ -30,31 +30,6 @@ public final class AdjacencyPacker {
 
     private AdjacencyPacker() {}
 
-    public static final class Compressed {
-        private final long address;
-        private final long bytes;
-        private final byte[] bits;
-
-        public Compressed(long address, long bytes, byte[] bits) {
-            this.address = address;
-            this.bytes = bytes;
-            this.bits = bits;
-        }
-
-        public long bytesUsed() {
-            return bytes + bits.length;
-        }
-
-        public void free() {
-            UnsafeUtil.free(address, bytes, EmptyMemoryTracker.INSTANCE);
-        }
-
-        @Override
-        public String toString() {
-            return "Compressed{address=" + address + ", bytes=" + bytes + ", blocks=" + bits.length + '}';
-        }
-    }
-
     public static final int PASS = 0;
     public static final int SORT = 1 << 22;
     public static final int DELTA = 1 << 23;
@@ -88,26 +63,31 @@ public final class AdjacencyPacker {
             allBits[blockIdx++] = (byte) bits;
         }
 
+        return compress(values, offset, length, allBits, bytes);
+    }
+
+    private static Compressed compress(long[] values, int offset, int length, byte[] blocks, long bytes) {
         bytes = BitUtil.align(bytes, Long.BYTES);
         long mem = UnsafeUtil.allocateMemory(bytes, EmptyMemoryTracker.INSTANCE);
         long ptr = mem;
 
-        i = offset;
-        for (byte bits : allBits) {
+        int i = offset;
+        for (byte bits : blocks) {
             ptr = AdjacencyPacking.pack(bits, values, i, ptr);
             i += AdjacencyPacking.BLOCK_SIZE;
         }
 
-        return new Compressed(mem, bytes, allBits);
+        return new Compressed(mem, bytes, blocks, length);
     }
 
     public static long[] decompressAndPrefixSum(Compressed compressed) {
-        long[] values = new long[compressed.bits.length * AdjacencyPacking.BLOCK_SIZE];
+        long ptr = compressed.address();
+        var blocks = compressed.blocks();
+        long[] values = new long[blocks.length * AdjacencyPacking.BLOCK_SIZE];
 
         long value = values[0];
         int offset = 0;
-        long ptr = compressed.address;
-        for (byte bits : compressed.bits) {
+        for (byte bits : blocks) {
             ptr = AdjacencyPacking.unpack(bits, values, offset, ptr);
             for (int i = 0; i < AdjacencyPacking.BLOCK_SIZE; i++) {
                 value = values[offset + i] += value;
@@ -115,18 +95,26 @@ public final class AdjacencyPacker {
             offset += AdjacencyPacking.BLOCK_SIZE;
         }
 
+        if (values.length > compressed.length()) {
+            values = Arrays.copyOf(values, compressed.length());
+        }
 
         return values;
     }
 
     public static long[] decompress(Compressed compressed) {
-        long[] values = new long[compressed.bits.length * AdjacencyPacking.BLOCK_SIZE];
+        long ptr = compressed.address();
+        var blocks = compressed.blocks();
+        long[] values = new long[blocks.length * AdjacencyPacking.BLOCK_SIZE];
 
         int offset = 0;
-        long ptr = compressed.address;
-        for (byte bits : compressed.bits) {
+        for (byte bits : blocks) {
             ptr = AdjacencyPacking.unpack(bits, values, offset, ptr);
             offset += AdjacencyPacking.BLOCK_SIZE;
+        }
+
+        if (values.length > compressed.length()) {
+            values = Arrays.copyOf(values, compressed.length());
         }
 
         return values;
