@@ -90,6 +90,32 @@ class InverseRelationshipsAlgorithmFactoryTest {
     }
 
     @Test
+    void memoryEstimationWithTypeFilter() {
+        var factory = new InverseRelationshipsAlgorithmFactory();
+        var config = InverseRelationshipsConfigImpl.builder().relationshipTypes(List.of("T2")).build();
+
+        GraphDimensions graphDimensions = GraphDimensions
+            .builder()
+            .nodeCount(100_000)
+            .putRelationshipCount(RelationshipType.of("T1"), 10_000)
+            .putRelationshipCount(RelationshipType.of("T2"), 90_000)
+            .build();
+
+        var memoryEstimation = factory.memoryEstimation(config);
+
+        MemoryTree memoryTree = memoryEstimation
+            .estimate(graphDimensions, config.concurrency());
+
+        assertThat(memoryTree.components().stream().map(MemoryTree::description)).containsExactly(
+            "this.instance",
+            "Inverse 'T2'"
+        );
+        var x = memoryTree.memoryUsage();
+
+        assertThat(memoryTree.memoryUsage()).isEqualTo(MemoryRange.of(1_462_320));
+    }
+
+    @Test
     void memoryEstimationWithFilterStar() {
         var factory = new InverseRelationshipsAlgorithmFactory();
         var config = InverseRelationshipsConfigImpl.builder().relationshipTypes("*").build();
