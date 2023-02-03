@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.splitting;
 import com.carrotsearch.hppc.predicates.LongLongPredicate;
 import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
@@ -41,12 +42,24 @@ public abstract class EdgeSplitter {
     public static final double POSITIVE = 1D;
     public static final String RELATIONSHIP_PROPERTY = "label";
     private final Random rng;
+    private final RelationshipType selectedRelationshipType;
+    private final RelationshipType remainingRelationshipType;
 
     protected final IdMap sourceNodes;
     protected final IdMap targetNodes;
+
     protected int concurrency;
 
-    EdgeSplitter(Optional<Long> maybeSeed, IdMap sourceNodes, IdMap targetNodes, int concurrency) {
+    EdgeSplitter(
+        Optional<Long> maybeSeed,
+        IdMap sourceNodes,
+        IdMap targetNodes,
+        RelationshipType selectedRelationshipType,
+        RelationshipType remainingRelationshipType,
+        int concurrency
+    ) {
+        this.selectedRelationshipType = selectedRelationshipType;
+        this.remainingRelationshipType = remainingRelationshipType;
         this.rng = new Random();
         maybeSeed.ifPresent(rng::setSeed);
 
@@ -66,7 +79,9 @@ public abstract class EdgeSplitter {
 
         RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilder(
             graph,
-            Direction.DIRECTED, Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY)
+            selectedRelationshipType,
+            Direction.DIRECTED,
+            Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY)
         );
 
         Direction remainingRelDirection = graph.schema().direction();
@@ -74,7 +89,7 @@ public abstract class EdgeSplitter {
         RelationshipsBuilder remainingRelsBuilder;
         RelationshipWithPropertyConsumer remainingRelsConsumer;
 
-        remainingRelsBuilder = newRelationshipsBuilder(graph, remainingRelDirection, remainingRelPropertyKey);
+        remainingRelsBuilder = newRelationshipsBuilder(graph, remainingRelationshipType, remainingRelDirection, remainingRelPropertyKey);
         remainingRelsConsumer = (s, t, w) -> {
             remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t), w);
             return true;
@@ -139,10 +154,12 @@ public abstract class EdgeSplitter {
 
     private static RelationshipsBuilder newRelationshipsBuilder(
         Graph graph,
+        RelationshipType relationshipType,
         Direction direction,
         Optional<String> propertyKey
     ) {
         return GraphFactory.initRelationshipsBuilder()
+            .relationshipType(relationshipType)
             .aggregation(Aggregation.SINGLE)
             .nodes(graph)
             .orientation(direction.toOrientation())

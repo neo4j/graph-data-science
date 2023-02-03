@@ -697,7 +697,7 @@
         <Or>
             <Class name="org.neo4j.gds.core.utils.progress.EmptyTaskStore" />
             <Class name="org.neo4j.gds.core.utils.warnings.EmptyUserLogStore" />
-            <Class name="org.neo4j.gds.AbstractNodeProjection" />
+            <Class name="org.neo4j.gds.NodeProjection" />
         </Or>
         <Bug code="MS" />
     </Match>

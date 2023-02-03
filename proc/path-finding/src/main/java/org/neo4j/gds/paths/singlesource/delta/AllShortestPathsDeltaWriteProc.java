@@ -23,7 +23,6 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.executor.ProcedureExecutorSpec;
@@ -61,7 +60,7 @@ public class AllShortestPathsDeltaWriteProc extends BaseProc {
             writeSpec,
             pipelineSpec,
             executionContext()
-        ).compute(graphName, configuration, false, false);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(name = "gds.allShortestPaths.delta.write.estimate", mode = READ)
@@ -82,17 +81,6 @@ public class AllShortestPathsDeltaWriteProc extends BaseProc {
 
     @Override
     public ExecutionContext executionContext() {
-        return ImmutableExecutionContext
-            .builder()
-            .databaseService(databaseService)
-            .log(log)
-            .procedureTransaction(procedureTransaction)
-            .transaction(transaction)
-            .callContext(callContext)
-            .userLogRegistryFactory(userLogRegistryFactory)
-            .taskRegistryFactory(taskRegistryFactory)
-            .username(username())
-            .relationshipStreamExporterBuilder(relationshipStreamExporterBuilder)
-            .build();
+        return super.executionContext().withRelationshipStreamExporterBuilder(relationshipStreamExporterBuilder);
     }
 }

@@ -303,12 +303,6 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
         return new FilteredNodePropertyValues.FilteredToOriginalNodePropertyValues(properties, this);
     }
 
-    @Override
-    public void release() {
-        super.release();
-        this.threadLocalGraph.close();
-    }
-
     private boolean filterAndConsume(long source, long target, RelationshipConsumer consumer) {
         if (filteredIdMap.containsRootNodeId(source) && filteredIdMap.containsRootNodeId(target)) {
             long internalSourceId = filteredIdMap.toFilteredNodeId(source);

@@ -28,6 +28,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
@@ -247,9 +248,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.create(mapWithJobId)).toMap();
             proc.compute(
                 loadedGraphName,
-                configMap,
-                releaseAlgorithm(),
-                true
+                configMap
             );
 
             assertThat(taskStore.seenJobIds).containsExactly(someJobId);
@@ -262,10 +261,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
 
     default boolean requiresUndirected() {
         return false;
-    }
-
-    default boolean releaseAlgorithm() {
-        return true;
     }
 
     default List<String> nodeProperties() {
@@ -294,15 +289,11 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         var configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
         var resultRun1 = proc.compute(
             loadedGraphName,
-            configMap,
-            releaseAlgorithm(),
-            true
+            configMap
         );
         var resultRun2 = proc.compute(
             loadedGraphName,
-            configMap,
-            releaseAlgorithm(),
-            true
+            configMap
         );
 
         assertResultEquals(resultRun1.result(), resultRun2.result());
@@ -321,9 +312,9 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             GraphProjectConfig graphProjectConfig = withNameAndProjections(
                 "",
                 loadedGraphName,
-                NodeProjections.of(
+                ImmutableNodeProjections.of(
                     Map.of(
-                        NodeLabel.of("X"), NodeProjection.of("X", PropertyMappings.of(propertyMappings))
+                        NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of(propertyMappings))
                     )
                 ),
                 relationshipProjections()
@@ -381,6 +372,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             GdsCypher.call(graphName)
                 .graphProject()
                 .loadEverything(orientation)
+                .withNodeProperties(nodeProperties(), DefaultValue.DEFAULT)
                 .yields()
         );
     }
@@ -439,10 +431,11 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         return ImmutableGraphLoader
             .builder()
             .context(ImmutableGraphLoaderContext.builder()
+                .databaseId(DatabaseId.of(db))
+                .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
                 .transactionContext(TestSupport.fullAccessTransaction(db))
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
                 .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-                .graphDatabaseService(db)
                 .log(Neo4jProxy.testLog())
                 .build())
             .username("")

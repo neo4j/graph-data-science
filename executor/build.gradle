@@ -18,9 +18,11 @@ dependencies {
     implementation project(':edition-api')
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
+    implementation project(':neo4j-api')
     implementation project(':transaction')
     implementation project(':string-formatting')
     implementation project(':defaults-and-limits-configuration')
+    implementation project(':licensing')
 
     implementation group: 'org.reflections',  name: 'reflections',  version: ver.doc.'reflections'
 

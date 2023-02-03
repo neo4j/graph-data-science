@@ -312,7 +312,7 @@ CALL gds.graph.project(
   'fullGraph',
   {
     Person: {
-      properties: ['age']
+      properties: {age: {defaultValue: 1}}
     },
     City: {
       properties: {age: {defaultValue: 1}}

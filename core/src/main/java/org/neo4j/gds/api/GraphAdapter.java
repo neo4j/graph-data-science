@@ -59,11 +59,6 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public void canRelease(boolean canRelease) {
-        graph.canRelease(canRelease);
-    }
-
-    @Override
     public Optional<NodeFilteredGraph> asNodeFilteredGraph() {
         return graph.asNodeFilteredGraph();
     }
@@ -245,21 +240,6 @@ public abstract class GraphAdapter implements Graph {
     @Override
     public double relationshipProperty(long sourceNodeId, long targetNodeId) {
         return graph.relationshipProperty(sourceNodeId, targetNodeId);
-    }
-
-    @Override
-    public void release() {
-        graph.release();
-    }
-
-    @Override
-    public void releaseTopology() {
-        graph.releaseTopology();
-    }
-
-    @Override
-    public void releaseProperties() {
-        graph.releaseProperties();
     }
 
     @Override

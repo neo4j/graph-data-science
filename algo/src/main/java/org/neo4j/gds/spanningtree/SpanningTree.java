@@ -20,7 +20,7 @@
 package org.neo4j.gds.spanningtree;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.neo4j.gds.api.RelationshipConsumer;
+import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
@@ -62,7 +62,9 @@ public class SpanningTree {
         return totalWeight;
     }
 
-    public HugeLongArray parentArray() {return parent;}
+    public HugeLongArray parentArray() {
+        return parent;
+    }
 
     public long parent(long nodeId) {return parent.get(nodeId);}
 
@@ -70,13 +72,14 @@ public class SpanningTree {
         return costToParent.get(nodeId);
     }
 
-    public void forEach(RelationshipConsumer consumer) {
+    public void forEach(RelationshipWithPropertyConsumer consumer) {
         for (int i = 0; i < nodeCount; i++) {
-            final long parent = this.parent.get(i);
+            long parent = this.parent.get(i);
+            double cost = this.costToParent(i);
             if (parent == -1) {
                 continue;
             }
-            if (!consumer.accept(parent, i)) {
+            if (!consumer.accept(parent, i, cost)) {
                 return;
             }
         }

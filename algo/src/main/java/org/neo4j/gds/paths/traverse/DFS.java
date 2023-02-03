@@ -108,8 +108,4 @@ public class DFS extends Algorithm<HugeLongArray> {
         return result.copyOf(resultIndex);
     }
 
-    @Override
-    public void release() {
-
-    }
 }

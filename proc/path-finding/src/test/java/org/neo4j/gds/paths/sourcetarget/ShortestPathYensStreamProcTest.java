@@ -63,9 +63,9 @@ class ShortestPathYensStreamProcTest extends ShortestPathYensProcTest<ShortestPa
 
         GraphDatabaseApiProxy.runInTransaction(db, tx -> {
             PathFactory.RelationshipIds.set(0);
-            var path0 = PathFactory.create(tx, ids0, costs0, RelationshipType.withName("PATH_0"), StreamResult.COST_PROPERTY_NAME);
-            var path1 = PathFactory.create(tx, ids1, costs1, RelationshipType.withName("PATH_1"), StreamResult.COST_PROPERTY_NAME);
-            var path2 = PathFactory.create(tx, ids2, costs2, RelationshipType.withName("PATH_2"), StreamResult.COST_PROPERTY_NAME);
+            var path0 = PathFactory.create(tx::getNodeById, ids0, costs0, RelationshipType.withName("PATH_0"), StreamResult.COST_PROPERTY_NAME);
+            var path1 = PathFactory.create(tx::getNodeById, ids1, costs1, RelationshipType.withName("PATH_1"), StreamResult.COST_PROPERTY_NAME);
+            var path2 = PathFactory.create(tx::getNodeById, ids2, costs2, RelationshipType.withName("PATH_2"), StreamResult.COST_PROPERTY_NAME);
             var expected = List.of(
                 Map.of("index", 0L, "sourceNode", idC, "targetNode", idD, "totalCost", 5.0D, "costs", asList(costs0), "nodeIds", asList(ids0), "path", path0),
                 Map.of("index", 1L, "sourceNode", idC, "targetNode", idD, "totalCost", 7.0D, "costs", asList(costs1), "nodeIds", asList(ids1), "path", path1),

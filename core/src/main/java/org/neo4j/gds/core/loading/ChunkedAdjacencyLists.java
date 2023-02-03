@@ -32,9 +32,7 @@ import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
@@ -50,7 +48,7 @@ public final class ChunkedAdjacencyLists {
     private static final long[] EMPTY_PROPERTIES = new long[0];
 
     private final HugeSparseByteArrayList targetLists;
-    private final Map<Integer, HugeSparseLongArrayList> properties;
+    private final HugeSparseLongArrayList[] properties;
     private final HugeSparseIntList positions;
     private final HugeSparseLongList lastValues;
     private final HugeSparseIntList lengths;
@@ -97,10 +95,8 @@ public final class ChunkedAdjacencyLists {
 
 
         if (numberOfProperties > 0) {
-            this.properties = new HashMap<>(numberOfProperties);
-            for (int i = 0; i < numberOfProperties; i++) {
-                this.properties.put(i, HugeSparseLongArrayList.of(EMPTY_PROPERTIES, initialCapacity));
-            }
+            this.properties = new HugeSparseLongArrayList[numberOfProperties];
+            Arrays.setAll(this.properties, i -> HugeSparseLongArrayList.of(EMPTY_PROPERTIES, initialCapacity));
         } else {
             this.properties = null;
         }
@@ -208,7 +204,7 @@ public final class ChunkedAdjacencyLists {
     private long[] ensurePropertyCapacity(long index, int pos, int required, int propertyIndex) {
         int targetLength = pos + required;
 
-        var currentProperties = properties.get(propertyIndex).get(index);
+        var currentProperties = this.properties[propertyIndex].get(index);
 
         if (targetLength < 0) {
             throw new IllegalArgumentException(formatWithLocale(
@@ -220,7 +216,7 @@ public final class ChunkedAdjacencyLists {
 //            int newLength = ArrayUtil.oversize(pos + required, Long.BYTES);
             int newLength = BitUtil.nextHighestPowerOfTwo(pos + required);
             currentProperties = Arrays.copyOf(currentProperties, newLength);
-            properties.get(propertyIndex).set(index, currentProperties);
+            this.properties[propertyIndex].set(index, currentProperties);
         }
 
         return currentProperties;
@@ -258,7 +254,7 @@ public final class ChunkedAdjacencyLists {
 
         CompositeDrainingIterator(
             HugeSparseByteArrayList targets,
-            Map<Integer, HugeSparseLongArrayList> properties,
+            HugeSparseLongArrayList[] properties,
             HugeSparseIntList positions,
             HugeSparseLongList lastValues,
             HugeSparseIntList lengths
@@ -277,16 +273,14 @@ public final class ChunkedAdjacencyLists {
                 propertyBatches = List.of();
                 propertiesBuffer = null;
             } else {
-                this.propertyIterators = properties
-                    .values()
-                    .stream()
+                this.propertyIterators = Arrays.stream(properties)
                     .map(HugeSparseLongArrayList::drainingIterator)
                     .collect(Collectors.toList());
-                this.propertyBatches = propertyIterators
+                this.propertyBatches = this.propertyIterators
                     .stream()
                     .map(DrainingIterator::drainingBatch)
                     .collect(Collectors.toList());
-                propertiesBuffer = new long[properties.size()][];
+                propertiesBuffer = new long[properties.length][];
             }
         }
 

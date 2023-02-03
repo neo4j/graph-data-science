@@ -64,8 +64,8 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
     }
 
     @Override
-    public ValidationConfiguration<LocalClusteringCoefficientStatsConfig> validationConfig() {
-        return LocalClusteringCoefficientCompanion.getValidationConfig(log);
+    public ValidationConfiguration<LocalClusteringCoefficientStatsConfig> validationConfig(ExecutionContext executionContext) {
+        return LocalClusteringCoefficientCompanion.getValidationConfig(executionContext.log());
     }
 
     @Override
@@ -75,7 +75,7 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
     ) {
         return LocalClusteringCoefficientCompanion.resultBuilder(
             new LocalClusteringCoefficientStatsBuilder(
-                callContext,
+                executionContext.callContext(),
                 computeResult.config().concurrency()
             ),
             computeResult

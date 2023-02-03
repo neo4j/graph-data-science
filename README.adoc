@@ -75,23 +75,26 @@ If you are using Neo4j Desktop you can simply add the Graph Data Science library
 |Neo4j 4.3.0 - 4.3.18
 |Neo4j 4.4.0 - 4.4.11
 
-.4+<.^|GDS 2.2.x
+.6+<.^|GDS 2.2.x
 |Neo4j 4.3.15 - 4.3.23
-.7+.^|Java 11 & Java 17
+.16+.^|Java 11 & Java 17
 |Neo4j 4.4.9 - 4.4.16
 |Neo4j 5.1.0
 |Neo4j 5.2.0
 |Neo4j 5.3.0
-.3+<.^|GDS 2.3.x
-|Neo4j 4.4.9 - 4.4.16
+|Neo4j 5.4.0
+.5+<.^|GDS 2.3.x
+|Neo4j 4.4.9 - 4.4.17
 |Neo4j 5.1.0
 |Neo4j 5.2.0
 |Neo4j 5.3.0
-.3+<.^|GDS 2.4.x
-|Neo4j 4.4.9 - 4.4.16
+|Neo4j 5.4.0
+.5+<.^|GDS 2.4.x
+|Neo4j 4.4.9 - 4.4.17
 |Neo4j 5.1.0
 |Neo4j 5.2.0
 |Neo4j 5.3.0
+|Neo4j 5.4.0
 |===
 
 NOTE: Preview releases are not automatically made available in Neo4j Desktop. They need to be installed manually.
@@ -135,7 +138,7 @@ For the most basic set of features, like graph loading and the graph representat
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>core</artifactId>
-  <version>2.2.6</version>
+  <version>2.3.0</version>
 </dependency>
 ----
 
@@ -147,21 +150,21 @@ The algorithms are located in the `algo-common`, `algo` and `alpha-algo` modules
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>algo-common</artifactId>
-  <version>2.2.6</version>
+  <version>2.3.0</version>
 </dependency>
 
 <!-- Contains the productized algorithms -->
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>algo</artifactId>
-  <version>2.2.6</version>
+  <version>2.3.0</version>
 </dependency>
 
 <!-- Contains some alpha algorithms -->
 <dependency>
     <groupId>org.neo4j.gds</groupId>
     <artifactId>alpha-algo</artifactId>
-    <version>2.2.6</version>
+    <version>2.3.0</version>
 </dependency>
 ----
 
@@ -173,28 +176,28 @@ The procedures are located in the `proc-common`, `proc` and `alpha-proc` modules
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>proc-common</artifactId>
-  <version>2.2.6</version>
+  <version>2.3.0</version>
 </dependency>
 
 <!-- Contains the productized algorithm procedures -->
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>proc</artifactId>
-  <version>2.2.6</version>
+  <version>2.3.0</version>
 </dependency>
 
 <!-- Contains some alpha algorithm procedures-->
 <dependency>
     <groupId>org.neo4j.gds</groupId>
     <artifactId>alpha-proc</artifactId>
-    <version>2.2.6</version>
+    <version>2.3.0</version>
 </dependency>
 
 <!-- Required by the write execution modes, this artifact is responsible for providing the various exporters -->
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>write-services</artifactId>
-  <version>2.2.6</version>
+  <version>2.3.0</version>
 </dependency>
 ----
 

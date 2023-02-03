@@ -57,7 +57,6 @@ public class CELFStreamSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap,
                 return Stream.empty();
             }
 
-            computationResult.graph().release();
             return Optional.ofNullable(computationResult.algorithm())
                 .map(CELF::resultStream)
                 .orElseGet(Stream::empty);

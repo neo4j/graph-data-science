@@ -22,11 +22,17 @@ package org.neo4j.gds;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CSRGraph;
+import org.neo4j.gds.api.CloseableResourceRegistry;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.EmptyDependencyResolver;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -45,6 +51,7 @@ import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.test.ImmutableTestMutateConfig;
 import org.neo4j.gds.test.TestAlgoResultBuilder;
 import org.neo4j.gds.test.TestAlgorithm;
+import org.neo4j.gds.test.TestAlgorithmResult;
 import org.neo4j.gds.test.TestMutateConfig;
 import org.neo4j.gds.test.TestResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -63,14 +70,20 @@ class MutatePropertyComputationResultConsumerTest {
     @Inject
     private GraphStore graphStore;
 
-    private MutatePropertyComputationResultConsumer<TestAlgorithm, TestAlgorithm, TestMutateConfig, TestResult> mutateResultConsumer;
+    private MutatePropertyComputationResultConsumer<TestAlgorithm, TestAlgorithmResult, TestMutateConfig, TestResult> mutateResultConsumer;
 
     private final ExecutionContext executionContext = ImmutableExecutionContext
         .builder()
+        .databaseId(DatabaseId.from(""))
+        .dependencyResolver(EmptyDependencyResolver.INSTANCE)
         .callContext(new ProcedureCallContext(42, new String[0], false, "neo4j", false))
         .log(Neo4jProxy.testLog())
         .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
         .username("")
+        .terminationMonitor(TerminationMonitor.EMPTY)
+        .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
+        .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
+        .nodeLookup(NodeLookup.EMPTY)
         .build();
 
     @BeforeEach
@@ -138,7 +151,7 @@ class MutatePropertyComputationResultConsumerTest {
     }
 
     @NotNull
-    private ComputationResult<TestAlgorithm, TestAlgorithm, TestMutateConfig> getComputationResult(
+    private ComputationResult<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> getComputationResult(
         GraphStore graphStore,
         Graph graph,
         TestMutateConfig config
@@ -149,12 +162,12 @@ class MutatePropertyComputationResultConsumerTest {
             false
         );
 
-        ImmutableComputationResult.Builder<TestAlgorithm, TestAlgorithm, TestMutateConfig> builder = ImmutableComputationResult.builder();
+        ImmutableComputationResult.Builder<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> builder = ImmutableComputationResult.builder();
 
         return builder
             .algorithm(algorithm)
             .config(config)
-            .result(algorithm)
+            .result(algorithm.compute())
             .graph(graph)
             .graphStore(graphStore)
             .preProcessingMillis(0)

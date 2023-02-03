@@ -29,7 +29,6 @@ import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.FilteredIdMap;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
@@ -46,15 +45,15 @@ import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.huge.CSRCompositeRelationshipIterator;
 import org.neo4j.gds.core.huge.HugeGraphBuilder;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.utils.TimeUtil;
-import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.time.ZonedDateTime;
@@ -88,9 +87,7 @@ public class CSRGraphStore implements GraphStore {
 
     private final Map<RelationshipType, SingleTypeRelationships> relationships;
 
-    private final Set<Graph> createdGraphs;
-
-    private GraphSchema schema;
+    private MutableGraphSchema schema;
 
     private GraphPropertyStore graphProperties;
 
@@ -102,7 +99,7 @@ public class CSRGraphStore implements GraphStore {
     public static CSRGraphStore of(
         DatabaseId databaseId,
         Capabilities capabilities,
-        GraphSchema schema,
+        MutableGraphSchema schema,
         Nodes nodes,
         RelationshipImportResult relationshipImportResult,
         Optional<GraphPropertyStore> graphProperties,
@@ -123,7 +120,7 @@ public class CSRGraphStore implements GraphStore {
     private CSRGraphStore(
         DatabaseId databaseId,
         Capabilities capabilities,
-        GraphSchema schema,
+        MutableGraphSchema schema,
         IdMap nodes,
         NodePropertyStore nodeProperties,
         Map<RelationshipType, SingleTypeRelationships> relationships,
@@ -144,7 +141,6 @@ public class CSRGraphStore implements GraphStore {
         this.relationships = new HashMap<>(relationships);
 
         this.concurrency = concurrency;
-        this.createdGraphs = new HashSet<>();
         this.modificationTime = TimeUtil.now();
     }
 
@@ -213,7 +209,7 @@ public class CSRGraphStore implements GraphStore {
             var newGraphPropertySchema = new HashMap<>(schema().graphProperties());
             newGraphPropertySchema.put(propertyKey, PropertySchema.of(propertyKey, propertyValues.valueType()));
 
-            this.schema = GraphSchema.of(schema().nodeSchema(), schema().relationshipSchema(), newGraphPropertySchema);
+            this.schema = MutableGraphSchema.of(schema.nodeSchema(), schema.relationshipSchema(), newGraphPropertySchema);
         });
     }
 
@@ -229,7 +225,7 @@ public class CSRGraphStore implements GraphStore {
             var newGraphPropertySchema = new HashMap<>(schema().graphProperties());
             newGraphPropertySchema.remove(propertyKey);
 
-            this.schema = GraphSchema.of(schema().nodeSchema(), schema().relationshipSchema(), newGraphPropertySchema);
+            this.schema = MutableGraphSchema.of(schema.nodeSchema(), schema.relationshipSchema(), newGraphPropertySchema);
         });
     }
 
@@ -370,24 +366,14 @@ public class CSRGraphStore implements GraphStore {
 
     @Override
     public ValueType relationshipPropertyType(String propertyKey) {
-        return relationships
-            .values()
-            .stream()
-            .flatMap(relationship -> relationship.properties().stream())
-            .filter(propertyStore -> propertyStore.containsKey(propertyKey))
-            .map(propertyStore -> propertyStore.get(propertyKey).valueType())
-            .findFirst()
+        return Optional.ofNullable(schema().relationshipSchema().unionProperties().get(propertyKey))
+            .map(PropertySchema::valueType)
             .orElse(ValueType.UNKNOWN);
     }
 
     @Override
     public Set<String> relationshipPropertyKeys() {
-        return relationships
-            .values()
-            .stream()
-            .flatMap(relationship -> relationship.properties().stream())
-            .flatMap(propertyStore -> propertyStore.keySet().stream())
-            .collect(Collectors.toSet());
+        return schema().relationshipSchema().allProperties();
     }
 
     @Override
@@ -409,15 +395,10 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public void addRelationshipType(
-        RelationshipType relationshipType, SingleTypeRelationships relationships
-    ) {
+    public void addRelationshipType(SingleTypeRelationships relationships) {
         updateGraphStore(graphStore -> {
-            graphStore.relationships.computeIfAbsent(relationshipType, __ -> {
-                var relationshipSchemaEntry = schema()
-                    .relationshipSchema()
-                    .getOrCreateRelationshipType(relationshipType, relationships.direction());
-                relationships.updateRelationshipSchemaEntry(relationshipSchemaEntry);
+            graphStore.relationships.computeIfAbsent(relationships.relationshipSchemaEntry().identifier(), __ -> {
+                schema.relationshipSchema().set(relationships.relationshipSchemaEntry());
                 return relationships;
             });
         });
@@ -452,7 +433,7 @@ public class CSRGraphStore implements GraphStore {
                             property.values().elementCount()
                         ));
                 });
-                schema().relationshipSchema().remove(relationshipType);
+                schema.relationshipSchema().remove(relationshipType);
             }, () -> builder.deletedRelationships(0));
         }));
     }
@@ -493,11 +474,6 @@ public class CSRGraphStore implements GraphStore {
         }).collect(Collectors.toList());
 
         return UnionGraph.of(graphs);
-    }
-
-    @Override
-    public void canRelease(boolean canRelease) {
-        createdGraphs.forEach(graph -> graph.canRelease(canRelease));
     }
 
     @Override
@@ -561,29 +537,6 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public void release() {
-        createdGraphs.forEach(Graph::release);
-        releaseInternals();
-    }
-
-    private void releaseInternals() {
-        var closeables = Stream.<AutoCloseable>builder();
-        if (this.nodes instanceof AutoCloseable) {
-            closeables.accept((AutoCloseable) this.nodes);
-        }
-        this.relationships.values().forEach(relationship -> {
-            closeables.add(relationship.topology().adjacencyList());
-            relationship
-                .properties()
-                .stream()
-                .flatMap(properties -> properties.values().stream())
-                .forEach(property -> closeables.add(property.values().propertiesList()));
-        });
-
-        ExceptionUtil.closeAll(ExceptionUtil.RETHROW_UNCHECKED, closeables.build().distinct());
-    }
-
-    @Override
     public long nodeCount() {
         return nodes.nodeCount();
     }
@@ -598,7 +551,7 @@ public class CSRGraphStore implements GraphStore {
     ) {
         var filteredNodes = getFilteredIdMap(nodeLabels);
         Map<String, NodePropertyValues> filteredNodeProperties = filterNodeProperties(nodeLabels);
-        var nodeSchema = schema().nodeSchema().filter(new HashSet<>(nodeLabels));
+        var nodeSchema = schema.nodeSchema().filter(new HashSet<>(nodeLabels));
         return createGraphFromRelationshipType(filteredNodes,
             filteredNodeProperties,
             nodeSchema,
@@ -614,7 +567,7 @@ public class CSRGraphStore implements GraphStore {
     ) {
         var filteredNodes = getFilteredIdMap(filteredLabels);
         Map<String, NodePropertyValues> filteredNodeProperties = filterNodeProperties(filteredLabels);
-        var nodeSchema = schema().nodeSchema().filter(new HashSet<>(filteredLabels));
+        var nodeSchema = schema.nodeSchema().filter(new HashSet<>(filteredLabels));
 
         List<CSRGraph> filteredGraphs = relationships
             .keySet()
@@ -628,17 +581,15 @@ public class CSRGraphStore implements GraphStore {
             ))
             .collect(Collectors.toList());
 
-        filteredGraphs.forEach(graph -> graph.canRelease(false));
-        createdGraphs.addAll(filteredGraphs);
         return UnionGraph.of(filteredGraphs);
     }
 
     private CSRGraph createNodeOnlyGraph(Collection<NodeLabel> nodeLabels) {
         var filteredNodes = getFilteredIdMap(nodeLabels);
         var filteredNodeProperties = filterNodeProperties(nodeLabels);
-        var nodeSchema = schema().nodeSchema().filter(new HashSet<>(nodeLabels));
+        var nodeSchema = schema.nodeSchema().filter(new HashSet<>(nodeLabels));
 
-        var graphSchema = GraphSchema.of(nodeSchema, RelationshipSchema.empty(), schema.graphProperties());
+        var graphSchema = MutableGraphSchema.of(nodeSchema, MutableRelationshipSchema.empty(), schema.graphProperties());
 
         var initialGraph = new HugeGraphBuilder()
             .nodes(nodes)
@@ -663,12 +614,12 @@ public class CSRGraphStore implements GraphStore {
     private CSRGraph createGraphFromRelationshipType(
         Optional<? extends FilteredIdMap> filteredNodes,
         Map<String, NodePropertyValues> filteredNodeProperties,
-        NodeSchema nodeSchema,
+        MutableNodeSchema nodeSchema,
         RelationshipType relationshipType,
         Optional<String> maybeRelationshipProperty
     ) {
-        var graphSchema = GraphSchema.of(nodeSchema,
-            schema().relationshipSchema().filter(Set.of(relationshipType)),
+        var graphSchema = MutableGraphSchema.of(nodeSchema,
+            schema.relationshipSchema().filter(Set.of(relationshipType)),
             schema.graphProperties()
         );
 

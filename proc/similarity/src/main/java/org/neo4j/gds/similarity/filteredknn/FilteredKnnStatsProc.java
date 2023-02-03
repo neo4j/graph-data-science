@@ -105,7 +105,7 @@ public final class FilteredKnnStatsProc extends StatsProc<FilteredKnn, FilteredK
 
             SimilarityProc.resultBuilderWithTimings(resultBuilder, computationResult);
 
-            if (shouldComputeHistogram(callContext)) {
+            if (shouldComputeHistogram(executionContext().callContext())) {
                 try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
                     SimilarityGraphResult similarityGraphResult = FilteredKnnHelpers.computeToGraph(
                         computationResult.graph(),

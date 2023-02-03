@@ -100,10 +100,6 @@ class HugeGraphCursorReuseTest {
             return new TestAdjacencyCursor();
         }
 
-        @Override
-        public void close() {
-
-        }
     }
 
     private static class TestAdjacencyCursor implements AdjacencyCursor {
@@ -156,11 +152,6 @@ class HugeGraphCursorReuseTest {
         @Override
         public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
             return new TestAdjacencyCursor();
-        }
-
-        @Override
-        public void close() {
-
         }
     }
 }

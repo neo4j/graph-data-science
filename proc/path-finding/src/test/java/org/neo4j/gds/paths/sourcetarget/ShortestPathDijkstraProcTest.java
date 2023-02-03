@@ -129,11 +129,6 @@ abstract class ShortestPathDijkstraProcTest<CONFIG extends ShortestPathBaseConfi
         assertEquals(result1.pathSet(), result2.pathSet());
     }
 
-    @Override
-    public boolean releaseAlgorithm() {
-        return false;
-    }
-
     @Test
     @Disabled
     @Override

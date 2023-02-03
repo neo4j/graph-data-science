@@ -79,7 +79,7 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
 
     @Override
     public Task progressTask(Graph graph, GraphSageTrainConfig config) {
-        return Tasks.task(taskName(), GraphSageModelTrainer.progressTasks(config));
+        return Tasks.task(taskName(), GraphSageModelTrainer.progressTasks(config, graph.nodeCount()));
     }
 
     private MemoryEstimation estimate(GraphSageTrainConfig config, long nodeCount, int labelCount) {

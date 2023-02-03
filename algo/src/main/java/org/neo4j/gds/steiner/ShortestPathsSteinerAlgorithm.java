@@ -150,9 +150,6 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         );
     }
 
-    @Override
-    public void release() {}
-
     private void initForSource(HugeLongArray parent, HugeDoubleArray parentCost) {
         parent.set(sourceId, ROOT_NODE);
         parentCost.set(sourceId, 0);

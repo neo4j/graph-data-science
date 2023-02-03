@@ -47,7 +47,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
+import java.util.function.LongToIntFunction;
 
 class GraphAggregationPhase {
 
@@ -148,6 +148,7 @@ class GraphAggregationPhase {
         IdMap idMap = nodesBuilder.build().idMap();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
+            .relationshipType(RelationshipType.of("_IGNORED_"))
             .orientation(direction.toOrientation())
             .addPropertyConfig(GraphFactory.PropertyConfig.builder()
                 .propertyKey("property")
@@ -161,7 +162,7 @@ class GraphAggregationPhase {
             concurrency
         );
 
-        Function<Long, Integer> customDegree = x -> workingGraph.degree(sortedNodesByCommunity.get(x));
+        LongToIntFunction customDegree = x -> workingGraph.degree(sortedNodesByCommunity.get(x));
         var relationshipCreators = PartitionUtils.customDegreePartitionWithBatchSize(
             workingGraph,
             concurrency,

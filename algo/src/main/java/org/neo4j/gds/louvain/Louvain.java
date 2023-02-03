@@ -20,6 +20,7 @@
 package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipIterator;
@@ -212,7 +213,6 @@ public final class Louvain extends Algorithm<LouvainResult> {
         modularityOptimization.setTerminationFlag(terminationFlag);
 
         var modularityOptimizationResult = modularityOptimization.compute();
-        modularityOptimization.release();
         return modularityOptimizationResult;
     }
 
@@ -234,13 +234,11 @@ public final class Louvain extends Algorithm<LouvainResult> {
         });
 
         terminationFlag.assertRunning();
-        double scaleCoefficient = 1.0;
-        if (workingGraph.schema().isUndirected()) {
-            scaleCoefficient /= 2.0;
-        }
+
         IdMap idMap = nodesBuilder.build().idMap();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
+            .relationshipType(RelationshipType.of("IGNORED"))
             .orientation(rootGraph.schema().direction().toOrientation())
             .addPropertyConfig(GraphFactory.PropertyConfig.builder()
                 .propertyKey("property")
@@ -249,7 +247,6 @@ public final class Louvain extends Algorithm<LouvainResult> {
             .executorService(executorService)
             .build();
 
-        double finalScaleCoefficient = scaleCoefficient;
         var relationshipCreators = PartitionUtils.rangePartition(
             concurrency,
             workingGraph.nodeCount(),
@@ -258,7 +255,6 @@ public final class Louvain extends Algorithm<LouvainResult> {
                     relationshipsBuilder,
                     modularityOptimizationResult,
                     workingGraph.concurrentCopy(),
-                    finalScaleCoefficient,
                     partition
                 ),
             Optional.empty()
@@ -283,11 +279,6 @@ public final class Louvain extends Algorithm<LouvainResult> {
         return this.ranLevels == 0 ? 1 : this.ranLevels;
     }
 
-    @Override
-    public void release() {
-        this.rootGraph.releaseTopology();
-    }
-
     static final class RelationshipCreator implements Runnable {
 
         private final RelationshipsBuilder relationshipsBuilder;
@@ -298,21 +289,16 @@ public final class Louvain extends Algorithm<LouvainResult> {
 
         private final Partition partition;
 
-        private final double scaleCoefficient;
-
-
         private RelationshipCreator(
             RelationshipsBuilder relationshipsBuilder,
             ModularityOptimizationResult modularityOptimizationResult,
             RelationshipIterator relationshipIterator,
-            double scaleCoefficient,
             Partition partition
         ) {
             this.relationshipsBuilder = relationshipsBuilder;
             this.modularityOptimizationResult = modularityOptimizationResult;
             this.relationshipIterator = relationshipIterator;
             this.partition = partition;
-            this.scaleCoefficient = scaleCoefficient;
         }
 
         @Override
@@ -320,18 +306,13 @@ public final class Louvain extends Algorithm<LouvainResult> {
             partition.consume(nodeId -> {
                 long communityId = modularityOptimizationResult.communityId(nodeId);
                 relationshipIterator.forEachRelationship(nodeId, 1.0, (source, target, property) -> {
-                    // In the case of undirected graphs, we need scaling as otherwise we'd have double the value in these edges
-                    // see GraphAggregationPhase.java for the equivalent in Leiden; and the corresponding test
-                    if (source == target) {
-                        relationshipsBuilder.add(communityId, modularityOptimizationResult.communityId(target), property);
-                    } else {
+                    //ignore scaling alltogether
                         relationshipsBuilder.add(
                             communityId,
                             modularityOptimizationResult.communityId(target),
-                            property * scaleCoefficient
+                            property
                         );
 
-                    }
 
                     return true;
                 });

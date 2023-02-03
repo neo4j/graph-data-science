@@ -51,8 +51,8 @@ public interface GraphStoreExporterBaseConfig extends BaseConfig {
 
     @Value.Default
     @Value.Parameter(false)
-    @Configuration.ConvertWith(method = "org.neo4j.gds.AbstractPropertyMappings#fromObject")
-    @Configuration.ToMapValue("org.neo4j.gds.AbstractPropertyMappings#toObject")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.PropertyMappings#fromObject")
+    @Configuration.ToMapValue("org.neo4j.gds.PropertyMappings#toObject")
     default org.neo4j.gds.PropertyMappings additionalNodeProperties() {
         return org.neo4j.gds.PropertyMappings.of();
     }

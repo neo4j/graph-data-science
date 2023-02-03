@@ -33,6 +33,7 @@ dependencies {
     implementation project(':ml-core')
     implementation project(':ml-algo')
     implementation project(':model-catalog-api')
+    implementation project(':neo4j-api')
     implementation project(':pregel')
     implementation project(':string-formatting')
 

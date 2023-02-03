@@ -171,9 +171,10 @@ class GraphStoreTest extends BaseTest {
 
         // add relationships
         Thread.sleep(42);
+        RelationshipType bar = RelationshipType.of("BAR");
         graphStore.addRelationshipType(
-            RelationshipType.of("BAR"),
             SingleTypeRelationships.of(
+                bar,
                 ImmutableTopology.of(CompressedAdjacencyList.EMPTY, 0, false),
                 Direction.DIRECTED,
                 Optional.empty(),
@@ -279,18 +280,18 @@ class GraphStoreTest extends BaseTest {
     private static List<NodeProjection> nodeProjections() {
         NodeProjection aMapping = NodeProjection.builder()
             .label("A")
-            .properties(PropertyMappings.of(Arrays.asList(
+            .addProperties(
                 PropertyMapping.of("nodeProperty", -1D),
                 PropertyMapping.of("a", -1D)
-            )))
+            )
             .build();
 
         NodeProjection bMapping = NodeProjection.builder()
             .label("B")
-            .properties(PropertyMappings.of(Arrays.asList(
+            .addProperties(
                 PropertyMapping.of("nodeProperty", -1D),
                 PropertyMapping.of("b", -1D)
-            )))
+            )
             .build();
 
         return Arrays.asList(aMapping, bMapping);
@@ -302,32 +303,24 @@ class GraphStoreTest extends BaseTest {
             .type("T1")
             .orientation(Orientation.NATURAL)
             .aggregation(Aggregation.NONE)
-            .properties(
-                PropertyMappings.builder()
-                    .addMapping("property1", "property1", DefaultValue.of(42D), Aggregation.NONE)
-                    .addMapping("property2", "property2", DefaultValue.of(1337D), Aggregation.NONE)
-                    .build()
+            .addProperties(
+                PropertyMapping.of("property1", "property1", DefaultValue.of(42D), Aggregation.NONE),
+                PropertyMapping.of("property2", "property2", DefaultValue.of(1337D), Aggregation.NONE)
             ).build();
 
         RelationshipProjection t2Mapping = RelationshipProjection.builder()
             .type("T2")
             .orientation(Orientation.NATURAL)
             .aggregation(Aggregation.NONE)
-            .properties(
-                PropertyMappings.builder()
-                    .addMapping("property1", "property1", DefaultValue.of(42D), Aggregation.NONE)
-                    .build()
-            ).build();
+            .addProperty(PropertyMapping.of("property1", "property1", DefaultValue.of(42D), Aggregation.NONE))
+            .build();
 
         RelationshipProjection t3Mapping = RelationshipProjection.builder()
             .type("T3")
             .orientation(Orientation.NATURAL)
             .aggregation(Aggregation.NONE)
-            .properties(
-                PropertyMappings.builder()
-                    .addMapping("property2", "property2", DefaultValue.of(42D), Aggregation.NONE)
-                    .build()
-            ).build();
+            .addProperty(PropertyMapping.of("property2", "property2", DefaultValue.of(42D), Aggregation.NONE))
+            .build();
 
         return Arrays.asList(t1Mapping, t2Mapping, t3Mapping);
     }

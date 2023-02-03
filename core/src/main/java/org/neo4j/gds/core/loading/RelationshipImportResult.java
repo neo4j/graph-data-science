@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
@@ -32,6 +33,8 @@ import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.ValueTypes;
 import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.Collection;
@@ -45,6 +48,15 @@ public interface RelationshipImportResult {
 
     Map<RelationshipType, SingleTypeRelationships> importResults();
 
+    @Value.Lazy
+    default MutableRelationshipSchema relationshipSchema() {
+        var relationshipSchema = MutableRelationshipSchema.empty();
+
+        importResults().forEach((__, relationships) -> relationshipSchema.set(relationships.relationshipSchemaEntry()));
+
+        return relationshipSchema;
+    }
+
     static ImmutableRelationshipImportResult.Builder builder() {
         return ImmutableRelationshipImportResult.builder();
     }
@@ -56,14 +68,19 @@ public interface RelationshipImportResult {
     ) {
         var relationshipImportResultBuilder = RelationshipImportResult.builder();
 
-        topologies.forEach((relationshipType, topology) -> relationshipImportResultBuilder.putImportResult(
-            relationshipType,
-            SingleTypeRelationships.builder()
-                .topology(topology)
-                .properties(Optional.ofNullable(properties.get(relationshipType)))
-                .direction(directions.get(relationshipType))
-                .build()
-        ));
+        topologies.forEach((relationshipType, topology) -> {
+            Direction direction = directions.get(relationshipType);
+            var schemaEntry = new MutableRelationshipSchemaEntry(relationshipType, direction);
+
+
+            relationshipImportResultBuilder.putImportResult(
+                relationshipType,
+                SingleTypeRelationships.builder()
+                    .topology(topology)
+                    .properties(Optional.ofNullable(properties.get(relationshipType)))
+                    .build()
+            );
+        });
 
         return relationshipImportResultBuilder.build();
     }
@@ -105,9 +122,20 @@ public interface RelationshipImportResult {
                     adjacencyListsWithProperties.relationshipCount()
                 ));
 
+            var schemaEntry = new MutableRelationshipSchemaEntry(
+                importContext.relationshipType(),
+                direction
+            );
+
+            properties.ifPresent(props -> props
+                .relationshipProperties()
+                .forEach((key, prop) -> schemaEntry.addProperty(key, prop.propertySchema())));
+
             var importResultBuilder = builders.computeIfAbsent(
                 importContext.relationshipType(),
-                relationshipType -> SingleTypeRelationships.builder().direction(direction)
+                relationshipType -> SingleTypeRelationships
+                    .builder()
+                    .relationshipSchemaEntry(schemaEntry)
             );
 
             if (isInverseRelationship) {

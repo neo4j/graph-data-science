@@ -19,6 +19,7 @@ dependencies {
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':graph-schema-api')
+    implementation project(':neo4j-api')
 
     implementation project(':executor')
     implementation project(':memory-usage')

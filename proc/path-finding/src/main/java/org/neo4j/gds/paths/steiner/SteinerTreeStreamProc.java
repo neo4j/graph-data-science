@@ -44,7 +44,7 @@ public class SteinerTreeStreamProc extends BaseProc {
         return new ProcedureExecutor<>(
             new SteinerTreeStreamSpec(),
             executionContext()
-        ).compute(graphName, configuration, true, true);
+        ).compute(graphName, configuration);
     }
 
 }

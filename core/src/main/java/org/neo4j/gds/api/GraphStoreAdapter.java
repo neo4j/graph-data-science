@@ -230,11 +230,8 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     }
 
     @Override
-    public void addRelationshipType(
-        RelationshipType relationshipType,
-        SingleTypeRelationships relationships
-    ) {
-        graphStore.addRelationshipType(relationshipType, relationships);
+    public void addRelationshipType(SingleTypeRelationships relationships) {
+        graphStore.addRelationshipType(relationships);
     }
 
     @Override
@@ -318,15 +315,5 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
         RelationshipType relationshipType, Collection<String> propertyKeys
     ) {
         return graphStore.getCompositeRelationshipIterator(relationshipType, propertyKeys);
-    }
-
-    @Override
-    public void canRelease(boolean canRelease) {
-        graphStore.canRelease(canRelease);
-    }
-
-    @Override
-    public void release() {
-        graphStore.release();
     }
 }

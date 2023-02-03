@@ -56,4 +56,9 @@ public class AllShortestPathsDijkstraWriteSpec implements AlgorithmSpec<Dijkstra
     public ComputationResultConsumer<Dijkstra, DijkstraResult, AllShortestPathsDijkstraWriteConfig, Stream<StandardWriteRelationshipsResult>> computationResultConsumer() {
         return new ShortestPathWriteResultConsumer<>();
     }
+
+@Override
+    public boolean releaseProgressTask() {
+        return false;
+    }
 }

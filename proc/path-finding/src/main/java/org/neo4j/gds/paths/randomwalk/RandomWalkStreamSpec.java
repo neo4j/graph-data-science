@@ -63,7 +63,6 @@ public class RandomWalkStreamSpec implements AlgorithmSpec<RandomWalk, Stream<lo
         return (computationResult, executionContext) -> {
             var graph = computationResult.graph();
             if (graph.isEmpty()) {
-                graph.release();
                 return Stream.empty();
             }
 
@@ -73,7 +72,7 @@ public class RandomWalkStreamSpec implements AlgorithmSpec<RandomWalk, Stream<lo
 
             Function<List<Long>, Path> pathCreator = returnPath
                 ? (List<Long> nodes) -> PathFactory.create(
-                executionContext.procedureTransaction(),
+                executionContext.nodeLookup(),
                 nodes,
                 RelationshipType.withName("NEXT")
             )
@@ -98,4 +97,8 @@ public class RandomWalkStreamSpec implements AlgorithmSpec<RandomWalk, Stream<lo
 
     }
 
+    @Override
+    public boolean releaseProgressTask() {
+        return false;
+    }
 }

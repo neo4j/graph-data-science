@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 @ValueClass
+@SuppressWarnings("immutables:subtype")
 public interface DoubleRangeParameter extends NumericalRangeParameter<Double> {
     boolean logScale();
 

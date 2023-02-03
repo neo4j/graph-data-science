@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.executor;
 
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.Config;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.mem.GcListenerExtension;
@@ -29,7 +29,6 @@ import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.internal.MemoryEstimationSettings;
 import org.neo4j.gds.mem.MemoryUsage;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.logging.Log;
 
 import java.util.StringJoiner;
@@ -45,11 +44,11 @@ public class MemoryUsageValidator {
     }
 
     private final Log log;
-    private final GraphDatabaseService api;
+    private final DependencyResolver dependencyResolver;
 
-    public MemoryUsageValidator(Log log, GraphDatabaseService api) {
+    public MemoryUsageValidator(Log log, DependencyResolver dependencyResolver) {
         this.log = log;
-        this.api = api;
+        this.dependencyResolver = dependencyResolver;
     }
 
     public <C extends BaseConfig> MemoryRange tryValidateMemoryUsage(C config, Function<C, MemoryTreeWithDimensions> runEstimation) {
@@ -75,7 +74,7 @@ public class MemoryUsageValidator {
         if (config.sudo()) {
             log.debug("Sudo mode: Won't check for available memory.");
         } else {
-            var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
+            var neo4jConfig = dependencyResolver.resolveDependency(Config.class);
             var useMaxMemoryEstimation = neo4jConfig.get(MemoryEstimationSettings.validate_using_max_memory_estimation);
             validateMemoryUsage(memoryTreeWithDimensions, inspector.freeMemory(), useMaxMemoryEstimation, log);
         }

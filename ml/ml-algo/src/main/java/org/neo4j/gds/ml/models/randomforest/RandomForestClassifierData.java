@@ -37,6 +37,7 @@ import java.util.function.LongUnaryOperator;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
 @ValueClass
+@SuppressWarnings("immutables:subtype")
 public interface RandomForestClassifierData extends Classifier.ClassifierData {
 
     List<DecisionTreePredictor<Integer>> decisionTrees();

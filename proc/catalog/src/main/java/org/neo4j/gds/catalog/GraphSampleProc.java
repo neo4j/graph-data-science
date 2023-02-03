@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.config.RandomWalkWithRestartsProcConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.executor.ProcPreconditions;
 import org.neo4j.gds.graphsampling.GraphSampleConstructor;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.graphsampling.samplers.rwr.RandomWalkWithRestarts;
@@ -61,10 +61,10 @@ public class GraphSampleProc extends CatalogProc {
             var randomWalkWithRestarts = new RandomWalkWithRestarts(rwrConfig);
             var progressTracker = new TaskProgressTracker(
                 GraphSampleConstructor.progressTask(fromGraphStore.graphStore(), randomWalkWithRestarts),
-                log,
+                executionContext().log(),
                 rwrConfig.concurrency(),
                 rwrConfig.jobId(),
-                taskRegistryFactory,
+                executionContext().taskRegistryFactory(),
                 EmptyUserLogRegistryFactory.INSTANCE
             );
             var graphSampleConstructor = new GraphSampleConstructor(

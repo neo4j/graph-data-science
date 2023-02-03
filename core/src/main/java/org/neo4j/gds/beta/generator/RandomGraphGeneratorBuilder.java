@@ -44,6 +44,8 @@ public class RandomGraphGeneratorBuilder {
     private RandomGraphGeneratorConfig.AllowSelfLoops allowSelfLoops = RandomGraphGeneratorConfig.AllowSelfLoops.NO;
     private RelationshipType relationshipType = RelationshipType.of("REL");
     private boolean forceDag = false;
+    private boolean inverseIndex = false;
+
 
     public RandomGraphGeneratorBuilder nodeCount(long nodeCount) {
         this.nodeCount = nodeCount;
@@ -112,6 +114,11 @@ public class RandomGraphGeneratorBuilder {
         return this;
     }
 
+    public RandomGraphGeneratorBuilder inverseIndex(boolean inverseIndex) {
+        this.inverseIndex = inverseIndex;
+        return this;
+    }
+
     public RandomGraphGenerator build() {
         validate();
         return new RandomGraphGenerator(
@@ -126,7 +133,8 @@ public class RandomGraphGeneratorBuilder {
             aggregation,
             direction,
             allowSelfLoops,
-            forceDag
+            forceDag,
+            inverseIndex
         );
     }
 
@@ -144,7 +152,11 @@ public class RandomGraphGeneratorBuilder {
             throw new IllegalArgumentException("Cannot create DAG with self loops");
         }
         if (relationshipDistribution == RelationshipDistribution.POWER_LAW && forceDag) {
-            throw new IllegalArgumentException("Forcing DAG with power law distributions is not supported in current implementation (this limitation might be removed in the future)");
+            throw new IllegalArgumentException(
+                "Forcing DAG with power law distributions is not supported in current implementation (this limitation might be removed in the future)");
+        }
+        if (inverseIndex && direction == Direction.UNDIRECTED) {
+            throw new IllegalArgumentException("Cannot use the inverse index feature with undirected graphs");
         }
     }
 }

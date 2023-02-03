@@ -90,10 +90,6 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
         );
     }
 
-    @Override
-    public void release() {
-    }
-
     private static Map<NodeLabel, Weights<Matrix>> makeWeightsByLabel(
         GraphSageTrainConfig config,
         MultiLabelFeatureExtractors multiLabelFeatureExtractors

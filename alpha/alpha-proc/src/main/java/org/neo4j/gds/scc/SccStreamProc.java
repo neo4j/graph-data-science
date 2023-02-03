@@ -58,11 +58,8 @@ public class SccStreamProc extends SccProc<SccAlgorithm.StreamResult> {
             HugeLongArray components = computationResult.result();
 
             if (graph.isEmpty()) {
-                graph.release();
                 return Stream.empty();
             }
-
-            graph.release();
 
             return LongStream.range(0, graph.nodeCount())
                 .filter(i -> components.get(i) != -1)

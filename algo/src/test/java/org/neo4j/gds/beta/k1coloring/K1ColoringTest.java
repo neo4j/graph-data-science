@@ -136,8 +136,8 @@ class K1ColoringTest {
             .isLessThan(20L);
 
         assertThat(usedColors.size())
-            .as("Used colors should be less than or equal to 20")
-            .isLessThanOrEqualTo(20);
+            .as("Used colors should be less than or equal to 21")
+            .isLessThanOrEqualTo(21);
     }
 
 

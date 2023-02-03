@@ -72,7 +72,7 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
     }
 
     @Override
-    public ValidationConfiguration<BetweennessCentralityWriteConfig> validationConfig() {
+    public ValidationConfiguration<BetweennessCentralityWriteConfig> validationConfig(ExecutionContext executionContext) {
         return BetweennessCentralityProc.getValidationConfig();
     }
 
@@ -92,7 +92,7 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
         ExecutionContext executionContext
     ) {
         return BetweennessCentralityProc.resultBuilder(
-            new WriteResult.Builder(callContext, computeResult.config().concurrency()),
+            new WriteResult.Builder(executionContext.callContext(), computeResult.config().concurrency()),
             computeResult
         );
     }

@@ -21,9 +21,9 @@ package org.neo4j.gds.paths;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,11 +72,11 @@ public final class StreamResult {
 
     public static class Builder {
         private final IdMap idMap;
-        private final Transaction transaction;
+        private final NodeLookup nodeLookup;
 
-        public Builder(IdMap idMap, Transaction transaction) {
+        public Builder(IdMap idMap, NodeLookup nodeLookup) {
             this.idMap = idMap;
-            this.transaction = transaction;
+            this.nodeLookup = nodeLookup;
         }
 
         public StreamResult build(PathResult pathResult, boolean createCypherPath) {
@@ -94,7 +94,7 @@ public final class StreamResult {
             Path path = null;
             if (createCypherPath) {
                 path = create(
-                    transaction,
+                    nodeLookup,
                     nodeIds,
                     costs,
                     relationshipType,

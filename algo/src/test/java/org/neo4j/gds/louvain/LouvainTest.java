@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.louvain;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -27,9 +28,12 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.config.RandomGraphGeneratorConfig;
+import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -45,11 +49,14 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.modularity.ModularityCalculator;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -515,6 +522,39 @@ class LouvainTest {
 
         assertThatThrownBy(algorithm::compute).hasMessageContaining("non-negative");
 
+    }
 
+    @Test
+    void shouldGiveSameResultWithCalculator() {
+        var myGraph = RandomGraphGenerator
+            .builder()
+            .nodeCount(1_000)
+            .averageDegree(10)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .direction(Direction.UNDIRECTED)
+            .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.YES)
+            .aggregation(Aggregation.SINGLE)
+            .seed(42)
+            .build()
+            .generate();
+
+        var louvain = new Louvain(
+            myGraph,
+            ImmutableLouvainStreamConfig.builder().build(),
+            false,
+            10,
+            10,
+            TOLERANCE_DEFAULT,
+            4,
+            ProgressTracker.NULL_TRACKER,
+            Pools.DEFAULT
+        );
+
+        var result = louvain.compute();
+        assertThat(result.ranLevels()).isGreaterThan(1);
+        LongUnaryOperator vToCommunity = v -> result.getCommunity(v);
+        var modularityCalculator = new ModularityCalculator(myGraph, vToCommunity, 4);
+        double calculatedModularity = modularityCalculator.compute().totalModularity();
+        assertThat(result.modularity()).isCloseTo(calculatedModularity, Offset.offset(1e-5));
     }
 }

@@ -63,15 +63,15 @@ public class ProcedureExecutor<
 
     public RESULT compute(
         String graphName,
-        Map<String, Object> configuration,
-        boolean releaseAlgorithm,
-        boolean releaseTopology
+        Map<String, Object> configuration
     ) {
+        ProcPreconditions.check();
+
         ImmutableComputationResult.Builder<ALGO, ALGO_RESULT, CONFIG> builder = ImmutableComputationResult.builder();
 
         CONFIG config = executorSpec.configParser(algoSpec.newConfigFunction(), executionContext).processInput(configuration);
 
-        setAlgorithmMetaDataToTransaction(config);
+        executionContext.algorithmMetaDataSetter().set(config);
 
         var graphCreation = executorSpec.graphCreationFactory(executionContext).create(config, graphName);
 
@@ -82,7 +82,7 @@ public class ProcedureExecutor<
 
         try (ProgressTimer timer = ProgressTimer.start(builder::preProcessingMillis)) {
             var graphProjectConfig = graphCreation.graphProjectConfig();
-            var validator = executorSpec.validator(algoSpec.validationConfig());
+            var validator = executorSpec.validator(algoSpec.validationConfig(executionContext));
             validator.validateConfigsBeforeLoad(graphProjectConfig, config);
             graphStore = graphCreation.graphStore();
             validator.validateConfigWithGraphStore(graphStore, graphProjectConfig, config);
@@ -106,7 +106,7 @@ public class ProcedureExecutor<
 
         algo.getProgressTracker().setEstimatedResourceFootprint(memoryEstimationInBytes, config.concurrency());
 
-        ALGO_RESULT result = executeAlgorithm(releaseAlgorithm, releaseTopology, builder, graph, algo);
+        ALGO_RESULT result = executeAlgorithm(builder, algo);
 
         var computationResult = builder
             .graph(graph)
@@ -120,10 +120,7 @@ public class ProcedureExecutor<
     }
 
     private ALGO_RESULT executeAlgorithm(
-        boolean releaseAlgorithm,
-        boolean releaseTopology,
         ImmutableComputationResult.Builder<ALGO, ALGO_RESULT, CONFIG> builder,
-        Graph graph,
         ALGO algo
     ) {
         return runWithExceptionLogging(
@@ -135,12 +132,8 @@ public class ProcedureExecutor<
                     algo.getProgressTracker().endSubTaskWithFailure();
                     throw e;
                 } finally {
-                    if (releaseAlgorithm) {
+                    if (algoSpec.releaseProgressTask()) {
                         algo.getProgressTracker().release();
-                        algo.release();
-                    }
-                    if (releaseTopology) {
-                        graph.releaseTopology();
                     }
                 }
             }
@@ -152,7 +145,7 @@ public class ProcedureExecutor<
         GraphStore graphStore,
         CONFIG config
     ) {
-        TerminationFlag terminationFlag = TerminationFlag.wrap(executionContext.transaction());
+        TerminationFlag terminationFlag = TerminationFlag.wrap(executionContext.terminationMonitor());
         ALGO algorithm = algoSpec.algorithmFactory()
             .accept(new AlgorithmFactory.Visitor<>() {
                 @Override
@@ -180,16 +173,6 @@ public class ProcedureExecutor<
         algorithm.setTerminationFlag(terminationFlag);
 
         return algorithm;
-    }
-
-    private void setAlgorithmMetaDataToTransaction(CONFIG algoConfig) {
-        if (executionContext.transaction() == null) {
-            return;
-        }
-        var metaData = executionContext.transaction().getMetaData();
-        if (metaData instanceof AlgorithmMetaData) {
-            ((AlgorithmMetaData) metaData).set(algoConfig);
-        }
     }
 
     private <R> R runWithExceptionLogging(String message, Supplier<R> supplier) {

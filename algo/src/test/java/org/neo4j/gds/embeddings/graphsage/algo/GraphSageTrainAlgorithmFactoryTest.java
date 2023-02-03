@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.eclipse.collections.api.tuple.primitive.IntObjectPair;
 import org.eclipse.collections.api.tuple.primitive.LongLongPair;
 import org.eclipse.collections.impl.tuple.Tuples;
@@ -29,13 +28,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTestGraph;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
@@ -475,19 +473,23 @@ class GraphSageTrainAlgorithmFactoryTest {
             .maxIterations(2)
             .build();
 
-        var log = Neo4jProxy.testLog();
+        var factory = new GraphSageTrainAlgorithmFactory();
 
-        var algo = new GraphSageTrainAlgorithmFactory().build(
+        var progressTracker = new InspectableTestProgressTracker(
+            factory.progressTask(graph, config),
+            config.username(),
+            config.jobId()
+        );
+
+        var algo = factory.build(
             graph,
             config,
-            log,
-            EmptyTaskRegistryFactory.INSTANCE
+            progressTracker
         );
+
         algo.compute();
 
-        var messagesInOrder = log.getMessages(INFO);
-
-        AssertionsForInterfaceTypes.assertThat(messagesInOrder)
+        assertThat(progressTracker.log().getMessages(INFO))
             // avoid asserting on the thread id
             .extracting(removingThreadId())
             .extracting(keepingFixedNumberOfDecimals(2))
@@ -499,27 +501,41 @@ class GraphSageTrainAlgorithmFactoryTest {
                 "GraphSageTrain :: Train model :: Start",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Start",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 :: Start",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 :: Average loss per node: 26.49",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 25%",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 50%",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 75%",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 100%",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 :: Average loss per node: 26.49",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 :: Start",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 :: Average loss per node: 25.58",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 25%",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 50%",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 75%",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 100%",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 :: Average loss per node: 25.58",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Start",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 :: Start",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 :: Average loss per node: 25.28",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 25%",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 50%",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 75%",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 100%",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 :: Average loss per node: 25.28",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 :: Start",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 :: Average loss per node: 25.23",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 25%",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 50%",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 75%",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 100%",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 :: Average loss per node: 25.23",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Finished",
                 "GraphSageTrain :: Finished"
             );
+
+        progressTracker.assertValidProgressEvolution();
     }
 
     private static List<IntObjectPair<String>> flatten(MemoryTree memoryTree) {

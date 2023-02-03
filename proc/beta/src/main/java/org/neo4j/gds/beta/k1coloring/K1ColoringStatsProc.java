@@ -69,10 +69,10 @@ public class K1ColoringStatsProc extends StatsProc<K1Coloring, HugeLongArray, K1
         ExecutionContext executionContext
     ) {
         StatsResult.Builder builder = new StatsResult.Builder(
-            callContext,
+            executionContext.callContext(),
             computeResult.config().concurrency()
         );
-        return K1ColoringProc.resultBuilder(builder, computeResult, callContext);
+        return K1ColoringProc.resultBuilder(builder, computeResult, executionContext.callContext());
     }
 
     @Override

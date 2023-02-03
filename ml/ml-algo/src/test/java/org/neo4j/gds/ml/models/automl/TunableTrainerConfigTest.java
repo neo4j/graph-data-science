@@ -232,7 +232,7 @@ class TunableTrainerConfigTest {
     void failsOnInvalidTypeForNumericParam() {
         var userInput = Map.<String, Object>of("maxDepth", List.of(1));
         assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForestClassification))
-            .hasMessage("Parameter `maxDepth` must be numeric or a map of the form {range: {min, max}}.")
+            .hasMessage("Parameter `maxDepth` must be numeric or a map of the form {range: [min, max]}.")
             .isInstanceOf(IllegalArgumentException.class);
     }
 

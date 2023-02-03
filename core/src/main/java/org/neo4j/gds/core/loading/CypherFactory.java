@@ -32,8 +32,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.GraphDimensions;
@@ -74,7 +72,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
             new GraphDimensionsCypherReader(
                 loadingContext.transactionContext().withRestrictedAccess(READ),
                 graphProjectConfig,
-                GraphDatabaseApiProxy.resolveDependency(loadingContext.graphDatabaseService(), IdGeneratorFactory.class)
+                loadingContext.dependencyResolver().resolveDependency(IdGeneratorFactory.class)
             ).call()
         );
     }
@@ -119,17 +117,6 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
     }
 
     @Override
-    protected GraphSchema computeGraphSchema(
-        Nodes nodes, RelationshipImportResult relationshipImportResult
-    ) {
-        return CSRGraphStoreUtil.computeGraphSchema(
-            nodes,
-            (__) -> nodes.properties().keySet(),
-            relationshipImportResult
-        );
-    }
-
-    @Override
     public CSRGraphStore build() {
         // Temporarily override the security context to enforce read-only access during load
         return readOnlyTransaction().apply((tx, ktx) -> {
@@ -141,7 +128,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
             ).load(ktx.internalTransaction());
 
             progressTracker.beginSubTask("Loading");
-            var idMapAndProperties = new CypherNodeLoader(
+            var nodes = new CypherNodeLoader(
                 nodeQuery(),
                 nodeCount.rows(),
                 cypherConfig,
@@ -149,17 +136,17 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
                 progressTracker
             ).load(ktx.internalTransaction());
 
-            var relationshipsAndProperties = new CypherRelationshipLoader(
+            var relationshipImportResult = new CypherRelationshipLoader(
                 relationshipQuery(),
-                idMapAndProperties.idMap(),
+                nodes.idMap(),
                 cypherConfig,
                 loadingContext,
                 progressTracker
             ).load(ktx.internalTransaction());
 
             var graphStore = createGraphStore(
-                idMapAndProperties,
-                relationshipsAndProperties
+                nodes,
+                relationshipImportResult
             );
 
             progressTracker.endSubTask("Loading");

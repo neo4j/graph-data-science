@@ -19,22 +19,22 @@
  */
 package org.neo4j.gds.paths.traverse;
 
+import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.paths.PathFactory;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.List;
 
 class PathFactoryFacade {
 
     Path createPath(
-        Transaction internalTransaction,
+        NodeLookup nodeLookup,
         List<Long> nodeList,
         RelationshipType relationshipType
     ) {
         return PathFactory.create(
-            internalTransaction,
+            nodeLookup,
             nodeList,
             relationshipType
         );

@@ -64,6 +64,7 @@ public class CollapsePathAlgorithmFactory extends GraphStoreAlgorithmFactory<Col
         return new CollapsePath(
             pathTemplatesEncodedAsListsOfSingleRelationshipTypeGraphs,
             config.allowSelfLoops(),
+            RelationshipType.of(config.mutateRelationshipType()),
             config.concurrency(),
             Pools.DEFAULT
         );

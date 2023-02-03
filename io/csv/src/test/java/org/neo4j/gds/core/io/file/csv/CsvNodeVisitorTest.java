@@ -22,7 +22,7 @@ package org.neo4j.gds.core.io.file.csv;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +34,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
 
     @Test
     void visitNodesWithoutLabelsAndProperties() {
-        var nodeVisitor = new CsvNodeVisitor(tempDir, NodeSchema.empty());
+        var nodeVisitor = new CsvNodeVisitor(tempDir, MutableNodeSchema.empty());
 
         nodeVisitor.id(0L);
         nodeVisitor.endOfEntity();
@@ -55,7 +55,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
 
     @Test
     void visitNodesWithLabels() {
-        var nodeVisitor = new CsvNodeVisitor(tempDir, NodeSchema.empty());
+        var nodeVisitor = new CsvNodeVisitor(tempDir, MutableNodeSchema.empty());
 
         nodeVisitor.id(0L);
         nodeVisitor.labels(new String[]{"Foo", "Bar"});
@@ -92,7 +92,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
 
     @Test
     void visitNodesWithProperties() {
-        var nodeSchema = NodeSchema.empty();
+        var nodeSchema = MutableNodeSchema.empty();
         nodeSchema.getOrCreateLabel(NodeLabel.ALL_NODES)
             .addProperty("foo", ValueType.DOUBLE)
             .addProperty("bar", ValueType.DOUBLE);
@@ -131,7 +131,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
         var bLabel = NodeLabel.of("B");
         var cLabel = NodeLabel.of("C");
 
-        var nodeSchema = NodeSchema.empty();
+        var nodeSchema = MutableNodeSchema.empty();
         nodeSchema.getOrCreateLabel(aLabel)
             .addProperty("foo", ValueType.LONG)
             .addProperty("bar", ValueType.LONG);

@@ -56,6 +56,7 @@ public class ShortestPathMutateResultConsumer<ALGO extends Algorithm<DijkstraRes
 
         var relationshipsBuilder = GraphFactory
             .initRelationshipsBuilder()
+            .relationshipType(mutateRelationshipType)
             .nodes(computationResult.graph())
             .addPropertyConfig(GraphFactory.PropertyConfig.of(TOTAL_COST_KEY))
             .orientation(Orientation.NATURAL)
@@ -75,6 +76,6 @@ public class ShortestPathMutateResultConsumer<ALGO extends Algorithm<DijkstraRes
 
         computationResult
             .graphStore()
-            .addRelationshipType(mutateRelationshipType, relationships);
+            .addRelationshipType(relationships);
     }
 }

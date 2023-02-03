@@ -75,7 +75,6 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
 
             if (!computationResult.isGraphEmpty()) {
                 writeToNeo(builder, computationResult, executionContext);
-                computationResult.graph().releaseProperties();
             }
             return Stream.of(builder.build());
         });

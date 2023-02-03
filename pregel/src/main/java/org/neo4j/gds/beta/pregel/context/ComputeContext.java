@@ -19,15 +19,17 @@
  */
 package org.neo4j.gds.beta.pregel.context;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.beta.pregel.BasePregelComputation;
 import org.neo4j.gds.beta.pregel.Messenger;
 import org.neo4j.gds.beta.pregel.NodeValue;
 import org.neo4j.gds.beta.pregel.PregelConfig;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Optional;
 
 /**
  * A context that is used during the computation. It allows an implementation
@@ -36,31 +38,32 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricContext<CONFIG> {
 
-    final RelationshipWeightApplier relationshipWeightApplier;
     private final HugeAtomicBitSet voteBits;
 
     private final Messenger<?> messenger;
     private final MutableInt iteration;
-    private final AtomicBoolean hasSendMessage;
+    private final MutableBoolean hasSendMessage;
+
+    protected BasePregelComputation<CONFIG> computation;
 
     public ComputeContext(Graph graph,
                           CONFIG config,
-                          RelationshipWeightApplier relationshipWeightApplier,
+                          BasePregelComputation<CONFIG> computation,
                           NodeValue nodeValue,
                           Messenger<?> messenger,
                           HugeAtomicBitSet voteBits,
                           MutableInt iteration,
-                          AtomicBoolean hasSendMessage,
+                          Optional<MutableBoolean> hasSendMessage,
                           ProgressTracker progressTracker) {
         super(graph, config, nodeValue, progressTracker);
-        this.relationshipWeightApplier = relationshipWeightApplier;
+        this.computation = computation;
         this.sendMessagesFunction = config.hasRelationshipWeightProperty()
             ? this::sendToNeighborsWeighted
             : this::sendToNeighbors;
         this.messenger = messenger;
         this.voteBits = voteBits;
         this.iteration = iteration;
-        this.hasSendMessage = hasSendMessage;
+        this.hasSendMessage = hasSendMessage.orElse(new MutableBoolean(false));
     }
 
     private final SendMessagesFunction sendMessagesFunction;
@@ -151,7 +154,7 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
      */
     public void sendTo(long targetNodeId, double message) {
         messenger.sendTo(targetNodeId, message);
-        this.hasSendMessage.set(true);
+        this.hasSendMessage.setValue(true);
     }
 
     private void sendToNeighbors(long sourceNodeId, double message) {
@@ -163,19 +166,18 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
 
     private void sendToNeighborsWeighted(long sourceNodeId, double message) {
         graph.forEachRelationship(sourceNodeId, 1.0, (ignored, targetNodeId, weight) -> {
-            sendTo(targetNodeId, relationshipWeightApplier.applyRelationshipWeight(message, weight));
+            sendTo(targetNodeId, computation.applyRelationshipWeight(message, weight));
             return true;
         });
+    }
+
+    public boolean hasSentMessage() {
+        return hasSendMessage.getValue();
     }
 
     @FunctionalInterface
     interface SendMessagesFunction {
         void sendToNeighbors(long sourceNodeId, double message);
-    }
-
-    @FunctionalInterface
-    public interface RelationshipWeightApplier {
-        double applyRelationshipWeight(double nodeValue, double relationshipWeight);
     }
 
     public static final class BidirectionalComputeContext<CONFIG extends PregelConfig> extends ComputeContext<CONFIG> implements BidirectionalNodeCentricContext {
@@ -185,18 +187,18 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
         public BidirectionalComputeContext(
             Graph graph,
             CONFIG config,
-            RelationshipWeightApplier relationshipWeightApplier,
+            BasePregelComputation<CONFIG> computation,
             NodeValue nodeValue,
             Messenger<?> messenger,
             HugeAtomicBitSet voteBits,
             MutableInt iteration,
-            AtomicBoolean hasSendMessage,
+            Optional<MutableBoolean> hasSendMessage,
             ProgressTracker progressTracker
         ) {
             super(
                 graph,
                 config,
-                relationshipWeightApplier,
+                computation,
                 nodeValue,
                 messenger,
                 voteBits,
@@ -226,7 +228,7 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
 
         private void sendToIncomingNeighborsWeighted(long sourceNodeId, double message) {
             graph.forEachInverseRelationship(sourceNodeId, 1.0, (ignored, targetNodeId, weight) -> {
-                sendTo(targetNodeId, relationshipWeightApplier.applyRelationshipWeight(message, weight));
+                sendTo(targetNodeId, computation.applyRelationshipWeight(message, weight));
                 return true;
             });
         }

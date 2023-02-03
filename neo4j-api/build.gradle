@@ -1,0 +1,15 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Neo4j API'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    neodeps().each {
+        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
+            transitive = false
+        }
+    }
+
+    implementation project(':config-api')
+}

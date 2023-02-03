@@ -32,6 +32,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
@@ -112,7 +113,8 @@ public final class BidirectionalComputationStreamProc extends PregelStreamProc<B
     }
 
     @Override
-    public ValidationConfiguration<PregelProcedureConfig> validationConfig() {
-        return PregelBaseProc.ensureIndexValidation(log, taskRegistryFactory);
+    public ValidationConfiguration<PregelProcedureConfig> validationConfig(
+        ExecutionContext executionContext) {
+        return PregelBaseProc.ensureIndexValidation(executionContext.log(), executionContext.taskRegistryFactory());
     }
 }

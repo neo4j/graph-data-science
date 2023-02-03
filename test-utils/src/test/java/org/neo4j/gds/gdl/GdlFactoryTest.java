@@ -32,8 +32,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.core.loading.CollectingConsumer;
 
 import java.util.ArrayList;
@@ -262,7 +262,7 @@ class GdlFactoryTest {
         );
 
         var nodeSchema = graph.schema().nodeSchema();
-        var expectedNodeSchema = NodeSchema.empty();
+        var expectedNodeSchema = MutableNodeSchema.empty();
 
         expectedNodeSchema.getOrCreateLabel(NodeLabel.of("A"))
             .addProperty("double", ValueType.DOUBLE)
@@ -278,7 +278,7 @@ class GdlFactoryTest {
         assertThat(nodeSchema).isEqualTo(expectedNodeSchema);
 
         var relationshipSchema = graph.schema().relationshipSchema();
-        var expectedRelationshipSchema = RelationshipSchema.empty();
+        var expectedRelationshipSchema = MutableRelationshipSchema.empty();
 
         expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("A"), Direction.DIRECTED)
             .addProperty("prop1", ValueType.DOUBLE, PropertyState.PERSISTENT)
@@ -315,7 +315,7 @@ class GdlFactoryTest {
                 .build()
         ).build().build();
 
-        var expectedRelationshipSchema = RelationshipSchema.empty();
+        var expectedRelationshipSchema = MutableRelationshipSchema.empty();
 
         var direction = Direction.fromOrientation(orientation);
         expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("A"), direction)

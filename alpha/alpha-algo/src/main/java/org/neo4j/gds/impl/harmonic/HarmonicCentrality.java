@@ -71,10 +71,5 @@ public class HarmonicCentrality extends Algorithm<HarmonicResult> {
         return ImmutableHarmonicResult.of(inverseFarness, graph.nodeCount());
     }
 
-    @Override
-    public void release() {
-        graph = null;
-    }
-
 
 }

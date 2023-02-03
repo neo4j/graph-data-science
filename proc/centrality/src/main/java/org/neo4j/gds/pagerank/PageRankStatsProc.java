@@ -72,7 +72,7 @@ public class PageRankStatsProc extends StatsProc<PageRankAlgorithm, PageRankResu
         ExecutionContext executionContext
     ) {
         return PageRankProc.resultBuilder(
-            new StatsResult.Builder(callContext, computeResult.config().concurrency()),
+            new StatsResult.Builder(executionContext.callContext(), computeResult.config().concurrency()),
             computeResult
         );
     }

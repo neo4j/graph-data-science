@@ -82,7 +82,7 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
             .builder(FastRP.class.getSimpleName())
             .fixed(
                 "propertyVectors",
-                MemoryUsage.sizeOfFloatArray(config.featureProperties().size() * config.propertyDimension())
+                MemoryUsage.sizeOfFloatArray((long) config.featureProperties().size() * config.propertyDimension())
             )
             .add("embeddings", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingDimension())))
             .add("embeddingA", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingDimension())))
@@ -142,12 +142,6 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
         propagateEmbeddings();
         progressTracker.endSubTask();
         return new FastRPResult(embeddings);
-    }
-
-    @Override
-    public void release() {
-        this.embeddingA.release();
-        this.embeddingB.release();
     }
 
     public void initDegreePartition() {

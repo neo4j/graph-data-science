@@ -67,7 +67,7 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
             Graph graph = computationResult.graph();
 
             AbstractResultBuilder<SccResult> writeBuilder = new SccResultBuilder(
-                callContext,
+                executionContext.callContext(),
                 config.concurrency()
             )
                 .buildCommunityCount(true)
@@ -79,16 +79,15 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
                 .withComputeMillis(computationResult.computeMillis());
 
             if (graph.isEmpty()) {
-                graph.release();
                 return Stream.of(writeBuilder.build());
             }
 
             try (ProgressTimer ignored = ProgressTimer.start(writeBuilder::withWriteMillis)) {
                 var progressTracker = new TaskProgressTracker(
                     NodePropertyExporter.baseTask("Scc", graph.nodeCount()),
-                    log,
+                    executionContext.log(),
                     config.writeConcurrency(),
-                    taskRegistryFactory
+                    executionContext.taskRegistryFactory()
                 );
                 NodePropertyExporter exporter = nodePropertyExporterBuilder
                     .withIdMap(graph)
@@ -117,7 +116,6 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
                 writeBuilder.withNodePropertiesWritten(exporter.propertiesWritten());
             }
 
-            graph.release();
             return Stream.of(writeBuilder.build());
         };
     }

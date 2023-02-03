@@ -22,12 +22,12 @@ package org.neo4j.gds.core.huge;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.PropertyCursor;
+import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.BumpAllocator;
@@ -152,13 +152,6 @@ public final class UncompressedAdjacencyList implements AdjacencyList, Adjacency
     @Override
     public AdjacencyCursor rawAdjacencyCursor() {
         return new Cursor(pages);
-    }
-
-    @Override
-    public void close() {
-        pages = null;
-        degrees = null;
-        offsets = null;
     }
 
     @Override

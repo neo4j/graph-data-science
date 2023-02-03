@@ -39,7 +39,6 @@ public final class ShortestPathStreamResultConsumer<ALGO extends Algorithm<Dijks
         var graph = computationResult.graph();
 
         if (computationResult.isGraphEmpty()) {
-            graph.release();
             return Stream.empty();
         }
 
@@ -47,7 +46,7 @@ public final class ShortestPathStreamResultConsumer<ALGO extends Algorithm<Dijks
             .outputFields()
             .anyMatch(field -> toLowerCaseWithLocale(field).equals("path"));
 
-        var resultBuilder = new StreamResult.Builder(graph, executionContext.transaction().internalTransaction());
+        var resultBuilder = new StreamResult.Builder(graph, executionContext.nodeLookup());
 
         var resultStream = computationResult
             .result()
@@ -55,9 +54,7 @@ public final class ShortestPathStreamResultConsumer<ALGO extends Algorithm<Dijks
 
         // this is necessary in order to close the result stream which triggers
         // the progress tracker to close its root task
-        try (var statement = executionContext.transaction().acquireStatement()) {
-            statement.registerCloseableResource(resultStream);
-        }
+        executionContext.closeableResourceRegistry().register(resultStream);
 
         return resultStream;
     }

@@ -91,16 +91,6 @@ public enum GdsFeatureToggles {
         );
     }
 
-    // Prevents full GC more often as not so much consecutive memory is allocated in one go as
-    // compared to a page shift of 30 or 32. See https://github.com/neo4j-contrib/neo4j-graph-algorithms/pull/859#discussion_r272262734.
-    // Feature toggle is there for testing: org.neo4j.gds.core.huge.loader.HugeGraphLoadingTest#testPropertyLoading
-    public static final int MAX_ARRAY_LENGTH_SHIFT_DEFAULT_SETTING = 28;
-    private static final int MAX_ARRAY_LENGTH_SHIFT_FLAG = Integer.getInteger(
-        name(GdsFeatureToggles.class, "maxArrayLengthShift"),
-        MAX_ARRAY_LENGTH_SHIFT_DEFAULT_SETTING
-    );
-    public static final AtomicInteger MAX_ARRAY_LENGTH_SHIFT = new AtomicInteger(MAX_ARRAY_LENGTH_SHIFT_FLAG);
-
     // How many pages per loading thread. Pages are being locked while written to, so
     // more pages allow for less contention, fewer pages allow for higher throughput.
     public static final int PAGES_PER_THREAD_DEFAULT_SETTING = 4;

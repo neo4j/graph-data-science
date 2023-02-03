@@ -28,15 +28,6 @@ public interface PropertyValues {
     ValueType valueType();
 
     /**
-     * Release internal data structures and return an estimate how many bytes were freed.
-     *
-     * Note that the mapping is not usable afterwards.
-     */
-    default long release() {
-        return 0;
-    }
-
-    /**
      * @return the number of values stored.
      */
     long size();

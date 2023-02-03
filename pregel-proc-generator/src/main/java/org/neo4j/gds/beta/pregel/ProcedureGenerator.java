@@ -34,6 +34,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
@@ -293,11 +294,12 @@ abstract class ProcedureGenerator extends PregelGenerator {
         return MethodSpec.methodBuilder("validationConfig")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
+            .addParameter(ClassName.get(ExecutionContext.class), "executionContext")
             .returns(ParameterizedTypeName.get(
                 ClassName.get(ValidationConfiguration.class),
                 pregelSpec.configTypeName()
             ))
-            .addStatement("return $T.ensureIndexValidation(log, taskRegistryFactory)", PregelBaseProc.class)
+            .addStatement("return $T.ensureIndexValidation(executionContext.log(), executionContext.taskRegistryFactory())", PregelBaseProc.class)
             .build();
     }
 }

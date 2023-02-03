@@ -2,7 +2,7 @@ plugins {
     // Apply the java plugin to add support for Java
     id 'java'
     // Used for building a standalone jar
-    id 'com.github.johnrengelman.shadow' version '4.0.4'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 ext {

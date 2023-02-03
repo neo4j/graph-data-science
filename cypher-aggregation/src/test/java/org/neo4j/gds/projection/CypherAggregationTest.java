@@ -162,6 +162,50 @@ class CypherAggregationTest extends BaseProcTest {
         }
     }
 
+    @Test
+    void testDifferentPropertySchemas() {
+        var query = "UNWIND [" +
+                    "  [0, 1, 'a', {}, 'rel', {}], " +
+                    "  [2, 3, 'b', {x:1}, 'rel2', {weight: 0.1}]," +
+                    "  [5, 6, 'c', {y:1}, 'rel3', {hq: 0.1}]" +
+                    "] AS data" +
+                    " RETURN gds.alpha.graph.project(" +
+                    "    'g'," +
+                    "    data[0]," +
+                    "    data[1]," +
+                    "    {sourceNodeLabels: data[2], sourceNodeProperties: data[3]}," +
+                    "    {relationshipType: data[4], properties: data[5]}," +
+                    "    {}" +
+                    ")";
+
+        runQuery(query);
+
+        var graph = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore().getUnion();
+
+        assertThat(graph.schema().nodeSchema().get(NodeLabel.of("a")).properties().keySet()).isEmpty();
+        assertThat(graph.schema().nodeSchema().get(NodeLabel.of("b")).properties().keySet()).containsExactly("x");
+        assertThat(graph.schema().nodeSchema().get(NodeLabel.of("c")).properties().keySet()).containsExactly("y");
+
+        assertThat(graph
+            .schema()
+            .relationshipSchema()
+            .get(org.neo4j.gds.RelationshipType.of("rel"))
+            .properties()
+            .keySet()).isEmpty();
+        assertThat(graph
+            .schema()
+            .relationshipSchema()
+            .get(org.neo4j.gds.RelationshipType.of("rel2"))
+            .properties()
+            .keySet()).containsExactly("weight");
+        assertThat(graph
+            .schema()
+            .relationshipSchema()
+            .get(org.neo4j.gds.RelationshipType.of("rel3"))
+            .properties()
+            .keySet()).containsExactly("hq");
+    }
+
     @ParameterizedTest
     @CsvSource({"13.37, Double", "true, Boolean", "false, Boolean", "null, NO_VALUE", "\"42\", String", "[42], List", "[13.37], List", "{foo:42}, Map", "{foo:13.37}, Map"})
     void testInvalidArbitraryIds(String idLiteral, String invalidType) {
@@ -640,7 +684,7 @@ class CypherAggregationTest extends BaseProcTest {
             .relationshipSchema()
             .entries()
             .forEach(entry -> {
-                var expectedDirection = expectedUndirectedTypes.contains(entry.identifier.name) ? org.neo4j.gds.api.schema.Direction.UNDIRECTED : org.neo4j.gds.api.schema.Direction.DIRECTED;
+                var expectedDirection = expectedUndirectedTypes.contains(entry.identifier().name) ? org.neo4j.gds.api.schema.Direction.UNDIRECTED : org.neo4j.gds.api.schema.Direction.DIRECTED;
                 assertThat(entry.direction()).isEqualTo(expectedDirection);
             });
     }

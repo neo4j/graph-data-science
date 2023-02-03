@@ -350,8 +350,4 @@ public class Conductance extends Algorithm<Conductance.Result> {
         HugeSparseDoubleArray externalCounts();
     }
 
-    @Override
-    public void release() {
-        graph = null;
-    }
 }

@@ -19,12 +19,14 @@
  */
 package org.neo4j.gds.executor;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
@@ -32,6 +34,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -72,11 +75,17 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
     @Override
     public GraphDimensions graphDimensions() {
         var graphStore = graphStore();
-        Graph filteredGraph = graphStore.getGraph(
-            config.nodeLabelIdentifiers(graphStore),
-            config.internalRelationshipTypes(graphStore),
-            Optional.empty()
+
+        Collection<NodeLabel> labelFilter = ElementTypeValidator.resolve(graphStore, config.nodeLabels());
+        Collection<RelationshipType> typeFilter = ElementTypeValidator.resolveTypes(
+            graphStore,
+            config.relationshipTypes()
         );
+
+        // validate the filters here as well as the other validation happens after the memory estimation
+        config.graphStoreValidation(graphStore, labelFilter, typeFilter);
+
+        Graph filteredGraph = graphStore.getGraph(labelFilter, typeFilter, Optional.empty());
         long relCount = filteredGraph.relationshipCount();
 
         var relationshipTypeTokens = new HashMap<String, Integer>();
@@ -87,7 +96,7 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
 
         return ImmutableGraphDimensions.builder()
             .nodeCount(filteredGraph.nodeCount())
-            .relationshipCounts(filteredGraphRelationshipCounts(config, graphStore, filteredGraph))
+            .relationshipCounts(filteredGraphRelationshipCounts(typeFilter.stream(), filteredGraph))
             .relCountUpperBound(relCount)
             .relationshipPropertyTokens(relationshipTypeTokens)
             .build();
@@ -109,13 +118,12 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
         return GraphStoreCatalog.get(request, graphName);
     }
 
-    private Map<RelationshipType, Long> filteredGraphRelationshipCounts(
-        AlgoBaseConfig config,
-        GraphStore graphStore,
+    private static Map<RelationshipType, Long> filteredGraphRelationshipCounts(
+        Stream<RelationshipType> typeFilter,
         Graph filteredGraph
     ) {
         var relCount = filteredGraph.relationshipCount();
-        return Stream.concat(config.internalRelationshipTypes(graphStore).stream(), Stream.of(RelationshipType.ALL_RELATIONSHIPS))
+        return Stream.concat(typeFilter, Stream.of(RelationshipType.ALL_RELATIONSHIPS))
             .distinct()
             .collect(Collectors.toMap(
                     Function.identity(),

@@ -24,6 +24,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.AlgorithmMetaDataSetter;
+import org.neo4j.gds.api.CloseableResourceRegistry;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.EmptyDependencyResolver;
+import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -45,6 +51,8 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.model.catalog.TestTrainConfigImpl;
 import org.neo4j.gds.model.catalog.TestWeightedTrainConfigImpl;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+import org.neo4j.logging.NullLog;
 
 import java.util.Collection;
 import java.util.List;
@@ -170,7 +178,15 @@ class LinkPredictionTrainingPipelineTest {
     @Test
     void deriveRelationshipWeightProperty() {
         var executionContext = ImmutableExecutionContext.builder()
+            .databaseId(DatabaseId.from(""))
+            .dependencyResolver(EmptyDependencyResolver.INSTANCE)
             .username("")
+            .terminationMonitor(TerminationMonitor.EMPTY)
+            .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
+            .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
+            .nodeLookup(NodeLookup.EMPTY)
+            .callContext(ProcedureCallContext.EMPTY)
+            .log(NullLog.getInstance())
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -201,8 +217,16 @@ class LinkPredictionTrainingPipelineTest {
         ));
 
         var executionContext = ImmutableExecutionContext.builder()
+            .databaseId(DatabaseId.from(""))
+            .dependencyResolver(EmptyDependencyResolver.INSTANCE)
             .username("")
             .modelCatalog(modelCatalog)
+            .terminationMonitor(TerminationMonitor.EMPTY)
+            .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
+            .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
+            .nodeLookup(NodeLookup.EMPTY)
+            .callContext(ProcedureCallContext.EMPTY)
+            .log(NullLog.getInstance())
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -233,8 +257,16 @@ class LinkPredictionTrainingPipelineTest {
         ));
 
         var executionContext = ImmutableExecutionContext.builder()
+            .databaseId(DatabaseId.from(""))
+            .dependencyResolver(EmptyDependencyResolver.INSTANCE)
             .username("")
             .modelCatalog(modelCatalog)
+            .terminationMonitor(TerminationMonitor.EMPTY)
+            .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
+            .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
+            .nodeLookup(NodeLookup.EMPTY)
+            .callContext(ProcedureCallContext.EMPTY)
+            .log(NullLog.getInstance())
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();

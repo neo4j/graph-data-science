@@ -21,11 +21,12 @@ package org.neo4j.gds.executor;
 
 import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestAlgorithmFactory;
+import org.neo4j.gds.test.TestAlgorithmResult;
 import org.neo4j.gds.test.TestMutateConfig;
 import org.neo4j.gds.test.TestMutateConfigImpl;
 import org.neo4j.gds.test.TestResult;
 
-public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorithm, TestMutateConfig, TestResult, TestAlgorithmFactory<TestMutateConfig>> {
+public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorithmResult, TestMutateConfig, TestResult, TestAlgorithmFactory<TestMutateConfig>> {
 
     @Override
     public String name() {
@@ -43,7 +44,7 @@ public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorith
     }
 
     @Override
-    public ComputationResultConsumer<TestAlgorithm, TestAlgorithm, TestMutateConfig, TestResult> computationResultConsumer() {
+    public ComputationResultConsumer<TestAlgorithm, TestAlgorithmResult, TestMutateConfig, TestResult> computationResultConsumer() {
         return (computationResult, executionContext) -> new TestResult.TestResultBuilder()
             .withRelationshipCount(computationResult.result().relationshipCount())
             .withNodeCount(computationResult.graph().nodeCount())

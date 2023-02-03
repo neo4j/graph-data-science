@@ -26,16 +26,15 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Topology;
-import org.neo4j.gds.api.schema.ImmutableGraphSchema;
-import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.io.GraphStoreGraphPropertyVisitor;
 import org.neo4j.gds.core.io.GraphStoreRelationshipVisitor;
-import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
-import org.neo4j.gds.core.loading.ImmutableNodes;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
+import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
@@ -52,7 +51,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -65,7 +63,7 @@ public abstract class FileToGraphStoreImporter {
     private final Path importPath;
     private final int concurrency;
 
-    private final ImmutableGraphSchema.Builder graphSchemaBuilder;
+    private final ImmutableMutableGraphSchema.Builder graphSchemaBuilder;
     private final GraphStoreBuilder graphStoreBuilder;
     private final Log log;
     private final TaskRegistryFactory taskRegistryFactory;
@@ -83,10 +81,9 @@ public abstract class FileToGraphStoreImporter {
         this.graphPropertyVisitorBuilder = new GraphStoreGraphPropertyVisitor.Builder();
         this.concurrency = concurrency;
         this.importPath = importPath;
-        this.graphSchemaBuilder = ImmutableGraphSchema.builder();
+        this.graphSchemaBuilder = ImmutableMutableGraphSchema.builder();
         this.graphStoreBuilder = new GraphStoreBuilder()
             .concurrency(concurrency)
-            // TODO: we need to export and import this flag: https://trello.com/c/2cEMPZ9L
             .capabilities(ImmutableStaticCapabilities.of(true));
         this.log = log;
         this.taskRegistryFactory = taskRegistryFactory;
@@ -138,13 +135,13 @@ public abstract class FileToGraphStoreImporter {
         graphStoreBuilder.capabilities(fileInput.capabilities());
 
         var nodes = importNodes(fileInput);
-        importRelationships(fileInput, nodes);
+        importRelationships(fileInput, nodes.idMap());
         importGraphProperties(fileInput);
     }
 
-    private IdMap importNodes(FileInput fileInput) {
+    private Nodes importNodes(FileInput fileInput) {
         progressTracker.beginSubTask();
-        NodeSchema nodeSchema = fileInput.nodeSchema();
+        MutableNodeSchema nodeSchema = fileInput.nodeSchema();
         graphSchemaBuilder.nodeSchema(nodeSchema);
 
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder(nodeSchema)
@@ -165,19 +162,12 @@ public abstract class FileToGraphStoreImporter {
         ParallelUtil.run(tasks, Pools.DEFAULT);
 
         var nodes = nodesBuilder.build();
-        var nodeImportResultBuilder = ImmutableNodes.builder().idMap(nodes.idMap());
 
-        var schemaProperties = nodeSchema.unionProperties();
-        CSRGraphStoreUtil.extractNodeProperties(
-            nodeImportResultBuilder,
-            schemaProperties::get,
-            nodes.properties().propertyValues()
-        );
+        this.graphStoreBuilder.nodes(nodes);
 
-        graphStoreBuilder.nodes(nodeImportResultBuilder.build());
+        this.progressTracker.endSubTask();
 
-        progressTracker.endSubTask();
-        return nodes.idMap();
+        return nodes;
     }
 
     private void importRelationships(FileInput fileInput, IdMap nodes) {
@@ -202,12 +192,7 @@ public abstract class FileToGraphStoreImporter {
 
         ParallelUtil.run(tasks, Pools.DEFAULT);
 
-        var relationships = relationshipTopologyAndProperties(relationshipBuildersByType);
-        var relationshipImportResult = RelationshipImportResult.of(
-            relationships.topologies(),
-            relationships.properties(),
-            relationshipSchema.directions()
-        );
+        var relationshipImportResult = relationshipImportResult(relationshipBuildersByType);
 
         graphStoreBuilder.relationshipImportResult(relationshipImportResult);
 
@@ -246,30 +231,15 @@ public abstract class FileToGraphStoreImporter {
         }
     }
 
-    public static RelationshipTopologyAndProperties relationshipTopologyAndProperties(Map<String, RelationshipsBuilder> relationshipBuildersByType) {
-        var propertyStores = new HashMap<RelationshipType, RelationshipPropertyStore>();
-        var relationshipTypeTopologyMap = relationshipTypeToTopologyMapping(
-            relationshipBuildersByType,
-            propertyStores
-        );
+    public static RelationshipImportResult relationshipImportResult(Map<String, RelationshipsBuilder> relationshipBuildersByType) {
+        var relationshipsByType = relationshipBuildersByType.entrySet()
+            .stream()
+            .collect(Collectors.toMap(
+                e -> RelationshipType.of(e.getKey()),
+                e -> e.getValue().build()
+            ));
 
-        var importedRelationships = relationshipTypeTopologyMap.values().stream().mapToLong(Topology::elementCount).sum();
-        return ImmutableRelationshipTopologyAndProperties.of(relationshipTypeTopologyMap, propertyStores, importedRelationships);
-    }
-
-    private static Map<RelationshipType, Topology> relationshipTypeToTopologyMapping(
-        Map<String, RelationshipsBuilder> relationshipBuildersByType,
-        Map<RelationshipType, RelationshipPropertyStore> propertyStores
-    ) {
-        return relationshipBuildersByType.entrySet().stream().map(entry -> {
-            var relationshipType = RelationshipType.of(entry.getKey());
-            var relationships = entry.getValue().build();
-
-            if (relationships.properties().isPresent()) {
-                propertyStores.put(relationshipType, relationships.properties().get());
-            }
-            return Map.entry(relationshipType, relationships.topology());
-        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return RelationshipImportResult.builder().importResults(relationshipsByType).build();
     }
 
     @ValueClass

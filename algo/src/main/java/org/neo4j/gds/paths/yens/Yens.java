@@ -200,13 +200,6 @@ public final class Yens extends Algorithm<DijkstraResult> {
             .thenComparingInt(MutablePathResult::nodeCount));
     }
 
-    @Override
-    public void release() {
-        dijkstra.release();
-        nodeBlackList.release();
-        relationshipBlackList.release();
-    }
-
     private Optional<PathResult> computeDijkstra(long sourceNode) {
         progressTracker.logInfo(formatWithLocale("Dijkstra for spur node %d", sourceNode));
         return dijkstra.compute().findFirst();

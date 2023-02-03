@@ -33,8 +33,4 @@ class FailingAlgorithm extends Algorithm<ProcedureThatFailsDuringTask.Output> {
         throw new IllegalStateException("Oops");
     }
 
-    @Override
-    public void release() {
-
-    }
 }

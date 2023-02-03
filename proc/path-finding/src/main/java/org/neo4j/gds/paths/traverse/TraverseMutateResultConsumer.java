@@ -44,6 +44,7 @@ final class TraverseMutateResultConsumer {
         var relationshipsBuilder = GraphFactory
             .initRelationshipsBuilder()
             .nodes(graph)
+            .relationshipType(mutateRelationshipType)
             .orientation(Orientation.NATURAL)
             .build();
 
@@ -59,6 +60,6 @@ final class TraverseMutateResultConsumer {
         relationships = relationshipsBuilder.build();
         resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
 
-        graphStore.addRelationshipType(mutateRelationshipType, relationships);
+        graphStore.addRelationshipType(relationships);
     }
 }

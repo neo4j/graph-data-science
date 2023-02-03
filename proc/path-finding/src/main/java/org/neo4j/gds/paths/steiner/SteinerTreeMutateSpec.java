@@ -67,18 +67,17 @@ public class SteinerTreeMutateSpec implements AlgorithmSpec<ShortestPathsSteiner
             MutateResult.Builder builder = new MutateResult.Builder();
 
             if (graph.isEmpty()) {
-                graph.release();
                 return Stream.of(builder.build());
             }
 
+            var mutateRelationshipType = RelationshipType.of(config.mutateRelationshipType());
             var relationshipsBuilder = GraphFactory
                 .initRelationshipsBuilder()
                 .nodes(computationResult.graph())
+                .relationshipType(mutateRelationshipType)
                 .addPropertyConfig(GraphFactory.PropertyConfig.of(config.mutateProperty()))
                 .orientation(Orientation.NATURAL)
                 .build();
-
-            var mutateRelationshipType = RelationshipType.of(config.mutateRelationshipType());
 
             builder
                 .withTotalWeight(steinerTreeResult.totalCost())
@@ -111,7 +110,7 @@ public class SteinerTreeMutateSpec implements AlgorithmSpec<ShortestPathsSteiner
 
             computationResult
                 .graphStore()
-                .addRelationshipType(mutateRelationshipType, relationships);
+                .addRelationshipType(relationships);
             builder
                 .withEffectiveTargetNodeCount(steinerTreeResult.effectiveTargetNodesCount())
                 .withComputeMillis(computationResult.computeMillis())

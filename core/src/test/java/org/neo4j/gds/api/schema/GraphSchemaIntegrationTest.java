@@ -27,7 +27,6 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
-import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
@@ -37,7 +36,6 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -62,10 +60,10 @@ class GraphSchemaIntegrationTest extends BaseTest {
         Graph graph = new StoreLoaderBuilder()
             .databaseService(db)
             .addNodeProjection(
-                NodeProjection.of(
-                    "Node",
-                    PropertyMappings.of(List.of(propertyMapping))
-                )
+                NodeProjection.builder()
+                    .label("Node")
+                    .addProperty(propertyMapping)
+                    .build()
             )
             .build()
             .graph();
@@ -81,7 +79,7 @@ class GraphSchemaIntegrationTest extends BaseTest {
             .addRelationshipProjection(
                 RelationshipProjection.builder()
                     .type("REL")
-                    .properties(PropertyMappings.of(List.of(propertyMapping)))
+                    .addProperties(propertyMapping)
                     .build()
             )
             .build()

@@ -69,12 +69,6 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
         return AllShortestPathsStream.stream(resultQueue, progressTracker::endSubTask);
     }
 
-    @Override
-    public void release() {
-        graph = null;
-        resultQueue = null;
-    }
-
     /**
      * Dijkstra Task. Takes one element of the counter at a time
      * and starts dijkstra on it. It starts emitting results to the

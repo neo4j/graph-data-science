@@ -19,13 +19,9 @@
  */
 package org.neo4j.gds.core.loading.construction;
 
-import com.carrotsearch.hppc.IntObjectHashMap;
-import com.carrotsearch.hppc.ObjectIntScatterMap;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.neo4j.gds.ImmutableRelationshipProjection;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
@@ -38,6 +34,9 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
@@ -50,18 +49,14 @@ import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporterBuilder;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.IntStream;
 
-import static java.util.stream.Collectors.toMap;
-import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
 
 @Value.Style(
@@ -120,8 +115,7 @@ public final class GraphFactory {
         )).orElseGet(() -> new NodesBuilder(
             maxOriginalId,
             threadCount,
-            TokenToNodeLabelMap.lazy(),
-            new ConcurrentHashMap<>(),
+            NodesBuilderContext.lazy(threadCount),
             idMapBuilder,
             labelInformation,
             hasProperties.orElse(false),
@@ -138,30 +132,10 @@ public final class GraphFactory {
         boolean hasLabelInformation,
         boolean deduplicateIds
     ) {
-        var nodeLabels = nodeSchema.availableLabels();
-
-        var elementIdentifierLabelTokenMapping = new ObjectIntScatterMap<NodeLabel>();
-        var labelTokenNodeLabelMapping = new IntObjectHashMap<List<NodeLabel>>();
-        var labelTokenCounter = new MutableInt(0);
-        nodeLabels.forEach(nodeLabel -> {
-            int labelToken = nodeLabel == NodeLabel.ALL_NODES
-                ? ANY_LABEL
-                : labelTokenCounter.getAndIncrement();
-
-            elementIdentifierLabelTokenMapping.put(nodeLabel, labelToken);
-            labelTokenNodeLabelMapping.put(labelToken, List.of(nodeLabel));
-        });
-
-        var propertyBuildersByPropertyKey = nodeSchema.unionProperties().entrySet().stream().collect(toMap(
-            Map.Entry::getKey,
-            e -> NodePropertiesFromStoreBuilder.of(e.getValue().defaultValue(), concurrency)
-        ));
-
         return new NodesBuilder(
             maxOriginalId,
             concurrency,
-            TokenToNodeLabelMap.fixed(elementIdentifierLabelTokenMapping, labelTokenNodeLabelMapping),
-            new ConcurrentHashMap<>(propertyBuildersByPropertyKey),
+            NodesBuilderContext.fixed(nodeSchema, concurrency),
             idMapBuilder,
             hasLabelInformation,
             nodeSchema.hasProperties(),
@@ -214,6 +188,7 @@ public final class GraphFactory {
     @Builder.Factory
     static RelationshipsBuilder relationshipsBuilder(
         PartialIdMap nodes,
+        RelationshipType relationshipType,
         Optional<Orientation> orientation,
         List<PropertyConfig> propertyConfigs,
         Optional<Aggregation> aggregation,
@@ -231,7 +206,6 @@ public final class GraphFactory {
                 .map(Aggregation::resolve)
                 .toArray(Aggregation[]::new);
 
-        var relationshipType = RelationshipType.ALL_RELATIONSHIPS;
         var isMultiGraph = Arrays.stream(aggregations).allMatch(Aggregation::equivalentToNone);
 
         var actualOrientation = orientation.orElse(Orientation.NATURAL);
@@ -286,6 +260,7 @@ public final class GraphFactory {
             .idMap(nodes)
             .importer(singleTypeRelationshipImporter)
             .bufferSize(bufferSize)
+            .relationshipType(relationshipType)
             .propertyConfigs(propertyConfigs)
             .isMultiGraph(isMultiGraph)
             .loadRelationshipProperty(loadRelationshipProperties)
@@ -327,17 +302,18 @@ public final class GraphFactory {
      * will be used.
      */
     public static HugeGraph create(IdMap idMap, SingleTypeRelationships relationships) {
-        var nodeSchema = NodeSchema.empty();
+        var nodeSchema = MutableNodeSchema.empty();
         idMap.availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
         relationships.properties().ifPresent(relationshipPropertyStore -> {
             assert relationshipPropertyStore.values().size() == 1: "Cannot instantiate graph with more than one relationship property.";
         });
 
-        var relationshipSchema = relationships.relationshipSchema(RelationshipType.of("REL"));
+        var relationshipSchema = MutableRelationshipSchema.empty();
+        relationshipSchema.set(relationships.relationshipSchemaEntry());
 
         return create(
-            GraphSchema.of(nodeSchema, relationshipSchema, Map.of()),
+            MutableGraphSchema.of(nodeSchema, relationshipSchema, Map.of()),
             idMap,
             Map.of(),
             relationships

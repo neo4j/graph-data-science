@@ -36,21 +36,21 @@ class GraphSchemaTest {
         var prop1Schema = PropertySchema.of("prop1", ValueType.LONG, DefaultValue.of(42L), PropertyState.TRANSIENT);
         var prop2Schema = PropertySchema.of("prop2", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.TRANSIENT);
 
-        var graphSchema1 = GraphSchema.of(
-            NodeSchema.empty(),
-            RelationshipSchema.empty(),
+        var graphSchema1 = MutableGraphSchema.of(
+            MutableNodeSchema.empty(),
+            MutableRelationshipSchema.empty(),
             Map.of("prop1", prop1Schema)
         );
 
-        var graphSchema2 = GraphSchema.of(
-            NodeSchema.empty(),
-            RelationshipSchema.empty(),
+        var graphSchema2 = MutableGraphSchema.of(
+            MutableNodeSchema.empty(),
+            MutableRelationshipSchema.empty(),
             Map.of("prop2", prop2Schema)
         );
 
-        var graphSchemaUnion = GraphSchema.of(
-            NodeSchema.empty(),
-            RelationshipSchema.empty(),
+        var graphSchemaUnion = MutableGraphSchema.of(
+            MutableNodeSchema.empty(),
+            MutableRelationshipSchema.empty(),
             Map.of(
                 "prop1", prop1Schema,
                 "prop2", prop2Schema
@@ -64,15 +64,15 @@ class GraphSchemaTest {
     void testUnionOfGraphPropertiesForSameProperties() {
         var prop1Schema = PropertySchema.of("prop1", ValueType.LONG, DefaultValue.of(42L), PropertyState.TRANSIENT);
 
-        var graphSchema1 = GraphSchema.of(
-            NodeSchema.empty(),
-            RelationshipSchema.empty(),
+        var graphSchema1 = MutableGraphSchema.of(
+            MutableNodeSchema.empty(),
+            MutableRelationshipSchema.empty(),
             Map.of("prop1", prop1Schema)
         );
 
-        var graphSchema2 = GraphSchema.of(
-            NodeSchema.empty(),
-            RelationshipSchema.empty(),
+        var graphSchema2 = MutableGraphSchema.of(
+            MutableNodeSchema.empty(),
+            MutableRelationshipSchema.empty(),
             Map.of("prop1", prop1Schema)
         );
 
@@ -84,15 +84,15 @@ class GraphSchemaTest {
         var prop1Schema1 = PropertySchema.of("prop1", ValueType.LONG, DefaultValue.of(42L), PropertyState.TRANSIENT);
         var prop1Schema2 = PropertySchema.of("prop1", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.TRANSIENT);
 
-        var graphSchema1 = GraphSchema.of(
-            NodeSchema.empty(),
-            RelationshipSchema.empty(),
+        var graphSchema1 = MutableGraphSchema.of(
+            MutableNodeSchema.empty(),
+            MutableRelationshipSchema.empty(),
             Map.of("prop1", prop1Schema1)
         );
 
-        var graphSchema2 = GraphSchema.of(
-            NodeSchema.empty(),
-            RelationshipSchema.empty(),
+        var graphSchema2 = MutableGraphSchema.of(
+            MutableNodeSchema.empty(),
+            MutableRelationshipSchema.empty(),
             Map.of("prop1", prop1Schema2)
         );
 

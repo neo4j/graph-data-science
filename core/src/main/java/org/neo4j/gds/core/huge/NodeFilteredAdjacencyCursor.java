@@ -129,9 +129,4 @@ public class NodeFilteredAdjacencyCursor implements AdjacencyCursor {
     public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
         return new NodeFilteredAdjacencyCursor(innerCursor.shallowCopy(destination), idMap);
     }
-
-    @Override
-    public void close() {
-        innerCursor.close();
-    }
 }

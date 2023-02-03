@@ -20,6 +20,7 @@
 package org.neo4j.gds.api;
 
 import org.immutables.value.Value;
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -28,7 +29,6 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
 
@@ -39,7 +39,9 @@ public interface GraphLoaderContext {
 
     TransactionContext transactionContext();
 
-    GraphDatabaseService graphDatabaseService();
+    DatabaseId databaseId();
+
+    DependencyResolver dependencyResolver();
 
     Log log();
 
@@ -65,7 +67,12 @@ public interface GraphLoaderContext {
         }
 
         @Override
-        public GraphDatabaseService graphDatabaseService() {
+        public DatabaseId databaseId() {
+            return null;
+        }
+
+        @Override
+        public DependencyResolver dependencyResolver() {
             return null;
         }
 

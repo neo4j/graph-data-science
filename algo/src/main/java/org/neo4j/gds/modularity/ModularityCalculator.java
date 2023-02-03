@@ -41,7 +41,7 @@ public class ModularityCalculator extends Algorithm<ModularityResult> {
     private final int concurrency;
 
 
-    protected ModularityCalculator(
+    public ModularityCalculator(
         Graph graph,
         LongUnaryOperator communityIdProvider,
         int concurrency
@@ -99,6 +99,4 @@ public class ModularityCalculator extends Algorithm<ModularityResult> {
         return ModularityResult.of(totalModularity.doubleValue(), communityCount, communityModularities);
     }
 
-    @Override
-    public void release() {}
 }

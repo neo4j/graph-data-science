@@ -63,7 +63,7 @@ public class HarmonicCentralityWriteProc extends HarmonicCentralityProc<Centrali
             var graph = computationResult.graph();
 
             AbstractCentralityResultBuilder<CentralityScore.Stats> builder = new CentralityScore.Stats.Builder(
-                callContext,
+                executionContext.callContext(),
                 config.concurrency()
             );
 
@@ -74,7 +74,6 @@ public class HarmonicCentralityWriteProc extends HarmonicCentralityProc<Centrali
                 .withPreProcessingMillis(computationResult.preProcessingMillis());
 
             if (graph.isEmpty()) {
-                graph.release();
                 return Stream.of(builder.build());
             }
 
@@ -84,9 +83,9 @@ public class HarmonicCentralityWriteProc extends HarmonicCentralityProc<Centrali
                 var writeConcurrency = computationResult.config().writeConcurrency();
                 var progressTracker = new TaskProgressTracker(
                     NodePropertyExporter.baseTask("HarmonicCentrality", graph.nodeCount()),
-                    log,
+                    executionContext.log(),
                     writeConcurrency,
-                    taskRegistryFactory
+                    executionContext.taskRegistryFactory()
                 );
                 NodePropertyExporter exporter =  nodePropertyExporterBuilder
                     .withIdMap(graph)

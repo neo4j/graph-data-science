@@ -22,6 +22,9 @@ package org.neo4j.gds.core.loading.construction;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.NodeLabel;
 
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
 public interface NodeLabelToken {
 
     /**
@@ -46,6 +49,13 @@ public interface NodeLabelToken {
     @NotNull NodeLabel get(int index);
 
     String[] getStrings();
+
+    /**
+     * @return a stream of {@link org.neo4j.gds.NodeLabel}s represented by this token.
+     */
+    default Stream<NodeLabel> nodeLabels() {
+        return IntStream.range(0, this.size()).mapToObj(this::get);
+    }
 }
 
 

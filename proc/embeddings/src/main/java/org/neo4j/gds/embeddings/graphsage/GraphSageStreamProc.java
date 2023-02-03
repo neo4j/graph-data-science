@@ -30,6 +30,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -88,7 +89,7 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
     }
 
     @Override
-    public ValidationConfiguration<GraphSageStreamConfig> validationConfig() {
+    public ValidationConfiguration<GraphSageStreamConfig> validationConfig(ExecutionContext executionContext) {
         return GraphSageCompanion.getValidationConfig(modelCatalog());
     }
 

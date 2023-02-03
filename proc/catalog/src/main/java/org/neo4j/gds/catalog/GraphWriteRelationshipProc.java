@@ -20,7 +20,6 @@
 package org.neo4j.gds.catalog;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -32,6 +31,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.executor.ProcPreconditions;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -104,11 +104,11 @@ public class GraphWriteRelationshipProc extends CatalogProc {
 
         var progressTracker = new TaskProgressTracker(
             RelationshipExporter.baseTask("Graph", relationshipCount),
-            log,
+            executionContext().log(),
             RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
             config.jobId(),
-            taskRegistryFactory,
-            userLogRegistryFactory
+            executionContext().taskRegistryFactory(),
+            executionContext().userLogRegistryFactory()
         );
 
         deprecationWarning.ifPresent(progressTracker::logWarning);
@@ -138,7 +138,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         var builder = relationshipExporterBuilder
             .withIdMappingOperator(graph::toOriginalNodeId)
             .withGraph(graph)
-            .withTerminationFlag(TerminationFlag.wrap(transaction))
+            .withTerminationFlag(TerminationFlag.wrap(executionContext().terminationMonitor()))
             .withProgressTracker(progressTracker);
 
         if (relationshipProperty.isPresent()) {

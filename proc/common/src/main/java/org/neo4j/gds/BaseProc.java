@@ -22,6 +22,7 @@ package org.neo4j.gds;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.Username;
@@ -41,9 +42,11 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.logging.Log;
+import org.neo4j.logging.NullLog;
 import org.neo4j.procedure.Context;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -85,12 +88,14 @@ public abstract class BaseProc {
         return username.username();
     }
 
-    protected DatabaseId databaseId() {
-        return DatabaseId.of(databaseService);
-    }
-
     protected GraphStoreWithConfig graphStoreFromCatalog(String graphName, BaseConfig config) {
-        return GraphStoreFromCatalogLoader.graphStoreFromCatalog(graphName, config, username(), databaseId(), isGdsAdmin());
+        return GraphStoreFromCatalogLoader.graphStoreFromCatalog(
+            graphName,
+            config,
+            username(),
+            databaseId(),
+            isGdsAdmin()
+        );
     }
 
     public boolean isGdsAdmin() {
@@ -142,32 +147,39 @@ public abstract class BaseProc {
 
     protected GraphLoaderContext graphLoaderContext() {
         return ImmutableGraphLoaderContext.builder()
+            .databaseId(databaseId())
+            .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
             .transactionContext(TransactionContext.of(databaseService, procedureTransaction))
-            .graphDatabaseService(databaseService)
-            .log(log)
+            .log(logOrDefault(log))
             .taskRegistryFactory(taskRegistryFactory)
             .userLogRegistryFactory(userLogRegistryFactory)
-            .terminationFlag(TerminationFlag.wrap(transaction))
+            .terminationFlag(TerminationFlag.wrap(new TransactionTerminationMonitor(transaction)))
             .build();
     }
 
     public MemoryUsageValidator memoryUsageValidator() {
-        return new MemoryUsageValidator(log, databaseService);
+        return new MemoryUsageValidator(log, GraphDatabaseApiProxy.dependencyResolver(databaseService));
     }
 
     public ExecutionContext executionContext() {
-        return ImmutableExecutionContext
-            .builder()
-            .databaseService(databaseService)
-            .modelCatalog(internalModelCatalog)
-            .log(log)
-            .procedureTransaction(procedureTransaction)
-            .transaction(transaction)
-            .callContext(callContext)
-            .userLogRegistryFactory(userLogRegistryFactory)
-            .taskRegistryFactory(taskRegistryFactory)
-            .username(username())
-            .build();
+        return databaseService == null
+            ? ExecutionContext.EMPTY
+            : ImmutableExecutionContext
+                .builder()
+                .databaseId(databaseId())
+                .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
+                .modelCatalog(internalModelCatalog)
+                .log(logOrDefault(log))
+                .transactionContext(TransactionContext.of(databaseService, procedureTransaction))
+                .callContext(procedureCallContextOrDefault(callContext))
+                .userLogRegistryFactory(userLogRegistryFactory)
+                .taskRegistryFactory(taskRegistryFactory)
+                .username(username())
+                .terminationMonitor(new TransactionTerminationMonitor(transaction))
+                .closeableResourceRegistry(new TransactionCloseableResourceRegistry(transaction))
+                .algorithmMetaDataSetter(new TransactionAlgorithmMetaDataSetter(transaction))
+                .nodeLookup(new TransactionNodeLookup(transaction))
+                .build();
     }
 
     public ModelCatalog modelCatalog() {
@@ -181,5 +193,17 @@ public abstract class BaseProc {
 
     public void setModelCatalog(ModelCatalog modelCatalog) {
         this.internalModelCatalog = modelCatalog;
+    }
+
+    private static ProcedureCallContext procedureCallContextOrDefault(ProcedureCallContext procedureCallContext) {
+        return Objects.requireNonNullElse(procedureCallContext, ProcedureCallContext.EMPTY);
+    }
+
+    private static Log logOrDefault(Log log) {
+        return Objects.requireNonNullElse(log, NullLog.getInstance());
+    }
+
+    private DatabaseId databaseId() {
+        return DatabaseId.of(databaseService);
     }
 }

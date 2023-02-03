@@ -279,13 +279,6 @@ public final class BFS extends Algorithm<HugeLongArray> {
         return bfsTaskList;
     }
 
-    @Override
-    public void release() {
-        traversedNodes = null;
-        weights = null;
-        visited = null;
-    }
-
     private int countTasksWithChunks(Collection<BFSTask> bfsTaskList) {
         return (int) bfsTaskList.stream().filter(BFSTask::hasMoreChunks).count();
     }

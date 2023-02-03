@@ -57,4 +57,9 @@ public class AllShortestPathsDeltaMutateSpec implements AlgorithmSpec<DeltaStepp
     public ComputationResultConsumer<DeltaStepping, DijkstraResult, AllShortestPathsDeltaMutateConfig, Stream<MutateResult>> computationResultConsumer() {
         return new ShortestPathMutateResultConsumer<>();
     }
+
+@Override
+    public boolean releaseProgressTask() {
+        return false;
+    }
 }

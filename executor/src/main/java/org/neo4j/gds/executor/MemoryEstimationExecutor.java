@@ -21,8 +21,10 @@ package org.neo4j.gds.executor;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.api.EmptyDependencyResolver;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -31,7 +33,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.Map;
 import java.util.Optional;
@@ -78,20 +79,18 @@ public class MemoryEstimationExecutor<
         Optional<MemoryEstimation> maybeGraphEstimation;
 
         if (graphNameOrConfiguration instanceof Map) {
-            // if the api is null, we are probably using EstimationCli
-            var graphLoaderContext = (executionContext.databaseService() == null)
+            // if the dependency resolver is empty, we are probably using EstimationCli
+            var graphLoaderContext = (executionContext.dependencyResolver() == EmptyDependencyResolver.INSTANCE)
                 ? GraphLoaderContext.NULL_CONTEXT
                 : ImmutableGraphLoaderContext
                     .builder()
-                    .graphDatabaseService(executionContext.databaseService())
+                    .databaseId(executionContext.databaseId())
+                    .dependencyResolver(executionContext.dependencyResolver())
                     .log(executionContext.log())
                     .taskRegistryFactory(executionContext.taskRegistryFactory())
                     .userLogRegistryFactory(executionContext.userLogRegistryFactory())
-                    .terminationFlag(TerminationFlag.wrap(executionContext.transaction()))
-                    .transactionContext(TransactionContext.of(
-                        executionContext.databaseService(),
-                        executionContext.procedureTransaction()
-                    )).build();
+                    .terminationFlag(TerminationFlag.wrap(TerminationMonitor.EMPTY))
+                    .transactionContext(executionContext.transactionContext()).build();
 
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(executionContext.username());
             var graphProjectConfig = memoryEstimationGraphConfigParser.processInput(graphNameOrConfiguration);

@@ -15,14 +15,17 @@ dependencies {
     compileOnly group: 'org.immutables',          name: 'builder',     version: ver.'immutables'
     compileOnly group: 'org.jetbrains',           name: 'annotations', version: ver.'jetbrains-annotations'
 
+    implementation project(':algo-common')
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':graph-schema-api')
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
+    implementation project(':neo4j-api')
     implementation project(':open-model-catalog')
     implementation project(':open-write-services')
+    implementation project(':proc-common')
     implementation project(':string-formatting')
     implementation project(':transaction')
 
@@ -39,8 +42,6 @@ dependencies {
     api(group: 'org.neo4j.community', name: 'it-test-support', version: ver.'neo4j') {
         exclude group:'org.junit.vintage', module: 'junit-vintage-engine'
     }
-    // TODO: Remove when dropping Neo4j 4.3 support
-    implementation(group: 'junit', name: 'junit', version: ver.'junit4')
 
     testImplementation project(':edition-api')
 }

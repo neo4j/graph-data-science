@@ -46,7 +46,7 @@ import static org.neo4j.gds.AlgoBaseProc.STATS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.testProc.mutate", description = STATS_DESCRIPTION, executionMode = ExecutionMode.MUTATE_NODE_PROPERTY)
-public class TestMutateProc extends MutatePropertyProc<TestAlgorithm, TestAlgorithm, TestResult, TestMutateConfig> {
+public class TestMutateProc extends MutatePropertyProc<TestAlgorithm, TestAlgorithmResult, TestResult, TestMutateConfig> {
 
     @Procedure(value = "gds.testProc.mutate", mode = READ)
     @Description(STATS_DESCRIPTION)
@@ -54,7 +54,7 @@ public class TestMutateProc extends MutatePropertyProc<TestAlgorithm, TestAlgori
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<TestAlgorithm, TestAlgorithm, TestMutateConfig> computationResult = compute(
+        ComputationResult<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> computationResult = compute(
             graphName,
             configuration
         );
@@ -62,7 +62,7 @@ public class TestMutateProc extends MutatePropertyProc<TestAlgorithm, TestAlgori
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<TestAlgorithm, TestAlgorithm, TestMutateConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> computationResult) {
         return new LongNodePropertyValues() {
             @Override
             public long longValue(long nodeId) {
@@ -78,7 +78,7 @@ public class TestMutateProc extends MutatePropertyProc<TestAlgorithm, TestAlgori
 
     @Override
     protected AbstractResultBuilder<TestResult> resultBuilder(
-        ComputationResult<TestAlgorithm, TestAlgorithm, TestMutateConfig> computeResult,
+        ComputationResult<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return new TestResult.TestResultBuilder().withRelationshipCount(computeResult.result().relationshipCount());

@@ -123,11 +123,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     }
 
     @Override
-    public void release() {
-        graph.release();
-    }
-
-    @Override
     public NodeSimilarityResult compute() {
         progressTracker.beginSubTask();
         if (config.computeToStream()) {
@@ -207,6 +202,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             degreeComputer.reset();
             vectorComputer.reset(degree);
 
+            progressTracker.logProgress(graph.degree(node));
             if (degree >= config.degreeCutoff()) {
                 if (sourceNodeFilter.test(node)) {
                     sourceNodes.set(node);
@@ -216,7 +212,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
                 }
 
                 // TODO: we don't need to do the rest of the prepare for a node that isn't going to be used in the computation
-                progressTracker.logProgress(graph.degree(node));
                 vectorComputer.forEachRelationship(node);
                 if (weighted) {
                     weights.set(node, vectorComputer.getWeights());
@@ -226,8 +221,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
                 }
                 return vectorComputer.targetIds.buffer;
             }
-
-            progressTracker.logProgress(graph.degree(node));
             return null;
         });
         nodesToCompare = sourceNodes.cardinality();

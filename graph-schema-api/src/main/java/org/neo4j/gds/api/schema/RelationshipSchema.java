@@ -20,116 +20,19 @@
 package org.neo4j.gds.api.schema;
 
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+public interface RelationshipSchema extends ElementSchema<RelationshipSchema, RelationshipType, MutableRelationshipSchemaEntry, RelationshipPropertySchema> {
+    Set<RelationshipType> availableTypes();
 
-public class RelationshipSchema extends ElementSchema<RelationshipSchema, RelationshipType, RelationshipSchemaEntry, RelationshipPropertySchema> {
+    boolean isUndirected();
 
-    public static RelationshipSchema empty() {
-        return new RelationshipSchema(new LinkedHashMap<>());
-    }
-
-    public RelationshipSchema(Map<RelationshipType, RelationshipSchemaEntry> entries) {
-        super(entries);
-    }
-
-    public static RelationshipSchema from(RelationshipSchema fromSchema) {
-        var relationshipSchema = RelationshipSchema.empty();
-        fromSchema.entries().forEach(fromEntry -> relationshipSchema.set(RelationshipSchemaEntry.from(fromEntry)));
-
-        return relationshipSchema;
-    }
-
-    @Override
-    public RelationshipSchema filter(Set<RelationshipType> relationshipTypesToKeep) {
-        return new RelationshipSchema(entries
-            .entrySet()
-            .stream()
-            .filter(e -> relationshipTypesToKeep.contains(e.getKey()))
-            .collect(Collectors.toMap(Map.Entry::getKey, entry -> RelationshipSchemaEntry.from(entry.getValue()))));
-    }
-
-    @Override
-    public RelationshipSchema union(RelationshipSchema other) {
-        return new RelationshipSchema(unionEntries(other));
-    }
-
-    public Set<RelationshipType> availableTypes() {
-        return entries.keySet();
-    }
-
-    public boolean isUndirected() {
-        // a graph with no relationships is considered undirected
-        // this is because algorithms such as TriangleCount are still well-defined
-        // so it is the least restrictive decision
-        return entries.values().stream().allMatch(RelationshipSchemaEntry::isUndirected);
-    }
-
-    public boolean isUndirected(RelationshipType type) {
-        return entries.get(type).isUndirected();
-    }
-
-    public RelationshipSchemaEntry getOrCreateRelationshipType(
-        RelationshipType relationshipType, Direction direction
-    ) {
-        return this.entries.computeIfAbsent(relationshipType,
-            __ -> new RelationshipSchemaEntry(relationshipType, direction)
-        );
-    }
-
-    public RelationshipSchema addRelationshipType(RelationshipType relationshipType, Direction direction) {
-        getOrCreateRelationshipType(relationshipType, direction);
-        return this;
-    }
-
-    public RelationshipSchema addProperty(
-        RelationshipType relationshipType,
-        Direction direction,
-        String propertyKey,
-        RelationshipPropertySchema propertySchema
-    ) {
-        getOrCreateRelationshipType(relationshipType, direction).addProperty(propertyKey, propertySchema);
-        return this;
-    }
-
-    public RelationshipSchema addProperty(
-        RelationshipType relationshipType,
-        Direction direction,
-        String propertyKey,
-        ValueType valueType,
-        PropertyState propertyState
-    ) {
-        getOrCreateRelationshipType(relationshipType, direction).addProperty(propertyKey, valueType, propertyState);
-        return this;
-    }
+    boolean isUndirected(RelationshipType type);
 
     // TODO: remove
-    public Map<RelationshipType, Direction> directions() {
-        return availableTypes()
-            .stream()
-            .collect(Collectors.toMap(
-                relationshipType -> relationshipType,
-                relationshipType -> entries.get(relationshipType).direction()
-            ));
-    }
+    Map<RelationshipType, Direction> directions();
 
-    Object toMapOld() {
-        return entries()
-            .stream()
-            .collect(Collectors.toMap(e -> e.identifier().name(),
-                e -> e
-                    .properties()
-                    .entrySet()
-                    .stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey,
-                        innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue())
-                    ))
-            ));
-    }
+    Object toMapOld();
 }

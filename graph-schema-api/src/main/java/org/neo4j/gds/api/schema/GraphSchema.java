@@ -21,15 +21,12 @@ package org.neo4j.gds.api.schema;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.ValueClass;
 
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-@ValueClass
 public interface GraphSchema {
 
     NodeSchema nodeSchema();
@@ -37,6 +34,12 @@ public interface GraphSchema {
     RelationshipSchema relationshipSchema();
 
     Map<String, PropertySchema> graphProperties();
+
+    GraphSchema filterNodeLabels(Set<NodeLabel> labelsToKeep);
+
+    GraphSchema filterRelationshipTypes(Set<RelationshipType> relationshipTypesToKeep);
+
+    GraphSchema union(GraphSchema other);
 
     default Map<String, Object> toMap() {
         return Map.of(
@@ -60,50 +63,20 @@ public interface GraphSchema {
         );
     }
 
-    default GraphSchema filterNodeLabels(Set<NodeLabel> labelsToKeep) {
-        return of(nodeSchema().filter(labelsToKeep), relationshipSchema(), graphProperties());
+    default boolean isUndirected() {
+        return relationshipSchema().isUndirected();
     }
 
-    default GraphSchema filterRelationshipTypes(Set<RelationshipType> relationshipTypesToKeep) {
-        return of(nodeSchema(), relationshipSchema().filter(relationshipTypesToKeep), graphProperties());
+    default Direction direction() {
+        return relationshipSchema().isUndirected() ? Direction.UNDIRECTED : Direction.DIRECTED;
     }
 
-    default GraphSchema union(GraphSchema other) {
-        return GraphSchema.of(
-            nodeSchema().union(other.nodeSchema()),
-            relationshipSchema().union(other.relationshipSchema()),
-            unionGraphProperties(other.graphProperties())
-        );
+    static GraphSchema empty() {
+        return MutableGraphSchema.empty();
     }
 
-    private Map<String, PropertySchema> unionGraphProperties(Map<String, PropertySchema> otherProperties) {
-        return Stream.concat(
-            graphProperties().entrySet().stream(),
-            otherProperties.entrySet().stream()
-        ).collect(Collectors.toMap(
-            Map.Entry::getKey,
-            Map.Entry::getValue,
-            (leftType, rightType) -> {
-                if (leftType.valueType() != rightType.valueType()) {
-                    throw new IllegalArgumentException(String.format(
-                        Locale.ENGLISH,
-                        "Combining schema entries with value type %s and %s is not supported.",
-                        leftType.valueType(),
-                        rightType.valueType()
-                    ));
-                } else {
-                    return leftType;
-                }
-            }
-        ));
-    }
-
-    static GraphSchema of(NodeSchema nodeSchema, RelationshipSchema relationshipSchema, Map<String, PropertySchema> graphProperties) {
-        return ImmutableGraphSchema.builder()
-            .nodeSchema(nodeSchema)
-            .relationshipSchema(relationshipSchema)
-            .graphProperties(graphProperties)
-            .build();
+    static MutableGraphSchema mutable() {
+        return MutableGraphSchema.empty();
     }
 
     static <PS extends PropertySchema> String forPropertySchema(PS propertySchema) {
@@ -125,15 +98,4 @@ public interface GraphSchema {
         );
     }
 
-    static GraphSchema empty() {
-        return of(NodeSchema.empty(), RelationshipSchema.empty(), Map.of());
-    }
-
-    default boolean isUndirected() {
-        return relationshipSchema().isUndirected();
-    }
-
-    default Direction direction() {
-        return relationshipSchema().isUndirected() ? Direction.UNDIRECTED : Direction.DIRECTED;
-    }
 }

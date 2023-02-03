@@ -20,7 +20,6 @@
 package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphWriteNodePropertiesConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -35,6 +34,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
+import org.neo4j.gds.executor.ProcPreconditions;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -122,11 +122,11 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         );
         var progressTracker = new TaskProgressTracker(
             task,
-            log,
+            executionContext().log(),
             config.writeConcurrency(),
             new JobId(),
-            taskRegistryFactory,
-            userLogRegistryFactory
+            executionContext().taskRegistryFactory(),
+            executionContext().userLogRegistryFactory()
         );
 
         deprecationWarning.ifPresent(progressTracker::logWarning);
@@ -163,7 +163,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
 
                 var exporter = nodePropertyExporterBuilder
                     .withIdMap(subGraph)
-                    .withTerminationFlag(TerminationFlag.wrap(transaction))
+                    .withTerminationFlag(TerminationFlag.wrap(executionContext().terminationMonitor()))
                     .parallel(Pools.DEFAULT, config.writeConcurrency())
                     .withProgressTracker(progressTracker)
                     .build();

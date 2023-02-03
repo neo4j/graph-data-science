@@ -33,15 +33,14 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.AbstractNodeProjection.LABEL_KEY;
 import static org.neo4j.gds.ElementProjection.PROPERTIES_KEY;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
+import static org.neo4j.gds.NodeProjection.LABEL_KEY;
 
 class NodeProjectionsTest {
 
@@ -50,10 +49,10 @@ class NodeProjectionsTest {
     void syntacticSugars(Object argument) {
         NodeProjections actual = NodeProjections.fromObject(argument);
 
-        NodeProjections expected = NodeProjections.builder().projections(singletonMap(
+        NodeProjections expected = NodeProjections.single(
             NodeLabel.of("A"),
             NodeProjection.builder().label("A").properties(PropertyMappings.of()).build()
-        )).build();
+        );
 
         assertThat(
             actual,
@@ -73,19 +72,17 @@ class NodeProjectionsTest {
             )
         ));
 
-        NodeProjections expected = NodeProjections.builder().projections(singletonMap(
+        NodeProjections expected = NodeProjections.single(
             NodeLabel.of("MY_LABEL"),
             NodeProjection
                 .builder()
                 .label("A")
-                .properties(PropertyMappings
-                    .builder()
-                    .addMapping(PropertyMapping.of("prop1", DefaultValue.DEFAULT))
-                    .addMapping(PropertyMapping.of("prop2", DefaultValue.DEFAULT))
-                    .build()
+                .addProperties(
+                    PropertyMapping.of("prop1", DefaultValue.DEFAULT),
+                    PropertyMapping.of("prop2", DefaultValue.DEFAULT)
                 )
                 .build()
-        )).build();
+        );
 
         assertThat(
             actual,
@@ -98,10 +95,10 @@ class NodeProjectionsTest {
     void shouldParseMultipleLabels() {
         NodeProjections actual = NodeProjections.fromObject(Arrays.asList("A", "B"));
 
-        NodeProjections expected = NodeProjections.builder()
-            .putProjection(NodeLabel.of("A"), NodeProjection.builder().label("A").build())
-            .putProjection(NodeLabel.of("B"), NodeProjection.builder().label("B").build())
-            .build();
+        NodeProjections expected = NodeProjections.create(Map.of(
+            NodeLabel.of("A"), NodeProjection.builder().label("A").build(),
+            NodeLabel.of("B"), NodeProjection.builder().label("B").build()
+        ));
 
         assertThat(actual, equalTo(expected));
         assertThat(actual.labelProjection(), equalTo("A, B"));
@@ -111,14 +108,14 @@ class NodeProjectionsTest {
     void shouldSupportStar() {
         NodeProjections actual = NodeProjections.fromObject("*");
 
-        NodeProjections expected = NodeProjections.builder().projections(singletonMap(
+        NodeProjections expected = NodeProjections.single(
             ALL_NODES,
             NodeProjection
                 .builder()
                 .label("*")
                 .properties(PropertyMappings.of())
                 .build()
-        )).build();
+        );
 
         assertThat(
             actual,
@@ -147,37 +144,69 @@ class NodeProjectionsTest {
             .hasMessage("Duplicate property key `prop`");
     }
 
-    @Test
-    void shouldFailOnAmbiguousNodePropertyDefinition() {
-        var builder = NodeProjections.builder().projections(Map.of(
+    static Stream<Arguments> ambiguousPropertyMappings() {
+        return Stream.of(
+            Arguments.of(
+                "different neo key",
+                PropertyMapping.of("foo", "bar", DefaultValue.DEFAULT),
+                PropertyMapping.of("foo", "baz", DefaultValue.DEFAULT),
+                new String[]{
+                    "Specifying multiple neoPropertyKeys for the same property is not allowed, found propertyKey: `foo` with conflicting neoPropertyKeys:",
+                    "`bar`",
+                    "`baz`"
+                }
+            ),
+            Arguments.of(
+                "different default value types",
+                PropertyMapping.of("foo", "baz", DefaultValue.forLong()),
+                PropertyMapping.of("foo", "baz", DefaultValue.forDouble()),
+                new String[]{
+                    "Specifying different default values for the same property with identical neoPropertyKey is not allowed, found propertyKey: `foo` with conflicting default values:",
+                    "`-9223372036854775808`",
+                    "`NaN`",
+                }
+            ),
+            Arguments.of(
+                "different default values",
+                PropertyMapping.of("foo", "baz", DefaultValue.of(42)),
+                PropertyMapping.of("foo", "baz", DefaultValue.of(1337)),
+                new String[]{
+                    "Specifying different default values for the same property with identical neoPropertyKey is not allowed, found propertyKey: `foo` with conflicting default values:",
+                    "`42`",
+                    "`1337`",
+                }
+            )
+        );
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("ambiguousPropertyMappings")
+    void shouldFailOnAmbiguousNodePropertyDefinition(
+        String ignore,
+        PropertyMapping first,
+        PropertyMapping second,
+        String... messages
+    ) {
+        var builder = ImmutableNodeProjections.builder().projections(Map.of(
             NodeLabel.of("A"),
             NodeProjection
                 .builder()
                 .label("A")
-                .properties(PropertyMappings
-                    .builder()
-                    .addMapping(PropertyMapping.of("foo", "bar", DefaultValue.DEFAULT))
-                    .build()
-                )
+                .addProperty(first)
                 .build(),
-
             NodeLabel.of("B"),
             NodeProjection
                 .builder()
                 .label("B")
-                .properties(PropertyMappings
-                    .builder()
-                    .addMapping(PropertyMapping.of("foo", "baz", DefaultValue.DEFAULT))
-                    .build()
-                )
+                .addProperty(second)
                 .build()
-
         ));
 
-        assertThatThrownBy(builder::build)
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining(
-                "Specifying multiple neoPropertyKeys for the same property is not allowed, found propertyKey: foo, neoPropertyKeys");
+        var throwableAssert = assertThatThrownBy(builder::build)
+            .isInstanceOf(IllegalArgumentException.class);
+        for (var message : messages) {
+            throwableAssert.hasMessageContaining(message);
+        }
     }
 
     @Test
@@ -191,19 +220,17 @@ class NodeProjectionsTest {
             )
         ));
 
-        NodeProjections expected = NodeProjections.builder().projections(singletonMap(
+        NodeProjections expected = NodeProjections.single(
             NodeLabel.of("MY_LABEL"),
             NodeProjection
                 .builder()
                 .label("A")
-                .properties(PropertyMappings
-                    .builder()
-                    .addMapping(PropertyMapping.of("prop1", DefaultValue.DEFAULT))
-                    .addMapping(PropertyMapping.of("prop2", DefaultValue.DEFAULT))
-                    .build()
+                .addProperties(
+                    PropertyMapping.of("prop1", DefaultValue.DEFAULT),
+                    PropertyMapping.of("prop2", DefaultValue.DEFAULT)
                 )
                 .build()
-        )).build();
+        );
 
         assertThat(
             actual,

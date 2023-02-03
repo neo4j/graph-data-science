@@ -25,6 +25,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
+@SuppressWarnings("immutables:subtype")
 public interface SteinerTreeStreamConfig extends  SteinerTreeBaseConfig {
 
     static SteinerTreeStreamConfig of(CypherMapWrapper userInput) {

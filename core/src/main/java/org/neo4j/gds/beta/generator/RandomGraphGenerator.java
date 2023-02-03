@@ -27,8 +27,9 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.huge.HugeGraph;
@@ -68,6 +69,7 @@ public final class RandomGraphGenerator {
     private final Aggregation aggregation;
     private final Direction direction;
     private final AllowSelfLoops allowSelfLoops;
+    private final boolean inverseIndex;
 
     private final Optional<NodeLabelProducer> maybeNodeLabelProducer;
     private final Optional<PropertyProducer<double[]>> maybeRelationshipPropertyProducer;
@@ -87,7 +89,8 @@ public final class RandomGraphGenerator {
         Aggregation aggregation,
         Direction direction,
         AllowSelfLoops allowSelfLoops,
-        boolean forceDag
+        boolean forceDag,
+        boolean inverseIndex
     ) {
         this.relationshipType = relationshipType;
         this.relationshipDistribution = relationshipDistribution;
@@ -104,6 +107,7 @@ public final class RandomGraphGenerator {
         long actualSeed = seed != null ? seed : 1;
         this.random.setSeed(actualSeed);
         this.randomDagMapping = generateRandomMapping(actualSeed);
+        this.inverseIndex = inverseIndex;
     }
 
     public static RandomGraphGeneratorBuilder builder() {
@@ -127,6 +131,7 @@ public final class RandomGraphGenerator {
 
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
+            .relationshipType(relationshipType)
             .orientation(direction.toOrientation())
             .addAllPropertyConfigs(maybeRelationshipPropertyProducer
                 .map(propertyProducer -> List.of(GraphFactory.PropertyConfig.of(
@@ -135,7 +140,7 @@ public final class RandomGraphGenerator {
                     DefaultValue.forDouble()
                 )))
                 .orElseGet(List::of)
-            )
+            ).indexInverse(inverseIndex)
             .aggregation(aggregation)
             .build();
 
@@ -143,9 +148,12 @@ public final class RandomGraphGenerator {
 
         var relationships = relationshipsBuilder.build();
 
-        var graphSchema = GraphSchema.of(
+        var relationshipSchema = MutableRelationshipSchema.empty();
+        relationshipSchema.set(relationships.relationshipSchemaEntry());
+
+        var graphSchema = MutableGraphSchema.of(
             nodePropertiesAndSchema.nodeSchema(),
-            relationships.relationshipSchema(relationshipType),
+            relationshipSchema,
             Map.of()
         );
 
@@ -226,14 +234,14 @@ public final class RandomGraphGenerator {
 
     @ValueClass
     interface NodePropertiesAndSchema {
-        NodeSchema nodeSchema();
+        MutableNodeSchema nodeSchema();
 
         Map<String, NodePropertyValues> nodeProperties();
     }
 
     private NodePropertiesAndSchema generateNodeProperties(IdMap idMap) {
         if (this.nodePropertyProducers.isEmpty()) {
-            var nodeSchema = NodeSchema.empty();
+            var nodeSchema = MutableNodeSchema.empty();
             idMap.availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
             return ImmutableNodePropertiesAndSchema.builder()
                 .nodeSchema(nodeSchema)
@@ -284,7 +292,7 @@ public final class RandomGraphGenerator {
         ));
 
         // Create a corresponding node schema
-        var nodeSchema = NodeSchema.empty();
+        var nodeSchema = MutableNodeSchema.empty();
         generatedProperties.forEach((propertyKey, property) -> propertyNameToLabels
             .get(propertyKey)
             .forEach(nodeLabel -> {

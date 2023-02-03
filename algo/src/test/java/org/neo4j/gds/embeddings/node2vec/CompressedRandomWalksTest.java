@@ -20,8 +20,6 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.mem.HugeArrays;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,30 +70,5 @@ class CompressedRandomWalksTest {
         });
 
         assertThat(decompressedWalks).containsExactlyElementsOf(expected);
-    }
-
-    @Test
-    void shouldComputeCorrectWalkLengthsOnPagedArrays() {
-        var shiftBefore = GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get();
-        try {
-            // Setting a lower shift will allow us to only having to fill
-            // PAGE_SIZE (2^14) random walks as compared to 2^28
-            GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.set(2);
-            var pageSize = HugeArrays.PAGE_SIZE;
-
-            var compressedRandomWalks = new CompressedRandomWalks(pageSize + 1);
-
-            long[] walk = new long[]{0, 1, 2};
-            for (int i = 0; i < pageSize; i++) {
-                compressedRandomWalks.add(walk);
-            }
-
-            compressedRandomWalks.add(0, 1);
-
-            var iterator = compressedRandomWalks.iterator(pageSize, 1);
-            iterator.next();
-        } finally {
-            GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.set(shiftBefore);
-        }
     }
 }

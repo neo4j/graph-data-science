@@ -45,7 +45,7 @@ public class RandomWalkStatsProc extends BaseProc {
         return new ProcedureExecutor<>(
             new RandomWalkStatsSpec(),
             executionContext()
-        ).compute(graphName, configuration, false, true);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.randomWalk.stats.estimate", mode = READ)

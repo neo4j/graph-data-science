@@ -79,11 +79,11 @@ public class GraphStoreExportProc extends BaseProc {
                         graphStore.nodeCount(),
                         graphStore.relationshipCount()
                     ),
-                    log,
+                    executionContext().log(),
                     exportConfig.writeConcurrency(),
                     exportConfig.jobId(),
-                    taskRegistryFactory,
-                    userLogRegistryFactory
+                    executionContext().taskRegistryFactory(),
+                    executionContext().userLogRegistryFactory()
                 );
 
                 var exporter = GraphStoreToDatabaseExporter.of(
@@ -91,7 +91,7 @@ public class GraphStoreExportProc extends BaseProc {
                     databaseService,
                     exportConfig,
                     neoNodeProperties(exportConfig, graphStore),
-                    log,
+                    executionContext().log(),
                     progressTracker
                 );
 
@@ -135,8 +135,8 @@ public class GraphStoreExportProc extends BaseProc {
             exportLocation(neo4jConfig, exportConfig),
             exportConfig,
             neoNodeProperties(exportConfig, graphStore),
-            taskRegistryFactory,
-            log
+            executionContext().taskRegistryFactory(),
+            executionContext().log()
         );
 
         return Stream.of(new FileExportResult(
@@ -185,7 +185,7 @@ public class GraphStoreExportProc extends BaseProc {
             graphStore,
             TransactionContext.of(databaseService, procedureTransaction),
             exportConfig.additionalNodeProperties(),
-            log
+            executionContext().log()
         );
     }
 

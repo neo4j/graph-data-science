@@ -57,6 +57,9 @@ public final class TransactionContext {
      * Creates a new {@code TransactionContext} with the same {@link SecurityContext} as the provided {@link Transaction}.
      */
     public static TransactionContext of(GraphDatabaseService databaseService, Transaction top) {
+        if (top == null) {
+            return of(databaseService, SecurityContext.AUTH_DISABLED);
+        }
         var internalTransaction = (InternalTransaction) top;
         return of(databaseService, internalTransaction);
     }
@@ -91,6 +94,16 @@ public final class TransactionContext {
      */
     public String username() {
         return Neo4jProxy.username(securityContext.subject());
+    }
+
+    /**
+     * @return `true` if the user that started the transaction has admin rights
+     */
+    public boolean isGdsAdmin() {
+        // this should be the same as the predefined role from enterprise-security
+        // com.neo4j.server.security.enterprise.auth.plugin.api.PredefinedRoles.ADMIN
+        String PREDEFINED_ADMIN_ROLE = "admin";
+        return securityContext.roles().contains(PREDEFINED_ADMIN_ROLE);
     }
 
     /**

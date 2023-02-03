@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.api;
 
-import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.CSRGraphStore;
@@ -28,6 +28,8 @@ import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.mem.MemoryUsage;
+
+import java.util.Map;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -42,15 +44,18 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
         super(graphProjectConfig, capabilities, loadingContext, dimensions);
     }
 
-    protected CSRGraphStore createGraphStore(
-        Nodes nodes,
-        RelationshipImportResult relationshipImportResult
-    ) {
+    protected CSRGraphStore createGraphStore(Nodes nodes, RelationshipImportResult relationshipImportResult) {
+        var schema = MutableGraphSchema.of(
+            nodes.schema(),
+            relationshipImportResult.relationshipSchema(),
+            Map.of()
+        );
+
         return new GraphStoreBuilder()
-            .databaseId(DatabaseId.of(loadingContext.graphDatabaseService()))
+            .databaseId(loadingContext.databaseId())
             .capabilities(capabilities)
-            .schema(computeGraphSchema(nodes, relationshipImportResult))
-            .nodes(Nodes.of(nodes.idMap(), nodes.properties()))
+            .schema(schema)
+            .nodes(nodes)
             .relationshipImportResult(relationshipImportResult)
             .concurrency(graphProjectConfig.readConcurrency())
             .build();
@@ -58,12 +63,9 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
 
     protected void logLoadingSummary(GraphStore graphStore) {
         var sizeInBytes = MemoryUsage.sizeOf(graphStore);
-        var memoryUsage = MemoryUsage.humanReadable(sizeInBytes);
-        progressTracker.logInfo(formatWithLocale("Actual memory usage of the loaded graph: %s", memoryUsage));
+        if (sizeInBytes >= 0) {
+            var memoryUsage = MemoryUsage.humanReadable(sizeInBytes);
+            progressTracker.logInfo(formatWithLocale("Actual memory usage of the loaded graph: %s", memoryUsage));
+        }
     }
-
-    protected abstract GraphSchema computeGraphSchema(
-        Nodes nodes,
-        RelationshipImportResult relationshipImportResult
-    );
 }

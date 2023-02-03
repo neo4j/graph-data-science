@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.core.utils;
 
+import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.graphdb.TransactionTerminatedException;
-import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.exceptions.Status;
 
 public interface TerminationFlag {
@@ -29,12 +29,12 @@ public interface TerminationFlag {
 
     int RUN_CHECK_NODE_COUNT = 10_000;
 
-    static TerminationFlag wrap(KernelTransaction transaction) {
-        return new TerminationFlagImpl(transaction);
+    static TerminationFlag wrap(TerminationMonitor terminationMonitor) {
+        return new TerminationFlagImpl(terminationMonitor);
     }
 
-    static TerminationFlag wrap(KernelTransaction transaction, long interval) {
-        return new TerminationFlagImpl(transaction).withCheckInterval(interval);
+    static TerminationFlag wrap(TerminationMonitor terminationMonitor, long interval) {
+        return new TerminationFlagImpl(terminationMonitor).withCheckInterval(interval);
     }
 
     boolean running();

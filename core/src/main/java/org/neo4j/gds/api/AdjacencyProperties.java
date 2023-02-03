@@ -23,7 +23,7 @@ package org.neo4j.gds.api;
  * The properties for a mono-partite graph for a single relationship property.
  * Provides access to the target {@link #propertyCursor(long) properties} for any given source node.
  */
-public interface AdjacencyProperties extends AutoCloseable {
+public interface AdjacencyProperties {
 
     /**
      * Create a new cursor for the properties of the relationships of a given {@code node}.
@@ -81,7 +81,4 @@ public interface AdjacencyProperties extends AutoCloseable {
      * NOTE: In order to use the returned cursor {@link PropertyCursor#init} must be called.
      */
     PropertyCursor rawPropertyCursor();
-
-    @Override
-    void close();
 }

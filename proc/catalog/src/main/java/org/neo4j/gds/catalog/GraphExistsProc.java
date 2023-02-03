@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.executor.ProcPreconditions;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -40,7 +40,7 @@ public class GraphExistsProc extends CatalogProc {
         validateGraphName(graphName);
         return Stream.of(new GraphExistsResult(graphName, GraphStoreCatalog.exists(
             username(),
-            databaseId(),
+            executionContext().databaseId(),
             graphName
         )));
     }

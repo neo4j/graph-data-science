@@ -33,7 +33,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.function.Function;
+import java.util.function.LongToIntFunction;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -184,11 +184,6 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality.DegreeFunction>
         return degrees::get;
     }
 
-    @Override
-    public void release() {
-        graph = null;
-    }
-
     private static class NaturalWeightedDegreeTask implements Runnable {
 
         private final HugeDoubleArray result;
@@ -276,11 +271,11 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality.DegreeFunction>
 
         @Override
         public void run() {
-            Function<Long, Integer> degreeFn = graph::degree;
+            LongToIntFunction degreeFn = graph::degree;
 
             partition.consume(node -> {
                 // outgoing
-                degrees.getAndAdd(node, degreeFn.apply(node));
+                degrees.getAndAdd(node, degreeFn.applyAsInt(node));
                 // incoming
                 graph.forEachRelationship(node, (sourceNodeId, targetNodeId) -> {
                     degrees.getAndAdd(targetNodeId, 1);

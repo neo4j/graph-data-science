@@ -23,8 +23,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphdb.RelationshipType;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,7 +53,7 @@ class PathFactoryTest extends BaseProcTest {
 
             GraphDatabaseApiProxy.runInTransaction(db, tx -> {
                 var path = PathFactory.create(
-                    tx,
+                    tx::getNodeById,
                     nodeIds,
                     costs,
                     RelationshipType.withName("REL"),
@@ -86,7 +86,7 @@ class PathFactoryTest extends BaseProcTest {
 
             GraphDatabaseApiProxy.runInTransaction(db, tx -> {
                 var path = PathFactory.create(
-                    tx,
+                    tx::getNodeById,
                     nodeIds,
                     costs,
                     RelationshipType.withName("REL"),

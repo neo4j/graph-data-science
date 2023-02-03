@@ -21,8 +21,13 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProcTest.InvocationCountingTaskStore;
+import org.neo4j.gds.api.AlgorithmMetaDataSetter;
+import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
@@ -36,9 +41,11 @@ import org.neo4j.gds.gdl.GdlGraphs;
 import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
 import org.neo4j.gds.test.TestAlgoResultBuilder;
 import org.neo4j.gds.test.TestAlgorithm;
+import org.neo4j.gds.test.TestAlgorithmResult;
 import org.neo4j.gds.test.TestResult;
 import org.neo4j.gds.test.TestWriteConfig;
 import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.List;
 import java.util.Map;
@@ -67,7 +74,7 @@ class WriteProcCancellationTest extends BaseTest {
 
         try (var tx = db.beginTx()) {
 
-            var resultConsumer = new WriteNodePropertiesComputationResultConsumer<TestAlgorithm, TestAlgorithm, TestWriteConfig, TestResult>(
+            var resultConsumer = new WriteNodePropertiesComputationResultConsumer<TestAlgorithm, TestAlgorithmResult, TestWriteConfig, TestResult>(
                 (computationResult, executionContext) -> new TestAlgoResultBuilder(),
                 (computationResult) -> List.of(nodeProperty),
                 new NativeNodePropertiesExporterBuilder(TransactionContext.of(db, tx)),
@@ -91,22 +98,28 @@ class WriteProcCancellationTest extends BaseTest {
                 .build()
                 .build();
 
-            var computationResult = ImmutableComputationResult.<TestAlgorithm, TestAlgorithm, TestWriteConfig>builder()
+            var computationResult = ImmutableComputationResult.<TestAlgorithm, TestAlgorithmResult, TestWriteConfig>builder()
                 .graphStore(graphStore)
                 .graph(graphStore.getUnion())
                 .config(TestWriteConfig.of(CypherMapWrapper.create(Map.of("writeProperty", "writeProp"))))
                 .algorithm(algorithm)
-                .result(algorithm)
+                .result(algorithm.compute())
                 .computeMillis(0)
                 .preProcessingMillis(0)
                 .build();
 
             var executionContext = ImmutableExecutionContext
                 .builder()
-                .databaseService(db)
+                .databaseId(DatabaseId.of(db))
+                .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
                 .taskRegistryFactory(jobId -> new TaskRegistry("", taskStore, jobId))
                 .username("")
                 .log(Neo4jProxy.testLog())
+                .terminationMonitor(TerminationMonitor.EMPTY)
+                .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
+                .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
+                .nodeLookup(NodeLookup.EMPTY)
+                .callContext(ProcedureCallContext.EMPTY)
                 .build();
 
             assertThatThrownBy(() -> resultConsumer.consume(computationResult, executionContext))

@@ -23,6 +23,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
 import org.immutables.value.Value;
+import org.neo4j.gds.ImmutablePropertyMappings;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
@@ -123,7 +124,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
                 ))
                 .collect(Collectors.toList());
 
-            initFromPropertyMappings(PropertyMappings.of(propertyMappings));
+            initFromPropertyMappings(ImmutablePropertyMappings.of(propertyMappings));
 
             initializedFromResult = true;
         }
@@ -178,6 +179,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
         private RelationshipsBuilder createRelationshipsBuilder(RelationshipType relationshipType) {
             return GraphFactory.initRelationshipsBuilder()
                 .nodes(idMap)
+                .relationshipType(relationshipType)
                 .concurrency(cypherConfig.readConcurrency())
                 .propertyConfigs(propertyConfigs)
                 .orientation(Orientation.NATURAL)

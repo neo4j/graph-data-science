@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.splitting;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyCursor;
 import org.neo4j.gds.api.schema.Direction;
@@ -130,6 +131,8 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             Optional.of(-1L),
             skewedGraphStore.nodes(),
             skewedGraphStore.nodes(),
+            RelationshipType.of("SELECTED"),
+            RelationshipType.of("REMAINING"),
             4
         );
 
@@ -147,6 +150,8 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             Optional.of(-1L),
             multiGraphStore.nodes(),
             multiGraphStore.nodes(),
+            RelationshipType.of("SELECTED"),
+            RelationshipType.of("REMAINING"),
             4
         );
 
@@ -165,6 +170,8 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             Optional.of(-1L),
             graphStore.nodes(),
             graphStore.nodes(),
+            RelationshipType.of("SELECTED"),
+            RelationshipType.of("REMAINING"),
             4
         );
 
@@ -174,7 +181,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var remainingRelationships = result.remainingRels().build();
         // 2 positive selected reduces remaining
         assertEquals(3L, remainingRelationships.topology().elementCount());
-        assertEquals(Direction.DIRECTED, remainingRelationships.direction());
+        assertEquals(Direction.DIRECTED, remainingRelationships.relationshipSchemaEntry().direction());
         assertFalse(remainingRelationships.topology().isMultiGraph());
         assertThat(remainingRelationships.properties()).isNotEmpty();
         assertRelInGraph(remainingRelationships, graph);
@@ -199,7 +206,13 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             .build()
             .generate();
 
-        var splitter = new DirectedEdgeSplitter(Optional.of(42L), huuuuugeDenseGraph, huuuuugeDenseGraph, 4);
+        var splitter = new DirectedEdgeSplitter(Optional.of(42L),
+            huuuuugeDenseGraph,
+            huuuuugeDenseGraph,
+            RelationshipType.of("SELECTED"),
+            RelationshipType.of("REMAINING"),
+            4
+        );
         var splitResult = splitter.splitPositiveExamples(huuuuugeDenseGraph, 0.9, Optional.empty());
         var graph = GraphFactory.create(
             huuuuugeDenseGraph.idMap(),
@@ -224,7 +237,14 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void negativeEdgeSampling() {
-        var splitter = new DirectedEdgeSplitter(Optional.of(42L), graphStore.nodes(), graphStore.nodes(), 4);
+        var splitter = new DirectedEdgeSplitter(
+            Optional.of(42L),
+            graphStore.nodes(),
+            graphStore.nodes(),
+            RelationshipType.of("SELECTED"),
+            RelationshipType.of("REMAINING"),
+            4
+        );
 
         var sum = 0;
         for (int i = 0; i < 100; i++) {
@@ -243,6 +263,8 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             Optional.of(1337L),
             multiLabelGraphStore.getGraph(sourceNodeLabels),
             multiLabelGraphStore.getGraph(targetNodeLabels),
+            RelationshipType.of("SELECTED"),
+            RelationshipType.of("REMAINING"),
             4
         );
 
@@ -269,7 +291,14 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void samplesWithinBounds() {
-        var splitter = new DirectedEdgeSplitter(Optional.of(42L), graphStore.nodes(), graphStore.nodes(), 4);
+        var splitter = new DirectedEdgeSplitter(
+            Optional.of(42L),
+            graphStore.nodes(),
+            graphStore.nodes(),
+            RelationshipType.of("SELECTED"),
+            RelationshipType.of("REMAINING"),
+            4
+        );
 
         assertEquals(1, splitter.samplesPerNode(1, 100, 10));
         assertEquals(1, splitter.samplesPerNode(100, 1, 1));
@@ -277,7 +306,15 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void shouldPreserveRelationshipWeights() {
-        var splitter = new DirectedEdgeSplitter(Optional.of(42L), graphStore.nodes(), graphStore.nodes(), 4);
+        var splitter = new DirectedEdgeSplitter(
+            Optional.of(42L),
+            graphStore.nodes(),
+            graphStore.nodes(),
+            RelationshipType.of("SELECTED"),
+            RelationshipType.of("REMAINING"),
+            4
+        );
+
         EdgeSplitter.SplitResult split = splitter.splitPositiveExamples(graph, 0.01, Optional.of("foo"));
         var maybeProp = split.remainingRels().build().properties();
         assertThat(maybeProp).isPresent();

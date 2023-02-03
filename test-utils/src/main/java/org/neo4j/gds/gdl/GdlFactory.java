@@ -22,7 +22,6 @@ package org.neo4j.gds.gdl;
 import org.immutables.builder.Builder;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.DatabaseId;
@@ -31,12 +30,9 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
-import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.Username;
@@ -49,12 +45,13 @@ import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.ImmutablePropertyConfig;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
+import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlSupportPerMethodExtension;
+import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Element;
@@ -164,57 +161,14 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     }
 
     @Override
-    protected GraphSchema computeGraphSchema(Nodes nodes, RelationshipImportResult relationshipImportResult) {
-        var nodeProperties = nodes.properties();
-        var nodeSchema = NodeSchema.empty();
-        gdlHandler
-            .getVertices()
-            .forEach(vertex -> {
-                var labels = vertex.getLabels().stream().map(NodeLabel::of).collect(Collectors.toList());
-                if (labels.isEmpty()) {
-                    labels = List.of(NodeLabel.ALL_NODES);
-                }
-
-                labels.forEach(label -> vertex
-                    .getProperties()
-                    .forEach((propertyKey, propertyValue) -> nodeSchema
-                        .getOrCreateLabel(label)
-                        .addProperty(
-                            propertyKey,
-                            PropertySchema.of(
-                                propertyKey,
-                                nodeProperties.get(propertyKey).valueType(),
-                                nodeProperties.get(propertyKey).defaultValue(),
-                                nodeProperties.get(propertyKey).propertyState()
-                            )
-                    )
-                ));
-            });
-        // in case there were no properties add all labels
-        nodes.idMap().availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
-
-        var relationshipSchema = relationshipImportResult.importResults().entrySet().stream().reduce(
-            RelationshipSchema.empty(),
-            (unionSchema, entry) -> {
-                var relationshipType = entry.getKey();
-                var relationships = entry.getValue();
-                return unionSchema.union(relationships.relationshipSchema(relationshipType));
-            },
-            RelationshipSchema::union
-        );
-
-        return GraphSchema.of(
-            nodeSchema,
-            relationshipSchema,
-            Map.of()
-        );
-    }
-
-    @Override
     public CSRGraphStore build() {
         var nodes = loadNodes();
         var relationshipImportResult = loadRelationships(nodes.idMap());
-        var schema = computeGraphSchema(nodes, relationshipImportResult);
+        var schema = MutableGraphSchema.of(
+            nodes.schema(),
+            relationshipImportResult.relationshipSchema(),
+            Map.of()
+        );
 
         return new GraphStoreBuilder()
             .databaseId(databaseId)
@@ -230,7 +184,9 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(dimensions.highestPossibleNodeCount() - 1)
             .hasLabelInformation(true)
+            .hasProperties(true)
             .concurrency(1)
+            .propertyState(graphProjectConfig.propertyState())
             .build();
 
         gdlHandler.getVertices().forEach(vertex -> {
@@ -241,38 +197,23 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                     .filter(label -> !NodeLabel.ALL_NODES.name().equals(label))
                     .collect(Collectors.toList());
             }
-            nodesBuilder.addNode(
-                vertex.getId(),
-                NodeLabelTokens.of(labels)
-            );
-        });
 
-        var idMap = nodesBuilder.build().idMap();
-
-        return Nodes.of(idMap, loadNodeProperties(idMap), graphProjectConfig.propertyState());
-    }
-
-    private Map<PropertyMapping, NodePropertyValues> loadNodeProperties(IdMap idMap) {
-        var propertyBuilders = new HashMap<PropertyMapping, NodePropertiesFromStoreBuilder>();
-
-        gdlHandler.getVertices().forEach(vertex -> vertex
-            .getProperties()
-            .forEach((propertyKey, propertyValue) -> {
+            Map<String, Value> propertyValues = new HashMap<>();
+            vertex.getProperties().forEach((propertyKey, propertyValue) -> {
                 if (propertyValue instanceof List) {
                     propertyValue = convertListProperty((List<?>) propertyValue);
                 }
+                propertyValues.put(propertyKey, Values.of(propertyValue));
+            });
 
-                propertyBuilders.computeIfAbsent(PropertyMapping.of(propertyKey), (key) ->
-                    NodePropertiesFromStoreBuilder.of(
-                        DefaultValue.DEFAULT,
-                        1
-                    )).set(vertex.getId(), Values.of(propertyValue));
-            }));
+            nodesBuilder.addNode(
+                vertex.getId(),
+                NodeLabelTokens.of(labels),
+                PropertyValues.of(propertyValues)
+            );
+        });
 
-        return propertyBuilders
-            .entrySet()
-            .stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().build(idMap)));
+        return nodesBuilder.build();
     }
 
     @NotNull
@@ -328,7 +269,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         var propertyKeysByRelType = new HashMap<RelationshipType, List<String>>();
 
         Direction orientation = Direction.fromOrientation(graphProjectConfig.orientation());
-        var relationshipSchema = RelationshipSchema.empty();
+        var relationshipSchema = MutableRelationshipSchema.empty();
         gdlHandler.getEdges().forEach(edge -> {
             var relType = RelationshipType.of(edge.getLabel());
             var entry = relationshipSchema.getOrCreateRelationshipType(relType, orientation);
@@ -399,6 +340,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
                     return GraphFactory.initRelationshipsBuilder()
                         .nodes(idMap)
+                        .relationshipType(relTypeAndProperty.getKey())
                         .orientation(graphProjectConfig.orientation())
                         .aggregation(graphProjectConfig.aggregation())
                         .indexInverse(graphProjectConfig.indexInverse())

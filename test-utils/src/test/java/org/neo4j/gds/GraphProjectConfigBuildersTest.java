@@ -58,9 +58,7 @@ class GraphProjectConfigBuildersTest {
             Arguments.arguments(
                 new StoreConfigBuilder().jobId(jobId).build(),
                 ImmutableGraphProjectFromStoreConfig.builder().username("").graphName("")
-                    .nodeProjections(NodeProjections.builder()
-                        .putProjection(ALL_NODES, NodeProjection.all())
-                        .build())
+                    .nodeProjections(NodeProjections.single(ALL_NODES, NodeProjection.all()))
                     .relationshipProjections(ImmutableRelationshipProjections.builder()
                         .putProjection(ALL_RELATIONSHIPS, RelationshipProjection.ALL)
                         .build())
@@ -72,9 +70,7 @@ class GraphProjectConfigBuildersTest {
             Arguments.arguments(
                 new StoreConfigBuilder().addNodeLabel("Foo").addRelationshipType("BAR").jobId(jobId).build(),
                 ImmutableGraphProjectFromStoreConfig.builder().username("").graphName("")
-                    .nodeProjections(NodeProjections.builder()
-                        .putProjection(NodeLabel.of("Foo"), NodeProjection.of("Foo", PropertyMappings.of()))
-                        .build())
+                    .nodeProjections(NodeProjections.single(NodeLabel.of("Foo"), NodeProjection.of("Foo")))
                     .relationshipProjections(ImmutableRelationshipProjections.builder()
                         .putProjection(
                             RelationshipType.of("BAR"),
@@ -93,9 +89,7 @@ class GraphProjectConfigBuildersTest {
                     .jobId(jobId)
                     .build(),
                 ImmutableGraphProjectFromStoreConfig.builder().username("").graphName("")
-                    .nodeProjections(NodeProjections.builder()
-                        .putProjection(NodeLabel.of("Foo"), NodeProjection.of("Foo", PropertyMappings.of()))
-                        .build())
+                    .nodeProjections(NodeProjections.single(NodeLabel.of("Foo"), NodeProjection.of("Foo")))
                     .relationshipProjections(ImmutableRelationshipProjections.builder()
                         .putProjection(
                             RelationshipType.of("BAR"),
@@ -115,9 +109,7 @@ class GraphProjectConfigBuildersTest {
                     .jobId(jobId)
                     .build(),
                 ImmutableGraphProjectFromStoreConfig.builder().username("").graphName("")
-                    .nodeProjections(NodeProjections.builder()
-                        .putProjection(NodeLabel.of("Foo"), NodeProjection.of("Foo", PropertyMappings.of()))
-                        .build())
+                    .nodeProjections(NodeProjections.single(NodeLabel.of("Foo"), NodeProjection.of("Foo")))
                     .relationshipProjections(ImmutableRelationshipProjections.builder()
                         .putProjection(
                             RelationshipType.of("BAR"),
@@ -138,9 +130,7 @@ class GraphProjectConfigBuildersTest {
                     .jobId(jobId)
                     .build(),
                 ImmutableGraphProjectFromStoreConfig.builder().username("").graphName("")
-                    .nodeProjections(NodeProjections.builder()
-                        .putProjection(NodeLabel.of("Foo"), NodeProjection.of("Foo", PropertyMappings.of()))
-                        .build())
+                    .nodeProjections(NodeProjections.single(NodeLabel.of("Foo"), NodeProjection.of("Foo")))
                     .relationshipProjections(ImmutableRelationshipProjections.builder()
                         .putProjection(
                             RelationshipType.of("BAR"),
@@ -168,15 +158,13 @@ class GraphProjectConfigBuildersTest {
                     .jobId(jobId)
                     .build(),
                 ImmutableGraphProjectFromStoreConfig.builder().username("").graphName("")
-                    .nodeProjections(NodeProjections.builder()
-                        .putProjection(
+                    .nodeProjections(NodeProjections.single(
                             NodeLabel.of("Foo"),
                             NodeProjection.builder()
                                 .label("Foo")
                                 .addProperty(PropertyMapping.of("nProp", DefaultValue.of(23.0D)))
                                 .build()
-                        )
-                        .build())
+                        ))
                     .relationshipProjections(ImmutableRelationshipProjections.builder()
                         .putProjection(
                             RelationshipType.of("BAR"),

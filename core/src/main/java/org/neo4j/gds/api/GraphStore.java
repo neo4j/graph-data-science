@@ -163,10 +163,7 @@ public interface GraphStore {
 
     RelationshipProperty relationshipPropertyValues(RelationshipType relationshipType, String propertyKey);
 
-    void addRelationshipType(
-        RelationshipType relationshipType,
-        SingleTypeRelationships relationships
-    );
+    void addRelationshipType(SingleTypeRelationships relationships);
 
     void addInverseIndex(
         RelationshipType relationshipType,
@@ -240,8 +237,4 @@ public interface GraphStore {
         RelationshipType relationshipType,
         Collection<String> propertyKeys
     );
-
-    void canRelease(boolean canRelease);
-
-    void release();
 }

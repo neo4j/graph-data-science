@@ -21,13 +21,13 @@ package org.neo4j.gds.catalog;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphStreamNodePropertiesConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.executor.ProcPreconditions;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -154,14 +154,21 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
 
         var subGraph = graphStore.getGraph(validNodeLabels, graphStore.relationshipTypes(), Optional.empty());
         var nodePropertyKeysAndValues = config.nodeProperties().stream().map(propertyKey -> Pair.of(propertyKey, subGraph.nodeProperties(propertyKey))).collect(Collectors.toList());
-        var usesPropertyNameColumn = callContext.outputFields().anyMatch(field -> field.equals("nodeProperty"));
+        var usesPropertyNameColumn = executionContext().callContext().outputFields().anyMatch(field -> field.equals("nodeProperty"));
 
         var task = Tasks.leaf(
             "Graph :: NodeProperties :: Stream",
             subGraph.nodeCount() * nodePropertyKeysAndValues.size()
         );
 
-        var taskProgressTracker = new TaskProgressTracker(task, log, config.concurrency(), new JobId(), taskRegistryFactory, userLogRegistryFactory);
+        var taskProgressTracker = new TaskProgressTracker(
+            task,
+            executionContext().log(),
+            config.concurrency(),
+            new JobId(),
+            executionContext().taskRegistryFactory(),
+            executionContext().userLogRegistryFactory()
+        );
         taskProgressTracker.beginSubTask();
 
         deprecationWarning.ifPresent(taskProgressTracker::logWarning);

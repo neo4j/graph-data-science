@@ -207,13 +207,14 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
         RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
+            .relationshipType(RelationshipType.of("NEW_REL"))
             .orientation(Orientation.NATURAL)
             .addPropertyConfig(GraphFactory.PropertyConfig.of("newRelProp3"))
             .build();
 
         relImporter.addFromInternal(0, 1, 23D);
 
-        graphStore.addRelationshipType(RelationshipType.of("NEW_REL"), relImporter.build());
+        graphStore.addRelationshipType(relImporter.build());
 
         String graphStreamQuery = formatWithLocale(
             "CALL gds.graph.relationshipProperties.stream(" +
@@ -283,17 +284,19 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
     @Test
     void streamMutatedNodeProperty() {
+
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), TEST_GRAPH_SAME_PROPERTIES).graphStore();
 
         RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
+            .relationshipType(RelationshipType.of("NEW_REL"))
             .orientation(Orientation.NATURAL)
             .addPropertyConfig(GraphFactory.PropertyConfig.of("newRelProp3"))
             .build();
 
         relImporter.addFromInternal(0, 1, 23D);
 
-        graphStore.addRelationshipType(RelationshipType.of("NEW_REL"), relImporter.build());
+        graphStore.addRelationshipType(relImporter.build());
 
         String graphStreamQuery = formatWithLocale(
             "CALL gds.graph.relationshipProperty.stream(" +

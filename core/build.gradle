@@ -27,6 +27,7 @@ dependencies {
     implementation project(':licensing')
     implementation project(':graph-schema-api')
     implementation project(':memory-usage')
+    implementation project(':neo4j-api')
     implementation project(':open-licensing')
     implementation project(':string-formatting')
     implementation project(':collections')

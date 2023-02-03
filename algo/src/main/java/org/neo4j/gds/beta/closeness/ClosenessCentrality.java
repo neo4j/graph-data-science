@@ -100,9 +100,6 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
         return ImmutableClosenessCentralityResult.of(centralities);
     }
 
-    @Override
-    public void release() {}
-
     private void computeFarness() {
         progressTracker.beginSubTask();
         final BfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {

@@ -71,17 +71,7 @@ public abstract class AlgoBaseProc<
         String graphName,
         Map<String, Object> configuration
     ) {
-        ProcPreconditions.check();
-        return compute(graphName, configuration, true, true);
-    }
-
-    protected ComputationResult<ALGO, ALGO_RESULT, CONFIG> compute(
-        String graphName,
-        Map<String, Object> configuration,
-        boolean releaseAlgorithm,
-        boolean releaseTopology
-    ) {
-        return procedureExecutor().compute(graphName, configuration, releaseAlgorithm, releaseTopology);
+        return procedureExecutor().compute(graphName, configuration);
     }
 
     /**
@@ -113,7 +103,7 @@ public abstract class AlgoBaseProc<
     }
 
     @Override
-    public ValidationConfiguration<CONFIG> validationConfig() {
+    public ValidationConfiguration<CONFIG> validationConfig(ExecutionContext executionContext) {
         return ValidationConfiguration.empty();
     }
 
@@ -121,9 +111,11 @@ public abstract class AlgoBaseProc<
         var pipelineSpec = new AlgoBaseExecutorSpec();
 
         var name = name();
+        var executionContext = executionContext();
         var factory = algorithmFactory();
         var configFunction = newConfigFunction();
-        var validationConfig = validationConfig();
+        var validationConfig = validationConfig(executionContext);
+        var releaseProgressTask = releaseProgressTask();
         var algoSpec = new AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ComputationResult<ALGO, ALGO_RESULT, CONFIG>, AlgorithmFactory<?, ALGO, CONFIG>>() {
             @Override
             public String name() {
@@ -146,15 +138,20 @@ public abstract class AlgoBaseProc<
             }
 
             @Override
-            public ValidationConfiguration<CONFIG> validationConfig() {
+            public ValidationConfiguration<CONFIG> validationConfig(ExecutionContext executionContext) {
                 return validationConfig;
+            }
+
+            @Override
+            public boolean releaseProgressTask() {
+                return releaseProgressTask;
             }
         };
 
         return new ProcedureExecutor<>(
             algoSpec,
             pipelineSpec,
-            executionContext()
+            executionContext
         );
     }
 
@@ -181,7 +178,7 @@ public abstract class AlgoBaseProc<
                     executionContext.databaseId(),
                     executionContext.isGdsAdmin()
                 ),
-                new MemoryUsageValidator(executionContext.log(), executionContext.databaseService())
+                new MemoryUsageValidator(executionContext.log(), executionContext.dependencyResolver())
             );
         }
     }

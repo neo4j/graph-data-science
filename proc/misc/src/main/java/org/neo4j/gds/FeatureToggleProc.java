@@ -97,19 +97,6 @@ public final class FeatureToggleProc {
     }
 
     @Internal
-    @Procedure("gds.features.maxArrayLengthShift")
-    @Description("Toggle how large arrays are allowed to get before they are being paged; value is a power of two.")
-    public void maxArrayLengthShift(@Name(value = "maxArrayLengthShift") long maxArrayLengthShift) {
-        if (maxArrayLengthShift <= 0 || maxArrayLengthShift >= Integer.SIZE) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Invalid value for maxArrayLengthShift, must be in (0, %d)",
-                Integer.SIZE
-            ));
-        }
-        GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.set((int) maxArrayLengthShift);
-    }
-
-    @Internal
     @Procedure("gds.features.pagesPerThread")
     @Description("Toggle how many pages per thread are being used by the loader.")
     public void pagesPerThread(@Name(value = "pagesPerThread") long pagesPerThread) {
@@ -165,14 +152,6 @@ public final class FeatureToggleProc {
     public Stream<FeatureState> resetEnableArrowDatabaseImport() {
         GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT.reset();
         return Stream.of(new FeatureState(GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT.isEnabled()));
-    }
-
-    @Internal
-    @Procedure("gds.features.maxArrayLengthShift.reset")
-    @Description("Set the value of the max array size before paging to the default. That value is returned.")
-    public Stream<FeatureValue> resetMaxArrayLengthShift() {
-        GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.set(GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT_DEFAULT_SETTING);
-        return Stream.of(new FeatureValue(GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT_DEFAULT_SETTING));
     }
 
     @Internal

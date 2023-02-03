@@ -53,11 +53,6 @@ final class ModularityColorArray {
         return sortedNodesByColor.get(indexId);
     }
 
-    void release() {
-        sortedNodesByColor.release();
-        colorCoordinates = null;
-    }
-
     static ModularityColorArray create(HugeLongArray colors, BitSet usedColors) {
         long nodeCount = colors.size();
         var sortedNodesByColor = HugeLongArray.newArray(nodeCount);

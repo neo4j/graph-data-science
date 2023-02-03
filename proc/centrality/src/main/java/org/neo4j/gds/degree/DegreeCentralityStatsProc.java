@@ -82,7 +82,7 @@ public class DegreeCentralityStatsProc extends StatsProc<DegreeCentrality, Degre
         ExecutionContext executionContext
     ) {
         return DegreeCentralityProc.resultBuilder(
-            new StatsResult.Builder(callContext, computeResult.config().concurrency()),
+            new StatsResult.Builder(executionContext.callContext(), computeResult.config().concurrency()),
             computeResult
         );
     }

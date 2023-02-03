@@ -74,7 +74,10 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
             .propertySchemasFor(fromRelationshipType);
         var propertyKeys = propertySchemas.stream().map(PropertySchema::key).collect(Collectors.toList());
 
-        var relationshipsBuilder = initializeRelationshipsBuilder(propertySchemas);
+        var relationshipsBuilder = initializeRelationshipsBuilder(
+            RelationshipType.of(config.mutateRelationshipType()),
+            propertySchemas
+        );
 
         var tasks = createTasks(fromRelationshipType, propertyKeys, relationshipsBuilder);
 
@@ -101,8 +104,12 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
     }
 
     @NotNull
-    private RelationshipsBuilder initializeRelationshipsBuilder(List<RelationshipPropertySchema> propertySchemas) {
+    private RelationshipsBuilder initializeRelationshipsBuilder(
+        RelationshipType relationshipType,
+        List<RelationshipPropertySchema> propertySchemas
+    ) {
         RelationshipsBuilderBuilder relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
+            .relationshipType(relationshipType)
             .concurrency(config.concurrency())
             .nodes(graphStore.nodes())
             .executorService(executorService)
@@ -158,11 +165,6 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
             taskCreator,
             Optional.empty()
         );
-    }
-
-    @Override
-    public void release() {
-
     }
 
     private static final class ToUndirectedTaskWithSingleProperty implements Runnable {

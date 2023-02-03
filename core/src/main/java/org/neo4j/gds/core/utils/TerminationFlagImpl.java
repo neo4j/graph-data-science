@@ -19,22 +19,22 @@
  */
 package org.neo4j.gds.core.utils;
 
-import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.gds.api.TerminationMonitor;
 
 public class TerminationFlagImpl implements TerminationFlag {
 
-    private final KernelTransaction transaction;
+    private final TerminationMonitor terminationMonitor;
 
     private long interval = 10_000;
 
     private volatile long lastCheck = 0;
     private volatile boolean running = true;
 
-    public TerminationFlagImpl(KernelTransaction transaction) {
-        this.transaction = transaction;
+    TerminationFlagImpl(TerminationMonitor terminationMonitor) {
+        this.terminationMonitor = terminationMonitor;
     }
 
-    public TerminationFlagImpl withCheckInterval(long interval) {
+    TerminationFlagImpl withCheckInterval(long interval) {
         this.interval = interval;
         return this;
     }
@@ -43,7 +43,7 @@ public class TerminationFlagImpl implements TerminationFlag {
     public boolean running() {
         final long currentTime = System.currentTimeMillis();
         if (currentTime > lastCheck + interval) {
-            if (transaction.getReasonIfTerminated().isPresent() || !transaction.isOpen()) {
+            if (terminationMonitor.isTerminated()) {
                 running = false;
             }
             lastCheck = currentTime;

@@ -89,11 +89,6 @@ public class LabelPropagation extends Algorithm<LabelPropagationResult> {
     }
 
     @Override
-    public void release() {
-        graph = null;
-    }
-
-    @Override
     public LabelPropagationResult compute() {
         if (config.maxIterations() <= 0L) {
             throw new IllegalArgumentException("Must iterate at least 1 time");

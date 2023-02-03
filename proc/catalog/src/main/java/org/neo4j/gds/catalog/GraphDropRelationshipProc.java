@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.config.DeleteRelationshipsConfig;
 import org.neo4j.gds.core.loading.DeletionResult;
@@ -27,6 +26,7 @@ import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.executor.ProcPreconditions;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -74,11 +74,11 @@ public class GraphDropRelationshipProc extends CatalogProc {
         var task = Tasks.leaf("Graph :: Relationships :: Drop", 1);
         var progressTracker = new TaskProgressTracker(
             task,
-            log,
+            executionContext().log(),
             1,
             new JobId(),
-            taskRegistryFactory,
-            userLogRegistryFactory
+            executionContext().taskRegistryFactory(),
+            executionContext().userLogRegistryFactory()
         );
 
         deprecationWarning.ifPresent(progressTracker::logWarning);

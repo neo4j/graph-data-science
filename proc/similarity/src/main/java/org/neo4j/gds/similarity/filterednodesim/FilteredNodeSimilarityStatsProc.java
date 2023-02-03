@@ -46,7 +46,7 @@ public class FilteredNodeSimilarityStatsProc extends BaseProc {
         return new ProcedureExecutor<>(
             new FilteredNodeSimilarityStatsSpec(),
             executionContext()
-        ).compute(graphName, configuration, true, true);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = "gds.alpha.nodeSimilarity.filtered.stats.estimate", mode = READ)

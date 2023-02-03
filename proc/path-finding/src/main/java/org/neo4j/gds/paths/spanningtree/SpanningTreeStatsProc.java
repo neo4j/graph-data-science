@@ -20,14 +20,9 @@
 package org.neo4j.gds.paths.spanningtree;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.RelationshipExporter;
-import org.neo4j.gds.core.write.RelationshipExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -40,8 +35,6 @@ import static org.neo4j.procedure.Mode.READ;
 public class SpanningTreeStatsProc extends BaseProc {
     static final String procedure = "gds.beta.spanningTree.stats";
     static final String DESCRIPTION = SpanningTreeWriteProc.DESCRIPTION;
-    @Context
-    public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
 
     @Procedure(value = procedure, mode = READ)
     @Description(DESCRIPTION)
@@ -52,7 +45,7 @@ public class SpanningTreeStatsProc extends BaseProc {
         return new ProcedureExecutor<>(
             new SpanningTreeStatsSpec(),
             executionContext()
-        ).compute(graphName, configuration, true, true);
+        ).compute(graphName, configuration);
     }
 
     @Procedure(value = procedure + ".estimate", mode = READ)
@@ -67,21 +60,4 @@ public class SpanningTreeStatsProc extends BaseProc {
             executionContext()
         ).computeEstimate(graphName, configuration);
     }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return ImmutableExecutionContext
-            .builder()
-            .databaseService(databaseService)
-            .log(log)
-            .procedureTransaction(procedureTransaction)
-            .transaction(transaction)
-            .callContext(callContext)
-            .userLogRegistryFactory(userLogRegistryFactory)
-            .taskRegistryFactory(taskRegistryFactory)
-            .username(username())
-            .relationshipExporterBuilder(relationshipExporterBuilder)
-            .build();
-    }
-
 }

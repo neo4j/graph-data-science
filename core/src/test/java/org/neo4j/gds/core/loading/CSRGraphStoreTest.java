@@ -68,12 +68,13 @@ class CSRGraphStoreTest {
 
         RelationshipsBuilder relBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
+            .relationshipType(RelationshipType.of("REL"))
             .orientation(Orientation.UNDIRECTED)
             .build();
 
         relBuilder.add(gdlFactory.nodeId("a"), gdlFactory.nodeId("d"));
 
-        graphStore.addRelationshipType(RelationshipType.of("NEW"), relBuilder.build());
+        graphStore.addRelationshipType(relBuilder.build());
 
         assertThat(graphStore.relationshipCount()).isEqualTo(6);
         assertThat(graphStore.schema().relationshipSchema().isUndirected()).isEqualTo(true);
@@ -95,12 +96,13 @@ class CSRGraphStoreTest {
 
         RelationshipsBuilder relBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
+            .relationshipType(RelationshipType.of("NEW"))
             .orientation(Orientation.NATURAL)
             .build();
 
         relBuilder.add(gdlFactory.nodeId("a"), gdlFactory.nodeId("d"));
 
-        graphStore.addRelationshipType(RelationshipType.of("NEW"), relBuilder.build());
+        graphStore.addRelationshipType(relBuilder.build());
 
         assertThat(graphStore.relationshipCount()).isEqualTo(3);
         assertThat(graphStore.schema().relationshipSchema().isUndirected()).isEqualTo(false);
@@ -166,12 +168,13 @@ class CSRGraphStoreTest {
 
         RelationshipsBuilder relBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
+            .relationshipType(RelationshipType.of("REL"))
             .orientation(addedOrientation)
             .build();
 
         relBuilder.add(gdlFactory.nodeId("a"), gdlFactory.nodeId("d"));
 
-        graphStore.addRelationshipType(RelationshipType.of("NEW"), relBuilder.build());
+        graphStore.addRelationshipType(relBuilder.build());
 
         assertThat(graphStore.relationshipCount()).isEqualTo(totalRelCount);
         assertThat(graphStore.schema().relationshipSchema().isUndirected()).isEqualTo(false);

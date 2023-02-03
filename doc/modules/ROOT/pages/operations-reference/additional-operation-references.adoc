@@ -23,10 +23,10 @@
 | xref:common-usage/debug-sysinfo.adoc[Status of the system]                                   | `gds.debug.sysInfo`
 | xref:management-ops/create-cypher-db.adoc[Create an impermanent database backed by a projected graph] | `gds.alpha.create.cypherdb`
 | xref:common-usage/monitoring-system.adoc[Get an overview of the system's workload and available resources] | `gds.alpha.systemMonitor`
-| Back-up graphs and models to disk             | `gds.alpha.backup`
-| Restore persisted graphs and models to memory | `gds.alpha.restore`
-| xref:management-ops/defaults-and-limits.adoc[List configured defaults] | `gds.alpha.config.defaults.list`
-| xref:management-ops/defaults-and-limits.adoc[Configure a default] | `gds.alpha.config.defaults.set`
-| xref:management-ops/defaults-and-limits.adoc#_limits_on_configuration_values[List configured limits] | `gds.alpha.config.limits.list`
-| xref:management-ops/defaults-and-limits.adoc#_limits_on_configuration_values[Configure a limit] | `gds.alpha.config.limits.set`
+| xref:management-ops/backup-restore.adoc[Back-up graphs and models to disk]             | `gds.alpha.backup`
+| xref:management-ops/backup-restore.adoc[Restore persisted graphs and models to memory] | `gds.alpha.restore`
+| xref:production-deployment/defaults-and-limits.adoc[List configured defaults] | `gds.alpha.config.defaults.list`
+| xref:production-deployment/defaults-and-limits.adoc[Configure a default] | `gds.alpha.config.defaults.set`
+| xref:production-deployment/defaults-and-limits.adoc#_limits_on_configuration_values[List configured limits] | `gds.alpha.config.limits.list`
+| xref:production-deployment/defaults-and-limits.adoc#_limits_on_configuration_values[Configure a limit] | `gds.alpha.config.limits.set`
 |===

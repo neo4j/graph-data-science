@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.collections;
 
-import java.util.stream.Stream;
-
 /**
  * A long-indexable version of a list of byte arrays that can
  * contain more than 2bn. elements and is growable.
@@ -36,7 +34,7 @@ import java.util.stream.Stream;
     valueType = byte[].class,
     forAllConsumerType = LongByteArrayConsumer.class
 )
-public interface HugeSparseByteArrayList {
+public interface HugeSparseByteArrayList extends HugeSparseObjectArrayList<byte[], LongByteArrayConsumer> {
 
     static HugeSparseByteArrayList of(byte[] defaultValue) {
         return of(defaultValue, 0);
@@ -45,43 +43,4 @@ public interface HugeSparseByteArrayList {
     static HugeSparseByteArrayList of(byte[] defaultValue, long initialCapacity) {
         return new HugeSparseByteArrayListSon(defaultValue, initialCapacity);
     }
-
-    /**
-     * @return the current maximum number of values that can be stored in the list
-     */
-    long capacity();
-
-    /**
-     * @return true, iff the value at the given index is not the default value
-     */
-    boolean contains(long index);
-
-    /**
-     * @return the byte array at the given index
-     */
-    byte[] get(long index);
-
-    /**
-     * Sets the value at the given index.
-     */
-    void set(long index, byte[] value);
-
-    /**
-     * Applies to given consumer to all non-default values stored in the list.
-     */
-    void forAll(LongByteArrayConsumer consumer);
-
-    /**
-     * Returns an iterator that consumes the underlying pages of this list.
-     * Once the iterator has been consumed, the list is empty and will return
-     * the default value for each index.
-     */
-    DrainingIterator<byte[][]> drainingIterator();
-
-    /**
-     * Returns a stream of the underlying data.
-     * The stream will skip over null pages and will otherwise stream over
-     * the full page, potentially containing default values.
-     */
-    Stream<byte[]> stream();
 }

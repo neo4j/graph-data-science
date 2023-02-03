@@ -37,6 +37,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.LongToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -235,7 +236,7 @@ class PartitionUtilsTest {
 
 
         int[] weights = {1, 6, 6, 1, 1};
-        Function<Long, Integer> weightFunction = x -> weights[x.intValue()];
+        LongToIntFunction weightFunction = x -> weights[(int) x];
         var partitions = PartitionUtils.customDegreePartitionWithBatchSize(
             graph,
             3,
@@ -271,7 +272,7 @@ class PartitionUtilsTest {
 
 
         int[] weights = {1, 6, 6, 1, 1};
-        Function<Long, Integer> weightFunction = x -> weights[x.intValue()];
+        LongToIntFunction weightFunction = x -> weights[(int) x];
         var partitions = PartitionUtils.customDegreePartitionWithBatchSize(
             graph,
             3,

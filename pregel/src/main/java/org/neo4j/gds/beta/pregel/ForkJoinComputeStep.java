@@ -43,8 +43,9 @@ public final class ForkJoinComputeStep<
 
     private final InitFunction<CONFIG, INIT_CONTEXT> initFunction;
     private final ComputeFunction<CONFIG, COMPUTE_CONTEXT> computeFunction;
-    private final Supplier<INIT_CONTEXT> initContext;
-    private final Supplier<COMPUTE_CONTEXT> computeContext;
+    private final Supplier<INIT_CONTEXT> initContextSupplier;
+    private final Supplier<COMPUTE_CONTEXT> computeContextSupplier;
+    private final COMPUTE_CONTEXT computeContext;
     private final NodeValue nodeValue;
     private final HugeAtomicBitSet voteBits;
     private final Messenger<ITERATOR> messenger;
@@ -56,8 +57,8 @@ public final class ForkJoinComputeStep<
     ForkJoinComputeStep(
         InitFunction<CONFIG, INIT_CONTEXT> initFunction,
         ComputeFunction<CONFIG, COMPUTE_CONTEXT> computeFunction,
-        Supplier<INIT_CONTEXT> initContext,
-        Supplier<COMPUTE_CONTEXT> computeContext,
+        Supplier<INIT_CONTEXT> initContextSupplier,
+        Supplier<COMPUTE_CONTEXT> computeContextSupplier,
         MutableInt iteration,
         Partition nodeBatch,
         NodeValue nodeValue,
@@ -70,8 +71,8 @@ public final class ForkJoinComputeStep<
         super(parent);
         this.initFunction = initFunction;
         this.computeFunction = computeFunction;
-        this.initContext = initContext;
-        this.computeContext = computeContext;
+        this.initContextSupplier = initContextSupplier;
+        this.computeContextSupplier = computeContextSupplier;
         this.iteration = iteration;
         this.voteBits = voteBits;
         this.nodeBatch = nodeBatch;
@@ -79,6 +80,7 @@ public final class ForkJoinComputeStep<
         this.messenger = messenger;
         this.hasSentMessage = sentMessage;
         this.progressTracker = progressTracker;
+        this.computeContext = computeContextSupplier.get();
     }
 
     @Override
@@ -99,8 +101,8 @@ public final class ForkJoinComputeStep<
             var leftTask = new ForkJoinComputeStep<>(
                 initFunction,
                 computeFunction,
-                initContext,
-                computeContext,
+                initContextSupplier,
+                computeContextSupplier,
                 iteration,
                 leftBatch,
                 nodeValue,
@@ -119,6 +121,7 @@ public final class ForkJoinComputeStep<
             this.compute();
         } else {
             computeBatch();
+            hasSentMessage.compareAndSet(false, computeContext.hasSentMessage());
             tryComplete();
         }
     }
@@ -155,12 +158,12 @@ public final class ForkJoinComputeStep<
 
     @Override
     public INIT_CONTEXT initContext() {
-        return initContext.get();
+        return initContextSupplier.get();
     }
 
     @Override
     public COMPUTE_CONTEXT computeContext() {
-        return computeContext.get();
+        return computeContext;
     }
 
     @Override

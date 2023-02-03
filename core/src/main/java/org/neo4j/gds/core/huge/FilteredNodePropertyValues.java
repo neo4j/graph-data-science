@@ -136,13 +136,6 @@ public abstract class FilteredNodePropertyValues implements NodePropertyValues {
     }
 
     @Override
-    public long release() {
-        long releasedFromProps = properties.release();
-        graph = null;
-        return releasedFromProps;
-    }
-
-    @Override
     public long size() {
         return Math.min(properties.size(), graph.nodeCount());
     }

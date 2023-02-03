@@ -382,11 +382,6 @@ public class Leiden extends Algorithm<LeidenResult> {
         );
     }
 
-    @Override
-    public void release() {
-
-    }
-
     private double[] resizeModularitiesArray(int iteration) {
         double[] resizedModularities = new double[iteration];
         if (iteration < maxIterations) {

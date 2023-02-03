@@ -52,7 +52,6 @@ public class ConductanceStreamProc extends StreamProc<Conductance, Conductance.R
         );
 
         if (result.isGraphEmpty()) {
-            result.graph().release();
             return Stream.empty();
         }
 

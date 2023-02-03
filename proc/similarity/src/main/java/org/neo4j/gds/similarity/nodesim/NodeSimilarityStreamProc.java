@@ -84,7 +84,6 @@ public class NodeSimilarityStreamProc extends StreamProc<NodeSimilarity, NodeSim
             Graph graph = computationResult.graph();
 
             if (computationResult.isGraphEmpty()) {
-                graph.release();
                 return Stream.empty();
             }
 

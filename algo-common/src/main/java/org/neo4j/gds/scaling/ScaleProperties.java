@@ -136,9 +136,6 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
         }
     }
 
-    @Override
-    public void release() {}
-
     @ValueClass
     interface Result {
         HugeObjectArray<double[]> scaledProperties();

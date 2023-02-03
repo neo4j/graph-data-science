@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.collections;
 
-import java.util.stream.Stream;
-
 /**
  * A long-indexable version of a list of double arrays that can
  * contain more than 2bn. elements and is growable.
@@ -36,7 +34,7 @@ import java.util.stream.Stream;
     valueType = double[].class,
     forAllConsumerType = LongDoubleArrayConsumer.class
 )
-public interface HugeSparseDoubleArrayList {
+public interface HugeSparseDoubleArrayList extends HugeSparseObjectArrayList<double[], LongDoubleArrayConsumer> {
 
     static HugeSparseDoubleArrayList of(double[] defaultValue) {
         return of(defaultValue, 0);
@@ -45,43 +43,4 @@ public interface HugeSparseDoubleArrayList {
     static HugeSparseDoubleArrayList of(double[] defaultValue, long initialCapacity) {
         return new HugeSparseDoubleArrayListSon(defaultValue, initialCapacity);
     }
-
-    /**
-     * @return the current maximum number of values that can be stored in the list
-     */
-    long capacity();
-
-    /**
-     * @return true, iff the value at the given index is not the default value
-     */
-    boolean contains(long index);
-
-    /**
-     * @return the long array at the given index
-     */
-    double[] get(long index);
-
-    /**
-     * Sets the value at the given index.
-     */
-    void set(long index, double[] value);
-
-    /**
-     * Applies to given consumer to all non-default values stored in the list.
-     */
-    void forAll(LongDoubleArrayConsumer consumer);
-
-    /**
-     * Returns an iterator that consumes the underlying pages of this list.
-     * Once the iterator has been consumed, the list is empty and will return
-     * the default value for each index.
-     */
-    DrainingIterator<double[][]> drainingIterator();
-
-    /**
-     * Returns a stream of the underlying data.
-     * The stream will skip over null pages and will otherwise stream over
-     * the full page, potentially containing default values.
-     */
-    Stream<double[]> stream();
 }

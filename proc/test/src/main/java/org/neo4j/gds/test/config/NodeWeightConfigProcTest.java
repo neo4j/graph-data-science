@@ -24,6 +24,7 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.NodeWeightConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.validation.Validator;
 import org.neo4j.gds.gdl.GdlFactory;
 
@@ -69,7 +70,7 @@ public final class NodeWeightConfigProcTest {
     ) {
         var graphStore = GdlFactory.of("(:A {a: 1})").build();
         return DynamicTest.dynamicTest("validateNodeWeightProperty", () -> {
-            var validator = new Validator<>(proc.validationConfig());
+            var validator = new Validator<>(proc.validationConfig(ExecutionContext.EMPTY));
             assertThatThrownBy(() -> validator.validateConfigWithGraphStore(
                     graphStore,
                     null,
@@ -89,7 +90,7 @@ public final class NodeWeightConfigProcTest {
     ) {
         var graphStore = GdlFactory.of("(a:Node), (b:Ignore {foo: 42}), (a)-[:T]->(b)").build();
         return DynamicTest.dynamicTest("validateNodeWeightPropertyFilteredGraph", () -> {
-            var validator = new Validator<>(proc.validationConfig());
+            var validator = new Validator<>(proc.validationConfig(ExecutionContext.EMPTY));
             assertThatThrownBy(() -> validator.validateConfigWithGraphStore(
                     graphStore,
                     null,
@@ -159,7 +160,7 @@ public final class NodeWeightConfigProcTest {
             var algoConfig = proc.configParser().processInput(nodeWeightConfig.toMap());
             assertThat(algoConfig.nodeWeightProperty()).isEqualTo("nw");
 
-            var validator = new Validator<>(proc.validationConfig());
+            var validator = new Validator<>(proc.validationConfig(ExecutionContext.EMPTY));
             assertThatCode(() -> validator.validateConfigWithGraphStore(
                 graphStore,
                 null,

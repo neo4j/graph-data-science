@@ -115,6 +115,7 @@ public final class RelationshipsFilter {
 
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(outputNodes)
+            .relationshipType(relType)
             .concurrency(concurrency)
             .addAllPropertyConfigs(propertyConfigs)
             .indexInverse(graphStore.inverseIndexedRelationshipTypes().contains(relType))

@@ -22,7 +22,6 @@ package org.neo4j.gds.storageengine;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
-import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryNodeCursor;
@@ -53,8 +52,8 @@ class InMemoryNodeCursorTest extends CypherTest {
     protected GraphStore graphStore() {
         return new StoreLoaderBuilder()
             .databaseService(db)
-            .addNodeProjection(NodeProjection.of("A", PropertyMappings.of(PropertyMapping.of("prop1"))))
-            .addNodeProjection(NodeProjection.of("B", PropertyMappings.of(PropertyMapping.of("prop2"))))
+            .addNodeProjection(NodeProjection.builder().label("A").addProperty(PropertyMapping.of("prop1")).build())
+            .addNodeProjection(NodeProjection.builder().label("B").addProperty(PropertyMapping.of("prop2")).build())
             .build()
             .graphStore();
     }

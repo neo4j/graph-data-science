@@ -63,7 +63,6 @@ public class KSpanningTreeWriteSpec implements AlgorithmSpec<KSpanningTree, Span
             KSpanningTreeWriteResult.Builder builder = new KSpanningTreeWriteResult.Builder();
 
             if (graph.isEmpty()) {
-                graph.release();
                 return Stream.of(builder.build());
             }
 

@@ -22,7 +22,6 @@ package org.neo4j.gds.walking;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.beta.walking.CollapsePath;
 import org.neo4j.gds.beta.walking.CollapsePathAlgorithmFactory;
 import org.neo4j.gds.beta.walking.CollapsePathConfig;
@@ -54,7 +53,7 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, SingleTypeR
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(graphName, configuration, true, false);
+        var computationResult = compute(graphName, configuration);
         return computationResultConsumer().consume(computationResult, executionContext());
     }
 
@@ -72,10 +71,7 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, SingleTypeR
                 ComputationResult<CollapsePath, SingleTypeRelationships, CollapsePathConfig> computationResult,
                 ExecutionContext executionContext
             ) {
-                computationResult.graphStore().addRelationshipType(
-                    RelationshipType.of(computationResult.config().mutateRelationshipType()),
-                    computationResult.result()
-                );
+                computationResult.graphStore().addRelationshipType(computationResult.result());
 
                 resultBuilder.withRelationshipsWritten(computationResult.result().topology().elementCount());
             }

@@ -3,7 +3,7 @@
 = Minimum Weight k-Spanning Tree
 :description: This section describes the Minimum Weight k-Spanning Tree algorithm in the Neo4j Graph Data Science library.
 :entity: node
-:result: spanning tree edge
+:result: spanning tree
 :algorithm: k-Spanning Tree heuristic
 
 include::partial$/operations-reference/alpha-note.adoc[]
@@ -11,16 +11,29 @@ include::partial$/operations-reference/alpha-note.adoc[]
 
 == Introduction
 
-Sometimes,  we want to limit the size of our spanning tree result, as we are only interested in finding a smaller tree within the graph, and not one that necessarily spans across all nodes.
+Sometimes, we might require a spanning tree(a tree where its nodes are connected with each via a single path) that does not necessarily span all nodes in the graph.
 The K-Spanning tree heuristic algorithm returns a tree with `k` nodes and `k − 1` relationships.
-Our heuristic processes the result found by the Prim algorithm for the Minimum Weight Spanning Tree problem.
+Our heuristic processes the result found by Prim's algorithm for the  xref:algorithms/minimum-weight-spanning-tree.adoc[Minimum Weight Spanning Tree] problem.
+Like Prim, it starts from a given source node, finds a spanning tree for all nodes and then removes nodes using heuristics to produce a tree with 'k' nodes.
+Note that the source node will not be necessarily included in the final output as the heuristic tries to find a globally good tree.
 
 [[algorithms-k-spanning]]
 == Considerations
-The minimum weight k-Spanning Tree is NP-Hard. The algorithm in the Neo4j GDS Library is therefore not guaranteed to find the optimal answer, but should return good approximation in practice.
+The Minimum weight k-Spanning Tree is NP-Hard. The algorithm in the Neo4j GDS Library is therefore not guaranteed to find the optimal answer, but should hopefully return a good approximation in practice.
+
+Like Prim algorithm, the algorithm focuses only on the component of the source node. If that component has fewer than `k` nodes, it will not look into other components, but will instead return the component.
+
 [[algorithms-minimum-k-weight-spanning-tree-syntax]]
 == Syntax
 
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.K Spanning Tree syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-write]
+======
 .The following will run the k-spanning tree algorithms and write back results:
 [source, cypher, role=noplay]
 ----
@@ -31,19 +44,19 @@ CALL gds.alpha.kSpanningTree.write(
 YIELD effectiveNodeCount: Integer,
       preProcessingMillis: Integer,
       computeMillis: Integer,
+      postProcessingMillis: Integer,
       writeMillis: Integer,
       configuration: Map
 ----
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
 .Configuration
-[opts="header",cols="1,1,1,1,4"]
+[opts="header",cols="3,2,3m,2,8"]
 |===
-| Name                                                                             | Type    | Default | Optional  | Description
-| k                                                                                | Integer | null    | no        | The result is a tree with `k` nodes and `k − 1` relationships.
-| sourceNode                                                                      | Integer | null    | no        | The start node ID.
-| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes       | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
-| writeProperty                                                                    | String  | n/a   | no       | The partition that a node belongs to.
-| objective  | String | 'minimum'  | yes      | If specified, the parameter dictates whether to try and find the minimum or the maximum  k-spanning tree. By default, the algorithm looks for the minimum one. Permitted values are 'minimum' and 'maximum'.
+| Name                                                                             | Type    | Default   | Optional  | Description
+include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+include::partial$/algorithms/k-spanning-tree/specific-configuration.adoc[]
+
 |===
 
 .Results
@@ -53,16 +66,24 @@ YIELD effectiveNodeCount: Integer,
 | effectiveNodeCount  | Integer | The number of visited nodes.
 | preProcessingMillis | Integer | Milliseconds for preprocessing the data.
 | computeMillis       | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis | Integer | Milliseconds for postprocessing results of the algorithm.
 | writeMillis         | Integer | Milliseconds for writing result data back.
+| configuration         | Map       | The configuration used for running the algorithm.
+
 |===
+======
+====
 
 [[algorithms-minimum-weight-spanning-tree-sample]]
 == Minimum Weight k-Spanning Tree algorithm examples
 
-image::mst.png[]
+:algorithm-name: {algorithm}
+:graph-description: road network
+:image-file: spanning-tree-graph.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
 
 .The following will create the sample graph depicted in the figure:
-[source, cypher, role=noplay]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE (a:Place {id: 'A'}),
        (b:Place {id: 'B'}),
@@ -81,7 +102,7 @@ CREATE (a:Place {id: 'A'}),
 ----
 
 .The following will project and store a named graph:
-[source, cypher, role=noplay]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'graph',
@@ -98,46 +119,57 @@ CALL gds.graph.project(
 [[algorithms-minimum-weight-spanning-tree-k]]
 == K-Spanning tree examples
 
-In our sample graph we have 5 nodes.
-When we ran MST above, we got a 5-minimum spanning tree returned, that covered all five nodes.
-By setting the `k=3`, we define that we want to get returned a 3-minimum spanning tree that covers 3 nodes and has 2 relationships.
+=== Minimum K-Spanning Tree example
+
+In our sample graph we have 7 nodes.
+By setting the `k=3`, we define that we want to find a 3-minimum spanning tree that covers 3 nodes and has 2 relationships.
 
 .The following will run the k-minimum spanning tree algorithm and write back results:
+[role=query-example, no-result=true, group=write-example]
+--
 [source, cypher, role=noplay]
 ----
-MATCH (n:Place{id: 'D'})
+MATCH (n:Place{id: 'A'})
 CALL gds.alpha.kSpanningTree.write('graph', {
   k: 3,
   sourceNode: id(n),
   relationshipWeightProperty: 'cost',
-  writeProperty:'kminst'
+  writeProperty:'kmin'
 })
 YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
 RETURN preProcessingMillis,computeMillis,writeMillis, effectiveNodeCount;
 ----
+--
 
-.Find nodes that belong to our k-spanning tree result:
+[role=query-example, group=write-example]
+--
+.The following will find the nodes that belong to our k-spanning tree result:
 [source, cypher, role=noplay]
 ----
-MATCH (n:Place)
-WITH n.id AS Place, n.kminst AS Partition, count(*) AS count
-WHERE count = 3
-RETURN Place, Partition
+MATCH (n)
+WITH n.kmin AS p, count(n) AS c
+WHERE c = 3
+MATCH (n)
+WHERE n.kmin = p
+RETURN n.id As Place, p as Partition
+
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
 | Place | Partition
-| A     | 1
-| B     | 1
-| C     | 1
-| D     | 3
-| E     | 4
+| "A"     | 0
+| "B"     | 0
+| "C"     | 0
 |===
+--
+Nodes A, B, and C form the discovered 3-minimum spanning tree of our graph.
 
-Nodes A, B, and C are the result 3-minimum spanning tree of our graph.
+=== Maximum K-Spanning Tree example
 
+[role=query-example,no-result=true, group=max-example]
+--
 .The following will run the k-maximum spanning tree algorithm and write back results:
 [source, cypher, role=noplay]
 ----
@@ -146,31 +178,33 @@ CALL gds.alpha.kSpanningTree.write('graph', {
   k: 3,
   sourceNode: id(n),
   relationshipWeightProperty: 'cost',
-  writeProperty:'kmaxst',
-  objective: 'maximum',
+  writeProperty:'kmax',
+  objective: 'maximum'
 })
 YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
 RETURN preProcessingMillis,computeMillis,writeMillis, effectiveNodeCount;
 ----
+--
 
+[role=query-example, group=max-example]
+--
 .Find nodes that belong to our k-spanning tree result:
 [source, cypher, role=noplay]
 ----
-MATCH (n:Place)
-WITH n.id AS Place, n.kmaxst AS Partition, count(*) AS count
-WHERE count = 3
-RETURN Place, Partition
+MATCH (n)
+WITH n.kmax AS p, count(n) AS c
+WHERE c = 3
+MATCH (n)
+WHERE n.kmax = p
+RETURN n.id As Place, p as Partition
 ----
-
 .Results
 [opts="header",cols="1,1"]
 |===
 | Place | Partition
-| A     | 0
-| B     | 1
-| C     | 3
-| D     | 3
-| E     | 3
+| "C"     | 3
+| "D"     | 3
+| "E"     | 3
 |===
-
-Nodes C, D, and E are the result 3-maximum spanning tree of our graph.
+--
+Nodes C, D, and E form a 3-maximum spanning tree of our graph.

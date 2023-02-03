@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -298,7 +296,6 @@ final class NodeSimilarityTest {
             .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        nodeSimilarity.release();
 
         assertEquals(orientation == REVERSE ? EXPECTED_WEIGHTED_INCOMING : EXPECTED_WEIGHTED_OUTGOING, result);
     }
@@ -319,7 +316,6 @@ final class NodeSimilarityTest {
             .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        nodeSimilarity.release();
 
         assertEquals(orientation == REVERSE ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
     }
@@ -340,7 +336,6 @@ final class NodeSimilarityTest {
             .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        nodeSimilarity.release();
 
         assertEquals(orientation == REVERSE ? EXPECTED_INCOMING_TOP_N_1 : EXPECTED_OUTGOING_TOP_N_1, result);
     }
@@ -383,7 +378,6 @@ final class NodeSimilarityTest {
             .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        nodeSimilarity.release();
 
         assertEquals(orientation == REVERSE ? EXPECTED_INCOMING_TOP_K_1 : EXPECTED_OUTGOING_TOP_K_1, result);
     }
@@ -438,7 +432,6 @@ final class NodeSimilarityTest {
             .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        nodeSimilarity.release();
 
         assertEquals(
             orientation == REVERSE ? EXPECTED_INCOMING_SIMILARITY_CUTOFF : EXPECTED_OUTGOING_SIMILARITY_CUTOFF,
@@ -462,7 +455,6 @@ final class NodeSimilarityTest {
             .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        nodeSimilarity.release();
 
         assertEquals(
             orientation == REVERSE ? EXPECTED_INCOMING_DEGREE_CUTOFF : EXPECTED_OUTGOING_DEGREE_CUTOFF,
@@ -480,7 +472,6 @@ final class NodeSimilarityTest {
             ProgressTracker.NULL_TRACKER
         );
         Set<SimilarityResult> result = nodeSimilarity.computeToStream().collect(Collectors.toSet());
-        nodeSimilarity.release();
         assertNotEquals(Collections.emptySet(), result);
     }
 
@@ -550,8 +541,6 @@ final class NodeSimilarityTest {
                           ", (:Item), (:Item), (:Item), (:Item)"),
             resultGraph
         );
-        nodeSimilarity.release();
-        resultGraph.release();
     }
 
     @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
@@ -591,8 +580,6 @@ final class NodeSimilarityTest {
             return true;
         });
 
-        nodeSimilarity.release();
-        resultGraph.release();
     }
 
     @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
@@ -614,7 +601,6 @@ final class NodeSimilarityTest {
             .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        nodeSimilarity.release();
 
         assertEquals(orientation == REVERSE ? EXPECTED_INCOMING_TOP_N_1 : EXPECTED_OUTGOING_TOP_N_1, result);
     }
@@ -642,25 +628,8 @@ final class NodeSimilarityTest {
             .computeToStream()
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
-        nodeSimilarity.release();
 
         assertEquals(orientation == REVERSE ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
-    }
-
-    @Disabled("Unsure how to proceed with direction BOTH")
-    @ParameterizedTest(name = "concurrency = {0}")
-    @MethodSource("concurrencies")
-    void shouldThrowForDirectionBoth(int concurrency) {
-        IllegalArgumentException ex = Assertions.assertThrows(
-            IllegalArgumentException.class,
-            () -> NodeSimilarity.create(
-                undirectedGraph,
-                configBuilder().concurrency(concurrency).build(),
-                Pools.DEFAULT,
-                ProgressTracker.NULL_TRACKER
-            ).computeToStream()
-        );
-        assertThat(ex.getMessage()).contains("Direction BOTH is not supported");
     }
 
     @ParameterizedTest(name = "topK = {0}")

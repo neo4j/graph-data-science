@@ -28,8 +28,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.GraphDimensionsStoreReader;
@@ -67,7 +65,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
             new GraphDimensionsStoreReader(
                 loadingContext.transactionContext(),
                 graphProjectConfig,
-                GraphDatabaseApiProxy.resolveDependency(loadingContext.graphDatabaseService(), IdGeneratorFactory.class)
+                loadingContext.dependencyResolver().resolveDependency(IdGeneratorFactory.class)
             ).call()
         );
     }
@@ -292,17 +290,6 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
             graphProjectConfig.jobId(),
             loadingContext.taskRegistryFactory(),
             EmptyUserLogRegistryFactory.INSTANCE
-        );
-    }
-
-    @Override
-    protected GraphSchema computeGraphSchema(
-        Nodes nodes, RelationshipImportResult relationshipImportResult
-    ) {
-        return CSRGraphStoreUtil.computeGraphSchema(
-            nodes,
-            (label) -> storeConfig.nodeProjections().projections().get(label).properties().propertyKeys(),
-            relationshipImportResult
         );
     }
 

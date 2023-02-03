@@ -78,7 +78,7 @@ public class LouvainWriteProc extends WriteProc<Louvain, LouvainResult, LouvainW
         ExecutionContext executionContext
     ) {
         return LouvainProc.resultBuilder(new WriteResult.Builder(
-            callContext,
+            executionContext.callContext(),
             computeResult.config().concurrency()
         ), computeResult);
     }

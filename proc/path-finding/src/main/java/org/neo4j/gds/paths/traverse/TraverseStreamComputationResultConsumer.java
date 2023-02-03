@@ -20,10 +20,10 @@
 package org.neo4j.gds.paths.traverse;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +44,7 @@ final class TraverseStreamComputationResultConsumer {
         boolean shouldReturnPath,
         PathFactoryFacade pathFactoryFacade,
         RelationshipType relationshipType,
-        Transaction internalTransaction
+        NodeLookup nodeLookup
     ) {
         if (graphIsEmpty || null == nodes) {
             return Stream.empty();
@@ -60,7 +60,7 @@ final class TraverseStreamComputationResultConsumer {
         Path path = null;
         if (shouldReturnPath) {
             path = pathFactoryFacade.createPath(
-                internalTransaction,
+                nodeLookup,
                 nodeList,
                 relationshipType
             );
