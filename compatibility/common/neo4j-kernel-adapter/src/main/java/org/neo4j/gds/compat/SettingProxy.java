@@ -49,5 +49,9 @@ public final class SettingProxy {
         IMPL.setDatabaseMode(config, databaseMode, databaseService);
     }
 
+    public static String secondaryModeName() {
+        return IMPL.secondaryModeName();
+    }
+
     private SettingProxy() {}
 }

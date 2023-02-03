@@ -79,4 +79,9 @@ public class SettingProxyImpl implements SettingProxyApi {
             throw new RuntimeException("Could not get the permissions to set the mode field.", e);
         }
     }
+
+    @Override
+    public String secondaryModeName() {
+        return "Secondary";
+    }
 }
