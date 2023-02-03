@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjections;
+import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
@@ -73,7 +74,13 @@ class MemoryEstimationExecutorTest extends BaseTest {
             .builder()
             .databaseId(DatabaseId.of(db))
             .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
-            .callContext(new ProcedureCallContext(42, new String[0], false, "neo4j", false))
+            .returnColumns(new ProcedureCallContextReturnColumns(new ProcedureCallContext(
+                42,
+                new String[0],
+                false,
+                "neo4j",
+                false
+            )))
             .log(Neo4jProxy.testLog())
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)

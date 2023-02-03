@@ -45,7 +45,7 @@ class BfsStreamComputationResultConsumer implements ComputationResultConsumer<BF
             computationResult.graph()::toOriginalNodeId,
             computationResult.graph().isEmpty(),
             BfsStreamResult::new,
-            executionContext.containsOutputField("path"),
+            executionContext.returnColumns().contains("path"),
             pathFactoryFacade,
             BfsStreamProc.NEXT,
             executionContext.nodeLookup()

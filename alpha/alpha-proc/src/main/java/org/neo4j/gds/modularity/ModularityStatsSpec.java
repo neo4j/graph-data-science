@@ -53,7 +53,7 @@ public class ModularityStatsSpec implements AlgorithmSpec<ModularityCalculator, 
 
 
             var config = computationResult.config();
-            var statsBuilder = new StatsResult.StatsBuilder(executionContext.callContext(), config.concurrency());
+            var statsBuilder = new StatsResult.StatsBuilder(executionContext.returnColumns(), config.concurrency());
             var result = Optional.ofNullable(computationResult.result())
                 .orElseGet(ModularityResult::empty);
 

@@ -20,10 +20,10 @@
 package org.neo4j.gds.centrality;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Map;
 
@@ -62,8 +62,8 @@ class CentralityScore {
 
         public static final class Builder extends AbstractCentralityResultBuilder<Stats> {
 
-            public Builder(ProcedureCallContext callContext, int concurrency) {
-                super(callContext, concurrency);
+            public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+                super(returnColumns, concurrency);
             }
 
             public CentralityScore.Stats buildResult() {
@@ -103,8 +103,8 @@ class CentralityScore {
 
         public static final class Builder extends AbstractCentralityResultBuilder<Mutate> {
 
-            public Builder(ProcedureCallContext callContext, int concurrency) {
-                super(callContext, concurrency);
+            public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+                super(returnColumns, concurrency);
             }
 
             public Mutate buildResult() {

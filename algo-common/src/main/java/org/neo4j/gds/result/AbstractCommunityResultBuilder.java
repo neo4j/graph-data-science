@@ -21,9 +21,9 @@ package org.neo4j.gds.result;
 
 import org.HdrHistogram.Histogram;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Map;
 import java.util.Optional;
@@ -51,23 +51,19 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
     private LongUnaryOperator communityFunction = null;
 
     protected AbstractCommunityResultBuilder(
-        ProcedureCallContext callContext,
+        ProcedureReturnColumns returnColumns,
         int concurrency
     ) {
-        this(callContext, Pools.DEFAULT, concurrency);
+        this(returnColumns, Pools.DEFAULT, concurrency);
     }
 
     protected AbstractCommunityResultBuilder(
-        ProcedureCallContext callContext,
+        ProcedureReturnColumns returnColumns,
         ExecutorService executorService,
         int concurrency
     ) {
-        this.buildHistogram = callContext
-            .outputFields()
-            .anyMatch(s -> s.equalsIgnoreCase("communityDistribution") || s.equalsIgnoreCase("componentDistribution"));
-        this.buildCommunityCount = callContext
-            .outputFields()
-            .anyMatch(s -> s.equalsIgnoreCase("communityCount") || s.equalsIgnoreCase("componentCount"));
+        this.buildHistogram = returnColumns.contains("communityDistribution") || returnColumns.contains("componentDistribution");
+        this.buildCommunityCount = returnColumns.contains("communityCount") || returnColumns.contains("componentCount");
         this.executorService = executorService;
         this.concurrency = concurrency;
     }

@@ -21,6 +21,7 @@ package org.neo4j.gds.beta.k1coloring;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -29,7 +30,6 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -77,9 +77,9 @@ public class K1ColoringMutateProc extends MutatePropertyProc<K1Coloring, HugeLon
         ExecutionContext executionContext
     ) {
         return K1ColoringProc.resultBuilder(new MutateResult.Builder(
-            executionContext.callContext(),
+            executionContext.returnColumns(),
             computeResult.config().concurrency()
-        ), computeResult, executionContext.callContext());
+        ), computeResult, executionContext.returnColumns());
     }
 
     @Override
@@ -134,10 +134,10 @@ public class K1ColoringMutateProc extends MutatePropertyProc<K1Coloring, HugeLon
 
         static class Builder extends K1ColoringProc.K1ColoringResultBuilder<MutateResult> {
             Builder(
-                ProcedureCallContext context,
+                ProcedureReturnColumns returnColumns,
                 int concurrency
             ) {
-                super(context, concurrency);
+                super(returnColumns, concurrency);
             }
 
             @Override

@@ -31,6 +31,7 @@ import org.neo4j.gds.api.EmptyDependencyResolver;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
@@ -56,7 +57,6 @@ import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestAlgorithmResult;
 import org.neo4j.gds.test.TestMutateConfig;
 import org.neo4j.gds.test.TestResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.List;
 import java.util.Optional;
@@ -78,7 +78,7 @@ class MutatePropertyComputationResultConsumerTest {
         .builder()
         .databaseId(DatabaseId.from(""))
         .dependencyResolver(EmptyDependencyResolver.INSTANCE)
-        .callContext(new ProcedureCallContext(42, new String[0], false, "neo4j", false))
+        .returnColumns(ProcedureReturnColumns.EMPTY)
         .log(Neo4jProxy.testLog())
         .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
         .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)

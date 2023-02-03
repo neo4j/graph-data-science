@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.leiden;
 
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.results.StandardStatsResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.List;
 import java.util.Map;
@@ -65,8 +65,8 @@ public class StatsResult extends StandardStatsResult {
         double modularity;
         List<Double> modularities;
 
-        StatsBuilder(ProcedureCallContext context, int concurrency) {
-            super(context, concurrency);
+        StatsBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
+            super(returnColumns, concurrency);
         }
 
         StatsBuilder withLevels(long levels) {

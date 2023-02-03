@@ -25,16 +25,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
-import org.neo4j.gds.utils.ExceptionUtil;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
@@ -48,7 +46,7 @@ final class AbstractCommunityResultBuilderTest {
     @MethodSource("concurrencies")
     void countCommunitySizesOverHugeCommunities(int concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
-            procedureCallContext("communityCount", "communityDistribution"),
+            procedureReturnColumns("communityCount", "communityDistribution"),
             concurrency,
             (maybeCommunityCount, maybeHistogram) -> {
                 assertTrue(maybeCommunityCount.isPresent());
@@ -73,7 +71,7 @@ final class AbstractCommunityResultBuilderTest {
     @MethodSource("concurrencies")
     void countCommunitySizesOverPresizedHugeCommunities(int concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
-            procedureCallContext("communityCount", "communityDistribution"),
+            procedureReturnColumns("communityCount", "communityDistribution"),
             concurrency,
             (maybeCommunityCount, maybeHistogram) -> {
                 assertTrue(maybeCommunityCount.isPresent());
@@ -98,7 +96,7 @@ final class AbstractCommunityResultBuilderTest {
     @MethodSource("concurrencies")
     void countCommunitySizesOverIntegerCommunities(int concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
-            procedureCallContext("communityCount", "communityDistribution"),
+            procedureReturnColumns("communityCount", "communityDistribution"),
             concurrency,
             (maybeCommunityCount, maybeHistogram) -> {
                 assertTrue(maybeCommunityCount.isPresent());
@@ -123,7 +121,7 @@ final class AbstractCommunityResultBuilderTest {
     @MethodSource("concurrencies")
     void countCommunitySizesOverLongCommunities(int concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
-            procedureCallContext("communityCount", "communityDistribution"),
+            procedureReturnColumns("communityCount", "communityDistribution"),
             concurrency,
             (maybeCommunityCount, maybeHistogram) -> {
                 assertTrue(maybeCommunityCount.isPresent());
@@ -148,7 +146,7 @@ final class AbstractCommunityResultBuilderTest {
     @MethodSource("concurrencies")
     void doNotGenerateCommunityCountOrHistogram(int concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
-            procedureCallContext(),
+            procedureReturnColumns(),
             concurrency,
             (maybeCommunityCount, maybeHistogram) -> {
                 assertFalse(maybeCommunityCount.isPresent());
@@ -165,7 +163,7 @@ final class AbstractCommunityResultBuilderTest {
     @MethodSource("concurrencies")
     void doNotGenerateHistogram(int concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
-            procedureCallContext("communityCount"),
+            procedureReturnColumns("communityCount"),
             concurrency,
             (maybeCommunityCount, maybeHistogram) -> {
                 assertTrue(maybeCommunityCount.isPresent());
@@ -197,7 +195,7 @@ final class AbstractCommunityResultBuilderTest {
     @MethodSource("concurrencies")
     void buildCommunityCountWithHugeCommunityCount(int concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
-            procedureCallContext("communityCount"),
+            procedureReturnColumns("communityCount"),
             concurrency,
             (maybeCommunityCount, maybeHistogram) -> {
                 assertTrue(maybeCommunityCount.isPresent());
@@ -218,7 +216,7 @@ final class AbstractCommunityResultBuilderTest {
     @MethodSource("concurrencies")
     void buildCommunityHistogramWithHugeCommunityCount(int concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
-            procedureCallContext("communityCount", "communityDistribution"),
+            procedureReturnColumns("communityCount", "communityDistribution"),
             concurrency,
             (maybeCommunityCount, maybeHistogram) -> {
                 assertTrue(maybeCommunityCount.isPresent());
@@ -246,53 +244,28 @@ final class AbstractCommunityResultBuilderTest {
         );
     }
 
-    private static final MethodHandle NEW_PROCEDURE_CALL_CONTEXT;
+    static ProcedureReturnColumns procedureReturnColumns(String... returnColumns) {
+        return new ProcedureReturnColumns() {
 
-    static {
-        MethodHandle constructor;
-        var lookup = MethodHandles.lookup();
-        try {
-            try {
-                var ctor = lookup.findConstructor(
-                    ProcedureCallContext.class,
-                    MethodType.methodType(
-                        void.class,
-                        int.class,
-                        String[].class,
-                        boolean.class,
-                        String.class,
-                        boolean.class
-                    )
-                );
-                constructor = MethodHandles.insertArguments(ctor, 0, 42);
-            } catch (NoSuchMethodException e) {
-                constructor = lookup.findConstructor(
-                    ProcedureCallContext.class,
-                    MethodType.methodType(void.class, String[].class, boolean.class, String.class, boolean.class)
-                );
+            @Override
+            public boolean contains(String fieldName) {
+                return Arrays.asList(returnColumns).contains(fieldName);
             }
-        } catch (IllegalAccessException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-        NEW_PROCEDURE_CALL_CONTEXT = constructor;
-    }
 
-    static ProcedureCallContext procedureCallContext(String... outputFieldNames) {
-        try {
-            return (ProcedureCallContext) NEW_PROCEDURE_CALL_CONTEXT.invoke(outputFieldNames, false, "", false);
-        } catch (Throwable throwable) {
-            ExceptionUtil.throwIfUnchecked(throwable);
-            throw new RuntimeException(throwable);
-        }
+            @Override
+            public ProcedureReturnColumns withTransformationFunction(Function<String, String> transformationFunction) {
+                return this;
+            }
+        };
     }
 
     private AbstractCommunityResultBuilder<Void> builder(
-        ProcedureCallContext context,
+        ProcedureReturnColumns returnColumns,
         int concurrency,
         BiConsumer<OptionalLong, Optional<Histogram>> check
     ) {
         return new AbstractCommunityResultBuilder<>(
-            context,
+            returnColumns,
             concurrency
         ) {
             @Override

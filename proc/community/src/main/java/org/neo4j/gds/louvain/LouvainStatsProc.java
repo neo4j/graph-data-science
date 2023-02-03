@@ -21,6 +21,7 @@ package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -28,7 +29,6 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardStatsResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -70,7 +70,7 @@ public class LouvainStatsProc extends StatsProc<Louvain, LouvainResult, LouvainS
         ExecutionContext executionContext
     ) {
         return LouvainProc.resultBuilder(
-            new StatsResult.Builder(executionContext.callContext(), computeResult.config().concurrency()),
+            new StatsResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
             computeResult
         );
     }
@@ -115,8 +115,8 @@ public class LouvainStatsProc extends StatsProc<Louvain, LouvainResult, LouvainS
 
         static class Builder extends LouvainProc.LouvainResultBuilder<StatsResult> {
 
-            Builder(ProcedureCallContext context, int concurrency) {
-                super(context, concurrency);
+            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+                super(returnColumns, concurrency);
             }
 
             @Override

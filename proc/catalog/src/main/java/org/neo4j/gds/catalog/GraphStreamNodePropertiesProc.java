@@ -154,7 +154,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
 
         var subGraph = graphStore.getGraph(validNodeLabels, graphStore.relationshipTypes(), Optional.empty());
         var nodePropertyKeysAndValues = config.nodeProperties().stream().map(propertyKey -> Pair.of(propertyKey, subGraph.nodeProperties(propertyKey))).collect(Collectors.toList());
-        var usesPropertyNameColumn = executionContext().callContext().outputFields().anyMatch(field -> field.equals("nodeProperty"));
+        var usesPropertyNameColumn = executionContext().returnColumns().contains("nodeProperty");
 
         var task = Tasks.leaf(
             "Graph :: NodeProperties :: Stream",

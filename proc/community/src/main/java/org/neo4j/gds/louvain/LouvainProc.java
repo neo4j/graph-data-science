@@ -20,12 +20,12 @@
 package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.CommunityProcCompanion;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 final class LouvainProc {
 
@@ -86,11 +86,8 @@ final class LouvainProc {
         double[] modularities = new double[]{};
         double modularity = -1;
 
-        LouvainResultBuilder(
-            ProcedureCallContext context,
-            int concurrency
-        ) {
-            super(context, concurrency);
+        LouvainResultBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
+            super(returnColumns, concurrency);
         }
 
         LouvainResultBuilder<PROC_RESULT> withLevels(long levels) {

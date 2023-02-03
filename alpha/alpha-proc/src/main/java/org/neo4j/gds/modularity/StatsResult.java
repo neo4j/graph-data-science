@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.modularity;
 
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.results.StandardStatsResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Map;
 
@@ -54,8 +54,8 @@ public class StatsResult extends StandardStatsResult {
         private long relationshipCount;
         private long communityCount;
 
-        StatsBuilder(ProcedureCallContext context, int concurrency) {
-            super(context, concurrency);
+        StatsBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
+            super(returnColumns, concurrency);
         }
 
         StatsBuilder withModularity(double modularity) {

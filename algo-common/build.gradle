@@ -24,6 +24,7 @@ dependencies {
     implementation project(':string-formatting')
     implementation project(':collections')
     implementation project(':memory-usage')
+    implementation project(':neo4j-api')
 
     implementation group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram'
 

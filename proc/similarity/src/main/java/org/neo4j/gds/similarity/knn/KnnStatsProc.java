@@ -119,7 +119,7 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.
 
             SimilarityProc.resultBuilderWithTimings(resultBuilder, computationResult);
 
-            if (shouldComputeHistogram(executionContext().callContext())) {
+            if (shouldComputeHistogram(executionContext().returnColumns())) {
                 try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
                     SimilarityGraphResult similarityGraphResult = computeToGraph(
                         computationResult.graph(),

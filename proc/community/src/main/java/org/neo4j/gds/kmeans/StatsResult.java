@@ -20,9 +20,9 @@
 package org.neo4j.gds.kmeans;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.results.StandardStatsResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.List;
 import java.util.Map;
@@ -51,8 +51,8 @@ public class StatsResult extends StandardStatsResult {
     }
 
     static final class Builder extends AbstractCommunityResultBuilder<StatsResult> {
-        Builder(ProcedureCallContext callContext, int concurrency) {
-            super(callContext, concurrency);
+        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+            super(returnColumns, concurrency);
         }
 
         private List<List<Double>> centroids;

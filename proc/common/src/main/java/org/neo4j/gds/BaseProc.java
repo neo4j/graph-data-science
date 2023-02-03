@@ -170,7 +170,7 @@ public abstract class BaseProc {
                 .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
                 .modelCatalog(internalModelCatalog)
                 .log(log)
-                .callContext(callContext)
+                .returnColumns(new ProcedureCallContextReturnColumns(callContext))
                 .userLogRegistryFactory(userLogRegistryFactory)
                 .taskRegistryFactory(taskRegistryFactory)
                 .username(username())

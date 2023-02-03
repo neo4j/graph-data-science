@@ -20,8 +20,8 @@
 package org.neo4j.gds.leiden;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.List;
 import java.util.Map;
@@ -71,11 +71,8 @@ public final class WriteResult extends StatsResult {
         double modularity;
         List<Double> modularities;
 
-        Builder(
-            ProcedureCallContext context,
-            int concurrency
-        ) {
-            super(context, concurrency);
+        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+            super(returnColumns, concurrency);
         }
 
         Builder withLevels(long levels) {

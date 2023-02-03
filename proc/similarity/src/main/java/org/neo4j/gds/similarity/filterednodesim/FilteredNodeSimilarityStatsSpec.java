@@ -88,7 +88,7 @@ public class FilteredNodeSimilarityStatsSpec implements AlgorithmSpec<
                 NodeSimilarityResult::graphResult
             );
 
-            if (shouldComputeHistogram(executionContext.callContext())) {
+            if (shouldComputeHistogram(executionContext.returnColumns())) {
                 try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
                     resultBuilder.withHistogram(computeHistogram(computationResult.result().graphResult().similarityGraph()));
                 }

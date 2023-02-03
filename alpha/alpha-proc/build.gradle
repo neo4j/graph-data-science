@@ -28,6 +28,7 @@ dependencies {
     implementation project(':core')
     implementation project(':executor')
     implementation project(':memory-usage')
+    implementation project(':neo4j-api')
     implementation project(':pregel')
     implementation project(':proc-catalog')
     implementation project(':proc-pregel')
