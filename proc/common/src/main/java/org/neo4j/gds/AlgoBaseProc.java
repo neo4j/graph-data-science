@@ -88,7 +88,8 @@ public abstract class AlgoBaseProc<
         return new MemoryEstimationExecutor<>(
             this,
             new ProcedureExecutorSpec<>(),
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 

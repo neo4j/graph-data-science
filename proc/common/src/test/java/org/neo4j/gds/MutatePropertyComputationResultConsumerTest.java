@@ -84,6 +84,7 @@ class MutatePropertyComputationResultConsumerTest {
         .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
         .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
         .nodeLookup(NodeLookup.EMPTY)
+        .isGdsAdmin(false)
         .build();
 
     @BeforeEach

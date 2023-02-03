@@ -56,7 +56,8 @@ public class SpanningTreeStreamProc extends BaseProc {
         var spec = new SpanningTreeStreamSpec();
         return new MemoryEstimationExecutor<>(
             spec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphName, configuration);
     }
 }

@@ -57,7 +57,8 @@ public class CELFStatsProc extends BaseProc {
 
         return new MemoryEstimationExecutor<>(
             statsSpec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 

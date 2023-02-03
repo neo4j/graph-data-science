@@ -57,7 +57,8 @@ public class SpanningTreeStatsProc extends BaseProc {
         var spec = new SpanningTreeStatsSpec();
         return new MemoryEstimationExecutor<>(
             spec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphName, configuration);
     }
 }

@@ -68,7 +68,8 @@ public class BfsStreamProc extends AlgoBaseProc<BFS, HugeLongArray, BfsStreamCon
 
         return new MemoryEstimationExecutor<>(
             streamSpec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphName, configuration);    }
 
     @Override

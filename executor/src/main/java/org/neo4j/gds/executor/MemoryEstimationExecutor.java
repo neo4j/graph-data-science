@@ -21,7 +21,6 @@ package org.neo4j.gds.executor;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.api.EmptyDependencyResolver;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.TerminationMonitor;
@@ -33,6 +32,8 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.transaction.EmptyTransactionContext;
+import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.Map;
 import java.util.Optional;
@@ -49,22 +50,26 @@ public class MemoryEstimationExecutor<
     private final AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ?, ?> algoSpec;
     private final ExecutorSpec<ALGO, ALGO_RESULT, CONFIG> executorSpec;
     private final ExecutionContext executionContext;
+    private final TransactionContext transactionContext;
 
     public MemoryEstimationExecutor(
         AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ?, ?> algoSpec,
         ExecutorSpec<ALGO, ALGO_RESULT, CONFIG> executorSpec,
-        ExecutionContext executionContext
+        ExecutionContext executionContext,
+        TransactionContext transactionContext
     ) {
         this.algoSpec = algoSpec;
         this.executorSpec = executorSpec;
         this.executionContext = executionContext;
+        this.transactionContext = transactionContext;
     }
 
     public MemoryEstimationExecutor(
         AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, ?, ?> algoSpec,
-        ExecutionContext executionContext
+        ExecutionContext executionContext,
+        TransactionContext transactionContext
     ) {
-        this(algoSpec, algoSpec.createDefaultExecutorSpec(), executionContext);
+        this(algoSpec, algoSpec.createDefaultExecutorSpec(), executionContext, transactionContext);
     }
 
 
@@ -79,8 +84,8 @@ public class MemoryEstimationExecutor<
         Optional<MemoryEstimation> maybeGraphEstimation;
 
         if (graphNameOrConfiguration instanceof Map) {
-            // if the dependency resolver is empty, we are probably using EstimationCli
-            var graphLoaderContext = (executionContext.dependencyResolver() == EmptyDependencyResolver.INSTANCE)
+            // if the transaction context is empty, we are probably using EstimationCli
+            var graphLoaderContext = transactionContext == EmptyTransactionContext.INSTANCE
                 ? GraphLoaderContext.NULL_CONTEXT
                 : ImmutableGraphLoaderContext
                     .builder()
@@ -90,7 +95,7 @@ public class MemoryEstimationExecutor<
                     .taskRegistryFactory(executionContext.taskRegistryFactory())
                     .userLogRegistryFactory(executionContext.userLogRegistryFactory())
                     .terminationFlag(TerminationFlag.wrap(TerminationMonitor.EMPTY))
-                    .transactionContext(executionContext.transactionContext()).build();
+                    .transactionContext(transactionContext).build();
 
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(executionContext.username());
             var graphProjectConfig = memoryEstimationGraphConfigParser.processInput(graphNameOrConfiguration);

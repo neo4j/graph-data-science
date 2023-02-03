@@ -61,7 +61,8 @@ public class FilteredNodeSimilarityStreamProc extends BaseProc {
     ) {
         return new MemoryEstimationExecutor<>(
             new FilteredNodeSimilarityStreamSpec(),
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

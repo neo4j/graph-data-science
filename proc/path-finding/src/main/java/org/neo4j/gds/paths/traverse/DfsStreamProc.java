@@ -69,7 +69,8 @@ public class DfsStreamProc extends AlgoBaseProc<DFS, HugeLongArray, DfsStreamCon
 
         return new MemoryEstimationExecutor<>(
             streamSpec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphName, configuration);
     }
 

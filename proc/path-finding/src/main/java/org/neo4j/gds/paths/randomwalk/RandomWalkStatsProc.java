@@ -56,7 +56,8 @@ public class RandomWalkStatsProc extends BaseProc {
     ) {
         return new MemoryEstimationExecutor<>(
             new RandomWalkStatsSpec(),
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 

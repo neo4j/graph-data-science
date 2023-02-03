@@ -40,7 +40,6 @@ import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
-import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
@@ -62,9 +61,6 @@ public interface ExecutionContext {
 
     Log log();
 
-    @Nullable
-    TransactionContext transactionContext();
-
     TerminationMonitor terminationMonitor();
 
     CloseableResourceRegistry closeableResourceRegistry();
@@ -84,6 +80,8 @@ public interface ExecutionContext {
 
     String username();
 
+    boolean isGdsAdmin();
+
     @Nullable
     RelationshipStreamExporterBuilder<? extends RelationshipStreamExporter> relationshipStreamExporterBuilder();
 
@@ -92,15 +90,6 @@ public interface ExecutionContext {
 
     @Nullable
     NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder();
-
-    @Value.Lazy
-    default boolean isGdsAdmin() {
-        var transactionContext = transactionContext();
-        if (transactionContext == null) {
-            return false;
-        }
-        return transactionContext.isGdsAdmin();
-    }
 
     @Value.Lazy
     default boolean containsOutputField(String fieldName) {
@@ -155,11 +144,6 @@ public interface ExecutionContext {
         }
 
         @Override
-        public TransactionContext transactionContext() {
-            return null;
-        }
-
-        @Override
         public AlgorithmMetaDataSetter algorithmMetaDataSetter() {
             return AlgorithmMetaDataSetter.EMPTY;
         }
@@ -193,6 +177,11 @@ public interface ExecutionContext {
         public @Nullable
         UserLogRegistryFactory userLogRegistryFactory() {
             return EmptyUserLogRegistryFactory.INSTANCE;
+        }
+
+        @Override
+        public boolean isGdsAdmin() {
+            return false;
         }
 
         @Override

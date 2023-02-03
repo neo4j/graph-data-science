@@ -58,7 +58,8 @@ public class CELFStreamProc extends BaseProc {
 
         return new MemoryEstimationExecutor<>(
             streamSpec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphName, configuration);
     }
 }

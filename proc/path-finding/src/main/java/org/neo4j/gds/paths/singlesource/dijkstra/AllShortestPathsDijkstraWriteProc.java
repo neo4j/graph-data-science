@@ -75,7 +75,8 @@ public class AllShortestPathsDijkstraWriteProc extends BaseProc {
         return new MemoryEstimationExecutor<>(
             writeSpec,
             pipelineSpec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 

@@ -62,7 +62,8 @@ public class KmeansMutateProc extends AlgoBaseProc<Kmeans, KmeansResult, KmeansM
 
         return new MemoryEstimationExecutor<>(
             writeSpec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphName, configuration);
     }
 

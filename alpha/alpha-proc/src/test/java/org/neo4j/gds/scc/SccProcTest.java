@@ -33,7 +33,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
-import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.gds.transaction.DatabaseTransactionContext;
 
 import java.util.Map;
 
@@ -150,7 +150,7 @@ class SccProcTest extends BaseProcTest {
 
             proc.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore, jobId));
             proc.nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(
-                TransactionContext.of(proc.databaseService, proc.procedureTransaction)
+                DatabaseTransactionContext.of(proc.databaseService, proc.procedureTransaction)
             );
 
             proc.write(

@@ -44,7 +44,7 @@ import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestAlgorithmResult;
 import org.neo4j.gds.test.TestResult;
 import org.neo4j.gds.test.TestWriteConfig;
-import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.List;
@@ -77,7 +77,7 @@ class WriteProcCancellationTest extends BaseTest {
             var resultConsumer = new WriteNodePropertiesComputationResultConsumer<TestAlgorithm, TestAlgorithmResult, TestWriteConfig, TestResult>(
                 (computationResult, executionContext) -> new TestAlgoResultBuilder(),
                 (computationResult) -> List.of(nodeProperty),
-                new NativeNodePropertiesExporterBuilder(TransactionContext.of(db, tx)),
+                new NativeNodePropertiesExporterBuilder(DatabaseTransactionContext.of(db, tx)),
                 "foo"
             );
 
@@ -120,6 +120,7 @@ class WriteProcCancellationTest extends BaseTest {
                 .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
                 .nodeLookup(NodeLookup.EMPTY)
                 .callContext(ProcedureCallContext.EMPTY)
+                .isGdsAdmin(false)
                 .build();
 
             assertThatThrownBy(() -> resultConsumer.consume(computationResult, executionContext))
