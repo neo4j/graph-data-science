@@ -32,6 +32,7 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -85,7 +86,7 @@ class YensTest {
     }
 
     // https://en.wikipedia.org/wiki/Yen%27s_algorithm#/media/File:Yen's_K-Shortest_Path_Algorithm,_K=3,_A_to_F.gif
-    @GdlGraph
+    @GdlGraph(aggregation = Aggregation.SINGLE)
     private static final String DB_CYPHER =
         "CREATE" +
         "  (c:C {id: 0})" +
@@ -165,7 +166,8 @@ class YensTest {
     @ParameterizedTest
     @MethodSource("pathInput")
     void compute(Collection<String> expectedPaths) {
-        assertResult(graph, idFunction, expectedPaths);
+
+        assertResult(graph, idFunction, expectedPaths, false);
     }
 
     @Test
@@ -238,8 +240,13 @@ class YensTest {
             );
     }
 
-    private static void assertResult(Graph graph, IdFunction idFunction, Collection<String> expectedPaths) {
-        var expectedPathResults = expectedPathResults(idFunction, expectedPaths);
+    private static void assertResult(
+        Graph graph,
+        IdFunction idFunction,
+        Collection<String> expectedPaths,
+        boolean trackRelationships
+    ) {
+        var expectedPathResults = expectedPathResults(idFunction, expectedPaths, trackRelationships);
 
         var firstResult = expectedPathResults
             .stream()
@@ -267,7 +274,11 @@ class YensTest {
     }
 
     @NotNull
-    private static Set<PathResult> expectedPathResults(IdFunction idFunction, Collection<String> expectedPaths) {
+    private static Set<PathResult> expectedPathResults(
+        IdFunction idFunction,
+        Collection<String> expectedPaths,
+        boolean trackRelationships
+    ) {
         var index = new MutableInt(0);
         return expectedPaths.stream()
             .map(expectedPath -> new GDLHandler.Builder()
@@ -312,7 +323,7 @@ class YensTest {
                     .sourceNode(sourceNode.getId())
                     .targetNode(targetNode.getId())
                     .nodeIds(nodeIds)
-                    .relationshipIds(relationshipIds)
+                    .relationshipIds(trackRelationships ? relationshipIds : new long[0])
                     .costs(costs)
                     .build();
             })
@@ -375,7 +386,7 @@ class YensTest {
         @ParameterizedTest
         @MethodSource("pathInput")
         void compute(Collection<String> expectedPaths) {
-            assertResult(graph, idFunction, expectedPaths);
+            assertResult(graph, idFunction, expectedPaths, true);
         }
     }
 }
