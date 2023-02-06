@@ -20,6 +20,7 @@
 package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
@@ -29,7 +30,6 @@ import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
 
 import java.util.Collections;
@@ -77,8 +77,8 @@ final class LocalClusteringCoefficientCompanion {
 
         double averageClusteringCoefficient = 0;
 
-        ResultBuilder(ProcedureCallContext callContext, int concurrency) {
-            super(callContext, concurrency);
+        ResultBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
+            super(returnColumns, concurrency);
         }
 
         ResultBuilder<PROC_RESULT> withAverageClusteringCoefficient(double averageClusteringCoefficient) {

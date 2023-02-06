@@ -22,6 +22,7 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':ml-core')
     implementation project(':neo4j-adapter')
+    implementation project(':neo4j-api')
     implementation project(':pregel')
     implementation project(':string-formatting')
     implementation project(':transaction')

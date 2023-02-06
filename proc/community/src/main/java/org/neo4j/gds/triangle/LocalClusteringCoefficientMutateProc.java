@@ -21,6 +21,7 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
@@ -29,7 +30,6 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -91,7 +91,7 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
     ) {
         return LocalClusteringCoefficientCompanion.resultBuilder(
             new LocalClusteringCoefficientMutateBuilder(
-                executionContext.callContext(),
+                executionContext.returnColumns(),
                 computeResult.config().concurrency()
             ),
             computeResult
@@ -128,10 +128,10 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
     static class LocalClusteringCoefficientMutateBuilder extends LocalClusteringCoefficientCompanion.ResultBuilder<MutateResult> {
 
         LocalClusteringCoefficientMutateBuilder(
-            ProcedureCallContext callContext,
+            ProcedureReturnColumns returnColumns,
             int concurrency
         ) {
-            super(callContext, concurrency);
+            super(returnColumns, concurrency);
         }
 
         @Override

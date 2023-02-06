@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.executor;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.annotation.ValueClass;
@@ -28,6 +27,7 @@ import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.EmptyDependencyResolver;
 import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -40,11 +40,8 @@ import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
-
-import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 
 @ValueClass
 public interface ExecutionContext {
@@ -65,7 +62,7 @@ public interface ExecutionContext {
 
     NodeLookup nodeLookup();
 
-    ProcedureCallContext callContext();
+    ProcedureReturnColumns returnColumns();
 
     TaskRegistryFactory taskRegistryFactory();
 
@@ -83,12 +80,6 @@ public interface ExecutionContext {
 
     @Nullable
     NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder();
-
-    @Value.Lazy
-    default boolean containsOutputField(String fieldName) {
-        return callContext().outputFields()
-            .anyMatch(field -> toLowerCaseWithLocale(field).equals(fieldName));
-    }
 
     default ExecutionContext withNodePropertyExporterBuilder(NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder) {
         return ImmutableExecutionContext
@@ -157,8 +148,8 @@ public interface ExecutionContext {
         }
 
         @Override
-        public ProcedureCallContext callContext() {
-            return ProcedureCallContext.EMPTY;
+        public ProcedureReturnColumns returnColumns() {
+            return ProcedureReturnColumns.EMPTY;
         }
 
         @Override

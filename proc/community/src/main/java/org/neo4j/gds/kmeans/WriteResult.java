@@ -20,8 +20,8 @@
 package org.neo4j.gds.kmeans;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.List;
 import java.util.Map;
@@ -64,11 +64,8 @@ public class WriteResult extends StatsResult {
 
         private double averageSilhouette;
 
-        Builder(
-            ProcedureCallContext context,
-            int concurrency
-        ) {
-            super(context, concurrency);
+        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+            super(returnColumns, concurrency);
         }
 
         @Override

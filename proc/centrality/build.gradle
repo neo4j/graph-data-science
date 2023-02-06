@@ -19,6 +19,7 @@ dependencies {
     implementation project(':core')
     implementation project(':executor')
     implementation project(':neo4j-adapter')
+    implementation project(':neo4j-api')
     implementation project(':pregel')
     implementation project(':string-formatting')
 

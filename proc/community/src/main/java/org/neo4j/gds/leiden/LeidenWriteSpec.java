@@ -62,7 +62,7 @@ public class LeidenWriteSpec implements AlgorithmSpec<Leiden, LeidenResult, Leid
         return (computationResult, executionContext) -> {
             var leidenResult = computationResult.result();
             var graph = computationResult.graph();
-            var builder = new WriteResult.Builder(executionContext.callContext(), computationResult.config().concurrency())
+            var builder = new WriteResult.Builder(executionContext.returnColumns(), computationResult.config().concurrency())
                 .withLevels(leidenResult.ranLevels())
                 .withDidConverge(leidenResult.didConverge())
                 .withModularities(Arrays.stream(leidenResult.modularities())
@@ -113,7 +113,7 @@ public class LeidenWriteSpec implements AlgorithmSpec<Leiden, LeidenResult, Leid
         ExecutionContext executionContext
     ) {
         var leidenResult = computationResult.result();
-        return new WriteResult.Builder(executionContext.callContext(), computationResult.config().concurrency())
+        return new WriteResult.Builder(executionContext.returnColumns(), computationResult.config().concurrency())
             .withLevels(leidenResult.ranLevels())
             .withDidConverge(leidenResult.didConverge())
             .withModularities(Arrays.stream(leidenResult.modularities())

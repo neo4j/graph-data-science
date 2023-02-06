@@ -57,7 +57,7 @@ public class LeidenStatsSpec implements AlgorithmSpec<Leiden, LeidenResult, Leid
             }
 
             var statsBuilder = new StatsResult.StatsBuilder(
-                executionContext.callContext(),
+                executionContext.returnColumns(),
                 computationResult.config().concurrency()
             );
 

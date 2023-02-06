@@ -21,10 +21,10 @@ package org.neo4j.gds.result;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.scaling.ScalarScaler;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,12 +46,10 @@ public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends Abst
     protected Map<String, Object> centralityHistogram;
 
     protected AbstractCentralityResultBuilder(
-        ProcedureCallContext callContext,
+        ProcedureReturnColumns returnColumns,
         int concurrency
     ) {
-        this.buildHistogram = callContext
-            .outputFields()
-            .anyMatch(s -> s.equalsIgnoreCase("centralityDistribution"));
+        this.buildHistogram = returnColumns.contains("centralityDistribution");
         this.concurrency = concurrency;
         this.histogramError = new HashMap<>();
     }

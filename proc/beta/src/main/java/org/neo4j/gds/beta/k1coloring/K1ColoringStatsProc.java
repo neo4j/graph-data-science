@@ -21,6 +21,7 @@ package org.neo4j.gds.beta.k1coloring;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
@@ -28,7 +29,6 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -69,10 +69,10 @@ public class K1ColoringStatsProc extends StatsProc<K1Coloring, HugeLongArray, K1
         ExecutionContext executionContext
     ) {
         StatsResult.Builder builder = new StatsResult.Builder(
-            executionContext.callContext(),
+            executionContext.returnColumns(),
             computeResult.config().concurrency()
         );
-        return K1ColoringProc.resultBuilder(builder, computeResult, executionContext.callContext());
+        return K1ColoringProc.resultBuilder(builder, computeResult, executionContext.returnColumns());
     }
 
     @Override
@@ -119,10 +119,10 @@ public class K1ColoringStatsProc extends StatsProc<K1Coloring, HugeLongArray, K1
         static class Builder extends K1ColoringProc.K1ColoringResultBuilder<StatsResult> {
 
             Builder(
-                ProcedureCallContext context,
+                ProcedureReturnColumns returnColumns,
                 int concurrency
             ) {
-                super(context, concurrency);
+                super(returnColumns, concurrency);
             }
 
             @Override

@@ -22,6 +22,7 @@ package org.neo4j.gds.degree;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
@@ -31,7 +32,6 @@ import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -86,7 +86,7 @@ public class DegreeCentralityWriteProc extends WriteProc<DegreeCentrality, Degre
         ExecutionContext executionContext
     ) {
         return DegreeCentralityProc.resultBuilder(
-            new WriteResult.Builder(executionContext.callContext(), computeResult.config().concurrency()),
+            new WriteResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
             computeResult
         );
     }
@@ -113,8 +113,8 @@ public class DegreeCentralityWriteProc extends WriteProc<DegreeCentrality, Degre
 
         static class Builder extends AbstractCentralityResultBuilder<WriteResult> {
 
-            Builder(ProcedureCallContext context, int concurrency) {
-                super(context, concurrency);
+            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+                super(returnColumns, concurrency);
             }
 
             @Override

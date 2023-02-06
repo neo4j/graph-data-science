@@ -22,6 +22,7 @@ package org.neo4j.gds.beta.closeness;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
@@ -31,7 +32,6 @@ import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.StandardMutateResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -86,7 +86,7 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
         ExecutionContext executionContext
     ) {
         var procResultBuilder = new MutateResult.Builder(
-            executionContext.callContext(),
+            executionContext.returnColumns(),
             computeResult.config().concurrency()
         ).withMutateProperty(computeResult.config().mutateProperty());
         return ClosenessCentralityProc
@@ -119,8 +119,8 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
         static final class Builder extends AbstractCentralityResultBuilder<ClosenessCentralityMutateProc.MutateResult> {
             public String mutateProperty;
 
-            private Builder(ProcedureCallContext callContext, int concurrency) {
-                super(callContext, concurrency);
+            private Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+                super(returnColumns, concurrency);
             }
 
             public ClosenessCentralityMutateProc.MutateResult.Builder withMutateProperty(String mutateProperty) {

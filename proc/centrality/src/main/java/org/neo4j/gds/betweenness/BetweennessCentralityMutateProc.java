@@ -22,6 +22,7 @@ package org.neo4j.gds.betweenness;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
@@ -32,7 +33,6 @@ import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -90,7 +90,7 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
         ExecutionContext executionContext
     ) {
         return BetweennessCentralityProc.resultBuilder(new MutateResult.Builder(
-            executionContext.callContext(),
+            executionContext.returnColumns(),
             computeResult.config().concurrency()
         ), computeResult);
     }
@@ -124,8 +124,8 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
 
         static final class Builder extends AbstractCentralityResultBuilder<MutateResult> {
 
-            Builder(ProcedureCallContext context, int concurrency) {
-                super(context, concurrency);
+            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+                super(returnColumns, concurrency);
             }
 
             @Override

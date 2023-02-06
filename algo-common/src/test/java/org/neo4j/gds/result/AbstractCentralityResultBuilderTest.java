@@ -20,7 +20,9 @@
 package org.neo4j.gds.result;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+import org.neo4j.gds.api.ProcedureReturnColumns;
+
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,7 +30,18 @@ class AbstractCentralityResultBuilderTest {
 
     @Test
     void catchHistogramAIOOBbug() {
-        AbstractCentralityResultBuilder<Object> builder = new AbstractCentralityResultBuilder<>(new ProcedureCallContext(42, new String[]{"centralityDistribution"}, false, "fakeDb", false), 4) {
+        var procedureReturnColumns = new ProcedureReturnColumns() {
+            @Override
+            public boolean contains(String fieldName) {
+                return fieldName.equals("centralityDistribution");
+            }
+
+            @Override
+            public ProcedureReturnColumns withReturnColumnNameTransformationFunction(Function<String, String> transformationFunction) {
+                return null;
+            }
+        };
+        AbstractCentralityResultBuilder<Object> builder = new AbstractCentralityResultBuilder<>(procedureReturnColumns, 4) {
             @Override
             protected Object buildResult() {
                 return null;

@@ -24,6 +24,7 @@ import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -45,7 +46,6 @@ import org.neo4j.gds.similarity.SimilarityProc;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.TopKGraph;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -108,7 +108,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
                     computationResult.result().graphResult(),
                     config.mutateProperty(),
                     (SimilarityProc.SimilarityResultBuilder<SimilarityMutateResult>) resultBuilder,
-                    executionContext.callContext()
+                    executionContext.returnColumns()
                 );
 
 
@@ -128,7 +128,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
         SimilarityGraphResult similarityGraphResult,
         String relationshipPropertyKey,
         SimilarityProc.SimilarityResultBuilder<SimilarityMutateResult> resultBuilder,
-        ProcedureCallContext callContext
+        ProcedureReturnColumns returnColumns
     ) {
         SingleTypeRelationships resultRelationships;
 
@@ -147,7 +147,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
 
             IdMap idMap = computationResult.graph();
 
-            if (shouldComputeHistogram(callContext)) {
+            if (shouldComputeHistogram(returnColumns)) {
                 DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
                 topKGraph.forEachNode(nodeId -> {
                     topKGraph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, property) -> {
@@ -178,7 +178,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
                 similarityGraph.relationshipProperties(),
                 Optional.of(RelationshipPropertySchema.of(relationshipPropertyKey, ValueType.DOUBLE))
             );
-            if (shouldComputeHistogram(callContext)) {
+            if (shouldComputeHistogram(returnColumns)) {
                 resultBuilder.withHistogram(computeHistogram(similarityGraph));
             }
         }

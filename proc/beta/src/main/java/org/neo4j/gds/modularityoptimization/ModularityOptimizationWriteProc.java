@@ -21,6 +21,7 @@ package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
@@ -28,7 +29,6 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -82,7 +82,7 @@ public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimiz
         ExecutionContext executionContext
     ) {
         return ModularityOptimizationProc.resultBuilder(
-            new WriteResult.Builder(executionContext.callContext(), computeResult.config().concurrency()),
+            new WriteResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
             computeResult
         );
     }
@@ -131,10 +131,10 @@ public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimiz
         static class Builder extends ModularityOptimizationProc.ModularityOptimizationResultBuilder<WriteResult> {
 
             Builder(
-                ProcedureCallContext context,
+                ProcedureReturnColumns returnColumns,
                 int concurrency
             ) {
-                super(context, concurrency);
+                super(returnColumns, concurrency);
             }
 
             @Override

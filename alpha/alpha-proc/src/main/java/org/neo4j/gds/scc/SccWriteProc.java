@@ -20,6 +20,7 @@
 package org.neo4j.gds.scc;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -33,7 +34,6 @@ import org.neo4j.gds.impl.scc.SccAlgorithm;
 import org.neo4j.gds.impl.scc.SccConfig;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -67,7 +67,7 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
             Graph graph = computationResult.graph();
 
             AbstractResultBuilder<SccResult> writeBuilder = new SccResultBuilder(
-                executionContext.callContext(),
+                executionContext.returnColumns(),
                 config.concurrency()
             )
                 .buildCommunityCount(true)
@@ -189,8 +189,8 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
 
     public static final class SccResultBuilder extends AbstractCommunityResultBuilder<SccResult> {
 
-        SccResultBuilder(ProcedureCallContext context, int concurrency) {
-            super(context, concurrency);
+        SccResultBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
+            super(returnColumns, concurrency);
         }
 
         @Override
