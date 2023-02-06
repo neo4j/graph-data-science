@@ -217,6 +217,7 @@ public final class Dijkstra extends Algorithm<DijkstraResult> {
                 return pathResult(node, pathResultBuilder);
             }
         }
+
         return PathResult.EMPTY;
     }
 
