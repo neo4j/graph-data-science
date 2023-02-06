@@ -91,7 +91,8 @@ class BfsStreamComputationResultConsumerTest {
         when(configMock.sourceNode()).thenReturn(0L);
         when(computationResultMock.config()).thenReturn(configMock);
 
-        doReturn(ProcedureReturnColumns.EMPTY).when(executionContextMock).returnColumns();
+        when(executionContextMock.returnColumns()).thenReturn(mock(ProcedureReturnColumns.class));
+        when(executionContextMock.returnColumns().contains("path")).thenReturn(true);
         doReturn(NodeLookup.EMPTY).when(executionContextMock).nodeLookup();
 
         doReturn(mock(Path.class)).when(pathFactoryFacadeMock).createPath(any(), any(), any());
