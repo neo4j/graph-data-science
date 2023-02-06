@@ -43,7 +43,7 @@ public class ProcedureCallContextReturnColumns implements ProcedureReturnColumns
     }
 
     @Override
-    public ProcedureReturnColumns withTransformationFunction(Function<String, String> transformationFunction) {
+    public ProcedureReturnColumns withReturnColumnNameTransformationFunction(Function<String, String> transformationFunction) {
         this.transformationFunction = transformationFunction;
         return this;
     }

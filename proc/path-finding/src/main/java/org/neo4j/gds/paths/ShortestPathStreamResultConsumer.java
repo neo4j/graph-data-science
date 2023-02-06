@@ -43,7 +43,7 @@ public final class ShortestPathStreamResultConsumer<ALGO extends Algorithm<Dijks
 
         var shouldReturnPath = executionContext
             .returnColumns()
-            .withTransformationFunction(StringFormatting::toLowerCaseWithLocale)
+            .withReturnColumnNameTransformationFunction(StringFormatting::toLowerCaseWithLocale)
             .contains("path");
 
         var resultBuilder = new StreamResult.Builder(graph, executionContext.nodeLookup());

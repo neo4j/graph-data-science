@@ -37,7 +37,7 @@ class AbstractCentralityResultBuilderTest {
             }
 
             @Override
-            public ProcedureReturnColumns withTransformationFunction(Function<String, String> transformationFunction) {
+            public ProcedureReturnColumns withReturnColumnNameTransformationFunction(Function<String, String> transformationFunction) {
                 return null;
             }
         };

@@ -68,7 +68,7 @@ public class RandomWalkStreamSpec implements AlgorithmSpec<RandomWalk, Stream<lo
 
             var returnPath = executionContext
                 .returnColumns()
-                .withTransformationFunction(StringFormatting::toLowerCaseWithLocale)
+                .withReturnColumnNameTransformationFunction(StringFormatting::toLowerCaseWithLocale)
                 .contains("path");
 
             Function<List<Long>, Path> pathCreator = returnPath

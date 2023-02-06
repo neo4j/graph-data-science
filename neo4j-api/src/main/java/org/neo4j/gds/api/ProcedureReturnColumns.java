@@ -25,7 +25,7 @@ public interface ProcedureReturnColumns {
 
     boolean contains(String fieldName);
 
-    ProcedureReturnColumns withTransformationFunction(Function<String, String> transformationFunction);
+    ProcedureReturnColumns withReturnColumnNameTransformationFunction(Function<String, String> transformationFunction);
 
     ProcedureReturnColumns EMPTY = new ProcedureReturnColumns() {
         @Override
@@ -34,7 +34,7 @@ public interface ProcedureReturnColumns {
         }
 
         @Override
-        public ProcedureReturnColumns withTransformationFunction(Function<String, String> transformationFunction) {
+        public ProcedureReturnColumns withReturnColumnNameTransformationFunction(Function<String, String> transformationFunction) {
             return this;
         }
     };

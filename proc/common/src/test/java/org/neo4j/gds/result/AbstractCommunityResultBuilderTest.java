@@ -253,7 +253,7 @@ final class AbstractCommunityResultBuilderTest {
             }
 
             @Override
-            public ProcedureReturnColumns withTransformationFunction(Function<String, String> transformationFunction) {
+            public ProcedureReturnColumns withReturnColumnNameTransformationFunction(Function<String, String> transformationFunction) {
                 return this;
             }
         };
