@@ -30,7 +30,7 @@ public class TerminationFlagImpl implements TerminationFlag {
     private volatile long lastCheck = 0;
     private volatile boolean running = true;
 
-    TerminationFlagImpl(TerminationMonitor terminationMonitor) {
+    public TerminationFlagImpl(TerminationMonitor terminationMonitor) {
         this.terminationMonitor = terminationMonitor;
     }
 
