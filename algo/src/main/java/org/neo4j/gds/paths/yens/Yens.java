@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.PriorityQueue;
+import java.util.function.BiConsumer;
 import java.util.function.ToLongBiFunction;
 import java.util.stream.Stream;
 
@@ -55,6 +56,8 @@ public final class Yens extends Algorithm<DijkstraResult> {
     private final LongObjectScatterMap<LongHashSet> relationshipAvoidList;
     private final ToLongBiFunction
         <MutablePathResult, Integer> relationshipAvoidMapper;
+    private final BiConsumer<MutablePathResult, PathResult> pathAppender;
+
 
     /**
      * Configure Yens to compute at most one source-target shortest path.
@@ -109,10 +112,12 @@ public final class Yens extends Algorithm<DijkstraResult> {
             // if we are in a multi-graph, we  must store the relationships ids as they are
             //since two nodes may be connected by multiple relationships and we must know which to avoid
             relationshipAvoidMapper = (path, position) -> path.relationship(position);
+            pathAppender = (rootPath, spurPath) -> rootPath.append(MutablePathResult.of(spurPath));
         } else {
             //otherwise the graph has surely no parallel edges, we do not need to explicitly store relationship ids
             //we can just store endpoints, so that we know which nodes a node should avoid
             relationshipAvoidMapper = (path, position) -> path.node(position + 1);
+            pathAppender = (rootPath, spurPath) -> rootPath.appendWithoutRelationshipIds(MutablePathResult.of(spurPath));
         }
         dijkstra.withRelationshipFilter((source, target, relationshipId) ->
             !nodeAvoidList.contains(target)
@@ -196,7 +201,8 @@ public final class Yens extends Algorithm<DijkstraResult> {
                 }
 
                 // Entire path is made up of the root path and spur path.
-                rootPath.append(MutablePathResult.of(spurPath.get()), graph.isMultiGraph());
+                pathAppender.accept(rootPath, spurPath.get());
+                
                 // Add the potential k-shortest path to the heap.
                 if (!candidates.contains(rootPath)) {
                     candidates.add(rootPath);
@@ -214,7 +220,7 @@ public final class Yens extends Algorithm<DijkstraResult> {
         progressTracker.endSubTask();
 
         progressTracker.endSubTask();
-    
+
         return new DijkstraResult(kShortestPaths.stream().map(MutablePathResult::toPathResult));
     }
 
