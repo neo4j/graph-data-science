@@ -24,21 +24,22 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class ProcedureCallContextReturnColumns implements ProcedureReturnColumns {
 
-    private final Stream<String> returnColumns;
+    private final Supplier<Stream<String>> returnColumnsSupplier;
     private Function<String, String> transformationFunction;
 
     public ProcedureCallContextReturnColumns(ProcedureCallContext procedureCallContext) {
-        this.returnColumns = procedureCallContext.outputFields();
+        this.returnColumnsSupplier = procedureCallContext::outputFields;
         this.transformationFunction = Functions.identity();
     }
 
     @Override
     public boolean contains(String fieldName) {
-        return returnColumns.map(transformationFunction).anyMatch(column -> column.equals(fieldName));
+        return returnColumnsSupplier.get().map(transformationFunction).anyMatch(column -> column.equals(fieldName));
     }
 
     @Override
