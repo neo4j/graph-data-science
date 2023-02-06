@@ -1,3 +1,5 @@
+:page-aliases: algorithms/alpha/leiden.adoc
+
 [[algorithms-leiden]]
 [.beta]
 = Leiden
