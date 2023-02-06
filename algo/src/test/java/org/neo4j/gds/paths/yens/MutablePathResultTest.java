@@ -170,7 +170,7 @@ class MutablePathResultTest {
         var path1 = testPath(0, 1, 2);
         var path2 = testPath(2, 3, 4);
 
-        path1.append(path2);
+        path1.append(path2, true);
         var expected = testPath(0, 1, 2, 3, 4);
 
         assertEquals(expected, path1);
@@ -184,7 +184,7 @@ class MutablePathResultTest {
         var expected = MutablePathResult.of(ImmutablePathResult.builder().nodeIds(0, 1, 2, 3, 4).relationshipIds(0, 1, 2, 3).costs(0, 1, 42, 55, 79).sourceNode(0).targetNode(2).index(2).build());
         //@formatter:on
 
-        p1.append(p2);
+        p1.append(p2, true);
 
         assertEquals(expected, p1);
         assertEquals(expected.totalCost(), p1.totalCost());
@@ -195,6 +195,6 @@ class MutablePathResultTest {
         var path1 = testPath(0, 1, 2);
         var path2 = testPath(4, 3, 5);
 
-        assertThatThrownBy(() -> path1.append(path2)).isInstanceOf(AssertionError.class);
+        assertThatThrownBy(() -> path1.append(path2, true)).isInstanceOf(AssertionError.class);
     }
 }

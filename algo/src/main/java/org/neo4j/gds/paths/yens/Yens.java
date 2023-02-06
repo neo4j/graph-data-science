@@ -65,6 +65,16 @@ public final class Yens extends Algorithm<DijkstraResult> {
         // If the input graph is a multi-graph, we need to track
         // parallel relationships. This is necessary since shortest
         // paths can visit the same nodes via different relationships.
+
+        System.out.println(graph.schema().relationshipSchema().toMap());
+        graph.forEachNode(nodeId -> {
+            graph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
+                System.out.println(s + "-[" + w + "]->" + t);
+                return true;
+            });
+            return true;
+        });
+
         var newConfig = ImmutableShortestPathYensBaseConfig
             .builder()
             .from(config)
@@ -101,9 +111,10 @@ public final class Yens extends Algorithm<DijkstraResult> {
         this.dijkstra = dijkstra;
         dijkstra.withRelationshipFilter((source, target, relationshipId) ->
             !nodeBlackList.contains(target) &&
-            !(relationshipBlackList.getOrDefault(source, EMPTY_SET).contains(relationshipId))
-        );
+            !(relationshipBlackList.getOrDefault(source, EMPTY_SET).contains(relationshipId)) &&
+            !(relationshipBlackList.getOrDefault(source, EMPTY_SET).contains(-target - 1)));
     }
+
 
     @Override
     public DijkstraResult compute() {
@@ -139,7 +150,8 @@ public final class Yens extends Algorithm<DijkstraResult> {
                     // Filter relationships that are part of the previous
                     // shortest paths which share the same root path.
                     if (rootPath.matchesExactly(path, n + 1)) {
-                        var relationshipId = path.relationship(n);
+                        System.out.println(i + ": " + rootPath + " |" + prevPath);
+                        var relationshipId = graph.isMultiGraph() ? path.relationship(n) : -(1 + path.node(n + 1));
 
                         var neighbors = relationshipBlackList.get(spurNode);
 
@@ -171,7 +183,7 @@ public final class Yens extends Algorithm<DijkstraResult> {
                 }
 
                 // Entire path is made up of the root path and spur path.
-                rootPath.append(MutablePathResult.of(spurPath.get()));
+                rootPath.append(MutablePathResult.of(spurPath.get()), graph.isMultiGraph());
                 // Add the potential k-shortest path to the heap.
                 if (!candidates.contains(rootPath)) {
                     candidates.add(rootPath);
@@ -189,7 +201,10 @@ public final class Yens extends Algorithm<DijkstraResult> {
         progressTracker.endSubTask();
 
         progressTracker.endSubTask();
-
+        System.out.println("----");
+        for (var path : kShortestPaths) {
+            System.out.println(path);
+        }
         return new DijkstraResult(kShortestPaths.stream().map(MutablePathResult::toPathResult));
     }
 

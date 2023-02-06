@@ -131,10 +131,10 @@ final class MutablePathResult {
      */
     boolean matchesExactly(MutablePathResult path, int index) {
 
-        if (relationshipIds == null || path.relationshipIds == null) {
+        if (relationshipIds.length == 0 || path.relationshipIds.length == 0) {
             return matches(path, index);
         }
-
+        //System.out.println(Arrays.toString(Arrays.stream(relationshipIds).toArray()));
         for (int i = 0; i < index; i++) {
             if (nodeIds[i] != path.nodeIds[i]) {
                 return false;
@@ -157,7 +157,7 @@ final class MutablePathResult {
      * The cost value associated with the last value in this path, is added to
      * the costs for each node in the second path.
      */
-    void append(MutablePathResult path) {
+    void append(MutablePathResult path, boolean shouldstore) {
         // spur node is end of first and beginning of second path
         assert nodeIds[nodeIds.length - 1] == path.nodeIds[0];
 
@@ -186,7 +186,7 @@ final class MutablePathResult {
         }
 
         this.nodeIds = newNodeIds;
-        this.relationshipIds = newRelationshipIds;
+        this.relationshipIds = shouldstore ? newRelationshipIds : new long[0];
         this.costs = newCosts;
     }
 
