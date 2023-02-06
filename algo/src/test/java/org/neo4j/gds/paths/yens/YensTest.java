@@ -168,6 +168,7 @@ class YensTest {
     void compute(Collection<String> expectedPaths) {
 
         assertResult(graph, idFunction, expectedPaths, false);
+
     }
 
     @Test
