@@ -50,6 +50,8 @@ public enum Neo4jVersion {
                 return "5.4";
             case V_5_5:
                 return "5.5";
+            case V_RC:
+                return "rc";
             default:
                 throw new IllegalArgumentException("Unexpected value: " + this.name() + " (sad java 😞)");
         }
