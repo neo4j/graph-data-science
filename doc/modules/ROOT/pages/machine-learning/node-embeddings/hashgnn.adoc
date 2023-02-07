@@ -15,7 +15,9 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 {nbsp} +
 [TIP]
 ====
-HashGNN is featured in the end-to-end example Jupyter notebook https://github.com/neo4j/graph-data-science-client/blob/main/examples/heterogeneous-node-classification-with-hashgnn.ipynb[Heterogeneous Node Classification with HashGNN and Autotuning].
+HashGNN is featured in the end-to-end example Jupyter notebooks:
+
+* https://github.com/neo4j/graph-data-science-client/blob/main/examples/heterogeneous-node-classification-with-hashgnn.ipynb[Heterogeneous Node Classification with HashGNN and Autotuning]
 ====
 
 [[algorithms-embeddings-hashgnn-introduction]]
