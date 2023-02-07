@@ -41,11 +41,12 @@ public class TestAlgorithm extends Algorithm<TestAlgorithm> {
 
     @Override
     public TestAlgorithm compute() {
-        progressTracker.beginSubTask();
+        progressTracker.beginSubTask(100);
 
         if (throwInCompute) {
             throw new IllegalStateException("boo");
         }
+        progressTracker.logProgress(50);
         relationshipCount = graph.relationshipCount();
 
         progressTracker.endSubTask();
