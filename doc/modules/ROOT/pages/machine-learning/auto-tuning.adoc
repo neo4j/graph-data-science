@@ -2,6 +2,12 @@
 = Auto-tuning
 :description: This section describes auto-tuning for hyper-parameters in training pipelines in the Neo4j Graph Data Science library.
 
+[TIP]
+====
+Auto-tuning is featured in the end-to-end example Jupyter notebooks:
+
+* https://github.com/neo4j/graph-data-science-client/blob/main/examples/heterogeneous-node-classification-with-hashgnn.ipynb[Heterogeneous Node Classification with HashGNN and Autotuning]
+====
 
 xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipelines], xref:machine-learning/node-property-prediction/noderegression-pipelines/node-regression.adoc[Node Regression Pipelines], and xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipelines] are trained using supervised machine learning methods which have multiple configurable parameters that affect training outcomes.
 To obtain models with high quality, setting good values for the hyper-parameters can have a large impact.
