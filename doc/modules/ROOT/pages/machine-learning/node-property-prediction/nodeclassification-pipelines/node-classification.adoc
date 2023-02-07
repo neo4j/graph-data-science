@@ -42,11 +42,6 @@ The order of the probabilities matches the order of the classes registered in th
 
 NOTE: xref:machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc[Classification] can only be done with a classification model (not with a training pipeline).
 
-The node classification pipeline is featured in the end-to-end example Jupyter notebooks:
-
-* https://github.com/neo4j/graph-data-science-client/blob/main/examples/heterogeneous-node-classification-with-hashgnn.ipynb[Heterogeneous Node Classification with HashGNN and Autotuning].
-*
-
 This segment is divided into the following pages:
 
 * xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc[Configuring the pipeline]
