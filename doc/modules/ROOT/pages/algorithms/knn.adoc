@@ -16,7 +16,9 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 {nbsp} +
 [TIP]
 ====
-kNN is featured in the end-to-end example Jupyter notebook https://github.com/neo4j/graph-data-science-client/blob/main/examples/fastrp-and-knn.ipynb[FastRP and kNN end-to-end example].
+kNN is featured in the end-to-end example Jupyter notebooks:
+
+* https://github.com/neo4j/graph-data-science-client/blob/main/examples/fastrp-and-knn.ipynb[FastRP and kNN end-to-end example]
 ====
 
 [[algorithms-knn-intro]]
