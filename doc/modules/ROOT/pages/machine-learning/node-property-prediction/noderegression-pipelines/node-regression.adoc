@@ -6,6 +6,10 @@
 
 include::partial$/operations-reference/alpha-note.adoc[]
 
+[NOTE]
+====
+Node regression pipelines are featured in the end-to-end example Jupyter notebook https://github.com/neo4j/graph-data-science-client/blob/main/examples/node-regression-with-subgraph-and-graph-sample.ipynb[Node Regression pipeline].
+====
 
 Node Regression is a common machine learning task applied to graphs: training models to predict node property values.
 Concretely, Node Regression models are used to predict the value of node property based on other node properties.
