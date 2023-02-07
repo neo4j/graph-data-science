@@ -28,6 +28,8 @@ import org.neo4j.gds.core.utils.AscendingLongComparator;
 import java.util.Arrays;
 
 import static org.neo4j.gds.core.huge.VarLongDecoding.decodeDeltaVLongs;
+import static org.neo4j.gds.core.huge.VarLongDecoding.unsafeDecodeDeltaVLongs;
+import static org.neo4j.gds.core.huge.VarLongDecoding.unsafeDecodeVLongs;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodeVLongs;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodedVLongsSize;
 import static org.neo4j.gds.core.loading.ZigZagLongDecoding.zigZagUncompress;
@@ -115,6 +117,10 @@ public final class AdjacencyCompression {
         return encodeVLongs(data, offset, offset + length, out, 0);
     }
 
+    public static long compress(long[] data, int offset, int length, long ptr) {
+        return encodeVLongs(data, offset, offset + length, ptr);
+    }
+
     public static byte[] deltaEncodeAndCompress(long[] values, int offset, int length, Aggregation aggregation) {
         length = AdjacencyCompression.deltaEncodeSortedValues(values, offset, length, aggregation);
         var requiredBytes = VarLongEncoding.encodedVLongsSize(values, offset, length);
@@ -127,6 +133,22 @@ public final class AdjacencyCompression {
         long[] out = new long[numberOfValues];
         decodeDeltaVLongs(0L, compressed, 0, numberOfValues, out);
         return out;
+    }
+
+    public static long decompressAndPrefixSum(
+        int numberOfValues,
+        long previousValue,
+        long ptr,
+        long[] into,
+        int offset
+    ) {
+        unsafeDecodeDeltaVLongs(numberOfValues, previousValue, ptr, into, offset);
+        return ptr;
+    }
+
+    public static long decompress(int numberOfValues, long ptr, long[] into, int offset) {
+        unsafeDecodeVLongs(numberOfValues, ptr, into, offset);
+        return ptr;
     }
 
     public static int deltaEncodeSortedValues(long[] values, int offset, int length, Aggregation aggregation) {
@@ -171,6 +193,14 @@ public final class AdjacencyCompression {
 //            out += increase;
         }
         return out;
+    }
+
+    public static void prefixSumDeltaEncodedValues(long[] values, int length) {
+        length = Math.min(values.length, length);
+        long value = values[0];
+        for (int idx = 1; idx < length; ++idx) {
+            value = values[idx] += value;
+        }
     }
 
     /**

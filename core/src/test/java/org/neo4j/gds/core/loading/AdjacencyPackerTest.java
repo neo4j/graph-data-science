@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.mem.BitUtil;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -206,6 +207,55 @@ class AdjacencyPackerTest {
                 data = Arrays.stream(data).distinct().toArray();
                 break;
         }
+
+        assertThat(decompressed)
+            .as("compressed data did not roundtrip, seed = %d", random.seed())
+            .containsExactly(data);
+
+        compressed.free();
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Features.class)
+    void compressNonBlockAlignedConsecutiveLongs(Features features) {
+        assertThat(1337 % AdjacencyPacking.BLOCK_SIZE).isNotEqualTo(0);
+        var data = LongStream.range(0, 1337).toArray();
+
+        var compressed = AdjacencyPacker.compress(data.clone(), 0, data.length, features.flags());
+
+        assertThat(compressed.bytesUsed())
+            .as("compressed exceeds original size")
+            .isLessThanOrEqualTo(1337L * Long.BYTES);
+        assertThat(compressed.address()).isNotZero();
+
+        var decompressed = features.decompress(compressed);
+
+        assertThat(decompressed)
+            .as("compressed data did not roundtrip")
+            .containsExactly(data);
+
+        compressed.free();
+    }
+
+    @Test
+    void compressNonBlockAlignedRandomLongs() {
+        assertThat(1337 % AdjacencyPacking.BLOCK_SIZE).isNotEqualTo(0);
+        var random = newRandom();
+        var data = random.random().longs(4242, 0, 1L << 50)
+            .distinct()
+            .limit(1337)
+            .toArray();
+
+        var compressed = AdjacencyPacker.compress(data.clone(), 0, data.length, Features.SortAndDelta.flags());
+
+        assertThat(compressed.bytesUsed())
+            .as("compressed exceeds original size, seed = %d", random.seed())
+            .isLessThanOrEqualTo(BitUtil.ceilDiv(1337L, AdjacencyPacking.BLOCK_SIZE) * Long.BYTES);
+        assertThat(compressed.address()).isNotZero();
+
+        var decompressed = Features.SortAndDelta.decompress(compressed);
+
+        Arrays.sort(data);
 
         assertThat(decompressed)
             .as("compressed data did not roundtrip, seed = %d", random.seed())
