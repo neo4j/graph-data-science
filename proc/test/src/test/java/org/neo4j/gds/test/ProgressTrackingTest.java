@@ -23,12 +23,20 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
@@ -57,6 +65,7 @@ class ProgressTrackingTest {
             .extracting(replaceTimings())
             .containsExactly(
                 "TestAlgorithm :: Start",
+                "TestAlgorithm 50%",
                 "TestAlgorithm 100%",
                 "TestAlgorithm :: Finished"
             );
@@ -69,10 +78,24 @@ class ProgressTrackingTest {
         var testConfig = TestConfigImpl.builder().logProgress(false).build();
         var log = Neo4jProxy.testLog();
 
-        factory.build(graph, testConfig, log, TaskRegistryFactory.empty()).compute();
+        TaskRegistryFactory taskRegistryFactoryMock = mock(TaskRegistryFactory.class);
+        TaskRegistry taskRegistryMock = mock(TaskRegistry.class);
+        doReturn(taskRegistryMock).when(taskRegistryFactoryMock).newInstance(any(JobId.class));
+
+        factory.build(graph, testConfig, log, taskRegistryFactoryMock).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
-            .as("When `logProgress` is set to `false` there should be no log messages")
-            .isEmpty();
+            .as("When `logProgress` is set to `false` there should only be `start`, `100%` and `finished` log messages")
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "TestAlgorithm :: Start",
+                "TestAlgorithm 100%",
+                "TestAlgorithm :: Finished"
+            );
+
+        // Now make sure that the tasks have been registered
+        verify(taskRegistryMock, times(1)).registerTask(any(Task.class));
+        verify(taskRegistryMock, times(1)).unregisterTask();
     }
 }

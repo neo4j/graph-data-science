@@ -42,6 +42,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.internal.id.IdGeneratorFactory;
@@ -250,40 +251,41 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
 
     @Override
     protected ProgressTracker initProgressTracker() {
+        long relationshipCount = graphProjectConfig
+            .relationshipProjections()
+            .projections()
+            .entrySet()
+            .stream()
+            .map(entry -> {
+                long relCount = entry.getKey().name.equals("*")
+                    ? dimensions.relationshipCounts().values().stream().reduce(Long::sum).orElse(0L)
+                    : dimensions.relationshipCounts().getOrDefault(entry.getKey(), 0L);
+
+                return entry.getValue().orientation() == Orientation.UNDIRECTED
+                    ? relCount * 2
+                    : relCount;
+            }).mapToLong(Long::longValue).sum();
+
+        var properties = IndexPropertyMappings.prepareProperties(
+            graphProjectConfig,
+            dimensions,
+            loadingContext.transactionContext()
+        );
+
+        List<Task> nodeTasks = properties.indexedProperties().isEmpty()
+            ? List.of(Tasks.leaf("Store Scan", dimensions.nodeCount()))
+            : List.of(
+                Tasks.leaf("Store Scan", dimensions.nodeCount()),
+                Tasks.leaf("Property Index Scan", properties.indexedProperties().size() * dimensions.nodeCount())
+            );
+
+        var task = Tasks.task(
+            "Loading",
+            Tasks.task("Nodes", nodeTasks),
+            Tasks.task("Relationships", Tasks.leaf("Store Scan", relationshipCount))
+        );
+
         if (graphProjectConfig.logProgress()) {
-            long relationshipCount = graphProjectConfig
-                .relationshipProjections()
-                .projections()
-                .entrySet()
-                .stream()
-                .map(entry -> {
-                    long relCount = entry.getKey().name.equals("*")
-                        ? dimensions.relationshipCounts().values().stream().reduce(Long::sum).orElse(0L)
-                        : dimensions.relationshipCounts().getOrDefault(entry.getKey(), 0L);
-
-                    return entry.getValue().orientation() == Orientation.UNDIRECTED
-                        ? relCount * 2
-                        : relCount;
-                }).mapToLong(Long::longValue).sum();
-
-            var properties = IndexPropertyMappings.prepareProperties(
-                graphProjectConfig,
-                dimensions,
-                loadingContext.transactionContext()
-            );
-
-            List<Task> nodeTasks = properties.indexedProperties().isEmpty()
-                ? List.of(Tasks.leaf("Store Scan", dimensions.nodeCount()))
-                : List.of(
-                    Tasks.leaf("Store Scan", dimensions.nodeCount()),
-                    Tasks.leaf("Property Index Scan", properties.indexedProperties().size() * dimensions.nodeCount())
-                );
-
-            var task = Tasks.task(
-                "Loading",
-                Tasks.task("Nodes", nodeTasks),
-                Tasks.task("Relationships", Tasks.leaf("Store Scan", relationshipCount))
-            );
             return new TaskProgressTracker(
                 task,
                 loadingContext.log(),
@@ -294,7 +296,14 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
             );
         }
 
-        return ProgressTracker.NULL_TRACKER;
+        return new TaskTreeProgressTracker(
+            task,
+            loadingContext.log(),
+            graphProjectConfig.readConcurrency(),
+            graphProjectConfig.jobId(),
+            loadingContext.taskRegistryFactory(),
+            EmptyUserLogRegistryFactory.INSTANCE
+        );
     }
 
     @Override

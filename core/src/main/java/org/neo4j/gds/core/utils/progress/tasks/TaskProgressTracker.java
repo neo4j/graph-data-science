@@ -51,7 +51,7 @@ public class TaskProgressTracker implements ProgressTracker {
     private long currentTotalSteps;
     private double progressLeftOvers;
 
-    private Runnable onError;
+    private final Runnable onError;
 
     public TaskProgressTracker(Task baseTask, Log log, int concurrency, TaskRegistryFactory taskRegistryFactory) {
         this(baseTask, log, concurrency, new JobId(), taskRegistryFactory, EmptyUserLogRegistryFactory.INSTANCE);
@@ -253,9 +253,9 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @TestOnly
-    public Task currentSubTask() {
+    Task currentSubTask() {
         requireCurrentTask();
-        return currentTask.get();
+        return currentTask.orElseThrow();
     }
 
     @Nullable
