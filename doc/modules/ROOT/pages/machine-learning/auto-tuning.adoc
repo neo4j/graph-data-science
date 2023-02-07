@@ -2,7 +2,7 @@
 = Auto-tuning
 :description: This section describes auto-tuning for hyper-parameters in training pipelines in the Neo4j Graph Data Science library.
 
-[NOTE]
+[TIP]
 ====
 Auto-tuning is featured in the end-to-end example Jupyter notebook https://github.com/neo4j/graph-data-science-client/blob/main/examples/heterogeneous-node-classification-with-hashgnn.ipynb[Heterogeneous Node Classification with HashGNN and Autotuning].
 ====

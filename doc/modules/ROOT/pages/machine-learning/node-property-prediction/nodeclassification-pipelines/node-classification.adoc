@@ -7,7 +7,7 @@
 
 include::partial$/operations-reference/beta-note.adoc[]
 
-[NOTE]
+[TIP]
 ====
 Node classification pipelines are featured in the end-to-end example Jupyter notebooks:
 
