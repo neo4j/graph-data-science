@@ -1,3 +1,5 @@
+:page-aliases: production-deployment/fabric
+
 [[composite]]
 // Putting "Fabric" in the header might help with searching for the
 // case that users are not familiar with composite databases yet
