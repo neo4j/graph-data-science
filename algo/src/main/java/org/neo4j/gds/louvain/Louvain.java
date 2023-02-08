@@ -20,6 +20,7 @@
 package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipIterator;
@@ -233,6 +234,7 @@ public final class Louvain extends Algorithm<Louvain> {
         IdMap idMap = nodesBuilder.build().idMap();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
+            .relationshipType(RelationshipType.of("IGNORED"))
             .orientation(rootGraph.schema().direction().toOrientation())
             .addPropertyConfig(GraphFactory.PropertyConfig.builder()
                 .propertyKey("property")

@@ -117,7 +117,6 @@ class GraphSageTest {
         graphStore = CSRGraphStoreUtil.createFromGraph(
             DatabaseId.random(),
             randomGraph,
-            "REL",
             Optional.of("weight"),
             4
         );

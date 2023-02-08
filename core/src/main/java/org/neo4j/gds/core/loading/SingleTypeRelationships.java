@@ -27,9 +27,9 @@ import org.neo4j.gds.api.Properties;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.api.schema.RelationshipSchemaEntry;
 
 import java.util.Optional;
 
@@ -38,42 +38,19 @@ public interface SingleTypeRelationships {
 
     SingleTypeRelationships EMPTY = SingleTypeRelationships
             .builder()
-            .direction(Direction.DIRECTED)
+            .relationshipSchemaEntry(new MutableRelationshipSchemaEntry(RelationshipType.of("REL"), Direction.DIRECTED))
             .topology(Topology.EMPTY)
             .build();
 
-    // TODO: figure out if we can remove this.
-    Direction direction();
-
     Topology topology();
+
+    MutableRelationshipSchemaEntry relationshipSchemaEntry();
 
     Optional<RelationshipPropertyStore> properties();
 
     Optional<Topology> inverseTopology();
 
     Optional<RelationshipPropertyStore> inverseProperties();
-
-    default MutableRelationshipSchema relationshipSchema(RelationshipType relationshipType) {
-        var schema = MutableRelationshipSchema.empty();
-        this.updateRelationshipSchemaEntry(schema.getOrCreateRelationshipType(relationshipType, direction()));
-        return schema;
-    }
-
-    default void updateRelationshipSchemaEntry(MutableRelationshipSchemaEntry schemaEntry) {
-        properties().ifPresent(relationshipPropertyStore -> relationshipPropertyStore
-            .relationshipProperties()
-            .forEach((propertyKey, relationshipProperty) -> {
-                schemaEntry.addProperty(
-                    propertyKey,
-                    RelationshipPropertySchema.of(propertyKey,
-                        relationshipProperty.valueType(),
-                        relationshipProperty.defaultValue(),
-                        relationshipProperty.propertyState(),
-                        relationshipProperty.aggregation()
-                    )
-                );
-            }));
-    }
 
     /**
      * Filters the relationships to include only the given property if present.
@@ -86,9 +63,14 @@ public interface SingleTypeRelationships {
             relationshipPropertyStore.filter(propertyKey)
         );
 
+
+        RelationshipSchemaEntry entry = relationshipSchemaEntry();
+        var filteredEntry = new MutableRelationshipSchemaEntry(entry.identifier(), entry.direction())
+            .addProperty(propertyKey, entry.properties().get(propertyKey));
+
         return SingleTypeRelationships.builder()
             .topology(topology())
-            .direction(direction())
+            .relationshipSchemaEntry(filteredEntry)
             .inverseTopology(inverseTopology())
             .properties(properties)
             .inverseProperties(inverseProperties)
@@ -111,14 +93,18 @@ public interface SingleTypeRelationships {
     }
 
     static SingleTypeRelationships of(
+        RelationshipType relationshipType,
         Topology topology,
         Direction direction,
         Optional<Properties> properties,
         Optional<RelationshipPropertySchema> propertySchema
     ) {
+        var schemaEntry = new MutableRelationshipSchemaEntry(relationshipType, direction);
+        propertySchema.ifPresent(schema -> schemaEntry.addProperty(schema.key(), schema));
+
         return SingleTypeRelationships.builder()
-            .direction(direction)
             .topology(topology)
+            .relationshipSchemaEntry(schemaEntry)
             .properties(
                 propertySchema.map(schema -> {
                     var relationshipProperty = ImmutableRelationshipProperty.builder()

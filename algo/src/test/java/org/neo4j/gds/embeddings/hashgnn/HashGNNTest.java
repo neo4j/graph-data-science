@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.ResourceUtil;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
@@ -45,11 +46,11 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -372,6 +373,7 @@ class HashGNNTest {
         );
         RelationshipsBuilder firstRelationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(firstIdMap)
+            .relationshipType(RelationshipType.of("REL"))
             .orientation(Orientation.UNDIRECTED)
             .executorService(Pools.DEFAULT)
             .build();
@@ -395,6 +397,7 @@ class HashGNNTest {
         );
         RelationshipsBuilder secondRelationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(secondIdMap)
+            .relationshipType(RelationshipType.of("REL"))
             .orientation(Orientation.UNDIRECTED)
             .executorService(Pools.DEFAULT)
             .build();

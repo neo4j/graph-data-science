@@ -36,6 +36,7 @@ import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
@@ -187,6 +188,7 @@ public final class GraphFactory {
     @Builder.Factory
     static RelationshipsBuilder relationshipsBuilder(
         PartialIdMap nodes,
+        RelationshipType relationshipType,
         Optional<Orientation> orientation,
         List<PropertyConfig> propertyConfigs,
         Optional<Aggregation> aggregation,
@@ -204,7 +206,6 @@ public final class GraphFactory {
                 .map(Aggregation::resolve)
                 .toArray(Aggregation[]::new);
 
-        var relationshipType = RelationshipType.ALL_RELATIONSHIPS;
         var isMultiGraph = Arrays.stream(aggregations).allMatch(Aggregation::equivalentToNone);
 
         var actualOrientation = orientation.orElse(Orientation.NATURAL);
@@ -259,6 +260,7 @@ public final class GraphFactory {
             .idMap(nodes)
             .importer(singleTypeRelationshipImporter)
             .bufferSize(bufferSize)
+            .relationshipType(relationshipType)
             .propertyConfigs(propertyConfigs)
             .isMultiGraph(isMultiGraph)
             .loadRelationshipProperty(loadRelationshipProperties)
@@ -307,7 +309,8 @@ public final class GraphFactory {
             assert relationshipPropertyStore.values().size() == 1: "Cannot instantiate graph with more than one relationship property.";
         });
 
-        var relationshipSchema = relationships.relationshipSchema(RelationshipType.of("REL"));
+        var relationshipSchema = MutableRelationshipSchema.empty();
+        relationshipSchema.set(relationships.relationshipSchemaEntry());
 
         return create(
             MutableGraphSchema.of(nodeSchema, relationshipSchema, Map.of()),

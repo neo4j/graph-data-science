@@ -24,14 +24,12 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.core.io.GraphStoreRelationshipVisitor;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.ImmutableNodes;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
-import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
@@ -150,24 +148,26 @@ class GraphStoreRelationshipVisitorTest {
         Map<String, RelationshipsBuilder> relationshipBuildersByType,
         long expectedImportedRelationshipsCount
     ) {
-        var actualRelationships = FileToGraphStoreImporter.relationshipTopologyAndProperties(relationshipBuildersByType);
-        assertThat(actualRelationships.importedRelationships()).isEqualTo(expectedImportedRelationshipsCount);
+        var actualRelationships = FileToGraphStoreImporter.relationshipImportResult(relationshipBuildersByType);
+        var actualRelationshipCount = actualRelationships
+            .importResults()
+            .values()
+            .stream()
+            .mapToLong(r -> r.topology().elementCount())
+            .sum();
+
+        assertThat(actualRelationshipCount).isEqualTo(expectedImportedRelationshipsCount);
 
         var nodes = ImmutableNodes.builder()
             .idMap(expectedGraph)
             .schema(MutableNodeSchema.from(expectedGraph.schema().nodeSchema()))
             .build();
 
-        Map<RelationshipType, RelationshipPropertyStore> propertyStores = actualRelationships.properties();
         return new GraphStoreBuilder()
             .schema(MutableGraphSchema.from(expectedGraph.schema()))
             .capabilities(ImmutableStaticCapabilities.of(true))
             .nodes(nodes)
-            .relationshipImportResult(RelationshipImportResult.of(
-                actualRelationships.topologies(),
-                propertyStores,
-                expectedGraph.schema().relationshipSchema().directions()
-            ))
+            .relationshipImportResult(actualRelationships)
             .databaseId(DatabaseId.random())
             .concurrency(1)
             .build()

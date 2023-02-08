@@ -139,8 +139,8 @@ public class KnnMutateProc extends AlgoBaseProc<Knn, Knn.Result, KnnMutateConfig
                 computationResult
                     .graphStore()
                     .addRelationshipType(
-                        relationshipType,
                         SingleTypeRelationships.of(
+                            relationshipType,
                             similarityGraph.relationshipTopology(),
                             similarityGraphResult.direction(),
                             similarityGraph.relationshipProperties(),

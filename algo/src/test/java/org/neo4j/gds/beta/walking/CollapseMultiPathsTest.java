@@ -108,6 +108,7 @@ class CollapseMultiPathsTest {
         var path = new CollapsePath(
             pathTemplates,
             false,
+            RelationshipType.of("REL"),
             2,
             Pools.DEFAULT
 
@@ -170,6 +171,7 @@ class CollapseMultiPathsTest {
                 new Graph[]{plane}
             ),
             false,
+            RelationshipType.of("REL"),
             2,
             Pools.DEFAULT
 

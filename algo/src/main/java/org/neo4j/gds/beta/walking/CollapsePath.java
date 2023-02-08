@@ -21,6 +21,7 @@ package org.neo4j.gds.beta.walking;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -43,12 +44,14 @@ public class CollapsePath extends Algorithm<SingleTypeRelationships> {
     private final List<Graph[]> pathTemplates;
     private final long nodeCount;
     private final boolean allowSelfLoops;
+    private RelationshipType mutateRelationshipType;
     private final int concurrency;
     private final ExecutorService executorService;
 
     public CollapsePath(
         List<Graph[]> pathTemplates,
         boolean allowSelfLoops,
+        RelationshipType mutateRelationshipType,
         int concurrency,
         ExecutorService executorService
     ) {
@@ -56,6 +59,7 @@ public class CollapsePath extends Algorithm<SingleTypeRelationships> {
         this.pathTemplates = pathTemplates;
         this.nodeCount = pathTemplates.get(0)[0].nodeCount();
         this.allowSelfLoops = allowSelfLoops;
+        this.mutateRelationshipType = mutateRelationshipType;
         this.concurrency = concurrency;
         this.executorService = executorService;
     }
@@ -64,6 +68,7 @@ public class CollapsePath extends Algorithm<SingleTypeRelationships> {
     public SingleTypeRelationships compute() {
         RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
             .nodes(pathTemplates.get(0)[0]) // just need any arbitrary graph
+            .relationshipType(mutateRelationshipType)
             .orientation(Orientation.NATURAL)
             .aggregation(Aggregation.NONE)
             .concurrency(concurrency)

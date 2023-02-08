@@ -108,10 +108,14 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
                 Collection<NodeLabel> labelFilter = computationResult.algorithm().labelFilter().predictNodeLabels();
                 var graph = graphStore.getGraph(labelFilter);
 
-                var concurrency = computationResult.config().concurrency();
+                var config = computationResult.config();
+                var concurrency = config.concurrency();
+                var mutateRelationshipType = RelationshipType.of(config.mutateRelationshipType());
+
                 var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
                     .aggregation(Aggregation.SINGLE)
                     .nodes(graph)
+                    .relationshipType(mutateRelationshipType)
                     .orientation(Orientation.UNDIRECTED)
                     .addPropertyConfig(GraphFactory.PropertyConfig.of(computationResult.config().mutateProperty()))
                     .concurrency(concurrency)
@@ -134,10 +138,11 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
 
                 var relationships = relationshipsBuilder.build();
 
-                var config = computationResult.config();
+
+
                 computationResult
                     .graphStore()
-                    .addRelationshipType(RelationshipType.of(config.mutateRelationshipType()), relationships);
+                    .addRelationshipType(relationships);
                 resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
             }
         };

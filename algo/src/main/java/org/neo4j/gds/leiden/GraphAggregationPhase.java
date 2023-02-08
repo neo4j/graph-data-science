@@ -148,6 +148,7 @@ class GraphAggregationPhase {
         IdMap idMap = nodesBuilder.build().idMap();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
+            .relationshipType(RelationshipType.of("_IGNORED_"))
             .orientation(direction.toOrientation())
             .addPropertyConfig(GraphFactory.PropertyConfig.builder()
                 .propertyKey("property")

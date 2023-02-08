@@ -29,6 +29,8 @@ import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.mem.MemoryUsage;
 
+import java.util.Map;
+
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> extends GraphStoreFactory<CSRGraphStore, CONFIG> {
@@ -43,10 +45,16 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
     }
 
     protected CSRGraphStore createGraphStore(Nodes nodes, RelationshipImportResult relationshipImportResult) {
+        var schema = MutableGraphSchema.of(
+            nodes.schema(),
+            relationshipImportResult.relationshipSchema(),
+            Map.of()
+        );
+
         return new GraphStoreBuilder()
             .databaseId(DatabaseId.of(loadingContext.graphDatabaseService()))
             .capabilities(capabilities)
-            .schema(computeGraphSchema(nodes, relationshipImportResult))
+            .schema(schema)
             .nodes(nodes)
             .relationshipImportResult(relationshipImportResult)
             .concurrency(graphProjectConfig.readConcurrency())
@@ -60,9 +68,4 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
             progressTracker.logInfo(formatWithLocale("Actual memory usage of the loaded graph: %s", memoryUsage));
         }
     }
-
-    protected abstract MutableGraphSchema computeGraphSchema(
-        Nodes nodes,
-        RelationshipImportResult relationshipImportResult
-    );
 }
