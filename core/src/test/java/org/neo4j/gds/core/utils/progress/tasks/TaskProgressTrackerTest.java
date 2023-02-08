@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.WARN;
 
-public class TaskProgressTrackerTest {
+class TaskProgressTrackerTest {
 
     @Test
     void shouldStepThroughSubtasks() {
@@ -91,19 +91,21 @@ public class TaskProgressTrackerTest {
 
     @Test
     void shouldNotThrowIfEndMoreTasksThanStarted() {
-        var task = Tasks.leaf("leaf");
-        var log = Neo4jProxy.testLog();
-        var progressTracker = new TaskProgressTracker(task, log, 1, EmptyTaskRegistryFactory.INSTANCE);
-        progressTracker.beginSubTask();
-        progressTracker.endSubTask();
-        assertThatNoException()
-            .as("When `THROW_WHEN_USING_PROGRESS_TRACKER_WITHOUT_TASKS` is disabled (default state) we should not throw an exception.")
-            .isThrownBy(progressTracker::endSubTask);
+        GdsFeatureToggles.THROW_WHEN_USING_PROGRESS_TRACKER_WITHOUT_TASKS.disableAndRun(() -> {
+            var task = Tasks.leaf("leaf");
+            var log = Neo4jProxy.testLog();
+            var progressTracker = new TaskProgressTracker(task, log, 1, EmptyTaskRegistryFactory.INSTANCE);
+            progressTracker.beginSubTask();
+            progressTracker.endSubTask();
+            assertThatNoException()
+                .as("When `THROW_WHEN_USING_PROGRESS_TRACKER_WITHOUT_TASKS` is disabled (default state) we should not throw an exception.")
+                .isThrownBy(progressTracker::endSubTask);
 
-        Assertions
-            .assertThat(log.getMessages(WARN))
-            .extracting(removingThreadId())
-            .containsExactly("leaf :: Tried to log progress, but there are no running tasks being tracked");
+            Assertions
+                .assertThat(log.getMessages(WARN))
+                .extracting(removingThreadId())
+                .containsExactly("leaf :: Tried to log progress, but there are no running tasks being tracked");
+        });
     }
 
     @Test
