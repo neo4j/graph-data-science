@@ -113,12 +113,12 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertThat(remainingRelationships.properties()).isNotEmpty();
 
         var selectedRelationships = result.selectedRels().build();
-        assertThat(selectedRelationships.topology()).satisfies(topology -> {
-            assertRelSamplingProperties(selectedRelationships, graph);
-            assertThat(topology.elementCount()).isEqualTo(1);
-            assertEquals(Direction.DIRECTED, selectedRelationships.relationshipSchemaEntry().direction());
-            assertFalse(topology.isMultiGraph());
-        });
+        var selectedGraph = createGraph(selectedRelationships, graphStore.nodes(), graphStore.schema().nodeSchema());
+
+        assertThat(selectedGraph.relationshipCount()).isEqualTo(1);
+        assertThat(selectedGraph.isMultiGraph()).isFalse();
+        assertThat(selectedGraph.schema().isUndirected()).isFalse();
+        assertRelSamplingProperties(selectedGraph, multiLabelGraph);
     }
 
     @Test
@@ -315,12 +315,12 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertThat(remainingRelationships.properties()).isNotEmpty();
 
         var selectedRelationships = result.selectedRels().build();
-        assertThat(selectedRelationships.topology()).satisfies(topology -> {
-            assertRelSamplingProperties(selectedRelationships, graph);
-            assertThat(topology.elementCount()).isEqualTo(1);
-            assertEquals(Direction.DIRECTED, selectedRelationships.relationshipSchemaEntry().direction());
-            assertFalse(topology.isMultiGraph());
-        });
+
+        var selectedGraph = createGraph(selectedRelationships, graphStore.nodes(), graphStore.schema().nodeSchema());
+        assertThat(selectedGraph.relationshipCount()).isEqualTo(1);
+        assertThat(selectedGraph.isMultiGraph()).isFalse();
+        assertThat(selectedGraph.schema().isUndirected()).isFalse();
+        assertRelSamplingProperties(selectedGraph, multiLabelGraph);
 
         assertNodeLabelFilter(selectedRelationships.topology(), sourceNodeLabels, targetNodeLabels, graph);
 
@@ -351,12 +351,11 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertRelInGraph(remainingRelationships, multiLabelGraph);
 
         var selectedRelationships = result.selectedRels().build();
-        assertThat(selectedRelationships.topology()).satisfies(topology -> {
-            assertRelSamplingProperties(selectedRelationships, multiLabelGraph);
-            assertThat(topology.elementCount()).isEqualTo(2);
-            assertEquals(Direction.DIRECTED, selectedRelationships.relationshipSchemaEntry().direction());
-            assertFalse(topology.isMultiGraph());
-        });
+        var selectedGraph = createGraph(selectedRelationships, multiLabelGraphStore.nodes(), multiLabelGraphStore.schema().nodeSchema());
+        assertThat(selectedGraph.relationshipCount()).isEqualTo(2);
+        assertThat(selectedGraph.isMultiGraph()).isFalse();
+        assertThat(selectedGraph.schema().isUndirected()).isFalse();
+        assertRelSamplingProperties(selectedGraph, multiLabelGraph);
 
         assertNodeLabelFilter(selectedRelationships.topology(), sourceNodeLabels, targetNodeLabels, multiLabelGraph);
     }
@@ -419,8 +418,11 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         // select 20%, which is 1 (undirected) rels in this graph
         var result = splitter.splitPositiveExamples(graph, .2, Optional.of("foo"));
 
-        assertRelSamplingProperties(result.selectedRels().build(), graph);
-        assertThat(result.selectedRels().build().topology().elementCount()).isEqualTo(1);
+        var selectedGraph = createGraph(result.selectedRels().build(), graphStore.nodes(), graphStore.schema().nodeSchema());
+        assertThat(selectedGraph.relationshipCount()).isEqualTo(1);
+        assertThat(selectedGraph.isMultiGraph()).isFalse();
+        assertThat(selectedGraph.schema().isUndirected()).isFalse();
+        assertRelSamplingProperties(selectedGraph, multiLabelGraph);
     }
 
     private boolean relationshipsAreEqual(IdMap mapping, SingleTypeRelationships r1, SingleTypeRelationships r2) {

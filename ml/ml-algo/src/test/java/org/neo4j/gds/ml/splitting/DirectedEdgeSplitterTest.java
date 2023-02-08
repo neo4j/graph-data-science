@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyCursor;
 import org.neo4j.gds.api.schema.Direction;
@@ -188,9 +189,11 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         var selectedRelationships = result.selectedRels().build();
 
-        assertRelSamplingProperties(selectedRelationships, graph);
-        assertThat(selectedRelationships.topology().elementCount()).isEqualTo(2);
-        assertFalse(selectedRelationships.topology().isMultiGraph());
+        Graph selectedGraph = createGraph(selectedRelationships, graphStore.nodes(), graphStore.schema().nodeSchema());
+
+        assertThat(selectedGraph.relationshipCount()).isEqualTo(2);
+        assertThat(selectedGraph.isMultiGraph()).isFalse();
+        assertRelSamplingProperties(selectedGraph, graph);
     }
 
     @Test
@@ -279,11 +282,11 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertRelInGraph(remainingRelationships, multiLabelGraph);
 
         var selectedRelationships = result.selectedRels().build();
-        assertThat(selectedRelationships.topology()).satisfies(topology -> {
-            assertRelSamplingProperties(selectedRelationships, multiLabelGraph);
-            assertThat(topology.elementCount()).isEqualTo(1);
-            assertFalse(topology.isMultiGraph());
-        });
+        var selectedGraph = createGraph(selectedRelationships, multiLabelGraphStore.nodes(), multiLabelGraphStore.schema().nodeSchema());
+
+        assertThat(selectedGraph.relationshipCount()).isEqualTo(1);
+        assertThat(selectedGraph.isMultiGraph()).isFalse();
+        assertRelSamplingProperties(selectedGraph, multiLabelGraph);
 
         assertNodeLabelFilter(selectedRelationships.topology(), sourceNodeLabels, targetNodeLabels, multiLabelGraph);
 
