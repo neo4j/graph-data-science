@@ -86,7 +86,6 @@ abstract class EdgeSplitterBaseTest {
     void assertRelSamplingProperties(Graph resultGraph, Graph inputGraph) {
         MutableInt positiveCount = new MutableInt();
         inputGraph.forEachNode(source -> {
-
                 resultGraph.forEachRelationship(source, Double.NaN, (src, trg, weight) -> {
                     boolean edgeIsPositive = weight == EdgeSplitter.POSITIVE;
                     if (edgeIsPositive) positiveCount.increment();
