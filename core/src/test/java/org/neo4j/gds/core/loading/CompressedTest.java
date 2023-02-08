@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 import java.util.Arrays;
@@ -47,12 +48,7 @@ class CompressedTest {
 
         cursor.init(0, -1);
 
-        var decompressed = new long[compressed.length()];
-
-        var idx = 0;
-        while (cursor.hasNextVLong()) {
-            decompressed[idx++] = cursor.nextVLong();
-        }
+        long[] decompressed = decompressCursor(compressed.length(), cursor);
 
         assertThat(decompressed)
             .as("compressed data did not roundtrip")
@@ -73,12 +69,7 @@ class CompressedTest {
 
         cursor.init(0, -1);
 
-        var decompressed = new long[compressed.length()];
-
-        var idx = 0;
-        while (cursor.hasNextVLong()) {
-            decompressed[idx++] = cursor.nextVLong();
-        }
+        long[] decompressed = decompressCursor(compressed.length(), cursor);
 
         if (features != AdjacencyPackerTest.Features.Delta) {
             Arrays.sort(data);
@@ -105,12 +96,7 @@ class CompressedTest {
 
         cursor.init(0, -1);
 
-        var decompressed = new long[compressed.length()];
-
-        var idx = 0;
-        while (cursor.hasNextVLong()) {
-            decompressed[idx++] = cursor.nextVLong();
-        }
+        long[] decompressed = decompressCursor(compressed.length(), cursor);
 
         assertThat(decompressed)
             .as("compressed data did not roundtrip")
@@ -137,12 +123,7 @@ class CompressedTest {
 
         cursor.init(0, -1);
 
-        var decompressed = new long[compressed.length()];
-
-        var idx = 0;
-        while (cursor.hasNextVLong()) {
-            decompressed[idx++] = cursor.nextVLong();
-        }
+        long[] decompressed = decompressCursor(compressed.length(), cursor);
 
         if (features != AdjacencyPackerTest.Features.Delta) {
             Arrays.sort(data);
@@ -153,6 +134,19 @@ class CompressedTest {
             .containsExactly(data);
 
         compressed.free();
+    }
+
+    private static long[] decompressCursor(int length, AdjacencyCursor cursor) {
+        var decompressed = new long[length];
+
+        var idx = 0;
+        while (cursor.hasNextVLong()) {
+            long peek = cursor.peekVLong();
+            long next = cursor.nextVLong();
+            assertThat(peek).isEqualTo(next);
+            decompressed[idx++] = next;
+        }
+        return decompressed;
     }
 
 }

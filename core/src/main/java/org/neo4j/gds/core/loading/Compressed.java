@@ -191,6 +191,11 @@ final class DecompressingCursor implements AdjacencyCursor {
     }
 
     @Override
+    public int remaining() {
+        return this.maxTargets - this.currentPosition;
+    }
+
+    @Override
     public boolean hasNextVLong() {
         return currentPosition < maxTargets;
     }
@@ -203,12 +208,7 @@ final class DecompressingCursor implements AdjacencyCursor {
 
     @Override
     public long peekVLong() {
-        return 0;
-    }
-
-    @Override
-    public int remaining() {
-        return 0;
+        return decompressingReader.peek();
     }
 
     @Override
@@ -274,6 +274,13 @@ final class BlockDecompressor {
             decompressBlock();
         }
         return block[this.idxInBlock++];
+    }
+
+    long peek() {
+        if (this.idxInBlock == BLOCK_SIZE) {
+            decompressBlock();
+        }
+        return block[this.idxInBlock];
     }
 
     private void decompressBlock() {
