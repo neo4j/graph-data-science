@@ -20,20 +20,63 @@
 package org.neo4j.gds.compat._55;
 
 import org.neo4j.internal.recordstorage.AbstractTransactionIdStore;
-import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.kernel.impl.transaction.log.LogPosition;
 import org.neo4j.storageengine.api.ClosedTransactionMetadata;
+import org.neo4j.storageengine.api.TransactionId;
+import org.neo4j.storageengine.api.TransactionIdStore;
 
 public class InMemoryTransactionIdStoreImpl extends AbstractTransactionIdStore {
 
+    @Override
+    protected void initLastCommittedAndClosedTransactionId(
+        long previouslyCommittedTxId,
+        int checksum,
+        long previouslyCommittedTxCommitTimestamp,
+        long previouslyCommittedTxLogByteOffset,
+        long previouslyCommittedTxLogVersion
+    ) {
+        this.setLastCommittedAndClosedTransactionId(
+            previouslyCommittedTxId,
+            checksum,
+            previouslyCommittedTxCommitTimestamp,
+            TransactionIdStore.UNKNOWN_CONSENSUS_INDEX,
+            previouslyCommittedTxLogByteOffset,
+            previouslyCommittedTxLogVersion
+        );
+    }
+
+    @Override
     public ClosedTransactionMetadata getLastClosedTransaction() {
         long[] metaData = this.closedTransactionId.get();
         return new ClosedTransactionMetadata(
             metaData[0],
             new LogPosition(metaData[1], metaData[2]),
             (int) metaData[3],
-            metaData[4]
+            metaData[4],
+            metaData[5]
         );
+    }
+
+    @Override
+    protected TransactionId transactionId(long transactionId, int checksum, long commitTimestamp) {
+        return new TransactionId(transactionId, checksum, commitTimestamp, TransactionIdStore.UNKNOWN_CONSENSUS_INDEX);
+    }
+
+    @Override
+    public void transactionCommitted(long transactionId, int checksum, long commitTimestamp, long consensusIndex) {
+
+    }
+
+    @Override
+    public void setLastCommittedAndClosedTransactionId(
+        long transactionId,
+        int checksum,
+        long commitTimestamp,
+        long consensusIndex,
+        long byteOffset,
+        long logVersion
+    ) {
+
     }
 
     @Override
@@ -42,9 +85,10 @@ public class InMemoryTransactionIdStoreImpl extends AbstractTransactionIdStore {
         long logVersion,
         long byteOffset,
         int checksum,
-        long commitTimestamp
+        long commitTimestamp,
+        long consensusIndex
     ) {
-        this.closedTransactionId.offer(transactionId, new long[]{logVersion, byteOffset, checksum, commitTimestamp});
+        this.closedTransactionId.offer(transactionId, new long[]{logVersion, byteOffset, checksum, commitTimestamp, consensusIndex});
     }
 
     @Override
@@ -53,23 +97,9 @@ public class InMemoryTransactionIdStoreImpl extends AbstractTransactionIdStore {
         long logVersion,
         long byteOffset,
         int checksum,
-        long commitTimestamp
+        long commitTimestamp,
+        long consensusIndex
     ) {
-        this.closedTransactionId.set(transactionId, new long[]{logVersion, byteOffset, checksum, commitTimestamp});
-    }
-
-    @Override
-    public void transactionCommitted(long transactionId, int checksum, long commitTimestamp) {
-    }
-
-    @Override
-    public void setLastCommittedAndClosedTransactionId(
-        long transactionId, int checksum, long commitTimestamp, long byteOffset, long logVersion
-    ) {
-    }
-
-    @Override
-    protected CursorContext getEmptyCursorContext() {
-        return CursorContext.NULL_CONTEXT;
+        this.closedTransactionId.set(transactionId, new long[]{logVersion, byteOffset, checksum, commitTimestamp, consensusIndex});
     }
 }

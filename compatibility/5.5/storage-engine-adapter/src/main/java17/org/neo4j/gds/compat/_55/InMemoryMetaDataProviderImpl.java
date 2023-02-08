@@ -26,7 +26,6 @@ import org.neo4j.storageengine.api.ExternalStoreId;
 import org.neo4j.storageengine.api.MetadataProvider;
 import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.TransactionId;
-import org.neo4j.storageengine.api.TransactionIdStore;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -55,40 +54,6 @@ public class InMemoryMetaDataProviderImpl implements MetadataProvider {
     }
 
     @Override
-    public void transactionClosed(
-        long transactionId,
-        long logVersion,
-        long byteOffset,
-        int checksum,
-        long commitTimestamp
-    ) {
-        this.transactionIdStore.transactionClosed(
-            transactionId,
-            logVersion,
-            byteOffset,
-            checksum,
-            commitTimestamp
-        );
-    }
-
-    @Override
-    public void resetLastClosedTransaction(
-        long transactionId,
-        long logVersion,
-        long byteOffset,
-        int checksum,
-        long commitTimestamp
-    ) {
-        this.transactionIdStore.resetLastClosedTransaction(
-            transactionId,
-            logVersion,
-            byteOffset,
-            checksum,
-            commitTimestamp
-        );
-    }
-
-    @Override
     public void setCurrentLogVersion(long version) {
         logVersionRepository.setCurrentLogVersion(version);
     }
@@ -109,20 +74,64 @@ public class InMemoryMetaDataProviderImpl implements MetadataProvider {
     }
 
     @Override
-    public void transactionCommitted(long transactionId, int checksum, long commitTimestamp) {
-        transactionIdStore.transactionCommitted(transactionId, checksum, commitTimestamp);
+    public void transactionCommitted(long transactionId, int checksum, long commitTimestamp, long consensusIndex) {
+        transactionIdStore.transactionCommitted(transactionId, checksum, commitTimestamp, consensusIndex);
     }
 
     @Override
     public void setLastCommittedAndClosedTransactionId(
-        long transactionId, int checksum, long commitTimestamp, long byteOffset, long logVersion
+        long transactionId,
+        int checksum,
+        long commitTimestamp,
+        long consensusIndex,
+        long byteOffset,
+        long logVersion
     ) {
         transactionIdStore.setLastCommittedAndClosedTransactionId(
             transactionId,
             checksum,
             commitTimestamp,
+            consensusIndex,
             byteOffset,
             logVersion
+        );
+    }
+
+    @Override
+    public void transactionClosed(
+        long transactionId,
+        long logVersion,
+        long byteOffset,
+        int checksum,
+        long commitTimestamp,
+        long consensusIndex
+    ) {
+        this.transactionIdStore.transactionClosed(
+            transactionId,
+            logVersion,
+            byteOffset,
+            checksum,
+            commitTimestamp,
+            consensusIndex
+        );
+    }
+
+    @Override
+    public void resetLastClosedTransaction(
+        long transactionId,
+        long logVersion,
+        long byteOffset,
+        int checksum,
+        long commitTimestamp,
+        long consensusIndex
+    ) {
+        this.transactionIdStore.resetLastClosedTransaction(
+            transactionId,
+            logVersion,
+            byteOffset,
+            checksum,
+            commitTimestamp,
+            consensusIndex
         );
     }
 
@@ -182,9 +191,5 @@ public class InMemoryMetaDataProviderImpl implements MetadataProvider {
     @Override
     public void setDatabaseIdUuid(UUID uuid, CursorContext cursorContext) {
         throw new IllegalStateException("Not supported");
-    }
-
-    TransactionIdStore transactionIdStore() {
-        return this.transactionIdStore;
     }
 }

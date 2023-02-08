@@ -20,12 +20,30 @@
 package org.neo4j.gds.compat._53;
 
 import org.neo4j.internal.recordstorage.AbstractTransactionIdStore;
-import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.kernel.impl.transaction.log.LogPosition;
 import org.neo4j.storageengine.api.ClosedTransactionMetadata;
+import org.neo4j.storageengine.api.TransactionId;
 
 public class InMemoryTransactionIdStoreImpl extends AbstractTransactionIdStore {
 
+    @Override
+    protected void initLastCommittedAndClosedTransactionId(
+        long previouslyCommittedTxId,
+        int checksum,
+        long previouslyCommittedTxCommitTimestamp,
+        long previouslyCommittedTxLogByteOffset,
+        long previouslyCommittedTxLogVersion
+    ) {
+        this.setLastCommittedAndClosedTransactionId(
+            previouslyCommittedTxId,
+            checksum,
+            previouslyCommittedTxCommitTimestamp,
+            previouslyCommittedTxLogByteOffset,
+            previouslyCommittedTxLogVersion
+        );
+    }
+
+    @Override
     public ClosedTransactionMetadata getLastClosedTransaction() {
         long[] metaData = this.closedTransactionId.get();
         return new ClosedTransactionMetadata(
@@ -69,7 +87,7 @@ public class InMemoryTransactionIdStoreImpl extends AbstractTransactionIdStore {
     }
 
     @Override
-    protected CursorContext getEmptyCursorContext() {
-        return CursorContext.NULL_CONTEXT;
+    protected TransactionId transactionId(long transactionId, int checksum, long commitTimestamp) {
+        return new TransactionId(transactionId, checksum, commitTimestamp);
     }
 }
