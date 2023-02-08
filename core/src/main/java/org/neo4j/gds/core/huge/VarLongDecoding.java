@@ -57,7 +57,7 @@ public final class VarLongDecoding {
     ) {
         long input, value = 0L;
         int shift = 0;
-        while (length-- > 0) {
+        while (length > 0) {
             input = UnsafeUtil.getByte(ptr);
             ptr++;
             value += (input & 127L) << shift;
@@ -66,6 +66,7 @@ public final class VarLongDecoding {
                 out[offset++] = previousValue;
                 value = 0L;
                 shift = 0;
+                length--;
             } else {
                 shift += 7;
             }
@@ -82,7 +83,7 @@ public final class VarLongDecoding {
     ) {
         long input, value = 0L;
         int shift = 0;
-        while (length-- > 0) {
+        while (length > 0) {
             input = UnsafeUtil.getByte(ptr);
             ptr++;
             value += (input & 127L) << shift;
@@ -90,6 +91,7 @@ public final class VarLongDecoding {
                 out[offset++] = value;
                 value = 0L;
                 shift = 0;
+                length--;
             } else {
                 shift += 7;
             }

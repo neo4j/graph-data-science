@@ -137,7 +137,7 @@ public final class AdjacencyPacker {
     public static long[] decompress(Compressed compressed) {
         long ptr = compressed.address();
         var header = compressed.header();
-        long[] values = new long[header.length * AdjacencyPacking.BLOCK_SIZE];
+        long[] values = new long[compressed.length()];
 
         // main unpacking loop
         int offset = 0;
