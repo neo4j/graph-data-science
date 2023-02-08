@@ -134,7 +134,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         var allNodeProperties = config
             .nodeProperties()
             .stream()
-            .map(v -> v.nodeProperty())
+            .map(v -> v.writeProperty())
             .collect(
                 Collectors.toList());
         // writing

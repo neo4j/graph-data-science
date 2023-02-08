@@ -47,15 +47,14 @@ public final class UserInputWriteProperties {
 
     private static PropertySpec parseOne(Object userInput, String configurationKey) {
         if (userInput instanceof String) {
-            System.out.println("hi: "+ (String) userInput);
             return new PropertySpec((String) userInput,Optional.empty());
         }else if (userInput instanceof  Map){
-            var convertedMap=(Map<String,String>) userInput;
-            if (convertedMap.size()==1){
-                var entry=convertedMap.entrySet().stream().findAny().get();
-                var key=entry.getKey();
-                var value=entry.getValue();
-                return new PropertySpec(key,Optional.of(value));
+            var convertedMap = (Map<String, String>) userInput;
+            if (convertedMap.size() == 1) { //TODO: Instead of having a single map per entry, we should keep a commmon map.
+                var entry = convertedMap.entrySet().stream().findAny().get();
+                var key = entry.getKey();
+                var value = entry.getValue();
+                return new PropertySpec(key, Optional.of(value));
             }
         }
         throw illegalArgumentException(userInput, configurationKey);
@@ -79,18 +78,20 @@ public final class UserInputWriteProperties {
         else throw new AssertionError("Developer error, this should not happen");
     }
 
-    public static class PropertySpec{
-          String nodePropertyName;
-         Optional<String> renamedNodeProperty;
+    public static class PropertySpec {
+        String nodePropertyName;
+        Optional<String> renamedNodeProperty;
 
-        PropertySpec(String nodePropertyName,Optional<String> renamedNodeProperty){
-                this.nodePropertyName=nodePropertyName;
-                this.renamedNodeProperty=renamedNodeProperty;
+        PropertySpec(String nodePropertyName, Optional<String> renamedNodeProperty) {
+            this.nodePropertyName = nodePropertyName;
+            this.renamedNodeProperty = renamedNodeProperty;
         }
-       public String writeProperty(){
-            return  renamedNodeProperty.orElse(nodePropertyName);
+
+        public String writeProperty() {
+            return renamedNodeProperty.orElse(nodePropertyName);
         }
-       public String nodeProperty(){
+
+        public String nodeProperty() {
             return nodePropertyName;
         }
     }

@@ -360,7 +360,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldRenameProperly() {
+    void shouldRenameSingleProperly() {
         long expectedPropertyCount = 6;
 
         GraphStore graphStore = GraphStoreCatalog
@@ -377,7 +377,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             List.of(Map.of(
                 "writeMillis", Matchers.greaterThan(-1L),
                 "graphName", TEST_GRAPH_SAME_PROPERTIES,
-                "nodeProperties", List.of("newNodeProp3"),
+                "nodeProperties", List.of("foo"),
                 "propertiesWritten", expectedPropertyCount
             ))
         );
@@ -394,6 +394,39 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             map("foo", 3L),
             map("foo", 4L),
             map("foo", 5L)
+        ));
+    }
+
+    @Test
+    void shouldRenameMultipleProperties() {
+        assertCypherResult(
+            "CALL gds.graph.nodeProperties.write($graph, [{newNodeProp1: 'foo'}, {newNodeProp2: 'bar'} ,'newNodeProp1'], 'A')",
+            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
+            List.of(Map.of(
+                "writeMillis", Matchers.greaterThan(-1L),
+                "graphName", TEST_GRAPH_SAME_PROPERTIES,
+                "nodeProperties", List.of("bar", "foo", "newNodeProp1"),
+                "propertiesWritten", 9L
+            ))
+        );
+
+        String validationQuery =
+            "MATCH (n) " +
+            "RETURN " +
+            "  labels(n) AS labels, " +
+            "  n.foo AS foo, " +
+            "  n.bar AS bar, " +
+            "  n.newNodeProp1 AS newNodeProp1 " +
+
+            "ORDER BY foo ASC, bar ASC, newNodeProp1 ASC";
+
+        assertCypherResult(validationQuery, asList(
+            map("labels", singletonList("A"), "foo", 0L, "bar", 42L, "newNodeProp1", 0L),
+            map("labels", singletonList("A"), "foo", 1L, "bar", 43L, "newNodeProp1", 1L),
+            map("labels", singletonList("A"), "foo", 2L, "bar", 44L, "newNodeProp1", 2L),
+            map("labels", singletonList("B"), "foo", null, "bar", null, "newNodeProp1", null),
+            map("labels", singletonList("B"), "foo", null, "bar", null, "newNodeProp1", null),
+            map("labels", singletonList("B"), "foo", null, "bar", null, "newNodeProp1", null)
         ));
     }
 }
