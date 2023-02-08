@@ -19,7 +19,6 @@
  */
 package org.neo4j.internal.recordstorage;
 
-import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.storageengine.api.TransactionId;
 import org.neo4j.storageengine.api.TransactionIdStore;
 import org.neo4j.util.concurrent.ArrayQueueOutOfOrderSequence;
@@ -29,12 +28,12 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class AbstractTransactionIdStore implements TransactionIdStore {
-    private final AtomicLong committingTransactionId;
+    protected final AtomicLong committingTransactionId;
     protected final OutOfOrderSequence closedTransactionId;
-    private final AtomicReference<TransactionId> committedTransactionId;
-    private final long previouslyCommittedTxId;
-    private final int initialTransactionChecksum;
-    private final long previouslyCommittedTxCommitTimestamp;
+    protected final AtomicReference<TransactionId> committedTransactionId;
+    protected final long previouslyCommittedTxId;
+    protected final int initialTransactionChecksum;
+    protected final long previouslyCommittedTxCommitTimestamp;
 
     public AbstractTransactionIdStore() {
         this(1L, -559063315, 0L, 0L, 64L);
@@ -48,94 +47,55 @@ public abstract class AbstractTransactionIdStore implements TransactionIdStore {
         long previouslyCommittedTxLogByteOffset
     ) {
         this.committingTransactionId = new AtomicLong();
-        this.closedTransactionId = new ArrayQueueOutOfOrderSequence(-1L, 100, new long[1]);
-        this.committedTransactionId = new AtomicReference<>(new TransactionId(1L, -559063315, 0L));
+        this.closedTransactionId = new ArrayQueueOutOfOrderSequence(-1L, 100, new long[5]);
+        this.committedTransactionId = new AtomicReference<>(transactionId(1L, -559063315, 0L));
 
         assert previouslyCommittedTxId >= 1L : "cannot start from a tx id less than BASE_TX_ID";
 
-        this.setLastCommittedAndClosedTransactionId(
+        initLastCommittedAndClosedTransactionId(
             previouslyCommittedTxId,
             checksum,
             previouslyCommittedTxCommitTimestamp,
-            previouslyCommittedTxLogByteOffset,
             previouslyCommittedTxLogVersion,
-            getEmptyCursorContext()
+            previouslyCommittedTxLogByteOffset
         );
         this.previouslyCommittedTxId = previouslyCommittedTxId;
         this.initialTransactionChecksum = checksum;
         this.previouslyCommittedTxCommitTimestamp = previouslyCommittedTxCommitTimestamp;
     }
 
-    protected abstract CursorContext getEmptyCursorContext();
+    protected abstract void initLastCommittedAndClosedTransactionId(
+        long previouslyCommittedTxId,
+        int checksum,
+        long previouslyCommittedTxCommitTimestamp,
+        long previouslyCommittedTxLogByteOffset,
+        long previouslyCommittedTxLogVersion
+    );
 
+    protected abstract TransactionId transactionId(long transactionId, int checksum, long commitTimestamp);
+
+    @Override
     public long nextCommittingTransactionId() {
         return this.committingTransactionId.incrementAndGet();
     }
 
+    @Override
     public long committingTransactionId() {
         return this.committingTransactionId.get();
     }
 
-    public synchronized void transactionCommitted(
-        long transactionId,
-        int checksum,
-        long commitTimestamp,
-        CursorContext cursorContext
-    ) {
-        TransactionId current = this.committedTransactionId.get();
-        if (current == null || transactionId > current.transactionId()) {
-            this.committedTransactionId.set(new TransactionId(transactionId, checksum, commitTimestamp));
-        }
-
-    }
-
+    @Override
     public long getLastCommittedTransactionId() {
         return this.committedTransactionId.get().transactionId();
     }
 
+    @Override
     public TransactionId getLastCommittedTransaction() {
         return this.committedTransactionId.get();
     }
 
-    public TransactionId getUpgradeTransaction() {
-        return new TransactionId(
-            this.previouslyCommittedTxId,
-            this.initialTransactionChecksum,
-            this.previouslyCommittedTxCommitTimestamp
-        );
-    }
-
+    @Override
     public long getLastClosedTransactionId() {
         return this.closedTransactionId.getHighestGapFreeNumber();
-    }
-
-    public void setLastCommittedAndClosedTransactionId(
-        long transactionId,
-        int checksum,
-        long commitTimestamp,
-        long byteOffset,
-        long logVersion,
-        CursorContext cursorContext
-    ) {
-        this.committingTransactionId.set(transactionId);
-        this.committedTransactionId.set(new TransactionId(transactionId, checksum, commitTimestamp));
-        this.closedTransactionId.set(transactionId, new long[]{logVersion, byteOffset, checksum, commitTimestamp});
-    }
-
-    public void transactionClosed(long transactionId, long logVersion, long byteOffset, CursorContext cursorContext) {
-        this.closedTransactionId.offer(transactionId, new long[]{logVersion, byteOffset});
-    }
-
-    public void resetLastClosedTransaction(
-        long transactionId,
-        long byteOffset,
-        long logVersion,
-        boolean missingLogs,
-        CursorContext cursorContext
-    ) {
-        this.closedTransactionId.set(transactionId, new long[]{logVersion, byteOffset});
-    }
-
-    public void flush(CursorContext cursorContext) {
     }
 }
