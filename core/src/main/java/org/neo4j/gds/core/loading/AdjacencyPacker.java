@@ -58,7 +58,9 @@ public final class AdjacencyPacker {
     }
 
     private static Compressed deltaCompress(long[] values, int offset, int length, Aggregation aggregation) {
-        length = AdjacencyCompression.deltaEncodeSortedValues(values, offset, length, aggregation);
+        if (length > 0) {
+            length = AdjacencyCompression.deltaEncodeSortedValues(values, offset, length, aggregation);
+        }
         return preparePacking(values, offset, length);
     }
 
