@@ -23,13 +23,12 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphCharacteristics;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.Properties;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
-import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.huge.HugeGraphBuilder;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 
@@ -42,9 +41,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 abstract class EdgeSplitterBaseTest {
 
-    Graph createGraph(SingleTypeRelationships relationships, IdMap nodes, NodeSchema nodeSchema) {
+    Graph createGraph(SingleTypeRelationships relationships, GraphStore graphStore) {
         var schema = MutableGraphSchema.of(
-            (MutableNodeSchema) nodeSchema,
+            (MutableNodeSchema) graphStore.schema().nodeSchema(),
             new MutableRelationshipSchema(Map.of(
                 relationships.relationshipSchemaEntry().identifier(),
                 relationships.relationshipSchemaEntry()
@@ -73,7 +72,7 @@ abstract class EdgeSplitterBaseTest {
             .map(RelationshipProperty::values));
 
         return new HugeGraphBuilder().characteristics(graphCharacteristicsBuilder.build())
-            .nodes(nodes)
+            .nodes(graphStore.nodes())
             .schema(schema)
             .topology(relationships.topology())
             .inverseTopology(relationships.inverseTopology())
