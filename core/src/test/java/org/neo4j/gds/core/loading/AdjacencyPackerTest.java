@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.mem.BitUtil;
 
 import java.util.Arrays;
 import java.util.Locale;
