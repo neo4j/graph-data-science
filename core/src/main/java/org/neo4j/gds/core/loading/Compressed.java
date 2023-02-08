@@ -19,6 +19,10 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.api.AdjacencyCursor;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 import org.neo4j.memory.EmptyMemoryTracker;
 
@@ -155,5 +159,147 @@ final class Address implements Runnable {
         if (address == 0) {
             throw new IllegalStateException("This compressed memory has already been freed.");
         }
+    }
+}
+
+final class DecompressingCursor implements AdjacencyCursor {
+
+    private final HugeObjectArray<Compressed> compressed;
+
+    private final BlockDecompressor decompressingReader;
+
+    private int maxTargets;
+    private int currentPosition;
+
+    DecompressingCursor(HugeObjectArray<Compressed> compressed, int flags) {
+        this.compressed = compressed;
+        this.decompressingReader = new BlockDecompressor(flags);
+
+    }
+
+    @Override
+    public void init(long node, int ignore) {
+        var compressed = this.compressed.get(node);
+        this.maxTargets = compressed.length();
+        this.currentPosition = 0;
+        this.decompressingReader.reset(compressed);
+    }
+
+    @Override
+    public int size() {
+        return this.maxTargets;
+    }
+
+    @Override
+    public boolean hasNextVLong() {
+        return currentPosition < maxTargets;
+    }
+
+    @Override
+    public long nextVLong() {
+        this.currentPosition++;
+        return decompressingReader.next();
+    }
+
+    @Override
+    public long peekVLong() {
+        return 0;
+    }
+
+    @Override
+    public int remaining() {
+        return 0;
+    }
+
+    @Override
+    public long skipUntil(long nodeId) {
+        return 0;
+    }
+
+    @Override
+    public long advance(long nodeId) {
+        return 0;
+    }
+
+    @Override
+    public long advanceBy(int n) {
+        return 0;
+    }
+
+    @Override
+    public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
+        return null;
+    }
+}
+
+final class BlockDecompressor {
+
+    private static final int BLOCK_SIZE = AdjacencyPacking.BLOCK_SIZE;
+
+    private final boolean isDeltaCompressed;
+
+    // Compressed
+    private long ptr;
+    private byte[] header;
+    private int length;
+
+    // Decompression state
+    private final long[] block;
+
+    private int idxInBlock;
+    private int blockId;
+    private int blockOffset;
+    private long lastValue;
+
+
+    BlockDecompressor(int flags) {
+        this.isDeltaCompressed = (flags & AdjacencyPacker.DELTA) == AdjacencyPacker.DELTA;
+        this.block = new long[BLOCK_SIZE];
+    }
+
+    void reset(Compressed compressed) {
+        this.ptr = compressed.address();
+        this.header = compressed.header();
+        this.length = compressed.length();
+        this.idxInBlock = 0;
+        this.blockId = 0;
+        this.blockOffset = 0;
+        this.lastValue = 0;
+
+        this.decompressBlock();
+    }
+
+    long next() {
+        if (this.idxInBlock == BLOCK_SIZE) {
+            decompressBlock();
+        }
+        return block[this.idxInBlock++];
+    }
+
+    private void decompressBlock() {
+        if (this.blockId < this.header.length) {
+            // block unpacking
+            byte blockHeader = this.header[blockId];
+            this.ptr = AdjacencyUnpacking.unpack(blockHeader, this.block, 0, this.ptr);
+            if (this.isDeltaCompressed) {
+                long value = this.lastValue;
+                for (int i = 0; i < AdjacencyPacking.BLOCK_SIZE; i++) {
+                    value = this.block[i] += value;
+                }
+                this.lastValue = value;
+            }
+            this.blockOffset += BLOCK_SIZE;
+            this.blockId++;
+        } else {
+            // tail decompression
+            int tailLength = this.length - blockOffset;
+            if (this.isDeltaCompressed) {
+                AdjacencyCompression.decompressAndPrefixSum(tailLength, this.lastValue, this.ptr, this.block, 0);
+            } else {
+                AdjacencyCompression.decompress(tailLength, this.ptr, this.block, 0);
+            }
+        }
+
+        this.idxInBlock = 0;
     }
 }

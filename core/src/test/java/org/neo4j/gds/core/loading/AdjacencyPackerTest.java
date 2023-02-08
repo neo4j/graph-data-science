@@ -24,13 +24,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.annotation.SuppressForbidden;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.Aggregation;
 
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.OptionalLong;
-import java.util.Random;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
