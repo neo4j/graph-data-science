@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.progress.tasks;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
@@ -27,13 +28,17 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.logging.Log;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.TestLog.WARN;
 
 public class TaskProgressTrackerTest {
 
@@ -72,14 +77,33 @@ public class TaskProgressTrackerTest {
     }
 
     @Test
-    void shouldThrowIfEndMoreTasksThanStarted() {
+    void shouldThrowIfEndMoreTasksThanStartedAndFeatureToggleIsEnabled() {
+        GdsFeatureToggles.THROW_WHEN_USING_PROGRESS_TRACKER_WITHOUT_TASKS.enableAndRun(() -> {
+            var task = Tasks.leaf("leaf");
+            TaskProgressTracker progressTracker = progressTracker(task);
+            progressTracker.beginSubTask();
+            progressTracker.endSubTask();
+            assertThatThrownBy(progressTracker::endSubTask)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Tried to log progress, but there are no running tasks being tracked");
+        });
+    }
+
+    @Test
+    void shouldNotThrowIfEndMoreTasksThanStarted() {
         var task = Tasks.leaf("leaf");
-        TaskProgressTracker progressTracker = progressTracker(task);
+        var log = Neo4jProxy.testLog();
+        var progressTracker = new TaskProgressTracker(task, log, 1, EmptyTaskRegistryFactory.INSTANCE);
         progressTracker.beginSubTask();
         progressTracker.endSubTask();
-        assertThatThrownBy(progressTracker::endSubTask)
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("Tried to log progress, but there are no running tasks being tracked");
+        assertThatNoException()
+            .as("When `THROW_WHEN_USING_PROGRESS_TRACKER_WITHOUT_TASKS` is disabled (default state) we should not throw an exception.")
+            .isThrownBy(progressTracker::endSubTask);
+
+        Assertions
+            .assertThat(log.getMessages(WARN))
+            .extracting(removingThreadId())
+            .containsExactly("leaf :: Tried to log progress, but there are no running tasks being tracked");
     }
 
     @Test

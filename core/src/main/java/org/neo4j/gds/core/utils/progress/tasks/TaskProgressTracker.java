@@ -77,7 +77,7 @@ public class TaskProgressTracker implements ProgressTracker {
             AtomicBoolean didLog = new AtomicBoolean(false);
             this.onError = () -> {
                 if (!didLog.get()) {
-                    taskProgressLogger.logError("Tried to log progress, but there are no running tasks being tracked");
+                    taskProgressLogger.logWarning(":: Tried to log progress, but there are no running tasks being tracked");
                     didLog.set(true);
                 }
             };
