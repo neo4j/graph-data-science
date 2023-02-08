@@ -36,6 +36,7 @@ import java.util.stream.LongStream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.SeededRandom.newRandom;
 
 class AdjacencyPackerTest {
 
@@ -316,19 +317,5 @@ class AdjacencyPackerTest {
                     throw new IllegalArgumentException();
             }
         }
-    }
-
-    private static SeededRandom newRandom() {
-        var random = new Random();
-        var seed = random.nextLong();
-        random.setSeed(seed);
-        return ImmutableSeededRandom.of(random, seed);
-    }
-
-    @ValueClass
-    interface SeededRandom {
-        Random random();
-
-        long seed();
     }
 }
