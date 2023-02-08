@@ -26,7 +26,6 @@ import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.Properties;
 import org.neo4j.gds.api.RelationshipProperty;
-import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
@@ -100,22 +99,24 @@ abstract class EdgeSplitterBaseTest {
     }
 
     void assertNodeLabelFilter(
-        Topology topology,
+        Graph actualGraph,
         Collection<NodeLabel> sourceLabels,
-        Collection<NodeLabel> targetLabels,
-        IdMap idmap
+        Collection<NodeLabel> targetLabels
     ) {
-        idmap.forEachNode(sourceNode -> {
-            var targetNodeCursor = topology.adjacencyList().adjacencyCursor(sourceNode);
-            if (targetNodeCursor.hasNextVLong()) {
-                assertThat(idmap.nodeLabels(sourceNode).stream().filter(sourceLabels::contains)).isNotEmpty();
+        actualGraph.forEachNode(sourceNode -> {
+            if (actualGraph.degree(sourceNode) > 0) {
+                assertThat(actualGraph.nodeLabels(sourceNode).stream().filter(sourceLabels::contains)).isNotEmpty();
             }
-            while (targetNodeCursor.hasNextVLong()) {
-                assertThat(idmap
-                    .nodeLabels(targetNodeCursor.nextVLong())
+
+            actualGraph.forEachRelationship(sourceNode, (src, trg) -> {
+                assertThat(actualGraph
+                    .nodeLabels(trg)
                     .stream()
                     .filter(targetLabels::contains)).isNotEmpty();
-            }
+
+                return true;
+            });
+
             return true;
         });
     }

@@ -288,7 +288,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertThat(selectedGraph.isMultiGraph()).isFalse();
         assertRelSamplingProperties(selectedGraph, multiLabelGraph);
 
-        assertNodeLabelFilter(selectedRelationships.topology(), sourceNodeLabels, targetNodeLabels, multiLabelGraph);
+        assertNodeLabelFilter(selectedGraph, sourceNodeLabels, targetNodeLabels);
 
     }
 

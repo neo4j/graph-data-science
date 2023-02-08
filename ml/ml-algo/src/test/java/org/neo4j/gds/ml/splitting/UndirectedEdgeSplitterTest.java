@@ -322,7 +322,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertThat(selectedGraph.schema().isUndirected()).isFalse();
         assertRelSamplingProperties(selectedGraph, multiLabelGraph);
 
-        assertNodeLabelFilter(selectedRelationships.topology(), sourceNodeLabels, targetNodeLabels, graph);
+        assertNodeLabelFilter(selectedGraph, sourceNodeLabels, targetNodeLabels);
 
     }
 
@@ -357,7 +357,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertThat(selectedGraph.schema().isUndirected()).isFalse();
         assertRelSamplingProperties(selectedGraph, multiLabelGraph);
 
-        assertNodeLabelFilter(selectedRelationships.topology(), sourceNodeLabels, targetNodeLabels, multiLabelGraph);
+        assertNodeLabelFilter(selectedGraph, sourceNodeLabels, targetNodeLabels);
     }
 
     @Test
