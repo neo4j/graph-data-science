@@ -41,6 +41,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -154,6 +155,8 @@ class LeidenTest {
                 community -> assertThat(community).containsExactlyInAnyOrder("a1", "a5", "a6", "a7")
             );
         assertThat(communitiesMap.keySet()).containsExactly(4000L, 5000L);
+
+        assertThat(leidenResult.modularity()).isGreaterThan(0);
     }
 
     @Test
@@ -363,5 +366,30 @@ class LeidenTest {
                 "Leiden :: Iteration :: Finished",
                 "Leiden :: Finished"
             );
+    }
+
+    @Test
+    void shouldWorkIfStopAtFirstIteration() {
+
+        var query = " CREATE\n" +
+                    "          (c:C {id: 0}) \n" +
+                    "        , (d:D {id: 1}) ";
+        var empty = GdlFactory.of(query).build().getUnion();
+        var result = new Leiden(
+            empty,
+            5,
+            1,
+            0.01,
+            false,
+            42,
+            null,
+            0.1,
+            1,
+            ProgressTracker.NULL_TRACKER
+        ).compute();
+        var communities = result.communities();
+        assertThat(communities.toArray()).isEqualTo(new long[]{0, 1});
+
+
     }
 }

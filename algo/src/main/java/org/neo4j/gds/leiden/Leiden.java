@@ -133,9 +133,10 @@ public class Leiden extends Algorithm<LeidenResult> {
                 gamma,
                 concurrency
             );
-            var communitiesCount = localMovePhase.run();
-            boolean localPhaseConverged = communitiesCount == workingGraph.nodeCount() || localMovePhase.swaps == 0;
 
+            localMovePhase.run();
+            //if you do swaps,  no convergence
+            boolean localPhaseConverged = localMovePhase.swaps == 0;
             progressTracker.endSubTask("Local Move");
 
             progressTracker.beginSubTask("Modularity Computation");
@@ -244,11 +245,11 @@ public class Leiden extends Algorithm<LeidenResult> {
 
     @NotNull
     private LeidenResult getLeidenResult(boolean didConverge, int iteration) {
-        boolean seedIsOptimal = didConverge && seedValues.isPresent() && iteration == 0;
-        if (seedIsOptimal) {
+        boolean stoppedAtFirstIteration = didConverge && iteration == 0;
+        if (stoppedAtFirstIteration) {
             var modularity = modularities[0];
             return LeidenResult.of(
-                LeidenUtils.createSeedCommunities(rootGraph.nodeCount(), seedValues.orElse(null)),
+                LeidenUtils.createStartingCommunities(rootGraph.nodeCount(), seedValues.orElse(null)),
                 1,
                 didConverge,
                 null,
@@ -266,8 +267,8 @@ public class Leiden extends Algorithm<LeidenResult> {
             );
         }
     }
-    
-    private boolean updateModularity(
+
+    private void updateModularity(
         Graph workingGraph,
         HugeLongArray localMoveCommunities,
         HugeDoubleArray localMoveCommunityVolumes,
@@ -276,8 +277,10 @@ public class Leiden extends Algorithm<LeidenResult> {
         boolean localPhaseConverged,
         int iteration
     ) {
-        boolean seedIsOptimal = localPhaseConverged && seedValues.isPresent() && iteration == 0;
-        boolean shouldCalculateModularity = !localPhaseConverged || seedIsOptimal;
+        //will calculate modularity only if:
+        // -    the local phase has not converged (i.e., no swaps done)
+        //- or we terminate in the first iteration (i.e., given seeding is optimal, graph is empty etc)
+        boolean shouldCalculateModularity = !localPhaseConverged || iteration == 0;
 
         if (shouldCalculateModularity) {
             modularities[iteration] = ModularityComputer.compute(
@@ -291,7 +294,6 @@ public class Leiden extends Algorithm<LeidenResult> {
                 progressTracker
             );
         }
-        return seedIsOptimal;
     }
 
     private double initVolumes(
