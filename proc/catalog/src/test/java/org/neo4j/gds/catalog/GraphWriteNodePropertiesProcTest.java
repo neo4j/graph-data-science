@@ -400,7 +400,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     @Test
     void shouldRenameMultipleProperties() {
         assertCypherResult(
-            "CALL gds.graph.nodeProperties.write($graph, [{newNodeProp1: 'foo'}, {newNodeProp2: 'bar'} ,'newNodeProp1'], 'A')",
+            "CALL gds.graph.nodeProperties.write($graph, [{newNodeProp1: 'foo', newNodeProp2: 'bar'} ,'newNodeProp1'], 'A')",
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             List.of(Map.of(
                 "writeMillis", Matchers.greaterThan(-1L),

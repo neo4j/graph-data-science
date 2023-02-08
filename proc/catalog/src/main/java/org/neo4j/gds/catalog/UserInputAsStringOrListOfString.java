@@ -57,15 +57,15 @@ public final class UserInputAsStringOrListOfString {
         return new IllegalArgumentException(message);
     }
 
-    private static String typeOf(Object userInput) {
-        if (userInput instanceof Number) return "number";
-        if (userInput instanceof Boolean) return "boolean";
-        if (userInput instanceof Node) return "node";
-        if (userInput instanceof Relationship) return "relationship";
-        if (userInput instanceof Path) return "path";
-        if (userInput instanceof Map) return "map";
-        if (userInput instanceof List) return "list";
+     static String typeOf(Object userInput) {
+         if (userInput instanceof Number) return "number";
+         if (userInput instanceof Boolean) return "boolean";
+         if (userInput instanceof Node) return "node";
+         if (userInput instanceof Relationship) return "relationship";
+         if (userInput instanceof Path) return "path";
+         if (userInput instanceof Map) return "map";
+         if (userInput instanceof List) return "list";
 
-        else throw new AssertionError("Developer error, this should not happen");
-    }
+         else throw new AssertionError("Developer error, this should not happen");
+     }
 }
