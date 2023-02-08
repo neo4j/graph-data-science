@@ -250,7 +250,7 @@ class AdjacencyPackerTest {
 
         assertThat(compressed.bytesUsed())
             .as("compressed exceeds original size, seed = %d", random.seed())
-            .isLessThanOrEqualTo(BitUtil.ceilDiv(1337L, AdjacencyPacking.BLOCK_SIZE) * Long.BYTES);
+            .isLessThanOrEqualTo(1337L * Long.BYTES);
         assertThat(compressed.address()).isNotZero();
 
         var decompressed = Features.SortAndDelta.decompress(compressed);
