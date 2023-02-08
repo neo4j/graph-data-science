@@ -121,21 +121,16 @@ abstract class EdgeSplitterBaseTest {
         });
     }
 
-    void assertRelInGraph(SingleTypeRelationships relationships, Graph inputGraph) {
+    void assertRelInGraph(Graph actualGraph, Graph inputGraph) {
         inputGraph.forEachNode(source -> {
-            var targetNodeCursor = relationships.topology().adjacencyList().adjacencyCursor(source);
-            var propertyCursor = relationships
-                .properties()
-                .map(p -> p.values().iterator().next().values().propertiesList().propertyCursor(source));
-            while (targetNodeCursor.hasNextVLong()) {
-                var targetNode = targetNodeCursor.nextVLong();
-                assertThat(inputGraph.exists(source, targetNode)).isTrue();
-                propertyCursor.ifPresent(cursor -> {
-                    assertThat(inputGraph.relationshipProperty(source, targetNode)).isEqualTo(Double.longBitsToDouble(
-                        cursor.nextLong()));
-                });
+            double fallbackValue = Double.NaN;
+            actualGraph.forEachRelationship(source, fallbackValue, (src, trg, weight) -> {
+                assertThat(inputGraph.exists(src, trg)).isTrue();
+                assertThat(actualGraph.relationshipProperty(src, trg, fallbackValue)).isEqualTo(weight);
 
-            }
+                return true;
+            });
+
             return true;
         });
     }
