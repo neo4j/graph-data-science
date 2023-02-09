@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -103,10 +102,9 @@ final class LocalMovePhase {
     }
 
     /**
-     *
      * @return The new community count.
      */
-    public long run() {
+    public void run() {
         HugeAtomicDoubleArray atomicCommunityVolumes = HugeAtomicDoubleArray.newArray(graph.nodeCount());
         graph.forEachNode(v -> {
             atomicCommunityVolumes.set(v, communityVolumes.get(v));
@@ -147,15 +145,11 @@ final class LocalMovePhase {
             swaps += task.swaps;
         }
 
-        MutableDouble aliveCommunities = new MutableDouble(graph.nodeCount());
         graph.forEachNode(v -> {
             communityVolumes.set(v, atomicCommunityVolumes.get(v));
-            if (Double.compare(communityVolumes.get(v), 0.0) == 0) {
-                aliveCommunities.decrement();
-            }
             return true;
         });
-        return aliveCommunities.longValue();
+
     }
-    
+
 }
