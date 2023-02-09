@@ -71,9 +71,7 @@ final class LocalMovePhase {
         double gamma,
         int concurrency
     ) {
-        var encounteredCommunitiesWeights = HugeDoubleArray.newArray(graph.nodeCount());
-        encounteredCommunitiesWeights.setAll(c -> -1L);
-
+        
         return new LocalMovePhase(
             graph,
             seedCommunities,
