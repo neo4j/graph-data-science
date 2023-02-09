@@ -129,8 +129,11 @@ public class LocalMoveTask implements Runnable {
         long oldCommunityId = currentCommunities.get(nodeId);
         currentCommunities.set(nodeId, newCommunityId);
         communityVolumes.getAndAdd(newCommunityId, currentNodeVolume);
-        communityVolumes.getAndAdd(oldCommunityId, -currentNodeVolume);
-
+        //do a atomic update to never go into negatives etc
+        communityVolumes.update(oldCommunityId, (oldValue) -> {
+            var diff = oldValue - currentNodeVolume;
+            return Math.max(diff, 0.0);
+        });
         swaps++;
 
     }

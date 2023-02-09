@@ -277,9 +277,9 @@ public class Leiden extends Algorithm<LeidenResult> {
         boolean localPhaseConverged,
         int iteration
     ) {
-        //will calculate modularity only if:
-        // -    the local phase has not converged (i.e., no swaps done)
-        //- or we terminate in the first iteration (i.e., given seeding is optimal, graph is empty etc)
+        // Will calculate modularity only if:
+        // - the local phase has not converged (i.e., no swaps done)
+        // - or we terminate in the first iteration (i.e., given seeding is optimal, graph is empty, etc)
         boolean shouldCalculateModularity = !localPhaseConverged || iteration == 0;
 
         if (shouldCalculateModularity) {
@@ -329,7 +329,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         rootGraph.forEachNode(nodeId -> {
             long communityId = initialCommunities.get(nodeId);
             progressTracker.logProgress();
-            communityVolumes.addTo(communityId, rootGraph.degree(nodeId));
+            communityVolumes.addTo(communityId, nodeVolumes.get(nodeId));
             return true;
         });
         progressTracker.endSubTask("Initialization");
