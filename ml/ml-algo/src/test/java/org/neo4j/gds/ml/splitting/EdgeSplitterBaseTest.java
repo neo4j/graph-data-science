@@ -108,10 +108,7 @@ abstract class EdgeSplitterBaseTest {
             }
 
             actualGraph.forEachRelationship(sourceNode, (src, trg) -> {
-                assertThat(actualGraph
-                    .nodeLabels(trg)
-                    .stream()
-                    .filter(targetLabels::contains)).isNotEmpty();
+                assertThat(actualGraph.nodeLabels(trg).stream().filter(targetLabels::contains)).isNotEmpty();
 
                 return true;
             });

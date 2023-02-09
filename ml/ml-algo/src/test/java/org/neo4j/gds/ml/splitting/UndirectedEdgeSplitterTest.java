@@ -343,7 +343,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var result = splitter.splitPositiveExamples(multiLabelGraph, .7, Optional.of("foo"));
 
         var remainingRelationships = result.remainingRels().build();
-        var remainingGraph = createGraph(remainingRelationships, multiGraphStore);
+        var remainingGraph = createGraph(remainingRelationships, multiLabelGraphStore);
 
         // 2 positive selected reduces remaining & 4 invalid relationships
         assertEquals(2L, remainingGraph.relationshipCount());
@@ -353,7 +353,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertRelInGraph(remainingGraph, multiLabelGraph);
 
         var selectedRelationships = result.selectedRels().build();
-        var selectedGraph = createGraph(selectedRelationships, multiGraphStore);
+        var selectedGraph = createGraph(selectedRelationships, multiLabelGraphStore);
         assertThat(selectedGraph.relationshipCount()).isEqualTo(2);
         assertThat(selectedGraph.isMultiGraph()).isFalse();
         assertThat(selectedGraph.schema().isUndirected()).isFalse();
