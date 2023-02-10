@@ -85,12 +85,11 @@ class ProgressTrackingTest {
         factory.build(graph, testConfig, log, taskRegistryFactoryMock).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
-            .as("When `logProgress` is set to `false` there should only be `start`, `100%` and `finished` log messages")
+            .as("When `logProgress` is set to `false` there should only be `start` and `finished` log messages")
             .extracting(removingThreadId())
             .extracting(replaceTimings())
             .containsExactly(
                 "TestAlgorithm :: Start",
-                "TestAlgorithm 100%",
                 "TestAlgorithm :: Finished"
             );
 

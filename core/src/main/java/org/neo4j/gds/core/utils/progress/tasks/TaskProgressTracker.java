@@ -58,12 +58,26 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     public TaskProgressTracker(
-        Task baseTask, Log log, int concurrency, JobId jobId, TaskRegistryFactory taskRegistryFactory,
+        Task baseTask,
+        Log log,
+        int concurrency,
+        JobId jobId,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory
+    ) {
+        this(baseTask, jobId, taskRegistryFactory, new TaskProgressLogger(log, baseTask, concurrency), userLogRegistryFactory);
+    }
+
+    protected TaskProgressTracker(
+        Task baseTask,
+        JobId jobId,
+        TaskRegistryFactory taskRegistryFactory,
+        TaskProgressLogger taskProgressLogger,
         UserLogRegistryFactory userLogRegistryFactory
     ) {
         this.baseTask = baseTask;
         this.taskRegistry = taskRegistryFactory.newInstance(jobId);
-        this.taskProgressLogger = new TaskProgressLogger(log, baseTask, concurrency);
+        this.taskProgressLogger = taskProgressLogger;
         this.currentTask = Optional.empty();
         this.currentTotalSteps = UNKNOWN_STEPS;
         this.progressLeftOvers = 0;
