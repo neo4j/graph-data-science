@@ -40,11 +40,12 @@ public class TestAlgorithm extends Algorithm<TestAlgorithmResult> {
 
     @Override
     public TestAlgorithmResult compute() {
-        progressTracker.beginSubTask();
+        progressTracker.beginSubTask(100);
 
         if (throwInCompute) {
             throw new IllegalStateException("boo");
         }
+        progressTracker.logProgress(50);
 
         progressTracker.endSubTask();
 

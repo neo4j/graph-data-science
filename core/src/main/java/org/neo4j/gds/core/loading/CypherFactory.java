@@ -164,6 +164,17 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
             Tasks.leaf("Nodes"),
             Tasks.leaf("Relationships", dimensions.relCountUpperBound())
         );
+        if (graphProjectConfig.logProgress()) {
+            return new TaskProgressTracker(
+                task,
+                loadingContext.log(),
+                graphProjectConfig.readConcurrency(),
+                graphProjectConfig.jobId(),
+                loadingContext.taskRegistryFactory(),
+                EmptyUserLogRegistryFactory.INSTANCE
+            );
+        }
+
         return new TaskProgressTracker(
             task,
             loadingContext.log(),

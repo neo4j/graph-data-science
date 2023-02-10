@@ -130,3 +130,7 @@ The Default is `concurrency`
 [[common-configuration-jobid]]
 jobId - String::
 An id for the job to be started can be provided in order for it to be more easily tracked with eg. GDS's xref:common-usage/logging.adoc[logging capabilities].
+
+[[common-configuration-logProgress]]
+logProgress - Boolean::
+Configuration parameter that allows to turn `off/on` percentage logging while running procedure. It is `on` by default

@@ -104,7 +104,7 @@ class GraphListProcTest extends BaseProcTest {
                 new Condition<>(config -> {
                     assertThat(config)
                         .asInstanceOf(stringObjectMapAssertFactory())
-                        .hasSize(9)
+                        .hasSize(10)
                         .containsEntry(
                             "nodeProjection", map(
                                 "A", map(
@@ -136,6 +136,7 @@ class GraphListProcTest extends BaseProcTest {
                             intAssertConsumer(readConcurrency -> readConcurrency.isEqualTo(4))
                         )
                         .hasEntrySatisfying("sudo", booleanAssertConsumer(AbstractBooleanAssert::isFalse))
+                        .hasEntrySatisfying("logProgress", booleanAssertConsumer(AbstractBooleanAssert::isTrue))
                         .doesNotContainKeys(
                             GraphProjectConfig.NODE_COUNT_KEY,
                             GraphProjectConfig.RELATIONSHIP_COUNT_KEY,
@@ -217,7 +218,7 @@ class GraphListProcTest extends BaseProcTest {
                 "configuration", new Condition<>(config -> {
                     assertThat(config)
                         .asInstanceOf(stringObjectMapAssertFactory())
-                        .hasSize(11)
+                        .hasSize(12)
                         .containsEntry("nodeProjections", map(
                             "10_Nodes", map(
                                 "label", "10_Nodes",
@@ -250,6 +251,7 @@ class GraphListProcTest extends BaseProcTest {
                         )
                         .hasEntrySatisfying("allowSelfLoops", booleanAssertConsumer(AbstractBooleanAssert::isFalse))
                         .hasEntrySatisfying("sudo", booleanAssertConsumer(AbstractBooleanAssert::isFalse))
+                        .hasEntrySatisfying("logProgress", booleanAssertConsumer(AbstractBooleanAssert::isTrue))
                         .hasEntrySatisfying(
                             "relationshipDistribution",
                             stringAssertConsumer(relationshipDistribution -> relationshipDistribution.isEqualTo(
@@ -344,7 +346,7 @@ class GraphListProcTest extends BaseProcTest {
                 "configuration", new Condition<>(config -> {
                     assertThat(config)
                         .asInstanceOf(stringObjectMapAssertFactory())
-                        .hasSize(8)
+                        .hasSize(9)
                         .hasEntrySatisfying(
                             "relationshipQuery",
                             stringAssertConsumer(relationshipQuery -> relationshipQuery.isEqualTo(
@@ -360,6 +362,7 @@ class GraphListProcTest extends BaseProcTest {
                             stringAssertConsumer(nodeQuery -> nodeQuery.isEqualTo(ALL_NODES_QUERY))
                         )
                         .hasEntrySatisfying("sudo", booleanAssertConsumer(AbstractBooleanAssert::isTrue))
+                        .hasEntrySatisfying("logProgress", booleanAssertConsumer(AbstractBooleanAssert::isTrue))
                         .hasEntrySatisfying(
                             "readConcurrency",
                             intAssertConsumer(readConcurrency -> readConcurrency.isEqualTo(4))
@@ -417,11 +420,12 @@ class GraphListProcTest extends BaseProcTest {
                 "configuration", new Condition<>(config -> {
                     assertThat(config)
                         .asInstanceOf(stringObjectMapAssertFactory())
-                        .hasSize(4)
+                        .hasSize(5)
                         .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
                         .hasEntrySatisfying("jobId", jobId -> assertThat(jobId).isNotNull())
                         .hasEntrySatisfying("undirectedRelationshipTypes", t -> assertThat(t).isEqualTo(List.of()))
-                        .hasEntrySatisfying("inverseIndexedRelationshipTypes", t -> assertThat(t).isEqualTo(List.of()));
+                        .hasEntrySatisfying("inverseIndexedRelationshipTypes", t -> assertThat(t).isEqualTo(List.of()))
+                        .hasEntrySatisfying("logProgress", booleanAssertConsumer(AbstractBooleanAssert::isTrue));
 
                     return true;
                 }, "Assert Cypher Aggregation `configuration` map"),

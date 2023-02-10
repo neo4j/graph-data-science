@@ -42,6 +42,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.internal.id.IdGeneratorFactory;
@@ -283,7 +284,19 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
             Tasks.task("Nodes", nodeTasks),
             Tasks.task("Relationships", Tasks.leaf("Store Scan", relationshipCount))
         );
-        return new TaskProgressTracker(
+
+        if (graphProjectConfig.logProgress()) {
+            return new TaskProgressTracker(
+                task,
+                loadingContext.log(),
+                graphProjectConfig.readConcurrency(),
+                graphProjectConfig.jobId(),
+                loadingContext.taskRegistryFactory(),
+                EmptyUserLogRegistryFactory.INSTANCE
+            );
+        }
+
+        return new TaskTreeProgressTracker(
             task,
             loadingContext.log(),
             graphProjectConfig.readConcurrency(),
