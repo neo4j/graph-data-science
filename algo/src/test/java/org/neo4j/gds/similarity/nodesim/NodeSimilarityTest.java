@@ -816,15 +816,13 @@ final class NodeSimilarityTest {
         nodeSimilarity.compute();
 
         assertThat(progressLog.getMessages(INFO))
-            .as("When progress logging is disabled we only log `start`, `100%` and `finished`.")
+            .as("When progress logging is disabled we only log `start` and `finished`.")
             .extracting(removingThreadId())
             .containsExactly(
                 "NodeSimilarity :: Start",
                 "NodeSimilarity :: prepare :: Start",
-                "NodeSimilarity :: prepare 100%",
                 "NodeSimilarity :: prepare :: Finished",
                 "NodeSimilarity :: compare node pairs :: Start",
-                "NodeSimilarity :: compare node pairs 100%",
                 "NodeSimilarity :: compare node pairs :: Finished",
                 "NodeSimilarity :: Finished"
             );

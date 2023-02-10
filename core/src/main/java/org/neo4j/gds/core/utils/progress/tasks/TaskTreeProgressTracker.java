@@ -34,7 +34,18 @@ public final class TaskTreeProgressTracker extends TaskProgressTracker {
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory
     ) {
-        super(baseTask, log, concurrency, jobId, taskRegistryFactory, userLogRegistryFactory);
+        super(
+            baseTask,
+            jobId,
+            taskRegistryFactory,
+            new TaskProgressLogger(
+                log,
+                baseTask,
+                concurrency,
+                new PassThroughTaskVisitor()
+            ),
+            userLogRegistryFactory
+        );
     }
 
     @Override
@@ -50,5 +61,12 @@ public final class TaskTreeProgressTracker extends TaskProgressTracker {
     @Override
     public void logProgress(long value, String messageTemplate) {
         // NOOP
+    }
+
+    private static class PassThroughTaskVisitor implements TaskVisitor {
+        @Override
+        public void visitLeafTask(LeafTask leafTask) {
+            // NOOP --> just pass through
+        }
     }
 }
