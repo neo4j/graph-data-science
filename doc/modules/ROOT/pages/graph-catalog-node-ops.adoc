@@ -121,7 +121,7 @@ YIELD
 ----
 CALL gds.graph.nodeProperties.write(
     graphName: String,
-    nodeProperties: String or List of Strings,
+    nodeProperties: String or Map of Strings or List of Strings and/or Maps of Strings,
     nodeLabels: String or List of Strings,
     configuration: Map
 )
@@ -137,7 +137,7 @@ YIELD
 |===
 | Name           | Type                       | Optional | Description
 | graphName      | String                     | no       | The name under which the graph is stored in the catalog.
-| nodeProperties | String or List of Strings  | no       | The node properties in the graph to write back.
+| nodeProperties | String, Map of Strings, or List of Strings and/or Maps of Strings | no       | The node properties in the graph to write back. To write back properties with new custom names, store them as entries inside maps in the form:  `nodeProperty: 'renamedProperty'`.
 | nodeLabels     | String or List of Strings  | yes      | The node labels to write back their node properties.
 | configuration  | Map                        | yes      | Additional parameters to configure writeNodeProperties.
 |===
@@ -461,6 +461,32 @@ YIELD propertiesWritten
 --
 
 The above example requires the `score` property to be present on _at least one_ projected node label, and the properties will be written for all such labels.
+
+====  Renaming properties when writing back
+
+It is possible to rename node properties and write them back to the database under a custom name. For this, you can use a map where each entry is a tuple `{nodeProperty: 'renamedProperty'}` i.e., the key corresponds to an existing node property in the in-memory graph and the value corresponds to the name to be written back to the database.
+
+For convenience, a map may hold more than one entries. The `nodeProperties` configuration parameter accepts both strings and maps and any combination of the two inside a list. This can be helpful when we only want to rename a handful of properties.
+
+[role=query-example]
+--
+.Write the `age` and `score` properties back to Neo4j with a new name for `score`:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.nodeProperties.write('socialGraph', ['age', {score: 'writtenScore'}])
+YIELD nodeProperties
+----
+
+.Results
+[opts="header"]
+|===
+| nodeProperties
+| [age, writtenScore]
+|===
+--
+
+In the above example, we write  `age` back to the database with its default name whereas we renamed  `score` to `writtenScore` by using a map.
+
 
 ==== NodeLabels
 
