@@ -32,40 +32,54 @@ public final class UserInputWriteProperties {
 
     public static List<PropertySpec> parse(Object userInput, String configurationKey) {
         var result = new ArrayList<PropertySpec>();
-
+        Object originalUserInput = userInput;
         if (userInput instanceof Iterable) {
             for (Object item : (Iterable) userInput) {
-                parseNextInList(item, configurationKey, result);
+                parseNextInList(item, configurationKey, result, originalUserInput);
             }
             return result;
         }
-        parseNextInList(userInput, configurationKey, result);
+        parseNextInList(userInput, configurationKey, result, originalUserInput);
         return result;
     }
 
     private static void parseNextInList(
         Object userInput,
         String configurationKey,
-        ArrayList<PropertySpec> result
+        ArrayList<PropertySpec> result,
+        Object originalUserInput
     ) {
         if (userInput instanceof String) {
             result.add(new PropertySpec((String) userInput, Optional.empty()));
         } else if (userInput instanceof Map) {
-            var convertedMap = (Map<String, String>) userInput;
+            var convertedMap = (Map) userInput;
             for (var entry : convertedMap.entrySet()) {
-                var key = entry.getKey();
-                var value = entry.getValue();
-                result.add(new PropertySpec(key, Optional.of(value)));
+                if (entry instanceof Map.Entry<?, ?>) {
+                    var key = ((Map.Entry<?, ?>) entry).getKey();
+                    var value = ((Map.Entry<?, ?>) entry).getValue();
+
+                    if (key instanceof String && value instanceof String) {
+                        var stringKey = (String) key;
+                        var stringValue = (String) value;
+                        result.add(new PropertySpec(stringKey, Optional.of(stringValue)));
+                    } else {
+                        throw illegalArgumentException(originalUserInput, configurationKey);
+                    }
+                }
             }
         } else {
-            throw illegalArgumentException(userInput, configurationKey);
+            throw illegalArgumentException(originalUserInput, configurationKey);
         }
     }
 
     private static IllegalArgumentException illegalArgumentException(Object userInput, String configurationKey) {
         var type = UserInputAsStringOrListOfString.typeOf(userInput);
+        if (type.equals("map") || type.equals("list")) {
+            type = "improperly defined " + type;
+        }
+      
         var message = formatWithLocale(
-            "Type mismatch for %s: expected List<String> or String or Map<String,String> or List<String or Map<String,String>>, but found %s",
+            "Type mismatch for %s: expected String, Map<String,String>, or List<String and/or Map<String,String>>, but found %s",
             configurationKey,
             type
         );
