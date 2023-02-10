@@ -79,25 +79,13 @@ public class LouvainStreamProc extends StreamProc<Louvain, LouvainResult, Louvai
         return runWithExceptionLogging("Graph streaming failed", () -> {
             Graph graph = computationResult.graph();
 
-            boolean consecutiveIds = computationResult
-                .config()
-                .consecutiveIds();
-
-            var nodeProperties = (computationResult.isGraphEmpty() || !consecutiveIds) ? null : nodeProperties((computationResult));
-
-            var louvain = computationResult.result();
-
             return LongStream
                 .range(0, graph.nodeCount())
                 .boxed()
                 .map((nodeId) -> {
-                    boolean includeIntermediateCommunities = computationResult
-                        .config()
-                        .includeIntermediateCommunities();
+                    long[] communities = getCommunities(computationResult, nodeId);
+                    long communityId = getCommunityId(computationResult, nodeId);
 
-                    long[] communities = includeIntermediateCommunities ? louvain.getIntermediateCommunities(nodeId) : null;
-                    long communityId = consecutiveIds ? nodeProperties.longValue(
-                        nodeId) : louvain.getCommunity(nodeId);
                     return new StreamResult(
                         graph.toOriginalNodeId(nodeId),
                         communities,
@@ -117,6 +105,30 @@ public class LouvainStreamProc extends StreamProc<Louvain, LouvainResult, Louvai
         long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
     ) {
         throw new UnsupportedOperationException("Louvain handles result building individually.");
+    }
+
+    @Nullable
+    private long[] getCommunities(ComputationResult<Louvain, LouvainResult, LouvainStreamConfig> computationResult, Long nodeId) {
+        var louvain = computationResult.result();
+
+        boolean includeIntermediateCommunities = computationResult
+                .config()
+                .includeIntermediateCommunities();
+
+        return includeIntermediateCommunities ? louvain.getIntermediateCommunities(nodeId) : null;
+    }
+
+    private long getCommunityId(ComputationResult<Louvain, LouvainResult, LouvainStreamConfig> computationResult, Long nodeId) {
+        var louvain = computationResult.result();
+
+        boolean consecutiveIds = computationResult
+                .config()
+                .consecutiveIds();
+
+        var nodeProperties = (computationResult.isGraphEmpty() || !consecutiveIds) ? null : nodeProperties((computationResult));
+
+        return consecutiveIds ? nodeProperties.longValue(
+                nodeId) : louvain.getCommunity(nodeId);
     }
 
     @SuppressWarnings("unused")
