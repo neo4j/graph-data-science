@@ -20,6 +20,12 @@
 package org.neo4j.gds.similarity.filterednodesim;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -30,6 +36,8 @@ import org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.TestLog.INFO;
 
 @GdlExtension
 class FilteredNodeSimilarityTest {
@@ -153,5 +161,56 @@ class FilteredNodeSimilarityTest {
         assertThat(noOfResultsWithTargetNodeOutSideOfFilter).isGreaterThan(0);
 
         nodeSimilarity.release();
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2})
+    void shouldLogProgressAccurately(int concurrency) {
+        var sourceNodeFilter = List.of(2L, 3L);
+
+        var config = ImmutableFilteredNodeSimilarityStreamConfig.builder()
+            .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
+            .concurrency(concurrency)
+            .topK(0)
+            .topN(10)
+            .build();
+        var progressTask = new FilteredNodeSimilarityFactory<>().progressTask(graph, config);
+        TestLog log = Neo4jProxy.testLog();
+        var progressTracker = new TestProgressTracker(
+            progressTask,
+            log,
+            concurrency,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+
+        new FilteredNodeSimilarityFactory<>().build(
+            graph,
+            config,
+            progressTracker
+        ).compute();
+
+
+        assertThat(log.getMessages(INFO))
+            .extracting(removingThreadId())
+            .containsExactly(
+                "FilteredNodeSimilarity :: Start",
+                "FilteredNodeSimilarity :: prepare :: Start",
+                "FilteredNodeSimilarity :: prepare 33%",
+                "FilteredNodeSimilarity :: prepare 55%",
+                "FilteredNodeSimilarity :: prepare 66%",
+                "FilteredNodeSimilarity :: prepare 100%",
+                "FilteredNodeSimilarity :: prepare :: Finished",
+                "FilteredNodeSimilarity :: compare node pairs :: Start",
+                "FilteredNodeSimilarity :: compare node pairs 12%",
+                "FilteredNodeSimilarity :: compare node pairs 25%",
+                "FilteredNodeSimilarity :: compare node pairs 37%",
+                "FilteredNodeSimilarity :: compare node pairs 50%",
+                "FilteredNodeSimilarity :: compare node pairs 62%",
+                "FilteredNodeSimilarity :: compare node pairs 75%",
+                "FilteredNodeSimilarity :: compare node pairs 100%",
+                "FilteredNodeSimilarity :: compare node pairs :: Finished",
+                "FilteredNodeSimilarity :: Finished"
+            );
     }
 }
