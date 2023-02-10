@@ -430,8 +430,14 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     }
 
     private long calculateWorkload() {
-        long workload = nodesToCompare * nodesToCompare;
-        if (concurrency == 1) {
+        //for each source node, examine all their target nodes
+        //if no filter then sourceNodes == targetNodes
+        long workload = sourceNodes.cardinality() * targetNodes.cardinality();
+
+        //when on concurrency of 1 on not-filtered similarity,  we only compare nodeId with greater indexed nodes
+        // so work is halved. This does not hold for filtered similarity, since the targetNodes might be lesser indexed.
+        boolean isNotFiltered = sourceNodes.equals(NodeFilter.noOp) && targetNodeFilter.equals(NodeFilter.noOp);
+        if (concurrency == 1 && isNotFiltered) {
             workload = workload / 2;
         }
         return workload;
