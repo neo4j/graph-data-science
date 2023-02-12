@@ -31,10 +31,13 @@ import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
+import org.neo4j.values.storable.LongValue;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -84,14 +87,15 @@ public class LouvainStreamProc extends StreamProc<Louvain, LouvainResult, Louvai
                 .boxed()
                 .map((nodeId) -> {
                     long[] communities = getCommunities(computationResult, nodeId);
-                    long communityId = getCommunityId(computationResult, nodeId);
+                    Optional<Long> communityId = getCommunityId(computationResult, nodeId);
 
-                    return new StreamResult(
-                        graph.toOriginalNodeId(nodeId),
-                        communities,
-                        communityId
-                    );
-                });
+                    return communityId.map(id -> new StreamResult(
+                            graph.toOriginalNodeId(nodeId),
+                            communities,
+                            id
+                    )).orElse(null);
+                })
+                .filter(Objects::nonNull);
         });
     }
 
@@ -118,17 +122,21 @@ public class LouvainStreamProc extends StreamProc<Louvain, LouvainResult, Louvai
         return includeIntermediateCommunities ? louvain.getIntermediateCommunities(nodeId) : null;
     }
 
-    private long getCommunityId(ComputationResult<Louvain, LouvainResult, LouvainStreamConfig> computationResult, Long nodeId) {
+    private Optional<Long> getCommunityId(ComputationResult<Louvain, LouvainResult, LouvainStreamConfig> computationResult, Long nodeId) {
         var louvain = computationResult.result();
 
         boolean consecutiveIds = computationResult
                 .config()
                 .consecutiveIds();
 
-        var nodeProperties = (computationResult.isGraphEmpty() || !consecutiveIds) ? null : nodeProperties((computationResult));
+        if (computationResult.isGraphEmpty() || !consecutiveIds) {
+            return Optional.of(louvain.getCommunity(nodeId));
+        }
 
-        return consecutiveIds ? nodeProperties.longValue(
-                nodeId) : louvain.getCommunity(nodeId);
+        var nodeProperties = nodeProperties((computationResult));
+        var value = nodeProperties.value(nodeId);
+
+        return Optional.ofNullable(value).map(val -> ((LongValue) val).longValue());
     }
 
     @SuppressWarnings("unused")

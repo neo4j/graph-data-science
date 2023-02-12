@@ -21,6 +21,9 @@ package org.neo4j.gds.louvain;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -28,6 +31,8 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -79,9 +84,7 @@ class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
         });
         assertCommunities(actualCommunities, RESULT);
         assertThat(communityMap).hasSize(3).containsExactlyInAnyOrder(0L, 1L, 2L);
-
     }
-
 
     @Test
     void testStreamCommunities() {
@@ -145,6 +148,35 @@ class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
         );
 
         assertThat(actualFilteredCount).isEqualTo(filteredNodeCount);
+    }
+
+    static Stream<Arguments> communitySizeInputs() {
+        return Stream.of(
+                Arguments.of(Map.of("minCommunitySize", 1), List.of(0, 1, 2)),
+                Arguments.of(Map.of("minCommunitySize", 5), List.of(0, 2))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("communitySizeInputs")
+    void testMinCommunitySize(Map<String, Long> parameters, List<Integer> expectedCommunityIds) {
+        @Language("Cypher") String query = GdsCypher.call("myGraph")
+                .algo("louvain")
+                .streamMode()
+                .addParameter("consecutiveIds", true)
+                .addAllParameters(parameters)
+                .yields("nodeId", "communityId");
+
+        var communityMap = new HashSet<Integer>();
+
+        runQueryWithRowConsumer(query, row -> {
+            long id = row.getNumber("nodeId").longValue();
+            int community = row.getNumber("communityId").intValue();
+
+            communityMap.add(community);
+            assertThat(RESULT.get(community)).contains(id);
+        });
+        assertThat(communityMap).containsExactlyElementsOf(expectedCommunityIds);
     }
 
     @Override
