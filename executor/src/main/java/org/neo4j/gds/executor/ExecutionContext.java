@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.executor;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.annotation.ValueClass;
@@ -28,6 +27,7 @@ import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.EmptyDependencyResolver;
 import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -40,30 +40,19 @@ import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
-import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
 
-import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
-
-// TODO Remove the @Nullable annotations once the EstimationCli uses ProcedureExecutors
 @ValueClass
 public interface ExecutionContext {
 
-    @Nullable
     DatabaseId databaseId();
 
-    @Nullable
     DependencyResolver dependencyResolver();
 
-    @Nullable
     ModelCatalog modelCatalog();
 
     Log log();
-
-    @Nullable
-    TransactionContext transactionContext();
 
     TerminationMonitor terminationMonitor();
 
@@ -73,16 +62,15 @@ public interface ExecutionContext {
 
     NodeLookup nodeLookup();
 
-    @Nullable
-    ProcedureCallContext callContext();
+    ProcedureReturnColumns returnColumns();
 
-    @Nullable
     TaskRegistryFactory taskRegistryFactory();
 
-    @Nullable
     UserLogRegistryFactory userLogRegistryFactory();
 
     String username();
+
+    boolean isGdsAdmin();
 
     @Nullable
     RelationshipStreamExporterBuilder<? extends RelationshipStreamExporter> relationshipStreamExporterBuilder();
@@ -92,21 +80,6 @@ public interface ExecutionContext {
 
     @Nullable
     NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder();
-
-    @Value.Lazy
-    default boolean isGdsAdmin() {
-        var transactionContext = transactionContext();
-        if (transactionContext == null) {
-            return false;
-        }
-        return transactionContext.isGdsAdmin();
-    }
-
-    @Value.Lazy
-    default boolean containsOutputField(String fieldName) {
-        return callContext().outputFields()
-            .anyMatch(field -> toLowerCaseWithLocale(field).equals(fieldName));
-    }
 
     default ExecutionContext withNodePropertyExporterBuilder(NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder) {
         return ImmutableExecutionContext
@@ -136,7 +109,7 @@ public interface ExecutionContext {
 
         @Override
         public DatabaseId databaseId() {
-            return null;
+            return DatabaseId.EMPTY;
         }
 
         @Override
@@ -145,18 +118,13 @@ public interface ExecutionContext {
         }
 
         @Override
-        public @Nullable ModelCatalog modelCatalog() {
-            return null;
+        public ModelCatalog modelCatalog() {
+            return ModelCatalog.EMPTY;
         }
 
         @Override
-        public @Nullable Log log() {
+        public Log log() {
             return NullLog.getInstance();
-        }
-
-        @Override
-        public TransactionContext transactionContext() {
-            return null;
         }
 
         @Override
@@ -180,19 +148,23 @@ public interface ExecutionContext {
         }
 
         @Override
-        public ProcedureCallContext callContext() {
-            return ProcedureCallContext.EMPTY;
+        public ProcedureReturnColumns returnColumns() {
+            return ProcedureReturnColumns.EMPTY;
         }
 
         @Override
-        public @Nullable TaskRegistryFactory taskRegistryFactory() {
+        public TaskRegistryFactory taskRegistryFactory() {
             return EmptyTaskRegistryFactory.INSTANCE;
         }
 
         @Override
-        public @Nullable
-        UserLogRegistryFactory userLogRegistryFactory() {
+        public UserLogRegistryFactory userLogRegistryFactory() {
             return EmptyUserLogRegistryFactory.INSTANCE;
+        }
+
+        @Override
+        public boolean isGdsAdmin() {
+            return false;
         }
 
         @Override

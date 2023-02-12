@@ -21,6 +21,7 @@ package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
@@ -28,7 +29,6 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -85,7 +85,7 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
         ExecutionContext executionContext
     ) {
         return LabelPropagationProc.resultBuilder(
-            new MutateResult.Builder(executionContext.callContext(), computeResult.config().concurrency()),
+            new MutateResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
             computeResult
         );
     }
@@ -124,8 +124,8 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
 
         static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<MutateResult> {
 
-            Builder(ProcedureCallContext context, int concurrency) {
-                super(context, concurrency);
+            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+                super(returnColumns, concurrency);
             }
 
             @Override

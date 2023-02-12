@@ -20,8 +20,10 @@ dependencies {
     implementation project(':executor')
     implementation project(':memory-usage')
     implementation project(':neo4j-adapter')
+    implementation project(':neo4j-api')
     implementation project(':string-formatting')
     implementation project(':graph-schema-api')
+    implementation project(':transaction')
 
     implementation group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram'
 

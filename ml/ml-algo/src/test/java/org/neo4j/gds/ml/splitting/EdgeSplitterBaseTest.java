@@ -22,85 +22,111 @@ package org.neo4j.gds.ml.splitting;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.GraphCharacteristics;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.Properties;
-import org.neo4j.gds.api.Topology;
+import org.neo4j.gds.api.RelationshipProperty;
+import org.neo4j.gds.api.schema.MutableGraphSchema;
+import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.api.schema.MutableRelationshipSchema;
+import org.neo4j.gds.core.huge.HugeGraphBuilder;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 abstract class EdgeSplitterBaseTest {
-    void assertRelExists(Topology topology, long source, long... targets) {
-        var cursor = topology.adjacencyList().adjacencyCursor(source);
-        for (long target : targets) {
-            assertThat(cursor.nextVLong()).isEqualTo(target);
-        }
+
+    Graph createGraph(SingleTypeRelationships relationships, GraphStore graphStore) {
+        var schema = MutableGraphSchema.of(
+            (MutableNodeSchema) graphStore.schema().nodeSchema(),
+            new MutableRelationshipSchema(Map.of(
+                relationships.relationshipSchemaEntry().identifier(),
+                relationships.relationshipSchemaEntry()
+            )),
+            Map.of()
+        );
+
+        var graphCharacteristicsBuilder = GraphCharacteristics
+            .builder()
+            .withDirection(relationships.relationshipSchemaEntry()
+                .direction());
+        relationships.inverseTopology().ifPresent(__ -> graphCharacteristicsBuilder.inverseIndexed());
+
+        Set<String> relProps = schema.relationshipSchema().allProperties();
+        assert relProps.size() <= 1 : "Cannot derive relationship property";
+
+        Optional<String> maybePropName = relProps.stream().findFirst();
+        Optional<Properties> property = maybePropName.flatMap(propName -> relationships
+            .properties()
+            .map(i -> i.get(propName))
+            .map(RelationshipProperty::values));
+
+        var inverseProperty = maybePropName.flatMap(propName -> relationships
+            .inverseProperties()
+            .map(i -> i.get(propName))
+            .map(RelationshipProperty::values));
+
+        return new HugeGraphBuilder().characteristics(graphCharacteristicsBuilder.build())
+            .nodes(graphStore.nodes())
+            .schema(schema)
+            .topology(relationships.topology())
+            .inverseTopology(relationships.inverseTopology())
+            .relationshipProperties(property)
+            .inverseRelationshipProperties(inverseProperty)
+            .build();
     }
 
-    void assertRelProperties(
-        Properties properties,
-        long source,
-        double... values
-    ) {
-        var cursor = properties.propertiesList().propertyCursor(source);
-        for (double property : values) {
-            assertThat(Double.longBitsToDouble(cursor.nextLong())).isEqualTo(property);
-        }
-    }
-
-    void assertRelSamplingProperties(SingleTypeRelationships selectedRels, Graph inputGraph) {
+    void assertRelSamplingProperties(Graph resultGraph, Graph inputGraph) {
         MutableInt positiveCount = new MutableInt();
         inputGraph.forEachNode(source -> {
-            var targetNodeCursor = selectedRels.topology().adjacencyList().adjacencyCursor(source);
-            var propertyCursor = selectedRels
-                .properties()
-                .get()
-                .values()
-                .iterator()
-                .next()
-                .values()
-                .propertiesList()
-                .propertyCursor(source);
-            while (targetNodeCursor.hasNextVLong()) {
-                boolean edgeIsPositive = Double.longBitsToDouble(propertyCursor.nextLong()) == EdgeSplitter.POSITIVE;
-                if (edgeIsPositive) positiveCount.increment();
-                assertThat(edgeIsPositive)
-                    .isEqualTo(inputGraph.exists(source, targetNodeCursor.nextVLong()));
-            }
-            assertThat(propertyCursor.hasNextLong()).isFalse();
-            return true;
-        });
-
-        assertThat(selectedRels.topology().elementCount()).isEqualTo(positiveCount.longValue());
-    }
-
-    void assertNodeLabelFilter(Topology topology, Collection<NodeLabel> sourceLabels, Collection<NodeLabel> targetLabels, IdMap idmap) {
-        idmap.forEachNode(sourceNode -> {
-            var targetNodeCursor = topology.adjacencyList().adjacencyCursor(sourceNode);
-            if (targetNodeCursor.hasNextVLong()) { assertThat(idmap.nodeLabels(sourceNode).stream().filter(sourceLabels::contains)).isNotEmpty(); }
-            while (targetNodeCursor.hasNextVLong()) {
-                assertThat(idmap.nodeLabels(targetNodeCursor.nextVLong()).stream().filter(targetLabels::contains)).isNotEmpty();
-            }
-            return true;
-        });
-    }
-
-    void assertRelInGraph(SingleTypeRelationships relationships, Graph inputGraph) {
-        inputGraph.forEachNode(source -> {
-            var targetNodeCursor = relationships.topology().adjacencyList().adjacencyCursor(source);
-            var propertyCursor = relationships
-                .properties()
-                .map(p -> p.values().iterator().next().values().propertiesList().propertyCursor(source));
-            while (targetNodeCursor.hasNextVLong()) {
-                var targetNode = targetNodeCursor.nextVLong();
-                assertThat(inputGraph.exists(source, targetNode)).isTrue();
-                propertyCursor.ifPresent(cursor -> {
-                    assertThat(inputGraph.relationshipProperty(source, targetNode)).isEqualTo(Double.longBitsToDouble(cursor.nextLong()));
+                resultGraph.forEachRelationship(source, Double.NaN, (src, trg, weight) -> {
+                    boolean edgeIsPositive = weight == EdgeSplitter.POSITIVE;
+                    if (edgeIsPositive) positiveCount.increment();
+                    assertThat(edgeIsPositive)
+                        .isEqualTo(inputGraph.exists(source, trg));
+                    return true;
                 });
+        return true;
+        });
 
+        assertThat(resultGraph.relationshipCount()).isEqualTo(positiveCount.longValue());
+    }
+
+    void assertNodeLabelFilter(
+        Graph actualGraph,
+        Collection<NodeLabel> sourceLabels,
+        Collection<NodeLabel> targetLabels
+    ) {
+        actualGraph.forEachNode(sourceNode -> {
+            if (actualGraph.degree(sourceNode) > 0) {
+                assertThat(actualGraph.nodeLabels(sourceNode).stream().filter(sourceLabels::contains)).isNotEmpty();
             }
+
+            actualGraph.forEachRelationship(sourceNode, (src, trg) -> {
+                assertThat(actualGraph.nodeLabels(trg).stream().filter(targetLabels::contains)).isNotEmpty();
+
+                return true;
+            });
+
+            return true;
+        });
+    }
+
+    void assertRelInGraph(Graph actualGraph, Graph inputGraph) {
+        inputGraph.forEachNode(source -> {
+            double fallbackValue = Double.NaN;
+            actualGraph.forEachRelationship(source, fallbackValue, (src, trg, weight) -> {
+                assertThat(inputGraph.exists(src, trg)).isTrue();
+                assertThat(actualGraph.relationshipProperty(src, trg, fallbackValue)).isEqualTo(weight);
+
+                return true;
+            });
+
             return true;
         });
     }

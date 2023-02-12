@@ -66,7 +66,8 @@ public class SpanningTreeWriteProc extends BaseProc {
         var spec = new SpanningTreeWriteSpec();
         return new MemoryEstimationExecutor<>(
             spec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphName, configuration);
     }
 

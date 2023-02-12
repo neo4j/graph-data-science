@@ -62,7 +62,8 @@ public class RandomWalkStreamProc extends BaseProc {
 
         return new MemoryEstimationExecutor<>(
             streamSpec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 

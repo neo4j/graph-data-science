@@ -29,10 +29,14 @@ import org.neo4j.gds.core.loading.DeltaVarLongCompressor;
 import org.neo4j.gds.core.loading.RawCompressor;
 import org.neo4j.gds.core.loading.UncompressedAdjacencyListBuilderFactory;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.Arrays;
+import java.util.function.BiFunction;
 import java.util.function.LongSupplier;
+
+import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 
 /**
  * Manages different configurations of adjacency list building,
@@ -95,7 +99,49 @@ public interface AdjacencyListBehavior {
             : CompressedAdjacencyList.adjacencyListEstimation(relationshipType, undirected);
     }
 
+    static MemoryEstimation adjacencyListsFromStarEstimation(boolean undirected) {
+        BiFunction<RelationshipType, Boolean, MemoryEstimation> estimationMethod = GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()
+            ? UncompressedAdjacencyList::adjacencyListEstimation
+            : CompressedAdjacencyList::adjacencyListEstimation;
+
+        return MemoryEstimations.setup("Adjacency Lists", dimensions -> {
+            var builder = MemoryEstimations.builder();
+
+            if (dimensions.relationshipCounts().isEmpty()) {
+                builder.add(adjacencyListEstimation(ALL_RELATIONSHIPS, undirected));
+            } else {
+                dimensions
+                    .relationshipCounts()
+                    .forEach((type, count) -> builder.add(type.name, estimationMethod.apply(type, undirected)));
+            }
+
+            return builder.build();
+        });
+    }
+
     static MemoryEstimation adjacencyPropertiesEstimation(RelationshipType relationshipType, boolean undirected) {
         return UncompressedAdjacencyList.adjacencyPropertiesEstimation(relationshipType, undirected);
+    }
+
+    static MemoryEstimation adjacencyPropertiesFromStarEstimation(boolean undirected) {
+        return MemoryEstimations.setup("", dimensions -> {
+            var builder = MemoryEstimations.builder();
+
+            if (dimensions.relationshipCounts().isEmpty()) {
+                builder.add(UncompressedAdjacencyList.adjacencyPropertiesEstimation(ALL_RELATIONSHIPS, undirected));
+            } else {
+                dimensions
+                    .relationshipCounts()
+                    .forEach((type, count) -> builder.add(
+                        type.name,
+                        UncompressedAdjacencyList.adjacencyPropertiesEstimation(
+                            type,
+                            undirected
+                        )
+                    ));
+            }
+
+            return builder.build();
+        });
     }
 }

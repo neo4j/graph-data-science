@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.pagerank;
 
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 final class PageRankProc {
 
@@ -61,8 +61,8 @@ final class PageRankProc {
 
         protected boolean didConverge;
 
-        PageRankResultBuilder(ProcedureCallContext callContext, int concurrency) {
-            super(callContext, concurrency);
+        PageRankResultBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
+            super(returnColumns, concurrency);
         }
 
         PageRankResultBuilder<PROC_RESULT> withRanIterations(long ranIterations) {

@@ -25,10 +25,9 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 
 public final class ShortestPathStreamResultConsumer<ALGO extends Algorithm<DijkstraResult>, CONFIG extends AlgoBaseConfig> implements ComputationResultConsumer<ALGO, DijkstraResult, CONFIG, Stream<StreamResult>> {
 
@@ -42,9 +41,10 @@ public final class ShortestPathStreamResultConsumer<ALGO extends Algorithm<Dijks
             return Stream.empty();
         }
 
-        var shouldReturnPath = executionContext.callContext()
-            .outputFields()
-            .anyMatch(field -> toLowerCaseWithLocale(field).equals("path"));
+        var shouldReturnPath = executionContext
+            .returnColumns()
+            .withReturnColumnNameTransformationFunction(StringFormatting::toLowerCaseWithLocale)
+            .contains("path");
 
         var resultBuilder = new StreamResult.Builder(graph, executionContext.nodeLookup());
 

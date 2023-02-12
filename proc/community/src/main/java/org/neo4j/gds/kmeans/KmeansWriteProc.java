@@ -67,7 +67,8 @@ public class KmeansWriteProc extends BaseProc {
 
         return new MemoryEstimationExecutor<>(
             writeSpec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphName, configuration);
     }
 

@@ -31,6 +31,7 @@ import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
+import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
@@ -88,6 +89,6 @@ final class OpenGdsExportBuildersContextProvider extends LifecycleAdapter {
     }
 
     private static TransactionContext transactionContext(Context ctx) {
-        return TransactionContext.of(ctx.graphDatabaseAPI(), ctx.internalTransactionOrNull());
+        return DatabaseTransactionContext.of(ctx.graphDatabaseAPI(), ctx.internalTransactionOrNull());
     }
 }

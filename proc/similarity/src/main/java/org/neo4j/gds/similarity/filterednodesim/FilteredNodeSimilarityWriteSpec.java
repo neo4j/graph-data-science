@@ -112,7 +112,7 @@ public class FilteredNodeSimilarityWriteSpec implements AlgorithmSpec<
                                 .withProgressTracker(progressTracker)
                                 .build();
 
-                            if (SimilarityProc.shouldComputeHistogram(executionContext.callContext())) {
+                            if (SimilarityProc.shouldComputeHistogram(executionContext.returnColumns())) {
                                 DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
                                 exporter.write(
                                     writeRelationshipType,

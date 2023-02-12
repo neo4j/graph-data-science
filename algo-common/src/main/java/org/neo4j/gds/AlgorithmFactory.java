@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -26,6 +27,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
@@ -55,16 +57,45 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory
     ) {
-        var progressTask = progressTask(graphOrGraphStore, configuration);
-        var progressTracker = new TaskProgressTracker(
-            progressTask,
+        var progressTracker = createProgressTracker(
+            configuration,
             log,
-            configuration.concurrency(),
-            configuration.jobId(),
             taskRegistryFactory,
-            userLogRegistryFactory
+            userLogRegistryFactory,
+            progressTask(graphOrGraphStore, configuration)
         );
         return build(graphOrGraphStore, configuration, progressTracker);
+    }
+
+    @NotNull
+    private ProgressTracker createProgressTracker(
+        CONFIG configuration,
+        Log log,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory,
+        Task progressTask
+    ) {
+        ProgressTracker progressTracker;
+        if (configuration.logProgress()) {
+            progressTracker = new TaskProgressTracker(
+                progressTask,
+                log,
+                configuration.concurrency(),
+                configuration.jobId(),
+                taskRegistryFactory,
+                userLogRegistryFactory
+            );
+        } else {
+            progressTracker = new TaskTreeProgressTracker(
+                progressTask,
+                log,
+                configuration.concurrency(),
+                configuration.jobId(),
+                taskRegistryFactory,
+                userLogRegistryFactory
+            );
+        }
+        return progressTracker;
     }
 
     ALGO build(

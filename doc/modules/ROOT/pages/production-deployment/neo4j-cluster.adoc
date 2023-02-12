@@ -1,3 +1,5 @@
+:page-aliases: production-deployment/causal-cluster
+
 [.enterprise-edition]
 [[cluster]]
 = GDS with Neo4j cluster

@@ -22,6 +22,7 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -30,7 +31,6 @@ import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardStatsResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -75,7 +75,7 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
     ) {
         return LocalClusteringCoefficientCompanion.resultBuilder(
             new LocalClusteringCoefficientStatsBuilder(
-                executionContext.callContext(),
+                executionContext.returnColumns(),
                 computeResult.config().concurrency()
             ),
             computeResult
@@ -115,10 +115,10 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
     static class LocalClusteringCoefficientStatsBuilder extends LocalClusteringCoefficientCompanion.ResultBuilder<StatsResult> {
 
         LocalClusteringCoefficientStatsBuilder(
-            ProcedureCallContext callContext,
+            ProcedureReturnColumns returnColumns,
             int concurrency
         ) {
-            super(callContext, concurrency);
+            super(returnColumns, concurrency);
         }
 
         @Override

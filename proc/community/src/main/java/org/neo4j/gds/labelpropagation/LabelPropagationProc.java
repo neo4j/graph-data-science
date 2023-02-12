@@ -20,11 +20,11 @@
 package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.CommunityProcCompanion;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 final class LabelPropagationProc {
 
@@ -65,8 +65,8 @@ final class LabelPropagationProc {
 
         boolean didConverge;
 
-        LabelPropagationResultBuilder(ProcedureCallContext callContext, int concurrency) {
-            super(callContext, concurrency);
+        LabelPropagationResultBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
+            super(returnColumns, concurrency);
         }
 
         LabelPropagationResultBuilder<PROC_RESULT> ranIterations(long iterations) {

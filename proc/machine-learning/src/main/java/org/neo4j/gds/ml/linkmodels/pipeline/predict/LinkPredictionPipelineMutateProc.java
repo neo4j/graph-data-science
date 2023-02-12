@@ -89,7 +89,7 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
         var builder = new MutateResult.Builder()
             .withSamplingStats(computeResult.result().samplingStats());
 
-        if (executionContext.callContext().outputFields().anyMatch(s -> s.equalsIgnoreCase("probabilityDistribution"))) {
+        if (executionContext.returnColumns().contains("probabilityDistribution")) {
             builder.withHistogram();
         }
         return builder;

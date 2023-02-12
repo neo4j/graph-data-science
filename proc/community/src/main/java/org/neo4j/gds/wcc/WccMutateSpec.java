@@ -77,7 +77,7 @@ public class WccMutateSpec implements AlgorithmSpec<Wcc, DisjointSetStruct, WccM
     ) {
         return WccProc.resultBuilder(
             new WccMutateProc.MutateResult.Builder(
-                executionContext.callContext(),
+                executionContext.returnColumns(),
                 computationResult.config().concurrency()
             ),
             computationResult

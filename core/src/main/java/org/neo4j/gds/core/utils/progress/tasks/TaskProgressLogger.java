@@ -29,12 +29,18 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 class TaskProgressLogger extends BatchingProgressLogger {
 
     private final Task baseTask;
-    private final LoggingLeafTaskVisitor loggingLeafTaskVisitor;
+    private final TaskVisitor loggingLeafTaskVisitor;
 
     TaskProgressLogger(Log log, Task baseTask, int concurrency) {
         super(log, baseTask, concurrency);
         this.baseTask = baseTask;
         this.loggingLeafTaskVisitor = new LoggingLeafTaskVisitor(this);
+
+    }
+    TaskProgressLogger(Log log, Task baseTask, int concurrency, TaskVisitor leafTaskVisitor) {
+        super(log, baseTask, concurrency);
+        this.baseTask = baseTask;
+        this.loggingLeafTaskVisitor = leafTaskVisitor;
     }
 
     void logBeginSubTask(Task task, Task parentTask) {

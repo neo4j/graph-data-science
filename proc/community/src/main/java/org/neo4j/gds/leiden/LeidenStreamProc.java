@@ -58,7 +58,8 @@ public class LeidenStreamProc extends BaseProc {
 
         return new MemoryEstimationExecutor<>(
             spec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphName, configuration);
     }
 

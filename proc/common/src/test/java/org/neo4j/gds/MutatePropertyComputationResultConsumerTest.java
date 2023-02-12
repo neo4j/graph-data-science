@@ -31,14 +31,17 @@ import org.neo4j.gds.api.EmptyDependencyResolver;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.CSRGraphStore;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -54,7 +57,6 @@ import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestAlgorithmResult;
 import org.neo4j.gds.test.TestMutateConfig;
 import org.neo4j.gds.test.TestResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.List;
 import java.util.Optional;
@@ -76,14 +78,17 @@ class MutatePropertyComputationResultConsumerTest {
         .builder()
         .databaseId(DatabaseId.from(""))
         .dependencyResolver(EmptyDependencyResolver.INSTANCE)
-        .callContext(new ProcedureCallContext(42, new String[0], false, "neo4j", false))
+        .returnColumns(ProcedureReturnColumns.EMPTY)
         .log(Neo4jProxy.testLog())
         .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+        .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
         .username("")
         .terminationMonitor(TerminationMonitor.EMPTY)
         .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
         .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
         .nodeLookup(NodeLookup.EMPTY)
+        .modelCatalog(ModelCatalog.EMPTY)
+        .isGdsAdmin(false)
         .build();
 
     @BeforeEach

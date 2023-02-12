@@ -1,3 +1,4 @@
+:page-aliases: algorithms/alpha/kmeans.adoc
 [[algorithms-k-means]]
 [.beta]
 = K-Means Clustering

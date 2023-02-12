@@ -57,6 +57,7 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.NullLog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -207,6 +208,8 @@ public class PregelProcTest extends BaseProcTest {
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
             proc.log = NullLog.getInstance();
+            proc.internalModelCatalog = ModelCatalog.EMPTY;
+            proc.callContext = ProcedureCallContext.EMPTY;
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,
                 "throwInCompute", true
@@ -230,8 +233,9 @@ public class PregelProcTest extends BaseProcTest {
             proc.databaseService = db;
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
-
             proc.log = NullLog.getInstance();
+            proc.internalModelCatalog = ModelCatalog.EMPTY;
+            proc.callContext = ProcedureCallContext.EMPTY;
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,
                 "throwInCompute", true
@@ -255,6 +259,8 @@ public class PregelProcTest extends BaseProcTest {
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
             proc.log = NullLog.getInstance();
+            proc.internalModelCatalog = ModelCatalog.EMPTY;
+            proc.callContext = ProcedureCallContext.EMPTY;
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,
                 "throwInCompute", true

@@ -22,6 +22,7 @@ package org.neo4j.gds.pagerank;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StatsProc;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -29,7 +30,6 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardStatsResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -72,7 +72,7 @@ public class PageRankStatsProc extends StatsProc<PageRankAlgorithm, PageRankResu
         ExecutionContext executionContext
     ) {
         return PageRankProc.resultBuilder(
-            new StatsResult.Builder(executionContext.callContext(), computeResult.config().concurrency()),
+            new StatsResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
             computeResult
         );
     }
@@ -111,8 +111,8 @@ public class PageRankStatsProc extends StatsProc<PageRankAlgorithm, PageRankResu
 
         static class Builder extends PageRankProc.PageRankResultBuilder<StatsResult> {
 
-            Builder(ProcedureCallContext context, int concurrency) {
-                super(context, concurrency);
+            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+                super(returnColumns, concurrency);
             }
 
             @Override

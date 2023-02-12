@@ -88,6 +88,58 @@ class IndexInverseProcTest extends BaseProcTest {
     }
 
     @Test
+    void shouldSupportStarFilterOverMultipleNonStarProjections() {
+        runQuery(GdsCypher.call("other_graph")
+            .graphProject()
+            .withAnyLabel()
+            .withRelationshipType("REL")
+            .withRelationshipType("REL2")
+            .withRelationshipProperty("prop1")
+            .yields()
+        );
+
+        assertCypherResult(
+            "CALL gds.beta.graph.relationships.indexInverse('other_graph', {relationshipTypes: '*'}) YIELD inputRelationships",
+            List.of(Map.of("inputRelationships", 4L))
+        );
+
+        var gs = GraphStoreCatalog.get(getUsername(), db.databaseName(), "other_graph");
+        assertThat(gs.graphStore().inverseIndexedRelationshipTypes()).contains(RelationshipType.of("REL"), RelationshipType.of("REL2"));
+    }
+
+    @Test
+    void shouldSupportStarFilterOverStarProjection() {
+        runQuery(GdsCypher.call("other_graph")
+            .graphProject()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withRelationshipProperty("prop1")
+            .yields()
+        );
+        assertCypherResult(
+            "CALL gds.beta.graph.relationships.indexInverse('other_graph', {relationshipTypes: '*'}) YIELD inputRelationships",
+            List.of(Map.of("inputRelationships", 4L))
+        );
+        var gs = GraphStoreCatalog.get(getUsername(), db.databaseName(), "other_graph");
+        assertThat(gs.graphStore().inverseIndexedRelationshipTypes()).contains(RelationshipType.ALL_RELATIONSHIPS);
+    }
+
+    @Test
+    void shouldFailIfStarIsAmbiguous() {
+        runQuery(GdsCypher.call("other_graph")
+            .graphProject()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withRelationshipType("REL2")
+            .withRelationshipProperty("prop1")
+            .yields()
+        );
+
+        assertThatThrownBy(() -> runQuery("CALL gds.beta.graph.relationships.indexInverse('other_graph', {relationshipTypes: '*'})"))
+            .hasMessageContaining("The 'relationshipTypes' parameter is ambiguous");
+    }
+
+    @Test
     void memoryEstimation() {
         String query = "CALL gds.beta.graph.relationships.indexInverse.estimate('graph', {relationshipTypes: 'REL'})";
 

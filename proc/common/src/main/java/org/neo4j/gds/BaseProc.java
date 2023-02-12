@@ -36,17 +36,17 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.executor.MemoryUsageValidator;
+import org.neo4j.gds.transaction.DatabaseTransactionContext;
+import org.neo4j.gds.transaction.EmptyTransactionContext;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.logging.Log;
-import org.neo4j.logging.NullLog;
 import org.neo4j.procedure.Context;
 
 import java.util.Collection;
-import java.util.Objects;
 import java.util.function.Supplier;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -149,8 +149,8 @@ public abstract class BaseProc {
         return ImmutableGraphLoaderContext.builder()
             .databaseId(databaseId())
             .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
-            .transactionContext(TransactionContext.of(databaseService, procedureTransaction))
-            .log(logOrDefault(log))
+            .transactionContext(transactionContext())
+            .log(log)
             .taskRegistryFactory(taskRegistryFactory)
             .userLogRegistryFactory(userLogRegistryFactory)
             .terminationFlag(TerminationFlag.wrap(new TransactionTerminationMonitor(transaction)))
@@ -169,9 +169,8 @@ public abstract class BaseProc {
                 .databaseId(databaseId())
                 .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
                 .modelCatalog(internalModelCatalog)
-                .log(logOrDefault(log))
-                .transactionContext(TransactionContext.of(databaseService, procedureTransaction))
-                .callContext(procedureCallContextOrDefault(callContext))
+                .log(log)
+                .returnColumns(new ProcedureCallContextReturnColumns(callContext))
                 .userLogRegistryFactory(userLogRegistryFactory)
                 .taskRegistryFactory(taskRegistryFactory)
                 .username(username())
@@ -179,7 +178,14 @@ public abstract class BaseProc {
                 .closeableResourceRegistry(new TransactionCloseableResourceRegistry(transaction))
                 .algorithmMetaDataSetter(new TransactionAlgorithmMetaDataSetter(transaction))
                 .nodeLookup(new TransactionNodeLookup(transaction))
+                .isGdsAdmin(transactionContext().isGdsAdmin())
                 .build();
+    }
+
+    public TransactionContext transactionContext() {
+        return databaseService == null
+            ? EmptyTransactionContext.INSTANCE
+            : DatabaseTransactionContext.of(databaseService, procedureTransaction);
     }
 
     public ModelCatalog modelCatalog() {
@@ -193,14 +199,6 @@ public abstract class BaseProc {
 
     public void setModelCatalog(ModelCatalog modelCatalog) {
         this.internalModelCatalog = modelCatalog;
-    }
-
-    private static ProcedureCallContext procedureCallContextOrDefault(ProcedureCallContext procedureCallContext) {
-        return Objects.requireNonNullElse(procedureCallContext, ProcedureCallContext.EMPTY);
-    }
-
-    private static Log logOrDefault(Log log) {
-        return Objects.requireNonNullElse(log, NullLog.getInstance());
     }
 
     private DatabaseId databaseId() {

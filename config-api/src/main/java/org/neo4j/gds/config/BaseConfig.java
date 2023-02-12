@@ -32,6 +32,7 @@ import java.util.Optional;
 public interface BaseConfig extends ToMapConvertible {
 
     String SUDO_KEY = "sudo";
+    String LOG_PROGRESS_KEY = "logProgress";
 
     @Value.Parameter(false)
     @Configuration.Key("username")
@@ -43,6 +44,13 @@ public interface BaseConfig extends ToMapConvertible {
     @Configuration.Key(SUDO_KEY)
     default boolean sudo() {
         return false;
+    }
+
+    @Value.Default
+    @Value.Parameter(false)
+    @Configuration.Key(LOG_PROGRESS_KEY)
+    default boolean logProgress() {
+        return true;
     }
 
     @Configuration.CollectKeys

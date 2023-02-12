@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.beta.k1coloring;
 
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 final class K1ColoringProc {
     static final String K1_COLORING_DESCRIPTION = "The K-1 Coloring algorithm assigns a color to every node in the graph.";
@@ -36,9 +36,9 @@ final class K1ColoringProc {
     static <PROC_RESULT, CONFIG extends K1ColoringConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         K1ColoringResultBuilder<PROC_RESULT> procResultBuilder,
         ComputationResult<K1Coloring, HugeLongArray, CONFIG> computeResult,
-        ProcedureCallContext callContext
+        ProcedureReturnColumns returnColumns
     ) {
-        if (callContext.outputFields().anyMatch((field) -> field.equals(COLOR_COUNT_FIELD_NAME))) {
+        if (returnColumns.contains(COLOR_COUNT_FIELD_NAME)) {
             procResultBuilder.withColorCount(computeResult.algorithm().usedColors().cardinality());
         }
 
@@ -58,10 +58,10 @@ final class K1ColoringProc {
         boolean didConverge;
 
         K1ColoringResultBuilder(
-            ProcedureCallContext callContext,
+            ProcedureReturnColumns returnColumns,
             int concurrency
         ) {
-            super(callContext, concurrency);
+            super(returnColumns, concurrency);
         }
 
         K1ColoringResultBuilder<PROC_RESULT> withColorCount(long colorCount) {

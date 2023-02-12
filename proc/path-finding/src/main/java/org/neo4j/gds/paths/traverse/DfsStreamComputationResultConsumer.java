@@ -45,7 +45,7 @@ class DfsStreamComputationResultConsumer implements ComputationResultConsumer<DF
             computationResult.graph()::toOriginalNodeId,
             computationResult.graph().isEmpty(),
             DfsStreamResult::new,
-            executionContext.containsOutputField("path"),
+            executionContext.returnColumns().contains("path"),
             pathFactoryFacade,
             DfsStreamProc.NEXT,
             executionContext.nodeLookup()

@@ -1,3 +1,4 @@
+:page-aliases: alpha-algorithms/minimum-weight-spanning-tree.adoc
 [[algorithms-minimum-weight-spanning-tree]]
 [.beta]
 = Minimum Weight Spanning Tree

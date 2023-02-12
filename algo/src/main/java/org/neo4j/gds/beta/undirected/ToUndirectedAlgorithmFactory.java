@@ -58,7 +58,7 @@ public class ToUndirectedAlgorithmFactory extends GraphStoreAlgorithmFactory<ToU
 
     @Override
     public MemoryEstimation memoryEstimation(ToUndirectedConfig configuration) {
-        RelationshipType relationshipType = RelationshipType.of(configuration.relationshipType());
+        RelationshipType relationshipType = configuration.internalRelationshipType();
 
         var builder = MemoryEstimations.builder(ToUndirected.class)
             .add("relationships", AdjacencyListBehavior.adjacencyListEstimation(relationshipType, true));

@@ -22,13 +22,13 @@ package org.neo4j.gds.beta.closeness;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StatsProc;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.StandardStatsResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -65,7 +65,7 @@ public class ClosenessCentralityStatsProc extends StatsProc<ClosenessCentrality,
         ExecutionContext executionContext
     ) {
         return ClosenessCentralityProc.resultBuilder(
-            new StatsResult.Builder(executionContext.callContext(), computeResult.config().concurrency()),
+            new StatsResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
             computeResult
         );
     }
@@ -87,8 +87,8 @@ public class ClosenessCentralityStatsProc extends StatsProc<ClosenessCentrality,
         }
 
         static final class Builder extends AbstractCentralityResultBuilder<StatsResult> {
-            private Builder(ProcedureCallContext callContext, int concurrency) {
-                super(callContext, concurrency);
+            private Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+                super(returnColumns, concurrency);
             }
 
             @Override

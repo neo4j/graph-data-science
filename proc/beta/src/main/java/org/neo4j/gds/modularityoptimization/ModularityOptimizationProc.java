@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.modularityoptimization;
 
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -26,7 +27,6 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.nodeproperties.ConsecutiveLongNodePropertyValues;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 final class ModularityOptimizationProc {
     static final String MODULARITY_OPTIMIZATION_DESCRIPTION = "The Modularity Optimization algorithm groups the nodes in the graph by optimizing the graphs modularity.";
@@ -76,10 +76,10 @@ final class ModularityOptimizationProc {
         double modularity;
 
         ModularityOptimizationResultBuilder(
-            ProcedureCallContext callContext,
+            ProcedureReturnColumns returnColumns,
             int concurrency
         ) {
-            super(callContext, concurrency);
+            super(returnColumns, concurrency);
         }
 
         ModularityOptimizationResultBuilder<PROC_RESULT> withRanIterations(long ranIterations) {

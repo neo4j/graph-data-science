@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjections;
+import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
@@ -37,13 +38,14 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.gdl.GdlGraphs;
 import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestAlgorithmResult;
 import org.neo4j.gds.test.TestMutateConfig;
-import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
@@ -72,22 +74,30 @@ class MemoryEstimationExecutorTest extends BaseTest {
             .builder()
             .databaseId(DatabaseId.of(db))
             .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
-            .callContext(new ProcedureCallContext(42, new String[0], false, "neo4j", false))
+            .returnColumns(new ProcedureCallContextReturnColumns(new ProcedureCallContext(
+                42,
+                new String[0],
+                false,
+                "neo4j",
+                false
+            )))
             .log(Neo4jProxy.testLog())
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .username("")
-            .transactionContext(TransactionContext.of(db, procedureTransaction))
             .terminationMonitor(TerminationMonitor.EMPTY)
             .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
             .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
             .nodeLookup(NodeLookup.EMPTY)
+            .modelCatalog(ModelCatalog.EMPTY)
+            .isGdsAdmin(false)
             .build();
 
         memoryEstimationExecutor = new MemoryEstimationExecutor<>(
             new TestMutateSpec(),
             new ProcedureExecutorSpec<>(),
-            executionContext
+            executionContext,
+            DatabaseTransactionContext.of(db, procedureTransaction)
         );
     }
 
@@ -121,7 +131,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
     }
 
     @Test
-    void failONMemoryEstimationWithInvalidRelationshipFilterOnExplicitGraphStore() {
+    void failOnMemoryEstimationWithInvalidRelationshipFilterOnExplicitGraphStore() {
         var graphName = "memoryEstimateGraph";
         GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("", graphName), GdlGraphs.EMPTY_GRAPH_STORE);
         runQuery(GdsCypher.call(graphName)

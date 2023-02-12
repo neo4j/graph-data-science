@@ -26,8 +26,11 @@ import org.neo4j.gds.core.Aggregation;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Random;
+import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class AdjacencyPackerTest {
 
@@ -75,4 +78,24 @@ class AdjacencyPackerTest {
             .isLessThanOrEqualTo(requiredBytes);
     }
 
+
+    @Test
+    void preventDoubleFree() {
+        var data = LongStream.range(0, AdjacencyPacking.BLOCK_SIZE).toArray();
+        var compressed = AdjacencyPacker.compress(data, 0, data.length);
+        assertThatCode(compressed::free).doesNotThrowAnyException();
+        assertThatThrownBy(compressed::free)
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("This compressed memory has already been freed.");
+    }
+
+    @Test
+    void preventUseAfterFree() {
+        var data = LongStream.range(0, AdjacencyPacking.BLOCK_SIZE).toArray();
+        var compressed = AdjacencyPacker.compress(data, 0, data.length);
+        assertThatCode(compressed::free).doesNotThrowAnyException();
+        assertThatThrownBy(() -> AdjacencyPacker.decompress(compressed))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("This compressed memory has already been freed.");
+    }
 }

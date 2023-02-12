@@ -22,12 +22,12 @@ package org.neo4j.gds.similarity;
 import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.result.HistogramUtils;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Collections;
 import java.util.Map;
@@ -40,10 +40,8 @@ public final class SimilarityProc {
 
     private SimilarityProc() {}
 
-    public static boolean shouldComputeHistogram(ProcedureCallContext callContext) {
-        return callContext
-            .outputFields()
-            .anyMatch(s -> s.equalsIgnoreCase("similarityDistribution"));
+    public static boolean shouldComputeHistogram(ProcedureReturnColumns returnColumns) {
+        return returnColumns.contains("similarityDistribution");
     }
 
     public static <RESULT, PROC_RESULT, CONFIG extends AlgoBaseConfig> SimilarityResultBuilder<PROC_RESULT> withGraphsizeAndTimings(

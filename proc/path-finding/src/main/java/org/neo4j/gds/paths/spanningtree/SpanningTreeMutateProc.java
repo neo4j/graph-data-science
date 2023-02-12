@@ -57,7 +57,8 @@ public class SpanningTreeMutateProc extends BaseProc {
         var spec = new SpanningTreeMutateSpec();
         return new MemoryEstimationExecutor<>(
             spec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphName, configuration);
     }
 }

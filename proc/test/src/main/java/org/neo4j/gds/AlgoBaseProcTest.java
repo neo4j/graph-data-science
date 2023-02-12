@@ -47,7 +47,7 @@ import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.core.write.NativeRelationshipExporterBuilder;
 import org.neo4j.gds.core.write.NativeRelationshipStreamExporterBuilder;
-import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.procedure.Procedure;
@@ -134,7 +134,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             proc -> {
                 if (proc instanceof NodePropertiesWriter) {
                     ((NodePropertiesWriter<?, ?, ?, ?>) proc).nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(
-                        TransactionContext.of(
+                        DatabaseTransactionContext.of(
                             proc.databaseService,
                             proc.procedureTransaction
                         ));
@@ -142,7 +142,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
 
                 if (proc instanceof WriteRelationshipsProc) {
                     ((WriteRelationshipsProc<?, ?, ?, ?>) proc).relationshipExporterBuilder = new NativeRelationshipExporterBuilder(
-                        TransactionContext.of(
+                        DatabaseTransactionContext.of(
                             proc.databaseService,
                             proc.procedureTransaction
                         ));
@@ -150,7 +150,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
 
                 if (proc instanceof StreamOfRelationshipsWriter) {
                     ((StreamOfRelationshipsWriter<?, ?, ?, ?>) proc).relationshipStreamExporterBuilder = new NativeRelationshipStreamExporterBuilder(
-                        TransactionContext.of(
+                        DatabaseTransactionContext.of(
                             proc.databaseService,
                             proc.procedureTransaction
                         ));

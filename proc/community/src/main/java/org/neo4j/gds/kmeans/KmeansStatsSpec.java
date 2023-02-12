@@ -55,20 +55,21 @@ public class KmeansStatsSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
             "Stats call failed",
             executionContext.log(),
             () -> {
+                var returnColumns = executionContext.returnColumns();
                 var builder = new StatsResult.Builder(
-                    executionContext.callContext(),
+                    returnColumns,
                     computationResult.config().concurrency()
                 );
 
-                if (executionContext.containsOutputField("centroids")) {
+                if (returnColumns.contains("centroids")) {
                     builder.withCentroids(KmeansProcHelper.arrayMatrixToListMatrix(computationResult
                         .result()
                         .centers()));
                 }
-                if (executionContext.containsOutputField("averageDistanceToCentroid")) {
+                if (returnColumns.contains("averageDistanceToCentroid")) {
                     builder.withAverageDistanceToCentroid(computationResult.result().averageDistanceToCentroid());
                 }
-                if (executionContext.containsOutputField("averageSilhouette")) {
+                if (returnColumns.contains("averageSilhouette")) {
                     builder.withAverageSilhouette(computationResult.result().averageSilhouette());
                 }
                 builder.withCommunityFunction(computationResult.result().communities()::get)

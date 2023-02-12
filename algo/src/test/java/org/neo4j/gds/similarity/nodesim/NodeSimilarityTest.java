@@ -768,6 +768,35 @@ final class NodeSimilarityTest {
             );
     }
 
+    @ParameterizedTest(name = "topK = {0}, concurrency = {1}")
+    @MethodSource("topKAndConcurrencies")
+    void shouldNotLogMessagesWhenLoggingIsDisabled(int topK, int concurrency) {
+        var graph = naturalGraph;
+        var config = configBuilder().topN(100).topK(topK).concurrency(concurrency).logProgress(false).build();
+
+        var progressLog = Neo4jProxy.testLog();
+        var nodeSimilarity = new NodeSimilarityFactory<>().build(
+            graph,
+            config,
+            progressLog,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        nodeSimilarity.compute();
+
+        assertThat(progressLog.getMessages(INFO))
+            .as("When progress logging is disabled we only log `start` and `finished`.")
+            .extracting(removingThreadId())
+            .containsExactly(
+                "NodeSimilarity :: Start",
+                "NodeSimilarity :: prepare :: Start",
+                "NodeSimilarity :: prepare :: Finished",
+                "NodeSimilarity :: compare node pairs :: Start",
+                "NodeSimilarity :: compare node pairs :: Finished",
+                "NodeSimilarity :: Finished"
+            );
+    }
+
     @ParameterizedTest(name = "concurrency = {0}")
     @ValueSource(ints = {1,2})
     void shouldLogProgress(int concurrency) {

@@ -4,4 +4,5 @@
 | Name                                                        | Type        | Default                | Optional | Description
 | xref:common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]            | Integer     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | xref:common-usage/running-algos.adoc#common-configuration-write-concurrency[writeConcurrency] | Integer     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result (applicable in WRITE mode).
+| xref:common-usage/running-algos.adoc#common-configuration-logProgress[logProgress] | Boolean | true | yes | If disabled the progress percentage will not be logged.
 |===

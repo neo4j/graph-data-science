@@ -68,7 +68,8 @@ public class IndexInverseProc extends BaseProc {
         return new MemoryEstimationExecutor<>(
             mutateSpec,
             pipelineSpec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

@@ -22,6 +22,7 @@ package org.neo4j.gds.betweenness;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
@@ -32,7 +33,6 @@ import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -92,7 +92,7 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
         ExecutionContext executionContext
     ) {
         return BetweennessCentralityProc.resultBuilder(
-            new WriteResult.Builder(executionContext.callContext(), computeResult.config().concurrency()),
+            new WriteResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
             computeResult
         );
     }
@@ -119,8 +119,8 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
 
         static final class Builder extends AbstractCentralityResultBuilder<WriteResult> {
 
-            protected Builder(ProcedureCallContext callContext, int concurrency) {
-                super(callContext, concurrency);
+            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+                super(returnColumns, concurrency);
             }
 
             @Override

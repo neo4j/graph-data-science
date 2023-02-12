@@ -69,7 +69,8 @@ public class KmeansStreamProc extends AlgoBaseProc<
 
         return new MemoryEstimationExecutor<>(
             writeSpec,
-            executionContext()
+            executionContext(),
+            transactionContext()
         ).computeEstimate(graphName, configuration);
     }
 

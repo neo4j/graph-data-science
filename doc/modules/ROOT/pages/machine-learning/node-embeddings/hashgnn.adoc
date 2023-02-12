@@ -12,6 +12,13 @@ include::partial$/operations-reference/beta-note.adoc[]
 :heterogeneous:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
+{nbsp} +
+[TIP]
+====
+HashGNN is featured in the end-to-end example Jupyter notebooks:
+
+* https://github.com/neo4j/graph-data-science-client/blob/main/examples/heterogeneous-node-classification-with-hashgnn.ipynb[Heterogeneous Node Classification with HashGNN and Autotuning]
+====
 
 [[algorithms-embeddings-hashgnn-introduction]]
 == Introduction
@@ -238,6 +245,22 @@ This is especially true for unsupervised embedding algorithms such as HashGNN.
 Therefore, caution should be taken when using many iterations in the heterogeneous mode.
 
 
+=== Random seed
+
+The random seed has a special role in this algorithm.
+Other than making all steps of the algorithm deterministic, the `randomSeed` parameter determines which (to some degree) hash functions are used inside the algorithm.
+This is important since it greatly affects which features are sampled each iteration.
+The hashing plays a similar role to the (typically neural) transformations in each layer of Graph Neural Networks, which tells us something about how important the hash functions are.
+Indeed, one can often see a significant difference in the quality of the node embeddings output from the algorithm when only the `randomSeed` is different in the configuration.
+
+For these reasons it can actually make sense to tune the random seed parameter.
+Note that it should be tuned as a categorical (i.e. non-ordinal) number, meaning that values 1 and 2 can be considered just as similar or different as 1 and 100.
+A good way to start doing this is to choose 5 - 10 arbitrary integers (eg. values 1, 2, 3, 4 and 5) as the candidates for the random seed.
+
+`randomSeed` codepends on several configuration parameters, and in particular on the `neighborInfluence` parameter which also directly influences which hash functions are used.
+Therefore, if `neighborInfluence` is changed, likely the `randomSeed` parameter needs to be retuned.
+
+
 [[algorithms-embeddings-hashgnn-syntax]]
 == Syntax
 
@@ -354,7 +377,7 @@ CREATE
   (matt)-[:LIKES]->(mango),
   (jeff)-[:LIKES]->(mango),
   (brie)-[:LIKES]->(banana),
-  (else)-[:LIKES]->(plum),
+  (elsa)-[:LIKES]->(plum),
   (john)-[:LIKES]->(plum),
 
   (dan)-[:KNOWS]->(annie),
@@ -574,17 +597,17 @@ YIELD nodeId, embedding
 .Results
 |===
 | nodeId | embedding
-| 0      | [1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
-| 1      | [1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
-| 2      | [1.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+| 0      | [1.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+| 1      | [1.0, 1.0, 1.0, 0.0, 0.0, 0.0]
+| 2      | [1.0, 1.0, 1.0, 0.0, 0.0, 0.0]
 | 3      | [1.0, 0.0, 1.0, 0.0, 0.0, 0.0]
-| 4      | [1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
-| 5      | [1.0, 1.0, 1.0, 0.0, 0.0, 0.0]
+| 4      | [1.0, 1.0, 1.0, 0.0, 0.0, 0.0]
+| 5      | [1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
 | 6      | [1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
 | 7      | [1.0, 0.0, 1.0, 0.0, 0.0, 0.0]
 | 8      | [1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
 | 9      | [1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
-| 10     | [1.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+| 10     | [1.0, 0.0, 1.0, 0.0, 0.0, 0.0]
 |===
 --
 
@@ -611,17 +634,17 @@ YIELD nodeId, embedding
 .Results
 |===
 | nodeId | embedding
-| 0      | [0.0, 0.8660253882408142, -0.8660253882408142, 0.0]
-| 1      | [0.0, 0.8660253882408142, -0.8660253882408142, 0.0]
-| 2      | [0.0, 0.0, -1.7320507764816284, 0.8660253882408142]
+| 0      | [0.0, 0.8660253882408142, -1.7320507764816284, 0.8660253882408142]
+| 1      | [0.0, 0.8660253882408142, -1.7320507764816284, 0.8660253882408142]
+| 2      | [0.0, 0.8660253882408142, -1.7320507764816284, 0.8660253882408142]
 | 3      | [0.0, 0.0, -1.7320507764816284, 0.8660253882408142]
-| 4      | [0.0, 0.8660253882408142, -0.8660253882408142, 0.0]
-| 5      | [0.0, 0.8660253882408142, -1.7320507764816284, 0.8660253882408142]
+| 4      | [0.0, 0.8660253882408142, -1.7320507764816284, 0.8660253882408142]
+| 5      | [0.0, 0.8660253882408142, -0.8660253882408142, 0.0]
 | 6      | [0.0, 0.0, -1.7320507764816284, 0.8660253882408142]
 | 7      | [0.0, 0.0, -1.7320507764816284, 0.8660253882408142]
 | 8      | [0.0, 0.0, -1.7320507764816284, 0.8660253882408142]
 | 9      | [0.0, 0.0, -1.7320507764816284, 0.8660253882408142]
-| 10     | [0.0, 0.0, -0.8660253882408142, 0.0]
+| 10     | [0.0, 0.0, -1.7320507764816284, 0.8660253882408142]
 |===
 --
 

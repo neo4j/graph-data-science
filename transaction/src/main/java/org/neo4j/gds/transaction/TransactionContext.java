@@ -19,21 +19,14 @@
  */
 package org.neo4j.gds.transaction;
 
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.security.AccessMode;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.impl.api.security.RestrictedAccessMode;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
-/**
- * Manage transactions by making sure that the correct {@link SecurityContext} is applied.
- */
-public final class TransactionContext {
+public interface TransactionContext {
 
-    public interface TxConsumer<E extends Exception> {
+    interface TxConsumer<E extends Exception> {
 
         /**
          * Run some code within a transaction.
@@ -43,7 +36,7 @@ public final class TransactionContext {
         void accept(Transaction tx, KernelTransaction ktx) throws E;
     }
 
-    public interface TxFunction<T, E extends Exception> {
+    interface TxFunction<T, E extends Exception> {
 
         /**
          * Calculate some result within a new transaction.
@@ -54,123 +47,55 @@ public final class TransactionContext {
     }
 
     /**
-     * Creates a new {@code TransactionContext} with the same {@link SecurityContext} as the provided {@link Transaction}.
+     * @return The username associated with the current {@link org.neo4j.internal.kernel.api.security.SecurityContext}.
      */
-    public static TransactionContext of(GraphDatabaseService databaseService, Transaction top) {
-        if (top == null) {
-            return of(databaseService, SecurityContext.AUTH_DISABLED);
-        }
-        var internalTransaction = (InternalTransaction) top;
-        return of(databaseService, internalTransaction);
-    }
-
-    /**
-     * Creates a new {@code TransactionContext} with the same {@link SecurityContext} as the provided {@link InternalTransaction}.
-     */
-    public static TransactionContext of(GraphDatabaseService databaseService, InternalTransaction top) {
-        return of(databaseService, top.securityContext());
-    }
-
-    /**
-     * Creates a new {@code TransactionContext} with the provided {@link SecurityContext}.
-     */
-    public static TransactionContext of(GraphDatabaseService databaseService, SecurityContext securityContext) {
-        return new TransactionContext(databaseService, securityContext);
-    }
-
-    private final GraphDatabaseService databaseService;
-    private final SecurityContext securityContext;
-
-    private TransactionContext(
-        GraphDatabaseService databaseService,
-        SecurityContext securityContext
-    ) {
-        this.databaseService = databaseService;
-        this.securityContext = securityContext;
-    }
-
-    /**
-     * @return The username associated with the current {@link SecurityContext}.
-     */
-    public String username() {
-        return Neo4jProxy.username(securityContext.subject());
-    }
+    String username();
 
     /**
      * @return `true` if the user that started the transaction has admin rights
      */
-    public boolean isGdsAdmin() {
-        // this should be the same as the predefined role from enterprise-security
-        // com.neo4j.server.security.enterprise.auth.plugin.api.PredefinedRoles.ADMIN
-        String PREDEFINED_ADMIN_ROLE = "admin";
-        return securityContext.roles().contains(PREDEFINED_ADMIN_ROLE);
-    }
+    boolean isGdsAdmin();
 
     /**
      * Run some code within a <strong>new</strong> {@code Transaction} under the managed {@code SecurityContext}.
      * The new transaction is closed afterwards and any resource that is tied to the lifecycle of that transaction
      * will throw a {@link org.neo4j.graphdb.NotInTransactionException} upon access.
      */
-    public <T, E extends Exception> T apply(TxFunction<T, E> block) throws E {
-        Transaction tx = databaseService.beginTx();
-        KernelTransaction ktx = ((InternalTransaction) tx).kernelTransaction();
-        ktx.overrideWith(securityContext);
-        try (tx) {
-            var result = block.apply(tx, ktx);
-            tx.commit();
-            return result;
-        }
-    }
+    <T, E extends Exception> T apply(TransactionContext.TxFunction<T, E> block) throws E;
 
     /**
      * Run some code within a <strong>new</strong> {@code Transaction} under the managed {@code SecurityContext}.
      * The new transaction is closed afterwards.
      */
-    public <E extends Exception> void accept(TxConsumer<E> block) throws E {
-        Transaction tx = databaseService.beginTx();
-        KernelTransaction ktx = ((InternalTransaction) tx).kernelTransaction();
-        ktx.overrideWith(securityContext);
-        try (tx) {
-            block.accept(tx, ktx);
-            tx.commit();
-        }
-    }
+    <E extends Exception> void accept(TransactionContext.TxConsumer<E> block) throws E;
 
     /**
-     * Returns a <strong>new</strong> {@link TransactionContext} restricted by the provided {@link AccessMode}.
+     * Returns a <strong>new</strong> {@link TransactionContext} restricted by the provided {@link org.neo4j.internal.kernel.api.security.AccessMode}.
      * The mode only restricts but does not override the given {@code SecurityContext}, i.e. you cannot grant more access.
      * <p>
-     * One use-case is to restrict the access to {@link AccessMode.Static#READ} to make sure that only read-only
+     * One use-case is to restrict the access to {@link org.neo4j.internal.kernel.api.security.AccessMode.Static#READ} to make sure that only read-only
      * queries can be executed.
      * <p>
      * A new instance is returned, {@code this} instance remains untouched.
      */
-    public TransactionContext withRestrictedAccess(AccessMode.Static accessMode) {
-        var restrictedMode = new RestrictedAccessMode(securityContext.mode(), accessMode);
-        var newContext = securityContext.withMode(restrictedMode);
-        return new TransactionContext(databaseService, newContext);
-    }
+    TransactionContext withRestrictedAccess(AccessMode.Static accessMode);
 
     /**
-     * Return a new {@link SecureTransaction} that owns a newly created top-level {@code Transaction}.
+     * Return a new {@link TransactionContext.SecureTransaction} that owns a newly created top-level {@code Transaction}.
      * The returned instance will operate under the {@code SecurityContext} as provided by this {@code TransactionContext}.
      * <p>
      * For shorter tasks, consider using {@link #accept(TransactionContext.TxConsumer)} or {@link #apply(TransactionContext.TxFunction)}
      * which make sure that the created transaction is closed.
      * <p>
      * This is intended for when you need to keep track of a new transaction for a longer time, in which case you can
-     * use {@link SecureTransaction#kernelTransaction()} to get the underlying transaction.
+     * use {@link TransactionContext.SecureTransaction#kernelTransaction()} to get the underlying transaction.
      */
-    public SecureTransaction fork() {
-        InternalTransaction tx = (InternalTransaction) databaseService.beginTx();
-        tx.kernelTransaction().overrideWith(securityContext);
-        return new SecureTransaction(tx);
-    }
+    TransactionContext.SecureTransaction fork();
 
-    public static final class SecureTransaction implements AutoCloseable {
+    final class SecureTransaction implements AutoCloseable {
         private final InternalTransaction tx;
 
-        private SecureTransaction(InternalTransaction tx) {
+        SecureTransaction(InternalTransaction tx) {
             this.tx = tx;
         }
 

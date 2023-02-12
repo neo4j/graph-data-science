@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyCursor;
 import org.neo4j.gds.api.schema.Direction;
@@ -178,19 +179,21 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         // select 40%, which is 2 rels in this graph
         var result = splitter.splitPositiveExamples(graph, .4, Optional.of("foo"));
 
-        var remainingRelationships = result.remainingRels().build();
+        var remainingGraph = createGraph(result.remainingRels().build(), graphStore);
         // 2 positive selected reduces remaining
-        assertEquals(3L, remainingRelationships.topology().elementCount());
-        assertEquals(Direction.DIRECTED, remainingRelationships.relationshipSchemaEntry().direction());
-        assertFalse(remainingRelationships.topology().isMultiGraph());
-        assertThat(remainingRelationships.properties()).isNotEmpty();
-        assertRelInGraph(remainingRelationships, graph);
+        assertEquals(3L, remainingGraph.relationshipCount());
+        assertThat(remainingGraph.schema().direction()).isEqualTo(Direction.DIRECTED);
+        assertThat(remainingGraph.isMultiGraph()).isFalse();
+        assertThat(remainingGraph.hasRelationshipProperty()).isTrue();
+        assertRelInGraph(remainingGraph, graph);
 
         var selectedRelationships = result.selectedRels().build();
 
-        assertRelSamplingProperties(selectedRelationships, graph);
-        assertThat(selectedRelationships.topology().elementCount()).isEqualTo(2);
-        assertFalse(selectedRelationships.topology().isMultiGraph());
+        Graph selectedGraph = createGraph(selectedRelationships, graphStore);
+
+        assertThat(selectedGraph.relationshipCount()).isEqualTo(2);
+        assertThat(selectedGraph.isMultiGraph()).isFalse();
+        assertRelSamplingProperties(selectedGraph, graph);
     }
 
     @Test
@@ -271,21 +274,21 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         // select 60%, which is 2*0.6 rounded down to 1 rel in this graph. 3 were invalid.
         var result = splitter.splitPositiveExamples(multiLabelGraph, .6, Optional.of("foo"));
 
-        var remainingRelationships = result.remainingRels().build();
+        var remainingGraph = createGraph(result.remainingRels().build(), multiGraphStore);
+
         // 1 positive selected reduces remaining & 2 invalid
-        assertEquals(1L, remainingRelationships.topology().elementCount());
-        assertFalse(remainingRelationships.topology().isMultiGraph());
-        assertThat(remainingRelationships.properties()).isNotEmpty();
-        assertRelInGraph(remainingRelationships, multiLabelGraph);
+        assertEquals(1L, remainingGraph.relationshipCount());
+        assertFalse(remainingGraph.isMultiGraph());
+        assertThat(remainingGraph.hasRelationshipProperty()).isTrue();
+        assertRelInGraph(remainingGraph, multiLabelGraph);
 
-        var selectedRelationships = result.selectedRels().build();
-        assertThat(selectedRelationships.topology()).satisfies(topology -> {
-            assertRelSamplingProperties(selectedRelationships, multiLabelGraph);
-            assertThat(topology.elementCount()).isEqualTo(1);
-            assertFalse(topology.isMultiGraph());
-        });
+        var selectedGraph = createGraph(result.selectedRels().build(), multiGraphStore);
 
-        assertNodeLabelFilter(selectedRelationships.topology(), sourceNodeLabels, targetNodeLabels, multiLabelGraph);
+        assertThat(selectedGraph.relationshipCount()).isEqualTo(1);
+        assertThat(selectedGraph.isMultiGraph()).isFalse();
+        assertRelSamplingProperties(selectedGraph, multiLabelGraph);
+
+        assertNodeLabelFilter(selectedGraph, sourceNodeLabels, targetNodeLabels);
 
     }
 

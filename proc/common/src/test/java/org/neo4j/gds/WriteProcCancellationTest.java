@@ -25,13 +25,16 @@ import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.executor.ImmutableComputationResult;
@@ -44,8 +47,7 @@ import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestAlgorithmResult;
 import org.neo4j.gds.test.TestResult;
 import org.neo4j.gds.test.TestWriteConfig;
-import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+import org.neo4j.gds.transaction.DatabaseTransactionContext;
 
 import java.util.List;
 import java.util.Map;
@@ -77,7 +79,7 @@ class WriteProcCancellationTest extends BaseTest {
             var resultConsumer = new WriteNodePropertiesComputationResultConsumer<TestAlgorithm, TestAlgorithmResult, TestWriteConfig, TestResult>(
                 (computationResult, executionContext) -> new TestAlgoResultBuilder(),
                 (computationResult) -> List.of(nodeProperty),
-                new NativeNodePropertiesExporterBuilder(TransactionContext.of(db, tx)),
+                new NativeNodePropertiesExporterBuilder(DatabaseTransactionContext.of(db, tx)),
                 "foo"
             );
 
@@ -113,13 +115,16 @@ class WriteProcCancellationTest extends BaseTest {
                 .databaseId(DatabaseId.of(db))
                 .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
                 .taskRegistryFactory(jobId -> new TaskRegistry("", taskStore, jobId))
+                .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
                 .username("")
                 .log(Neo4jProxy.testLog())
                 .terminationMonitor(TerminationMonitor.EMPTY)
                 .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
                 .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
                 .nodeLookup(NodeLookup.EMPTY)
-                .callContext(ProcedureCallContext.EMPTY)
+                .returnColumns(ProcedureReturnColumns.EMPTY)
+                .modelCatalog(ModelCatalog.EMPTY)
+                .isGdsAdmin(false)
                 .build();
 
             assertThatThrownBy(() -> resultConsumer.consume(computationResult, executionContext))
