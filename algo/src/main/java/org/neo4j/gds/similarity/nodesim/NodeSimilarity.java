@@ -57,7 +57,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private final MetricSimilarityComputer similarityComputer;
     private HugeObjectArray<long[]> vectors;
     private HugeObjectArray<double[]> weights;
-    private long nodesToCompare;
 
     private final boolean weighted;
 
@@ -188,7 +187,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
                 executorService
             ).build(similarities);
         }
-        return new SimilarityGraphResult(similarityGraph, nodesToCompare, isTopKGraph);
+        return new SimilarityGraphResult(similarityGraph, sourceNodes.cardinality(), isTopKGraph);
     }
 
     private void prepare() {
@@ -230,7 +229,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             progressTracker.logProgress(graph.degree(node));
             return null;
         });
-        nodesToCompare = sourceNodes.cardinality();
         progressTracker.endSubTask();
     }
 
