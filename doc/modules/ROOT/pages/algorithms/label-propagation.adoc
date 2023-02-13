@@ -87,7 +87,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-include::partial$/algorithms/label-propagation/specific-configuration.adoc[]
+include::partial$/algorithms/label-propagation/specific-configuration-stream.adoc[]
 |===
 
 .Results
