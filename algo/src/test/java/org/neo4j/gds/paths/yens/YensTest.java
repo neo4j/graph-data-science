@@ -166,9 +166,7 @@ class YensTest {
     @ParameterizedTest
     @MethodSource("pathInput")
     void compute(Collection<String> expectedPaths) {
-
         assertResult(graph, idFunction, expectedPaths, false);
-
     }
 
     @Test

@@ -127,10 +127,9 @@ public final class Yens extends Algorithm<DijkstraResult> {
     }
 
     private boolean shouldAvoidRelationship(long source, long target, long relationshipId) {
-        long forbidden = target;
-        if (config.trackRelationships()) {
-            forbidden = relationshipId;
-        }
+        long forbidden = config.trackRelationships()
+            ? relationshipId
+            : target;
         return relationshipAvoidList.getOrDefault(source, EMPTY_SET).contains(forbidden);
 
     }
