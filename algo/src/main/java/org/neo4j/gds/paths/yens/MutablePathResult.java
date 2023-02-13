@@ -31,6 +31,7 @@ import java.util.Arrays;
  */
 final class MutablePathResult {
 
+    private final long[] EMPTY_ARRAY = new long[0];
     private long index;
 
     private final long sourceNode;
@@ -156,8 +157,7 @@ final class MutablePathResult {
      * The cost value associated with the last value in this path, is added to
      * the costs for each node in the second path.
      */
-
-
+    
     private void append(MutablePathResult path, long[] relationships) {
         // spur node is end of first and beginning of second path
         assert nodeIds[nodeIds.length - 1] == path.nodeIds[0];
@@ -213,7 +213,7 @@ final class MutablePathResult {
      */
     void appendWithoutRelationshipIds(MutablePathResult path) {
         // spur node is end of first and beginning of second path
-        append(path, new long[0]);
+        append(path, EMPTY_ARRAY);
     }
 
 
