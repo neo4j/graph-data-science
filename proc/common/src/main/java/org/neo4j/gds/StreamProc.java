@@ -27,6 +27,7 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 
+import java.util.Objects;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -50,7 +51,8 @@ public abstract class StreamProc<
                 NodePropertyValues nodePropertyValues = nodeProperties(computationResult);
                 return LongStream
                     .range(IdMap.START_NODE_ID, graph.nodeCount())
-                    .mapToObj(nodeId -> streamResult(graph.toOriginalNodeId(nodeId), nodeId, nodePropertyValues));
+                    .mapToObj(nodeId -> streamResult(graph.toOriginalNodeId(nodeId), nodeId, nodePropertyValues))
+                    .filter(Objects::nonNull);
                 }
             );
     }

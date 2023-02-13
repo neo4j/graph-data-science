@@ -159,7 +159,7 @@ class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
 
     @ParameterizedTest
     @MethodSource("communitySizeInputs")
-    void testMinCommunitySize(Map<String, Long> parameters, List<Integer> expectedCommunityIds) {
+    void testStreamMinCommunitySize(Map<String, Long> parameters, List<Integer> expectedCommunityIds) {
         @Language("Cypher") String query = GdsCypher.call("myGraph")
                 .algo("louvain")
                 .streamMode()
