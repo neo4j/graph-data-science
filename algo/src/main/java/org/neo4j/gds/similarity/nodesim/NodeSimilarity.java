@@ -434,7 +434,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
         //when on concurrency of 1 on not-filtered similarity,  we only compare nodeId with greater indexed nodes
         // so work is halved. This does not hold for filtered similarity, since the targetNodes might be lesser indexed.
-        boolean isNotFiltered = sourceNodes.equals(NodeFilter.noOp) && targetNodeFilter.equals(NodeFilter.noOp);
+        boolean isNotFiltered = sourceNodeFilter.equals(NodeFilter.noOp) && targetNodeFilter.equals(NodeFilter.noOp);
         if (concurrency == 1 && isNotFiltered) {
             workload = workload / 2;
         }
