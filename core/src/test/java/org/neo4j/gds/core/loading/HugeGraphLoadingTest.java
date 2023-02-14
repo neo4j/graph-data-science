@@ -37,6 +37,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.compression.common.BumpAllocator;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;

@@ -35,10 +35,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.core.compression.common.VarLongEncoding.encodeVLongs;
+import static org.neo4j.gds.core.compression.common.VarLongEncoding.encodedVLongSize;
+import static org.neo4j.gds.core.compression.common.VarLongEncoding.zigZag;
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
-import static org.neo4j.gds.core.loading.VarLongEncoding.encodeVLongs;
-import static org.neo4j.gds.core.loading.VarLongEncoding.encodedVLongSize;
-import static org.neo4j.gds.core.loading.VarLongEncoding.zigZag;
 import static org.neo4j.gds.mem.BitUtil.ceilDiv;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 

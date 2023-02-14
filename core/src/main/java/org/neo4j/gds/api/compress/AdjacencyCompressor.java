@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.api.compress;
 
-import org.neo4j.gds.core.compress.LongArrayBuffer;
-
 public interface AdjacencyCompressor extends AutoCloseable {
 
     /**
@@ -34,7 +32,7 @@ public interface AdjacencyCompressor extends AutoCloseable {
      * the same array index in the uncompressed target list. Implementors need to make sure to maintain that order
      * when re-ordering the target ids.
      *
-     * Implementors of this method can use the provided {@link org.neo4j.gds.core.compress.LongArrayBuffer} to reuse existing allocations
+     * Implementors of this method can use the provided {@link LongArrayBuffer} to reuse existing allocations
      * of a {@code long[]} or share newly created buffers with next invocations of this method.
      * The buffer exists solely so that implementors can reduce allocations of {@code long[]}.
      * It is not expected that the buffer contains any useful data after this method invocation.

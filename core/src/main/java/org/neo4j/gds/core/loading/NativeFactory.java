@@ -28,7 +28,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.compress.AdjacencyListBehavior;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.GraphDimensionsStoreReader;

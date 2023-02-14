@@ -28,7 +28,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
-import org.neo4j.gds.api.compress.AdjacencyListBehavior;
 import org.neo4j.gds.api.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.kernel.api.KernelTransaction;

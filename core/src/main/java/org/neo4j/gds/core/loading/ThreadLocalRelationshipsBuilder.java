@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
+import org.neo4j.gds.core.compression.common.ThreadLocalRelationshipsCompressor;
 
 import java.util.concurrent.locks.ReentrantLock;
 

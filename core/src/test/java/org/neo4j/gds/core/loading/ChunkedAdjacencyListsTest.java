@@ -21,11 +21,13 @@ package org.neo4j.gds.core.loading;
 
 import org.assertj.core.data.Index;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.compression.common.AdjacencyCompression;
+import org.neo4j.gds.core.compression.common.ZigZagLongDecoding;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.neo4j.gds.core.compression.common.ZigZagLongDecoding.Identity.INSTANCE;
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
-import static org.neo4j.gds.core.loading.ZigZagLongDecoding.Identity.INSTANCE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ChunkedAdjacencyListsTest {
