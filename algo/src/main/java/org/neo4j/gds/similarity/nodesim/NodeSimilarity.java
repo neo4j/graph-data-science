@@ -154,9 +154,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             // but run on primitives.
             return computeTopN();
         } else {
-            return config.isParallel()
-                ? computeParallel()
-                : computeSimilarityResultStream();
+            return computeSimilarityResultStream();
         }
     }
 
@@ -168,9 +166,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             prepare();
             terminationFlag.assertRunning();
 
-            TopKMap topKMap = config.isParallel()
-                ? computeTopKMapParallel()
-                : computeTopKMap();
+            TopKMap topKMap = computeTopKMap();
 
             isTopKGraph = true;
             similarityGraph = new TopKGraph(graph, topKMap);
@@ -233,15 +229,12 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
                 : computeAll();
     }
 
-    private Stream<SimilarityResult> computeParallel() {
-        return (config.hasTopK() && config.hasTopN())
-            ? computeTopN(computeTopKMapParallel())
-            : (config.hasTopK())
-                ? computeTopKMapParallel().stream()
-                : computeAllParallel();
-    }
 
     private Stream<SimilarityResult> computeAll() {
+
+        if (config.isParallel()) {
+            return computeAllParallel();
+        }
         progressTracker.beginSubTask(calculateWorkload());
 
         var similarityResultStream = loggableAndTerminatableSourceNodeStream()
@@ -260,6 +253,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     }
 
     private TopKMap computeTopKMap() {
+        if (config.isParallel()) {
+            return computeTopKMapParallel();
+        }
         progressTracker.beginSubTask(calculateWorkload());
 
         Comparator<SimilarityResult> comparator = config.normalizedK() > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
