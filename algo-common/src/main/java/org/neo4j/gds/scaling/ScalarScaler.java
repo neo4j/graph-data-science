@@ -94,7 +94,7 @@ public abstract class ScalarScaler implements Scaler {
             public ScalarScaler create(
                 NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
-                return new LogTransformer(properties);
+                return new LogScaler(properties);
             }
         },
         STDSCORE {

@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class LogTest {
+class LogScalerTest {
 
     private static Stream<Arguments> properties() {
         double[] expected = {1, 2, 3, 4};
@@ -42,7 +42,7 @@ class LogTest {
     @ParameterizedTest
     @MethodSource("properties")
     void normalizes(NodePropertyValues properties, double[] expected) {
-        var scaler = new LogTransformer(properties);
+        var scaler = new LogScaler(properties);
 
         double[] actual = IntStream.range(1, 5).mapToDouble(scaler::scaleProperty).toArray();
         assertThat(actual).containsSequence(expected);
