@@ -30,34 +30,34 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class ScalerVariantTest {
 
     @Test
-    void lookup() {
-        assertThat(ScalarScaler.Variant.lookup("log")).isEqualTo(ScalarScaler.Variant.LOG);
-        assertThat(ScalarScaler.Variant.lookup("minmax")).isEqualTo(ScalarScaler.Variant.MINMAX);
-        assertThat(ScalarScaler.Variant.lookup("max")).isEqualTo(ScalarScaler.Variant.MAX);
-        assertThat(ScalarScaler.Variant.lookup("center")).isEqualTo(ScalarScaler.Variant.CENTER);
-        assertThat(ScalarScaler.Variant.lookup("l1norm")).isEqualTo(ScalarScaler.Variant.L1NORM);
-        assertThat(ScalarScaler.Variant.lookup("l2norm")).isEqualTo(ScalarScaler.Variant.L2NORM);
-        assertThat(ScalarScaler.Variant.lookup("mean")).isEqualTo(ScalarScaler.Variant.MEAN);
-        assertThat(ScalarScaler.Variant.lookup("stdscore")).isEqualTo(ScalarScaler.Variant.STDSCORE);
-        assertThat(ScalarScaler.Variant.lookup("none")).isEqualTo(ScalarScaler.Variant.NONE);
+    void parse() {
+        assertThat(ScalarScaler.Variant.parse("log")).isEqualTo(ScalarScaler.Variant.LOG);
+        assertThat(ScalarScaler.Variant.parse("minmax")).isEqualTo(ScalarScaler.Variant.MINMAX);
+        assertThat(ScalarScaler.Variant.parse("max")).isEqualTo(ScalarScaler.Variant.MAX);
+        assertThat(ScalarScaler.Variant.parse("center")).isEqualTo(ScalarScaler.Variant.CENTER);
+        assertThat(ScalarScaler.Variant.parse("l1norm")).isEqualTo(ScalarScaler.Variant.L1NORM);
+        assertThat(ScalarScaler.Variant.parse("l2norm")).isEqualTo(ScalarScaler.Variant.L2NORM);
+        assertThat(ScalarScaler.Variant.parse("mean")).isEqualTo(ScalarScaler.Variant.MEAN);
+        assertThat(ScalarScaler.Variant.parse("stdscore")).isEqualTo(ScalarScaler.Variant.STDSCORE);
+        assertThat(ScalarScaler.Variant.parse("none")).isEqualTo(ScalarScaler.Variant.NONE);
 
         // case insensitive
-        assertThat(ScalarScaler.Variant.lookup("L1NORM")).isEqualTo(ScalarScaler.Variant.L1NORM);
-        assertThat(ScalarScaler.Variant.lookup("StdScore")).isEqualTo(ScalarScaler.Variant.STDSCORE);
+        assertThat(ScalarScaler.Variant.parse("L1NORM")).isEqualTo(ScalarScaler.Variant.L1NORM);
+        assertThat(ScalarScaler.Variant.parse("StdScore")).isEqualTo(ScalarScaler.Variant.STDSCORE);
     }
 
     @Test
-    void badLookups() {
+    void badInput() {
         // bad strings
-        assertThatThrownBy(() -> ScalarScaler.Variant.lookup("mean  ")).hasMessageContaining("Scaler `mean  ` is not supported.");
-        assertThatThrownBy(() -> ScalarScaler.Variant.lookup("yo")).hasMessageContaining("Scaler `yo` is not supported.");
+        assertThatThrownBy(() -> ScalarScaler.Variant.parse("mean  ")).hasMessageContaining("Scaler `mean  ` is not supported.");
+        assertThatThrownBy(() -> ScalarScaler.Variant.parse("yo")).hasMessageContaining("Scaler `yo` is not supported.");
 
         // bad types
-        assertThatThrownBy(() -> ScalarScaler.Variant.lookup(1L)).hasMessageContaining("Unsupported scaler specified: `1`.");
-        assertThatThrownBy(() -> ScalarScaler.Variant.lookup(42D)).hasMessageContaining("Unsupported scaler specified: `42.0`.");
-        assertThatThrownBy(() -> ScalarScaler.Variant.lookup(List.of("mean"))).hasMessageContaining("Unsupported scaler specified: `[mean]`.");
-        assertThatThrownBy(() -> ScalarScaler.Variant.lookup(Map.of("mean", "scaler"))).hasMessageContaining("Unsupported scaler specified: `{mean=scaler}`.");
-        assertThatThrownBy(() -> ScalarScaler.Variant.lookup(false)).hasMessageContaining("Unsupported scaler specified: `false`.");
+        assertThatThrownBy(() -> ScalarScaler.Variant.parse(1L)).hasMessageContaining("Unsupported scaler specified: `1`.");
+        assertThatThrownBy(() -> ScalarScaler.Variant.parse(42D)).hasMessageContaining("Unsupported scaler specified: `42.0`.");
+        assertThatThrownBy(() -> ScalarScaler.Variant.parse(List.of("mean"))).hasMessageContaining("Unsupported scaler specified: `[mean]`.");
+        assertThatThrownBy(() -> ScalarScaler.Variant.parse(Map.of("mean", "scaler"))).hasMessageContaining("Unsupported scaler specified: `{mean=scaler}`.");
+        assertThatThrownBy(() -> ScalarScaler.Variant.parse(false)).hasMessageContaining("Unsupported scaler specified: `false`.");
     }
 
 }

@@ -133,7 +133,7 @@ public abstract class ScalarScaler implements Scaler {
             .map(Variant::name)
             .collect(Collectors.toList());
 
-        public static Variant lookup(Object name) {
+        public static Variant parse(Object name) {
             if (name instanceof String) {
                 var inputString = toUpperCaseWithLocale((String) name);
 

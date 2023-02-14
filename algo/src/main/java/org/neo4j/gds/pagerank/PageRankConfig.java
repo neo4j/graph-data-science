@@ -57,7 +57,7 @@ public interface PageRankConfig extends
     }
 
     @Value.Default
-    @Configuration.ConvertWith(method = "org.neo4j.gds.scaling.ScalarScaler.Variant#lookup")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.scaling.ScalarScaler.Variant#parse")
     @Configuration.ToMapValue("org.neo4j.gds.scaling.ScalarScaler.Variant#toString")
     default ScalarScaler.Variant scaler() {
         return ScalarScaler.Variant.NONE;
