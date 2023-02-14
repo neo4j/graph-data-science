@@ -51,12 +51,13 @@ include::partial$/algorithms/common-configuration/common-configuration.adoc[]
 .Algorithm specific configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name                                                                             | Type    | Default                | Optional | Description
+| Name                                                                                                               | Type    | Default                | Optional | Description
 | xref:common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations]                            | Integer | 10                     | yes      | The maximum number of iterations to run.
 | xref:common-usage/running-algos.adoc#common-configuration-tolerance[tolerance]                                     | Float   | 0.0001                 | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
-| seedProperty                                                                     | String  | n/a                    | yes      | Used to define initial set of labels (must be a non-negative number).
-| consecutiveIds                                                                   | Boolean | false                  | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).
+| seedProperty                                                                                                       | String  | n/a                    | yes      | Used to define initial set of labels (must be a non-negative number).
+| consecutiveIds                                                                                                     | Boolean | false                  | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).
 | xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null                   | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
+| minCommunitySize                                                                                                   | Integer | 0                      | yes      | Only nodes inside communities larger or equal the given value are returned.
 |===
 
 .Results
