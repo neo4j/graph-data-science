@@ -281,7 +281,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
                         .filter(node2 -> node1 != node2)
                         .forEach(node2 -> {
                             double similarity = calculateSimilarityForNodePair(node1, node2, vector1);
-
                             if (!Double.isNaN(similarity)) {
                                 topKMap.put(node1, node2, similarity);
                             }
@@ -324,6 +323,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         return topKMap;
     }
 
+
     private Stream<SimilarityResult> computeTopN() {
         progressTracker.beginSubTask(calculateWorkload());
 
@@ -331,26 +331,13 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         loggableAndTerminatableSourceNodeStream()
             .forEach(node1 -> {
                 long[] vector1 = vectors.get(node1);
-
-                if (sourceNodeFilter.equals(NodeFilter.noOp)) {
-                    targetNodesStream(node1 + 1)
+                targetNodesExactStream(node1)
                         .forEach(node2 -> {
                             double similarity = calculateSimilarityForNodePair(node1, node2, vector1);
                             if (!Double.isNaN(similarity)) {
                                 topNList.add(node1, node2, similarity);
                             }
                         });
-                } else {
-                    targetNodesStream()
-                        .filter(node2 -> node1 != node2)
-                        .forEach(node2 -> {
-                            double similarity = calculateSimilarityForNodePair(node1, node2, vector1);
-                            if (!Double.isNaN(similarity)) {
-                                topNList.add(node1, node2, similarity);
-                            }
-                        });
-                }
-
             });
 
         progressTracker.endSubTask();
@@ -381,6 +368,14 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
     private LongStream targetNodesStream() {
         return targetNodesStream(0);
+    }
+
+    private LongStream targetNodesExactStream(long node) {
+        if (sourceNodeFilter.equals(NodeFilter.noOp)) {
+            return targetNodesStream(node + 1);
+        } else {
+            return targetNodesStream().filter(node1 -> node != node1);
+        }
     }
 
     private double computeWeightedSimilarity(long[] vector1, long[] vector2, double[] weights1, double[] weights2) {
