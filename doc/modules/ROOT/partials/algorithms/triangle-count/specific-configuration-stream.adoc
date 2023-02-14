@@ -1,0 +1,2 @@
+| maxDegree            | Integer | 2^63^ - 1 | yes      | If a node has a degree higher than this it will not be considered by the algorithm. The triangle count for these nodes will be `-1`.
+| minCommunitySize     | Integer | 0         | yes      | Only nodes inside communities larger or equal the given value are returned.
