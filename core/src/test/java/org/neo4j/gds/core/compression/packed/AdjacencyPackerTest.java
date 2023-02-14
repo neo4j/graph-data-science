@@ -88,7 +88,11 @@ class AdjacencyPackerTest {
         var data = LongStream.range(0, AdjacencyPacking.BLOCK_SIZE).toArray();
         var compressed = AdjacencyPacker.compress(data.clone(), 0, data.length, features.flags());
 
-        assertThat(compressed.bytesUsed()).isLessThanOrEqualTo(1 + 6 * Long.BYTES);
+        int maxBitsPerValues = 6; // packing uses max. 6 bits for any value in this test
+        int maxBitsPerBlock = maxBitsPerValues * AdjacencyPacking.BLOCK_SIZE;
+        int maxBytesPerBlock = maxBitsPerBlock / Byte.SIZE;
+        int maxBytes = 1 /* header size */ + maxBytesPerBlock;
+        assertThat(compressed.bytesUsed()).isLessThanOrEqualTo(maxBytes);
         assertThat(compressed.address()).isNotZero();
 
         var decompressed = features.decompress(compressed);
@@ -154,7 +158,13 @@ class AdjacencyPackerTest {
             .toArray();
         var compressed = AdjacencyPacker.compress(data.clone(), 0, data.length, features.flags(Aggregation.SINGLE));
 
-        assertThat(compressed.bytesUsed()).isLessThanOrEqualTo(1 + 6 * Long.BYTES);
+        int maxBitsPerValues = 8; // tail compression is 1 byte per value
+        int maxBitsPerBlock = maxBitsPerValues * AdjacencyPacking.BLOCK_SIZE;
+        int maxBytesPerBlock = maxBitsPerBlock / Byte.SIZE;
+        int maxBytes = 1 /* possible header size */ + maxBytesPerBlock;
+        assertThat(compressed.bytesUsed())
+            .as("compression uses more space than expected, seed = %s", random.seed())
+            .isLessThanOrEqualTo(maxBytes);
         assertThat(compressed.address()).isNotZero();
 
         if (features != Features.Sort) {
