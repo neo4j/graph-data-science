@@ -70,6 +70,8 @@ image::equations/scale-properties/log.svg[scaled p equals natural logarithm of p
 Scales all property values using the https://en.wikipedia.org/wiki/Standard_score[Standard Score (Wikipedia)].
 
 image::equations/scale-properties/standardScore.svg[scaled p equals p minus average of p divided by standard deviation of p,align="center"]
+
+
 [[algorithms--scale-properties-center]]
 === Center
 

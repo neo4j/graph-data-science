@@ -141,13 +141,20 @@ public abstract class ScalarScaler implements Scaler {
                     return valueOf(inputString);
                 } else {
                     throw new IllegalArgumentException(formatWithLocale(
-                        "Scaler `%s` is not supported. Must be one of: %s.",
+                        "Scaler `%s` is not supported. Expected one of: %s.",
                         name,
                         StringJoining.join(VALUES)
                     ));
                 }
+            } else if (name instanceof Variant) {
+                return (Variant) name;
             }
-            return (Variant) name;
+
+            throw new IllegalArgumentException(formatWithLocale(
+                "Unsupported scaler specified: `%s`. Expected one of: %s.",
+                name,
+                StringJoining.join(VALUES)
+            ));
         }
 
         public static String toString(Variant variant) {
