@@ -20,8 +20,8 @@
 package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.sorting.IndirectSort;
+import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.compress.LongArrayBuffer;
 import org.neo4j.gds.core.utils.AscendingLongComparator;
 

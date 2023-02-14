@@ -26,11 +26,11 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.PartialIdMap;
+import org.neo4j.gds.api.compress.AdjacencyCompressor;
+import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
+import org.neo4j.gds.api.compress.AdjacencyListBehavior;
+import org.neo4j.gds.api.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.compress.AdjacencyCompressor;
-import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
-import org.neo4j.gds.core.compress.AdjacencyListBehavior;
-import org.neo4j.gds.core.compress.AdjacencyListsWithProperties;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Collection;

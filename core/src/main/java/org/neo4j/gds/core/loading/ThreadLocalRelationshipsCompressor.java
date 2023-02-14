@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.core.compress.AdjacencyCompressor;
+import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.compress.LongArrayBuffer;
 
 final class ThreadLocalRelationshipsCompressor implements AutoCloseable {

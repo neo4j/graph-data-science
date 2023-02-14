@@ -17,26 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.compress;
+package org.neo4j.gds.api.compress;
 
-import java.util.concurrent.atomic.LongAdder;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.AdjacencyList;
+import org.neo4j.gds.api.AdjacencyProperties;
 
-public interface AdjacencyCompressorFactory {
+import java.util.List;
 
-    /**
-     * Prepares the compressor for flushing, for example by initializing data structures as they are needed.
-     */
-    void init();
+@ValueClass
+public interface AdjacencyListsWithProperties {
 
-    /**
-     * @return a copy of this blueprint that can be used concurrently with other copies to compress data.
-     */
-    AdjacencyCompressor createCompressor();
+    AdjacencyList adjacency();
 
-    LongAdder relationshipCounter();
+    long relationshipCount();
 
-    /**
-     * @return the final adjacency list, together with any number of properties, if any.
-     */
-    AdjacencyListsWithProperties build();
+    List<AdjacencyProperties> properties();
 }

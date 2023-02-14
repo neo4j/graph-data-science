@@ -22,9 +22,9 @@ package org.neo4j.gds.core.loading;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.api.compress.AdjacencyCompressor.ValueMapper;
+import org.neo4j.gds.api.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.compress.AdjacencyCompressor.ValueMapper;
-import org.neo4j.gds.core.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.huge.DirectIdMap;
 
 import java.util.HashMap;

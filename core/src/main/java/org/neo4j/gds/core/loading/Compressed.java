@@ -299,7 +299,7 @@ final class BlockDecompressor {
             this.blockId++;
         } else {
             // tail decompression
-            int tailLength = this.length - blockOffset;
+            int tailLength = this.length - this.blockOffset;
             if (this.isDeltaCompressed) {
                 AdjacencyCompression.decompressAndPrefixSum(tailLength, this.lastValue, this.ptr, this.block, 0);
             } else {

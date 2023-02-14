@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.loading.construction;
 
 import org.neo4j.gds.api.PartialIdMap;
-import org.neo4j.gds.core.compress.AdjacencyCompressor;
+import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 
