@@ -31,6 +31,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
@@ -71,7 +72,7 @@ public class ModularityOptimizationStreamProc extends StreamProc<ModularityOptim
     protected NodePropertyValues nodeProperties(
         ComputationResult<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationStreamConfig> computationResult
     ) {
-        return ModularityOptimizationProc.nodeProperties(computationResult);
+        return ModularityOptimizationProc.nodeProperties(computationResult, UUID.randomUUID().toString());
     }
 
     @Override
