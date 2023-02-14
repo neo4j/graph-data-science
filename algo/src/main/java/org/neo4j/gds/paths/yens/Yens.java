@@ -233,8 +233,8 @@ public final class Yens extends Algorithm<DijkstraResult> {
     @Override
     public void release() {
         dijkstra.release();
-        nodeBlackList.release();
-        relationshipBlackList.release();
+        nodeAvoidList.release();
+        relationshipAvoidList.release();
     }
 
     private Optional<PathResult> computeDijkstra(long sourceNode) {
