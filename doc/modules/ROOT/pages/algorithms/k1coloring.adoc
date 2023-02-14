@@ -60,9 +60,10 @@ YIELD nodeId, color
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name                                                  | Type    | Default                | Optional | Description
-| concurrency                                           | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see xref:installation/System-requirements.adoc#system-requirements-cpu[CPU].
+| Name                                                                                    | Type    | Default                | Optional | Description
+| concurrency                                                                             | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see xref:installation/System-requirements.adoc#system-requirements-cpu[CPU].
 | xref:common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations] | Integer | 10                     | yes      | The maximum number of iterations of K1 Coloring to run.
+| minCommunitySize                                                                        | Integer | 0                      | yes      | Only nodes inside communities larger or equal the given value are returned.
 |===
 
 .Results
