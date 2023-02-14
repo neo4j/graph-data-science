@@ -348,11 +348,85 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
     @Test
     void shouldLogDeprecationWarning() {
-        runQuery("CALL gds.graph.writeNodeProperties($graph, ['newNodeProp1', 'newNodeProp2'])", Map.of("graph", TEST_GRAPH_SAME_PROPERTIES));
+        runQuery(
+            "CALL gds.graph.writeNodeProperties($graph, ['newNodeProp1', 'newNodeProp2'])",
+            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES)
+        );
         var userLogEntries = userLogStore.query(getUsername()).collect(Collectors.toList());
         Assertions.assertThat(userLogEntries.size()).isEqualTo(1);
         Assertions.assertThat(userLogEntries.get(0).getMessage())
             .contains("deprecated")
             .contains("gds.graph.nodeProperties.write");
+    }
+
+    @Test
+    void shouldRenameSingleProperly() {
+        long expectedPropertyCount = 6;
+
+        GraphStore graphStore = GraphStoreCatalog
+            .get(getUsername(), DatabaseId.of(db), TEST_GRAPH_SAME_PROPERTIES)
+            .graphStore();
+        NodePropertyValues identityProperties = new IdentityPropertyValues(expectedPropertyCount);
+        graphStore.addNodeProperty(Set.of(NodeLabel.of("A"), NodeLabel.of("B")), "newNodeProp3", identityProperties);
+
+        assertCypherResult(
+            "CALL gds.graph.nodeProperties.write(" +
+            "   $graph, " +
+            "   { newNodeProp3: 'foo'} " +
+            ")", Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
+            List.of(Map.of(
+                "writeMillis", Matchers.greaterThan(-1L),
+                "graphName", TEST_GRAPH_SAME_PROPERTIES,
+                "nodeProperties", List.of("foo"),
+                "propertiesWritten", expectedPropertyCount
+            ))
+        );
+
+        String validationQuery =
+            "MATCH (n) " +
+            "RETURN n.foo AS foo " +
+            "ORDER BY foo ASC";
+
+        assertCypherResult(validationQuery, asList(
+            map("foo", 0L),
+            map("foo", 1L),
+            map("foo", 2L),
+            map("foo", 3L),
+            map("foo", 4L),
+            map("foo", 5L)
+        ));
+    }
+
+    @Test
+    void shouldRenameMultipleProperties() {
+        assertCypherResult(
+            "CALL gds.graph.nodeProperties.write($graph, [{newNodeProp1: 'foo', newNodeProp2: 'bar'} ,'newNodeProp1'], 'A')",
+            Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
+            List.of(Map.of(
+                "writeMillis", Matchers.greaterThan(-1L),
+                "graphName", TEST_GRAPH_SAME_PROPERTIES,
+                "nodeProperties", List.of("bar", "foo", "newNodeProp1"),
+                "propertiesWritten", 9L
+            ))
+        );
+
+        String validationQuery =
+            "MATCH (n) " +
+            "RETURN " +
+            "  labels(n) AS labels, " +
+            "  n.foo AS foo, " +
+            "  n.bar AS bar, " +
+            "  n.newNodeProp1 AS newNodeProp1 " +
+
+            "ORDER BY foo ASC, bar ASC, newNodeProp1 ASC";
+
+        assertCypherResult(validationQuery, asList(
+            map("labels", singletonList("A"), "foo", 0L, "bar", 42L, "newNodeProp1", 0L),
+            map("labels", singletonList("A"), "foo", 1L, "bar", 43L, "newNodeProp1", 1L),
+            map("labels", singletonList("A"), "foo", 2L, "bar", 44L, "newNodeProp1", 2L),
+            map("labels", singletonList("B"), "foo", null, "bar", null, "newNodeProp1", null),
+            map("labels", singletonList("B"), "foo", null, "bar", null, "newNodeProp1", null),
+            map("labels", singletonList("B"), "foo", null, "bar", null, "newNodeProp1", null)
+        ));
     }
 }

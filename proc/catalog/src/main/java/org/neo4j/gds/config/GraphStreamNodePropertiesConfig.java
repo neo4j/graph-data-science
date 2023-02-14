@@ -37,8 +37,8 @@ public interface GraphStreamNodePropertiesConfig extends GraphExportNodeProperti
         CypherMapWrapper config
     ) {
         return new GraphStreamNodePropertiesConfigImpl(
-            Optional.of(graphName),
             nodeProperties,
+            Optional.of(graphName),
             nodeLabels,
             config
         );
