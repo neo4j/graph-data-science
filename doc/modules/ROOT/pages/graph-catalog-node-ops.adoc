@@ -464,9 +464,12 @@ The above example requires the `score` property to be present on _at least one_ 
 
 ====  Renaming properties when writing back
 
-It is possible to rename node properties and write them back to the database under a custom name. For this, you can use a map where each entry is a tuple `{nodeProperty: 'renamedProperty'}` i.e., the key corresponds to an existing node property in the in-memory graph and the value corresponds to the name to be written back to the database.
+It is possible to rename node properties and write them back to the database under a custom name.
+For this, you can use a map where each entry is a tuple `{nodeProperty: 'renamedProperty'}` i.e., the key corresponds to an existing node property in the in-memory graph and the value corresponds to the name to be written back to the database.
 
-For convenience, a map may hold more than one entries. The `nodeProperties` configuration parameter accepts both strings and maps and any combination of the two inside a list. This can be helpful when we only want to rename a handful of properties.
+For convenience, a map may hold more than one entries.
+The `nodeProperties` configuration parameter accepts both strings and maps and any combination of the two inside a list.
+This can be helpful when we only want to rename a handful of properties.
 
 [role=query-example]
 --
