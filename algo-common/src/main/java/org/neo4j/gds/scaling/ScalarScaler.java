@@ -35,9 +35,7 @@ public abstract class ScalarScaler implements Scaler {
 
     protected final NodePropertyValues properties;
 
-    public ScalarScaler(NodePropertyValues properties) {this.properties = properties;}
-
-    public abstract double scaleProperty(long nodeId);
+    protected ScalarScaler(NodePropertyValues properties) {this.properties = properties;}
 
     @Override
     public int dimension() {
