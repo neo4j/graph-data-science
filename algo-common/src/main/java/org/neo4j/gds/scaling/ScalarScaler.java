@@ -35,9 +35,7 @@ public abstract class ScalarScaler implements Scaler {
 
     protected final NodePropertyValues properties;
 
-    public ScalarScaler(NodePropertyValues properties) {this.properties = properties;}
-
-    public abstract double scaleProperty(long nodeId);
+    protected ScalarScaler(NodePropertyValues properties) {this.properties = properties;}
 
     @Override
     public int dimension() {
@@ -94,7 +92,7 @@ public abstract class ScalarScaler implements Scaler {
             public ScalarScaler create(
                 NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
-                return new LogTransformer(properties);
+                return new LogScaler(properties);
             }
         },
         STDSCORE {
@@ -135,7 +133,7 @@ public abstract class ScalarScaler implements Scaler {
             .map(Variant::name)
             .collect(Collectors.toList());
 
-        public static Variant lookup(Object name) {
+        public static Variant parse(Object name) {
             if (name instanceof String) {
                 var inputString = toUpperCaseWithLocale((String) name);
 
@@ -143,13 +141,20 @@ public abstract class ScalarScaler implements Scaler {
                     return valueOf(inputString);
                 } else {
                     throw new IllegalArgumentException(formatWithLocale(
-                        "Scaler `%s` is not supported. Must be one of: %s.",
+                        "Scaler `%s` is not supported. Expected one of: %s.",
                         name,
                         StringJoining.join(VALUES)
                     ));
                 }
+            } else if (name instanceof Variant) {
+                return (Variant) name;
             }
-            return (Variant) name;
+
+            throw new IllegalArgumentException(formatWithLocale(
+                "Unsupported scaler specified: `%s`. Expected one of: %s.",
+                name,
+                StringJoining.join(VALUES)
+            ));
         }
 
         public static String toString(Variant variant) {
