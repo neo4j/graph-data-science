@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.internal.unsafe.UnsafeUtil;
+
 public final class VarLongEncoding {
 
     public static final long THRESHOLD_1_BYTE = 128L;
@@ -59,6 +61,17 @@ public final class VarLongEncoding {
             into = encodeVLong(out, values[i], into);
         }
         return into;
+    }
+
+    static long encodeVLongs(long[] values, int offset, int end, long ptr) {
+        for (int i = offset; i < end; ++i) {
+            if (values[i] == Long.MIN_VALUE) {
+                continue;
+            }
+
+            ptr = unsafeEncodeVLong(ptr, values[i]);
+        }
+        return ptr;
     }
 
     //@formatter:off
@@ -126,6 +139,74 @@ public final class VarLongEncoding {
             buffer[7 + output] = (byte) (val >> 49 & 127L);
             buffer[8 + output] = (byte) (val >> 56 | 128L);
             return 9 + output;
+        }
+    }
+
+    //@formatter:off
+    private static long unsafeEncodeVLong(long ptr, long val) {
+        if (val < THRESHOLD_1_BYTE) {
+            UnsafeUtil.putByte(    ptr, (byte) (val       | 128L));
+            return 1 + ptr;
+        } else if (val < THRESHOLD_2_BYTE) {
+            UnsafeUtil.putByte(    ptr, (byte) (val       & 127L));
+            UnsafeUtil.putByte(1 + ptr, (byte) (val >>  7 | 128L));
+            return 2 + ptr;
+        } else if (val < THRESHOLD_3_BYTE) {
+            UnsafeUtil.putByte(    ptr, (byte) (val       & 127L));
+            UnsafeUtil.putByte(1 + ptr, (byte) (val >>  7 & 127L));
+            UnsafeUtil.putByte(2 + ptr, (byte) (val >> 14 | 128L));
+            return 3 + ptr;
+        } else if (val < THRESHOLD_4_BYTE) {
+            UnsafeUtil.putByte(    ptr, (byte) (val       & 127L));
+            UnsafeUtil.putByte(1 + ptr, (byte) (val >>  7 & 127L));
+            UnsafeUtil.putByte(2 + ptr, (byte) (val >> 14 & 127L));
+            UnsafeUtil.putByte(3 + ptr, (byte) (val >> 21 | 128L));
+            return 4 + ptr;
+        } else if (val < THRESHOLD_5_BYTE) {
+            UnsafeUtil.putByte(    ptr, (byte) (val       & 127L));
+            UnsafeUtil.putByte(1 + ptr, (byte) (val >>  7 & 127L));
+            UnsafeUtil.putByte(2 + ptr, (byte) (val >> 14 & 127L));
+            UnsafeUtil.putByte(3 + ptr, (byte) (val >> 21 & 127L));
+            UnsafeUtil.putByte(4 + ptr, (byte) (val >> 28 | 128L));
+            return 5 + ptr;
+        } else if (val < THRESHOLD_6_BYTE) {
+            UnsafeUtil.putByte(    ptr, (byte) (val       & 127L));
+            UnsafeUtil.putByte(1 + ptr, (byte) (val >>  7 & 127L));
+            UnsafeUtil.putByte(2 + ptr, (byte) (val >> 14 & 127L));
+            UnsafeUtil.putByte(3 + ptr, (byte) (val >> 21 & 127L));
+            UnsafeUtil.putByte(4 + ptr, (byte) (val >> 28 & 127L));
+            UnsafeUtil.putByte(5 + ptr, (byte) (val >> 35 | 128L));
+            return 6 + ptr;
+        } else if (val < THRESHOLD_7_BYTE) {
+            UnsafeUtil.putByte(    ptr, (byte) (val       & 127L));
+            UnsafeUtil.putByte(1 + ptr, (byte) (val >>  7 & 127L));
+            UnsafeUtil.putByte(2 + ptr, (byte) (val >> 14 & 127L));
+            UnsafeUtil.putByte(3 + ptr, (byte) (val >> 21 & 127L));
+            UnsafeUtil.putByte(4 + ptr, (byte) (val >> 28 & 127L));
+            UnsafeUtil.putByte(5 + ptr, (byte) (val >> 35 & 127L));
+            UnsafeUtil.putByte(6 + ptr, (byte) (val >> 42 | 128L));
+            return 7 + ptr;
+        } else if (val < THRESHOLD_8_BYTE) {
+            UnsafeUtil.putByte(    ptr, (byte) (val       & 127L));
+            UnsafeUtil.putByte(1 + ptr, (byte) (val >>  7 & 127L));
+            UnsafeUtil.putByte(2 + ptr, (byte) (val >> 14 & 127L));
+            UnsafeUtil.putByte(3 + ptr, (byte) (val >> 21 & 127L));
+            UnsafeUtil.putByte(4 + ptr, (byte) (val >> 28 & 127L));
+            UnsafeUtil.putByte(5 + ptr, (byte) (val >> 35 & 127L));
+            UnsafeUtil.putByte(6 + ptr, (byte) (val >> 42 & 127L));
+            UnsafeUtil.putByte(7 + ptr, (byte) (val >> 49 | 128L));
+            return 8 + ptr;
+        } else {
+            UnsafeUtil.putByte(    ptr, (byte) (val       & 127L));
+            UnsafeUtil.putByte(1 + ptr, (byte) (val >>  7 & 127L));
+            UnsafeUtil.putByte(2 + ptr, (byte) (val >> 14 & 127L));
+            UnsafeUtil.putByte(3 + ptr, (byte) (val >> 21 & 127L));
+            UnsafeUtil.putByte(4 + ptr, (byte) (val >> 28 & 127L));
+            UnsafeUtil.putByte(5 + ptr, (byte) (val >> 35 & 127L));
+            UnsafeUtil.putByte(6 + ptr, (byte) (val >> 42 & 127L));
+            UnsafeUtil.putByte(7 + ptr, (byte) (val >> 49 & 127L));
+            UnsafeUtil.putByte(8 + ptr, (byte) (val >> 56 | 128L));
+            return 9 + ptr;
         }
     }
 

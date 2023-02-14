@@ -38,18 +38,18 @@ public final class Compressed implements AutoCloseable {
     // number of compressed values
     private final int length;
     // header of compression blocks
-    private final byte[] blocks;
+    private final byte[] header;
 
-    public Compressed(long address, long bytes, byte[] blocks, int length) {
+    public Compressed(long address, long bytes, byte[] header, int length) {
         this.address = new Address(address, bytes);
         this.cleanable = CLEANER.register(this, this.address);
-        this.blocks = blocks;
+        this.header = header;
         this.length = length;
     }
 
     @Override
     public String toString() {
-        return "Compressed{address=" + this.address.address() + ", bytes=" + this.address.bytes() + ", blocks=" + blocks.length + '}';
+        return "Compressed{address=" + this.address.address() + ", bytes=" + this.address.bytes() + ", blocks=" + header.length + '}';
     }
 
     /**
@@ -82,7 +82,7 @@ public final class Compressed implements AutoCloseable {
      * @return number of bytes to represent the data in compressed format.
      */
     public long bytesUsed() {
-        return this.address.bytes() + this.blocks.length;
+        return this.address.bytes() + this.header.length;
     }
 
     /**
@@ -96,8 +96,8 @@ public final class Compressed implements AutoCloseable {
     /**
      * @return the headers of compression blocks
      */
-    byte[] blocks() {
-        return this.blocks;
+    byte[] header() {
+        return this.header;
     }
 
     /**

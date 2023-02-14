@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.huge;
 
+import org.neo4j.internal.unsafe.UnsafeUtil;
+
 public final class VarLongDecoding {
 
     public static int decodeDeltaVLongs(
@@ -44,6 +46,58 @@ public final class VarLongDecoding {
         }
 
         return offset;
+    }
+
+    public static long unsafeDecodeDeltaVLongs(
+        int length,
+        long previousValue,
+        long ptr,
+        long[] out,
+        int offset
+    ) {
+        long input, value = 0L;
+        int shift = 0;
+        while (length > 0) {
+            input = UnsafeUtil.getByte(ptr);
+            ptr++;
+            value += (input & 127L) << shift;
+            if ((input & 128L) == 128L) {
+                previousValue += value;
+                out[offset++] = previousValue;
+                value = 0L;
+                shift = 0;
+                length--;
+            } else {
+                shift += 7;
+            }
+        }
+
+        return ptr;
+    }
+
+    public static long unsafeDecodeVLongs(
+        int length,
+        long ptr,
+        long[] out,
+        int offset
+    ) {
+        long input, value = 0L;
+        int shift = 0;
+        while (length > 0) {
+            input = UnsafeUtil.getByte(ptr);
+            ptr++;
+            value += (input & 127L) << shift;
+            if ((input & 128L) == 128L) {
+                out[offset++] = value;
+                value = 0L;
+                shift = 0;
+                length--;
+            } else {
+                shift += 7;
+            }
+        }
+
+        return ptr;
     }
 
     private VarLongDecoding() {
