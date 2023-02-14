@@ -36,7 +36,10 @@ final class TriangleCountCompanion {
 
     static <CONFIG extends TriangleCountBaseConfig> NodePropertyValues nodePropertyTranslator(ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, CONFIG> computeResult) {
         var config = computeResult.config();
-        return CommunityProcCompanion.getNodePropertyValues(config, computeResult.result().asNodeProperties());
+        IntersectingTriangleCount.TriangleCountResult triangleCountResult = computeResult.result();
+        var result = triangleCountResult == null ? null : triangleCountResult.asNodeProperties();
+
+        return CommunityProcCompanion.getNodePropertyValues(config, result);
     }
 
     static <PROC_RESULT, CONFIG extends TriangleCountBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(

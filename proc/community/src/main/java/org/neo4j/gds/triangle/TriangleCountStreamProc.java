@@ -31,6 +31,7 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
+import org.neo4j.values.storable.LongValue;
 
 import java.util.Map;
 import java.util.stream.LongStream;
@@ -65,13 +66,15 @@ public class TriangleCountStreamProc
     protected Stream<Result> stream(ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig> computationResult) {
         return runWithExceptionLogging("Graph streaming failed", () -> {
             var graph = computationResult.graph();
-            var result = computationResult.result();
+
+            var nodeProperties = nodeProperties(computationResult);
 
             return LongStream.range(0, graph.nodeCount())
-                .mapToObj(i -> new Result(
-                    graph.toOriginalNodeId(i),
-                    result.localTriangles().get(i)
-                ));
+                    .filter(i -> nodeProperties.value(i) != null)
+                    .mapToObj(i -> new Result(
+                            graph.toOriginalNodeId(i),
+                            ((LongValue)nodeProperties.value(i)).longValue()
+                    ));
         });
     }
 
