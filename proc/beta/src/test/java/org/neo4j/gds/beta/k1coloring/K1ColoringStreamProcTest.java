@@ -21,6 +21,9 @@ package org.neo4j.gds.beta.k1coloring;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -29,7 +32,9 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -79,5 +84,40 @@ class K1ColoringStreamProcTest extends K1ColoringProcBaseTest<K1ColoringStreamCo
             assertNotNull(bytesHuman);
             assertTrue(row.getString("requiredMemory").contains(bytesHuman));
         });
+    }
+
+    static Stream<Arguments> communitySizeInputs() {
+        return Stream.of(
+                Arguments.of(Map.of("minCommunitySize", 1), Map.of(
+                        0L, 1L,
+                        1L, 0L,
+                        2L, 0L,
+                        3L, 0L
+                )),
+                Arguments.of(Map.of("minCommunitySize", 2), Map.of(
+                        1L, 0L,
+                        2L, 0L,
+                        3L, 0L
+                ))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("communitySizeInputs")
+    void testStreamingMinCommunitySize(Map<String, Long> parameter, Map<Long, Long> expectedResult) {
+        @Language("Cypher")
+        String yields = algoBuildStage()
+                .streamMode()
+                .addAllParameters(parameter)
+                .yields("nodeId", "color");
+
+        Map<Long, Long> coloringResult = new HashMap<>(4);
+        runQueryWithRowConsumer(yields, (row) -> {
+            long nodeId = row.getNumber("nodeId").longValue();
+            long color = row.getNumber("color").longValue();
+            coloringResult.put(nodeId, color);
+        });
+
+        assertEquals(coloringResult, expectedResult);
     }
 }

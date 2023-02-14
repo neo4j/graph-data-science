@@ -72,6 +72,11 @@ public class K1ColoringStreamProc extends StreamProc<K1Coloring, HugeLongArray, 
     protected StreamResult streamResult(
         long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
     ) {
+
+        if (nodePropertyValues.value(internalNodeId) == null) {
+            return null;
+        }
+
         return new StreamResult(originalNodeId, nodePropertyValues.longValue(internalNodeId));
     }
 
