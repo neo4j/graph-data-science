@@ -21,12 +21,13 @@ package org.neo4j.gds.impl.approxmaxkcut.config;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.config.CommunitySizeConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ApproxMaxKCutStreamConfig extends ApproxMaxKCutConfig {
+public interface ApproxMaxKCutStreamConfig extends ApproxMaxKCutConfig, CommunitySizeConfig {
 
     static ApproxMaxKCutStreamConfig of(CypherMapWrapper config) {
         return new ApproxMaxKCutStreamConfigImpl(config);
