@@ -1,7 +1,7 @@
 apply plugin: 'java-library'
 apply plugin: 'me.champeau.mrjar'
 
-description = 'Neo4j Graph Data Science :: Neo4j Kernel Adapter RC'
+description = 'Neo4j Graph Data Science :: Neo4j Kernel Adapter 5.5'
 
 group = 'org.neo4j.gds'
 
