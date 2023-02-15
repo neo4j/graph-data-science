@@ -22,7 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.neo4j.kernel.impl.query.QueryExecution;
 import org.neo4j.kernel.impl.query.QueryExecutionKernelException;
 
-final class CypherLoadingUtils {
+public final class CypherLoadingUtils {
 
     public static void consume(QueryExecution execution) {
         try {
