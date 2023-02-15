@@ -41,13 +41,25 @@ public final class AdjacencyCompression {
      * After this, {@link org.neo4j.gds.api.compress.LongArrayBuffer#length} will reflect the number of decompressed values
      * that are in the {@link org.neo4j.gds.api.compress.LongArrayBuffer#buffer}.
      */
-    public static void copyFrom(LongArrayBuffer into, byte[] targets, int compressedValues, int limit, AdjacencyCompressor.ValueMapper mapper) {
+    public static void zigZagUncompressFrom(
+        LongArrayBuffer into,
+        byte[] targets,
+        int compressedValues,
+        int limit,
+        AdjacencyCompressor.ValueMapper mapper
+    ) {
         into.ensureCapacity(compressedValues);
-        copyFrom(into.buffer, targets, compressedValues, limit, mapper);
+        zigZagUncompressFrom(into.buffer, targets, compressedValues, limit, mapper);
         into.length = compressedValues;
     }
 
-    public static void copyFrom(long[] into, byte[] targets, int compressedValues, int limit, AdjacencyCompressor.ValueMapper mapper) {
+    public static void zigZagUncompressFrom(
+        long[] into,
+        byte[] targets,
+        int compressedValues,
+        int limit,
+        AdjacencyCompressor.ValueMapper mapper
+    ) {
         assert into.length >= compressedValues;
         zigZagUncompress(targets, limit, into, mapper);
     }
@@ -72,21 +84,27 @@ public final class AdjacencyCompression {
     }
 
     // TODO: requires lots of additional memory ... inline indirect sort to make reuse of - to be created - buffers
-    static int applyDeltaEncoding(long[] data, int length, long[][] weights, Aggregation[] aggregations, boolean noAggregation) {
+    static int applyDeltaEncoding(
+        long[] data,
+        int length,
+        long[][] weights,
+        Aggregation[] aggregations,
+        boolean noAggregation
+    ) {
         int[] order = IndirectSort.mergesort(0, length, new AscendingLongComparator(data));
 
         long[] sortedValues = new long[length];
         long[][] sortedWeights = new long[weights.length][length];
 
         length = applyDelta(
-                order,
-                data,
-                sortedValues,
-                weights,
-                sortedWeights,
-                length,
-                aggregations,
-                noAggregation
+            order,
+            data,
+            sortedValues,
+            weights,
+            sortedWeights,
+            length,
+            aggregations,
+            noAggregation
         );
 
         System.arraycopy(sortedValues, 0, data, 0, length);
@@ -212,24 +230,24 @@ public final class AdjacencyCompression {
      * Applies delta encoding to the given {@code values}.
      * Weights are not encoded.
      *
-     * @param order Ordered indices into {@code values} and {@code weights} for consuming these in ascending value order.
-     * @param values Relationships represented by target node ID.
-     * @param outValues Sorted, delta-encoded and optionally aggregated relationships.
-     * @param weights Relationship properties by key, ordered by {@code order}.
-     * @param outWeights Sorted and optionally aggregated relationship properties.
-     * @param length Number of relationships (degree of source node) to process.
-     * @param aggregations Aggregations to apply to parallel edges. One per relationship property key in {@code weights}.
+     * @param order         Ordered indices into {@code values} and {@code weights} for consuming these in ascending value order.
+     * @param values        Relationships represented by target node ID.
+     * @param outValues     Sorted, delta-encoded and optionally aggregated relationships.
+     * @param weights       Relationship properties by key, ordered by {@code order}.
+     * @param outWeights    Sorted and optionally aggregated relationship properties.
+     * @param length        Number of relationships (degree of source node) to process.
+     * @param aggregations  Aggregations to apply to parallel edges. One per relationship property key in {@code weights}.
      * @param noAggregation Is true iff all aggregations are NONE.
      */
     private static int applyDelta(
-            int[] order,
-            long[] values,
-            long[] outValues,
-            long[][] weights,
-            long[][] outWeights,
-            int length,
-            Aggregation[] aggregations,
-            boolean noAggregation
+        int[] order,
+        long[] values,
+        long[] outValues,
+        long[][] weights,
+        long[][] outWeights,
+        int length,
+        Aggregation[] aggregations,
+        boolean noAggregation
     ) {
         int firstSortIdx = order[0];
         long value = values[firstSortIdx];

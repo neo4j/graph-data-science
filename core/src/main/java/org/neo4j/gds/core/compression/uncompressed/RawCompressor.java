@@ -130,7 +130,7 @@ public final class RawCompressor implements AdjacencyCompressor {
         ValueMapper mapper
     ) {
         // decompress target ids
-        AdjacencyCompression.copyFrom(buffer, targets, numberOfCompressedTargets, compressedBytesSize, mapper);
+        AdjacencyCompression.zigZagUncompressFrom(buffer, targets, numberOfCompressedTargets, compressedBytesSize, mapper);
 
         int degree = aggregate(buffer, aggregations[0]);
 
@@ -237,7 +237,7 @@ public final class RawCompressor implements AdjacencyCompressor {
         LongArrayBuffer buffer,
         ValueMapper mapper
     ) {
-        AdjacencyCompression.copyFrom(buffer, targets, numberOfCompressedTargets, compressedBytesSize, mapper);
+        AdjacencyCompression.zigZagUncompressFrom(buffer, targets, numberOfCompressedTargets, compressedBytesSize, mapper);
 
         int degree = aggregateWithProperties(buffer, uncompressedProperties, aggregations);
 

@@ -178,6 +178,10 @@ final class DecompressingCursor implements AdjacencyCursor {
 
     }
 
+    void init(long node) {
+        init(node, 42);
+    }
+
     @Override
     public void init(long node, int ignore) {
         var compressed = this.compressed.get(node);
