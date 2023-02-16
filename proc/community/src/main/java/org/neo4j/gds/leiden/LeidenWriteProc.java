@@ -74,6 +74,4 @@ public class LeidenWriteProc extends BaseProc {
     public ExecutionContext executionContext() {
         return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
     }
-
-
 }

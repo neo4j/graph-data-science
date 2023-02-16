@@ -21,6 +21,9 @@ package org.neo4j.gds.leiden;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -29,7 +32,11 @@ import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 
+import static java.lang.String.format;
+import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 
@@ -142,5 +149,27 @@ class LeidenStreamProcTest extends BaseProcTest {
                     "   includeIntermediateCommunities: true" +
                     "})";
         assertThatNoException().isThrownBy(() -> runQuery(query));
+    }
+
+    static Stream<Arguments> communitySizeInputs() {
+        return Stream.of(
+                Arguments.of(1, Set.of(0L, 1L)),
+                Arguments.of(10, emptySet())
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("communitySizeInputs")
+    void streamWithMinCommunitySize(int minCommunitySize, Set<Long> expectedCommunityIds) {
+        runQuery(format("CALL gds.beta.leiden.stream('leiden', {minCommunitySize: %d, consecutiveIds: true})", minCommunitySize), result -> {
+            assertThat(result.columns()).containsExactlyInAnyOrder("nodeId", "communityId", "intermediateCommunityIds");
+            var communities = new HashSet<Long>();
+            while (result.hasNext()) {
+                var next = result.next();
+                communities.add((Long) next.get("communityId"));
+            }
+            assertThat(communities).isEqualTo(expectedCommunityIds);
+            return true;
+        });
     }
 }
