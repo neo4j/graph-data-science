@@ -21,20 +21,19 @@ package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.nodeproperties.ConsecutiveLongNodePropertyValues;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.wcc.WccProc.WCC_DESCRIPTION;
@@ -88,12 +87,7 @@ public class WccStreamProc extends StreamProc<
 
     @Override
     protected NodePropertyValues nodeProperties(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
-        DisjointSetStruct dss = computationResult.result();
-        LongNodePropertyValues simpleNodeProperties = dss.asNodeProperties();
-
-        return computationResult.config().consecutiveIds()
-            ? new ConsecutiveLongNodePropertyValues(simpleNodeProperties, computationResult.graph().nodeCount())
-            : simpleNodeProperties;
+        return WccProc.nodeProperties(computationResult, UUID.randomUUID().toString());
     }
 
     @SuppressWarnings("unused")

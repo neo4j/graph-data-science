@@ -21,6 +21,9 @@ package org.neo4j.gds.wcc;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.GdsCypher;
@@ -34,8 +37,11 @@ import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
@@ -63,6 +69,7 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("wcc")
             .streamMode()
+                .addParameter("minComponentSize", 1)
             .yields("nodeId", "componentId");
 
         long [] communities = new long[10];
@@ -135,4 +142,30 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
         assertEquals(3, actualCommunities.size());
     }
 
+    static Stream<Arguments> communitySizeInputs() {
+        return Stream.of(
+                Arguments.of(Map.of("minComponentSize", 1), new Long[]{0L, 0L, 0L, 0L, 0L, 0L, 0L, 7L, 7L, 9L}),
+                Arguments.of(Map.of("minComponentSize", 3), new Long[]{0L, 0L, 0L, 0L, 0L, 0L, 0L})
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("communitySizeInputs")
+    void testStreamWithMinComponentSize(Map<String, Long> parameters, Long[] expectedCommunities) {
+        loadGraph(DEFAULT_GRAPH_NAME);
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+                .algo("wcc")
+                .streamMode()
+                .addAllParameters(parameters)
+                .yields("nodeId", "componentId");
+
+        Long [] communities = new Long[expectedCommunities.length];
+        runQueryWithRowConsumer(query, row -> {
+            int nodeId = row.getNumber("nodeId").intValue();
+            long setId = row.getNumber("componentId").longValue();
+            communities[nodeId] = setId;
+        });
+
+        assertArrayEquals(expectedCommunities, communities);
+    }
 }
