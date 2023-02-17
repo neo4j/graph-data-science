@@ -57,7 +57,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private final MetricSimilarityComputer similarityComputer;
     private HugeObjectArray<long[]> vectors;
     private HugeObjectArray<double[]> weights;
-    private long nodesToCompare;
 
     private final boolean weighted;
 
@@ -183,7 +182,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
                 executorService
             ).build(similarities);
         }
-        return new SimilarityGraphResult(similarityGraph, nodesToCompare, isTopKGraph);
+        return new SimilarityGraphResult(similarityGraph, sourceNodes.cardinality(), isTopKGraph);
     }
 
     private void prepare() {
@@ -223,7 +222,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             }
             return null;
         });
-        nodesToCompare = sourceNodes.cardinality();
         progressTracker.endSubTask();
     }
 
@@ -430,8 +428,14 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     }
 
     private long calculateWorkload() {
-        long workload = nodesToCompare * nodesToCompare;
-        if (concurrency == 1) {
+        //for each source node, examine all their target nodes
+        //if no filter then sourceNodes == targetNodes
+        long workload = sourceNodes.cardinality() * targetNodes.cardinality();
+
+        //when on concurrency of 1 on not-filtered similarity,  we only compare nodeId with greater indexed nodes
+        // so work is halved. This does not hold for filtered similarity, since the targetNodes might be lesser indexed.
+        boolean isNotFiltered = sourceNodeFilter.equals(NodeFilter.noOp) && targetNodeFilter.equals(NodeFilter.noOp);
+        if (concurrency == 1 && isNotFiltered) {
             workload = workload / 2;
         }
         return workload;

@@ -31,6 +31,7 @@ import java.util.Arrays;
  */
 final class MutablePathResult {
 
+    private final long[] EMPTY_ARRAY = new long[0];
     private long index;
 
     private final long sourceNode;
@@ -131,10 +132,9 @@ final class MutablePathResult {
      */
     boolean matchesExactly(MutablePathResult path, int index) {
 
-        if (relationshipIds == null || path.relationshipIds == null) {
+        if (relationshipIds.length == 0 || path.relationshipIds.length == 0) {
             return matches(path, index);
         }
-
         for (int i = 0; i < index; i++) {
             if (nodeIds[i] != path.nodeIds[i]) {
                 return false;
@@ -157,7 +157,8 @@ final class MutablePathResult {
      * The cost value associated with the last value in this path, is added to
      * the costs for each node in the second path.
      */
-    void append(MutablePathResult path) {
+    
+    private void append(MutablePathResult path, long[] relationships) {
         // spur node is end of first and beginning of second path
         assert nodeIds[nodeIds.length - 1] == path.nodeIds[0];
 
@@ -166,15 +167,10 @@ final class MutablePathResult {
         var newNodeIds = new long[oldLength + path.nodeIds.length - 1];
         var newCosts = new double[oldLength + path.nodeIds.length - 1];
 
-        var oldRelationshipIdsLength = relationshipIds.length;
-        var newRelationshipIds = new long[oldRelationshipIdsLength + path.relationshipIds.length];
-
         // copy node ids
         System.arraycopy(this.nodeIds, 0, newNodeIds, 0, oldLength);
         System.arraycopy(path.nodeIds, 1, newNodeIds, oldLength, path.nodeIds.length - 1);
-        // copy relationship ids
-        System.arraycopy(this.relationshipIds, 0, newRelationshipIds, 0, oldRelationshipIdsLength);
-        System.arraycopy(path.relationshipIds, 0, newRelationshipIds, oldRelationshipIdsLength, path.relationshipIds.length);
+
         // copy costs
         System.arraycopy(this.costs, 0, newCosts, 0, oldLength);
         System.arraycopy(path.costs, 1, newCosts, oldLength, path.costs.length - 1);
@@ -186,9 +182,40 @@ final class MutablePathResult {
         }
 
         this.nodeIds = newNodeIds;
-        this.relationshipIds = newRelationshipIds;
+        this.relationshipIds = relationships;
         this.costs = newCosts;
     }
+
+    void append(MutablePathResult path) {
+
+        var oldRelationshipIdsLength = relationshipIds.length;
+        var newRelationshipIds = new long[oldRelationshipIdsLength + path.relationshipIds.length];
+        // copy relationship ids
+        System.arraycopy(this.relationshipIds, 0, newRelationshipIds, 0, oldRelationshipIdsLength);
+        System.arraycopy(
+            path.relationshipIds,
+            0,
+            newRelationshipIds,
+            oldRelationshipIdsLength,
+            path.relationshipIds.length
+        );
+        
+        append(path, newRelationshipIds);
+    }
+
+    /**
+     * Appends the given path to this path without creating an explicit relationship array.
+     *
+     * The last node in this path, must match the first node in the given path.
+     * This node will only appear once in the resulting path.
+     * The cost value associated with the last value in this path, is added to
+     * the costs for each node in the second path.
+     */
+    void appendWithoutRelationshipIds(MutablePathResult path) {
+        // spur node is end of first and beginning of second path
+        append(path, EMPTY_ARRAY);
+    }
+
 
     @Override
     public boolean equals(Object o) {

@@ -28,6 +28,8 @@ import org.neo4j.gds.core.utils.AscendingLongComparator;
 import java.util.Arrays;
 
 import static org.neo4j.gds.core.huge.VarLongDecoding.decodeDeltaVLongs;
+import static org.neo4j.gds.core.huge.VarLongDecoding.unsafeDecodeDeltaVLongs;
+import static org.neo4j.gds.core.huge.VarLongDecoding.unsafeDecodeVLongs;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodeVLongs;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodedVLongsSize;
 import static org.neo4j.gds.core.loading.ZigZagLongDecoding.zigZagUncompress;
@@ -115,6 +117,10 @@ public final class AdjacencyCompression {
         return encodeVLongs(data, offset, offset + length, out, 0);
     }
 
+    public static long compress(long[] data, int offset, int length, long ptr) {
+        return encodeVLongs(data, offset, offset + length, ptr);
+    }
+
     public static byte[] deltaEncodeAndCompress(long[] values, int offset, int length, Aggregation aggregation) {
         length = AdjacencyCompression.deltaEncodeSortedValues(values, offset, length, aggregation);
         var requiredBytes = VarLongEncoding.encodedVLongsSize(values, offset, length);
@@ -129,16 +135,62 @@ public final class AdjacencyCompression {
         return out;
     }
 
+    public static long decompressAndPrefixSum(
+        int numberOfValues,
+        long previousValue,
+        long ptr,
+        long[] into,
+        int offset
+    ) {
+        unsafeDecodeDeltaVLongs(numberOfValues, previousValue, ptr, into, offset);
+        return ptr;
+    }
+
+    public static long decompress(int numberOfValues, long ptr, long[] into, int offset) {
+        unsafeDecodeVLongs(numberOfValues, ptr, into, offset);
+        return ptr;
+    }
+
     public static int deltaEncodeSortedValues(long[] values, int offset, int length, Aggregation aggregation) {
         long value = values[offset], delta;
         int end = offset + length;
         int in = offset + 1, out = in;
         for (; in < end; ++in) {
             delta = values[in] - value;
-            value = values[in];
+
             if (delta > 0L || aggregation == Aggregation.NONE) {
+                value = values[in];
                 values[out++] = delta;
             }
+
+//            // branch-free alternative, I hope
+//            values[out] = delta;
+//
+//            // for any non-zero x, the sign bit of x and -x is different,
+//            // so the sign bit will be set to 1 in `x ^ -x`.
+//            // Since 0 and -0 have the same representation, their sign bit is 0
+//            // and the sign bit of `x ^ -x` will be 0 as well.
+//            // Shifting all the bits by Long::BITS - 1 will give us only the sign bit.
+//            // Or, `boolean b = (x != 0) ? 1 : 0`, but without a branch.
+//            long increase = (delta ^ -delta) >> (Long.SIZE - 1);
+//
+//            // We also want to include the aggregation here, so we advance the out position.
+//            // if the aggregation is NONE. Since we no longer expect Aggregation.DEFAULT here,
+//            // we can compute the diff of the ordinals of the aggregation and Aggregation.NONE.
+//            // The value will be 1 if the aggregation was *not* NONE, so we need to invert it.
+//            long agg = aggregation.ordinal() - Aggregation.NONE.ordinal();
+//            agg = (agg ^ -agg) >> (Long.SIZE - 1);
+//            // 0: 1 - 0 = 1; 1: 1 - 1 = 0
+//            agg = 1 - agg;
+//
+//            // compute `delta > 0L || aggregation == Aggregation.NONE`
+//            // `delta > 0L`  |  `aggregation == Aggregation.NONE`  | increase ^ agg
+//            //         true  |                              true   | 1 | 1 = 1
+//            //         true  |                             false   | 1 | 0 = 1
+//            //        false  |                              true   | 0 | 1 = 1
+//            //        false  |                             false   | 0 | 0 = 0
+//            increase |= agg;
+//            out += increase;
         }
         return out;
     }

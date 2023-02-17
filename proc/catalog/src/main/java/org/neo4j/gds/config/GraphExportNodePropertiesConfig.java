@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
@@ -28,42 +27,20 @@ import org.neo4j.gds.catalog.UserInputAsStringOrListOfString;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public interface GraphExportNodePropertiesConfig extends BaseConfig, ConcurrencyConfig {
-
-    @Configuration.Parameter
-    Optional<String> graphName();
+public interface GraphExportNodePropertiesConfig extends GraphNodePropertiesConfig {
 
     @Configuration.Parameter
     @Configuration.ConvertWith(method = "org.neo4j.gds.config.GraphExportNodePropertiesConfig#parseNodeProperties")
     List<String> nodeProperties();
 
     static List<String> parseNodeProperties(Object userInput) {
+        
         return UserInputAsStringOrListOfString.parse(userInput, "nodeProperties");
-    }
-
-    @Configuration.Parameter
-    @Value.Default
-    @Configuration.ConvertWith(method = "org.neo4j.gds.config.GraphExportNodePropertiesConfig#parseNodeLabels")
-    default List<String> nodeLabels() {
-        return Collections.singletonList(ElementProjection.PROJECT_ALL);
-    }
-
-    static List<String> parseNodeLabels(Object userInput) {
-        return UserInputAsStringOrListOfString.parse(userInput, "nodeLabels");
-    }
-
-    @Configuration.Ignore
-    default Collection<NodeLabel> nodeLabelIdentifiers(GraphStore graphStore) {
-        return nodeLabels().contains(ElementProjection.PROJECT_ALL)
-            ? graphStore.nodeLabels()
-            : nodeLabels().stream().map(NodeLabel::of).collect(Collectors.toList());
     }
 
     @Configuration.Ignore

@@ -17,20 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.scaling;
+package org.neo4j.gds.compat._55;
 
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.annotations.service.ServiceProvider;
+import org.neo4j.gds.compat.Neo4jVersion;
+import org.neo4j.gds.compat.SettingProxyApi;
+import org.neo4j.gds.compat.SettingProxyFactory;
 
-final class LogTransformer extends ScalarScaler {
+@ServiceProvider
+public final class SettingProxyFactoryImpl implements SettingProxyFactory {
 
-    LogTransformer(NodePropertyValues properties) {
-        super(properties);
+    @Override
+    public boolean canLoad(Neo4jVersion version) {
+        return version == Neo4jVersion.V_5_5;
     }
 
     @Override
-    public double scaleProperty(long nodeId) {
-        // TODO: check for 0 ? (as its -Infinity)
-        return Math.log(properties.doubleValue(nodeId));
+    public SettingProxyApi load() {
+        return new SettingProxyImpl();
     }
 
+    @Override
+    public String description() {
+        return "Neo4j Settings 5.5";
+    }
 }

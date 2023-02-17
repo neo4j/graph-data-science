@@ -28,6 +28,8 @@ import org.neo4j.consistency.report.ConsistencySummaryStatistics;
 import org.neo4j.dbms.database.readonly.DatabaseReadOnlyChecker;
 import org.neo4j.function.ThrowingSupplier;
 import org.neo4j.gds.annotation.SuppressForbidden;
+import org.neo4j.gds.compat.Neo4jVersion;
+import org.neo4j.gds.compat.StorageEngineFactoryIdProvider;
 import org.neo4j.index.internal.gbptree.RecoveryCleanupWorkCollector;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
@@ -113,6 +115,10 @@ import java.util.function.Function;
 public class InMemoryStorageEngineFactory implements StorageEngineFactory {
 
     static final String IN_MEMORY_STORAGE_ENGINE_NAME = "in-memory-53";
+
+    public byte id() {
+        return StorageEngineFactoryIdProvider.id(Neo4jVersion.V_5_3);
+    }
 
     @Override
     public boolean storageExists(FileSystemAbstraction fileSystem, DatabaseLayout databaseLayout) {
