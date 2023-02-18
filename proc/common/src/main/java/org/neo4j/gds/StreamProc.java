@@ -27,7 +27,6 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 
-import java.util.Objects;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
