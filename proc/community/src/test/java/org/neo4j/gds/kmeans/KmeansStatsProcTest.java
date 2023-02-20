@@ -110,7 +110,7 @@ class KmeansStatsProcTest extends BaseProcTest {
 
                 assertThat(resultRow.get("averageDistanceToCentroid"))
                     .isNotNull()
-                    .asInstanceOf(DOUBLE);
+                    .asInstanceOf(DOUBLE).isNotEqualTo(0.0d);
 
                 var centroids = resultRow.get("centroids");
                 assertThat(centroids)
@@ -126,7 +126,7 @@ class KmeansStatsProcTest extends BaseProcTest {
                 }
                 assertThat(resultRow.get("averageSilhouette"))
                     .isNotNull()
-                    .asInstanceOf(DOUBLE).isGreaterThanOrEqualTo(-1d).isLessThanOrEqualTo(1d);
+                    .asInstanceOf(DOUBLE).isGreaterThanOrEqualTo(-1d).isLessThanOrEqualTo(1d).isNotEqualTo(0.0d);
             }
 
             return true;

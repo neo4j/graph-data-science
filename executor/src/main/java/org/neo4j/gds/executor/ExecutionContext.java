@@ -42,8 +42,6 @@ import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
 
-import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
-
 // TODO Remove the @Nullable annotations once the EstimationCli uses ProcedureExecutors
 @ValueClass
 public interface ExecutionContext {
@@ -96,7 +94,7 @@ public interface ExecutionContext {
     @Value.Lazy
     default boolean containsOutputField(String fieldName) {
         return callContext().outputFields()
-            .anyMatch(field -> toLowerCaseWithLocale(field).equals(fieldName));
+            .anyMatch(field -> field.equals(fieldName));
     }
 
     @Value.Lazy
