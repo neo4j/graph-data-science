@@ -170,7 +170,6 @@ public final class GraphDatabaseApiProxy {
         return cast(db).beginTransaction(type, loginContext);
     }
 
-    @TestOnly
     public static Transactions newKernelTransaction(GraphDatabaseService db) {
         Transaction tx = db.beginTx();
         return ImmutableTransactions.of(tx, kernelTransaction(tx));
