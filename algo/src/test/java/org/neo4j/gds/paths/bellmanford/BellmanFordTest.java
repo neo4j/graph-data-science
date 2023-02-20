@@ -42,8 +42,8 @@ class BellmanFordTest {
         "  (a0)-[:R {weight: 1.0}]->(a1)," +
         "  (a0)-[:R {weight: -1.0}]->(a2)," +
         "  (a0)-[:R {weight: 10.0}]->(a3), " +
-        "  (a3)-[:R {weight: -8.0}]->(a4), "  +
-        "  (a1)-[:R {weight: 3.0}]->(a4) " ;
+        "  (a3)-[:R {weight: -8.0}]->(a4), " +
+        "  (a1)-[:R {weight: 3.0}]->(a4) ";
 
     @Inject
     private TestGraph graph;
@@ -51,8 +51,29 @@ class BellmanFordTest {
     @Inject
     private IdFunction idFunction;
 
+    @GdlGraph(graphNamePrefix = "loop")
+    private static final String LOOP_DB_CYPHER =
+        "CREATE " +
+        "  (a0)," +
+        "  (a1)," +
+        "  (a2)," +
+        "  (a3)," +
+        "  (a4)," +
+        "  (a0)-[:R {weight: 1.0}]->(a1)," +
+        "  (a0)-[:R {weight: 10.0}]->(a2), " +
+        "  (a2)-[:R {weight: -8.0}]->(a3), " +
+        "  (a3)-[:R {weight: -4.0}]->(a4), " +
+        "  (a4)-[:R {weight: 1.0}]->(a2) ";
+
+
+    @Inject
+    private TestGraph loopGraph;
+
+    @Inject
+    private IdFunction loopIdFunction;
+
     @Test
-    void shouldComputeShortestPathsWithoutLoops(){
+    void shouldComputeShortestPathsWithoutLoops() {
         long[] a = new long[]{idFunction.of("a0"), idFunction.of("a1"), idFunction.of("a2"), idFunction.of("a3"), idFunction.of(
             "a4")};
         var result = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, a[0], 1).compute();
@@ -70,13 +91,28 @@ class BellmanFordTest {
         EXPECTED_COSTS[(int) a[4]] = 2;
 
         long counter = 0;
-        for (var path : result.pathSet()) {
+        for (var path : result.shortestPaths().pathSet()) {
             counter++;
             int currentTargetNode = (int) path.targetNode();
             assertThat(path.nodeIds()).isEqualTo(EXPECTED_PATHS[currentTargetNode]);
             assertThat(EXPECTED_COSTS[currentTargetNode]).isEqualTo(path.totalCost());
         }
         assertThat(counter).isEqualTo(5L);
+        assertThat(result.containsNegativeCycle()).isFalse();
+
+    }
+
+    @Test
+    void shouldStopAtLoops() {
+
+        long a0 = loopIdFunction.of("a0");
+        var result = new BellmanFord(loopGraph, ProgressTracker.NULL_TRACKER, a0, 1).compute();
+        int counter = 0;
+        for (var path : result.shortestPaths().pathSet()) {
+            counter++;
+        }
+        assertThat(result.containsNegativeCycle()).isTrue();
+        assertThat(counter).isEqualTo(0L);
     }
 
 }

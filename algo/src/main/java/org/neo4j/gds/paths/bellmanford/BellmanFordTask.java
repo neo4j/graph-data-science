@@ -22,8 +22,8 @@ package org.neo4j.gds.paths.bellmanford;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.paths.delta.TentativeDistances;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class BellmanFordTask implements Runnable {
@@ -31,37 +31,48 @@ public class BellmanFordTask implements Runnable {
     private static final long LOCAL_QUEUE_BOUND = 1000;
 
     private final Graph localGraph;
-    private final TentativeDistances distances;
+    private final TentativeBothDistances distances;
 
     private final HugeLongArray frontier;
     private final AtomicLong frontierIndex;
     private final AtomicLong frontierSize;
     private long localQueueIndex;
+    private final long lengthBound;
 
     private final HugeLongArray localQueue;
-    private final HugeAtomicBitSet insideQueue;
+    private final HugeAtomicBitSet validBitset;
     private BellmanFordPhase phase;
+    private boolean locallyFoundNegativeCycle = false;
+    private final AtomicBoolean negativeCycleFound;
 
     BellmanFordTask(
         Graph localGraph,
-        TentativeDistances distances,
+        TentativeBothDistances distances,
         HugeLongArray frontier,
         AtomicLong frontierIndex,
         AtomicLong frontierSize,
-        HugeAtomicBitSet insideQueue
+        HugeAtomicBitSet validBitset,
+        AtomicBoolean negativeCycleFound
     ) {
+        this.lengthBound = localGraph.nodeCount();
         this.localGraph = localGraph;
         this.distances = distances;
         this.frontier = frontier;
         this.frontierIndex = frontierIndex;
         this.localQueue = HugeLongArray.newArray(localGraph.nodeCount());
-        this.insideQueue = insideQueue;
+        this.validBitset = validBitset;
         this.frontierSize = frontierSize;
         this.phase = BellmanFordPhase.RUN;
+        this.negativeCycleFound = negativeCycleFound;
     }
 
     private void processNode(long nodeId) {
-        insideQueue.clear(nodeId);
+        validBitset.clear(nodeId);
+        if (distances.length(nodeId) >= lengthBound) {
+            locallyFoundNegativeCycle = true;
+            negativeCycleFound.set(true);
+            return;
+        }
         localGraph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
             tryToUpdate(s, t, w);
             return true;
@@ -71,11 +82,12 @@ public class BellmanFordTask implements Runnable {
     private void tryToUpdate(long sourceNodeId, long targetNodeId, double weight) {
         var oldDist = distances.distance(targetNodeId);
         var newDist = distances.distance(sourceNodeId) + weight;
+        var newLength = distances.length(sourceNodeId) + 1;
         while (Double.compare(newDist, oldDist) < 0) {
-            var witness = distances.compareAndExchange(targetNodeId, oldDist, newDist, sourceNodeId);
+            var witness = distances.compareAndExchange(targetNodeId, oldDist, newDist, sourceNodeId, newLength);
 
             if (Double.compare(witness, oldDist) == 0) {
-                if (!insideQueue.getAndSet(targetNodeId)) {
+                if (!validBitset.getAndSet(targetNodeId)) {
                     localQueue.set(localQueueIndex++, targetNodeId);
                 }
                 break;
@@ -90,8 +102,11 @@ public class BellmanFordTask implements Runnable {
     private void relaxPhase() {
         long offset;
         while ((offset = frontierIndex.getAndAdd(64)) < frontierSize.get()) {
+            if (negativeCycleFound.get()) {
+                break;
+            }
             var chunkSize = Math.min(offset + 64, frontierSize.get());
-            for (long idx = offset; idx < chunkSize; idx++) {
+            for (long idx = offset; (idx < chunkSize && !locallyFoundNegativeCycle); idx++) {
                 long nodeId = frontier.get(idx);
                 processNode(nodeId);
             }
@@ -101,6 +116,7 @@ public class BellmanFordTask implements Runnable {
             long nodeId = localQueue.get(--localQueueIndex);
             processNode(nodeId);
         }
+
     }
 
     private void sync() {
@@ -117,11 +133,12 @@ public class BellmanFordTask implements Runnable {
             localQueueIndex = 0;
             relaxPhase();
             phase = BellmanFordPhase.SYNC;
-        } else {
+        } else if (phase == BellmanFordPhase.SYNC) {
             sync();
             this.phase = BellmanFordPhase.RUN;
         }
     }
+
 
     enum BellmanFordPhase {
         RUN, SYNC

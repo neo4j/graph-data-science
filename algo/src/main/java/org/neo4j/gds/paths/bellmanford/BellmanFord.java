@@ -34,24 +34,24 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
-import org.neo4j.gds.paths.delta.TentativeDistances;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.delta.TentativeDistances.NO_PREDECESSOR;
 
-class BellmanFord extends Algorithm<DijkstraResult> {
+public class BellmanFord extends Algorithm<BellmanFordResult> {
 
     private final long sourceNode;
     private final Graph graph;
     private final int concurrency;
 
-    protected BellmanFord(Graph graph, ProgressTracker progressTracker, long sourceNode, int concurrency) {
+    public BellmanFord(Graph graph, ProgressTracker progressTracker, long sourceNode, int concurrency) {
         super(progressTracker);
         this.graph = graph;
         this.sourceNode = sourceNode;
@@ -59,13 +59,18 @@ class BellmanFord extends Algorithm<DijkstraResult> {
     }
 
     @Override
-    public DijkstraResult compute() {
+    public BellmanFordResult compute() {
         HugeLongArray frontier = HugeLongArray.newArray(graph.nodeCount());
         AtomicLong frontierIndex = new AtomicLong();
         AtomicLong frontierSize = new AtomicLong();
 
-        HugeAtomicBitSet insideQueue = HugeAtomicBitSet.create(graph.nodeCount());
-        TentativeDistances distances = TentativeDistances.distanceAndPredecessors(graph.nodeCount(), concurrency);
+        HugeAtomicBitSet validBitset = HugeAtomicBitSet.create(graph.nodeCount());
+        TentativeBothDistances distances = TentativeBothDistances.distanceAndPredecessors(
+            graph.nodeCount(),
+            concurrency
+        );
+
+        AtomicBoolean negativeCycleFound = new AtomicBoolean();
         var tasks = new ArrayList<BellmanFordTask>();
         for (int i = 0; i < concurrency; ++i) {
             tasks.add(new BellmanFordTask(
@@ -74,14 +79,15 @@ class BellmanFord extends Algorithm<DijkstraResult> {
                 frontier,
                 frontierIndex,
                 frontierSize,
-                insideQueue
+                validBitset,
+                negativeCycleFound
             ));
         }
         //
         frontier.set(0, sourceNode);
         frontierSize.incrementAndGet();
-        distances.set(sourceNode, -1, 0);
-        insideQueue.set(sourceNode);
+        distances.set(sourceNode, -1, 0, 1);
+        validBitset.set(sourceNode);
         //
         while (frontierSize.get() > 0) {
             frontierIndex.set(0); //exhaust global queue
@@ -89,11 +95,22 @@ class BellmanFord extends Algorithm<DijkstraResult> {
             frontierSize.set(0); //fill global queue again
             RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
         }
-        return new DijkstraResult(pathResults(distances, sourceNode, concurrency));
+
+
+        return produceResult(negativeCycleFound.get(), distances);
     }
 
+    private BellmanFordResult produceResult(boolean containsNegativeCycle, TentativeBothDistances distances) {
+        Stream<PathResult> paths = (containsNegativeCycle) ? Stream.empty() : pathResults(
+            distances,
+            sourceNode,
+            concurrency
+        );
+        return BellmanFordResult.of(containsNegativeCycle, new DijkstraResult(paths));
+    }
+    
     private static Stream<PathResult> pathResults(
-        TentativeDistances tentativeDistances,
+        TentativeBothDistances tentativeDistances,
         long sourceNode,
         int concurrency
     ) {
@@ -115,6 +132,7 @@ class BellmanFord extends Algorithm<DijkstraResult> {
             parallelStream -> parallelStream.flatMap(partition -> {
                 var localPathIndex = new MutableLong(pathIndex.getAndAdd(partition.nodeCount()));
                 var pathResultBuilder = ImmutablePathResult.builder().sourceNode(sourceNode);
+
 
                 return LongStream
                     .range(partition.startNode(), partition.startNode() + partition.nodeCount())
