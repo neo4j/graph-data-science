@@ -20,17 +20,7 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.partition.Partition;
-import org.neo4j.gds.utils.StringJoining;
-
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.function.Function;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 
 public abstract class ScalarScaler implements Scaler {
 
@@ -49,65 +39,6 @@ public abstract class ScalarScaler implements Scaler {
             return 0;
         }
     };
-
-    public interface ScalerFactory {
-        String SCALER_KEY = "scaler";
-
-        Map<String, Function<CypherMapWrapper, ScalerFactory>> SUPPORTED_SCALERS = Map.of(
-            NoneScaler.NAME, NoneScaler::buildFrom,
-            Mean.NAME, Mean::buildFrom,
-            Max.NAME, Max::buildFrom,
-            LogScaler.NAME, LogScaler::buildFrom,
-            Center.NAME, Center::buildFrom,
-            StdScore.NAME, StdScore::buildFrom,
-            L1Norm.NAME, L1Norm::buildFrom,
-            L2Norm.NAME, L2Norm::buildFrom,
-            MinMax.NAME, MinMax::buildFrom
-        );
-
-        static String toString(ScalerFactory factory) {
-            return factory.name().toUpperCase(Locale.ENGLISH);
-        }
-
-        static ScalerFactory parse(Object userInput) {
-            if (userInput instanceof ScalerFactory) {
-                return (ScalerFactory) userInput;
-            }
-            if (userInput instanceof String) {
-                return parse(Map.of(SCALER_KEY, ((String) userInput)));
-            }
-            if (userInput instanceof Map) {
-                var inputMap = (Map<String, Object>) userInput;
-                var scalerSpec = inputMap.get(SCALER_KEY);
-                if (scalerSpec instanceof String) {
-                    var scalerName = toLowerCaseWithLocale((String) scalerSpec);
-                    var selectedScaler = SUPPORTED_SCALERS.get(scalerName);
-                    if (selectedScaler == null) {
-                        throw new IllegalArgumentException(formatWithLocale(
-                            "Unrecognised scaler specified: `%s`. Expected one of: %s.",
-                            scalerSpec,
-                            StringJoining.join(SUPPORTED_SCALERS.keySet())
-                        ));
-                    }
-                    return selectedScaler.apply(CypherMapWrapper.create(inputMap).withoutEntry("scaler"));
-                }
-            }
-            throw new IllegalArgumentException(formatWithLocale(
-                "Unrecognised scaler specified: `%s`. Expected one of: %s.",
-                userInput,
-                StringJoining.join(SUPPORTED_SCALERS.keySet())
-            ));
-        }
-
-        String name();
-
-        ScalarScaler create(
-            NodePropertyValues properties,
-            long nodeCount,
-            int concurrency,
-            ExecutorService executor
-        );
-    }
 
     abstract static class AggregatesComputer implements Runnable {
 

@@ -28,7 +28,7 @@ import org.neo4j.gds.config.SourceNodesConfig;
 import org.neo4j.gds.config.ToleranceConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.scaling.NoneScaler;
-import org.neo4j.gds.scaling.ScalarScaler;
+import org.neo4j.gds.scaling.ScalerFactory;
 
 @ValueClass
 @Configuration("PageRankConfigImpl")
@@ -59,9 +59,9 @@ public interface PageRankConfig extends
     }
 
     @Value.Default
-    @Configuration.ConvertWith(method = "org.neo4j.gds.scaling.ScalarScaler.ScalerFactory#parse")
-    @Configuration.ToMapValue("org.neo4j.gds.scaling.ScalarScaler.ScalerFactory#toString")
-    default ScalarScaler.ScalerFactory scaler() {
+    @Configuration.ConvertWith(method = "org.neo4j.gds.scaling.ScalerFactory#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.scaling.ScalerFactory#toString")
+    default ScalerFactory scaler() {
         return NoneScaler.buildFrom(CypherMapWrapper.empty());
     }
     
