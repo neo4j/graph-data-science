@@ -69,8 +69,7 @@ public final class GraphDatabaseApiProxy {
         return cast(db).getDependencyResolver();
     }
 
-    public static void
-    registerProcedures(GraphDatabaseService db, Class<?>... procedureClasses) throws
+    public static void registerProcedures(GraphDatabaseService db, Class<?>... procedureClasses) throws
         KernelException {
         registerProcedures(db, false, procedureClasses);
     }
