@@ -47,6 +47,7 @@ class ScalerFactoryTest {
 
         // nested syntax
         assertThat(ScalarScaler.ScalerFactory.parse(Map.of("scaler", "log")).name()).isEqualTo(LogScaler.NAME);
+        assertThat(ScalarScaler.ScalerFactory.parse(Map.of("scaler", "log", "offset", 10)).name()).isEqualTo(LogScaler.NAME);
         assertThat(ScalarScaler.ScalerFactory.parse(Map.of("scaler", "minmax")).name()).isEqualTo(MinMax.NAME);
         assertThat(ScalarScaler.ScalerFactory.parse(Map.of("scaler", "STDSCORE")).name()).isEqualTo(StdScore.NAME);
         assertThat(ScalarScaler.ScalerFactory.parse(Map.of("scaler", "CEntEr")).name()).isEqualTo(Center.NAME);
@@ -67,6 +68,8 @@ class ScalerFactoryTest {
 
         // bad nested syntax
         assertThatThrownBy(() -> ScalarScaler.ScalerFactory.parse(Map.of("scaler", "lag"))).hasMessageContaining("Unrecognised scaler specified: `lag`.");
+        assertThatThrownBy(() -> ScalarScaler.ScalerFactory.parse(Map.of("scaler", "log", "offset", false))).hasMessageContaining("The value of `offset` must be of type `Number` but was `Boolean`.");
+        assertThatThrownBy(() -> ScalarScaler.ScalerFactory.parse(Map.of("scaler", "log", "offsat", 0))).hasMessageContaining("Unexpected configuration key: offsat");
     }
 
 }

@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 public final class LogScaler extends ScalarScaler {
 
     public static final String NAME = "log";
+    private static final String OFFSET_KEY = "offset";
     private final double offset;
 
     LogScaler(NodePropertyValues properties, double offset) {
@@ -41,7 +42,8 @@ public final class LogScaler extends ScalarScaler {
     }
 
     static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
-        mapWrapper.requireOnlyKeysFrom(List.of());
+        mapWrapper.requireOnlyKeysFrom(List.of(OFFSET_KEY));
+        final double offset = mapWrapper.getNumber(OFFSET_KEY, 0).doubleValue();
         return new ScalerFactory() {
             @Override
             public String name() {
@@ -55,7 +57,7 @@ public final class LogScaler extends ScalarScaler {
                 int concurrency,
                 ExecutorService executor
             ) {
-                return new LogScaler(properties, 0);
+                return new LogScaler(properties, offset);
             }
         };
     }

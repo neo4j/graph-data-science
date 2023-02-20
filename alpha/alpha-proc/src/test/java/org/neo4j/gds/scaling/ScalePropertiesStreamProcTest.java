@@ -84,4 +84,22 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
             Map.of("nodeId", 5L, "scaledProperty", List.of(1 / 2D, 0D))
         ));
     }
+
+    @Test
+    void streamLogWithOffset() {
+        var query = "CALL gds.alpha.scaleProperties.stream('graph', {" +
+                    "scaler: {scaler: 'log', offset: 10 }," +
+                    "nodeProperties: 'id'}) " +
+                    "yield nodeId, scaledProperty " +
+                    "RETURN nodeId, [p in scaledProperty | toInteger(p*100)/100.0] AS scaledProperty";
+
+        assertCypherResult(query, List.of(
+            Map.of("nodeId", 0L, "scaledProperty", List.of(2.3, 2.48)),
+            Map.of("nodeId", 1L, "scaledProperty", List.of(2.39, 2.48)),
+            Map.of("nodeId", 2L, "scaledProperty", List.of(2.48, 2.48)),
+            Map.of("nodeId", 3L, "scaledProperty", List.of(2.56, 2.48)),
+            Map.of("nodeId", 4L, "scaledProperty", List.of(2.63, 2.48)),
+            Map.of("nodeId", 5L, "scaledProperty", List.of(2.7, 2.48))
+        ));
+    }
 }
