@@ -144,5 +144,9 @@ public enum Neo4jVersion {
     public interface MajorMinorVersion {
         int major();
         int minor();
+
+        default String asString() {
+          return  major() + "." + minor();
+        }
     }
 }
