@@ -39,29 +39,6 @@ public final class L2Norm extends ScalarScaler {
         this.euclideanLength = euclideanLength;
     }
 
-    static ScalarScaler initialize(NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor) {
-        var tasks = PartitionUtils.rangePartition(
-            concurrency,
-            nodeCount,
-            partition -> new ComputeSquaredSum(partition, properties),
-            Optional.empty()
-        );
-        RunWithConcurrency.builder()
-            .concurrency(concurrency)
-            .tasks(tasks)
-            .executor(executor)
-            .run();
-
-        var squaredSum = tasks.stream().mapToDouble(ComputeSquaredSum::squaredSum).sum();
-        var euclideanLength = Math.sqrt(squaredSum);
-
-        if (euclideanLength < CLOSE_TO_ZERO) {
-            return ZERO;
-        } else {
-            return new L2Norm(properties, euclideanLength);
-        }
-    }
-
     @Override
     public double scaleProperty(long nodeId) {
         return properties.doubleValue(nodeId) / euclideanLength;
@@ -82,7 +59,26 @@ public final class L2Norm extends ScalarScaler {
                 int concurrency,
                 ExecutorService executor
             ) {
-                return initialize(properties, nodeCount, concurrency, executor);
+                var tasks = PartitionUtils.rangePartition(
+                    concurrency,
+                    nodeCount,
+                    partition -> new ComputeSquaredSum(partition, properties),
+                    Optional.empty()
+                );
+                RunWithConcurrency.builder()
+                    .concurrency(concurrency)
+                    .tasks(tasks)
+                    .executor(executor)
+                    .run();
+
+                var squaredSum = tasks.stream().mapToDouble(ComputeSquaredSum::squaredSum).sum();
+                var euclideanLength1 = Math.sqrt(squaredSum);
+
+                if (euclideanLength1 < CLOSE_TO_ZERO) {
+                    return ZERO;
+                } else {
+                    return new L2Norm(properties, euclideanLength1);
+                }
             }
         };
     }

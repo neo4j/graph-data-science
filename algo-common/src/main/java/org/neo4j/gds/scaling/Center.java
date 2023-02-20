@@ -39,30 +39,6 @@ final class Center extends ScalarScaler {
         this.avg = avg;
     }
 
-    static ScalarScaler initialize(
-        NodePropertyValues properties,
-        long nodeCount,
-        int concurrency,
-        ExecutorService executor
-    ) {
-        var tasks = PartitionUtils.rangePartition(
-            concurrency,
-            nodeCount,
-            partition -> new ComputeSum(partition, properties),
-            Optional.empty()
-        );
-        RunWithConcurrency.builder()
-            .concurrency(concurrency)
-            .tasks(tasks)
-            .executor(executor)
-            .run();
-        var sum = tasks.stream().mapToDouble(ComputeSum::sum).sum();
-        var avg = sum / nodeCount;
-
-        return new Center(properties, avg);
-
-    }
-
     @Override
     public double scaleProperty(long nodeId) {
         return (properties.doubleValue(nodeId) - avg);
@@ -83,7 +59,22 @@ final class Center extends ScalarScaler {
                 int concurrency,
                 ExecutorService executor
             ) {
-                return initialize(properties, nodeCount, concurrency, executor);
+                var tasks = PartitionUtils.rangePartition(
+                    concurrency,
+                    nodeCount,
+                    partition -> new ComputeSum(partition, properties),
+                    Optional.empty()
+                );
+                RunWithConcurrency.builder()
+                    .concurrency(concurrency)
+                    .tasks(tasks)
+                    .executor(executor)
+                    .run();
+                var sum = tasks.stream().mapToDouble(ComputeSum::sum).sum();
+                var avg1 = sum / nodeCount;
+
+                return new Center(properties, avg1);
+
             }
         };
     }

@@ -41,32 +41,6 @@ public final class Mean extends ScalarScaler {
         this.maxMinDiff = maxMinDiff;
     }
 
-    static ScalarScaler initialize(NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor) {
-        var tasks = PartitionUtils.rangePartition(
-            concurrency,
-            nodeCount,
-            partition -> new ComputeMaxMinSum(partition, properties),
-            Optional.empty()
-        );
-        RunWithConcurrency.builder()
-            .concurrency(concurrency)
-            .tasks(tasks)
-            .executor(executor)
-            .run();
-
-        var min = tasks.stream().mapToDouble(ComputeMaxMinSum::min).min().orElse(Double.MAX_VALUE);
-        var max = tasks.stream().mapToDouble(ComputeMaxMinSum::max).max().orElse(-Double.MAX_VALUE);
-        var sum = tasks.stream().mapToDouble(ComputeMaxMinSum::sum).sum();
-
-        var maxMinDiff = max - min;
-
-        if (Math.abs(maxMinDiff) < CLOSE_TO_ZERO) {
-            return ZERO;
-        } else {
-            return new Mean(properties, sum / nodeCount, maxMinDiff);
-        }
-    }
-
     @Override
     public double scaleProperty(long nodeId) {
         return (properties.doubleValue(nodeId) - avg) / maxMinDiff;
@@ -87,7 +61,29 @@ public final class Mean extends ScalarScaler {
                 int concurrency,
                 ExecutorService executor
             ) {
-                return initialize(properties, nodeCount, concurrency, executor);
+                var tasks = PartitionUtils.rangePartition(
+                    concurrency,
+                    nodeCount,
+                    partition -> new ComputeMaxMinSum(partition, properties),
+                    Optional.empty()
+                );
+                RunWithConcurrency.builder()
+                    .concurrency(concurrency)
+                    .tasks(tasks)
+                    .executor(executor)
+                    .run();
+
+                var min = tasks.stream().mapToDouble(ComputeMaxMinSum::min).min().orElse(Double.MAX_VALUE);
+                var max = tasks.stream().mapToDouble(ComputeMaxMinSum::max).max().orElse(-Double.MAX_VALUE);
+                var sum = tasks.stream().mapToDouble(ComputeMaxMinSum::sum).sum();
+
+                var maxMinDiff1 = max - min;
+
+                if (Math.abs(maxMinDiff1) < CLOSE_TO_ZERO) {
+                    return ZERO;
+                } else {
+                    return new Mean(properties, sum / nodeCount, maxMinDiff1);
+                }
             }
         };
     }

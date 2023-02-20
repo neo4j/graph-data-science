@@ -39,28 +39,6 @@ public final class Max extends ScalarScaler {
         this.maxAbs = maxAbs;
     }
 
-    static ScalarScaler initialize(NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor) {
-        var tasks = PartitionUtils.rangePartition(
-            concurrency,
-            nodeCount,
-            partition -> new ComputeAbsMax(partition, properties),
-            Optional.empty()
-        );
-        RunWithConcurrency.builder()
-            .concurrency(concurrency)
-            .tasks(tasks)
-            .executor(executor)
-            .run();
-
-        var absMax = tasks.stream().mapToDouble(ComputeAbsMax::absMax).max().orElse(0);
-
-        if (Math.abs(absMax) < CLOSE_TO_ZERO) {
-            return ZERO;
-        } else {
-            return new Max(properties, absMax);
-        }
-    }
-
     @Override
     public double scaleProperty(long nodeId) {
         return properties.doubleValue(nodeId) / maxAbs;
@@ -81,7 +59,25 @@ public final class Max extends ScalarScaler {
                 int concurrency,
                 ExecutorService executor
             ) {
-                return initialize(properties, nodeCount, concurrency, executor);
+                var tasks = PartitionUtils.rangePartition(
+                    concurrency,
+                    nodeCount,
+                    partition -> new ComputeAbsMax(partition, properties),
+                    Optional.empty()
+                );
+                RunWithConcurrency.builder()
+                    .concurrency(concurrency)
+                    .tasks(tasks)
+                    .executor(executor)
+                    .run();
+
+                var absMax = tasks.stream().mapToDouble(ComputeAbsMax::absMax).max().orElse(0);
+
+                if (Math.abs(absMax) < CLOSE_TO_ZERO) {
+                    return ZERO;
+                } else {
+                    return new Max(properties, absMax);
+                }
             }
         };
     }

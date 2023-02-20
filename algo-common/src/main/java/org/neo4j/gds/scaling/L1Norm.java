@@ -54,31 +54,27 @@ public final class L1Norm extends ScalarScaler {
                 int concurrency,
                 ExecutorService executor
             ) {
-                return initialize(properties, nodeCount, concurrency, executor);
+                var tasks = PartitionUtils.rangePartition(
+                    concurrency,
+                    nodeCount,
+                    partition -> new ComputeAbsoluteSum(partition, properties),
+                    Optional.empty()
+                );
+                RunWithConcurrency.builder()
+                    .concurrency(concurrency)
+                    .tasks(tasks)
+                    .executor(executor)
+                    .run();
+
+                var absoluteSum = tasks.stream().mapToDouble(ComputeAbsoluteSum::sum).sum();
+
+                if (absoluteSum < CLOSE_TO_ZERO) {
+                    return ZERO;
+                } else {
+                    return new L1Norm(properties, absoluteSum);
+                }
             }
         };
-    }
-
-    static ScalarScaler initialize(NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor) {
-        var tasks = PartitionUtils.rangePartition(
-            concurrency,
-            nodeCount,
-            partition -> new ComputeAbsoluteSum(partition, properties),
-            Optional.empty()
-        );
-        RunWithConcurrency.builder()
-            .concurrency(concurrency)
-            .tasks(tasks)
-            .executor(executor)
-            .run();
-
-        var absoluteSum = tasks.stream().mapToDouble(ComputeAbsoluteSum::sum).sum();
-
-        if (absoluteSum < CLOSE_TO_ZERO) {
-            return ZERO;
-        } else {
-            return new L1Norm(properties, absoluteSum);
-        }
     }
 
     @Override
