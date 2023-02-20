@@ -77,12 +77,12 @@ public final class Mean extends ScalarScaler {
                 var max = tasks.stream().mapToDouble(ComputeMaxMinSum::max).max().orElse(-Double.MAX_VALUE);
                 var sum = tasks.stream().mapToDouble(ComputeMaxMinSum::sum).sum();
 
-                var maxMinDiff1 = max - min;
+                var maxMinDiff = max - min;
 
-                if (Math.abs(maxMinDiff1) < CLOSE_TO_ZERO) {
+                if (Math.abs(maxMinDiff) < CLOSE_TO_ZERO) {
                     return ZERO;
                 } else {
-                    return new Mean(properties, sum / nodeCount, maxMinDiff1);
+                    return new Mean(properties, sum / nodeCount, maxMinDiff);
                 }
             }
         };

@@ -71,9 +71,9 @@ final class Center extends ScalarScaler {
                     .executor(executor)
                     .run();
                 var sum = tasks.stream().mapToDouble(ComputeSum::sum).sum();
-                var avg1 = sum / nodeCount;
+                var avg = sum / nodeCount;
 
-                return new Center(properties, avg1);
+                return new Center(properties, avg);
 
             }
         };

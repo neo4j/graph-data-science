@@ -72,12 +72,12 @@ public final class L2Norm extends ScalarScaler {
                     .run();
 
                 var squaredSum = tasks.stream().mapToDouble(ComputeSquaredSum::squaredSum).sum();
-                var euclideanLength1 = Math.sqrt(squaredSum);
+                var euclideanLength = Math.sqrt(squaredSum);
 
-                if (euclideanLength1 < CLOSE_TO_ZERO) {
+                if (euclideanLength < CLOSE_TO_ZERO) {
                     return ZERO;
                 } else {
-                    return new L2Norm(properties, euclideanLength1);
+                    return new L2Norm(properties, euclideanLength);
                 }
             }
         };
