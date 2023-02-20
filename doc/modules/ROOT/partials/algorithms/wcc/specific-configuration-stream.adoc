@@ -1,5 +1,2 @@
-| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
-| xref:common-usage/running-algos.adoc#common-configuration-seed-property[seedProperty]                              | String  | n/a     | yes      | Used to set the initial component for a node. The property value needs to be a number.
-| threshold                                                                                                          | Float   | null    | yes      | The value of the weight above which the relationship is considered in the computation.
-| consecutiveIds                                                                                                     | Boolean | false   | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).
-| minComponentSize                                                                                                   | Integer | 0       | yes      | Only nodes inside communities larger or equal the given value are returned.
+include::partial$algorithms/wcc/specific-configuration.adoc
+| minCommunitySize | Integer | 0  | yes | Only nodes inside communities larger or equal the given value are returned.
