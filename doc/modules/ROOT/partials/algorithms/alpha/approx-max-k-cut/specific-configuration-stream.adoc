@@ -1,6 +1,2 @@
-| k                                                                                                                        | Integer | 2           | yes      | The number of disjoint communities the nodes will be divided into.
-| xref:algorithms/alpha/approx-max-k-cut.adoc#algorithms-approx-max-k-cut-iterations[iterations]                           | Integer | 8           | yes      | The number of iterations the algorithm will run before returning the best solution among all the iterations.
-| xref:algorithms/alpha/approx-max-k-cut.adoc#algorithms-approx-max-k-cut-vns-order[vnsMaxNeighborhoodOrder]               | Integer | 0 (VNS off) | yes      | The maximum number of nodes VNS will swap when perturbing solutions.
-| randomSeed                                                                                                               | Integer | n/a         | yes      | A random seed which is used for all randomness in the computation. Requires `concurrency = 1`.
-| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty]       | String  | null        | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
-| minCommunitySize                                                                                                         | Integer | 0           | yes      | Only nodes inside communities larger or equal the given value are returned.
+include::partial$algorithms/alpha/approx-max-k-cut/specific-configuration.adoc[]
+| minCommunitySize | Integer | 0  | yes | Only nodes inside communities larger or equal the given value are returned.
