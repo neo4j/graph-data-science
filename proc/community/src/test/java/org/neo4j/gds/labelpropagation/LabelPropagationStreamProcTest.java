@@ -86,7 +86,7 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
 
     static Stream<Arguments> communitySizeInputs() {
         return Stream.of(
-                Arguments.of(Map.of("minCommunitySize", 1), RESULT.toArray(RESULT.toArray(new Long[0]))),
+                Arguments.of(Map.of("minCommunitySize", 1), RESULT.toArray(new Long[0])),
                 Arguments.of(Map.of("minCommunitySize", 2), new Long[]{2L, 7L, 2L, null, null, null, null, 7L, null, null, null, null})
         );
     }
