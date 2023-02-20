@@ -20,15 +20,18 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 final class Center extends ScalarScaler {
 
+    static final String NAME = "center";
     final double avg;
 
     private Center(NodePropertyValues properties, double avg) {
@@ -63,6 +66,26 @@ final class Center extends ScalarScaler {
     @Override
     public double scaleProperty(long nodeId) {
         return (properties.doubleValue(nodeId) - avg);
+    }
+
+    static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
+        mapWrapper.requireOnlyKeysFrom(List.of());
+        return new ScalerFactory() {
+            @Override
+            public String name() {
+                return NAME;
+            }
+
+            @Override
+            public ScalarScaler create(
+                NodePropertyValues properties,
+                long nodeCount,
+                int concurrency,
+                ExecutorService executor
+            ) {
+                return initialize(properties, nodeCount, concurrency, executor);
+            }
+        };
     }
 
     static class ComputeSum extends AggregatesComputer {

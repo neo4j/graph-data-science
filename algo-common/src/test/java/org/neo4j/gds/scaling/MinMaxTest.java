@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 
@@ -43,7 +44,7 @@ class MinMaxTest {
     @ParameterizedTest
     @MethodSource("properties")
     void normalizes(NodePropertyValues properties, double min, double max) {
-        var scaler = (MinMax) MinMax.initialize(properties, 10, 1, Pools.DEFAULT);
+        var scaler = (MinMax) MinMax.buildFrom(CypherMapWrapper.empty()).create(properties, 10, 1, Pools.DEFAULT);
 
         assertThat(scaler.min).isEqualTo(min);
         assertThat(scaler.maxMinDiff).isEqualTo(max - min);
@@ -56,7 +57,7 @@ class MinMaxTest {
     @Test
     void avoidsDivByZero() {
         var properties = new DoubleTestPropertyValues(nodeId -> 4D);
-        var scaler = MinMax.initialize(properties, 10, 1, Pools.DEFAULT);
+        var scaler = MinMax.buildFrom(CypherMapWrapper.empty()).create(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {
             assertThat(scaler.scaleProperty(i)).isEqualTo(0D);

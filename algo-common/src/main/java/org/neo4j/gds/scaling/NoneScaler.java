@@ -25,22 +25,11 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
-public final class LogScaler extends ScalarScaler {
+public class NoneScaler extends ScalarScaler {
 
-    public static final String NAME = "log";
-    private final double offset;
+    public static final String NAME = "none";
 
-    LogScaler(NodePropertyValues properties, double offset) {
-        super(properties);
-        this.offset = offset;
-    }
-
-    @Override
-    public double scaleProperty(long nodeId) {
-        return Math.log(properties.doubleValue(nodeId) + offset);
-    }
-
-    static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
+    public static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
         mapWrapper.requireOnlyKeysFrom(List.of());
         return new ScalerFactory() {
             @Override
@@ -55,8 +44,17 @@ public final class LogScaler extends ScalarScaler {
                 int concurrency,
                 ExecutorService executor
             ) {
-                return new LogScaler(properties, 0);
+                return new NoneScaler(properties);
             }
         };
+    }
+
+    NoneScaler(NodePropertyValues properties) {
+        super(properties);
+    }
+
+    @Override
+    public double scaleProperty(long nodeId) {
+        return properties.doubleValue(nodeId);
     }
 }

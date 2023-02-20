@@ -592,13 +592,13 @@ class PageRankTest {
 
         @ParameterizedTest
         @CsvSource({"L1NORM, expectedL1", "L2NORM, expectedL2", "MEAN, expectedMean"})
-        void test(ScalarScaler.Variant variant, String expectedPropertyKey) {
+        void test(String scalerName, String expectedPropertyKey) {
             var config = ImmutablePageRankConfig
                 .builder()
                 .maxIterations(40)
                 .tolerance(0)
                 .concurrency(1)
-                .scaler(variant)
+                .scaler(ScalarScaler.ScalerFactory.parse(scalerName))
                 .build();
 
             var actual = runOnPregel(graph, config).scores();

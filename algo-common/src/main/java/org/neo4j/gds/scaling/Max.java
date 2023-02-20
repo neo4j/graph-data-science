@@ -20,15 +20,18 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
-final class Max extends ScalarScaler {
+public final class Max extends ScalarScaler {
 
+    public static final String NAME = "max";
     final double maxAbs;
 
     private Max(NodePropertyValues properties, double maxAbs) {
@@ -61,6 +64,26 @@ final class Max extends ScalarScaler {
     @Override
     public double scaleProperty(long nodeId) {
         return properties.doubleValue(nodeId) / maxAbs;
+    }
+
+    static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
+        mapWrapper.requireOnlyKeysFrom(List.of());
+        return new ScalerFactory() {
+            @Override
+            public String name() {
+                return NAME;
+            }
+
+            @Override
+            public ScalarScaler create(
+                NodePropertyValues properties,
+                long nodeCount,
+                int concurrency,
+                ExecutorService executor
+            ) {
+                return initialize(properties, nodeCount, concurrency, executor);
+            }
+        };
     }
 
     static class ComputeAbsMax extends AggregatesComputer {

@@ -42,7 +42,7 @@ class LogScalerTest {
     @ParameterizedTest
     @MethodSource("properties")
     void normalizes(NodePropertyValues properties, double[] expected) {
-        var scaler = new LogScaler(properties);
+        var scaler = new LogScaler(properties, 0);
 
         double[] actual = IntStream.range(1, 5).mapToDouble(scaler::scaleProperty).toArray();
         assertThat(actual).containsSequence(expected);

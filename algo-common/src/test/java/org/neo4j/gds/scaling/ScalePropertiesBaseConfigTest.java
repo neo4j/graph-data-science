@@ -21,34 +21,39 @@ package org.neo4j.gds.scaling;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 
 class ScalePropertiesBaseConfigTest {
 
+    static Stream<Arguments> scalers() {
+        return ScalarScaler.ScalerFactory.SUPPORTED_SCALERS.keySet().stream().map(Arguments::of);
+    }
+
     @ParameterizedTest
-    @EnumSource(ScalarScaler.Variant.class)
-    void parseValidScalers(ScalarScaler.Variant scaler) {
+    @MethodSource("scalers")
+    void parseValidScalers(String scaler) {
         ScalePropertiesMutateConfigImpl config = new ScalePropertiesMutateConfigImpl(
             CypherMapWrapper.create(
                 Map.of(
                     "mutateProperty", "test",
-                    "scaler", toLowerCaseWithLocale(scaler.name()),
+                    "scaler", scaler,
                     "nodeProperties", List.of("a", "b")
                 )
             )
         );
 
-        assertThat(config.scaler()).isEqualTo(scaler);
+        assertThat(config.scaler().name()).isEqualTo(scaler);
     }
 
     @Test
@@ -81,7 +86,7 @@ class ScalePropertiesBaseConfigTest {
             )
         );
 
-        assertThat(ex.getMessage()).contains("Scaler `nonExistent` is not supported.");
+        assertThat(ex.getMessage()).contains("Unrecognised scaler specified: `nonExistent`");
     }
 
     @Test

@@ -21,10 +21,11 @@ package org.neo4j.gds.scaling;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -59,7 +60,7 @@ class ScalePropertiesTest {
     void scaleSingleProperty() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("a"))
-            .scaler(ScalarScaler.Variant.MINMAX)
+            .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .concurrency(1)
             .build();
         var algo = new ScaleProperties(graph, config, Pools.DEFAULT);
@@ -78,7 +79,7 @@ class ScalePropertiesTest {
     void scaleMultipleProperties() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("a", "b", "c"))
-            .scaler(ScalarScaler.Variant.MINMAX)
+            .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .concurrency(1)
             .build();
         var algo = new ScaleProperties(graph, config, Pools.DEFAULT);
@@ -107,7 +108,7 @@ class ScalePropertiesTest {
 
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("a"))
-            .scaler(ScalarScaler.Variant.MINMAX);
+            .scaler(MinMax.buildFrom(CypherMapWrapper.empty()));
 
         var parallelResult = new ScaleProperties(
             bigGraph,
@@ -128,7 +129,7 @@ class ScalePropertiesTest {
     void scaleArrayProperty() {
         var arrayConfig = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("a", "bAndC", "a"))
-            .scaler(ScalarScaler.Variant.MINMAX)
+            .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .build();
 
         var actual = new ScaleProperties(graph, arrayConfig, Pools.DEFAULT)
@@ -137,7 +138,7 @@ class ScalePropertiesTest {
 
         var singlePropConfig = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("a", "b", "c", "a"))
-            .scaler(ScalarScaler.Variant.MINMAX)
+            .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .build();
 
         var expected = new ScaleProperties(graph, singlePropConfig, Pools.DEFAULT)
@@ -148,10 +149,10 @@ class ScalePropertiesTest {
     }
 
     @ParameterizedTest
-    @EnumSource(ScalarScaler.Variant.class)
-    void supportLongAndFloatArrays(ScalarScaler.Variant scaler) {
+    @MethodSource("org.neo4j.gds.scaling.ScalePropertiesBaseConfigTest#scalers")
+    void supportLongAndFloatArrays(String scaler) {
         var baseConfigBuilder = ImmutableScalePropertiesBaseConfig.builder()
-            .scaler(scaler);
+            .scaler(ScalarScaler.ScalerFactory.SUPPORTED_SCALERS.get(scaler).apply(CypherMapWrapper.empty()));
         var bConfig = baseConfigBuilder.nodeProperties(List.of("b")).build();
         var longArrayBConfig = baseConfigBuilder.nodeProperties(List.of("longArrayB")).build();
         var doubleArrayBConfig = baseConfigBuilder.nodeProperties(List.of("floatArrayB")).build();
@@ -166,7 +167,7 @@ class ScalePropertiesTest {
 
     @Test
     void supportDoubleArrays() {
-        var baseConfigBuilder = ImmutableScalePropertiesBaseConfig.builder().scaler(ScalarScaler.Variant.MINMAX);
+        var baseConfigBuilder = ImmutableScalePropertiesBaseConfig.builder().scaler(MinMax.buildFrom(CypherMapWrapper.empty()));
         var config = baseConfigBuilder.nodeProperties(List.of("doubleArray")).build();
 
         var expected = new double[][]{new double[]{0.0}, new double[]{0.2499999722444236}, new double[]{.5}, new double[]{0.7500000277555764}, new double[]{1.0}};
@@ -179,7 +180,7 @@ class ScalePropertiesTest {
     void failOnArrayPropertyWithUnequalLength() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("mixedSizeArray"))
-            .scaler(ScalarScaler.Variant.MINMAX)
+            .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .build();
 
         var algo = new ScaleProperties(graph, config, Pools.DEFAULT);
@@ -194,7 +195,7 @@ class ScalePropertiesTest {
     void failOnMissingValuesForArrayProperty() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("missingArray"))
-            .scaler(ScalarScaler.Variant.MINMAX)
+            .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .build();
 
         var algo = new ScaleProperties(graph, config, Pools.DEFAULT);
@@ -209,7 +210,7 @@ class ScalePropertiesTest {
     void failOnNonExistentProperty() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("IMAGINARY_PROP"))
-            .scaler(ScalarScaler.Variant.MINMAX)
+            .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .build();
 
         var algo = new ScaleProperties(graph, config, Pools.DEFAULT);
