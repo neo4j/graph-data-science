@@ -37,6 +37,8 @@ public final class Compressed implements AutoCloseable {
 
     private static final Cleaner CLEANER = Cleaner.create();
 
+    public static final Compressed EMPTY = new Compressed();
+
     private final Address address;
     private final Cleaner.Cleanable cleanable;
 
@@ -45,8 +47,15 @@ public final class Compressed implements AutoCloseable {
     // header of compression blocks
     private final byte[] header;
 
+    private Compressed() {
+        this.address = Address.EMPTY;
+        this.header = new byte[0];
+        this.length = 0;
+        this.cleanable = () -> {};
+    }
+
     public Compressed(long address, long bytes, byte[] header, int length) {
-        this.address = new Address(address, bytes);
+        this.address = Address.createAddress(address, bytes);
         this.cleanable = CLEANER.register(this, this.address);
         this.header = header;
         this.length = length;
@@ -121,6 +130,9 @@ public final class Compressed implements AutoCloseable {
  * This is an auxiliary class to prevent accidental access to private members.
  */
 final class Address implements Runnable {
+
+    static Address EMPTY = new Address(0, 0);
+
     private static final AtomicLongFieldUpdater<Address> ADDRESS = AtomicLongFieldUpdater.newUpdater(
         Address.class,
         "address"
@@ -129,10 +141,14 @@ final class Address implements Runnable {
     private volatile long address;
     private final long bytes;
 
-    Address(long address, long bytes) {
-        requirePointerIsValid(address);
+    private Address(long address, long bytes) {
         this.address = address;
         this.bytes = bytes;
+    }
+
+    static Address createAddress(long address, long bytes) {
+        requirePointerIsValid(address);
+        return new Address(address, bytes);
     }
 
     @Override
@@ -165,15 +181,15 @@ final class Address implements Runnable {
 
 final class DecompressingCursor implements AdjacencyCursor {
 
-    private final HugeObjectArray<Compressed> compressed;
+    private final HugeObjectArray<Compressed> adjacencies;
 
     private final BlockDecompressor decompressingReader;
 
     private int maxTargets;
     private int currentPosition;
 
-    DecompressingCursor(HugeObjectArray<Compressed> compressed, int flags) {
-        this.compressed = compressed;
+    DecompressingCursor(HugeObjectArray<Compressed> adjacencies, int flags) {
+        this.adjacencies = adjacencies;
         this.decompressingReader = new BlockDecompressor(flags);
 
     }
@@ -184,7 +200,7 @@ final class DecompressingCursor implements AdjacencyCursor {
 
     @Override
     public void init(long node, int ignore) {
-        var compressed = this.compressed.get(node);
+        var compressed = this.adjacencies.getOrDefault(node, Compressed.EMPTY);
         this.maxTargets = compressed.length();
         this.currentPosition = 0;
         this.decompressingReader.reset(compressed);
