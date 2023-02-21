@@ -558,8 +558,8 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public InputEntityIdVisitor.String inputEntityStringIdVisitor() {
-        var globalGroup = new Group(0, null, null);
+    public InputEntityIdVisitor.String inputEntityStringIdVisitor(ReadableGroups groups) {
+        var globalGroup = groups.get(null);
 
         return new InputEntityIdVisitor.String() {
             @Override
