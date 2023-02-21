@@ -48,10 +48,10 @@ public final class CommunityProcCompanion {
         Supplier<NodeProperty> seedPropertySupplier
     ) {
         LongNodePropertyValues result = getLongNodePropertyValues(config, resultProperty, nodeProperties, seedPropertySupplier);
-        return getNodePropertyValues(config, result);
+        return applySizeFilterWhenNecessary(config, result);
     }
 
-    public static <CONFIG extends ConcurrencyConfig> LongNodePropertyValues getNodePropertyValues(CONFIG config, LongNodePropertyValues result) {
+    public static <CONFIG extends ConcurrencyConfig> LongNodePropertyValues applySizeFilterWhenNecessary(CONFIG config, LongNodePropertyValues result) {
         if (config instanceof CommunitySizeConfig) {
             var finalResult = result;
             result = ((CommunitySizeConfig) config)

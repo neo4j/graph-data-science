@@ -39,7 +39,7 @@ final class TriangleCountCompanion {
         IntersectingTriangleCount.TriangleCountResult triangleCountResult = computeResult.result();
         var result = triangleCountResult == null ? null : triangleCountResult.asNodeProperties();
 
-        return CommunityProcCompanion.getNodePropertyValues(config, result);
+        return CommunityProcCompanion.applySizeFilterWhenNecessary(config, result);
     }
 
     static <PROC_RESULT, CONFIG extends TriangleCountBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(

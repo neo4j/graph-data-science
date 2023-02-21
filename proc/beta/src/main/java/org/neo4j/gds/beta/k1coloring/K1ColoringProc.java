@@ -49,7 +49,7 @@ final class K1ColoringProc {
 
     static <CONFIG extends K1ColoringConfig> NodePropertyValues nodeProperties(ComputationResult<K1Coloring, HugeLongArray, CONFIG> computeResult) {
         var config = computeResult.config();
-        return CommunityProcCompanion.getNodePropertyValues(config, computeResult.result().asNodeProperties());
+        return CommunityProcCompanion.applySizeFilterWhenNecessary(config, computeResult.result().asNodeProperties());
     }
 
     abstract static class K1ColoringResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {
