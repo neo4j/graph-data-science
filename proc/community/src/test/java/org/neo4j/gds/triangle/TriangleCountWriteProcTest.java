@@ -119,14 +119,14 @@ class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCount
 
     static Stream<Arguments> communitySizeInputs() {
         return Stream.of(
-                Arguments.of(Map.of("minCommunitySize", 1), Map.of(
+                Arguments.of(Map.of("minTriangles", 1), Map.of(
                         "a", 4L,
                         "b", 4L,
                         "c", 3L,
                         "d", 3L,
                         "e", 1L
                 )),
-                Arguments.of(Map.of("minCommunitySize", 2), Map.of(
+                Arguments.of(Map.of("minTriangles", 2), Map.of(
                         "a", 4L,
                         "b", 4L,
                         "c", 3L,
