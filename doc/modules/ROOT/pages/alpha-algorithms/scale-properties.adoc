@@ -60,6 +60,7 @@ image::equations/scale-properties/mean.svg[scaled p equals p minus average of p 
 === Log scaler
 
 Transforms all property values using the natural logarithm.
+`C` denotes a configurable constant offset, which can be used to avoid negative values or zeros in the value space, as these are not finite values.
 
 image::equations/scale-properties/log.svg[scaled p equals natural logarithm of p,align="center"]
 
@@ -341,3 +342,62 @@ We can see that some values are negative and that the maximum value sticks out f
 The other three list positions are the scaled values for the `storyCapacity` list property.
 Note that each list item is scaled only with respect to the corresponding item in the other lists.
 Thus, the `Polar` hotel has the greatest scaled value in all list positions.
+
+
+[[algorithms-scale-properties-examples-log-offset]]
+=== Scaler-specific configuration
+
+The `log` scaler supports a configurable offset parameter.
+In this example we illustrate how to configure that offset.
+
+We want to scale the `avgReview` property, but it contains negative numbers, for which the logarithm is not defined.
+First, we'll determine what the minimum value is, by using Cypher's `min()` aggregating function:
+
+[role=query-example]
+--
+----
+CALL gds.graph.nodeProperty.stream('myGraph', 'avgReview') YIELD propertyValue
+RETURN min(propertyValue) AS minimumAvgReview
+----
+
+.Results
+[opts="header"]
+|===
+| minimumAvgReview
+| -4.12
+|===
+--
+
+Learning this value, we can use a slightly greater value, thus ensuring that the logarithm will be a finite value.
+We will use `4.13`.
+
+[role=query-example]
+--
+.The following will run the algorithm with a custom offset for the log scaler:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.scaleProperties.stream('myGraph', {
+  nodeProperties: ['avgReview'],
+  scaler: {scaler: 'Log', offset: 4.13}
+}) YIELD nodeId, scaledProperty
+RETURN gds.util.asNode(nodeId).name AS name, scaledProperty
+  ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name       | scaledProperty
+| "Beach"    | [2.005525858729668]
+| "Central"  | [3.141130476243348]
+| "East"     | [2.1198634561787513]
+| "Forest"   | [1.0750024230289759]
+| "Mountain" | [2.382320061012899]
+| "Plaza"    | [2.503891949699081]
+| "Polar"    | [1.4206957878372228]
+| "West"     | [-4.605170185988113]
+|===
+--
+
+As we can see, all scaled values are finite numbers.
+Try this example with a lower offset value if you are curious about the results.
