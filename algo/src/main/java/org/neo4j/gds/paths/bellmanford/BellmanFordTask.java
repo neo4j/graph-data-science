@@ -31,7 +31,7 @@ public class BellmanFordTask implements Runnable {
     private static final long LOCAL_QUEUE_BOUND = 1000;
 
     private final Graph localGraph;
-    private final TentativeBothDistances distances;
+    private final TentativeDistancesWithLength distances;
 
     private final HugeLongArray frontier;
     private final AtomicLong frontierIndex;
@@ -47,7 +47,7 @@ public class BellmanFordTask implements Runnable {
 
     BellmanFordTask(
         Graph localGraph,
-        TentativeBothDistances distances,
+        TentativeDistancesWithLength distances,
         HugeLongArray frontier,
         AtomicLong frontierIndex,
         AtomicLong frontierSize,

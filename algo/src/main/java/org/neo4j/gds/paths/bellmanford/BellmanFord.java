@@ -65,7 +65,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         AtomicLong frontierSize = new AtomicLong();
 
         HugeAtomicBitSet validBitset = HugeAtomicBitSet.create(graph.nodeCount());
-        TentativeBothDistances distances = TentativeBothDistances.distanceAndPredecessors(
+        TentativeDistancesWithLength distances = TentativeDistancesWithLength.distanceAndPredecessors(
             graph.nodeCount(),
             concurrency
         );
@@ -100,7 +100,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         return produceResult(negativeCycleFound.get(), distances);
     }
 
-    private BellmanFordResult produceResult(boolean containsNegativeCycle, TentativeBothDistances distances) {
+    private BellmanFordResult produceResult(boolean containsNegativeCycle, TentativeDistancesWithLength distances) {
         Stream<PathResult> paths = (containsNegativeCycle) ? Stream.empty() : pathResults(
             distances,
             sourceNode,
@@ -110,7 +110,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
     }
     
     private static Stream<PathResult> pathResults(
-        TentativeBothDistances tentativeDistances,
+        TentativeDistancesWithLength tentativeDistances,
         long sourceNode,
         int concurrency
     ) {

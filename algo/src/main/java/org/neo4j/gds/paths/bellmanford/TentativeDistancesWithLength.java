@@ -27,11 +27,11 @@ import org.neo4j.gds.core.utils.paged.LongPageCreator;
 
 import java.util.Optional;
 
-public interface TentativeBothDistances  {
+public interface TentativeDistancesWithLength {
 
     double DIST_INF = Double.MAX_VALUE;
     long NO_PREDECESSOR = Long.MAX_VALUE;
-    long NO_LENGTH=Long.MAX_VALUE;
+    long NO_LENGTH = Long.MAX_VALUE;
 
     double distance(long nodeId);
 
@@ -48,7 +48,7 @@ public interface TentativeBothDistances  {
 
     Optional<HugeAtomicLongArray> predecessors();
 
-    static TentativeBothDistances.DistanceOnly distanceOnly(
+    static TentativeDistancesWithLength.DistanceOnly distanceOnly(
         long size,
         int concurrency
     ) {
@@ -56,9 +56,11 @@ public interface TentativeBothDistances  {
             size,
             DoublePageCreator.of(concurrency, index -> DIST_INF)
         );
-        var lengths=HugeAtomicLongArray.newArray(size,
-            LongPageCreator.of(concurrency,index -> NO_LENGTH));
-        return new TentativeBothDistances.DistanceOnly(distances,lengths);
+        var lengths = HugeAtomicLongArray.newArray(
+            size,
+            LongPageCreator.of(concurrency, index -> NO_LENGTH)
+        );
+        return new TentativeDistancesWithLength.DistanceOnly(distances, lengths);
     }
 
     static DistanceAndPredecessor distanceAndPredecessors(
@@ -80,14 +82,14 @@ public interface TentativeBothDistances  {
         return new DistanceAndPredecessor(predecessors, distances,lengths);
     }
 
-    class DistanceOnly implements TentativeBothDistances {
+    class DistanceOnly implements TentativeDistancesWithLength {
 
         private final HugeAtomicDoubleArray distances;
         private final HugeAtomicLongArray lengths;
 
         public DistanceOnly(HugeAtomicDoubleArray distances, HugeAtomicLongArray lengths) {
             this.distances = distances;
-            this.lengths=lengths;
+            this.lengths = lengths;
         }
 
         @Override
@@ -145,15 +147,19 @@ public interface TentativeBothDistances  {
         }
     }
 
-    class DistanceAndPredecessor implements TentativeBothDistances {
+    class DistanceAndPredecessor implements TentativeDistancesWithLength {
 
         private final HugeAtomicLongArray predecessors;
         // Use atomic array since it get/set methods are volatile
         private final HugeAtomicDoubleArray distances;
 
-        private final  HugeAtomicLongArray lengths;
+        private final HugeAtomicLongArray lengths;
 
-        public DistanceAndPredecessor(HugeAtomicLongArray predecessors, HugeAtomicDoubleArray distances, HugeAtomicLongArray lengths) {
+        public DistanceAndPredecessor(
+            HugeAtomicLongArray predecessors,
+            HugeAtomicDoubleArray distances,
+            HugeAtomicLongArray lengths
+        ) {
             this.predecessors = predecessors;
             this.distances = distances;
             this.lengths=lengths;
