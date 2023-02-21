@@ -418,7 +418,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType) {
+    public InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType, ReadableGroups groups) {
         switch (idType) {
             case ACTUAL:
                 return new InputEntityIdVisitor.Long() {
@@ -438,20 +438,22 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
                     }
                 };
             case INTEGER:
+                var globalGroup = groups.get(Group.GLOBAL.id());
+
                 return new InputEntityIdVisitor.Long() {
                     @Override
                     public void visitNodeId(InputEntityVisitor visitor, long id) {
-                        visitor.id(id, Group.GLOBAL);
+                        visitor.id(id, globalGroup);
                     }
 
                     @Override
                     public void visitSourceId(InputEntityVisitor visitor, long id) {
-                        visitor.startId(id, Group.GLOBAL);
+                        visitor.startId(id, globalGroup);
                     }
 
                     @Override
                     public void visitTargetId(InputEntityVisitor visitor, long id) {
-                        visitor.endId(id, Group.GLOBAL);
+                        visitor.endId(id, globalGroup);
                     }
                 };
             default:

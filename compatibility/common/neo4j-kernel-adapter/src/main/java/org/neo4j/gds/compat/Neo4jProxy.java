@@ -281,8 +281,8 @@ public final class Neo4jProxy {
         );
     }
 
-    public static InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType) {
-        return IMPL.inputEntityLongIdVisitor(idType);
+    public static InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType, ReadableGroups groups) {
+        return IMPL.inputEntityLongIdVisitor(idType, groups);
     }
 
     public static InputEntityIdVisitor.String inputEntityStringIdVisitor(ReadableGroups groups) {

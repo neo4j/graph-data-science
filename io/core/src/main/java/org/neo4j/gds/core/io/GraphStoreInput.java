@@ -73,18 +73,18 @@ public final class GraphStoreInput implements CompatInput {
         MAPPING(IdType.INTEGER, new Groups()) {
             @Override
             public InputEntityIdVisitor.Long get() {
-                return Neo4jProxy.inputEntityLongIdVisitor(IdType.INTEGER);
+                return Neo4jProxy.inputEntityLongIdVisitor(IdType.INTEGER, readableGroups);
             }
         },
         ACTUAL(IdType.ACTUAL, Groups.EMPTY) {
             @Override
             public InputEntityIdVisitor.Long get() {
-                return Neo4jProxy.inputEntityLongIdVisitor(IdType.ACTUAL);
+                return Neo4jProxy.inputEntityLongIdVisitor(IdType.ACTUAL, readableGroups);
             }
         };
 
         private final IdType idType;
-        private final ReadableGroups readableGroups;
+        final ReadableGroups readableGroups;
 
         IdMode(IdType idType, ReadableGroups readableGroups) {
             this.idType = idType;
