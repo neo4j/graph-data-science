@@ -75,7 +75,7 @@ import static org.neo4j.gds.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Value.Style(typeBuilder = "GraphStoreBuilder")
-public class CSRGraphStore implements GraphStore {
+public final class CSRGraphStore implements GraphStore {
 
     private final int concurrency;
 
