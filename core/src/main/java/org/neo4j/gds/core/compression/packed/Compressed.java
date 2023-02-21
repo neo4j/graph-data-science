@@ -222,8 +222,14 @@ final class DecompressingCursor implements AdjacencyCursor {
     }
 
     @Override
-    public long advance(long nodeId) {
-        throw new UnsupportedOperationException("not yet implemented");
+    public long advance(long targetId) {
+        long next;
+        while (hasNextVLong()) {
+            if ((next = nextVLong()) >= targetId) {
+                return next;
+            }
+        }
+        return AdjacencyCursor.NOT_FOUND;
     }
 
     @Override
