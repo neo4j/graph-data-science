@@ -72,6 +72,34 @@ class BellmanFordTest {
     @Inject
     private IdFunction loopIdFunction;
 
+    //another graph: https://www.javatpoint.com/bellman-ford-algorithm
+
+    @GdlGraph(graphNamePrefix = "third")
+    private static final String EXAMPLE_2_DB_CYPHER =
+        "CREATE " +
+        "  (A)," +
+        "  (B)," +
+        "  (C)," +
+        "  (D)," +
+        "  (E)," +
+        "  (F)," +
+        " (L)," +
+        "  (A)-[:R {weight: 6.0}]->(B)," +
+        "  (A)-[:R {weight: 4.0}]->(C), " +
+        "  (A)-[:R {weight: 5.0}]->(D), " +
+        "  (B)-[:R {weight: -1.0}]->(E), " +
+        "  (C)-[:R {weight: -2.0}]->(B), " +
+        "  (C)-[:R {weight: 3.0}]->(E), " +
+        "  (D)-[:R {weight: -2.0}]->(C), " +
+        "  (D)-[:R {weight: -1.0}]->(F), " +
+        "  (E)-[:R {weight: 3.0}]->(F) ";
+
+    @Inject
+    private TestGraph thirdGraph;
+
+    @Inject
+    private IdFunction thirdIdFunction;
+
     @Test
     void shouldComputeShortestPathsWithoutLoops() {
         long[] a = new long[]{idFunction.of("a0"), idFunction.of("a1"), idFunction.of("a2"), idFunction.of("a3"), idFunction.of(
@@ -99,7 +127,6 @@ class BellmanFordTest {
         }
         assertThat(counter).isEqualTo(5L);
         assertThat(result.containsNegativeCycle()).isFalse();
-
     }
 
     @Test
@@ -115,4 +142,40 @@ class BellmanFordTest {
         assertThat(counter).isEqualTo(0L);
     }
 
+    @Test
+    void shouldUpdateBasedOnNegativeCorrectly() {
+        long[] nodes = new long[]{thirdIdFunction.of("A"),
+            thirdIdFunction.of("B"),
+            thirdIdFunction.of("C"),
+            thirdIdFunction.of("D"),
+            thirdIdFunction.of("E"),
+            thirdIdFunction.of("F")};
+
+        var result = new BellmanFord(thirdGraph, ProgressTracker.NULL_TRACKER, nodes[0], 1).compute();
+        long[][] EXPECTED_PATHS = new long[6][];
+        EXPECTED_PATHS[(int) nodes[0]] = new long[]{nodes[0]};
+        EXPECTED_PATHS[(int) nodes[1]] = new long[]{nodes[0], nodes[3], nodes[2], nodes[1]};
+        EXPECTED_PATHS[(int) nodes[2]] = new long[]{nodes[0], nodes[3], nodes[2]};
+        EXPECTED_PATHS[(int) nodes[3]] = new long[]{nodes[0], nodes[3]};
+        EXPECTED_PATHS[(int) nodes[4]] = new long[]{nodes[0], nodes[3], nodes[2], nodes[1], nodes[4]};
+        EXPECTED_PATHS[(int) nodes[5]] = new long[]{nodes[0], nodes[3], nodes[2], nodes[1], nodes[4], nodes[5]};
+
+        double[] EXPECTED_COSTS = new double[6];
+        EXPECTED_COSTS[(int) nodes[0]] = 0;
+        EXPECTED_COSTS[(int) nodes[1]] = 1;
+        EXPECTED_COSTS[(int) nodes[2]] = 3;
+        EXPECTED_COSTS[(int) nodes[3]] = 5;
+        EXPECTED_COSTS[(int) nodes[4]] = 0;
+        EXPECTED_COSTS[(int) nodes[5]] = 3;
+
+        long counter = 0;
+        for (var path : result.shortestPaths().pathSet()) {
+            counter++;
+            int currentTargetNode = (int) path.targetNode();
+            assertThat(path.nodeIds()).isEqualTo(EXPECTED_PATHS[currentTargetNode]);
+            assertThat(EXPECTED_COSTS[currentTargetNode]).isEqualTo(path.totalCost());
+        }
+        assertThat(counter).isEqualTo(6L);
+        assertThat(result.containsNegativeCycle()).isFalse();
+    }
 }
