@@ -165,13 +165,11 @@ public final class AdjacencyCompression {
         long[] into,
         int offset
     ) {
-        unsafeDecodeDeltaVLongs(numberOfValues, previousValue, ptr, into, offset);
-        return ptr;
+        return unsafeDecodeDeltaVLongs(numberOfValues, previousValue, ptr, into, offset);
     }
 
     public static long decompress(int numberOfValues, long ptr, long[] into, int offset) {
-        unsafeDecodeVLongs(numberOfValues, ptr, into, offset);
-        return ptr;
+        return unsafeDecodeVLongs(numberOfValues, ptr, into, offset);
     }
 
     public static int deltaEncodeSortedValues(long[] values, int offset, int length, Aggregation aggregation) {
