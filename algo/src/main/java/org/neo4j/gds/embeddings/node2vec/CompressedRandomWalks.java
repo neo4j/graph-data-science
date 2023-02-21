@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import com.carrotsearch.hppc.AbstractIterator;
-import org.neo4j.gds.core.loading.ZigZagLongDecoding;
+import org.neo4j.gds.core.compression.common.ZigZagLongDecoding;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -28,9 +28,9 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import static org.neo4j.gds.core.loading.VarLongEncoding.encodeVLongs;
-import static org.neo4j.gds.core.loading.VarLongEncoding.encodedVLongSize;
-import static org.neo4j.gds.core.loading.VarLongEncoding.zigZag;
+import static org.neo4j.gds.core.compression.common.VarLongEncoding.encodeVLongs;
+import static org.neo4j.gds.core.compression.common.VarLongEncoding.encodedVLongSize;
+import static org.neo4j.gds.core.compression.common.VarLongEncoding.zigZag;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class CompressedRandomWalks {

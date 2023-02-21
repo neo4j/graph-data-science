@@ -41,7 +41,7 @@ import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.gds.core.huge.CompressedAdjacencyList;
+import org.neo4j.gds.core.compression.varlong.CompressedAdjacencyList;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.loading.NullPropertyMap.DoubleNullPropertyMap;
 import org.neo4j.gds.extension.Neo4jGraph;
