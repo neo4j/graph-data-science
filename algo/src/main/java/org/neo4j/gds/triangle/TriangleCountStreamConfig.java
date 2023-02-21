@@ -24,6 +24,8 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.CommunitySizeConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
+import java.util.Optional;
+
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -32,4 +34,9 @@ public interface TriangleCountStreamConfig extends TriangleCountBaseConfig, Comm
     static TriangleCountStreamConfig of(CypherMapWrapper userInput) {
         return new TriangleCountStreamConfigImpl(userInput);
     }
+
+    @Override
+    @Configuration.Key("minTriangles")
+    @Configuration.LongRange(min = 0L)
+    Optional<Long> minCommunitySize();
 }

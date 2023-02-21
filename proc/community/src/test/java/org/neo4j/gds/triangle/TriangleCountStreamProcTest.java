@@ -52,8 +52,8 @@ class TriangleCountStreamProcTest extends TriangleCountBaseProcTest<TriangleCoun
 
     static Stream<Arguments> communitySizeInputs() {
         return Stream.of(
-                Arguments.of(Map.of("minCommunitySize", 1), 3),
-                Arguments.of(Map.of("minCommunitySize", 4), 0)
+                Arguments.of(Map.of("minTriangles", 1), 3),
+                Arguments.of(Map.of("minTriangles", 4), 0)
         );
     }
 
