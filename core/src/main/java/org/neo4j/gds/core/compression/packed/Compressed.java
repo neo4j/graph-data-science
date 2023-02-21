@@ -47,11 +47,14 @@ public final class Compressed implements AutoCloseable {
     // header of compression blocks
     private final byte[] header;
 
+    private long[][] properties;
+
     private Compressed() {
         this.address = Address.EMPTY;
         this.header = new byte[0];
         this.length = 0;
         this.cleanable = () -> {};
+        this.properties = null;
     }
 
     public Compressed(long address, long bytes, byte[] header, int length) {
@@ -59,11 +62,16 @@ public final class Compressed implements AutoCloseable {
         this.cleanable = CLEANER.register(this, this.address);
         this.header = header;
         this.length = length;
+        this.properties = null;
     }
 
     @Override
     public String toString() {
         return "Compressed{address=" + this.address.address() + ", bytes=" + this.address.bytes() + ", blocks=" + header.length + '}';
+    }
+
+    public void properties(long[][] properties) {
+        this.properties = properties;
     }
 
     /**

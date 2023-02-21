@@ -53,6 +53,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
         this.adjacencies = adjacencies;
         this.aggregations = aggregations;
 
+        // TODO we need to support all aggregations
         this.flags = FLAGS | aggregations[0].ordinal();
     }
 
@@ -66,18 +67,52 @@ public final class PackedCompressor implements AdjacencyCompressor {
         LongArrayBuffer buffer,
         ValueMapper mapper
     ) {
-        // TODO: support properties
-
-        Compressed compressed = packWithoutProperties(
-            targets,
-            numberOfCompressedTargets,
-            compressedBytesSize,
-            buffer,
-            mapper
-        );
+        Compressed compressed;
+        if (properties != null) {
+            compressed = packWithProperties(
+                targets,
+                properties,
+                numberOfCompressedTargets,
+                compressedBytesSize,
+                buffer,
+                mapper
+            );
+        } else {
+            compressed = packWithoutProperties(
+                targets,
+                numberOfCompressedTargets,
+                compressedBytesSize,
+                buffer,
+                mapper
+            );
+        }
 
         this.adjacencies.set(nodeId, compressed);
         return compressed.length();
+    }
+
+    private Compressed packWithProperties(
+        byte[] semiCompressedBytesDuringLoading,
+        long[][] uncompressedPropertiesPerProperty,
+        int numberOfCompressedTargets,
+        int compressedByteSize,
+        LongArrayBuffer buffer,
+        ValueMapper mapper
+    ) {
+        AdjacencyCompression.zigZagUncompressFrom(
+            buffer,
+            semiCompressedBytesDuringLoading,
+            numberOfCompressedTargets,
+            compressedByteSize,
+            mapper
+        );
+
+        long[] targets = buffer.buffer;
+        int targetsLength = buffer.length;
+
+        var compress = AdjacencyPacker.compressWithProperties(targets, uncompressedPropertiesPerProperty, targetsLength, flags);
+
+        return compress;
     }
 
     private Compressed packWithoutProperties(
