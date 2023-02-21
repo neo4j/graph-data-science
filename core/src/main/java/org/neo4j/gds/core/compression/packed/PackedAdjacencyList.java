@@ -34,7 +34,7 @@ public class PackedAdjacencyList implements AdjacencyList {
 
     @Override
     public int degree(long node) {
-        return adjacencies.get(node).length();
+        return adjacencies.getOrDefault(node, Compressed.EMPTY).length();
     }
 
     @Override
