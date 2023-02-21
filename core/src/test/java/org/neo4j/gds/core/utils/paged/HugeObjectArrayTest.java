@@ -185,4 +185,19 @@ final class HugeObjectArrayTest extends HugeArrayTestBase<String[], String, Huge
         var estimation = HugeObjectArray.memoryEstimation(elementCount, elementEstimation);
         assertThat(estimation).isCloseTo(lowerBoundEstimate, Percentage.withPercentage(2));
     }
+
+    @ParameterizedTest
+    @MethodSource("longsArrays")
+    void shouldReturnDefaultValueIfNull(HugeObjectArray<long[]> longArrays) {
+        long[] fillValue = new long[] { 42 };
+        long[] defaultValue = new long[] { 1337 };
+        long updateIndex = NODE_COUNT / 2;
+
+        longArrays.fill(fillValue);
+
+        assertThat(longArrays.get(updateIndex)).isEqualTo(fillValue);
+        longArrays.set(updateIndex, null);
+        assertThat(longArrays.get(updateIndex)).isNull();
+        assertThat(longArrays.getOrDefault(updateIndex, defaultValue)).isEqualTo(defaultValue);
+    }
 }
