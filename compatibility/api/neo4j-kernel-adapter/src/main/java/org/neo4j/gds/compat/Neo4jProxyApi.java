@@ -209,7 +209,7 @@ public interface Neo4jProxyApi {
 
     Input batchInputFrom(CompatInput compatInput);
 
-    InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType);
+    InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType, ReadableGroups groups);
 
     InputEntityIdVisitor.String inputEntityStringIdVisitor(ReadableGroups groups);
 
