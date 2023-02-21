@@ -150,7 +150,6 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
             terminationFlag.assertRunning();
             Write ops = stmt.dataWrite();
 
-
             RelationshipWithPropertyConsumer writeConsumer = new WriteConsumer(
                 toOriginalId,
                 ops,
