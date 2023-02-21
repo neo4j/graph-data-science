@@ -272,15 +272,18 @@ public final class UncompressedAdjacencyList implements AdjacencyList, Adjacency
                 if (offset + 1 < limit) { // Page has more elements.
                     value = currentPage[offset + 1];
                     offset = offset + 2;
-                } else { // Target is the last element.
-                    value = currentPage[offset++];
+                } else {
+                    // Target is the last element, however, "skip until" requires
+                    // the value to be strictly greater than the target.
+                    offset++;
+                    value = NOT_FOUND;
                 }
             } else { // Not found
                 offset = -idx - 1; // Index of next largest element.
                 if (offset < limit) { // Page has more elements.
                     value = currentPage[offset++];
                 } else {
-                    value = currentPage[offset - 1];
+                    value = NOT_FOUND;
                 }
             }
 
@@ -303,7 +306,7 @@ public final class UncompressedAdjacencyList implements AdjacencyList, Adjacency
 
                 if (offset == 0 || offset >= limit) { // Target is out of range
                     offset = limit;
-                    return currentPage[offset - 1];
+                    return NOT_FOUND;
                 }
             }
 

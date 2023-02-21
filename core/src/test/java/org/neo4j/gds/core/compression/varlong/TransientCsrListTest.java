@@ -42,6 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
 import static org.neo4j.gds.core.compression.varlong.AdjacencyDecompressingReader.CHUNK_SIZE;
 
 class TransientCsrListTest {
@@ -87,7 +88,11 @@ class TransientCsrListTest {
     void advanceOutOfUpperBound(TestMethodRunner runner) {
         runner.run(() -> {
             var adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 2, 3});
-            assertThat(adjacencyCursor.advance(5)).isEqualTo(3);
+            assertThat(adjacencyCursor.advance(5)).isEqualTo(NOT_FOUND);
+            assertFalse(adjacencyCursor.hasNextVLong());
+
+            adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 2, 3});
+            assertThat(adjacencyCursor.advance(3)).isEqualTo(3);
             assertFalse(adjacencyCursor.hasNextVLong());
         });
     }
@@ -107,7 +112,11 @@ class TransientCsrListTest {
     void skipUntilOutOfUpperBound(TestMethodRunner runner) {
         runner.run(() -> {
             var adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 2, 3});
-            assertThat(adjacencyCursor.skipUntil(5)).isEqualTo(3);
+            assertThat(adjacencyCursor.skipUntil(5)).isEqualTo(NOT_FOUND);
+            assertFalse(adjacencyCursor.hasNextVLong());
+
+            adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 2, 3});
+            assertThat(adjacencyCursor.skipUntil(3)).isEqualTo(NOT_FOUND);
             assertFalse(adjacencyCursor.hasNextVLong());
         });
     }
