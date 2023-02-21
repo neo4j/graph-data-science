@@ -28,10 +28,11 @@ import org.neo4j.gds.scaling.LogScaler;
 import org.neo4j.gds.scaling.ScalerFactory;
 
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongToDoubleFunction;
+
+import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 
 public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends AbstractResultBuilder<WRITE_RESULT> {
 
@@ -82,11 +83,13 @@ public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends Abst
 
     @NotNull
     private Optional<DoubleHistogram> computeCentralityHistogram() {
-        var logScaler = scaler == null ? false : scaler.name().equals(LogScaler.NAME);
+        var logScaler = scaler != null && scaler.name().equals(LogScaler.NAME);
         if (buildHistogram && centralityFunction != null) {
             if (logScaler) {
-                this.histogramError.put(HISTOGRAM_ERROR_KEY,
-                    "Unable to create histogram when using scaler of type " + LogScaler.NAME.toUpperCase(Locale.ENGLISH));
+                this.histogramError.put(
+                    HISTOGRAM_ERROR_KEY,
+                    "Unable to create histogram when using scaler of type " + toUpperCaseWithLocale(LogScaler.NAME)
+                );
             } else {
                 try {
                     return Optional.of(CentralityStatistics.histogram(
