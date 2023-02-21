@@ -30,7 +30,17 @@ class CompressedAdjacencyListBuilderTest extends AdjacencyListBuilderBaseTest {
     }
 
     @Test
+    void testWithProperties() {
+        GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.disableAndRun(this::testAdjacencyListWithProperties);
+    }
+
+    @Test
     void testMapper() {
         GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.disableAndRun(this::testValueMapper);
+    }
+
+    @Test
+    void testMapperWithProperties() {
+        GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.disableAndRun(this::testValueMapperWithProperties);
     }
 }
