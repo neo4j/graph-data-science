@@ -25,10 +25,7 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.values.storable.LongValue;
 
-import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -63,33 +60,18 @@ public class LeidenStreamSpec implements AlgorithmSpec<Leiden, LeidenResult, Lei
             var graph = computationResult.graph();
             boolean includeIntermediateCommunities = computationResult.config().includeIntermediateCommunities();
 
+            boolean consecutiveIds = computationResult.config().consecutiveIds();
+            var nodeProperties = consecutiveIds ? nodeProperties(computationResult) : null;
+            var communities = leidenResult.communities();
 
             return LongStream.range(0, graph.nodeCount())
-                .mapToObj(nodeId -> {
-                    Optional<Long> communityId = getCommunityId(computationResult, nodeId);
-
-                    return communityId.map(id -> new StreamResult(
+                    .filter(i -> !consecutiveIds || nodeProperties.isValid(i))
+                    .mapToObj(nodeId -> new StreamResult(
                             graph.toOriginalNodeId(nodeId),
                             includeIntermediateCommunities ? leidenResult.getIntermediateCommunities(nodeId) : null,
-                            id
-                    )).orElse(null);
-                })
-                .filter(Objects::nonNull);
+                            consecutiveIds ? nodeProperties.longValue(nodeId) : communities.get(nodeId)
+                    ));
         };
-    }
-
-    private Optional<Long> getCommunityId(ComputationResult<Leiden, LeidenResult, LeidenStreamConfig> computationResult, long nodeId) {
-        var leidenResult = computationResult.result();
-        var communities = leidenResult.communities();
-        boolean consecutiveIds = computationResult.config().consecutiveIds();
-
-        if (!consecutiveIds) {
-            return Optional.of(communities.get(nodeId));
-        }
-
-        var nodeValue = nodeProperties(computationResult).value(nodeId);
-
-        return Optional.ofNullable(nodeValue).map(value -> ((LongValue) value).value());
     }
 
     protected NodePropertyValues nodeProperties(ComputationResult<Leiden, LeidenResult, LeidenStreamConfig> computationResult) {
