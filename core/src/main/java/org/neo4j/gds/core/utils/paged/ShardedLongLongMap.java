@@ -254,7 +254,7 @@ public final class ShardedLongLongMap {
 
             long addNode(long nodeId) {
                 this.assertIsUnderLock();
-                long mappedId = mapping.getIfAbsent(nodeId, -1);
+                long mappedId = mapping.getIfAbsent(nodeId, IdMap.NOT_FOUND);
                 if (mappedId != IdMap.NOT_FOUND) {
                     return -mappedId - 1;
                 }
