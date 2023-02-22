@@ -1,2 +1,2 @@
-include::partial$algorithms/triangle-count/specific-configuration.adoc[]
+include::partial$/algorithms/triangle-count/specific-configuration.adoc[]
 | minTriangles     | Integer | 0         | yes      | Only nodes inside communities larger or equal the given value are returned.

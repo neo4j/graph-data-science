@@ -1,2 +1,2 @@
-include::partial$algorithms/wcc/specific-configuration.adoc[]
+include::partial$/algorithms/wcc/specific-configuration.adoc[]
 | minCommunitySize | Integer | 0  | yes | Only nodes inside communities larger or equal the given value are returned.

@@ -1,2 +1,2 @@
-include::partial$algorithms/label-propagation/specific-configuration.adoc[]                                                                | Boolean | false                  | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).
+include::partial$/algorithms/label-propagation/specific-configuration.adoc[]
 | minCommunitySize                                                                 | Integer  | 0       | yes      | Only community ids of communities with a size greater than or equal to the given value are written to Neo4j.
