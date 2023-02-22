@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.paths.delta;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -29,6 +31,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.beta.generator.PropertyProducer;
+import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
+import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -39,8 +45,10 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.paths.delta.config.ImmutableAllShortestPathsDeltaStreamConfig;
+import org.neo4j.gds.paths.dijkstra.Dijkstra;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.DoubleStream;
@@ -337,4 +345,60 @@ final class DeltaSteppingTest {
     }
 
     private DeltaSteppingTest() {}
+
+    @RepeatedTest(200)
+    void incorrect() {
+        int nodeCount = 3_000;
+        long seed = 42L;
+        long start = 42;
+        int concurrency = 4;
+        var newGraph = new RandomGraphGeneratorBuilder()
+            .direction(Direction.DIRECTED)
+            .averageDegree(10)
+            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+            .relationshipPropertyProducer(PropertyProducer.randomDouble("foo", 1, 10))
+            .nodeCount(nodeCount)
+            .seed(seed)
+            .build()
+            .generate();
+
+        var config = ImmutableAllShortestPathsDeltaStreamConfig.builder()
+            .concurrency(concurrency)
+            .sourceNode(start)
+            .trackRelationships(true)
+            .build();
+        var deltaStepping = DeltaStepping.of(
+            newGraph,
+            config,
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        ).compute();
+
+        var dijkstraAlgo = Dijkstra
+            .singleSource(newGraph, config, Optional.empty(), ProgressTracker.NULL_TRACKER)
+            .compute();
+
+        double[] delta = new double[nodeCount];
+        double[] djikstra = new double[nodeCount];
+
+        double deltaSum = 0;
+        double dijkstraSum = 0;
+
+        for (var path : deltaStepping.pathSet()) {
+            delta[(int) path.targetNode()] = path.totalCost();
+        }
+        for (var path : dijkstraAlgo.pathSet()) {
+            djikstra[(int) path.targetNode()] = path.totalCost();
+        }
+        for (int i = 0; i < nodeCount; ++i) {
+            deltaSum += delta[i];
+            dijkstraSum += djikstra[i];
+        }
+        System.out.println(" deltaStepping:" + deltaSum + " dijkstra: " + dijkstraSum);
+        assertThat(deltaSum).isCloseTo(dijkstraSum, Offset.offset(1e-5));
+        for (int i = 0; i < nodeCount; ++i) {
+            assertThat(djikstra[i]).isCloseTo(delta[i], Offset.offset(1e-5));
+        }
+    }
+
 }
