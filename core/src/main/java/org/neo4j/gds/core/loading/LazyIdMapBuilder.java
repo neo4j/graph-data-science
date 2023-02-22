@@ -55,14 +55,12 @@ public final class LazyIdMapBuilder implements PartialIdMap {
     }
 
     public long addNode(long nodeId, NodeLabelToken nodeLabels) {
-        var intermediateId = this.intermediateIdMapBuilder.toMappedNodeId(nodeId);
+        long intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
 
         // deduplication
-        if (intermediateId != IdMap.NOT_FOUND) {
-            return intermediateId;
+        if (intermediateId < 0) {
+            return -(intermediateId + 1);
         }
-
-        intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
 
         this.nodesBuilder.addNode(intermediateId, nodeLabels);
 
@@ -74,14 +72,13 @@ public final class LazyIdMapBuilder implements PartialIdMap {
         PropertyValues properties,
         NodeLabelToken nodeLabels
     ) {
-        var intermediateId = this.intermediateIdMapBuilder.toMappedNodeId(nodeId);
+        long intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
 
         // deduplication
-        if (intermediateId != IdMap.NOT_FOUND) {
-            return intermediateId;
+        if (intermediateId < 0) {
+            return -(intermediateId + 1);
         }
 
-        intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
         if (properties.isEmpty()) {
             this.nodesBuilder.addNode(intermediateId, nodeLabels);
         } else {
