@@ -42,6 +42,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
@@ -260,6 +261,15 @@ public abstract class BaseTest {
         List<Map<String, Object>> expected
     ) {
         TestSupport.assertCypherResult(db, query, queryParameters, expected);
+    }
+
+    private static final Pattern DEPRECATION_NOTE = Pattern.compile(
+        "The query used a deprecated function.+",
+        Pattern.DOTALL
+    );
+
+    public static String resultAsStringNoDeprecation(Result result) {
+        return DEPRECATION_NOTE.matcher(result.resultAsString()).replaceAll("");
     }
 
     static {
