@@ -50,7 +50,7 @@ public abstract class StreamProc<
                 NodePropertyValues nodePropertyValues = nodeProperties(computationResult);
                 return LongStream
                     .range(IdMap.START_NODE_ID, graph.nodeCount())
-                    .filter(i -> nodePropertyValues.value(i) != null)
+                    .filter(nodePropertyValues::isValid)
                     .mapToObj(nodeId -> streamResult(graph.toOriginalNodeId(nodeId), nodeId, nodePropertyValues));
                 }
             );

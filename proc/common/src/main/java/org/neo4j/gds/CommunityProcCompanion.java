@@ -147,7 +147,16 @@ public final class CommunityProcCompanion {
             // This cast is safe since we handle LongNodeProperties.
             var communityId = ((LongValue) value).longValue();
 
-            return communitySizes.get(communityId) >= minCommunitySize ? value : null;
+            return isCommunityMinSizeMet(communityId) ? value : null;
+        }
+
+        @Override
+        public boolean isValid(long nodeId) {
+            return isCommunityMinSizeMet(properties.longValue(nodeId));
+        }
+
+        private boolean isCommunityMinSizeMet(long communityId) {
+            return communitySizes.get(communityId) >= minCommunitySize;
         }
     }
 }

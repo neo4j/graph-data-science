@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -79,7 +78,6 @@ public class LeidenStreamSpec implements AlgorithmSpec<Leiden, LeidenResult, Lei
         };
     }
 
-    @Nullable
     private Optional<Long> getCommunityId(ComputationResult<Leiden, LeidenResult, LeidenStreamConfig> computationResult, long nodeId) {
         var leidenResult = computationResult.result();
         var communities = leidenResult.communities();
@@ -92,7 +90,6 @@ public class LeidenStreamSpec implements AlgorithmSpec<Leiden, LeidenResult, Lei
         var nodeValue = nodeProperties(computationResult).value(nodeId);
 
         return Optional.ofNullable(nodeValue).map(value -> ((LongValue) value).value());
-
     }
 
     protected NodePropertyValues nodeProperties(ComputationResult<Leiden, LeidenResult, LeidenStreamConfig> computationResult) {
