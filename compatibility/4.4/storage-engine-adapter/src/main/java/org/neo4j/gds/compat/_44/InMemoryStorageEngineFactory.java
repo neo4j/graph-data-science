@@ -22,6 +22,8 @@ package org.neo4j.gds.compat._44;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
 import org.neo4j.dbms.database.readonly.DatabaseReadOnlyChecker;
+import org.neo4j.gds.compat.Neo4jVersion;
+import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.index.internal.gbptree.RecoveryCleanupWorkCollector;
 import org.neo4j.internal.id.IdController;
 import org.neo4j.internal.id.IdGeneratorFactory;
@@ -72,6 +74,10 @@ import java.util.UUID;
 public class InMemoryStorageEngineFactory implements StorageEngineFactory {
 
     static final String IN_MEMORY_STORAGE_ENGINE_NAME = "in-memory-44";
+
+    public InMemoryStorageEngineFactory() {
+        StorageEngineProxyApi.requireNeo4jVersion(Neo4jVersion.V_4_4, StorageEngineFactory.class);
+    }
 
     private final InMemoryMetaDataProviderImpl metadataProvider = new InMemoryMetaDataProviderImpl();
 

@@ -24,7 +24,7 @@ public final class StorageEngineFactoryIdProvider {
     // Record storage = 0, Freki = 1
     // Let's leave some room for future storage engines
     // This arbitrary seems quite future-proof
-    private static final byte ID = 42;
+    public static final byte ID = 42;
 
     private StorageEngineFactoryIdProvider() {}
 
