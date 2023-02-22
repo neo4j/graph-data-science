@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.IsFiniteFunc;
 import org.neo4j.gds.shortestpaths.AllShortestPathsProc;
-import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -83,7 +82,7 @@ public class AllShortestPathsDocTest extends BaseProcTest {
                        " ORDER BY distance DESC, source ASC, target ASC" +
                        " LIMIT 10";
 
-        String actual = runQuery(query, Result::resultAsString);
+        String actual = runQuery(query, BaseTest::resultAsStringNoDeprecation);
         String expected = "+----------------------------+" + NL +
                           "| source | target | distance |" + NL +
                           "+----------------------------+" + NL +
@@ -127,7 +126,7 @@ public class AllShortestPathsDocTest extends BaseProcTest {
                        " ORDER BY distance DESC, source ASC, target ASC" +
                        " LIMIT 10";
 
-        String actual = runQuery(query, Result::resultAsString);
+        String actual = runQuery(query, BaseTest::resultAsStringNoDeprecation);
         String expected = "+----------------------------+" + NL +
                           "| source | target | distance |" + NL +
                           "+----------------------------+" + NL +
