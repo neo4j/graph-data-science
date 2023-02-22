@@ -56,7 +56,7 @@ class LazyIdMapBuilderTest {
         var tasks = PartitionUtils.rangePartition(concurrency, idCount, partition -> (Runnable) () -> {
             int start = (int) partition.startNode();
             int end = (int) (start + partition.nodeCount());
-            for (int i = start; i < end ; i++) {
+            for (int i = start; i < end; i++) {
                 long originalId = idArray[i];
                 // We potentially insert the same original id from multiple threads.
                 // This MUST not lead to new intermediate ids generated internally.
