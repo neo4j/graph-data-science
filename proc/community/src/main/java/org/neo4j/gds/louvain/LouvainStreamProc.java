@@ -31,13 +31,10 @@ import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.values.storable.LongValue;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -82,20 +79,32 @@ public class LouvainStreamProc extends StreamProc<Louvain, LouvainResult, Louvai
         return runWithExceptionLogging("Graph streaming failed", () -> {
             Graph graph = computationResult.graph();
 
-            return LongStream
-                .range(0, graph.nodeCount())
-                .boxed()
-                .map((nodeId) -> {
-                    long[] communities = getCommunities(computationResult, nodeId);
-                    Optional<Long> communityId = getCommunityId(computationResult, nodeId);
+            boolean consecutiveIds = computationResult
+                    .config()
+                    .consecutiveIds();
 
-                    return communityId.map(id -> new StreamResult(
-                            graph.toOriginalNodeId(nodeId),
-                            communities,
-                            id
-                    )).orElse(null);
-                })
-                .filter(Objects::nonNull);
+            var nodeProperties = (computationResult.isGraphEmpty() || !consecutiveIds) ? null : nodeProperties((computationResult));
+
+            var louvain = computationResult.result();
+
+            return LongStream
+                    .range(0, graph.nodeCount())
+                    .boxed()
+                    .filter(nodeId -> nodeProperties == null || nodeProperties.isValid(nodeId))
+                    .map((nodeId) -> {
+                        boolean includeIntermediateCommunities = computationResult
+                                .config()
+                                .includeIntermediateCommunities();
+
+                        long[] communities = includeIntermediateCommunities ? louvain.getIntermediateCommunities(nodeId) : null;
+                        long communityId = consecutiveIds ? nodeProperties.longValue(
+                                nodeId) : louvain.getCommunity(nodeId);
+                        return new StreamResult(
+                                graph.toOriginalNodeId(nodeId),
+                                communities,
+                                communityId
+                        );
+                    });
         });
     }
 
@@ -109,34 +118,6 @@ public class LouvainStreamProc extends StreamProc<Louvain, LouvainResult, Louvai
         long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
     ) {
         throw new UnsupportedOperationException("Louvain handles result building individually.");
-    }
-
-    @Nullable
-    private long[] getCommunities(ComputationResult<Louvain, LouvainResult, LouvainStreamConfig> computationResult, Long nodeId) {
-        var louvain = computationResult.result();
-
-        boolean includeIntermediateCommunities = computationResult
-                .config()
-                .includeIntermediateCommunities();
-
-        return includeIntermediateCommunities ? louvain.getIntermediateCommunities(nodeId) : null;
-    }
-
-    private Optional<Long> getCommunityId(ComputationResult<Louvain, LouvainResult, LouvainStreamConfig> computationResult, Long nodeId) {
-        var louvain = computationResult.result();
-
-        boolean consecutiveIds = computationResult
-                .config()
-                .consecutiveIds();
-
-        if (computationResult.isGraphEmpty() || !consecutiveIds) {
-            return Optional.of(louvain.getCommunity(nodeId));
-        }
-
-        var nodeProperties = nodeProperties((computationResult));
-        var value = nodeProperties.value(nodeId);
-
-        return Optional.ofNullable(value).map(val -> ((LongValue) val).longValue());
     }
 
     @SuppressWarnings("unused")

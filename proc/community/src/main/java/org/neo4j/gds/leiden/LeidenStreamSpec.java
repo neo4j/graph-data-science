@@ -65,7 +65,7 @@ public class LeidenStreamSpec implements AlgorithmSpec<Leiden, LeidenResult, Lei
             var communities = leidenResult.communities();
 
             return LongStream.range(0, graph.nodeCount())
-                    .filter(i -> !consecutiveIds || nodeProperties.isValid(i))
+                    .filter(nodeId -> !consecutiveIds || nodeProperties.isValid(nodeId))
                     .mapToObj(nodeId -> new StreamResult(
                             graph.toOriginalNodeId(nodeId),
                             includeIntermediateCommunities ? leidenResult.getIntermediateCommunities(nodeId) : null,
