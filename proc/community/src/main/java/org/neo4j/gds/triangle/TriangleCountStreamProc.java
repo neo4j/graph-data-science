@@ -31,7 +31,6 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.values.storable.LongValue;
 
 import java.util.Map;
 import java.util.stream.LongStream;
@@ -70,10 +69,10 @@ public class TriangleCountStreamProc
             var nodeProperties = nodeProperties(computationResult);
 
             return LongStream.range(0, graph.nodeCount())
-                    .filter(i -> nodeProperties.value(i) != null)
+                    .filter(i -> nodeProperties != null && nodeProperties.isValid(i))
                     .mapToObj(i -> new Result(
                             graph.toOriginalNodeId(i),
-                            ((LongValue)nodeProperties.value(i)).longValue()
+                            nodeProperties.longValue(i)
                     ));
         });
     }
