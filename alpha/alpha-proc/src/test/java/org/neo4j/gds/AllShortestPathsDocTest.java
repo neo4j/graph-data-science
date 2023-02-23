@@ -24,6 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.IsFiniteFunc;
 import org.neo4j.gds.shortestpaths.AllShortestPathsProc;
+import org.neo4j.graphdb.Result;
+
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -82,7 +85,7 @@ public class AllShortestPathsDocTest extends BaseProcTest {
                        " ORDER BY distance DESC, source ASC, target ASC" +
                        " LIMIT 10";
 
-        String actual = runQuery(query, BaseTest::resultAsStringNoDeprecation);
+        String actual = runQuery(query, AllShortestPathsDocTest::resultAsStringNoDeprecation);
         String expected = "+----------------------------+" + NL +
                           "| source | target | distance |" + NL +
                           "+----------------------------+" + NL +
@@ -126,7 +129,7 @@ public class AllShortestPathsDocTest extends BaseProcTest {
                        " ORDER BY distance DESC, source ASC, target ASC" +
                        " LIMIT 10";
 
-        String actual = runQuery(query, BaseTest::resultAsStringNoDeprecation);
+        String actual = runQuery(query, AllShortestPathsDocTest::resultAsStringNoDeprecation);
         String expected = "+----------------------------+" + NL +
                           "| source | target | distance |" + NL +
                           "+----------------------------+" + NL +
@@ -144,5 +147,14 @@ public class AllShortestPathsDocTest extends BaseProcTest {
                           "10 rows" + NL;
 
         assertEquals(expected, actual);
+    }
+
+    private static final Pattern DEPRECATION_NOTE = Pattern.compile(
+        "The query used a deprecated function.+",
+        Pattern.DOTALL
+    );
+
+    private static String resultAsStringNoDeprecation(Result result) {
+        return DEPRECATION_NOTE.matcher(result.resultAsString()).replaceAll("");
     }
 }
