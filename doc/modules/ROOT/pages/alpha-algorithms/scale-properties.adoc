@@ -397,7 +397,7 @@ CALL gds.alpha.scaleProperties.stream('myGraph', {
   nodeProperties: ['avgReview'],
   scaler: {scaler: 'Log', offset: 5.12}
 }) YIELD nodeId, scaledProperty
-RETURN gds.util.asNode(nodeId).name AS name, scaledProperty
+RETURN gds.util.asNode(nodeId).name AS name, [x IN scaledProperty | round(x, 2)] AS scaledProperty
   ORDER BY name ASC
 ----
 
@@ -405,13 +405,13 @@ RETURN gds.util.asNode(nodeId).name AS name, scaledProperty
 [opts="header"]
 |===
 | name       | scaledProperty
-| "Beach"    | [2.130609828254235]
-| "Central"  | [3.1830413718589847]
-| "East"     | [2.2321626286975]
-| "Forest"   | [1.366091653802371]
-| "Mountain" | [2.469793011977952]
-| "Plaza"    | [2.5817308344235403]
-| "Polar"    | [1.635105659182678]
+| "Beach"    | [2.13]
+| "Central"  | [3.18]
+| "East"     | [2.23]
+| "Forest"   | [1.37]
+| "Mountain" | [2.47]
+| "Plaza"    | [2.58]
+| "Polar"    | [1.64]
 | "West"     | [0.0]
 |===
 --
