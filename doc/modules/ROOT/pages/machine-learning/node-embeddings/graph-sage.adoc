@@ -9,6 +9,11 @@
 
 include::partial$/operations-reference/beta-note.adoc[]
 
+:undirected:
+:homogeneous:
+:weighted:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
 
 GraphSAGE is an _inductive_ algorithm for computing node embeddings.
 GraphSAGE is using node feature information to generate node embeddings on unseen nodes or graphs.

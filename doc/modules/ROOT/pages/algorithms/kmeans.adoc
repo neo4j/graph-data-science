@@ -9,6 +9,10 @@
 
 include::partial$/operations-reference/beta-note.adoc[]
 
+:undirected:
+:homogeneous:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
 
 [[algorithms-k-means-intro]]
 == Introduction

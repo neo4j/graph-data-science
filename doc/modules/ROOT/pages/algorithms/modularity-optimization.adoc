@@ -6,6 +6,11 @@
 
 include::partial$/operations-reference/beta-note.adoc[]
 
+:undirected:
+:homogeneous:
+:weighted:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
 
 [[algorithms-modularity-optimization-intro]]
 == Introduction

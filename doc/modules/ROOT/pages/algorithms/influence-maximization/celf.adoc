@@ -9,6 +9,10 @@
 
 include::partial$/operations-reference/beta-note.adoc[]
 
+:directed:
+:homogeneous:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
 
 [[alpha-algorithms-celf-intro]]
 == Introduction
