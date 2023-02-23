@@ -19,14 +19,20 @@
  */
 package org.neo4j.gds.utils;
 
+import org.neo4j.values.storable.ByteArray;
 import org.neo4j.values.storable.DoubleArray;
 import org.neo4j.values.storable.FloatArray;
 import org.neo4j.values.storable.FloatingPointArray;
 import org.neo4j.values.storable.FloatingPointValue;
+import org.neo4j.values.storable.IntArray;
 import org.neo4j.values.storable.IntegralArray;
 import org.neo4j.values.storable.IntegralValue;
 import org.neo4j.values.storable.LongArray;
+import org.neo4j.values.storable.ShortArray;
 import org.neo4j.values.storable.Value;
+
+import java.util.Locale;
+import java.util.function.IntToLongFunction;
 
 import static org.neo4j.gds.api.ValueConversion.exactDoubleToLong;
 import static org.neo4j.gds.api.ValueConversion.exactLongToDouble;
@@ -94,9 +100,11 @@ public final class Neo4jValueConversion {
     private static double[] integralToDoubleArray(IntegralArray intArray) {
         var result = new double[intArray.length()];
 
+        IntToLongFunction longValueProvider = resolvelongValueProvider(intArray);
+
         try {
             for (int idx = 0; idx < intArray.length(); idx++) {
-                result[idx] = exactLongToDouble(intArray.longValue(idx));
+                result[idx] = exactLongToDouble(longValueProvider.applyAsLong(idx));
             }
         } catch (UnsupportedOperationException e) {
             throw conversionError(intArray, "Double Array", e.getMessage());
@@ -132,15 +140,35 @@ public final class Neo4jValueConversion {
     private static float[] longToFloatArray(IntegralArray integralArray) {
         var result = new float[integralArray.length()];
 
+        IntToLongFunction longValueProvider = resolvelongValueProvider(integralArray);
+
         try {
             for (int idx = 0; idx < integralArray.length(); idx++) {
-                result[idx] = exactLongToFloat(integralArray.longValue(idx));
+                result[idx] = exactLongToFloat(longValueProvider.applyAsLong(idx));
             }
         } catch (UnsupportedOperationException e) {
             throw conversionError(integralArray, "Float Array", e.getMessage());
         }
 
         return result;
+    }
+
+    private static IntToLongFunction resolvelongValueProvider(IntegralArray integralArray) {
+        // need narrow casting as IntegralArray::longValue is only public since Neo4j 5.4
+        if (integralArray instanceof LongArray) {
+            return ((LongArray) integralArray)::longValue;
+        } else if (integralArray instanceof IntArray) {
+            return ((IntArray) integralArray)::longValue;
+        } else if (integralArray instanceof ShortArray) {
+            return ((ShortArray) integralArray)::longValue;
+        } else if (integralArray instanceof ByteArray) {
+            return ((ByteArray) integralArray)::longValue;
+        }
+
+        throw new IllegalStateException(String.format(
+            Locale.US,
+            "Did not expect array of type %s.", integralArray.getClass().getSimpleName()
+        ));
     }
 
     private static long[] floatToLongArray(FloatingPointArray floatArray) {
