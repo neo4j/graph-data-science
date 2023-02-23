@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
@@ -55,14 +54,12 @@ public final class LazyIdMapBuilder implements PartialIdMap {
     }
 
     public long addNode(long nodeId, NodeLabelToken nodeLabels) {
-        var intermediateId = this.intermediateIdMapBuilder.toMappedNodeId(nodeId);
+        long intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
 
         // deduplication
-        if (intermediateId != IdMap.NOT_FOUND) {
-            return intermediateId;
+        if (intermediateId < 0) {
+            return -(intermediateId + 1);
         }
-
-        intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
 
         this.nodesBuilder.addNode(intermediateId, nodeLabels);
 
@@ -74,14 +71,13 @@ public final class LazyIdMapBuilder implements PartialIdMap {
         PropertyValues properties,
         NodeLabelToken nodeLabels
     ) {
-        var intermediateId = this.intermediateIdMapBuilder.toMappedNodeId(nodeId);
+        long intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
 
         // deduplication
-        if (intermediateId != IdMap.NOT_FOUND) {
-            return intermediateId;
+        if (intermediateId < 0) {
+            return -(intermediateId + 1);
         }
 
-        intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
         if (properties.isEmpty()) {
             this.nodesBuilder.addNode(intermediateId, nodeLabels);
         } else {
