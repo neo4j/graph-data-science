@@ -65,7 +65,7 @@ class NodeSimilarityTerminationTest extends BaseTest {
             db,
             nodeSimilarity,
             nhs -> nodeSimilarity.computeToStream(),
-            100
+            200
         );
     }
 
