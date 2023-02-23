@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.compression.varlong;
 
-import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.core.loading.MutableIntValue;
 
 import java.util.Arrays;
