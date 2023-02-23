@@ -58,4 +58,9 @@ public interface DoubleArrayNodePropertyValues extends NodePropertyValues {
     default ValueType valueType() {
         return ValueType.DOUBLE_ARRAY;
     }
+
+    @Override
+    default int dimension() {
+        return doubleArrayValue(0).length;
+    }
 }

@@ -48,6 +48,11 @@ public interface DoubleNodePropertyValues extends NodePropertyValues {
     }
 
     @Override
+    default int dimension() {
+        return 1;
+    }
+
+    @Override
     default OptionalDouble getMaxDoublePropertyValue() {
         return LongStream
             .range(0, size())

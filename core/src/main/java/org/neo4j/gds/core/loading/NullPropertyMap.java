@@ -34,7 +34,12 @@ import java.util.OptionalLong;
  */
 public abstract class NullPropertyMap implements NodePropertyValues {
 
-    static public class DoubleNullPropertyMap extends NullPropertyMap {
+    @Override
+    public int dimension() {
+        return 1;
+    }
+
+    public static class DoubleNullPropertyMap extends NullPropertyMap {
         private final double defaultValue;
 
         public DoubleNullPropertyMap(double defaultValue) {this.defaultValue = defaultValue;}
@@ -70,7 +75,7 @@ public abstract class NullPropertyMap implements NodePropertyValues {
         }
     }
 
-    static public class LongNullPropertyMap extends NullPropertyMap implements LongNodePropertyValues {
+    public static class LongNullPropertyMap extends NullPropertyMap implements LongNodePropertyValues {
         private final long defaultValue;
 
         public LongNullPropertyMap(long defaultValue) {this.defaultValue = defaultValue;}

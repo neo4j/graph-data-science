@@ -59,4 +59,9 @@ public interface FloatArrayNodePropertyValues extends NodePropertyValues {
     default ValueType valueType() {
         return ValueType.FLOAT_ARRAY;
     }
+
+    @Override
+    default int dimension() {
+        return floatArrayValue(0).length;
+    }
 }

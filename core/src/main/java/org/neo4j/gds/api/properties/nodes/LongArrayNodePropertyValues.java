@@ -43,4 +43,9 @@ public interface LongArrayNodePropertyValues extends NodePropertyValues {
     default ValueType valueType() {
         return ValueType.LONG_ARRAY;
     }
+
+    @Override
+    default int dimension() {
+        return longArrayValue(0).length;
+    }
 }

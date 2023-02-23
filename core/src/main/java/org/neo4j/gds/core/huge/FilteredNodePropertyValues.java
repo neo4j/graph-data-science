@@ -82,6 +82,11 @@ public abstract class FilteredNodePropertyValues implements NodePropertyValues {
     }
 
     @Override
+    public int dimension() {
+        return properties.dimension();
+    }
+
+    @Override
     public OptionalLong getMaxLongPropertyValue() {
         if (valueType() == ValueType.LONG) {
             MutableLong currentMax = new MutableLong(Long.MIN_VALUE);

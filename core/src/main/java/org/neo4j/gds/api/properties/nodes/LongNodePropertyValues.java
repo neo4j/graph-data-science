@@ -49,6 +49,11 @@ public interface LongNodePropertyValues extends NodePropertyValues {
     }
 
     @Override
+    default int dimension() {
+        return 1;
+    }
+
+    @Override
     default double doubleValue(long nodeId) {
         long value = longValue(nodeId);
         if (value == DefaultValue.LONG_DEFAULT_FALLBACK) {

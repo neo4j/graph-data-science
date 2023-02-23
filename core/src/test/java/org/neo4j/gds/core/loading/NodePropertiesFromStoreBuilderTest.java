@@ -164,6 +164,21 @@ final class NodePropertiesFromStoreBuilderTest {
         assertArrayEquals(defaultValue, properties.doubleArrayValue(0));
     }
 
+    @Test
+    void dimensions() {
+        var longs = createNodeProperties(10L, -6L, b -> b.set(1, Values.of(69L)));
+        var doubles = createNodeProperties(25L, 420D, b -> b.set(1, Values.of(13.37D)));
+        var floatArray = createNodeProperties(2L, new float[2], b -> b.set(1, Values.of(new float[]{42.2F, 1337.1F})));
+        var doubleArray = createNodeProperties(3L, new double[3], b -> b.set(1, Values.of(new double[]{1D, 1D, 0D})));
+        var longArray = createNodeProperties(4L, new long[0], b -> b.set(1, Values.of(new long[0])));
+
+        assertEquals(1, longs.dimension());
+        assertEquals(1, doubles.dimension());
+        assertEquals(2, floatArray.dimension());
+        assertEquals(3, doubleArray.dimension());
+        assertEquals(0, longArray.dimension());
+    }
+
     static Stream<Arguments> unsupportedValues() {
         return Stream.of(
             arguments(Values.stringValue("42L")),

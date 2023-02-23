@@ -79,6 +79,11 @@ public final class NullCheckingNodePropertyValues implements NodePropertyValues 
     }
 
     @Override
+    public int dimension() {
+        return properties.dimension();
+    }
+
+    @Override
     public Value value(long nodeId) {
         var value = properties.value(nodeId);
         check(nodeId, value);

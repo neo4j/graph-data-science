@@ -60,6 +60,15 @@ public interface NodePropertyValues extends PropertyValues {
     Value value(long nodeId);
 
     /**
+     * The dimension of the properties.
+     * For scalar values, this is 1.
+     * For arrays, this is the length of the array.
+     *
+     * @return the dimension of the properties stored.
+     */
+    int dimension();
+
+    /**
      * @return the maximum long value contained in the mapping or an empty {@link OptionalLong} if the mapping is
      *         empty or the feature is not supported.
      * @throws java.lang.UnsupportedOperationException if the type is not coercible into a long.
