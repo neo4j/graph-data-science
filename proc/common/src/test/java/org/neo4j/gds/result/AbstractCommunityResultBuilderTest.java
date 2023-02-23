@@ -32,7 +32,6 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
@@ -250,11 +249,6 @@ final class AbstractCommunityResultBuilderTest {
             @Override
             public boolean contains(String fieldName) {
                 return Arrays.asList(returnColumns).contains(fieldName);
-            }
-
-            @Override
-            public ProcedureReturnColumns withReturnColumnNameTransformationFunction(Function<String, String> transformationFunction) {
-                return this;
             }
         };
     }
