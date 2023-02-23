@@ -30,6 +30,7 @@ import org.neo4j.function.ThrowingSupplier;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.compat.StorageEngineFactoryIdProvider;
+import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.index.internal.gbptree.RecoveryCleanupWorkCollector;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
@@ -115,9 +116,13 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
 
     static final String IN_MEMORY_STORAGE_ENGINE_NAME = "in-memory-55";
 
+    public InMemoryStorageEngineFactory() {
+        StorageEngineProxyApi.requireNeo4jVersion(Neo4jVersion.V_5_5, StorageEngineFactory.class);
+    }
+
     @Override
     public byte id() {
-        return StorageEngineFactoryIdProvider.id(Neo4jVersion.V_5_5);
+        return StorageEngineFactoryIdProvider.ID;
     }
 
     @Override
