@@ -71,7 +71,7 @@ public final class Compressed implements AutoCloseable {
     }
 
     public void properties(long[][] properties) {
-        this.properties = properties;
+        this.properties = properties.clone();
     }
 
     /**
