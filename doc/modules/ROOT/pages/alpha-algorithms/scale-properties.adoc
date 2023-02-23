@@ -60,6 +60,7 @@ image::equations/scale-properties/mean.svg[scaled p equals p minus average of p 
 === Log scaler
 
 Transforms all property values using the natural logarithm.
+`C` denotes a configurable constant offset, which can be used to avoid negative values or zeros in the value space, as their logarithms are not finite values.
 
 image::equations/scale-properties/log.svg[scaled p equals natural logarithm of p,align="center"]
 
@@ -176,6 +177,23 @@ include::partial$/algorithms/alpha/scale-properties/specific-configuration.adoc[
 |===
 ======
 ====
+
+
+[[algorithms-scale-properties-syntax-scalerparams]]
+=== Scaler-specific configuration options
+
+The log scaler supports specific configuration, which we document here.
+
+.Specific configuration for `log` scaler
+[opts="header",cols="1,1,1m,1,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+| scaler        | String | n/a     | no       | Name of the scaler applied for the properties. Supported values are `MinMax`, `Max`, `Mean`, `Log`, `L1Norm`, `L2Norm`, `Center`, and `StdScore`, case insensitively.
+| offset        | Number | 0       | yes      | Constant additive term applied before computing the logarithm of the property value.
+|===
+
+
+All other scalers do not support additional, custom configuration.
 
 
 [[algorithms-scale-properties-examples]]
@@ -341,3 +359,63 @@ We can see that some values are negative and that the maximum value sticks out f
 The other three list positions are the scaled values for the `storyCapacity` list property.
 Note that each list item is scaled only with respect to the corresponding item in the other lists.
 Thus, the `Polar` hotel has the greatest scaled value in all list positions.
+
+
+[[algorithms-scale-properties-examples-log-offset]]
+=== Scaler-specific configuration
+
+The `log` scaler supports a configurable offset parameter.
+In this example we illustrate how to configure that offset.
+
+We want to scale the `avgReview` property, but it contains negative numbers, for which the logarithm is not defined.
+First, we'll determine what the minimum value is, by using Cypher's `min()` aggregating function:
+
+[role=query-example]
+--
+----
+CALL gds.graph.nodeProperty.stream('myGraph', 'avgReview') YIELD propertyValue
+RETURN min(propertyValue) AS minimumAvgReview
+----
+
+.Results
+[opts="header"]
+|===
+| minimumAvgReview
+| -4.12
+|===
+--
+
+Learning this value, we can use a greater value, thus ensuring that the logarithm will be a finite value.
+We will use `5.12`, as this will make the smallest scaled value zero.
+
+[role=query-example]
+--
+.The following will run the algorithm with a custom offset for the log scaler:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.scaleProperties.stream('myGraph', {
+  nodeProperties: ['avgReview'],
+  scaler: {scaler: 'Log', offset: 5.12}
+}) YIELD nodeId, scaledProperty
+RETURN gds.util.asNode(nodeId).name AS name, [x IN scaledProperty | round(x, 2)] AS scaledProperty
+  ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name       | scaledProperty
+| "Beach"    | [2.13]
+| "Central"  | [3.18]
+| "East"     | [2.23]
+| "Forest"   | [1.37]
+| "Mountain" | [2.47]
+| "Plaza"    | [2.58]
+| "Polar"    | [1.64]
+| "West"     | [0.0]
+|===
+--
+
+As we can see, all scaled values are finite numbers.
+In particular, the smallest scaled value is zero.
+Try this example with an offset lower than `4.12` if you are curious about the results.

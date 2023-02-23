@@ -1,2 +1,2 @@
 | nodeProperties | List of String | n/a     | no       | The names of the node properties that are to be scaled. All property names must exist in the projected graph.
-| scaler         | String         | n/a     | no       | The name of the scaler applied for the properties. Supported values are `MinMax`, `Max`, `Mean`, `Log`, `L1Norm`, `L2Norm`, `Center`, and `StdScore`, case insensitively.
+| scaler         | String or Map  | n/a     | no       | The name of the scaler applied for the properties. Supported values are `MinMax`, `Max`, `Mean`, `Log`, `L1Norm`, `L2Norm`, `Center`, and `StdScore`, case insensitively. To apply scaler-specific configuration, use the Map syntax: `{scaler: 'name', ...}`.
