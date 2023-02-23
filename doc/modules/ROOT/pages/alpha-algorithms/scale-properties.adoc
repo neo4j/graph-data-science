@@ -185,9 +185,10 @@ include::partial$/algorithms/alpha/scale-properties/specific-configuration.adoc[
 The log scaler supports specific configuration, which we document here.
 
 .Specific configuration for `log` scaler
-[opts="header",cols="3,2,3m,2,8"]
+[opts="header",cols="1,1,1m,1,8"]
 |===
 | Name          | Type   | Default | Optional | Description
+| scaler        | String | n/a     | no       | Name of the scaler applied for the properties. Supported values are `MinMax`, `Max`, `Mean`, `Log`, `L1Norm`, `L2Norm`, `Center`, and `StdScore`, case insensitively.
 | offset        | Number | 0       | yes      | Constant additive term applied before computing the logarithm of the property value.
 |===
 
