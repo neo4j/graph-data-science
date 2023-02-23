@@ -51,21 +51,21 @@ public abstract class PropertyMappings implements Iterable<PropertyMapping> {
         return ImmutablePropertyMappings.of(Arrays.asList(mappings));
     }
 
-    public static PropertyMappings fromObject(Object relPropertyMapping) {
-        return fromObject(relPropertyMapping, Aggregation.DEFAULT);
+    public static PropertyMappings fromObject(Object propertyMappingInput) {
+        return fromObject(propertyMappingInput, Aggregation.DEFAULT);
     }
 
-    public static PropertyMappings fromObject(Object relPropertyMapping, Aggregation defaultAggregation) {
-        if (relPropertyMapping instanceof ImmutablePropertyMappings) {
-            ImmutablePropertyMappings properties = (ImmutablePropertyMappings) relPropertyMapping;
+    public static PropertyMappings fromObject(Object propertyMappingInput, Aggregation defaultAggregation) {
+        if (propertyMappingInput instanceof ImmutablePropertyMappings) {
+            ImmutablePropertyMappings properties = (ImmutablePropertyMappings) propertyMappingInput;
             return ImmutablePropertyMappings.builder().from(properties).withDefaultAggregation(defaultAggregation).build();
         }
-        if (relPropertyMapping instanceof String) {
-            String propertyMapping = (String) relPropertyMapping;
+        if (propertyMappingInput instanceof String) {
+            String propertyMapping = (String) propertyMappingInput;
             return fromObject(singletonMap(propertyMapping, propertyMapping), defaultAggregation);
-        } else if (relPropertyMapping instanceof List) {
+        } else if (propertyMappingInput instanceof List) {
             PropertyMappings.Builder builder = PropertyMappings.builder().withDefaultAggregation(defaultAggregation);
-            for (Object mapping : (List<?>) relPropertyMapping) {
+            for (Object mapping : (List<?>) propertyMappingInput) {
                 List<PropertyMapping> propertyMappings = fromObject(mapping, defaultAggregation).mappings();
                 for (PropertyMapping propertyMapping : propertyMappings) {
                     if (builder.mappings != null && builder.mappings.contains(propertyMapping)) {
@@ -78,9 +78,9 @@ public abstract class PropertyMappings implements Iterable<PropertyMapping> {
                 }
             }
             return builder.build();
-        } else if (relPropertyMapping instanceof Map) {
+        } else if (propertyMappingInput instanceof Map) {
             PropertyMappings.Builder builder = PropertyMappings.builder().withDefaultAggregation(defaultAggregation);
-            ((Map<String, Object>) relPropertyMapping).forEach((key, spec) -> {
+            ((Map<String, Object>) propertyMappingInput).forEach((key, spec) -> {
                 PropertyMapping propertyMapping = PropertyMapping.fromObject(key, spec);
                 builder.addMapping(propertyMapping);
             });
@@ -88,7 +88,7 @@ public abstract class PropertyMappings implements Iterable<PropertyMapping> {
         } else {
             throw new IllegalArgumentException(formatWithLocale(
                 "Expected String or Map for property mappings. Got %s.",
-                relPropertyMapping.getClass().getSimpleName()
+                propertyMappingInput.getClass().getSimpleName()
             ));
         }
     }
