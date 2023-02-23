@@ -368,8 +368,8 @@ RETURN min(propertyValue) AS minimumAvgReview
 |===
 --
 
-Learning this value, we can use a slightly greater value, thus ensuring that the logarithm will be a finite value.
-We will use `4.13`.
+Learning this value, we can use a greater value, thus ensuring that the logarithm will be a finite value.
+We will use `5.12`, as this will make the smallest scaled value zero.
 
 [role=query-example]
 --
@@ -378,7 +378,7 @@ We will use `4.13`.
 ----
 CALL gds.alpha.scaleProperties.stream('myGraph', {
   nodeProperties: ['avgReview'],
-  scaler: {scaler: 'Log', offset: 4.13}
+  scaler: {scaler: 'Log', offset: 5.12}
 }) YIELD nodeId, scaledProperty
 RETURN gds.util.asNode(nodeId).name AS name, scaledProperty
   ORDER BY name ASC
@@ -388,16 +388,17 @@ RETURN gds.util.asNode(nodeId).name AS name, scaledProperty
 [opts="header"]
 |===
 | name       | scaledProperty
-| "Beach"    | [2.005525858729668]
-| "Central"  | [3.141130476243348]
-| "East"     | [2.1198634561787513]
-| "Forest"   | [1.0750024230289759]
-| "Mountain" | [2.382320061012899]
-| "Plaza"    | [2.503891949699081]
-| "Polar"    | [1.4206957878372228]
-| "West"     | [-4.605170185988113]
+| "Beach"    | [2.130609828254235]
+| "Central"  | [3.1830413718589847]
+| "East"     | [2.2321626286975]
+| "Forest"   | [1.366091653802371]
+| "Mountain" | [2.469793011977952]
+| "Plaza"    | [2.5817308344235403]
+| "Polar"    | [1.635105659182678]
+| "West"     | [0.0]
 |===
 --
 
 As we can see, all scaled values are finite numbers.
-Try this example with a lower offset value if you are curious about the results.
+In particular, the smallest scaled value is zero.
+Try this example with an offset lower than `4.12` if you are curious about the results.
