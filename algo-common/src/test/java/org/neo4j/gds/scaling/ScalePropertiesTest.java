@@ -58,7 +58,7 @@ class ScalePropertiesTest {
 
     @Test
     void scaleSingleProperty() {
-        var config = ImmutableScalePropertiesBaseConfig.builder()
+        var config = ScalePropertiesStreamConfigImpl.builder()
             .nodeProperties(List.of("a"))
             .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .concurrency(1)
@@ -77,7 +77,7 @@ class ScalePropertiesTest {
 
     @Test
     void scaleMultipleProperties() {
-        var config = ImmutableScalePropertiesBaseConfig.builder()
+        var config = ScalePropertiesStreamConfigImpl.builder()
             .nodeProperties(List.of("a", "b", "c"))
             .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .concurrency(1)
@@ -106,7 +106,7 @@ class ScalePropertiesTest {
             .build()
             .generate();
 
-        var config = ImmutableScalePropertiesBaseConfig.builder()
+        var config = ScalePropertiesStreamConfigImpl.builder()
             .nodeProperties(List.of("a"))
             .scaler(MinMax.buildFrom(CypherMapWrapper.empty()));
 
@@ -127,8 +127,8 @@ class ScalePropertiesTest {
 
     @Test
     void scaleArrayProperty() {
-        var arrayConfig = ImmutableScalePropertiesBaseConfig.builder()
-            .nodeProperties(List.of("a", "bAndC", "a"))
+        var arrayConfig = ScalePropertiesStreamConfigImpl.builder()
+            .nodeProperties(List.of("a", "bAndC", "longArrayB"))
             .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .build();
 
@@ -136,8 +136,8 @@ class ScalePropertiesTest {
             .compute()
             .scaledProperties();
 
-        var singlePropConfig = ImmutableScalePropertiesBaseConfig.builder()
-            .nodeProperties(List.of("a", "b", "c", "a"))
+        var singlePropConfig = ScalePropertiesStreamConfigImpl.builder()
+            .nodeProperties(List.of("a", "b", "c", "longArrayB"))
             .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .build();
 
@@ -151,7 +151,7 @@ class ScalePropertiesTest {
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.scaling.ScalePropertiesBaseConfigTest#scalers")
     void supportLongAndFloatArrays(String scaler) {
-        var baseConfigBuilder = ImmutableScalePropertiesBaseConfig.builder()
+        var baseConfigBuilder = ScalePropertiesStreamConfigImpl.builder()
             .scaler(ScalerFactory.SUPPORTED_SCALERS.get(scaler).apply(CypherMapWrapper.empty()));
         var bConfig = baseConfigBuilder.nodeProperties(List.of("b")).build();
         var longArrayBConfig = baseConfigBuilder.nodeProperties(List.of("longArrayB")).build();
@@ -167,7 +167,7 @@ class ScalePropertiesTest {
 
     @Test
     void supportDoubleArrays() {
-        var baseConfigBuilder = ImmutableScalePropertiesBaseConfig.builder().scaler(MinMax.buildFrom(CypherMapWrapper.empty()));
+        var baseConfigBuilder = ScalePropertiesStreamConfigImpl.builder().scaler(MinMax.buildFrom(CypherMapWrapper.empty()));
         var config = baseConfigBuilder.nodeProperties(List.of("doubleArray")).build();
 
         var expected = new double[][]{new double[]{0.0}, new double[]{0.2499999722444236}, new double[]{.5}, new double[]{0.7500000277555764}, new double[]{1.0}};
@@ -178,7 +178,7 @@ class ScalePropertiesTest {
 
     @Test
     void failOnArrayPropertyWithUnequalLength() {
-        var config = ImmutableScalePropertiesBaseConfig.builder()
+        var config = ScalePropertiesStreamConfigImpl.builder()
             .nodeProperties(List.of("mixedSizeArray"))
             .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .build();
@@ -193,7 +193,7 @@ class ScalePropertiesTest {
 
     @Test
     void failOnMissingValuesForArrayProperty() {
-        var config = ImmutableScalePropertiesBaseConfig.builder()
+        var config = ScalePropertiesStreamConfigImpl.builder()
             .nodeProperties(List.of("missingArray"))
             .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .build();
@@ -208,7 +208,7 @@ class ScalePropertiesTest {
 
     @Test
     void failOnNonExistentProperty() {
-        var config = ImmutableScalePropertiesBaseConfig.builder()
+        var config = ScalePropertiesStreamConfigImpl.builder()
             .nodeProperties(List.of("IMAGINARY_PROP"))
             .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .build();

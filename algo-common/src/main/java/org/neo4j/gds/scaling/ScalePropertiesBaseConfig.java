@@ -21,7 +21,6 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
 import java.util.List;
@@ -29,7 +28,6 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.PropertyMappings.fromObject;
 
-@ValueClass
 @SuppressWarnings("immutables:subtype")
 public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
 
