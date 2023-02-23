@@ -23,6 +23,8 @@ import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.mem.BitUtil;
+import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.Values;
 
 public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues {
 
@@ -35,6 +37,7 @@ public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues
         long nodeCount
     ) {
         var nextConsecutiveId = -1L;
+        var nextSkippableId = -2L; // communities signaled with <0 are skipped and not written
 
         var setIdToConsecutiveId = new HugeLongLongMap(BitUtil.ceilDiv(
             nodeCount,
@@ -47,8 +50,14 @@ public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues
             var setId = longNodeProperties.longValue(nodeId);
             var communityId = setIdToConsecutiveId.getOrDefault(setId, -1);
             if (communityId == -1) {
-                setIdToConsecutiveId.addTo(setId, ++nextConsecutiveId);
-                communityId = nextConsecutiveId;
+                //if this is null, it  means this community should not be written
+                if (longNodeProperties.value(nodeId) != null) {
+                    setIdToConsecutiveId.addTo(setId, ++nextConsecutiveId);
+                    communityId = nextConsecutiveId;
+                } else {
+                    setIdToConsecutiveId.addTo(setId, --nextSkippableId); //assign it a negative id
+                    communityId = nextSkippableId;
+                }
             }
             communities.set(nodeId, communityId);
         }
@@ -57,6 +66,15 @@ public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues
     @Override
     public long longValue(long nodeId) {
         return communities.get(nodeId);
+    }
+
+    @Override
+    public Value value(long nodeId) {
+        if (communities.get(nodeId) < 0) { //community is skipped, return null
+            return null;
+        } else {
+            return Values.longValue(communities.get(nodeId));
+        }
     }
 
     @Override

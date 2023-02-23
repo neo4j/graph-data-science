@@ -118,6 +118,40 @@ class CommunityProcCompanionTest {
         }
     }
 
+    @Test
+    void shouldWorkWithMinComponentAndConsecutive() {
+        long[] values = new long[]{20, 20, 200, 10, 10, 90, 50, 10, 50, 50, 50};
+        Long[] returnedValues = new Long[]{null, null, null, 0l, 0L, null, 1l, 0l, 1l, 1l, 1l};
+
+        LongNodePropertyValues inputProperties = new TestNodePropertyValues(11, id -> values[(int) id]);
+
+        var config = ConfigWithComponentSize.of(CypherMapWrapper
+            .empty()
+            .withNumber("minComponentSize", 3L)
+            .withBoolean("consecutiveIds", true));
+
+        var result = CommunityProcCompanion.nodeProperties(
+            config,
+            "seed",
+            inputProperties,
+            () -> {throw new UnsupportedOperationException("Not implemented");}
+        );
+
+
+        for (long i = 0L; i < result.size(); i++) {
+            int ii = (int) i;
+            if (returnedValues[ii] != null) {
+                assertThat(result.value(i).asObject()).isEqualTo(returnedValues[ii]);
+                assertThat(result.longValue(i)).isEqualTo(returnedValues[ii]);
+            } else {
+                assertThat(result.value(i)).isNull();
+                assertThat(result.longValue(i)).isLessThan(0l);
+            }
+
+        }
+
+    }
+
     private static final class TestNodePropertyValues implements LongNodePropertyValues {
         private final long size;
         private final LongToLongFunction transformer;
