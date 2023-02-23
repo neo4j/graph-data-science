@@ -60,7 +60,7 @@ image::equations/scale-properties/mean.svg[scaled p equals p minus average of p 
 === Log scaler
 
 Transforms all property values using the natural logarithm.
-`C` denotes a configurable constant offset, which can be used to avoid negative values or zeros in the value space, as these are not finite values.
+`C` denotes a configurable constant offset, which can be used to avoid negative values or zeros in the value space, as their logarithms are not finite values.
 
 image::equations/scale-properties/log.svg[scaled p equals natural logarithm of p,align="center"]
 
