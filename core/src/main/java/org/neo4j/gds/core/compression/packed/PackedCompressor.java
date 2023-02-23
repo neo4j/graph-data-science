@@ -152,7 +152,7 @@ public final class PackedCompressor implements AdjacencyCompressor {
 
         private HugeObjectArray<Compressed> adjacencies;
 
-        public Factory(
+        Factory(
             LongSupplier nodeCountSupplier,
             PropertyMappings propertyMappings,
             Aggregation[] aggregations,
@@ -185,10 +185,17 @@ public final class PackedCompressor implements AdjacencyCompressor {
         public AdjacencyListsWithProperties build() {
             var adjacency = new PackedAdjacencyList(this.adjacencies);
 
-            return ImmutableAdjacencyListsWithProperties.builder()
+            var builder = ImmutableAdjacencyListsWithProperties.builder()
                 .adjacency(adjacency)
-                .relationshipCount(this.relationshipCounter.longValue())
-                .build();
+                .relationshipCount(this.relationshipCounter.longValue());
+
+            var mappings = propertyMappings.mappings();
+            for (int i = 0; i < mappings.size(); i++) {
+                var property = new PackedPropertyList(this.adjacencies, i);
+                builder.addProperty(property);
+            }
+
+            return builder.build();
         }
     }
 }

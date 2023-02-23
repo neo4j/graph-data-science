@@ -66,6 +66,10 @@ public final class Compressed implements AutoCloseable {
         return "Compressed{address=" + this.address.address() + ", bytes=" + this.address.bytes() + ", blocks=" + header.length + '}';
     }
 
+    public long[] @Nullable [] properties() {
+        return this.properties;
+    }
+
     public void properties(long[][] properties) {
         this.properties = properties;
     }
