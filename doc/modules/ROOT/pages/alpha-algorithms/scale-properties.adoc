@@ -179,6 +179,22 @@ include::partial$/algorithms/alpha/scale-properties/specific-configuration.adoc[
 ====
 
 
+[[algorithms-scale-properties-syntax-scalerparams]]
+=== Scaler-specific configuration options
+
+The log scaler supports specific configuration, which we document here.
+
+.Specific configuration for `log` scaler
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+| offset        | Number | 0       | yes      | Constant additive term applied before computing the logarithm of the property value.
+|===
+
+
+All other scalers do not support additional, custom configuration.
+
+
 [[algorithms-scale-properties-examples]]
 == Examples
 
