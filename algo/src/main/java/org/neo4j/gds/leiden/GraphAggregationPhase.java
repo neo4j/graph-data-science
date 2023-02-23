@@ -53,22 +53,22 @@ class GraphAggregationPhase {
 
     static MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(GraphAggregationPhase.class)
-            .rangePerGraphDimension("aggregated graph", (rootGraphDimensions, concurrency) -> {
+            .rangePerGraphDimension("aggregated graph", (rootDimensions, concurrency) -> {
                 // The input graph might have multiple node and relationship properties
                 // but the aggregated graph will never have more than a single relationship property
                 // so let's
-                var maxDimensions = ImmutableGraphDimensions
-                    .builder()
-                    .from(rootGraphDimensions)
-                    .build();
+
+                // Handle the case where the input graph has only one node
+                var minNodeCount = Math.min(2, rootDimensions.nodeCount());
+                var minRelCount = Math.min(1, rootDimensions.relCountUpperBound());
 
                 var minDimensions = ImmutableGraphDimensions
                     .builder()
-                    .nodeCount(2)
-                    .highestPossibleNodeCount(2)
-                    .relationshipCounts(Map.of(RelationshipType.of("foo"), 1L))
-                    .relCountUpperBound(1)
-                    .highestRelationshipId(1)
+                    .nodeCount(minNodeCount)
+                    .highestPossibleNodeCount(minNodeCount)
+                    .relationshipCounts(Map.of(RelationshipType.of("foo"), minRelCount))
+                    .relCountUpperBound(minRelCount)
+                    .highestRelationshipId(minRelCount)
                     .build();
 
                 var relationshipProjections = ImmutableRelationshipProjections.builder()
@@ -89,7 +89,7 @@ class GraphAggregationPhase {
                     false
                 );
                 var min = memoryEstimation.estimate(minDimensions, concurrency).memoryUsage().min;
-                var max = memoryEstimation.estimate(maxDimensions, concurrency).memoryUsage().max;
+                var max = memoryEstimation.estimate(rootDimensions, concurrency).memoryUsage().max;
 
                 return MemoryRange.of(min, max);
             }).perNode("sorted communities", HugeLongArray::memoryEstimation)
