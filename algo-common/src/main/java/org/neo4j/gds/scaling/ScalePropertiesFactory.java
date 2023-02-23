@@ -24,6 +24,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 
 public final class ScalePropertiesFactory<CONFIG extends ScalePropertiesBaseConfig> extends GraphAlgorithmFactory<ScaleProperties, CONFIG> {
@@ -38,6 +40,15 @@ public final class ScalePropertiesFactory<CONFIG extends ScalePropertiesBaseConf
     }
 
     @Override
+    public Task progressTask(Graph graphOrGraphStore, CONFIG config) {
+        return Tasks.task(
+            taskName(),
+            Tasks.leaf("Prepare scalers"),
+            Tasks.leaf("Scale properties")
+        );
+    }
+
+    @Override
     public ScaleProperties build(
         Graph graph,
         CONFIG configuration,
@@ -46,6 +57,7 @@ public final class ScalePropertiesFactory<CONFIG extends ScalePropertiesBaseConf
         return new ScaleProperties(
             graph,
             configuration,
+            progressTracker,
             Pools.DEFAULT
         );
     }

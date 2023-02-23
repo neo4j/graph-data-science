@@ -53,9 +53,10 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
     public ScaleProperties(
         Graph graph,
         ScalePropertiesBaseConfig config,
+        ProgressTracker progressTracker,
         ExecutorService executor
     ) {
-        super(ProgressTracker.NULL_TRACKER);
+        super(progressTracker);
         this.graph = graph;
         this.config = config;
         this.executor = executor;
@@ -63,24 +64,30 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
 
     @Override
     public Result compute() {
+        progressTracker.beginSubTask("ScaleProperties");
         var scaledProperties = HugeObjectArray.newArray(double[].class, graph.nodeCount());
 
         // Create a Scaler for each input property
         // Array properties are unrolled into multiple scalers
+        progressTracker.beginSubTask("Prepare scalers");
         var scalers = config.nodeProperties().stream()
             .map(this::prepareScalers)
             .collect(Collectors.toList());
+        progressTracker.endSubTask("Prepare scalers");
 
         var outputArrayLength = scalers.stream().mapToInt(Scaler::dimension).sum();
         initializeArrays(scaledProperties, outputArrayLength);
 
-        // Materialize each scaler and apply it to all properties
+        // Apply scalers to all properties
+        progressTracker.beginSubTask("Scale properties");
         var resultIndex = 0;
         for (var scaler : scalers) {
             scaleProperty(scaledProperties, scaler, resultIndex);
             resultIndex += scaler.dimension();
         }
+        progressTracker.endSubTask("Scale properties");
 
+        progressTracker.endSubTask("ScaleProperties");
         return Result.of(scaledProperties);
     }
 
@@ -167,6 +174,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
                     nodeProperties,
                     graph.nodeCount(),
                     config.concurrency(),
+                    progressTracker,
                     executor
                 );
             case LONG_ARRAY:
@@ -176,6 +184,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
                         transformLongArrayEntryToDoubleProperty(propertyName, nodeProperties, arrayLength, idx),
                         graph.nodeCount(),
                         config.concurrency(),
+                        progressTracker,
                         executor
                     )).collect(Collectors.toList());
                 return new Scaler.ArrayScaler(elementScalers);
@@ -186,6 +195,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
                         transformFloatArrayEntryToDoubleProperty(propertyName, nodeProperties, arrayLength, idx),
                         graph.nodeCount(),
                         config.concurrency(),
+                        progressTracker,
                         executor
                     )).collect(Collectors.toList());
                 return new Scaler.ArrayScaler(elementScalers);
@@ -196,6 +206,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
                         transformDoubleArrayEntryToDoubleProperty(propertyName, nodeProperties, arrayLength, idx),
                         graph.nodeCount(),
                         config.concurrency(),
+                        progressTracker,
                         executor
                     )).collect(Collectors.toList());
                 return new Scaler.ArrayScaler(elementScalers);

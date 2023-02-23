@@ -24,6 +24,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
 import java.util.Optional;
@@ -57,12 +58,13 @@ public final class L2Norm extends ScalarScaler {
                 NodePropertyValues properties,
                 long nodeCount,
                 int concurrency,
+                ProgressTracker progressTracker,
                 ExecutorService executor
             ) {
                 var tasks = PartitionUtils.rangePartition(
                     concurrency,
                     nodeCount,
-                    partition -> new ComputeSquaredSum(partition, properties),
+                    partition -> new ComputeSquaredSum(partition, properties, progressTracker),
                     Optional.empty()
                 );
                 RunWithConcurrency.builder()
@@ -87,8 +89,8 @@ public final class L2Norm extends ScalarScaler {
 
         private double squaredSum;
 
-        ComputeSquaredSum(Partition partition, NodePropertyValues property) {
-            super(partition, property);
+        ComputeSquaredSum(Partition partition, NodePropertyValues property, ProgressTracker progressTracker) {
+            super(partition, property, progressTracker);
             this.squaredSum = 0D;
         }
 

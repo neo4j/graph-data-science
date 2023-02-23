@@ -24,6 +24,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
 import java.util.Optional;
@@ -57,12 +58,13 @@ public final class Max extends ScalarScaler {
                 NodePropertyValues properties,
                 long nodeCount,
                 int concurrency,
+                ProgressTracker progressTracker,
                 ExecutorService executor
             ) {
                 var tasks = PartitionUtils.rangePartition(
                     concurrency,
                     nodeCount,
-                    partition -> new ComputeAbsMax(partition, properties),
+                    partition -> new ComputeAbsMax(partition, properties, progressTracker),
                     Optional.empty()
                 );
                 RunWithConcurrency.builder()
@@ -86,8 +88,8 @@ public final class Max extends ScalarScaler {
 
         private double absMax;
 
-        ComputeAbsMax(Partition partition, NodePropertyValues property) {
-            super(partition, property);
+        ComputeAbsMax(Partition partition, NodePropertyValues property, ProgressTracker progressTracker) {
+            super(partition, property, progressTracker);
             this.absMax = 0;
         }
 

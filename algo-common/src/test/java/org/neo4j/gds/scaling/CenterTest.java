@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 
 import java.util.stream.IntStream;
@@ -53,7 +54,13 @@ class CenterTest {
     @ParameterizedTest
     @MethodSource("properties")
     void normalizes(NodePropertyValues properties, double avg, double[] expected) {
-        var scaler = (Center) Center.buildFrom(CypherMapWrapper.empty()).create(properties, 10, 1, Pools.DEFAULT);
+        var scaler = (Center) Center.buildFrom(CypherMapWrapper.empty()).create(
+            properties,
+            10,
+            1,
+            ProgressTracker.NULL_TRACKER,
+            Pools.DEFAULT
+        );
 
         assertThat(scaler.avg).isEqualTo(avg);
 
