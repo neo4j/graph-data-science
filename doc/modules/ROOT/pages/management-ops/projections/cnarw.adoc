@@ -1,0 +1,156 @@
+[[alpha-algorithms-cnarw]]
+[.alpha]
+= Common neighbor awareness random walk sampling
+:description: This section describes the Common neighbor awareness random walk sampling algorithm in the Neo4j Graph Data Science library.
+
+include::partial$/operations-reference/alpha-note.adoc[]
+
+:directed:
+:undirected:
+:homogeneous:
+:heterogeneous:
+:weighted:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+== Introduction
+
+
+=== Relationship weights
+
+
+=== Node label stratification
+
+
+== Syntax
+
+[.project-sample-syntax]
+--
+.The following describes the API for running the algorithm
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.graph.sample.cnarw(
+  graphName: String,
+  fromGraphName: String,
+  configuration: Map
+)
+YIELD
+  graphName,
+  fromGraphName,
+  nodeCount,
+  relationshipCount,
+  startNodeCount,
+  projectMillis
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name                | Type    | Description
+| graphName           | String  | The name of the new graph that is stored in the graph catalog.
+| fromGraphName       | String  | The name of the original graph in the graph catalog.
+| configuration       | Map     | Additional parameters to configure the subgraph sampling.
+|===
+
+[[alpha-algorithms-cnarw-syntax-configuration]]
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name                    | Type            | Default                           | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes       | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
+| samplingRatio           | Float           | 0.15                              | yes      | The fraction of nodes in the original graph to be sampled.
+| restartProbability      | Float           | 0.1                               | yes      | The probability that a sampling random walk restarts from one of the start nodes.
+| startNodes              | List of Integer | A node chosen uniformly at random | yes      | IDs of the initial set of nodes of the original graph from which the sampling random walks will start.
+| nodeLabelStratification | Boolean         | false                             | yes      | If true, preserves the node label distribution of the original graph.
+|===
+
+.Results
+[opts="header",cols="1,1,4"]
+|===
+| Name                   | Type     | Description
+| graphName              | String   | The name of the new graph that is stored in the graph catalog.
+| fromGraphName          | String   | The name of the original graph in the graph catalog.
+| nodeCount              | Integer  | Number of nodes in the subgraph.
+| relationshipCount      | Integer  | Number of relationships in the subgraph.
+| startNodeCount         | Integer  | Number of start nodes actually used by the algorithm.
+| projectMillis          | Integer  | Milliseconds for projecting the subgraph.
+|===
+--
+
+
+== Examples
+
+In this section we will demonstrate the usage of the CNARW sampling algorithm on a small toy graph.
+
+
+=== Setting up
+
+:algorithm-name: Common neighbor awareness random walk sampling
+:graph-description: social network
+:image-file: two-user-communities.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (nAlice:User {name: 'Alice'}),
+  (nBridget:User {name: 'Bridget'}),
+  (nCharles:User {name: 'Charles'}),
+  (nDoug:User {name: 'Doug'}),
+  (nMark:User {name: 'Mark'}),
+  (nMichael:User {name: 'Michael'}),
+
+  (nAlice)-[:LINK]->(nBridget),
+  (nAlice)-[:LINK]->(nCharles),
+  (nCharles)-[:LINK]->(nBridget),
+
+  (nAlice)-[:LINK]->(nDoug),
+
+  (nMark)-[:LINK]->(nDoug),
+  (nMark)-[:LINK]->(nMichael),
+  (nMichael)-[:LINK]->(nMark);
+----
+
+This graph has two clusters of _Users_, that are closely connected.
+Between those clusters there is one single relationship.
+
+We can now project the graph and store it in the graph catalog.
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+.The following statement will project the graph and store it in the graph catalog.
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project( 'myGraph', 'User', 'LINK' )
+----
+
+
+=== Sampling
+
+We can now go on to sample a subgraph from "myGraph" using CNARW.
+Using the "Alice" `User` node as our set of start nodes, we will venture to visit four nodes in the graph for our sample.
+Since we have six nodes total in our graph, and 4/6 ≈ 0.66 we will use this as our sampling ratio.
+
+[role=query-example]
+--
+.The following will run the Common neighbor awareness random walk sampling algorithm:
+[source, cypher, role=noplay]
+----
+MATCH (start:User {name: 'Alice'})
+CALL gds.alpha.graph.sample.cnarw('mySample', 'myGraph', { samplingRatio: 0.66, startNodes: [id(start)] })
+YIELD nodeCount, relationshipCount
+RETURN nodeCount, relationshipCount
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount
+| 4         | 4
+|===
+--
+
+As we can see we did indeed visit four nodes.
+Looking at the topology of our original graph, "myGraph", we can conclude that the nodes must be those corresponding to the `User` nodes with the name properties "Alice", "Bridget", "Charles" and "Doug".
+And the relationships sampled are those connecting these nodes.

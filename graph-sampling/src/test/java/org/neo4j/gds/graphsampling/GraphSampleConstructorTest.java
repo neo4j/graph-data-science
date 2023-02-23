@@ -126,7 +126,6 @@ class GraphSampleConstructorTest {
         }
     }
 
-
     @Test
     void shouldSampleAndFilterSchema() {
         var config = RandomWalkWithRestartsConfigImpl.builder()
