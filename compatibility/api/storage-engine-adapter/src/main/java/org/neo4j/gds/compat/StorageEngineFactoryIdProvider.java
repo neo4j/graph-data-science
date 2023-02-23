@@ -27,9 +27,4 @@ public final class StorageEngineFactoryIdProvider {
     public static final byte ID = 42;
 
     private StorageEngineFactoryIdProvider() {}
-
-    public static byte id(Neo4jVersion neo4jVersion) {
-        // making sure the compatible version comes last when sorting by id
-        return Neo4jVersion.findNeo4jVersion() == neo4jVersion ? ID + 1 : ID;
-    }
 }

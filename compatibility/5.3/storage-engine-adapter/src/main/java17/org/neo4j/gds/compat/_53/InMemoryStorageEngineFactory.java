@@ -122,7 +122,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
     static final String IN_MEMORY_STORAGE_ENGINE_NAME = "in-memory-53";
 
     public byte id() {
-        return StorageEngineFactoryIdProvider.id(Neo4jVersion.V_5_3);
+        return StorageEngineFactoryIdProvider.ID;
     }
 
     @Override
