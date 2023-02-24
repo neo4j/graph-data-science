@@ -38,7 +38,6 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
@@ -233,15 +232,17 @@ class ScalePropertiesTest {
     void progressLogging() {
         var graph = RandomGraphGenerator
             .builder()
-            .nodeCount(1000)
+            .nodeCount(1_000)
             .averageDegree(1)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .nodePropertyProducer(PropertyProducer.randomEmbedding("data", 42, -1337, 1337))
+            .nodePropertyProducer(PropertyProducer.randomLong("data1", -9, 420))
+            .nodePropertyProducer(PropertyProducer.randomEmbedding("data2", 64, -1337, 1337))
+            .nodePropertyProducer(PropertyProducer.randomLong("data3", -9, 420))
             .build()
             .generate();
 
         var config = ScalePropertiesStreamConfigImpl.builder()
-            .nodeProperties(List.of("data"))
+            .nodeProperties(List.of("data1", "data2", "data3"))
             .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .build();
 
@@ -256,28 +257,29 @@ class ScalePropertiesTest {
 
         factory.build(graph, config, progressTracker).compute();
 
-        List<AtomicLong> progresses = progressTracker.getProgresses();
-        System.out.println("progresses = " + progresses);
-        assertEquals(3, progresses.size());
-
-        var messagesInOrder = testLog.getMessages(INFO);
-
-        Assertions.assertThat(messagesInOrder)
+        assertEquals(3, progressTracker.getProgresses().size());
+        Assertions.assertThat(testLog.getMessages(INFO))
             // avoid asserting on the thread id
             .extracting(removingThreadId())
-            .hasSize(49)
+            .hasSize(133)
             .containsSequence(
                 "ScaleProperties :: Start",
                 "ScaleProperties :: Prepare scalers :: Start",
-                "ScaleProperties :: Prepare scalers 2%",
-                "ScaleProperties :: Prepare scalers 4%",
-                "ScaleProperties :: Prepare scalers 7%")
-            .containsSequence(
-                "ScaleProperties :: Prepare scalers 95%",
-                "ScaleProperties :: Prepare scalers 97%",
+                "ScaleProperties :: Prepare scalers 7%",
+                "ScaleProperties :: Prepare scalers 9%",
+                "ScaleProperties :: Prepare scalers 10%"
+            ).containsSequence(
+                "ScaleProperties :: Prepare scalers 96%",
+                "ScaleProperties :: Prepare scalers 98%",
                 "ScaleProperties :: Prepare scalers 100%",
                 "ScaleProperties :: Prepare scalers :: Finished",
                 "ScaleProperties :: Scale properties :: Start",
+                "ScaleProperties :: Scale properties 1%",
+                "ScaleProperties :: Scale properties 2%",
+                "ScaleProperties :: Scale properties 3%"
+            ).containsSequence(
+                "ScaleProperties :: Scale properties 96%",
+                "ScaleProperties :: Scale properties 98%",
                 "ScaleProperties :: Scale properties 100%",
                 "ScaleProperties :: Scale properties :: Finished",
                 "ScaleProperties :: Finished"

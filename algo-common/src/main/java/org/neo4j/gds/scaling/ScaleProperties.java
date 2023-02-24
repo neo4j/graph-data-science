@@ -113,7 +113,10 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
         var tasks = PartitionUtils.rangePartition(
             config.concurrency(),
             graph.nodeCount(),
-            partition -> (Runnable) () -> partition.consume(strategy),
+            partition -> (Runnable) () -> {
+                partition.consume(strategy);
+                progressTracker.logProgress(partition.nodeCount());
+            },
             Optional.empty()
         );
         RunWithConcurrency.builder()
@@ -132,14 +135,9 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
         int index
     ) {
         if (scaler instanceof Scaler.ArrayScaler) {
-            return (nodeId) ->
-                ((Scaler.ArrayScaler) scaler).scaleProperty(nodeId, scaledProperties.get(nodeId), index);
+            return nodeId -> ((Scaler.ArrayScaler) scaler).scaleProperty(nodeId, scaledProperties.get(nodeId), index);
         } else {
-            return (nodeId) -> {
-                var afterValue = scaler.scaleProperty(nodeId);
-                double[] existingResult = scaledProperties.get(nodeId);
-                existingResult[index] = afterValue;
-            };
+            return nodeId -> scaledProperties.get(nodeId)[index] = scaler.scaleProperty(nodeId);
         }
     }
 
@@ -186,7 +184,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
                         progressTracker,
                         executor
                     )).collect(Collectors.toList());
-                return new Scaler.ArrayScaler(elementScalers);
+                return new Scaler.ArrayScaler(elementScalers, progressTracker);
             case FLOAT_ARRAY:
                 elementScalers = IntStream.range(0, dimension)
                     .mapToObj(idx -> scalerVariant.create(
@@ -196,7 +194,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
                         progressTracker,
                         executor
                     )).collect(Collectors.toList());
-                return new Scaler.ArrayScaler(elementScalers);
+                return new Scaler.ArrayScaler(elementScalers, progressTracker);
             case DOUBLE_ARRAY:
                 elementScalers = IntStream.range(0, dimension)
                     .mapToObj(idx -> scalerVariant.create(
@@ -206,7 +204,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
                         progressTracker,
                         executor
                     )).collect(Collectors.toList());
-                return new Scaler.ArrayScaler(elementScalers);
+                return new Scaler.ArrayScaler(elementScalers, progressTracker);
             case UNKNOWN:
         }
 
