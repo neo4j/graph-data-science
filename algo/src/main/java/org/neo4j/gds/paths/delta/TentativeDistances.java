@@ -170,7 +170,8 @@ public interface TentativeDistances {
             if (currentPredecessor < 0) {
                 //we  should signal failure
                 // for that we must be sure not to return the 'expectedDistance' by accident!
-                return expectedDistance / 2.0;
+                //we hence return its negation (or -1 if ==0)
+                return (Double.compare(expectedDistance, 0.0) == 0) ? -1.0 : -expectedDistance;
             }
 
             var witness = predecessors.compareAndExchange(nodeId, currentPredecessor, -predecessor - 1);
@@ -179,7 +180,7 @@ public interface TentativeDistances {
             if (witness != currentPredecessor) {
                 //we  should signal failure
                 // for that we must be sure not to return the 'expectedDistance' by accident!
-                return expectedDistance / 2.0;
+                return (Double.compare(expectedDistance, 0.0) == 0) ? -1.0 : -expectedDistance;
             }
 
             // we have the lock; no-one else can write on nodeId at the moment.
@@ -196,7 +197,9 @@ public interface TentativeDistances {
                 return expectedDistance;
             }
             predecessors.set(nodeId, currentPredecessor);
-            return expectedDistance / 2.0; //signal unsucesfull update
+            //signal unsuccesful update
+            //note that this unsuccesful update will be the last attempt
+            return (Double.compare(expectedDistance, 0.0) == 0.0) ? -1.0 : -expectedDistance;
         }
     }
 }
