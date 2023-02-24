@@ -7,21 +7,59 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 
 
 .All settings
-[cols="2,1,2", caption =]
+[cols="2,2,1", caption =]
 |===
-<.^| <<gds.arrow.abortion_timeout, gds.arrow.abortion_timeout>> ^.^| label:enterprise-edition[Enterprise Edition] | The maximum time to wait for the next command before aborting the import process.
-<.^| <<gds.arrow.advertised_listen_address, gds.arrow.advertised_listen_address>> ^.^| label:enterprise-edition[Enterprise Edition] | Address that clients should use to connect to the GDS Arrow Flight Server.
-<.^| <<gds.arrow.batch_size, gds.arrow.batch_size>> ^.^| label:enterprise-edition[Enterprise Edition] | The batch size used for arrow property export.
-<.^| <<gds.arrow.enabled, gds.arrow.enabled>> ^.^| label:enterprise-edition[Enterprise Edition] | Enable the GDS Arrow Flight Server.
-<.^| <<gds.arrow.encryption.never, gds.arrow.encryption.never>> ^.^| label:enterprise-edition[Enterprise Edition] | Never activate server-side encryption for the GDS Arrow Flight Server.
-<.^| <<gds.arrow.listen_address, gds.arrow.listen_address>> ^.^| label:enterprise-edition[Enterprise Edition] | Address the GDS Arrow Flight Server should bind to.
-<.^| <<gds.cluster.tx.max.size, gds.cluster.tx.max.size>> ^.^| label:enterprise-edition[Enterprise Edition] | Set the maximum transaction size for GDS write back when running in Neo4j Cluster.
-<.^| <<gds.cluster.tx.min.size, gds.cluster.tx.min.size>> ^.^| label:enterprise-edition[Enterprise Edition] | Set the minimum transaction size for GDS write back when running in Neo4j Cluster.
-<.^| <<gds.enterprise.license_file, gds.enterprise.license_file>> | | Sets the location of the file that contains the Neo4j Graph Data Science library license key
-<.^| <<gds.export.location, gds.export.location>> | | Sets the export location for file based exports.
-<.^| <<gds.model.store_location, gds.model.store_location>> ^.^| label:enterprise-edition[Enterprise Edition] | Sets the location where persisted models are stored.
-<.^| <<gds.progress_tracking_enabled, gds.progress_tracking_enabled>> | | Enable progress logging tracking.
-<.^| <<gds.validate_using_max_memory_estimation, gds.validate_using_max_memory_estimation>> | | Use maximum memory estimation in procedure memory guard.
+<.^| <<gds.arrow.abortion_timeout, gds.arrow.abortion_timeout>>
+| The maximum time to wait for the next command before aborting the import process.
+^.^| label:enterprise-edition[Enterprise Edition]
+
+<.^| <<gds.arrow.advertised_listen_address, gds.arrow.advertised_listen_address>>
+| Address that clients should use to connect to the GDS Arrow Flight Server.
+^.^| label:enterprise-edition[Enterprise Edition]
+
+<.^| <<gds.arrow.batch_size, gds.arrow.batch_size>>
+| The batch size used for arrow property export.
+^.^| label:enterprise-edition[Enterprise Edition]
+
+<.^| <<gds.arrow.enabled, gds.arrow.enabled>>
+| Enable the GDS Arrow Flight Server.
+^.^| label:enterprise-edition[Enterprise Edition]
+
+<.^| <<gds.arrow.encryption.never, gds.arrow.encryption.never>>
+| Never activate server-side encryption for the GDS Arrow Flight Server.
+^.^| label:enterprise-edition[Enterprise Edition]
+
+<.^| <<gds.arrow.listen_address, gds.arrow.listen_address>>
+| Address the GDS Arrow Flight Server should bind to.
+^.^| label:enterprise-edition[Enterprise Edition]
+
+<.^| <<gds.cluster.tx.max.size, gds.cluster.tx.max.size>>
+| Set the maximum transaction size for GDS write back when running in Neo4j Cluster.
+^.^| label:enterprise-edition[Enterprise Edition]
+
+<.^| <<gds.cluster.tx.min.size, gds.cluster.tx.min.size>>
+| Set the minimum transaction size for GDS write back when running in Neo4j Cluster.
+^.^| label:enterprise-edition[Enterprise Edition]
+
+<.^| <<gds.enterprise.license_file, gds.enterprise.license_file>>
+| Sets the location of the file that contains the Neo4j Graph Data Science library license key.
+|
+
+<.^| <<gds.export.location, gds.export.location>>
+| Sets the export location for file based exports.
+^.^| label:enterprise-edition[Enterprise Edition]
+
+<.^| <<gds.model.store_location, gds.model.store_location>>
+| Sets the location where persisted models are stored.
+^.^| label:enterprise-edition[Enterprise Edition]
+
+<.^| <<gds.progress_tracking_enabled, gds.progress_tracking_enabled>>
+| Enable progress logging tracking.
+|
+
+<.^| <<gds.validate_using_max_memory_estimation, gds.validate_using_max_memory_estimation>>
+| Use maximum memory estimation in procedure memory guard.
+|
 |===
 
 [[gds.arrow.abortion_timeout]]
