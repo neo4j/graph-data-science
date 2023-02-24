@@ -150,6 +150,7 @@ class SteinerBasedDeltaTask implements Runnable {
     private void tryToUpdate(long sourceNodeId, long targetNodeId, double weight) {
         var oldDist = distances.distance(targetNodeId);
         var newDist = distances.distance(sourceNodeId) + weight;
+        
         while (Double.compare(newDist, oldDist) < 0) {
             var witness = distances.compareAndExchange(targetNodeId, oldDist, newDist, sourceNodeId);
 
@@ -167,7 +168,7 @@ class SteinerBasedDeltaTask implements Runnable {
                 break;
             }
             // CAX failed, retry
-            oldDist = witness;
+            oldDist = distances.distance(targetNodeId);
         }
         smallestConsideredDistance = Math.min(newDist, smallestConsideredDistance);
 
