@@ -2,6 +2,13 @@
 = Random Walk
 :description: This section describes the Random Walk algorithm in the Neo4j Graph Data Science library.
 
+:directed:
+:undirected:
+:homogeneous:
+:weighted:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
 Random Walk is an algorithm that provides random paths in a graph.
 
 A random walk simulates a traversal of the graph in which the traversed relationships are chosen at random.
