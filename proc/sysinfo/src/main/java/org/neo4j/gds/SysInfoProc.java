@@ -33,6 +33,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.io.os.OsBeanUtil;
+import org.neo4j.kernel.api.procedure.SystemProcedure;
 import org.neo4j.kernel.internal.Version;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -64,6 +65,7 @@ public class SysInfoProc {
     public LicenseState licenseState;
 
     @Procedure("gds.debug.sysInfo")
+    @SystemProcedure
     @Description("Returns details about the status of the system")
     public Stream<DebugValue> version() throws IOException {
         var properties = BuildInfoProperties.get();
