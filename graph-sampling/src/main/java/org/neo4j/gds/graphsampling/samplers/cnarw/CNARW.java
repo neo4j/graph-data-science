@@ -33,6 +33,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -41,8 +42,10 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.graphsampling.NodesSampler;
 import org.neo4j.gds.graphsampling.config.CNARWConfig;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.SplittableRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class CNARW implements NodesSampler {
     private static final double QUALITY_MOMENTUM = 0.9;
@@ -256,13 +259,37 @@ public class CNARW implements NodesSampler {
                     if (totalWeights.isPresent()) {
                         currentNode = weightedNextNode(currentNode);
                     } else {
-                        int targetOffset = rng.nextInt(inputGraph.degree(currentNode));
-                        currentNode = inputGraph.nthTarget(currentNode, targetOffset);
-                        assert currentNode != IdMap.NOT_FOUND : "The offset '" + targetOffset + "' is bound by the degree but no target could be found for nodeId " + currentNode;
+                        long[] currentNodeNeighbours = getSortedNeighbours(inputGraph, currentNode);
+                        int currentNodeDegree = inputGraph.degree(currentNode);
+                        double q, chanceOutOfNeighbours;
+                        long candidateNode;
+                        do {
+                            int targetOffsetCandidate = rng.nextInt(inputGraph.degree(currentNode));
+                            candidateNode = inputGraph.nthTarget(currentNode, targetOffsetCandidate);
+                            assert candidateNode != IdMap.NOT_FOUND : "The offset '" + targetOffsetCandidate +
+                                                                      "' is bound by the degree but no target could be found for nodeId " + candidateNode;
+                            long[] candidateNodeNeighbours = getSortedNeighbours(inputGraph, candidateNode);
+                            int candidateNodeDegree = inputGraph.degree(candidateNode);
+                            long numberOfCommonNeighbours = Intersections.intersection3(currentNodeNeighbours, candidateNodeNeighbours);
+                            chanceOutOfNeighbours = 1.0D - numberOfCommonNeighbours * 1.0D / Math.min(currentNodeDegree, candidateNodeDegree);
+                            q = rng.nextDouble();
+                        } while (q > chanceOutOfNeighbours);
+                        currentNode = candidateNode;
                     }
                     nodesConsidered++;
                 }
             }
+        }
+
+        private long[] getSortedNeighbours(Graph inputGraph, long nodeId) {
+            long[] neighbours = new long[inputGraph.degree(nodeId)];
+            var idx = new AtomicInteger(0);
+            inputGraph.forEachRelationship(nodeId, (src, dst) -> {
+                neighbours[idx.getAndIncrement()] = dst;
+                return true;
+            });
+            Arrays.sort(neighbours);
+            return neighbours;
         }
 
         private double computeDegree(long currentNode) {
