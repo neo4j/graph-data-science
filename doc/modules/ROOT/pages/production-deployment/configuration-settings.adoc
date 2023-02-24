@@ -8,6 +8,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 
 == GDS Enterprise Edition
 
+[.setting-details]
 .gds.enterprise.license_file
 [cols="1,4", caption =]
 |===
@@ -21,6 +22,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 [.enterprise-edition]
 == GDS and Arrow
 
+[.setting-details]
 .gds.arrow.abortion_timeout
 [cols="1,4", caption =]
 |===
@@ -30,6 +32,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 | Dynamic       | `false`
 |===
 
+[.setting-details]
 .gds.arrow.advertised_listen_address
 [cols="1,4", caption =]
 |===
@@ -39,6 +42,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 | Dynamic       | `false`
 |===
 
+[.setting-details]
 .gds.arrow.batch_size
 [cols="1,4", caption =]
 |===
@@ -48,6 +52,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 | Dynamic       | `true`
 |===
 
+[.setting-details]
 .gds.arrow.enabled
 [cols="1,4", caption =]
 |===
@@ -57,6 +62,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 | Dynamic       | `false`
 |===
 
+[.setting-details]
 .gds.arrow.encryption.never
 [cols="1,4", caption =]
 |===
@@ -66,6 +72,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 | Dynamic       | `false`
 |===
 
+[.setting-details]
 .gds.arrow.listen_address
 [cols="1,4", caption =]
 |===
@@ -79,6 +86,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 [.enterprise-edition]
 == Neo4j Cluster
 
+[.setting-details]
 .gds.cluster.tx.max.size
 [cols="1,4", caption =]
 |===
@@ -88,6 +96,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 | Dynamic       | `false`
 |===
 
+[.setting-details]
 .gds.cluster.tx.min.size
 [cols="1,4", caption =]
 |===
@@ -100,6 +109,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 
 == GDS Export
 
+[.setting-details]
 .gds.export.location
 [cols="1,4", caption = ]
 |===
@@ -109,6 +119,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 | Dynamic       | `false`
 |===
 
+[.setting-details]
 .gds.model.store_location label:enterprise-edition[Enterprise Edition]
 [cols="1,4", caption =]
 |===
@@ -121,6 +132,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 
 == Miscellaneous
 
+[.setting-details]
 .gds.progress_tracking_enabled
 [cols="1,4", caption =]
 |===
@@ -130,6 +142,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 | Dynamic       | `false`
 |===
 
+[.setting-details]
 .gds.validate_using_max_memory_estimation
 [cols="1,4", caption =]
 |===
