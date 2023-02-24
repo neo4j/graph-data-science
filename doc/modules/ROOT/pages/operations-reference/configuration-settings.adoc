@@ -5,7 +5,7 @@
 This page describes the available configuration settings in GDS.
 Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4j-conf/#neo4j-conf[neo4j.conf] file for details on how to use configuration settings.
 
-
+[.all-settings]
 .All settings
 [cols="2,2,1", caption =]
 |===
@@ -63,6 +63,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 |===
 
 [[gds.arrow.abortion_timeout]]
+[.setting-details]
 .gds.arrow.abortion_timeout label:enterprise-edition[Enterprise Edition]
 [cols="1,4", caption =]
 |===
@@ -73,6 +74,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 |===
 
 [[gds.arrow.advertised_listen_address]]
+[.setting-details]
 .gds.arrow.advertised_listen_address label:enterprise-edition[Enterprise Edition]
 [cols="1,4", caption =]
 |===
@@ -83,6 +85,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 |===
 
 [[gds.arrow.batch_size]]
+[.setting-details]
 .gds.arrow.batch_size label:enterprise-edition[Enterprise Edition]
 [cols="1,4", caption =]
 |===
@@ -94,6 +97,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 
 
 [[gds.arrow.enabled]]
+[.setting-details]
 .gds.arrow.enabled label:enterprise-edition[Enterprise Edition]
 [cols="1,4", caption =]
 |===
@@ -105,6 +109,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 
 
 [[gds.arrow.encryption.never]]
+[.setting-details]
 .gds.arrow.encryption.never label:enterprise-edition[Enterprise Edition]
 [cols="1,4", caption =]
 |===
@@ -116,6 +121,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 
 
 [[gds.arrow.listen_address]]
+[.setting-details]
 .gds.arrow.listen_address label:enterprise-edition[Enterprise Edition]
 [cols="1,4", caption =]
 |===
@@ -127,6 +133,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 
 
 [[gds.cluster.tx.max.size]]
+[.setting-details]
 .gds.cluster.tx.max.size label:enterprise-edition[Enterprise Edition]
 [cols="1,4", caption =]
 |===
@@ -138,6 +145,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 
 
 [[gds.cluster.tx.min.size]]
+[.setting-details]
 .gds.cluster.tx.min.size label:enterprise-edition[Enterprise Edition]
 [cols="1,4", caption =]
 |===
@@ -149,6 +157,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 
 
 [[gds.enterprise.license_file]]
+[.setting-details]
 .gds.enterprise.license_file
 [cols="1,4", caption =]
 |===
@@ -160,6 +169,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 
 
 [[gds.export.location]]
+[.setting-details]
 .gds.export.location
 [cols="1,4", caption = ]
 |===
@@ -171,6 +181,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 
 
 [[gds.model.store_location]]
+[.setting-details]
 .gds.model.store_location label:enterprise-edition[Enterprise Edition]
 [cols="1,4", caption =]
 |===
@@ -182,6 +193,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 
 
 [[gds.progress_tracking_enabled]]
+[.setting-details]
 .gds.progress_tracking_enabled
 [cols="1,4", caption =]
 |===
@@ -193,6 +205,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 
 
 [[gds.validate_using_max_memory_estimation]]
+[.setting-details]
 .gds.validate_using_max_memory_estimation
 [cols="1,4", caption =]
 |===
