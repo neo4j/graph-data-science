@@ -6,6 +6,17 @@
 This page describes the available configuration settings in GDS.
 Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4j-conf/#neo4j-conf[neo4j.conf] file for details on how to use configuration settings.
 
+== GDS Enterprise Edition
+
+.gds.enterprise.license_file
+[cols="1,4", caption =]
+|===
+| Description   | Sets the location of the file that contains the Neo4j Graph Data Science library license key.
+| Default Value | `No Value`
+| Valid Values  | An absolute path.
+| Dynamic       | `false`
+|===
+
 
 [.enterprise-edition]
 == GDS and Arrow
@@ -83,18 +94,6 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 | Description   | Set the minimum transaction size for GDS write back when running in Neo4j Cluster.
 | Default Value | `10000`
 | Valid Values  | An integer.
-| Dynamic       | `false`
-|===
-
-
-== GDS Enterprise Edition
-
-.gds.enterprise.license_file
-[cols="1,4", caption =]
-|===
-| Description   | Sets the location of the file that contains the Neo4j Graph Data Science library license key.
-| Default Value | `No Value`
-| Valid Values  | An absolute path.
 | Dynamic       | `false`
 |===
 
