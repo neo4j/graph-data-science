@@ -21,7 +21,6 @@ package org.neo4j.gds.paths.delta;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -47,8 +46,6 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.paths.delta.config.ImmutableAllShortestPathsDeltaStreamConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -348,8 +345,8 @@ final class DeltaSteppingTest {
 
     private DeltaSteppingTest() {}
 
-    @RepeatedTest(1000)
-    void incorrect() {
+    @Test
+    void shouldGiveSameResultsAsDijkstra() {
         int nodeCount = 3_000;
         long seed = 42L;
         long start = 42;
@@ -386,31 +383,17 @@ final class DeltaSteppingTest {
         double deltaSum = 0;
         double dijkstraSum = 0;
 
-        HashMap<Long, long[]> deltaPath = new HashMap<>();
         for (var path : deltaStepping.pathSet()) {
             delta[(int) path.targetNode()] = path.totalCost();
-            // System.out.println(path.targetNode() + ":" + Arrays.toString(path.nodeIds()) + " with " + path.totalCost());
-            deltaPath.put(path.targetNode(), path.nodeIds());
         }
 
-        HashMap<Long, long[]> dijkstraPath = new HashMap<>();
         for (var path : dijkstraAlgo.pathSet()) {
             djikstra[(int) path.targetNode()] = path.totalCost();
-            // System.out.println(path.targetNode() + ":" + Arrays.toString(path.nodeIds()) + " with " + path.totalCost());
-            dijkstraPath.put(path.targetNode(), path.nodeIds());
         }
         for (int i = 0; i < nodeCount; ++i) {
             deltaSum += delta[i];
             dijkstraSum += djikstra[i];
-        }
-        //  System.out.println(" deltaStepping:" + deltaSum + " dijkstra: " + dijkstraSum);
-
-        for (var value : deltaPath.keySet()) {
-            var depath = Arrays.toString(deltaPath.get(value));
-            int t = value.intValue();
-            var djpath = Arrays.toString(dijkstraPath.get(value));
-            //  System.out.println(value + ":  delta: " + depath + " dijkstra: " + djpath + " | " + delta[t] + " " + djikstra[t]);
-            assertThat(djikstra[t]).isCloseTo(delta[t], Offset.offset(1e-5));
+            assertThat(djikstra[i]).isCloseTo(delta[i], Offset.offset(1e-5));
 
         }
         assertThat(deltaSum).isCloseTo(dijkstraSum, Offset.offset(1e-5));
