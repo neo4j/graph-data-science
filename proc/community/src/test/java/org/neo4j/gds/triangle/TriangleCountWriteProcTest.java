@@ -22,9 +22,6 @@ package org.neo4j.gds.triangle;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -113,42 +110,6 @@ class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCount
             "d", -1L,
             "e", 0L
         );
-
-        assertWriteResult(expectedResult, "triangles");
-    }
-
-    static Stream<Arguments> communitySizeInputs() {
-        return Stream.of(
-                Arguments.of(Map.of("minTriangles", 1), Map.of(
-                        "a", 4L,
-                        "b", 4L,
-                        "c", 3L,
-                        "d", 3L,
-                        "e", 1L
-                )),
-                Arguments.of(Map.of("minTriangles", 2), Map.of(
-                        "a", 4L,
-                        "b", 4L,
-                        "c", 3L,
-                        "d", 3L
-                ))
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("communitySizeInputs")
-    void testWriteWithMinCommunitySize(Map<String, Long> parameter, Map<String, Long> expectedResult) {
-        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-                .algo("triangleCount")
-                .writeMode()
-                .addParameter("writeProperty", "triangles")
-                .addAllParameters(parameter)
-                .yields("globalTriangleCount", "nodeCount");
-
-        assertCypherResult(query, List.of(Map.of(
-                "globalTriangleCount", 5L,
-                "nodeCount", 5L
-        )));
 
         assertWriteResult(expectedResult, "triangles");
     }

@@ -65,15 +65,13 @@ public class TriangleCountStreamProc
     protected Stream<Result> stream(ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig> computationResult) {
         return runWithExceptionLogging("Graph streaming failed", () -> {
             var graph = computationResult.graph();
-
-            var nodeProperties = nodeProperties(computationResult);
+            var result = computationResult.result();
 
             return LongStream.range(0, graph.nodeCount())
-                    .filter(i -> nodeProperties != null && nodeProperties.isValid(i))
-                    .mapToObj(i -> new Result(
-                            graph.toOriginalNodeId(i),
-                            nodeProperties.longValue(i)
-                    ));
+                .mapToObj(i -> new Result(
+                    graph.toOriginalNodeId(i),
+                    result.localTriangles().get(i)
+                ));
         });
     }
 

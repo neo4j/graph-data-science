@@ -20,16 +20,10 @@
 package org.neo4j.gds.triangle;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -48,32 +42,6 @@ class TriangleCountStreamProcTest extends TriangleCountBaseProcTest<TriangleCoun
         });
 
         assertEquals(3, rowCount.get());
-    }
-
-    static Stream<Arguments> communitySizeInputs() {
-        return Stream.of(
-                Arguments.of(Map.of("minTriangles", 1), 3),
-                Arguments.of(Map.of("minTriangles", 4), 0)
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("communitySizeInputs")
-    void testStreamWithMinCommunitySize(Map<String, Long> parameters, int expectedValue) {
-        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-                .algo("triangleCount")
-                .streamMode()
-                .addAllParameters(parameters)
-                .yields();
-
-        var rowCount = new AtomicInteger();
-
-        runQueryWithRowConsumer(query, row -> {
-            assertEquals(1L, row.getNumber("triangleCount"));
-            rowCount.incrementAndGet();
-        });
-
-        assertEquals(rowCount.get(), expectedValue);
     }
 
     @Override
