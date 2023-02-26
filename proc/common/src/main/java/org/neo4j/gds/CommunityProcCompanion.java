@@ -47,7 +47,7 @@ public final class CommunityProcCompanion {
         LongNodePropertyValues nodeProperties,
         Supplier<NodeProperty> seedPropertySupplier
     ) {
-        LongNodePropertyValues result = getLongNodePropertyValues(config, resultProperty, nodeProperties, seedPropertySupplier);
+        LongNodePropertyValues result = applySeedProperty(config, resultProperty, nodeProperties, seedPropertySupplier);
         return applySizeFilterWhenNecessary(config, result);
     }
 
@@ -55,7 +55,7 @@ public final class CommunityProcCompanion {
             CONFIG config,
             LongNodePropertyValues nodeProperties
     ) {
-        LongNodePropertyValues result = getLongNodePropertyValues(config, nodeProperties);
+        LongNodePropertyValues result = applyConsecutiveIds(config, nodeProperties);
         return applySizeFilterWhenNecessary(config, result);
     }
 
@@ -76,7 +76,7 @@ public final class CommunityProcCompanion {
         return result;
     }
 
-    private static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> LongNodePropertyValues getLongNodePropertyValues(
+    private static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> LongNodePropertyValues applySeedProperty(
             CONFIG config,
             String resultProperty,
             LongNodePropertyValues nodeProperties,
@@ -90,10 +90,10 @@ public final class CommunityProcCompanion {
             return LongIfChangedNodePropertyValues.of(seedPropertySupplier.get(), nodeProperties);
         }
 
-        return getLongNodePropertyValues(config, nodeProperties);
+        return applyConsecutiveIds(config, nodeProperties);
     }
 
-    private static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> LongNodePropertyValues getLongNodePropertyValues(
+    private static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> LongNodePropertyValues applyConsecutiveIds(
             CONFIG config,
             LongNodePropertyValues nodeProperties
     ) {
