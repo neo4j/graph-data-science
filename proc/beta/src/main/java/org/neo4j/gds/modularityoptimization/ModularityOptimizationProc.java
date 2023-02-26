@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.modularityoptimization;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.CommunityProcCompanion;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;

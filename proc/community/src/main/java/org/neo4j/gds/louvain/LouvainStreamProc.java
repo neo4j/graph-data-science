@@ -20,6 +20,7 @@
 package org.neo4j.gds.louvain;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.Graph;
@@ -35,7 +36,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -110,7 +110,19 @@ public class LouvainStreamProc extends StreamProc<Louvain, LouvainResult, Louvai
 
     @Override
     protected NodePropertyValues nodeProperties(ComputationResult<Louvain, LouvainResult, LouvainStreamConfig> computationResult) {
-        return LouvainProc.nodeProperties(computationResult, UUID.randomUUID().toString());
+        var config = computationResult.config();
+        var includeIntermediateCommunities = config.includeIntermediateCommunities();
+
+        var result = computationResult.result();
+
+        if (!includeIntermediateCommunities) {
+            return CommunityProcCompanion.nodeProperties(
+                    computationResult.config(),
+                    result.dendrogramManager().getCurrent().asNodeProperties()
+            );
+        }
+
+        return LouvainProc.longArrayNodePropertyValues(computationResult, result);
     }
 
     @Override

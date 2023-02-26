@@ -51,6 +51,14 @@ public final class CommunityProcCompanion {
         return applySizeFilterWhenNecessary(config, result);
     }
 
+    public static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> NodePropertyValues nodeProperties(
+            CONFIG config,
+            LongNodePropertyValues nodeProperties
+    ) {
+        LongNodePropertyValues result = getLongNodePropertyValues(config, nodeProperties);
+        return applySizeFilterWhenNecessary(config, result);
+    }
+
     public static <CONFIG extends ConcurrencyConfig> LongNodePropertyValues applySizeFilterWhenNecessary(CONFIG config, LongNodePropertyValues result) {
         if (config instanceof CommunitySizeConfig) {
             var finalResult = result;
@@ -80,10 +88,21 @@ public final class CommunityProcCompanion {
 
         if (resultPropertyEqualsSeedProperty && !consecutiveIds) {
             return LongIfChangedNodePropertyValues.of(seedPropertySupplier.get(), nodeProperties);
-        } else if (consecutiveIds && !isIncremental) {
+        }
+
+        return getLongNodePropertyValues(config, nodeProperties);
+    }
+
+    private static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> LongNodePropertyValues getLongNodePropertyValues(
+            CONFIG config,
+            LongNodePropertyValues nodeProperties
+    ) {
+        var consecutiveIds = config.consecutiveIds();
+        var isIncremental = config.isIncremental();
+        if (consecutiveIds && !isIncremental) {
             return new ConsecutiveLongNodePropertyValues(
                     nodeProperties,
-                nodeProperties.size()
+                    nodeProperties.size()
             );
         }
 

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.wcc;
 
+import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -33,7 +34,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.wcc.WccProc.WCC_DESCRIPTION;
@@ -87,7 +87,10 @@ public class WccStreamProc extends StreamProc<
 
     @Override
     protected NodePropertyValues nodeProperties(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
-        return WccProc.nodeProperties(computationResult, UUID.randomUUID().toString());
+        return CommunityProcCompanion.nodeProperties(
+                computationResult.config(),
+                computationResult.result().asNodeProperties()
+        );
     }
 
     @SuppressWarnings("unused")

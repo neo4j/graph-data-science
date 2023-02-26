@@ -51,19 +51,24 @@ final class LouvainProc {
                 () -> computationResult.graphStore().nodeProperty(config.seedProperty())
             );
         } else {
-            var size = computationResult.graph().nodeCount();
-
-            return new LongArrayNodePropertyValues() {
-                @Override
-                public long size() {
-                    return size;
-                }
-                @Override
-                public long[] longArrayValue(long nodeId) {
-                    return result.getIntermediateCommunities(nodeId);
-                }
-            };
+            return longArrayNodePropertyValues(computationResult, result);
         }
+    }
+
+    static <CONFIG extends LouvainBaseConfig> LongArrayNodePropertyValues longArrayNodePropertyValues(ComputationResult<Louvain, LouvainResult, CONFIG> computationResult, LouvainResult result) {
+        var size = computationResult.graph().nodeCount();
+
+        return new LongArrayNodePropertyValues() {
+            @Override
+            public long size() {
+                return size;
+            }
+
+            @Override
+            public long[] longArrayValue(long nodeId) {
+                return result.getIntermediateCommunities(nodeId);
+            }
+        };
     }
 
     static <PROC_RESULT, CONFIG extends LouvainBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
