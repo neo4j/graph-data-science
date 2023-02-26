@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 
@@ -60,7 +61,7 @@ class MaxTest {
     @ParameterizedTest
     @MethodSource("properties")
     void scale(int nodeCount, NodePropertyValues properties, double maxAbs, double[] expected) {
-        var scaler = (Max) Max.initialize(properties, nodeCount, 1, Pools.DEFAULT);
+        var scaler = (Max) Max.buildFrom(CypherMapWrapper.empty()).create(properties, nodeCount, 1, Pools.DEFAULT);
 
         assertThat(scaler.maxAbs).isEqualTo(maxAbs);
 
@@ -71,7 +72,7 @@ class MaxTest {
     @Test
     void avoidsDivByZero() {
         var properties = new DoubleTestPropertyValues(nodeId -> 0D);
-        var scaler = Max.initialize(properties, 10, 1, Pools.DEFAULT);
+        var scaler = Max.buildFrom(CypherMapWrapper.empty()).create(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {
             assertThat(scaler.scaleProperty(i)).isEqualTo(0D);

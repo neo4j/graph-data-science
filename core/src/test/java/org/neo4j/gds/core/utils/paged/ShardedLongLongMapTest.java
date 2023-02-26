@@ -111,6 +111,16 @@ abstract class ShardedLongLongMapTest {
     }
 
     @Property
+    void testAddNode(@ForAll("ids") long[] originalIds) {
+        var builder = builder(1);
+        for (int i = 0; i < originalIds.length; i++) {
+            long originalId = originalIds[i];
+            long mappedId = builder.addNode(originalId);
+            assertThat(mappedId).isEqualTo(i);
+        }
+    }
+
+    @Property
     void testMaxOriginalId(@ForAll("ids") long[] originalIds) {
         var builder = builder(1);
         builder.addNodes(originalIds);
@@ -189,12 +199,24 @@ abstract class ShardedLongLongMapTest {
     abstract TestBuilder builder(int concurrency);
 
     interface TestBuilder {
+        long addNode(long nodeId);
+
         void addNodes(long... nodeIds);
 
         ShardedLongLongMap build();
     }
 
     static class DefaultBuilderTest extends ShardedLongLongMapTest {
+
+        @Property
+        void testAddNodeWithDuplicates(@ForAll("ids") long[] originalIds) {
+            var builder = builder(1);
+            for (long originalId : originalIds) {
+                long mappedId = builder.addNode(originalId);
+                long duplicateMappedId = builder.addNode(originalId);
+                assertThat(duplicateMappedId).isEqualTo(-mappedId - 1);
+            }
+        }
 
         @Override
         TestBuilder builder(int concurrency) {
@@ -206,6 +228,11 @@ abstract class ShardedLongLongMapTest {
 
             DefaultBuilder(int concurrency) {
                 this.inner = ShardedLongLongMap.builder(concurrency);
+            }
+
+            @Override
+            public long addNode(long nodeId) {
+                return inner.addNode(nodeId);
             }
 
             @Override
@@ -246,6 +273,12 @@ abstract class ShardedLongLongMapTest {
 
             BatchedBuilder(int concurrency) {
                 inner = ShardedLongLongMap.batchedBuilder(concurrency);
+            }
+
+            @Override
+            public long addNode(long nodeId) {
+                var batch = inner.prepareBatch(1);
+                return batch.addNode(nodeId);
             }
 
             @Override

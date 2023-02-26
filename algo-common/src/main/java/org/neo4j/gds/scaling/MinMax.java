@@ -20,14 +20,18 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
-final class MinMax extends ScalarScaler {
+public final class MinMax extends ScalarScaler {
+
+    public static final String NAME = "minmax";
 
     final double min;
     final double maxMinDiff;
@@ -38,29 +42,45 @@ final class MinMax extends ScalarScaler {
         this.maxMinDiff = maxMinDiff;
     }
 
-    static ScalarScaler initialize(NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor) {
-        var tasks = PartitionUtils.rangePartition(
-            concurrency,
-            nodeCount,
-            partition -> new ComputeMaxMin(partition, properties),
-            Optional.empty()
-        );
-        RunWithConcurrency.builder()
-            .concurrency(concurrency)
-            .tasks(tasks)
-            .executor(executor)
-            .run();
+    static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
+        mapWrapper.requireOnlyKeysFrom(List.of());
+        return new ScalerFactory() {
+            @Override
+            public String name() {
+                return NAME;
+            }
 
-        var min = tasks.stream().mapToDouble(ComputeMaxMin::min).min().orElse(Double.MAX_VALUE);
-        var max = tasks.stream().mapToDouble(ComputeMaxMin::max).max().orElse(-Double.MAX_VALUE);
+            @Override
+            public ScalarScaler create(
+                NodePropertyValues properties,
+                long nodeCount,
+                int concurrency,
+                ExecutorService executor
+            ) {
+                var tasks = PartitionUtils.rangePartition(
+                    concurrency,
+                    nodeCount,
+                    partition -> new ComputeMaxMin(partition, properties),
+                    Optional.empty()
+                );
+                RunWithConcurrency.builder()
+                    .concurrency(concurrency)
+                    .tasks(tasks)
+                    .executor(executor)
+                    .run();
 
-        var maxMinDiff = max - min;
+                var min = tasks.stream().mapToDouble(ComputeMaxMin::min).min().orElse(Double.MAX_VALUE);
+                var max = tasks.stream().mapToDouble(ComputeMaxMin::max).max().orElse(-Double.MAX_VALUE);
 
-        if (Math.abs(maxMinDiff) < CLOSE_TO_ZERO) {
-            return ZERO;
-        } else {
-            return new MinMax(properties, min, maxMinDiff);
-        }
+                var maxMinDiff = max - min;
+
+                if (Math.abs(maxMinDiff) < CLOSE_TO_ZERO) {
+                    return ZERO;
+                } else {
+                    return new MinMax(properties, min, maxMinDiff);
+                }
+            }
+        };
     }
 
     @Override

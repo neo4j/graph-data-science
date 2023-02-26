@@ -20,17 +20,45 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-final class LogScaler extends ScalarScaler {
+import java.util.List;
+import java.util.concurrent.ExecutorService;
 
-    LogScaler(NodePropertyValues properties) {
+public final class LogScaler extends ScalarScaler {
+
+    public static final String NAME = "log";
+    private static final String OFFSET_KEY = "offset";
+    private final double offset;
+
+    LogScaler(NodePropertyValues properties, double offset) {
         super(properties);
+        this.offset = offset;
     }
 
     @Override
     public double scaleProperty(long nodeId) {
-        // TODO: check for 0 ? (as its -Infinity)
-        return Math.log(properties.doubleValue(nodeId));
+        return Math.log(properties.doubleValue(nodeId) + offset);
     }
 
+    static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
+        mapWrapper.requireOnlyKeysFrom(List.of(OFFSET_KEY));
+        final double offset = mapWrapper.getNumber(OFFSET_KEY, 0).doubleValue();
+        return new ScalerFactory() {
+            @Override
+            public String name() {
+                return NAME;
+            }
+
+            @Override
+            public ScalarScaler create(
+                NodePropertyValues properties,
+                long nodeCount,
+                int concurrency,
+                ExecutorService executor
+            ) {
+                return new LogScaler(properties, offset);
+            }
+        };
+    }
 }

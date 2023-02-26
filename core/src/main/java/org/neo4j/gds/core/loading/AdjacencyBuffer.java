@@ -24,10 +24,11 @@ import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.compress.AdjacencyCompressor;
+import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
+import org.neo4j.gds.api.compress.LongArrayBuffer;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.compress.AdjacencyCompressor;
-import org.neo4j.gds.core.compress.AdjacencyCompressorFactory;
-import org.neo4j.gds.core.compress.LongArrayBuffer;
+import org.neo4j.gds.core.compression.common.ZigZagLongDecoding;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 

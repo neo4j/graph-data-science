@@ -32,7 +32,6 @@ import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.GraphDimensionsStoreReader;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
-import org.neo4j.gds.core.compress.AdjacencyListBehavior;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;

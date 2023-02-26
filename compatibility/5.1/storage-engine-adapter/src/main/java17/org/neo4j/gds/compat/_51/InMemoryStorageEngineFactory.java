@@ -27,6 +27,8 @@ import org.neo4j.consistency.checking.ConsistencyFlags;
 import org.neo4j.consistency.report.ConsistencySummaryStatistics;
 import org.neo4j.dbms.database.readonly.DatabaseReadOnlyChecker;
 import org.neo4j.gds.annotation.SuppressForbidden;
+import org.neo4j.gds.compat.Neo4jVersion;
+import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.index.internal.gbptree.RecoveryCleanupWorkCollector;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
@@ -112,6 +114,10 @@ import static org.neo4j.dbms.database.readonly.DatabaseReadOnlyChecker.readOnly;
 public class InMemoryStorageEngineFactory implements StorageEngineFactory {
 
     static final String IN_MEMORY_STORAGE_ENGINE_NAME = "in-memory-51";
+
+    public InMemoryStorageEngineFactory() {
+        StorageEngineProxyApi.requireNeo4jVersion(Neo4jVersion.V_5_1, StorageEngineFactory.class);
+    }
 
     private final InMemoryMetaDataProviderImpl metadataProvider = new InMemoryMetaDataProviderImpl();
 

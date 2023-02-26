@@ -20,15 +20,18 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 final class StdScore extends ScalarScaler {
 
+    static final String NAME = "stdscore";
     final double avg;
     final double std;
 
@@ -38,40 +41,56 @@ final class StdScore extends ScalarScaler {
         this.std = std;
     }
 
-    static ScalarScaler initialize(NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor) {
-        var tasks = PartitionUtils.rangePartition(
-            concurrency,
-            nodeCount,
-            partition -> new ComputeSumAndSquaredSum(partition, properties),
-            Optional.empty()
-        );
-        RunWithConcurrency.builder()
-            .concurrency(concurrency)
-            .tasks(tasks)
-            .executor(executor)
-            .run();
-
-        // calculate global metrics
-        var squaredSum = tasks.stream().mapToDouble(ComputeSumAndSquaredSum::squaredSum).sum();
-        var sum = tasks.stream().mapToDouble(ComputeSumAndSquaredSum::sum).sum();
-        var avg = sum / nodeCount;
-        // std = σ² = Σ(pᵢ - avg)² / N =
-        // (Σ(pᵢ²) + Σ(avg²) - 2avgΣ(pᵢ)) / N =
-        // (Σ(pᵢ²) + Navg² - 2avgΣ(pᵢ)) / N =
-        // (Σ(pᵢ²) + avg(Navg - 2Σ(pᵢ)) / N
-        var variance = (squaredSum + avg * (nodeCount * avg - 2 * sum)) / nodeCount;
-        var std = Math.sqrt(variance);
-
-        if (Math.abs(std) < CLOSE_TO_ZERO) {
-            return ZERO;
-        } else {
-            return new StdScore(properties, avg, std);
-        }
-    }
-
     @Override
     public double scaleProperty(long nodeId) {
         return (properties.doubleValue(nodeId) - avg) / std;
+    }
+
+    static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
+        mapWrapper.requireOnlyKeysFrom(List.of());
+        return new ScalerFactory() {
+            @Override
+            public String name() {
+                return NAME;
+            }
+
+            @Override
+            public ScalarScaler create(
+                NodePropertyValues properties,
+                long nodeCount,
+                int concurrency,
+                ExecutorService executor
+            ) {
+                var tasks = PartitionUtils.rangePartition(
+                    concurrency,
+                    nodeCount,
+                    partition -> new ComputeSumAndSquaredSum(partition, properties),
+                    Optional.empty()
+                );
+                RunWithConcurrency.builder()
+                    .concurrency(concurrency)
+                    .tasks(tasks)
+                    .executor(executor)
+                    .run();
+
+                // calculate global metrics
+                var squaredSum = tasks.stream().mapToDouble(ComputeSumAndSquaredSum::squaredSum).sum();
+                var sum = tasks.stream().mapToDouble(ComputeSumAndSquaredSum::sum).sum();
+                var avg = sum / nodeCount;
+                // std = σ² = Σ(pᵢ - avg)² / N =
+                // (Σ(pᵢ²) + Σ(avg²) - 2avgΣ(pᵢ)) / N =
+                // (Σ(pᵢ²) + Navg² - 2avgΣ(pᵢ)) / N =
+                // (Σ(pᵢ²) + avg(Navg - 2Σ(pᵢ)) / N
+                var variance = (squaredSum + avg * (nodeCount * avg - 2 * sum)) / nodeCount;
+                var std = Math.sqrt(variance);
+
+                if (Math.abs(std) < CLOSE_TO_ZERO) {
+                    return ZERO;
+                } else {
+                    return new StdScore(properties, avg, std);
+                }
+            }
+        };
     }
 
     static class ComputeSumAndSquaredSum extends AggregatesComputer {

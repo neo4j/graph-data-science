@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 
@@ -47,7 +48,7 @@ class MeanTest {
     @ParameterizedTest
     @MethodSource("properties")
     void normalizes(NodePropertyValues properties, double avg, double maxMinDiff, double[] expected) {
-        var scaler = (Mean) Mean.initialize(properties, 10, 1, Pools.DEFAULT);
+        var scaler = (Mean) Mean.buildFrom(CypherMapWrapper.empty()).create(properties, 10, 1, Pools.DEFAULT);
 
         assertThat(scaler.avg).isEqualTo(avg);
         assertThat(scaler.maxMinDiff).isEqualTo(maxMinDiff);
@@ -59,7 +60,7 @@ class MeanTest {
     @Test
     void avoidsDivByZero() {
         var properties = new DoubleTestPropertyValues(nodeId -> 4D);
-        var scaler = Mean.initialize(properties, 10, 1, Pools.DEFAULT);
+        var scaler = Mean.buildFrom(CypherMapWrapper.empty()).create(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {
             assertThat(scaler.scaleProperty(i)).isEqualTo(0D);

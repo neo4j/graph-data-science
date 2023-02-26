@@ -20,15 +20,18 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 final class Center extends ScalarScaler {
 
+    static final String NAME = "center";
     final double avg;
 
     private Center(NodePropertyValues properties, double avg) {
@@ -36,33 +39,44 @@ final class Center extends ScalarScaler {
         this.avg = avg;
     }
 
-    static ScalarScaler initialize(
-        NodePropertyValues properties,
-        long nodeCount,
-        int concurrency,
-        ExecutorService executor
-    ) {
-        var tasks = PartitionUtils.rangePartition(
-            concurrency,
-            nodeCount,
-            partition -> new ComputeSum(partition, properties),
-            Optional.empty()
-        );
-        RunWithConcurrency.builder()
-            .concurrency(concurrency)
-            .tasks(tasks)
-            .executor(executor)
-            .run();
-        var sum = tasks.stream().mapToDouble(ComputeSum::sum).sum();
-        var avg = sum / nodeCount;
-
-        return new Center(properties, avg);
-
-    }
-
     @Override
     public double scaleProperty(long nodeId) {
         return (properties.doubleValue(nodeId) - avg);
+    }
+
+    static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
+        mapWrapper.requireOnlyKeysFrom(List.of());
+        return new ScalerFactory() {
+            @Override
+            public String name() {
+                return NAME;
+            }
+
+            @Override
+            public ScalarScaler create(
+                NodePropertyValues properties,
+                long nodeCount,
+                int concurrency,
+                ExecutorService executor
+            ) {
+                var tasks = PartitionUtils.rangePartition(
+                    concurrency,
+                    nodeCount,
+                    partition -> new ComputeSum(partition, properties),
+                    Optional.empty()
+                );
+                RunWithConcurrency.builder()
+                    .concurrency(concurrency)
+                    .tasks(tasks)
+                    .executor(executor)
+                    .run();
+                var sum = tasks.stream().mapToDouble(ComputeSum::sum).sum();
+                var avg = sum / nodeCount;
+
+                return new Center(properties, avg);
+
+            }
+        };
     }
 
     static class ComputeSum extends AggregatesComputer {

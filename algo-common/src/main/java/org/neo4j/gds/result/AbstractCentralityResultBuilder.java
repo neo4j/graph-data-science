@@ -24,12 +24,15 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.scaling.ScalarScaler;
+import org.neo4j.gds.scaling.LogScaler;
+import org.neo4j.gds.scaling.ScalerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongToDoubleFunction;
+
+import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 
 public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends AbstractResultBuilder<WRITE_RESULT> {
 
@@ -40,7 +43,7 @@ public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends Abst
     private final Map<String, Object> histogramError;
 
     private LongToDoubleFunction centralityFunction;
-    private ScalarScaler.Variant scaler;
+    private ScalerFactory scaler;
 
     protected long postProcessingMillis = -1L;
     protected Map<String, Object> centralityHistogram;
@@ -61,7 +64,7 @@ public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends Abst
         return this;
     }
 
-    public AbstractCentralityResultBuilder<WRITE_RESULT> withScalerVariant(ScalarScaler.Variant scaler) {
+    public AbstractCentralityResultBuilder<WRITE_RESULT> withScalerVariant(ScalerFactory scaler) {
         this.scaler = scaler;
         return this;
     }
@@ -80,10 +83,13 @@ public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends Abst
 
     @NotNull
     private Optional<DoubleHistogram> computeCentralityHistogram() {
-        var logScaler = scaler == ScalarScaler.Variant.LOG;
+        var logScaler = scaler != null && scaler.name().equals(LogScaler.NAME);
         if (buildHistogram && centralityFunction != null) {
             if (logScaler) {
-                this.histogramError.put(HISTOGRAM_ERROR_KEY, "Unable to create histogram when using scaler of type " + ScalarScaler.Variant.LOG);
+                this.histogramError.put(
+                    HISTOGRAM_ERROR_KEY,
+                    "Unable to create histogram when using scaler of type " + toUpperCaseWithLocale(LogScaler.NAME)
+                );
             } else {
                 try {
                     return Optional.of(CentralityStatistics.histogram(

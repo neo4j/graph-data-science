@@ -24,12 +24,7 @@ public final class StorageEngineFactoryIdProvider {
     // Record storage = 0, Freki = 1
     // Let's leave some room for future storage engines
     // This arbitrary seems quite future-proof
-    private static final byte ID = 42;
+    public static final byte ID = 42;
 
     private StorageEngineFactoryIdProvider() {}
-
-    public static byte id(Neo4jVersion neo4jVersion) {
-        // making sure the compatible version comes last when sorting by id
-        return Neo4jVersion.findNeo4jVersion() == neo4jVersion ? ID + 1 : ID;
-    }
 }

@@ -7,6 +7,13 @@
 
 include::partial$/operations-reference/beta-note.adoc[]
 
+:directed:
+:undirected:
+:homogeneous:
+:weighted:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
 Node2Vec is a node embedding algorithm that computes a vector representation of a node based on random walks in the graph.
 The neighborhood is sampled through random walks.
 Using a number of random neighborhood samples, the algorithm trains a single hidden layer neural network.

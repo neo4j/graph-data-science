@@ -19,23 +19,9 @@
  */
 package org.neo4j.gds.api;
 
-import java.util.function.Function;
-
 public interface ProcedureReturnColumns {
 
     boolean contains(String fieldName);
-
-    ProcedureReturnColumns withReturnColumnNameTransformationFunction(Function<String, String> transformationFunction);
-
-    ProcedureReturnColumns EMPTY = new ProcedureReturnColumns() {
-        @Override
-        public boolean contains(String fieldName) {
-            return false;
-        }
-
-        @Override
-        public ProcedureReturnColumns withReturnColumnNameTransformationFunction(Function<String, String> transformationFunction) {
-            return this;
-        }
-    };
+    
+    ProcedureReturnColumns EMPTY = fieldName -> false;
 }

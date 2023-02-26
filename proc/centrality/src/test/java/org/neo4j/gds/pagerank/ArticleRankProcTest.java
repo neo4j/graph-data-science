@@ -28,11 +28,15 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.scaling.ScalarScaler;
+import org.neo4j.gds.scaling.L1Norm;
+import org.neo4j.gds.scaling.L2Norm;
+import org.neo4j.gds.scaling.Max;
+import org.neo4j.gds.scaling.Mean;
+import org.neo4j.gds.scaling.MinMax;
+import org.neo4j.gds.scaling.NoneScaler;
 import org.neo4j.kernel.impl.core.NodeEntity;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -76,22 +80,22 @@ class ArticleRankProcTest extends BaseProcTest {
 
     static Stream<Arguments> scalers() {
         return Stream.of(
-            Arguments.of(ScalarScaler.Variant.NONE, 0.15, 0.2350),
-            Arguments.of(ScalarScaler.Variant.L1NORM, 0.38961, 0.61038),
-            Arguments.of(ScalarScaler.Variant.L2NORM, 0.53803, 0.84292),
-            Arguments.of(ScalarScaler.Variant.MEAN, -0.5, 0.5),
-            Arguments.of(ScalarScaler.Variant.MINMAX, 0.0, 1.0),
-            Arguments.of(ScalarScaler.Variant.MAX, 0.63829, 1.0)
+            Arguments.of(NoneScaler.NAME, 0.15, 0.2350),
+            Arguments.of(L1Norm.NAME, 0.38961, 0.61038),
+            Arguments.of(L2Norm.NAME, 0.53803, 0.84292),
+            Arguments.of(Mean.NAME, -0.5, 0.5),
+            Arguments.of(MinMax.NAME, 0.0, 1.0),
+            Arguments.of(Max.NAME, 0.63829, 1.0)
         );
     }
 
     @ParameterizedTest
     @MethodSource("scalers")
-    void scalers(ScalarScaler.Variant variant, double expectedNode0, double expectedNode1) {
+    void scalers(String scaler, double expectedNode0, double expectedNode1) {
         String query = GdsCypher.call(GRAPH_NAME)
             .algo("articleRank")
             .streamMode()
-            .addParameter("scaler", variant.name().toLowerCase(Locale.ENGLISH))
+            .addParameter("scaler", scaler)
             .yields();
 
         assertCypherResult(query, List.of(
@@ -110,7 +114,7 @@ class ArticleRankProcTest extends BaseProcTest {
         )
             .getRootCause()
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Scaler `SUPERDUPERSCALARSCALERVARIANT` is not supported.");
+            .hasMessageContaining("Unrecognised scaler specified: `SUPERDUPERSCALARSCALERVARIANT`.");
     }
 
     @Test

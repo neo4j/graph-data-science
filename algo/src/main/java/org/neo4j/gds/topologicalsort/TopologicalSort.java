@@ -19,20 +19,19 @@
  */
 package org.neo4j.gds.topologicalsort;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.concurrent.ExecutorService;
-
-import static java.util.concurrent.TimeUnit.MICROSECONDS;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountedCompleter;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 
 /*
  * Topological sort algorithm.
@@ -52,46 +51,41 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
     private final HugeAtomicLongArray inDegrees;
     private final Graph graph;
     private final long nodeCount;
-    private final ExecutorService executor;
-    private final int numThreads;
-    private final TopologicalSortQueue queue;
+    private final int concurrency;
+
 
     protected TopologicalSort(
         Graph graph,
         TopologicalSortConfig config,
-        ExecutorService executor,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
-        this.executor = executor;
-        int concurrency = config.concurrency();
-        this.numThreads = (nodeCount < concurrency) ? 1 : concurrency;
+        this.concurrency = config.concurrency();
         this.result = new TopologicalSortResult(nodeCount);
-        this.queue = new TopologicalSortQueue(nodeCount, numThreads);
         this.inDegrees = HugeAtomicLongArray.newArray(nodeCount);
     }
 
     @Override
     public TopologicalSortResult compute() {
         this.progressTracker.beginSubTask("TopologicalSort");
+
         initializeInDegrees();
-        addFirstSources();
-        performParallelSourcesSteps();
+        traverse();
 
         this.progressTracker.endSubTask("TopologicalSort");
         return result;
     }
 
     private void initializeInDegrees() {
-        try (var concurrentCopy = CloseableThreadLocal.withInitial(() -> graph.concurrentCopy())) {
+        try (var concurrentCopy = CloseableThreadLocal.withInitial(graph::concurrentCopy)) {
             ParallelUtil.parallelForEachNode(graph,
-                numThreads,
+                concurrency,
                 nodeId -> concurrentCopy.get().forEachRelationship(
                     nodeId,
                     (source, target) -> {
-                        inDegrees.getAndAdd(target, 1L);
+                        inDegrees.getAndAdd(target,1L);
                         return true;
                     }
                 )
@@ -99,63 +93,62 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         }
     }
 
-    private void addFirstSources() {
-        ParallelUtil.parallelForEachNode(nodeCount, numThreads,
+    private void traverse() {
+        ForkJoinPool forkJoinPool = Pools.createForkJoinPool(concurrency);
+        var tasks = ConcurrentHashMap.<ForkJoinTask<Void>>newKeySet();
+
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency,
             nodeId -> {
             if (inDegrees.get(nodeId) == 0L) {
-                queue.add(nodeId);
                 result.addNode(nodeId);
+                tasks.add(new TraversalTask(null, nodeId, graph.concurrentCopy(), result, inDegrees));
             }
         });
-    }
 
-    private void performParallelSourcesSteps() {
-        Collection<WorkerThread> tasks = new ArrayList<>(numThreads);
-        for (int i = 0; i < numThreads; ++i) {
-            WorkerThread t = new WorkerThread(i);
-            tasks.add(t);
+        for (ForkJoinTask<Void> task : tasks) {
+               forkJoinPool.submit(task);
         }
 
-        RunWithConcurrency.builder()
-            .concurrency(numThreads)
-            .tasks(tasks)
-            .waitTime(1, MICROSECONDS)
-            .terminationFlag(terminationFlag)
-            .executor(executor)
-            .run();
+        // calling join makes sure the pool waits for all the tasks to complete before shutting down
+        tasks.forEach(ForkJoinTask::join);
+        forkJoinPool.shutdown();
     }
 
-    class WorkerThread implements Runnable {
-        // The thread should identify itself with this id to fetch nodes from the right queue
-        private final int threadId;
-        private final RelationshipIterator iter;
+    private static final class TraversalTask extends CountedCompleter<Void> {
+        private final long sourceId;
+        private final Graph graph;
+        private final TopologicalSortResult result;
+        private final HugeAtomicLongArray inDegrees;
 
-        WorkerThread(int threadId) {
-            this.threadId = threadId;
-            this.iter = graph.concurrentCopy();
+        TraversalTask(@Nullable TraversalTask parent, long sourceId, Graph graph, TopologicalSortResult result, HugeAtomicLongArray inDegrees) {
+            super(parent);
+            this.sourceId = sourceId;
+            this.graph = graph;
+            this.result = result;
+            this.inDegrees = inDegrees;
         }
 
         @Override
-        public void run() {
-            long sourceId = queue.peekBy(threadId);
-            while (sourceId > -1L) {
-                // Because of how the queue works, it's important to first do the work, only then pop
-                performStep(iter, sourceId);
-                queue.popBy(threadId);
-                sourceId = queue.peekBy(threadId);
-            }
-        }
-    }
-    private void performStep(RelationshipIterator iter, long sourceId) {
-        iter.forEachRelationship(sourceId,
-            (source, target) -> {
-                long prevDegree = inDegrees.getAndAdd(target, -1L);
+        public void compute() {
+            graph.forEachRelationship(sourceId, (source, target) -> {
+                long prevDegree = inDegrees.getAndAdd(target, -1);
                 // if the previous degree was 1, this node is now a source
-                if (prevDegree == 1L) {
-                    queue.add(target);
-                    result.addNode((target));
+                if (prevDegree == 1) {
+                    result.addNode(target);
+                    addToPendingCount(1);
+                    TraversalTask traversalTask = new TraversalTask(
+                        this,
+                        target,
+                        graph.concurrentCopy(),
+                        result,
+                        inDegrees
+                    );
+                    traversalTask.fork();
                 }
                 return true;
             });
+
+            propagateCompletion();
+        }
     }
 }

@@ -23,6 +23,7 @@ import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.Options;
 import org.asciidoctor.SafeMode;
 import org.assertj.core.api.Assertions;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -200,6 +201,9 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
             .stream()
             .map(list -> list.stream().map(string -> {
                     try {
+                        if (string.startsWith("[")) {
+                            return formatListOfNumbers(string);
+                        }
                         return DocumentationTestToolsConstants.FLOAT_FORMAT.format(Double.parseDouble(string));
                     } catch (NumberFormatException e) {
                         return string;
@@ -208,15 +212,37 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
             ).collect(Collectors.toList());
     }
 
+    @NotNull
+    private static String formatListOfNumbers(String string) {
+        var withoutBrackets = string.substring(1, string.length() - 1);
+        var commaSeparator = ", ";
+        var parts = withoutBrackets.split(commaSeparator);
+        var builder = new StringBuilder("[");
+        var separator = "";
+        for (var part : parts) {
+            builder.append(separator);
+            builder.append(DocumentationTestToolsConstants.FLOAT_FORMAT.format(Double.parseDouble(part)));
+            separator = commaSeparator;
+        }
+        builder.append("]");
+
+        return builder.toString();
+    }
+
     private String valueToString(Object value) {
-        // TODO: Do we want to use the Values API here? We would get single-quote strings instead of double quotes.
-        // return Values.of(value).prettyPrint();
         if (value == null) {
             return "null";
         } else if (value instanceof String) {
             return "\"" + value + "\"";
         } else if (value instanceof Double) {
             return DocumentationTestToolsConstants.FLOAT_FORMAT.format(value);
+        } else if (value instanceof List<?>) {
+            return ((List<?>) value).stream().map(v -> {
+                if (v instanceof Number) {
+                    return DocumentationTestToolsConstants.FLOAT_FORMAT.format(v);
+                }
+                return v;
+            }).collect(Collectors.toList()).toString();
         } else {
             return value.toString();
         }

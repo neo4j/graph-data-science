@@ -19,11 +19,14 @@
  */
 package org.neo4j.gds.scaling;
 
+import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
+import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
 
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -42,10 +45,18 @@ class LogScalerTest {
     @ParameterizedTest
     @MethodSource("properties")
     void normalizes(NodePropertyValues properties, double[] expected) {
-        var scaler = new LogScaler(properties);
+        var scaler = new LogScaler(properties, 0);
 
         double[] actual = IntStream.range(1, 5).mapToDouble(scaler::scaleProperty).toArray();
         assertThat(actual).containsSequence(expected);
     }
 
+    @Test
+    void normalizesWithOffset() {
+        var properties = new LongTestPropertyValues(nodeId -> nodeId - 7);
+        var scaler = new LogScaler(properties, 7);
+
+        double[] actual = IntStream.range(1, 5).mapToDouble(scaler::scaleProperty).toArray();
+        assertThat(actual).containsSequence(new double[]{0.0, 0.69, 1.09, 1.38}, Offset.offset(1e-2));
+    }
 }

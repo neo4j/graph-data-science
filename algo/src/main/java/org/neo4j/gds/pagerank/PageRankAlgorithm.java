@@ -28,12 +28,12 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.scaling.L2Norm;
+import org.neo4j.gds.scaling.NoneScaler;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
-import static org.neo4j.gds.scaling.ScalarScaler.Variant.L2NORM;
-import static org.neo4j.gds.scaling.ScalarScaler.Variant.NONE;
 
 public class PageRankAlgorithm extends Algorithm<PageRankResult> {
 
@@ -81,14 +81,14 @@ public class PageRankAlgorithm extends Algorithm<PageRankResult> {
     }
 
     private void scaleScores(HugeDoubleArray scores) {
-        var variant = config.scaler();
+        var scalerFactory = config.scaler();
 
         // Eigenvector produces L2NORM-scaled results by default.
-        if (variant == NONE || (variant == L2NORM && mode == PageRankAlgorithmFactory.Mode.EIGENVECTOR)) {
+        if (scalerFactory.name().equals(NoneScaler.NAME) || (scalerFactory.name().equals(L2Norm.NAME) && mode == PageRankAlgorithmFactory.Mode.EIGENVECTOR)) {
             return;
         }
 
-        var scaler = variant.create(
+        var scaler = scalerFactory.create(
             scores.asNodeProperties(),
             graph.nodeCount(),
             config.concurrency(),

@@ -20,15 +20,18 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
-final class Mean extends ScalarScaler {
+public final class Mean extends ScalarScaler {
 
+    public static final String NAME = "mean";
     final double avg;
     final double maxMinDiff;
 
@@ -38,35 +41,51 @@ final class Mean extends ScalarScaler {
         this.maxMinDiff = maxMinDiff;
     }
 
-    static ScalarScaler initialize(NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor) {
-        var tasks = PartitionUtils.rangePartition(
-            concurrency,
-            nodeCount,
-            partition -> new ComputeMaxMinSum(partition, properties),
-            Optional.empty()
-        );
-        RunWithConcurrency.builder()
-            .concurrency(concurrency)
-            .tasks(tasks)
-            .executor(executor)
-            .run();
-
-        var min = tasks.stream().mapToDouble(ComputeMaxMinSum::min).min().orElse(Double.MAX_VALUE);
-        var max = tasks.stream().mapToDouble(ComputeMaxMinSum::max).max().orElse(-Double.MAX_VALUE);
-        var sum = tasks.stream().mapToDouble(ComputeMaxMinSum::sum).sum();
-
-        var maxMinDiff = max - min;
-
-        if (Math.abs(maxMinDiff) < CLOSE_TO_ZERO) {
-            return ZERO;
-        } else {
-            return new Mean(properties, sum / nodeCount, maxMinDiff);
-        }
-    }
-
     @Override
     public double scaleProperty(long nodeId) {
         return (properties.doubleValue(nodeId) - avg) / maxMinDiff;
+    }
+
+    static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
+        mapWrapper.requireOnlyKeysFrom(List.of());
+        return new ScalerFactory() {
+            @Override
+            public String name() {
+                return NAME;
+            }
+
+            @Override
+            public ScalarScaler create(
+                NodePropertyValues properties,
+                long nodeCount,
+                int concurrency,
+                ExecutorService executor
+            ) {
+                var tasks = PartitionUtils.rangePartition(
+                    concurrency,
+                    nodeCount,
+                    partition -> new ComputeMaxMinSum(partition, properties),
+                    Optional.empty()
+                );
+                RunWithConcurrency.builder()
+                    .concurrency(concurrency)
+                    .tasks(tasks)
+                    .executor(executor)
+                    .run();
+
+                var min = tasks.stream().mapToDouble(ComputeMaxMinSum::min).min().orElse(Double.MAX_VALUE);
+                var max = tasks.stream().mapToDouble(ComputeMaxMinSum::max).max().orElse(-Double.MAX_VALUE);
+                var sum = tasks.stream().mapToDouble(ComputeMaxMinSum::sum).sum();
+
+                var maxMinDiff = max - min;
+
+                if (Math.abs(maxMinDiff) < CLOSE_TO_ZERO) {
+                    return ZERO;
+                } else {
+                    return new Mean(properties, sum / nodeCount, maxMinDiff);
+                }
+            }
+        };
     }
 
     static class ComputeMaxMinSum extends AggregatesComputer {

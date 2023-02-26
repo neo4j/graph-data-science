@@ -42,6 +42,7 @@ public class TopologicalSortResult {
     }
 
     void addNode(long nodeId) {
-        sortedNodes.set(addIndex.getAndIncrement(), nodeId);
+        var index = addIndex.getAndIncrement();
+        sortedNodes.set(index, nodeId);
     }
 }

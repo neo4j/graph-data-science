@@ -20,15 +20,18 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
-final class L1Norm extends ScalarScaler {
+public final class L1Norm extends ScalarScaler {
 
+    public static final String NAME = "l1norm";
     final double l1Norm;
 
     private L1Norm(NodePropertyValues properties, double l1Norm) {
@@ -36,26 +39,42 @@ final class L1Norm extends ScalarScaler {
         this.l1Norm = l1Norm;
     }
 
-    static ScalarScaler initialize(NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor) {
-        var tasks = PartitionUtils.rangePartition(
-            concurrency,
-            nodeCount,
-            partition -> new ComputeAbsoluteSum(partition, properties),
-            Optional.empty()
-        );
-        RunWithConcurrency.builder()
-            .concurrency(concurrency)
-            .tasks(tasks)
-            .executor(executor)
-            .run();
+    static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
+        mapWrapper.requireOnlyKeysFrom(List.of());
+        return new ScalerFactory() {
+            @Override
+            public String name() {
+                return NAME;
+            }
 
-        var absoluteSum = tasks.stream().mapToDouble(ComputeAbsoluteSum::sum).sum();
+            @Override
+            public ScalarScaler create(
+                NodePropertyValues properties,
+                long nodeCount,
+                int concurrency,
+                ExecutorService executor
+            ) {
+                var tasks = PartitionUtils.rangePartition(
+                    concurrency,
+                    nodeCount,
+                    partition -> new ComputeAbsoluteSum(partition, properties),
+                    Optional.empty()
+                );
+                RunWithConcurrency.builder()
+                    .concurrency(concurrency)
+                    .tasks(tasks)
+                    .executor(executor)
+                    .run();
 
-        if (absoluteSum < CLOSE_TO_ZERO) {
-            return ZERO;
-        } else {
-            return new L1Norm(properties, absoluteSum);
-        }
+                var absoluteSum = tasks.stream().mapToDouble(ComputeAbsoluteSum::sum).sum();
+
+                if (absoluteSum < CLOSE_TO_ZERO) {
+                    return ZERO;
+                } else {
+                    return new L1Norm(properties, absoluteSum);
+                }
+            }
+        };
     }
 
     @Override

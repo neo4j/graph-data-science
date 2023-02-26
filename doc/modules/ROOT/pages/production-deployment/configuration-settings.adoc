@@ -6,110 +6,148 @@
 This page describes the available configuration settings in GDS.
 Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4j-conf/#neo4j-conf[neo4j.conf] file for details on how to use configuration settings.
 
+== GDS Enterprise Edition
+
+[.setting-details]
+.gds.enterprise.license_file
+[cols="1,4", caption =]
+|===
+| Description   | Sets the location of the file that contains the Neo4j Graph Data Science library license key.
+| Default Value | `No Value`
+| Valid Values  | An absolute path.
+| Dynamic       | `false`
+|===
+
 
 [.enterprise-edition]
 == GDS and Arrow
 
-`gds.arrow.abortion_timeout`
+[.setting-details]
+.gds.arrow.abortion_timeout
+[cols="1,4", caption =]
+|===
+| Description   | The maximum time to wait for the next command before aborting the import process.
+| Default Value | `10m`
+| Valid Values  | A duration (Valid units are: `ns`, `μs`, `ms`, `s`, `m`, `h` and `d` default unit is `s`).
+| Dynamic       | `false`
+|===
 
-* The maximum time to wait for the next command before aborting the import process.
-* defaultValue: `10m`
-* validValues: a duration (Valid units are: `ns`, `μs`, `ms`, `s`, `m`, `h` and `d` default unit is `s`)
-* dynamic: `false`
+[.setting-details]
+.gds.arrow.advertised_listen_address
+[cols="1,4", caption =]
+|===
+| Description   | Address that clients should use to connect to the GDS Arrow Flight Server.
+| Default Value | `:8491`
+| Valid Values  | A socket address in the format `hostname:port`, `hostname` or `:port`. If missing port or hostname it is acquired from `gds.arrow.listen_address`.
+| Dynamic       | `false`
+|===
 
-`gds.arrow.advertised_listen_address`
+[.setting-details]
+.gds.arrow.batch_size
+[cols="1,4", caption =]
+|===
+| Description   | The batch size used for arrow property export.
+| Default Value | `10000`
+| Valid Values  | An integer.
+| Dynamic       | `true`
+|===
 
-* Address that clients should use to connect to the GDS Arrow Flight Server.
-* defaultValue: `:8491`
-* validValues: a socket address in the format `hostname:port`, `hostname` or `:port`. If missing port or hostname it is acquired from `gds.arrow.listen_address`
-* dynamic: `false`
+[.setting-details]
+.gds.arrow.enabled
+[cols="1,4", caption =]
+|===
+| Description   | Enable the GDS Arrow Flight Server.
+| Default Value | `false`
+| Valid Values  | A boolean.
+| Dynamic       | `false`
+|===
 
-`gds.arrow.batch_size`
+[.setting-details]
+.gds.arrow.encryption.never
+[cols="1,4", caption =]
+|===
+| Description   | Never activate server-side encryption for the GDS Arrow Flight Server.
+| Default Value | `false`
+| Valid Values  | A boolean.
+| Dynamic       | `false`
+|===
 
-* The batch size used for arrow property export.
-* defaultValue: `10000`
-* validValues: an integer
-* dynamic: `true`
-
-`gds.arrow.enabled`
-
-* Enable the GDS Arrow Flight Server.
-* defaultValue: `false`
-* validValues: a boolean
-* dynamic: `false`
-
-`gds.arrow.encryption.never`
-
-* Never activate server-side encryption for the GDS Arrow Flight Server.
-* defaultValue: `false`
-* validValues: a boolean
-* dynamic: `false`
-
-`gds.arrow.listen_address`
-
-* The maximum time to wait for the next command before aborting the import process.
-* defaultValue: `10m`
-* validValues: a duration (Valid units are: `ns`, `μs`, `ms`, `s`, `m`, `h` and `d` default unit is `s`)
-* dynamic: `false`
+[.setting-details]
+.gds.arrow.listen_address
+[cols="1,4", caption =]
+|===
+| Description   | Address the GDS Arrow Flight Server should bind to.
+| Default Value | `localhost:8491`
+| Valid Values  | A socket address in the format `hostname:port`, `hostname` or `:port`.
+| Dynamic       | `false`
+|===
 
 
 [.enterprise-edition]
 == Neo4j Cluster
 
-`gds.cluster.tx.max.size`
+[.setting-details]
+.gds.cluster.tx.max.size
+[cols="1,4", caption =]
+|===
+| Description   | Set the maximum transaction size for GDS write back when running in Neo4j Cluster.
+| Default Value | `100000`
+| Valid Values  | An integer, must be set greater than or equal to the value of `gds.cluster.tx.min.size`.
+| Dynamic       | `false`
+|===
 
-* Set the maximum transaction size for GDS write back when running in Neo4j Cluster.
-* defaultValue: `100000`
-* validValues: an integer, must be set greater than or equal to the value of `gds.cluster.tx.min.size`
-* dynamic: `false`
-
-`gds.cluster.tx.min.size`
-
-* Set the minimum transaction size for GDS write back when running in Neo4j Cluster.
-* defaultValue: `10000`
-* validValues: an integer
-* dynamic: `false`
-
-
-== GDS Enterprise Edition
-
-`gds.enterprise.license_file`
-
-* Sets the location of the file that contains the Neo4j Graph Data Science library license key.
-* defaultValue: `No Value`
-* validValues: an absolute path
-* dynamic: `false`
+[.setting-details]
+.gds.cluster.tx.min.size
+[cols="1,4", caption =]
+|===
+| Description   | Set the minimum transaction size for GDS write back when running in Neo4j Cluster.
+| Default Value | `10000`
+| Valid Values  | An integer.
+| Dynamic       | `false`
+|===
 
 
 == GDS Export
 
-`gds.export.location`
+[.setting-details]
+.gds.export.location
+[cols="1,4", caption = ]
+|===
+| Description   | Sets the export location for file based exports.
+| Default Value | `No Value`
+| Valid Values  | An absolute path.
+| Dynamic       | `false`
+|===
 
-* Sets the export location for file based exports.
-* defaultValue: `No Value`
-* validValues: an absolute path
-* dynamic: `false`
-
-`gds.model.store_location` label:enterprise-edition[Enterprise Edition]
-
-* Sets the location where persisted models are stored.
-* defaultValue: `No Value`
-* validValues: an absolute path
-* dynamic: `false`
+[.setting-details]
+.gds.model.store_location label:enterprise-edition[Enterprise Edition]
+[cols="1,4", caption =]
+|===
+| Description   | Sets the location where persisted models are stored.
+| Default Value | `No Value`
+| Valid Values  | An absolute path.
+| Dynamic       | `false`
+|===
 
 
 == Miscellaneous
 
-`gds.progress_tracking_enabled`
+[.setting-details]
+.gds.progress_tracking_enabled
+[cols="1,4", caption =]
+|===
+| Description   | Enable progress logging tracking.
+| Default Value | `true`
+| Valid Values  | A boolean.
+| Dynamic       | `false`
+|===
 
-* Enable progress logging tracking.
-* defaultValue: `true`
-* validValues: a boolean
-* dynamic: `false`
-
-`gds.validate_using_max_memory_estimation`
-
-* Use maximum memory estimation in procedure memory guard.
-* defaultValue: `false`
-* validValues: a boolean
-* dynamic: `false`
+[.setting-details]
+.gds.validate_using_max_memory_estimation
+[cols="1,4", caption =]
+|===
+| Description   | Use maximum memory estimation in procedure memory guard.
+| Default Value | `false`
+| Valid Values  | A boolean.
+| Dynamic       | `false`
+|===

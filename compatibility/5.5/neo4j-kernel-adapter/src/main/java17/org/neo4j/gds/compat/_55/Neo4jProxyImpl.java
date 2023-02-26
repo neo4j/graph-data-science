@@ -62,7 +62,6 @@ import org.neo4j.internal.batchimport.IndexConfig;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.Monitor;
 import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.internal.batchimport.input.Group;
 import org.neo4j.internal.batchimport.input.IdType;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
@@ -512,7 +511,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType) {
+    public InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType, ReadableGroups groups) {
         switch (idType) {
             case ACTUAL -> {
                 return new InputEntityIdVisitor.Long() {
@@ -533,7 +532,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
                 };
             }
             case INTEGER -> {
-                var globalGroup = new Group(0, null, null);
+                var globalGroup = groups.get(null);
 
                 return new InputEntityIdVisitor.Long() {
                     @Override
@@ -557,8 +556,8 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public InputEntityIdVisitor.String inputEntityStringIdVisitor() {
-        var globalGroup = new Group(0, null, null);
+    public InputEntityIdVisitor.String inputEntityStringIdVisitor(ReadableGroups groups) {
+        var globalGroup = groups.get(null);
 
         return new InputEntityIdVisitor.String() {
             @Override

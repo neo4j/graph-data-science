@@ -20,15 +20,18 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
-final class Max extends ScalarScaler {
+public final class Max extends ScalarScaler {
 
+    public static final String NAME = "max";
     final double maxAbs;
 
     private Max(NodePropertyValues properties, double maxAbs) {
@@ -36,31 +39,47 @@ final class Max extends ScalarScaler {
         this.maxAbs = maxAbs;
     }
 
-    static ScalarScaler initialize(NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor) {
-        var tasks = PartitionUtils.rangePartition(
-            concurrency,
-            nodeCount,
-            partition -> new ComputeAbsMax(partition, properties),
-            Optional.empty()
-        );
-        RunWithConcurrency.builder()
-            .concurrency(concurrency)
-            .tasks(tasks)
-            .executor(executor)
-            .run();
-
-        var absMax = tasks.stream().mapToDouble(ComputeAbsMax::absMax).max().orElse(0);
-
-        if (Math.abs(absMax) < CLOSE_TO_ZERO) {
-            return ZERO;
-        } else {
-            return new Max(properties, absMax);
-        }
-    }
-
     @Override
     public double scaleProperty(long nodeId) {
         return properties.doubleValue(nodeId) / maxAbs;
+    }
+
+    static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
+        mapWrapper.requireOnlyKeysFrom(List.of());
+        return new ScalerFactory() {
+            @Override
+            public String name() {
+                return NAME;
+            }
+
+            @Override
+            public ScalarScaler create(
+                NodePropertyValues properties,
+                long nodeCount,
+                int concurrency,
+                ExecutorService executor
+            ) {
+                var tasks = PartitionUtils.rangePartition(
+                    concurrency,
+                    nodeCount,
+                    partition -> new ComputeAbsMax(partition, properties),
+                    Optional.empty()
+                );
+                RunWithConcurrency.builder()
+                    .concurrency(concurrency)
+                    .tasks(tasks)
+                    .executor(executor)
+                    .run();
+
+                var absMax = tasks.stream().mapToDouble(ComputeAbsMax::absMax).max().orElse(0);
+
+                if (Math.abs(absMax) < CLOSE_TO_ZERO) {
+                    return ZERO;
+                } else {
+                    return new Max(properties, absMax);
+                }
+            }
+        };
     }
 
     static class ComputeAbsMax extends AggregatesComputer {
