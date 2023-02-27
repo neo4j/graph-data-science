@@ -40,11 +40,17 @@ public final class ScalePropertiesFactory<CONFIG extends ScalePropertiesBaseConf
     }
 
     @Override
-    public Task progressTask(Graph graphOrGraphStore, CONFIG config) {
+    public Task progressTask(Graph graph, CONFIG config) {
+        int totalPropertyDimension = config
+            .nodeProperties()
+            .stream()
+            .map(graph::nodeProperties)
+            .mapToInt(p -> p.dimension().orElseThrow(/* already validated in config */))
+            .sum();
         return Tasks.task(
             taskName(),
-            Tasks.leaf("Prepare scalers"),
-            Tasks.leaf("Scale properties")
+            Tasks.leaf("Prepare scalers", graph.nodeCount() * totalPropertyDimension),
+            Tasks.leaf("Scale properties", graph.nodeCount() * totalPropertyDimension)
         );
     }
 

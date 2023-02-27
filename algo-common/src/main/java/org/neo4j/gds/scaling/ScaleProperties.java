@@ -164,7 +164,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
             ));
         }
 
-        int arrayLength;
+        int dimension = nodeProperties.dimension().orElseThrow(/* already validated in config */);
         List<ScalarScaler> elementScalers;
 
         switch (nodeProperties.valueType()) {
@@ -178,10 +178,9 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
                     executor
                 );
             case LONG_ARRAY:
-                arrayLength = nodeProperties.longArrayValue(0).length;
-                elementScalers = IntStream.range(0, arrayLength)
+                elementScalers = IntStream.range(0, dimension)
                     .mapToObj(idx -> scalerVariant.create(
-                        transformLongArrayEntryToDoubleProperty(propertyName, nodeProperties, arrayLength, idx),
+                        transformLongArrayEntryToDoubleProperty(propertyName, nodeProperties, dimension, idx),
                         graph.nodeCount(),
                         config.concurrency(),
                         progressTracker,
@@ -189,10 +188,9 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
                     )).collect(Collectors.toList());
                 return new Scaler.ArrayScaler(elementScalers);
             case FLOAT_ARRAY:
-                arrayLength = nodeProperties.floatArrayValue(0).length;
-                elementScalers = IntStream.range(0, arrayLength)
+                elementScalers = IntStream.range(0, dimension)
                     .mapToObj(idx -> scalerVariant.create(
-                        transformFloatArrayEntryToDoubleProperty(propertyName, nodeProperties, arrayLength, idx),
+                        transformFloatArrayEntryToDoubleProperty(propertyName, nodeProperties, dimension, idx),
                         graph.nodeCount(),
                         config.concurrency(),
                         progressTracker,
@@ -200,10 +198,9 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
                     )).collect(Collectors.toList());
                 return new Scaler.ArrayScaler(elementScalers);
             case DOUBLE_ARRAY:
-                arrayLength = nodeProperties.doubleArrayValue(0).length;
-                elementScalers = IntStream.range(0, arrayLength)
+                elementScalers = IntStream.range(0, dimension)
                     .mapToObj(idx -> scalerVariant.create(
-                        transformDoubleArrayEntryToDoubleProperty(propertyName, nodeProperties, arrayLength, idx),
+                        transformDoubleArrayEntryToDoubleProperty(propertyName, nodeProperties, dimension, idx),
                         graph.nodeCount(),
                         config.concurrency(),
                         progressTracker,
@@ -220,14 +217,14 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
         ));
     }
 
-    private DoubleNodePropertyValues transformFloatArrayEntryToDoubleProperty(String propertyName, NodePropertyValues property, int expectedArrayLength, int idx) {
+    private DoubleNodePropertyValues transformFloatArrayEntryToDoubleProperty(String propertyName, NodePropertyValues property, int dimension, int idx) {
         return new DoubleNodePropertyValues() {
             @Override
             public double doubleValue(long nodeId) {
                 var propertyValue = property.floatArrayValue(nodeId);
 
-                if (propertyValue == null || propertyValue.length != expectedArrayLength) {
-                    throw createInvalidArrayException(propertyName, expectedArrayLength, nodeId, Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0));
+                if (propertyValue == null || propertyValue.length != dimension) {
+                    throw createInvalidArrayException(propertyName, dimension, nodeId, Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0));
                 }
                 return propertyValue[idx];
             }
@@ -239,14 +236,14 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
         };
     }
 
-    private DoubleNodePropertyValues transformDoubleArrayEntryToDoubleProperty(String propertyName, NodePropertyValues property, int expectedArrayLength, int idx) {
+    private DoubleNodePropertyValues transformDoubleArrayEntryToDoubleProperty(String propertyName, NodePropertyValues property, int dimension, int idx) {
         return new DoubleNodePropertyValues() {
             @Override
             public double doubleValue(long nodeId) {
                 var propertyValue = property.doubleArrayValue(nodeId);
 
-                if (propertyValue == null || propertyValue.length != expectedArrayLength) {
-                    throw createInvalidArrayException(propertyName, expectedArrayLength, nodeId, Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0));
+                if (propertyValue == null || propertyValue.length != dimension) {
+                    throw createInvalidArrayException(propertyName, dimension, nodeId, Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0));
                 }
                 return propertyValue[idx];
             }
@@ -258,14 +255,14 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
         };
     }
 
-    private DoubleNodePropertyValues transformLongArrayEntryToDoubleProperty(String propertyName, NodePropertyValues property, int expectedArrayLength, int idx) {
+    private DoubleNodePropertyValues transformLongArrayEntryToDoubleProperty(String propertyName, NodePropertyValues property, int dimension, int idx) {
         return new DoubleNodePropertyValues() {
             @Override
             public double doubleValue(long nodeId) {
                 var propertyValue = property.longArrayValue(nodeId);
 
-                if (propertyValue == null || propertyValue.length != expectedArrayLength) {
-                    throw createInvalidArrayException(propertyName, expectedArrayLength, nodeId, Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0));
+                if (propertyValue == null || propertyValue.length != dimension) {
+                    throw createInvalidArrayException(propertyName, dimension, nodeId, Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0));
                 }
                 return propertyValue[idx];
             }
@@ -279,16 +276,16 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
 
     private IllegalArgumentException createInvalidArrayException(
         String propertyName,
-        int expectedArrayLength,
+        int dimension,
         long nodeId,
         int actualLength
     ) {
         return new IllegalArgumentException(formatWithLocale(
             "For scaling property `%s` expected array of length %d but got length %d for node %d",
             propertyName,
-            expectedArrayLength,
+            dimension,
             actualLength,
-            nodeId
+            graph.toOriginalNodeId(nodeId)
         ));
     }
 }

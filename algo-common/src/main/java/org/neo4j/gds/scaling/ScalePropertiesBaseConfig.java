@@ -19,14 +19,19 @@
  */
 package org.neo4j.gds.scaling;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.PropertyMappings.fromObject;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @SuppressWarnings("immutables:subtype")
 public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
@@ -37,6 +42,24 @@ public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
     @Configuration.ConvertWith(method = "org.neo4j.gds.scaling.ScalerFactory#parse")
     @Configuration.ToMapValue("org.neo4j.gds.scaling.ScalerFactory#toString")
     ScalerFactory scaler();
+
+    @Configuration.GraphStoreValidationCheck
+    default void validatePropertyDimensions(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        nodeProperties().forEach(propertyName -> {
+            if (graphStore.nodeProperty(propertyName).values().dimension().isEmpty()) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Node property `%s` contains a `null` value and cannot be scaled. " +
+                    "Specifying a default value for the property in the node projection might help.",
+                    propertyName
+                ));
+            }
+        });
+    }
+
 
     @SuppressWarnings("unused")
     static List<String> parsePropertyNames(Object nodePropertiesOrMappings) {

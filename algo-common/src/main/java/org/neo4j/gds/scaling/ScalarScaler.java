@@ -59,6 +59,7 @@ public abstract class ScalarScaler implements Scaler {
             for (long nodeId = partition.startNode(); nodeId < end; nodeId++) {
                 compute(nodeId);
             }
+            progressTracker.logProgress(partition.nodeCount());
         }
 
         abstract void compute(long nodeId);

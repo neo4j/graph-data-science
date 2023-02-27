@@ -231,8 +231,17 @@ class ScalePropertiesTest {
 
     @Test
     void progressLogging() {
+        var graph = RandomGraphGenerator
+            .builder()
+            .nodeCount(1000)
+            .averageDegree(1)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .nodePropertyProducer(PropertyProducer.randomEmbedding("data", 42, -1337, 1337))
+            .build()
+            .generate();
+
         var config = ScalePropertiesStreamConfigImpl.builder()
-            .nodeProperties(List.of("a"))
+            .nodeProperties(List.of("data"))
             .scaler(MinMax.buildFrom(CypherMapWrapper.empty()))
             .build();
 
@@ -256,10 +265,16 @@ class ScalePropertiesTest {
         Assertions.assertThat(messagesInOrder)
             // avoid asserting on the thread id
             .extracting(removingThreadId())
-            .hasSize(8)
+            .hasSize(49)
             .containsSequence(
                 "ScaleProperties :: Start",
                 "ScaleProperties :: Prepare scalers :: Start",
+                "ScaleProperties :: Prepare scalers 2%",
+                "ScaleProperties :: Prepare scalers 4%",
+                "ScaleProperties :: Prepare scalers 7%")
+            .containsSequence(
+                "ScaleProperties :: Prepare scalers 95%",
+                "ScaleProperties :: Prepare scalers 97%",
                 "ScaleProperties :: Prepare scalers 100%",
                 "ScaleProperties :: Prepare scalers :: Finished",
                 "ScaleProperties :: Scale properties :: Start",
