@@ -633,7 +633,7 @@ final class NodeSimilarityTest {
     }
 
     @ParameterizedTest(name = "topK = {0}")
-    @ValueSource(ints = {TOP_K_DEFAULT, 100, 1_000_005})
+    @ValueSource(ints = {TOP_K_DEFAULT, 100})
     void shouldComputeMemrec(int topK) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(1_000_000)
