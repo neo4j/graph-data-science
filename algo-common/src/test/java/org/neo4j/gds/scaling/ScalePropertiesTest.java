@@ -271,6 +271,7 @@ class ScalePropertiesTest {
             ).containsSequence(
                 "ScaleProperties :: Prepare scalers 96%",
                 "ScaleProperties :: Prepare scalers 98%",
+
                 "ScaleProperties :: Prepare scalers 100%",
                 "ScaleProperties :: Prepare scalers :: Finished",
                 "ScaleProperties :: Scale properties :: Start",

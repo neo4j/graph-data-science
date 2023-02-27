@@ -167,4 +167,5 @@ class ScalePropertiesBaseConfigTest {
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("`nodeProperties` must not be empty");
     }
+
 }
