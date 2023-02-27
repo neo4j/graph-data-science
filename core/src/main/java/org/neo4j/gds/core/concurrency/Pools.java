@@ -47,7 +47,7 @@ public final class Pools {
         throw new UnsupportedOperationException();
     }
 
-    static ExecutorService createDefaultPool() {
+    public static ExecutorService createDefaultPool() {
         var poolSizes = PoolSizesService.poolSizes();
         return new ThreadPoolExecutor(
             poolSizes.corePoolSize(),
