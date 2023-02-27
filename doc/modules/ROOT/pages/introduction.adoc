@@ -63,9 +63,13 @@ Homogeneous::
 The algorithm will treat all nodes and relationships in its input graph(s) similarly, as if they were all of the same type.
 If multiple types of nodes or relationships exist in the graph, this must be taken into account when analysing the results of the algorithm.
 
-[[introduction-algorithms-heterogeneous]]
-Heterogeneous::
-The algorithm has the ability to distinguish between nodes and/or relationships of different types.
+[[introduction-algorithms-heterogeneous-nodes]]
+Heterogeneous nodes::
+The algorithm has the ability to distinguish between nodes of different types.
+
+[[introduction-algorithms-heterogeneous-rels]]
+Heterogeneous relationships::
+The algorithm has the ability to distinguish between relationships of different types.
 
 [[introduction-algorithms-weighted]]
 Weighted::

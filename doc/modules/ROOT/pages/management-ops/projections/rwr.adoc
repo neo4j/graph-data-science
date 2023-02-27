@@ -8,7 +8,8 @@ include::partial$/operations-reference/alpha-note.adoc[]
 :directed:
 :undirected:
 :homogeneous:
-:heterogeneous:
+:heterogeneous-nodes:
+:heterogeneous-rels:
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
