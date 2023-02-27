@@ -19,13 +19,16 @@
  */
 package org.neo4j.gds.ml.models.mlp;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.TrainingMethod;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -33,13 +36,24 @@ import java.util.SplittableRandom;
 
 @ValueClass
 @SuppressWarnings("immutables:subtype")
-public interface MLPClassifierData extends Classifier.ClassifierData {
+public interface MLPClassifierData extends Classifier.ClassifierData, Serializable {
 
     List<Weights<Matrix>> weights();
 
     List<Weights<Vector>> biases();
 
-    int depth();
+    @Value.Derived
+    default int depth() {return biases().size() + 1;}
+
+    @Value.Derived
+    @Override
+    default int numberOfClasses() {return biases().get(biases().size()-1).dimension(0);}
+
+    @Value.Derived
+    default int featureDimension() {
+        return weights().get(0).dimension(Dimensions.COLUMNS_INDEX);
+    }
+
 
     default TrainingMethod trainerMethod() {return TrainingMethod.MLPClassification;}
 
@@ -61,9 +75,6 @@ public interface MLPClassifierData extends Classifier.ClassifierData {
             .builder()
             .weights(weights)
             .biases(biases)
-            .depth(hiddenDepth+2)
-            .numberOfClasses(classCount)
-            .featureDimension(featureCount)
             .build();
     }
 
@@ -90,5 +101,10 @@ public interface MLPClassifierData extends Classifier.ClassifierData {
 
         return new Weights<>(new Vector(data));
     }
+
+    static ImmutableMLPClassifierData.Builder builder() {
+        return ImmutableMLPClassifierData.builder();
+    }
+
 
 }
