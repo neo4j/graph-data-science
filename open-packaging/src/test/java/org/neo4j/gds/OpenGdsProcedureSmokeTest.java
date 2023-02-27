@@ -56,6 +56,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
         "gds.alpha.allShortestPaths.stream",
 
+        "gds.bellmanFord.stats",
         "gds.bellmanFord.stream",
 
         "gds.beta.collapsePath.mutate",
@@ -535,7 +536,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 379;
+        int expectedCount = 380;
         assertEquals(
             expectedCount,
             registeredProcedures.size(),
