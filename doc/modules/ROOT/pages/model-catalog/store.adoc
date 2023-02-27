@@ -29,7 +29,8 @@ The `gds.model.store_location` parameter must be configured for this feature.
 For xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification] and xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction], storing a model is only supported for a subset of xref:machine-learning/training-methods/index.adoc[trainer-methods].
 The trainer method of a model can be inspected in the `modelInfo` under `bestParameters`.
 
-Currently, we only support xref:machine-learning/training-methods/logistic-regression.adoc[Logistic Regression].
+Currently, we only support xref:machine-learning/training-methods/logistic-regression.adoc[Logistic Regression]
+and xref:machine-learning/training-methods/mlp.adoc[MLP].
 
 
 === Syntax
