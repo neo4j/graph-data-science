@@ -19,8 +19,15 @@
  */
 package org.neo4j.gds.paths.bellmanford;
 
-import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-public interface BellmanFordBaseConfig extends AllShortestPathsBaseConfig {
+@Configuration
+
+public interface BellmanFordStreamConfig extends BellmanFordBaseConfig {
+
+    static BellmanFordStreamConfig of(CypherMapWrapper userInput) {
+        return new BellmanFordStreamConfigImpl(userInput);
+    }
 
 }

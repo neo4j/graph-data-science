@@ -46,6 +46,8 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.paths.delta.TentativeDistances.NO_PREDECESSOR;
 
 public class BellmanFord extends Algorithm<BellmanFordResult> {
+    public static final String DESCRIPTION = "The Bellman-Ford shortest path algorithm computes the shortest (weighted) path between one node and any other node in the graph without negative cycles. " +
+                                             "The computation is run multi-threaded";
 
     private final long sourceNode;
     private final Graph graph;
