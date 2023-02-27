@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
-import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
-import org.neo4j.gds.core.utils.AscendingLongComparator;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 import org.neo4j.memory.EmptyMemoryTracker;
