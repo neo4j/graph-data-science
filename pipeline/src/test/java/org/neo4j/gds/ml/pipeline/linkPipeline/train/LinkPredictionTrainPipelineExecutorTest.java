@@ -348,7 +348,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 assertThatThrownBy(executor::compute)
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage(
-                        "The relationship types ['_TEST_', '_TEST_COMPLEMENT_'] are in the input graph, but are reserved for splitting.");
+                        "You might have two parallel pipelines running on the same graph which is not supported.");
             });
         }
 
