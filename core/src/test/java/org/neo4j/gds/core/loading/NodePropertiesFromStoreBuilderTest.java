@@ -41,11 +41,10 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.StringContains.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.TestSupport.idMap;
@@ -166,17 +165,28 @@ final class NodePropertiesFromStoreBuilderTest {
 
     @Test
     void dimensions() {
-        var longs = createNodeProperties(10L, -6L, b -> b.set(1, Values.of(69L)));
-        var doubles = createNodeProperties(25L, 420D, b -> b.set(1, Values.of(13.37D)));
-        var floatArray = createNodeProperties(2L, new float[2], b -> b.set(1, Values.of(new float[]{42.2F, 1337.1F})));
-        var doubleArray = createNodeProperties(3L, new double[3], b -> b.set(1, Values.of(new double[]{1D, 1D, 0D})));
-        var longArray = createNodeProperties(4L, new long[0], b -> b.set(1, Values.of(new long[0])));
+        var longs = createNodeProperties(2, -6L, b -> b.set(1, Values.of(69L)));
+        var doubles = createNodeProperties(2, 420D, b -> b.set(1, Values.of(13.37D)));
+        var floatArray = createNodeProperties(2, new float[2], b -> b.set(1, Values.of(new float[]{42.2F, 1337.1F})));
+        var doubleArray = createNodeProperties(2, new double[3], b -> b.set(1, Values.of(new double[]{1D, 1D, 0D})));
+        var longArray = createNodeProperties(2, new long[0], b -> b.set(1, Values.of(new long[0])));
 
-        assertEquals(1, longs.dimension());
-        assertEquals(1, doubles.dimension());
-        assertEquals(2, floatArray.dimension());
-        assertEquals(3, doubleArray.dimension());
-        assertEquals(0, longArray.dimension());
+        assertThat(longs.dimension()).contains(1);
+        assertThat(doubles.dimension()).contains(1);
+        assertThat(floatArray.dimension()).contains(2);
+        assertThat(doubleArray.dimension()).contains(3);
+        assertThat(longArray.dimension()).contains(0);
+    }
+
+    @Test
+    void dimensionsWithNulls() {
+        var floatArray = createNodeProperties(3, null, b -> b.set(1, Values.of(new float[]{42.2F, 1337.1F})));
+        var doubleArray = createNodeProperties(3, new double[3], b -> b.set(1, Values.of(null)));
+        var longArray = createNodeProperties(3, new long[0], b -> b.set(0, Values.of(null)));
+
+        assertThat(floatArray.dimension()).isEmpty();
+        assertThat(doubleArray.dimension()).contains(3);
+        assertThat(longArray.dimension()).contains(0);
     }
 
     static Stream<Arguments> unsupportedValues() {
@@ -192,16 +202,12 @@ final class NodePropertiesFromStoreBuilderTest {
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.core.loading.NodePropertiesFromStoreBuilderTest#unsupportedValues")
     void shouldFailOnUnSupportedTypes(Value data) {
-        UnsupportedOperationException ex = assertThrows(
-            UnsupportedOperationException.class,
-            () -> createNodeProperties(
-                2L,
-                null,
-                b -> b.set(1, data)
-            )
-        );
-
-        assertThat(ex.getMessage(), containsString("Loading of values of type"));
+        assertThatThrownBy(() -> createNodeProperties(
+            2L,
+            null,
+            b -> b.set(1, data)
+        )).isInstanceOf(UnsupportedOperationException.class)
+            .hasMessageContaining("Loading of values of type");
     }
 
     private static Stream<Arguments> invalidValueTypeCombinations() {
@@ -330,12 +336,12 @@ final class NodePropertiesFromStoreBuilderTest {
         assertEquals(1L << 42, maxPropertyValue.getAsDouble());
     }
 
-    static NodePropertyValues createNodeProperties(long size, Object defaultValue, Consumer<NodePropertiesFromStoreBuilder> buildBlock) {
+    static NodePropertyValues createNodeProperties(long nodeCount, Object defaultValue, Consumer<NodePropertiesFromStoreBuilder> buildBlock) {
         var builder = NodePropertiesFromStoreBuilder.of(
             DefaultValue.of(defaultValue),
             1
         );
         buildBlock.accept(builder);
-        return builder.build(idMap(size));
+        return builder.build(idMap(nodeCount));
     }
 }

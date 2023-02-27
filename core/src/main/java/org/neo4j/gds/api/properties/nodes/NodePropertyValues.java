@@ -24,6 +24,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.PropertyValues;
 import org.neo4j.values.storable.Value;
 
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
 
@@ -62,11 +63,12 @@ public interface NodePropertyValues extends PropertyValues {
     /**
      * The dimension of the properties.
      * For scalar values, this is 1.
-     * For arrays, this is the length of the array.
+     * For arrays, this is the length of the array stored for the 0th node id.
+     * If that array is {@code null}, this method returns {@link Optional#empty()}.
      *
-     * @return the dimension of the properties stored.
+     * @return the dimension of the properties stored, or empty if the dimension cannot easily be retrieved.
      */
-    int dimension();
+    Optional<Integer> dimension();
 
     /**
      * @return the maximum long value contained in the mapping or an empty {@link OptionalLong} if the mapping is

@@ -25,6 +25,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.stream.LongStream;
 
@@ -49,8 +50,8 @@ public interface LongNodePropertyValues extends NodePropertyValues {
     }
 
     @Override
-    default int dimension() {
-        return 1;
+    default Optional<Integer> dimension() {
+        return Optional.of(1);
     }
 
     @Override

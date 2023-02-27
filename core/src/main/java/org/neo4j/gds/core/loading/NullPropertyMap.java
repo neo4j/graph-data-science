@@ -25,6 +25,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
 
@@ -35,8 +36,8 @@ import java.util.OptionalLong;
 public abstract class NullPropertyMap implements NodePropertyValues {
 
     @Override
-    public int dimension() {
-        return 1;
+    public Optional<Integer> dimension() {
+        return Optional.of(1);
     }
 
     public static class DoubleNullPropertyMap extends NullPropertyMap {

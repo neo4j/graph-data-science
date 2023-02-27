@@ -23,6 +23,8 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
+import java.util.Optional;
+
 public interface LongArrayNodePropertyValues extends NodePropertyValues {
 
     @Override
@@ -45,7 +47,11 @@ public interface LongArrayNodePropertyValues extends NodePropertyValues {
     }
 
     @Override
-    default int dimension() {
-        return longArrayValue(0).length;
+    default Optional<Integer> dimension() {
+        var value = longArrayValue(0);
+        if (value == null) {
+            return Optional.empty();
+        }
+        return Optional.of(value.length);
     }
 }
