@@ -106,7 +106,11 @@ public class FilteredNodeSimilarityFactory<CONFIG extends FilteredNodeSimilarity
             );
         }
         if (config.hasTopN()) {
-            builder.add("topN list", TopNList.memoryEstimation(topN));
+            builder.add(
+                "topN list",
+                MemoryEstimations.setup("", (dimensions, concurrency) ->
+                    TopNList.memoryEstimation(dimensions.nodeCount(), topN))
+            );
         }
         return builder.build();
     }

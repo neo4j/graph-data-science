@@ -101,7 +101,11 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
             );
         }
         if (config.hasTopN()) {
-            builder.add("topN list", TopNList.memoryEstimation(topN));
+            builder.add(
+                "topN list",
+                MemoryEstimations.setup("", (dimensions, concurrency) ->
+                    TopNList.memoryEstimation(dimensions.nodeCount(), topN))
+            );
         }
         return builder.build();
     }
