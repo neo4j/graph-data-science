@@ -1,2 +1,2 @@
-include::partial$algorithms/louvain/specific-configuration.adoc[]
+include::partial$/algorithms/louvain/specific-configuration.adoc[]
 | minCommunitySize                                                                 | Integer  | 0       | yes      | Only community ids of communities with a size greater than or equal to the given value are written to Neo4j.
