@@ -77,58 +77,37 @@ public class LouvainStreamProc extends StreamProc<Louvain, LouvainResult, Louvai
     @Override
     protected Stream<StreamResult> stream(ComputationResult<Louvain, LouvainResult, LouvainStreamConfig> computationResult) {
         return runWithExceptionLogging("Graph streaming failed", () -> {
-            Graph graph = computationResult.graph();
-
-            boolean consecutiveIds = computationResult
-                    .config()
-                    .consecutiveIds();
-
             if (computationResult.isGraphEmpty()) {
                 return Stream.empty();
             }
 
+            boolean includeIntermediateCommunities = computationResult
+                .config()
+                .includeIntermediateCommunities();
+
+            Graph graph = computationResult.graph();
+
             var louvain = computationResult.result();
             var nodeProperties = nodeProperties(computationResult);
 
+            return LongStream.range(0, graph.nodeCount())
+                .boxed().
+                filter(nodeProperties::hasValue)
+                .map(nodeId -> {
+                    long[] communities = includeIntermediateCommunities ? louvain.getIntermediateCommunities(nodeId) : null;
+                    long communityId = nodeProperties.longValue(nodeId);
 
-            return LongStream
-                    .range(0, graph.nodeCount())
-                    .boxed()
-                    .filter(nodeProperties::hasValue)
-                    .map(nodeId -> {
-                        boolean includeIntermediateCommunities = computationResult
-                                .config()
-                                .includeIntermediateCommunities();
-
-                        long[] communities = includeIntermediateCommunities ? louvain.getIntermediateCommunities(nodeId) : null;
-                        long communityId = consecutiveIds
-                            ? nodeProperties.longValue(nodeId)
-                            : louvain.getCommunity(nodeId);
-
-                        return new StreamResult(
-                                graph.toOriginalNodeId(nodeId),
-                                communities,
-                                communityId
-                        );
-                    });
+                    return new StreamResult(graph.toOriginalNodeId(nodeId), communities, communityId);
+                });
         });
     }
 
     @Override
     protected NodePropertyValues nodeProperties(ComputationResult<Louvain, LouvainResult, LouvainStreamConfig> computationResult) {
-        var config = computationResult.config();
-        var includeIntermediateCommunities = config.includeIntermediateCommunities();
-
-        var result = computationResult.result();
-
-        if (!includeIntermediateCommunities) {
-            return CommunityProcCompanion.nodeProperties(
-                    computationResult.config(),
-                    result.dendrogramManager().getCurrent().asNodeProperties()
-            );
-        }
-
-        return LouvainProc.longArrayNodePropertyValues(computationResult, result);
+        return CommunityProcCompanion.nodeProperties(
+            computationResult.config(),
+            computationResult.result().dendrogramManager().getCurrent().asNodeProperties()
+        );
     }
 
     @Override
