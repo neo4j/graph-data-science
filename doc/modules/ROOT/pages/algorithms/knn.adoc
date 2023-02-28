@@ -18,7 +18,7 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 ====
 kNN is featured in the end-to-end example Jupyter notebooks:
 
-* https://github.com/neo4j/graph-data-science-client/blob/main/examples/fastrp-and-knn.ipynb[FastRP and kNN end-to-end example]
+* https://neo4j.com/docs/graph-data-science-client/current/tutorials/fastrp-and-knn/[Product recommendations with kNN based on FastRP embeddings]
 ====
 
 [[algorithms-knn-intro]]
