@@ -52,6 +52,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.graph.sample.rwr",
 
         "gds.alpha.create.cypherdb",
+        "gds.alpha.drop.cypherdb",
 
         "gds.alpha.allShortestPaths.stream",
 
@@ -532,7 +533,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 377;
+        int expectedCount = 378;
         assertEquals(
             expectedCount,
             registeredProcedures.size(),
