@@ -19,7 +19,8 @@
  */
 package org.neo4j.gds.modularity;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.extension.GdlExtension;
@@ -35,12 +36,12 @@ class ModularityCalculatorTest {
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     static final String GRAPH =
         "CREATE " +
-        " (a1: Node { communityId: 0 })," +
-        " (a2: Node { communityId: 0 })," +
-        " (a3: Node { communityId: 5 })," +
-        " (a4: Node { communityId: 0 })," +
-        " (a5: Node { communityId: 5 })," +
-        " (a6: Node { communityId: 5 })," +
+        " (a1: Node { communityId: 0, communityId2: 200 })," +
+        " (a2: Node { communityId: 0, communityId2: 200 })," +
+        " (a3: Node { communityId: 5, communityId2: 205 })," +
+        " (a4: Node { communityId: 0, communityId2: 200 })," +
+        " (a5: Node { communityId: 5, communityId2: 205 })," +
+        " (a6: Node { communityId: 5, communityId2: 205 })," +
 
         " (a1)-[:R]->(a2)," +
         " (a1)-[:R]->(a4)," +
@@ -56,11 +57,12 @@ class ModularityCalculatorTest {
     @Inject
     private GraphStore graphStore;
 
-    @Test
-    void compute() {
-        var modularityCalculator = new ModularityCalculator(
+    @ParameterizedTest
+    @CsvSource({"communityId,0", "communityId2,200"})
+    void compute(String communityId, int startingId) {
+        var modularityCalculator = ModularityCalculator.create(
             graph,
-            graphStore.nodeProperty("communityId").values()::longValue,
+            graphStore.nodeProperty(communityId).values()::longValue,
             4
         );
 
@@ -74,8 +76,9 @@ class ModularityCalculatorTest {
 
         assertThat(modularities)
             .containsExactlyInAnyOrder(
-                CommunityModularity.of(0L, community_0_score),
-                CommunityModularity.of(5L, community_5_score)
+                CommunityModularity.of(startingId, community_0_score),
+                CommunityModularity.of(startingId + 5L, community_5_score)
             );
     }
+
 }
