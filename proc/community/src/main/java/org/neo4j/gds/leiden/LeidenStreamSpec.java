@@ -58,33 +58,28 @@ public class LeidenStreamSpec implements AlgorithmSpec<Leiden, LeidenResult, Lei
                 return Stream.empty();
             }
             var graph = computationResult.graph();
+            var nodeProperties = nodeProperties(computationResult);
+
             boolean includeIntermediateCommunities = computationResult.config().includeIntermediateCommunities();
 
-            boolean consecutiveIds = computationResult.config().consecutiveIds();
-            var nodeProperties = consecutiveIds ? nodeProperties(computationResult) : null;
-            var communities = leidenResult.communities();
-
             return LongStream.range(0, graph.nodeCount())
-                    .filter(nodeId ->  nodeProperties.hasValue(nodeId))
-                    .mapToObj(nodeId -> new StreamResult(
-                            graph.toOriginalNodeId(nodeId),
-                            includeIntermediateCommunities ? leidenResult.getIntermediateCommunities(nodeId) : null,
-                            consecutiveIds ? nodeProperties.longValue(nodeId) : communities.get(nodeId)
-                    ));
+                .filter(nodeProperties::hasValue)
+                .mapToObj(nodeId -> {
+                    long[] intermediateCommunityIds = includeIntermediateCommunities
+                        ? leidenResult.getIntermediateCommunities(nodeId)
+                        : null;
+                    long communityId = nodeProperties.longValue(nodeId);
+
+                    return new StreamResult(
+                        graph.toOriginalNodeId(nodeId),
+                        intermediateCommunityIds,
+                        communityId
+                    );
+                });
         };
     }
 
     protected NodePropertyValues nodeProperties(ComputationResult<Leiden, LeidenResult, LeidenStreamConfig> computationResult) {
-        var config = computationResult.config();
-        var leidenResult = computationResult.result();
-
-        if (config.includeIntermediateCommunities()) {
-            return new IntermediateCommunityNodeProperties(
-                    leidenResult.communities().size(),
-                    leidenResult::getIntermediateCommunities
-            );
-        }
-
         return getCommunities(computationResult);
     }
 
