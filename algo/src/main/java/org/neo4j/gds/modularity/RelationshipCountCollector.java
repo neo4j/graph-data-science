@@ -20,7 +20,6 @@
 package org.neo4j.gds.modularity;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 
@@ -32,7 +31,6 @@ class RelationshipCountCollector implements Runnable {
     private final Graph localGraph;
     private final HugeAtomicDoubleArray insideRelationships;
     private final HugeAtomicDoubleArray totalCommunityRelationships;
-    private final HugeAtomicBitSet communityTracker;
     private final LongUnaryOperator communityIdProvider;
 
     private final DoubleAdder totalRelationshipWeight;
@@ -42,19 +40,15 @@ class RelationshipCountCollector implements Runnable {
         Graph graph,
         HugeAtomicDoubleArray insideRelationships,
         HugeAtomicDoubleArray totalCommunityRelationships,
-        HugeAtomicBitSet communityTracker,
         LongUnaryOperator communityIdProvider,
         DoubleAdder totalRelationshipWeight
     ) {
         this.totalRelationshipWeight = totalRelationshipWeight;
-        assert insideRelationships.size() == totalCommunityRelationships.size()
-               && insideRelationships.size() == communityTracker.size();
-
+        assert insideRelationships.size() == totalCommunityRelationships.size();
         this.partition = partition;
         this.localGraph = graph.concurrentCopy();
         this.insideRelationships = insideRelationships;
         this.totalCommunityRelationships = totalCommunityRelationships;
-        this.communityTracker = communityTracker;
         this.communityIdProvider = communityIdProvider;
     }
 
@@ -66,7 +60,6 @@ class RelationshipCountCollector implements Runnable {
             long communityId = communityIdProvider.applyAsLong(nodeId);
             localGraph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
                 long tCommunityId = communityIdProvider.applyAsLong(t);
-                communityTracker.set(communityId);
                 if (tCommunityId == communityId) {
                     insideRelationships.getAndAdd(communityId, w);
                 }

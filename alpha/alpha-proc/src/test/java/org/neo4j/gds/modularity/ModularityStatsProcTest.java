@@ -38,10 +38,10 @@ class ModularityStatsProcTest extends BaseProcTest {
     @Neo4jGraph
     static final String GRAPH =
         "CREATE " +
-        " (a1: Node { communityId: 0 })," +
-        " (a2: Node { communityId: 0 })," +
+        " (a1: Node { communityId: 10 })," +
+        " (a2: Node { communityId: 10 })," +
         " (a3: Node { communityId: 5 })," +
-        " (a4: Node { communityId: 0 })," +
+        " (a4: Node { communityId: 10 })," +
         " (a5: Node { communityId: 5 })," +
         " (a6: Node { communityId: 5 })," +
 
