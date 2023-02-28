@@ -83,22 +83,28 @@ public class LouvainStreamProc extends StreamProc<Louvain, LouvainResult, Louvai
                     .config()
                     .consecutiveIds();
 
-            var nodeProperties = (computationResult.isGraphEmpty() || !consecutiveIds) ? null : nodeProperties((computationResult));
+            if (computationResult.isGraphEmpty()) {
+                return Stream.empty();
+            }
 
             var louvain = computationResult.result();
+            var nodeProperties = nodeProperties(computationResult);
+
 
             return LongStream
                     .range(0, graph.nodeCount())
                     .boxed()
-                    .filter(nodeId -> nodeProperties == null || nodeProperties.isValid(nodeId))
-                    .map((nodeId) -> {
+                    .filter(nodeProperties::hasValue)
+                    .map(nodeId -> {
                         boolean includeIntermediateCommunities = computationResult
                                 .config()
                                 .includeIntermediateCommunities();
 
                         long[] communities = includeIntermediateCommunities ? louvain.getIntermediateCommunities(nodeId) : null;
-                        long communityId = consecutiveIds ? nodeProperties.longValue(
-                                nodeId) : louvain.getCommunity(nodeId);
+                        long communityId = consecutiveIds
+                            ? nodeProperties.longValue(nodeId)
+                            : louvain.getCommunity(nodeId);
+
                         return new StreamResult(
                                 graph.toOriginalNodeId(nodeId),
                                 communities,

@@ -170,7 +170,7 @@ public final class CommunityProcCompanion {
         }
 
         @Override
-        public boolean isValid(long nodeId) {
+        public boolean hasValue(long nodeId) {
             return isCommunityMinSizeMet(properties.longValue(nodeId));
         }
 
