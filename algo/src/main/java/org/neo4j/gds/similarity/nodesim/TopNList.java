@@ -31,9 +31,14 @@ import java.util.stream.StreamSupport;
 
 public class TopNList {
 
-    public static MemoryEstimation memoryEstimation(int topN) {
+    public static MemoryEstimation memoryEstimation(long nodeCount, int topN) {
+        int actualTopN = topN;
+        if (topN > nodeCount) { //avoid overflows for nodeCount * nodeCount (when nodeCount is >2^31)
+            long normalizedMaximum = nodeCount * nodeCount;
+            actualTopN = Math.toIntExact(Math.min(normalizedMaximum, topN));
+        }
         return MemoryEstimations.builder(TopNList.class)
-            .add("queue", BoundedLongLongPriorityQueue.memoryEstimation(topN))
+            .add("queue", BoundedLongLongPriorityQueue.memoryEstimation(actualTopN))
             .build();
     }
 
