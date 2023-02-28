@@ -9,12 +9,11 @@ Time to upgrade!
 
 [opts=header]
 |===
-| Neo4j version               | Neo4j Graph Data Science
-| `5.5` | `2.4`, `2.3.1 or later`
-| `5.4` | `2.4`, `2.3`, `2.2.7 or later`
-| `5.3` | `2.4`, `2.3`, `2.2.6 or later`
-| `5.2` | `2.4`, `2.3`, `2.2.3 or later`
-| `5.1`| `2.4`, `2.3`, `2.2.1`
-| `4.4.9 or later`| `2.4`, `2.3`, `2.2`
-| `4.3.15 or later`     | `2.2.`
+| Neo4j version     | Neo4j Graph Data Science
+| `5.5`             | `2.4`, `2.3.1 or later`
+| `5.4`             | `2.4`, `2.3`
+| `5.3`             | `2.4`, `2.3`
+| `5.2`             | `2.4`, `2.3`
+| `5.1`             | `2.4`, `2.3`
+| `4.4.9 or later`  | `2.4`, `2.3`
 |===
