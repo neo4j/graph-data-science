@@ -27,6 +27,7 @@ import org.neo4j.gds.catalog.CatalogProc;
 import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.storageengine.InMemoryDatabaseCreator;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -52,7 +53,7 @@ public class GraphCreateCypherDbProc extends CatalogProc {
         CreateCypherDbResult result = runWithExceptionLogging(
             "In-memory Cypher database creation failed",
             () -> {
-                validateNeo4jEnterpriseEdition();
+                validateNeo4jEnterpriseEdition(databaseService);
                 MutableLong createMillis = new MutableLong(0);
                 try (ProgressTimer ignored = ProgressTimer.start(createMillis::setValue)) {
                     InMemoryDatabaseCreator.createDatabase(databaseService, username(), graphName, dbName);
@@ -78,7 +79,7 @@ public class GraphCreateCypherDbProc extends CatalogProc {
         }
     }
 
-    private void validateNeo4jEnterpriseEdition() {
+    static void validateNeo4jEnterpriseEdition(GraphDatabaseService databaseService) {
         var edition = StorageEngineProxy.dbmsEdition(databaseService);
         if (!(edition == Edition.ENTERPRISE)) {
             throw new DatabaseManagementException(formatWithLocale(
