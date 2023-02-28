@@ -21,6 +21,9 @@ package org.neo4j.gds.labelpropagation;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
@@ -32,7 +35,10 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropagationStreamConfig> {
@@ -76,6 +82,32 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
             "bytesMin", 1640L,
             "bytesMax", 2152L
         )));
+    }
+
+    static Stream<Arguments> communitySizeInputs() {
+        return Stream.of(
+                Arguments.of(Map.of("minCommunitySize", 1), RESULT.toArray(new Long[0])),
+                Arguments.of(Map.of("minCommunitySize", 2), new Long[]{2L, 7L, 2L, null, null, null, null, 7L, null, null, null, null})
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("communitySizeInputs")
+    void testStreamMinCommunitySize(Map<String, Long> parameters, Long[] expectedCommunityIds) {
+        String query = GdsCypher.call(TEST_GRAPH_NAME)
+                .algo("gds.labelPropagation")
+                .streamMode()
+                .addAllParameters(parameters)
+                .yields();
+
+        Long[] actualCommunities = new Long[RESULT.size()];
+        runQueryWithRowConsumer(query, row -> {
+            int id = row.getNumber("nodeId").intValue();
+            long community = row.getNumber("communityId").longValue();
+            actualCommunities[id] = community;
+        });
+
+        assertArrayEquals(actualCommunities, expectedCommunityIds);
     }
 
     @Nested

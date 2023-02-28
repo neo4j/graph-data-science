@@ -21,6 +21,9 @@ package org.neo4j.gds.approxmaxkcut;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -30,6 +33,7 @@ import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -72,6 +76,45 @@ class ApproxMaxKCutStreamProcTest extends ApproxMaxKCutProcTest<ApproxMaxKCutStr
             long nodeId = row.getNumber("nodeId").longValue();
             long communityId = row.getNumber("communityId").longValue();
             assertEquals(expected.get(nodeId), communityId);
+        });
+    }
+
+    static Stream<Arguments> communitySizeInputs() {
+        return Stream.of(
+                Arguments.of(Map.of("minCommunitySize", 1), Map.of(
+                        0L, 1L,
+                        1L, 1L,
+                        2L, 1L,
+                        3L, 0L,
+                        4L, 0L,
+                        5L, 0L,
+                        6L, 0L
+                )),
+                Arguments.of(Map.of("minCommunitySize", 4), Map.of(
+                        3L, 0L,
+                        4L, 0L,
+                        5L, 0L,
+                        6L, 0L
+                ))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("communitySizeInputs")
+    void testStreamWithMinCommunitySize(Map<String, Long> parameter, Map<Long, Long> expectedResult) {
+        String streamQuery = GdsCypher.call(GRAPH_NAME)
+                .algo("gds.alpha.maxkcut")
+                .streamMode()
+                // Make sure we get a deterministic result.
+                .addParameter("randomSeed", 1337L)
+                .addParameter("concurrency", 1)
+                .addAllParameters(parameter)
+                .yields();
+
+        runQueryWithRowConsumer(streamQuery, row -> {
+            long nodeId = row.getNumber("nodeId").longValue();
+            long communityId = row.getNumber("communityId").longValue();
+            assertEquals(expectedResult.get(nodeId), communityId);
         });
     }
 

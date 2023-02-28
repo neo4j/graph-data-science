@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.modularityoptimization;
 
+import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -71,7 +72,10 @@ public class ModularityOptimizationStreamProc extends StreamProc<ModularityOptim
     protected NodePropertyValues nodeProperties(
         ComputationResult<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationStreamConfig> computationResult
     ) {
-        return ModularityOptimizationProc.nodeProperties(computationResult);
+        return CommunityProcCompanion.nodeProperties(
+                computationResult.config(),
+                computationResult.result().asNodeProperties()
+        );
     }
 
     @Override

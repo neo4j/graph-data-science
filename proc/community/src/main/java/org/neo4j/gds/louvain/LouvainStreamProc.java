@@ -20,6 +20,7 @@
 package org.neo4j.gds.louvain;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.Graph;
@@ -35,7 +36,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -80,36 +80,49 @@ public class LouvainStreamProc extends StreamProc<Louvain, LouvainResult, Louvai
             Graph graph = computationResult.graph();
 
             boolean consecutiveIds = computationResult
-                .config()
-                .consecutiveIds();
+                    .config()
+                    .consecutiveIds();
 
             var nodeProperties = (computationResult.isGraphEmpty() || !consecutiveIds) ? null : nodeProperties((computationResult));
 
             var louvain = computationResult.result();
 
             return LongStream
-                .range(0, graph.nodeCount())
-                .boxed()
-                .map((nodeId) -> {
-                    boolean includeIntermediateCommunities = computationResult
-                        .config()
-                        .includeIntermediateCommunities();
+                    .range(0, graph.nodeCount())
+                    .boxed()
+                    .filter(nodeId -> nodeProperties == null || nodeProperties.isValid(nodeId))
+                    .map((nodeId) -> {
+                        boolean includeIntermediateCommunities = computationResult
+                                .config()
+                                .includeIntermediateCommunities();
 
-                    long[] communities = includeIntermediateCommunities ? louvain.getIntermediateCommunities(nodeId) : null;
-                    long communityId = consecutiveIds ? nodeProperties.longValue(
-                        nodeId) : louvain.getCommunity(nodeId);
-                    return new StreamResult(
-                        graph.toOriginalNodeId(nodeId),
-                        communities,
-                        communityId
-                    );
-                });
+                        long[] communities = includeIntermediateCommunities ? louvain.getIntermediateCommunities(nodeId) : null;
+                        long communityId = consecutiveIds ? nodeProperties.longValue(
+                                nodeId) : louvain.getCommunity(nodeId);
+                        return new StreamResult(
+                                graph.toOriginalNodeId(nodeId),
+                                communities,
+                                communityId
+                        );
+                    });
         });
     }
 
     @Override
     protected NodePropertyValues nodeProperties(ComputationResult<Louvain, LouvainResult, LouvainStreamConfig> computationResult) {
-        return LouvainProc.nodeProperties(computationResult, UUID.randomUUID().toString());
+        var config = computationResult.config();
+        var includeIntermediateCommunities = config.includeIntermediateCommunities();
+
+        var result = computationResult.result();
+
+        if (!includeIntermediateCommunities) {
+            return CommunityProcCompanion.nodeProperties(
+                    computationResult.config(),
+                    result.dendrogramManager().getCurrent().asNodeProperties()
+            );
+        }
+
+        return LouvainProc.longArrayNodePropertyValues(computationResult, result);
     }
 
     @Override

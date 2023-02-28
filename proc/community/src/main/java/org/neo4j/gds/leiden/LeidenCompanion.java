@@ -46,20 +46,18 @@ final class LeidenCompanion {
         }
     }
 
-    static <CONFIG extends LeidenBaseConfig> NodePropertyValues getCommunities(
+    private static <CONFIG extends LeidenBaseConfig> NodePropertyValues getCommunities(
         ComputationResult<Leiden, LeidenResult, CONFIG> computationResult,
         String resultProperty
     ) {
-        {
-            var config = computationResult.config();
-            var leidenResult = computationResult.result();
+        var config = computationResult.config();
+        var leidenResult = computationResult.result();
 
-            return CommunityProcCompanion.nodeProperties(
-                config,
-                resultProperty,
-                leidenResult.dendrogramManager().getCurrent().asNodeProperties(),
-                () -> computationResult.graphStore().nodeProperty(config.seedProperty())
-            );
-        }
+        return CommunityProcCompanion.nodeProperties(
+            config,
+            resultProperty,
+            leidenResult.dendrogramManager().getCurrent().asNodeProperties(),
+            () -> computationResult.graphStore().nodeProperty(config.seedProperty())
+        );
     }
 }

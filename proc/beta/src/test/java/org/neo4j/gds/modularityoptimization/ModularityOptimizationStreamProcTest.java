@@ -21,9 +21,18 @@ package org.neo4j.gds.modularityoptimization;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.CommunityHelper.assertCommunities;
 import static org.neo4j.gds.GdsCypher.ExecutionModes.STREAM;
@@ -104,5 +113,32 @@ class ModularityOptimizationStreamProcTest extends ModularityOptimizationProcTes
             assertTrue(row.getNumber("bytesMin").longValue() > 0);
             assertTrue(row.getNumber("bytesMax").longValue() > 0);
         });
+    }
+
+    static Stream<Arguments> communitySizeInputs() {
+        return Stream.of(
+                Arguments.of(Map.of("minCommunitySize", 1), Set.of(3L, 4L)),
+                Arguments.of(Map.of("minCommunitySize", 3), Set.of(4L)),
+                Arguments.of(Map.of("minCommunitySize", 1, "consecutiveIds", true), Set.of(0L, 1L)),
+                Arguments.of(Map.of("minCommunitySize", 3, "consecutiveIds", true), Set.of(0L))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("communitySizeInputs")
+    void testWriteMinCommunitySize(Map<String, Object> parameters, Set<Long> expectedCommunityIds) {
+        String query = algoBuildStage()
+                .streamMode()
+                .addAllParameters(parameters)
+                .yields("nodeId", "communityId");
+
+        var actualCommunities = new HashSet<Long>();
+
+        runQueryWithRowConsumer(query, row -> {
+            long communityId = row.getNumber("communityId").longValue();
+            actualCommunities.add(communityId);
+        });
+
+        assertEquals(actualCommunities, expectedCommunityIds);
     }
 }

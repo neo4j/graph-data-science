@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.leiden;
 
+import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -26,7 +27,6 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
-import java.util.UUID;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -65,15 +65,37 @@ public class LeidenStreamSpec implements AlgorithmSpec<Leiden, LeidenResult, Lei
             var communities = leidenResult.communities();
 
             return LongStream.range(0, graph.nodeCount())
-                .mapToObj(nodeId -> new StreamResult(
-                    graph.toOriginalNodeId(nodeId),
-                    includeIntermediateCommunities ? leidenResult.getIntermediateCommunities(nodeId) : null,
-                    consecutiveIds ? nodeProperties.longValue(nodeId) : communities.get(nodeId)
-                ));
+                    .filter(nodeId -> !consecutiveIds || nodeProperties.isValid(nodeId))
+                    .mapToObj(nodeId -> new StreamResult(
+                            graph.toOriginalNodeId(nodeId),
+                            includeIntermediateCommunities ? leidenResult.getIntermediateCommunities(nodeId) : null,
+                            consecutiveIds ? nodeProperties.longValue(nodeId) : communities.get(nodeId)
+                    ));
         };
     }
 
     protected NodePropertyValues nodeProperties(ComputationResult<Leiden, LeidenResult, LeidenStreamConfig> computationResult) {
-        return LeidenCompanion.leidenNodeProperties(computationResult, UUID.randomUUID().toString());
+        var config = computationResult.config();
+        var leidenResult = computationResult.result();
+
+        if (config.includeIntermediateCommunities()) {
+            return new IntermediateCommunityNodeProperties(
+                    leidenResult.communities().size(),
+                    leidenResult::getIntermediateCommunities
+            );
+        }
+
+        return getCommunities(computationResult);
+    }
+
+    private static <CONFIG extends LeidenBaseConfig> NodePropertyValues getCommunities(
+            ComputationResult<Leiden, LeidenResult, CONFIG> computationResult
+    ) {
+        var leidenResult = computationResult.result();
+
+        return CommunityProcCompanion.nodeProperties(
+                computationResult.config(),
+                leidenResult.dendrogramManager().getCurrent().asNodeProperties()
+        );
     }
 }

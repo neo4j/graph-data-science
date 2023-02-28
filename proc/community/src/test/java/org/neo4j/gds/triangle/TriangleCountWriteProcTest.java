@@ -140,10 +140,9 @@ class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCount
             "MATCH (n) RETURN n.name AS name, n.%s AS triangles",
             writeProperty
         ), (row) -> {
-            long triangles = row.getNumber("triangles").longValue();
             String name = row.getString("name");
             Long expectedTriangles = expectedResult.get(name);
-            assertEquals(expectedTriangles, triangles);
+            assertEquals(expectedTriangles, row.getNumber("triangles"));
         });
     }
 

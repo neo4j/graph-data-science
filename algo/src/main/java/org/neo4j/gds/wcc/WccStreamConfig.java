@@ -21,12 +21,13 @@ package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.config.ComponentSizeConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface WccStreamConfig extends WccBaseConfig {
+public interface WccStreamConfig extends WccBaseConfig, ComponentSizeConfig {
 
     static WccStreamConfig of(CypherMapWrapper userInput) {
         WccStreamConfigImpl wccStreamConfig = new WccStreamConfigImpl(userInput);

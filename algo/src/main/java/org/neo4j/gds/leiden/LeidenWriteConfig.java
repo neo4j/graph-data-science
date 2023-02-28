@@ -20,11 +20,12 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.CommunitySizeConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-public interface LeidenWriteConfig extends LeidenBaseConfig, WritePropertyConfig {
+public interface LeidenWriteConfig extends LeidenBaseConfig, WritePropertyConfig, CommunitySizeConfig {
 
     static LeidenWriteConfig of(CypherMapWrapper userInput) {
         return new LeidenWriteConfigImpl(userInput);

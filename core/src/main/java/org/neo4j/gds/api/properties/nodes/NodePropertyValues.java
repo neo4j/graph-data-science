@@ -95,4 +95,8 @@ public interface NodePropertyValues extends PropertyValues {
             throw unsupportedTypeException(ValueType.DOUBLE);
         }
     }
+
+    default boolean isValid(long nodeId) {
+        return true;
+    }
 }
