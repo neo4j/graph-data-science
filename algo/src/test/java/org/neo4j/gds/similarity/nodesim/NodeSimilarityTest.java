@@ -742,6 +742,29 @@ final class NodeSimilarityTest {
         assertEquals(expected.memoryUsage(), actual.memoryUsage());
     }
 
+    @Test
+    void shouldComputeMemrecWithTopKAndTopNGreaterThanNodeCount() {
+        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
+            .nodeCount(100)
+            .relCountUpperBound(20_000)
+            .build();
+
+        NodeSimilarityWriteConfig config = ImmutableNodeSimilarityWriteConfig
+            .builder()
+            .similarityCutoff(0.0)
+            .topK(Integer.MAX_VALUE)
+            .topN(Integer.MAX_VALUE)
+            .writeProperty("writeProperty")
+            .writeRelationshipType("writeRelationshipType")
+            .build();
+
+        MemoryTree actual = new NodeSimilarityFactory<>().memoryEstimation(config).estimate(dimensions, 1);
+
+        assertEquals(570592, actual.memoryUsage().min);
+        assertEquals(732192, actual.memoryUsage().max);
+
+    }
+
     @ParameterizedTest(name = "topK = {0}, concurrency = {1}")
     @MethodSource("topKAndConcurrencies")
     void shouldLogMessages(int topK, int concurrency) {

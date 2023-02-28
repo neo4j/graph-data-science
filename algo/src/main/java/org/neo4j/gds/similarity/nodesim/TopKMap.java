@@ -39,10 +39,11 @@ public class TopKMap {
     private final BitSet sourceNodes;
 
     public static MemoryEstimation memoryEstimation(long nodes, int topK) {
+        int actualTopK = Math.toIntExact(Math.min(topK, nodes));
         return MemoryEstimations.builder(TopKMap.class)
             .add("topK lists",
                 MemoryEstimations.builder("topK lists", TopKList.class)
-                    .add("queues", BoundedLongPriorityQueue.memoryEstimation(topK))
+                    .add("queues", BoundedLongPriorityQueue.memoryEstimation(actualTopK))
                     .build()
                     .times(nodes)
             )
