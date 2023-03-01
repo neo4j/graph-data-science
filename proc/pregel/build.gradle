@@ -17,6 +17,7 @@ dependencies {
     implementation project(':algo-common')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':core-write')
     implementation project(':executor')
     implementation project(':proc-common')
     implementation project(':string-formatting')
