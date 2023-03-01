@@ -19,49 +19,30 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.List;
 import java.util.Map;
 
-class ScalePropertiesStreamProcTest extends BaseProcTest {
+class ScalePropertiesStreamProcTest extends ScalePropertiesProcTest<ScalePropertiesStreamConfig> {
 
-    private static final String DB_CYPHER =
-        "CREATE" +
-        " (n0:A {id: [0, 2]})" +
-        ",(n1:A {id: [1, 2]})" +
-        ",(n2:A {id: [2, 2]})" +
-        ",(n3:A {id: [3, 2]})" +
-        ",(n4:A {id: [4, 2]})" +
-        ",(n5:A {id: [5, 2]})";
-    private static final String GRAPH_NAME = "graph";
 
-    @BeforeEach
-    void setup() throws Exception {
-        runQuery(DB_CYPHER);
-
-        registerProcedures(GraphProjectProc.class, ScalePropertiesStreamProc.class);
-        var loadQuery = GdsCypher
-            .call(GRAPH_NAME)
-            .graphProject()
-            .withAnyRelationshipType()
-            .withNodeLabel("A")
-            .withNodeProperty("id")
-            .yields();
-        runQuery(loadQuery);
-    }
+    // Does not work since it remove the `nodeProperties` key which is mandatory for SP config
+    @Override
+    public void testRunOnEmptyGraph() {}
 
     @Test
     void stream() {
+        loadGraph(GRAPH_NAME);
+
         var query = GdsCypher
             .call(GRAPH_NAME)
             .algo("gds.alpha.scaleProperties")
             .streamMode()
-            .addParameter("nodeProperties", List.of("id"))
+            .addParameter("nodeProperties", List.of(NODE_PROP_NAME))
             .addParameter("scaler", "Mean")
             .yields();
 
@@ -77,9 +58,11 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
 
     @Test
     void streamLogWithOffset() {
-        var query = "CALL gds.alpha.scaleProperties.stream('graph', {" +
+        loadGraph(GRAPH_NAME);
+
+        var query = "CALL gds.alpha.scaleProperties.stream('myGraph', {" +
                     "scaler: {type: 'log', offset: 10 }," +
-                    "nodeProperties: 'id'}) " +
+                    "nodeProperties: 'myProp'}) " +
                     "yield nodeId, scaledProperty " +
                     "RETURN nodeId, [p in scaledProperty | toInteger(p*100)/100.0] AS scaledProperty";
 
@@ -91,5 +74,15 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
             Map.of("nodeId", 4L, "scaledProperty", List.of(2.63, 2.48)),
             Map.of("nodeId", 5L, "scaledProperty", List.of(2.7, 2.48))
         ));
+    }
+
+    @Override
+    public Class<? extends AlgoBaseProc<ScaleProperties, ScaleProperties.Result, ScalePropertiesStreamConfig, ?>> getProcedureClazz() {
+        return ScalePropertiesStreamProc.class;
+    }
+
+    @Override
+    public ScalePropertiesStreamConfig createConfig(CypherMapWrapper mapWrapper) {
+        return ScalePropertiesStreamConfig.of(mapWrapper);
     }
 }

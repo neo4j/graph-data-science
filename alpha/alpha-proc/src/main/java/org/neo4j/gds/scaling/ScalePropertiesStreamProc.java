@@ -36,12 +36,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
+import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.scaleProperties.stream", description = "Scale node properties", executionMode = STREAM)
+@GdsCallable(name = "gds.alpha.scaleProperties.stream", description = SCALE_PROPERTIES_DESCRIPTION, executionMode = STREAM)
 public class ScalePropertiesStreamProc extends StreamProc<ScaleProperties, ScaleProperties.Result, ScalePropertiesStreamProc.Result, ScalePropertiesStreamConfig> {
 
     @Procedure("gds.alpha.scaleProperties.stream")
-    @Description("Scale node properties")
+    @Description(SCALE_PROPERTIES_DESCRIPTION)
     public Stream<Result> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
