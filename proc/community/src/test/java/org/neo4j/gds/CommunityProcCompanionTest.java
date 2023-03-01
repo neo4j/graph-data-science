@@ -87,7 +87,7 @@ class CommunityProcCompanionTest {
         );
 
         assertThat(result).isInstanceOf(LongIfChangedNodePropertyValues.class);
-        for (long i = 0; i < result.size(); i++) {
+        for (long i = 0; i < result.valuesStored(); i++) {
             assertThat(result.longValue(i)).isEqualTo(inputProperties.longValue(i));
             assertThat(result.value(i)).isNull();
         }
@@ -106,7 +106,7 @@ class CommunityProcCompanionTest {
             () -> { throw new UnsupportedOperationException("Not implemented"); }
         );
 
-        for (long i = 0L; i < result.size(); i++) {
+        for (long i = 0L; i < result.valuesStored(); i++) {
 
             if (i < 5) {
                 assertThat(result.longValue(i)).isEqualTo(inputProperties.longValue(i));
@@ -165,7 +165,7 @@ class CommunityProcCompanionTest {
         }
 
         @Override
-        public long size() {
+        public long valuesStored() {
             return size;
         }
 

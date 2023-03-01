@@ -34,7 +34,7 @@ final class IntermediateCommunityNodeProperties implements LongArrayNodeProperty
     }
 
     @Override
-    public long size() {
+    public long valuesStored() {
         return size;
     }
 

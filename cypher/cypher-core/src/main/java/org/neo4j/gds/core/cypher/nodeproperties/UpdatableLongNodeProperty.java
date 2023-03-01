@@ -37,7 +37,7 @@ public class UpdatableLongNodeProperty implements UpdatableNodeProperty, LongNod
 
 
     @Override
-    public long size() {
+    public long valuesStored() {
         return nodeCount;
     }
 

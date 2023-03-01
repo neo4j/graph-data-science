@@ -52,7 +52,7 @@ public final class DegreeCentralityProc {
 
         return new DoubleNodePropertyValues() {
             @Override
-            public long size() {
+            public long valuesStored() {
                 return size;
             }
 

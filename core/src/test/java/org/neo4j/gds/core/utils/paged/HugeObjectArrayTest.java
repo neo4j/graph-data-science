@@ -53,7 +53,7 @@ final class HugeObjectArrayTest extends HugeArrayTestBase<String[], String, Huge
         assertThat(nodeProperties)
             .asInstanceOf(InstanceOfAssertFactories.type(FloatArrayNodePropertyValues.class))
             .describedAs("float properties must return the same size and elements as the underlying array")
-            .returns(floats.size(), FloatArrayNodePropertyValues::size)
+            .returns(floats.size(), FloatArrayNodePropertyValues::valuesStored)
             .satisfies(array -> {
                 for (int nodeId = 0; nodeId < NODE_COUNT; nodeId++) {
                     assertThat(array.floatArrayValue(nodeId))
@@ -75,7 +75,7 @@ final class HugeObjectArrayTest extends HugeArrayTestBase<String[], String, Huge
         assertThat(nodeProperties)
             .asInstanceOf(InstanceOfAssertFactories.type(DoubleArrayNodePropertyValues.class))
             .describedAs("double properties must return the same size and elements as the underlying array")
-            .returns(doubles.size(), DoubleArrayNodePropertyValues::size)
+            .returns(doubles.size(), DoubleArrayNodePropertyValues::valuesStored)
             .satisfies(array -> {
                 for (int nodeId = 0; nodeId < NODE_COUNT; nodeId++) {
                     assertThat(array.doubleArrayValue(nodeId))
@@ -104,7 +104,7 @@ final class HugeObjectArrayTest extends HugeArrayTestBase<String[], String, Huge
         assertThat(nodeProperties)
             .asInstanceOf(InstanceOfAssertFactories.type(LongArrayNodePropertyValues.class))
             .describedAs("long properties must return the same size and elements as the underlying array")
-            .returns(longs.size(), LongArrayNodePropertyValues::size)
+            .returns(longs.size(), LongArrayNodePropertyValues::valuesStored)
             .satisfies(array -> {
                 for (int nodeId = 0; nodeId < NODE_COUNT; nodeId++) {
                     assertThat(array.longArrayValue(nodeId))

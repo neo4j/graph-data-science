@@ -69,7 +69,7 @@ public class KSpanningTreeWriteSpec implements AlgorithmSpec<KSpanningTree, Span
 
             var properties = new LongNodePropertyValues() {
                 @Override
-                public long size() {
+                public long valuesStored() {
                     return computationResult.graph().nodeCount();
                 }
 

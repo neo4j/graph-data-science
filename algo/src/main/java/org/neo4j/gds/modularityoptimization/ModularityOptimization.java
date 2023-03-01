@@ -416,7 +416,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             }
 
             @Override
-            public long size() {
+            public long valuesStored() {
                 return currentCommunities.size();
             }
         };

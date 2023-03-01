@@ -225,8 +225,8 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
             }
 
             @Override
-            public long size() {
-                return property.size();
+            public long valuesStored() {
+                return property.valuesStored();
             }
         };
     }
@@ -244,8 +244,8 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
             }
 
             @Override
-            public long size() {
-                return property.size();
+            public long valuesStored() {
+                return property.valuesStored();
             }
         };
     }
@@ -263,8 +263,8 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
             }
 
             @Override
-            public long size() {
-                return property.size();
+            public long valuesStored() {
+                return property.valuesStored();
             }
         };
     }

@@ -40,7 +40,7 @@ final class HashGNNProcCompanion {
             }
 
             @Override
-            public long size() {
+            public long valuesStored() {
                 return nodeCount;
             }
         };

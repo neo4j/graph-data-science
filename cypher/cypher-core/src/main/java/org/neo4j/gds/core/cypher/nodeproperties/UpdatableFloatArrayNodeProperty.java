@@ -36,7 +36,7 @@ public class UpdatableFloatArrayNodeProperty implements UpdatableNodeProperty, F
     }
 
     @Override
-    public long size() {
+    public long valuesStored() {
         return nodeCount;
     }
 

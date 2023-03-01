@@ -61,7 +61,7 @@ final class NodePropertiesFromStoreBuilderTest {
             1
         ).build(idMap(nodeCount));
 
-        assertEquals(0L, properties.size());
+        assertEquals(0L, properties.valuesStored());
         assertEquals(OptionalDouble.empty(), properties.getMaxDoublePropertyValue());
         assertEquals(42.0, properties.doubleValue(0));
     }
@@ -74,7 +74,7 @@ final class NodePropertiesFromStoreBuilderTest {
             1
         ).build(idMap(nodeCount));
 
-        assertEquals(0L, properties.size());
+        assertEquals(0L, properties.valuesStored());
         assertEquals(OptionalLong.empty(), properties.getMaxLongPropertyValue());
         assertEquals(42, properties.longValue(0));
     }
@@ -241,7 +241,7 @@ final class NodePropertiesFromStoreBuilderTest {
             b.set(0, Values.of(42.0));
             b.set(1, Values.of(21.0));
         });
-        assertEquals(2, properties.size());
+        assertEquals(2, properties.valuesStored());
     }
 
     @Test
@@ -304,7 +304,7 @@ final class NodePropertiesFromStoreBuilderTest {
             var expected = i == 1338 ? 0x1p41 : i == 1337 ? 0x1p42 : i % 2 == 0 ? 2.0 : 1.0;
             assertEquals(expected, properties.doubleValue(i), "" + i);
         }
-        assertEquals(nodeSize, properties.size());
+        assertEquals(nodeSize, properties.valuesStored());
         var maxPropertyValue = properties.getMaxDoublePropertyValue();
         assertTrue(maxPropertyValue.isPresent());
 

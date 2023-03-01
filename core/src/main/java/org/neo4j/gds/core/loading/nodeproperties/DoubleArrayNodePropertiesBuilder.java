@@ -116,7 +116,7 @@ public class DoubleArrayNodePropertiesBuilder implements InnerNodePropertiesBuil
         }
 
         @Override
-        public long size() {
+        public long valuesStored() {
             return size;
         }
     }

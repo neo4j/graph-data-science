@@ -175,7 +175,7 @@ public abstract class HugeAtomicDoubleArray {
             }
 
             @Override
-            public long size() {
+            public long valuesStored() {
                 return HugeAtomicDoubleArray.this.size();
             }
         };

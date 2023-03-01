@@ -58,7 +58,7 @@ class GenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
             }
 
             @Override
-            public long size() {
+            public long valuesStored() {
                 return nodeCount;
             }
         };

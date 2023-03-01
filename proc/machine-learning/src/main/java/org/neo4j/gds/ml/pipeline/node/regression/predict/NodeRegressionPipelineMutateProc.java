@@ -71,7 +71,7 @@ public class NodeRegressionPipelineMutateProc
 
         return new DoubleNodePropertyValues() {
             @Override
-            public long size() {
+            public long valuesStored() {
                 return size;
             }
 

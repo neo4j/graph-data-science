@@ -28,7 +28,7 @@ public final class LongArrayTestPropertyValues implements LongArrayNodePropertyV
     public LongArrayTestPropertyValues(LongToObjectFunction<long[]> transformer) {this.transformer = transformer;}
 
     @Override
-    public long size() {
+    public long valuesStored() {
         return 0;
     }
 

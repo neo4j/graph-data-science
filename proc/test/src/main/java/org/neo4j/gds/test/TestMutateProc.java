@@ -70,7 +70,7 @@ public class TestMutateProc extends MutatePropertyProc<TestAlgorithm, TestAlgori
             }
 
             @Override
-            public long size() {
+            public long valuesStored() {
                 return 0;
             }
         };

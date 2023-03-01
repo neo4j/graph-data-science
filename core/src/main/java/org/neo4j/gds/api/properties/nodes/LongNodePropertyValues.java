@@ -60,7 +60,7 @@ public interface LongNodePropertyValues extends NodePropertyValues {
     @Override
     default OptionalLong getMaxLongPropertyValue() {
         return LongStream
-            .range(0, size())
+            .range(0, valuesStored())
             .parallel()
             .map(this::longValue)
             .max();

@@ -78,7 +78,7 @@ public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues
     }
 
     @Override
-    public long size() {
+    public long valuesStored() {
         return communities.size();
     }
 }

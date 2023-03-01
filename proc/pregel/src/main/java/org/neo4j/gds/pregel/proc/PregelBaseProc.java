@@ -164,7 +164,7 @@ public final class PregelBaseProc {
         HugeObjectArrayLongArrayPropertyValues(HugeObjectArray<long[]> longArrays) {this.longArrays = longArrays;}
 
         @Override
-        public long size() {
+        public long valuesStored() {
             return longArrays.size();
         }
 
@@ -180,7 +180,7 @@ public final class PregelBaseProc {
         HugeObjectArrayDoubleArrayPropertyValues(HugeObjectArray<double[]> doubleArrays) {this.doubleArrays = doubleArrays;}
 
         @Override
-        public long size() {
+        public long valuesStored() {
             return doubleArrays.size();
         }
 

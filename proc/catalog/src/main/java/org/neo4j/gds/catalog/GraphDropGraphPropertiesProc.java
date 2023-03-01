@@ -57,7 +57,7 @@ public class GraphDropGraphPropertiesProc extends CatalogProc {
         config.validate(graphStore);
 
         // removing
-        long propertiesRemoved = graphStore.graphPropertyValues(graphProperty).size();
+        long propertiesRemoved = graphStore.graphPropertyValues(graphProperty).valuesStored();
         runWithExceptionLogging(
             "Graph property removal failed",
             () -> graphStore.removeGraphProperty(graphProperty)
