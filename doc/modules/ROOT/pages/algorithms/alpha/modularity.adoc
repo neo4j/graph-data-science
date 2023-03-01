@@ -185,6 +185,8 @@ For more details on the stream mode in general, see xref:common-usage/running-al
 ----
 CALL gds.alpha.modularity.stream('myGraph', { communityProperty: 'community', relationshipWeightProperty: 'weight' })
 YIELD communityId, modularity
+RETURN communityId, modularity
+ORDER BY communityId ASC
 ----
 
 .Results
