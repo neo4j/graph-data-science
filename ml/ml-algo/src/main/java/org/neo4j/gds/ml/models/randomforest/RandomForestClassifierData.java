@@ -31,7 +31,6 @@ import org.neo4j.gds.ml.decisiontree.TreeNode;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.TrainingMethod;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.function.LongUnaryOperator;
 
@@ -39,7 +38,7 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
 @ValueClass
 @SuppressWarnings("immutables:subtype")
-public interface RandomForestClassifierData extends Classifier.ClassifierData, Serializable {
+public interface RandomForestClassifierData extends Classifier.ClassifierData {
 
     List<DecisionTreePredictor<Integer>> decisionTrees();
 
