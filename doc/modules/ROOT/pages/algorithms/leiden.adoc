@@ -316,14 +316,14 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.leiden.write.estimate('myGraph', {writeProperty: 'communityId', randomSeed: 19})
-YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+YIELD nodeCount, relationshipCount, requiredMemory
 ----
 
 .Results
 [opts="header"]
 |===
-| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 6         | 14                | 561256   | 561368   | "[548 KiB \... 548 KiB]"
+| nodeCount | relationshipCount | requiredMemory
+| 6         | 14                | "[548 KiB \... 548 KiB]"
 |===
 --
 
