@@ -45,7 +45,7 @@ class ConsecutiveLongNodePropertyValuesTest {
             10
         );
 
-        assertThat(consecutiveIds.size()).isEqualTo(10);
+        assertThat(consecutiveIds.size()).isEqualTo(nonConsecutiveIds.size());
 
         for (int i = 0; i < 10; i++) {
             assertThat(consecutiveIds.longValue(i)).isEqualTo(i % 3);
