@@ -1,5 +1,63 @@
-.Supported algorithm traits (table)
-[cols="1,1,1,1,1,1", options="header,autowidth", caption=]
+.Supported algorithm traits (vertical table)
+[cols="1,1", options="autowidth", caption=]
+|===
+|<<directed>>
+|
+ifdef::directed[]
+icon:check[]
+endif::[]
+ifndef::directed[]
+icon:times[]
+endif::[]
+
+|<<undirected>>
+|
+ifdef::undirected[]
+icon:check[]
+endif::[]
+ifndef::undirected[]
+icon:times[]
+endif::[]
+
+|<<homogeneous>>
+|
+ifdef::homogeneous[]
+icon:check[]
+endif::[]
+ifndef::homogeneous[]
+icon:times[]
+endif::[]
+
+|<<heterogeneous-nodes>>
+|
+ifdef::heterogeneous-nodes[]
+icon:check[]
+endif::[]
+ifndef::heterogeneous-nodes[]
+icon:times[]
+endif::[]
+
+|<<heterogeneous-rels>>
+|
+ifdef::heterogeneous-rels[]
+icon:check[]
+endif::[]
+ifndef::heterogeneous-rels[]
+icon:times[]
+endif::[]
+
+|<<weighted>>
+|
+ifdef::weighted[]
+icon:check[]
+endif::[]
+ifndef::weighted[]
+icon:times[]
+endif::[]
+|===
+
+.Supported algorithm traits (horizontal table)
+[cols="1,1,1,1,1,1", options="autowidth", caption=]
 |===
 |<<directed>>
 |<<undirected>>
