@@ -1,0 +1,196 @@
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.{algorithm} syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+
+.Run {algorithm} in stream mode on a named graph.
+[source, cypher, role=noplay, subs="quotes,attributes+"]
+----
+CALL {procedure-name}.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  index: Integer,
+  sourceNode: Integer,
+  targetNode: Integer,
+  totalCost: Float,
+  nodeIds: List of Integer,
+  costs: List of Float,
+  route: Path,
+  isNegativeCycle: Boolean
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+| sourceNode                                                                       | Integer | n/a     | no       | The Neo4j source node or node id.
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
+|===
+
+.Results
+[opts="header"]
+|===
+| Name        | Type            | Description
+| index       | Integer         | 0-based index of the found route.
+| sourceNode  | Integer         | Source node of the route.
+| targetNode  | Integer         | Target node of the route.
+| totalCost   | Float           | Total cost from source to target.
+| nodeIds     | List of Integer | Node ids on the route in traversal order.
+| costs       | List of Float   | Accumulated costs for each node on the route.
+| route        | Path           | The route represented as Cypher entity.
+| isNegativeCycle | Boolean     | If true, the discovered route is a negative cycle. Otherwise it is a shortest path.
+|===
+
+======
+
+[.include-with-mutate]
+======
+
+The mutate mode creates new relationships in the projected graph.
+Each relationship represents a path from the source node to the target node.
+The total cost of a path is stored via the `totalCost` relationship property.
+
+.Run {algorithm} in mutate mode on a named graph.
+[source, cypher, role=noplay, subs="quotes,attributes+"]
+----
+CALL {procedure-name}.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  relationshipsWritten: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  mutateMillis: Integer,
+  containsNegativeCycle: Boolean,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+| sourceNode        | Integer | n/a     | no       | The Neo4j source node or node id.
+| mutateNegativeCycles | Boolean | false | yes      | If set to true, any discovered negative cycles are added in the in-memory graph.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Unused.
+| mutateMillis           | Integer   | Milliseconds for adding relationships to the projected graph.
+| relationshipsWritten   | Integer   | The number of relationships that were added.
+| containsNegativeCycle | Boolean   | True if negative cycles were discovered.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+
+======
+
+[.include-with-write]
+======
+
+The write mode creates new relationships in the Neo4j database.
+Each relationship represents a path from the source node to the target node.
+Additional path information is stored using relationship properties.
+By default, the write mode stores a `totalCost` property.
+Optionally, one can also store `nodeIds` and `costs` of intermediate nodes on the path.
+
+.Run {algorithm} in write mode on a named graph.
+[source, cypher, role=noplay, subs="quotes,attributes+"]
+----
+CALL {procedure-name}.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  relationshipsWritten: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  writeMillis: Integer,
+  containsNegativeCycle: Boolean,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+| sourceNode        | Integer | n/a     | no       | The Neo4j source node or node id.
+| writeNegativeCycles | Boolean | false | yes      | If set to true, any discovered negative cycles are written back to  the Neo4j graph.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Unused.
+| writeMillis            | Integer   | Milliseconds for writing relationships to Neo4j.
+| relationshipsWritten   | Integer   | The number of relationships that were written.
+| containsNegativeCycle | Boolean   | True if negative cycles were discovered.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+
+======
+
+[.include-with-stats]
+======
+
+.Run {algorithm} in stats mode on a named graph.
+[source, cypher, role=noplay, subs="quotes,attributes+"]
+----
+CALL {procedure-name}.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  containsNegativeCycle: Boolean,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+| sourceNode        | Integer | n/a     | no       | The Neo4j source node or node id.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Unused.
+| containsNegativeCycle  | Boolean   | True if negative cycles were discovered.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+
+======
+
+
+====
