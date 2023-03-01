@@ -20,13 +20,9 @@
 package org.neo4j.gds.core.concurrency;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.api.BatchNodeIterable;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.loading.HugeParallelGraphImporter;
 import org.neo4j.gds.core.utils.BiLongConsumer;
-import org.neo4j.gds.core.utils.LazyMappingCollection;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.utils.ExceptionUtil;
 
@@ -49,7 +45,6 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -227,47 +222,6 @@ public final class ParallelUtil {
 
     public static boolean canRunInParallel(@Nullable ExecutorService executor) {
         return executor != null && !(executor.isShutdown() || executor.isTerminated());
-    }
-
-    /**
-     * Executes read operations in parallel, based on the given batch size
-     * and executor.
-     *
-     * @deprecated Use {@link org.neo4j.gds.core.concurrency.RunWithConcurrency} instead.
-     */
-    @Deprecated(forRemoval = true)
-    public static <T extends Runnable> void readParallel(
-        final int concurrency,
-        final int batchSize,
-        final BatchNodeIterable idMap,
-        final ExecutorService executor,
-        final HugeParallelGraphImporter<T> importer
-    ) {
-
-        Collection<PrimitiveLongIterable> iterators =
-            idMap.batchIterables(batchSize);
-
-        int threads = iterators.size();
-
-        if (!canRunInParallel(executor) || threads == 1) {
-            long nodeOffset = 0L;
-            for (PrimitiveLongIterable iterator : iterators) {
-                final T task = importer.newImporter(nodeOffset, iterator);
-                task.run();
-                nodeOffset += batchSize;
-            }
-        } else {
-            AtomicLong nodeOffset = new AtomicLong();
-            Collection<T> importers = LazyMappingCollection.of(
-                iterators,
-                it -> importer.newImporter(nodeOffset.getAndAdd(batchSize), it)
-            );
-            RunWithConcurrency.builder()
-                .concurrency(concurrency)
-                .tasks(importers)
-                .executor(executor)
-                .run();
-        }
     }
 
     public static void readParallel(

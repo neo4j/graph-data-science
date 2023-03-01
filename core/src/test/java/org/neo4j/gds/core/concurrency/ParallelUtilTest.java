@@ -25,8 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.function.ThrowingConsumer;
-import org.neo4j.gds.api.BatchNodeIterable;
-import org.neo4j.gds.core.loading.HugeParallelGraphImporter;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
@@ -65,8 +63,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -188,28 +184,6 @@ final class ParallelUtilTest {
                 IllegalArgumentException.class,
                 () -> ParallelUtil.threadCount(-1337, 42));
         assertEquals("Invalid batch size: -1337", exception.getMessage());
-    }
-
-    @Test
-    void shouldRunBatchesSequentialIfNoExecutorIsGiven() {
-        PrimitiveLongIterable[] ints = {longs(0, 10), longs(10, 14)};
-        BatchNodeIterable batches = mock(BatchNodeIterable.class);
-        when(batches.batchIterables(anyLong())).thenReturn(asList(ints));
-        long currentThreadId = Thread.currentThread().getId();
-        Runnable task = () -> assertEquals(Thread.currentThread().getId(), currentThreadId);
-        @SuppressWarnings("unchecked") HugeParallelGraphImporter<Runnable> importer = mock(HugeParallelGraphImporter.class);
-        when(importer.newImporter(anyLong(), any())).thenReturn(task);
-
-        ParallelUtil.readParallel(
-                100,
-                10,
-                batches,
-                null,
-                importer
-        );
-
-        verify(importer, times(1)).newImporter(0, ints[0]);
-        verify(importer, times(1)).newImporter(10, ints[1]);
     }
 
     @Test

@@ -24,7 +24,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
 
 import java.util.Map;
 
@@ -40,29 +39,13 @@ public final class GraphInfoHelper {
     private GraphInfoHelper() {}
 
     public static Map<String, Object> degreeDistribution(Graph graph) {
-        int batchSize = Math.toIntExact(ParallelUtil.adjustedBatchSize(
-            graph.nodeCount(),
-            ConcurrencyConfig.DEFAULT_CONCURRENCY,
-            ParallelUtil.DEFAULT_BATCH_SIZE
-        ));
-
         long maximumDegree = Math.max(2, graph.relationshipCount());
         AtomicHistogram histogram = new AtomicHistogram(maximumDegree, PRECISION);
 
-        //noinspection removal
-        ParallelUtil.readParallel(
-            ConcurrencyConfig.DEFAULT_CONCURRENCY,
-            batchSize,
+        ParallelUtil.parallelForEachNode(
             graph,
-            Pools.DEFAULT,
-            (nodeOffset, nodeIds) -> () -> {
-                var iterator = nodeIds.iterator();
-                while (iterator.hasNext()) {
-                    long nodeId = iterator.nextLong();
-                    int degree = graph.degree(nodeId);
-                    histogram.recordValue(degree);
-                }
-            }
+            ConcurrencyConfig.DEFAULT_CONCURRENCY,
+            nodeId -> histogram.recordValue(graph.degree(nodeId))
         );
 
         return MapUtil.map(
