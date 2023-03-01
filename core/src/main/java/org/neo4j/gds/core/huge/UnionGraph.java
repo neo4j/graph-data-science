@@ -32,7 +32,7 @@ import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
 
 import java.util.ArrayList;
 import java.util.Collection;

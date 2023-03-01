@@ -26,8 +26,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.function.ThrowingConsumer;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongCollections;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 
 import java.util.AbstractCollection;
 import java.util.Arrays;
@@ -49,7 +47,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.LongAccumulator;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -81,10 +78,8 @@ final class ParallelUtilTest {
         long firstNum = 1;
         long lastNum = 1_000_000;
 
-        List<Long> list = LongStream.rangeClosed(firstNum, lastNum).boxed().collect(Collectors.toList());
-
         ForkJoinPool commonPool = ForkJoinPool.commonPool();
-        Stream<Long> stream = list.stream();
+        Stream<Long> stream = LongStream.rangeClosed(firstNum, lastNum).boxed();
 
         long actualTotal = parallelStream(stream, concurrency, (s) -> {
             assertTrue(s.isParallel());
@@ -493,10 +488,6 @@ final class ParallelUtilTest {
         }
     }
 
-    private PrimitiveLongIterable longs(int from, int size) {
-        return () -> PrimitiveLongCollections.range(from, from + size - 1);
-    }
-
     static final class Tasks extends AbstractCollection<Runnable> {
         private final AtomicInteger started;
         private final AtomicInteger running;
@@ -504,15 +495,6 @@ final class ParallelUtilTest {
         private final LongAccumulator maxRunning;
         private int size;
         private final long parkNanos;
-
-        Tasks(int size) {
-            this.size = size;
-            started = new AtomicInteger();
-            running = new AtomicInteger();
-            requested = new AtomicInteger();
-            maxRunning = new LongAccumulator(Long::max, Long.MIN_VALUE);
-            parkNanos = 0;
-        }
 
         Tasks(int size, int runtimeMillis) {
             this.size = size;

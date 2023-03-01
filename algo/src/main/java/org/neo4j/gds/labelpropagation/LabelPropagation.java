@@ -23,13 +23,13 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.collections.primitive.PrimitiveLongCollections;
+import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.NullPropertyMap.DoubleNullPropertyMap;
 import org.neo4j.gds.core.loading.NullPropertyMap.LongNullPropertyMap;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongCollections;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 

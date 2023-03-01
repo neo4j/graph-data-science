@@ -20,9 +20,9 @@
 package org.neo4j.gds.api;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.loading.LabelInformation;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 
 import java.util.Collection;
 import java.util.List;
