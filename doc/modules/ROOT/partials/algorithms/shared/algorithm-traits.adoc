@@ -60,7 +60,7 @@ endif::[]
 
 [[homogeneous]]Homogeneous:: xref:introduction.adoc#introduction-algorithms-homogeneous[Homogeneous trait]. The algorithm will treat all nodes and relationships in its input graph(s) similarly, as if they were all of the same type. If multiple types of nodes or relationships exist in the graph, this must be taken into account when analysing the results of the algorithm.
 
-[[heterogeneous-nodes]]Heterogeneous nodes:: xref:introduction.adoc#introduction-algorithms-heterogeneous-nodes[Heterogeneous nodes trait]. The algorithm has the ability to distinguish between nodes of different types.
+[[heterogeneous-nodes]]Heterogeneous nodes:: xref:introduction.adoc#introduction-algorithms-heterogeneous-nodes[Heterogeneous nodes trait]. The algorithm makes use of different node labels.
 
 [[heterogeneous-rels]]Heterogeneous relationships:: xref:introduction.adoc#introduction-algorithms-heterogeneous-rels[Heterogeneous relationships trait]. The algorithm makes use of different relationships types.
 
