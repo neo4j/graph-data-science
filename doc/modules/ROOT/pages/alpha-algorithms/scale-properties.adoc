@@ -188,7 +188,7 @@ The log scaler supports specific configuration, which we document here.
 [opts="header",cols="1,1,1m,1,8"]
 |===
 | Name          | Type   | Default | Optional | Description
-| scaler        | String | n/a     | no       | Name of the scaler applied for the properties. Supported values are `MinMax`, `Max`, `Mean`, `Log`, `L1Norm`, `L2Norm`, `Center`, and `StdScore`, case insensitively.
+| type          | String | n/a     | no       | Type of the scaler applied for the properties. Supported values are `MinMax`, `Max`, `Mean`, `Log`, `L1Norm`, `L2Norm`, `Center`, and `StdScore`, case insensitively.
 | offset        | Number | 0       | yes      | Constant additive term applied before computing the logarithm of the property value.
 |===
 
@@ -395,7 +395,7 @@ We will use `5.12`, as this will make the smallest scaled value zero.
 ----
 CALL gds.alpha.scaleProperties.stream('myGraph', {
   nodeProperties: ['avgReview'],
-  scaler: {scaler: 'Log', offset: 5.12}
+  scaler: {type: 'Log', offset: 5.12}
 }) YIELD nodeId, scaledProperty
 RETURN gds.util.asNode(nodeId).name AS name, scaledProperty
   ORDER BY name ASC
