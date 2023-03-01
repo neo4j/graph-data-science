@@ -94,7 +94,7 @@ public class BellmanFordTask implements Runnable {
 
             }
             // CAX failed, retry
-            oldDist = witness;
+            oldDist = distances.distance(targetNodeId);
         }
     }
 

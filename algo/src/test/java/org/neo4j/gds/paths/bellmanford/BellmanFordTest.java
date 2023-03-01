@@ -19,13 +19,22 @@
  */
 package org.neo4j.gds.paths.bellmanford;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.beta.generator.PropertyProducer;
+import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
+import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.paths.delta.config.ImmutableAllShortestPathsDeltaStreamConfig;
+import org.neo4j.gds.paths.dijkstra.Dijkstra;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -177,5 +186,61 @@ class BellmanFordTest {
         }
         assertThat(counter).isEqualTo(6L);
         assertThat(result.containsNegativeCycle()).isFalse();
+    }
+    
+    @Test
+    void shouldGiveSameResultsAsDijkstra() {
+        int nodeCount = 3_000;
+        long seed = 42L;
+        long start = 42;
+        int concurrency = 4;
+        var newGraph = new RandomGraphGeneratorBuilder()
+            .direction(Direction.DIRECTED)
+            .averageDegree(10)
+            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+            .relationshipPropertyProducer(PropertyProducer.randomDouble("foo", 1, 10))
+            .nodeCount(nodeCount)
+            .seed(seed)
+            .build()
+            .generate();
+
+        var config = ImmutableAllShortestPathsDeltaStreamConfig.builder()
+            .concurrency(concurrency)
+            .sourceNode(start)
+            .trackRelationships(true)
+            .build();
+
+        var bellmanFord = new BellmanFord(
+            newGraph,
+            ProgressTracker.NULL_TRACKER,
+            start,
+            4
+        ).compute().shortestPaths();
+
+        var dijkstraAlgo = Dijkstra
+            .singleSource(newGraph, config, Optional.empty(), ProgressTracker.NULL_TRACKER)
+            .compute();
+
+        double[] bellman = new double[nodeCount];
+        double[] djikstra = new double[nodeCount];
+
+        double bellmanSum = 0;
+        double dijkstraSum = 0;
+
+        for (var path : bellmanFord.pathSet()) {
+            bellman[(int) path.targetNode()] = path.totalCost();
+        }
+
+        for (var path : dijkstraAlgo.pathSet()) {
+            djikstra[(int) path.targetNode()] = path.totalCost();
+        }
+        for (int i = 0; i < nodeCount; ++i) {
+            bellmanSum += bellman[i];
+            dijkstraSum += djikstra[i];
+            assertThat(djikstra[i]).isCloseTo(bellman[i], Offset.offset(1e-5));
+
+        }
+        assertThat(bellmanSum).isCloseTo(dijkstraSum, Offset.offset(1e-5));
+
     }
 }

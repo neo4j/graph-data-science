@@ -105,24 +105,39 @@ class DistanceTracker {
 
         // locked by another thread
         if (currentPredecessor < 0) {
-            return distances.get(nodeId);
+            //we  should signal failure
+            // for that we must be sure not to return the 'expectedDistance' by accident!
+            //we hence return its negation (or -1 if ==0)
+            return (Double.compare(expectedDistance, 0.0) == 0) ? -1.0 : -expectedDistance;
         }
 
         var witness = predecessors.compareAndExchange(nodeId, currentPredecessor, -predecessor - 1);
-
+        
         // CAX failed
         if (witness != currentPredecessor) {
-            return distances.get(nodeId);
+            //we  should signal failure
+            // for that we must be sure not to return the 'expectedDistance' by accident!
+            return (Double.compare(expectedDistance, 0.0) == 0) ? -1.0 : -expectedDistance;
         }
 
-        // we have the look
-        distances.set(nodeId, newDistance);
-        lengths.set(nodeId, length);
-        // unlock
-        predecessors.set(nodeId, predecessor);
+        double oldDistance = distances.get(nodeId);
+        // we have the lock; no-one else can write on nodeId at the moment.
+        // Let us do a check if it makes sense to update
 
-        // return previous distance to signal successful CAX
-        return expectedDistance;
+        if (oldDistance > newDistance) {
+            distances.set(nodeId, newDistance);
+            lengths.set(nodeId, length);
+            // unlock
+            predecessors.set(nodeId, predecessor);
+            // return previous distance to signal successful CAX
+
+            return expectedDistance;
+        }
+        predecessors.set(nodeId, currentPredecessor);
+        //signal unsuccesful update
+        //note that this unsuccesful update will be the last attempt
+        return (Double.compare(expectedDistance, 0.0) == 0.0) ? -1.0 : -expectedDistance;
+
     }
 }
 
