@@ -48,33 +48,39 @@ public class TreeNode<PREDICTION extends Number> {
         this.prediction = prediction;
     }
 
-    PREDICTION prediction() {
+    public void setPrediction(PREDICTION prediction) { this.prediction = prediction; }
+
+    public PREDICTION prediction() {
         return prediction;
     }
 
-    int featureIndex() {
+    public int featureIndex() {
         return featureIndex;
     }
 
-    double thresholdValue() {
+    public double thresholdValue() {
         return thresholdValue;
     }
 
-    TreeNode<PREDICTION> leftChild() {
+    public TreeNode<PREDICTION> leftChild() {
         return leftChild;
     }
 
-    void setLeftChild(TreeNode leftChild) {
+    public void setLeftChild(TreeNode leftChild) {
         this.leftChild = leftChild;
     }
 
-    TreeNode<PREDICTION> rightChild() {
+    public boolean hasLeftChild() { return leftChild != null; }
+
+    public TreeNode<PREDICTION> rightChild() {
         return rightChild;
     }
 
-    void setRightChild(TreeNode rightChild) {
+    public void setRightChild(TreeNode rightChild) {
         this.rightChild = rightChild;
     }
+
+    public boolean hasRightChild() { return rightChild != null; }
 
     @Override
     public String toString() {

@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.decisiontree;
 
 public class DecisionTreePredictor<PREDICTION extends Number> {
 
-    private final TreeNode<PREDICTION> root;
+    public final TreeNode<PREDICTION> root;
 
     public DecisionTreePredictor(TreeNode<PREDICTION> root) {
         this.root = root;
