@@ -47,40 +47,48 @@ public final class CommunityProcCompanion {
         LongNodePropertyValues nodeProperties,
         Supplier<NodeProperty> seedPropertySupplier
     ) {
-        LongNodePropertyValues result = applySeedProperty(config, resultProperty, nodeProperties, seedPropertySupplier);
-        return applySizeFilterWhenNecessary(config, result);
+        LongNodePropertyValues result = considerSeedProperty(
+            config,
+            resultProperty,
+            nodeProperties,
+            seedPropertySupplier
+        );
+        return considerSizeFilter(config, result);
     }
 
     public static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> NodePropertyValues nodeProperties(
-            CONFIG config,
-            LongNodePropertyValues nodeProperties
+        CONFIG config,
+        LongNodePropertyValues nodeProperties
     ) {
-        LongNodePropertyValues result = applyConsecutiveIds(config, nodeProperties);
-        return applySizeFilterWhenNecessary(config, result);
+        LongNodePropertyValues result = considerConsecutiveIdsFlag(config, nodeProperties);
+        return considerSizeFilter(config, result);
     }
 
-    public static <CONFIG extends ConcurrencyConfig> LongNodePropertyValues applySizeFilterWhenNecessary(CONFIG config, LongNodePropertyValues result) {
+    public static <CONFIG extends ConcurrencyConfig> LongNodePropertyValues considerSizeFilter(
+        CONFIG config,
+        LongNodePropertyValues result
+    ) {
         if (config instanceof CommunitySizeConfig) {
             var finalResult = result;
             result = ((CommunitySizeConfig) config)
-                    .minCommunitySize()
-                    .map(size -> applySizeFilter(finalResult, size, config.concurrency()))
-                    .orElse(result);
+                .minCommunitySize()
+                .map(size -> applySizeFilter(finalResult, size, config.concurrency()))
+                .orElse(result);
         } else if (config instanceof ComponentSizeConfig) {
             var finalResult = result;
             result = ((ComponentSizeConfig) config)
-                    .minComponentSize()
-                    .map(size -> applySizeFilter(finalResult, size, config.concurrency()))
-                    .orElse(result);
+                .minComponentSize()
+                .map(size -> applySizeFilter(finalResult, size, config.concurrency()))
+                .orElse(result);
         }
         return result;
     }
 
-    private static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> LongNodePropertyValues applySeedProperty(
-            CONFIG config,
-            String resultProperty,
-            LongNodePropertyValues nodeProperties,
-            Supplier<NodeProperty> seedPropertySupplier
+    private static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> LongNodePropertyValues considerSeedProperty(
+        CONFIG config,
+        String resultProperty,
+        LongNodePropertyValues nodeProperties,
+        Supplier<NodeProperty> seedPropertySupplier
     ) {
         var consecutiveIds = config.consecutiveIds();
         var isIncremental = config.isIncremental();
@@ -90,19 +98,19 @@ public final class CommunityProcCompanion {
             return LongIfChangedNodePropertyValues.of(seedPropertySupplier.get(), nodeProperties);
         }
 
-        return applyConsecutiveIds(config, nodeProperties);
+        return considerConsecutiveIdsFlag(config, nodeProperties);
     }
 
-    private static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> LongNodePropertyValues applyConsecutiveIds(
-            CONFIG config,
-            LongNodePropertyValues nodeProperties
+    private static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> LongNodePropertyValues considerConsecutiveIdsFlag(
+        CONFIG config,
+        LongNodePropertyValues nodeProperties
     ) {
         var consecutiveIds = config.consecutiveIds();
         var isIncremental = config.isIncremental();
         if (consecutiveIds && !isIncremental) {
             return new ConsecutiveLongNodePropertyValues(
-                    nodeProperties,
-                    nodeProperties.size()
+                nodeProperties,
+                nodeProperties.size()
             );
         }
 
@@ -131,7 +139,11 @@ public final class CommunityProcCompanion {
 
         private final long minCommunitySize;
 
-        CommunitySizeFilter(LongNodePropertyValues properties, HugeSparseLongArray communitySizes, long minCommunitySize) {
+        CommunitySizeFilter(
+            LongNodePropertyValues properties,
+            HugeSparseLongArray communitySizes,
+            long minCommunitySize
+        ) {
             this.properties = properties;
             this.communitySizes = communitySizes;
             this.minCommunitySize = minCommunitySize;

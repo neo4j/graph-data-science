@@ -42,6 +42,6 @@ public final class ApproxMaxKCutProc {
     ) {
         var config = computationResult.config();
 
-        return CommunityProcCompanion.applySizeFilterWhenNecessary(config, computationResult.result().asNodeProperties());
+        return CommunityProcCompanion.considerSizeFilter(config, computationResult.result().asNodeProperties());
     }
 }
