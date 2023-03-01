@@ -24,6 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.TerminationFlag;
 
 import java.util.Map;
 
@@ -43,8 +44,9 @@ public final class GraphInfoHelper {
         AtomicHistogram histogram = new AtomicHistogram(maximumDegree, PRECISION);
 
         ParallelUtil.parallelForEachNode(
-            graph,
+            graph.nodeCount(),
             ConcurrencyConfig.DEFAULT_CONCURRENCY,
+            TerminationFlag.RUNNING_TRUE,
             nodeId -> histogram.recordValue(graph.degree(nodeId))
         );
 

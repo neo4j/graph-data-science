@@ -83,7 +83,8 @@ public class Leiden extends Algorithm<LeidenResult> {
             rootGraph,
             maxIterations,
             concurrency,
-            includeIntermediateCommunities
+            includeIntermediateCommunities,
+            terminationFlag
         );
         this.seedValues = Optional.ofNullable(seedValues);
         this.modularities = new double[maxIterations];

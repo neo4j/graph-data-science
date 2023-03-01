@@ -171,7 +171,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
         ModularityOptimizationResult modularityOptimizationResult
     ) {
         AtomicLong maxCommunityId = new AtomicLong(0L);
-        ParallelUtil.parallelForEachNode(rootGraph, concurrency, (nodeId) -> {
+        ParallelUtil.parallelForEachNode(rootGraph.nodeCount(), concurrency, terminationFlag, nodeId -> {
             long prevId = level == 0
                 ? nodeId
                 : workingGraph.toMappedNodeId(dendrogramManager.getPrevious(nodeId));

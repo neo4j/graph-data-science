@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.concurrency;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.BiLongConsumer;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.mem.BitUtil;
@@ -48,6 +47,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.LongConsumer;
 import java.util.function.Supplier;
 import java.util.stream.BaseStream;
@@ -103,10 +103,6 @@ public final class ParallelUtil {
         Consumer<T> consumer
     ) {
         parallelStreamConsume(data, concurrency, TerminationFlag.RUNNING_TRUE, consumer);
-    }
-
-    public static void parallelForEachNode(Graph graph, int concurrency, LongConsumer consumer) {
-        parallelForEachNode(graph.nodeCount(), concurrency, TerminationFlag.RUNNING_TRUE, consumer);
     }
 
     public static void parallelForEachNode(long nodeCount, int concurrency, LongConsumer consumer) {
@@ -261,7 +257,7 @@ public final class ParallelUtil {
 
     public static Collection<Runnable> tasks(
         final int concurrency,
-        final Function<Integer, ? extends Runnable> newTask
+        final IntFunction<? extends Runnable> newTask
     ) {
         final Collection<Runnable> tasks = new ArrayList<>();
         for (int i = 0; i < concurrency; i++) {

@@ -80,15 +80,17 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
 
     private void initializeInDegrees() {
         try (var concurrentCopy = CloseableThreadLocal.withInitial(graph::concurrentCopy)) {
-            ParallelUtil.parallelForEachNode(graph,
+            ParallelUtil.parallelForEachNode(
+                graph.nodeCount(),
                 concurrency,
+                terminationFlag,
                 nodeId -> concurrentCopy.get().forEachRelationship(
-                    nodeId,
-                    (source, target) -> {
-                        inDegrees.getAndAdd(target,1L);
-                        return true;
-                    }
-                )
+                        nodeId,
+                        (source, target) -> {
+                            inDegrees.getAndAdd(target,1L);
+                            return true;
+                        }
+                    )
             );
         }
     }

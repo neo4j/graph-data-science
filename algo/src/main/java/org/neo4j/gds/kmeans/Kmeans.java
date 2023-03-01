@@ -410,10 +410,15 @@ public class Kmeans extends Algorithm<KmeansResult> {
         if (restartIteration >= 1) {
             if (averageDistanceFromCentroid < bestDistance) {
                 bestDistance = averageDistanceFromCentroid;
-                ParallelUtil.parallelForEachNode(graph, concurrency, v -> {
-                    bestCommunities.set(v, currentCommunities.get(v));
-                    distanceFromCentroid.set(v, currentDistanceFromCentroid.get(v));
-                });
+                ParallelUtil.parallelForEachNode(
+                    graph.nodeCount(),
+                    concurrency,
+                    terminationFlag,
+                    v -> {
+                        bestCommunities.set(v, currentCommunities.get(v));
+                        distanceFromCentroid.set(v, currentDistanceFromCentroid.get(v));
+                    }
+                );
                 bestCentroids = clusterManager.getCentroids();
                 if (computeSilhouette) {
                     nodesInCluster = clusterManager.getNodesInCluster();
