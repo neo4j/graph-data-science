@@ -62,6 +62,6 @@ endif::[]
 
 [[heterogeneous-nodes]]Heterogeneous nodes:: xref:introduction.adoc#introduction-algorithms-heterogeneous-nodes[Heterogeneous nodes trait]. The algorithm has the ability to distinguish between nodes of different types.
 
-[[heterogeneous-rels]]Heterogeneous relationships:: xref:introduction.adoc#introduction-algorithms-heterogeneous-rels[Heterogeneous relationships trait]. The algorithm has the ability to distinguish between relationships of different types.
+[[heterogeneous-rels]]Heterogeneous relationships:: xref:introduction.adoc#introduction-algorithms-heterogeneous-rels[Heterogeneous relationships trait]. The algorithm makes use of different relationships types.
 
 [[weighted]]Weighted:: xref:introduction.adoc#introduction-algorithms-weighted[Weighted trait]. The algorithm supports configuration to set node and/or relationship properties to use as weights. These values can represent cost, time, capacity or some other domain-specific properties, specified via the nodeWeightProperty, nodeProperties and relationshipWeightProperty configuration parameters. The algorithm will by default consider each node and/or relationship as equally important.
