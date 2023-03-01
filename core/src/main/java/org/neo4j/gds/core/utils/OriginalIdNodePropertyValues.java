@@ -42,7 +42,7 @@ public class OriginalIdNodePropertyValues implements LongNodePropertyValues {
     }
 
     @Override
-    public long size() {
+    public long valuesStored() {
         return idMap.nodeCount();
     }
 }

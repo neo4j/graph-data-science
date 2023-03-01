@@ -117,7 +117,7 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
 
         var properties = new DoubleNodePropertyValues() {
             @Override
-            public long size() {
+            public long valuesStored() {
                 return context.nodeCount();
             }
 

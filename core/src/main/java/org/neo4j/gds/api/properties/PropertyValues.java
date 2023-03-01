@@ -30,7 +30,7 @@ public interface PropertyValues {
     /**
      * @return the number of values stored.
      */
-    long size();
+    long valuesStored();
 
     default UnsupportedOperationException unsupportedTypeException(ValueType expectedType) {
         return new UnsupportedOperationException(formatWithLocale("Tried to retrieve a value of type %s value from properties of type %s", expectedType, valueType()));

@@ -207,7 +207,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
             }
 
             @Override
-            public long size() {
+            public long valuesStored() {
                 return HugeLongArray.this.size();
             }
         };

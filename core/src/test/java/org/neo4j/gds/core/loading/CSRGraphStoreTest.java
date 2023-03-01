@@ -253,7 +253,7 @@ class CSRGraphStoreTest {
             }
 
             @Override
-            public long size() {
+            public long valuesStored() {
                 return 4;
             }
         });

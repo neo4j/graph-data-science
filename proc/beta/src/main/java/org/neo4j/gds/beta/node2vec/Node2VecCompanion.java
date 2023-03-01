@@ -40,7 +40,7 @@ final class Node2VecCompanion {
 
         return new FloatArrayNodePropertyValues() {
             @Override
-            public long size() {
+            public long valuesStored() {
                 return size;
             }
 

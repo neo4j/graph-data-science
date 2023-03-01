@@ -120,7 +120,7 @@ public class GraphDropNodePropertiesProc extends CatalogProc {
 
         progressTracker.beginSubTask();
         config.nodeProperties().forEach(propertyKey -> {
-            removedPropertiesCount.add(graphStore.nodeProperty(propertyKey).values().size());
+            removedPropertiesCount.add(graphStore.nodeProperty(propertyKey).values().valuesStored());
             graphStore.removeNodeProperty(propertyKey);
             progressTracker.logProgress();
         });

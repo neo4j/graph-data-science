@@ -68,7 +68,7 @@ class GraphDropGraphPropertiesProcTest extends BaseProcTest {
             }
 
             @Override
-            public long size() {
+            public long valuesStored() {
                 return 10;
 
             }
@@ -113,7 +113,7 @@ class GraphDropGraphPropertiesProcTest extends BaseProcTest {
             }
 
             @Override
-            public long size() {
+            public long valuesStored() {
                 return 10;
 
             }

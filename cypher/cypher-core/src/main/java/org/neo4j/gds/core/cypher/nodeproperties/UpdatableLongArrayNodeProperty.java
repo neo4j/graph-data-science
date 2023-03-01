@@ -36,7 +36,7 @@ public class UpdatableLongArrayNodeProperty implements UpdatableNodeProperty, Lo
     }
 
     @Override
-    public long size() {
+    public long valuesStored() {
         return nodeCount;
     }
 

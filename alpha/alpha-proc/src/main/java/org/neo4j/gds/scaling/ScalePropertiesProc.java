@@ -33,7 +33,7 @@ public class ScalePropertiesProc {
 
         return new DoubleArrayNodePropertyValues() {
             @Override
-            public long size() {
+            public long valuesStored() {
                 return size;
             }
 

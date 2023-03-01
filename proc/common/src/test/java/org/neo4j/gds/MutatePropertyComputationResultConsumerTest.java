@@ -183,7 +183,7 @@ class MutatePropertyComputationResultConsumerTest {
     class TestNodePropertyValues implements LongNodePropertyValues {
 
         @Override
-        public long size() {
+        public long valuesStored() {
             return graphStore.nodeCount();
         }
 

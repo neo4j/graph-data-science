@@ -98,7 +98,7 @@ public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
 
                 var properties = new LongNodePropertyValues() {
                     @Override
-                    public long size() {
+                    public long valuesStored() {
                         return graph.nodeCount();
                     }
 

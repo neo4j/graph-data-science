@@ -68,7 +68,7 @@ class WriteProcCancellationTest extends BaseTest {
             }
 
             @Override
-            public long size() {
+            public long valuesStored() {
                 return 42;
             }
         };

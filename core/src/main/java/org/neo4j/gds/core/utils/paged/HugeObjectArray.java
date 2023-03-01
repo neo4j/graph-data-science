@@ -200,7 +200,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
                 }
 
                 @Override
-                public long size() {
+                public long valuesStored() {
                     return HugeObjectArray.this.size();
                 }
             };
@@ -213,7 +213,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
                 }
 
                 @Override
-                public long size() {
+                public long valuesStored() {
                     return HugeObjectArray.this.size();
                 }
             };
@@ -226,7 +226,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
                 }
 
                 @Override
-                public long size() {
+                public long valuesStored() {
                     return HugeObjectArray.this.size();
                 }
             };

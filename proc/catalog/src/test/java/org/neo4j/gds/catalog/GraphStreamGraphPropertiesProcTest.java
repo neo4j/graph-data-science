@@ -92,7 +92,7 @@ class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
             }
 
             @Override
-            public long size() {
+            public long valuesStored() {
                 return 10;
 
             }
@@ -103,7 +103,7 @@ class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
             }
 
             @Override
-            public long size() {
+            public long valuesStored() {
                 return 3;
             }
         }), arguments(new LongArrayGraphPropertyValues() {
@@ -113,7 +113,7 @@ class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
             }
 
             @Override
-            public long size() {
+            public long valuesStored() {
                 return 2;
             }
         }));
@@ -137,7 +137,7 @@ class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
             }
 
             @Override
-            public long size() {
+            public long valuesStored() {
                 return 10;
 
             }

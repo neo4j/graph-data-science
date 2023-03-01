@@ -265,7 +265,7 @@ class SimilarityComputerTest {
             }
 
             @Override
-            public long size() {
+            public long valuesStored() {
                 return nodeCount;
             }
         };

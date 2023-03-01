@@ -37,7 +37,7 @@ public class UpdatableDoubleNodeProperty implements UpdatableNodeProperty, Doubl
 
 
     @Override
-    public long size() {
+    public long valuesStored() {
         return nodeCount;
     }
 

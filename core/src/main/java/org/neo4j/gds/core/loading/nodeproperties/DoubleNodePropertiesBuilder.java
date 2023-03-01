@@ -183,7 +183,7 @@ public class DoubleNodePropertiesBuilder implements InnerNodePropertiesBuilder {
         }
 
         @Override
-        public long size() {
+        public long valuesStored() {
             return size;
         }
     }

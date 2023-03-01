@@ -93,7 +93,7 @@ final class GraphPropertyStoreFromVisitorHelper {
         }
 
         @Override
-        public long size() {
+        public long valuesStored() {
             return -1;
         }
 
@@ -112,7 +112,7 @@ final class GraphPropertyStoreFromVisitorHelper {
         }
 
         @Override
-        public long size() {
+        public long valuesStored() {
             return -1;
         }
 
@@ -132,7 +132,7 @@ final class GraphPropertyStoreFromVisitorHelper {
         }
 
         @Override
-        public long size() {
+        public long valuesStored() {
             return -1;
         }
 
@@ -151,7 +151,7 @@ final class GraphPropertyStoreFromVisitorHelper {
         }
 
         @Override
-        public long size() {
+        public long valuesStored() {
             return -1;
         }
 
@@ -170,7 +170,7 @@ final class GraphPropertyStoreFromVisitorHelper {
         }
 
         @Override
-        public long size() {
+        public long valuesStored() {
             return -1;
         }
 

@@ -34,7 +34,7 @@ public class IdentityPropertyValues implements LongNodePropertyValues {
     }
 
     @Override
-    public long size() {
+    public long valuesStored() {
         return expectedPropertyCount;
     }
 }

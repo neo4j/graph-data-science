@@ -102,7 +102,7 @@ public final class CommunityProcCompanion {
         if (consecutiveIds && !isIncremental) {
             return new ConsecutiveLongNodePropertyValues(
                 nodeProperties,
-                nodeProperties.size()
+                nodeProperties.valuesStored()
             );
         }
         
@@ -123,7 +123,7 @@ public final class CommunityProcCompanion {
         int concurrency
     ) {
         var communitySizes = CommunityStatistics.communitySizes(
-            nodeProperties.size(),
+            nodeProperties.valuesStored(),
             nodeProperties::longValue,
             Pools.DEFAULT,
             concurrency
@@ -150,8 +150,8 @@ public final class CommunityProcCompanion {
         }
 
         @Override
-        public long size() {
-            return properties.size();
+        public long valuesStored() {
+            return properties.valuesStored();
         }
 
         @Override

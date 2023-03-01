@@ -76,8 +76,8 @@ public final class LongIfChangedNodePropertyValues implements LongNodePropertyVa
     }
 
     @Override
-    public long size() {
-        return newProperties.size();
+    public long valuesStored() {
+        return newProperties.valuesStored();
     }
 
     @Override
