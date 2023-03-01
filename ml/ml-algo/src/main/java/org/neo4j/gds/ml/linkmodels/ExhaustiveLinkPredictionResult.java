@@ -21,10 +21,6 @@ package org.neo4j.gds.ml.linkmodels;
 
 import com.carrotsearch.hppc.AbstractIterator;
 import org.neo4j.gds.core.utils.queue.BoundedLongLongPriorityQueue;
-import org.neo4j.gds.core.write.ImmutableRelationship;
-import org.neo4j.gds.core.write.Relationship;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import java.util.Map;
 import java.util.PrimitiveIterator;
@@ -71,21 +67,6 @@ public class ExhaustiveLinkPredictionResult implements LinkPredictionResult {
         };
 
         return StreamSupport.stream(iterable.spliterator(), true);
-    }
-
-    @Override
-    public Stream<Relationship> relationshipStream() {
-        var natural = stream().map(link -> ImmutableRelationship.of(
-            link.sourceId(),
-            link.targetId(),
-            new Value[]{Values.doubleValue(link.probability())}
-        ));
-        var reverse = stream().map(link -> ImmutableRelationship.of(
-            link.targetId(),
-            link.sourceId(),
-            new Value[]{Values.doubleValue(link.probability())}
-        ));
-        return Stream.concat(natural, reverse);
     }
 
     @Override
