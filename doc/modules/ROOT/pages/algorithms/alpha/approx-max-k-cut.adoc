@@ -115,7 +115,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-include::partial$/algorithms/alpha/approx-max-k-cut/specific-configuration.adoc[]
+include::partial$/algorithms/alpha/approx-max-k-cut/specific-configuration-stream.adoc[]
 |===
 
 .Results

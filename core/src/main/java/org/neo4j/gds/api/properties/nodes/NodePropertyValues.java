@@ -95,4 +95,13 @@ public interface NodePropertyValues extends PropertyValues {
             throw unsupportedTypeException(ValueType.DOUBLE);
         }
     }
+
+    /**
+     *
+     * @param nodeId
+     * @return Returns whether the value is present. This is necessary as for primitive types, we do not have a `null` value.
+     */
+    default boolean hasValue(long nodeId) {
+        return true;
+    }
 }

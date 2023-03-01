@@ -47,24 +47,27 @@ public final class CommunityProcCompanion {
         LongNodePropertyValues nodeProperties,
         Supplier<NodeProperty> seedPropertySupplier
     ) {
+        LongNodePropertyValues result = considerSeedProperty(
+            config,
+            resultProperty,
+            nodeProperties,
+            seedPropertySupplier
+        );
+        return considerSizeFilter(config, result);
+    }
 
-        var consecutiveIds = config.consecutiveIds();
-        var isIncremental = config.isIncremental();
-        var resultPropertyEqualsSeedProperty = isIncremental && resultProperty.equals(config.seedProperty());
+    public static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> NodePropertyValues nodeProperties(
+        CONFIG config,
+        LongNodePropertyValues nodeProperties
+    ) {
+        LongNodePropertyValues result = considerConsecutiveIdsFlag(config, nodeProperties);
+        return considerSizeFilter(config, result);
+    }
 
-        LongNodePropertyValues result;
-
-        if (resultPropertyEqualsSeedProperty && !consecutiveIds) {
-            result = LongIfChangedNodePropertyValues.of(seedPropertySupplier.get(), nodeProperties);
-        } else if (consecutiveIds && !isIncremental) {
-            result = new ConsecutiveLongNodePropertyValues(
-                nodeProperties,
-                nodeProperties.size()
-            );
-        } else {
-            result = nodeProperties;
-        }
-
+    public static <CONFIG extends ConcurrencyConfig> LongNodePropertyValues considerSizeFilter(
+        CONFIG config,
+        LongNodePropertyValues result
+    ) {
         if (config instanceof CommunitySizeConfig) {
             var finalResult = result;
             result = ((CommunitySizeConfig) config)
@@ -78,8 +81,40 @@ public final class CommunityProcCompanion {
                 .map(size -> applySizeFilter(finalResult, size, config.concurrency()))
                 .orElse(result);
         }
-
         return result;
+    }
+
+    private static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> LongNodePropertyValues considerSeedProperty(
+        CONFIG config,
+        String resultProperty,
+        LongNodePropertyValues nodeProperties,
+        Supplier<NodeProperty> seedPropertySupplier
+    ) {
+        var consecutiveIds = config.consecutiveIds();
+        var isIncremental = config.isIncremental();
+        var resultPropertyEqualsSeedProperty = isIncremental && resultProperty.equals(config.seedProperty());
+
+        if (resultPropertyEqualsSeedProperty && !consecutiveIds) {
+            return LongIfChangedNodePropertyValues.of(seedPropertySupplier.get(), nodeProperties);
+        }
+
+        return considerConsecutiveIdsFlag(config, nodeProperties);
+    }
+
+    private static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> LongNodePropertyValues considerConsecutiveIdsFlag(
+        CONFIG config,
+        LongNodePropertyValues nodeProperties
+    ) {
+        var consecutiveIds = config.consecutiveIds();
+        var isIncremental = config.isIncremental();
+        if (consecutiveIds && !isIncremental) {
+            return new ConsecutiveLongNodePropertyValues(
+                nodeProperties,
+                nodeProperties.size()
+            );
+        }
+
+        return nodeProperties;
     }
 
     private static LongNodePropertyValues applySizeFilter(
@@ -104,7 +139,11 @@ public final class CommunityProcCompanion {
 
         private final long minCommunitySize;
 
-        CommunitySizeFilter(LongNodePropertyValues properties, HugeSparseLongArray communitySizes, long minCommunitySize) {
+        CommunitySizeFilter(
+            LongNodePropertyValues properties,
+            HugeSparseLongArray communitySizes,
+            long minCommunitySize
+        ) {
             this.properties = properties;
             this.communitySizes = communitySizes;
             this.minCommunitySize = minCommunitySize;
@@ -122,7 +161,7 @@ public final class CommunityProcCompanion {
 
         /**
          * Returning null indicates that the value is not written to Neo4j.
-         *
+         * <p>
          * The filter is applied in the latest stage before writing to Neo4j.
          * Since the wrapped node properties may have additional logic in value(),
          * we need to check if they already filtered the value. Only in the case
@@ -139,7 +178,16 @@ public final class CommunityProcCompanion {
             // This cast is safe since we handle LongNodeProperties.
             var communityId = ((LongValue) value).longValue();
 
-            return communitySizes.get(communityId) >= minCommunitySize ? value : null;
+            return isCommunityMinSizeMet(communityId) ? value : null;
+        }
+
+        @Override
+        public boolean hasValue(long nodeId) {
+            return isCommunityMinSizeMet(properties.longValue(nodeId));
+        }
+
+        private boolean isCommunityMinSizeMet(long communityId) {
+            return communitySizes.get(communityId) >= minCommunitySize;
         }
     }
 }
