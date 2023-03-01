@@ -9,8 +9,6 @@
 :directed:
 :undirected:
 :homogeneous:
-:heterogeneous-nodes:
-:heterogeneous-rels:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 
