@@ -58,6 +58,8 @@ public final class DeltaStepping extends Algorithm<DijkstraResult> {
 
     private static final int NO_BIN = Integer.MAX_VALUE;
     private static final int BIN_SIZE_THRESHOLD = 1000;
+    private static final int BATCH_SIZE = 64;
+
 
     private final Graph graph;
     private final long startNode;
@@ -281,8 +283,8 @@ public final class DeltaStepping extends Algorithm<DijkstraResult> {
 
         private void relaxGlobalBin() {
             long offset;
-            while ((offset = frontierIndex.getAndAdd(64)) < frontierLength) {
-                long limit = Math.min(offset + 64, frontierLength);
+            while ((offset = frontierIndex.getAndAdd(BATCH_SIZE)) < frontierLength) {
+                long limit = Math.min(offset + BATCH_SIZE, frontierLength);
 
                 for (long idx = offset; idx < limit; idx++) {
                     var nodeId = frontier.get(idx);
@@ -326,7 +328,8 @@ public final class DeltaStepping extends Algorithm<DijkstraResult> {
                         break;
                     }
                     // CAX failed, retry
-                    oldDist = witness;
+                    //we need to fetch the most recent value from distances
+                    oldDist = distances.distance(targetNodeId);
                 }
 
                 return true;
