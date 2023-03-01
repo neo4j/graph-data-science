@@ -9,6 +9,7 @@ dependencies {
     annotationProcessor group: 'org.neo4j',                name: 'annotations',        version: ver.'neo4j'
 
     compileOnly project(':core')
+    compileOnly project(':core-write')
     compileOnly project(':transaction')
 
     neodeps().each {

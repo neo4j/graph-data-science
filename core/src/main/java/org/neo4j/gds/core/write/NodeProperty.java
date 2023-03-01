@@ -31,11 +31,4 @@ public interface NodeProperty {
     static NodeProperty of(String propertyKey, NodePropertyValues properties) {
         return ImmutableNodeProperty.of(propertyKey, properties);
     }
-
-    default NativeNodePropertyExporter.ResolvedNodeProperty resolveWith(int propertyToken) {
-        if (propertyToken == -1) {
-            throw new IllegalStateException("No write property token id is set.");
-        }
-        return NativeNodePropertyExporter.ResolvedNodeProperty.of(this, propertyToken);
-    }
 }

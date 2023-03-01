@@ -17,6 +17,7 @@ dependencies {
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':core-write')
     implementation project(':executor')
     implementation project(':graph-schema-api')
     implementation project(':neo4j-adapter')

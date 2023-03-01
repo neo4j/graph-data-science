@@ -103,10 +103,17 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
         write(List.of(nodeProperty));
     }
 
+    private static NativeNodePropertyExporter.ResolvedNodeProperty resolveWith(NodeProperty property, int propertyToken) {
+        if (propertyToken == -1) {
+            throw new IllegalStateException("No write property token id is set.");
+        }
+        return NativeNodePropertyExporter.ResolvedNodeProperty.of(property, propertyToken);
+    }
+
     @Override
     public void write(Collection<NodeProperty> nodeProperties) {
         var resolvedNodeProperties = nodeProperties.stream()
-            .map(desc -> desc.resolveWith(getOrCreatePropertyToken(desc.propertyKey())))
+            .map(desc -> resolveWith(desc, getOrCreatePropertyToken(desc.propertyKey())))
             .collect(Collectors.toList());
 
         progressTracker.beginSubTask(nodeCount);
