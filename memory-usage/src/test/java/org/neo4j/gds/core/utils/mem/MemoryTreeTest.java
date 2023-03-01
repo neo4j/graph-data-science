@@ -20,14 +20,12 @@
 package org.neo4j.gds.core.utils.mem;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.MapUtil;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsIterableContaining.hasItem;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class MemoryTreeTest {
@@ -53,7 +51,9 @@ final class MemoryTreeTest {
 
         List<Map<String, Object>> components = (List<Map<String, Object>>) value.get("components");
 
-        assertThat(components, hasItem(MapUtil.map("name", "level2A", "memoryUsage", "12 Bytes")));
-        assertThat(components, hasItem(MapUtil.map("name", "level2B", "memoryUsage", "22 Bytes")));
+        assertThat(components).containsExactly(
+            Map.of("name", "level2A", "memoryUsage", "12 Bytes"),
+            Map.of("name", "level2B", "memoryUsage", "22 Bytes")
+        );
     }
 }
