@@ -554,7 +554,7 @@ class LouvainTest {
         var result = louvain.compute();
         assertThat(louvain.levels()).isGreaterThan(1);
         LongUnaryOperator vToCommunity = v -> result.getCommunity(v);
-        var modularityCalculator = new ModularityCalculator(myGraph, vToCommunity, 4);
+        var modularityCalculator = ModularityCalculator.create(myGraph, vToCommunity, 4);
         double calculatedModularity = modularityCalculator.compute().totalModularity();
         assertThat(result.modularities()[louvain.levels() - 1]).isCloseTo(calculatedModularity, Offset.offset(1e-5));
     }
