@@ -28,14 +28,14 @@ import java.util.concurrent.ExecutorService;
 
 public class NoneScaler extends ScalarScaler {
 
-    public static final String NAME = "none";
+    public static final String TYPE = "none";
 
     public static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
         mapWrapper.requireOnlyKeysFrom(List.of());
         return new ScalerFactory() {
             @Override
-            public String name() {
-                return NAME;
+            public String type() {
+                return TYPE;
             }
 
             @Override

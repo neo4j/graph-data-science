@@ -28,7 +28,7 @@ import java.util.concurrent.ExecutorService;
 
 public final class LogScaler extends ScalarScaler {
 
-    public static final String NAME = "log";
+    public static final String TYPE = "log";
     private static final String OFFSET_KEY = "offset";
     private final double offset;
 
@@ -47,8 +47,8 @@ public final class LogScaler extends ScalarScaler {
         final double offset = mapWrapper.getNumber(OFFSET_KEY, 0).doubleValue();
         return new ScalerFactory() {
             @Override
-            public String name() {
-                return NAME;
+            public String type() {
+                return TYPE;
             }
 
             @Override

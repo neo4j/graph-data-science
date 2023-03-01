@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutorService;
 
 public final class L1Norm extends ScalarScaler {
 
-    public static final String NAME = "l1norm";
+    public static final String TYPE = "l1norm";
     final double l1Norm;
 
     private L1Norm(NodePropertyValues properties, double l1Norm) {
@@ -44,8 +44,8 @@ public final class L1Norm extends ScalarScaler {
         mapWrapper.requireOnlyKeysFrom(List.of());
         return new ScalerFactory() {
             @Override
-            public String name() {
-                return NAME;
+            public String type() {
+                return TYPE;
             }
 
             @Override

@@ -55,7 +55,7 @@ class ScalePropertiesBaseConfigTest {
             )
         );
 
-        assertThat(config.scaler().name()).isEqualTo(scaler);
+        assertThat(config.scaler().type()).isEqualTo(scaler);
     }
 
     @Test
@@ -88,7 +88,7 @@ class ScalePropertiesBaseConfigTest {
             )
         );
 
-        assertThat(ex.getMessage()).contains("Unrecognised scaler specified: `nonExistent`");
+        assertThat(ex.getMessage()).contains("Unrecognised scaler type specified: `nonExistent`");
     }
 
     @Test

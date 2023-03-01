@@ -78,7 +78,7 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
     @Test
     void streamLogWithOffset() {
         var query = "CALL gds.alpha.scaleProperties.stream('graph', {" +
-                    "scaler: {scaler: 'log', offset: 10 }," +
+                    "scaler: {type: 'log', offset: 10 }," +
                     "nodeProperties: 'id'}) " +
                     "yield nodeId, scaledProperty " +
                     "RETURN nodeId, [p in scaledProperty | toInteger(p*100)/100.0] AS scaledProperty";

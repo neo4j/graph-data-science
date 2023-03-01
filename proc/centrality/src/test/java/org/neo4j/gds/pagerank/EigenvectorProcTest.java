@@ -81,12 +81,12 @@ class EigenvectorProcTest extends BaseProcTest {
 
     static Stream<Arguments> scalers() {
         return Stream.of(
-            Arguments.of(NoneScaler.NAME,   0.04371, 0.99904),
-            Arguments.of(L1Norm.NAME, 0.04192, 0.95807),
-            Arguments.of(L2Norm.NAME, 0.04371, 0.99904),
-            Arguments.of(Mean.NAME,      -0.5, 0.5),
-            Arguments.of(MinMax.NAME,     0.0, 1.0),
-            Arguments.of(Max.NAME,    0.04375, 1.0)
+            Arguments.of(NoneScaler.TYPE,   0.04371, 0.99904),
+            Arguments.of(L1Norm.TYPE, 0.04192, 0.95807),
+            Arguments.of(L2Norm.TYPE, 0.04371, 0.99904),
+            Arguments.of(Mean.TYPE,      -0.5, 0.5),
+            Arguments.of(MinMax.TYPE,     0.0, 1.0),
+            Arguments.of(Max.TYPE,    0.04375, 1.0)
         );
     }
 

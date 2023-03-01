@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutorService;
 
 public final class MinMax extends ScalarScaler {
 
-    public static final String NAME = "minmax";
+    public static final String TYPE = "minmax";
 
     final double min;
     final double maxMinDiff;
@@ -47,8 +47,8 @@ public final class MinMax extends ScalarScaler {
         mapWrapper.requireOnlyKeysFrom(List.of());
         return new ScalerFactory() {
             @Override
-            public String name() {
-                return NAME;
+            public String type() {
+                return TYPE;
             }
 
             @Override

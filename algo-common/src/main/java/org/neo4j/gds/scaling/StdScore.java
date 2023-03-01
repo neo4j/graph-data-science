@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutorService;
 
 final class StdScore extends ScalarScaler {
 
-    static final String NAME = "stdscore";
+    static final String TYPE = "stdscore";
     final double avg;
     final double std;
 
@@ -51,8 +51,8 @@ final class StdScore extends ScalarScaler {
         mapWrapper.requireOnlyKeysFrom(List.of());
         return new ScalerFactory() {
             @Override
-            public String name() {
-                return NAME;
+            public String type() {
+                return TYPE;
             }
 
             @Override

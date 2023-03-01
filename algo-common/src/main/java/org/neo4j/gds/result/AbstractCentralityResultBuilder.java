@@ -83,12 +83,12 @@ public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends Abst
 
     @NotNull
     private Optional<DoubleHistogram> computeCentralityHistogram() {
-        var logScaler = scaler != null && scaler.name().equals(LogScaler.NAME);
+        var logScaler = scaler != null && scaler.type().equals(LogScaler.TYPE);
         if (buildHistogram && centralityFunction != null) {
             if (logScaler) {
                 this.histogramError.put(
                     HISTOGRAM_ERROR_KEY,
-                    "Unable to create histogram when using scaler of type " + toUpperCaseWithLocale(LogScaler.NAME)
+                    "Unable to create histogram when using scaler of type " + toUpperCaseWithLocale(LogScaler.TYPE)
                 );
             } else {
                 try {

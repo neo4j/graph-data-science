@@ -80,12 +80,12 @@ class ArticleRankProcTest extends BaseProcTest {
 
     static Stream<Arguments> scalers() {
         return Stream.of(
-            Arguments.of(NoneScaler.NAME, 0.15, 0.2350),
-            Arguments.of(L1Norm.NAME, 0.38961, 0.61038),
-            Arguments.of(L2Norm.NAME, 0.53803, 0.84292),
-            Arguments.of(Mean.NAME, -0.5, 0.5),
-            Arguments.of(MinMax.NAME, 0.0, 1.0),
-            Arguments.of(Max.NAME, 0.63829, 1.0)
+            Arguments.of(NoneScaler.TYPE, 0.15, 0.2350),
+            Arguments.of(L1Norm.TYPE, 0.38961, 0.61038),
+            Arguments.of(L2Norm.TYPE, 0.53803, 0.84292),
+            Arguments.of(Mean.TYPE, -0.5, 0.5),
+            Arguments.of(MinMax.TYPE, 0.0, 1.0),
+            Arguments.of(Max.TYPE, 0.63829, 1.0)
         );
     }
 
