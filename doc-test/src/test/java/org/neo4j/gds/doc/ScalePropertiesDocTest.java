@@ -24,6 +24,7 @@ import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.scaling.ScalePropertiesMutateProc;
 import org.neo4j.gds.scaling.ScalePropertiesStreamProc;
+import org.neo4j.gds.scaling.ScalePropertiesWriteProc;
 
 import java.util.List;
 
@@ -35,6 +36,7 @@ class ScalePropertiesDocTest extends SingleFileDocTestBase {
             GraphProjectProc.class,
             ScalePropertiesStreamProc.class,
             ScalePropertiesMutateProc.class,
+            ScalePropertiesWriteProc.class,
             GraphStreamNodePropertiesProc.class
         );
     }

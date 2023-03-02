@@ -176,6 +176,47 @@ include::partial$/algorithms/alpha/scale-properties/specific-configuration.adoc[
 | configuration         | Map       | Configuration used for running the algorithm.
 |===
 ======
+
+[.include-with-write]
+======
+.Run Scale properties in write mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.beta.scaleProperties.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  postProcessingMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+include::partial$/algorithms/wcc/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type      | Description
+| preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
+| computeMillis         | Integer   | Milliseconds for running the algorithm.
+| writeMillis          | Integer   | Milliseconds for writing result back to Neo4j.
+| postProcessingMillis  | Integer   | Unused.
+| nodePropertiesWritten | Integer   | Number of node properties written.
+| configuration         | Map       | Configuration used for running the algorithm.
+|===
+======
 ====
 
 
@@ -313,6 +354,35 @@ CALL gds.alpha.scaleProperties.mutate('myGraph', {
 The result shows that there are now eight new node properties in the in-memory graph.
 These contain the scaled values from the input properties, where the scaled `buildYear` values are in the first list position and scaled `avgReview` values are in the second position.
 To find out how to inspect the new schema of the in-memory graph, see xref:graph-list.adoc[Listing graphs in the catalog].
+
+
+=== Write
+
+include::partial$/algorithms/shared/examples-write-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `write` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.scaleProperties.write('myGraph', {
+  nodeProperties: ['buildYear', 'avgReview'],
+  scaler: 'stdscore',
+  writeProperty: 'hotelStdScore'
+}) YIELD nodePropertiesWritten
+
+----
+
+.Results
+[opts="header"]
+|===
+| nodePropertiesWritten
+| 8
+|===
+--
+
+The result shows that there are now eight new node properties in the database graph on the nodes corresponding to those in the projection `'myGraph'`.
+These node properties contain the scaled values from the input properties, where the scaled `buildYear` values are in the first list position and scaled `avgReview` values are in the second position.
 
 
 [[algorithms-scale-properties-examples-list]]
