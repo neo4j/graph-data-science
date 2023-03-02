@@ -23,16 +23,24 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.gds.AlgoBaseProcTest;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.NodeProjections;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.graphdb.GraphDatabaseService;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 abstract class ScalePropertiesProcTest<CONFIG extends ScalePropertiesBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<ScaleProperties, CONFIG, ScaleProperties.Result> {
@@ -86,5 +94,40 @@ abstract class ScalePropertiesProcTest<CONFIG extends ScalePropertiesBaseConfig>
         return userInput
             .withString("scaler", "mean")
             .withEntry("nodeProperties", List.of(NODE_PROP_NAME));
+    }
+
+    // Custom implementation, since the default one removes the `nodeProperties` key which is mandatory for SP config
+    // Copy-pasted from default implementation, then simplified
+    @Override
+    public void testRunOnEmptyGraph() {
+        applyOnProcedure((proc) -> {
+            GraphStoreCatalog.removeAllLoadedGraphs();
+            var loadedGraphName = "graph";
+            GraphProjectConfig graphProjectConfig = withNameAndProjections(
+                "",
+                loadedGraphName,
+                NodeProjections.ALL,
+                relationshipProjections()
+            );
+            GraphStore graphStore = graphLoader(graphProjectConfig).graphStore();
+            GraphStoreCatalog.set(graphProjectConfig, graphStore);
+            getWriteAndStreamProcedures(proc)
+                .forEach(method -> {
+                    Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
+
+                    try {
+                        Stream<?> result = (Stream<?>) method.invoke(proc, loadedGraphName, configMap);
+
+                        if (getProcedureMethodName(method).endsWith("stream")) {
+                            assertEquals(0, result.count(), "Stream result should be empty.");
+                        } else {
+                            assertEquals(1, result.count());
+                        }
+
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        fail(e);
+                    }
+                });
+        });
     }
 }

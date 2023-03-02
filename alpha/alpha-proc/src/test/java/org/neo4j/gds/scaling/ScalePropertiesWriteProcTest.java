@@ -54,10 +54,6 @@ class ScalePropertiesWriteProcTest extends ScalePropertiesProcTest<ScaleProperti
         return minimalConfig;
     }
 
-    // Does not work since it remove the `nodeProperties` key which is mandatory for SP config
-    @Override
-    public void testRunOnEmptyGraph() {}
-
     @Test
     void testWrite() {
         loadGraph(GRAPH_NAME);

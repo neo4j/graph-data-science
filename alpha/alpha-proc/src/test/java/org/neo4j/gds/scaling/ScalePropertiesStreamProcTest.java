@@ -29,11 +29,6 @@ import java.util.Map;
 
 class ScalePropertiesStreamProcTest extends ScalePropertiesProcTest<ScalePropertiesStreamConfig> {
 
-
-    // Does not work since it remove the `nodeProperties` key which is mandatory for SP config
-    @Override
-    public void testRunOnEmptyGraph() {}
-
     @Test
     void stream() {
         loadGraph(GRAPH_NAME);
