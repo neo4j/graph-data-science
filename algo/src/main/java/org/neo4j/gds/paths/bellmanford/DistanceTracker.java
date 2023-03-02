@@ -99,20 +99,24 @@ final class DistanceTracker {
         long predecessor,
         long length
     ) {
-        long currentPredecessor = predecessors.get(nodeId);
+        long currentLength = lengths.get(nodeId);
+
 
         // locked by another thread
-        if (currentPredecessor < 0) {
+        if (currentLength < 0) { //the length is always positive
             //we  should signal failure
             // for that we must be sure not to return the 'expectedDistance' by accident!
             //we hence return its negation (or -1 if ==0)
             return (Double.compare(expectedDistance, 0.0) == 0) ? -1.0 : -expectedDistance;
         }
 
-        var witness = predecessors.compareAndExchange(nodeId, currentPredecessor, -predecessor - 1);
-        
+        //we obtain a lock on nodeId, if we negate it's length to a negative side
+        //if simultaneously nodeId is being relaxed, we can obtain its most recent correct value by negating
+        //if negative
+        var witness = lengths.compareAndExchange(nodeId, currentLength, -currentLength);
+
         // CAX failed
-        if (witness != currentPredecessor) {
+        if (witness != currentLength) {
             //we  should signal failure
             // for that we must be sure not to return the 'expectedDistance' by accident!
             return (Double.compare(expectedDistance, 0.0) == 0) ? -1.0 : -expectedDistance;
@@ -124,14 +128,14 @@ final class DistanceTracker {
 
         if (oldDistance > newDistance) {
             distances.set(nodeId, newDistance);
-            lengths.set(nodeId, length);
-            // unlock
             predecessors.set(nodeId, predecessor);
+            // unlock
+            lengths.set(nodeId, length);
             // return previous distance to signal successful CAX
 
             return expectedDistance;
         }
-        predecessors.set(nodeId, currentPredecessor);
+        lengths.set(nodeId, currentLength);
         //signal unsuccesful update
         //note that this unsuccesful update will be the last attempt
         return (Double.compare(expectedDistance, 0.0) == 0.0) ? -1.0 : -expectedDistance;

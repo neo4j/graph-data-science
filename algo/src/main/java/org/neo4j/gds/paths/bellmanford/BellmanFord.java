@@ -37,9 +37,11 @@ import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -72,8 +74,8 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
             graph.nodeCount(),
             concurrency
         );
-
-        AtomicBoolean negativeCycleFound = new AtomicBoolean();
+        var negativeCyclesVertices = HugeLongArray.newArray(graph.nodeCount());
+        var negativeCyclesIndex = new AtomicLong();
         var tasks = new ArrayList<BellmanFordTask>();
         for (int i = 0; i < concurrency; ++i) {
             tasks.add(new BellmanFordTask(
@@ -83,7 +85,8 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
                 frontierIndex,
                 frontierSize,
                 validBitset,
-                negativeCycleFound
+                negativeCyclesVertices,
+                negativeCyclesIndex
             ));
         }
 
@@ -108,18 +111,71 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
                 .run();
             progressTracker.endSubTask();
         }
-
         progressTracker.endSubTask();
-        return produceResult(negativeCycleFound.get(), distances);
+        boolean containsNegativeCycle = negativeCyclesIndex.get() > 0;
+        return produceResult(containsNegativeCycle, negativeCyclesVertices, negativeCyclesIndex, distances);
     }
 
-    private BellmanFordResult produceResult(boolean containsNegativeCycle, DistanceTracker distances) {
+    private BellmanFordResult produceResult(
+        boolean containsNegativeCycle,
+        HugeLongArray negativeCyclesVertices,
+        AtomicLong negativeCyclesIndex,
+        DistanceTracker distanceTracker
+    ) {
         Stream<PathResult> paths = (containsNegativeCycle) ? Stream.empty() : pathResults(
-            distances,
+            distanceTracker,
             sourceNode,
             concurrency
         );
-        return BellmanFordResult.of(containsNegativeCycle, new DijkstraResult(paths));
+
+        var negativeCycles = negativeCycles(
+            distanceTracker,
+            negativeCyclesIndex.longValue(),
+            negativeCyclesVertices,
+            graph.nodeCount(),
+            concurrency
+        );
+
+        return BellmanFordResult.of(containsNegativeCycle, new DijkstraResult(paths), negativeCycles);
+    }
+
+    private static List<List<Long>> negativeCycles(
+        DistanceTracker tentativeDistances,
+        long numberOfNegativeCycles,
+        HugeLongArray negativeCycleVertices,
+        long nodeCount,
+        int concurrency
+    ) {
+
+        var negativeCycles = new ArrayList<List<Long>>();
+        var lock = new ReentrantLock();
+        ParallelUtil.parallelForEachNode(numberOfNegativeCycles, concurrency,
+            indexId -> {
+                long nodeId = negativeCycleVertices.get(indexId);// we have a vertex within a cycle
+                var currentCycle = new ArrayList<Long>();
+                currentCycle.add(nodeId);
+                long curr = tentativeDistances.predecessor(nodeId);
+                long length = 0;
+                boolean shouldAdd = true;
+                while (curr != nodeId) {
+                    currentCycle.add(curr);
+                    curr = tentativeDistances.predecessor(curr);
+                    length++;
+                    if (length == nodeCount + 1) {
+                        shouldAdd = false;
+                        break;
+                    }
+                }
+                if (shouldAdd) {
+                    lock.lock();
+                    Collections.reverse(currentCycle);
+                    negativeCycles.add(currentCycle);
+                    lock.unlock();
+                }
+            }
+        );
+        return negativeCycles;
+
     }
 
     private static Stream<PathResult> pathResults(
