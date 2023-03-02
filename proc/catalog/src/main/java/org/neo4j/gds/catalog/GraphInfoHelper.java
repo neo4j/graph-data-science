@@ -39,14 +39,14 @@ public final class GraphInfoHelper {
 
     private GraphInfoHelper() {}
 
-    public static Map<String, Object> degreeDistribution(Graph graph) {
+    public static Map<String, Object> degreeDistribution(Graph graph, TerminationFlag terminationFlag) {
         long maximumDegree = Math.max(2, graph.relationshipCount());
         AtomicHistogram histogram = new AtomicHistogram(maximumDegree, PRECISION);
 
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
             ConcurrencyConfig.DEFAULT_CONCURRENCY,
-            TerminationFlag.RUNNING_TRUE,
+            terminationFlag,
             nodeId -> histogram.recordValue(graph.degree(nodeId))
         );
 

@@ -116,7 +116,7 @@ public class LeidenDendrogramManager {
     ) {
 
         HugeLongArray finalAlgorithmDendrogram = algorithmDendrogram;
-        ParallelUtil.parallelForEachNode(rootGraph.nodeCount(), concurrency, TerminationFlag.RUNNING_TRUE, (nodeId) -> {
+        ParallelUtil.parallelForEachNode(rootGraph.nodeCount(), concurrency, terminationFlag, nodeId -> {
             long prevId = translateNode(workingGraph, finalAlgorithmDendrogram, nodeId, iteration);
             long communityId = communitiesToWrite.get(prevId);
             finalAlgorithmDendrogram.set(nodeId, communityId);
