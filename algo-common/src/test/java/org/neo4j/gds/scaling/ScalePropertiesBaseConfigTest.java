@@ -128,8 +128,43 @@ class ScalePropertiesBaseConfigTest {
 
         var graphStore = GdlFactory.of("(), ({a: [1.0, 2.2]})").build();
 
-        assertThatThrownBy(() -> config.graphStoreValidation(graphStore, List.of(), List.of()))
+        assertThatThrownBy(() -> config.graphStoreValidation(
+            graphStore,
+            config.nodeLabelIdentifiers(graphStore),
+            config.internalRelationshipTypes(graphStore)
+        ))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Node property `a` contains a `null` value");
+    }
+
+    @Test
+    void failsOnMissingProperty() {
+        var config = ScalePropertiesStreamConfigImpl.builder().scaler("mean").nodeProperties(List.of("b")).build();
+
+        var graphStore = GdlFactory.of("(), ({a: [1.0, 2.2]})").build();
+
+        assertThatThrownBy(() -> config.graphStoreValidation(
+            graphStore,
+            config.nodeLabelIdentifiers(graphStore),
+            config.internalRelationshipTypes(graphStore)
+        ))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining(
+                "The node properties `['b']` are not present for all requested labels. Requested labels: `['__ALL__']`. Properties available on all requested labels: `['a']`");
+    }
+
+    @Test
+    void failsOnEmptyNodeProperties() {
+        var config = ScalePropertiesStreamConfigImpl.builder().scaler("mean").nodeProperties(List.of()).build();
+
+        var graphStore = GdlFactory.of("(), ({a: [1.0, 2.2]})").build();
+
+        assertThatThrownBy(() -> config.graphStoreValidation(
+            graphStore,
+            config.nodeLabelIdentifiers(graphStore),
+            config.internalRelationshipTypes(graphStore)
+        ))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("`nodeProperties` must not be empty");
     }
 }

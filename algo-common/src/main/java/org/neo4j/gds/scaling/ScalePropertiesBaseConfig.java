@@ -25,6 +25,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.List;
@@ -44,11 +45,29 @@ public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
     ScalerFactory scaler();
 
     @Configuration.GraphStoreValidationCheck
-    default void validatePropertyDimensions(
+    default void validateNodeProperties(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
+        if (nodeProperties().size() == 0) {
+            throw new IllegalArgumentException("`nodeProperties` must not be empty");
+        }
+
+        var missingProperties = nodeProperties()
+            .stream()
+            .filter(featureProperty -> !graphStore.hasNodeProperty(selectedLabels, featureProperty))
+            .collect(Collectors.toList());
+        if (!missingProperties.isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The node properties `%s` are not present for all requested labels. " +
+                "Requested labels: `%s`. Properties available on all requested labels: `%s`",
+                StringJoining.join(missingProperties),
+                StringJoining.join(selectedLabels.stream().map(NodeLabel::name)),
+                StringJoining.join(graphStore.nodePropertyKeys(selectedLabels))
+            ));
+        }
+
         nodeProperties().forEach(propertyName -> {
             if (graphStore.nodeProperty(propertyName).values().dimension().isEmpty()) {
                 throw new IllegalArgumentException(formatWithLocale(
