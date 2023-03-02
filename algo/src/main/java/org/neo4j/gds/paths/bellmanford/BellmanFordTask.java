@@ -98,7 +98,6 @@ public class BellmanFordTask implements Runnable {
         }
     }
 
-
     private void relaxPhase() {
         long offset;
         while ((offset = frontierIndex.getAndAdd(64)) < frontierSize.get()) {
@@ -116,7 +115,6 @@ public class BellmanFordTask implements Runnable {
             long nodeId = localQueue.get(--localQueueIndex);
             processNode(nodeId);
         }
-
     }
 
     private void sync() {
@@ -139,10 +137,7 @@ public class BellmanFordTask implements Runnable {
         }
     }
 
-
     enum BellmanFordPhase {
         RUN, SYNC
     }
-
-
 }

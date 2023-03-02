@@ -60,11 +60,11 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
 
     @Override
     public BellmanFordResult compute() {
-        HugeLongArray frontier = HugeLongArray.newArray(graph.nodeCount());
-        AtomicLong frontierIndex = new AtomicLong();
-        AtomicLong frontierSize = new AtomicLong();
+        var frontier = HugeLongArray.newArray(graph.nodeCount());
+        var frontierIndex = new AtomicLong();
+        var frontierSize = new AtomicLong();
 
-        HugeAtomicBitSet validBitset = HugeAtomicBitSet.create(graph.nodeCount());
+        var validBitset = HugeAtomicBitSet.create(graph.nodeCount());
         var distances = DistanceTracker.create(
             graph.nodeCount(),
             concurrency
@@ -83,19 +83,18 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
                 negativeCycleFound
             ));
         }
-        //
+
         frontier.set(0, sourceNode);
         frontierSize.incrementAndGet();
         distances.set(sourceNode, -1, 0, 1);
         validBitset.set(sourceNode);
-        //
+
         while (frontierSize.get() > 0) {
-            frontierIndex.set(0); //exhaust global queue
+            frontierIndex.set(0); // exhaust global queue
             RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
-            frontierSize.set(0); //fill global queue again
+            frontierSize.set(0); // fill global queue again
             RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
         }
-
 
         return produceResult(negativeCycleFound.get(), distances);
     }
@@ -108,7 +107,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         );
         return BellmanFordResult.of(containsNegativeCycle, new DijkstraResult(paths));
     }
-    
+
     private static Stream<PathResult> pathResults(
         DistanceTracker tentativeDistances,
         long sourceNode,
@@ -132,7 +131,6 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
             parallelStream -> parallelStream.flatMap(partition -> {
                 var localPathIndex = new MutableLong(pathIndex.getAndAdd(partition.nodeCount()));
                 var pathResultBuilder = ImmutablePathResult.builder().sourceNode(sourceNode);
-
 
                 return LongStream
                     .range(partition.startNode(), partition.startNode() + partition.nodeCount())
@@ -186,6 +184,4 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
             .costs(costs.toArray())
             .build();
     }
-
-
 }

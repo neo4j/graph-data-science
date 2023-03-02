@@ -42,7 +42,7 @@ import static org.neo4j.gds.paths.PathTestUtil.expected;
 final class BellmanFordCopiedDeltaSteppingTests {
 
     // concurrency X id-supplier
-    public static Stream<Arguments> testParameters() {
+    static Stream<Arguments> testParameters() {
         return TestSupport.crossArguments(
             () -> TestSupport.crossArguments(
                 () -> IntStream.of(1, 4).mapToObj(Arguments::of)
@@ -67,19 +67,13 @@ final class BellmanFordCopiedDeltaSteppingTests {
             ", (e:E)" +
             ", (f:F)" +
 
-            ", (a)-[:TYPE {cost: 4}]->(b)" +
-            ", (a)-[:TYPE {cost: 2}]->(c)" +
-            ", (b)-[:TYPE {cost: 5}]->(c)" +
+            ", (a)-[:TYPE {cost:  4}]->(b)" +
+            ", (a)-[:TYPE {cost:  2}]->(c)" +
+            ", (b)-[:TYPE {cost:  5}]->(c)" +
             ", (b)-[:TYPE {cost: 10}]->(d)" +
-            ", (c)-[:TYPE {cost: 3}]->(e)" +
+            ", (c)-[:TYPE {cost:  3}]->(e)" +
             ", (d)-[:TYPE {cost: 11}]->(f)" +
-            ", (e)-[:TYPE {cost: 4}]->(d)";
-
-        @Inject
-        Graph graph;
-
-        @Inject
-        IdFunction idFunction;
+            ", (e)-[:TYPE {cost:  4}]->(d)";
 
         @ParameterizedTest
         @MethodSource("org.neo4j.gds.paths.bellmanford.BellmanFordCopiedDeltaSteppingTests#testParameters")
@@ -120,7 +114,6 @@ final class BellmanFordCopiedDeltaSteppingTests {
             var paths = new BellmanFord(graph,ProgressTracker.NULL_TRACKER,sourceNode,concurrency).compute().shortestPaths().pathSet();
             assertEquals(expected, paths);
         }
-
     }
 
     @Nested
@@ -219,4 +212,5 @@ final class BellmanFordCopiedDeltaSteppingTests {
         }
     }
 
+    private BellmanFordCopiedDeltaSteppingTests() {}
 }

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.paths.bellmanford;
 
-
 import org.neo4j.gds.core.utils.paged.DoublePageCreator;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
@@ -27,11 +26,11 @@ import org.neo4j.gds.core.utils.paged.LongPageCreator;
 
 import java.util.Optional;
 
-class DistanceTracker {
+final class DistanceTracker {
 
-    static double DIST_INF = Double.MAX_VALUE;
-    static long NO_PREDECESSOR = Long.MAX_VALUE;
-    static long NO_LENGTH = Long.MAX_VALUE;
+    private static final double DIST_INF = Double.MAX_VALUE;
+    private static final long NO_PREDECESSOR = Long.MAX_VALUE;
+    private static final long NO_LENGTH = Long.MAX_VALUE;
 
     static DistanceTracker create(
         long size,
@@ -41,7 +40,6 @@ class DistanceTracker {
             size,
             DoublePageCreator.of(concurrency, index -> DIST_INF)
         );
-
         var predecessors = HugeAtomicLongArray.newArray(
             size,
             LongPageCreator.of(concurrency, index -> NO_PREDECESSOR)
@@ -80,11 +78,11 @@ class DistanceTracker {
 
     public long length(long nodeId) {return lengths.get(nodeId);}
 
-    public HugeAtomicDoubleArray distances() {
+    HugeAtomicDoubleArray distances() {
         return distances;
     }
 
-    public Optional<HugeAtomicLongArray> predecessors() {
+    Optional<HugeAtomicLongArray> predecessors() {
         return Optional.of(predecessors);
     }
 
@@ -94,7 +92,7 @@ class DistanceTracker {
         lengths.set(nodeId, length);
     }
 
-    public double compareAndExchange(
+    double compareAndExchange(
         long nodeId,
         double expectedDistance,
         double newDistance,
@@ -137,8 +135,5 @@ class DistanceTracker {
         //signal unsuccesful update
         //note that this unsuccesful update will be the last attempt
         return (Double.compare(expectedDistance, 0.0) == 0.0) ? -1.0 : -expectedDistance;
-
     }
 }
-
-

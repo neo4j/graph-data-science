@@ -48,11 +48,11 @@ class BellmanFordTest {
         "  (a2)," +
         "  (a3)," +
         "  (a4)," +
-        "  (a0)-[:R {weight: 1.0}]->(a1)," +
+        "  (a0)-[:R {weight:  1.0}]->(a1)," +
         "  (a0)-[:R {weight: -1.0}]->(a2)," +
-        "  (a0)-[:R {weight: 10.0}]->(a3), " +
-        "  (a3)-[:R {weight: -8.0}]->(a4), " +
-        "  (a1)-[:R {weight: 3.0}]->(a4) ";
+        "  (a0)-[:R {weight: 10.0}]->(a3)," +
+        "  (a3)-[:R {weight: -8.0}]->(a4)," +
+        "  (a1)-[:R {weight:  3.0}]->(a4) ";
 
     @Inject
     private TestGraph graph;
@@ -68,12 +68,11 @@ class BellmanFordTest {
         "  (a2)," +
         "  (a3)," +
         "  (a4)," +
-        "  (a0)-[:R {weight: 1.0}]->(a1)," +
-        "  (a0)-[:R {weight: 10.0}]->(a2), " +
-        "  (a2)-[:R {weight: -8.0}]->(a3), " +
-        "  (a3)-[:R {weight: -4.0}]->(a4), " +
-        "  (a4)-[:R {weight: 1.0}]->(a2) ";
-
+        "  (a0)-[:R {weight:  1.0}]->(a1)," +
+        "  (a0)-[:R {weight: 10.0}]->(a2)," +
+        "  (a2)-[:R {weight: -8.0}]->(a3)," +
+        "  (a3)-[:R {weight: -4.0}]->(a4)," +
+        "  (a4)-[:R {weight:  1.0}]->(a2) ";
 
     @Inject
     private TestGraph loopGraph;
@@ -81,8 +80,7 @@ class BellmanFordTest {
     @Inject
     private IdFunction loopIdFunction;
 
-    //another graph: https://www.javatpoint.com/bellman-ford-algorithm
-
+    // another graph: https://www.javatpoint.com/bellman-ford-algorithm
     @GdlGraph(graphNamePrefix = "third")
     private static final String EXAMPLE_2_DB_CYPHER =
         "CREATE " +
@@ -92,16 +90,16 @@ class BellmanFordTest {
         "  (D)," +
         "  (E)," +
         "  (F)," +
-        " (L)," +
-        "  (A)-[:R {weight: 6.0}]->(B)," +
-        "  (A)-[:R {weight: 4.0}]->(C), " +
-        "  (A)-[:R {weight: 5.0}]->(D), " +
-        "  (B)-[:R {weight: -1.0}]->(E), " +
-        "  (C)-[:R {weight: -2.0}]->(B), " +
-        "  (C)-[:R {weight: 3.0}]->(E), " +
-        "  (D)-[:R {weight: -2.0}]->(C), " +
-        "  (D)-[:R {weight: -1.0}]->(F), " +
-        "  (E)-[:R {weight: 3.0}]->(F) ";
+        "  (L)," +
+        "  (A)-[:R {weight:  6.0}]->(B)," +
+        "  (A)-[:R {weight:  4.0}]->(C)," +
+        "  (A)-[:R {weight:  5.0}]->(D)," +
+        "  (B)-[:R {weight: -1.0}]->(E)," +
+        "  (C)-[:R {weight: -2.0}]->(B)," +
+        "  (C)-[:R {weight:  3.0}]->(E)," +
+        "  (D)-[:R {weight: -2.0}]->(C)," +
+        "  (D)-[:R {weight: -1.0}]->(F)," +
+        "  (E)-[:R {weight:  3.0}]->(F) ";
 
     @Inject
     private TestGraph thirdGraph;
@@ -111,8 +109,13 @@ class BellmanFordTest {
 
     @Test
     void shouldComputeShortestPathsWithoutLoops() {
-        long[] a = new long[]{idFunction.of("a0"), idFunction.of("a1"), idFunction.of("a2"), idFunction.of("a3"), idFunction.of(
-            "a4")};
+        long[] a = new long[]{
+            idFunction.of("a0"),
+            idFunction.of("a1"),
+            idFunction.of("a2"),
+            idFunction.of("a3"),
+            idFunction.of("a4")
+        };
         var result = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, a[0], 1).compute();
         long[][] EXPECTED_PATHS = new long[5][];
         EXPECTED_PATHS[(int) a[0]] = new long[]{a[0]};
@@ -140,7 +143,6 @@ class BellmanFordTest {
 
     @Test
     void shouldStopAtLoops() {
-
         long a0 = loopIdFunction.of("a0");
         var result = new BellmanFord(loopGraph, ProgressTracker.NULL_TRACKER, a0, 1).compute();
         int counter = 0;
@@ -153,7 +155,8 @@ class BellmanFordTest {
 
     @Test
     void shouldUpdateBasedOnNegativeCorrectly() {
-        long[] nodes = new long[]{thirdIdFunction.of("A"),
+        long[] nodes = new long[]{
+            thirdIdFunction.of("A"),
             thirdIdFunction.of("B"),
             thirdIdFunction.of("C"),
             thirdIdFunction.of("D"),
@@ -241,6 +244,5 @@ class BellmanFordTest {
 
         }
         assertThat(bellmanSum).isCloseTo(dijkstraSum, Offset.offset(1e-5));
-
     }
 }
