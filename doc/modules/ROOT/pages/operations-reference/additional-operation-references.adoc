@@ -22,6 +22,7 @@
 | xref:alpha-algorithms/one-hot-encoding.adoc[One Hot Encoding] | `_gds.alpha.ml.oneHotEncoding_`
 | xref:common-usage/debug-sysinfo.adoc[Status of the system]                                   | `gds.debug.sysInfo`
 | xref:management-ops/create-cypher-db.adoc[Create an impermanent database backed by a projected graph] | `gds.alpha.create.cypherdb`
+| xref:management-ops/create-cypher-db.adoc#drop-cypher-db[Drop an impermanent database backed by a projected graph] | `gds.alpha.drop.cypherdb`
 | xref:common-usage/monitoring-system.adoc[Get an overview of the system's workload and available resources] | `gds.alpha.systemMonitor`
 | xref:management-ops/backup-restore.adoc[Back-up graphs and models to disk]             | `gds.alpha.backup`
 | xref:management-ops/backup-restore.adoc[Restore persisted graphs and models to memory] | `gds.alpha.restore`
