@@ -25,8 +25,6 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.write.ImmutableRelationship;
-import org.neo4j.gds.core.write.Relationship;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
 import org.neo4j.gds.ml.models.Classifier;
@@ -35,8 +33,6 @@ import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 import org.neo4j.gds.similarity.knn.KnnFactory;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -119,17 +115,6 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             return predictions
                 .streamSimilarityResult()
                 .map(i -> PredictedLink.of(i.sourceNodeId(), i.targetNodeId(), i.similarity));
-        }
-
-        @Override
-        public Stream<Relationship> relationshipStream() {
-            return predictions
-                .streamSimilarityResult()
-                .map(i -> ImmutableRelationship.of(
-                    i.node1,
-                    i.node2,
-                    new Value[]{Values.doubleValue(i.similarity)}
-                ));
         }
 
         @Override
