@@ -24,14 +24,16 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.BaseConfig;
-import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.gds.model.catalog.TestTrainConfig;
 
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -48,12 +50,12 @@ class OpenModelCatalogTest {
     private static final String USERNAME = "testUser";
     private static final GraphSchema GRAPH_SCHEMA = GdlFactory.of("(:Node1)").build().schema();
 
-    private static final Model<String, TestTrainConfig, ToMapConvertible> TEST_MODEL = Model.of(
+    private static final Model<String, TestTrainConfig, CustomInfo> TEST_MODEL = Model.of(
         "testAlgo",
         GRAPH_SCHEMA,
         "modelData",
         TestTrainConfig.of(USERNAME, "testModel"),
-        Map::of
+        new TestCustomInfo()
     );
 
     @InjectModelCatalog
@@ -71,7 +73,7 @@ class OpenModelCatalogTest {
                     GRAPH_SCHEMA,
                     1337L,
                     TestTrainConfig.of(USERNAME, "testModel_" + modelIndex),
-                    Map::of
+                    new TestCustomInfo()
                 ));
             });
         }
@@ -81,7 +83,7 @@ class OpenModelCatalogTest {
             GRAPH_SCHEMA,
             1337L,
             TestTrainConfig.of(USERNAME, "testModel_" + (allowedModelsCount + 1)),
-            Map::of
+            new TestCustomInfo()
         );
 
         assertThatThrownBy(() -> modelCatalog.set(tippingModel))
@@ -101,20 +103,20 @@ class OpenModelCatalogTest {
             GRAPH_SCHEMA,
             "testTrainData",
             TestTrainConfig.of(USERNAME, "testModel"),
-            Map::of
+            new TestCustomInfo()
         );
-        var model2 = Model.of("testAlgo2", GRAPH_SCHEMA, 1337L, TestTrainConfig.of(USERNAME, "testModel2"), Map::of);
+        var model2 = Model.of("testAlgo2", GRAPH_SCHEMA, 1337L, TestTrainConfig.of(USERNAME, "testModel2"), new TestCustomInfo());
 
         modelCatalog.set(model);
         modelCatalog.set(model2);
 
         assertEquals(
             model,
-            modelCatalog.get(USERNAME, "testModel", String.class, TestTrainConfig.class, ToMapConvertible.class)
+            modelCatalog.get(USERNAME, "testModel", String.class, TestTrainConfig.class, CustomInfo.class)
         );
         assertEquals(
             model2,
-            modelCatalog.get(USERNAME, "testModel2", Long.class, TestTrainConfig.class, ToMapConvertible.class)
+            modelCatalog.get(USERNAME, "testModel2", Long.class, TestTrainConfig.class, CustomInfo.class)
         );
     }
 
@@ -134,14 +136,14 @@ class OpenModelCatalogTest {
             GRAPH_SCHEMA,
             "testTrainData",
             TestTrainConfig.of("user1", "testModel"),
-            Map::of
+            new TestCustomInfo()
         );
         var model2 = Model.of(
             "testAlgo",
             GRAPH_SCHEMA,
             "testTrainData",
             TestTrainConfig.of("user2", "testModel2"),
-            Map::of
+            new TestCustomInfo()
         );
 
         modelCatalog.set(model);
@@ -149,11 +151,11 @@ class OpenModelCatalogTest {
 
         assertEquals(
             model,
-            modelCatalog.get("user1", "testModel", String.class, TestTrainConfig.class, ToMapConvertible.class)
+            modelCatalog.get("user1", "testModel", String.class, TestTrainConfig.class, CustomInfo.class)
         );
         assertEquals(
             model2,
-            modelCatalog.get("user2", "testModel2", String.class, TestTrainConfig.class, ToMapConvertible.class)
+            modelCatalog.get("user2", "testModel2", String.class, TestTrainConfig.class, CustomInfo.class)
         );
     }
 
@@ -164,7 +166,7 @@ class OpenModelCatalogTest {
             GRAPH_SCHEMA,
             "modelData1",
             TestTrainConfig.of(USERNAME, "testModel1"),
-            Map::of
+            new TestCustomInfo()
         );
 
         var model2 = Model.of(
@@ -172,7 +174,7 @@ class OpenModelCatalogTest {
             GRAPH_SCHEMA,
             1337L,
             TestTrainConfig.of(USERNAME, "testModel2"),
-            Map::of
+            new TestCustomInfo()
         );
 
         var publicModel = Model.of(
@@ -180,7 +182,7 @@ class OpenModelCatalogTest {
             GRAPH_SCHEMA,
             1337L,
             TestTrainConfig.of("anotherUser", "testModel2"),
-            Map::of
+            new TestCustomInfo()
         );
 
         assertThat(modelCatalog.modelCount()).isEqualTo(0);
@@ -204,7 +206,7 @@ class OpenModelCatalogTest {
 
         var ex = assertThrows(
             NoSuchElementException.class,
-            () -> modelCatalog.get("fakeUser", "testModel", String.class, TestTrainConfig.class, ToMapConvertible.class)
+            () -> modelCatalog.get("fakeUser", "testModel", String.class, TestTrainConfig.class, CustomInfo.class)
         );
 
         assertEquals("Model with name `testModel` does not exist.", ex.getMessage());
@@ -217,7 +219,7 @@ class OpenModelCatalogTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> modelCatalog.get(USERNAME, "testModel", Double.class, TestTrainConfig.class, ToMapConvertible.class)
+            () -> modelCatalog.get(USERNAME, "testModel", Double.class, TestTrainConfig.class, CustomInfo.class)
         );
 
         assertEquals(
@@ -238,7 +240,7 @@ class OpenModelCatalogTest {
                 "testModel",
                 String.class,
                 ModelCatalogTestTrainConfig.class,
-                ToMapConvertible.class
+                CustomInfo.class
             )
         );
 
@@ -317,6 +319,19 @@ class OpenModelCatalogTest {
 
         static ModelCatalogTestTrainConfig of() {
             return ImmutableModelCatalogTestTrainConfig.of("username", "modelName");
+        }
+    }
+
+    static class TestCustomInfo implements CustomInfo {
+
+        @Override
+        public Map<String, Object> toMap() {
+            return Map.of();
+        }
+
+        @Override
+        public Optional<TrainingMethod> optionalTrainerMethod() {
+            return Optional.empty();
         }
     }
 }

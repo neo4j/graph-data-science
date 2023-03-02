@@ -25,4 +25,5 @@ dependencies {
     // But that also seems wrong--one should be able to use the latter without the former
     // Best solution TBD
     testImplementation project(':core')
+    testImplementation project(':ml-algo')
 }
