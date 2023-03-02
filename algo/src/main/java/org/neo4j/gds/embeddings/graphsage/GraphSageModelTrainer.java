@@ -115,7 +115,7 @@ public class GraphSageModelTrainer {
 
         progressTracker.beginSubTask("Prepare batches");
 
-        var batchSampler = new BatchSampler(graph);
+        var batchSampler = new BatchSampler(graph, progressTracker);
 
         List<long[]> extendedBatches = batchSampler
             .extendedBatches(config.batchSize(), config.searchDepth(), randomSeed);
