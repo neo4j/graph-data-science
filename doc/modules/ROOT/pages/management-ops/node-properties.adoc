@@ -33,12 +33,13 @@ Arrays with mixed content types are not supported.
 
 Most algorithms that are capable of using node properties require a specific property type.
 In cases of a mismatch between the type of the provided property and the required type, the library will try to convert the property value into the required type.
-This automatic conversion only happens when the following conditions are satisfied:
 
-* Neither the given, nor the expected type are an `Array` type.
-* The conversion is loss-less
-** `Long` to `Double`: The Long values does not exceed the supported range of the Double type.
-** `Double` to `Long`: The Double value does not have any decimal places.
+The automatic conversion only happens when the conversion is loss-less.
+Hence, we check the following:
+
+* `Long` to `Double`: The Long value does not exceed the supported range of the Double type.
+* `Double` to `Long`: The Double value does not have any decimal places.
+* `Double[]` to `Float[]`: The Double values do not exceed the supported range of the Float type for any of the elements in the array.
 
 The algorithm computation will fail if any of these conditions are not satisfied for any node property value.
 
