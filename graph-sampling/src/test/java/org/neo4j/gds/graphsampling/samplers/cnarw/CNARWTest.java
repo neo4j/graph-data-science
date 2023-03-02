@@ -29,6 +29,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.graphsampling.config.CNARWConfig;
 import org.neo4j.gds.graphsampling.config.CNARWConfigImpl;
 
@@ -41,7 +42,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-class CNARWTest {
+class CNARWTest {ß
 
     @GdlGraph(idOffset = 42)
     private static final String DB_CYPHER =
@@ -76,6 +77,35 @@ class CNARWTest {
     @Inject
     private GraphStore graphStore;
 
+    @Inject
+    private IdFunction idFunction;
+
+    @GdlGraph(graphNamePrefix = "lollipop", idOffset = 42)
+    private static final String lollipopGDL =
+        "CREATE" +
+        "  (xy:Z {prop: 42})" +
+        ", (x1:Z {prop: 43})" +
+        ", (x2:Z {prop: 44})" +
+        ", (x3:Z {prop: 45})" +
+        ", (x4:Z {prop: 46})" +
+        ", (x5:Z {prop: 47})" +
+        ", (y1:Z {prop: 48})" +
+        ", (y2:Z {prop: 49})" +
+        ", (xy)-[:REL]->(x1), (xy)-[:REL]->(x2), (xy)-[:REL]->(x3), (xy)-[:REL]->(x4), (xy)-[:REL]->(x5)" +
+        ", (x1)-[:REL]->(xy), (x1)-[:REL]->(x2), (x1)-[:REL]->(x3), (x1)-[:REL]->(x4), (x1)-[:REL]->(x5)" +
+        ", (x2)-[:REL]->(x1), (x2)-[:REL]->(xy), (x2)-[:REL]->(x3), (x2)-[:REL]->(x4), (x2)-[:REL]->(x5)" +
+        ", (x3)-[:REL]->(x1), (x3)-[:REL]->(x2), (x3)-[:REL]->(xy), (x3)-[:REL]->(x4), (x3)-[:REL]->(x5)" +
+        ", (x4)-[:REL]->(x1), (x4)-[:REL]->(x2), (x4)-[:REL]->(x3), (x4)-[:REL]->(xy), (x4)-[:REL]->(x5)" +
+        ", (x5)-[:REL]->(x1), (x5)-[:REL]->(x2), (x5)-[:REL]->(x3), (x5)-[:REL]->(x4), (x5)-[:REL]->(xy)" +
+        ", (xy)-[:REL]->(y1)" +
+        ", (y1)-[:REL]->(y2)";
+
+    @Inject
+    private TestGraph lollipopGraph;
+
+    @Inject
+    private IdFunction lollipopIdFunction;
+
     Graph getGraph(CNARWConfig config) {
         return graphStore.getGraph(
             config.nodeLabelIdentifiers(graphStore),
@@ -83,9 +113,6 @@ class CNARWTest {
             config.relationshipWeightProperty()
         );
     }
-
-    @Inject
-    private IdFunction idFunction;
 
     @Test
     void shouldSample() {
@@ -108,6 +135,26 @@ class CNARWTest {
         assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("e")))).isTrue();
         assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("f")))).isTrue();
         assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("g")))).isTrue();
+    }
+
+    @Test
+    void shouldSampleLollipop() {
+        var config = CNARWConfigImpl.builder()
+            .startNodes(List.of(lollipopIdFunction.of("xy")))
+            .samplingRatio(0.375)
+            .restartProbability(0.0001)
+            .concurrency(1)
+            .randomSeed(777L)
+            .build();
+
+        var cnarw = new CNARW(config);
+        var nodes = cnarw.compute(lollipopGraph, ProgressTracker.NULL_TRACKER);
+
+        assertThat(nodes.cardinality()).isEqualTo(3);
+
+        assertThat(nodes.get(lollipopGraph.toMappedNodeId(lollipopIdFunction.of("xy")))).isTrue();
+        assertThat(nodes.get(lollipopGraph.toMappedNodeId(lollipopIdFunction.of("y1")))).isTrue();
+        assertThat(nodes.get(lollipopGraph.toMappedNodeId(lollipopIdFunction.of("y2")))).isTrue();
     }
 
     @Test

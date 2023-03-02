@@ -69,7 +69,7 @@ public class CNARW implements NodesSampler {
 
         var seenNodes = getSeenNodes(inputGraph, progressTracker);
 
-        progressTracker.beginSubTask("Do random walks");
+        progressTracker.beginSubTask("Do common neighbours aware random walks");
         progressTracker.setSteps(seenNodes.totalExpectedNodes());
 
         startNodesUsed = new LongHashSet();
