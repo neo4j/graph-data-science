@@ -25,6 +25,7 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
+import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.config.CommunitySizeConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
@@ -32,6 +33,9 @@ import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.nodeproperties.ConsecutiveLongNodePropertyValues;
 import org.neo4j.gds.nodeproperties.LongIfChangedNodePropertyValues;
+import org.neo4j.values.storable.Values;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -152,6 +156,60 @@ class CommunityProcCompanionTest {
 
     }
 
+    @Test
+    void minComponentSizeWithSparseProperties() {
+        var inputBuilder = HugeSparseLongArray.builder(Long.MIN_VALUE);
+        inputBuilder.set(1, 42);
+        inputBuilder.set(2, 99);
+        inputBuilder.set(3, 42);
+        var input = inputBuilder.build();
+
+        LongNodePropertyValues sparseProperties = new TestSparseNodePropertyValues(4, 3, input::get);
+
+        var config = ConfigWithComponentSize.of(CypherMapWrapper.empty().withNumber("minComponentSize", 2L));
+
+        var filteredProperties = CommunityProcCompanion.nodeProperties(
+            config,
+            "seed",
+            sparseProperties,
+            () -> { throw new UnsupportedOperationException("Not implemented"); }
+        );
+
+        // null from the beginning
+        assertThat(filteredProperties.value(0)).isNull();
+        assertThat(filteredProperties.value(1)).isEqualTo(Values.longValue(42));
+        // filtered out
+        assertThat(filteredProperties.value(2)).isNull();
+        assertThat(filteredProperties.value(3)).isEqualTo(Values.longValue(42));
+    }
+
+    @Test
+    void consecutiveIdsWithSparseProperties() {
+        var inputBuilder = HugeSparseLongArray.builder(Long.MIN_VALUE);
+        inputBuilder.set(1, 42);
+        inputBuilder.set(2, 99);
+        inputBuilder.set(3, 42);
+        var input = inputBuilder.build();
+
+        LongNodePropertyValues sparseProperties = new TestSparseNodePropertyValues(4, 3, input::get);
+
+        var config = ConfigWithComponentSize.of(CypherMapWrapper.create(Map.of("minComponentSize", 2L, "consecutiveIds", true)));
+
+        var filteredProperties = CommunityProcCompanion.nodeProperties(
+            config,
+            "seed",
+            sparseProperties,
+            () -> { throw new UnsupportedOperationException("Not implemented"); }
+        );
+
+        // null from the beginning
+        assertThat(filteredProperties.value(0)).isNull();
+        assertThat(filteredProperties.value(1)).isEqualTo(Values.longValue(0));
+        // filtered out
+        assertThat(filteredProperties.value(2)).isNull();
+        assertThat(filteredProperties.value(3)).isEqualTo(Values.longValue(0));
+    }
+
     private static final class TestNodePropertyValues implements LongNodePropertyValues {
         private final long size;
         private final LongToLongFunction transformer;
@@ -166,6 +224,36 @@ class CommunityProcCompanionTest {
 
         @Override
         public long valuesStored() {
+            return size;
+        }
+
+        @Override
+        public long longValue(long nodeId) {
+            return transformer.applyAsLong(nodeId);
+        }
+    }
+
+    private static final class TestSparseNodePropertyValues implements LongNodePropertyValues {
+        private final long size;
+        private final long valuesStored;
+        private final LongToLongFunction transformer;
+
+        private TestSparseNodePropertyValues(
+            long size,
+            long valuesStored,
+            LongToLongFunction transformer
+        ) {
+            this.size = size;
+            this.valuesStored = valuesStored;
+            this.transformer = transformer;
+        }
+
+        @Override
+        public long valuesStored() {
+            return valuesStored;
+        }
+
+        public long size() {
             return size;
         }
 
