@@ -32,6 +32,7 @@ import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.scaling.L2Norm;
 import org.neo4j.gds.scaling.ScalerFactory;
 
@@ -131,6 +132,7 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
             properties,
             context.nodeCount(),
             concurrency,
+            ProgressTracker.NULL_TRACKER,
             context.executorService()
         );
 

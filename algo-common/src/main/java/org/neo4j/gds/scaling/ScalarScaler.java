@@ -21,6 +21,7 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 public abstract class ScalarScaler implements Scaler {
 
@@ -44,10 +45,12 @@ public abstract class ScalarScaler implements Scaler {
 
         private final Partition partition;
         final NodePropertyValues properties;
+        private final ProgressTracker progressTracker;
 
-        AggregatesComputer(Partition partition, NodePropertyValues property) {
+        AggregatesComputer(Partition partition, NodePropertyValues property, ProgressTracker progressTracker) {
             this.partition = partition;
             this.properties = property;
+            this.progressTracker = progressTracker;
         }
 
         @Override
@@ -56,6 +59,7 @@ public abstract class ScalarScaler implements Scaler {
             for (long nodeId = partition.startNode(); nodeId < end; nodeId++) {
                 compute(nodeId);
             }
+            progressTracker.logProgress(partition.nodeCount());
         }
 
         abstract void compute(long nodeId);

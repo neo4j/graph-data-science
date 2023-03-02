@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.scaling;
 
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+
 import java.util.List;
 
 public interface Scaler {
@@ -32,15 +34,19 @@ public interface Scaler {
     class ArrayScaler implements Scaler {
 
         private final List<ScalarScaler> elementScalers;
+        private final ProgressTracker progressTracker;
 
-        ArrayScaler(List<ScalarScaler> elementScalers) {
+        ArrayScaler(List<ScalarScaler> elementScalers, ProgressTracker progressTracker) {
             this.elementScalers = elementScalers;
+            this.progressTracker = progressTracker;
         }
 
         public void scaleProperty(long nodeId, double[] result, int offset) {
             for (int i = 0; i < dimension(); i++) {
                 result[offset + i] = elementScalers.get(i).scaleProperty(nodeId);
             }
+            // -1 because we also count progress for the partition
+            progressTracker.logProgress(dimension() - 1);
         }
 
         @Override

@@ -92,6 +92,7 @@ public class PageRankAlgorithm extends Algorithm<PageRankResult> {
             scores.asNodeProperties(),
             graph.nodeCount(),
             config.concurrency(),
+            ProgressTracker.NULL_TRACKER,
             executorService
         );
 

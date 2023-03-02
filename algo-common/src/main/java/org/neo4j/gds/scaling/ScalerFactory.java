@@ -21,6 +21,7 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Locale;
@@ -86,6 +87,7 @@ public interface ScalerFactory {
         NodePropertyValues properties,
         long nodeCount,
         int concurrency,
+        ProgressTracker progressTracker,
         ExecutorService executor
     );
 }
