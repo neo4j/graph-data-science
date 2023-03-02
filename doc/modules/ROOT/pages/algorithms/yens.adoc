@@ -6,6 +6,7 @@
 :algorithm: Yen's
 :source-target: true
 :procedure-name: pass:q[gds.shortestPath.yens]
+:sequential: true
 
 
 :directed:
