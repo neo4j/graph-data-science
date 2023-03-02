@@ -22,14 +22,17 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.ml.metrics.ModelCandidateStats;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.metrics.Metric;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
+import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 
 import java.util.Map;
+import java.util.Optional;
 
 @ValueClass
-public interface NodeRegressionPipelineModelInfo extends ToMapConvertible {
+public interface NodeRegressionPipelineModelInfo extends ToMapConvertible, Model.CustomInfo {
 
     Map<Metric, Double> testMetrics();
     Map<Metric, Double> outerTrainMetrics();
@@ -62,4 +65,7 @@ public interface NodeRegressionPipelineModelInfo extends ToMapConvertible {
     ) {
         return ImmutableNodeRegressionPipelineModelInfo.of(testMetrics, outerTrainMetrics, bestCandidate, pipeline);
     }
+
+    @Override
+    default Optional<TrainingMethod> optionalTrainerMethod() { return Optional.of(bestCandidate().trainerConfig().method()); }
 }

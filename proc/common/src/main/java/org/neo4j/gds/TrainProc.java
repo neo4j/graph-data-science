@@ -21,8 +21,8 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -117,7 +117,7 @@ public abstract class TrainProc<
         public final Map<String, Object> configuration;
         public final long trainMillis;
 
-        public <TRAIN_RESULT, TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig, TRAIN_INFO extends ToMapConvertible> TrainResult(
+        public <TRAIN_RESULT, TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig, TRAIN_INFO extends CustomInfo> TrainResult(
             Model<TRAIN_RESULT, TRAIN_CONFIG, TRAIN_INFO> trainedModel,
             long trainMillis,
             long nodeCount,

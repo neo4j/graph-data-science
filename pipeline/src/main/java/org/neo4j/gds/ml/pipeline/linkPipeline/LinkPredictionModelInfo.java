@@ -21,14 +21,17 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.models.TrainerConfig;
+import org.neo4j.gds.ml.models.TrainingMethod;
 
 import java.util.Map;
+import java.util.Optional;
 
 @ValueClass
-public interface LinkPredictionModelInfo extends ToMapConvertible {
+public interface LinkPredictionModelInfo extends ToMapConvertible, CustomInfo {
 
     TrainerConfig bestParameters();
     Map<String, Object> metrics();
@@ -56,4 +59,7 @@ public interface LinkPredictionModelInfo extends ToMapConvertible {
         var metrics = bestCandidate.renderMetrics(testMetrics, outerTrainMetrics);
         return ImmutableLinkPredictionModelInfo.of(bestCandidate.trainerConfig(), metrics, pipeline);
     }
+
+    @Override
+    default Optional<TrainingMethod> optionalTrainerMethod() { return Optional.of(bestParameters().method()); }
 }

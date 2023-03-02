@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.pipeline.node;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.models.BaseModelData;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPipelineBaseTrainConfig;
@@ -42,7 +42,7 @@ public final class NodePropertyPredictPipelineFilterUtil {
             modelName,
             BaseModelData.class,
             NodePropertyPipelineBaseTrainConfig.class,
-            ToMapConvertible.class
+            CustomInfo.class
         );
 
         var combinedTargetNodeLabels = basePredictConfig.targetNodeLabels().isEmpty() ? trainedModel
