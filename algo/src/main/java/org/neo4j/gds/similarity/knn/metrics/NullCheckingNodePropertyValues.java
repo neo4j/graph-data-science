@@ -97,6 +97,11 @@ public final class NullCheckingNodePropertyValues implements NodePropertyValues 
         return properties.valuesStored();
     }
 
+    @Override
+    public long maxIndex() {
+        return properties.maxIndex();
+    }
+
     private void check(long nodeId, @Nullable Object value) {
         if (value == null) {
             throw new IllegalArgumentException(formatWithLocale(

@@ -117,6 +117,12 @@ public class DoubleArrayNodePropertiesBuilder implements InnerNodePropertiesBuil
 
         @Override
         public long valuesStored() {
+            // FIXME does not reflect the sparse array
+            return propertyValues.capacity();
+        }
+
+        @Override
+        public long maxIndex() {
             return size;
         }
     }

@@ -120,6 +120,12 @@ public class LongArrayNodePropertiesBuilder implements InnerNodePropertiesBuilde
 
         @Override
         public long valuesStored() {
+            // FIXME this does not actually contain the number of stored values in the sparse array
+            return size;
+        }
+
+        @Override
+        public long maxIndex() {
             return size;
         }
     }

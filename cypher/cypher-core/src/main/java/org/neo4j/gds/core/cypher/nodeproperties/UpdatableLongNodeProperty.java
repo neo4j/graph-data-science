@@ -38,6 +38,11 @@ public class UpdatableLongNodeProperty implements UpdatableNodeProperty, LongNod
 
     @Override
     public long valuesStored() {
+        return longList.capacity();
+    }
+
+    @Override
+    public long maxIndex() {
         return nodeCount;
     }
 

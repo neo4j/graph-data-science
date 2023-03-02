@@ -47,6 +47,11 @@ public final class GraphSageCompanion {
         return new DoubleArrayNodePropertyValues() {
             @Override
             public long valuesStored() {
+                return embeddings.size();
+            }
+
+            @Override
+            public long maxIndex() {
                 return size;
             }
 

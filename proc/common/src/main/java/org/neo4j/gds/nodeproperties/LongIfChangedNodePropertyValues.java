@@ -81,6 +81,11 @@ public final class LongIfChangedNodePropertyValues implements LongNodePropertyVa
     }
 
     @Override
+    public long maxIndex() {
+        return Math.max(newProperties.maxIndex(), seedProperties.maxIndex());
+    }
+
+    @Override
     public boolean hasValue(long nodeId) {
         long seedValue = seedProperties.longValue(nodeId);
         long writeValue = newProperties.longValue(nodeId);

@@ -34,11 +34,11 @@ import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.TerminationMonitor;
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.IdentityPropertyValues;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
@@ -93,7 +93,7 @@ class MutatePropertyComputationResultConsumerTest {
 
     @BeforeEach
     void setup() {
-        var nodePropertyList = List.of(ImmutableNodeProperty.of("mutateProperty", new TestNodePropertyValues()));
+        var nodePropertyList = List.of(ImmutableNodeProperty.of("mutateProperty", new IdentityPropertyValues(graphStore.nodeCount())));
         mutateResultConsumer = new MutatePropertyComputationResultConsumer<>(
             (computationResult) -> nodePropertyList,
             (computationResult, executionContext) -> new TestAlgoResultBuilder()
@@ -179,18 +179,4 @@ class MutatePropertyComputationResultConsumerTest {
             .computeMillis(0)
             .build();
     }
-
-    class TestNodePropertyValues implements LongNodePropertyValues {
-
-        @Override
-        public long valuesStored() {
-            return graphStore.nodeCount();
-        }
-
-        @Override
-        public long longValue(long nodeId) {
-            return nodeId;
-        }
-    }
-
 }

@@ -169,6 +169,11 @@ class CsvToGraphStoreImporterIntegrationTest {
 
             @Override
             public long valuesStored() {
+                return 0;
+            }
+
+            @Override
+            public long maxIndex() {
                 return 1337;
             }
         });
@@ -183,6 +188,11 @@ class CsvToGraphStoreImporterIntegrationTest {
 
             @Override
             public long valuesStored() {
+                return 0;
+            }
+
+            @Override
+            public long maxIndex() {
                 return 10_000;
             }
         });
@@ -197,6 +207,11 @@ class CsvToGraphStoreImporterIntegrationTest {
 
             @Override
             public long valuesStored() {
+                return 0;
+            }
+
+            @Override
+            public long maxIndex() {
                 return 10_000;
             }
         });

@@ -101,6 +101,11 @@ public class HarmonicCentralityWriteProc extends HarmonicCentralityProc<Centrali
                     }
 
                     @Override
+                    public long maxIndex() {
+                        return computationResult.graph().nodeCount();
+                    }
+
+                    @Override
                     public double doubleValue(long nodeId) {
                         return result.getCentralityScore(nodeId);
                     }

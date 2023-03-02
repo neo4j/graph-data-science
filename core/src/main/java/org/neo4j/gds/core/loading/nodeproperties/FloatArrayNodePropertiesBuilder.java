@@ -115,6 +115,12 @@ public class FloatArrayNodePropertiesBuilder implements InnerNodePropertiesBuild
 
         @Override
         public long valuesStored() {
+            // FIXME this reports not the number of stored values
+            return propertyValues.capacity();
+        }
+
+        @Override
+        public long maxIndex() {
             return size;
         }
     }

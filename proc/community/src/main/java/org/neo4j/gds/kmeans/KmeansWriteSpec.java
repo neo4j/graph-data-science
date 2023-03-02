@@ -22,6 +22,7 @@ package org.neo4j.gds.kmeans;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.AlgorithmSpecProgressTrackerProvider;
@@ -72,7 +73,8 @@ public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
             if (returnColumns.contains("averageSilhouette")) {
                 builder.withAverageSilhouette(computationResult.result().averageSilhouette());
             }
-            builder.withCommunityFunction(computationResult.result().communities()::get)
+            HugeIntArray communities = computationResult.result().communities();
+            builder.withCommunityFunction(communities::get)
                 .withPreProcessingMillis(computationResult.preProcessingMillis())
                 .withComputeMillis(computationResult.computeMillis())
                 .withNodeCount(graph.nodeCount())
@@ -99,12 +101,17 @@ public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
                 var properties = new LongNodePropertyValues() {
                     @Override
                     public long valuesStored() {
+                        return communities.size();
+                    }
+
+                    @Override
+                    public long maxIndex() {
                         return graph.nodeCount();
                     }
 
                     @Override
                     public long longValue(long nodeId) {
-                        return computationResult.result().communities().get(nodeId);
+                        return communities.get(nodeId);
                     }
                 };
 

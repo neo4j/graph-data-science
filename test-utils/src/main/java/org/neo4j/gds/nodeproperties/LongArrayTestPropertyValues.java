@@ -33,6 +33,11 @@ public final class LongArrayTestPropertyValues implements LongArrayNodePropertyV
     }
 
     @Override
+    public long maxIndex() {
+        return -1;
+    }
+
+    @Override
     public long[] longArrayValue(long nodeId) {
         return transformer.apply(nodeId);
     }

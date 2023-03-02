@@ -41,6 +41,11 @@ final class FastRPCompanion {
 
             @Override
             public long valuesStored() {
+                return embeddings.size();
+            }
+
+            @Override
+            public long maxIndex() {
                 return nodeCount;
             }
         };

@@ -34,22 +34,19 @@ public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues
 
     private final HugeLongArray communities;
 
-    public ConsecutiveLongNodePropertyValues(
-        LongNodePropertyValues longNodeProperties,
-        long nodeCount
-    ) {
+    public ConsecutiveLongNodePropertyValues(LongNodePropertyValues inputProperties) {
         var nextConsecutiveId = -1L;
-
+        long maxIdx = inputProperties.maxIndex();
         var setIdToConsecutiveId = new HugeLongLongMap(BitUtil.ceilDiv(
-            nodeCount,
+            maxIdx,
             MAPPING_SIZE_QUOTIENT
         ));
 
-        this.communities = HugeLongArray.newArray(nodeCount);
+        this.communities = HugeLongArray.newArray(maxIdx);
 
-        for (var nodeId = 0; nodeId < nodeCount; nodeId++) {
+        for (var nodeId = 0; nodeId < maxIdx; nodeId++) {
             if (longNodeProperties.hasValue(nodeId)) {
-                var setId = longNodeProperties.longValue(nodeId);
+                var setId = inputProperties.longValue(nodeId);
                 var communityId = setIdToConsecutiveId.getOrDefault(setId, -1);
                 if (communityId == -1) {
                     setIdToConsecutiveId.addTo(setId, ++nextConsecutiveId);
@@ -84,5 +81,10 @@ public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues
         }
         return null;
 
+    }
+
+    @Override
+    public long maxIndex() {
+        return communities.size();
     }
 }

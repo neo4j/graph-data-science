@@ -93,8 +93,13 @@ class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
 
             @Override
             public long valuesStored() {
-                return 10;
+                return 0;
 
+            }
+
+            @Override
+            public long maxIndex() {
+                return 10;
             }
         }), arguments(new DoubleGraphPropertyValues() {
             @Override
@@ -104,6 +109,11 @@ class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
 
             @Override
             public long valuesStored() {
+                return 0;
+            }
+
+            @Override
+            public long maxIndex() {
                 return 3;
             }
         }), arguments(new LongArrayGraphPropertyValues() {
@@ -114,6 +124,11 @@ class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
 
             @Override
             public long valuesStored() {
+                return 0;
+            }
+
+            @Override
+            public long maxIndex() {
                 return 2;
             }
         }));
@@ -138,8 +153,13 @@ class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
 
             @Override
             public long valuesStored() {
-                return 10;
+                return 0;
 
+            }
+
+            @Override
+            public long maxIndex() {
+                return 10;
             }
         };
         graphStore.addGraphProperty("prop", values);

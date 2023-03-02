@@ -69,8 +69,12 @@ class GraphDropGraphPropertiesProcTest extends BaseProcTest {
 
             @Override
             public long valuesStored() {
-                return 10;
+                return 0;
+            }
 
+            @Override
+            public long maxIndex() {
+                return 10;
             }
         };
 
@@ -114,8 +118,13 @@ class GraphDropGraphPropertiesProcTest extends BaseProcTest {
 
             @Override
             public long valuesStored() {
-                return 10;
+                return 0;
 
+            }
+
+            @Override
+            public long maxIndex() {
+                return 10;
             }
         };
         graphStore.addGraphProperty("prop", values);

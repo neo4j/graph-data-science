@@ -159,7 +159,7 @@ class CommunityProcCompanionTest {
 
         LongNodePropertyValues sparseProperties = new TestSparseNodePropertyValues(4, 3, input::get);
 
-        var config = ConfigWithComponentSize.of(CypherMapWrapper.create(Map.of("minComponentSize", 2L, "consecutiveIds", true)));
+        var config = ConfigWithComponentSize.of(CypherMapWrapper.create(Map.of("consecutiveIds", true)));
 
         var filteredProperties = CommunityProcCompanion.nodeProperties(
             config,
@@ -172,7 +172,7 @@ class CommunityProcCompanionTest {
         assertThat(filteredProperties.value(0)).isNull();
         assertThat(filteredProperties.value(1)).isEqualTo(Values.longValue(0));
         // filtered out
-        assertThat(filteredProperties.value(2)).isNull();
+        assertThat(filteredProperties.value(2)).isEqualTo(Values.longValue(1));
         assertThat(filteredProperties.value(3)).isEqualTo(Values.longValue(0));
     }
 
@@ -190,6 +190,11 @@ class CommunityProcCompanionTest {
 
         @Override
         public long valuesStored() {
+            return 0;
+        }
+
+        @Override
+        public long maxIndex() {
             return size;
         }
 
@@ -219,7 +224,8 @@ class CommunityProcCompanionTest {
             return valuesStored;
         }
 
-        public long size() {
+        @Override
+        public long maxIndex() {
             return size;
         }
 

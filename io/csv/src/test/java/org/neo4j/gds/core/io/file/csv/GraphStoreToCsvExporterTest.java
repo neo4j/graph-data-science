@@ -236,12 +236,17 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         var graphPropertyValues = new LongGraphPropertyValues() {
             @Override
             public long valuesStored() {
+                return 0;
+            }
+
+            @Override
+            public long maxIndex() {
                 return 3;
             }
 
             @Override
             public LongStream longValues() {
-                return LongStream.range(0, valuesStored());
+                return LongStream.range(0, maxIndex());
             }
         };
 
@@ -339,12 +344,17 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         var graphPropertyValues = new LongGraphPropertyValues() {
             @Override
             public long valuesStored() {
+                return 0;
+            }
+
+            @Override
+            public long maxIndex() {
                 return 1_000_000;
             }
 
             @Override
             public LongStream longValues() {
-                return LongStream.range(0, valuesStored());
+                return LongStream.range(0, maxIndex());
             }
         };
 
@@ -401,11 +411,16 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         graphStore.addGraphProperty("graphProp", new LongGraphPropertyValues() {
             @Override
             public LongStream longValues() {
-                return LongStream.range(0, valuesStored());
+                return LongStream.range(0, maxIndex());
             }
 
             @Override
             public long valuesStored() {
+                return 0;
+            }
+
+            @Override
+            public long maxIndex() {
                 return 3;
             }
         });

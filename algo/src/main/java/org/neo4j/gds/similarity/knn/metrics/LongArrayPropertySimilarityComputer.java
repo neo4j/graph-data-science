@@ -55,7 +55,7 @@ final class LongArrayPropertySimilarityComputer implements SimilarityComputer {
         private final HugeObjectArray<long[]> properties;
 
         SortedLongArrayPropertyValues(NodePropertyValues nodePropertyValues) {
-            this.properties = HugeObjectArray.newArray(long[].class, nodePropertyValues.valuesStored());
+            this.properties = HugeObjectArray.newArray(long[].class, nodePropertyValues.maxIndex());
             this.properties.setAll(i -> {
                 long[] input = nodePropertyValues.longArrayValue(i);
 
@@ -71,6 +71,11 @@ final class LongArrayPropertySimilarityComputer implements SimilarityComputer {
 
         @Override
         public long valuesStored() {
+            return properties.size();
+        }
+
+        @Override
+        public long maxIndex() {
             return properties.size();
         }
 

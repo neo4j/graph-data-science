@@ -122,6 +122,11 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
             }
 
             @Override
+            public long maxIndex() {
+                return context.nodeCount();
+            }
+
+            @Override
             public double doubleValue(long nodeId) {
                 return context.doubleNodeValue(nodeId, NEXT_RANK);
             }

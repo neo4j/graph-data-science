@@ -203,6 +203,11 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
                 public long valuesStored() {
                     return HugeObjectArray.this.size();
                 }
+
+                @Override
+                public long maxIndex() {
+                    return valuesStored();
+                }
             };
         }
         if (cls == double[].class) {
@@ -216,6 +221,11 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
                 public long valuesStored() {
                     return HugeObjectArray.this.size();
                 }
+
+                @Override
+                public long maxIndex() {
+                    return valuesStored();
+                }
             };
         }
         if (cls == long[].class) {
@@ -228,6 +238,11 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
                 @Override
                 public long valuesStored() {
                     return HugeObjectArray.this.size();
+                }
+
+                @Override
+                public long maxIndex() {
+                    return valuesStored();
                 }
             };
         }

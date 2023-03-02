@@ -33,6 +33,11 @@ public final class DoubleArrayTestPropertyValues implements DoubleArrayNodePrope
     }
 
     @Override
+    public long maxIndex() {
+        return -1;
+    }
+
+    @Override
     public double[] doubleArrayValue(long nodeId) {
         return transformer.apply(nodeId);
     }

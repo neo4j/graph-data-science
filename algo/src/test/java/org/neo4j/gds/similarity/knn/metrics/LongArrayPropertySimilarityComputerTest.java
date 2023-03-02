@@ -40,6 +40,11 @@ class LongArrayPropertySimilarityComputerTest {
             public long valuesStored() {
                 return 2;
             }
+
+            @Override
+            public long maxIndex() {
+                return 3;
+            }
         };
 
         var sortedValues = new LongArrayPropertySimilarityComputer.SortedLongArrayPropertyValues(sparseProperties);
