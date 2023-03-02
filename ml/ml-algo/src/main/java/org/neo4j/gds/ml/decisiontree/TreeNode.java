@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.ml.decisiontree;
 
+import java.util.Objects;
+
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -113,5 +115,26 @@ public class TreeNode<PREDICTION extends Number> {
 
         render(sb, node.leftChild, depth + 1);
         render(sb, node.rightChild, depth + 1);
+    }
+
+    private static boolean equals(TreeNode o, TreeNode b) {
+        if (o == null && b != null) return false;
+        if (o != null && b == null) return false;
+        if (o == null && b == null) return true;
+        return o.featureIndex == b.featureIndex && Double.compare(o.thresholdValue, b.thresholdValue) == 0
+               && o.prediction.equals(b.prediction) && TreeNode.equals(o.leftChild, b.leftChild) && TreeNode.equals(o.rightChild, b.rightChild);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || TreeNode.class != o.getClass()) return false;
+        TreeNode<PREDICTION> treeNode = (TreeNode<PREDICTION>) o;
+        return equals(this, treeNode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(prediction, featureIndex, thresholdValue, leftChild, rightChild);
     }
 }
