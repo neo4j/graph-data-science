@@ -23,7 +23,9 @@ import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
 
-public class ScalePropertiesProc {
+public final class ScalePropertiesProc {
+
+    private ScalePropertiesProc() {}
 
     static NodePropertyValues nodeProperties(ComputationResult<ScaleProperties, ScaleProperties.Result, ? extends ScalePropertiesBaseConfig> computationResult) {
         var size = computationResult.graph().nodeCount();
@@ -32,6 +34,11 @@ public class ScalePropertiesProc {
         return new DoubleArrayNodePropertyValues() {
             @Override
             public long valuesStored() {
+                return scaledProperties.size();
+            }
+
+            @Override
+            public long maxIndex() {
                 return size;
             }
 

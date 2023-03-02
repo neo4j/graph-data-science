@@ -169,6 +169,12 @@ public final class PregelBaseProc {
         }
 
         @Override
+        public long maxIndex() {
+            // Its backed by a dense array
+            return longArrays.size();
+        }
+
+        @Override
         public long[] longArrayValue(long nodeId) {
             return longArrays.get(nodeId);
         }
@@ -181,6 +187,12 @@ public final class PregelBaseProc {
 
         @Override
         public long valuesStored() {
+            return doubleArrays.size();
+        }
+
+        @Override
+        public long maxIndex() {
+            // its backed by dense array
             return doubleArrays.size();
         }
 

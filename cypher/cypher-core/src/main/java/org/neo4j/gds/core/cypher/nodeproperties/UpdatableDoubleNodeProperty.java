@@ -38,6 +38,12 @@ public class UpdatableDoubleNodeProperty implements UpdatableNodeProperty, Doubl
 
     @Override
     public long valuesStored() {
+        // FIXME does not reflect sparse array
+        return doubleList.capacity();
+    }
+
+    @Override
+    public long maxIndex() {
         return nodeCount;
     }
 

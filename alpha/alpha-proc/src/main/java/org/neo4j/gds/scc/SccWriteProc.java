@@ -100,6 +100,11 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
                 var properties = new LongNodePropertyValues() {
                     @Override
                     public long valuesStored() {
+                        return components.size();
+                    }
+
+                    @Override
+                    public long maxIndex() {
                         return computationResult.graph().nodeCount();
                     }
 

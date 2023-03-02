@@ -32,22 +32,20 @@ public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues
 
     private final HugeLongArray communities;
 
-    public ConsecutiveLongNodePropertyValues(
-        LongNodePropertyValues longNodeProperties,
-        long nodeCount
-    ) {
+    public ConsecutiveLongNodePropertyValues(LongNodePropertyValues inputProperties) {
         var nextConsecutiveId = -1L;
         var nextSkippableId = -2L; // communities signaled with <0 are skipped and not written
 
+        long maxIdx = inputProperties.maxIndex();
         var setIdToConsecutiveId = new HugeLongLongMap(BitUtil.ceilDiv(
-            nodeCount,
+            maxIdx,
             MAPPING_SIZE_QUOTIENT
         ));
 
-        this.communities = HugeLongArray.newArray(nodeCount);
+        this.communities = HugeLongArray.newArray(maxIdx);
 
-        for (var nodeId = 0; nodeId < nodeCount; nodeId++) {
-            var setId = longNodeProperties.longValue(nodeId);
+        for (var nodeId = 0; nodeId < maxIdx; nodeId++) {
+            var setId = inputProperties.longValue(nodeId);
             var communityId = setIdToConsecutiveId.getOrDefault(setId, -1);
             if (communityId == -1) {
                 //if this is null, it  means this community should not be written
@@ -79,6 +77,11 @@ public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues
 
     @Override
     public long valuesStored() {
+        return communities.size();
+    }
+
+    @Override
+    public long maxIndex() {
         return communities.size();
     }
 }

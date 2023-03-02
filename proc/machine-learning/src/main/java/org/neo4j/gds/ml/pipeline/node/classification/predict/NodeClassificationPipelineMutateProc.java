@@ -98,6 +98,11 @@ public class NodeClassificationPipelineMutateProc
             var properties = new DoubleArrayNodePropertyValues() {
                 @Override
                 public long valuesStored() {
+                    return probabilityProperties.size();
+                }
+
+                @Override
+                public long maxIndex() {
                     return computationResult.graph().nodeCount();
                 }
 

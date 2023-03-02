@@ -62,6 +62,11 @@ class WriteProcCancellationTest extends BaseTest {
             public long valuesStored() {
                 return 42;
             }
+
+            @Override
+            public long maxIndex() {
+                return 42;
+            }
         };
         var nodeProperty = ImmutableNodeProperty.of("prop", nodeProperties);
 

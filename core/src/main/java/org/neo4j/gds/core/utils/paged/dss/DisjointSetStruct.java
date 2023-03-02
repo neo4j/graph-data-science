@@ -80,6 +80,11 @@ public interface DisjointSetStruct {
             public long valuesStored() {
                 return DisjointSetStruct.this.size();
             }
+
+            @Override
+            public long maxIndex() {
+                return DisjointSetStruct.this.size();
+            }
         };
     }
 }

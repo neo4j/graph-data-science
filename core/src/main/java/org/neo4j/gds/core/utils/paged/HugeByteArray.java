@@ -208,6 +208,11 @@ public abstract class HugeByteArray extends HugeArray<byte[], Byte, HugeByteArra
             public long valuesStored() {
                 return HugeByteArray.this.size();
             }
+
+            @Override
+            public long maxIndex() {
+                return valuesStored();
+            }
         };
     }
 

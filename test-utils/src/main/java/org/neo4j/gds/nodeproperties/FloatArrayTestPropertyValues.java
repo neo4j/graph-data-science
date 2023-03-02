@@ -33,6 +33,11 @@ public final class FloatArrayTestPropertyValues implements FloatArrayNodePropert
     }
 
     @Override
+    public long maxIndex() {
+        return -1;
+    }
+
+    @Override
     public float[] floatArrayValue(long nodeId) {
         return transformer.apply(nodeId);
     }

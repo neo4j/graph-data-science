@@ -34,6 +34,11 @@ public final class DoubleTestPropertyValues implements DoubleNodePropertyValues 
     }
 
     @Override
+    public long maxIndex() {
+        return 0;
+    }
+
+    @Override
     public double doubleValue(long nodeId) {
         return transformer.applyAsDouble(nodeId);
     }

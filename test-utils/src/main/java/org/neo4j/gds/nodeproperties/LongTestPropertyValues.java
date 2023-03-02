@@ -33,6 +33,11 @@ public final class LongTestPropertyValues implements LongNodePropertyValues {
     }
 
     @Override
+    public long maxIndex() {
+        return -1;
+    }
+
+    @Override
     public long longValue(long nodeId) {
         return transformer.applyAsLong(nodeId);
     }

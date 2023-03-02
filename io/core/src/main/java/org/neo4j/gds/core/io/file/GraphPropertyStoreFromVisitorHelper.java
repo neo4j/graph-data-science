@@ -98,6 +98,11 @@ final class GraphPropertyStoreFromVisitorHelper {
         }
 
         @Override
+        public long maxIndex() {
+            return -1;
+        }
+
+        @Override
         public LongStream longValues() {
             return (LongStream) mergeStreamFractions(streamFractions).stream();
         }
@@ -113,6 +118,11 @@ final class GraphPropertyStoreFromVisitorHelper {
 
         @Override
         public long valuesStored() {
+            return -1;
+        }
+
+        @Override
+        public long maxIndex() {
             return -1;
         }
 
@@ -137,6 +147,11 @@ final class GraphPropertyStoreFromVisitorHelper {
         }
 
         @Override
+        public long maxIndex() {
+            return -1;
+        }
+
+        @Override
         public Stream<float[]> floatArrayValues() {
             return (Stream<float[]>) mergeStreamFractions(streamFractions).stream();
         }
@@ -156,6 +171,11 @@ final class GraphPropertyStoreFromVisitorHelper {
         }
 
         @Override
+        public long maxIndex() {
+            return -1;
+        }
+
+        @Override
         public Stream<double[]> doubleArrayValues() {
             return (Stream<double[]>) mergeStreamFractions(streamFractions).stream();
         }
@@ -171,6 +191,11 @@ final class GraphPropertyStoreFromVisitorHelper {
 
         @Override
         public long valuesStored() {
+            return -1;
+        }
+
+        @Override
+        public long maxIndex() {
             return -1;
         }
 

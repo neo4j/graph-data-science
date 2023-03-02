@@ -57,6 +57,11 @@ public final class DegreeCentralityProc {
             }
 
             @Override
+            public long maxIndex() {
+                return size;
+            }
+
+            @Override
             public double doubleValue(long nodeId) {
                 return degrees.get(nodeId);
             }

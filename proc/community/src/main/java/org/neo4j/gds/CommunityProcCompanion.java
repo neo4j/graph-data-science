@@ -55,7 +55,7 @@ public final class CommunityProcCompanion {
             return communitySizeFilter(incrementalNodePropertyValues, config);
         } else if (consecutiveIds && !isIncremental) {
             var sizeFilteredPropertyValues = communitySizeFilter(propertyValues, config);
-            return new ConsecutiveLongNodePropertyValues(sizeFilteredPropertyValues, sizeFilteredPropertyValues.valuesStored());
+            return new ConsecutiveLongNodePropertyValues(sizeFilteredPropertyValues);
         } else {
             return communitySizeFilter(propertyValues, config);
         }
@@ -82,7 +82,7 @@ public final class CommunityProcCompanion {
         int concurrency
     ) {
         var communitySizes = CommunityStatistics.communitySizes(
-            nodeProperties.valuesStored(),
+            nodeProperties.maxIndex(),
             nodeProperties::longValue,
             Pools.DEFAULT,
             concurrency
@@ -107,6 +107,11 @@ public final class CommunityProcCompanion {
         @Override
         public long valuesStored() {
             return properties.valuesStored();
+        }
+
+        @Override
+        public long maxIndex() {
+            return properties.maxIndex();
         }
 
         @Override

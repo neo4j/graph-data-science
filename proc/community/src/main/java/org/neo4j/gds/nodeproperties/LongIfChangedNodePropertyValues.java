@@ -79,4 +79,9 @@ public final class LongIfChangedNodePropertyValues implements LongNodePropertyVa
     public long valuesStored() {
         return newProperties.valuesStored();
     }
+
+    @Override
+    public long maxIndex() {
+        return Math.max(newProperties.maxIndex(), seedProperties.maxIndex());
+    }
 }

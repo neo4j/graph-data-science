@@ -66,13 +66,18 @@ public class NodeRegressionPipelineMutateProc
 
     @Override
     protected NodePropertyValues nodeProperties(ComputationResult<NodeRegressionPredictPipelineExecutor, HugeDoubleArray, NodeRegressionPredictPipelineMutateConfig> computationResult) {
-        var size = computationResult.graph().nodeCount();
+        var nodeCount = computationResult.graph().nodeCount();
         var predictedPropertyValues = computationResult.result();
 
         return new DoubleNodePropertyValues() {
             @Override
             public long valuesStored() {
-                return size;
+                return predictedPropertyValues.size();
+            }
+
+            @Override
+            public long maxIndex() {
+                return nodeCount;
             }
 
             @Override

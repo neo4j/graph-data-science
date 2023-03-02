@@ -144,7 +144,12 @@ public abstract class FilteredNodePropertyValues implements NodePropertyValues {
 
     @Override
     public long valuesStored() {
-        return Math.min(properties.valuesStored(), graph.nodeCount());
+        return properties.valuesStored();
+    }
+
+    @Override
+    public long maxIndex() {
+        return graph.nodeCount();
     }
 
     // This class is used when the ID space of the wrapped properties is wider than the id space used to retrieved node properties.

@@ -419,6 +419,11 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             public long valuesStored() {
                 return currentCommunities.size();
             }
+
+            @Override
+            public long maxIndex() {
+                return graph.nodeCount();
+            }
         };
     }
 }
