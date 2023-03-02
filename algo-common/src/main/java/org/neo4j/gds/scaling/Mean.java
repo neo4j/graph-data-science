@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutorService;
 
 public final class Mean extends ScalarScaler {
 
-    public static final String NAME = "mean";
+    public static final String TYPE = "mean";
     final double avg;
     final double maxMinDiff;
 
@@ -51,8 +51,8 @@ public final class Mean extends ScalarScaler {
         mapWrapper.requireOnlyKeysFrom(List.of());
         return new ScalerFactory() {
             @Override
-            public String name() {
-                return NAME;
+            public String type() {
+                return TYPE;
             }
 
             @Override

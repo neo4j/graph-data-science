@@ -128,7 +128,7 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
         };
 
         // Normalize using L2-Norm (Power iteration)
-        var scaler = ScalerFactory.parse(L2Norm.NAME).create(
+        var scaler = ScalerFactory.parse(L2Norm.TYPE).create(
             properties,
             context.nodeCount(),
             concurrency,

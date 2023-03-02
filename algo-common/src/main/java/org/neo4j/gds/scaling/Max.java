@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutorService;
 
 public final class Max extends ScalarScaler {
 
-    public static final String NAME = "max";
+    public static final String TYPE = "max";
     final double maxAbs;
 
     private Max(NodePropertyValues properties, double maxAbs) {
@@ -49,8 +49,8 @@ public final class Max extends ScalarScaler {
         mapWrapper.requireOnlyKeysFrom(List.of());
         return new ScalerFactory() {
             @Override
-            public String name() {
-                return NAME;
+            public String type() {
+                return TYPE;
             }
 
             @Override

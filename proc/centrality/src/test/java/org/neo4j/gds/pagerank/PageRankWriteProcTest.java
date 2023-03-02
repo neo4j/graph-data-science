@@ -123,7 +123,7 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> {
         var query = GdsCypher.call("graphLabel1")
             .algo("pageRank")
             .writeMode()
-            .addParameter("scaler", LogScaler.NAME)
+            .addParameter("scaler", LogScaler.TYPE)
             .addParameter("writeProperty", writeProp)
             .yields("centralityDistribution");
 

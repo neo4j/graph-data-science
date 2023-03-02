@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutorService;
 
 final class Center extends ScalarScaler {
 
-    static final String NAME = "center";
+    static final String TYPE = "center";
     final double avg;
 
     private Center(NodePropertyValues properties, double avg) {
@@ -49,8 +49,8 @@ final class Center extends ScalarScaler {
         mapWrapper.requireOnlyKeysFrom(List.of());
         return new ScalerFactory() {
             @Override
-            public String name() {
-                return NAME;
+            public String type() {
+                return TYPE;
             }
 
             @Override
