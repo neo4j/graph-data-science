@@ -130,6 +130,7 @@ class CommunityProcCompanionTest {
         inputBuilder.set(3, 42);
         var input = inputBuilder.build();
 
+        // we mimic the sparseness here through size > valueStored
         LongNodePropertyValues sparseProperties = new TestSparseNodePropertyValues(4, 3, input::get);
 
         var config = ConfigWithComponentSize.of(CypherMapWrapper.empty().withNumber("minComponentSize", 2L));
@@ -141,10 +142,8 @@ class CommunityProcCompanionTest {
             () -> { throw new UnsupportedOperationException("Not implemented"); }
         );
 
-        // null from the beginning
         assertThat(filteredProperties.value(0)).isNull();
         assertThat(filteredProperties.value(1)).isEqualTo(Values.longValue(42));
-        // filtered out
         assertThat(filteredProperties.value(2)).isNull();
         assertThat(filteredProperties.value(3)).isEqualTo(Values.longValue(42));
     }
@@ -157,6 +156,7 @@ class CommunityProcCompanionTest {
         inputBuilder.set(3, 42);
         var input = inputBuilder.build();
 
+        // we mimic the sparseness here through size > valueStored
         LongNodePropertyValues sparseProperties = new TestSparseNodePropertyValues(4, 3, input::get);
 
         var config = ConfigWithComponentSize.of(CypherMapWrapper.create(Map.of("consecutiveIds", true)));
@@ -168,12 +168,10 @@ class CommunityProcCompanionTest {
             () -> { throw new UnsupportedOperationException("Not implemented"); }
         );
 
-        // null from the beginning
-        assertThat(filteredProperties.value(0)).isNull();
-        assertThat(filteredProperties.value(1)).isEqualTo(Values.longValue(0));
-        // filtered out
-        assertThat(filteredProperties.value(2)).isEqualTo(Values.longValue(1));
-        assertThat(filteredProperties.value(3)).isEqualTo(Values.longValue(0));
+        assertThat(filteredProperties.value(0)).isEqualTo(Values.longValue(0));
+        assertThat(filteredProperties.value(1)).isEqualTo(Values.longValue(1));
+        assertThat(filteredProperties.value(2)).isEqualTo(Values.longValue(2));
+        assertThat(filteredProperties.value(3)).isEqualTo(Values.longValue(1));
     }
 
     private static final class TestNodePropertyValues implements LongNodePropertyValues {
