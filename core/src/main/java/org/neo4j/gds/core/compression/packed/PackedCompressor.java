@@ -40,7 +40,6 @@ public final class PackedCompressor implements AdjacencyCompressor {
     private final Aggregation[] aggregations;
     private final int flags;
 
-
     public static AdjacencyCompressorFactory factory(
         LongSupplier nodeCountSupplier,
         PropertyMappings propertyMappings,
