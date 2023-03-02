@@ -19,11 +19,14 @@
  */
 package org.neo4j.gds.collections.primitive;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.PrimitiveIterator;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PrimitiveLongCollectionsTest {
 
@@ -39,14 +42,14 @@ class PrimitiveLongCollectionsTest {
         };
 
         // WHEN/THEN
-        Assertions.assertTrue(iterator.hasNext());
-        Assertions.assertTrue(iterator.hasNext());
-        Assertions.assertEquals(1L, iterator.nextLong());
-        Assertions.assertTrue(iterator.hasNext());
-        Assertions.assertTrue(iterator.hasNext());
-        Assertions.assertEquals(0L, iterator.nextLong());
-        Assertions.assertFalse(iterator.hasNext());
-        Assertions.assertFalse(iterator.hasNext());
-        Assertions.assertEquals(-1L, count.get());
+        assertTrue(iterator.hasNext());
+        assertTrue(iterator.hasNext());
+        assertEquals(1L, iterator.nextLong());
+        assertTrue(iterator.hasNext());
+        assertTrue(iterator.hasNext());
+        assertEquals(0L, iterator.nextLong());
+        assertFalse(iterator.hasNext());
+        assertFalse(iterator.hasNext());
+        assertEquals(-1L, count.get());
     }
 }
