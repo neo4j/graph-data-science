@@ -1,4 +1,4 @@
-[[create-cypher-db]]
+[[cypher-on-gds]]
 = Cypher on GDS graph
 :description: This chapter explains how to execute Cypher queries on named graphs in the Neo4j Graph Data Science library.
 
@@ -23,14 +23,13 @@ That database will then use data from the projected graph as compared to the sto
 Although it is possible to execute arbitrary Cypher queries on the database created by the `gds.alpha.create.cypherdb` procedure, not every aspect of Cypher is implemented yet.
 Some known limitations are listed below:
 
-* Dropping the newly created database
-** Restarting the DBMS will remove the database instead
-* Writes
-** All queries that attempt to write things, such as nodes, properties or labels, will fail
+* Some writes will fail
+** Creating new nodes and adding node labels
+** Everything related to relationships
 
 
 [[create-cypher-db-syntax]]
-== Syntax
+== Create database syntax
 
 [.create-cypher-db-syntax]
 --
@@ -157,3 +156,28 @@ MATCH (n:Person)-[:KNOWS]->(m:Person) RETURN n.age AS age1, m.age AS age2
 |===
 
 We can see that the returned ages correspond to the structure of the original graph.
+
+
+[[drop-cypher-db]]
+== Dropping a GDS database
+
+As described above, in-memory GDS databases are impermanent and will be removed when the DBMS is shut down.
+If we need to drop the GDS database earlier, there are 2 ways to achieve this:
+ 1. Using an administrative cypher command against the system database (`DROP DATABASE <db-name>`)
+ 2. Using the <<drop-cypher-db-procedure-syntax, `gds.alpha.drop.cypherdb`>> procedure
+
+[[drop-cypher-db-procedure-syntax]]
+=== Drop database syntax
+
+[.drop-cypher-db-syntax]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.drop.cypherdb(
+    dbName: String
+)
+YIELD
+    dbName: String,
+    dropMillis: Integer
+----
+--
