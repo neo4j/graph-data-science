@@ -20,11 +20,11 @@
 package org.neo4j.gds.paths.yens;
 
 import com.carrotsearch.hppc.LongHashSet;
-import com.carrotsearch.hppc.LongObjectScatterMap;
-import com.carrotsearch.hppc.LongScatterSet;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -39,24 +39,20 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.PriorityQueue;
-import java.util.function.BiConsumer;
-import java.util.function.ToLongBiFunction;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class Yens extends Algorithm<DijkstraResult> {
 
-    private static final LongHashSet EMPTY_SET = new LongHashSet(0);
+    static final LongHashSet EMPTY_SET = new LongHashSet(0);
 
     private final Graph graph;
     private final ShortestPathYensBaseConfig config;
     private final Dijkstra dijkstra;
-    private final LongScatterSet nodeAvoidList;
-    private final LongObjectScatterMap<LongHashSet> relationshipAvoidList;
-    private final ToLongBiFunction
-        <MutablePathResult, Integer> relationshipAvoidMapper;
-    private final BiConsumer<MutablePathResult, PathResult> pathAppender;
+
 
 
     /**
@@ -101,38 +97,13 @@ public final class Yens extends Algorithm<DijkstraResult> {
         super(progressTracker);
         this.graph = graph;
         this.config = config;
-        // Track nodes and relationships that are skipped in a single iteration.
-        // The content of these data structures is reset after each of k iterations.
-        this.nodeAvoidList = new LongScatterSet();
-        this.relationshipAvoidList = new LongObjectScatterMap<>();
+
         // set filter in Dijkstra to respect our list of relationships to avoid
         this.dijkstra = dijkstra;
 
-        if (config.trackRelationships()) {
-            // if we are in a multi-graph, we  must store the relationships ids as they are
-            //since two nodes may be connected by multiple relationships and we must know which to avoid
-            relationshipAvoidMapper = (path, position) -> path.relationship(position);
-            pathAppender = (rootPath, spurPath) -> rootPath.append(MutablePathResult.of(spurPath));
-        } else {
-            //otherwise the graph has surely no parallel edges, we do not need to explicitly store relationship ids
-            //we can just store endpoints, so that we know which nodes a node should avoid
-            relationshipAvoidMapper = (path, position) -> path.node(position + 1);
-            pathAppender = (rootPath, spurPath) -> rootPath.appendWithoutRelationshipIds(MutablePathResult.of(spurPath));
-        }
-        dijkstra.withRelationshipFilter((source, target, relationshipId) ->
-            !nodeAvoidList.contains(target)
-            && !shouldAvoidRelationship(source, target, relationshipId)
-
-        );
     }
 
-    private boolean shouldAvoidRelationship(long source, long target, long relationshipId) {
-        long forbidden = config.trackRelationships()
-            ? relationshipId
-            : target;
-        return relationshipAvoidList.getOrDefault(source, EMPTY_SET).contains(forbidden);
 
-    }
 
     @Override
     public DijkstraResult compute() {
@@ -156,71 +127,45 @@ public final class Yens extends Algorithm<DijkstraResult> {
 
         PriorityQueue<MutablePathResult> candidates = initCandidatesQueue();
 
+        AtomicInteger currentSpurIndexId = new AtomicInteger(0);
+
+        var candidateLock = new ReentrantLock();
+        var tasks = createTasks(kShortestPaths, candidates, candidateLock, currentSpurIndexId);
+
         for (int i = 1; i < config.k(); i++) {
             progressTracker.beginSubTask();
             var prevPath = kShortestPaths.get(i - 1);
-
-            for (int n = 0; n < prevPath.nodeCount() - 1; n++) {
-                var spurNode = prevPath.node(n);
-                var rootPath = prevPath.subPath(n + 1);
-
-                for (var path : kShortestPaths) {
-                    // Filter relationships that are part of the previous
-                    // shortest paths which share the same root path.
-                    if (rootPath.matchesExactly(path, n + 1)) {
-                        var relationshipId = relationshipAvoidMapper.applyAsLong(path, n);
-
-                        var neighbors = relationshipAvoidList.get(spurNode);
-
-                        if (neighbors == null) {
-                            neighbors = new LongHashSet();
-                            relationshipAvoidList.put(spurNode, neighbors);
-                        }
-                        neighbors.add(relationshipId);
-                    }
-                }
-
-                // Filter nodes from root path to avoid cyclic path searches.
-                for (int j = 0; j < n; j++) {
-                    nodeAvoidList.add(rootPath.node(j));
-                }
-
-                // Calculate the spur path from the spur node to the sink.
-                dijkstra.resetTraversalState();
-                dijkstra.withSourceNode(spurNode);
-                var spurPath = computeDijkstra(graph.toOriginalNodeId(spurNode));
-
-                // Clear filters for next spur node
-                nodeAvoidList.clear();
-                relationshipAvoidList.clear();
-
-                // No new candidate from this spur node, continue with next node.
-                if (spurPath.isEmpty()) {
-                    continue;
-                }
-
-                // Entire path is made up of the root path and spur path.
-                pathAppender.accept(rootPath, spurPath.get());
-                
-                // Add the potential k-shortest path to the heap.
-                if (!candidates.contains(rootPath)) {
-                    candidates.add(rootPath);
-                }
+            for (var task : tasks) {
+                task.withPreviousPath(prevPath);
             }
-
-            progressTracker.endSubTask();
+            currentSpurIndexId.set(0);
+            RunWithConcurrency.builder()
+                .concurrency(config.concurrency())
+                .tasks(tasks)
+                .executor(Pools.DEFAULT)
+                .run();
 
             if (candidates.isEmpty()) {
                 break;
             }
-
-            kShortestPaths.add(candidates.poll().withIndex(i));
+            addPathToSolution(i, kShortestPaths, candidates);
+            progressTracker.endSubTask();
         }
         progressTracker.endSubTask();
 
         progressTracker.endSubTask();
 
         return new DijkstraResult(kShortestPaths.stream().map(MutablePathResult::toPathResult));
+    }
+
+    private void addPathToSolution(
+        int index,
+        ArrayList<MutablePathResult> kShortestPaths,
+        PriorityQueue<MutablePathResult> candidates
+    ) {
+        var pathToAdd = candidates.poll();
+        pathToAdd.withIndex(index);
+        kShortestPaths.add(pathToAdd);
     }
 
     @NotNull
@@ -235,4 +180,27 @@ public final class Yens extends Algorithm<DijkstraResult> {
         return dijkstra.compute().findFirst();
     }
 
+    private ArrayList<YensTask> createTasks(
+        ArrayList<MutablePathResult> kShortestPaths,
+        PriorityQueue<MutablePathResult> candidates,
+        ReentrantLock candidateLock,
+        AtomicInteger currentSpurIndexId
+    ) {
+        var tasks = new ArrayList<YensTask>();
+        for (int concurrentId = 0; concurrentId < config.concurrency(); ++concurrentId) {
+            tasks.add(new YensTask(
+                graph.concurrentCopy(),
+                config.targetNode(),
+                kShortestPaths,
+                candidateLock,
+                candidates,
+                currentSpurIndexId,
+                config.trackRelationships()
+            ));
+        }
+        return tasks;
+    }
+
 }
+
+

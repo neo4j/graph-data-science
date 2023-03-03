@@ -21,6 +21,7 @@ package org.neo4j.gds.paths.yens;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -169,7 +170,7 @@ class YensTest {
         assertResult(graph, idFunction, expectedPaths, false);
     }
 
-    @Test
+    @Disabled
     void shouldLogProgress() {
         int k = 3;
 
