@@ -5,6 +5,7 @@
 :entity: node
 :result: spanning tree
 :algorithm: k-Spanning Tree heuristic
+:sequential: true
 
 include::partial$/operations-reference/alpha-note.adoc[]
 

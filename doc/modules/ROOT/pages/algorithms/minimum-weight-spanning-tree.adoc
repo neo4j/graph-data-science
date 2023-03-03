@@ -6,6 +6,7 @@
 :entity: relationship
 :result: weight
 :algorithm: Prim
+:sequential: true
 
 include::partial$/operations-reference/beta-note.adoc[]
 

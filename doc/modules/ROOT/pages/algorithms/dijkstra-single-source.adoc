@@ -6,6 +6,7 @@
 :algorithm: Dijkstra
 :source-target: false
 :procedure-name: pass:q[gds.allShortestPaths.dijkstra]
+:sequential: true
 
 
 :directed:
@@ -25,7 +26,7 @@ To compute the shortest path between a source and a target node, xref:algorithms
 
 The GDS implementation is based on the http://www-m3.ma.tum.de/twiki/pub/MN0506/WebHome/dijkstra.pdf[original description] and uses a binary heap as priority queue.
 The implementation is also used for the xref:algorithms/astar.adoc[A*] and xref:algorithms/yens.adoc[Yen's] algorithms, as well as xref:algorithms/betweenness-centrality.adoc[weighted Betweenness Centrality].
-The algorithm implementation is executed using a single thread and altering the concurrency configuration has no effect.
+The algorithm implementation is executed using a single thread.
 You can consider xref:algorithms/delta-single-source.adoc[Delta-Stepping] for an efficient parallel shortest path algorithm instead.
 
 [[algorithms-dijkstra-single-source-syntax]]
