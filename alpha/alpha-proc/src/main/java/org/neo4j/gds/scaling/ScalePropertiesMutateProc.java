@@ -32,6 +32,7 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -70,14 +71,16 @@ public class ScalePropertiesMutateProc extends MutatePropertyProc<ScalePropertie
         ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        return new MutateResult.Builder();
+        return new MutateResult.Builder().withScalerStatistics(computeResult.result().scalerStatistics());
     }
 
     public static final class MutateResult extends StandardMutateResult {
 
+        public final Map<String, Map<String, List<Double>>> scalerStatistics;
         public final long nodePropertiesWritten;
 
         MutateResult(
+            Map<String, Map<String, List<Double>>> scalerStatistics,
             long preProcessingMillis,
             long computeMillis,
             long mutateMillis,
@@ -91,14 +94,23 @@ public class ScalePropertiesMutateProc extends MutatePropertyProc<ScalePropertie
                 mutateMillis,
                 configuration
             );
+            this.scalerStatistics = scalerStatistics;
             this.nodePropertiesWritten = nodePropertiesWritten;
         }
 
         static class Builder extends AbstractResultBuilder<MutateResult> {
 
+            private Map<String, Map<String, List<Double>>> scalerStatistics;
+
+            Builder withScalerStatistics(Map<String, Map<String, List<Double>>> stats) {
+                this.scalerStatistics = stats;
+                return this;
+            }
+
             @Override
             public MutateResult build() {
                 return new MutateResult(
+                    scalerStatistics,
                     preProcessingMillis,
                     computeMillis,
                     mutateMillis,
