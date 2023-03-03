@@ -1,11 +1,11 @@
 ext {
     neos = [
-        '4.4'           : properties.getOrDefault('neo4jVersion44', '4.4.18'),
-        '5.1'           : properties.getOrDefault('neo4jVersion51', '5.1.0'),
-        '5.2'           : properties.getOrDefault('neo4jVersion52', '5.2.0'),
-        '5.3'           : properties.getOrDefault('neo4jVersion53', '5.3.0'),
-        '5.4'           : properties.getOrDefault('neo4jVersion54', '5.4.0'),
-        '5.5'           : properties.getOrDefault('neo4jVersion55', '5.5.0'),
+        '4.4': properties.getOrDefault('neo4jVersion44', '4.4.18'),
+        '5.1': properties.getOrDefault('neo4jVersion51', '5.1.0'),
+        '5.2': properties.getOrDefault('neo4jVersion52', '5.2.0'),
+        '5.3': properties.getOrDefault('neo4jVersion53', '5.3.0'),
+        '5.4': properties.getOrDefault('neo4jVersion54', '5.4.0'),
+        '5.5': properties.getOrDefault('neo4jVersion55', '5.5.0'),
     ]
 
     neo4jDefault = neos.'4.4'
