@@ -22,17 +22,36 @@ package org.neo4j.gds.paths.bellmanford;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+
+import java.util.List;
 
 public class BellmanFordAlgorithmFactory<CONFIG extends BellmanFordBaseConfig> extends GraphAlgorithmFactory<BellmanFord, CONFIG> {
 
     @Override
     public BellmanFord build(Graph graphOrGraphStore, CONFIG configuration, ProgressTracker progressTracker) {
-        return new BellmanFord(graphOrGraphStore,ProgressTracker.NULL_TRACKER,graphOrGraphStore.toMappedNodeId(configuration.sourceNode()),
-            configuration.concurrency());
+        return new BellmanFord(
+            graphOrGraphStore,
+            progressTracker,
+            graphOrGraphStore.toMappedNodeId(configuration.sourceNode()),
+            configuration.concurrency()
+        );
     }
 
     @Override
     public String taskName() {
         return "BellmanFord";
+    }
+
+    @Override
+    public Task progressTask(Graph graphOrGraphStore, BellmanFordBaseConfig config) {
+        return Tasks.iterativeOpen(
+            taskName(),
+            () -> List.of(
+                Tasks.leaf("Relax"),
+                Tasks.leaf("Sync")
+            )
+        );
     }
 }

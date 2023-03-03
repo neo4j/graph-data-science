@@ -21,6 +21,9 @@ package org.neo4j.gds.paths.bellmanford;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
@@ -36,7 +39,12 @@ import org.neo4j.gds.paths.dijkstra.Dijkstra;
 
 import java.util.Optional;
 
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.TestLog.INFO;
 
 @GdlExtension
 class BellmanFordTest {
@@ -190,7 +198,43 @@ class BellmanFordTest {
         assertThat(counter).isEqualTo(6L);
         assertThat(result.containsNegativeCycle()).isFalse();
     }
-    
+
+    @Test
+    void shouldLogProgress() {
+        var config = BellmanFordStatsConfigImpl.builder()
+            .concurrency(4)
+            .sourceNode(idFunction.of("a0"))
+            .build();
+
+        var progressTask = new BellmanFordAlgorithmFactory<>().progressTask(graph, config);
+        var testLog = Neo4jProxy.testLog();
+        var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
+
+        new BellmanFordAlgorithmFactory<>().build(graph, config, progressTracker)
+            .compute()
+            .shortestPaths().pathSet();
+
+        List<AtomicLong> progresses = progressTracker.getProgresses();
+        //  assertEquals(7, progresses.size());
+
+        var messagesInOrder = testLog.getMessages(INFO);
+
+        assertThat(messagesInOrder)
+            // avoid asserting on the thread id
+            .extracting(removingThreadId())
+            .hasSize(8)
+            .containsExactly(
+                "BellmanFord :: Start",
+                "BellmanFord :: Relax 1 :: Start",
+                "BellmanFord :: Relax 1 100%",
+                "BellmanFord :: Relax 1 :: Finished",
+                "BellmanFord :: Sync 1 :: Start",
+                "BellmanFord :: Sync 1 100%",
+                "BellmanFord :: Sync 1 :: Finished",
+                "BellmanFord :: Finished"
+            );
+    }
+
     @Test
     void shouldGiveSameResultsAsDijkstra() {
         int nodeCount = 3_000;

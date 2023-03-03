@@ -62,6 +62,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
 
     @Override
     public BellmanFordResult compute() {
+        progressTracker.beginSubTask();
         var frontier = HugeLongArray.newArray(graph.nodeCount());
         var frontierIndex = new AtomicLong();
         var frontierSize = new AtomicLong();
@@ -92,12 +93,23 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         validBitset.set(sourceNode);
 
         while (frontierSize.get() > 0) {
+            progressTracker.beginSubTask();
             frontierIndex.set(0); // exhaust global queue
-            RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
+            RunWithConcurrency.builder()
+                .tasks(tasks)
+                .concurrency(concurrency)
+                .run();
+            progressTracker.endSubTask();
+            progressTracker.beginSubTask();
             frontierSize.set(0); // fill global queue again
-            RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
+            RunWithConcurrency.builder()
+                .tasks(tasks)
+                .concurrency(concurrency)
+                .run();
+            progressTracker.endSubTask();
         }
 
+        progressTracker.endSubTask();
         return produceResult(negativeCycleFound.get(), distances);
     }
 
