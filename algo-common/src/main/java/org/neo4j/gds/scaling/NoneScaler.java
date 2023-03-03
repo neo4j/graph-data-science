@@ -24,6 +24,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 public class NoneScaler extends ScalarScaler {
@@ -52,7 +53,7 @@ public class NoneScaler extends ScalarScaler {
     }
 
     NoneScaler(NodePropertyValues properties) {
-        super(properties);
+        super(properties, Map.of());
     }
 
     @Override

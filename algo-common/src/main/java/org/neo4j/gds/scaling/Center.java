@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
@@ -35,8 +36,8 @@ final class Center extends ScalarScaler {
     static final String TYPE = "center";
     final double avg;
 
-    private Center(NodePropertyValues properties, double avg) {
-        super(properties);
+    private Center(NodePropertyValues properties, Map<String, List<Double>> statistics, double avg) {
+        super(properties, statistics);
         this.avg = avg;
     }
 
@@ -75,7 +76,7 @@ final class Center extends ScalarScaler {
                 var sum = tasks.stream().mapToDouble(ComputeSum::sum).sum();
                 var avg = sum / nodeCount;
 
-                return new Center(properties, avg);
+                return new Center(properties, Map.of("avg", List.of(avg)), avg);
 
             }
         };

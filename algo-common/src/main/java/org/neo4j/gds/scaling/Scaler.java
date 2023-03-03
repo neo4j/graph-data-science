@@ -23,6 +23,8 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public interface Scaler {
 
@@ -32,9 +34,7 @@ public interface Scaler {
 
     int dimension();
 
-    default Map<String, List<Double>> statistics() {
-        return Map.of();
-    }
+    Map<String, List<Double>> statistics();
 
     class ArrayScaler implements Scaler {
 
@@ -62,6 +62,19 @@ public interface Scaler {
         @Override
         public int dimension() {
             return elementScalers.size();
+        }
+
+
+        // TODO: Add tests for this
+        @Override
+        public Map<String, List<Double>> statistics() {
+            return elementScalers.get(0).statistics().keySet().stream().collect(Collectors.toMap(
+                Function.identity(),
+                stat -> elementScalers
+                    .stream()
+                    .map(scaler -> scaler.statistics().get(stat).get(0))
+                    .collect(Collectors.toList())
+            ));
         }
     }
 

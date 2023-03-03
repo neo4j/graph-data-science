@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
@@ -36,8 +37,8 @@ final class StdScore extends ScalarScaler {
     final double avg;
     final double std;
 
-    private StdScore(NodePropertyValues properties, double avg, double std) {
-        super(properties);
+    private StdScore(NodePropertyValues properties, Map<String, List<Double>> statistics, double avg, double std) {
+        super(properties, statistics);
         this.avg = avg;
         this.std = std;
     }
@@ -86,10 +87,15 @@ final class StdScore extends ScalarScaler {
                 var variance = (squaredSum + avg * (nodeCount * avg - 2 * sum)) / nodeCount;
                 var std = Math.sqrt(variance);
 
+                var statistics = Map.of(
+                    "avg", List.of(avg),
+                    "std", List.of(std)
+                );
+
                 if (Math.abs(std) < CLOSE_TO_ZERO) {
-                    return ZERO;
+                    return new StatsOnly(statistics);
                 } else {
-                    return new StdScore(properties, avg, std);
+                    return new StdScore(properties, statistics, avg, std);
                 }
             }
         };

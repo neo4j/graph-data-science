@@ -26,7 +26,9 @@ import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
@@ -36,10 +38,10 @@ public final class Mean extends ScalarScaler {
     final double avg;
     final double maxMinDiff;
 
-    private Mean(NodePropertyValues properties, double avg, double maxMinDiff) {
-        super(properties);
+    private Mean(NodePropertyValues properties, Map<String, List<Double>> statistics, double avg, double minMaxDiff) {
+        super(properties, statistics);
         this.avg = avg;
-        this.maxMinDiff = maxMinDiff;
+        this.maxMinDiff = minMaxDiff;
     }
 
     @Override
@@ -81,10 +83,18 @@ public final class Mean extends ScalarScaler {
 
                 var maxMinDiff = max - min;
 
+                Map<String, List<Double>> statistics = new HashMap<>(3) {{
+                    put("min", List.of(min));
+                    put("max", List.of(max));
+                }};
+
                 if (Math.abs(maxMinDiff) < CLOSE_TO_ZERO) {
-                    return ZERO;
+                    statistics.put("avg", List.of(maxMinDiff >= 0 ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY));
+                    return new StatsOnly(statistics);
                 } else {
-                    return new Mean(properties, sum / nodeCount, maxMinDiff);
+                    var avg = sum / nodeCount;
+                    statistics.put("avg", List.of(avg));
+                    return new Mean(properties, statistics, avg, maxMinDiff);
                 }
             }
         };

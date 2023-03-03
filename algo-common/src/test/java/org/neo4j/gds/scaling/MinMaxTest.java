@@ -29,6 +29,8 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,6 +57,10 @@ class MinMaxTest {
 
         assertThat(scaler.min).isEqualTo(min);
         assertThat(scaler.maxMinDiff).isEqualTo(max - min);
+        assertThat(scaler.statistics()).containsExactlyEntriesOf(Map.of(
+            "max", List.of(max),
+            "min", List.of(min)
+        ));
 
         for (int i = 0; i < 10; i++) {
             assertThat(scaler.scaleProperty(i)).isEqualTo(i / 9D);

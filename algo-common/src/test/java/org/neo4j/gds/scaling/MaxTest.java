@@ -29,6 +29,8 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 
+import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -61,7 +63,7 @@ class MaxTest {
 
     @ParameterizedTest
     @MethodSource("properties")
-    void scale(int nodeCount, NodePropertyValues properties, double maxAbs, double[] expected) {
+    void scale(int nodeCount, NodePropertyValues properties, double absMax, double[] expected) {
         var scaler = (Max) Max.buildFrom(CypherMapWrapper.empty()).create(
             properties,
             nodeCount,
@@ -70,7 +72,8 @@ class MaxTest {
             Pools.DEFAULT
         );
 
-        assertThat(scaler.maxAbs).isEqualTo(maxAbs);
+        assertThat(scaler.maxAbs).isEqualTo(absMax);
+        assertThat(scaler.statistics()).containsExactlyEntriesOf(Map.of("absMax", List.of(absMax)));
 
         double[] actual = IntStream.range(0, nodeCount).mapToDouble(scaler::scaleProperty).toArray();
         assertThat(actual).containsSequence(expected);

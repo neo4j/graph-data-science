@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
@@ -36,7 +37,7 @@ public final class L1Norm extends ScalarScaler {
     final double l1Norm;
 
     private L1Norm(NodePropertyValues properties, double l1Norm) {
-        super(properties);
+        super(properties, Map.of());
         this.l1Norm = l1Norm;
     }
 
