@@ -61,7 +61,7 @@ class MeanTest {
 
         assertThat(scaler.avg).isEqualTo(avg);
         assertThat(scaler.maxMinDiff).isEqualTo(max - min);
-        assertThat(scaler.statistics()).containsExactlyEntriesOf(Map.of(
+        assertThat(scaler.statistics()).containsExactlyInAnyOrderEntriesOf(Map.of(
             "max", List.of(max),
             "avg", List.of(avg),
             "min", List.of(min)
@@ -83,9 +83,9 @@ class MeanTest {
             Pools.DEFAULT
         );
 
-        assertThat(scaler.statistics()).containsExactlyEntriesOf(Map.of(
+        assertThat(scaler.statistics()).containsExactlyInAnyOrderEntriesOf(Map.of(
             "max", List.of(propValue),
-            "avg", List.of(Double.POSITIVE_INFINITY),
+            "avg", List.of(propValue),
             "min", List.of(propValue)
         ));
 

@@ -26,7 +26,6 @@ import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -82,18 +81,16 @@ public final class Mean extends ScalarScaler {
                 var sum = tasks.stream().mapToDouble(ComputeMaxMinSum::sum).sum();
 
                 var maxMinDiff = max - min;
-
-                Map<String, List<Double>> statistics = new HashMap<>(3) {{
-                    put("min", List.of(min));
-                    put("max", List.of(max));
-                }};
+                var avg = sum / nodeCount;
+                var statistics = Map.of(
+                    "min", List.of(min),
+                    "avg", List.of(avg),
+                    "max", List.of(max)
+                );
 
                 if (Math.abs(maxMinDiff) < CLOSE_TO_ZERO) {
-                    statistics.put("avg", List.of(maxMinDiff >= 0 ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY));
                     return new StatsOnly(statistics);
                 } else {
-                    var avg = sum / nodeCount;
-                    statistics.put("avg", List.of(avg));
                     return new Mean(properties, statistics, avg, maxMinDiff);
                 }
             }
