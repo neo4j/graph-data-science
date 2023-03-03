@@ -42,7 +42,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-class CNARWTest {ß
+class CNARWTest {
 
     @GdlGraph(idOffset = 42)
     private static final String DB_CYPHER =

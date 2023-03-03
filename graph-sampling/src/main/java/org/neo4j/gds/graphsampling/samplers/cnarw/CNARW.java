@@ -33,7 +33,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -41,8 +40,8 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.graphsampling.NodesSampler;
 import org.neo4j.gds.graphsampling.config.CNARWConfig;
+import org.neo4j.gds.similarity.nodesim.OverlapSimilarityComputer;
 
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -189,6 +188,7 @@ public class CNARW implements NodesSampler {
         private final ProgressTracker progressTracker;
 
         private final LongSet startNodesUsed;
+        private OverlapSimilarityComputer overlapSimilarity;
 
         Walker(
             SeenNodes seenNodes,
@@ -209,6 +209,7 @@ public class CNARW implements NodesSampler {
             this.config = config;
             this.progressTracker = progressTracker;
             this.startNodesUsed = new LongHashSet();
+            this.overlapSimilarity = new OverlapSimilarityComputer(0.0);
         }
 
         @Override
@@ -256,29 +257,43 @@ public class CNARW implements NodesSampler {
                     startNodesUsed.add(inputGraph.toOriginalNodeId(currentNode));
                     walksLeft = (int) Math.round(walkQualities.nodeQuality(currentStartNodePosition) * MAX_WALKS_PER_START);
                 } else {
-                    if (totalWeights.isPresent()) {
-                        currentNode = weightedNextNode(currentNode);
-                    } else {
-                        long[] currentNodeNeighbours = getSortedNeighbours(inputGraph, currentNode);
-                        int currentNodeDegree = inputGraph.degree(currentNode);
-                        double q, chanceOutOfNeighbours;
-                        long candidateNode;
-                        do {
-                            int targetOffsetCandidate = rng.nextInt(inputGraph.degree(currentNode));
-                            candidateNode = inputGraph.nthTarget(currentNode, targetOffsetCandidate);
-                            assert candidateNode != IdMap.NOT_FOUND : "The offset '" + targetOffsetCandidate +
-                                                                      "' is bound by the degree but no target could be found for nodeId " + candidateNode;
-                            long[] candidateNodeNeighbours = getSortedNeighbours(inputGraph, candidateNode);
-                            int candidateNodeDegree = inputGraph.degree(candidateNode);
-                            long numberOfCommonNeighbours = Intersections.intersection3(currentNodeNeighbours, candidateNodeNeighbours);
-                            chanceOutOfNeighbours = 1.0D - numberOfCommonNeighbours * 1.0D / Math.min(currentNodeDegree, candidateNodeDegree);
-                            q = rng.nextDouble();
-                        } while (q > chanceOutOfNeighbours);
-                        currentNode = candidateNode;
-                    }
+
+                    double q, chanceOutOfNeighbours;
+                    long candidateNode;
+
+                    long[] currentNodeNeighbours = getSortedNeighbours(inputGraph, currentNode);
+                    var currentWeights = getWeights(inputGraph, currentNode);
+                    do {
+                        int targetOffsetCandidate = rng.nextInt(inputGraph.degree(currentNode));
+                        candidateNode = inputGraph.nthTarget(currentNode, targetOffsetCandidate);
+                        assert candidateNode != IdMap.NOT_FOUND : "The offset '" + targetOffsetCandidate +
+                                                                  "' is bound by the degree but no target could be found for nodeId " + candidateNode;
+                        long[] candidateNodeNeighbours = getSortedNeighbours(inputGraph, candidateNode);
+                        var candidateWeights = getWeights(inputGraph, candidateNode);
+                        chanceOutOfNeighbours = 1.0D - computeChance(
+                            currentNodeNeighbours, currentWeights,
+                            candidateNodeNeighbours, candidateWeights
+                        );
+                        q = rng.nextDouble();
+                    } while (q > chanceOutOfNeighbours);
+
                     nodesConsidered++;
                 }
             }
+        }
+
+        private double computeChance(
+            long[] currentNodeNeighbours, Optional<double[]> currentWeights,
+            long[] candidateNodeNeighbours, Optional<double[]> candidateWeights
+        ) {
+            if (currentWeights.isPresent()) {
+                assert candidateWeights.isPresent();
+                return overlapSimilarity.computeWeightedSimilarity(
+                    currentNodeNeighbours, candidateNodeNeighbours,
+                    currentWeights.get(), candidateWeights.get()
+                );
+            }
+            return overlapSimilarity.computeSimilarity(currentNodeNeighbours, candidateNodeNeighbours);
         }
 
         private long[] getSortedNeighbours(Graph inputGraph, long nodeId) {
@@ -288,8 +303,18 @@ public class CNARW implements NodesSampler {
                 neighbours[idx.getAndIncrement()] = dst;
                 return true;
             });
-            Arrays.sort(neighbours);
             return neighbours;
+        }
+
+        private Optional<double[]> getWeights(Graph inputGraph, long nodeId) {
+            if (totalWeights.isEmpty()) return Optional.empty();
+            double[] weights = new double[inputGraph.degree(nodeId)];
+            var idx = new AtomicInteger(0);
+            inputGraph.forEachRelationship(nodeId, 0.0, (src, dst, w) -> {
+                weights[idx.getAndIncrement()] = w;
+                return true;
+            });
+            return Optional.of(weights);
         }
 
         private double computeDegree(long currentNode) {
@@ -308,24 +333,6 @@ public class CNARW implements NodesSampler {
             }
 
             return presentTotalWeights.get(currentNode);
-        }
-
-        private long weightedNextNode(long currentNode) {
-            var remainingMass = new MutableDouble(rng.nextDouble(0, computeDegree(currentNode)));
-            var target = new MutableLong(INVALID_NODE_ID);
-
-            inputGraph.forEachRelationship(currentNode, 0.0, (src, trg, weight) -> {
-                if (remainingMass.doubleValue() < weight) {
-                    target.setValue(trg);
-                    return false;
-                }
-                remainingMass.subtract(weight);
-                return true;
-            });
-
-            assert target.getValue() != -1;
-
-            return target.getValue();
         }
 
         public LongSet startNodesUsed() {
