@@ -145,7 +145,6 @@ public class YensTask implements Runnable {
         for (var path : kShortestPaths) {
             // Filter relationships that are part of the previous
             // shortest paths which share the same root path.
-            System.out.println(path.toString() + " " + rootPath.toString());
             if (rootPath.matchesExactly(path, indexId + 1)) {
                 var avoidId = relationshipAvoidMapper.applyAsLong(path, indexId);
                 neighbors[allNeighbors++] = avoidId;
@@ -168,6 +167,10 @@ public class YensTask implements Runnable {
 
         // Entire path is made up of the root path and spur path.
         pathAppender.accept(rootPath, spurPath.get());
+
+        //https://en.wikipedia.org/wiki/Yen%27s_algorithm#Lawler's_modification
+        //We store the index of the spur node
+        //so that if this path ever gets selected, we know where to start from
         rootPath.withIndex(indexId);
         // Add the potential k-shortest path to the heap.
         candidateLock.lock();

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.paths.yens;
 
-import com.carrotsearch.hppc.LongHashSet;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
@@ -45,8 +44,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
 
 public final class Yens extends Algorithm<DijkstraResult> {
-
-    static final LongHashSet EMPTY_SET = new LongHashSet(0);
 
     private final Graph graph;
     private final ShortestPathYensBaseConfig config;
@@ -132,11 +129,10 @@ public final class Yens extends Algorithm<DijkstraResult> {
         }
         progressTracker.endSubTask();
 
-        return new DijkstraResult
-            (
-                kShortestPaths.stream().map(MutablePathResult::toPathResult),
-                progressTracker::endSubTask
-            );
+        return new DijkstraResult(
+            kShortestPaths.stream().map(MutablePathResult::toPathResult),
+            progressTracker::endSubTask
+        );
     }
 
     private void addPathToSolution(
@@ -147,9 +143,10 @@ public final class Yens extends Algorithm<DijkstraResult> {
     ) {
         var pathToAdd = candidates.poll();
         int newIndex = (int) pathToAdd.index();
-        pathToAdd.withIndex(index);
+        currentSpurIndexId.set(newIndex);   //Apply lawler's modification
+        pathToAdd.withIndex(index); //set the correct index to this path
         kShortestPaths.add(pathToAdd);
-        currentSpurIndexId.set(newIndex);
+
     }
 
     @NotNull
@@ -197,7 +194,7 @@ public final class Yens extends Algorithm<DijkstraResult> {
 
         return ImmutableShortestPathDijkstraStreamConfig
             .builder()
-            .sourceNode(targetNode) //this irrelevant
+            .sourceNode(targetNode) //this is irrelevant
             .targetNode(targetNode)
             .trackRelationships(trackRelationships)
             .build();
