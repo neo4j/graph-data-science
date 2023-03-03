@@ -19,11 +19,14 @@
  */
 package org.neo4j.gds.paths.yens;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
-import org.neo4j.gds.paths.dijkstra.config.ImmutableShortestPathDijkstraStreamConfig;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,7 +42,7 @@ public class YensTask implements Runnable {
     // Track nodes and relationships that are skipped in a single iteration.
     // The content of these data structures is reset after each of k iterations.
     private final long[] neighbors;
-    private final Dijkstra localDijkstra;
+    private @Nullable Dijkstra localDijkstra;
     private final ArrayList<MutablePathResult> kShortestPaths;
     private MutablePathResult previousPath;
     private final ReentrantLock candidateLock;
@@ -50,10 +53,17 @@ public class YensTask implements Runnable {
     private final ToLongBiFunction
         <MutablePathResult, Integer> relationshipAvoidMapper;
     private final BiConsumer<MutablePathResult, PathResult> pathAppender;
+    private final long targetNode;
 
     private long filteringSpurNode;
     private int allNeighbors;
     private int neighborIndex;
+
+    public static MemoryEstimation memoryEstimation(int k, boolean trackRelationships) {
+        return MemoryEstimations.builder(YensTask.class)
+            .fixed("neighbors", MemoryUsage.sizeOfLongArray(k))
+            .add("Dijkstra", Dijkstra.memoryEstimation(trackRelationships)).build();
+    }
 
     YensTask(
         Graph graph,
@@ -67,25 +77,10 @@ public class YensTask implements Runnable {
     ) {
         this.currentSpurIndexId = currentSpurIndexId;
         this.localGraph = graph;
-        this.trackRelationships=trackRelationships;
-        var newConfig = ImmutableShortestPathDijkstraStreamConfig
-            .builder()
-            .sourceNode(targetNode)
-            .targetNode(targetNode)
-            .trackRelationships(trackRelationships)
-            .build();
-        this.localDijkstra = Dijkstra.sourceTarget(
-            localGraph,
-            newConfig,
-            Optional.empty(),
-            ProgressTracker.NULL_TRACKER
-        );
-        localDijkstra.withRelationshipFilter((source, target, relationshipId) -> validRelationship(
-                source,
-                target,
-                relationshipId
-            )
-        );
+        this.trackRelationships = trackRelationships;
+        this.targetNode = targetNode;
+        this.localDijkstra = null;
+
 
         this.kShortestPaths = kShortestPaths;
         this.candidates = candidates;
@@ -116,6 +111,9 @@ public class YensTask implements Runnable {
     public void run() {
         int indexId = currentSpurIndexId.getAndIncrement();
         while (indexId < maxLength) {
+            if (localDijkstra == null) {
+                setupDijkstra();
+            }
             process(indexId);
             indexId = currentSpurIndexId.getAndIncrement();
         }
@@ -200,6 +198,20 @@ public class YensTask implements Runnable {
 
         return true;
 
+    }
+
+    private void setupDijkstra() {
+
+        this.localDijkstra = Dijkstra.sourceTarget(
+            localGraph,
+            Yens.dijkstraConfig(targetNode, localGraph.isMultiGraph()),
+            Optional.empty(),
+            ProgressTracker.NULL_TRACKER
+        );
+
+        localDijkstra.withRelationshipFilter((source, target, relationshipId) ->
+            validRelationship(source, target, relationshipId)
+        );
     }
 
 }

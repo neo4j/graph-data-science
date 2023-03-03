@@ -28,10 +28,11 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.paths.PathResult;
+import org.neo4j.gds.paths.ShortestPathBaseConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
+import org.neo4j.gds.paths.dijkstra.config.ImmutableShortestPathDijkstraStreamConfig;
 import org.neo4j.gds.paths.yens.config.ImmutableShortestPathYensBaseConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 
@@ -43,17 +44,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
 public final class Yens extends Algorithm<DijkstraResult> {
 
     static final LongHashSet EMPTY_SET = new LongHashSet(0);
 
     private final Graph graph;
     private final ShortestPathYensBaseConfig config;
-    private final Dijkstra dijkstra;
-
-
 
     /**
      * Configure Yens to compute at most one source-target shortest path.
@@ -74,35 +70,22 @@ public final class Yens extends Algorithm<DijkstraResult> {
             .from(config)
             .trackRelationships(shouldTrackRelationships)
             .build();
-        // Init dijkstra algorithm for computing shortest paths
-        var dijkstra = Dijkstra.sourceTarget(graph, newConfig, Optional.empty(), progressTracker);
-        return new Yens(graph, dijkstra, newConfig, progressTracker);
+
+        return new Yens(graph, newConfig, progressTracker);
     }
 
-    // The blacklists contain nodes and relationships that are
-    // "forbidden" to be traversed by Dijkstra. The size of that
-    // blacklist is not known upfront and depends on the length
-    // of the found paths.
-    private static final long AVERAGE_BLACKLIST_SIZE = 10L;
-
-    public static MemoryEstimation memoryEstimation() {
-        return MemoryEstimations.builder(Yens.class.getSimpleName())
-            .add("Dijkstra", Dijkstra.memoryEstimation(false))
-            .fixed("nodeBlackList", MemoryUsage.sizeOfLongArray(AVERAGE_BLACKLIST_SIZE))
-            .fixed("relationshipBlackList", MemoryUsage.sizeOfLongArray(AVERAGE_BLACKLIST_SIZE * 2))
+    public static MemoryEstimation memoryEstimation(int k, boolean trackRelationships) {
+        return MemoryEstimations.builder(Yens.class)
+            .perThread("Yens Task", YensTask.memoryEstimation(k, trackRelationships))
             .build();
     }
 
-    private Yens(Graph graph, Dijkstra dijkstra, ShortestPathYensBaseConfig config, ProgressTracker progressTracker) {
+    private Yens(Graph graph, ShortestPathYensBaseConfig config, ProgressTracker progressTracker) {
         super(progressTracker);
         this.graph = graph;
         this.config = config;
 
-        // set filter in Dijkstra to respect our list of relationships to avoid
-        this.dijkstra = dijkstra;
-
     }
-
 
 
     @Override
@@ -112,7 +95,8 @@ public final class Yens extends Algorithm<DijkstraResult> {
         // compute top 1 shortest path
         progressTracker.beginSubTask();
         progressTracker.beginSubTask();
-        var shortestPath = computeDijkstra(config.sourceNode());
+
+        var shortestPath = findFirstPath();
 
         // no shortest path has been found
         if (shortestPath.isEmpty()) {
@@ -178,11 +162,6 @@ public final class Yens extends Algorithm<DijkstraResult> {
             .thenComparingInt(MutablePathResult::nodeCount));
     }
 
-    private Optional<PathResult> computeDijkstra(long sourceNode) {
-        progressTracker.logInfo(formatWithLocale("Dijkstra for spur node %d", sourceNode));
-        return dijkstra.compute().findFirst();
-    }
-
     private ArrayList<YensTask> createTasks(
         ArrayList<MutablePathResult> kShortestPaths,
         PriorityQueue<MutablePathResult> candidates,
@@ -203,6 +182,28 @@ public final class Yens extends Algorithm<DijkstraResult> {
             ));
         }
         return tasks;
+    }
+
+    private Optional<PathResult> findFirstPath() {
+
+        var dijkstra = Dijkstra.sourceTarget(
+            graph,
+            config,
+            Optional.empty(),
+            ProgressTracker.NULL_TRACKER
+        );
+        var result = dijkstra.compute();
+        return result.findFirst();
+    }
+
+    static ShortestPathBaseConfig dijkstraConfig(long targetNode, boolean trackRelationships) {
+
+        return ImmutableShortestPathDijkstraStreamConfig
+            .builder()
+            .sourceNode(targetNode) //this irrelevant
+            .targetNode(targetNode)
+            .trackRelationships(trackRelationships)
+            .build();
     }
 
 }

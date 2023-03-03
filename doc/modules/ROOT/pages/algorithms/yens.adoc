@@ -6,8 +6,6 @@
 :algorithm: Yen's
 :source-target: true
 :procedure-name: pass:q[gds.shortestPath.yens]
-:sequential: true
-
 
 :directed:
 :undirected:
@@ -118,7 +116,7 @@ RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 6         | 9                 | 1008      | 1008      | "1008 Bytes"
+| 6         | 9                 | 4736      | 4736      | "4736 Bytes"
 |===
 --
 

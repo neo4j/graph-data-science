@@ -69,19 +69,30 @@ class YensTest {
 
     static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
-            Arguments.of(1_000, 40_888L),
-            Arguments.of(1_000_000, 40_125_760L),
-            Arguments.of(1_000_000_000, 40_131_104_400L)
+            Arguments.of(1_000, 3, 1, 56_992L),
+            Arguments.of(1_000, 3, 4, 227_872L),
+
+            Arguments.of(1_000_000, 3, 1, 56_125_864L),
+            Arguments.of(1_000_000, 3, 4, 224_503_360L),
+
+            Arguments.of(1_000_000_000, 3, 1, 56_133_545_960L),
+            Arguments.of(1_000_000_000, 3, 4, 224_534_183_744L)
+
         );
     }
 
     @ParameterizedTest
     @MethodSource("expectedMemoryEstimation")
-    void shouldComputeMemoryEstimation(int nodeCount, long expectedBytes) {
+    void shouldComputeMemoryEstimation(
+        int nodeCount,
+        int k,
+        int concurrency,
+        long expectedBytes
+    ) {
         TestSupport.assertMemoryEstimation(
-            Yens::memoryEstimation,
+            () -> Yens.memoryEstimation(k, true),
             nodeCount,
-            1,
+            concurrency,
             MemoryRange.of(expectedBytes)
         );
     }

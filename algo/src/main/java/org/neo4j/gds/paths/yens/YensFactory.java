@@ -34,7 +34,8 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> extends Grap
 
     @Override
     public MemoryEstimation memoryEstimation(ShortestPathYensBaseConfig configuration) {
-        return Yens.memoryEstimation();
+        //it is more likely that trackRelationships is true than false
+        return Yens.memoryEstimation(configuration.k(), true);
     }
 
     @Override
