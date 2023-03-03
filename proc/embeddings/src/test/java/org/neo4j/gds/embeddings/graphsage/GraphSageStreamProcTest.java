@@ -28,14 +28,11 @@ import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.QueryExecutionException;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GraphSageStreamProcTest extends GraphSageBaseProcTest {
 
@@ -52,13 +49,12 @@ class GraphSageStreamProcTest extends GraphSageBaseProcTest {
             .yields();
 
         runQueryWithRowConsumer(query, Map.of("embeddingDimension", embeddingDimension), row -> {
-            Number nodeId = row.getNumber("nodeId");
-            assertNotNull(nodeId);
+            assertThat(row.getNumber("nodeId"))
+                .isNotNull();
 
-            Object o = row.get("embedding");
-            assertTrue(o instanceof List);
-            Collection<Double> nodeEmbeddings = (List<Double>) o;
-            assertEquals(embeddingDimension, nodeEmbeddings.size());
+            assertThat(row.get("embedding"))
+                .asList()
+                .hasSize(embeddingDimension);
         });
     }
 

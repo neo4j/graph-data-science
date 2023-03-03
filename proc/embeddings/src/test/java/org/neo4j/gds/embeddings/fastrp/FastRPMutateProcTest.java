@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.FLOAT_ARRAY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig>
@@ -109,7 +110,8 @@ class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig>
     void shouldMutateNonZeroEmbeddings(List<Float> weights, double propertyRatio) {
         List<String> featureProperties = propertyRatio == 0 ? List.of() : List.of("f1", "f2");
         int embeddingDimension = 128;
-        GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call(mutateGraphName().get())
+        var mutateGraphName = mutateGraphName().orElseThrow();
+        GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call(mutateGraphName)
             .algo("fastRP")
             .mutateMode()
             .addParameter("embeddingDimension", embeddingDimension)
@@ -126,11 +128,12 @@ class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig>
 
         String expectedResultQuery = formatWithLocale(
             "MATCH (n:Node) RETURN gds.util.nodeProperty('%s', id(n), 'embedding') as embedding",
-            mutateGraphName().get()
+            mutateGraphName
         );
 
         runQueryWithRowConsumer(expectedResultQuery, row -> {
-            assertThat((float[]) row.get("embedding"))
+            assertThat(row.get("embedding"))
+                .asInstanceOf(FLOAT_ARRAY)
                 .hasSize(embeddingDimension)
                 .matches(vector -> FloatVectorOperations.anyMatch(vector, v -> v != 0.0));
         });
@@ -173,8 +176,10 @@ class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig>
         );
 
         runQueryWithRowConsumer(expectedResultQuery, row -> {
-            assertThat((float[]) row.get("embedding"))
-                .isEqualTo(expectedEmbeddings.get(Math.toIntExact((Long) row.get("nodeId"))));
+            var currentNode = row.getNumber("nodeId").longValue();
+            assertThat(row.get("embedding"))
+                .asInstanceOf(FLOAT_ARRAY)
+                .isEqualTo(expectedEmbeddings.get(Math.toIntExact(currentNode)));
         });
     }
 }

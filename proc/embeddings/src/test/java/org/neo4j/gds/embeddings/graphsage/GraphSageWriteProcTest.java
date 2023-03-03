@@ -30,8 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class GraphSageWriteProcTest extends GraphSageBaseProcTest {
 
@@ -48,12 +48,12 @@ class GraphSageWriteProcTest extends GraphSageBaseProcTest {
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
-            assertNotNull(row.get("nodeCount"));
-            assertNotNull(row.get("nodePropertiesWritten"));
-            assertNotNull(row.get("preProcessingMillis"));
-            assertNotNull(row.get("computeMillis"));
-            assertNotNull(row.get("writeMillis"));
-            assertNotNull(row.get("configuration"));
+            assertThat(row.get("nodeCount")).isNotNull();
+            assertThat(row.get("nodePropertiesWritten")).isNotNull();
+            assertThat(row.get("preProcessingMillis")).isNotNull();
+            assertThat(row.get("computeMillis")).isNotNull();
+            assertThat(row.get("writeMillis")).isNotNull();
+            assertThat(row.get("configuration")).isNotNull();
         });
 
         List<Map<String, Object>> results = new ArrayList<>();
@@ -94,11 +94,11 @@ class GraphSageWriteProcTest extends GraphSageBaseProcTest {
             .addParameter("writeProperty", modelName)
             .yields();
 
-        assertThatThrownBy(() -> runQuery(query))
-            .isInstanceOf(QueryExecutionException.class)
-            .hasRootCauseInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("The feature properties %s are not present for all requested labels.", StringJoining.join(nodeProperties))
-            .hasMessageContaining("Requested labels: %s", StringJoining.join(label))
-            .hasMessageContaining("Properties available on all requested labels: %s", StringJoining.join(graphProperties));
+        assertThatExceptionOfType(QueryExecutionException.class)
+            .isThrownBy(() -> runQuery(query))
+            .withRootCauseInstanceOf(IllegalArgumentException.class)
+            .withMessageContaining("The feature properties %s are not present for all requested labels.", StringJoining.join(nodeProperties))
+            .withMessageContaining("Requested labels: %s", StringJoining.join(label))
+            .withMessageContaining("Properties available on all requested labels: %s", StringJoining.join(graphProperties));
     }
 }

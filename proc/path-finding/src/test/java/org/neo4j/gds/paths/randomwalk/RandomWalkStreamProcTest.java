@@ -43,7 +43,6 @@ import java.util.concurrent.locks.LockSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assumptions.assumeThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.TestSupport.assertCypherMemoryEstimation;
 
 @SuppressWarnings("unchecked")
@@ -90,13 +89,14 @@ class RandomWalkStreamProcTest extends BaseProcTest {
         runQueryWithRowConsumer(query, row -> result.add((List<Long>) row.get("nodeIds")));
 
         int expectedNumberOfWalks = 3 * 3;
-        assertEquals(expectedNumberOfWalks, result.size());
+        assertThat(result).hasSize(expectedNumberOfWalks);
+
         List<Long> walkForNodeZero = result
             .stream()
             .filter(arr -> arr.get(0) == 0)
             .findFirst()
             .orElse(List.of());
-        assertEquals(10, walkForNodeZero.size());
+        assertThat(walkForNodeZero).hasSize(10);
     }
 
 
@@ -122,7 +122,7 @@ class RandomWalkStreamProcTest extends BaseProcTest {
             var path = paths.get(i);
 
             AtomicInteger indexInPath = new AtomicInteger(0);
-            path.nodes().forEach(node -> assertEquals(node.getId(), nodes.get(indexInPath.getAndIncrement())));
+            path.nodes().forEach(node -> assertThat(nodes.get(indexInPath.getAndIncrement())).isEqualTo(node.getId()));
         }
     }
 

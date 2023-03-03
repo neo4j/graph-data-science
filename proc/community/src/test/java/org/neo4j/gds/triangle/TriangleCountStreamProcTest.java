@@ -23,9 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 class TriangleCountStreamProcTest extends TriangleCountBaseProcTest<TriangleCountStreamConfig> {
 
@@ -34,14 +33,13 @@ class TriangleCountStreamProcTest extends TriangleCountBaseProcTest<TriangleCoun
 
         var query = "CALL gds.triangleCount.stream('" + DEFAULT_GRAPH_NAME + "')";
 
-        var rowCount = new AtomicInteger();
-
-        runQueryWithRowConsumer(query, row -> {
-            assertEquals(1L, row.getNumber("triangleCount"));
-            rowCount.incrementAndGet();
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("triangleCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(1L);
         });
 
-        assertEquals(3, rowCount.get());
+        assertThat(rowCount).isEqualTo(3L);
     }
 
     @Override

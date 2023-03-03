@@ -26,7 +26,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class LocalClusteringCoefficientStreamProcTest extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientStreamConfig> {
 
@@ -66,7 +66,7 @@ class LocalClusteringCoefficientStreamProcTest extends LocalClusteringCoefficien
                     nodeId
                 ), row -> {
                     String name = row.getString("name");
-                    assertEquals(coefficient, expectedResult.get(name));
+                    assertThat(expectedResult.get(name)).isEqualTo(coefficient);
                 });
             }
         );

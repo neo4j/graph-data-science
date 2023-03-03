@@ -64,9 +64,10 @@ class HashGNNStreamProcTest extends HashGNNProcTest<HashGNNStreamConfig> {
         String query = queryBuilder.yields();
 
         runQueryWithRowConsumer(query, row -> {
-            assertThat((List<Double>) row.get("embedding"))
+            assertThat(row.get("embedding"))
+                .asList()
                 .hasSize(3)
-                .anyMatch(value -> value != 0.0);
+                .anySatisfy(value -> assertThat(value).isNotEqualTo(0.0));
         });
     }
 }

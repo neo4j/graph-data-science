@@ -23,6 +23,7 @@ import org.assertj.core.api.HamcrestCondition;
 import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
 import org.intellij.lang.annotations.RegExp;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
@@ -145,7 +146,7 @@ public class BaseProcTest extends BaseTest {
         }
     }
 
-    protected void assertUserInput(Result.ResultRow row, String key, Object expected) {
+    protected void assertUserInput(Result.ResultRow row, String key, @Nullable Object expected) {
         Map<String, Object> configMap = extractUserInput(row);
         assertTrue(configMap.containsKey(key), formatWithLocale("Key %s is not present in config", key));
         assertEquals(expected, configMap.get(key));

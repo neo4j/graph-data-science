@@ -31,11 +31,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class LocalClusteringCoefficientWriteProcTest
     extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientWriteConfig> {
@@ -113,9 +112,11 @@ class LocalClusteringCoefficientWriteProcTest
             writeProperty
         ), (row) -> {
             double lcc = row.getNumber("localCC").doubleValue();
-            String name = row.getString("name");
-            Double expectedLcc = expectedResult.get(name);
-            assertEquals(expectedLcc, lcc, formatWithLocale("Node with name `%s` has wrong coefficient", name));
+            var name = row.getString("name");
+            var expectedLcc = expectedResult.get(name);
+            assertThat(lcc)
+                .as("Node with name `%s` has wrong coefficient", name)
+                .isEqualTo(expectedLcc);
         });
     }
 

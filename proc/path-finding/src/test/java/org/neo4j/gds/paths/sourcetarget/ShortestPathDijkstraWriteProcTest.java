@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -46,9 +45,6 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.neo4j.gds.config.WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY;
 import static org.neo4j.gds.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
 import static org.neo4j.gds.paths.PathTestUtil.validationQuery;
@@ -135,25 +131,23 @@ class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<Sho
         runQuery(query);
 
         var validationQuery = "MATCH ()-[r:%s]->() RETURN r.nodeIds AS nodeIds, r.costs AS costs";
-        var rowCount = new MutableInt(0);
-        runQueryWithRowConsumer(formatWithLocale(validationQuery, WRITE_RELATIONSHIP_TYPE), row -> {
-            rowCount.increment();
+        var rowCount = runQueryWithRowConsumer(formatWithLocale(validationQuery, WRITE_RELATIONSHIP_TYPE), row -> {
             var nodeIds = row.get("nodeIds");
             var costs = row.get("costs");
 
             if (writeNodeIds) {
-                assertNotNull(nodeIds);
+                assertThat(nodeIds).isNotNull();
             } else {
-                assertNull(nodeIds);
+                assertThat(nodeIds).isNull();
             }
 
             if (writeCosts) {
-                assertNotNull(costs);
+                assertThat(costs).isNotNull();
             } else {
-                assertNull(costs);
+                assertThat(costs).isNull();
             }
         });
-        assertEquals(1, rowCount.getValue());
+        assertThat(rowCount).isEqualTo(1);
     }
 
     @Test
