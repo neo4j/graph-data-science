@@ -66,7 +66,7 @@ public class HashGNNMutateProc extends MutatePropertyProc<HashGNN, HashGNN.HashG
 
     @Override
     protected NodePropertyValues nodeProperties(ComputationResult<HashGNN, HashGNN.HashGNNResult, HashGNNMutateConfig> computationResult) {
-        return HashGNNProcCompanion.getNodeProperties(computationResult);
+        return computationResult.result().embeddings();
     }
 
     @Override
@@ -84,7 +84,7 @@ public class HashGNNMutateProc extends MutatePropertyProc<HashGNN, HashGNN.HashG
 
     @Override
     public GraphAlgorithmFactory<HashGNN, HashGNNMutateConfig> algorithmFactory() {
-        return new HashGNNFactory();
+        return new HashGNNFactory<>();
     }
 
     @SuppressWarnings("unused")

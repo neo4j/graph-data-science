@@ -33,6 +33,8 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.LongUnaryOperator;
 
 public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithmFactory<HashGNN, CONFIG> {
 
@@ -118,11 +120,22 @@ public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithm
                 config.heterogeneous() ? dims.relationshipCounts().size() : 1
             )));
 
-        int outputDimension = config.outputDimension().orElse(FUDGED_BINARY_DIMENSION);
-        builder.perNode(
-            "Embeddings output",
-            n -> HugeObjectArray.memoryEstimation(n, MemoryUsage.sizeOfDoubleArray(outputDimension))
+        Optional<Integer> outputDimension = config.outputDimension();
+        LongUnaryOperator denseResultEstimation = n -> HugeObjectArray.memoryEstimation(
+            n,
+            MemoryUsage.sizeOfDoubleArray(outputDimension.orElse(FUDGED_BINARY_DIMENSION))
         );
+
+        if (outputDimension.isPresent()) {
+            builder.perNode("Embeddings output", denseResultEstimation);
+        } else {
+            // in the sparse case we store the bitset, but we convert the result to double[] before returning to the user
+            builder.rangePerNode("Embeddings output", n -> MemoryRange.of(
+                HugeObjectArray.memoryEstimation(n, MemoryUsage.sizeOfBitset(FUDGED_BINARY_DIMENSION)),
+                denseResultEstimation.applyAsLong(n)
+            ));
+        }
+
 
         return builder.build();
     }

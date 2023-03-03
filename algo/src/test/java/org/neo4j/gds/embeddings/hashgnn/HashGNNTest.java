@@ -108,9 +108,9 @@ class HashGNNTest {
             .build();
         var result = new HashGNN(binaryGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
         //dimension should be equal to dimension of feature input which is 3
-        assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("a")))).containsExactly(1.0, 0.0, 0.0);
-        assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("b")))).containsExactly(0.0, 1.0, 1.0);
-        assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("c")))).containsExactly(0.0, 0.0, 1.0);
+        assertThat(result.doubleArrayValue(binaryGraph.toMappedNodeId(binaryIdFunction.of("a")))).containsExactly(1.0, 0.0, 0.0);
+        assertThat(result.doubleArrayValue(binaryGraph.toMappedNodeId(binaryIdFunction.of("b")))).containsExactly(0.0, 1.0, 1.0);
+        assertThat(result.doubleArrayValue(binaryGraph.toMappedNodeId(binaryIdFunction.of("c")))).containsExactly(0.0, 0.0, 1.0);
     }
 
     @Test
@@ -125,9 +125,9 @@ class HashGNNTest {
             .build();
         var result = new HashGNN(binaryGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
         //dimension should be equal to dimension of feature input which is 3
-        assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("a")))).containsExactly(1.0, 0.0, 0.0);
-        assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("b")))).containsExactly(1.0, 0.0, 1.0);
-        assertThat(result.get(binaryGraph.toMappedNodeId(binaryIdFunction.of("c")))).containsExactly(0.0, 0.0, 1.0);
+        assertThat(result.doubleArrayValue(binaryGraph.toMappedNodeId(binaryIdFunction.of("a")))).containsExactly(1.0, 0.0, 0.0);
+        assertThat(result.doubleArrayValue(binaryGraph.toMappedNodeId(binaryIdFunction.of("b")))).containsExactly(1.0, 0.0, 1.0);
+        assertThat(result.doubleArrayValue(binaryGraph.toMappedNodeId(binaryIdFunction.of("c")))).containsExactly(0.0, 0.0, 1.0);
     }
 
     static Stream<Arguments> determinismParams() {
@@ -166,7 +166,7 @@ class HashGNNTest {
         var result2 = new HashGNN(binaryGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
 
         for (int i = 0; i < result1.size(); i++) {
-            assertThat(result1.get(i)).containsExactly(result2.get(i));
+            assertThat(result1.doubleArrayValue(i)).containsExactly(result2.doubleArrayValue(i));
         }
     }
 
@@ -193,9 +193,9 @@ class HashGNNTest {
         // because of equal neighbor and self influence and high embeddingDensity, we expect the node `b` to have the union of features of its neighbors plus some of its own features
         // the neighbors are expected to have the same features as their initial projection
 
-        double[] embeddingB = result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("b")));
-        double[] embeddingABefore = resultBefore.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("a")));
-        double[] embeddingCBefore = resultBefore.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("c")));
+        double[] embeddingB = result.doubleArrayValue(doubleGraph.toMappedNodeId(doubleIdFunction.of("b")));
+        double[] embeddingABefore = resultBefore.doubleArrayValue(doubleGraph.toMappedNodeId(doubleIdFunction.of("a")));
+        double[] embeddingCBefore = resultBefore.doubleArrayValue(doubleGraph.toMappedNodeId(doubleIdFunction.of("c")));
 
         var bHasUniqueFeature = false;
         for (int component = 0; component < binarizationDimension; component++) {
@@ -208,7 +208,7 @@ class HashGNNTest {
             }
         }
 
-        assertThat(result.get(0).length).isEqualTo(binarizationDimension);
+        assertThat(result.doubleArrayValue(0).length).isEqualTo(binarizationDimension);
         assertThat(bHasUniqueFeature).isTrue();
     }
 
@@ -235,9 +235,9 @@ class HashGNNTest {
         // because of high neighbor influence and high embeddingDensity, we expect the node `b` to have the union of features of its neighbors
         // the neighbors are expected to have the same features as their initial projection
 
-        double[] embeddingB = result.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("b")));
-        double[] embeddingABefore = resultBefore.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("a")));
-        double[] embeddingCBefore = resultBefore.get(doubleGraph.toMappedNodeId(doubleIdFunction.of("c")));
+        double[] embeddingB = result.doubleArrayValue(doubleGraph.toMappedNodeId(doubleIdFunction.of("b")));
+        double[] embeddingABefore = resultBefore.doubleArrayValue(doubleGraph.toMappedNodeId(doubleIdFunction.of("a")));
+        double[] embeddingCBefore = resultBefore.doubleArrayValue(doubleGraph.toMappedNodeId(doubleIdFunction.of("c")));
         for (int component = 0; component < binarizationDimension; component++) {
             assertThat(embeddingB[component]).isEqualTo(Math.max(
                 embeddingABefore[component],
@@ -245,7 +245,7 @@ class HashGNNTest {
             ));
         }
 
-        assertThat(result.get(0).length).isEqualTo(binarizationDimension);
+        assertThat(result.doubleArrayValue(0).length).isEqualTo(binarizationDimension);
     }
 
     @Test
@@ -263,30 +263,33 @@ class HashGNNTest {
             .build();
         var result = new HashGNN(binaryGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
         //dimension should be equal to dimension of feature input which is 3
-        assertThat(result.get(0).length).isEqualTo(42);
-        assertThat(result.get(1).length).isEqualTo(42);
-        assertThat(result.get(2).length).isEqualTo(42);
+        assertThat(result.doubleArrayValue(0).length).isEqualTo(42);
+        assertThat(result.doubleArrayValue(1).length).isEqualTo(42);
+        assertThat(result.doubleArrayValue(2).length).isEqualTo(42);
     }
 
     @ParameterizedTest
     @CsvSource(value = {
         // BASE
-        "    10,  4,  10_000, 20_000, 1,  86_324_072",
+        "    10,  4,  10_000, 20_000, 1, -1,  5_924_072, 86_324_072",
 
         // Should increase fairly little with higher density
-        "   100,  4,  10_000, 20_000, 1,  87_438_992",
+        "   100,  4,  10_000, 20_000, 1, -1,  7_038_992, 87_438_992",
 
         // Should increase fairly little with more iterations
-        "    10, 16,  10_000, 20_000, 1,  86_324_072",
+        "    10, 16,  10_000, 20_000, 1, -1,  5_924_072, 86_324_072",
 
         // Should increase almost linearly with node count
-        "    10,  4, 100_000, 20_000, 1, 862_124_432",
+        "    10,  4, 100_000, 20_000, 1, -1, 58_124_432, 862_124_432",
 
         // Should be unaffected by relationship count
-        "    10,  4,  10_000, 80_000, 1,  86_324_072",
+        "    10,  4,  10_000, 80_000, 1, -1,  5_924_072, 86_324_072",
 
         // Should be unaffected by concurrency
-        "    10,  4,  10_000, 20_000, 8,  86_324_072",
+        "    10,  4,  10_000, 20_000, 8, -1, 5_924_072, 86_324_072",
+
+        // Should be
+        "    10,  4,  10_000, 20_000, 8, 100, 12_404_072, 12_404_072",
     })
         void shouldEstimateMemory(
         int embeddingDensity,
@@ -294,13 +297,18 @@ class HashGNNTest {
         long nodeCount,
         long relationshipCount,
         int concurrency,
-        long expectedMemory
+        int outputDimension,
+        long expectedMinMemory,
+        long expectedMaxMemory
     ) {
+        Optional<Integer> maybeOutputDimension = outputDimension == -1 ? Optional.empty() : Optional.of(outputDimension);
+
         var config = HashGNNStreamConfigImpl
             .builder()
             .featureProperties(List.of("f1", "f2"))
             .embeddingDensity(embeddingDensity)
             .iterations(iterations)
+            .outputDimension(maybeOutputDimension)
             .build();
 
         assertMemoryEstimation(
@@ -308,7 +316,7 @@ class HashGNNTest {
             nodeCount,
             relationshipCount,
             concurrency,
-            MemoryRange.of(expectedMemory)
+            MemoryRange.of(expectedMinMemory, expectedMaxMemory)
         );
     }
 
@@ -430,8 +438,8 @@ class HashGNNTest {
 
         double cosineSum = 0;
         for (long originalNodeId = 0; originalNodeId < nodeCount; originalNodeId++) {
-            var firstVector = firstEmbeddings.get(firstGraph.toMappedNodeId(originalNodeId));
-            var secondVector = secondEmbeddings.get(secondGraph.toMappedNodeId(originalNodeId));
+            var firstVector = firstEmbeddings.doubleArrayValue(firstGraph.toMappedNodeId(originalNodeId));
+            var secondVector = secondEmbeddings.doubleArrayValue(secondGraph.toMappedNodeId(originalNodeId));
             double cosine = Intersections.cosine(firstVector, secondVector, secondVector.length);
             cosineSum += cosine;
         }
