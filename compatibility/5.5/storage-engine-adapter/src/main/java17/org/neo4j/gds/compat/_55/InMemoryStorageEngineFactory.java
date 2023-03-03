@@ -43,7 +43,7 @@ import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.LenientStoreInput;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.id.ScanOnOpenReadOnlyIdGeneratorFactory;
-import org.neo4j.internal.recordstorage.InMemoryStorageCommandReaderFactory;
+import org.neo4j.internal.recordstorage.InMemoryStorageCommandReaderFactory55;
 import org.neo4j.internal.recordstorage.StoreTokens;
 import org.neo4j.internal.schema.IndexConfigCompleter;
 import org.neo4j.internal.schema.SchemaRule;
@@ -446,7 +446,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
 
     @Override
     public CommandReaderFactory commandReaderFactory() {
-        return InMemoryStorageCommandReaderFactory.INSTANCE;
+        return InMemoryStorageCommandReaderFactory55.INSTANCE;
     }
 
     @Override
