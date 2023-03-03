@@ -22,6 +22,7 @@ package org.neo4j.gds.scaling;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
+import java.util.Map;
 
 public interface Scaler {
 
@@ -30,6 +31,10 @@ public interface Scaler {
     double scaleProperty(long nodeId);
 
     int dimension();
+
+    default Map<String, List<Double>> statistics() {
+        return Map.of();
+    }
 
     class ArrayScaler implements Scaler {
 
