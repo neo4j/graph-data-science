@@ -138,7 +138,7 @@ public final class Yens extends Algorithm<DijkstraResult> {
             for (var task : tasks) {
                 task.withPreviousPath(prevPath);
             }
-            currentSpurIndexId.set(0);
+
             RunWithConcurrency.builder()
                 .concurrency(config.concurrency())
                 .tasks(tasks)
@@ -148,7 +148,7 @@ public final class Yens extends Algorithm<DijkstraResult> {
             if (candidates.isEmpty()) {
                 break;
             }
-            addPathToSolution(i, kShortestPaths, candidates);
+            addPathToSolution(i, kShortestPaths, candidates, currentSpurIndexId);
             progressTracker.endSubTask();
         }
         progressTracker.endSubTask();
@@ -161,11 +161,14 @@ public final class Yens extends Algorithm<DijkstraResult> {
     private void addPathToSolution(
         int index,
         ArrayList<MutablePathResult> kShortestPaths,
-        PriorityQueue<MutablePathResult> candidates
+        PriorityQueue<MutablePathResult> candidates,
+        AtomicInteger currentSpurIndexId
     ) {
         var pathToAdd = candidates.poll();
+        int newIndex = (int) pathToAdd.index();
         pathToAdd.withIndex(index);
         kShortestPaths.add(pathToAdd);
+        currentSpurIndexId.set(newIndex);
     }
 
     @NotNull

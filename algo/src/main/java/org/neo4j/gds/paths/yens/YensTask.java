@@ -130,7 +130,7 @@ public class YensTask implements Runnable {
 
         // No new candidate from this spur node, continue with next node.
         if (!spurPath.isEmpty()) {
-            storePath(rootPath, spurPath);
+            storePath(indexId, rootPath, spurPath);
         }
 
     }
@@ -169,10 +169,11 @@ public class YensTask implements Runnable {
         return result;
     }
 
-    private void storePath(MutablePathResult rootPath, Optional<PathResult> spurPath) {
+    private void storePath(int indexId, MutablePathResult rootPath, Optional<PathResult> spurPath) {
 
         // Entire path is made up of the root path and spur path.
         pathAppender.accept(rootPath, spurPath.get());
+        rootPath.withIndex(indexId);
         // Add the potential k-shortest path to the heap.
         candidateLock.lock();
         if (!candidates.contains(rootPath)) {
