@@ -28,7 +28,6 @@ import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.utils.TestProcedureAndFunctionScanner;
 import org.neo4j.graphdb.Result;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -529,17 +528,16 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
     @Test
     void countShouldMatch() {
-        var registeredProcedures = new ArrayList<>();
-        runQueryWithRowConsumer(
+        var returnedRows = runQueryWithRowConsumer(
             "CALL gds.list() YIELD name",
-            row -> registeredProcedures.add(row.getString("name"))
+            ignored -> {}
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
         int expectedCount = 380;
         assertEquals(
             expectedCount,
-            registeredProcedures.size(),
+            returnedRows,
             "The expected and registered procedures don't match. Please also update the SmokeTest counts."
         );
     }

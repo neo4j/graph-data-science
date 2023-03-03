@@ -26,8 +26,6 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.concurrent.atomic.LongAdder;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
@@ -92,8 +90,7 @@ class GraphMutateNodeLabelProcTest extends BaseProcTest {
         );
 
         // Assert
-        var counter = new LongAdder();
-        runQueryWithRowConsumer(
+        var rowCount = runQueryWithRowConsumer(
             "CALL gds.graph.nodeProperty.stream('graph', 'p', ['TestLabel'])",
             row -> {
                 assertThat(row.getNumber("nodeId"))
@@ -108,10 +105,9 @@ class GraphMutateNodeLabelProcTest extends BaseProcTest {
                     .asInstanceOf(DOUBLE)
                     .as("The node property should match the applied filter")
                     .isGreaterThan(1d);
-                counter.increment();
             }
         );
-        assertThat(counter.intValue())
+        assertThat(rowCount)
             .as("There should have been two steamed nodes")
             .isEqualTo(2);
     }
@@ -148,8 +144,7 @@ class GraphMutateNodeLabelProcTest extends BaseProcTest {
         );
 
         // Assert
-        var counter = new LongAdder();
-        runQueryWithRowConsumer(
+        var rowCount = runQueryWithRowConsumer(
             "CALL gds.graph.nodeProperty.stream('graph', 'p', ['TestLabel'])",
             row -> {
                 assertThat(row.getNumber("nodeId"))
@@ -164,11 +159,9 @@ class GraphMutateNodeLabelProcTest extends BaseProcTest {
                     .asInstanceOf(DOUBLE)
                     .as("The node property should match the applied filter")
                     .isGreaterThan(1d);
-
-                counter.increment();
             }
         );
-        assertThat(counter.intValue())
+        assertThat(rowCount)
             .as("There should have been two steamed nodes")
             .isEqualTo(2);
 
@@ -206,8 +199,7 @@ class GraphMutateNodeLabelProcTest extends BaseProcTest {
         );
 
         // Assert
-        var counter = new LongAdder();
-        runQueryWithRowConsumer(
+        var rowCount = runQueryWithRowConsumer(
             "CALL gds.graph.nodeProperty.stream('graph', 'p', ['TestLabel'])",
             row -> {
                 assertThat(row.getNumber("nodeId"))
@@ -221,11 +213,10 @@ class GraphMutateNodeLabelProcTest extends BaseProcTest {
                     .asInstanceOf(DOUBLE)
                     .as("The node property should match the applied filter")
                     .isGreaterThan(2d);
-
-                counter.increment();
             }
         );
-        assertThat(counter.intValue())
+
+        assertThat(rowCount)
             .as("There should have been one steamed node")
             .isEqualTo(1);
 

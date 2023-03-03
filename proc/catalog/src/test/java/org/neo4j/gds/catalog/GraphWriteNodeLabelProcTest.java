@@ -26,8 +26,6 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.concurrent.atomic.LongAdder;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
@@ -89,8 +87,7 @@ class GraphWriteNodeLabelProcTest extends BaseProcTest {
         );
 
         // Check that we actually created the labels in the database
-        LongAdder rowCounter = new LongAdder();
-        runQueryWithRowConsumer(
+        var rowCount = runQueryWithRowConsumer(
             "MATCH (n:TestLabel) RETURN labels(n) AS updatedLabels, n.p AS p",
             row -> {
                 assertThat(row.get("updatedLabels"))
@@ -100,11 +97,10 @@ class GraphWriteNodeLabelProcTest extends BaseProcTest {
                 assertThat(row.getNumber("p"))
                     .asInstanceOf(LONG)
                     .isGreaterThan(1L);
-
-                rowCounter.increment();
             }
         );
-        assertThat(rowCounter.intValue()).isEqualTo(2);
+
+        assertThat(rowCount).isEqualTo(2);
 
     }
 

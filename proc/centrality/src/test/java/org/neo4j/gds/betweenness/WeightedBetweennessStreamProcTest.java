@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.betweenness;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
@@ -93,19 +92,17 @@ public class WeightedBetweennessStreamProcTest extends BaseProcTest {
         );
 
         var bcQuery = "CALL gds.betweenness.stream('graph',{relationshipWeightProperty: 'weight'})";
-        var resultRowCount = new MutableLong();
         var scores = new HashMap<Long, Double>();
 
-        runQueryWithRowConsumer(bcQuery, resultRow -> {
+        var resultRowCount = runQueryWithRowConsumer(bcQuery, resultRow -> {
             var nodeId = resultRow.getNumber("nodeId");
             var score = resultRow.getNumber("score");
             assertThat(nodeId).isInstanceOf(Long.class);
             assertThat(score).isInstanceOf(Double.class);
-            resultRowCount.increment();
             scores.put(nodeId.longValue(), score.doubleValue());
 
         });
-        assertThat(resultRowCount.longValue()).isEqualTo(7L);
+        assertThat(resultRowCount).isEqualTo(7L);
         assertThat(scores).containsExactlyInAnyOrderEntriesOf(expected);
     }
 }

@@ -63,12 +63,12 @@ class NativeNodeLabelExporterTest extends BaseTest {
 
         exporter.write("GeneratedLabel");
 
-        assertThat(exporter.nodeLabelsWritten()).isEqualTo(4);
-
-        runQueryWithRowConsumer("MATCH (n) RETURN labels(n) AS labels", row -> {
+        var rowCount = runQueryWithRowConsumer("MATCH (n) RETURN labels(n) AS labels", row -> {
             assertThat(row.get("labels"))
                 .asList()
                 .contains("GeneratedLabel");
         });
+
+        assertThat(exporter.nodeLabelsWritten()).isEqualTo(rowCount);
     }
 }
