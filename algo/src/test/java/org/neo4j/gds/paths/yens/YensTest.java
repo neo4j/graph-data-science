@@ -21,7 +21,6 @@ package org.neo4j.gds.paths.yens;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -55,9 +54,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 class YensTest {
@@ -107,6 +105,7 @@ class YensTest {
         ", (f:F {id: 3})" +
         ", (g:G {id: 4})" +
         ", (h:H {id: 5})" +
+        ", (z:Z {id: 6})" +
         ", (c)-[:REL {cost: 3.0}]->(d)" +
         ", (c)-[:REL {cost: 2.0}]->(e)" +
         ", (d)-[:REL {cost: 4.0}]->(f)" +
@@ -181,7 +180,7 @@ class YensTest {
         assertResult(graph, idFunction, expectedPaths, false);
     }
 
-    @Disabled
+    @Test
     void shouldLogProgress() {
         int k = 3;
 
@@ -199,30 +198,34 @@ class YensTest {
             .compute()
             .pathSet();
 
-        assertEquals(12, progressTracker.getProgresses().size());
-
-        // once
-        assertThat(log.containsMessage(TestLog.INFO, "Yens :: Start")).isTrue();
-        assertThat(log.containsMessage(TestLog.INFO, "Yens :: Finished")).isTrue();
-        // for each k
-        MutableInt iteration = new MutableInt(0);
-        for (int i = 1; i <= k; i++) {
-            iteration.setValue(i);
-            var expected = formatWithLocale("k %d of %d", iteration.getValue(), k);
-            assertThat(log.containsMessage(TestLog.INFO, expected)).isTrue();
-        }
-        // multiple times within each k
-        log.assertContainsMessage(TestLog.INFO, ":: Dijkstra for spur node");
-        log.assertContainsMessage(TestLog.INFO, ":: Dijkstra 1 :: Start");
-        log.assertContainsMessage(TestLog.INFO, ":: Dijkstra 1 :: Finished");
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "Yens :: Start",
+                "Yens :: Dijkstra :: Start",
+                "Yens :: Dijkstra 22%",
+                "Yens :: Dijkstra 55%",
+                "Yens :: Dijkstra 66%",
+                "Yens :: Dijkstra 88%",
+                "Yens :: Dijkstra 100%",
+                "Yens :: Dijkstra :: Finished",
+                "Yens :: Path growing :: Start",
+                "Yens :: Path growing 50%",
+                "Yens :: Path growing 100%",
+                "Yens :: Path growing :: Finished",
+                "Yens :: Finished"
+            );
     }
 
     @Test
-    void shouldCloseProgressTasksOnEmptyResult() {
+    void shouldLogProgressIfNothingToDo() {
+        int k = 3;
+
         var config = defaultSourceTargetConfigBuilder()
-            .sourceNode(idFunction.of("h"))
-            .targetNode(idFunction.of("c"))
-            .k(1)
+            .sourceNode(idFunction.of("z"))
+            .targetNode(idFunction.of("h"))
+            .k(k)
             .build();
 
         var progressTask = new YensFactory<>().progressTask(graph, config);
@@ -233,23 +236,18 @@ class YensTest {
             .compute()
             .pathSet();
 
-        var messages = log.getMessages(TestLog.INFO);
-
-        assertThat(messages)
+        assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
+            .extracting(replaceTimings())
             .containsExactly(
                 "Yens :: Start",
-                "Yens :: Searching path :: Start",
-                "Yens :: Searching path :: k 1 of 1 :: Start",
-                "Yens :: Searching path :: k 1 of 1 :: Dijkstra for spur node " + idFunction.of("h"),
-                "Yens :: Searching path :: k 1 of 1 :: Dijkstra 1 :: Start",
-                "Yens :: Searching path :: k 1 of 1 :: Dijkstra 1 100%",
-                "Yens :: Searching path :: k 1 of 1 :: Dijkstra 1 :: Finished",
-                "Yens :: Searching path :: k 1 of 1 :: Finished",
-                "Yens :: Searching path :: Finished",
+                "Yens :: Dijkstra :: Start",
+                "Yens :: Dijkstra 100%",
+                "Yens :: Dijkstra :: Finished",
                 "Yens :: Finished"
             );
     }
+
 
     private static void assertResult(
         Graph graph,

@@ -28,8 +28,6 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 
-import java.util.List;
-
 public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> extends GraphAlgorithmFactory<Yens, CONFIG> {
 
     @Override
@@ -40,17 +38,8 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> extends Grap
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.task(
-            taskName(),
-            Tasks.iterativeDynamic(
-                "Searching path",
-                () -> List.of(Tasks.iterativeOpen(
-                    "k",
-                    () -> List.of(DijkstraFactory.dijkstraProgressTask(graph))
-                )),
-                config.k()
-            )
-        );
+        var initTask = DijkstraFactory.dijkstraProgressTask(graph);
+        return Tasks.task(taskName(), initTask, Tasks.leaf("Path growing", config.k() - 1));
     }
 
     @Override

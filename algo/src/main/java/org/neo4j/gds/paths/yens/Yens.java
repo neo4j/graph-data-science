@@ -90,22 +90,16 @@ public final class Yens extends Algorithm<DijkstraResult> {
 
     @Override
     public DijkstraResult compute() {
-        progressTracker.beginSubTask();
+        progressTracker.beginSubTask("Yens");
         var kShortestPaths = new ArrayList<MutablePathResult>();
         // compute top 1 shortest path
-        progressTracker.beginSubTask();
-        progressTracker.beginSubTask();
 
         var shortestPath = findFirstPath();
 
         // no shortest path has been found
         if (shortestPath.isEmpty()) {
-            progressTracker.endSubTask();
-            progressTracker.endSubTask();
             return new DijkstraResult(Stream.empty(), progressTracker::endSubTask);
         }
-
-        progressTracker.endSubTask();
 
         kShortestPaths.add(MutablePathResult.of(shortestPath.get()));
 
@@ -116,8 +110,9 @@ public final class Yens extends Algorithm<DijkstraResult> {
         var candidateLock = new ReentrantLock();
         var tasks = createTasks(kShortestPaths, candidates, candidateLock, currentSpurIndexId);
 
+        progressTracker.beginSubTask("Path growing");
+
         for (int i = 1; i < config.k(); i++) {
-            progressTracker.beginSubTask();
             var prevPath = kShortestPaths.get(i - 1);
             for (var task : tasks) {
                 task.withPreviousPath(prevPath);
@@ -128,18 +123,20 @@ public final class Yens extends Algorithm<DijkstraResult> {
                 .tasks(tasks)
                 .executor(Pools.DEFAULT)
                 .run();
+            progressTracker.logProgress();
 
             if (candidates.isEmpty()) {
                 break;
             }
             addPathToSolution(i, kShortestPaths, candidates, currentSpurIndexId);
-            progressTracker.endSubTask();
         }
         progressTracker.endSubTask();
 
-        progressTracker.endSubTask();
-
-        return new DijkstraResult(kShortestPaths.stream().map(MutablePathResult::toPathResult));
+        return new DijkstraResult
+            (
+                kShortestPaths.stream().map(MutablePathResult::toPathResult),
+                progressTracker::endSubTask
+            );
     }
 
     private void addPathToSolution(
@@ -190,7 +187,7 @@ public final class Yens extends Algorithm<DijkstraResult> {
             graph,
             config,
             Optional.empty(),
-            ProgressTracker.NULL_TRACKER
+            progressTracker
         );
         var result = dijkstra.compute();
         return result.findFirst();
