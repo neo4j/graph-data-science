@@ -362,7 +362,8 @@
 | `gds.beta.steinerTree.stats`
 | `gds.beta.steinerTree.stream`
 | `gds.beta.steinerTree.write`
-.2+<.^| Bellman-Ford
+.3+<.^| Bellman-Ford
+| `gds.bellmanFord.mutate`
 | `gds.bellmanFord.stats`
 | `gds.bellmanFord.stream`
 
