@@ -22,7 +22,7 @@ package org.neo4j.gds.embeddings.hashgnn;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -156,7 +156,7 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
 
         var binaryOutputVectors = (config.iterations() - 1) % 2 == 0 ? embeddingsA : embeddingsB;
 
-        DoubleArrayNodePropertyValues outputVectors;
+        NodePropertyValues outputVectors;
         if (config.outputDimension().isPresent()) {
             var denseVectors = DensifyTask.compute(
                 graph,
@@ -191,13 +191,13 @@ public class HashGNN extends Algorithm<HashGNN.HashGNNResult> {
     }
 
     public static class HashGNNResult {
-        private final DoubleArrayNodePropertyValues embeddings;
+        private final NodePropertyValues embeddings;
 
-        public HashGNNResult(DoubleArrayNodePropertyValues embeddings) {
+        public HashGNNResult(NodePropertyValues embeddings) {
             this.embeddings = embeddings;
         }
 
-        public DoubleArrayNodePropertyValues embeddings() {
+        public NodePropertyValues embeddings() {
             return embeddings;
         }
     }
