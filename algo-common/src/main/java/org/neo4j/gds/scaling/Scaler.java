@@ -65,7 +65,6 @@ public interface Scaler {
         }
 
 
-        // TODO: Add tests for this
         @Override
         public Map<String, List<Double>> statistics() {
             return elementScalers.get(0).statistics().keySet().stream().collect(Collectors.toMap(
