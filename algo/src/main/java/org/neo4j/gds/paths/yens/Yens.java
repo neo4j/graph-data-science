@@ -198,7 +198,8 @@ public final class Yens extends Algorithm<DijkstraResult> {
                 candidateLock,
                 candidates,
                 currentSpurIndexId,
-                config.trackRelationships()
+                config.trackRelationships(),
+                config.k()
             ));
         }
         return tasks;

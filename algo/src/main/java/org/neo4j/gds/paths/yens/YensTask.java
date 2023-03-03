@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.paths.yens;
 
-import com.carrotsearch.hppc.LongHashSet;
-import com.carrotsearch.hppc.LongObjectScatterMap;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.PathResult;
@@ -28,6 +26,7 @@ import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.config.ImmutableShortestPathDijkstraStreamConfig;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,13 +34,11 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
 import java.util.function.ToLongBiFunction;
 
-import static org.neo4j.gds.paths.yens.Yens.EMPTY_SET;
-
 public class YensTask implements Runnable {
     private final Graph localGraph;
     // Track nodes and relationships that are skipped in a single iteration.
     // The content of these data structures is reset after each of k iterations.
-    private final LongObjectScatterMap<LongHashSet> relationshipAvoidList;
+    private final long[] neighbors;
     private final Dijkstra localDijkstra;
     private final ArrayList<MutablePathResult> kShortestPaths;
     private MutablePathResult previousPath;
@@ -49,10 +46,14 @@ public class YensTask implements Runnable {
     private final PriorityQueue<MutablePathResult> candidates;
     private AtomicInteger currentSpurIndexId;
     private int maxLength;
-    private  final boolean trackRelationships;
+    private final boolean trackRelationships;
     private final ToLongBiFunction
         <MutablePathResult, Integer> relationshipAvoidMapper;
     private final BiConsumer<MutablePathResult, PathResult> pathAppender;
+
+    private long filteringSpurNode;
+    private int allNeighbors;
+    private int neighborIndex;
 
     YensTask(
         Graph graph,
@@ -61,11 +62,11 @@ public class YensTask implements Runnable {
         ReentrantLock candidateLock,
         PriorityQueue<MutablePathResult> candidates,
         AtomicInteger currentSpurIndexId,
-        boolean trackRelationships
+        boolean trackRelationships,
+        int k
     ) {
         this.currentSpurIndexId = currentSpurIndexId;
         this.localGraph = graph;
-        this.relationshipAvoidList = new LongObjectScatterMap<>();
         this.trackRelationships=trackRelationships;
         var newConfig = ImmutableShortestPathDijkstraStreamConfig
             .builder()
@@ -79,7 +80,7 @@ public class YensTask implements Runnable {
             Optional.empty(),
             ProgressTracker.NULL_TRACKER
         );
-        localDijkstra.withRelationshipFilter((source, target, relationshipId) -> !shouldAvoidRelationship(
+        localDijkstra.withRelationshipFilter((source, target, relationshipId) -> validRelationship(
                 source,
                 target,
                 relationshipId
@@ -102,6 +103,8 @@ public class YensTask implements Runnable {
             relationshipAvoidMapper = (path, position) -> path.node(position + 1);
             pathAppender = (rootPath, spurPath) -> rootPath.appendWithoutRelationshipIds(MutablePathResult.of(spurPath));
         }
+
+        this.neighbors = new long[k];
     }
 
     void withPreviousPath(MutablePathResult previousPath) {
@@ -135,24 +138,22 @@ public class YensTask implements Runnable {
     }
 
     private void createFilters(MutablePathResult rootPath, long spurNode, int indexId) {
+        //clean all filters
         localDijkstra.resetTraversalState();
+        allNeighbors = 0;
+        neighborIndex = 0;
+        filteringSpurNode = spurNode;
+
         for (var path : kShortestPaths) {
             // Filter relationships that are part of the previous
             // shortest paths which share the same root path.
             System.out.println(path.toString() + " " + rootPath.toString());
             if (rootPath.matchesExactly(path, indexId + 1)) {
-
                 var avoidId = relationshipAvoidMapper.applyAsLong(path, indexId);
-
-                var neighbors = relationshipAvoidList.get(spurNode);
-
-                if (neighbors == null) {
-                    neighbors = new LongHashSet();
-                    relationshipAvoidList.put(spurNode, neighbors);
-                }
-                neighbors.add(avoidId);
+                neighbors[allNeighbors++] = avoidId;
             }
         }
+        Arrays.sort(neighbors, 0, allNeighbors);
         // Filter nodes from root path to avoid cyclic path searches.
         for (int j = 0; j < indexId; j++) {
             localDijkstra.withVisited(rootPath.node(j));
@@ -162,8 +163,6 @@ public class YensTask implements Runnable {
     private Optional<PathResult> computeDijkstra(long spurNode) {
         localDijkstra.withSourceNode(spurNode);
         var result = localDijkstra.compute().findFirst();
-        // Clear filters for next spur node
-        relationshipAvoidList.clear();
         return result;
     }
 
@@ -180,11 +179,26 @@ public class YensTask implements Runnable {
         candidateLock.unlock();
 
     }
-    private boolean shouldAvoidRelationship(long source, long target, long relationshipId) {
-        long forbidden = trackRelationships
-            ? relationshipId
-            : target;
-        return relationshipAvoidList.getOrDefault(source, EMPTY_SET).contains(forbidden);
+
+    private boolean validRelationship(long source, long target, long relationshipId) {
+        if (source == filteringSpurNode) {
+
+            long forbidden = trackRelationships
+                ? relationshipId
+                : target;
+
+            if (neighborIndex == allNeighbors) return true;
+
+            while (neighbors[neighborIndex] < forbidden) {
+                if (++neighborIndex == allNeighbors) {
+                    return true;
+                }
+            }
+
+            return neighbors[neighborIndex] != forbidden;
+        }
+
+        return true;
 
     }
 
