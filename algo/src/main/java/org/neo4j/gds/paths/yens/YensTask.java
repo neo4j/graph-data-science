@@ -21,7 +21,6 @@ package org.neo4j.gds.paths.yens;
 
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongObjectScatterMap;
-import com.carrotsearch.hppc.LongScatterSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.PathResult;
@@ -42,7 +41,6 @@ public class YensTask implements Runnable {
     private final Graph localGraph;
     // Track nodes and relationships that are skipped in a single iteration.
     // The content of these data structures is reset after each of k iterations.
-    private final LongScatterSet nodeAvoidList;
     private final LongObjectScatterMap<LongHashSet> relationshipAvoidList;
     private final Dijkstra localDijkstra;
     private final ArrayList<MutablePathResult> kShortestPaths;
@@ -67,7 +65,6 @@ public class YensTask implements Runnable {
     ) {
         this.currentSpurIndexId = currentSpurIndexId;
         this.localGraph = graph;
-        this.nodeAvoidList = new LongScatterSet();
         this.relationshipAvoidList = new LongObjectScatterMap<>();
         this.trackRelationships=trackRelationships;
         var newConfig = ImmutableShortestPathDijkstraStreamConfig
@@ -82,9 +79,11 @@ public class YensTask implements Runnable {
             Optional.empty(),
             ProgressTracker.NULL_TRACKER
         );
-        localDijkstra.withRelationshipFilter((source, target, relationshipId) ->
-            !nodeAvoidList.contains(target)
-            && !shouldAvoidRelationship(source,target,relationshipId)
+        localDijkstra.withRelationshipFilter((source, target, relationshipId) -> !shouldAvoidRelationship(
+                source,
+                target,
+                relationshipId
+            )
         );
 
         this.kShortestPaths = kShortestPaths;
@@ -136,13 +135,14 @@ public class YensTask implements Runnable {
     }
 
     private void createFilters(MutablePathResult rootPath, long spurNode, int indexId) {
+        localDijkstra.resetTraversalState();
         for (var path : kShortestPaths) {
             // Filter relationships that are part of the previous
             // shortest paths which share the same root path.
-            System.out.println(path.toString()+" "+rootPath.toString());
+            System.out.println(path.toString() + " " + rootPath.toString());
             if (rootPath.matchesExactly(path, indexId + 1)) {
 
-                var avoidId = relationshipAvoidMapper.applyAsLong(path,indexId);
+                var avoidId = relationshipAvoidMapper.applyAsLong(path, indexId);
 
                 var neighbors = relationshipAvoidList.get(spurNode);
 
@@ -155,16 +155,14 @@ public class YensTask implements Runnable {
         }
         // Filter nodes from root path to avoid cyclic path searches.
         for (int j = 0; j < indexId; j++) {
-            nodeAvoidList.add(rootPath.node(j));
+            localDijkstra.withVisited(rootPath.node(j));
         }
     }
 
     private Optional<PathResult> computeDijkstra(long spurNode) {
-        localDijkstra.resetTraversalState();
         localDijkstra.withSourceNode(spurNode);
         var result = localDijkstra.compute().findFirst();
         // Clear filters for next spur node
-        nodeAvoidList.clear();
         relationshipAvoidList.clear();
         return result;
     }
