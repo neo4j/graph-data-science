@@ -46,7 +46,6 @@ public abstract class ScalarScaler implements Scaler {
         return statistics;
     }
 
-    // TODO: Add tests for this
     static class StatsOnly extends ScalarScaler {
 
         protected StatsOnly(Map<String, List<Double>> stats) {

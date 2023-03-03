@@ -69,7 +69,8 @@ class MinMaxTest {
 
     @Test
     void avoidsDivByZero() {
-        var properties = new DoubleTestPropertyValues(nodeId -> 4D);
+        double propValue = 4D;
+        var properties = new DoubleTestPropertyValues(nodeId -> propValue);
         var scaler = MinMax.buildFrom(CypherMapWrapper.empty()).create(
             properties,
             10,
@@ -77,6 +78,11 @@ class MinMaxTest {
             ProgressTracker.NULL_TRACKER,
             Pools.DEFAULT
         );
+
+        assertThat(scaler.statistics()).containsExactlyEntriesOf(Map.of(
+            "max", List.of(propValue),
+            "min", List.of(propValue)
+        ));
 
         for (int i = 0; i < 10; i++) {
             assertThat(scaler.scaleProperty(i)).isEqualTo(0D);

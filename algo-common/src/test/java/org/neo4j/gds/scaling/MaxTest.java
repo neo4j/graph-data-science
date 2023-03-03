@@ -90,6 +90,8 @@ class MaxTest {
             Pools.DEFAULT
         );
 
+        assertThat(scaler.statistics()).containsExactlyEntriesOf(Map.of("absMax", List.of(0D)));
+
         for (int i = 0; i < 10; i++) {
             assertThat(scaler.scaleProperty(i)).isEqualTo(0D);
         }
