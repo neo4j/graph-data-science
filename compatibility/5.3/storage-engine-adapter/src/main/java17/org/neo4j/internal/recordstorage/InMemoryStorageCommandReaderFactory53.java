@@ -23,9 +23,9 @@ import org.neo4j.kernel.KernelVersion;
 import org.neo4j.storageengine.api.CommandReader;
 import org.neo4j.storageengine.api.CommandReaderFactory;
 
-public class InMemoryStorageCommandReaderFactory implements CommandReaderFactory {
+public class InMemoryStorageCommandReaderFactory53 implements CommandReaderFactory {
 
-    public static final CommandReaderFactory INSTANCE = new InMemoryStorageCommandReaderFactory();
+    public static final CommandReaderFactory INSTANCE = new InMemoryStorageCommandReaderFactory53();
 
     @Override
     public CommandReader get(KernelVersion kernelVersion) {

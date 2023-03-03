@@ -23,16 +23,16 @@ import org.neo4j.storageengine.api.LogVersionRepository;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class InMemoryLogVersionRepository implements LogVersionRepository {
+public class InMemoryLogVersionRepository53 implements LogVersionRepository {
 
     private final AtomicLong logVersion;
     private final AtomicLong checkpointLogVersion;
 
-    public InMemoryLogVersionRepository() {
-        this(0,0);
+    public InMemoryLogVersionRepository53() {
+        this(0, 0);
     }
 
-    private InMemoryLogVersionRepository(long initialLogVersion, long initialCheckpointLogVersion) {
+    private InMemoryLogVersionRepository53(long initialLogVersion, long initialCheckpointLogVersion) {
         this.logVersion = new AtomicLong();
         this.checkpointLogVersion = new AtomicLong();
         this.logVersion.set(initialLogVersion);
