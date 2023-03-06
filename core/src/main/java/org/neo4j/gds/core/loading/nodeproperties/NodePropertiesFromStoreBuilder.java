@@ -31,7 +31,6 @@ import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.atomic.LongAdder;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.values.storable.Values.NO_VALUE;
@@ -63,7 +62,6 @@ public final class NodePropertiesFromStoreBuilder {
     private final DefaultValue defaultValue;
     private final int concurrency;
     private final AtomicReference<InnerNodePropertiesBuilder> innerBuilder;
-    private final LongAdder size;
 
     private NodePropertiesFromStoreBuilder(
         DefaultValue defaultValue,
@@ -72,7 +70,6 @@ public final class NodePropertiesFromStoreBuilder {
         this.defaultValue = defaultValue;
         this.concurrency = concurrency;
         this.innerBuilder = new AtomicReference<>();
-        this.size = new LongAdder();
     }
 
     public void set(long neoNodeId, Value value) {
@@ -81,7 +78,6 @@ public final class NodePropertiesFromStoreBuilder {
                 initializeWithType(value);
             }
             innerBuilder.get().setValue(neoNodeId, value);
-            size.increment();
         }
     }
 
@@ -94,7 +90,7 @@ public final class NodePropertiesFromStoreBuilder {
             }
         }
 
-        return innerBuilder.get().build(this.size.sum(), idMap, idMap.highestOriginalId());
+        return innerBuilder.get().build(idMap.nodeCount(), idMap, idMap.highestOriginalId());
     }
 
     // This is synchronized as we want to prevent the creation of multiple InnerNodePropertiesBuilders of which only once survives.

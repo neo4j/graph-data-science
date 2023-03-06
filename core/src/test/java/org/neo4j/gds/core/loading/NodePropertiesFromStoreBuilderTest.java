@@ -61,7 +61,7 @@ final class NodePropertiesFromStoreBuilderTest {
             1
         ).build(idMap(nodeCount));
 
-        assertEquals(0L, properties.nodeCount());
+        assertEquals(nodeCount, properties.nodeCount());
         assertEquals(OptionalDouble.empty(), properties.getMaxDoublePropertyValue());
         assertEquals(42.0, properties.doubleValue(0));
     }
@@ -74,7 +74,7 @@ final class NodePropertiesFromStoreBuilderTest {
             1
         ).build(idMap(nodeCount));
 
-        assertEquals(0L, properties.nodeCount());
+        assertEquals(nodeCount, properties.nodeCount());
         assertEquals(OptionalLong.empty(), properties.getMaxLongPropertyValue());
         assertEquals(42, properties.longValue(0));
     }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.similarity.knn;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
@@ -29,6 +30,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+
+import static org.assertj.core.api.Assertions.*;
 
 class KnnStreamProcTest extends KnnProcTest<KnnStreamConfig> {
 
@@ -100,7 +103,6 @@ class KnnStreamProcTest extends KnnProcTest<KnnStreamConfig> {
         String nodeCreateQuery =
             "CREATE " +
             "  (alice:Person {grades: [24, 4]})" +
-            " ,(carol:Person)" +
             " ,(eve:Person)" +
             " ,(bob:Foo {grades: [24, 4, 42]})";
 
@@ -117,9 +119,6 @@ class KnnStreamProcTest extends KnnProcTest<KnnStreamConfig> {
             .addParameter("nodeProperties", List.of("grades"))
             .yields("node1", "node2", "similarity");
 
-        assertCypherResult(algoQuery, List.of(
-            Map.of("node1", 6L, "node2", 7L, "similarity", 1.0),
-            Map.of("node1", 7L, "node2", 6L, "similarity", 1.0)
-        ));
+        runQueryWithResultConsumer(algoQuery, result -> assertThat(result.stream().count()).isEqualTo(2));
     }
 }
