@@ -27,17 +27,6 @@ public interface PropertyValues {
 
     ValueType valueType();
 
-    /**
-     * @return the number of values stored.
-     */
-    long valuesStored();
-
-    /**
-     *
-     * @return the highest index which can be accessed.
-     */
-    long maxIndex();
-
     default UnsupportedOperationException unsupportedTypeException(ValueType expectedType) {
         return new UnsupportedOperationException(formatWithLocale("Tried to retrieve a value of type %s value from properties of type %s", expectedType, valueType()));
     }

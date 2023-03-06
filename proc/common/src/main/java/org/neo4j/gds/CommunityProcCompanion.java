@@ -100,10 +100,7 @@ public final class CommunityProcCompanion {
         var consecutiveIds = config.consecutiveIds();
         var isIncremental = config.isIncremental();
         if (consecutiveIds && !isIncremental) {
-            return new ConsecutiveLongNodePropertyValues(
-                nodeProperties,
-                nodeProperties.valuesStored()
-            );
+            return new ConsecutiveLongNodePropertyValues(nodeProperties);
         }
         
         return nodeProperties;
