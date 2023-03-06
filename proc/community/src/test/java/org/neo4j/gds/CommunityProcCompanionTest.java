@@ -25,7 +25,7 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
-import org.neo4j.gds.config.ComponentSizeConfig;
+import org.neo4j.gds.config.CommunitySizeConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
 import org.neo4j.gds.config.SeedConfig;
@@ -94,10 +94,10 @@ class CommunityProcCompanionTest {
     }
 
     @Test
-    void shouldRestrictComponentSize() {
+    void shouldRestrictCommunitySize() {
         LongNodePropertyValues inputProperties = new TestNodePropertyValues(10, id -> id < 5 ? id : 5 );
 
-        var config = ConfigWithComponentSize.of(CypherMapWrapper.empty().withNumber("minComponentSize", 2L));
+        var config = CommunityProcCompanionConfig.of(CypherMapWrapper.empty().withNumber("minCommunitySize", 2L));
 
         var result = CommunityProcCompanion.nodeProperties(
             config,
@@ -121,13 +121,13 @@ class CommunityProcCompanionTest {
     @Test
     void shouldWorkWithMinComponentAndConsecutive() {
         long[] values = new long[]{20, 20, 200, 10, 10, 90, 50, 10, 50, 50, 50};
-        Long[] returnedValues = new Long[]{null, null, null, 0l, 0L, null, 1l, 0l, 1l, 1l, 1l};
+        Long[] returnedValues = new Long[]{null, null, null, 0L, 0L, null, 1L, 0L, 1L, 1L, 1L};
 
         LongNodePropertyValues inputProperties = new TestNodePropertyValues(11, id -> values[(int) id]);
 
-        var config = ConfigWithComponentSize.of(CypherMapWrapper
+        var config = CommunityProcCompanionConfig.of(CypherMapWrapper
             .empty()
-            .withNumber("minComponentSize", 3L)
+            .withNumber("minCommunitySize", 3L)
             .withBoolean("consecutiveIds", true));
 
         var result = CommunityProcCompanion.nodeProperties(
@@ -145,7 +145,7 @@ class CommunityProcCompanionTest {
                 assertThat(result.longValue(i)).isEqualTo(returnedValues[ii]);
             } else {
                 assertThat(result.value(i)).isNull();
-                assertThat(result.longValue(i)).isLessThan(0l);
+                assertThat(result.longValue(i)).isLessThan(0L);
             }
 
         }
@@ -176,16 +176,9 @@ class CommunityProcCompanionTest {
     }
 
     @Configuration
-    interface CommunityProcCompanionConfig extends ConsecutiveIdsConfig, SeedConfig, ConcurrencyConfig {
+    interface CommunityProcCompanionConfig extends ConsecutiveIdsConfig, SeedConfig, ConcurrencyConfig, CommunitySizeConfig {
         static CommunityProcCompanionConfig of(CypherMapWrapper map) {
             return new CommunityProcCompanionConfigImpl(map);
-        }
-    }
-
-    @Configuration
-    interface ConfigWithComponentSize extends ConsecutiveIdsConfig, SeedConfig, ComponentSizeConfig, ConcurrencyConfig {
-        static ConfigWithComponentSize of(CypherMapWrapper map) {
-            return new ConfigWithComponentSizeImpl(map);
         }
     }
 }
