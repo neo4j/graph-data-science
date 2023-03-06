@@ -29,35 +29,26 @@ import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Optional;
-import java.util.PriorityQueue;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
-import java.util.function.ToLongBiFunction;
 
 public class YensTask implements Runnable {
     private final Graph localGraph;
     // Track nodes and relationships that are skipped in a single iteration.
     // The content of these data structures is reset after each of k iterations.
-    private final long[] neighbors;
     private @Nullable Dijkstra localDijkstra;
-    private final ArrayList<MutablePathResult> kShortestPaths;
-    private MutablePathResult previousPath;
-    private final ReentrantLock candidateLock;
-    private final PriorityQueue<MutablePathResult> candidates;
-    private AtomicInteger currentSpurIndexId;
-    private int maxLength;
     private final boolean trackRelationships;
-    private final ToLongBiFunction
-        <MutablePathResult, Integer> relationshipAvoidMapper;
-    private final BiConsumer<MutablePathResult, PathResult> pathAppender;
     private final long targetNode;
+    //Dijkstra filter
+    private final RelationshipFilterer relationshipFilterer;
 
-    private long filteringSpurNode;
-    private int allNeighbors;
-    private int neighborIndex;
+    private MutablePathResult previousPath;
+    private AtomicInteger currentSpurIndexId;
+
+    private final ArrayList<MutablePathResult> kShortestPaths;
+    private final CandidatePathsPriorityQueue candidatePathsQueue;
+    private final BiConsumer<MutablePathResult, PathResult> pathAppender;
 
     public static MemoryEstimation memoryEstimation(int k, boolean trackRelationships) {
         return MemoryEstimations.builder(YensTask.class)
@@ -69,8 +60,7 @@ public class YensTask implements Runnable {
         Graph graph,
         long targetNode,
         ArrayList<MutablePathResult> kShortestPaths,
-        ReentrantLock candidateLock,
-        PriorityQueue<MutablePathResult> candidates,
+        CandidatePathsPriorityQueue candidatePathsQueue,
         AtomicInteger currentSpurIndexId,
         boolean trackRelationships,
         int k
@@ -81,35 +71,25 @@ public class YensTask implements Runnable {
         this.targetNode = targetNode;
         this.localDijkstra = null;
 
-
         this.kShortestPaths = kShortestPaths;
-        this.candidates = candidates;
-        this.candidateLock = candidateLock;
+        this.candidatePathsQueue = candidatePathsQueue;
 
+        this.relationshipFilterer = new RelationshipFilterer(k, trackRelationships);
         if (trackRelationships) {
-            // if we are in a multi-graph, we  must store the relationships ids as they are
-            //since two nodes may be connected by multiple relationships and we must know which to avoid
-            relationshipAvoidMapper = (path, position) -> path.relationship(position);
             pathAppender = (rootPath, spurPath) -> rootPath.append(MutablePathResult.of(spurPath));
-
         } else {
-            //otherwise the graph has surely no parallel edges, we do not need to explicitly store relationship ids
-            //we can just store endpoints, so that we know which nodes a node should avoid
-            relationshipAvoidMapper = (path, position) -> path.node(position + 1);
             pathAppender = (rootPath, spurPath) -> rootPath.appendWithoutRelationshipIds(MutablePathResult.of(spurPath));
         }
-
-        this.neighbors = new long[k];
     }
 
     void withPreviousPath(MutablePathResult previousPath) {
         this.previousPath = previousPath;
-        this.maxLength = previousPath.nodeCount() - 1;
     }
 
     @Override
     public void run() {
         int indexId = currentSpurIndexId.getAndIncrement();
+        int maxLength = previousPath.nodeCount() - 1; //-1 is because in source-a1-a2-t path we ignore t
         while (indexId < maxLength) {
             if (localDijkstra == null) {
                 setupDijkstra();
@@ -138,19 +118,16 @@ public class YensTask implements Runnable {
     private void createFilters(MutablePathResult rootPath, long spurNode, int indexId) {
         //clean all filters
         localDijkstra.resetTraversalState();
-        allNeighbors = 0;
-        neighborIndex = 0;
-        filteringSpurNode = spurNode;
+        relationshipFilterer.setFilter(spurNode);
 
         for (var path : kShortestPaths) {
             // Filter relationships that are part of the previous
             // shortest paths which share the same root path.
             if (rootPath.matchesExactly(path, indexId + 1)) {
-                var avoidId = relationshipAvoidMapper.applyAsLong(path, indexId);
-                neighbors[allNeighbors++] = avoidId;
+                relationshipFilterer.addBlockingNeighbor(path, indexId);
             }
         }
-        Arrays.sort(neighbors, 0, allNeighbors);
+        relationshipFilterer.prepare();
         // Filter nodes from root path to avoid cyclic path searches.
         for (int j = 0; j < indexId; j++) {
             localDijkstra.withVisited(rootPath.node(j));
@@ -173,47 +150,22 @@ public class YensTask implements Runnable {
         //so that if this path ever gets selected, we know where to start from
         rootPath.withIndex(indexId);
         // Add the potential k-shortest path to the heap.
-        candidateLock.lock();
-        if (!candidates.contains(rootPath)) {
-            candidates.add(rootPath);
-        }
-        candidateLock.unlock();
+        candidatePathsQueue.addPath(rootPath);
 
     }
 
-    private boolean validRelationship(long source, long target, long relationshipId) {
-        if (source == filteringSpurNode) {
-
-            long forbidden = trackRelationships
-                ? relationshipId
-                : target;
-
-            if (neighborIndex == allNeighbors) return true;
-
-            while (neighbors[neighborIndex] < forbidden) {
-                if (++neighborIndex == allNeighbors) {
-                    return true;
-                }
-            }
-
-            return neighbors[neighborIndex] != forbidden;
-        }
-
-        return true;
-
-    }
 
     private void setupDijkstra() {
 
         this.localDijkstra = Dijkstra.sourceTarget(
             localGraph,
-            Yens.dijkstraConfig(targetNode, localGraph.isMultiGraph()),
+            Yens.dijkstraConfig(targetNode, trackRelationships),
             Optional.empty(),
             ProgressTracker.NULL_TRACKER
         );
 
         localDijkstra.withRelationshipFilter((source, target, relationshipId) ->
-            validRelationship(source, target, relationshipId)
+            relationshipFilterer.validRelationship(source, target, relationshipId)
         );
     }
 

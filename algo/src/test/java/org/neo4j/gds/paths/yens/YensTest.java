@@ -67,14 +67,14 @@ class YensTest {
 
     static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
-            Arguments.of(1_000, 3, 1, 56_992L),
-            Arguments.of(1_000, 3, 4, 227_872L),
+            Arguments.of(1_000, 3, 1, 56_960L),
+            Arguments.of(1_000, 3, 4, 227_744L),
 
-            Arguments.of(1_000_000, 3, 1, 56_125_864L),
-            Arguments.of(1_000_000, 3, 4, 224_503_360L),
+            Arguments.of(1_000_000, 3, 1, 56_125_832L),
+            Arguments.of(1_000_000, 3, 4, 224_503_232L),
 
-            Arguments.of(1_000_000_000, 3, 1, 56_133_545_960L),
-            Arguments.of(1_000_000_000, 3, 4, 224_534_183_744L)
+            Arguments.of(1_000_000_000, 3, 1, 56_133_545_928L),
+            Arguments.of(1_000_000_000, 3, 4, 224_534_183_616L)
 
         );
     }

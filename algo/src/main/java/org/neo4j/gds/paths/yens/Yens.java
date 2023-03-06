@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.paths.yens;
 
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -36,11 +35,8 @@ import org.neo4j.gds.paths.yens.config.ImmutableShortestPathYensBaseConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Optional;
-import java.util.PriorityQueue;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
 
 public final class Yens extends Algorithm<DijkstraResult> {
@@ -100,12 +96,11 @@ public final class Yens extends Algorithm<DijkstraResult> {
 
         kShortestPaths.add(MutablePathResult.of(shortestPath.get()));
 
-        PriorityQueue<MutablePathResult> candidates = initCandidatesQueue();
+        var candidatePathsQueue = new CandidatePathsPriorityQueue();
 
         AtomicInteger currentSpurIndexId = new AtomicInteger(0);
 
-        var candidateLock = new ReentrantLock();
-        var tasks = createTasks(kShortestPaths, candidates, candidateLock, currentSpurIndexId);
+        var tasks = createTasks(kShortestPaths, candidatePathsQueue, currentSpurIndexId);
 
         progressTracker.beginSubTask("Path growing");
 
@@ -122,10 +117,10 @@ public final class Yens extends Algorithm<DijkstraResult> {
                 .run();
             progressTracker.logProgress();
 
-            if (candidates.isEmpty()) {
+            if (candidatePathsQueue.isEmpty()) {
                 break;
             }
-            addPathToSolution(i, kShortestPaths, candidates, currentSpurIndexId);
+            addPathToSolution(i, kShortestPaths, candidatePathsQueue, currentSpurIndexId);
         }
         progressTracker.endSubTask();
 
@@ -138,10 +133,10 @@ public final class Yens extends Algorithm<DijkstraResult> {
     private void addPathToSolution(
         int index,
         ArrayList<MutablePathResult> kShortestPaths,
-        PriorityQueue<MutablePathResult> candidates,
+        CandidatePathsPriorityQueue candidatePathsQueue,
         AtomicInteger currentSpurIndexId
     ) {
-        var pathToAdd = candidates.poll();
+        var pathToAdd = candidatePathsQueue.pop();
         int newIndex = (int) pathToAdd.index();
         currentSpurIndexId.set(newIndex);   //Apply lawler's modification
         pathToAdd.withIndex(index); //set the correct index to this path
@@ -149,17 +144,10 @@ public final class Yens extends Algorithm<DijkstraResult> {
 
     }
 
-    @NotNull
-    private PriorityQueue<MutablePathResult> initCandidatesQueue() {
-        return new PriorityQueue<>(Comparator
-            .comparingDouble(MutablePathResult::totalCost)
-            .thenComparingInt(MutablePathResult::nodeCount));
-    }
 
     private ArrayList<YensTask> createTasks(
         ArrayList<MutablePathResult> kShortestPaths,
-        PriorityQueue<MutablePathResult> candidates,
-        ReentrantLock candidateLock,
+        CandidatePathsPriorityQueue candidatePathsQueue,
         AtomicInteger currentSpurIndexId
     ) {
         var tasks = new ArrayList<YensTask>();
@@ -168,8 +156,7 @@ public final class Yens extends Algorithm<DijkstraResult> {
                 graph.concurrentCopy(),
                 config.targetNode(),
                 kShortestPaths,
-                candidateLock,
-                candidates,
+                candidatePathsQueue,
                 currentSpurIndexId,
                 config.trackRelationships(),
                 config.k()
