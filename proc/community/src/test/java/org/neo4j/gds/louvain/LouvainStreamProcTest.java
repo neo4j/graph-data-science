@@ -150,29 +150,33 @@ class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
 
     static Stream<Arguments> communitySizeInputs() {
         return Stream.of(
-                Arguments.of(Map.of("minCommunitySize", 1), List.of(0, 1, 2)),
-                Arguments.of(Map.of("minCommunitySize", 5), List.of(0, 2))
+            Arguments.of(Map.of("minCommunitySize", 1), List.of(0, 1, 2), List.of(0, 1, 2)),
+            Arguments.of(Map.of("minCommunitySize", 5), List.of(0, 1), List.of(0, 2))
         );
     }
 
     @ParameterizedTest
     @MethodSource("communitySizeInputs")
-    void testStreamMinCommunitySize(Map<String, Long> parameters, List<Integer> expectedCommunityIds) {
+    void testStreamMinCommunitySize(
+        Map<String, Long> parameters,
+        List<Integer> expectedCommunityIds,
+        List<Integer> mappedCommunityIds
+    ) {
         @Language("Cypher") String query = GdsCypher.call("myGraph")
-                .algo("louvain")
-                .streamMode()
-                .addParameter("consecutiveIds", true)
-                .addAllParameters(parameters)
-                .yields("nodeId", "communityId");
+            .algo("louvain")
+            .streamMode()
+            .addParameter("consecutiveIds", true)
+            .addAllParameters(parameters)
+            .yields("nodeId", "communityId");
 
         var communitySet = new HashSet<Integer>();
 
         runQueryWithRowConsumer(query, row -> {
             long id = row.getNumber("nodeId").longValue();
             int community = row.getNumber("communityId").intValue();
-
+            int mappedCommunityId = mappedCommunityIds.get(community);
             communitySet.add(community);
-            assertThat(RESULT.get(community)).contains(id);
+            assertThat(RESULT.get(mappedCommunityId)).contains(id);
         });
         assertThat(communitySet).containsExactlyElementsOf(expectedCommunityIds);
     }

@@ -105,7 +105,7 @@ public final class CommunityProcCompanion {
                 nodeProperties.size()
             );
         }
-
+        
         return nodeProperties;
     }
 
