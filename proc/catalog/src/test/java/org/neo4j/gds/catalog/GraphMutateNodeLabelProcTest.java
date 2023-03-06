@@ -19,25 +19,36 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.graphdb.QueryExecutionException;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
+@ExtendWith(SoftAssertionsExtension.class)
 class GraphMutateNodeLabelProcTest extends BaseProcTest {
 
     @Neo4jGraph(offsetIds = true)
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a:A { p: 1.0 })" +
-        ", (b:A { p: 2.0 })" +
-        ", (c:A { p: 3.0 })" +
+        "  (a:A {longProperty: 1, floatProperty: 15.5})" +
+        ", (b:A {longProperty: 2, floatProperty: 23})" +
+        ", (c:A {longProperty: 3, floatProperty: 18.3})" +
         ", (d:B)";
 
     @Inject
@@ -54,12 +65,12 @@ class GraphMutateNodeLabelProcTest extends BaseProcTest {
     }
 
     @Test
-    void mutateNodeLabelMultiLabelProjection() {
+    void mutateNodeLabelMultiLabelProjection(SoftAssertions assertions) {
         // Arrange
         runQuery(
             "CALL gds.graph.project('graph', " +
             "{" +
-            "  A: { properties: 'p' }," +
+            "  A: { properties: 'longProperty' }," +
             "  B: { label: 'B' }" +
             "}, " +
             "'*')"
@@ -67,33 +78,33 @@ class GraphMutateNodeLabelProcTest extends BaseProcTest {
 
         // Act
         runQuery(
-            "CALL gds.alpha.graph.nodeLabel.mutate('graph', 'TestLabel', { nodeFilter: 'n:A AND n.p > 1.0' }) YIELD nodeCount, nodeLabel, nodeLabelsWritten",
+            "CALL gds.alpha.graph.nodeLabel.mutate('graph', 'TestLabel', { nodeFilter: 'n:A AND n.longProperty > 1' }) YIELD nodeCount, nodeLabel, nodeLabelsWritten",
             result -> {
-                assertThat(result.hasNext()).isTrue();
+                assertions.assertThat(result.hasNext()).isTrue();
 
                 var row = result.next();
-                assertThat(row.get("nodeCount"))
+                assertions.assertThat(row.get("nodeCount"))
                     .as("Total number of nodes in the graph should be four, including the nodes that didn't get the new label")
                     .isEqualTo(4L);
 
-                assertThat(row.get("nodeLabel"))
+                assertions.assertThat(row.get("nodeLabel"))
                     .as("The specified node label should be present in the result")
                     .isEqualTo("TestLabel");
 
-                assertThat(row.get("nodeLabelsWritten"))
+                assertions.assertThat(row.get("nodeLabelsWritten"))
                     .as("There should be two nodes having the new label in the in-memory graph")
                     .isEqualTo(2L);
 
-                assertThat(result.hasNext()).isFalse();
+                assertions.assertThat(result.hasNext()).isFalse();
                 return false;
             }
         );
 
         // Assert
         var rowCount = runQueryWithRowConsumer(
-            "CALL gds.graph.nodeProperty.stream('graph', 'p', ['TestLabel'])",
+            "CALL gds.graph.nodeProperty.stream('graph', 'longProperty', ['TestLabel'])",
             row -> {
-                assertThat(row.getNumber("nodeId"))
+                assertions.assertThat(row.getNumber("nodeId"))
                     .asInstanceOf(LONG)
                     .as("Only nodes `b` and `c` should have the `TestLabel` applied.")
                     .isIn(
@@ -101,53 +112,53 @@ class GraphMutateNodeLabelProcTest extends BaseProcTest {
                         idFunction.of("c")
                     );
 
-                assertThat(row.getNumber("propertyValue"))
-                    .asInstanceOf(DOUBLE)
+                assertions.assertThat(row.getNumber("propertyValue"))
+                    .asInstanceOf(LONG)
                     .as("The node property should match the applied filter")
-                    .isGreaterThan(1d);
+                    .isGreaterThan(1);
             }
         );
-        assertThat(rowCount)
+        assertions.assertThat(rowCount)
             .as("There should have been two steamed nodes")
             .isEqualTo(2);
     }
 
     @Test
-    void mutateNodeLabelSingleLabelProjection() {
+    void mutateNodeLabelSingleLabelProjection(SoftAssertions assertions) {
         // Arrange
         runQuery(
             "CALL gds.graph.project('graph', " +
             "{" +
-            "  A: { properties: 'p' }" +
+            "  A: { properties: 'longProperty' }" +
             "}, " +
             "'*')"
         );
 
         // Act
         runQuery(
-            "CALL gds.alpha.graph.nodeLabel.mutate('graph', 'TestLabel', { nodeFilter: 'n:A AND n.p > 1.0' }) YIELD nodeCount, nodeLabelsWritten",
+            "CALL gds.alpha.graph.nodeLabel.mutate('graph', 'TestLabel', { nodeFilter: 'n:A AND n.longProperty > 1' }) YIELD nodeCount, nodeLabelsWritten",
             result -> {
-                assertThat(result.hasNext()).isTrue();
+                assertions.assertThat(result.hasNext()).isTrue();
 
                 var row = result.next();
-                assertThat(row.get("nodeCount"))
+                assertions.assertThat(row.get("nodeCount"))
                     .as("Total number of nodes in the graph should be three, including the nodes that didn't get the new label")
                     .isEqualTo(3L);
 
-                assertThat(row.get("nodeLabelsWritten"))
+                assertions.assertThat(row.get("nodeLabelsWritten"))
                     .as("There should be two nodes having the new label in the in-memory graph")
                     .isEqualTo(2L);
 
-                assertThat(result.hasNext()).isFalse();
+                assertions.assertThat(result.hasNext()).isFalse();
                 return false;
             }
         );
 
         // Assert
         var rowCount = runQueryWithRowConsumer(
-            "CALL gds.graph.nodeProperty.stream('graph', 'p', ['TestLabel'])",
+            "CALL gds.graph.nodeProperty.stream('graph', 'longProperty', ['TestLabel'])",
             row -> {
-                assertThat(row.getNumber("nodeId"))
+                assertions.assertThat(row.getNumber("nodeId"))
                     .asInstanceOf(LONG)
                     .as("Only nodes `b` and `c` should have the `TestLabel` applied.")
                     .isIn(
@@ -155,70 +166,154 @@ class GraphMutateNodeLabelProcTest extends BaseProcTest {
                         idFunction.of("c")
                     );
 
-                assertThat(row.getNumber("propertyValue"))
-                    .asInstanceOf(DOUBLE)
+                assertions.assertThat(row.getNumber("propertyValue"))
+                    .asInstanceOf(LONG)
                     .as("The node property should match the applied filter")
-                    .isGreaterThan(1d);
+                    .isGreaterThan(1);
             }
         );
-        assertThat(rowCount)
+        assertions.assertThat(rowCount)
             .as("There should have been two steamed nodes")
             .isEqualTo(2);
 
     }
 
     @Test
-    void mutateNodeLabelStarProjection() {
+    void mutateNodeLabelStarProjection(SoftAssertions assertions) {
         // Arrange
         runQuery(
             "CALL gds.graph.project('graph', " +
             "'*'," +
             "'*'," +
-            "{ nodeProperties: {p: {defaultValue: 0.0}}}" +
+            "{nodeProperties: {longProperty: {defaultValue: 0}}}" +
             ")"
         );
 
         // Act
         runQuery(
-            "CALL gds.alpha.graph.nodeLabel.mutate('graph', 'TestLabel', { nodeFilter: 'n.p > 2.0' }) YIELD nodeCount, nodeLabelsWritten",
+            "CALL gds.alpha.graph.nodeLabel.mutate('graph', 'TestLabel', { nodeFilter: 'n.longProperty <= 2' }) YIELD nodeCount, nodeLabelsWritten",
             result -> {
-                assertThat(result.hasNext()).isTrue();
+                assertions.assertThat(result.hasNext()).isTrue();
 
                 var row = result.next();
-                assertThat(row.get("nodeCount"))
+                assertions.assertThat(row.get("nodeCount"))
                     .as("Total number of nodes in the graph should be four, including the nodes that didn't get the new label")
                     .isEqualTo(4L);
 
-                assertThat(row.get("nodeLabelsWritten"))
-                    .as("There should be two nodes having the new label in the in-memory graph")
-                    .isEqualTo(1L);
+                assertions.assertThat(row.get("nodeLabelsWritten"))
+                    .as("There should be three nodes having the new label in the in-memory graph")
+                    .isEqualTo(3L);
 
-                assertThat(result.hasNext()).isFalse();
+                assertions.assertThat(result.hasNext()).isFalse();
                 return false;
             }
         );
 
         // Assert
         var rowCount = runQueryWithRowConsumer(
-            "CALL gds.graph.nodeProperty.stream('graph', 'p', ['TestLabel'])",
+            "CALL gds.graph.nodeProperty.stream('graph', 'longProperty', ['TestLabel'])",
             row -> {
-                assertThat(row.getNumber("nodeId"))
+                assertions.assertThat(row.getNumber("nodeId"))
                     .asInstanceOf(LONG)
-                    .as("Only node `c` should have the `TestLabel` applied.")
-                    .isEqualTo(
-                        idFunction.of("c")
+                    .as("Nodes `a` and `b` and `d` should have the `TestLabel` applied.")
+                    .isIn(
+                        idFunction.of("a"),
+                        idFunction.of("b"),
+                        idFunction.of("d")
                     );
 
-                assertThat(row.getNumber("propertyValue"))
-                    .asInstanceOf(DOUBLE)
+                assertions.assertThat(row.getNumber("propertyValue"))
+                    .asInstanceOf(LONG)
                     .as("The node property should match the applied filter")
-                    .isGreaterThan(2d);
+                    .isLessThanOrEqualTo(2);
+            }
+        );
+        assertions.assertThat(rowCount)
+            .as("There should have been three steamed nodes")
+            .isEqualTo(3);
+    }
+
+    @Test
+    void shouldWorkWithFloatProperties(SoftAssertions assertions) {
+        // Arrange
+        runQuery("CALL gds.graph.project('graph', " +
+                 "{" +
+                 "  A: { properties: 'floatProperty' }," +
+                 "  B: { label: 'B' }" +
+                 "}, " +
+                 "'*')");
+
+
+        // Act
+        runQuery(
+            "CALL gds.alpha.graph.nodeLabel.mutate('graph', 'TestLabel', { nodeFilter: 'n.floatProperty <= 19.0' }) YIELD nodeCount, nodeLabelsWritten",
+            result -> {
+                assertions.assertThat(result.hasNext()).isTrue();
+
+                var row = result.next();
+                assertions.assertThat(row.get("nodeCount"))
+                    .as("Total number of nodes in the graph should be four, including the nodes that didn't get the new label")
+                    .isEqualTo(4L);
+
+                assertions.assertThat(row.get("nodeLabelsWritten"))
+                    .as("There should be two nodes having the new label in the in-memory graph")
+                    .isEqualTo(2L);
+
+                assertions.assertThat(result.hasNext()).isFalse();
+                return false;
             }
         );
 
-        assertThat(rowCount)
-            .as("There should have been one steamed node")
-            .isEqualTo(1);
+        // Assert
+        var rowCount = runQueryWithRowConsumer(
+            "CALL gds.graph.nodeProperty.stream('graph', 'floatProperty', ['TestLabel'])",
+            row -> {
+                assertions.assertThat(row.getNumber("nodeId"))
+                    .asInstanceOf(LONG)
+                    .as("Nodes `a` and `c` should have the `TestLabel` applied.")
+                    .isIn(
+                        idFunction.of("a"),
+                        idFunction.of("c")
+                    );
 
+                assertions.assertThat(row.getNumber("propertyValue"))
+                    .asInstanceOf(DOUBLE)
+                    .as("The node property should match the applied filter")
+                    .isLessThanOrEqualTo(19d);
+            }
+        );
+        assertions.assertThat(rowCount)
+            .as("There should have been two steamed nodes")
+            .isEqualTo(2);
+    }
+
+    // Only check two scenarios, the rest are covered in NodeFilterParserTest.
+    @ParameterizedTest
+    @ValueSource(
+        strings = {
+            "n.floatProperty > 10",
+            "n.longProperty <= 19.6",
+        }
+    )
+    void shouldFailOnIncompatiblePropertyAndValue(String nodeFilter) {
+        runQuery(
+            "CALL gds.graph.project('graph', " +
+            "{" +
+            "  A: { properties: ['longProperty', 'floatProperty'] }," +
+            "  B: { label: 'B' }" +
+            "}, " +
+            "'*')"
+        );
+
+        assertThatExceptionOfType(QueryExecutionException.class)
+            .isThrownBy(() -> runQuery("CALL gds.alpha.graph.nodeLabel.mutate('graph', 'TestLabel', { nodeFilter: $nodeFilter })",
+                Map.of("nodeFilter", nodeFilter)))
+            .withMessageContaining("Semantic errors while parsing expression")
+            .withMessageContaining("Incompatible types");
+    }
+
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 }

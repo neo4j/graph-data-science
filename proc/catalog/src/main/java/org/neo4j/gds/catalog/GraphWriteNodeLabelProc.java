@@ -20,7 +20,6 @@
 package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.beta.filter.NodesFilter;
-import org.neo4j.gds.beta.filter.expression.ExpressionParser;
 import org.neo4j.gds.config.WriteLabelConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -38,6 +37,7 @@ import org.opencypher.v9_0.parser.javacc.ParseException;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.catalog.NodeFilterParser.parseAndValidate;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class GraphWriteNodeLabelProc extends CatalogProc {
@@ -56,16 +56,15 @@ public class GraphWriteNodeLabelProc extends CatalogProc {
         ProcPreconditions.check();
 
         var procedureConfig = WriteLabelConfig.of(configuration);
-
         var graphStore = graphStoreFromCatalog(graphName).graphStore();
-        var filter = ExpressionParser.parse(procedureConfig.nodeFilter(), Map.of());
 
+        var nodeFilter = parseAndValidate(graphStore, procedureConfig.nodeFilter());
         var resultBuilder = WriteLabelResult.builder(graphName, nodeLabel)
             .withConfig(procedureConfig.toMap());
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
             var filteredNodes = NodesFilter.filterNodes(
                 graphStore,
-                filter,
+                nodeFilter,
                 procedureConfig.concurrency(),
                 Map.of(),
                 Pools.DEFAULT,

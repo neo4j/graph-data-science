@@ -19,24 +19,34 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.graphdb.QueryExecutionException;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
+@ExtendWith(SoftAssertionsExtension.class)
 class GraphWriteNodeLabelProcTest extends BaseProcTest {
 
     @Neo4jGraph(offsetIds = true)
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a:A {p: 1})" +
-        ", (b:A {p: 2})" +
-        ", (c:A {p: 3})" +
+        "  (a:A {longProperty: 1, floatProperty: 15.5})" +
+        ", (b:A {longProperty: 2, floatProperty: 23})" +
+        ", (c:A {longProperty: 3, floatProperty: 18.3})" +
         ", (d:B)";
 
     @BeforeEach
@@ -45,63 +55,228 @@ class GraphWriteNodeLabelProcTest extends BaseProcTest {
             GraphProjectProc.class,
             GraphWriteNodeLabelProc.class
         );
-    }
 
-    @Test
-    void writeFilteredNodeLabels() {
         runQuery("CALL gds.graph.project('graph', " +
                  "{" +
-                 "  A: { properties: 'p' }," +
+                 "  A: { properties: ['longProperty', 'floatProperty'] }," +
                  "  B: { label: 'B' }" +
                  "}, " +
                  "'*')");
 
+    }
+
+    @Test
+    void writeFilteredNodeLabelsWithLongPropertyGreaterComparison(SoftAssertions assertions) {
         // First make sure the label we want to write doesn't exist
         runQueryWithRowConsumer(
             "MATCH (n:TestLabel) RETURN count(n) AS nodeCount",
-            row -> assertThat(row.getNumber("nodeCount")).asInstanceOf(LONG).isEqualTo(0L)
+            row -> assertions.assertThat(row.getNumber("nodeCount")).asInstanceOf(LONG).isEqualTo(0L)
         );
 
         runQuery(
-            "CALL gds.alpha.graph.nodeLabel.write('graph', 'TestLabel', { nodeFilter: 'n:A AND n.p > 1.0' }) YIELD nodeCount, nodeLabel, nodeLabelsWritten",
+            "CALL gds.alpha.graph.nodeLabel.write('graph', 'TestLabel', { nodeFilter: 'n:A AND n.longProperty > 1' }) YIELD nodeCount, nodeLabel, nodeLabelsWritten",
             result -> {
-                assertThat(result.hasNext()).isTrue();
+                assertions.assertThat(result.hasNext()).isTrue();
 
                 var row = result.next();
-                assertThat(row.get("nodeCount"))
+                assertions.assertThat(row.get("nodeCount"))
                     .as("Total number of nodes in the graph should be four, including the nodes that didn't get the new label")
                     .isEqualTo(4L);
 
-                assertThat(row.get("nodeLabel"))
+                assertions.assertThat(row.get("nodeLabel"))
                     .as("The specified node label should be present in the result")
                     .isEqualTo("TestLabel");
 
-                assertThat(row.get("nodeLabelsWritten"))
+                assertions.assertThat(row.get("nodeLabelsWritten"))
                     .as("There should be two nodes having the new label written back to Neo4j")
                     .isEqualTo(2L);
 
 
-                assertThat(result.hasNext()).isFalse();
+                assertions.assertThat(result.hasNext()).isFalse();
                 return false;
             }
         );
 
         // Check that we actually created the labels in the database
         var rowCount = runQueryWithRowConsumer(
-            "MATCH (n:TestLabel) RETURN labels(n) AS updatedLabels, n.p AS p",
+            "MATCH (n:TestLabel) RETURN labels(n) AS updatedLabels, n.longProperty AS longProperty",
             row -> {
-                assertThat(row.get("updatedLabels"))
+                assertions.assertThat(row.get("updatedLabels"))
                     .asList()
                     .containsExactlyInAnyOrder("A", "TestLabel");
 
-                assertThat(row.getNumber("p"))
+                assertions.assertThat(row.getNumber("longProperty"))
                     .asInstanceOf(LONG)
                     .isGreaterThan(1L);
             }
         );
+        assertions.assertThat(rowCount).isEqualTo(2);
 
-        assertThat(rowCount).isEqualTo(2);
+    }
 
+    @Test
+    void writeFilteredNodeLabelsWithLongPropertyLessThanOrEqualComparison(SoftAssertions assertions) {
+        // First make sure the label we want to write doesn't exist
+        runQueryWithRowConsumer(
+            "MATCH (n:TestLabel) RETURN count(n) AS nodeCount",
+            row -> assertions.assertThat(row.getNumber("nodeCount")).asInstanceOf(LONG).isEqualTo(0L)
+        );
+
+        runQuery(
+            "CALL gds.alpha.graph.nodeLabel.write('graph', 'TestLabel', { nodeFilter: 'n:A AND n.longProperty <= 1' }) YIELD nodeCount, nodeLabel, nodeLabelsWritten",
+            result -> {
+                assertions.assertThat(result.hasNext()).isTrue();
+
+                var row = result.next();
+                assertions.assertThat(row.get("nodeCount"))
+                    .as("Total number of nodes in the graph should be four, including the nodes that didn't get the new label")
+                    .isEqualTo(4L);
+
+                assertions.assertThat(row.get("nodeLabel"))
+                    .as("The specified node label should be present in the result")
+                    .isEqualTo("TestLabel");
+
+                assertions.assertThat(row.get("nodeLabelsWritten"))
+                    .as("There should be one node having the new label written back to Neo4j")
+                    .isEqualTo(1L);
+
+
+                assertions.assertThat(result.hasNext()).isFalse();
+                return false;
+            }
+        );
+
+        // Check that we actually created the labels in the database
+        var rowCount = runQueryWithRowConsumer(
+            "MATCH (n:TestLabel) RETURN labels(n) AS updatedLabels, n.longProperty AS longProperty",
+            row -> {
+                assertions.assertThat(row.get("updatedLabels"))
+                    .asList()
+                    .containsExactlyInAnyOrder("A", "TestLabel");
+
+                assertions.assertThat(row.getNumber("longProperty"))
+                    .asInstanceOf(LONG)
+                    .isLessThanOrEqualTo(1L);
+            }
+        );
+        assertions.assertThat(rowCount)
+            .as("The MATCH query should return two nodes.")
+            .isEqualTo(1);
+    }
+
+    @Test
+    void writeFilteredNodeLabelsWithFloatPropertyLessThanOrEqualComparison(SoftAssertions assertions) {
+        // First make sure the label we want to write doesn't exist
+        runQueryWithRowConsumer(
+            "MATCH (n:TestLabel) RETURN count(n) AS nodeCount",
+            row -> assertions.assertThat(row.getNumber("nodeCount")).asInstanceOf(LONG).isEqualTo(0L)
+        );
+
+        runQuery(
+            "CALL gds.alpha.graph.nodeLabel.write('graph', 'TestLabel', { nodeFilter: 'n:A AND n.floatProperty <= 22.0' }) YIELD nodeCount, nodeLabel, nodeLabelsWritten",
+            result -> {
+                assertions.assertThat(result.hasNext()).isTrue();
+
+                var row = result.next();
+                assertions.assertThat(row.get("nodeCount"))
+                    .as("Total number of nodes in the graph should be four, including the nodes that didn't get the new label")
+                    .isEqualTo(4L);
+
+                assertions.assertThat(row.get("nodeLabel"))
+                    .as("The specified node label should be present in the result")
+                    .isEqualTo("TestLabel");
+
+                assertions.assertThat(row.get("nodeLabelsWritten"))
+                    .as("There should be two nodes having the new label written back to Neo4j")
+                    .isEqualTo(2L);
+
+
+                assertions.assertThat(result.hasNext()).isFalse();
+                return false;
+            }
+        );
+
+        // Check that we actually created the labels in the database
+        var rowCount = runQueryWithRowConsumer(
+            "MATCH (n:TestLabel) RETURN labels(n) AS updatedLabels, n.floatProperty AS floatProperty",
+            row -> {
+                assertions.assertThat(row.get("updatedLabels"))
+                    .asList()
+                    .containsExactlyInAnyOrder("A", "TestLabel");
+
+                assertions.assertThat(row.getNumber("floatProperty"))
+                    .asInstanceOf(DOUBLE)
+                    .isLessThanOrEqualTo(23d);
+            }
+        );
+        assertions.assertThat(rowCount)
+            .as("The MATCH query should return two nodes.")
+            .isEqualTo(2);
+
+    }
+
+    @Test
+    void writeFilteredNodeLabelsWithFloatPropertyGreaterComparison(SoftAssertions assertions) {
+        // First make sure the label we want to write doesn't exist
+        runQueryWithRowConsumer(
+            "MATCH (n:TestLabel) RETURN count(n) AS nodeCount",
+            row -> assertions.assertThat(row.getNumber("nodeCount")).asInstanceOf(LONG).isEqualTo(0L)
+        );
+
+        runQuery(
+            "CALL gds.alpha.graph.nodeLabel.write('graph', 'TestLabel', { nodeFilter: 'n:A AND n.floatProperty > 19.0' }) YIELD nodeCount, nodeLabel, nodeLabelsWritten",
+            result -> {
+                assertions.assertThat(result.hasNext()).isTrue();
+
+                var row = result.next();
+                assertions.assertThat(row.get("nodeCount"))
+                    .as("Total number of nodes in the graph should be four, including the nodes that didn't get the new label")
+                    .isEqualTo(4L);
+
+                assertions.assertThat(row.get("nodeLabel"))
+                    .as("The specified node label should be present in the result")
+                    .isEqualTo("TestLabel");
+
+                assertions.assertThat(row.get("nodeLabelsWritten"))
+                    .as("There should be one node having the new label written back to Neo4j")
+                    .isEqualTo(1L);
+
+
+                assertions.assertThat(result.hasNext()).isFalse();
+                return false;
+            }
+        );
+
+        // Check that we actually created the labels in the database
+        var rowCount = runQueryWithRowConsumer(
+            "MATCH (n:TestLabel) RETURN labels(n) AS updatedLabels, n.floatProperty AS floatProperty",
+            row -> {
+                assertions.assertThat(row.get("updatedLabels"))
+                    .asList()
+                    .containsExactlyInAnyOrder("A", "TestLabel");
+
+                assertions.assertThat(row.getNumber("floatProperty").doubleValue())
+                    .isGreaterThan(19d);
+            }
+        );
+        assertions.assertThat(rowCount).isEqualTo(1);
+
+    }
+
+    // Only check two scenarios, the rest are covered in NodeFilterParserTest.
+    @ParameterizedTest
+    @ValueSource(
+        strings = {
+            "n.floatProperty > 10",
+            "n.longProperty <= 19.6",
+        }
+    )
+    void shouldFailOnIncompatiblePropertyAndValue(String nodeFilter) {
+        assertThatExceptionOfType(QueryExecutionException.class)
+            .isThrownBy(() -> runQuery("CALL gds.alpha.graph.nodeLabel.write('graph', 'TestLabel', { nodeFilter: $nodeFilter })",
+                Map.of("nodeFilter", nodeFilter)))
+            .withMessageContaining("Semantic errors while parsing expression")
+            .withMessageContaining("Incompatible types");
     }
 
     @AfterEach
