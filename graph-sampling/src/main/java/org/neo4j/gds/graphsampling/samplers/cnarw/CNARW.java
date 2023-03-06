@@ -276,7 +276,7 @@ public class CNARW implements NodesSampler {
                         );
                         q = rng.nextDouble();
                     } while (q > chanceOutOfNeighbours);
-
+                    currentNode = candidateNode;
                     nodesConsidered++;
                 }
             }
@@ -286,6 +286,7 @@ public class CNARW implements NodesSampler {
             long[] currentNodeNeighbours, Optional<double[]> currentWeights,
             long[] candidateNodeNeighbours, Optional<double[]> candidateWeights
         ) {
+            if (currentNodeNeighbours.length == 0 || candidateNodeNeighbours.length == 0) return 0.0D;
             if (currentWeights.isPresent()) {
                 assert candidateWeights.isPresent();
                 return overlapSimilarity.computeWeightedSimilarity(

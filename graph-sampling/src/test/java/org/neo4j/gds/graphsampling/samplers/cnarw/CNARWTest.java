@@ -275,9 +275,15 @@ class CNARWTest {
             .build();
 
         var cnarw = new CNARW(config);
-        var nodes = cnarw.compute(getGraph(config), ProgressTracker.NULL_TRACKER);
+        var graph = getGraph(config);
+        var nodes = cnarw.compute(graph, ProgressTracker.NULL_TRACKER);
 
         assertThat(nodes.cardinality()).isEqualTo(4);
+
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("x")))).isTrue();
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("x1")))).isTrue();
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("x2")))).isTrue();
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("x3")))).isTrue();
     }
 
     @Test
