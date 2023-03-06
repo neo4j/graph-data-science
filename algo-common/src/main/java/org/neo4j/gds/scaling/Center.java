@@ -36,8 +36,8 @@ final class Center extends ScalarScaler {
     static final String TYPE = "center";
     final double avg;
 
-    private Center(NodePropertyValues properties, Map<String, List<Double>> statistics, double avg) {
-        super(properties, statistics);
+    private Center(NodePropertyValues properties, double avg) {
+        super(properties, Map.of("avg", List.of(avg)));
         this.avg = avg;
     }
 
@@ -76,8 +76,7 @@ final class Center extends ScalarScaler {
                 var sum = tasks.stream().mapToDouble(ComputeSum::sum).sum();
                 var avg = sum / nodeCount;
 
-                return new Center(properties, Map.of("avg", List.of(avg)), avg);
-
+                return new Center(properties, avg);
             }
         };
     }

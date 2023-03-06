@@ -48,7 +48,7 @@ public abstract class ScalarScaler implements Scaler {
 
     static class StatsOnly extends ScalarScaler {
 
-        protected StatsOnly(Map<String, List<Double>> stats) {
+        StatsOnly(Map<String, List<Double>> stats) {
             super(null, stats);
         }
 
