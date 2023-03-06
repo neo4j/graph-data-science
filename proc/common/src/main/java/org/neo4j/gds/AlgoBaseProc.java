@@ -46,6 +46,10 @@ import org.neo4j.gds.results.MemoryEstimateResult;
 import java.util.Map;
 import java.util.stream.Stream;
 
+/**
+ * @deprecated do not add new uses of this. Instead, inherit from BaseProc and use the Spec framework.
+ */
+@Deprecated(forRemoval = true)
 public abstract class AlgoBaseProc<
     ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,
