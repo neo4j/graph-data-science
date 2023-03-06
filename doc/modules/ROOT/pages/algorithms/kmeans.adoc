@@ -22,7 +22,7 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 K-Means clustering is an unsupervised learning algorithm that is used to solve clustering problems.
 It follows a simple procedure of classifying a given data set into a number of clusters, defined by the parameter `k`.
 The Neo4j GDS Library conducts clustering based on node properties, with a float array node property being passed as input via the `nodeProperty` parameter.
-Nodes in the graph are then positioned as points in a `d`-dimensional space (where `d` is the size of length of the array property).
+Nodes in the graph are then positioned as points in a `d`-dimensional space (where `d` is the length of the array property).
 
 The algorithm then begins by selecting `k` initial cluster centroids, which are `d`-dimensional arrays (see xref:algorithms-kmeans-sampling[section below] for more details).
 The centroids act as representatives for a cluster.
