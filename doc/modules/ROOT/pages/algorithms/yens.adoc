@@ -6,8 +6,6 @@
 :algorithm: Yen's
 :source-target: true
 :procedure-name: pass:q[gds.shortestPath.yens]
-:sequential: true
-
 
 :directed:
 :undirected:
@@ -32,8 +30,8 @@ The GDS implementation is based on the https://www.ams.org/journals/qam/1970-27-
 For the actual path computation, Yen's algorithm uses xref:algorithms/dijkstra-source-target.adoc[Dijkstra's shortest path algorithm].
 The algorithm makes sure that an already discovered shortest path will not be traversed again.
 
-The algorithm implementation is executed using a single thread.
-Altering the concurrency configuration has no effect.
+The algorithm implementation is parallelized, but limited by the number of nodes in source-target paths.
+If these paths are expected to have small length (i.e., a few new nodes) setting a high value for concurrency is discouraged as some of the cores might be left unitilized.
 
 [[algorithms-yens-syntax]]
 == Syntax
@@ -118,7 +116,7 @@ RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 6         | 9                 | 1008      | 1008      | "1008 Bytes"
+| 6         | 9                 | 4608      | 4608      | "4608 Bytes"
 |===
 --
 

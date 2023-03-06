@@ -153,6 +153,11 @@ public final class Dijkstra extends Algorithm<DijkstraResult> {
         return this;
     }
 
+    public Dijkstra withVisited(long node) {
+        visited.set(node);
+        return this;
+    }
+    
     public Dijkstra withRelationshipFilter(RelationshipFilter relationshipFilter) {
         this.relationshipFilter = this.relationshipFilter.and(relationshipFilter);
         return this;

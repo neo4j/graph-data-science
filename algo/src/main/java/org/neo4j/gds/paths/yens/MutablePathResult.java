@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.paths.yens;
 
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
 
@@ -246,7 +245,6 @@ final class MutablePathResult {
                '}';
     }
 
-    @TestOnly
     long index() {
         return index;
     }
