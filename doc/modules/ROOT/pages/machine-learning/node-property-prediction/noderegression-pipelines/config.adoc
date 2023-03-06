@@ -64,7 +64,7 @@ CALL gds.alpha.pipeline.nodeRegression.create('pipe')
 | "pipe"   | []                | []
 | {testFraction=0.3, validationFolds=3}
 | {maxTrials=10}
-| {RandomForest=[], LinearRegression=[]}
+| {LinearRegression=[], RandomForest=[]}
 |===
 --
 
