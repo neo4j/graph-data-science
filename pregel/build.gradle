@@ -17,8 +17,10 @@ dependencies {
 
     implementation project(':config-api')
     implementation project(":core")
+    implementation project(":core-utils")
     implementation project(':annotations')
     implementation project(':memory-usage')
+    implementation project(':progress-tracking')
     implementation project(':string-formatting')
 
     testAnnotationProcessor project(':annotations')

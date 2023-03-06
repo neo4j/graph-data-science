@@ -44,6 +44,7 @@ dependencies {
 
     // TEST DEPENDENCIES
 
+    testCompileOnly project(':progress-tracking')
     testCompileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
 
     testImplementation project(':executor')

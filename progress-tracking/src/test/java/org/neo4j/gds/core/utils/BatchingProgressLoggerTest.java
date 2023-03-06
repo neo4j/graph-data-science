@@ -23,9 +23,11 @@ import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.eclipse.collections.impl.utility.ListIterate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.progress.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.utils.CloseableThreadLocal;
@@ -159,25 +161,25 @@ class BatchingProgressLoggerTest {
 
     @Test
     void log100Percent() {
-        try (var ignore = RenamesCurrentThread.renameThread("test")) {
-            TestLog log = Neo4jProxy.testLog();
-            var testProgressLogger = new BatchingProgressLogger(log, Tasks.leaf("Test"), 1);
-            testProgressLogger.reset(1337);
-            testProgressLogger.logFinishPercentage();
-            assertThat(log.getMessages(TestLog.INFO)).containsExactly("[test] Test 100%");
-        }
+        TestLog log = Neo4jProxy.testLog();
+        var testProgressLogger = new BatchingProgressLogger(log, Tasks.leaf("Test"), 1);
+        testProgressLogger.reset(1337);
+        testProgressLogger.logFinishPercentage();
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(Extractors.removingThreadId())
+            .containsExactly("Test 100%");
     }
 
     @Test
     void shouldLog100OnlyOnce() {
-        try (var ignore = RenamesCurrentThread.renameThread("test")) {
-            TestLog log = Neo4jProxy.testLog();
-            var testProgressLogger = new BatchingProgressLogger(log, Tasks.leaf("Test"), 1);
-            testProgressLogger.reset(1);
-            testProgressLogger.logProgress(1);
-            testProgressLogger.logFinishPercentage();
-            assertThat(log.getMessages(TestLog.INFO)).containsExactly("[test] Test 100%");
-        }
+        TestLog log = Neo4jProxy.testLog();
+        var testProgressLogger = new BatchingProgressLogger(log, Tasks.leaf("Test"), 1);
+        testProgressLogger.reset(1);
+        testProgressLogger.logProgress(1);
+        testProgressLogger.logFinishPercentage();
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(Extractors.removingThreadId())
+            .containsExactly("Test 100%");
     }
 
     @Test

@@ -167,22 +167,16 @@ class TaskTest {
             a, b
         );
 
-        assertThat(root.getProgress())
-            .hasFieldOrPropertyWithValue("volume", 200L)
-            .hasFieldOrPropertyWithValue("progress", 0L);
+        assertThat(root.getProgress()).isEqualTo(ImmutableProgress.of(0, 200));
 
         a.logProgress(50);
 
-        assertThat(root.getProgress())
-            .hasFieldOrPropertyWithValue("volume", 200L)
-            .hasFieldOrPropertyWithValue("progress", 50L);
+        assertThat(root.getProgress()).isEqualTo(ImmutableProgress.of(50, 200));
 
         a.logProgress(50);
         a.logProgress(100);
 
-        assertThat(root.getProgress())
-            .hasFieldOrPropertyWithValue("volume", 200L)
-            .hasFieldOrPropertyWithValue("progress", 200L);
+        assertThat(root.getProgress()).isEqualTo(ImmutableProgress.of(200, 200));
     }
 
     @Test
@@ -195,15 +189,11 @@ class TaskTest {
             a, b
         );
 
-        assertThat(root.getProgress())
-            .hasFieldOrPropertyWithValue("volume", -1L)
-            .hasFieldOrPropertyWithValue("progress", 0L);
+        assertThat(root.getProgress()).isEqualTo(ImmutableProgress.of(0, -1L));
 
         a.logProgress(50);
 
-        assertThat(root.getProgress())
-            .hasFieldOrPropertyWithValue("volume", -1L)
-            .hasFieldOrPropertyWithValue("progress", 50L);
+        assertThat(root.getProgress()).isEqualTo(ImmutableProgress.of(50, -1));
     }
 
     @Test

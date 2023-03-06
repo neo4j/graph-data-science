@@ -26,13 +26,12 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class ExceptionUtil {
 
@@ -219,7 +218,8 @@ public final class ExceptionUtil {
     private static void validateNodeIsLoaded(long mappedId, long neoId, String side) {
         if (mappedId == -1) {
             throw new IllegalArgumentException(
-                formatWithLocale(
+                String.format(
+                    Locale.US,
                     "Failed to load a relationship because its %s-node with id %s is not part of the node query or projection. " +
                     "To ignore the relationship, set the configuration parameter `validateRelationships` to false.",
                     side,

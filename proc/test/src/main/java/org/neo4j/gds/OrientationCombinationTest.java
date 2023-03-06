@@ -19,22 +19,19 @@
  */
 package org.neo4j.gds;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.QueryRunner.runQuery;
-import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 
 public interface OrientationCombinationTest<ALGORITHM extends Algorithm<RESULT>, CONFIG extends AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 
@@ -127,22 +124,15 @@ public interface OrientationCombinationTest<ALGORITHM extends Algorithm<RESULT>,
         applyOnProcedure(proc -> {
             getProcedureMethods(proc)
                 .filter(procMethod -> !getProcedureMethodName(procMethod).endsWith(".estimate"))
-                .forEach(noneEstimateMethod -> {
-                    InvocationTargetException ex = assertThrows(
-                        InvocationTargetException.class,
-                        () -> {
-                            noneEstimateMethod.invoke(
-                                proc,
-                                "directedMultiRels",
-                                config.toMap()
-                            );
-                        }
-                    );
-                    assertThat(
-                        rootCause(ex).getMessage(),
-                        containsString(expectedValidationMessage())
-                    );
-                });
+                .forEach(noneEstimateMethod -> Assertions.assertThatThrownBy(() -> noneEstimateMethod.invoke(
+                            proc,
+                            "directedMultiRels",
+                            config.toMap()
+                        )
+                    )
+                    .isInstanceOf(InvocationTargetException.class)
+                    .rootCause()
+                    .hasMessageContaining(expectedValidationMessage()));
         });
     }
 

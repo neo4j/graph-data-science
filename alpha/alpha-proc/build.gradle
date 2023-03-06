@@ -26,6 +26,7 @@ dependencies {
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':core-utils')
     implementation project(':core-write')
     implementation project(':executor')
     implementation project(':memory-usage')
@@ -33,6 +34,7 @@ dependencies {
     implementation project(':pregel')
     implementation project(':proc-catalog')
     implementation project(':proc-pregel')
+    implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':transaction')
 

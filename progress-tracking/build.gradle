@@ -1,0 +1,44 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Progress Tracking'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    annotationProcessor project(':annotations')
+    annotationProcessor project(':config-generator')
+    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
+    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+    annotationProcessor group: 'org.neo4j',                name: 'annotations',        version: ver.'neo4j'
+
+    compileOnly         group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
+    compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
+    compileOnly         group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
+    compileOnly         group: 'com.github.spotbugs',      name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
+
+    neodeps().each {
+        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
+            transitive = false
+        }
+    }
+
+    implementation project(':annotations')
+    implementation project(':core-utils')
+    implementation project(':memory-usage')
+    implementation project(':neo4j-kernel-adapter')
+    implementation project(':string-formatting')
+
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: ver.'commons-lang3'
+
+
+    // TEST DEPENDENCIES
+
+    testCompileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
+
+    testAnnotationProcessor project(':annotations')
+    testAnnotationProcessor project(':config-generator')
+    testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+
+    testImplementation project(':core') // TODO remove this once RunWithConcurrency is out of core
+    testImplementation project(':test-utils')
+}

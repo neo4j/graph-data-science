@@ -20,6 +20,7 @@ dependencies {
         }
     }
 
+    testCompileOnly    project(':progress-tracking')
     testImplementation project(':core')
     testImplementation project(':storage-engine-adapter')
     testImplementation project(':config-api')

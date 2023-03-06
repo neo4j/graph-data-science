@@ -25,6 +25,7 @@ dependencies {
     implementation project(':collections')
     implementation project(':memory-usage')
     implementation project(':neo4j-api')
+    implementation project(':progress-tracking')
 
     testImplementation group: 'org.assertj', name: 'assertj-core',          version: ver.'assertj'
 

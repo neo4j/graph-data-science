@@ -23,7 +23,9 @@ dependencies {
     }
 
     implementation project(':annotations')
-    implementation project(':core')
+    implementation project(':core') // TODO move core.concurrency out of core to not depend on whole core
+    implementation project(':core-utils')
+    implementation project(':progress-tracking')
     implementation project(':graph-schema-api')
     implementation project(':transaction')
 

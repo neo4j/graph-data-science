@@ -20,6 +20,7 @@ dependencies {
     implementation project(':core-write')
     implementation project(':executor')
     implementation project(':proc-common')
+    implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':graph-schema-api')
     api project(':pregel')

@@ -22,6 +22,7 @@ dependencies {
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':graph-schema-api')
+    implementation project(':progress-tracking')
     implementation project(':string-formatting')
 
     testImplementation project(":test-utils")

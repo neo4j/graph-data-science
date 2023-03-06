@@ -24,6 +24,7 @@ dependencies {
     implementation project(':core')
     implementation project(':graph-schema-api')
     implementation project(':proc-common')
+    implementation project(':progress-tracking')
     implementation project(':string-formatting')
 
     implementation group: 'org.openjdk.jol',   name: 'jol-core',                  version: ver.'jol'

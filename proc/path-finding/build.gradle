@@ -21,6 +21,7 @@ dependencies {
     implementation project(':core-write')
     implementation project(':graph-schema-api')
     implementation project(':neo4j-api')
+    implementation project(':progress-tracking')
 
     implementation project(':executor')
     implementation project(':memory-usage')

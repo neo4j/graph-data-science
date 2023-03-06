@@ -21,6 +21,7 @@ dependencies {
     implementation project(':neo4j-adapter')
     implementation project(':neo4j-api')
     implementation project(':pregel')
+    implementation project(':progress-tracking')
     implementation project(':string-formatting')
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'

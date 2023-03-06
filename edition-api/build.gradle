@@ -16,6 +16,7 @@ dependencies {
     }
 
     implementation project(':core')
+    implementation project(':core-utils')
     implementation project(':licensing')
     implementation project(':concurrency-validation-api')
     implementation project(':model-catalog-api')

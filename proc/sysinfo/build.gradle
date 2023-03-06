@@ -21,6 +21,7 @@ dependencies {
     compileOnly group: 'org.neo4j', name: 'neo4j-kernel', version: ver.neo4j
 
     implementation project(':core')
+    implementation project(':core-utils')
     implementation project(':memory-usage')
     implementation project(':licensing')
     implementation project(':proc-common')

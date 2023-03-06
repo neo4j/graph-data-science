@@ -28,6 +28,7 @@ dependencies {
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':core-utils')
     implementation project(':graph-schema-api')
     implementation project(':memory-usage')
     implementation project(':ml-core')
@@ -35,6 +36,7 @@ dependencies {
     implementation project(':model-catalog-api')
     implementation project(':neo4j-api')
     implementation project(':pregel')
+    implementation project(':progress-tracking')
     implementation project(':string-formatting')
 
     // TEST DEPENDENCIES

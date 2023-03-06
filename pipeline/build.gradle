@@ -46,6 +46,7 @@ dependencies {
     implementation project(':graph-schema-api')
     implementation project(':model-catalog-api')
     implementation project(':neo4j-api')
+    implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':memory-usage')
     implementation project(':defaults-and-limits-configuration')

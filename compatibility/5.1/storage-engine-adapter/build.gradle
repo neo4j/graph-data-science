@@ -21,6 +21,7 @@ if (ver.'neo4j'.startsWith('5.')) {
         annotationProcessor group: 'org.neo4j',      name: 'annotations',        version: neos.'5.1'
 
         compileOnly project(':annotations')
+        compileOnly project(':progress-tracking')
         compileOnly group: 'org.immutables', name: 'value-annotations',           version: ver.'immutables'
         compileOnly group: 'org.neo4j',      name: 'neo4j',                       version: neos.'5.1'
         compileOnly group: 'org.neo4j',      name: 'neo4j-record-storage-engine', version: neos.'5.1'

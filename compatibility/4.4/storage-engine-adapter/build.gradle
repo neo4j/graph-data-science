@@ -17,4 +17,5 @@ dependencies {
     compileOnly project(':annotations')
     compileOnly         group: 'org.immutables', name: 'value-annotations',  version: ver.'immutables'
     compileOnly         group: 'org.neo4j',      name: 'neo4j',              version: neos.'4.4'
+    compileOnly project(':progress-tracking')
 }

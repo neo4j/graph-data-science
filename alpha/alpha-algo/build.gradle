@@ -26,6 +26,7 @@ dependencies {
     implementation project(':graph-schema-api')
     implementation project(':memory-usage')
     implementation project(':string-formatting')
+    implementation project(':progress-tracking')
 
     api group: 'org.eclipse.collections', name: 'eclipse-collections',  version: ver.'eclipse-collections'
 

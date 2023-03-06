@@ -22,6 +22,7 @@ dependencies {
     implementation project(':graph-schema-api')
     implementation project(':model-catalog-api')
     implementation project(':neo4j-adapter')
+    implementation project(':progress-tracking')
     implementation project(':string-formatting')
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'

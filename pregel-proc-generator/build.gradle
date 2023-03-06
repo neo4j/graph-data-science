@@ -21,6 +21,7 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':proc-common')
     implementation project(':pregel')
+    implementation project(':progress-tracking')
     implementation project(':proc-pregel')
     implementation project(':string-formatting')
 

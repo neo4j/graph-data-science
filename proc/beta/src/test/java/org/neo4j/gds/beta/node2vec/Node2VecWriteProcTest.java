@@ -37,9 +37,7 @@ import org.neo4j.graphdb.QueryExecutionException;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class Node2VecWriteProcTest extends BaseProcTest implements MemoryEstimateTest<Node2Vec, Node2VecWriteConfig, Node2VecModel.Result> {
@@ -130,8 +128,6 @@ class Node2VecWriteProcTest extends BaseProcTest implements MemoryEstimateTest<N
             .addParameter("sudo", true)
             .yields();
 
-        Throwable throwable = rootCause(assertThrows(QueryExecutionException.class, () -> runQuery(query)));
-        assertEquals(IllegalArgumentException.class, throwable.getClass());
         String expectedMessage = formatWithLocale(
             "Aborting execution, running with the configured parameters is likely to overflow: node count: %d, walks per node: %d, walkLength: %d." +
             " Try reducing these parameters or run on a smaller graph.",
@@ -139,7 +135,11 @@ class Node2VecWriteProcTest extends BaseProcTest implements MemoryEstimateTest<N
             Integer.MAX_VALUE,
             Integer.MAX_VALUE
         );
-        assertEquals(expectedMessage, throwable.getMessage());
+
+        assertThatThrownBy(() -> runQuery(query))
+            .rootCause()
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage(expectedMessage);
     }
 
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper userInput) {

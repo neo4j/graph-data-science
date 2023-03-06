@@ -28,6 +28,7 @@ dependencies {
     testImplementation project(':doc-test-tools')
     testImplementation project(':proc')
     testImplementation project(':pregel-example')
+    testImplementation project(':progress-tracking')
     testImplementation project(':pipeline')
     testImplementation project(':proc-sysinfo')
 

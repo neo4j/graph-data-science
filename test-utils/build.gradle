@@ -19,6 +19,7 @@ dependencies {
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':core-utils')
     implementation project(':graph-schema-api')
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
@@ -26,6 +27,7 @@ dependencies {
     implementation project(':open-model-catalog')
     implementation project(':open-write-services')
     implementation project(':proc-common')
+    implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':transaction')
 

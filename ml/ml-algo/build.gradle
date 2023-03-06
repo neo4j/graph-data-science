@@ -23,6 +23,7 @@ dependencies {
     implementation project(':algo-common')
     implementation project(':annotations')
     implementation project(':core')
+    implementation project(':progress-tracking')
     implementation project(':memory-usage')
     implementation project(':ml-core')
     implementation project(':config-api')

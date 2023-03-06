@@ -30,11 +30,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.QueryRunner.runQuery;
-import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 
 public interface OnlyUndirectedTest<ALGORITHM extends Algorithm<RESULT>, CONFIG extends AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 
@@ -47,18 +44,14 @@ public interface OnlyUndirectedTest<ALGORITHM extends Algorithm<RESULT>, CONFIG 
         applyOnProcedure(proc -> {
             getProcedureMethods(proc)
                 .filter(procMethod -> !getProcedureMethodName(procMethod).endsWith(".estimate"))
-                .forEach(nonEstimateMethod -> {
-                    InvocationTargetException ex = assertThrows(
-                        InvocationTargetException.class,
-                        () -> {
-                            nonEstimateMethod.invoke(proc, "directed", config.toMap());
-                        }
-                    );
-                    assertThat(
-                        rootCause(ex).getMessage(),
-                        containsString("requires relationship projections to be UNDIRECTED.")
-                    );
-                });
+                .forEach(nonEstimateMethod -> assertThatThrownBy(() -> nonEstimateMethod.invoke(
+                    proc,
+                    "directed",
+                    config.toMap()
+                ))
+                    .isInstanceOf(InvocationTargetException.class)
+                    .rootCause()
+                    .hasMessageContaining("requires relationship projections to be UNDIRECTED."));
         });
 
     }
@@ -76,26 +69,20 @@ public interface OnlyUndirectedTest<ALGORITHM extends Algorithm<RESULT>, CONFIG 
             .empty()
             .withEntry("relationshipTypes", filter));
 
-        applyOnProcedure(proc -> {
+        applyOnProcedure(proc ->
             getProcedureMethods(proc)
                 .filter(procMethod -> !getProcedureMethodName(procMethod).endsWith(".estimate"))
-                .forEach(noneEstimateMethod -> {
-                    InvocationTargetException ex = assertThrows(
-                        InvocationTargetException.class,
-                        () -> {
-                            noneEstimateMethod.invoke(
-                                proc,
-                                "directedMultiRels",
-                                config.toMap()
-                            );
-                        }
-                    );
-                    assertThat(
-                        rootCause(ex).getMessage(),
-                        containsString("requires relationship projections to be UNDIRECTED.")
-                    );
-                });
-        });
+                .forEach(noneEstimateMethod -> assertThatThrownBy(() ->
+                        noneEstimateMethod.invoke(
+                            proc,
+                            "directedMultiRels",
+                            config.toMap()
+                        )
+                    )
+                        .isInstanceOf(InvocationTargetException.class)
+                        .rootCause()
+                        .hasMessageContaining("requires relationship projections to be UNDIRECTED.")
+                ));
     }
 
     static Stream<Arguments> filtered() {

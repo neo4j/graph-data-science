@@ -20,8 +20,8 @@
 package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.core.utils.BatchingProgressLogger;
-import org.neo4j.gds.core.utils.ProgressLogger;
+import org.neo4j.gds.core.utils.progress.BatchingProgressLogger;
+import org.neo4j.gds.core.utils.progress.ProgressLogger;
 import org.neo4j.logging.Log;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;

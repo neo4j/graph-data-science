@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.logging.Log;
 
 import java.util.Optional;
@@ -35,7 +36,6 @@ import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.neo4j.gds.core.utils.progress.tasks.Task.UNKNOWN_VOLUME;
-import static org.neo4j.gds.utils.GdsFeatureToggles.THROW_WHEN_USING_PROGRESS_TRACKER_WITHOUT_TASKS;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class TaskProgressTracker implements ProgressTracker {
@@ -83,7 +83,7 @@ public class TaskProgressTracker implements ProgressTracker {
         this.progressLeftOvers = 0;
         this.nestedTasks = new Stack<>();
         this.userLogRegistry = userLogRegistryFactory.newInstance();
-        if (THROW_WHEN_USING_PROGRESS_TRACKER_WITHOUT_TASKS.isEnabled()) {
+        if (GdsFeatureToggles.THROW_WHEN_USING_PROGRESS_TRACKER_WITHOUT_TASKS.isEnabled()) {
             this.onError = () -> {
                 throw new IllegalStateException("Tried to log progress, but there are no running tasks being tracked");
             };
