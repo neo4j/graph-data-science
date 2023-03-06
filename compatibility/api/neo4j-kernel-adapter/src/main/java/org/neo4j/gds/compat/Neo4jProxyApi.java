@@ -84,7 +84,9 @@ import org.neo4j.logging.internal.LogService;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.ssl.config.SslPolicyLoader;
+import org.neo4j.values.storable.TextArray;
 import org.neo4j.values.virtual.MapValue;
+import org.neo4j.values.virtual.NodeValue;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -248,6 +250,8 @@ public interface Neo4jProxyApi {
     Log getUserLog(LogService logService, Class<?> loggingClass);
 
     Log getInternalLog(LogService logService, Class<?> loggingClass);
+
+    NodeValue nodeValue(long id, TextArray labels, MapValue properties);
 
     Relationship virtualRelationship(long id, Node startNode, Node endNode, RelationshipType type);
 

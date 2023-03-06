@@ -125,9 +125,12 @@ import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.ssl.config.SslPolicyLoader;
 import org.neo4j.storageengine.api.PropertySelection;
+import org.neo4j.values.storable.TextArray;
 import org.neo4j.values.storable.ValueCategory;
 import org.neo4j.values.storable.ValueGroup;
 import org.neo4j.values.virtual.MapValue;
+import org.neo4j.values.virtual.NodeValue;
+import org.neo4j.values.virtual.VirtualValues;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -607,6 +610,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @SuppressForbidden(reason = "This is the compat specific use")
     public Log getInternalLog(LogService logService, Class<?> loggingClass) {
         return logService.getInternalLog(loggingClass);
+    }
+
+    @Override
+    public NodeValue nodeValue(long id, TextArray labels, MapValue properties) {
+        return VirtualValues.nodeValue(id, labels, properties);
     }
 
     @Override
