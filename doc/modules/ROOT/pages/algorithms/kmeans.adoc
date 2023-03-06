@@ -21,13 +21,24 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 K-Means clustering is an unsupervised learning algorithm that is used to solve clustering problems.
 It follows a simple procedure of classifying a given data set into a number of clusters, defined by the parameter `k`.
-The clusters are then positioned as points and all observations or data points are associated with the nearest cluster, computed, adjusted and then the process starts over using the new adjustments until a desired result is reached.
+The Neo4j GDS Library conducts clustering based on node properties, with a float array node property being passed as input via the `nodeProperty` parameter.
+Nodes in the graph are then positioned as points in a `d`-dimensional space (where `d` is the size of length of the array property).
+
+The algorithm then begins by selecting `k` initial cluster centroids, which are `d`-dimensional arrays (see xref:algorithms-kmeans-sampling[section below] for more details).
+The centroids act as representatives for a cluster.
+
+Then, all nodes in the graph calculate their Euclidean distance from each of the cluster centroids and are assigned to the cluster of minimum distance from them.
+ After these assignments, each cluster takes the mean of all nodes (as points) assigned to it to form its new representative centroid (as a `d`-dimensional array).
+
+The process repeats with the new centroids until results stabilize, i.e., only a few nodes change clusters per iteration or the number of maximum iterations is reached.
+
+Note that the K-Means implementation ignores relationships as it is only focused on node properties.
 
 For more information on this algorithm, see:
 
 * https://en.wikipedia.org/wiki/K-means_clustering
 
-[[algorithms-kmeans-introduction-sampling]]
+[[algorithms-kmeans-sampling]]
 == Initial Centroid Sampling
 
 The algorithm starts by picking `k` centroids by  randomly sampling from the set of available nodes.
