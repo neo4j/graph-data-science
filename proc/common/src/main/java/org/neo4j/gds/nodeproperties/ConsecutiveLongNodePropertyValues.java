@@ -27,6 +27,8 @@ import org.neo4j.gds.mem.BitUtil;
 public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues {
 
     private static final long MAPPING_SIZE_QUOTIENT = 10L;
+    private static final long NO_VALUE = -1L;
+
 
     private final HugeLongArray communities;
 
@@ -44,13 +46,17 @@ public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues
         this.communities = HugeLongArray.newArray(nodeCount);
 
         for (var nodeId = 0; nodeId < nodeCount; nodeId++) {
-            var setId = longNodeProperties.longValue(nodeId);
-            var communityId = setIdToConsecutiveId.getOrDefault(setId, -1);
-            if (communityId == -1) {
-                setIdToConsecutiveId.addTo(setId, ++nextConsecutiveId);
-                communityId = nextConsecutiveId;
+            if (longNodeProperties.hasValue(nodeId)) {
+                var setId = longNodeProperties.longValue(nodeId);
+                var communityId = setIdToConsecutiveId.getOrDefault(setId, -1);
+                if (communityId == -1) {
+                    setIdToConsecutiveId.addTo(setId, ++nextConsecutiveId);
+                    communityId = nextConsecutiveId;
+                }
+                communities.set(nodeId, communityId);
+            } else {
+                communities.set(nodeId, NO_VALUE);
             }
-            communities.set(nodeId, communityId);
         }
     }
 
@@ -62,5 +68,10 @@ public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues
     @Override
     public long size() {
         return communities.size();
+    }
+
+    @Override
+    public boolean hasValue(long nodeId) {
+        return communities.get(nodeId) != NO_VALUE;
     }
 }
