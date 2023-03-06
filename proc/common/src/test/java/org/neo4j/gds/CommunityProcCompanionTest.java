@@ -25,7 +25,7 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
-import org.neo4j.gds.config.ComponentSizeConfig;
+import org.neo4j.gds.config.CommunitySizeConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
 import org.neo4j.gds.config.SeedConfig;
@@ -94,10 +94,10 @@ class CommunityProcCompanionTest {
     }
 
     @Test
-    void shouldRestrictComponentSize() {
+    void shouldRestrictCommunitySize() {
         LongNodePropertyValues inputProperties = new TestNodePropertyValues(10, id -> id < 5 ? id : 5 );
 
-        var config = ConfigWithComponentSize.of(CypherMapWrapper.empty().withNumber("minComponentSize", 2L));
+        var config = CommunityProcCompanionConfig.of(CypherMapWrapper.empty().withNumber("minCommunitySize", 2L));
 
         var result = CommunityProcCompanion.nodeProperties(
             config,
@@ -142,16 +142,9 @@ class CommunityProcCompanionTest {
     }
 
     @Configuration
-    interface CommunityProcCompanionConfig extends ConsecutiveIdsConfig, SeedConfig, ConcurrencyConfig {
+    interface CommunityProcCompanionConfig extends ConsecutiveIdsConfig, SeedConfig, ConcurrencyConfig, CommunitySizeConfig {
         static CommunityProcCompanionConfig of(CypherMapWrapper map) {
             return new CommunityProcCompanionConfigImpl(map);
-        }
-    }
-
-    @Configuration
-    interface ConfigWithComponentSize extends ConsecutiveIdsConfig, SeedConfig, ComponentSizeConfig, ConcurrencyConfig {
-        static ConfigWithComponentSize of(CypherMapWrapper map) {
-            return new ConfigWithComponentSizeImpl(map);
         }
     }
 }
