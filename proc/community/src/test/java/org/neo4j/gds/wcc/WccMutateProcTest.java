@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.wcc;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
@@ -27,18 +28,16 @@ import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 
-import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThan;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
@@ -155,28 +154,50 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
         runQueryWithRowConsumer(
             query,
             row -> {
-                assertEquals(10L, row.getNumber("nodePropertiesWritten"));
+                Assertions.assertThat(row.getNumber("nodePropertiesWritten"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(10L);
 
-                assertThat(-1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
-                assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
-                assertThat(-1L, lessThan(row.getNumber("mutateMillis").longValue()));
-                assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
+                Assertions.assertThat(row.getNumber("preProcessingMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThan(-1L);
 
-                assertEquals(3L, row.getNumber("componentCount"));
+                Assertions.assertThat(row.getNumber("computeMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThan(-1L);
+
+                Assertions.assertThat(row.getNumber("postProcessingMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThan(-1L);
+
+                Assertions.assertThat(row.getNumber("mutateMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThan(-1L);
+
+                Assertions.assertThat(row.getNumber("componentCount"))
+                    .asInstanceOf(LONG)
+                    .as("wrong component count")
+                    .isEqualTo(3L);
+
                 assertUserInput(row, "threshold", 0D);
                 assertUserInput(row, "consecutiveIds", false);
 
-                assertEquals(MapUtil.map(
-                    "p99", 7L,
-                    "min", 1L,
-                    "max", 7L,
-                    "mean", 3.3333333333333335D,
-                    "p999", 7L,
-                    "p95", 7L,
-                    "p90", 7L,
-                    "p75", 7L,
-                    "p50", 2L
-                ), row.get("componentDistribution"));
+                assertThat(row.get("componentDistribution"))
+                    .isInstanceOf(Map.class)
+                    .asInstanceOf(MAP)
+                    .containsExactlyInAnyOrderEntriesOf(
+                        Map.of(
+                            "p99", 7L,
+                            "min", 1L,
+                            "max", 7L,
+                            "mean", 3.3333333333333335D,
+                            "p999", 7L,
+                            "p95", 7L,
+                            "p90", 7L,
+                            "p75", 7L,
+                            "p50", 2L
+                        )
+                    );
             }
         );
     }
@@ -201,9 +222,14 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
             .addParameter("mutateProperty", "foo")
             .yields("componentCount");
 
-        assertCypherResult(query, List.of(Map.of("componentCount", 0L)));
+        runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("componentCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(0);
+        });
     }
 
+    @Test
     @Disabled("This procedure for now does no longer extend MutateProc")
     @Override
     public void testExceptionLogging() {}

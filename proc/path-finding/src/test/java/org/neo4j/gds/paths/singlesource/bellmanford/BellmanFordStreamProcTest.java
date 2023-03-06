@@ -31,7 +31,6 @@ import org.neo4j.graphdb.Path;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.LongAdder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -67,7 +66,6 @@ class BellmanFordStreamProcTest extends BaseProcTest {
 
     @Test
     void stream() {
-        LongAdder resultCounter = new LongAdder();
         long[] a = new long[]{idFunction.of("a0"), idFunction.of("a1"), idFunction.of("a2"), idFunction.of("a3"), idFunction.of(
             "a4")};
         var EXPECTED_COST = Map.of(
@@ -93,7 +91,7 @@ class BellmanFordStreamProcTest extends BaseProcTest {
             a[3], new double[]{0.0, 10.0},
             a[4], new double[]{0.0, 10.0, 2.0}
         );
-        runQueryWithRowConsumer("MATCH (n) WHERE  n.id = 0 " +
+        var rowCount = runQueryWithRowConsumer("MATCH (n) WHERE  n.id = 0 " +
                                 "CALL gds.bellmanFord.stream('graph', {sourceNode: n, relationshipWeightProperty: 'weight'}) " +
                                 "YIELD index,sourceNode,targetNode,totalCost,nodeIds,costs,path " +
                                 "RETURN index,sourceNode,targetNode,totalCost,nodeIds,costs,path", row -> {
@@ -126,11 +124,8 @@ class BellmanFordStreamProcTest extends BaseProcTest {
                 assertThat(nodeIds.get(i)).isEqualTo(expectedPath[i]);
                 assertThat(costsValues.get(i)).isCloseTo(edgeCost, Offset.offset(1e-5));
             }
-
-            resultCounter.increment();
-
         });
-        assertThat(resultCounter.longValue()).isEqualTo(5L);
+        assertThat(rowCount).isEqualTo(5L);
 
     }
 }

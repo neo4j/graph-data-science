@@ -28,7 +28,6 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
-import java.util.concurrent.atomic.LongAdder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -76,11 +75,9 @@ class SteinerTreeStatsProcTest extends BaseProcTest {
                 "totalWeight",
                 "effectiveTargetNodesCount"
             );
-        LongAdder counter = new LongAdder();
-        runQueryWithRowConsumer(
+        var rowCount = runQueryWithRowConsumer(
             query,
             res -> {
-                counter.increment();
                 assertThat(res.getNumber("effectiveNodeCount").longValue()).isEqualTo(2L);
                 assertThat(res.getNumber("effectiveTargetNodesCount").doubleValue()).isEqualTo(1.0);
                 assertThat(res.getNumber("totalWeight").doubleValue()).isEqualTo(1.0);
@@ -88,6 +85,6 @@ class SteinerTreeStatsProcTest extends BaseProcTest {
                 assertThat(res.getNumber("computeMillis").longValue()).isGreaterThanOrEqualTo(0L);
             }
         );
-        assertThat(counter.intValue()).isEqualTo(1);
+        assertThat(rowCount).isEqualTo(1L);
     }
 }

@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 
 class RandomWalkStatsProcTest extends BaseProcTest {
@@ -71,23 +72,17 @@ class RandomWalkStatsProcTest extends BaseProcTest {
             .addParameter("walkLength", 10)
             .yields();
 
-        var rowCount = new LongAdder();
-        runQueryWithRowConsumer(query, row -> {
-            var preProcessingMillis = row.getNumber("preProcessingMillis").longValue();
-            var computeMillis = row.getNumber("computeMillis").longValue();
-            var configuration = row.get("configuration");
-            assertThat(preProcessingMillis).isGreaterThanOrEqualTo(0L);
-            assertThat(computeMillis).isGreaterThanOrEqualTo(0L);
-            assertThat(configuration)
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("preProcessingMillis")).asInstanceOf(LONG).isGreaterThanOrEqualTo(0L);
+            assertThat(row.getNumber("computeMillis")).asInstanceOf(LONG).isGreaterThanOrEqualTo(0L);
+            assertThat(row.get("configuration"))
                 .isNotNull()
                 .asInstanceOf(MAP)
                 .containsEntry("walksPerNode", 3)
                 .containsEntry("walkLength", 10);
-
-            rowCount.increment();
         });
 
-        assertThat(rowCount.longValue())
+        assertThat(rowCount)
             .as("Should have one result row.")
             .isEqualTo(1L);
     }

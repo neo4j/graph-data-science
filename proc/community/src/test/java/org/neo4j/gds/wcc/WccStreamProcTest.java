@@ -38,11 +38,10 @@ import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
 
@@ -124,8 +123,12 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
             .yields();
 
         runQueryWithRowConsumer(graphCreateQuery, row -> {
-            assertEquals(11L, row.getNumber("nodeCount"));
-            assertEquals(11L, row.getNumber("relationshipCount"));
+            assertThat(row.getNumber("nodeCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(11L);
+            assertThat(row.getNumber("relationshipCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(11L);
         });
 
         String query = GdsCypher.call("nodeFilterGraph")
@@ -134,12 +137,12 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
             .addParameter("nodeLabels", Arrays.asList("Label", "Label2"))
             .yields("nodeId", "componentId");
 
-        Set<Long> actualCommunities = new HashSet<>();
+        var actualCommunities = new HashSet<>();
         runQueryWithRowConsumer(query, row -> {
             actualCommunities.add(row.getNumber("componentId").longValue());
         });
 
-        assertEquals(3, actualCommunities.size());
+        assertThat(actualCommunities).hasSize(3);
     }
 
     static Stream<Arguments> communitySizeInputs() {
@@ -166,6 +169,7 @@ class WccStreamProcTest extends WccProcTest<WccStreamConfig> {
             communities[nodeId] = setId;
         });
 
-        assertArrayEquals(expectedCommunities, communities);
+        assertThat(communities)
+            .containsExactly(expectedCommunities);
     }
 }

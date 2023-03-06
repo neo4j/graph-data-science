@@ -34,11 +34,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
@@ -88,29 +86,50 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
             row -> {
                 assertUserInput(row, "writeProperty", WRITE_PROPERTY);
                 assertUserInput(row, "seedProperty", null);
-
-                assertEquals(10L, row.getNumber("nodePropertiesWritten"));
-
-                assertNotEquals(-1L, row.getNumber("preProcessingMillis"));
-                assertNotEquals(-1L, row.getNumber("computeMillis"));
-                assertNotEquals(-1L, row.getNumber("writeMillis"));
-                assertNotEquals(-1L, row.getNumber("postProcessingMillis"));
-
-                assertEquals(3L, row.getNumber("componentCount"));
                 assertUserInput(row, "threshold", 0D);
                 assertUserInput(row, "consecutiveIds", false);
 
-                assertEquals(MapUtil.map(
-                    "p99", 7L,
-                    "min", 1L,
-                    "max", 7L,
-                    "mean", 3.3333333333333335D,
-                    "p999", 7L,
-                    "p95", 7L,
-                    "p90", 7L,
-                    "p75", 7L,
-                    "p50", 2L
-                ), row.get("componentDistribution"));
+                assertThat(row.getNumber("nodePropertiesWritten"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(10L);
+
+                assertThat(row.getNumber("preProcessingMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThan(-1L);
+
+                assertThat(row.getNumber("computeMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThan(-1L);
+
+                assertThat(row.getNumber("postProcessingMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThan(-1L);
+
+                assertThat(row.getNumber("writeMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThan(-1L);
+
+                assertThat(row.getNumber("componentCount"))
+                    .asInstanceOf(LONG)
+                    .as("wrong component count")
+                    .isEqualTo(3L);
+
+                assertThat(row.get("componentDistribution"))
+                    .isInstanceOf(Map.class)
+                    .asInstanceOf(MAP)
+                    .containsExactlyInAnyOrderEntriesOf(
+                        Map.of(
+                            "p99", 7L,
+                            "min", 1L,
+                            "max", 7L,
+                            "mean", 3.3333333333333335D,
+                            "p999", 7L,
+                            "p95", 7L,
+                            "p90", 7L,
+                            "p75", 7L,
+                            "p50", 2L
+                        )
+                    );
             }
         );
     }
@@ -126,7 +145,9 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
             .yields("componentCount");
 
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(3L, row.getNumber("componentCount"));
+            assertThat(row.getNumber("componentCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(3L);
         });
     }
 
@@ -143,8 +164,12 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
             .yields("nodeCount", "relationshipCount");
 
         runQueryWithRowConsumer(graphCreateQuery, row -> {
-            assertEquals(11L, row.getNumber("nodeCount"));
-            assertEquals(11L, row.getNumber("relationshipCount"));
+            assertThat(row.getNumber("nodeCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(11L);
+            assertThat(row.getNumber("relationshipCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(11L);
         });
 
         String query = GdsCypher
@@ -156,7 +181,9 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
             .yields("componentCount");
 
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(3L, row.getNumber("componentCount"));
+            assertThat(row.getNumber("componentCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(3L);
         });
     }
 
@@ -177,7 +204,9 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
             .yields("componentCount");
 
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(1L, row.getNumber("componentCount"));
+            assertThat(row.getNumber("componentCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(1L);
         });
     }
 
@@ -271,27 +300,34 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
             .yields("componentCount");
 
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(3L, row.getNumber("componentCount"));
+            assertThat(row.getNumber("componentCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(3L);
         });
 
         runQueryWithRowConsumer(
             "MATCH (n) RETURN collect(DISTINCT n." + WRITE_PROPERTY + ") AS components ",
             row -> {
-                @SuppressWarnings("unchecked") var actualComponents = (List<Long>) row.get("components");
-                assertThat(actualComponents, containsInAnyOrder(expectedComponentIds));
+                assertThat(row.get("components"))
+                    .asList()
+                    .containsExactlyInAnyOrder(expectedComponentIds);
             }
         );
     }
 
     private void assertForSeedTests(String query, String writeProperty) {
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(3L, row.getNumber("componentCount"));
+            assertThat(row.getNumber("componentCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(3L);
         });
 
         runQueryWithRowConsumer(
             formatWithLocale("MATCH (n) RETURN n.%s AS %s", writeProperty, writeProperty),
             row -> {
-                assertTrue(row.getNumber(writeProperty).longValue() >= 42);
+                assertThat(row.getNumber(writeProperty))
+                    .asInstanceOf(LONG)
+                    .isGreaterThanOrEqualTo(42L);
             }
         );
 
@@ -301,9 +337,9 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
                 final long nodeId = row.getNumber("nodeId").longValue();
                 final long componentId = row.getNumber(writeProperty).longValue();
                 if (nodeId >= 0 && nodeId <= 6) {
-                    assertEquals(42, componentId);
+                    assertThat(componentId).isEqualTo(42L);
                 } else {
-                    assertTrue(componentId != 42);
+                    assertThat(componentId).isNotEqualTo(42L);
                 }
             }
         );
@@ -321,12 +357,15 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
             .yields("componentCount");
 
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(3L, row.getNumber("componentCount"));
+            assertThat(row.getNumber("componentCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(3L);
+
         });
 
         runQueryWithRowConsumer(
             "MATCH (n) RETURN collect(DISTINCT n." + WRITE_PROPERTY + ") AS components ",
-            row -> assertThat((List<Long>) row.get("components"), containsInAnyOrder(0L, 1L, 2L))
+            row -> assertThat(row.get("components")).asList().containsExactlyInAnyOrder(0L, 1L, 2L)
         );
     }
 

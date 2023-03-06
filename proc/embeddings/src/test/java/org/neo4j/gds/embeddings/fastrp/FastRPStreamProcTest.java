@@ -31,8 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SuppressWarnings("unchecked")
 class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
@@ -71,9 +71,10 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
         String query = queryBuilder.yields();
 
         runQueryWithRowConsumer(query, row -> {
-            assertThat((List<Double>) row.get("embedding"))
+            assertThat(row.get("embedding"))
+                .asList()
                 .hasSize(embeddingDimension)
-                .anyMatch(value -> value != 0.0);
+                .anySatisfy(value -> assertThat(value).asInstanceOf(DOUBLE).isNotEqualTo(0.0));
         });
     }
 
@@ -95,8 +96,9 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
         String query = queryBuilder.yields();
 
         runQueryWithRowConsumer(query, row -> {
-            var embeddings = (List<Double>) row.get("embedding");
-            assertFalse(embeddings.stream().allMatch(value -> value == 0.0));
+            assertThat(row.get("embedding"))
+                .asList()
+                .anySatisfy(value -> assertThat(value).asInstanceOf(DOUBLE).isNotEqualTo(0.0));
         });
     }
 

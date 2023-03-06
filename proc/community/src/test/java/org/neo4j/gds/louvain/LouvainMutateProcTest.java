@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.louvain;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
@@ -27,17 +28,16 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThan;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
@@ -174,27 +174,52 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
         runQueryWithRowConsumer(
             query,
             row -> {
-                assertEquals(15L, row.getNumber("nodePropertiesWritten"));
+                assertThat(row.getNumber("nodePropertiesWritten"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(15);
 
-                assertThat(-1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
-                assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
-                assertThat(-1L, lessThan(row.getNumber("mutateMillis").longValue()));
+                assertThat(row.getNumber("preProcessingMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThan(-1L);
 
-                assertEquals(2L, row.get("ranLevels"));
-                assertEquals(3L, row.getNumber("communityCount"));
-                assertEquals(0.376, ((List<Double>) row.get("modularities")).get(0), 1E-3);
+                assertThat(row.getNumber("computeMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThan(-1L);
 
-                assertEquals(MapUtil.map(
-                    "p99", 7L,
-                    "min", 3L,
-                    "max", 7L,
-                    "mean", 5.0D,
-                    "p50", 5L,
-                    "p75", 7L,
-                    "p90", 7L,
-                    "p95", 7L,
-                    "p999", 7L
-                ), row.get("communityDistribution"));
+                assertThat(row.getNumber("mutateMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThan(-1L);
+
+                assertThat(row.getNumber("ranLevels"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(2L);
+
+                assertThat(row.getNumber("communityCount"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(3L);
+
+                assertThat(row.get("modularities"))
+                    .asList()
+                    .first(DOUBLE)
+                    .isEqualTo(0.376, Offset.offset(1e-3));
+
+
+                assertThat(row.get("communityDistribution"))
+                    .isInstanceOf(Map.class)
+                    .asInstanceOf(MAP)
+                    .containsExactlyInAnyOrderEntriesOf(
+                        Map.of(
+                            "p99", 7L,
+                            "min", 3L,
+                            "max", 7L,
+                            "mean", 5.0D,
+                            "p50", 5L,
+                            "p75", 7L,
+                            "p90", 7L,
+                            "p95", 7L,
+                            "p999", 7L
+                        )
+                    );
             }
         );
     }
@@ -221,6 +246,10 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
             .addParameter("mutateProperty", "foo")
             .yields("communityCount");
 
-        assertCypherResult(query, List.of(Map.of("communityCount", 0L)));
+        runQueryWithRowConsumer(query, row -> {
+           assertThat(row.getNumber("communityCount"))
+               .asInstanceOf(LONG)
+               .isEqualTo(0L);
+        });
     }
 }
