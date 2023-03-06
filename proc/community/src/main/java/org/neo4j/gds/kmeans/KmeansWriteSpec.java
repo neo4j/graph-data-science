@@ -99,12 +99,7 @@ public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
 
                 var properties = new LongNodePropertyValues() {
                     @Override
-                    public long valuesStored() {
-                        return communities.size();
-                    }
-
-                    @Override
-                    public long maxIndex() {
+                    public long nodeCount() {
                         return graph.nodeCount();
                     }
 

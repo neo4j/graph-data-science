@@ -109,7 +109,7 @@ final class NodeRegressionPipelineMutateProcTest extends BaseProcTest {
 
         assertThat(graphStore.nodePropertyKeys()).contains("p");
         var propertyValues = graphStore.nodeProperty("p").values();
-        assertThat(propertyValues.valuesStored()).isEqualTo(5);
+        assertThat(propertyValues.nodeCount()).isEqualTo(5);
 
         assertThat(propertyValues.doubleValue(idFunction.of("n0"))).isEqualTo(99.3);
         assertThat(propertyValues.doubleValue(idFunction.of("n1"))).isEqualTo(100.0);

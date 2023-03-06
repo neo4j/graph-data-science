@@ -71,12 +71,7 @@ public class NodeRegressionPipelineMutateProc
 
         return new DoubleNodePropertyValues() {
             @Override
-            public long valuesStored() {
-                return predictedPropertyValues.size();
-            }
-
-            @Override
-            public long maxIndex() {
+            public long nodeCount() {
                 return nodeCount;
             }
 

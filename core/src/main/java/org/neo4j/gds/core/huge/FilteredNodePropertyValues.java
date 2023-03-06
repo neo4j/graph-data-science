@@ -141,14 +141,8 @@ public abstract class FilteredNodePropertyValues implements NodePropertyValues {
         graph = null;
         return releasedFromProps;
     }
-
     @Override
-    public long valuesStored() {
-        return properties.valuesStored();
-    }
-
-    @Override
-    public long maxIndex() {
+    public long nodeCount() {
         return graph.nodeCount();
     }
 

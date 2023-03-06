@@ -92,12 +92,7 @@ public class HarmonicCentralityWriteProc extends HarmonicCentralityProc<Centrali
 
                 var properties = new DoubleNodePropertyValues() {
                     @Override
-                    public long valuesStored() {
-                        return computationResult.graph().nodeCount();
-                    }
-
-                    @Override
-                    public long maxIndex() {
+                    public long nodeCount() {
                         return computationResult.graph().nodeCount();
                     }
 

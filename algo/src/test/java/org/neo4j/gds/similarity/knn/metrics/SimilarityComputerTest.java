@@ -265,12 +265,7 @@ class SimilarityComputerTest {
             }
 
             @Override
-            public long valuesStored() {
-                return 0;
-            }
-
-            @Override
-            public long maxIndex() {
+            public long nodeCount() {
                 return nodeCount;
             }
         };

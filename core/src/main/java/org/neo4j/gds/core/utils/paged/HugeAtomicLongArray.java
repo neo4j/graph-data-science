@@ -204,13 +204,8 @@ public abstract class HugeAtomicLongArray implements HugeCursorSupport<long[]> {
             }
 
             @Override
-            public long valuesStored() {
+            public long nodeCount() {
                 return HugeAtomicLongArray.this.size();
-            }
-
-            @Override
-            public long maxIndex() {
-                return valuesStored();
             }
         };
     }

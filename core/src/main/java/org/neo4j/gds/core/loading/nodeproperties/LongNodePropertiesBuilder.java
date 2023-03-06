@@ -191,13 +191,7 @@ public class LongNodePropertiesBuilder implements InnerNodePropertiesBuilder {
         }
 
         @Override
-        public long valuesStored() {
-            // FIXME this does not reflect the sparse array
-            return propertyValues.capacity();
-        }
-
-        @Override
-        public long maxIndex() {
+        public long nodeCount() {
             return size;
         }
     }

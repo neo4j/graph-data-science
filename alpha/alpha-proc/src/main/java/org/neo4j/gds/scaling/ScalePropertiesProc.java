@@ -33,12 +33,7 @@ public final class ScalePropertiesProc {
 
         return new DoubleArrayNodePropertyValues() {
             @Override
-            public long valuesStored() {
-                return scaledProperties.size();
-            }
-
-            @Override
-            public long maxIndex() {
+            public long nodeCount() {
                 return size;
             }
 

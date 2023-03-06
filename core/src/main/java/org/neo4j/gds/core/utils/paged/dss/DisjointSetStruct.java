@@ -77,12 +77,7 @@ public interface DisjointSetStruct {
             }
 
             @Override
-            public long valuesStored() {
-                return DisjointSetStruct.this.size();
-            }
-
-            @Override
-            public long maxIndex() {
+            public long nodeCount() {
                 return DisjointSetStruct.this.size();
             }
         };

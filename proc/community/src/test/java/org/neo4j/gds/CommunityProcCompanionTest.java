@@ -91,7 +91,7 @@ class CommunityProcCompanionTest {
         );
 
         assertThat(result).isInstanceOf(LongIfChangedNodePropertyValues.class);
-        for (long i = 0; i < result.valuesStored(); i++) {
+        for (long i = 0; i < result.nodeCount(); i++) {
             assertThat(result.longValue(i)).isEqualTo(inputProperties.longValue(i));
             assertThat(result.value(i)).isNull();
         }
@@ -110,7 +110,7 @@ class CommunityProcCompanionTest {
             () -> { throw new UnsupportedOperationException("Not implemented"); }
         );
 
-        for (long i = 0L; i < result.valuesStored(); i++) {
+        for (long i = 0L; i < result.nodeCount(); i++) {
 
             if (i < 5) {
                 assertThat(result.longValue(i)).isEqualTo(inputProperties.longValue(i));
@@ -165,7 +165,7 @@ class CommunityProcCompanionTest {
         var input = inputBuilder.build();
 
         // we mimic the sparseness here through size > valueStored
-        LongNodePropertyValues sparseProperties = new TestSparseNodePropertyValues(4, 3, input::get);
+        LongNodePropertyValues sparseProperties = new TestSparseNodePropertyValues(4, input::get);
 
         var config = ConfigWithComponentSize.of(CypherMapWrapper.empty().withNumber("minComponentSize", 2L));
 
@@ -191,7 +191,7 @@ class CommunityProcCompanionTest {
         var input = inputBuilder.build();
 
         // we mimic the sparseness here through size > valueStored
-        LongNodePropertyValues sparseProperties = new TestSparseNodePropertyValues(4, 3, input::get);
+        LongNodePropertyValues sparseProperties = new TestSparseNodePropertyValues(4, input::get);
 
         var config = ConfigWithComponentSize.of(CypherMapWrapper.create(Map.of("consecutiveIds", true)));
 
@@ -221,12 +221,7 @@ class CommunityProcCompanionTest {
         }
 
         @Override
-        public long valuesStored() {
-            return 0;
-        }
-
-        @Override
-        public long maxIndex() {
+        public long nodeCount() {
             return size;
         }
 
@@ -238,26 +233,18 @@ class CommunityProcCompanionTest {
 
     private static final class TestSparseNodePropertyValues implements LongNodePropertyValues {
         private final long size;
-        private final long valuesStored;
         private final LongToLongFunction transformer;
 
         private TestSparseNodePropertyValues(
             long size,
-            long valuesStored,
             LongToLongFunction transformer
         ) {
             this.size = size;
-            this.valuesStored = valuesStored;
             this.transformer = transformer;
         }
 
         @Override
-        public long valuesStored() {
-            return valuesStored;
-        }
-
-        @Override
-        public long maxIndex() {
+        public long nodeCount() {
             return size;
         }
 

@@ -36,13 +36,7 @@ public class UpdatableFloatArrayNodeProperty implements UpdatableNodeProperty, F
     }
 
     @Override
-    public long valuesStored() {
-        // FIXME does not reflect sparse array
-        return floatArrayList.capacity();
-    }
-
-    @Override
-    public long maxIndex() {
+    public long nodeCount() {
         return nodeCount;
     }
 

@@ -93,12 +93,7 @@ final class GraphPropertyStoreFromVisitorHelper {
         }
 
         @Override
-        public long valuesStored() {
-            return -1;
-        }
-
-        @Override
-        public long maxIndex() {
+        public long valueCount() {
             return -1;
         }
 
@@ -117,12 +112,7 @@ final class GraphPropertyStoreFromVisitorHelper {
         }
 
         @Override
-        public long valuesStored() {
-            return -1;
-        }
-
-        @Override
-        public long maxIndex() {
+        public long valueCount() {
             return -1;
         }
 
@@ -142,12 +132,7 @@ final class GraphPropertyStoreFromVisitorHelper {
         }
 
         @Override
-        public long valuesStored() {
-            return -1;
-        }
-
-        @Override
-        public long maxIndex() {
+        public long valueCount() {
             return -1;
         }
 
@@ -166,12 +151,7 @@ final class GraphPropertyStoreFromVisitorHelper {
         }
 
         @Override
-        public long valuesStored() {
-            return -1;
-        }
-
-        @Override
-        public long maxIndex() {
+        public long valueCount() {
             return -1;
         }
 
@@ -190,12 +170,7 @@ final class GraphPropertyStoreFromVisitorHelper {
         }
 
         @Override
-        public long valuesStored() {
-            return -1;
-        }
-
-        @Override
-        public long maxIndex() {
+        public long valueCount() {
             return -1;
         }
 

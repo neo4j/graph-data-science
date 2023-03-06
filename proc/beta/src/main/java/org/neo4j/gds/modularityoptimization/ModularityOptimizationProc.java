@@ -50,7 +50,7 @@ final class ModularityOptimizationProc {
     ) {
         LongNodePropertyValues resultCommunities = computationResult.result().asNodeProperties();
         if (computationResult.config().consecutiveIds()) {
-            return new ConsecutiveLongNodePropertyValues(resultCommunities, computationResult.graph().nodeCount());
+            return new ConsecutiveLongNodePropertyValues(resultCommunities);
         } else {
             return resultCommunities;
         }

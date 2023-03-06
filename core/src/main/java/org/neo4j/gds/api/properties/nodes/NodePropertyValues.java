@@ -59,6 +59,8 @@ public interface NodePropertyValues extends PropertyValues {
 
     Value value(long nodeId);
 
+    long nodeCount();
+
     /**
      * @return the maximum long value contained in the mapping or an empty {@link OptionalLong} if the mapping is
      *         empty or the feature is not supported.

@@ -37,13 +37,8 @@ class LongArrayPropertySimilarityComputerTest {
             }
 
             @Override
-            public long valuesStored() {
-                return 2;
-            }
-
-            @Override
-            public long maxIndex() {
-                return 3;
+            public long nodeCount() {
+                return inputValues.length;
             }
         };
 

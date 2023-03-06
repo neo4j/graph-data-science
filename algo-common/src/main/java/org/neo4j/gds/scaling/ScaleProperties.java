@@ -225,13 +225,8 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
             }
 
             @Override
-            public long valuesStored() {
-                return property.valuesStored();
-            }
-
-            @Override
-            public long maxIndex() {
-                return property.maxIndex();
+            public long nodeCount() {
+                return property.nodeCount();
             }
         };
     }
@@ -249,13 +244,8 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
             }
 
             @Override
-            public long valuesStored() {
-                return property.valuesStored();
-            }
-
-            @Override
-            public long maxIndex() {
-                return property.maxIndex();
+            public long nodeCount() {
+                return property.nodeCount();
             }
         };
     }
@@ -273,13 +263,8 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
             }
 
             @Override
-            public long valuesStored() {
-                return property.valuesStored();
-            }
-
-            @Override
-            public long maxIndex() {
-                return property.maxIndex();
+            public long nodeCount() {
+                return property.nodeCount();
             }
         };
     }

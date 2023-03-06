@@ -265,7 +265,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
             for (var entry : buildersByPropertyKey.entrySet()) {
                 NodePropertyValues propertyValues = entry.getValue().build(idMap);
                 nodeProperties.put(entry.getKey(), propertyValues);
-                recordsImported += propertyValues.valuesStored();
+                recordsImported += propertyValues.nodeCount();
             }
 
             long tookNanos = System.nanoTime() - indexStart;

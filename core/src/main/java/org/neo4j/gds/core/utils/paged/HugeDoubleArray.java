@@ -189,13 +189,8 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
             }
 
             @Override
-            public long valuesStored() {
+            public long nodeCount() {
                 return HugeDoubleArray.this.size();
-            }
-
-            @Override
-            public long maxIndex() {
-                return valuesStored();
             }
         };
     }

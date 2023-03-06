@@ -35,15 +35,8 @@ public class UpdatableDoubleNodeProperty implements UpdatableNodeProperty, Doubl
         this.doubleList = HugeSparseDoubleList.of(defaultValue);
     }
 
-
     @Override
-    public long valuesStored() {
-        // FIXME does not reflect sparse array
-        return doubleList.capacity();
-    }
-
-    @Override
-    public long maxIndex() {
+    public long nodeCount() {
         return nodeCount;
     }
 

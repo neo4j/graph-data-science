@@ -414,14 +414,8 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             public long longValue(long nodeId) {
                 return getCommunityId(nodeId);
             }
-
-            @Override
-            public long valuesStored() {
-                return currentCommunities.size();
-            }
-
-            @Override
-            public long maxIndex() {
+           @Override
+            public long nodeCount() {
                 return graph.nodeCount();
             }
         };

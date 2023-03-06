@@ -50,7 +50,7 @@ public interface DoubleNodePropertyValues extends NodePropertyValues {
     @Override
     default OptionalDouble getMaxDoublePropertyValue() {
         return LongStream
-            .range(0, size())
+            .range(0, nodeCount())
             .parallel()
             .mapToDouble(this::doubleValue)
             .max();

@@ -36,7 +36,7 @@ public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues
         var nextConsecutiveId = -1L;
         var nextSkippableId = -2L; // communities signaled with <0 are skipped and not written
 
-        long maxIdx = inputProperties.maxIndex();
+        long maxIdx = inputProperties.nodeCount();
         var setIdToConsecutiveId = new HugeLongLongMap(BitUtil.ceilDiv(
             maxIdx,
             MAPPING_SIZE_QUOTIENT
@@ -76,12 +76,7 @@ public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues
     }
 
     @Override
-    public long valuesStored() {
-        return communities.size();
-    }
-
-    @Override
-    public long maxIndex() {
+    public long nodeCount() {
         return communities.size();
     }
 }
