@@ -19,16 +19,13 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.WriteProc;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ExecutionMode;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.StandardWriteResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -40,8 +37,10 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.beta.scaleProperties.write", description = SCALE_PROPERTIES_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
-public class ScalePropertiesWriteProc extends WriteProc<ScaleProperties, ScaleProperties.Result, ScalePropertiesWriteProc.WriteResult, ScalePropertiesWriteConfig> {
+public class ScalePropertiesWriteProc extends BaseProc {
+
+    @Context
+    public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
 
     @Procedure(value = "gds.beta.scaleProperties.write", mode = WRITE)
     @Description(SCALE_PROPERTIES_DESCRIPTION)
@@ -49,36 +48,10 @@ public class ScalePropertiesWriteProc extends WriteProc<ScaleProperties, ScalePr
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesWriteConfig> computationResult = compute(
-            graphName,
-            configuration
-        );
-        return write(computationResult);
-    }
-
-    @Override
-    protected ScalePropertiesWriteConfig newConfig(String username, CypherMapWrapper config) {
-        return ScalePropertiesWriteConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<ScaleProperties, ScalePropertiesWriteConfig> algorithmFactory() {
-        return new ScalePropertiesFactory<>();
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(
-        ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesWriteConfig> computationResult
-    ) {
-        return ScalePropertiesProc.nodeProperties(computationResult);
-    }
-
-    @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesWriteConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return new WriteResult.Builder().withScalerStatistics(computeResult.result().scalerStatistics());
+        return new ProcedureExecutor<>(
+            new ScalePropertiesWriteSpec(nodePropertyExporterBuilder),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @SuppressWarnings("unused")
@@ -127,6 +100,5 @@ public class ScalePropertiesWriteProc extends WriteProc<ScaleProperties, ScalePr
                 );
             }
         }
-
     }
 }

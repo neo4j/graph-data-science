@@ -29,7 +29,9 @@ public final class ScalePropertiesProc {
 
     static final String SCALE_PROPERTIES_DESCRIPTION = "Scale node properties";
 
-    static NodePropertyValues nodeProperties(ComputationResult<ScaleProperties, ScaleProperties.Result, ? extends ScalePropertiesBaseConfig> computationResult) {
+    static NodePropertyValues nodeProperties(
+        ComputationResult<ScaleProperties, ScaleProperties.Result, ? extends ScalePropertiesBaseConfig> computationResult
+    ) {
         var size = computationResult.graph().nodeCount();
         var scaledProperties = computationResult.result().scaledProperties();
 

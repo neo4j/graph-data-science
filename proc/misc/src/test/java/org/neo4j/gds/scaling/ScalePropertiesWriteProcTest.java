@@ -20,10 +20,13 @@
 package org.neo4j.gds.scaling;
 
 import org.hamcrest.Matchers;
+import org.intellij.lang.annotations.Language;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
 import java.util.Map;
@@ -36,46 +39,45 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.isA;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class ScalePropertiesWriteProcTest extends ScalePropertiesProcTest<ScalePropertiesWriteConfig> {
+class ScalePropertiesWriteProcTest extends BaseProcTest {
 
-    private static final String WRITE_PROPERTY = "scaledProperty";
+    @Neo4jGraph
+    @Language("Cypher")
+    private static final String DB_CYPHER =
+        "CREATE" +
+        " (n0:A {myProp: [0, 2]})" +
+        ",(n1:A {myProp: [1, 2]})" +
+        ",(n2:A {myProp: [2, 2]})" +
+        ",(n3:A {myProp: [3, 2]})" +
+        ",(n4:A {myProp: [4, 2]})" +
+        ",(n5:A {myProp: [5, 2]})";
 
-    @Override
-    public Class<? extends AlgoBaseProc<ScaleProperties, ScaleProperties.Result, ScalePropertiesWriteConfig, ?>> getProcedureClazz() {
-        return ScalePropertiesWriteProc.class;
-    }
 
-    @Override
-    public ScalePropertiesWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ScalePropertiesWriteConfig.of(mapWrapper);
-    }
+    @BeforeEach
+    void setUp() throws Exception {
+        registerProcedures(
+            GraphProjectProc.class,
+            ScalePropertiesWriteProc.class
+        );
 
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper userInput) {
-        var minimalConfig = super.createMinimalConfig(userInput);
-
-        if (!minimalConfig.containsKey("writeProperty")) {
-            return minimalConfig.withString("writeProperty", WRITE_PROPERTY);
-        }
-        return minimalConfig;
+        runQuery("CALL gds.graph.project('g', {A: {properties: 'myProp'}}, '*')");
     }
 
     @Test
-    void testWrite() {
-        loadGraph(GRAPH_NAME);
+    void write() {
         String query = GdsCypher
-            .call(GRAPH_NAME)
+            .call("g")
             .algo("gds.beta.scaleProperties")
             .writeMode()
-            .addParameter("nodeProperties", List.of(NODE_PROP_NAME))
+            .addParameter("nodeProperties", List.of("myProp"))
             .addParameter("scaler", "stdscore")
-            .addParameter("writeProperty", WRITE_PROPERTY)
+            .addParameter("writeProperty", "scaledProperty")
             .yields();
 
         assertCypherResult(query, List.of(Map.of(
                 "nodePropertiesWritten", 6L,
                 "scalerStatistics", hasEntry(
-                    equalTo(NODE_PROP_NAME),
+                    equalTo("myProp"),
                     Matchers.allOf(
                         hasEntry(equalTo("std"), hasSize(2)),
                         hasEntry(equalTo("avg"), hasSize(2))
@@ -91,10 +93,10 @@ class ScalePropertiesWriteProcTest extends ScalePropertiesProcTest<ScaleProperti
 
         runQueryWithRowConsumer(formatWithLocale(
             "MATCH (n) RETURN n.%s AS %s",
-            WRITE_PROPERTY,
-            WRITE_PROPERTY
+            "scaledProperty",
+            "scaledProperty"
         ), row -> {
-            var scaledProperties = (double[]) row.get(WRITE_PROPERTY);
+            var scaledProperties = (double[]) row.get("scaledProperty");
             assertThat(scaledProperties).hasSize(2);
         });
     }

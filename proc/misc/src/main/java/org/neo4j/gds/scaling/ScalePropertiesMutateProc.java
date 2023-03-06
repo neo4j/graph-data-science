@@ -19,13 +19,8 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.MutatePropertyProc;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.StandardMutateResult;
 import org.neo4j.procedure.Description;
@@ -36,11 +31,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.scaleProperties.mutate", description = SCALE_PROPERTIES_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class ScalePropertiesMutateProc extends MutatePropertyProc<ScaleProperties, ScaleProperties.Result, ScalePropertiesMutateProc.MutateResult, ScalePropertiesMutateConfig> {
+public class ScalePropertiesMutateProc extends BaseProc {
 
     @Procedure("gds.alpha.scaleProperties.mutate")
     @Description(SCALE_PROPERTIES_DESCRIPTION)
@@ -48,30 +41,10 @@ public class ScalePropertiesMutateProc extends MutatePropertyProc<ScalePropertie
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(compute(graphName, configuration));
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesMutateConfig> computationResult) {
-        return ScalePropertiesProc.nodeProperties(computationResult);
-    }
-
-    @Override
-    protected ScalePropertiesMutateConfig newConfig(String username, CypherMapWrapper config) {
-        return ScalePropertiesMutateConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<ScaleProperties, ScalePropertiesMutateConfig> algorithmFactory() {
-        return new ScalePropertiesFactory<>();
-    }
-
-    @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesMutateConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return new MutateResult.Builder().withScalerStatistics(computeResult.result().scalerStatistics());
+        return new ProcedureExecutor<>(
+            new ScalePropertiesMutateSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     public static final class MutateResult extends StandardMutateResult {

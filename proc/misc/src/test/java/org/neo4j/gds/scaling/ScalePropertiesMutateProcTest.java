@@ -20,12 +20,16 @@
 package org.neo4j.gds.scaling;
 
 import org.hamcrest.Matchers;
+import org.intellij.lang.annotations.Language;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
 import java.util.Map;
@@ -35,69 +39,56 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.isA;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.fromGdl;
 
-class ScalePropertiesMutateProcTest extends ScalePropertiesProcTest<ScalePropertiesMutateConfig>
-    implements MutateNodePropertyTest<ScaleProperties, ScalePropertiesMutateConfig, ScaleProperties.Result> {
+class ScalePropertiesMutateProcTest extends BaseProcTest {
 
-    private static final String MUTATE_PROPERTY = "scaledProperty";
+    @Neo4jGraph
+    @Language("Cypher")
+    private static final String DB_CYPHER =
+        "CREATE" +
+        " (n0:A {myProp: [0, 2]})" +
+        ",(n1:A {myProp: [1, 2]})" +
+        ",(n2:A {myProp: [2, 2]})" +
+        ",(n3:A {myProp: [3, 2]})" +
+        ",(n4:A {myProp: [4, 2]})" +
+        ",(n5:A {myProp: [5, 2]})";
 
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper userInput) {
-        var minimalConfig = super.createMinimalConfig(userInput);
+    private static final String EXPECTED_MUTATED_GRAPH =
+        " (:A {myProp: [0L, 2L], scaledProperty: [0.0, 1.0]})" +
+        ",(:A {myProp: [1L, 2L], scaledProperty: [0.2, 1.0]})" +
+        ",(:A {myProp: [2L, 2L], scaledProperty: [0.4, 1.0]})" +
+        ",(:A {myProp: [3L, 2L], scaledProperty: [0.6, 1.0]})" +
+        ",(:A {myProp: [4L, 2L], scaledProperty: [0.8, 1.0]})" +
+        ",(:A {myProp: [5L, 2L], scaledProperty: [1.0, 1.0]})";
 
-        if (!minimalConfig.containsKey("mutateProperty")) {
-            return minimalConfig.withString("mutateProperty", MUTATE_PROPERTY);
-        }
-        return minimalConfig;
-    }
 
-    @Override
-    public Class<? extends AlgoBaseProc<ScaleProperties, ScaleProperties.Result, ScalePropertiesMutateConfig, ?>> getProcedureClazz() {
-        return ScalePropertiesMutateProc.class;
-    }
+    @BeforeEach
+    void setUp() throws Exception {
+        registerProcedures(
+            GraphProjectProc.class,
+            ScalePropertiesMutateProc.class
+        );
 
-    @Override
-    public ScalePropertiesMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ScalePropertiesMutateConfig.of(mapWrapper);
-    }
-
-    @Override
-    public String mutateProperty() {
-        return MUTATE_PROPERTY;
-    }
-
-    @Override
-    public ValueType mutatePropertyType() {
-        return ValueType.DOUBLE_ARRAY;
-    }
-
-    @Override
-    public String expectedMutatedGraph() {
-        return "CREATE" +
-               " (n0 {myProp: [0L, 2L], scaledProperty: [-0.5, 0.0]})" +
-               ",(n1 {myProp: [1L, 2L], scaledProperty: [-0.3, 0.0]})" +
-               ",(n2 {myProp: [2L, 2L], scaledProperty: [-0.1, 0.0]})" +
-               ",(n3 {myProp: [3L, 2L], scaledProperty: [0.1, 0.0]})" +
-               ",(n4 {myProp: [4L, 2L], scaledProperty: [0.3, 0.0]})" +
-               ",(n5 {myProp: [5L, 2L], scaledProperty: [0.5, 0.0]})";
+        runQuery("CALL gds.graph.project('g', {A: {properties: 'myProp'}}, '*')");
     }
 
     @Test
-    void testGetsStatistics() {
-        loadGraph(GRAPH_NAME);
+    void mutate() {
         String query = GdsCypher
-            .call(GRAPH_NAME)
+            .call("g")
             .algo("gds.alpha.scaleProperties")
             .mutateMode()
-            .addParameter("nodeProperties", List.of(NODE_PROP_NAME))
+            .addParameter("nodeProperties", List.of("myProp"))
             .addParameter("scaler", "max")
-            .addParameter("mutateProperty", MUTATE_PROPERTY)
+            .addParameter("mutateProperty", "scaledProperty")
             .yields();
 
         assertCypherResult(query, List.of(Map.of(
                 "nodePropertiesWritten", 6L,
                 "scalerStatistics", hasEntry(
-                    equalTo(NODE_PROP_NAME),
+                    equalTo("myProp"),
                     Matchers.allOf(hasEntry(equalTo("absMax"), hasSize(2)))
                 ),
                 "configuration", isA(Map.class),
@@ -107,5 +98,8 @@ class ScalePropertiesMutateProcTest extends ScalePropertiesProcTest<ScalePropert
                 "postProcessingMillis", 0L
             ))
         );
+
+        Graph graph = GraphStoreCatalog.get("", DatabaseId.of(db), "g").graphStore().getUnion();
+        assertGraphEquals(fromGdl(EXPECTED_MUTATED_GRAPH), graph);
     }
 }
