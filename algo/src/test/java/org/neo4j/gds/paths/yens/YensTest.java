@@ -60,9 +60,9 @@ import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 @GdlExtension
 class YensTest {
 
-    static ImmutableShortestPathYensStreamConfig.Builder defaultSourceTargetConfigBuilder() {
+    static ImmutableShortestPathYensStreamConfig.Builder defaultSourceTargetConfigBuilder(int concurrency) {
         return ImmutableShortestPathYensStreamConfig.builder()
-            .concurrency(1);
+            .concurrency(concurrency);
     }
 
     static Stream<Arguments> expectedMemoryEstimation() {
@@ -177,14 +177,14 @@ class YensTest {
     @ParameterizedTest
     @MethodSource("pathInput")
     void compute(Collection<String> expectedPaths) {
-        assertResult(graph, idFunction, expectedPaths, false);
+        assertResult(graph, idFunction, expectedPaths, false, 4);
     }
 
     @Test
     void shouldLogProgress() {
         int k = 3;
 
-        var config = defaultSourceTargetConfigBuilder()
+        var config = defaultSourceTargetConfigBuilder(1)
             .sourceNode(idFunction.of("c"))
             .targetNode(idFunction.of("h"))
             .k(k)
@@ -222,7 +222,7 @@ class YensTest {
     void shouldLogProgressIfNothingToDo() {
         int k = 3;
 
-        var config = defaultSourceTargetConfigBuilder()
+        var config = defaultSourceTargetConfigBuilder(1)
             .sourceNode(idFunction.of("z"))
             .targetNode(idFunction.of("h"))
             .k(k)
@@ -253,7 +253,8 @@ class YensTest {
         Graph graph,
         IdFunction idFunction,
         Collection<String> expectedPaths,
-        boolean trackRelationships
+        boolean trackRelationships,
+        int concurrency
     ) {
         var expectedPathResults = expectedPathResults(idFunction, expectedPaths, trackRelationships);
 
@@ -268,7 +269,7 @@ class YensTest {
             throw new IllegalArgumentException("All expected paths must have the same source and target nodes.");
         }
 
-        var config = defaultSourceTargetConfigBuilder()
+        var config = defaultSourceTargetConfigBuilder(concurrency)
             .sourceNode(firstResult.sourceNode())
             .targetNode(firstResult.targetNode())
             .k(expectedPathResults.size())
@@ -395,7 +396,7 @@ class YensTest {
         @ParameterizedTest
         @MethodSource("pathInput")
         void compute(Collection<String> expectedPaths) {
-            assertResult(graph, idFunction, expectedPaths, true);
+            assertResult(graph, idFunction, expectedPaths, true, 4);
         }
     }
 }
