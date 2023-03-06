@@ -107,6 +107,18 @@ public final class CypherMapWrapper implements CypherMapAccess {
 
     // FACTORIES
 
+    public CypherMapWrapper withStringIfMissing(String key, String value) {
+        return withEntryIfMissing(key, value);
+    }
+
+    public CypherMapWrapper withNumberIfMissing(String key, Number value) {
+        return withEntryIfMissing(key, value);
+    }
+
+    public CypherMapWrapper withBooleanIfMissing(String key, Boolean value) {
+        return withEntryIfMissing(key, value);
+    }
+
     public CypherMapWrapper withString(String key, String value) {
         return withEntry(key, value);
     }
@@ -117,6 +129,14 @@ public final class CypherMapWrapper implements CypherMapAccess {
 
     public CypherMapWrapper withBoolean(String key, Boolean value) {
         return withEntry(key, value);
+    }
+
+    public CypherMapWrapper withEntryIfMissing(String key, Object value) {
+        if(!containsKey(key)) {
+            return withEntry(key, value);
+        }
+
+        return this;
     }
 
     public CypherMapWrapper withEntry(String key, Object value) {
