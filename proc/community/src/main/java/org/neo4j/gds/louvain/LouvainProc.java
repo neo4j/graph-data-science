@@ -60,13 +60,7 @@ final class LouvainProc {
 
         return new LongArrayNodePropertyValues() {
             @Override
-            public long valuesStored() {
-                // the result is dense
-                    return size;
-                }
-
-                @Override
-                public long maxIndex() {return size;
+            public long nodeCount() {return size;
             }
 
             @Override

@@ -175,13 +175,8 @@ public abstract class HugeAtomicDoubleArray {
             }
 
             @Override
-            public long valuesStored() {
+            public long nodeCount() {
                 return HugeAtomicDoubleArray.this.size();
-            }
-
-            @Override
-            public long maxIndex() {
-                return valuesStored();
             }
         };
     }

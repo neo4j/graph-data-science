@@ -70,12 +70,7 @@ public class TestMutateProc extends MutatePropertyProc<TestAlgorithm, TestAlgori
             }
 
             @Override
-            public long valuesStored() {
-                return 0;
-            }
-
-            @Override
-            public long maxIndex() {
+            public long nodeCount() {
                 return 0;
             }
         };

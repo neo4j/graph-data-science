@@ -30,12 +30,7 @@ class ConsecutiveLongNodePropertyValuesTest {
     void shouldReturnConsecutiveIds() {
         LongNodePropertyValues nonConsecutiveIds = new LongNodePropertyValues() {
             @Override
-            public long valuesStored() {
-                return 0;
-            }
-
-            @Override
-            public long maxIndex() {
+            public long nodeCount() {
                 return 10;
             }
 
@@ -47,7 +42,7 @@ class ConsecutiveLongNodePropertyValuesTest {
 
         var consecutiveIds = new ConsecutiveLongNodePropertyValues(nonConsecutiveIds);
 
-        assertThat(consecutiveIds.valuesStored()).isEqualTo(nonConsecutiveIds.valuesStored());
+        assertThat(consecutiveIds.nodeCount()).isEqualTo(nonConsecutiveIds.nodeCount());
 
         for (int i = 0; i < 10; i++) {
             assertThat(consecutiveIds.longValue(i)).isEqualTo(i % 3);

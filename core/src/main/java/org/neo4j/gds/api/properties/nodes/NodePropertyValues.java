@@ -60,6 +60,8 @@ public interface NodePropertyValues extends PropertyValues {
 
     Value value(long nodeId);
 
+    long nodeCount();
+
     /**
      * The dimension of the properties.
      * For scalar values, this is 1.

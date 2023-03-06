@@ -40,12 +40,7 @@ final class HashGNNProcCompanion {
             }
 
             @Override
-            public long valuesStored() {
-                return embeddings.size();
-            }
-
-            @Override
-            public long maxIndex() {
+            public long nodeCount() {
                 return nodeCount;
             }
         };

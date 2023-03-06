@@ -36,13 +36,7 @@ public class UpdatableDoubleArrayNodeProperty implements UpdatableNodeProperty, 
     }
 
     @Override
-    public long valuesStored() {
-        // FIXME this does not reflect the number of values stored
-        return doubleArrayList.capacity();
-    }
-
-    @Override
-    public long maxIndex() {
+    public long nodeCount() {
         return nodeCount;
     }
 

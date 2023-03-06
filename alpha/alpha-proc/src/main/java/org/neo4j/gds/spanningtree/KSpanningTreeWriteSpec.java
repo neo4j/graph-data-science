@@ -68,12 +68,7 @@ public class KSpanningTreeWriteSpec implements AlgorithmSpec<KSpanningTree, Span
 
             var properties = new LongNodePropertyValues() {
                 @Override
-                public long valuesStored() {
-                    return spanningTree.effectiveNodeCount;
-                }
-
-                @Override
-                public long maxIndex() {
+                public long nodeCount() {
                     return computationResult.graph().nodeCount();
                 }
 

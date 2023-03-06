@@ -253,12 +253,7 @@ class CSRGraphStoreTest {
             }
 
             @Override
-            public long valuesStored() {
-                return 0;
-            }
-
-            @Override
-            public long maxIndex() {
+            public long valueCount() {
                 return 4;
             }
         });

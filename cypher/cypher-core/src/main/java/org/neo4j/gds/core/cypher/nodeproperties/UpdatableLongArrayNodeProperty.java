@@ -36,12 +36,7 @@ public class UpdatableLongArrayNodeProperty implements UpdatableNodeProperty, Lo
     }
 
     @Override
-    public long valuesStored() {
-        return longArrayList.capacity();
-    }
-
-    @Override
-    public long maxIndex() {
+    public long nodeCount() {
         return nodeCount;
     }
 

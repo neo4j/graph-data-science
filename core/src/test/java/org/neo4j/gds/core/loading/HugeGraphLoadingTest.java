@@ -106,10 +106,10 @@ final class HugeGraphLoadingTest extends BaseTest {
             .graph();
 
         NodePropertyValues nodePropertyValues = graph.nodeProperties("bar");
-        long propertyCountDiff = nodeCount - nodePropertyValues.valuesStored();
+        long propertyCountDiff = nodeCount - nodePropertyValues.nodeCount();
         String errorMessage = formatWithLocale(
             "Expected %d properties to be imported. Actually imported %d properties (missing %d properties).",
-            nodeCount, nodePropertyValues.valuesStored(), propertyCountDiff
+            nodeCount, nodePropertyValues.nodeCount(), propertyCountDiff
         );
         assertEquals(0, propertyCountDiff, errorMessage);
 

@@ -163,12 +163,7 @@ public final class PregelBaseProc {
         HugeObjectArrayLongArrayPropertyValues(HugeObjectArray<long[]> longArrays) {this.longArrays = longArrays;}
 
         @Override
-        public long valuesStored() {
-            return longArrays.size();
-        }
-
-        @Override
-        public long maxIndex() {
+        public long nodeCount() {
             // Its backed by a dense array
             return longArrays.size();
         }
@@ -185,12 +180,7 @@ public final class PregelBaseProc {
         HugeObjectArrayDoubleArrayPropertyValues(HugeObjectArray<double[]> doubleArrays) {this.doubleArrays = doubleArrays;}
 
         @Override
-        public long valuesStored() {
-            return doubleArrays.size();
-        }
-
-        @Override
-        public long maxIndex() {
+        public long nodeCount() {
             // its backed by dense array
             return doubleArrays.size();
         }

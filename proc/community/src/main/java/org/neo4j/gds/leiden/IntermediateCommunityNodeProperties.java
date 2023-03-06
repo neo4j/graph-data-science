@@ -25,24 +25,19 @@ import java.util.function.LongFunction;
 
 final class IntermediateCommunityNodeProperties implements LongArrayNodePropertyValues {
 
-    private final long maxIndex;
+    private final long nodeCount;
     private final long storedValues;
     private final LongFunction<long[]> intermediateCommunity;
 
-    IntermediateCommunityNodeProperties(long maxIndex, long storedValues, LongFunction<long[]> intermediateCommunity) {
-        this.maxIndex = maxIndex;
+    IntermediateCommunityNodeProperties(long nodeCount, long storedValues, LongFunction<long[]> intermediateCommunity) {
+        this.nodeCount = nodeCount;
         this.storedValues = storedValues;
         this.intermediateCommunity = intermediateCommunity;
     }
 
     @Override
-    public long valuesStored() {
-        return storedValues;
-    }
-
-    @Override
-    public long maxIndex() {
-        return maxIndex;
+    public long nodeCount() {
+        return nodeCount;
     }
 
     @Override

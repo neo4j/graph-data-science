@@ -68,12 +68,7 @@ class WriteProcCancellationTest extends BaseTest {
             }
 
             @Override
-            public long valuesStored() {
-                return 42;
-            }
-
-            @Override
-            public long maxIndex() {
+            public long nodeCount() {
                 return 42;
             }
         };

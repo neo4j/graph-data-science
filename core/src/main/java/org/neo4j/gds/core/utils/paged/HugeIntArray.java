@@ -205,13 +205,8 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
             }
 
             @Override
-            public long valuesStored() {
+            public long nodeCount() {
                 return HugeIntArray.this.size();
-            }
-
-            @Override
-            public long maxIndex() {
-                return valuesStored();
             }
         };
     }

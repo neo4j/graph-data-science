@@ -29,12 +29,7 @@ public final class DoubleTestPropertyValues implements DoubleNodePropertyValues 
     public DoubleTestPropertyValues(LongToDoubleFunction transformer) {this.transformer = transformer;}
 
     @Override
-    public long valuesStored() {
-        return 0;
-    }
-
-    @Override
-    public long maxIndex() {
+    public long nodeCount() {
         return 0;
     }
 

@@ -71,12 +71,7 @@ public abstract class NullPropertyMap implements NodePropertyValues {
         }
 
         @Override
-        public long valuesStored() {
-            return 0;
-        }
-
-        @Override
-        public long maxIndex() {
+        public long nodeCount() {
             return 0;
         }
     }
@@ -112,12 +107,7 @@ public abstract class NullPropertyMap implements NodePropertyValues {
         }
 
         @Override
-        public long valuesStored() {
-            return 0;
-        }
-
-        @Override
-        public long maxIndex() {
+        public long nodeCount() {
             return 0;
         }
     }

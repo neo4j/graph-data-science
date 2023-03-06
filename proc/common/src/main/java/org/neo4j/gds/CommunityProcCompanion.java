@@ -123,7 +123,7 @@ public final class CommunityProcCompanion {
         int concurrency
     ) {
         var communitySizes = CommunityStatistics.communitySizes(
-            nodeProperties.maxIndex(),
+            nodeProperties.nodeCount(),
             nodeProperties::longValue,
             Pools.DEFAULT,
             concurrency
@@ -150,13 +150,8 @@ public final class CommunityProcCompanion {
         }
 
         @Override
-        public long valuesStored() {
-            return properties.valuesStored();
-        }
-
-        @Override
-        public long maxIndex() {
-            return properties.maxIndex();
+        public long nodeCount() {
+            return properties.nodeCount();
         }
 
         @Override

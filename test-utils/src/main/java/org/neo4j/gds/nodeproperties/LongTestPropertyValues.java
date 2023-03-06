@@ -28,12 +28,7 @@ public final class LongTestPropertyValues implements LongNodePropertyValues {
     public LongTestPropertyValues(LongToLongFunction transformer) {this.transformer = transformer;}
 
     @Override
-    public long valuesStored() {
-        return 0;
-    }
-
-    @Override
-    public long maxIndex() {
+    public long nodeCount() {
         return -1;
     }
 

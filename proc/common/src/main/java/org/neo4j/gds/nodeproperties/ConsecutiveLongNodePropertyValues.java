@@ -36,7 +36,7 @@ public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues
 
     public ConsecutiveLongNodePropertyValues(LongNodePropertyValues inputProperties) {
         var nextConsecutiveId = -1L;
-        long maxIdx = inputProperties.maxIndex();
+        long maxIdx = inputProperties.nodeCount();
         var setIdToConsecutiveId = new HugeLongLongMap(BitUtil.ceilDiv(
             maxIdx,
             MAPPING_SIZE_QUOTIENT
@@ -84,7 +84,7 @@ public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues
     }
 
     @Override
-    public long maxIndex() {
+    public long nodeCount() {
         return communities.size();
     }
 }

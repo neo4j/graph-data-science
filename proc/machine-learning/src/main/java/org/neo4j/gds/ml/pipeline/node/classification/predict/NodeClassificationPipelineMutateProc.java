@@ -97,12 +97,7 @@ public class NodeClassificationPipelineMutateProc
         result.predictedProbabilities().ifPresent(probabilityProperties -> {
             var properties = new DoubleArrayNodePropertyValues() {
                 @Override
-                public long valuesStored() {
-                    return probabilityProperties.size();
-                }
-
-                @Override
-                public long maxIndex() {
+                public long nodeCount() {
                     return computationResult.graph().nodeCount();
                 }
 

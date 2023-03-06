@@ -183,13 +183,7 @@ public class DoubleNodePropertiesBuilder implements InnerNodePropertiesBuilder {
         }
 
         @Override
-        public long valuesStored() {
-            // At the moment, this is reporting the upperbound of values stored.
-            return propertyValues.capacity();
-        }
-
-        @Override
-        public long maxIndex() {
+        public long nodeCount() {
             return size;
         }
     }

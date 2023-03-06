@@ -33,12 +33,7 @@ class CelfNodeProperties implements DoubleNodePropertyValues {
     }
 
     @Override
-    public long valuesStored() {
-        return celfSeedSet.size();
-    }
-
-    @Override
-    public long maxIndex() {
+    public long nodeCount() {
         return totalGraphNodeCount;
     }
 

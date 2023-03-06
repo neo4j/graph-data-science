@@ -200,13 +200,8 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
                 }
 
                 @Override
-                public long valuesStored() {
+                public long nodeCount() {
                     return HugeObjectArray.this.size();
-                }
-
-                @Override
-                public long maxIndex() {
-                    return valuesStored();
                 }
             };
         }
@@ -218,13 +213,8 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
                 }
 
                 @Override
-                public long valuesStored() {
+                public long nodeCount() {
                     return HugeObjectArray.this.size();
-                }
-
-                @Override
-                public long maxIndex() {
-                    return valuesStored();
                 }
             };
         }
@@ -236,13 +226,8 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
                 }
 
                 @Override
-                public long valuesStored() {
+                public long nodeCount() {
                     return HugeObjectArray.this.size();
-                }
-
-                @Override
-                public long maxIndex() {
-                    return valuesStored();
                 }
             };
         }
