@@ -22,7 +22,6 @@ package org.neo4j.gds.catalog;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.beta.filter.NodesFilter;
-import org.neo4j.gds.beta.filter.expression.ExpressionParser;
 import org.neo4j.gds.config.MutateLabelConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -36,6 +35,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.catalog.NodeFilterParser.parseAndValidate;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphMutateNodeLabelProc extends CatalogProc {
@@ -52,14 +52,14 @@ public class GraphMutateNodeLabelProc extends CatalogProc {
 
         var procedureConfig = MutateLabelConfig.of(configuration);
         var graphStore = graphStoreFromCatalog(graphName).graphStore();
-        var filter = ExpressionParser.parse(procedureConfig.nodeFilter(), Map.of());
+        var nodeFilter = parseAndValidate(graphStore, procedureConfig.nodeFilter());
         var nodeLabelToMutate = NodeLabel.of(nodeLabel);
 
         var resultBuilder = MutateLabelResult.builder(graphName, nodeLabel).withConfig(procedureConfig.toMap());
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
             var filteredNodes = NodesFilter.filterNodes(
                 graphStore,
-                filter,
+                nodeFilter,
                 procedureConfig.concurrency(),
                 Map.of(),
                 Pools.DEFAULT,
@@ -87,5 +87,4 @@ public class GraphMutateNodeLabelProc extends CatalogProc {
 
         return Stream.of(resultBuilder.build());
     }
-
 }
