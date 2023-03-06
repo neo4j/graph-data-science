@@ -65,13 +65,9 @@ import java.util.UUID;
 @ServiceProvider
 public class InMemoryStorageEngineFactory implements StorageEngineFactory {
 
-    public InMemoryStorageEngineFactory() {
-        throw new UnsupportedOperationException("This should never be instantiated");
-    }
-
     @Override
     public String name() {
-        return null;
+        throw new UnsupportedOperationException("5.1 storage engine requires JDK17");
     }
 
     @Override
@@ -83,22 +79,22 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
         LogService logService,
         PageCacheTracer pageCacheTracer
     ) {
-        return null;
+        throw new UnsupportedOperationException("5.1 storage engine requires JDK17");
     }
 
     @Override
     public StoreVersion versionInformation(String storeVersion) {
-        return null;
+        throw new UnsupportedOperationException("5.1 storage engine requires JDK17");
     }
 
     @Override
     public StoreVersion versionInformation(StoreId storeId) {
-        return null;
+        throw new UnsupportedOperationException("5.1 storage engine requires JDK17");
     }
 
     @Override
     public RollingUpgradeCompatibility rollingUpgradeCompatibility() {
-        return null;
+        throw new UnsupportedOperationException("5.1 storage engine requires JDK17");
     }
 
     @Override
@@ -111,7 +107,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
         PageCacheTracer cacheTracer,
         MemoryTracker memoryTracker
     ) {
-        return null;
+        throw new UnsupportedOperationException("5.1 storage engine requires JDK17");
     }
 
     @Override
@@ -136,18 +132,18 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
         DatabaseReadOnlyChecker readOnlyChecker,
         MemoryTracker memoryTracker
     ) {
-        return null;
+        throw new UnsupportedOperationException("5.1 storage engine requires JDK17");
     }
 
     @Override
     public List<Path> listStorageFiles(FileSystemAbstraction fileSystem, DatabaseLayout databaseLayout) throws
         IOException {
-        return null;
+        throw new UnsupportedOperationException("5.1 storage engine requires JDK17");
     }
 
     @Override
     public boolean storageExists(FileSystemAbstraction fileSystem, DatabaseLayout databaseLayout, PageCache pageCache) {
-        return false;
+        throw new UnsupportedOperationException("5.1 storage engine requires JDK17");
     }
 
     @Override
@@ -157,7 +153,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
         PageCache pageCache,
         CursorContext cursorContext
     ) throws IOException {
-        return null;
+        throw new UnsupportedOperationException("5.1 storage engine requires JDK17");
     }
 
     @Override
@@ -166,7 +162,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
         PageCache pageCache,
         CursorContext cursorContext
     ) throws IOException {
-        return null;
+        throw new UnsupportedOperationException("5.1 storage engine requires JDK17");
     }
 
     @Override
@@ -178,7 +174,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
         PageCacheTracer cacheTracer,
         DatabaseReadOnlyChecker readOnlyChecker
     ) throws IOException {
-        return null;
+        throw new UnsupportedOperationException("5.1 storage engine requires JDK17");
     }
 
     @Override
@@ -188,7 +184,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
         PageCache pageCache,
         CursorContext cursorContext
     ) throws IOException {
-        return null;
+        throw new UnsupportedOperationException("5.1 storage engine requires JDK17");
     }
 
     @Override
@@ -201,7 +197,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
         long upgradeTxChecksum,
         long upgradeTxCommitTimestamp
     ) throws IOException {
-
+        throw new UnsupportedOperationException("5.1 storage engine requires JDK17");
     }
 
     @Override
@@ -212,7 +208,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
         CursorContext cursorContext,
         UUID externalStoreId
     ) throws IOException {
-
+        throw new UnsupportedOperationException("5.1 storage engine requires JDK17");
     }
 
     @Override
@@ -222,7 +218,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
         PageCache pageCache,
         CursorContext cursorContext
     ) {
-        return Optional.empty();
+        throw new UnsupportedOperationException("5.1 storage engine requires JDK17");
     }
 
     @Override
@@ -237,7 +233,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
         CursorContext cursorContext,
         MemoryTracker memoryTracker
     ) {
-        return null;
+        throw new UnsupportedOperationException("5.1 storage engine requires JDK17");
     }
 
     @Override
@@ -248,7 +244,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
         DatabaseLayout databaseLayout,
         CursorContext cursorContext
     ) {
-        return null;
+        throw new UnsupportedOperationException("5.1 storage engine requires JDK17");
     }
 
     @Override
@@ -257,16 +253,16 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
         DatabaseLayout databaseLayout,
         PageCache pageCache
     ) {
-        return null;
+        throw new UnsupportedOperationException("5.1 storage engine requires JDK17");
     }
 
     @Override
     public CommandReaderFactory commandReaderFactory() {
-        return null;
+        throw new UnsupportedOperationException("5.1 storage engine requires JDK17");
     }
 
     @Override
     public DatabaseLayout databaseLayout(Neo4jLayout neo4jLayout, String databaseName) {
-        return null;
+        throw new UnsupportedOperationException("5.1 storage engine requires JDK17");
     }
 }
