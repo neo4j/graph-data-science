@@ -39,6 +39,8 @@ Scales all property values into the range `[0, 1]` where the minimum value(s) ge
 
 image::equations/scale-properties/minmax.svg[scaled p equals p minus minimum of p divided by maximum of p minus minimum of p,align="center"]
 
+The minimum and maximum values are reported as statistics when this scaler is used.
+
 
 [[algorithms-scale-properties-max]]
 === Max scaler
@@ -47,6 +49,8 @@ Scales all property values into the range `[-1, 1]` where the absolute maximum v
 
 image::equations/scale-properties/max.svg[scaled p equals p divided by the absolute maximum of p,align="center"]
 
+The maximum absolute value is reported as statistic when this scaler is used.
+
 
 [[algorithms-scale-properties-mean]]
 === Mean scaler
@@ -54,6 +58,8 @@ image::equations/scale-properties/max.svg[scaled p equals p divided by the absol
 Scales all property values into the range `[-1, 1]` where the average value(s) get the scaled value `0`.
 
 image::equations/scale-properties/mean.svg[scaled p equals p minus average of p divided by maximum of p minus minimum of p,align="center"]
+
+The minimum, maximum and average values are reported as statistics when this scaler is used.
 
 
 [[algorithms-scale-properties-log]]
@@ -72,13 +78,17 @@ Scales all property values using the https://en.wikipedia.org/wiki/Standard_scor
 
 image::equations/scale-properties/standardScore.svg[scaled p equals p minus average of p divided by standard deviation of p,align="center"]
 
+The average value and standard deviation are reported as statistics when this scaler is used.
+
 
 [[algorithms--scale-properties-center]]
 === Center
 
 Transforms all properties by subtracting the mean.
 
-image::equations/scale-properties/center.svg[scaled p equals p minus average of p divided by standard deviation of p,align="center"]
+image::equations/scale-properties/center.svg[p minus average value of p,align="center"]
+
+The average value is reported as statistic when this scaler is used.
 
 
 [[algorithms-scale-properties-l1norm]]
@@ -146,6 +156,7 @@ CALL gds.alpha.scaleProperties.mutate(
   graphName: String,
   configuration: Map
 ) YIELD
+  scalerStatistics: Map,
   preProcessingMillis: Integer,
   computeMillis: Integer,
   mutateMillis: Integer,
@@ -168,6 +179,7 @@ include::partial$/algorithms/alpha/scale-properties/specific-configuration.adoc[
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type      | Description
+| scalerStatistics      | Map       | Statistics computed by the specified scaler, if any.
 | preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
 | computeMillis         | Integer   | Milliseconds for running the algorithm.
 | mutateMillis          | Integer   | Milliseconds for adding properties to the projected graph.
@@ -187,6 +199,7 @@ CALL gds.beta.scaleProperties.write(
   configuration: Map
 )
 YIELD
+  scalerStatistics: Map,
   preProcessingMillis: Integer,
   computeMillis: Integer,
   writeMillis: Integer,
@@ -209,9 +222,10 @@ include::partial$/algorithms/wcc/specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type      | Description
+| scalerStatistics      | Map       | Statistics computed by the specified scaler, if any.
 | preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
 | computeMillis         | Integer   | Milliseconds for running the algorithm.
-| writeMillis          | Integer   | Milliseconds for writing result back to Neo4j.
+| writeMillis           | Integer   | Milliseconds for writing result back to Neo4j.
 | postProcessingMillis  | Integer   | Unused.
 | nodePropertiesWritten | Integer   | Number of node properties written.
 | configuration         | Map       | Configuration used for running the algorithm.
@@ -340,14 +354,14 @@ CALL gds.alpha.scaleProperties.mutate('myGraph', {
   nodeProperties: ['buildYear', 'avgReview'],
   scaler: 'Mean',
   mutateProperty: 'hotelFeatures'
-}) YIELD nodePropertiesWritten
+}) YIELD nodePropertiesWritten, scalerStatistics
 ----
 
 .Results
 [opts="header"]
 |===
-| nodePropertiesWritten
-| 8
+| nodePropertiesWritten | scalerStatistics
+| 8                     | {avgReview={avg=[4.49875], max=[19.0], min=[-4.12]}, buildYear={avg=[1991.875], max=[2020.0], min=[1958.0]}}
 |===
 --
 
@@ -369,15 +383,15 @@ CALL gds.beta.scaleProperties.write('myGraph', {
   nodeProperties: ['buildYear', 'avgReview'],
   scaler: 'stdscore',
   writeProperty: 'hotelStdScore'
-}) YIELD nodePropertiesWritten
+}) YIELD nodePropertiesWritten, scalerStatistics
 
 ----
 
 .Results
 [opts="header"]
 |===
-| nodePropertiesWritten
-| 8
+| nodePropertiesWritten | scalerStatistics
+| 8                     | {avgReview={avg=[4.49875], std=[6.675837845356941]}, buildYear={avg=[1991.875], std=[18.917171432325713]}}
 |===
 --
 

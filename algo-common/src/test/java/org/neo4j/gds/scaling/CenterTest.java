@@ -28,6 +28,8 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 
+import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -63,6 +65,7 @@ class CenterTest {
         );
 
         assertThat(scaler.avg).isEqualTo(avg);
+        assertThat(scaler.statistics()).containsExactlyEntriesOf(Map.of("avg", List.of(avg)));
 
         double[] actual = IntStream.range(0, 10).mapToDouble(scaler::scaleProperty).toArray();
         assertThat(actual).containsSequence(expected);

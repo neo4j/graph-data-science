@@ -33,6 +33,7 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -77,15 +78,17 @@ public class ScalePropertiesWriteProc extends WriteProc<ScaleProperties, ScalePr
         ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        return new WriteResult.Builder();
+        return new WriteResult.Builder().withScalerStatistics(computeResult.result().scalerStatistics());
     }
 
     @SuppressWarnings("unused")
     public static final class WriteResult extends StandardWriteResult {
 
         public final long nodePropertiesWritten;
+        public final Map<String, Map<String, List<Double>>> scalerStatistics;
 
         WriteResult(
+            Map<String, Map<String, List<Double>>> scalerStatistics,
             long preProcessingMillis,
             long computeMillis,
             long writeMillis,
@@ -100,13 +103,22 @@ public class ScalePropertiesWriteProc extends WriteProc<ScaleProperties, ScalePr
                 configuration
             );
             this.nodePropertiesWritten = nodePropertiesWritten;
+            this.scalerStatistics = scalerStatistics;
         }
 
         static class Builder extends AbstractResultBuilder<WriteResult> {
 
+            private Map<String, Map<String, List<Double>>> scalerStatistics;
+
+            Builder withScalerStatistics(Map<String, Map<String, List<Double>>> stats) {
+                this.scalerStatistics = stats;
+                return this;
+            }
+
             @Override
             public WriteResult build() {
                 return new WriteResult(
+                    scalerStatistics,
                     preProcessingMillis,
                     computeMillis,
                     writeMillis,

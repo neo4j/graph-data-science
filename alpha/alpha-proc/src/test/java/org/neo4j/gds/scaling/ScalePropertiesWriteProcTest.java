@@ -19,15 +19,21 @@
  */
 package org.neo4j.gds.scaling;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.isA;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ScalePropertiesWriteProcTest extends ScalePropertiesProcTest<ScalePropertiesWriteConfig> {
@@ -64,11 +70,24 @@ class ScalePropertiesWriteProcTest extends ScalePropertiesProcTest<ScaleProperti
             .addParameter("nodeProperties", List.of(NODE_PROP_NAME))
             .addParameter("scaler", "stdscore")
             .addParameter("writeProperty", WRITE_PROPERTY)
-            .yields("nodePropertiesWritten");
+            .yields();
 
-        runQueryWithRowConsumer(query, row -> {
-            assertEquals(6L, row.getNumber("nodePropertiesWritten"));
-        });
+        assertCypherResult(query, List.of(Map.of(
+                "nodePropertiesWritten", 6L,
+                "scalerStatistics", hasEntry(
+                    equalTo(NODE_PROP_NAME),
+                    Matchers.allOf(
+                        hasEntry(equalTo("std"), hasSize(2)),
+                        hasEntry(equalTo("avg"), hasSize(2))
+                    )
+                ),
+                "configuration", isA(Map.class),
+                "writeMillis", greaterThan(-1L),
+                "preProcessingMillis", greaterThan(-1L),
+                "computeMillis", greaterThan(-1L),
+                "postProcessingMillis", 0L
+            ))
+        );
 
         runQueryWithRowConsumer(formatWithLocale(
             "MATCH (n) RETURN n.%s AS %s",

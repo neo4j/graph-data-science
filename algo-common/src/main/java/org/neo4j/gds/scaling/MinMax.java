@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
@@ -37,8 +38,8 @@ public final class MinMax extends ScalarScaler {
     final double min;
     final double maxMinDiff;
 
-    private MinMax(NodePropertyValues properties, double min, double maxMinDiff) {
-        super(properties);
+    private MinMax(NodePropertyValues properties, Map<String, List<Double>> statistics, double min, double maxMinDiff) {
+        super(properties, statistics);
         this.min = min;
         this.maxMinDiff = maxMinDiff;
     }
@@ -74,12 +75,17 @@ public final class MinMax extends ScalarScaler {
                 var min = tasks.stream().mapToDouble(ComputeMaxMin::min).min().orElse(Double.MAX_VALUE);
                 var max = tasks.stream().mapToDouble(ComputeMaxMin::max).max().orElse(-Double.MAX_VALUE);
 
+                var statistics = Map.of(
+                    "min", List.of(min),
+                    "max", List.of(max)
+                );
+
                 var maxMinDiff = max - min;
 
                 if (Math.abs(maxMinDiff) < CLOSE_TO_ZERO) {
-                    return ZERO;
+                    return new StatsOnly(statistics);
                 } else {
-                    return new MinMax(properties, min, maxMinDiff);
+                    return new MinMax(properties, statistics, min, maxMinDiff);
                 }
             }
         };

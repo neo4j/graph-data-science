@@ -19,10 +19,22 @@
  */
 package org.neo4j.gds.scaling;
 
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.CypherMapWrapper;
+
+import java.util.List;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.isA;
 
 class ScalePropertiesMutateProcTest extends ScalePropertiesProcTest<ScalePropertiesMutateConfig>
     implements MutateNodePropertyTest<ScaleProperties, ScalePropertiesMutateConfig, ScaleProperties.Result> {
@@ -68,5 +80,32 @@ class ScalePropertiesMutateProcTest extends ScalePropertiesProcTest<ScalePropert
                ",(n3 {myProp: [3L, 2L], scaledProperty: [0.1, 0.0]})" +
                ",(n4 {myProp: [4L, 2L], scaledProperty: [0.3, 0.0]})" +
                ",(n5 {myProp: [5L, 2L], scaledProperty: [0.5, 0.0]})";
+    }
+
+    @Test
+    void testGetsStatistics() {
+        loadGraph(GRAPH_NAME);
+        String query = GdsCypher
+            .call(GRAPH_NAME)
+            .algo("gds.alpha.scaleProperties")
+            .mutateMode()
+            .addParameter("nodeProperties", List.of(NODE_PROP_NAME))
+            .addParameter("scaler", "max")
+            .addParameter("mutateProperty", MUTATE_PROPERTY)
+            .yields();
+
+        assertCypherResult(query, List.of(Map.of(
+                "nodePropertiesWritten", 6L,
+                "scalerStatistics", hasEntry(
+                    equalTo(NODE_PROP_NAME),
+                    Matchers.allOf(hasEntry(equalTo("absMax"), hasSize(2)))
+                ),
+                "configuration", isA(Map.class),
+                "mutateMillis", greaterThan(-1L),
+                "preProcessingMillis", greaterThan(-1L),
+                "computeMillis", greaterThan(-1L),
+                "postProcessingMillis", 0L
+            ))
+        );
     }
 }
