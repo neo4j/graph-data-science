@@ -44,33 +44,25 @@ public final class CommunityProcCompanion {
     public static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> NodePropertyValues nodeProperties(
         CONFIG config,
         String resultProperty,
-        LongNodePropertyValues nodeProperties,
+        LongNodePropertyValues propertyValues,
         Supplier<NodeProperty> seedPropertySupplier
     ) {
-
         var consecutiveIds = config.consecutiveIds();
         var isIncremental = config.isIncremental();
         var resultPropertyEqualsSeedProperty = isIncremental && resultProperty.equals(config.seedProperty());
 
-        LongNodePropertyValues result;
-
         if (resultPropertyEqualsSeedProperty && !consecutiveIds) {
-            result = LongIfChangedNodePropertyValues.of(seedPropertySupplier.get(), nodeProperties);
+            var incrementalNodePropertyValues = LongIfChangedNodePropertyValues.of(seedPropertySupplier.get(), propertyValues);
+            return communitySizeFilter(incrementalNodePropertyValues, config);
         } else if (consecutiveIds && !isIncremental) {
-            var temp = sizeFilterCheck(nodeProperties, config);
-            result = new ConsecutiveLongNodePropertyValues(
-                temp,
-                temp.size()
-            );
-            return result;
+            var sizeFilteredPropertyValues = communitySizeFilter(propertyValues, config);
+            return new ConsecutiveLongNodePropertyValues(sizeFilteredPropertyValues, sizeFilteredPropertyValues.size());
         } else {
-            result = nodeProperties;
+            return communitySizeFilter(propertyValues, config);
         }
-        return sizeFilterCheck(result, config);
-
     }
 
-    private static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> LongNodePropertyValues sizeFilterCheck(
+    private static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> LongNodePropertyValues communitySizeFilter(
         LongNodePropertyValues result,
         CONFIG config
     ) {
@@ -89,7 +81,6 @@ public final class CommunityProcCompanion {
         }
 
         return result;
-
     }
 
     private static LongNodePropertyValues applySizeFilter(
