@@ -1,0 +1,2 @@
+include::partial$/algorithms/wcc/specific-configuration.adoc[]
+| minComponentSize  | Integer | 0       | yes      | Only nodes inside communities larger or equal the given value will be written to the underlying Neo4j database.

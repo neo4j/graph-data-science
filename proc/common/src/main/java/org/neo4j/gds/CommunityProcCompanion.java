@@ -24,7 +24,6 @@ import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.config.CommunitySizeConfig;
-import org.neo4j.gds.config.ComponentSizeConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
 import org.neo4j.gds.config.SeedConfig;
@@ -74,13 +73,8 @@ public final class CommunityProcCompanion {
                 .minCommunitySize()
                 .map(size -> applySizeFilter(finalResult, size, config.concurrency()))
                 .orElse(result);
-        } else if (config instanceof ComponentSizeConfig) {
-            var finalResult = result;
-            result = ((ComponentSizeConfig) config)
-                .minComponentSize()
-                .map(size -> applySizeFilter(finalResult, size, config.concurrency()))
-                .orElse(result);
         }
+
         return result;
     }
 

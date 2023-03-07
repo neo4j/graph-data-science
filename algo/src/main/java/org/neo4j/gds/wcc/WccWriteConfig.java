@@ -21,14 +21,20 @@ package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.ComponentSizeConfig;
+import org.neo4j.gds.config.CommunitySizeConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+
+import java.util.Optional;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface WccWriteConfig extends WccBaseConfig, WritePropertyConfig, ComponentSizeConfig {
+public interface WccWriteConfig extends WccBaseConfig, WritePropertyConfig, CommunitySizeConfig {
+
+    @Override
+    @Configuration.Key("minComponentSize")
+    Optional<Long> minCommunitySize();
 
     static WccWriteConfig of(CypherMapWrapper userInput) {
         return new WccWriteConfigImpl(userInput);
