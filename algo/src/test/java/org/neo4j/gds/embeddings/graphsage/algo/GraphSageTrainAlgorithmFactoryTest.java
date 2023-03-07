@@ -496,6 +496,9 @@ class GraphSageTrainAlgorithmFactoryTest {
             .containsExactly(
                 "GraphSageTrain :: Start",
                 "GraphSageTrain :: Prepare batches :: Start",
+                "GraphSageTrain :: Prepare batches 25%",
+                "GraphSageTrain :: Prepare batches 50%",
+                "GraphSageTrain :: Prepare batches 75%",
                 "GraphSageTrain :: Prepare batches 100%",
                 "GraphSageTrain :: Prepare batches :: Finished",
                 "GraphSageTrain :: Train model :: Start",

@@ -21,6 +21,9 @@ package org.neo4j.gds.louvain;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -28,11 +31,11 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.neo4j.gds.CommunityHelper.assertCommunities;
 
 class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
@@ -53,7 +56,7 @@ class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
         runQueryWithRowConsumer(query, row -> {
             int id = row.getNumber("nodeId").intValue();
             long community = row.getNumber("communityId").longValue();
-            assertNull(row.get("intermediateCommunityIds"));
+            assertThat(row.get("intermediateCommunityIds")).isNull();
             actualCommunities.add(id, community);
         });
         assertCommunities(actualCommunities, RESULT);
@@ -67,21 +70,19 @@ class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
             .addParameter("consecutiveIds", true)
             .yields("nodeId", "communityId", "intermediateCommunityIds");
 
-        var communityMap = new HashSet<Long>();
+        var communitySet = new HashSet<Long>();
 
         List<Long> actualCommunities = new ArrayList<>();
         runQueryWithRowConsumer(query, row -> {
             int id = row.getNumber("nodeId").intValue();
             long community = row.getNumber("communityId").longValue();
-            communityMap.add(community);
-            assertNull(row.get("intermediateCommunityIds"));
+            communitySet.add(community);
+            assertThat(row.get("intermediateCommunityIds")).isNull();
             actualCommunities.add(id, community);
         });
         assertCommunities(actualCommunities, RESULT);
-        assertThat(communityMap).hasSize(3).containsExactlyInAnyOrder(0L, 1L, 2L);
-
+        assertThat(communitySet).hasSize(3).containsExactlyInAnyOrder(0L, 1L, 2L);
     }
-
 
     @Test
     void testStreamCommunities() {
@@ -92,19 +93,19 @@ class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
             .yields("nodeId", "communityId", "intermediateCommunityIds");
 
         runQueryWithRowConsumer(query, row -> {
-            Object maybeList = row.get("intermediateCommunityIds");
-            assertTrue(maybeList instanceof List);
-            List<Long> communities = (List<Long>) maybeList;
-            assertEquals(2, communities.size());
-            assertEquals(communities.get(1), row.getNumber("communityId").longValue());
+            assertThat(row.get("intermediateCommunityIds"))
+                .asList()
+                .hasSize(2)
+                .last(LONG)
+                .isEqualTo(row.getNumber("communityId").longValue());
         });
     }
 
     @Test
     void testCreateConfigWithDefaults() {
         LouvainBaseConfig louvainConfig = LouvainStreamConfig.of(CypherMapWrapper.empty());
-        assertEquals(false, louvainConfig.includeIntermediateCommunities());
-        assertEquals(10, louvainConfig.maxLevels());
+        assertThat(louvainConfig.includeIntermediateCommunities()).isFalse();
+        assertThat(louvainConfig.maxLevels()).isEqualTo(10);
     }
 
     @Test
@@ -145,6 +146,35 @@ class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
         );
 
         assertThat(actualFilteredCount).isEqualTo(filteredNodeCount);
+    }
+
+    static Stream<Arguments> communitySizeInputs() {
+        return Stream.of(
+                Arguments.of(Map.of("minCommunitySize", 1), List.of(0, 1, 2)),
+                Arguments.of(Map.of("minCommunitySize", 5), List.of(0, 2))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("communitySizeInputs")
+    void testStreamMinCommunitySize(Map<String, Long> parameters, List<Integer> expectedCommunityIds) {
+        @Language("Cypher") String query = GdsCypher.call("myGraph")
+                .algo("louvain")
+                .streamMode()
+                .addParameter("consecutiveIds", true)
+                .addAllParameters(parameters)
+                .yields("nodeId", "communityId");
+
+        var communitySet = new HashSet<Integer>();
+
+        runQueryWithRowConsumer(query, row -> {
+            long id = row.getNumber("nodeId").longValue();
+            int community = row.getNumber("communityId").intValue();
+
+            communitySet.add(community);
+            assertThat(RESULT.get(community)).contains(id);
+        });
+        assertThat(communitySet).containsExactlyElementsOf(expectedCommunityIds);
     }
 
     @Override

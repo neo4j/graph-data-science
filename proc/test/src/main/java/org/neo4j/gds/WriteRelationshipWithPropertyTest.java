@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -110,19 +109,17 @@ public interface WriteRelationshipWithPropertyTest<ALGORITHM extends Algorithm<R
         );
 
         SoftAssertions.assertSoftly(softly -> {
-            var numberOfRows = new MutableLong();
-            runQueryWithRowConsumer(
+            var numberOfRows = runQueryWithRowConsumer(
                 graphDb(),
                 checkNeo4jGraphPositiveQuery,
                 Map.of(),
                 (transaction, resultRow) -> {
-                    numberOfRows.increment();
                     softly.assertThat(resultRow.get("property")).as("positive check on created relationship").isNotNull();
                     softly.assertThat(resultRow.getString("label1")).as("label on created relationship").isEqualTo("A");
                     softly.assertThat(resultRow.getString("label2")).as("label on created relationship").isEqualTo("A");
                 }
             );
-            softly.assertThat(numberOfRows.longValue()).isGreaterThan(0L);
+            softly.assertThat(numberOfRows).isGreaterThan(0L);
         });
     }
 

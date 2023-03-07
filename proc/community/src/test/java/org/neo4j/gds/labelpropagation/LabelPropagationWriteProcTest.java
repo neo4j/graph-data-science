@@ -32,7 +32,6 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
@@ -44,11 +43,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropagationWriteConfig> {
@@ -97,21 +94,32 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
             );
 
         runQueryWithRowConsumer(query, row -> {
-            long communityCount = row.getNumber("communityCount").longValue();
-            long preProcessingMillis = row.getNumber("preProcessingMillis").longValue();
-            long computeMillis = row.getNumber("computeMillis").longValue();
-            long writeMillis = row.getNumber("writeMillis").longValue();
-            boolean didConverge = row.getBoolean("didConverge");
-            Map<String, Object> communityDistribution = (Map<String, Object>) row.get("communityDistribution");
-            assertEquals(10, communityCount, "wrong community count");
-            assertTrue(preProcessingMillis >= 0, "invalid preProcessingTime");
-            assertTrue(writeMillis >= 0, "invalid writeTime");
-            assertTrue(computeMillis >= 0, "invalid computeTime");
-            assertTrue(didConverge, "did not converge");
-            assertNotNull(communityDistribution);
-            for (String key : Arrays.asList("min", "max", "mean", "p50", "p75", "p90", "p99", "p999", "p95")) {
-                assertTrue(communityDistribution.containsKey(key));
-            }
+            assertThat(row.getNumber("communityCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(10);
+
+            assertThat(row.getNumber("preProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("computeMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("postProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("writeMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getBoolean("didConverge")).isTrue();
+
+            assertThat(row.get("communityDistribution"))
+                .isInstanceOf(Map.class)
+                .asInstanceOf(MAP)
+                .containsKeys("min", "max", "mean", "p50", "p75", "p90", "p99", "p999", "p95");
         });
     }
 
@@ -127,21 +135,25 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
         runQueryWithRowConsumer(
             query,
             row -> {
-                assertTrue(5 >= row.getNumber("ranIterations").intValue());
-                assertEquals(
-                    MapUtil.map(
-                        "p999", 2L,
-                        "p99", 2L,
-                        "p95", 2L,
-                        "p90", 2L,
-                        "p75", 1L,
-                        "p50", 1L,
-                        "min", 1L,
-                        "max", 2L,
-                        "mean", 1.2D
-                    ),
-                    row.get("communityDistribution")
-                );
+                assertThat(row.getNumber("ranIterations"))
+                    .asInstanceOf(LONG)
+                    .isLessThanOrEqualTo(5);
+                assertThat(row.get("communityDistribution"))
+                    .isInstanceOf(Map.class)
+                    .asInstanceOf(MAP)
+                    .containsExactlyInAnyOrderEntriesOf(
+                        Map.of(
+                            "p999", 2L,
+                            "p99", 2L,
+                            "p95", 2L,
+                            "p90", 2L,
+                            "p75", 1L,
+                            "p50", 1L,
+                            "min", 1L,
+                            "max", 2L,
+                            "mean", 1.2D
+                        )
+                    );
             }
         );
 
@@ -167,31 +179,35 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
         runQueryWithRowConsumer(
             query,
             row -> {
-                assertEquals(12, row.getNumber("nodePropertiesWritten").intValue());
+                assertThat(row.getNumber("nodePropertiesWritten"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(12L);
                 checkMillisSet(row);
-                assertEquals(
-                    MapUtil.map(
-                        "p999", 8L,
-                        "p99", 8L,
-                        "p95", 8L,
-                        "p90", 8L,
-                        "p75", 8L,
-                        "p50", 4L,
-                        "min", 4L,
-                        "max", 8L,
-                        "mean", 6.0D
-                    ),
-                    row.get("communityDistribution")
-                );
-
+                assertThat(row.get("communityDistribution"))
+                    .isInstanceOf(Map.class)
+                    .asInstanceOf(MAP)
+                    .containsExactlyInAnyOrderEntriesOf(
+                        Map.of(
+                            "p999", 8L,
+                            "p99", 8L,
+                            "p95", 8L,
+                            "p90", 8L,
+                            "p75", 8L,
+                            "p50", 4L,
+                            "min", 4L,
+                            "max", 8L,
+                            "mean", 6.0D
+                        )
+                    );
             }
         );
         String check = "MATCH (n) " +
                        "WHERE n.id IN [0,1] " +
                        "RETURN n.community AS community";
-        runQueryWithRowConsumer(check, row -> {
-            assertEquals(2, row.getNumber("community").intValue());
-        });
+        runQueryWithRowConsumer(check, row ->
+            assertThat(row.getNumber("community"))
+                .asInstanceOf(LONG)
+                .isEqualTo(2L));
     }
 
     @Test
@@ -207,31 +223,37 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
                        "    }" +
                        ")";
 
-        runQueryWithRowConsumer(query, MapUtil.map("graph", graphName, "writeProperty", writeProperty), row -> {
-                assertEquals(12, row.getNumber("nodePropertiesWritten").intValue());
-                checkMillisSet(row);
-                assertEquals(
-                    MapUtil.map(
-                        "p999", 6L,
-                        "p99", 6L,
-                        "p95", 6L,
-                        "p90", 6L,
-                        "p75", 6L,
-                        "p50", 6L,
-                        "min", 6L,
-                        "max", 6L,
-                        "mean", 6.0D
-                    ),
-                    row.get("communityDistribution")
-                );
-
+        runQueryWithRowConsumer(query, Map.of("graph", graphName, "writeProperty", writeProperty), row -> {
+                assertThat(row.getNumber("nodePropertiesWritten"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(12L);
+                assertThat(row.get("communityDistribution"))
+                    .isInstanceOf(Map.class)
+                    .asInstanceOf(MAP)
+                    .containsExactlyInAnyOrderEntriesOf(
+                        Map.of(
+                            "p999", 6L,
+                            "p99", 6L,
+                            "p95", 6L,
+                            "p90", 6L,
+                            "p75", 6L,
+                            "p50", 6L,
+                            "min", 6L,
+                            "max", 6L,
+                            "mean", 6.0D
+                        )
+                    );
             }
         );
         String check = formatWithLocale("MATCH (a {id: 0}), (b {id: 1}) " +
                                      "RETURN a.%1$s AS a, b.%1$s AS b", writeProperty);
         runQueryWithRowConsumer(check, row -> {
-            assertEquals(2, row.getNumber("a").intValue());
-            assertEquals(7, row.getNumber("b").intValue());
+            assertThat(row.getNumber("a"))
+                .asInstanceOf(LONG)
+                .isEqualTo(2);
+            assertThat(row.getNumber("b"))
+                .asInstanceOf(LONG)
+                .isEqualTo(7);
         });
     }
 
@@ -250,23 +272,27 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
 
         runQueryWithRowConsumer(query,
             row -> {
-                assertEquals(12, row.getNumber("nodePropertiesWritten").intValue());
-                checkMillisSet(row);
-                assertEquals(
-                    MapUtil.map(
-                        "p999", 6L,
-                        "p99", 6L,
-                        "p95", 6L,
-                        "p90", 6L,
-                        "p75", 6L,
-                        "p50", 6L,
-                        "min", 6L,
-                        "max", 6L,
-                        "mean", 6.0D
-                    ),
-                    row.get("communityDistribution")
-                );
+                assertThat(row.getNumber("nodePropertiesWritten"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(12L);
 
+                checkMillisSet(row);
+                assertThat(row.get("communityDistribution"))
+                    .isInstanceOf(Map.class)
+                    .asInstanceOf(MAP)
+                    .containsExactlyInAnyOrderEntriesOf(
+                        Map.of(
+                            "p999", 6L,
+                            "p99", 6L,
+                            "p95", 6L,
+                            "p90", 6L,
+                            "p75", 6L,
+                            "p50", 6L,
+                            "min", 6L,
+                            "max", 6L,
+                            "mean", 6.0D
+                        )
+                    );
             }
         );
         String validateQuery = formatWithLocale(
@@ -274,8 +300,8 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
             writeProperty
         );
         assertCypherResult(validateQuery, Arrays.asList(
-            MapUtil.map("community", 0L, "communitySize", 6L),
-            MapUtil.map("community", 1L, "communitySize", 6L)
+            Map.of("community", 0L, "communitySize", 6L),
+            Map.of("community", 1L, "communitySize", 6L)
         ));
     }
 
@@ -295,31 +321,41 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
         runQueryWithRowConsumer(
             query,
             row -> {
-                assertEquals(2, row.getNumber("nodePropertiesWritten").intValue());
+                assertThat(row.getNumber("nodePropertiesWritten"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(2L);
+
                 assertUserInput(row, "seedProperty", "seed");
                 assertUserInput(row, "writeProperty", "seed");
                 checkMillisSet(row);
-                assertEquals(
-                    MapUtil.map(
-                        "p999", 8L,
-                        "p99", 8L,
-                        "p95", 8L,
-                        "p90", 8L,
-                        "p75", 8L,
-                        "p50", 4L,
-                        "min", 4L,
-                        "max", 8L,
-                        "mean", 6.0D
-                    ),
-                    row.get("communityDistribution")
-                );
-
+                assertThat(row.get("communityDistribution"))
+                    .isInstanceOf(Map.class)
+                    .asInstanceOf(MAP)
+                    .containsExactlyInAnyOrderEntriesOf(
+                        Map.of(
+                            "p999", 8L,
+                            "p99", 8L,
+                            "p95", 8L,
+                            "p90", 8L,
+                            "p75", 8L,
+                            "p50", 4L,
+                            "min", 4L,
+                            "max", 8L,
+                            "mean", 6.0D
+                        )
+                    );
             }
         );
         String check = "MATCH (n) " +
                        "WHERE n.id IN [0,1] " +
                        "RETURN n.seed AS community";
-        runQueryWithRowConsumer(check, row -> assertEquals(2, row.getNumber("community").intValue()));
+        runQueryWithRowConsumer(
+            check,
+            row ->
+                assertThat(row.getNumber("community"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(2L)
+        );
     }
 
     @ParameterizedTest(name = "concurrency = {0}")
@@ -338,34 +374,44 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
             query,
             row -> {
                 assertUserInput(row, "seedProperty", null);
-                assertEquals(12, row.getNumber("nodePropertiesWritten").intValue());
+                assertThat(row.getNumber("nodePropertiesWritten"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(12L);
+
                 checkMillisSet(row);
             }
         );
         runQueryWithRowConsumer(
             "MATCH (n) WHERE n.id = 0 RETURN n.community AS community",
-            row -> assertEquals(6, row.getNumber("community").intValue())
+            row ->
+                assertThat(row.getNumber("community"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(6L)
+
         );
         runQueryWithRowConsumer(
             "MATCH (n) WHERE n.id = 1 RETURN n.community AS community",
-            row -> assertEquals(11, row.getNumber("community").intValue())
+            row ->
+                assertThat(row.getNumber("community"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(11L)
         );
     }
 
     static Stream<Arguments> communitySizeInputs() {
         return Stream.of(
-            Arguments.of(Map.of("minCommunitySize", 1), new Long[] {2L, 7L, 3L, 4L, 5L, 6L, 8L, 9L, 10L, 11L}),
-            Arguments.of(Map.of("minCommunitySize", 2), new Long[] {2L, 7L}),
-            Arguments.of(Map.of("minCommunitySize", 1, "consecutiveIds", true), new Long[] {0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L}),
-            Arguments.of(Map.of("minCommunitySize", 2, "consecutiveIds", true), new Long[] {0L, 1L}),
-            Arguments.of(Map.of("minCommunitySize", 1, "seedProperty", "seed"), new Long[] {1L, 2L}),
-            Arguments.of(Map.of("minCommunitySize", 2, "seedProperty", "seed"), new Long[] {1L, 2L})
+            Arguments.of(Map.of("minCommunitySize", 1), List.of(2L, 7L, 3L, 4L, 5L, 6L, 8L, 9L, 10L, 11L)),
+            Arguments.of(Map.of("minCommunitySize", 2), List.of(2L, 7L)),
+            Arguments.of(Map.of("minCommunitySize", 1, "consecutiveIds", true), List.of(0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L)),
+            Arguments.of(Map.of("minCommunitySize", 2, "consecutiveIds", true), List.of(0L, 1L)),
+            Arguments.of(Map.of("minCommunitySize", 1, "seedProperty", "seed"), List.of(1L, 2L)),
+            Arguments.of(Map.of("minCommunitySize", 2, "seedProperty", "seed"), List.of(1L, 2L))
         );
     }
 
     @ParameterizedTest
     @MethodSource("communitySizeInputs")
-    void testWriteWithMinCommunitySize(Map<String, Object> parameters, Long[] expectedCommunityIds) {
+    void testWriteWithMinCommunitySize(Map<String, Object> parameters, Iterable<Long> expectedCommunityIds) {
         String writeProp = "writeProp";
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .graphProject()
@@ -385,15 +431,19 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
 
         runQueryWithRowConsumer(
             query,
-            row -> assertEquals(parameters.containsKey("seedProperty") ? 2L : 10L, row.getNumber("communityCount"))
+            row ->
+                assertThat(row.getNumber("communityCount"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(parameters.containsKey("seedProperty") ? 2L : 10L)
+
         );
 
         runQueryWithRowConsumer(
             "MATCH (n) RETURN collect(DISTINCT n." + writeProp + ") AS communities ",
-            row -> {
-                @SuppressWarnings("unchecked") var actualComponents = (List<Long>) row.get("communities");
-                assertThat(actualComponents, containsInAnyOrder(expectedCommunityIds));
-            }
+            row ->
+                assertThat(row.get("communities"))
+                    .asList()
+                    .containsExactlyInAnyOrderElementsOf(expectedCommunityIds)
         );
     }
 
@@ -403,10 +453,10 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
             .call(TEST_GRAPH_NAME)
             .algo("labelPropagation")
             .writeEstimation()
-            .addAllParameters(createMinimalConfig(CypherMapWrapper.create(MapUtil.map("concurrency", 4))).toMap())
+            .addAllParameters(createMinimalConfig(CypherMapWrapper.create(Map.of("concurrency", 4))).toMap())
             .yields(Arrays.asList("bytesMin", "bytesMax", "nodeCount", "relationshipCount"));
 
-        assertCypherResult(query, Arrays.asList(MapUtil.map(
+        assertCypherResult(query, List.of(Map.of(
             "nodeCount", 12L,
             "relationshipCount", 10L,
             "bytesMin", 1640L,
@@ -455,8 +505,14 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
                 .yields("nodeCount", "relationshipCount");
 
             runQueryWithRowConsumer(graphCreateQuery, row -> {
-                assertEquals(12L, row.getNumber("nodeCount"));
-                assertEquals(10L, row.getNumber("relationshipCount"));
+                assertThat(row.getNumber("nodeCount"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(12L);
+
+                assertThat(row.getNumber("relationshipCount"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(10L);
+
             });
 
             String query = GdsCypher.call("nodeFilterGraph")
@@ -471,37 +527,57 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
             runQueryWithRowConsumer(
                 query,
                 row -> {
-                    assertEquals(12, row.getNumber("nodePropertiesWritten").intValue());
-                    checkMillisSet(row);
-                    assertEquals(
-                        MapUtil.map(
-                            "p999", 8L,
-                            "p99", 8L,
-                            "p95", 8L,
-                            "p90", 8L,
-                            "p75", 8L,
-                            "p50", 4L,
-                            "min", 4L,
-                            "max", 8L,
-                            "mean", 6.0D
-                        ),
-                        row.get("communityDistribution")
-                    );
+                    assertThat(row.getNumber("nodePropertiesWritten"))
+                        .asInstanceOf(LONG)
+                        .isEqualTo(12L);
 
+                    checkMillisSet(row);
+
+                    assertThat(row.get("communityDistribution"))
+                        .isInstanceOf(Map.class)
+                        .asInstanceOf(MAP)
+                        .containsExactlyInAnyOrderEntriesOf(
+                            Map.of(
+                                "p999", 8L,
+                                "p99", 8L,
+                                "p95", 8L,
+                                "p90", 8L,
+                                "p75", 8L,
+                                "p50", 4L,
+                                "min", 4L,
+                                "max", 8L,
+                                "mean", 6.0D
+                            )
+                        );
                 }
             );
             String check = "MATCH (n) " +
                            "WHERE n.id IN [0,1] " +
                            "RETURN n.community AS community";
-            runQueryWithRowConsumer(check, row -> {
-                assertEquals(2, row.getNumber("community").intValue());
-            });
+            runQueryWithRowConsumer(
+                check,
+                row ->
+                    assertThat(row.getNumber("community"))
+                        .asInstanceOf(LONG)
+                        .isEqualTo(2L)
+            );
         }
     }
 
     private void checkMillisSet(Result.ResultRow row) {
-        assertTrue(row.getNumber("preProcessingMillis").intValue() >= 0, "load time not set");
-        assertTrue(row.getNumber("computeMillis").intValue() >= 0, "compute time not set");
-        assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
+        assertThat(row.getNumber("preProcessingMillis"))
+            .asInstanceOf(LONG)
+            .as("load time not set")
+            .isGreaterThan(-1L);
+
+        assertThat(row.getNumber("computeMillis"))
+            .asInstanceOf(LONG)
+            .as("compute time not set")
+            .isGreaterThan(-1L);
+
+        assertThat(row.getNumber("writeMillis"))
+            .asInstanceOf(LONG)
+            .as("write time not set")
+            .isGreaterThan(-1L);
     }
 }

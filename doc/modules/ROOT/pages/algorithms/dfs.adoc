@@ -4,7 +4,7 @@
 :entity: relationship
 :result: path in traversal order
 :algorithm: Depth First Search
-
+:sequential: true
 
 :directed:
 :undirected:

@@ -24,18 +24,20 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 public final class L1Norm extends ScalarScaler {
 
-    public static final String NAME = "l1norm";
+    public static final String TYPE = "l1norm";
     final double l1Norm;
 
     private L1Norm(NodePropertyValues properties, double l1Norm) {
-        super(properties);
+        super(properties, Map.of());
         this.l1Norm = l1Norm;
     }
 
@@ -43,8 +45,8 @@ public final class L1Norm extends ScalarScaler {
         mapWrapper.requireOnlyKeysFrom(List.of());
         return new ScalerFactory() {
             @Override
-            public String name() {
-                return NAME;
+            public String type() {
+                return TYPE;
             }
 
             @Override
@@ -52,12 +54,13 @@ public final class L1Norm extends ScalarScaler {
                 NodePropertyValues properties,
                 long nodeCount,
                 int concurrency,
+                ProgressTracker progressTracker,
                 ExecutorService executor
             ) {
                 var tasks = PartitionUtils.rangePartition(
                     concurrency,
                     nodeCount,
-                    partition -> new ComputeAbsoluteSum(partition, properties),
+                    partition -> new ComputeAbsoluteSum(partition, properties, progressTracker),
                     Optional.empty()
                 );
                 RunWithConcurrency.builder()
@@ -86,8 +89,8 @@ public final class L1Norm extends ScalarScaler {
 
         private double sum;
 
-        ComputeAbsoluteSum(Partition partition, NodePropertyValues property) {
-            super(partition, property);
+        ComputeAbsoluteSum(Partition partition, NodePropertyValues property, ProgressTracker progressTracker) {
+            super(partition, property, progressTracker);
             this.sum = 0;
         }
 

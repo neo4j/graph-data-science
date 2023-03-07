@@ -282,9 +282,10 @@
 .2+<.^|xref:algorithms/strongly-connected-components.adoc[Strongly Connected Components]
 | `gds.alpha.scc.stream`
 | `gds.alpha.scc.write`
-.2+<.^|xref:alpha-algorithms/scale-properties.adoc[Scale Properties]
+.3+<.^|xref:alpha-algorithms/scale-properties.adoc[Scale Properties]
 | `gds.alpha.scaleProperties.mutate`
 | `gds.alpha.scaleProperties.stream`
+| `gds.beta.scaleProperties.write`
 .8+<.^|xref:algorithms/sllpa.adoc[Speaker-Listener Label Propagation]
 | `gds.alpha.sllpa.mutate`
 | `gds.alpha.sllpa.mutate.estimate`
@@ -362,5 +363,10 @@
 | `gds.beta.steinerTree.stats`
 | `gds.beta.steinerTree.stream`
 | `gds.beta.steinerTree.write`
+.4+<.^| Bellman-Ford
+| `gds.bellmanFord.mutate`
+| `gds.bellmanFord.stats`
+| `gds.bellmanFord.stream`
+| `gds.bellmanFord.write`
 
 |===

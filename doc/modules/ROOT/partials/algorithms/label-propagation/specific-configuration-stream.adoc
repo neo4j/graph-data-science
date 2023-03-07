@@ -1,0 +1,2 @@
+include::partial$/algorithms/label-propagation/specific-configuration.adoc[]
+| minCommunitySize                                                                                                   | Integer | 0                      | yes      | Only nodes inside communities larger or equal the given value are returned.

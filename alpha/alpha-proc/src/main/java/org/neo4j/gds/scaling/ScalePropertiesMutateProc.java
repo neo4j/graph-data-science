@@ -32,16 +32,18 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
+import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.scaleProperties.mutate", description = "Scale node properties", executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.alpha.scaleProperties.mutate", description = SCALE_PROPERTIES_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class ScalePropertiesMutateProc extends MutatePropertyProc<ScaleProperties, ScaleProperties.Result, ScalePropertiesMutateProc.MutateResult, ScalePropertiesMutateConfig> {
 
     @Procedure("gds.alpha.scaleProperties.mutate")
-    @Description("Scale node properties")
+    @Description(SCALE_PROPERTIES_DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -69,14 +71,16 @@ public class ScalePropertiesMutateProc extends MutatePropertyProc<ScalePropertie
         ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        return new MutateResult.Builder();
+        return new MutateResult.Builder().withScalerStatistics(computeResult.result().scalerStatistics());
     }
 
     public static final class MutateResult extends StandardMutateResult {
 
+        public final Map<String, Map<String, List<Double>>> scalerStatistics;
         public final long nodePropertiesWritten;
 
         MutateResult(
+            Map<String, Map<String, List<Double>>> scalerStatistics,
             long preProcessingMillis,
             long computeMillis,
             long mutateMillis,
@@ -90,14 +94,23 @@ public class ScalePropertiesMutateProc extends MutatePropertyProc<ScalePropertie
                 mutateMillis,
                 configuration
             );
+            this.scalerStatistics = scalerStatistics;
             this.nodePropertiesWritten = nodePropertiesWritten;
         }
 
         static class Builder extends AbstractResultBuilder<MutateResult> {
 
+            private Map<String, Map<String, List<Double>>> scalerStatistics;
+
+            Builder withScalerStatistics(Map<String, Map<String, List<Double>>> stats) {
+                this.scalerStatistics = stats;
+                return this;
+            }
+
             @Override
             public MutateResult build() {
                 return new MutateResult(
+                    scalerStatistics,
                     preProcessingMillis,
                     computeMillis,
                     mutateMillis,

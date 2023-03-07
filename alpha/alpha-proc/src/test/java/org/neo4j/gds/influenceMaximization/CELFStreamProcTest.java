@@ -31,8 +31,6 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.concurrent.atomic.LongAdder;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 /**
@@ -122,17 +120,15 @@ class CELFStreamProcTest extends BaseProcTest {
             .addParameter("monteCarloSimulations", 10)
             .yields("nodeId", "spread");
 
-        LongAdder resultRowCounter = new LongAdder();
 
-        runQueryWithRowConsumer(cypher, (tx, row) -> {
-            resultRowCounter.increment();
+        var resultRowCount = runQueryWithRowConsumer(cypher, (tx, row) -> {
             long nodeId = row.getNumber("nodeId").longValue();
             double spread = row.getNumber("spread").doubleValue();
             assertThat(nodeId).isBetween(0L, 10L);
             assertThat(spread).isGreaterThanOrEqualTo(0d);
         });
 
-        assertThat(resultRowCounter.longValue())
+        assertThat(resultRowCount)
             .as("There should be five result rows!")
             .isEqualTo(5L);
     }

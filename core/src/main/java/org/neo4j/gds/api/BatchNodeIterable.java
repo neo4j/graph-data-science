@@ -20,7 +20,7 @@
 package org.neo4j.gds.api;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
 
 import java.util.Collection;
 import java.util.PrimitiveIterator;

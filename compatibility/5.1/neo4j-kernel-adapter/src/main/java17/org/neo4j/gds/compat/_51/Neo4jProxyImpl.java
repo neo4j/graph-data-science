@@ -62,7 +62,6 @@ import org.neo4j.internal.batchimport.IndexConfig;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.Monitor;
 import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.internal.batchimport.input.Group;
 import org.neo4j.internal.batchimport.input.IdType;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
@@ -135,9 +134,12 @@ import org.neo4j.ssl.config.SslPolicyLoader;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.StorageEngineFactory;
 import org.neo4j.util.Bits;
+import org.neo4j.values.storable.TextArray;
 import org.neo4j.values.storable.ValueCategory;
 import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.MapValue;
+import org.neo4j.values.virtual.NodeValue;
+import org.neo4j.values.virtual.VirtualValues;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -513,7 +515,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType) {
+    public InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType, ReadableGroups groups) {
         switch (idType) {
             case ACTUAL -> {
                 return new InputEntityIdVisitor.Long() {
@@ -534,7 +536,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
                 };
             }
             case INTEGER -> {
-                var globalGroup = new Group(0, null, null);
+                var globalGroup = groups.get(null);
 
                 return new InputEntityIdVisitor.Long() {
                     @Override
@@ -558,8 +560,8 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public InputEntityIdVisitor.String inputEntityStringIdVisitor() {
-        var globalGroup = new Group(0, null, null);
+    public InputEntityIdVisitor.String inputEntityStringIdVisitor(ReadableGroups groups) {
+        var globalGroup = groups.get(null);
 
         return new InputEntityIdVisitor.String() {
             @Override
@@ -716,6 +718,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @SuppressForbidden(reason = "This is the compat specific use")
     public Log getInternalLog(LogService logService, Class<?> loggingClass) {
         return logService.getInternalLog(loggingClass);
+    }
+
+    @Override
+    public NodeValue nodeValue(long id, TextArray labels, MapValue properties) {
+        return VirtualValues.nodeValue(id, String.valueOf(id), labels, properties);
     }
 
     @Override

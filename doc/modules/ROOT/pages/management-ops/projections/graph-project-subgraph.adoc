@@ -9,7 +9,7 @@ include::partial$/operations-reference/beta-note.adoc[]
 ====
 Subgraph projection is featured in the end-to-end example Jupyter notebooks:
 
-* https://github.com/neo4j/graph-data-science-client/blob/main/examples/node-regression-with-subgraph-and-graph-sample.ipynb[Node Regression with Subgraph and Graph Sample projections]
+* https://neo4j.com/docs/graph-data-science-client/current/tutorials/node-regression-with-subgraph-and-graph-sample/[Node Regression with Subgraph and Graph Sample projections]
 ====
 
 In GDS, algorithms can be executed on a named graph that has been filtered based on its xref:common-usage/running-algos.adoc#common-configuration-node-labels[node labels] and xref:common-usage/running-algos.adoc#common-configuration-relationship-types[relationship types].

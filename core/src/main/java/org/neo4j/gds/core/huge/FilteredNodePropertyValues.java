@@ -27,6 +27,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
 
@@ -79,6 +80,11 @@ public abstract class FilteredNodePropertyValues implements NodePropertyValues {
     @Override
     public ValueType valueType() {
         return properties.valueType();
+    }
+
+    @Override
+    public Optional<Integer> dimension() {
+        return properties.dimension();
     }
 
     @Override

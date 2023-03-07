@@ -27,7 +27,8 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 final class LouvainAlmostEmptyGraphTest extends BaseProcTest {
 
@@ -60,8 +61,12 @@ final class LouvainAlmostEmptyGraphTest extends BaseProcTest {
                 .addParameter("includeIntermediateCommunities", false)
                 .yields(),
             row -> {
-                assertEquals(0, row.getNumber("nodeId").intValue());
-                assertEquals(0, row.getNumber("communityId").intValue());
+                assertThat(row.getNumber("nodeId"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(0);
+                assertThat(row.getNumber("communityId"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(0);
             }
         );
     }

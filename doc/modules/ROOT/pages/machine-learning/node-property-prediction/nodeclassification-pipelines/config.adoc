@@ -67,7 +67,7 @@ CALL gds.beta.pipeline.nodeClassification.create('pipe')
 | "pipe"   | []                | []
 | {testFraction=0.3, validationFolds=3}
 | {maxTrials={max-trials}}
-| {MultilayerPerceptron=[], RandomForest=[], LogisticRegression=[]}
+| {LogisticRegression=[], MultilayerPerceptron=[], RandomForest=[]}
 |===
 --
 

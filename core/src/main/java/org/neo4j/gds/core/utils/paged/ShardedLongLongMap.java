@@ -213,16 +213,16 @@ public final class ShardedLongLongMap {
                 .toArray(Shard[]::new);
         }
 
+        /**
+         * Add a node to the mapping.
+         * @return {@code mappedId >= 0} if the node was added,
+         *      or {@code -(mappedId) - 1} if the node was already mapped.
+         */
         public long addNode(long nodeId) {
             var shard = findShard(nodeId, this.shards, this.shardShift, this.shardMask);
             try (var ignoredLock = shard.acquireLock()) {
                 return shard.addNode(nodeId);
             }
-        }
-
-        public long toMappedNodeId(long nodeId) {
-            var shard = findShard(nodeId, this.shards, this.shardShift, this.shardMask);
-            return shard.toMappedNodeId(nodeId);
         }
 
         public ShardedLongLongMap build() {
@@ -252,15 +252,15 @@ public final class ShardedLongLongMap {
                 this.nextId = nextId;
             }
 
-            long toMappedNodeId(long nodeId) {
-                return mapping.getIfAbsent(nodeId, IdMap.NOT_FOUND);
-            }
-
             long addNode(long nodeId) {
                 this.assertIsUnderLock();
-                long internalId = this.nextId.getAndIncrement();
-                mapping.put(nodeId, internalId);
-                return internalId;
+                long mappedId = mapping.getIfAbsent(nodeId, IdMap.NOT_FOUND);
+                if (mappedId != IdMap.NOT_FOUND) {
+                    return -mappedId - 1;
+                }
+                mappedId = nextId.getAndIncrement();
+                mapping.put(nodeId, mappedId);
+                return mappedId;
             }
         }
     }

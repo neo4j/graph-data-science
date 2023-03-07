@@ -25,7 +25,7 @@ public final class ValueConversion {
 
     private ValueConversion() {}
 
-    public static long exactDoubleToLong(double d) {
+    public static long exactDoubleToLong(double d) throws UnsupportedOperationException {
         if (d % 1 == 0) {
             return (long) d;
         } else {

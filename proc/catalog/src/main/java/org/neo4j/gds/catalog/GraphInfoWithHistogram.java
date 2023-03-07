@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.TerminationFlag;
 
 import java.util.Map;
 import java.util.Optional;
@@ -56,7 +57,8 @@ public class GraphInfoWithHistogram extends GraphInfo {
         GraphProjectConfig graphProjectConfig,
         GraphStore graphStore,
         boolean computeHistogram,
-        boolean computeGraphSize
+        boolean computeGraphSize,
+        TerminationFlag terminationFlag
     ) {
         var graphInfo = computeGraphSize
             ? GraphInfo.withMemoryUsage(graphProjectConfig, graphStore)
@@ -70,7 +72,7 @@ public class GraphInfoWithHistogram extends GraphInfo {
 
         var degreeDistribution = maybeDegreeDistribution.orElseGet(() -> {
             if (computeHistogram) {
-                var newHistogram = GraphInfoHelper.degreeDistribution(graphStore.getUnion());
+                var newHistogram = GraphInfoHelper.degreeDistribution(graphStore.getUnion(), terminationFlag);
                 // Cache the computed degree distribution in the Catalog
                 GraphStoreCatalog.setDegreeDistribution(
                     graphProjectConfig.username(),

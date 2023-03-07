@@ -30,6 +30,7 @@ import org.neo4j.gds.mem.HugeArrays;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
@@ -72,6 +73,15 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
     public abstract T get(long index);
+
+    /**
+     * Returns the value at the given index. If the value at the index is {@code null},
+     * the given defaultValue is returned.
+     *
+     * @param defaultValue return value in case the element at index is {@code null}
+     * @return value at index or defaultValue
+     */
+    public abstract T getOrDefault(long index, T defaultValue);
 
     /**
      * Sets the value at the given index to the given value.
@@ -339,6 +349,11 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
         }
 
         @Override
+        public T getOrDefault(long index, T defaultValue) {
+            return Objects.requireNonNullElse(get(index), defaultValue);
+        }
+
+        @Override
         public void set(long index, T value) {
             assert index < size;
             page[(int) index] = value;
@@ -482,6 +497,11 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
             final int pageIndex = pageIndex(index);
             final int indexInPage = indexInPage(index);
             return pages[pageIndex][indexInPage];
+        }
+
+        @Override
+        public T getOrDefault(long index, T defaultValue) {
+            return Objects.requireNonNullElse(get(index), defaultValue);
         }
 
         @Override

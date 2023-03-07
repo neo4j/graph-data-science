@@ -75,11 +75,10 @@ import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROP
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 /**
- * Base test that should be used for every algorithm procedure.
- * This test assumes that the implementing test method populates
- * the database returned by {@link AlgoBaseProcTest#graphDb} and
- * clears the data after each test.
+ * @deprecated do not add new uses of this.
+ * Instead, copy any test cases you might want to use into your specific procedure test classes.
  */
+@Deprecated(forRemoval = true)
 public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG extends AlgoBaseConfig, RESULT>
     extends GraphProjectConfigSupport {
 

@@ -24,18 +24,20 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 public final class Max extends ScalarScaler {
 
-    public static final String NAME = "max";
+    public static final String TYPE = "max";
     final double maxAbs;
 
-    private Max(NodePropertyValues properties, double maxAbs) {
-        super(properties);
+    private Max(NodePropertyValues properties, Map<String, List<Double>> statistics, double maxAbs) {
+        super(properties, statistics);
         this.maxAbs = maxAbs;
     }
 
@@ -48,8 +50,8 @@ public final class Max extends ScalarScaler {
         mapWrapper.requireOnlyKeysFrom(List.of());
         return new ScalerFactory() {
             @Override
-            public String name() {
-                return NAME;
+            public String type() {
+                return TYPE;
             }
 
             @Override
@@ -57,12 +59,13 @@ public final class Max extends ScalarScaler {
                 NodePropertyValues properties,
                 long nodeCount,
                 int concurrency,
+                ProgressTracker progressTracker,
                 ExecutorService executor
             ) {
                 var tasks = PartitionUtils.rangePartition(
                     concurrency,
                     nodeCount,
-                    partition -> new ComputeAbsMax(partition, properties),
+                    partition -> new ComputeAbsMax(partition, properties, progressTracker),
                     Optional.empty()
                 );
                 RunWithConcurrency.builder()
@@ -73,10 +76,12 @@ public final class Max extends ScalarScaler {
 
                 var absMax = tasks.stream().mapToDouble(ComputeAbsMax::absMax).max().orElse(0);
 
-                if (Math.abs(absMax) < CLOSE_TO_ZERO) {
-                    return ZERO;
+                var statistics = Map.of("absMax", List.of(absMax));
+
+                if (absMax < CLOSE_TO_ZERO) {
+                    return new StatsOnly(statistics);
                 } else {
-                    return new Max(properties, absMax);
+                    return new Max(properties, statistics, absMax);
                 }
             }
         };
@@ -86,8 +91,8 @@ public final class Max extends ScalarScaler {
 
         private double absMax;
 
-        ComputeAbsMax(Partition partition, NodePropertyValues property) {
-            super(partition, property);
+        ComputeAbsMax(Partition partition, NodePropertyValues property, ProgressTracker progressTracker) {
+            super(partition, property, progressTracker);
             this.absMax = 0;
         }
 

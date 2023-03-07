@@ -23,8 +23,8 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 
 import java.util.Collection;
 import java.util.List;

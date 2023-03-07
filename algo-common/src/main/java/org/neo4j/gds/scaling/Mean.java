@@ -24,21 +24,23 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 public final class Mean extends ScalarScaler {
 
-    public static final String NAME = "mean";
+    public static final String TYPE = "mean";
     final double avg;
     final double maxMinDiff;
 
-    private Mean(NodePropertyValues properties, double avg, double maxMinDiff) {
-        super(properties);
+    private Mean(NodePropertyValues properties, Map<String, List<Double>> statistics, double avg, double minMaxDiff) {
+        super(properties, statistics);
         this.avg = avg;
-        this.maxMinDiff = maxMinDiff;
+        this.maxMinDiff = minMaxDiff;
     }
 
     @Override
@@ -50,8 +52,8 @@ public final class Mean extends ScalarScaler {
         mapWrapper.requireOnlyKeysFrom(List.of());
         return new ScalerFactory() {
             @Override
-            public String name() {
-                return NAME;
+            public String type() {
+                return TYPE;
             }
 
             @Override
@@ -59,12 +61,13 @@ public final class Mean extends ScalarScaler {
                 NodePropertyValues properties,
                 long nodeCount,
                 int concurrency,
+                ProgressTracker progressTracker,
                 ExecutorService executor
             ) {
                 var tasks = PartitionUtils.rangePartition(
                     concurrency,
                     nodeCount,
-                    partition -> new ComputeMaxMinSum(partition, properties),
+                    partition -> new ComputeMaxMinSum(partition, properties, progressTracker),
                     Optional.empty()
                 );
                 RunWithConcurrency.builder()
@@ -78,11 +81,17 @@ public final class Mean extends ScalarScaler {
                 var sum = tasks.stream().mapToDouble(ComputeMaxMinSum::sum).sum();
 
                 var maxMinDiff = max - min;
+                var avg = sum / nodeCount;
+                var statistics = Map.of(
+                    "min", List.of(min),
+                    "avg", List.of(avg),
+                    "max", List.of(max)
+                );
 
                 if (Math.abs(maxMinDiff) < CLOSE_TO_ZERO) {
-                    return ZERO;
+                    return new StatsOnly(statistics);
                 } else {
-                    return new Mean(properties, sum / nodeCount, maxMinDiff);
+                    return new Mean(properties, statistics, avg, maxMinDiff);
                 }
             }
         };
@@ -94,8 +103,8 @@ public final class Mean extends ScalarScaler {
         private double min;
         private double sum;
 
-        ComputeMaxMinSum(Partition partition, NodePropertyValues property) {
-            super(partition, property);
+        ComputeMaxMinSum(Partition partition, NodePropertyValues property, ProgressTracker progressTracker) {
+            super(partition, property, progressTracker);
             this.min = Double.MAX_VALUE;
             this.max = -Double.MAX_VALUE;
             this.sum = 0D;

@@ -24,18 +24,20 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 public final class L2Norm extends ScalarScaler {
 
-    public static final String NAME = "l2norm";
+    public static final String TYPE = "l2norm";
     final double euclideanLength;
 
     private L2Norm(NodePropertyValues properties, double euclideanLength) {
-        super(properties);
+        super(properties, Map.of());
         this.euclideanLength = euclideanLength;
     }
 
@@ -48,8 +50,8 @@ public final class L2Norm extends ScalarScaler {
         mapWrapper.requireOnlyKeysFrom(List.of());
         return new ScalerFactory() {
             @Override
-            public String name() {
-                return NAME;
+            public String type() {
+                return TYPE;
             }
 
             @Override
@@ -57,12 +59,13 @@ public final class L2Norm extends ScalarScaler {
                 NodePropertyValues properties,
                 long nodeCount,
                 int concurrency,
+                ProgressTracker progressTracker,
                 ExecutorService executor
             ) {
                 var tasks = PartitionUtils.rangePartition(
                     concurrency,
                     nodeCount,
-                    partition -> new ComputeSquaredSum(partition, properties),
+                    partition -> new ComputeSquaredSum(partition, properties, progressTracker),
                     Optional.empty()
                 );
                 RunWithConcurrency.builder()
@@ -87,8 +90,8 @@ public final class L2Norm extends ScalarScaler {
 
         private double squaredSum;
 
-        ComputeSquaredSum(Partition partition, NodePropertyValues property) {
-            super(partition, property);
+        ComputeSquaredSum(Partition partition, NodePropertyValues property, ProgressTracker progressTracker) {
+            super(partition, property, progressTracker);
             this.squaredSum = 0D;
         }
 

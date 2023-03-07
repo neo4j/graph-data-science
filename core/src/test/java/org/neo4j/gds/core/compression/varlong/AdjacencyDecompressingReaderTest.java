@@ -60,7 +60,7 @@ class AdjacencyDecompressingReaderTest {
 
         // read to the end
         nextTarget = reader.skipUntil(targets[127], remaining, consumed);
-        assertThat(nextTarget).isEqualTo(targets[127]);
+        assertThat(nextTarget).isEqualTo(AdjacencyCursor.NOT_FOUND);
         assertThat(consumed.value).isEqualTo(63);
         remaining -= consumed.value;
 
@@ -105,7 +105,7 @@ class AdjacencyDecompressingReaderTest {
 
         // read beyond the end
         nextTarget = reader.advance(targets[127] + 1, remaining, consumed);
-        assertThat(nextTarget).isEqualTo(targets[127]);
+        assertThat(nextTarget).isEqualTo(AdjacencyCursor.NOT_FOUND);
         assertThat(consumed.value).isEqualTo(0);
     }
 

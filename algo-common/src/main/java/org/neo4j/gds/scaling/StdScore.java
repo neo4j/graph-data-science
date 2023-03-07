@@ -24,19 +24,21 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 final class StdScore extends ScalarScaler {
 
-    static final String NAME = "stdscore";
+    static final String TYPE = "stdscore";
     final double avg;
     final double std;
 
-    private StdScore(NodePropertyValues properties, double avg, double std) {
-        super(properties);
+    private StdScore(NodePropertyValues properties, Map<String, List<Double>> statistics, double avg, double std) {
+        super(properties, statistics);
         this.avg = avg;
         this.std = std;
     }
@@ -50,8 +52,8 @@ final class StdScore extends ScalarScaler {
         mapWrapper.requireOnlyKeysFrom(List.of());
         return new ScalerFactory() {
             @Override
-            public String name() {
-                return NAME;
+            public String type() {
+                return TYPE;
             }
 
             @Override
@@ -59,12 +61,13 @@ final class StdScore extends ScalarScaler {
                 NodePropertyValues properties,
                 long nodeCount,
                 int concurrency,
+                ProgressTracker progressTracker,
                 ExecutorService executor
             ) {
                 var tasks = PartitionUtils.rangePartition(
                     concurrency,
                     nodeCount,
-                    partition -> new ComputeSumAndSquaredSum(partition, properties),
+                    partition -> new ComputeSumAndSquaredSum(partition, properties, progressTracker),
                     Optional.empty()
                 );
                 RunWithConcurrency.builder()
@@ -84,10 +87,15 @@ final class StdScore extends ScalarScaler {
                 var variance = (squaredSum + avg * (nodeCount * avg - 2 * sum)) / nodeCount;
                 var std = Math.sqrt(variance);
 
+                var statistics = Map.of(
+                    "avg", List.of(avg),
+                    "std", List.of(std)
+                );
+
                 if (Math.abs(std) < CLOSE_TO_ZERO) {
-                    return ZERO;
+                    return new StatsOnly(statistics);
                 } else {
-                    return new StdScore(properties, avg, std);
+                    return new StdScore(properties, statistics, avg, std);
                 }
             }
         };
@@ -98,8 +106,8 @@ final class StdScore extends ScalarScaler {
         private double squaredSum;
         private double sum;
 
-        ComputeSumAndSquaredSum(Partition partition, NodePropertyValues property) {
-            super(partition, property);
+        ComputeSumAndSquaredSum(Partition partition, NodePropertyValues property, ProgressTracker progressTracker) {
+            super(partition, property, progressTracker);
             this.squaredSum = 0D;
             this.sum = 0D;
         }

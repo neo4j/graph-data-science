@@ -23,6 +23,7 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.compression.packed.PackedCompressor;
 import org.neo4j.gds.core.compression.uncompressed.RawCompressor;
 import org.neo4j.gds.core.compression.uncompressed.UncompressedAdjacencyList;
 import org.neo4j.gds.core.compression.uncompressed.UncompressedAdjacencyListBuilderFactory;
@@ -53,9 +54,11 @@ public interface AdjacencyListBehavior {
         var resolvedAggregations = Arrays.stream(aggregations).map(Aggregation::resolve).toArray(Aggregation[]::new);
         var noAggregation = Arrays.stream(aggregations).map(Aggregation::resolve).allMatch(Aggregation::equivalentToNone);
 
-        return GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()
-            ? uncompressed(nodeCountSupplier, propertyMappings, resolvedAggregations, noAggregation)
-            : compressed(nodeCountSupplier, propertyMappings, resolvedAggregations, noAggregation);
+        return GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.isEnabled()
+            ? packed(nodeCountSupplier, propertyMappings, resolvedAggregations, noAggregation)
+            : GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()
+                ? uncompressed(nodeCountSupplier, propertyMappings, resolvedAggregations, noAggregation)
+                : compressed(nodeCountSupplier, propertyMappings, resolvedAggregations, noAggregation);
     }
 
     static AdjacencyCompressorFactory compressed(
@@ -82,6 +85,20 @@ public interface AdjacencyListBehavior {
         return RawCompressor.factory(
             nodeCountSupplier,
             UncompressedAdjacencyListBuilderFactory.of(),
+            propertyMappings,
+            aggregations,
+            noAggregation
+        );
+    }
+
+    static AdjacencyCompressorFactory packed(
+        LongSupplier nodeCountSupplier,
+        PropertyMappings propertyMappings,
+        Aggregation[] aggregations,
+        boolean noAggregation
+    ) {
+        return PackedCompressor.factory(
+            nodeCountSupplier,
             propertyMappings,
             aggregations,
             noAggregation

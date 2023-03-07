@@ -34,7 +34,9 @@ public interface TestMethodRunner {
             TestMethodRunner::runCompressedUnordered,
             TestMethodRunner::runCompressedOrdered,
             TestMethodRunner::runUncompressedUnordered,
-            TestMethodRunner::runUncompressedOrdered
+            TestMethodRunner::runUncompressedOrdered,
+            TestMethodRunner::runPackedUnordered,
+            TestMethodRunner::runPackedOrdered
         );
     }
 
@@ -59,6 +61,18 @@ public interface TestMethodRunner {
     @TestOnly
     static <E extends Exception> void runUncompressedOrdered(CheckedRunnable<E> code) throws E {
         GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.enableAndRun(() ->
+            GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.enableAndRun(code));
+    }
+
+    @TestOnly
+    static <E extends Exception> void runPackedUnordered(CheckedRunnable<E> code) throws E {
+        GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.enableAndRun(() ->
+            GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.disableAndRun(code));
+    }
+
+    @TestOnly
+    static <E extends Exception> void runPackedOrdered(CheckedRunnable<E> code) throws E {
+        GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.enableAndRun(() ->
             GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.enableAndRun(code));
     }
 }

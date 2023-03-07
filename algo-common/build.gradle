@@ -26,6 +26,8 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':neo4j-api')
 
+    testImplementation group: 'org.assertj', name: 'assertj-core',          version: ver.'assertj'
+
     implementation group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram'
 
 

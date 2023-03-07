@@ -32,7 +32,6 @@ import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.beta.pregel.PregelSchema;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.AfterLoadValidation;
@@ -152,7 +151,7 @@ public final class PregelBaseProc {
                         throw new IllegalArgumentException("Unsupported property type: " + element.propertyType());
                 }
 
-                return ImmutableNodeProperty.of(formatWithLocale("%s%s", propertyPrefix, propertyKey), nodePropertyValues);
+                return NodeProperty.of(formatWithLocale("%s%s", propertyPrefix, propertyKey), nodePropertyValues);
             }).collect(Collectors.toList());
     }
 

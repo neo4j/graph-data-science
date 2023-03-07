@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.modularity;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -89,15 +88,13 @@ class ModularityStreamProcTest extends BaseProcTest {
             5L, (4 - 7 * 7 * (1.0 / 16)) / 16
         );
 
-        var rowCount = new MutableInt();
-        runQueryWithRowConsumer(streamQuery, row -> {
+        var rowCount = runQueryWithRowConsumer(streamQuery, row -> {
             long community = row.getNumber("communityId").longValue();
             double conductance = row.getNumber("modularity").doubleValue();
             assertThat(conductance).isCloseTo(expected.get(community), Offset.offset(0.0001));
-            rowCount.increment();
         });
 
-        assertThat(rowCount.intValue())
+        assertThat(rowCount)
             .as("Result count doesn't match")
             .isEqualTo(2);
     }

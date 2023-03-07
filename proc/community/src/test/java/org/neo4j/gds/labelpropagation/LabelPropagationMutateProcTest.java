@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.labelpropagation;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
@@ -29,7 +30,6 @@ import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -40,10 +40,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThan;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
@@ -136,26 +134,45 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
         runQueryWithRowConsumer(
             query,
             row -> {
-                assertThat(-1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
-                assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
-                assertThat(-1L, lessThan(row.getNumber("mutateMillis").longValue()));
-                assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
+                assertThat(row.getNumber("preProcessingMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThan(-1L);
 
-                assertEquals(12L, row.getNumber("nodePropertiesWritten").longValue());
-                assertEquals(10L, row.getNumber("communityCount"));
-                assertTrue(row.getBoolean("didConverge"));
+                assertThat(row.getNumber("computeMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThan(-1L);
 
-                assertEquals(MapUtil.map(
-                    "p99", 2L,
-                    "min", 1L,
-                    "max", 2L,
-                    "mean", 1.2D,
-                    "p90", 2L,
-                    "p50", 1L,
-                    "p999", 2L,
-                    "p95", 2L,
-                    "p75", 1L
-                ), row.get("communityDistribution"));
+                assertThat(row.getNumber("postProcessingMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThan(-1L);
+
+                assertThat(row.getNumber("mutateMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThan(-1L);
+
+                assertThat(row.getNumber("nodePropertiesWritten"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(12L);
+
+                assertThat(row.getNumber("communityCount"))
+                    .asInstanceOf(LONG)
+                    .isEqualTo(10L);
+
+                assertThat(row.getBoolean("didConverge")).isTrue();
+
+                assertThat(row.get("communityDistribution"))
+                    .isNotNull()
+                    .isInstanceOf(Map.class)
+                    .asInstanceOf(InstanceOfAssertFactories.MAP)
+                    .containsEntry("p99", 2L)
+                    .containsEntry("min", 1L)
+                    .containsEntry("max", 2L)
+                    .containsEntry("mean", 1.2D)
+                    .containsEntry("p90", 2L)
+                    .containsEntry("p50", 1L)
+                    .containsEntry("p999", 2L)
+                    .containsEntry("p95", 2L)
+                    .containsEntry("p75", 1L);
             }
         );
     }
@@ -222,9 +239,9 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
 
             Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, databaseId(), graphName).graphStore().getUnion();
             mutatedGraph.forEachNode(nodeId -> {
-                    assertEquals(
-                        expectedValueList.get(Math.toIntExact(nodeId)),
-                        mutatedGraph.nodeProperties("communityId").longValue(nodeId)
+                    assertThat(mutatedGraph.nodeProperties("communityId").longValue(nodeId))
+                        .isEqualTo(
+                        expectedValueList.get(Math.toIntExact(nodeId))
                     );
                     return true;
                 }

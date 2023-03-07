@@ -21,20 +21,22 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 public class NoneScaler extends ScalarScaler {
 
-    public static final String NAME = "none";
+    public static final String TYPE = "none";
 
     public static ScalerFactory buildFrom(CypherMapWrapper mapWrapper) {
         mapWrapper.requireOnlyKeysFrom(List.of());
         return new ScalerFactory() {
             @Override
-            public String name() {
-                return NAME;
+            public String type() {
+                return TYPE;
             }
 
             @Override
@@ -42,6 +44,7 @@ public class NoneScaler extends ScalarScaler {
                 NodePropertyValues properties,
                 long nodeCount,
                 int concurrency,
+                ProgressTracker progressTracker,
                 ExecutorService executor
             ) {
                 return new NoneScaler(properties);
@@ -50,7 +53,7 @@ public class NoneScaler extends ScalarScaler {
     }
 
     NoneScaler(NodePropertyValues properties) {
-        super(properties);
+        super(properties, Map.of());
     }
 
     @Override

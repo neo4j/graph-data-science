@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.utils.queue;
 
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;

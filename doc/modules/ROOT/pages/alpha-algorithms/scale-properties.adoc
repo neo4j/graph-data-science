@@ -39,6 +39,8 @@ Scales all property values into the range `[0, 1]` where the minimum value(s) ge
 
 image::equations/scale-properties/minmax.svg[scaled p equals p minus minimum of p divided by maximum of p minus minimum of p,align="center"]
 
+The minimum and maximum values are reported as statistics when this scaler is used.
+
 
 [[algorithms-scale-properties-max]]
 === Max scaler
@@ -46,6 +48,8 @@ image::equations/scale-properties/minmax.svg[scaled p equals p minus minimum of 
 Scales all property values into the range `[-1, 1]` where the absolute maximum value(s) get the scaled value `1`, according to this formula:
 
 image::equations/scale-properties/max.svg[scaled p equals p divided by the absolute maximum of p,align="center"]
+
+The maximum absolute value is reported as statistic when this scaler is used.
 
 
 [[algorithms-scale-properties-mean]]
@@ -55,11 +59,14 @@ Scales all property values into the range `[-1, 1]` where the average value(s) g
 
 image::equations/scale-properties/mean.svg[scaled p equals p minus average of p divided by maximum of p minus minimum of p,align="center"]
 
+The minimum, maximum and average values are reported as statistics when this scaler is used.
+
 
 [[algorithms-scale-properties-log]]
 === Log scaler
 
 Transforms all property values using the natural logarithm.
+`C` denotes a configurable constant offset, which can be used to avoid negative values or zeros in the value space, as their logarithms are not finite values.
 
 image::equations/scale-properties/log.svg[scaled p equals natural logarithm of p,align="center"]
 
@@ -71,13 +78,17 @@ Scales all property values using the https://en.wikipedia.org/wiki/Standard_scor
 
 image::equations/scale-properties/standardScore.svg[scaled p equals p minus average of p divided by standard deviation of p,align="center"]
 
+The average value and standard deviation are reported as statistics when this scaler is used.
+
 
 [[algorithms--scale-properties-center]]
 === Center
 
 Transforms all properties by subtracting the mean.
 
-image::equations/scale-properties/center.svg[scaled p equals p minus average of p divided by standard deviation of p,align="center"]
+image::equations/scale-properties/center.svg[p minus average value of p,align="center"]
+
+The average value is reported as statistic when this scaler is used.
 
 
 [[algorithms-scale-properties-l1norm]]
@@ -145,6 +156,7 @@ CALL gds.alpha.scaleProperties.mutate(
   graphName: String,
   configuration: Map
 ) YIELD
+  scalerStatistics: Map,
   preProcessingMillis: Integer,
   computeMillis: Integer,
   mutateMillis: Integer,
@@ -167,6 +179,7 @@ include::partial$/algorithms/alpha/scale-properties/specific-configuration.adoc[
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type      | Description
+| scalerStatistics      | Map       | Statistics computed by the specified scaler, if any.
 | preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
 | computeMillis         | Integer   | Milliseconds for running the algorithm.
 | mutateMillis          | Integer   | Milliseconds for adding properties to the projected graph.
@@ -175,7 +188,67 @@ include::partial$/algorithms/alpha/scale-properties/specific-configuration.adoc[
 | configuration         | Map       | Configuration used for running the algorithm.
 |===
 ======
+
+[.include-with-write]
+======
+.Run Scale properties in write mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.beta.scaleProperties.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  scalerStatistics: Map,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  postProcessingMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+include::partial$/algorithms/wcc/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type      | Description
+| scalerStatistics      | Map       | Statistics computed by the specified scaler, if any.
+| preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
+| computeMillis         | Integer   | Milliseconds for running the algorithm.
+| writeMillis           | Integer   | Milliseconds for writing result back to Neo4j.
+| postProcessingMillis  | Integer   | Unused.
+| nodePropertiesWritten | Integer   | Number of node properties written.
+| configuration         | Map       | Configuration used for running the algorithm.
+|===
+======
 ====
+
+
+[[algorithms-scale-properties-syntax-scalerparams]]
+=== Scaler-specific configuration options
+
+The log scaler supports specific configuration, which we document here.
+
+.Specific configuration for `log` scaler
+[opts="header",cols="1,1,1m,1,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+| type          | String | n/a     | no       | Type of the scaler applied for the properties. Supported values are `MinMax`, `Max`, `Mean`, `Log`, `L1Norm`, `L2Norm`, `Center`, and `StdScore`, case insensitively.
+| offset        | Number | 0       | yes      | Constant additive term applied before computing the logarithm of the property value.
+|===
+
+
+All other scalers do not support additional, custom configuration.
 
 
 [[algorithms-scale-properties-examples]]
@@ -281,20 +354,49 @@ CALL gds.alpha.scaleProperties.mutate('myGraph', {
   nodeProperties: ['buildYear', 'avgReview'],
   scaler: 'Mean',
   mutateProperty: 'hotelFeatures'
-}) YIELD nodePropertiesWritten
+}) YIELD nodePropertiesWritten, scalerStatistics
 ----
 
 .Results
 [opts="header"]
 |===
-| nodePropertiesWritten
-| 8
+| nodePropertiesWritten | scalerStatistics
+| 8                     | {avgReview={avg=[4.49875], max=[19.0], min=[-4.12]}, buildYear={avg=[1991.875], max=[2020.0], min=[1958.0]}}
 |===
 --
 
 The result shows that there are now eight new node properties in the in-memory graph.
 These contain the scaled values from the input properties, where the scaled `buildYear` values are in the first list position and scaled `avgReview` values are in the second position.
 To find out how to inspect the new schema of the in-memory graph, see xref:graph-list.adoc[Listing graphs in the catalog].
+
+
+=== Write
+
+include::partial$/algorithms/shared/examples-write-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `write` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.scaleProperties.write('myGraph', {
+  nodeProperties: ['buildYear', 'avgReview'],
+  scaler: 'stdscore',
+  writeProperty: 'hotelStdScore'
+}) YIELD nodePropertiesWritten, scalerStatistics
+
+----
+
+.Results
+[opts="header"]
+|===
+| nodePropertiesWritten | scalerStatistics
+| 8                     | {avgReview={avg=[4.49875], std=[6.675837845356941]}, buildYear={avg=[1991.875], std=[18.917171432325713]}}
+|===
+--
+
+The result shows that there are now eight new node properties in the database graph on the nodes corresponding to those in the projection `'myGraph'`.
+These node properties contain the scaled values from the input properties, where the scaled `buildYear` values are in the first list position and scaled `avgReview` values are in the second position.
 
 
 [[algorithms-scale-properties-examples-list]]
@@ -341,3 +443,63 @@ We can see that some values are negative and that the maximum value sticks out f
 The other three list positions are the scaled values for the `storyCapacity` list property.
 Note that each list item is scaled only with respect to the corresponding item in the other lists.
 Thus, the `Polar` hotel has the greatest scaled value in all list positions.
+
+
+[[algorithms-scale-properties-examples-log-offset]]
+=== Scaler-specific configuration
+
+The `log` scaler supports a configurable offset parameter.
+In this example we illustrate how to configure that offset.
+
+We want to scale the `avgReview` property, but it contains negative numbers, for which the logarithm is not defined.
+First, we'll determine what the minimum value is, by using Cypher's `min()` aggregating function:
+
+[role=query-example]
+--
+----
+CALL gds.graph.nodeProperty.stream('myGraph', 'avgReview') YIELD propertyValue
+RETURN min(propertyValue) AS minimumAvgReview
+----
+
+.Results
+[opts="header"]
+|===
+| minimumAvgReview
+| -4.12
+|===
+--
+
+Learning this value, we can use a greater value, thus ensuring that the logarithm will be a finite value.
+We will use `5.12`, as this will make the smallest scaled value zero.
+
+[role=query-example]
+--
+.The following will run the algorithm with a custom offset for the log scaler:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.scaleProperties.stream('myGraph', {
+  nodeProperties: ['avgReview'],
+  scaler: {type: 'Log', offset: 5.12}
+}) YIELD nodeId, scaledProperty
+RETURN gds.util.asNode(nodeId).name AS name, scaledProperty
+  ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name       | scaledProperty
+| "Beach"    | [2.130609828254235]
+| "Central"  | [3.183041371858985]
+| "East"     | [2.2321626286975]
+| "Forest"   | [1.366091653802371]
+| "Mountain" | [2.469793011977952]
+| "Plaza"    | [2.581730834423540]
+| "Polar"    | [1.635105659182678]
+| "West"     | [0.0]
+|===
+--
+
+As we can see, all scaled values are finite numbers.
+In particular, the smallest scaled value is zero.
+Try this example with an offset lower than `4.12` if you are curious about the results.

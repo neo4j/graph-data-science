@@ -94,18 +94,18 @@ public abstract class BaseTest {
         return sourceNodes;
     }
 
-    protected void runQueryWithRowConsumer(
+    protected long runQueryWithRowConsumer(
         @Language("Cypher") String query,
         Consumer<Result.ResultRow> check
     ) {
-        QueryRunner.runQueryWithRowConsumer(db, query, check);
+        return QueryRunner.runQueryWithRowConsumer(db, query, check);
     }
 
-    protected void runQueryWithRowConsumer(
+    protected long runQueryWithRowConsumer(
         @Language("Cypher") String query,
         BiConsumer<Transaction, Result.ResultRow> check
     ) {
-        QueryRunner.runQueryWithRowConsumer(db, query, emptyMap(), check);
+        return QueryRunner.runQueryWithRowConsumer(db, query, emptyMap(), check);
     }
 
     protected void runQueryWithRowConsumer(
@@ -116,29 +116,29 @@ public abstract class BaseTest {
         QueryRunner.runQueryWithRowConsumer(db, query, params, discardTx(check));
     }
 
-    protected void runQueryWithRowConsumer(
+    protected long runQueryWithRowConsumer(
         GraphDatabaseService localDb,
         @Language("Cypher") String query,
         Map<String, Object> params,
         Consumer<Result.ResultRow> check
     ) {
-        QueryRunner.runQueryWithRowConsumer(localDb, query, params, discardTx(check));
+        return QueryRunner.runQueryWithRowConsumer(localDb, query, params, discardTx(check));
     }
 
-    protected void runQueryWithRowConsumer(
+    protected long runQueryWithRowConsumer(
         GraphDatabaseService localDb,
         @Language("Cypher") String query,
         Consumer<Result.ResultRow> check
     ) {
-        QueryRunner.runQueryWithRowConsumer(localDb, query, emptyMap(), discardTx(check));
+        return QueryRunner.runQueryWithRowConsumer(localDb, query, emptyMap(), discardTx(check));
     }
 
-    protected void runQueryWithRowConsumer(
+    protected long runQueryWithRowConsumer(
         String username,
         @Language("Cypher") String query,
         Consumer<Result.ResultRow> check
     ) {
-        QueryRunner.runQueryWithRowConsumer(db, username, query, emptyMap(), discardTx(check));
+        return QueryRunner.runQueryWithRowConsumer(db, username, query, emptyMap(), discardTx(check));
     }
 
     protected <T> T runQuery(

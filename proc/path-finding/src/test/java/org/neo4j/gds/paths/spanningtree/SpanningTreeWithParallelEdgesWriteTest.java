@@ -28,6 +28,7 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 
 public class SpanningTreeWithParallelEdgesWriteTest extends BaseProcTest {
 
@@ -71,8 +72,7 @@ public class SpanningTreeWithParallelEdgesWriteTest extends BaseProcTest {
         
         var validationQuery = "MATCH ()-[r:MINST]->() RETURN r.writeCost AS cost";
         runQueryWithRowConsumer(validationQuery, row -> {
-            var cost = (double) row.get("cost");
-            assertThat(cost).isEqualTo(1);
+            assertThat(row.get("cost")).asInstanceOf(DOUBLE).isEqualTo(1d);
         });
     }
 

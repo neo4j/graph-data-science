@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.FLOAT_ARRAY;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.anyMatch;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scale;
 
@@ -96,8 +97,8 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig> {
         runQuery(writeQuery);
 
         runQueryWithRowConsumer("MATCH (n:Node) RETURN n.embedding as embedding", row -> {
-            var embedding = (float[]) row.get("embedding");
-            assertThat(embedding)
+            assertThat(row.get("embedding"))
+                .asInstanceOf(FLOAT_ARRAY)
                 .hasSize(embeddingDimension)
                 .matches(vector -> anyMatch(vector, v -> v != 0.0));
         });

@@ -49,6 +49,9 @@ project(':config-generator').projectDir = file('config-generator')
 include('core')
 project(':core').projectDir = file('core')
 
+include('core-write')
+project(':core-write').projectDir = file('core-write')
+
 include('core-test-utils')
 project(':core-test-utils').projectDir = file('core-test-utils')
 

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +33,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 
 class GraphSampleProcTest extends BaseProcTest {
 
@@ -129,8 +129,10 @@ class GraphSampleProcTest extends BaseProcTest {
         runQuery("CALL gds.alpha.graph.sample.rwr('sample', 'g', {samplingRatio: 0.5})");
         assertGraphExists("sample");
         runQueryWithRowConsumer("CALL gds.graph.list('sample') YIELD configuration", resultRow -> {
-            var config = (Map<String, Object>) resultRow.get("configuration");
-            assertThat(config.get("samplingRatio")).isEqualTo(0.5);
+            assertThat(resultRow.get("configuration"))
+                .isInstanceOf(Map.class)
+                .asInstanceOf(MAP)
+                .containsEntry("samplingRatio", 0.5);
         });
     }
 
@@ -154,11 +156,11 @@ class GraphSampleProcTest extends BaseProcTest {
             )
         );
 
-        var numberOfStreamedProperties = new MutableLong();
-        runQueryWithRowConsumer("CALL gds.graph.nodeProperty.stream('sample', 'rank')", unused -> {
-            numberOfStreamedProperties.increment();
-        });
-        assertThat(numberOfStreamedProperties.getValue()).isEqualTo(expectedNodeCount);
+        var numberOfStreamedProperties = runQueryWithRowConsumer(
+            "CALL gds.graph.nodeProperty.stream('sample', 'rank')",
+            unused -> {}
+        );
+        assertThat(numberOfStreamedProperties).isEqualTo(expectedNodeCount);
 
         assertThatThrownBy(() -> runQuery("CALL gds.graph.nodeProperty.stream('g', 'rank')"))
             .hasRootCauseInstanceOf(IllegalArgumentException.class);

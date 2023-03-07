@@ -21,6 +21,7 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Locale;
@@ -32,22 +33,22 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 
 public interface ScalerFactory {
-    String SCALER_KEY = "scaler";
+    String SCALER_KEY = "type";
 
     Map<String, Function<CypherMapWrapper, ScalerFactory>> SUPPORTED_SCALERS = Map.of(
-        NoneScaler.NAME, NoneScaler::buildFrom,
-        Mean.NAME, Mean::buildFrom,
-        Max.NAME, Max::buildFrom,
-        LogScaler.NAME, LogScaler::buildFrom,
-        Center.NAME, Center::buildFrom,
-        StdScore.NAME, StdScore::buildFrom,
-        L1Norm.NAME, L1Norm::buildFrom,
-        L2Norm.NAME, L2Norm::buildFrom,
-        MinMax.NAME, MinMax::buildFrom
+        NoneScaler.TYPE, NoneScaler::buildFrom,
+        Mean.TYPE, Mean::buildFrom,
+        Max.TYPE, Max::buildFrom,
+        LogScaler.TYPE, LogScaler::buildFrom,
+        Center.TYPE, Center::buildFrom,
+        StdScore.TYPE, StdScore::buildFrom,
+        L1Norm.TYPE, L1Norm::buildFrom,
+        L2Norm.TYPE, L2Norm::buildFrom,
+        MinMax.TYPE, MinMax::buildFrom
     );
 
     static String toString(ScalerFactory factory) {
-        return factory.name().toUpperCase(Locale.ENGLISH);
+        return factory.type().toUpperCase(Locale.ENGLISH);
     }
 
     static ScalerFactory parse(Object userInput) {
@@ -61,31 +62,32 @@ public interface ScalerFactory {
             var inputMap = (Map<String, Object>) userInput;
             var scalerSpec = inputMap.get(SCALER_KEY);
             if (scalerSpec instanceof String) {
-                var scalerName = toLowerCaseWithLocale((String) scalerSpec);
-                var selectedScaler = SUPPORTED_SCALERS.get(scalerName);
+                var scalerType = toLowerCaseWithLocale((String) scalerSpec);
+                var selectedScaler = SUPPORTED_SCALERS.get(scalerType);
                 if (selectedScaler == null) {
                     throw new IllegalArgumentException(formatWithLocale(
-                        "Unrecognised scaler specified: `%s`. Expected one of: %s.",
+                        "Unrecognised scaler type specified: `%s`. Expected one of: %s.",
                         scalerSpec,
                         StringJoining.join(SUPPORTED_SCALERS.keySet())
                     ));
                 }
-                return selectedScaler.apply(CypherMapWrapper.create(inputMap).withoutEntry("scaler"));
+                return selectedScaler.apply(CypherMapWrapper.create(inputMap).withoutEntry(SCALER_KEY));
             }
         }
         throw new IllegalArgumentException(formatWithLocale(
-            "Unrecognised scaler specified: `%s`. Expected one of: %s.",
+            "Unrecognised scaler type specified: `%s`. Expected one of: %s.",
             userInput,
             StringJoining.join(SUPPORTED_SCALERS.keySet())
         ));
     }
 
-    String name();
+    String type();
 
     ScalarScaler create(
         NodePropertyValues properties,
         long nodeCount,
         int concurrency,
+        ProgressTracker progressTracker,
         ExecutorService executor
     );
 }

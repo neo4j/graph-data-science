@@ -25,11 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.function.ThrowingConsumer;
-import org.neo4j.gds.api.BatchNodeIterable;
-import org.neo4j.gds.core.loading.HugeParallelGraphImporter;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongCollections;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 
 import java.util.AbstractCollection;
 import java.util.Arrays;
@@ -51,7 +47,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.LongAccumulator;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -65,8 +60,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -85,10 +78,8 @@ final class ParallelUtilTest {
         long firstNum = 1;
         long lastNum = 1_000_000;
 
-        List<Long> list = LongStream.rangeClosed(firstNum, lastNum).boxed().collect(Collectors.toList());
-
         ForkJoinPool commonPool = ForkJoinPool.commonPool();
-        Stream<Long> stream = list.stream();
+        Stream<Long> stream = LongStream.rangeClosed(firstNum, lastNum).boxed();
 
         long actualTotal = parallelStream(stream, concurrency, (s) -> {
             assertTrue(s.isParallel());
@@ -188,28 +179,6 @@ final class ParallelUtilTest {
                 IllegalArgumentException.class,
                 () -> ParallelUtil.threadCount(-1337, 42));
         assertEquals("Invalid batch size: -1337", exception.getMessage());
-    }
-
-    @Test
-    void shouldRunBatchesSequentialIfNoExecutorIsGiven() {
-        PrimitiveLongIterable[] ints = {longs(0, 10), longs(10, 14)};
-        BatchNodeIterable batches = mock(BatchNodeIterable.class);
-        when(batches.batchIterables(anyLong())).thenReturn(asList(ints));
-        long currentThreadId = Thread.currentThread().getId();
-        Runnable task = () -> assertEquals(Thread.currentThread().getId(), currentThreadId);
-        @SuppressWarnings("unchecked") HugeParallelGraphImporter<Runnable> importer = mock(HugeParallelGraphImporter.class);
-        when(importer.newImporter(anyLong(), any())).thenReturn(task);
-
-        ParallelUtil.readParallel(
-                100,
-                10,
-                batches,
-                null,
-                importer
-        );
-
-        verify(importer, times(1)).newImporter(0, ints[0]);
-        verify(importer, times(1)).newImporter(10, ints[1]);
     }
 
     @Test
@@ -519,10 +488,6 @@ final class ParallelUtilTest {
         }
     }
 
-    private PrimitiveLongIterable longs(int from, int size) {
-        return () -> PrimitiveLongCollections.range(from, from + size - 1);
-    }
-
     static final class Tasks extends AbstractCollection<Runnable> {
         private final AtomicInteger started;
         private final AtomicInteger running;
@@ -530,15 +495,6 @@ final class ParallelUtilTest {
         private final LongAccumulator maxRunning;
         private int size;
         private final long parkNanos;
-
-        Tasks(int size) {
-            this.size = size;
-            started = new AtomicInteger();
-            running = new AtomicInteger();
-            requested = new AtomicInteger();
-            maxRunning = new LongAccumulator(Long::max, Long.MIN_VALUE);
-            parkNanos = 0;
-        }
 
         Tasks(int size, int runtimeMillis) {
             this.size = size;

@@ -15,6 +15,7 @@ dependencies {
     implementation project(':algo-common')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':core-write')
     implementation project(':edition-api')
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')

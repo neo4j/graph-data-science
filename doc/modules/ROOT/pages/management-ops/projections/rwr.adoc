@@ -17,8 +17,8 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 ====
 Random walk with restarts sampling is featured in the end-to-end example Jupyter notebooks:
 
-* https://github.com/neo4j/graph-data-science-client/blob/main/examples/import-sample-export-gnn.ipynb[Sampling, Export and Integration with PyG example]
-* https://github.com/neo4j/graph-data-science-client/blob/main/examples/node-regression-with-subgraph-and-graph-sample.ipynb[Node Regression with Subgraph and Graph Sample projections]
+* https://neo4j.com/docs/graph-data-science-client/current/tutorials/import-sample-export-gnn/[Sampling, Export and Integration with PyG example]
+* https://neo4j.com/docs/graph-data-science-client/current/tutorials/node-regression-with-subgraph-and-graph-sample/[Node Regression with Subgraph and Graph Sample projections]
 ====
 
 == Introduction

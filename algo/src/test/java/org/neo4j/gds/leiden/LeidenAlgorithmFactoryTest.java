@@ -90,7 +90,7 @@ class LeidenAlgorithmFactoryTest {
             "    |-- relationship calculator: 128 Bytes" + System.lineSeparator() +
             "        |-- this.instance: 32 Bytes" + System.lineSeparator() +
             "|-- dendogram manager: 78 KiB" + System.lineSeparator() +
-            "    |-- this.instance: 40 Bytes" + System.lineSeparator() +
+            "    |-- this.instance: 48 Bytes" + System.lineSeparator() +
             "    |-- dendograms: 78 KiB" + System.lineSeparator() +
             "|-- refinement phase: 470 KiB" + System.lineSeparator() +
             "    |-- this.instance: 96 Bytes" + System.lineSeparator() +

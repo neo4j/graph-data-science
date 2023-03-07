@@ -21,6 +21,7 @@ package org.neo4j.gds.beta.pregel;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
@@ -65,9 +66,11 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
         this.receiveArray = sendArray;
         this.sendArray = tmp;
 
+        int concurrency = config.concurrency();
         ParallelUtil.parallelForEachNode(
-            graph,
-            config.concurrency(),
+            graph.nodeCount(),
+            concurrency,
+            TerminationFlag.RUNNING_TRUE,
             nodeId -> sendArray.set(nodeId, reducer.identity())
         );
     }

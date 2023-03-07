@@ -84,7 +84,7 @@ public class PageRankAlgorithm extends Algorithm<PageRankResult> {
         var scalerFactory = config.scaler();
 
         // Eigenvector produces L2NORM-scaled results by default.
-        if (scalerFactory.name().equals(NoneScaler.NAME) || (scalerFactory.name().equals(L2Norm.NAME) && mode == PageRankAlgorithmFactory.Mode.EIGENVECTOR)) {
+        if (scalerFactory.type().equals(NoneScaler.TYPE) || (scalerFactory.type().equals(L2Norm.TYPE) && mode == PageRankAlgorithmFactory.Mode.EIGENVECTOR)) {
             return;
         }
 
@@ -92,6 +92,7 @@ public class PageRankAlgorithm extends Algorithm<PageRankResult> {
             scores.asNodeProperties(),
             graph.nodeCount(),
             config.concurrency(),
+            ProgressTracker.NULL_TRACKER,
             executorService
         );
 

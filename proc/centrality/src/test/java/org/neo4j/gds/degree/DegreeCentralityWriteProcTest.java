@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.degree;
 
+import org.assertj.core.api.Assertions;
+import org.assertj.core.api.InstanceOfAssertFactories;
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
@@ -30,10 +33,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThan;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 class DegreeCentralityWriteProcTest extends DegreeCentralityProcTest<DegreeCentralityWriteConfig> {
 
@@ -71,16 +71,36 @@ class DegreeCentralityWriteProcTest extends DegreeCentralityProcTest<DegreeCentr
             .yields();
 
         runQueryWithRowConsumer(writeQuery, row -> {
-            Map<String, Object> centralityDistribution = (Map<String, Object>) row.get("centralityDistribution");
-            assertNotNull(centralityDistribution);
-            assertEquals(0.0, centralityDistribution.get("min"));
-            assertEquals(3.0, (double) centralityDistribution.get("max"), 1e-4);
+            Assertions.assertThat(row.get("centralityDistribution"))
+                .isNotNull()
+                .isInstanceOf(Map.class)
+                .asInstanceOf(InstanceOfAssertFactories.MAP)
+                .containsEntry("min", 0.0)
+                .hasEntrySatisfying("max",
+                    value -> Assertions.assertThat(value)
+                        .asInstanceOf(InstanceOfAssertFactories.DOUBLE)
+                        .isEqualTo(3.0, Offset.offset(1e-4))
+                );
 
-            assertThat(-1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
-            assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
-            assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
-            assertThat(-1L, lessThan(row.getNumber("writeMillis").longValue()));
-            assertEquals(10L, row.getNumber("nodePropertiesWritten"));
+            Assertions.assertThat(row.getNumber("preProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            Assertions.assertThat(row.getNumber("computeMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            Assertions.assertThat(row.getNumber("postProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            Assertions.assertThat(row.getNumber("writeMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            Assertions.assertThat(row.getNumber("nodePropertiesWritten"))
+                .asInstanceOf(LONG)
+                .isEqualTo(10L);
         });
     }
 }

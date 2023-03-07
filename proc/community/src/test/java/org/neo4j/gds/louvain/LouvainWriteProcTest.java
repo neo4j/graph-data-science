@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -39,14 +38,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG_ARRAY;
 import static org.neo4j.gds.CommunityHelper.assertCommunities;
-import static org.neo4j.gds.ThrowableRootCauseMatcher.rootCause;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
@@ -84,22 +81,42 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
             );
 
         runQueryWithRowConsumer(query, row -> {
-            long communityCount = row.getNumber("communityCount").longValue();
-            double modularity = row.getNumber("modularity").doubleValue();
-            List<Double> modularities = (List<Double>) row.get("modularities");
-            long levels = row.getNumber("ranLevels").longValue();
-            long preProcessingMillis = row.getNumber("preProcessingMillis").longValue();
-            long computeMillis = row.getNumber("computeMillis").longValue();
-            long writeMillis = row.getNumber("writeMillis").longValue();
+            assertThat(row.getNumber("communityCount"))
+                .asInstanceOf(LONG)
+                .as("wrong community count")
+                .isEqualTo(3L);
 
-            assertEquals(3, communityCount, "wrong community count");
-            assertEquals(2, modularities.size(), "invalud modularities");
-            assertEquals(2, levels, "invalid level count");
+            assertThat(row.get("modularities"))
+                .asList()
+                .as("invalud modularities")
+                .hasSize(2);
+
+            assertThat(row.getNumber("ranLevels"))
+                .asInstanceOf(LONG)
+                .as("invalid level count")
+                .isEqualTo(2L);
+
             assertUserInput(row, "includeIntermediateCommunities", false);
-            assertTrue(modularity > 0, "wrong modularity value");
-            assertTrue(preProcessingMillis >= 0, "invalid preProcessingTime");
-            assertTrue(writeMillis >= 0, "invalid writeTime");
-            assertTrue(computeMillis >= 0, "invalid computeTime");
+
+            assertThat(row.getNumber("modularity"))
+                .asInstanceOf(DOUBLE)
+                .as("wrong modularity value")
+                .isGreaterThan(0);
+
+            assertThat(row.getNumber("preProcessingMillis"))
+                .asInstanceOf(LONG)
+                .as("invalid preProcessingTime")
+                .isGreaterThanOrEqualTo(0);
+
+            assertThat(row.getNumber("writeMillis"))
+                .asInstanceOf(LONG)
+                .as("invalid writeTime")
+                .isGreaterThanOrEqualTo(0);
+
+            assertThat(row.getNumber("computeMillis"))
+                .asInstanceOf(LONG)
+                .as("invalid computeTime")
+                .isGreaterThanOrEqualTo(0);
         });
         assertWriteResult(RESULT, writeProperty);
     }
@@ -119,10 +136,9 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
         });
 
         runQueryWithRowConsumer(formatWithLocale("MATCH (n) RETURN n.%s as %s", writeProperty, writeProperty), row -> {
-            Object maybeList = row.get(writeProperty);
-            assertTrue(maybeList instanceof long[]);
-            long[] communities = (long[]) maybeList;
-            assertEquals(2, communities.length);
+            assertThat(row.get(writeProperty))
+                .asInstanceOf(LONG_ARRAY)
+                .hasSize(2);
         });
     }
 
@@ -143,15 +159,11 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
                        writePropertyParameter +
                        "})";
 
-        QueryExecutionException exception = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery(query)
-        );
-
-        assertThat(exception, rootCause(
-            IllegalArgumentException.class,
-            "No value specified for the mandatory configuration parameter `writeProperty`"
-        ));
+        assertThatExceptionOfType(QueryExecutionException.class)
+            .isThrownBy(() -> runQuery(query))
+            .havingRootCause()
+            .isInstanceOf(IllegalArgumentException.class)
+            .withMessage("No value specified for the mandatory configuration parameter `writeProperty`");
     }
 
     @Test
@@ -167,8 +179,14 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
         runQueryWithRowConsumer(
             query,
             row -> {
-                assertEquals(3, row.getNumber("communityCount").longValue(), "wrong community count");
-                assertEquals(1, row.getNumber("ranLevels").longValue(), "wrong number of levels");
+                assertThat(row.getNumber("communityCount"))
+                    .asInstanceOf(LONG)
+                    .as("wrong community count")
+                    .isEqualTo(3L);
+                assertThat(row.getNumber("ranLevels"))
+                    .asInstanceOf(LONG)
+                    .as("wrong number of levels")
+                    .isEqualTo(1L);
             }
         );
         assertWriteResult(RESULT, writeProperty);
@@ -178,11 +196,11 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
     @Test
     void testCreateConfigWithDefaults() {
         LouvainBaseConfig louvainConfig = LouvainWriteConfig.of(createMinimalConfig(CypherMapWrapper.empty()));
-        assertFalse(louvainConfig.includeIntermediateCommunities());
-        assertEquals(10, louvainConfig.maxLevels());
-        assertEquals(10, louvainConfig.maxIterations());
-        assertEquals(0.0001D, louvainConfig.tolerance());
-        assertNull(louvainConfig.seedProperty());
+        assertThat(louvainConfig.includeIntermediateCommunities()).isFalse();
+        assertThat(louvainConfig.maxLevels()).isEqualTo(10);
+        assertThat(louvainConfig.maxIterations()).isEqualTo(10);
+        assertThat(louvainConfig.tolerance()).isEqualTo(0.0001D);
+        assertThat(louvainConfig.seedProperty()).isNull();
     }
 
     @Test
@@ -238,14 +256,15 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
             .yields("communityCount");
 
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(expectedCommunityCount, row.getNumber("communityCount"));
-
+            assertThat(row.getNumber("communityCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(expectedCommunityCount);
         });
 
         runQueryWithRowConsumer(
             "MATCH (n) RETURN collect(DISTINCT n." + WRITE_PROPERTY + ") AS communities ",
             row -> {
-                Assertions.assertThat(row.get("communities"))
+                assertThat(row.get("communities"))
                     .asList()
                     .containsExactlyInAnyOrder(expectedCommunityIds);
             }

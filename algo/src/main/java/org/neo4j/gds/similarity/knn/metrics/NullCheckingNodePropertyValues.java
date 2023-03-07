@@ -25,6 +25,8 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.values.storable.Value;
 
+import java.util.Optional;
+
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class NullCheckingNodePropertyValues implements NodePropertyValues {
@@ -76,6 +78,11 @@ public final class NullCheckingNodePropertyValues implements NodePropertyValues 
     @Override
     public ValueType valueType() {
         return properties.valueType();
+    }
+
+    @Override
+    public Optional<Integer> dimension() {
+        return properties.dimension();
     }
 
     @Override

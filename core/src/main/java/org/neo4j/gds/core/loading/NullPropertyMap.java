@@ -25,6 +25,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
 
@@ -34,7 +35,12 @@ import java.util.OptionalLong;
  */
 public abstract class NullPropertyMap implements NodePropertyValues {
 
-    static public class DoubleNullPropertyMap extends NullPropertyMap {
+    @Override
+    public Optional<Integer> dimension() {
+        return Optional.of(1);
+    }
+
+    public static class DoubleNullPropertyMap extends NullPropertyMap {
         private final double defaultValue;
 
         public DoubleNullPropertyMap(double defaultValue) {this.defaultValue = defaultValue;}
@@ -70,7 +76,7 @@ public abstract class NullPropertyMap implements NodePropertyValues {
         }
     }
 
-    static public class LongNullPropertyMap extends NullPropertyMap implements LongNodePropertyValues {
+    public static class LongNullPropertyMap extends NullPropertyMap implements LongNodePropertyValues {
         private final long defaultValue;
 
         public LongNullPropertyMap(long defaultValue) {this.defaultValue = defaultValue;}

@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -53,7 +55,7 @@ class ScalePropertiesBaseConfigTest {
             )
         );
 
-        assertThat(config.scaler().name()).isEqualTo(scaler);
+        assertThat(config.scaler().type()).isEqualTo(scaler);
     }
 
     @Test
@@ -86,7 +88,7 @@ class ScalePropertiesBaseConfigTest {
             )
         );
 
-        assertThat(ex.getMessage()).contains("Unrecognised scaler specified: `nonExistent`");
+        assertThat(ex.getMessage()).contains("Unrecognised scaler type specified: `nonExistent`");
     }
 
     @Test
@@ -119,4 +121,51 @@ class ScalePropertiesBaseConfigTest {
 
         assertThat(ex.getMessage()).contains("Expected String or Map for property mappings. Got Integer.");
     }
+
+    @Test
+    void failsOnMissingPropertyDimensions() {
+        var config = ScalePropertiesStreamConfigImpl.builder().scaler("mean").nodeProperties(List.of("a")).build();
+
+        var graphStore = GdlFactory.of("(), ({a: [1.0, 2.2]})").build();
+
+        assertThatThrownBy(() -> config.graphStoreValidation(
+            graphStore,
+            config.nodeLabelIdentifiers(graphStore),
+            config.internalRelationshipTypes(graphStore)
+        ))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Node property `a` contains a `null` value");
+    }
+
+    @Test
+    void failsOnMissingProperty() {
+        var config = ScalePropertiesStreamConfigImpl.builder().scaler("mean").nodeProperties(List.of("b")).build();
+
+        var graphStore = GdlFactory.of("(), ({a: [1.0, 2.2]})").build();
+
+        assertThatThrownBy(() -> config.graphStoreValidation(
+            graphStore,
+            config.nodeLabelIdentifiers(graphStore),
+            config.internalRelationshipTypes(graphStore)
+        ))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining(
+                "The node properties `['b']` are not present for all requested labels. Requested labels: `['__ALL__']`. Properties available on all requested labels: `['a']`");
+    }
+
+    @Test
+    void failsOnEmptyNodeProperties() {
+        var config = ScalePropertiesStreamConfigImpl.builder().scaler("mean").nodeProperties(List.of()).build();
+
+        var graphStore = GdlFactory.of("(), ({a: [1.0, 2.2]})").build();
+
+        assertThatThrownBy(() -> config.graphStoreValidation(
+            graphStore,
+            config.nodeLabelIdentifiers(graphStore),
+            config.internalRelationshipTypes(graphStore)
+        ))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("`nodeProperties` must not be empty");
+    }
+
 }

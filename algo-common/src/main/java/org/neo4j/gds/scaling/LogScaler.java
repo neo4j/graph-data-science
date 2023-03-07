@@ -21,18 +21,20 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 public final class LogScaler extends ScalarScaler {
 
-    public static final String NAME = "log";
+    public static final String TYPE = "log";
     private static final String OFFSET_KEY = "offset";
     private final double offset;
 
     LogScaler(NodePropertyValues properties, double offset) {
-        super(properties);
+        super(properties, Map.of());
         this.offset = offset;
     }
 
@@ -46,8 +48,8 @@ public final class LogScaler extends ScalarScaler {
         final double offset = mapWrapper.getNumber(OFFSET_KEY, 0).doubleValue();
         return new ScalerFactory() {
             @Override
-            public String name() {
-                return NAME;
+            public String type() {
+                return TYPE;
             }
 
             @Override
@@ -55,6 +57,7 @@ public final class LogScaler extends ScalarScaler {
                 NodePropertyValues properties,
                 long nodeCount,
                 int concurrency,
+                ProgressTracker progressTracker,
                 ExecutorService executor
             ) {
                 return new LogScaler(properties, offset);

@@ -33,9 +33,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCountWriteConfig> {
@@ -140,10 +141,11 @@ class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCount
             "MATCH (n) RETURN n.name AS name, n.%s AS triangles",
             writeProperty
         ), (row) -> {
-            long triangles = row.getNumber("triangles").longValue();
             String name = row.getString("name");
             Long expectedTriangles = expectedResult.get(name);
-            assertEquals(expectedTriangles, triangles);
+            assertThat(row.getNumber("triangles"))
+                .asInstanceOf(LONG)
+                .isEqualTo(expectedTriangles);
         });
     }
 

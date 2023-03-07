@@ -27,7 +27,6 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
-import java.util.concurrent.atomic.LongAdder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -118,8 +117,7 @@ class SteinerTreeWriteProcTest extends BaseProcTest {
 
         runQuery(query);
 
-        var rowCounter = new LongAdder();
-        runQueryWithRowConsumer(
+        var rowCount = runQueryWithRowConsumer(
             "MATCH (a)-[r:STEINER]->(b) RETURN id(a) AS a, id(b) AS b, r.cost AS cost",
             row -> {
                 var a = row.getNumber("a").longValue();
@@ -134,12 +132,10 @@ class SteinerTreeWriteProcTest extends BaseProcTest {
                 assertThat(writtenCost)
                     .as("The relationship property shoud be written correctly")
                     .isEqualTo(5.4);
-
-                rowCounter.increment();
             }
         );
 
-        assertThat(rowCounter.longValue()).isEqualTo(1L);
+        assertThat(rowCount).isEqualTo(1L);
     }
 
 }

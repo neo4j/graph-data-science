@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.labelpropagation;
 
+import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -31,7 +32,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
@@ -77,9 +77,9 @@ public class LabelPropagationStreamProc extends StreamProc<LabelPropagation, Lab
 
     @Override
     protected NodePropertyValues nodeProperties(ComputationResult<LabelPropagation, LabelPropagationResult, LabelPropagationStreamConfig> computationResult) {
-        return LabelPropagationProc.nodeProperties(
-            computationResult,
-            UUID.randomUUID().toString()
+        return CommunityProcCompanion.nodeProperties(
+                computationResult.config(),
+                computationResult.result().labels().asNodeProperties()
         );
     }
 

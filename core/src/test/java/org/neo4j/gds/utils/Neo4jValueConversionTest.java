@@ -33,6 +33,7 @@ import org.neo4j.values.storable.Values;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -152,9 +153,20 @@ class Neo4jValueConversionTest {
             arguments(Values.longArray(new long[]{42L}), new long[]{42L}),
 
             arguments(Values.intArray(new int[]{42}), null),
-            arguments(Values.floatArray(new float[]{42.0F}), null),
+            arguments(Values.floatArray(new float[]{42.0F}), new long[]{42L}),
+            arguments(Values.floatArray(new float[]{42.42F}), null),
+            arguments(Values.doubleArray(new double[]{42.0}), new long[]{42L}),
+            arguments(Values.doubleArray(new double[]{42.42d}), null),
             arguments(Values.stringValue("42L"), null)
         );
+    }
+
+    @Test
+    void testLongArrayConversionErrorShowsCause() {
+        var input = Values.floatArray(new float[] {42.0F, 13.37F, 256.0F});
+        assertThatThrownBy(() -> Neo4jValueConversion.getLongArray(input))
+            .hasMessage("Cannot safely convert FloatArray[42.0, 13.37, 256.0] into a Long Array." +
+                        " Cannot safely convert 13.37 into an long value");
     }
 
     @ParameterizedTest
@@ -170,11 +182,20 @@ class Neo4jValueConversionTest {
     static Stream<Arguments> doubleArrayConversion() {
         return Stream.of(
             arguments(Values.doubleArray(new double[]{42.0}), new double[]{42.0}),
-
-            arguments(Values.floatArray(new float[]{42.0F}), null),
-            arguments(Values.longArray(new long[]{42}), null),
+            arguments(Values.floatArray(new float[]{42.0F}), new double[]{42.0}),
+            arguments(Values.longArray(new long[]{42}), new double[]{42}),
+            arguments(Values.intArray(new int[]{42}), new double[]{42}),
+            arguments(Values.longArray(new long[]{9007199254740993L}), null),
             arguments(Values.stringValue("42L"), null)
         );
+    }
+
+    @Test
+    void testDoubleArrayConversionErrorShowsCause() {
+        var input = Values.longArray(new long[] {42, 9007199254740993L, -100});
+        assertThatThrownBy(() -> Neo4jValueConversion.getDoubleArray(input))
+            .hasMessage("Cannot safely convert LongArray[42, 9007199254740993, -100] into a Double Array." +
+                        " Cannot safely convert 9007199254740993 into an double value");
     }
 
     @ParameterizedTest
@@ -190,9 +211,10 @@ class Neo4jValueConversionTest {
     static Stream<Arguments> floatArrayConversion() {
         return Stream.of(
             arguments(Values.floatArray(new float[]{42.0f}), new float[]{42.0f}),
-
-            arguments(Values.doubleArray(new double[]{42.0}), null),
-            arguments(Values.longArray(new long[]{42}), null),
+            arguments(Values.doubleArray(new double[]{42.0}), new float[]{42.0f}),
+            arguments(Values.doubleArray(new double[]{Double.MAX_VALUE}), null),
+            arguments(Values.longArray(new long[]{42}), new float[]{42.0f}),
+            arguments(Values.longArray(new long[]{9007199254740993L}), null),
             arguments(Values.stringValue("42L"), null)
         );
     }

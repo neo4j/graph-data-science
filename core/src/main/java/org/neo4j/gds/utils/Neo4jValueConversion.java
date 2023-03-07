@@ -19,16 +19,25 @@
  */
 package org.neo4j.gds.utils;
 
-import org.jetbrains.annotations.NotNull;
+import org.neo4j.values.storable.ByteArray;
 import org.neo4j.values.storable.DoubleArray;
 import org.neo4j.values.storable.FloatArray;
+import org.neo4j.values.storable.FloatingPointArray;
 import org.neo4j.values.storable.FloatingPointValue;
+import org.neo4j.values.storable.IntArray;
+import org.neo4j.values.storable.IntegralArray;
 import org.neo4j.values.storable.IntegralValue;
 import org.neo4j.values.storable.LongArray;
+import org.neo4j.values.storable.ShortArray;
 import org.neo4j.values.storable.Value;
+
+import java.util.Locale;
+import java.util.function.IntToLongFunction;
 
 import static org.neo4j.gds.api.ValueConversion.exactDoubleToLong;
 import static org.neo4j.gds.api.ValueConversion.exactLongToDouble;
+import static org.neo4j.gds.api.ValueConversion.exactLongToFloat;
+import static org.neo4j.gds.api.ValueConversion.notOverflowingDoubleToFloat;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class Neo4jValueConversion {
@@ -56,7 +65,10 @@ public final class Neo4jValueConversion {
     public static long[] getLongArray(Value value) {
         if (value instanceof LongArray) {
             return ((LongArray) value).asObjectCopy();
-        } else {
+        } else if (value instanceof FloatingPointArray) {
+            return floatToLongArray((FloatingPointArray) value);
+        }
+        else {
             throw conversionError(value, "Long Array");
         }
     }
@@ -64,8 +76,10 @@ public final class Neo4jValueConversion {
     public static double[] getDoubleArray(Value value) {
         if (value instanceof DoubleArray) {
             return ((DoubleArray) value).asObjectCopy();
-        } else if (value instanceof LongArray && ((LongArray) value).length() == 0) { // no .isEmpty() on 4.2
-            return new double[0];
+        } else if (value instanceof FloatArray) {
+            return floatToDoubleArray((FloatArray) value);
+        } else if (value instanceof IntegralArray) {
+            return integralToDoubleArray((IntegralArray) value);
         } else {
             throw conversionError(value, "Double Array");
         }
@@ -74,17 +88,113 @@ public final class Neo4jValueConversion {
     public static float[] getFloatArray(Value value) {
         if (value instanceof FloatArray) {
             return ((FloatArray) value).asObjectCopy();
-        } else {
+        } else if (value instanceof DoubleArray) {
+            return doubleToFloatArray((DoubleArray) value);
+        } else if (value instanceof IntegralArray) {
+            return longToFloatArray((IntegralArray) value);
+        }else {
             throw conversionError(value, "Float Array");
         }
     }
 
-    @NotNull
+    private static double[] integralToDoubleArray(IntegralArray intArray) {
+        var result = new double[intArray.length()];
+
+        IntToLongFunction longValueProvider = resolvelongValueProvider(intArray);
+
+        try {
+            for (int idx = 0; idx < intArray.length(); idx++) {
+                result[idx] = exactLongToDouble(longValueProvider.applyAsLong(idx));
+            }
+        } catch (UnsupportedOperationException e) {
+            throw conversionError(intArray, "Double Array", e.getMessage());
+        }
+
+        return result;
+    }
+
+    private static double[] floatToDoubleArray(FloatArray floatArray) {
+        var result = new double[floatArray.length()];
+
+        for (int idx = 0; idx < floatArray.length(); idx++) {
+            result[idx] = floatArray.doubleValue(idx);
+        }
+
+        return result;
+    }
+
+    private static float[] doubleToFloatArray(DoubleArray doubleArray) {
+        var result = new float[doubleArray.length()];
+
+        try {
+            for (int idx = 0; idx < doubleArray.length(); idx++) {
+                result[idx] = notOverflowingDoubleToFloat(doubleArray.doubleValue(idx));
+            }
+        } catch (UnsupportedOperationException e) {
+            throw conversionError(doubleArray, "Float Array", e.getMessage());
+        }
+
+        return result;
+    }
+
+    private static float[] longToFloatArray(IntegralArray integralArray) {
+        var result = new float[integralArray.length()];
+
+        IntToLongFunction longValueProvider = resolvelongValueProvider(integralArray);
+
+        try {
+            for (int idx = 0; idx < integralArray.length(); idx++) {
+                result[idx] = exactLongToFloat(longValueProvider.applyAsLong(idx));
+            }
+        } catch (UnsupportedOperationException e) {
+            throw conversionError(integralArray, "Float Array", e.getMessage());
+        }
+
+        return result;
+    }
+
+    private static IntToLongFunction resolvelongValueProvider(IntegralArray integralArray) {
+        // need narrow casting as IntegralArray::longValue is only public since Neo4j 5.4
+        if (integralArray instanceof LongArray) {
+            return ((LongArray) integralArray)::longValue;
+        } else if (integralArray instanceof IntArray) {
+            return ((IntArray) integralArray)::longValue;
+        } else if (integralArray instanceof ShortArray) {
+            return ((ShortArray) integralArray)::longValue;
+        } else if (integralArray instanceof ByteArray) {
+            return ((ByteArray) integralArray)::longValue;
+        }
+
+        throw new IllegalStateException(String.format(
+            Locale.US,
+            "Did not expect array of type %s.", integralArray.getClass().getSimpleName()
+        ));
+    }
+
+    private static long[] floatToLongArray(FloatingPointArray floatArray) {
+        var result = new long[floatArray.length()];
+
+        try {
+            for (int idx = 0; idx < floatArray.length(); idx++) {
+                result[idx] = exactDoubleToLong(floatArray.doubleValue(idx));
+            }
+        } catch (UnsupportedOperationException e) {
+            throw conversionError(floatArray, "Long Array", e.getMessage());
+        }
+
+        return result;
+    }
+
     private static UnsupportedOperationException conversionError(Value value, String expected) {
+        return conversionError(value, expected, "");
+    }
+
+    private static UnsupportedOperationException conversionError(Value value, String expected, String context) {
         return new UnsupportedOperationException(formatWithLocale(
-            "Cannot safely convert %s into a %s",
+            "Cannot safely convert %s into a %s. %s",
             value,
-            expected
+            expected,
+            context
         ));
     }
 

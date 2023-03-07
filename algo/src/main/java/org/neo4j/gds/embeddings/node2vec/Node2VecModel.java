@@ -20,8 +20,8 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.collections.primitive.PrimitiveLongCollections;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;

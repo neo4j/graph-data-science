@@ -30,7 +30,7 @@ public class ModularityCalculatorFactory<CONFIG extends ModularityBaseConfig> ex
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return new ModularityCalculator(
+        return ModularityCalculator.create(
             graph,
             graph.nodeProperties(configuration.communityProperty())::longValue,
             configuration.concurrency()

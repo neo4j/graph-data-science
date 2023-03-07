@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.intellij.lang.annotations.Language;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -45,53 +46,68 @@ public final class QueryRunner {
 
     private QueryRunner() {}
 
-    public static void runQueryWithRowConsumer(
+    public static long runQueryWithRowConsumer(
         GraphDatabaseService db,
         String username,
         @Language("Cypher") String query,
         Map<String, Object> params,
         BiConsumer<Transaction, Result.ResultRow> rowConsumer
     ) {
+        var rowCounter = new MutableLong();
         runInTransaction(db, tx -> {
             try (KernelTransaction.Revertable ignored = withUsername(tx, username, db.databaseName());
                  Result result = runQueryWithoutClosingTheResult(tx, query, params)) {
                 result.accept(row -> {
                     rowConsumer.accept(tx, row);
+                    rowCounter.increment();
+
                     return true;
                 });
             }
         });
+
+        return rowCounter.longValue();
     }
 
-    public static void runQueryWithRowConsumer(
+    public static long runQueryWithRowConsumer(
         GraphDatabaseService db,
         @Language("Cypher") String query,
         Map<String, Object> params,
         BiConsumer<Transaction, Result.ResultRow> rowConsumer
     ) {
+        var rowCounter = new MutableLong();
         runInTransaction(db, tx -> {
             try (Result result = runQueryWithoutClosingTheResult(tx, query, params)) {
                 result.accept(row -> {
                     rowConsumer.accept(tx, row);
+                    rowCounter.increment();
+
                     return true;
                 });
             }
         });
+
+        return rowCounter.longValue();
     }
 
-    public static void runQueryWithRowConsumer(
+    public static long runQueryWithRowConsumer(
         GraphDatabaseService db,
         @Language("Cypher") String query,
         Consumer<Result.ResultRow> rowConsumer
     ) {
+        var rowCounter = new MutableLong();
         runInTransaction(db, tx -> {
             try (Result result = runQueryWithoutClosingTheResult(tx, query, emptyMap())) {
                 result.accept(row -> {
                     rowConsumer.accept(row);
+                    rowCounter.increment();
+
                     return true;
                 });
             }
         });
+
+        return rowCounter.longValue();
     }
 
     public static void runQuery(GraphDatabaseService db, @Language("Cypher") String query) {

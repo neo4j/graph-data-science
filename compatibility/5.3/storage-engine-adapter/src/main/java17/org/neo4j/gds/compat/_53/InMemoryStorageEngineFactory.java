@@ -30,6 +30,7 @@ import org.neo4j.function.ThrowingSupplier;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.compat.StorageEngineFactoryIdProvider;
+import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.index.internal.gbptree.RecoveryCleanupWorkCollector;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
@@ -43,8 +44,8 @@ import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.LenientStoreInput;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.id.ScanOnOpenReadOnlyIdGeneratorFactory;
-import org.neo4j.internal.recordstorage.InMemoryLogVersionRepository;
-import org.neo4j.internal.recordstorage.InMemoryStorageCommandReaderFactory;
+import org.neo4j.internal.recordstorage.InMemoryLogVersionRepository53;
+import org.neo4j.internal.recordstorage.InMemoryStorageCommandReaderFactory53;
 import org.neo4j.internal.recordstorage.StoreTokens;
 import org.neo4j.internal.schema.IndexConfigCompleter;
 import org.neo4j.internal.schema.SchemaRule;
@@ -114,10 +115,14 @@ import java.util.function.Function;
 @ServiceProvider
 public class InMemoryStorageEngineFactory implements StorageEngineFactory {
 
+    public InMemoryStorageEngineFactory() {
+        StorageEngineProxyApi.requireNeo4jVersion(Neo4jVersion.V_5_3, StorageEngineFactory.class);
+    }
+
     static final String IN_MEMORY_STORAGE_ENGINE_NAME = "in-memory-53";
 
     public byte id() {
-        return StorageEngineFactoryIdProvider.id(Neo4jVersion.V_5_3);
+        return StorageEngineFactoryIdProvider.ID;
     }
 
     @Override
@@ -435,7 +440,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
 
     @Override
     public CommandReaderFactory commandReaderFactory() {
-        return InMemoryStorageCommandReaderFactory.INSTANCE;
+        return InMemoryStorageCommandReaderFactory53.INSTANCE;
     }
 
     @Override
@@ -478,7 +483,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
 
     @Override
     public LogVersionRepository readOnlyLogVersionRepository(LogTailMetadata logTailMetadata) {
-        return new InMemoryLogVersionRepository();
+        return new InMemoryLogVersionRepository53();
     }
 
     @Override

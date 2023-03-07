@@ -22,6 +22,7 @@ package org.neo4j.gds.catalog;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.executor.ProcPreconditions;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -41,6 +42,8 @@ public class GraphListProc extends CatalogProc {
     @Description(DESCRIPTION)
     public Stream<GraphInfoWithHistogram> list(@Name(value = "graphName", defaultValue = NO_VALUE) String graphName) {
         ProcPreconditions.check();
+
+        var terminationFlag = TerminationFlag.wrap(executionContext().terminationMonitor());
 
         var graphEntries = isGdsAdmin()
             ? GraphStoreCatalog.getAllGraphStores().map(graphStore -> Map.entry(graphStore.config(), graphStore.graphStore()))
@@ -65,7 +68,8 @@ public class GraphListProc extends CatalogProc {
                 graphProjectConfig,
                 graphStore,
                 computeDegreeDistribution,
-                computeGraphSize
+                computeGraphSize,
+                terminationFlag
             );
         });
     }

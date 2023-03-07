@@ -1,0 +1,2 @@
+include::partial$/algorithms/alpha/approx-max-k-cut/specific-configuration.adoc[]
+| minCommunitySize                                                                                                         | Integer | 0           | yes      | Only nodes inside communities larger or equal the given value are returned.

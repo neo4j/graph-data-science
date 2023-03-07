@@ -29,6 +29,7 @@ import org.neo4j.gds.beta.pregel.PregelComputation;
 import org.neo4j.gds.beta.pregel.PregelSchema;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -50,8 +51,9 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Gra
     private static double averageDegree(Graph graph, int concurrency) {
         var degreeSum = new LongAdder();
         ParallelUtil.parallelForEachNode(
-            graph,
+            graph.nodeCount(),
             concurrency,
+            TerminationFlag.RUNNING_TRUE,
             nodeId -> degreeSum.add(graph.degree(nodeId))
         );
         return (double) degreeSum.sum() / graph.nodeCount();

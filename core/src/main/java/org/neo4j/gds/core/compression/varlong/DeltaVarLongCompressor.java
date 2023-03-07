@@ -120,7 +120,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         LongArrayBuffer buffer,
         ValueMapper mapper
     ) {
-        AdjacencyCompression.copyFrom(
+        AdjacencyCompression.zigZagUncompressFrom(
             buffer,
             semiCompressedBytesDuringLoading,
             numberOfCompressedTargets,
@@ -159,7 +159,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     ) {
         // decompress semiCompressed into full uncompressed long[] (in buffer)
         // ordered by whatever order they've been read
-        AdjacencyCompression.copyFrom(buffer, semiCompressedBytesDuringLoading, numberOfCompressedTargets, compressedByteSize, mapper);
+        AdjacencyCompression.zigZagUncompressFrom(buffer, semiCompressedBytesDuringLoading, numberOfCompressedTargets, compressedByteSize, mapper);
         // buffer contains uncompressed, unsorted target list
 
         int degree = AdjacencyCompression.applyDeltaEncoding(

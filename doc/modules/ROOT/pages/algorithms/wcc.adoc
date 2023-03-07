@@ -62,7 +62,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-include::partial$/algorithms/wcc/specific-configuration.adoc[]
+include::partial$/algorithms/wcc/specific-configuration-stream.adoc[]
 |===
 
 .Results
@@ -190,7 +190,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
-include::partial$/algorithms/wcc/specific-configuration.adoc[]
+include::partial$/algorithms/wcc/specific-configuration-write.adoc[]
 |===
 
 .Results
@@ -631,7 +631,7 @@ This time, we execute WCC on `myIndexedGraph` which will allow the algorithm to 
 .The following will run the algorithm with sampled strategy and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.wcc.stream('myIndexedGraph', {concurrency: 1})
+CALL gds.wcc.stream('myIndexedGraph', {concurrency: 1, consecutiveIds: true})
 YIELD nodeId, componentId
 RETURN gds.util.asNode(nodeId).name AS name, componentId
 ORDER BY componentId, name
@@ -644,9 +644,9 @@ ORDER BY componentId, name
 | "Alice"   | 0
 | "Bridget" | 0
 | "Charles" | 0
-| "Doug"    | 3
-| "Mark"    | 3
-| "Michael" | 3
+| "Doug"    | 1
+| "Mark"    | 1
+| "Michael" | 1
 |===
 --
 

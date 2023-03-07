@@ -28,7 +28,6 @@ import org.neo4j.gds.paths.PathFactory;
 import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkAlgorithmFactory;
 import org.neo4j.gds.traversal.RandomWalkStreamConfig;
-import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
 
@@ -68,7 +67,6 @@ public class RandomWalkStreamSpec implements AlgorithmSpec<RandomWalk, Stream<lo
 
             var returnPath = executionContext
                 .returnColumns()
-                .withReturnColumnNameTransformationFunction(StringFormatting::toLowerCaseWithLocale)
                 .contains("path");
 
             Function<List<Long>, Path> pathCreator = returnPath

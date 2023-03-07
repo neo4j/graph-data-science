@@ -25,6 +25,8 @@ import org.neo4j.gds.executor.ComputationResult;
 
 public class ScalePropertiesProc {
 
+    static final String SCALE_PROPERTIES_DESCRIPTION = "Scale node properties";
+
     static NodePropertyValues nodeProperties(ComputationResult<ScaleProperties, ScaleProperties.Result, ? extends ScalePropertiesBaseConfig> computationResult) {
         var size = computationResult.graph().nodeCount();
         var scaledProperties = computationResult.result().scaledProperties();
@@ -41,4 +43,5 @@ public class ScalePropertiesProc {
             }
         };
     }
+
 }

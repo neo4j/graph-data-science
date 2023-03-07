@@ -42,7 +42,7 @@ class ChunkedAdjacencyListsTest {
         var expectedTargets = new long[]{42L, 1337L, 5L};
         var actualTargets = new long[3];
 
-        adjacencyLists.consume((nodeId, targets, __, position, length) -> AdjacencyCompression.copyFrom(
+        adjacencyLists.consume((nodeId, targets, __, position, length) -> AdjacencyCompression.zigZagUncompressFrom(
             actualTargets,
             targets,
             length,
@@ -61,7 +61,7 @@ class ChunkedAdjacencyListsTest {
 
         var expectedTargets = new long[]{42L, 1337L, 5L, 1337L, 5L};
         var actualTargets = new long[5];
-        adjacencyLists.consume((nodeId, targets, __, position, length) -> AdjacencyCompression.copyFrom(
+        adjacencyLists.consume((nodeId, targets, __, position, length) -> AdjacencyCompression.zigZagUncompressFrom(
             actualTargets,
             targets,
             length,
@@ -130,7 +130,7 @@ class ChunkedAdjacencyListsTest {
         var expectedTargets = new long[]{42L, 1337L, 5L};
         var actualTargets = new long[3];
 
-        adjacencyLists.consume((nodeId, targets, __, position, length) -> AdjacencyCompression.copyFrom(
+        adjacencyLists.consume((nodeId, targets, __, position, length) -> AdjacencyCompression.zigZagUncompressFrom(
             actualTargets,
             targets,
             length,
@@ -152,7 +152,7 @@ class ChunkedAdjacencyListsTest {
 
         adjacencyLists.consume((nodeId, targets, actualProperties, position, length) -> {
             var actualTargets = new long[3];
-            AdjacencyCompression.copyFrom(
+            AdjacencyCompression.zigZagUncompressFrom(
                 actualTargets,
                 targets,
                 length,

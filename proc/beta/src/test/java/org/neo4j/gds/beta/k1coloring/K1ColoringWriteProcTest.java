@@ -21,6 +21,9 @@ package org.neo4j.gds.beta.k1coloring;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -29,6 +32,7 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -99,6 +103,43 @@ class K1ColoringWriteProcTest extends K1ColoringProcBaseTest<K1ColoringWriteConf
             String bytesHuman = MemoryUsage.humanReadable(row.getNumber("bytesMin").longValue());
             assertNotNull(bytesHuman);
             assertTrue(row.getString("requiredMemory").contains(bytesHuman));
+        });
+    }
+
+    static Stream<Arguments> communitySizeInputs() {
+        return Stream.of(
+                Arguments.of(Map.of("minCommunitySize", 1), Map.of(
+                        0L, 1L,
+                        1L, 0L,
+                        2L, 0L,
+                        3L, 0L
+                )),
+                Arguments.of(Map.of("minCommunitySize", 2), Map.of(
+                        1L, 0L,
+                        2L, 0L,
+                        3L, 0L
+                ))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("communitySizeInputs")
+    void testWriteWithMinCommunitySize(Map<String, Long> parameter, Map<Long, Long> expectedResult) {
+        @Language("Cypher")
+        String query = algoBuildStage()
+                .writeMode()
+                .addParameter("writeProperty", "color")
+                .addAllParameters(parameter)
+                .yields("nodeCount", "colorCount");
+
+        runQueryWithRowConsumer(query, row -> {
+            assertEquals(4L, row.getNumber("nodeCount"));
+            assertEquals(2L, row.getNumber("colorCount"));
+        });
+
+        runQueryWithRowConsumer("MATCH (n) RETURN id(n) AS id, n.color AS color", row -> {
+            long nodeId = row.getNumber("id").longValue();
+            assertEquals(expectedResult.get(nodeId), row.getNumber("color"));
         });
     }
 }

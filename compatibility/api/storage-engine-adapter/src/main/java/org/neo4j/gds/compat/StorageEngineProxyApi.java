@@ -35,7 +35,21 @@ import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
 
+import java.util.Locale;
+
 public interface StorageEngineProxyApi {
+
+    static void requireNeo4jVersion(Neo4jVersion version, Class<?> self) {
+        if (Neo4jVersion.findNeo4jVersion() != version) {
+            throw new IllegalStateException(String.format(
+                Locale.ENGLISH,
+                "This '%s' instance is only compatible with Neo4j version %s, but Neo4j version %s has been detected.",
+                self.getName(),
+                version,
+                Neo4jVersion.findNeo4jVersion()
+            ));
+        }
+    }
 
 //    InMemoryStorageEngineBuilder<? extends org.neo4j.gds.compat._51.InMemoryStorageEngineImpl> inMemoryStorageEngineBuilder(
 //        DatabaseLayout databaseLayout,

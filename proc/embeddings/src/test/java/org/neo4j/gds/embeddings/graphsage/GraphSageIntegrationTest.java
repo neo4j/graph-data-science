@@ -24,19 +24,16 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 
 import java.time.ZonedDateTime;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.aMapWithSize;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.isA;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.embeddings.graphsage.ActivationFunction.SIGMOID;
 
 class GraphSageIntegrationTest extends GraphSageBaseProcTest {
@@ -90,13 +87,12 @@ class GraphSageIntegrationTest extends GraphSageBaseProcTest {
             .yields();
 
         runQueryWithRowConsumer(streamQuery, row -> {
-            Number nodeId = row.getNumber("nodeId");
-            assertNotNull(nodeId);
+            assertThat(row.getNumber("nodeId"))
+                .isNotNull();
 
-            Object o = row.get("embedding");
-            assertTrue(o instanceof List);
-            Collection<Double> nodeEmbeddings = (List<Double>) o;
-            assertEquals(GraphSageIntegrationTest.EMBEDDING_SIZE, nodeEmbeddings.size());
+            assertThat(row.get("embedding"))
+                .asList()
+                .hasSize(GraphSageIntegrationTest.EMBEDDING_SIZE);
         });
     }
 

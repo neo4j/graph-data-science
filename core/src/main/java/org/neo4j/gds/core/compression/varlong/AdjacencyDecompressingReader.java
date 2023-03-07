@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.core.compression.varlong;
 
-import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.core.loading.MutableIntValue;
 
 import java.util.Arrays;
 
+import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
 import static org.neo4j.gds.core.compression.common.VarLongDecoding.decodeDeltaVLongs;
 
 final class AdjacencyDecompressingReader {
@@ -110,10 +110,19 @@ final class AdjacencyDecompressingReader {
 
         // last block
         if(available <= 0) {
-            return AdjacencyCursor.NOT_FOUND;
+            return NOT_FOUND;
         }
 
         int targetPos = findPosStrictlyGreaterInBlock(target, pos, Math.min(pos + available, CHUNK_SIZE), block);
+
+        if (targetPos == NOT_FOUND) {
+            // We exhausted the cursor and did not find the target.
+            consumed.value = remaining;
+            this.pos = pos + available;
+
+            return NOT_FOUND;
+        }
+
         // we need to consume including targetPos, not to it, therefore +1
         available -= (1 + targetPos - pos);
         consumed.value = remaining - available;
@@ -137,6 +146,15 @@ final class AdjacencyDecompressingReader {
 
         // last block
         int targetPos = findPosInBlock(target, pos, Math.min(pos + available, CHUNK_SIZE), block);
+
+        if (targetPos == NOT_FOUND) {
+            // We exhausted the cursor and did not find the target.
+            consumed.value = remaining;
+            this.pos = pos + available;
+
+            return NOT_FOUND;
+        }
+
         // we need to consume including targetPos, not to it, therefore +1
         available -= (1 + targetPos - pos);
         consumed.value = remaining - available;
@@ -182,7 +200,10 @@ final class AdjacencyDecompressingReader {
     private int findPosInBlock(long target, int pos, int limit, long[] block) {
         int targetPos = Arrays.binarySearch(block, pos, limit, target);
         if (targetPos < 0) {
-            targetPos = Math.min(-1 - targetPos, -1 + limit);
+            if (-targetPos > limit) {
+                return (int) NOT_FOUND;
+            }
+            targetPos = Math.min(-1 - targetPos, limit - 1);
         }
         return targetPos;
     }

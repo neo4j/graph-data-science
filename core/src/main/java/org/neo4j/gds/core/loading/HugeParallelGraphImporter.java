@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
 
 public interface HugeParallelGraphImporter<T extends Runnable> {
 

@@ -24,18 +24,20 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 final class Center extends ScalarScaler {
 
-    static final String NAME = "center";
+    static final String TYPE = "center";
     final double avg;
 
     private Center(NodePropertyValues properties, double avg) {
-        super(properties);
+        super(properties, Map.of("avg", List.of(avg)));
         this.avg = avg;
     }
 
@@ -48,8 +50,8 @@ final class Center extends ScalarScaler {
         mapWrapper.requireOnlyKeysFrom(List.of());
         return new ScalerFactory() {
             @Override
-            public String name() {
-                return NAME;
+            public String type() {
+                return TYPE;
             }
 
             @Override
@@ -57,12 +59,13 @@ final class Center extends ScalarScaler {
                 NodePropertyValues properties,
                 long nodeCount,
                 int concurrency,
+                ProgressTracker progressTracker,
                 ExecutorService executor
             ) {
                 var tasks = PartitionUtils.rangePartition(
                     concurrency,
                     nodeCount,
-                    partition -> new ComputeSum(partition, properties),
+                    partition -> new ComputeSum(partition, properties, progressTracker),
                     Optional.empty()
                 );
                 RunWithConcurrency.builder()
@@ -74,7 +77,6 @@ final class Center extends ScalarScaler {
                 var avg = sum / nodeCount;
 
                 return new Center(properties, avg);
-
             }
         };
     }
@@ -83,8 +85,8 @@ final class Center extends ScalarScaler {
 
         private double sum;
 
-        ComputeSum(Partition partition, NodePropertyValues property) {
-            super(partition, property);
+        ComputeSum(Partition partition, NodePropertyValues property, ProgressTracker progressTracker) {
+            super(partition, property, progressTracker);
             this.sum = 0D;
         }
 

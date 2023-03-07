@@ -410,7 +410,7 @@ YIELD
 [opts="header", cols="1,3m,1,3m,1m"]
 |===
 | graph     | nodeProjection                         | nodes  | relationshipProjection                                                        | rels
-| "persons" | {Person={label=Person, properties={}}} | 3      | {KNOWS={orientation=NATURAL, indexInverse=false, aggregation=DEFAULT, type=KNOWS, properties={}}} | 2
+| "persons" | {Person={label=Person, properties={}}} | 3      | {KNOWS={aggregation=DEFAULT, indexInverse=false, orientation=NATURAL, properties={}, type=KNOWS}} | 2
 |===
 --
 
@@ -485,7 +485,7 @@ YIELD
 [opts="header", cols="1,3m,1m,1m"]
 |===
 | graph             | knowsProjection                                                                                      | nodes  | rels
-| "undirectedKnows" | {KNOWS={orientation=UNDIRECTED, indexInverse=false, aggregation=DEFAULT, type=KNOWS, properties={}}} | 3      | 4
+| "undirectedKnows" | {KNOWS={aggregation=DEFAULT, indexInverse=false, orientation=UNDIRECTED, properties={}, type=KNOWS}} | 3      | 4
 |===
 --
 
@@ -594,7 +594,7 @@ YIELD
 [opts="header", cols="1,3m,1m,1m"]
 |===
 | graph                | readProjection                                                                                                                                                                | nodes  | rels
-| "readWithProperties" | {READ={orientation=NATURAL, indexInverse=false, aggregation=DEFAULT, type=READ, properties={numberOfPages={defaultValue=null, property=numberOfPages, aggregation=DEFAULT}}}} | 5      | 4
+| "readWithProperties" | {READ={aggregation=DEFAULT, indexInverse=false, orientation=NATURAL, properties={numberOfPages={defaultValue=null, property=numberOfPages, aggregation=DEFAULT}}, type=READ}} | 5      | 4
 |===
 --
 
@@ -676,7 +676,7 @@ YIELD
 [opts="header", cols="1,3m,1m,1m"]
 |===
 | graph      | readProjection                                                                                                                                                   | nodes  | rels
-| "readCount" | {READ={orientation=NATURAL, indexInverse=false, aggregation=DEFAULT, type=READ, properties={numberOfReads={defaultValue=null, property=*, aggregation=COUNT}}}} | 5      | 3
+| "readCount" | {READ={aggregation=DEFAULT, indexInverse=false, orientation=NATURAL, properties={numberOfReads={defaultValue=null, property=*, aggregation=COUNT}}, type=READ}} | 5      | 3
 |===
 --
 
@@ -737,7 +737,7 @@ YIELD
 [opts="header", cols="1,3m,1m,1m"]
 |===
 | graph      | readProjection                                                                                                                                                            | nodes  | rels
-| "readSums" | {READ={orientation=NATURAL, indexInverse=false, aggregation=DEFAULT, type=READ, properties={numberOfPages={defaultValue=null, property=numberOfPages, aggregation=SUM}}}} | 5      | 3
+| "readSums" | {READ={aggregation=DEFAULT, indexInverse=false, orientation=NATURAL, properties={numberOfPages={defaultValue=null, property=numberOfPages, aggregation=SUM}}, type=READ}} | 5      | 3
 |===
 --
 

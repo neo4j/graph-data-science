@@ -6,6 +6,11 @@
 
 include::partial$/operations-reference/beta-note.adoc[]
 
+:directed:
+:undirected:
+:homogeneous:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
 
 [[algorithms-k1coloring-intro]]
 == Introduction
@@ -60,9 +65,10 @@ YIELD nodeId, color
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name                                                  | Type    | Default                | Optional | Description
-| concurrency                                           | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see xref:installation/System-requirements.adoc#system-requirements-cpu[CPU].
+| Name                                                                                    | Type    | Default                | Optional | Description
+| concurrency                                                                             | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see xref:installation/System-requirements.adoc#system-requirements-cpu[CPU].
 | xref:common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations] | Integer | 10                     | yes      | The maximum number of iterations of K1 Coloring to run.
+| minCommunitySize                                                                        | Integer | 0                      | yes      | Only nodes inside communities larger or equal the given value are returned.
 |===
 
 .Results
@@ -163,11 +169,12 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
 |===
-| Name                                                        | Type    | Default                | Optional | Description
-| xref:common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]            | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see xref:installation/System-requirements.adoc#system-requirements-cpu[CPU].
-| xref:common-usage/running-algos.adoc#common-configuration-write-concurrency[writeConcurrency] | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| xref:common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations]       | Integer | 10                     | yes      | The maximum number of iterations of K1 Coloring to run.
-| xref:common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]       | String  | n/a                    | no       | The node property this procedure writes the color to.
+| Name                                                                                           | Type     | Default                | Optional | Description
+| xref:common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]             | Integer  | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see xref:installation/System-requirements.adoc#system-requirements-cpu[CPU].
+| xref:common-usage/running-algos.adoc#common-configuration-write-concurrency[writeConcurrency]  | Integer  | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| xref:common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations]        | Integer  | 10                     | yes      | The maximum number of iterations of K1 Coloring to run.
+| xref:common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]        | String   | n/a                    | no       | The node property this procedure writes the color to.
+| minCommunitySize                                                                               | Integer  | 0                      | yes      | Only community ids of communities with a size greater than or equal to the given value are written to Neo4j.
 |===
 
 .Results

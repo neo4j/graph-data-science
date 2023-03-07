@@ -1,0 +1,42 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Core :: Write'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    annotationProcessor project(':annotations')
+    annotationProcessor project(':config-generator')
+    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
+    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+    annotationProcessor group: 'org.neo4j',                name: 'annotations',        version: ver.'neo4j'
+
+    compileOnly         group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
+    compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
+    compileOnly         group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
+    compileOnly         group: 'com.github.spotbugs',      name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
+
+    neodeps().each {
+        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
+            transitive = false
+        }
+    }
+
+    implementation project(':annotations')
+    implementation project(':core')
+    implementation project(':graph-schema-api')
+    implementation project(':transaction')
+
+
+    // TEST DEPENDENCIES
+    testImplementation project(':test-graph-loaders')
+    testImplementation project(':test-utils')
+}
+
+afterEvaluate {
+    if (ver.'neo4j'.startsWith('5.')) {
+        dependencies {
+            testImplementation group: 'org.neo4j', name: 'neo4j-record-storage-engine', version: ver.'neo4j'
+        }
+    }
+}

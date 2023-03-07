@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.paths.singlesource;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -28,11 +27,9 @@ import org.neo4j.gds.GdsCypher;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.neo4j.gds.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
 import static org.neo4j.gds.paths.PathTestUtil.validationQuery;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -87,25 +84,23 @@ public abstract class AllShortestPathsWriteProcTest extends AllShortestPathsProc
         runQuery(query);
 
         var validationQuery = "MATCH ()-[r:%s]->() RETURN r.nodeIds AS nodeIds, r.costs AS costs";
-        var rowCount = new MutableInt(0);
-        runQueryWithRowConsumer(formatWithLocale(validationQuery, WRITE_RELATIONSHIP_TYPE), row -> {
-            rowCount.increment();
+        var rowCount = runQueryWithRowConsumer(formatWithLocale(validationQuery, WRITE_RELATIONSHIP_TYPE), row -> {
             var nodeIds = row.get("nodeIds");
             var costs = row.get("costs");
 
             if (writeNodeIds) {
-                assertNotNull(nodeIds);
+                assertThat(nodeIds).isNotNull();
             } else {
-                assertNull(nodeIds);
+                assertThat(nodeIds).isNull();
             }
 
             if (writeCosts) {
-                assertNotNull(costs);
+                assertThat(costs).isNotNull();
             } else {
-                assertNull(costs);
+                assertThat(costs).isNull();
             }
         });
-        assertEquals(6, rowCount.getValue());
+        assertThat(rowCount).isEqualTo(6L);
     }
 
     @Test

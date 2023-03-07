@@ -28,7 +28,6 @@ import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.utils.TestProcedureAndFunctionScanner;
 import org.neo4j.graphdb.Result;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -53,8 +52,14 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.graph.sample.cnarw",
 
         "gds.alpha.create.cypherdb",
+        "gds.alpha.drop.cypherdb",
 
         "gds.alpha.allShortestPaths.stream",
+
+        "gds.bellmanFord.stats",
+        "gds.bellmanFord.stream",
+        "gds.bellmanFord.mutate",
+        "gds.bellmanFord.write",
 
         "gds.beta.collapsePath.mutate",
 
@@ -172,6 +177,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
         "gds.alpha.scaleProperties.mutate",
         "gds.alpha.scaleProperties.stream",
+        "gds.beta.scaleProperties.write",
 
         "gds.alpha.sllpa.mutate",
         "gds.alpha.sllpa.mutate.estimate",
@@ -526,17 +532,16 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
     @Test
     void countShouldMatch() {
-        var registeredProcedures = new ArrayList<>();
-        runQueryWithRowConsumer(
+        var returnedRows = runQueryWithRowConsumer(
             "CALL gds.list() YIELD name",
-            row -> registeredProcedures.add(row.getString("name"))
+            ignored -> {}
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 377;
+        int expectedCount = 383;
         assertEquals(
             expectedCount,
-            registeredProcedures.size(),
+            returnedRows,
             "The expected and registered procedures don't match. Please also update the SmokeTest counts."
         );
     }

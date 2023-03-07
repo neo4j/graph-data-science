@@ -26,8 +26,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,10 +47,20 @@ class MinMaxTest {
     @ParameterizedTest
     @MethodSource("properties")
     void normalizes(NodePropertyValues properties, double min, double max) {
-        var scaler = (MinMax) MinMax.buildFrom(CypherMapWrapper.empty()).create(properties, 10, 1, Pools.DEFAULT);
+        var scaler = (MinMax) MinMax.buildFrom(CypherMapWrapper.empty()).create(
+            properties,
+            10,
+            1,
+            ProgressTracker.NULL_TRACKER,
+            Pools.DEFAULT
+        );
 
         assertThat(scaler.min).isEqualTo(min);
         assertThat(scaler.maxMinDiff).isEqualTo(max - min);
+        assertThat(scaler.statistics()).containsExactlyEntriesOf(Map.of(
+            "max", List.of(max),
+            "min", List.of(min)
+        ));
 
         for (int i = 0; i < 10; i++) {
             assertThat(scaler.scaleProperty(i)).isEqualTo(i / 9D);
@@ -56,8 +69,20 @@ class MinMaxTest {
 
     @Test
     void avoidsDivByZero() {
-        var properties = new DoubleTestPropertyValues(nodeId -> 4D);
-        var scaler = MinMax.buildFrom(CypherMapWrapper.empty()).create(properties, 10, 1, Pools.DEFAULT);
+        double propValue = 4D;
+        var properties = new DoubleTestPropertyValues(nodeId -> propValue);
+        var scaler = MinMax.buildFrom(CypherMapWrapper.empty()).create(
+            properties,
+            10,
+            1,
+            ProgressTracker.NULL_TRACKER,
+            Pools.DEFAULT
+        );
+
+        assertThat(scaler.statistics()).containsExactlyEntriesOf(Map.of(
+            "max", List.of(propValue),
+            "min", List.of(propValue)
+        ));
 
         for (int i = 0; i < 10; i++) {
             assertThat(scaler.scaleProperty(i)).isEqualTo(0D);

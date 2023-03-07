@@ -6,6 +6,7 @@
 :algorithm: Dijkstra
 :source-target: true
 :procedure-name: pass:q[gds.shortestPath.dijkstra]
+:sequential: true
 
 
 :directed:

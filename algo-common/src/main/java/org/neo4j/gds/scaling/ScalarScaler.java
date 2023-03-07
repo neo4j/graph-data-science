@@ -21,19 +21,45 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+
+import java.util.List;
+import java.util.Map;
 
 public abstract class ScalarScaler implements Scaler {
 
     protected final NodePropertyValues properties;
+    private final Map<String, List<Double>> statistics;
 
-    protected ScalarScaler(NodePropertyValues properties) {this.properties = properties;}
+    protected ScalarScaler(NodePropertyValues properties, Map<String, List<Double>> statistics) {
+        this.properties = properties;
+        this.statistics = statistics;
+    }
 
     @Override
     public int dimension() {
         return 1;
     }
 
-    static final ScalarScaler ZERO = new ScalarScaler(null) {
+    @Override
+    public Map<String, List<Double>> statistics() {
+        return statistics;
+    }
+
+    static class StatsOnly extends ScalarScaler {
+
+        StatsOnly(Map<String, List<Double>> stats) {
+            super(null, stats);
+        }
+
+        @Override
+        public double scaleProperty(long nodeId) {
+            return 0;
+        }
+
+    }
+
+    static final ScalarScaler ZERO = new ScalarScaler(null, Map.of()) {
         @Override
         public double scaleProperty(long nodeId) {
             return 0;
@@ -44,10 +70,12 @@ public abstract class ScalarScaler implements Scaler {
 
         private final Partition partition;
         final NodePropertyValues properties;
+        private final ProgressTracker progressTracker;
 
-        AggregatesComputer(Partition partition, NodePropertyValues property) {
+        AggregatesComputer(Partition partition, NodePropertyValues property, ProgressTracker progressTracker) {
             this.partition = partition;
             this.properties = property;
+            this.progressTracker = progressTracker;
         }
 
         @Override
@@ -56,6 +84,7 @@ public abstract class ScalarScaler implements Scaler {
             for (long nodeId = partition.startNode(); nodeId < end; nodeId++) {
                 compute(nodeId);
             }
+            progressTracker.logProgress(partition.nodeCount());
         }
 
         abstract void compute(long nodeId);

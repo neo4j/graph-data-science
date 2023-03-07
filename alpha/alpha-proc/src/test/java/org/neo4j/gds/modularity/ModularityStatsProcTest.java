@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.modularity;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
@@ -38,10 +37,10 @@ class ModularityStatsProcTest extends BaseProcTest {
     @Neo4jGraph
     static final String GRAPH =
         "CREATE " +
-        " (a1: Node { communityId: 0 })," +
-        " (a2: Node { communityId: 0 })," +
+        " (a1: Node { communityId: 10 })," +
+        " (a2: Node { communityId: 10 })," +
         " (a3: Node { communityId: 5 })," +
-        " (a4: Node { communityId: 0 })," +
+        " (a4: Node { communityId: 10 })," +
         " (a5: Node { communityId: 5 })," +
         " (a6: Node { communityId: 5 })," +
 
@@ -82,8 +81,7 @@ class ModularityStatsProcTest extends BaseProcTest {
             .addParameter("communityProperty", "communityId")
             .yields();
 
-        var rowCount = new MutableInt();
-        runQueryWithRowConsumer(statsQuery, row -> {
+        var rowCount = runQueryWithRowConsumer(statsQuery, row -> {
             assertThat(row.getNumber("nodeCount").longValue()).isEqualTo(6L);
             assertThat(row.getNumber("relationshipCount").longValue()).isEqualTo(16L);
             assertThat(row.getNumber("communityCount").longValue()).isEqualTo(2L);
@@ -93,10 +91,9 @@ class ModularityStatsProcTest extends BaseProcTest {
             assertThat(row.getNumber("computeMillis").longValue()).isGreaterThanOrEqualTo(0L);
             assertThat(row.getNumber("postProcessingMillis").longValue()).isGreaterThanOrEqualTo(0L);
             assertThat(row.get("configuration")).asInstanceOf(MAP).isNotEmpty();
-            rowCount.increment();
         });
 
-        assertThat(rowCount.intValue())
+        assertThat(rowCount)
             .as("Result count doesn't match")
             .isEqualTo(1);
     }

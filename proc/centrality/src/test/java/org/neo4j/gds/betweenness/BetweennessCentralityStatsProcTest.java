@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.betweenness;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
@@ -27,10 +29,8 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThan;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 public class BetweennessCentralityStatsProcTest extends BetweennessCentralityProcTest<BetweennessCentralityStatsConfig> {
     @Override
@@ -53,15 +53,33 @@ public class BetweennessCentralityStatsProcTest extends BetweennessCentralityPro
             .yields("centralityDistribution", "preProcessingMillis", "computeMillis", "postProcessingMillis");
 
         runQueryWithRowConsumer(query, row -> {
-            Map<String, Object> centralityDistribution = (Map<String, Object>) row.get("centralityDistribution");
-            assertNotNull(centralityDistribution);
-            assertEquals(0.0, centralityDistribution.get("min"));
-            assertEquals(4.0, (double) centralityDistribution.get("max"), 1e-4);
-            assertEquals(2.0, (double) centralityDistribution.get("mean"), 1e-4);
-            
-            assertThat(-1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
-            assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
-            assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
+            assertThat(row.get("centralityDistribution"))
+                .isNotNull()
+                .isInstanceOf(Map.class)
+                .asInstanceOf(InstanceOfAssertFactories.MAP)
+                .containsEntry("min", 0.0)
+                .hasEntrySatisfying("max",
+                    value -> assertThat(value)
+                        .asInstanceOf(InstanceOfAssertFactories.DOUBLE)
+                        .isEqualTo(4.0, Offset.offset(1e-4))
+                )
+                .hasEntrySatisfying("mean",
+                    value -> assertThat(value)
+                        .asInstanceOf(InstanceOfAssertFactories.DOUBLE)
+                        .isEqualTo(2.0, Offset.offset(1e-4))
+                );
+
+            assertThat(row.getNumber("preProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("computeMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("postProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
         });
     }
 
@@ -75,10 +93,17 @@ public class BetweennessCentralityStatsProcTest extends BetweennessCentralityPro
             .yields("preProcessingMillis", "computeMillis", "postProcessingMillis");
 
         runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("preProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
 
-            assertThat(-1L, lessThan(row.getNumber("preProcessingMillis").longValue()));
-            assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
-            assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
+            assertThat(row.getNumber("computeMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
+
+            assertThat(row.getNumber("postProcessingMillis"))
+                .asInstanceOf(LONG)
+                .isGreaterThan(-1L);
         });
     }
 }

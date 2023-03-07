@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.compat._55;
 
-import org.neo4j.internal.recordstorage.InMemoryLogVersionRepository;
+import org.neo4j.internal.recordstorage.InMemoryLogVersionRepository55;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.storageengine.api.ClosedTransactionMetadata;
 import org.neo4j.storageengine.api.ExternalStoreId;
@@ -35,11 +35,11 @@ import java.util.UUID;
 public class InMemoryMetaDataProviderImpl implements MetadataProvider {
 
     private final ExternalStoreId externalStoreId;
-    private final InMemoryLogVersionRepository logVersionRepository;
+    private final InMemoryLogVersionRepository55 logVersionRepository;
     private final InMemoryTransactionIdStoreImpl transactionIdStore;
 
     InMemoryMetaDataProviderImpl() {
-        this.logVersionRepository = new InMemoryLogVersionRepository();
+        this.logVersionRepository = new InMemoryLogVersionRepository55();
         this.externalStoreId = new ExternalStoreId(UUID.randomUUID());
         this.transactionIdStore = new InMemoryTransactionIdStoreImpl();
     }

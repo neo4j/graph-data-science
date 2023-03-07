@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.beta.k1coloring;
 
+import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -47,7 +48,8 @@ final class K1ColoringProc {
     }
 
     static <CONFIG extends K1ColoringConfig> NodePropertyValues nodeProperties(ComputationResult<K1Coloring, HugeLongArray, CONFIG> computeResult) {
-        return computeResult.result().asNodeProperties();
+        var config = computeResult.config();
+        return CommunityProcCompanion.considerSizeFilter(config, computeResult.result().asNodeProperties());
     }
 
     abstract static class K1ColoringResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {
