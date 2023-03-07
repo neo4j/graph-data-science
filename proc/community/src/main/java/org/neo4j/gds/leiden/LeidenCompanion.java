@@ -38,6 +38,7 @@ final class LeidenCompanion {
 
         if (config.includeIntermediateCommunities()) {
             return new IntermediateCommunityNodeProperties(
+                computationResult.graph().nodeCount(),
                 leidenResult.communities().size(),
                 leidenResult::getIntermediateCommunities
             );

@@ -51,8 +51,9 @@ public final class DegreeCentralityProc {
         var degrees = computationResult.result();
 
         return new DoubleNodePropertyValues() {
+
             @Override
-            public long size() {
+            public long nodeCount() {
                 return size;
             }
 

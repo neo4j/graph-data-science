@@ -114,7 +114,7 @@ public class FloatArrayNodePropertiesBuilder implements InnerNodePropertiesBuild
         }
 
         @Override
-        public long size() {
+        public long nodeCount() {
             return size;
         }
     }

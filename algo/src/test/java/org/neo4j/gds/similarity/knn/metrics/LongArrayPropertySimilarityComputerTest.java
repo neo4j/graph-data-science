@@ -17,35 +17,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.nodeproperties;
+package org.neo4j.gds.similarity.knn.metrics;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ConsecutiveLongNodePropertyValuesTest {
+class LongArrayPropertySimilarityComputerTest {
 
     @Test
-    void shouldReturnConsecutiveIds() {
-        LongNodePropertyValues nonConsecutiveIds = new LongNodePropertyValues() {
+    void usingSparseProperties() {
+        long[][] inputValues = {{42, 24}, null, {84, 48}};
+
+        var sparseProperties = new LongArrayNodePropertyValues() {
             @Override
-            public long nodeCount() {
-                return 10;
+            public long[] longArrayValue(long nodeId) {
+                return inputValues[(int) nodeId];
             }
 
             @Override
-            public long longValue(long nodeId) {
-                return nodeId % 3 * 10;
+            public long nodeCount() {
+                return inputValues.length;
             }
         };
 
-        var consecutiveIds = new ConsecutiveLongNodePropertyValues(nonConsecutiveIds);
+        var sortedValues = new LongArrayPropertySimilarityComputer.SortedLongArrayPropertyValues(sparseProperties);
 
-        assertThat(consecutiveIds.nodeCount()).isEqualTo(nonConsecutiveIds.nodeCount());
-
-        for (int i = 0; i < 10; i++) {
-            assertThat(consecutiveIds.longValue(i)).isEqualTo(i % 3);
-        }
+        assertThat(sortedValues.longArrayValue(0)).containsExactly(24, 42);
+        assertThat(sortedValues.longArrayValue(1)).isNull();
+        assertThat(sortedValues.longArrayValue(2)).containsExactly(48, 84);
     }
+
 }

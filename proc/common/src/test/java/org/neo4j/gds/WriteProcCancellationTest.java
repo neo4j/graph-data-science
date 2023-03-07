@@ -68,7 +68,7 @@ class WriteProcCancellationTest extends BaseTest {
             }
 
             @Override
-            public long size() {
+            public long nodeCount() {
                 return 42;
             }
         };

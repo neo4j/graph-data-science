@@ -77,7 +77,7 @@ public interface DisjointSetStruct {
             }
 
             @Override
-            public long size() {
+            public long nodeCount() {
                 return DisjointSetStruct.this.size();
             }
         };

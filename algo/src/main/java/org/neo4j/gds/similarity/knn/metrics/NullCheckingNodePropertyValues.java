@@ -93,8 +93,8 @@ public final class NullCheckingNodePropertyValues implements NodePropertyValues 
     }
 
     @Override
-    public long size() {
-        return properties.size();
+    public long nodeCount() {
+        return properties.nodeCount();
     }
 
     private void check(long nodeId, @Nullable Object value) {

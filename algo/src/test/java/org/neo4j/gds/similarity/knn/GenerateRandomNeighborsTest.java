@@ -23,8 +23,8 @@ import net.jqwik.api.ForAll;
 import net.jqwik.api.From;
 import net.jqwik.api.Property;
 import org.eclipse.collections.api.tuple.primitive.IntIntPair;
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.core.huge.DirectIdMap;
+import org.neo4j.gds.core.utils.IdentityPropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -51,17 +51,7 @@ class GenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
             nodeCount
         );
 
-        var nodeProperties = new LongNodePropertyValues() {
-            @Override
-            public long longValue(long nodeId) {
-                return nodeId;
-            }
-
-            @Override
-            public long size() {
-                return nodeCount;
-            }
-        };
+        var nodeProperties = new IdentityPropertyValues(nodeCount);
 
         var similarityComputer = SimilarityComputer.ofProperty(
             idMap,

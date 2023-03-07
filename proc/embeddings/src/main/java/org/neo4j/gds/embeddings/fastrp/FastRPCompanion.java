@@ -40,7 +40,7 @@ final class FastRPCompanion {
             }
 
             @Override
-            public long size() {
+            public long nodeCount() {
                 return nodeCount;
             }
         };

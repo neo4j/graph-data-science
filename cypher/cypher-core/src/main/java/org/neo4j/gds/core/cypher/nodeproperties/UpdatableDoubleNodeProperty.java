@@ -35,9 +35,8 @@ public class UpdatableDoubleNodeProperty implements UpdatableNodeProperty, Doubl
         this.doubleList = HugeSparseDoubleList.of(defaultValue);
     }
 
-
     @Override
-    public long size() {
+    public long nodeCount() {
         return nodeCount;
     }
 

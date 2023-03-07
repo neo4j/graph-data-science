@@ -30,6 +30,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 class KnnStreamProcTest extends KnnProcTest<KnnStreamConfig> {
 
     private static final Collection<SimilarityResult> EXPECTED = new HashSet<>();
@@ -93,5 +95,29 @@ class KnnStreamProcTest extends KnnProcTest<KnnStreamConfig> {
             Map.of("node1", 6L, "node2", 7L, "similarity", 1.0),
             Map.of("node1", 7L, "node2", 6L, "similarity", 1.0)
         ));
+    }
+
+    @Test
+    void computeOverSparseNodeProperties() {
+        String nodeCreateQuery =
+            "CREATE " +
+            "  (alice:Person {grades: [24, 4]})" +
+            " ,(eve:Person)" +
+            " ,(bob:Foo {grades: [24, 4, 42]})";
+
+        runQuery(nodeCreateQuery);
+
+        String createQuery = "CALL gds.graph.project('graph', " +
+                             "'Person', '*', {nodeProperties: {grades: {defaultValue: [1, 1]}}})";
+        runQuery(createQuery);
+
+        String algoQuery = GdsCypher.call("graph")
+            .algo("gds.knn")
+            .streamMode()
+            .addParameter("nodeLabels", List.of("Person"))
+            .addParameter("nodeProperties", List.of("grades"))
+            .yields("node1", "node2", "similarity");
+
+        runQueryWithResultConsumer(algoQuery, result -> assertThat(result.stream().count()).isEqualTo(2));
     }
 }

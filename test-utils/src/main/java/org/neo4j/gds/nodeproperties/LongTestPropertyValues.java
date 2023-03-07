@@ -28,8 +28,8 @@ public final class LongTestPropertyValues implements LongNodePropertyValues {
     public LongTestPropertyValues(LongToLongFunction transformer) {this.transformer = transformer;}
 
     @Override
-    public long size() {
-        return 0;
+    public long nodeCount() {
+        return -1;
     }
 
     @Override

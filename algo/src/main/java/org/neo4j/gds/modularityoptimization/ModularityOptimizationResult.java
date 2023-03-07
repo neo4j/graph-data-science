@@ -70,7 +70,7 @@ public class ModularityOptimizationResult {
             }
 
             @Override
-            public long size() {
+            public long nodeCount() {
                 return nodeCount;
             }
         };

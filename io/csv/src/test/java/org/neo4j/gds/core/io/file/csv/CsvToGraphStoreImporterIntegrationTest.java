@@ -168,7 +168,7 @@ class CsvToGraphStoreImporterIntegrationTest {
             }
 
             @Override
-            public long size() {
+            public long valueCount() {
                 return 1337;
             }
         });
@@ -182,7 +182,7 @@ class CsvToGraphStoreImporterIntegrationTest {
             }
 
             @Override
-            public long size() {
+            public long valueCount() {
                 return 10_000;
             }
         });
@@ -196,7 +196,7 @@ class CsvToGraphStoreImporterIntegrationTest {
             }
 
             @Override
-            public long size() {
+            public long valueCount() {
                 return 10_000;
             }
         });

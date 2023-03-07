@@ -52,4 +52,6 @@ public interface GraphPropertyValues extends PropertyValues {
     Stream<?> objects();
 
     Stream<Value> values();
+
+    long valueCount();
 }

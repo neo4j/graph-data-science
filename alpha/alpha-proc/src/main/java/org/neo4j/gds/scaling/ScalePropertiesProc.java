@@ -23,7 +23,9 @@ import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
 
-public class ScalePropertiesProc {
+public final class ScalePropertiesProc {
+
+    private ScalePropertiesProc() {}
 
     static final String SCALE_PROPERTIES_DESCRIPTION = "Scale node properties";
 
@@ -33,7 +35,7 @@ public class ScalePropertiesProc {
 
         return new DoubleArrayNodePropertyValues() {
             @Override
-            public long size() {
+            public long nodeCount() {
                 return size;
             }
 
