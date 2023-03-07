@@ -143,7 +143,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
 
     @Override
     public boolean storageExists(FileSystemAbstraction fileSystem, DatabaseLayout databaseLayout, PageCache pageCache) {
-        throw new UnsupportedOperationException("5.5 storage engine requires JDK17");
+        return false;
     }
 
     @Override
