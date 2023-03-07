@@ -45,7 +45,7 @@ public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues
         this.communities = HugeLongArray.newArray(maxIdx);
 
         for (var nodeId = 0; nodeId < maxIdx; nodeId++) {
-            if (longNodeProperties.hasValue(nodeId)) {
+            if (inputProperties.hasValue(nodeId)) {
                 var setId = inputProperties.longValue(nodeId);
                 var communityId = setIdToConsecutiveId.getOrDefault(setId, -1);
                 if (communityId == -1) {
@@ -62,11 +62,6 @@ public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues
     @Override
     public long longValue(long nodeId) {
         return communities.get(nodeId);
-    }
-
-    @Override
-    public long valuesStored() {
-        return communities.size();
     }
 
     @Override

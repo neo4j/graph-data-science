@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
@@ -31,7 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class KnnStreamProcTest extends KnnProcTest<KnnStreamConfig> {
 

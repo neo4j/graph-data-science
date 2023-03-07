@@ -133,14 +133,9 @@ class CommunityProcCompanionTest {
         // we mimic the sparseness here through size > valueStored
         LongNodePropertyValues sparseProperties = new TestSparseNodePropertyValues(4, input::get);
 
-        var config = ConfigWithComponentSize.of(CypherMapWrapper.empty().withNumber("minComponentSize", 2L));
+        var config = CommunityProcCompanionConfig.of(CypherMapWrapper.empty().withNumber("minCommunitySize", 2L));
 
-        var filteredProperties = CommunityProcCompanion.nodeProperties(
-            config,
-            "seed",
-            sparseProperties,
-            () -> { throw new UnsupportedOperationException("Not implemented"); }
-        );
+        var filteredProperties = CommunityProcCompanion.nodeProperties(config, sparseProperties);
 
         assertThat(filteredProperties.value(0)).isNull();
         assertThat(filteredProperties.value(1)).isEqualTo(Values.longValue(42));
@@ -159,14 +154,9 @@ class CommunityProcCompanionTest {
         // we mimic the sparseness here through size > valueStored
         LongNodePropertyValues sparseProperties = new TestSparseNodePropertyValues(4, input::get);
 
-        var config = ConfigWithComponentSize.of(CypherMapWrapper.create(Map.of("consecutiveIds", true)));
+        var config = CommunityProcCompanionConfig.of(CypherMapWrapper.create(Map.of("consecutiveIds", true)));
 
-        var filteredProperties = CommunityProcCompanion.nodeProperties(
-            config,
-            "seed",
-            sparseProperties,
-            () -> { throw new UnsupportedOperationException("Not implemented"); }
-        );
+        var filteredProperties = CommunityProcCompanion.nodeProperties(config, sparseProperties);
 
         assertThat(filteredProperties.value(0)).isEqualTo(Values.longValue(0));
         assertThat(filteredProperties.value(1)).isEqualTo(Values.longValue(1));
@@ -248,7 +238,7 @@ class CommunityProcCompanionTest {
         );
 
 
-        for (long i = 0L; i < result.size(); i++) {
+        for (long i = 0L; i < result.nodeCount(); i++) {
             int ii = (int) i;
             if (returnedValues[ii] == null) {
                 assertThat(result.hasValue(i)).isFalse();
