@@ -22,6 +22,7 @@ package org.neo4j.gds.scaling;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.StandardWriteResult;
@@ -49,9 +50,14 @@ public class ScalePropertiesWriteProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return new ProcedureExecutor<>(
-            new ScalePropertiesWriteSpec(nodePropertyExporterBuilder),
+            new ScalePropertiesWriteSpec(),
             executionContext()
         ).compute(graphName, configuration);
+    }
+
+    @Override
+    public ExecutionContext executionContext() {
+        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
     }
 
     @SuppressWarnings("unused")

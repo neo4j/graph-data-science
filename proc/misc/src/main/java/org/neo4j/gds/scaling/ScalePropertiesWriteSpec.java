@@ -21,8 +21,6 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
-import org.neo4j.gds.core.write.NodePropertyExporter;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionMode;
@@ -36,12 +34,6 @@ import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIP
 
 @GdsCallable(name = "gds.beta.scaleProperties.write", description = SCALE_PROPERTIES_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
 public class ScalePropertiesWriteSpec implements AlgorithmSpec<ScaleProperties, ScaleProperties.Result, ScalePropertiesWriteConfig, Stream<ScalePropertiesWriteProc.WriteResult>, ScalePropertiesFactory<ScalePropertiesWriteConfig>> {
-
-    private final NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
-
-    ScalePropertiesWriteSpec(NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder) {
-        this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
-    }
 
     @Override
     public String name() {
@@ -69,7 +61,6 @@ public class ScalePropertiesWriteSpec implements AlgorithmSpec<ScaleProperties, 
                 computationResult.config().writeProperty(),
                 ScalePropertiesProc.nodeProperties(computationResult)
             )),
-            nodePropertyExporterBuilder,
             name()
         );
     }
