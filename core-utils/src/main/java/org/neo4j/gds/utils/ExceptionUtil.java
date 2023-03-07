@@ -26,12 +26,10 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public final class ExceptionUtil {
 
@@ -81,27 +79,12 @@ public final class ExceptionUtil {
         throw new RuntimeException(e);
     };
 
-    public static void closeAll(Stream<? extends AutoCloseable> closeables) throws Exception {
-        closeAll(closeables.iterator());
-    }
-
-    public static void closeAll(AutoCloseable... closeables) throws Exception {
-        closeAll(Arrays.asList(closeables));
-    }
-
     public static void closeAll(Iterable<? extends AutoCloseable> closeables) throws Exception {
         closeAll(closeables.iterator());
     }
 
     public static void closeAll(Iterator<? extends AutoCloseable> closeables) throws Exception {
         closeAll(RETHROW_CHECKED, closeables);
-    }
-
-    public static <E extends Exception> void closeAll(
-        CheckedConsumer<Exception, E> handler,
-        Stream<? extends AutoCloseable> closeables
-    ) throws E {
-        closeAll(handler, closeables.iterator());
     }
 
     public static <E extends Exception> void closeAll(
@@ -205,28 +188,6 @@ public final class ExceptionUtil {
         T input
     ) {
         return function.apply(input);
-    }
-
-    public static void validateTargetNodeIsLoaded(long mappedId, long neoId) {
-        validateNodeIsLoaded(mappedId, neoId, "target");
-    }
-
-    public static void validateSourceNodeIsLoaded(long mappedId, long neoId) {
-        validateNodeIsLoaded(mappedId, neoId, "source");
-    }
-
-    private static void validateNodeIsLoaded(long mappedId, long neoId, String side) {
-        if (mappedId == -1) {
-            throw new IllegalArgumentException(
-                String.format(
-                    Locale.US,
-                    "Failed to load a relationship because its %s-node with id %s is not part of the node query or projection. " +
-                    "To ignore the relationship, set the configuration parameter `validateRelationships` to false.",
-                    side,
-                    neoId
-                )
-            );
-        }
     }
 
     private ExceptionUtil() {
