@@ -67,7 +67,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
 
     @Override
     public String name() {
-        throw new UnsupportedOperationException("5.4 storage engine requires JDK17");
+        return "unsupported";
     }
 
     @Override
