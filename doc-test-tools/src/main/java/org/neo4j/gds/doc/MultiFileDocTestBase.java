@@ -39,6 +39,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -243,6 +245,8 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
                 }
                 return v;
             }).collect(Collectors.toList()).toString();
+        } else if (value instanceof Map<?,?>) {
+            return new TreeMap<>(((Map<?, ?>) value)).toString();
         } else {
             return value.toString();
         }

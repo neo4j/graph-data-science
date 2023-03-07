@@ -307,7 +307,7 @@ Because we are using the `UNDIRECTED` orientation, we will write twice as many r
 [opts="header",cols="3,7"]
 |===
 | relationshipsWritten | samplingStats
-| 16                   | {linksConsidered=48, didConverge=true, strategy=approximate, ranIterations=2}
+| 16                   | {didConverge=true, linksConsidered=48, ranIterations=2, strategy=approximate}
 |===
 --
 

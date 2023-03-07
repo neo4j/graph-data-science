@@ -246,7 +246,7 @@ RETURN
 [opts="header", cols="6, 2, 2, 2"]
 |===
 | winningModel                                                                                                                                | avgTrainScore | outerTrainScore    | testScore
-| {maxDepth=2147483647, minLeafSize=1, minSplitSize=2, numberOfDecisionTrees=5, methodName=RandomForest, numberOfSamplesRatio=1.0} | 658.1848249523812 | 1188.6296009999999 | 1583.5897253333333
+| {maxDepth=2147483647, methodName=RandomForest, minLeafSize=1, minSplitSize=2, numberOfDecisionTrees=5, numberOfSamplesRatio=1.0} | 658.1848249523812 | 1188.6296009999999 | 1583.5897253333333
 |===
 
 Here we can observe that the `RandomForest` candidate with 5 decision trees performed the best in the training phase.
@@ -342,7 +342,7 @@ RETURN
 [opts="header", cols="6, 2, 2, 2"]
 |===
 | winningModel                                                                                                                                | avgTrainScore | outerTrainScore    | testScore
-| {maxDepth=2147483647, minLeafSize=1, minSplitSize=2, numberOfDecisionTrees=5, methodName=RandomForest, numberOfSamplesRatio=1.0} | 849.7884240000002 | 901.3513857142859 | 824.8937999999998
+| {maxDepth=2147483647, methodName=RandomForest, minLeafSize=1, minSplitSize=2, numberOfDecisionTrees=5, numberOfSamplesRatio=1.0} | 849.7884240000002 | 901.3513857142859 | 824.8937999999998
 |===
 --
 

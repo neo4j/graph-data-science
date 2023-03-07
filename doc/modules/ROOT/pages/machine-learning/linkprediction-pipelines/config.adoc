@@ -65,9 +65,9 @@ CALL gds.beta.pipeline.linkPrediction.create('pipe')
 |===
 | name     | nodePropertySteps | featureSteps | splitConfig | autoTuningConfig | parameterSpace
 | "pipe"   | []                | []
-| {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
+| {negativeSamplingRatio=1.0, testFraction=0.1, trainFraction=0.1, validationFolds=3}
 | {maxTrials={max-trials}}
-| {MultilayerPerceptron=[], RandomForest=[], LogisticRegression=[]}
+| {LogisticRegression=[], MultilayerPerceptron=[], RandomForest=[]}
 |===
 --
 
@@ -143,9 +143,9 @@ CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {
 | name     | nodePropertySteps | featureSteps | splitConfig | autoTuningConfig | parameterSpace
 | "pipe"   | [{name=gds.fastRP.mutate, config={randomSeed=42, contextRelationshipTypes=[], embeddingDimension=256, contextNodeLabels=[], mutateProperty=embedding}}]
 | []
-| {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
+| {negativeSamplingRatio=1.0, testFraction=0.1, trainFraction=0.1, validationFolds=3}
 | {maxTrials={max-trials}}
-| {MultilayerPerceptron=[], RandomForest=[], LogisticRegression=[]}
+| {LogisticRegression=[], MultilayerPerceptron=[], RandomForest=[]}
 |===
 
 The pipeline will now execute the xref:machine-learning/node-embeddings/fastrp.adoc[fastRP algorithm] in mutate mode both before xref:machine-learning/linkprediction-pipelines/training.adoc[training] a model, and when the trained model is xref:machine-learning/linkprediction-pipelines/predict.adoc[applied for prediction].
@@ -350,7 +350,7 @@ YIELD splitConfig
 [opts="header",cols="1"]
 |===
 | splitConfig
-| {negativeSamplingRatio=1.0, testFraction=0.25, validationFolds=3, trainFraction=0.6}
+| {negativeSamplingRatio=1.0, testFraction=0.25, trainFraction=0.6, validationFolds=3}
 |===
 
 We now reconfigured the splitting of the pipeline, which will be applied during xref:machine-learning/linkprediction-pipelines/training.adoc[training].
