@@ -91,12 +91,12 @@ class CNARWTest {
         ", (x5:Z {prop: 47})" +
         ", (y1:Z {prop: 48})" +
         ", (y2:Z {prop: 49})" +
-        ", (xy)-[:REL]->(x1), (xy)-[:REL]->(x2), (xy)-[:REL]->(x3), (xy)-[:REL]->(x4), (xy)-[:REL]->(x5)" +
-        ", (x1)-[:REL]->(xy), (x1)-[:REL]->(x2), (x1)-[:REL]->(x3), (x1)-[:REL]->(x4), (x1)-[:REL]->(x5)" +
-        ", (x2)-[:REL]->(x1), (x2)-[:REL]->(xy), (x2)-[:REL]->(x3), (x2)-[:REL]->(x4), (x2)-[:REL]->(x5)" +
-        ", (x3)-[:REL]->(x1), (x3)-[:REL]->(x2), (x3)-[:REL]->(xy), (x3)-[:REL]->(x4), (x3)-[:REL]->(x5)" +
-        ", (x4)-[:REL]->(x1), (x4)-[:REL]->(x2), (x4)-[:REL]->(x3), (x4)-[:REL]->(xy), (x4)-[:REL]->(x5)" +
-        ", (x5)-[:REL]->(x1), (x5)-[:REL]->(x2), (x5)-[:REL]->(x3), (x5)-[:REL]->(x4), (x5)-[:REL]->(xy)" +
+        ",                    (xy)-[:REL]->(x1), (xy)-[:REL]->(x2), (xy)-[:REL]->(x3), (xy)-[:REL]->(x4), (xy)-[:REL]->(x5)" +
+        ", (x1)-[:REL]->(xy),                    (x1)-[:REL]->(x2), (x1)-[:REL]->(x3), (x1)-[:REL]->(x4), (x1)-[:REL]->(x5)" +
+        ", (x2)-[:REL]->(xy), (x2)-[:REL]->(x1),                    (x2)-[:REL]->(x3), (x2)-[:REL]->(x4), (x2)-[:REL]->(x5)" +
+        ", (x3)-[:REL]->(xy), (x3)-[:REL]->(x1), (x3)-[:REL]->(x2),                    (x3)-[:REL]->(x4), (x3)-[:REL]->(x5)" +
+        ", (x4)-[:REL]->(xy), (x4)-[:REL]->(x1), (x4)-[:REL]->(x2), (x4)-[:REL]->(x3),                    (x4)-[:REL]->(x5)" +
+        ", (x5)-[:REL]->(xy), (x5)-[:REL]->(x1), (x5)-[:REL]->(x2), (x5)-[:REL]->(x3), (x5)-[:REL]->(x4)" +
         ", (xy)-[:REL]->(y1)" +
         ", (y1)-[:REL]->(y2)";
 
@@ -105,6 +105,28 @@ class CNARWTest {
 
     @Inject
     private IdFunction lollipopIdFunction;
+
+    @GdlGraph(graphNamePrefix = "complete", idOffset = 42)
+    private static final String completeGDL =
+        "CREATE" +
+        "  (x0:Z {prop: 42})" +
+        ", (x1:Z {prop: 43})" +
+        ", (x2:Z {prop: 44})" +
+        ", (x3:Z {prop: 45})" +
+        ", (x4:Z {prop: 46})" +
+        ", (x5:Z {prop: 47})" +
+        ",                    (x0)-[:REL]->(x1), (x0)-[:REL]->(x2), (x0)-[:REL]->(x3), (x0)-[:REL]->(x4), (x0)-[:REL]->(x5)" +
+        ", (x1)-[:REL]->(x0),                    (x1)-[:REL]->(x2), (x1)-[:REL]->(x3), (x1)-[:REL]->(x4), (x1)-[:REL]->(x5)" +
+        ", (x2)-[:REL]->(x0), (x2)-[:REL]->(x1),                    (x2)-[:REL]->(x3), (x2)-[:REL]->(x4), (x2)-[:REL]->(x5)" +
+        ", (x3)-[:REL]->(x0), (x3)-[:REL]->(x1), (x3)-[:REL]->(x2),                    (x3)-[:REL]->(x4), (x3)-[:REL]->(x5)" +
+        ", (x4)-[:REL]->(x0), (x4)-[:REL]->(x1), (x4)-[:REL]->(x2), (x4)-[:REL]->(x3),                    (x4)-[:REL]->(x5)" +
+        ", (x5)-[:REL]->(x0), (x5)-[:REL]->(x1), (x5)-[:REL]->(x2), (x5)-[:REL]->(x3), (x5)-[:REL]->(x4)";
+
+    @Inject
+    private TestGraph completeGraph;
+
+    @Inject
+    private IdFunction completeIdFunction;
 
     Graph getGraph(CNARWConfig config) {
         return graphStore.getGraph(
@@ -174,9 +196,8 @@ class CNARWTest {
             var graph = getGraph(config);
             var cnarw = new CNARW(config);
             var nodes = cnarw.compute(graph, ProgressTracker.NULL_TRACKER);
-            if (cnarw.startNodesUsed().contains(idFunction.of("x1")) || cnarw
-                .startNodesUsed()
-                .contains(idFunction.of("x2"))) {
+            if (cnarw.startNodesUsed().contains(idFunction.of("x1")) ||
+                cnarw.startNodesUsed().contains(idFunction.of("x2"))) {
                 continue;
             }
             validCases++;
@@ -196,7 +217,7 @@ class CNARWTest {
         // the number of these walks is 30, because first walk keeps quality at 1 and for remaining
         // walks we have quality *= 0.9 and 0.9 ^ 29 is the first that is lower than the threshold 0.05.
         // therefore the probability of a case passing is (200 / 202) ^ 30.
-        assertThat(casesPassed / validCases).isCloseTo(Math.pow(200.0 / 202, 30), Offset.offset(0.015));
+        assertThat(casesPassed / validCases).isCloseTo(Math.pow(200.0 / 202, 45), Offset.offset(0.015));
     }
 
     @Test
@@ -239,7 +260,7 @@ class CNARWTest {
         // other threads have less time to find the improbable node x2
         assertThat(casesPassed / validCases).isCloseTo(
             Math.pow(200.0 / 202, 51.0 * config.concurrency() / 2),
-            Offset.offset(0.33)
+            Offset.offset(0.15)
         );
     }
 

@@ -188,7 +188,7 @@ public class CNARW implements NodesSampler {
         private final ProgressTracker progressTracker;
 
         private final LongSet startNodesUsed;
-        private OverlapSimilarityComputer overlapSimilarity;
+        private final OverlapSimilarityComputer overlapSimilarity;
 
         Walker(
             SeenNodes seenNodes,
@@ -257,44 +257,91 @@ public class CNARW implements NodesSampler {
                     startNodesUsed.add(inputGraph.toOriginalNodeId(currentNode));
                     walksLeft = (int) Math.round(walkQualities.nodeQuality(currentStartNodePosition) * MAX_WALKS_PER_START);
                 } else {
-
                     double q, chanceOutOfNeighbours;
                     long candidateNode;
 
                     long[] currentNodeNeighbours = getSortedNeighbours(inputGraph, currentNode);
                     var currentWeights = getWeights(inputGraph, currentNode);
                     do {
-                        int targetOffsetCandidate = rng.nextInt(inputGraph.degree(currentNode));
-                        candidateNode = inputGraph.nthTarget(currentNode, targetOffsetCandidate);
-                        assert candidateNode != IdMap.NOT_FOUND : "The offset '" + targetOffsetCandidate +
-                                                                  "' is bound by the degree but no target could be found for nodeId " + candidateNode;
+                        if (totalWeights.isPresent()) {
+                            candidateNode = weightedNextNode(currentNode);
+                        } else {
+                            int targetOffsetCandidate = rng.nextInt(inputGraph.degree(currentNode));
+                            candidateNode = inputGraph.nthTarget(currentNode, targetOffsetCandidate);
+                            assert candidateNode != IdMap.NOT_FOUND : "The offset '" + targetOffsetCandidate +
+                                                                      "' is bound by the degree but no target could be found for nodeId " + candidateNode;
+                        }
                         long[] candidateNodeNeighbours = getSortedNeighbours(inputGraph, candidateNode);
                         var candidateWeights = getWeights(inputGraph, candidateNode);
-                        chanceOutOfNeighbours = 1.0D - computeChance(
+                        var overlap = computeOverlapSimilarity(
                             currentNodeNeighbours, currentWeights,
                             candidateNodeNeighbours, candidateWeights
                         );
+
+                        chanceOutOfNeighbours = 1.0D - overlap;
                         q = rng.nextDouble();
                     } while (q > chanceOutOfNeighbours);
+
                     currentNode = candidateNode;
                     nodesConsidered++;
                 }
             }
         }
 
-        private double computeChance(
+        private double computeDegree(long currentNode) {
+            if (totalWeights.isEmpty()) {
+                return inputGraph.degree(currentNode);
+            }
+
+            var presentTotalWeights = totalWeights.get();
+            if (presentTotalWeights.get(currentNode) == TOTAL_WEIGHT_MISSING) {
+                var degree = new MutableDouble(0.0);
+                inputGraph.forEachRelationship(currentNode, 0.0, (src, trg, weight) -> {
+                    degree.add(weight);
+                    return true;
+                });
+                presentTotalWeights.set(currentNode, degree.doubleValue());
+            }
+
+            return presentTotalWeights.get(currentNode);
+        }
+
+        private long weightedNextNode(long currentNode) {
+            var remainingMass = new MutableDouble(rng.nextDouble(0, computeDegree(currentNode)));
+            var target = new MutableLong(INVALID_NODE_ID);
+
+            inputGraph.forEachRelationship(currentNode, 0.0, (src, trg, weight) -> {
+                if (remainingMass.doubleValue() < weight) {
+                    target.setValue(trg);
+                    return false;
+                }
+                remainingMass.subtract(weight);
+                return true;
+            });
+
+            assert target.getValue() != -1;
+
+            return target.getValue();
+        }
+
+        private double computeOverlapSimilarity(
             long[] currentNodeNeighbours, Optional<double[]> currentWeights,
             long[] candidateNodeNeighbours, Optional<double[]> candidateWeights
         ) {
-            if (currentNodeNeighbours.length == 0 || candidateNodeNeighbours.length == 0) return 0.0D;
+            double similarity;
             if (currentWeights.isPresent()) {
                 assert candidateWeights.isPresent();
-                return overlapSimilarity.computeWeightedSimilarity(
+                similarity = overlapSimilarity.computeWeightedSimilarity(
                     currentNodeNeighbours, candidateNodeNeighbours,
                     currentWeights.get(), candidateWeights.get()
                 );
+            } else {
+                similarity = overlapSimilarity.computeSimilarity(currentNodeNeighbours, candidateNodeNeighbours);
             }
-            return overlapSimilarity.computeSimilarity(currentNodeNeighbours, candidateNodeNeighbours);
+            if (!Double.isNaN(similarity))
+                return similarity;
+            else
+                return 0.0D;
         }
 
         private long[] getSortedNeighbours(Graph inputGraph, long nodeId) {
@@ -316,24 +363,6 @@ public class CNARW implements NodesSampler {
                 return true;
             });
             return Optional.of(weights);
-        }
-
-        private double computeDegree(long currentNode) {
-            if (totalWeights.isEmpty()) {
-                return inputGraph.degree(currentNode);
-            }
-
-            var presentTotalWeights = totalWeights.get();
-            if (presentTotalWeights.get(currentNode) == TOTAL_WEIGHT_MISSING) {
-                var degree = new MutableDouble(0.0);
-                inputGraph.forEachRelationship(currentNode, 0.0, (src, trg, weight) -> {
-                    degree.add(weight);
-                    return true;
-                });
-                presentTotalWeights.set(currentNode, degree.doubleValue());
-            }
-
-            return presentTotalWeights.get(currentNode);
         }
 
         public LongSet startNodesUsed() {
