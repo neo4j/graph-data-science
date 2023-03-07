@@ -167,7 +167,7 @@ class CommunityProcCompanionTest {
         // we mimic the sparseness here through size > valueStored
         LongNodePropertyValues sparseProperties = new TestSparseNodePropertyValues(4, input::get);
 
-        var config = ConfigWithComponentSize.of(CypherMapWrapper.empty().withNumber("minComponentSize", 2L));
+        var config = CommunityProcCompanionConfig.of(CypherMapWrapper.empty().withNumber("minCommunitySize", 2L));
 
         var filteredProperties = CommunityProcCompanion.nodeProperties(
             config,
@@ -193,7 +193,7 @@ class CommunityProcCompanionTest {
         // we mimic the sparseness here through size > valueStored
         LongNodePropertyValues sparseProperties = new TestSparseNodePropertyValues(4, input::get);
 
-        var config = ConfigWithComponentSize.of(CypherMapWrapper.create(Map.of("consecutiveIds", true)));
+        var config = CommunityProcCompanionConfig.of(CypherMapWrapper.create(Map.of("consecutiveIds", true)));
 
         var filteredProperties = CommunityProcCompanion.nodeProperties(
             config,
