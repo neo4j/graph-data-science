@@ -67,7 +67,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
 
     @Override
     public String name() {
-        return "unsupported";
+        return "unsupported52";
     }
 
     @Override
