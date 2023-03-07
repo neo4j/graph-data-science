@@ -52,15 +52,14 @@ public final class CommunityProcCompanion {
             nodeProperties,
             seedPropertySupplier
         );
-        return considerSizeFilter(config, result);
+        return considerConsecutiveIdsFlagAndSize(config, result);
     }
 
     public static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> NodePropertyValues nodeProperties(
         CONFIG config,
         LongNodePropertyValues nodeProperties
     ) {
-        LongNodePropertyValues result = considerConsecutiveIdsFlag(config, nodeProperties);
-        return considerSizeFilter(config, result);
+        return considerConsecutiveIdsFlagAndSize(config, nodeProperties);
     }
 
     public static <CONFIG extends ConcurrencyConfig> LongNodePropertyValues considerSizeFilter(
@@ -69,12 +68,11 @@ public final class CommunityProcCompanion {
     ) {
         if (config instanceof CommunitySizeConfig) {
             var finalResult = result;
-            result = ((CommunitySizeConfig) config)
+            return ((CommunitySizeConfig) config)
                 .minCommunitySize()
                 .map(size -> applySizeFilter(finalResult, size, config.concurrency()))
                 .orElse(result);
         }
-
         return result;
     }
 
@@ -92,7 +90,7 @@ public final class CommunityProcCompanion {
             return LongIfChangedNodePropertyValues.of(seedPropertySupplier.get(), nodeProperties);
         }
 
-        return considerConsecutiveIdsFlag(config, nodeProperties);
+        return nodeProperties;
     }
 
     private static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> LongNodePropertyValues considerConsecutiveIdsFlag(
@@ -107,8 +105,16 @@ public final class CommunityProcCompanion {
                 nodeProperties.size()
             );
         }
-
+        
         return nodeProperties;
+    }
+
+    private static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> LongNodePropertyValues considerConsecutiveIdsFlagAndSize(
+        CONFIG config,
+        LongNodePropertyValues nodeProperties
+    ) {
+        var resultAfterMinFilter = considerSizeFilter(config, nodeProperties);
+        return considerConsecutiveIdsFlag(config, resultAfterMinFilter);
     }
 
     private static LongNodePropertyValues applySizeFilter(

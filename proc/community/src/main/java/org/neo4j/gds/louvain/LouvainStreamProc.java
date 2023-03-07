@@ -96,7 +96,6 @@ public class LouvainStreamProc extends StreamProc<Louvain, LouvainResult, Louvai
                 .map(nodeId -> {
                     long[] communities = includeIntermediateCommunities ? louvain.getIntermediateCommunities(nodeId) : null;
                     long communityId = nodeProperties.longValue(nodeId);
-
                     return new StreamResult(graph.toOriginalNodeId(nodeId), communities, communityId);
                 });
         });

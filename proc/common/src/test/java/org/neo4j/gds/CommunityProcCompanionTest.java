@@ -147,4 +147,37 @@ class CommunityProcCompanionTest {
             return new CommunityProcCompanionConfigImpl(map);
         }
     }
+
+
+    @Test
+    void shouldWorkWithMinComponentAndConsecutive() {
+        long[] values = new long[]{20, 20, 200, 10, 10, 50, 90, 10, 50, 50, 50};
+        Long[] returnedValues = new Long[]{null, null, null, 0l, 0L, 1l, null, 0l, 1l, 1l, 1l};
+
+        LongNodePropertyValues inputProperties = new TestNodePropertyValues(11, id -> values[(int) id]);
+
+        var config = CommunityProcCompanionConfig.of(CypherMapWrapper
+            .empty()
+            .withNumber("minCommunitySize", 3L)
+            .withBoolean("consecutiveIds", true));
+
+        var result = CommunityProcCompanion.nodeProperties(
+            config,
+            "seed",
+            inputProperties,
+            () -> {throw new UnsupportedOperationException("Not implemented");}
+        );
+
+
+        for (long i = 0L; i < result.size(); i++) {
+            int ii = (int) i;
+            if (returnedValues[ii] == null) {
+                assertThat(result.hasValue(i)).isFalse();
+            } else {
+                assertThat(result.hasValue(i)).isTrue();
+                assertThat(result.value(i).asObject()).isEqualTo(returnedValues[(int) i]);
+            }
+
+        }
+    }
 }
