@@ -28,7 +28,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
-import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -78,9 +78,22 @@ class BellmanFordMultipleNegativeCyclesTest {
             var result = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, a[0], 4).compute();
 
             assertThat(result.containsNegativeCycle()).isTrue();
-            var negativeCycles = result.negativeCycles();
-            assertThat(negativeCycles).hasSize(2).
-                containsExactlyInAnyOrder(List.of(a[3], a[4], a[1]), List.of(a[5], a[6], a[2]));
+            var negativeCycles = result
+                .negativeCycles()
+                .pathSet()
+                .stream()
+                .collect(Collectors.toList());
+
+            var negativeCyclesNodes = negativeCycles.stream().map(v -> v.nodeIds()).collect(Collectors.toList());
+            assertThat(negativeCyclesNodes).containsExactlyInAnyOrder(
+                new long[]{a[1], a[3], a[4], a[1]},
+                new long[]{a[2], a[5], a[6], a[2]}
+            );
+            var negativeCyclesWeights = negativeCycles.stream().map(v -> v.costs()).collect(Collectors.toList());
+            assertThat(negativeCyclesWeights).containsExactlyInAnyOrder(
+                new double[]{0, -1, -3, -1},
+                new double[]{0, -100, -95, -89}
+            );
 
         }
     }
@@ -118,10 +131,13 @@ class BellmanFordMultipleNegativeCyclesTest {
             };
             var result = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, a[0], 4).compute();
 
-            assertThat(result.containsNegativeCycle()).isTrue();
-            var negativeCycles = result.negativeCycles();
-            assertThat(negativeCycles).
-                containsExactlyInAnyOrder(List.of(2l, 1l));
+            assertThat(result.negativeCycles().pathSet())
+                .hasSize(1)
+                .first()
+                .satisfies(pathResult -> {
+                    assertThat(pathResult.nodeIds()).containsExactly(1L, 2L, 1L);
+                    assertThat(pathResult.costs()).containsExactly(0, 10, -5);
+                });
 
         }
     }

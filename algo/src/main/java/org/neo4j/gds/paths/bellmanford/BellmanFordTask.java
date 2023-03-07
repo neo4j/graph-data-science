@@ -43,6 +43,7 @@ public class BellmanFordTask implements Runnable {
     private BellmanFordPhase phase;
 
     private HugeLongArray negativeCycleVertices;
+    
     private AtomicLong negativeCycleIndex;
 
     BellmanFordTask(

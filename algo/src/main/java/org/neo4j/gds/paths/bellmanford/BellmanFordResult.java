@@ -22,8 +22,6 @@ package org.neo4j.gds.paths.bellmanford;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 
-import java.util.List;
-
 @ValueClass
 @SuppressWarnings("immutables:subtype")
 public interface BellmanFordResult {
@@ -32,11 +30,12 @@ public interface BellmanFordResult {
 
     DijkstraResult shortestPaths();
 
-    List<List<Long>> negativeCycles();
+    DijkstraResult negativeCycles();
 
     static BellmanFordResult of(
-        boolean containsNegativeCycles, DijkstraResult shortestPaths,
-        List<List<Long>> negativeCycles
+        boolean containsNegativeCycles,
+        DijkstraResult shortestPaths,
+        DijkstraResult negativeCycles
     ) {
         return ImmutableBellmanFordResult.of(containsNegativeCycles, shortestPaths, negativeCycles);
 

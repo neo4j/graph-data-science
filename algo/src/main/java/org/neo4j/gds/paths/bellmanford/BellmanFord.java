@@ -21,6 +21,7 @@ package org.neo4j.gds.paths.bellmanford;
 
 import com.carrotsearch.hppc.DoubleArrayDeque;
 import com.carrotsearch.hppc.LongArrayDeque;
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
@@ -37,11 +38,8 @@ import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -122,24 +120,33 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         AtomicLong negativeCyclesIndex,
         DistanceTracker distanceTracker
     ) {
-        Stream<PathResult> paths = (containsNegativeCycle) ? Stream.empty() : pathResults(
-            distanceTracker,
-            sourceNode,
-            concurrency
-        );
+        Stream<PathResult> paths = (containsNegativeCycle) ?
+            Stream.empty()
+            : pathResults(
+                distanceTracker,
+                sourceNode,
+                concurrency
+            );
 
-        var negativeCycles = negativeCycles(
-            distanceTracker,
-            negativeCyclesIndex.longValue(),
-            negativeCyclesVertices,
-            graph.nodeCount(),
-            concurrency
-        );
+        var negativeCycles =
+            negativeCyclesResults(
+                graph,
+                distanceTracker,
+                negativeCyclesIndex.longValue(),
+                negativeCyclesVertices,
+                graph.nodeCount(),
+                concurrency
+            );
 
-        return BellmanFordResult.of(containsNegativeCycle, new DijkstraResult(paths), negativeCycles);
+        return BellmanFordResult.of(
+            containsNegativeCycle,
+            new DijkstraResult(paths),
+            new DijkstraResult(negativeCycles)
+        );
     }
 
-    private static List<List<Long>> negativeCycles(
+    private static Stream<PathResult> negativeCyclesResults(
+        Graph graph,
         DistanceTracker tentativeDistances,
         long numberOfNegativeCycles,
         HugeLongArray negativeCycleVertices,
@@ -147,36 +154,41 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         int concurrency
     ) {
 
-        var negativeCycles = new ArrayList<List<Long>>();
-        var lock = new ReentrantLock();
-        ParallelUtil.parallelForEachNode(numberOfNegativeCycles, concurrency,
-            indexId -> {
-                long nodeId = negativeCycleVertices.get(indexId);// we have a vertex within a cycle
-                var currentCycle = new ArrayList<Long>();
-                currentCycle.add(nodeId);
-                long curr = tentativeDistances.predecessor(nodeId);
-                long length = 0;
-                boolean shouldAdd = true;
-                while (curr != nodeId) {
-                    currentCycle.add(curr);
-                    curr = tentativeDistances.predecessor(curr);
-                    length++;
-                    if (length == nodeCount + 1) {
-                        shouldAdd = false;
-                        break;
-                    }
-                }
-                if (shouldAdd) {
-                    lock.lock();
-                    Collections.reverse(currentCycle);
-                    negativeCycles.add(currentCycle);
-                    lock.unlock();
-                }
-            }
+        AtomicLong cycleIndex = new AtomicLong();
+        var predecessors = tentativeDistances.predecessors().orElseThrow();
+        var distances = tentativeDistances.distances();
+
+        var partitions = PartitionUtils.rangePartition(
+            concurrency,
+            numberOfNegativeCycles,
+            partition -> partition,
+            Optional.of(1 + (int) numberOfNegativeCycles / concurrency)
         );
-        return negativeCycles;
+
+        return ParallelUtil.parallelStream(
+            partitions.stream(),
+            concurrency,
+            parallelStream -> parallelStream.flatMap(partition -> {
+                var pathResultBuilder = ImmutablePathResult.builder();
+
+                return LongStream
+                    .range(partition.startNode(), partition.startNode() + partition.nodeCount())
+                    .filter(target -> predecessors.get(target) != NO_PREDECESSOR)
+                    .mapToObj(indexId -> negativeCycleResult(
+                        pathResultBuilder,
+                        cycleIndex,
+                        negativeCycleVertices.get(indexId),
+                        distances,
+                        predecessors,
+                        graph.concurrentCopy(),
+                        nodeCount
+
+                    )).filter(cycle -> cycle != PathResult.EMPTY);
+            })
+        );
 
     }
+
 
     private static Stream<PathResult> pathResults(
         DistanceTracker tentativeDistances,
@@ -254,4 +266,71 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
             .costs(costs.toArray())
             .build();
     }
+
+    private static PathResult negativeCycleResult(
+        ImmutablePathResult.Builder pathResultBuilder,
+        AtomicLong cycleIndex,
+        long startNode,
+        HugeAtomicDoubleArray distances,
+        HugeAtomicLongArray predecessors,
+        Graph localGraph,
+        long nodeCount
+    ) {
+        var pathNodeIds = new LongArrayDeque();
+        double totalCost = 0;
+        long nodeId = startNode;// we have a vertex within a cycle
+        pathNodeIds.addFirst(nodeId);
+        long curr = predecessors.get(nodeId);
+        long length = 0;
+        boolean shouldAdd = true;
+        while (curr != nodeId) {
+            pathNodeIds.addFirst(curr);
+            long predecessor = predecessors.get(curr);
+            length++;
+            totalCost += distances.get(curr) - distances.get(predecessor); //this is not correct
+            curr = predecessors.get(curr);
+
+            if (length == nodeCount + 1) {
+                shouldAdd = false;
+                break;
+            }
+        }
+        if (shouldAdd) {
+
+            pathNodeIds.addFirst(startNode);
+            var pathArray = pathNodeIds.toArray();
+            int pathLength = pathArray.length;
+            var costs = new double[pathLength];
+
+            long endNode = pathArray[1];
+            MutableDouble minimum = new MutableDouble(Double.MAX_VALUE);
+            localGraph.forEachRelationship(startNode, 1.0, (s, t, w) -> {
+                if (t == endNode) {
+                    if (minimum.doubleValue() > w) {
+                        minimum.setValue(w);
+                    }
+                }
+                return true;
+            });
+            costs[1] = minimum.doubleValue();
+            for (int j = 2; j < pathLength; ++j) {
+                long node = pathArray[j];
+                long previous = pathArray[j - 1];
+                double currentDist = distances.get(node) - distances.get(previous);
+                costs[j] = costs[j - 1] + currentDist;
+            }
+
+            return pathResultBuilder.
+                index(cycleIndex.getAndIncrement())
+                .sourceNode(-1)
+                .targetNode(-1)
+                .nodeIds(pathArray)
+                .relationshipIds(EMPTY_ARRAY)
+                .costs(costs).build();
+        }
+
+        return PathResult.EMPTY;
+
+    }
+
 }
