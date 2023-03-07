@@ -128,7 +128,7 @@ public class LongNodePropertiesBuilder implements InnerNodePropertiesBuilder {
 
         var propertyValues = propertiesByMappedIdsBuilder.build();
 
-        var maybeMaxValue = size > 0
+        var maybeMaxValue = propertyValues.capacity() > 0
             ? OptionalLong.of((long) MAX_VALUE.getVolatile(LongNodePropertiesBuilder.this))
             : OptionalLong.empty();
 
