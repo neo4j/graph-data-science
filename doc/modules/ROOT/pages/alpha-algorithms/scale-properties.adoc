@@ -361,7 +361,7 @@ CALL gds.alpha.scaleProperties.mutate('myGraph', {
 [opts="header"]
 |===
 | nodePropertiesWritten | scalerStatistics
-| 8                     | {avgReview={avg=[4.49875], min=[-4.12], max=[19.0]}, buildYear={avg=[1991.875], min=[1958.0], max=[2020.0]}}
+| 8                     | {avgReview={avg=[4.49875], max=[19.0], min=[-4.12]}, buildYear={avg=[1991.875], max=[2020.0], min=[1958.0]}}
 |===
 --
 
@@ -383,15 +383,15 @@ CALL gds.beta.scaleProperties.write('myGraph', {
   nodeProperties: ['buildYear', 'avgReview'],
   scaler: 'stdscore',
   writeProperty: 'hotelStdScore'
-}) YIELD nodePropertiesWritten
+}) YIELD nodePropertiesWritten, scalerStatistics
 
 ----
 
 .Results
 [opts="header"]
 |===
-| nodePropertiesWritten
-| 8
+| nodePropertiesWritten | scalerStatistics
+| 8                     | {avgReview={avg=[4.49875], std=[6.675837845356941]}, buildYear={avg=[1991.875], std=[18.917171432325713]}}
 |===
 --
 

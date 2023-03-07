@@ -245,8 +245,19 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
                 }
                 return v;
             }).collect(Collectors.toList()).toString();
-        } else if (value instanceof Map<?,?>) {
-            return new TreeMap<>(((Map<?, ?>) value)).toString();
+        } else if (value instanceof Map<?, ?>) {
+            var map = ((Map<?, ?>) value);
+            var mappedMap = map.entrySet().stream().collect(Collectors.toMap(
+                entry -> entry.getKey().toString(),
+                entry -> {
+                    var innerValue = entry.getValue();
+                    if (innerValue instanceof Map<?, ?>) {
+                        return new TreeMap<>((Map<?, ?>) innerValue);
+                    }
+                    return innerValue;
+                }
+            ));
+            return new TreeMap<>(mappedMap).toString();
         } else {
             return value.toString();
         }
