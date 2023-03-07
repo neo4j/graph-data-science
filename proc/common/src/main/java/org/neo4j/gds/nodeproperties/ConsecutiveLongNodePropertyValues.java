@@ -49,7 +49,7 @@ public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues
             var communityId = setIdToConsecutiveId.getOrDefault(setId, -1);
             if (communityId == -1) {
                 //if this is null, it  means this community should not be written
-                if (longNodeProperties.value(nodeId) != null) {
+                if (inputProperties.value(nodeId) != null) {
                     setIdToConsecutiveId.addTo(setId, ++nextConsecutiveId);
                     communityId = nextConsecutiveId;
                 } else {

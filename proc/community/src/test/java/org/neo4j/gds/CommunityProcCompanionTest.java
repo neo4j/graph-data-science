@@ -142,7 +142,7 @@ class CommunityProcCompanionTest {
         );
 
 
-        for (long i = 0L; i < result.size(); i++) {
+        for (long i = 0L; i < result.nodeCount(); i++) {
             int ii = (int) i;
             if (returnedValues[ii] != null) {
                 assertThat(result.value(i).asObject()).isEqualTo(returnedValues[ii]);
