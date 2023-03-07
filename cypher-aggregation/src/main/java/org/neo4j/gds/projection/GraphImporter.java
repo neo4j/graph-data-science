@@ -110,7 +110,7 @@ public final class GraphImporter {
         return new LazyIdMapBuilder(readConcurrency, true, true);
     }
 
-    void update(
+    public void update(
         long sourceNode,
         long targetNode,
         @Nullable PropertyValues sourceNodePropertyValues,
@@ -160,7 +160,12 @@ public final class GraphImporter {
         }
     }
 
-    AggregationResult result(String username, DatabaseId databaseId, ProgressTimer timer, boolean hasSeenArbitraryId) {
+    public AggregationResult result(
+        String username,
+        DatabaseId databaseId,
+        ProgressTimer timer,
+        boolean hasSeenArbitraryId
+    ) {
         var graphName = this.graphName;
 
         // in case something else has written something with the same graph name
