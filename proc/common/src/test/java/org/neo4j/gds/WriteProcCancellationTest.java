@@ -68,7 +68,7 @@ class WriteProcCancellationTest extends BaseTest {
             }
 
             @Override
-            public long size() {
+            public long nodeCount() {
                 return 42;
             }
         };
@@ -79,7 +79,6 @@ class WriteProcCancellationTest extends BaseTest {
             var resultConsumer = new WriteNodePropertiesComputationResultConsumer<TestAlgorithm, TestAlgorithmResult, TestWriteConfig, TestResult>(
                 (computationResult, executionContext) -> new TestAlgoResultBuilder(),
                 (computationResult) -> List.of(nodeProperty),
-                new NativeNodePropertiesExporterBuilder(DatabaseTransactionContext.of(db, tx)),
                 "foo"
             );
 
@@ -125,6 +124,7 @@ class WriteProcCancellationTest extends BaseTest {
                 .returnColumns(ProcedureReturnColumns.EMPTY)
                 .modelCatalog(ModelCatalog.EMPTY)
                 .isGdsAdmin(false)
+                .nodePropertyExporterBuilder(new NativeNodePropertiesExporterBuilder(DatabaseTransactionContext.of(db, tx)))
                 .build();
 
             assertThatThrownBy(() -> resultConsumer.consume(computationResult, executionContext))

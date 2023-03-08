@@ -52,7 +52,15 @@ public abstract class WriteProc<
     }
 
     protected Stream<PROC_RESULT> write(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult) {
-        return computationResultConsumer().consume(computeResult, executionContext());
+        return computationResultConsumer().consume(
+            computeResult,
+            executionContext()
+        );
+    }
+
+    @Override
+    public ExecutionContext executionContext() {
+        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
     }
 
     @Override
@@ -60,7 +68,6 @@ public abstract class WriteProc<
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
             this::nodePropertyList,
-            nodePropertyExporterBuilder,
             name()
         );
     }

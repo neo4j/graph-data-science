@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.ml.decisiontree;
 
+import java.util.Objects;
+
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -48,33 +50,39 @@ public class TreeNode<PREDICTION extends Number> {
         this.prediction = prediction;
     }
 
-    PREDICTION prediction() {
+    public void setPrediction(PREDICTION prediction) { this.prediction = prediction; }
+
+    public PREDICTION prediction() {
         return prediction;
     }
 
-    int featureIndex() {
+    public int featureIndex() {
         return featureIndex;
     }
 
-    double thresholdValue() {
+    public double thresholdValue() {
         return thresholdValue;
     }
 
-    TreeNode<PREDICTION> leftChild() {
+    public TreeNode<PREDICTION> leftChild() {
         return leftChild;
     }
 
-    void setLeftChild(TreeNode leftChild) {
+    public void setLeftChild(TreeNode leftChild) {
         this.leftChild = leftChild;
     }
 
-    TreeNode<PREDICTION> rightChild() {
+    public boolean hasLeftChild() { return leftChild != null; }
+
+    public TreeNode<PREDICTION> rightChild() {
         return rightChild;
     }
 
-    void setRightChild(TreeNode rightChild) {
+    public void setRightChild(TreeNode rightChild) {
         this.rightChild = rightChild;
     }
+
+    public boolean hasRightChild() { return rightChild != null; }
 
     @Override
     public String toString() {
@@ -107,5 +115,31 @@ public class TreeNode<PREDICTION extends Number> {
 
         render(sb, node.leftChild, depth + 1);
         render(sb, node.rightChild, depth + 1);
+    }
+
+    private static boolean equals(TreeNode o, TreeNode b) {
+        if (o == null) {
+            return b == null;
+        } else {
+            //o nonnull
+            if (b == null) return false;
+            else {
+                return o.featureIndex == b.featureIndex && Double.compare(o.thresholdValue, b.thresholdValue) == 0
+                       && o.prediction.equals(b.prediction) && TreeNode.equals(o.leftChild, b.leftChild) && TreeNode.equals(o.rightChild, b.rightChild);
+            }
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || this.getClass() != o.getClass()) return false;
+        TreeNode<PREDICTION> treeNode = (TreeNode<PREDICTION>) o;
+        return equals(this, treeNode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(prediction, featureIndex, thresholdValue, leftChild, rightChild);
     }
 }

@@ -51,5 +51,4 @@ dependencies {
     testImplementation project(':proc-community')
 
     testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: ver.'mockito'
-    testImplementation group: 'org.assertj', name: 'assertj-core',          version: ver.'assertj'
 }

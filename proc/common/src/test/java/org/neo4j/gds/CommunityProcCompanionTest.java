@@ -25,6 +25,7 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
+import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.config.CommunitySizeConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
@@ -32,6 +33,9 @@ import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.nodeproperties.ConsecutiveLongNodePropertyValues;
 import org.neo4j.gds.nodeproperties.LongIfChangedNodePropertyValues;
+import org.neo4j.values.storable.Values;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -87,7 +91,7 @@ class CommunityProcCompanionTest {
         );
 
         assertThat(result).isInstanceOf(LongIfChangedNodePropertyValues.class);
-        for (long i = 0; i < result.size(); i++) {
+        for (long i = 0; i < result.nodeCount(); i++) {
             assertThat(result.longValue(i)).isEqualTo(inputProperties.longValue(i));
             assertThat(result.value(i)).isNull();
         }
@@ -106,7 +110,7 @@ class CommunityProcCompanionTest {
             () -> { throw new UnsupportedOperationException("Not implemented"); }
         );
 
-        for (long i = 0L; i < result.size(); i++) {
+        for (long i = 0L; i < result.nodeCount(); i++) {
 
             if (i < 5) {
                 assertThat(result.longValue(i)).isEqualTo(inputProperties.longValue(i));
@@ -116,6 +120,48 @@ class CommunityProcCompanionTest {
                 assertThat(result.value(i).asObject()).isEqualTo(5L);
             }
         }
+    }
+
+    @Test
+    void minComponentSizeWithSparseProperties() {
+        var inputBuilder = HugeSparseLongArray.builder(Long.MIN_VALUE);
+        inputBuilder.set(1, 42);
+        inputBuilder.set(2, 99);
+        inputBuilder.set(3, 42);
+        var input = inputBuilder.build();
+
+        // we mimic the sparseness here through size > valueStored
+        LongNodePropertyValues sparseProperties = new TestSparseNodePropertyValues(4, input::get);
+
+        var config = CommunityProcCompanionConfig.of(CypherMapWrapper.empty().withNumber("minCommunitySize", 2L));
+
+        var filteredProperties = CommunityProcCompanion.nodeProperties(config, sparseProperties);
+
+        assertThat(filteredProperties.value(0)).isNull();
+        assertThat(filteredProperties.value(1)).isEqualTo(Values.longValue(42));
+        assertThat(filteredProperties.value(2)).isNull();
+        assertThat(filteredProperties.value(3)).isEqualTo(Values.longValue(42));
+    }
+
+    @Test
+    void consecutiveIdsWithSparseProperties() {
+        var inputBuilder = HugeSparseLongArray.builder(Long.MIN_VALUE);
+        inputBuilder.set(1, 42);
+        inputBuilder.set(2, 99);
+        inputBuilder.set(3, 42);
+        var input = inputBuilder.build();
+
+        // we mimic the sparseness here through size > valueStored
+        LongNodePropertyValues sparseProperties = new TestSparseNodePropertyValues(4, input::get);
+
+        var config = CommunityProcCompanionConfig.of(CypherMapWrapper.create(Map.of("consecutiveIds", true)));
+
+        var filteredProperties = CommunityProcCompanion.nodeProperties(config, sparseProperties);
+
+        assertThat(filteredProperties.value(0)).isEqualTo(Values.longValue(0));
+        assertThat(filteredProperties.value(1)).isEqualTo(Values.longValue(1));
+        assertThat(filteredProperties.value(2)).isEqualTo(Values.longValue(2));
+        assertThat(filteredProperties.value(3)).isEqualTo(Values.longValue(1));
     }
 
     private static final class TestNodePropertyValues implements LongNodePropertyValues {
@@ -131,7 +177,30 @@ class CommunityProcCompanionTest {
         }
 
         @Override
-        public long size() {
+        public long nodeCount() {
+            return size;
+        }
+
+        @Override
+        public long longValue(long nodeId) {
+            return transformer.applyAsLong(nodeId);
+        }
+    }
+
+    private static final class TestSparseNodePropertyValues implements LongNodePropertyValues {
+        private final long size;
+        private final LongToLongFunction transformer;
+
+        private TestSparseNodePropertyValues(
+            long size,
+            LongToLongFunction transformer
+        ) {
+            this.size = size;
+            this.transformer = transformer;
+        }
+
+        @Override
+        public long nodeCount() {
             return size;
         }
 
@@ -145,6 +214,39 @@ class CommunityProcCompanionTest {
     interface CommunityProcCompanionConfig extends ConsecutiveIdsConfig, SeedConfig, ConcurrencyConfig, CommunitySizeConfig {
         static CommunityProcCompanionConfig of(CypherMapWrapper map) {
             return new CommunityProcCompanionConfigImpl(map);
+        }
+    }
+
+
+    @Test
+    void shouldWorkWithMinComponentAndConsecutive() {
+        long[] values = new long[]{20, 20, 200, 10, 10, 50, 90, 10, 50, 50, 50};
+        Long[] returnedValues = new Long[]{null, null, null, 0l, 0L, 1l, null, 0l, 1l, 1l, 1l};
+
+        LongNodePropertyValues inputProperties = new TestNodePropertyValues(11, id -> values[(int) id]);
+
+        var config = CommunityProcCompanionConfig.of(CypherMapWrapper
+            .empty()
+            .withNumber("minCommunitySize", 3L)
+            .withBoolean("consecutiveIds", true));
+
+        var result = CommunityProcCompanion.nodeProperties(
+            config,
+            "seed",
+            inputProperties,
+            () -> {throw new UnsupportedOperationException("Not implemented");}
+        );
+
+
+        for (long i = 0L; i < result.nodeCount(); i++) {
+            int ii = (int) i;
+            if (returnedValues[ii] == null) {
+                assertThat(result.hasValue(i)).isFalse();
+            } else {
+                assertThat(result.hasValue(i)).isTrue();
+                assertThat(result.value(i).asObject()).isEqualTo(returnedValues[(int) i]);
+            }
+
         }
     }
 }

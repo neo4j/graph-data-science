@@ -98,7 +98,7 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
 
                 var properties = new LongNodePropertyValues() {
                     @Override
-                    public long size() {
+                    public long nodeCount() {
                         return computationResult.graph().nodeCount();
                     }
 

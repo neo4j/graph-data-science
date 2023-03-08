@@ -36,7 +36,7 @@ public class UpdatableDoubleArrayNodeProperty implements UpdatableNodeProperty, 
     }
 
     @Override
-    public long size() {
+    public long nodeCount() {
         return nodeCount;
     }
 

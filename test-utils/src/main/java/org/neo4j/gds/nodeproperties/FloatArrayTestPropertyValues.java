@@ -28,8 +28,8 @@ public final class FloatArrayTestPropertyValues implements FloatArrayNodePropert
     public FloatArrayTestPropertyValues(LongToObjectFunction<float[]> transformer) {this.transformer = transformer;}
 
     @Override
-    public long size() {
-        return 0;
+    public long nodeCount() {
+        return -1;
     }
 
     @Override

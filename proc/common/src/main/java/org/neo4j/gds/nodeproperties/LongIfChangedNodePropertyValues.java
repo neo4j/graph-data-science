@@ -76,7 +76,15 @@ public final class LongIfChangedNodePropertyValues implements LongNodePropertyVa
     }
 
     @Override
-    public long size() {
-        return newProperties.size();
+    public long nodeCount() {
+        return Math.max(newProperties.nodeCount(), seedProperties.nodeCount());
+    }
+
+    @Override
+    public boolean hasValue(long nodeId) {
+        long seedValue = seedProperties.longValue(nodeId);
+        long writeValue = newProperties.longValue(nodeId);
+        return seedValue == Long.MIN_VALUE || (seedValue != writeValue) ? true : false;
+
     }
 }

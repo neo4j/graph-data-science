@@ -205,7 +205,7 @@ public abstract class HugeByteArray extends HugeArray<byte[], Byte, HugeByteArra
             }
 
             @Override
-            public long size() {
+            public long nodeCount() {
                 return HugeByteArray.this.size();
             }
         };

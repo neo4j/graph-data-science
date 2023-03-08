@@ -27,7 +27,6 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.NodePropertyExporter;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -40,23 +39,20 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends WritePropertyConfig & AlgoBaseConfig, RESULT>
     implements ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, Stream<RESULT>> {
 
-    interface WriteNodePropertyListFunction<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends WritePropertyConfig & AlgoBaseConfig>
+    public interface WriteNodePropertyListFunction<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends WritePropertyConfig & AlgoBaseConfig>
         extends NodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> {}
 
     private final ResultBuilderFunction<ALGO, ALGO_RESULT, CONFIG, RESULT> resultBuilderFunction;
     private final WriteNodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertyListFunction;
-    private final NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
     private final String procedureName;
 
-    WriteNodePropertiesComputationResultConsumer(
+    public WriteNodePropertiesComputationResultConsumer(
         ResultBuilderFunction<ALGO, ALGO_RESULT, CONFIG, RESULT> resultBuilderFunction,
         WriteNodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertyListFunction,
-        NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder,
         String procedureName
     ) {
         this.resultBuilderFunction = resultBuilderFunction;
         this.nodePropertyListFunction = nodePropertyListFunction;
-        this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
         this.procedureName = procedureName;
     }
 
@@ -92,7 +88,13 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
                 computationResult.config().writeConcurrency(),
                 executionContext
             );
-            var exporter = createNodePropertyExporter(graph, progressTracker, computationResult);
+            var exporter = executionContext
+                .nodePropertyExporterBuilder()
+                .withIdMap(graph)
+                .withTerminationFlag(computationResult.algorithm().terminationFlag)
+                .withProgressTracker(progressTracker)
+                .parallel(Pools.DEFAULT, computationResult.config().writeConcurrency())
+                .build();
 
             try {
                 exporter.write(nodePropertyListFunction.apply(computationResult));
@@ -116,18 +118,5 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
             writeConcurrency,
             executionContext.taskRegistryFactory()
         );
-    }
-
-    NodePropertyExporter createNodePropertyExporter(
-        Graph graph,
-        ProgressTracker progressTracker,
-        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
-    ) {
-        return nodePropertyExporterBuilder
-            .withIdMap(graph)
-            .withTerminationFlag(computationResult.algorithm().terminationFlag)
-            .withProgressTracker(progressTracker)
-            .parallel(Pools.DEFAULT, computationResult.config().writeConcurrency())
-            .build();
     }
 }

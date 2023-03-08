@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.ml.decisiontree;
 
+import java.util.Objects;
+
 public class DecisionTreePredictor<PREDICTION extends Number> {
 
-    private final TreeNode<PREDICTION> root;
+    public final TreeNode<PREDICTION> root;
 
     public DecisionTreePredictor(TreeNode<PREDICTION> root) {
         this.root = root;
@@ -45,4 +47,19 @@ public class DecisionTreePredictor<PREDICTION extends Number> {
 
         return node.prediction();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DecisionTreePredictor<?> that = (DecisionTreePredictor<?>) o;
+        return root.equals(that.root);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(root);
+    }
+
+
 }

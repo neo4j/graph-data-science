@@ -46,7 +46,7 @@ public final class GraphSageCompanion {
 
         return new DoubleArrayNodePropertyValues() {
             @Override
-            public long size() {
+            public long nodeCount() {
                 return size;
             }
 

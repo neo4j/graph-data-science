@@ -60,8 +60,7 @@ final class LouvainProc {
 
         return new LongArrayNodePropertyValues() {
             @Override
-            public long size() {
-                return size;
+            public long nodeCount() {return size;
             }
 
             @Override

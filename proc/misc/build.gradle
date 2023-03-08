@@ -5,8 +5,11 @@ description = 'Neo4j Graph Data Science :: Procedures :: Misc'
 group = 'org.neo4j.gds'
 
 dependencies {
+    implementation project(':algo-common')
     implementation project(':annotations')
+    implementation project(':config-api')
     implementation project(':core')
+    implementation project(':core-write')
     implementation project(':csv')
     implementation project(':executor')
     implementation project(':memory-usage')
@@ -23,7 +26,7 @@ dependencies {
         }
     }
 
-    testImplementation project(':proc-test')
-    testImplementation project(':algo-common')
+    testImplementation project(':graph-schema-api')
     testImplementation project(':ml-core')
+    testImplementation project(':proc-test')
 }

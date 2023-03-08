@@ -120,7 +120,7 @@ public class DoubleNodePropertiesBuilder implements InnerNodePropertiesBuilder {
 
         var propertyValues = propertiesByMappedIdsBuilder.build();
 
-        var maybeMaxValue = size > 0
+        var maybeMaxValue = propertyValues.capacity() > 0
             ? OptionalDouble.of((double) MAX_VALUE.getVolatile(DoubleNodePropertiesBuilder.this))
             : OptionalDouble.empty();
 
@@ -183,7 +183,7 @@ public class DoubleNodePropertiesBuilder implements InnerNodePropertiesBuilder {
         }
 
         @Override
-        public long size() {
+        public long nodeCount() {
             return size;
         }
     }

@@ -175,7 +175,7 @@ public abstract class HugeAtomicDoubleArray {
             }
 
             @Override
-            public long size() {
+            public long nodeCount() {
                 return HugeAtomicDoubleArray.this.size();
             }
         };

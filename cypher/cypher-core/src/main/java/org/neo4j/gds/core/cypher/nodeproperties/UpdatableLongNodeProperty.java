@@ -35,9 +35,8 @@ public class UpdatableLongNodeProperty implements UpdatableNodeProperty, LongNod
         this.longList = HugeSparseLongList.of(defaultValue);
     }
 
-
     @Override
-    public long size() {
+    public long nodeCount() {
         return nodeCount;
     }
 

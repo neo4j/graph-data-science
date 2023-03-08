@@ -97,7 +97,7 @@ public class NodeClassificationPipelineMutateProc
         result.predictedProbabilities().ifPresent(probabilityProperties -> {
             var properties = new DoubleArrayNodePropertyValues() {
                 @Override
-                public long size() {
+                public long nodeCount() {
                     return computationResult.graph().nodeCount();
                 }
 

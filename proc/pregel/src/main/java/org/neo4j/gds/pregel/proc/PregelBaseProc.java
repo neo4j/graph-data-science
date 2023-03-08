@@ -163,7 +163,8 @@ public final class PregelBaseProc {
         HugeObjectArrayLongArrayPropertyValues(HugeObjectArray<long[]> longArrays) {this.longArrays = longArrays;}
 
         @Override
-        public long size() {
+        public long nodeCount() {
+            // Its backed by a dense array
             return longArrays.size();
         }
 
@@ -179,7 +180,8 @@ public final class PregelBaseProc {
         HugeObjectArrayDoubleArrayPropertyValues(HugeObjectArray<double[]> doubleArrays) {this.doubleArrays = doubleArrays;}
 
         @Override
-        public long size() {
+        public long nodeCount() {
+            // its backed by dense array
             return doubleArrays.size();
         }
 

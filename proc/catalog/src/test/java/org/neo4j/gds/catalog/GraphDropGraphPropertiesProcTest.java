@@ -68,9 +68,8 @@ class GraphDropGraphPropertiesProcTest extends BaseProcTest {
             }
 
             @Override
-            public long size() {
+            public long valueCount() {
                 return 10;
-
             }
         };
 
@@ -113,9 +112,8 @@ class GraphDropGraphPropertiesProcTest extends BaseProcTest {
             }
 
             @Override
-            public long size() {
+            public long valueCount() {
                 return 10;
-
             }
         };
         graphStore.addGraphProperty("prop", values);

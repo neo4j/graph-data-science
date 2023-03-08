@@ -19,25 +19,47 @@
  */
 package org.neo4j.gds.scaling;
 
+import org.intellij.lang.annotations.Language;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
 import java.util.Map;
 
-class ScalePropertiesStreamProcTest extends ScalePropertiesProcTest<ScalePropertiesStreamConfig> {
+class ScalePropertiesStreamProcTest extends BaseProcTest {
+
+    @Neo4jGraph
+    @Language("Cypher")
+    private static final String DB_CYPHER =
+        "CREATE" +
+        " (n0:A {myProp: [0, 2]})" +
+        ",(n1:A {myProp: [1, 2]})" +
+        ",(n2:A {myProp: [2, 2]})" +
+        ",(n3:A {myProp: [3, 2]})" +
+        ",(n4:A {myProp: [4, 2]})" +
+        ",(n5:A {myProp: [5, 2]})";
+
+    @BeforeEach
+    void setUp() throws Exception {
+        registerProcedures(
+            GraphProjectProc.class,
+            ScalePropertiesStreamProc.class
+        );
+
+        runQuery("CALL gds.graph.project('g', {A: {properties: 'myProp'}}, '*')");
+    }
 
     @Test
     void stream() {
-        loadGraph(GRAPH_NAME);
-
         var query = GdsCypher
-            .call(GRAPH_NAME)
+            .call("g")
             .algo("gds.alpha.scaleProperties")
             .streamMode()
-            .addParameter("nodeProperties", List.of(NODE_PROP_NAME))
+            .addParameter("nodeProperties", List.of("myProp"))
             .addParameter("scaler", "Mean")
             .yields();
 
@@ -53,9 +75,7 @@ class ScalePropertiesStreamProcTest extends ScalePropertiesProcTest<ScalePropert
 
     @Test
     void streamLogWithOffset() {
-        loadGraph(GRAPH_NAME);
-
-        var query = "CALL gds.alpha.scaleProperties.stream('myGraph', {" +
+        var query = "CALL gds.alpha.scaleProperties.stream('g', {" +
                     "scaler: {type: 'log', offset: 10 }," +
                     "nodeProperties: 'myProp'}) " +
                     "yield nodeId, scaledProperty " +
@@ -69,15 +89,5 @@ class ScalePropertiesStreamProcTest extends ScalePropertiesProcTest<ScalePropert
             Map.of("nodeId", 4L, "scaledProperty", List.of(2.63, 2.48)),
             Map.of("nodeId", 5L, "scaledProperty", List.of(2.7, 2.48))
         ));
-    }
-
-    @Override
-    public Class<? extends AlgoBaseProc<ScaleProperties, ScaleProperties.Result, ScalePropertiesStreamConfig, ?>> getProcedureClazz() {
-        return ScalePropertiesStreamProc.class;
-    }
-
-    @Override
-    public ScalePropertiesStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ScalePropertiesStreamConfig.of(mapWrapper);
     }
 }

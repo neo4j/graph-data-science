@@ -28,8 +28,8 @@ public final class DoubleArrayTestPropertyValues implements DoubleArrayNodePrope
     public DoubleArrayTestPropertyValues(LongToObjectFunction<double[]> transformer) {this.transformer = transformer;}
 
     @Override
-    public long size() {
-        return 0;
+    public long nodeCount() {
+        return -1;
     }
 
     @Override

@@ -246,8 +246,8 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
             }
 
             @Override
-            public long size() {
-                return property.size();
+            public long nodeCount() {
+                return property.nodeCount();
             }
         };
     }
@@ -275,8 +275,8 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
             }
 
             @Override
-            public long size() {
-                return property.size();
+            public long nodeCount() {
+                return property.nodeCount();
             }
         };
     }
@@ -304,8 +304,8 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
             }
 
             @Override
-            public long size() {
-                return property.size();
+            public long nodeCount() {
+                return property.nodeCount();
             }
         };
     }

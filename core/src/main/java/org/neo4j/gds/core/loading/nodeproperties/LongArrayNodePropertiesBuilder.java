@@ -119,7 +119,7 @@ public class LongArrayNodePropertiesBuilder implements InnerNodePropertiesBuilde
         }
 
         @Override
-        public long size() {
+        public long nodeCount() {
             return size;
         }
     }

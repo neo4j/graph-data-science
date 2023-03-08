@@ -702,6 +702,10 @@
         <Bug code="MS" />
     </Match>
 
+    <Match>
+        <Bug pattern="CC_CYCLOMATIC_COMPLEXITY"/>
+    </Match>
+
     <!--
         Match for specific rules in specific classes
     -->

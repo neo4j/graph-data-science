@@ -35,13 +35,13 @@ final class Node2VecCompanion {
     static <CONFIG extends Node2VecBaseConfig> NodePropertyValues nodeProperties(
         ComputationResult<Node2Vec, Node2VecModel.Result, CONFIG> computationResult
     ) {
-        var size = computationResult.graph().nodeCount();
+        var nodeCount = computationResult.graph().nodeCount();
         HugeObjectArray<FloatVector> embeddings = computationResult.result().embeddings();
 
         return new FloatArrayNodePropertyValues() {
             @Override
-            public long size() {
-                return size;
+            public long nodeCount() {
+                return nodeCount;
             }
 
             @Override

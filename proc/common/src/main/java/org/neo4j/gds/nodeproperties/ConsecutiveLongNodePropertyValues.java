@@ -23,34 +23,39 @@ import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.mem.BitUtil;
+import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.Values;
 
 public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues {
 
     private static final long MAPPING_SIZE_QUOTIENT = 10L;
+    private static final long NO_VALUE = -1L;
+
 
     private final HugeLongArray communities;
 
-    public ConsecutiveLongNodePropertyValues(
-        LongNodePropertyValues longNodeProperties,
-        long nodeCount
-    ) {
+    public ConsecutiveLongNodePropertyValues(LongNodePropertyValues inputProperties) {
         var nextConsecutiveId = -1L;
-
+        long maxIdx = inputProperties.nodeCount();
         var setIdToConsecutiveId = new HugeLongLongMap(BitUtil.ceilDiv(
-            nodeCount,
+            maxIdx,
             MAPPING_SIZE_QUOTIENT
         ));
 
-        this.communities = HugeLongArray.newArray(nodeCount);
+        this.communities = HugeLongArray.newArray(maxIdx);
 
-        for (var nodeId = 0; nodeId < nodeCount; nodeId++) {
-            var setId = longNodeProperties.longValue(nodeId);
-            var communityId = setIdToConsecutiveId.getOrDefault(setId, -1);
-            if (communityId == -1) {
-                setIdToConsecutiveId.addTo(setId, ++nextConsecutiveId);
-                communityId = nextConsecutiveId;
+        for (var nodeId = 0; nodeId < maxIdx; nodeId++) {
+            if (inputProperties.hasValue(nodeId)) {
+                var setId = inputProperties.longValue(nodeId);
+                var communityId = setIdToConsecutiveId.getOrDefault(setId, -1);
+                if (communityId == -1) {
+                    setIdToConsecutiveId.addTo(setId, ++nextConsecutiveId);
+                    communityId = nextConsecutiveId;
+                }
+                communities.set(nodeId, communityId);
+            } else {
+                communities.set(nodeId, NO_VALUE);
             }
-            communities.set(nodeId, communityId);
         }
     }
 
@@ -60,7 +65,21 @@ public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues
     }
 
     @Override
-    public long size() {
+    public boolean hasValue(long nodeId) {
+        return communities.get(nodeId) != NO_VALUE;
+    }
+
+    @Override
+    public Value value(long nodeId) {
+        if (hasValue(nodeId)) {
+            return Values.longValue(communities.get(nodeId));
+        }
+        return null;
+
+    }
+
+    @Override
+    public long nodeCount() {
         return communities.size();
     }
 }

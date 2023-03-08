@@ -67,4 +67,6 @@ public interface RandomForestClassifierData extends Classifier.ClassifierData {
             )
             .build();
     }
+
+    static ImmutableRandomForestClassifierData.Builder builder() { return ImmutableRandomForestClassifierData.builder(); }
 }

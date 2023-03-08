@@ -19,15 +19,14 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.MutatePropertyProc;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.write.NodePropertyExporter;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.results.StandardMutateResult;
+import org.neo4j.gds.results.StandardWriteResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -36,54 +35,42 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
+import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.alpha.scaleProperties.mutate", description = SCALE_PROPERTIES_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class ScalePropertiesMutateProc extends MutatePropertyProc<ScaleProperties, ScaleProperties.Result, ScalePropertiesMutateProc.MutateResult, ScalePropertiesMutateConfig> {
+public class ScalePropertiesWriteProc extends BaseProc {
 
-    @Procedure("gds.alpha.scaleProperties.mutate")
+    @Context
+    public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
+
+    @Procedure(value = "gds.beta.scaleProperties.write", mode = WRITE)
     @Description(SCALE_PROPERTIES_DESCRIPTION)
-    public Stream<MutateResult> mutate(
+    public Stream<ScalePropertiesWriteProc.WriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return mutate(compute(graphName, configuration));
+        return new ProcedureExecutor<>(
+            new ScalePropertiesWriteSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesMutateConfig> computationResult) {
-        return ScalePropertiesProc.nodeProperties(computationResult);
+    public ExecutionContext executionContext() {
+        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
     }
 
-    @Override
-    protected ScalePropertiesMutateConfig newConfig(String username, CypherMapWrapper config) {
-        return ScalePropertiesMutateConfig.of(config);
-    }
+    @SuppressWarnings("unused")
+    public static final class WriteResult extends StandardWriteResult {
 
-    @Override
-    public GraphAlgorithmFactory<ScaleProperties, ScalePropertiesMutateConfig> algorithmFactory() {
-        return new ScalePropertiesFactory<>();
-    }
-
-    @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesMutateConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return new MutateResult.Builder().withScalerStatistics(computeResult.result().scalerStatistics());
-    }
-
-    public static final class MutateResult extends StandardMutateResult {
-
-        public final Map<String, Map<String, List<Double>>> scalerStatistics;
         public final long nodePropertiesWritten;
+        public final Map<String, Map<String, List<Double>>> scalerStatistics;
 
-        MutateResult(
+        WriteResult(
             Map<String, Map<String, List<Double>>> scalerStatistics,
             long preProcessingMillis,
             long computeMillis,
-            long mutateMillis,
+            long writeMillis,
             long nodePropertiesWritten,
             Map<String, Object> configuration
         ) {
@@ -91,14 +78,14 @@ public class ScalePropertiesMutateProc extends MutatePropertyProc<ScalePropertie
                 preProcessingMillis,
                 computeMillis,
                 0L,
-                mutateMillis,
+                writeMillis,
                 configuration
             );
-            this.scalerStatistics = scalerStatistics;
             this.nodePropertiesWritten = nodePropertiesWritten;
+            this.scalerStatistics = scalerStatistics;
         }
 
-        static class Builder extends AbstractResultBuilder<MutateResult> {
+        static class Builder extends AbstractResultBuilder<WriteResult> {
 
             private Map<String, Map<String, List<Double>>> scalerStatistics;
 
@@ -108,12 +95,12 @@ public class ScalePropertiesMutateProc extends MutatePropertyProc<ScalePropertie
             }
 
             @Override
-            public MutateResult build() {
-                return new MutateResult(
+            public WriteResult build() {
+                return new WriteResult(
                     scalerStatistics,
                     preProcessingMillis,
                     computeMillis,
-                    mutateMillis,
+                    writeMillis,
                     nodePropertiesWritten,
                     config.toMap()
                 );

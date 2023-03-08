@@ -19,12 +19,8 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -35,11 +31,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.scaleProperties.stream", description = SCALE_PROPERTIES_DESCRIPTION, executionMode = STREAM)
-public class ScalePropertiesStreamProc extends StreamProc<ScaleProperties, ScaleProperties.Result, ScalePropertiesStreamProc.Result, ScalePropertiesStreamConfig> {
+public class ScalePropertiesStreamProc extends BaseProc {
 
     @Procedure("gds.alpha.scaleProperties.stream")
     @Description(SCALE_PROPERTIES_DESCRIPTION)
@@ -47,27 +41,10 @@ public class ScalePropertiesStreamProc extends StreamProc<ScaleProperties, Scale
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return stream(compute(graphName, configuration));
-    }
-
-    @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesStreamConfig> computationResult) {
-        return ScalePropertiesProc.nodeProperties(computationResult);
-    }
-
-    @Override
-    protected ScalePropertiesStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return ScalePropertiesStreamConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<ScaleProperties, ScalePropertiesStreamConfig> algorithmFactory() {
-        return new ScalePropertiesFactory<>();
-    }
-
-    @Override
-    protected Result streamResult(long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues) {
-        return new Result(originalNodeId, nodePropertyValues.doubleArrayValue(internalNodeId));
+        return new ProcedureExecutor<>(
+            new ScalePropertiesStreamSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
     }
 
     public static class Result {
