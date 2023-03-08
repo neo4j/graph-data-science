@@ -29,7 +29,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.graphsampling.config.CNARWConfig;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.graphsampling.samplers.rwr.RandomWalkWithRestarts;
-import org.neo4j.gds.graphsampling.samplers.rwr.SeenNodes;
+import org.neo4j.gds.graphsampling.samplers.SeenNodes;
 import org.neo4j.gds.similarity.nodesim.OverlapSimilarityComputer;
 
 import java.util.Optional;

@@ -40,6 +40,8 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.graphsampling.NodesSampler;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
+import org.neo4j.gds.graphsampling.samplers.SeenNodes;
+import org.neo4j.gds.graphsampling.samplers.NodeLabelHistogram;
 
 import java.util.Optional;
 import java.util.SplittableRandom;
