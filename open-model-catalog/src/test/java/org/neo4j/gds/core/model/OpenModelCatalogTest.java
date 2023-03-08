@@ -26,14 +26,11 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.gds.model.catalog.TestTrainConfig;
 
 import java.util.Locale;
-import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -322,16 +319,4 @@ class OpenModelCatalogTest {
         }
     }
 
-    static class TestCustomInfo implements CustomInfo {
-
-        @Override
-        public Map<String, Object> toMap() {
-            return Map.of();
-        }
-
-        @Override
-        public Optional<TrainingMethod> optionalTrainerMethod() {
-            return Optional.empty();
-        }
-    }
 }

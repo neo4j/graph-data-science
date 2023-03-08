@@ -108,7 +108,6 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
             .build();
     }
 
-    //TODO Refactor to separate file/package
     interface CustomInfo extends ToMapConvertible, Serializable{
         Optional<TrainingMethod> optionalTrainerMethod();
     }
