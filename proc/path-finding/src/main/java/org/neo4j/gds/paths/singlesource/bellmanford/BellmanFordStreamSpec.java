@@ -23,11 +23,11 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.paths.StreamResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
 import org.neo4j.gds.paths.bellmanford.BellmanFordAlgorithmFactory;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFordStreamConfig;
+import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 
 import java.util.stream.Stream;
 
@@ -64,13 +64,22 @@ public class BellmanFordStreamSpec implements AlgorithmSpec<BellmanFord, Bellman
 
             var shouldReturnPath = executionContext
                 .returnColumns()
-                .contains("path");
+                .contains("route");
 
-            var resultBuilder = new StreamResult.Builder(graph, executionContext.nodeLookup());
+            var result = computationResult.result();
+            var containsNegativeCycle = result.containsNegativeCycle();
 
-            var resultStream = computationResult
-                .result().shortestPaths()
-                .mapPaths(path -> resultBuilder.build(path, shouldReturnPath));
+            var resultBuilder = new StreamResult.Builder(graph, executionContext.nodeLookup())
+                .withIsCycle(containsNegativeCycle);
+
+            DijkstraResult algorithmResult;
+            if (containsNegativeCycle) {
+                algorithmResult = result.negativeCycles();
+            } else {
+                algorithmResult = result.shortestPaths();
+            }
+
+            var resultStream = algorithmResult.mapPaths(path -> resultBuilder.build(path, shouldReturnPath));
 
             // this is necessary in order to close the result stream which triggers
             // the progress tracker to close its root task
@@ -80,7 +89,7 @@ public class BellmanFordStreamSpec implements AlgorithmSpec<BellmanFord, Bellman
         };
     }
 
-@Override
+    @Override
     public boolean releaseProgressTask() {
         return false;
     }

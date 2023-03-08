@@ -21,7 +21,6 @@ package org.neo4j.gds.paths.singlesource.bellmanford;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.paths.StreamResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
