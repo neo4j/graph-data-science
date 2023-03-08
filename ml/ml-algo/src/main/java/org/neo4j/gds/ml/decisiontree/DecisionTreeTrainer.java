@@ -125,7 +125,7 @@ public abstract class DecisionTreeTrainer<PREDICTION extends Number> {
         {
             var mutableTrainSetIndices = HugeLongArray.newArray(trainSetIndices.size());
             mutableTrainSetIndices.setAll(trainSetIndices::get);
-            var impurityData = impurityCriterion. groupImpurity(
+            var impurityData = impurityCriterion.groupImpurity(
                 mutableTrainSetIndices,
                 0,
                 mutableTrainSetIndices.size()
