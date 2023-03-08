@@ -29,6 +29,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
 import org.neo4j.gds.paths.bellmanford.BellmanFordMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
+import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
@@ -65,7 +66,12 @@ public class BellmanFordMutateResultConsumer extends MutateComputationResultCons
 
         SingleTypeRelationships relationships;
 
-        result.shortestPaths().forEachPath(pathResult -> {
+        DijkstraResult dijkstraResult = result.shortestPaths();
+        if (result.containsNegativeCycle() && config.mutateNegativeCycles()) {
+            dijkstraResult = result.negativeCycles();
+        }
+
+        dijkstraResult.forEachPath(pathResult -> {
             relationshipsBuilder.addFromInternal(
                 pathResult.sourceNode(),
                 pathResult.targetNode(),

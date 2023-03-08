@@ -26,6 +26,10 @@ import org.neo4j.gds.core.CypherMapWrapper;
 @Configuration
 public interface BellmanFordMutateConfig extends BellmanFordBaseConfig, MutateRelationshipConfig {
 
+    default boolean mutateNegativeCycles() {
+        return false;
+    }
+
     static BellmanFordMutateConfig of(CypherMapWrapper userInput) {
         return new BellmanFordMutateConfigImpl(userInput);
     }

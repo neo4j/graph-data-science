@@ -35,10 +35,26 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
 
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
-class BellmanFordMutateProcTest {
+class BellmanFordMutateProcTest extends BaseProcTest{
 
+
+    @Inject
+    public IdFunction idFunction;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        registerProcedures(
+            GraphProjectProc.class,
+            BellmanFordMutateProc.class,
+            GraphStreamRelationshipPropertiesProc.class
+        );
+
+        var projectQuery="CALL gds.graph.project('graph', '*' , { R : { properties :'weight' }})";
+        runQuery(projectQuery);
+    }
 
     @Nested
     @ExtendWith(SoftAssertionsExtension.class)
@@ -57,26 +73,12 @@ class BellmanFordMutateProcTest {
             "  (a3)-[:R {weight: -4.0}]->(a4), " +
             "  (a4)-[:R {weight: 1.0}]->(a2) ";
 
-        @Inject
-        public IdFunction idFunction;
-
-        @BeforeEach
-        void setUp() throws Exception {
-            registerProcedures(
-                GraphProjectProc.class,
-                BellmanFordMutateProc.class
-            );
-
-            var projectQuery="CALL gds.graph.project('graph', '*' , { R : { properties :'weight' }})";
-            runQuery(projectQuery);
-        }
-
         @Test
         void shouldNotMutateTheInMemoryGraph(SoftAssertions assertions) {
             var rowCounter = new LongAdder();
             runQueryWithRowConsumer(
                 " MATCH (n) WHERE  n.id = 0 " +
-                " CALL gds.bellmanFord.mutate('graph', {sourceNode: n, relationshipWeightProperty: 'weight', mutateRelationshipType: 'BF'}) " +
+                " CALL gds.bellmanFord.mutate('graph', {sourceNode: n, relationshipWeightProperty: 'weight', mutateRelationshipType: 'BF', mutateNegativeCycles: false}) " + // `mutateNegativeCycles` is `false` by default but we want to be explicit here
                 " YIELD relationshipsWritten, containsNegativeCycle " +
                 " RETURN relationshipsWritten, containsNegativeCycle",
                 row -> {
@@ -86,7 +88,7 @@ class BellmanFordMutateProcTest {
 
                     assertions.assertThat(row.getNumber("relationshipsWritten"))
                         .asInstanceOf(LONG)
-                            .as("The in-memory graph should not have been mutated because it contains negative cycle.")
+                            .as("The in-memory graph should not have been mutated because configuration parameter `mutateNegativeCycles` is `false`.")
                                 .isEqualTo(0L);
 
 
@@ -95,6 +97,59 @@ class BellmanFordMutateProcTest {
 
             assertions.assertThat(rowCounter.longValue())
                 .as("There should always be one result row.")
+                .isEqualTo(1L);
+        }
+
+        @Test
+        void shouldMutateTheInMemoryGraph(SoftAssertions assertions) {
+            var rowCounter = new LongAdder();
+            runQueryWithRowConsumer(
+                " MATCH (n) WHERE  n.id = 0 " +
+                " CALL gds.bellmanFord.mutate('graph', {sourceNode: n, relationshipWeightProperty: 'weight', mutateRelationshipType: 'BF', mutateNegativeCycles: true}) " +
+                " YIELD relationshipsWritten, containsNegativeCycle " +
+                " RETURN relationshipsWritten, containsNegativeCycle",
+                row -> {
+                    assertions.assertThat(row.getBoolean("containsNegativeCycle"))
+                        .as("This graph should contain a negative cycle.")
+                        .isTrue();
+
+                    assertions.assertThat(row.getNumber("relationshipsWritten"))
+                        .asInstanceOf(LONG)
+                            .as("The in-memory graph should have been mutated because configuration parameter `mutateNegativeCycles` is `true`.")
+                                .isEqualTo(1L);
+
+                    rowCounter.increment();
+                });
+            assertions.assertThat(rowCounter.longValue())
+                .as("There should always be one result row.")
+                .isEqualTo(1L);
+
+            var streamPropertyCount = runQueryWithRowConsumer(
+                "CALL gds.graph.relationshipProperty.stream(" +
+                "    'graph'," +
+                "    'totalCost'," +
+                "    ['BF']," +
+                "    {}" +
+                ")",
+                row -> {
+                    assertions.assertThat(row.getNumber("sourceNodeId"))
+                        .asInstanceOf(LONG)
+                        .as("Source node should be `a3`")
+                        .isEqualTo(idFunction.of("a3"));
+                    assertions.assertThat(row.getNumber("targetNodeId"))
+                        .asInstanceOf(LONG)
+                        .as("Target node should be `a3`")
+                        .isEqualTo(idFunction.of("a3"));
+
+                    assertions.assertThat(row.getNumber("propertyValue"))
+                        .asInstanceOf(DOUBLE)
+                        .as("Incorrect negative cycle cost")
+                        .isEqualTo(-11.0);
+                }
+            );
+
+            assertions.assertThat(streamPropertyCount)
+                .as("One property should have been streamed")
                 .isEqualTo(1L);
         }
     }
@@ -117,25 +172,9 @@ class BellmanFordMutateProcTest {
             "  (a3)-[:R {weight: -8.0}]->(a4), " +
             "  (a1)-[:R {weight: 3.0}]->(a4) ";
 
-        @Inject
-        public IdFunction idFunction;
-
-        @BeforeEach
-        void setUp() throws Exception {
-            registerProcedures(
-                GraphProjectProc.class,
-                BellmanFordMutateProc.class,
-                GraphStreamRelationshipPropertiesProc.class
-            );
-
-            var projectQuery="CALL gds.graph.project('graph', '*' , { R : { properties :'weight' }})";
-            runQuery(projectQuery);
-        }
-
         @Test
         void shouldMutateTheInMemoryGraph(SoftAssertions assertions) {
-            var rowCounter = new LongAdder();
-            runQueryWithRowConsumer(
+            var rowCount = runQueryWithRowConsumer(
                 " MATCH (n) WHERE  n.id = 0 " +
                 " CALL gds.bellmanFord.mutate('graph', {sourceNode: n, relationshipWeightProperty: 'weight', mutateRelationshipType: 'BF'}) " +
                 " YIELD relationshipsWritten, containsNegativeCycle " +
@@ -149,14 +188,9 @@ class BellmanFordMutateProcTest {
                         .asInstanceOf(LONG)
                         .as("There should be five relationships written")
                         .isEqualTo(5L);
-
-
-                    rowCounter.increment();
                 });
 
-
-
-            assertions.assertThat(rowCounter.longValue())
+            assertions.assertThat(rowCount)
                 .as("There should always be one result row.")
                 .isEqualTo(1L);
 
@@ -168,8 +202,7 @@ class BellmanFordMutateProcTest {
                 idFunction.of("a4"), 2d
             );
 
-            var streamPropertyCounter = new LongAdder();
-            runQueryWithRowConsumer(
+            var streamPropertyCount = runQueryWithRowConsumer(
                 "CALL gds.graph.relationshipProperty.stream(" +
                 "    'graph'," +
                 "    'totalCost'," +
@@ -186,11 +219,10 @@ class BellmanFordMutateProcTest {
                     assertions.assertThat(EXPECTED_COST.get(targetNodeId))
                         .as("The cost between `%s` and `%s` should be `%s`", idFunction.of("a0"), targetNodeId, mutatedCost)
                         .isEqualTo(mutatedCost);
-                    streamPropertyCounter.increment();
                 }
             );
 
-            assertions.assertThat(streamPropertyCounter.longValue())
+            assertions.assertThat(streamPropertyCount)
                 .as("Five properties should have been streamed")
                 .isEqualTo(5L);
         }
