@@ -20,37 +20,66 @@
 package org.neo4j.gds.beta.k1coloring;
 
 import org.intellij.lang.annotations.Language;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.MemoryEstimateTest;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class K1ColoringWriteProcTest extends K1ColoringProcBaseTest<K1ColoringWriteConfig> {
+class K1ColoringWriteProcTest extends BaseProcTest implements
+    MemoryEstimateTest<K1Coloring, K1ColoringWriteConfig, HugeLongArray> {
+
+    private static final String K1COLORING_GRAPH = "myGraph";
+
+    @Neo4jGraph
+    public static final String DB_CYPHER =
+        "CREATE" +
+        " (a)" +
+        ",(b)" +
+        ",(c)" +
+        ",(d)" +
+        ",(a)-[:REL]->(b)" +
+        ",(a)-[:REL]->(c)";
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            K1ColoringWriteProc.class,
+            GraphProjectProc.class
+        );
+        loadGraph(K1COLORING_GRAPH);
+    }
+
 
     @Override
-    public Class<? extends AlgoBaseProc<K1Coloring, HugeLongArray, K1ColoringWriteConfig, ?>> getProcedureClazz() {
+    public Class<K1ColoringWriteProc> getProcedureClazz() {
         return K1ColoringWriteProc.class;
     }
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        return !mapWrapper.containsKey("writeProperty")
-            ? mapWrapper.withEntry("writeProperty", "color")
-            : mapWrapper;
+        return mapWrapper.withEntryIfMissing("writeProperty", "color");
     }
 
     @Override
@@ -61,7 +90,7 @@ class K1ColoringWriteProcTest extends K1ColoringProcBaseTest<K1ColoringWriteConf
     @Test
     void testWriting() {
         @Language("Cypher")
-        String query = algoBuildStage()
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
             .writeMode()
             .addParameter("writeProperty", "color")
             .yields();
@@ -91,7 +120,7 @@ class K1ColoringWriteProcTest extends K1ColoringProcBaseTest<K1ColoringWriteConf
     @Test
     void testWritingEstimate() {
         @Language("Cypher")
-        String query = algoBuildStage()
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
             .estimationMode(GdsCypher.ExecutionModes.WRITE)
             .addParameter("writeProperty", "color")
             .yields("requiredMemory", "treeView", "bytesMin", "bytesMax");
@@ -126,7 +155,7 @@ class K1ColoringWriteProcTest extends K1ColoringProcBaseTest<K1ColoringWriteConf
     @MethodSource("communitySizeInputs")
     void testWriteWithMinCommunitySize(Map<String, Long> parameter, Map<Long, Long> expectedResult) {
         @Language("Cypher")
-        String query = algoBuildStage()
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
                 .writeMode()
                 .addParameter("writeProperty", "color")
                 .addAllParameters(parameter)
@@ -141,5 +170,21 @@ class K1ColoringWriteProcTest extends K1ColoringProcBaseTest<K1ColoringWriteConf
             long nodeId = row.getNumber("id").longValue();
             assertEquals(expectedResult.get(nodeId), row.getNumber("color"));
         });
+    }
+
+
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
+    @Override
+    public GraphDatabaseService graphDb() {
+        return db;
+    }
+
+    @Override
+    public void assertResultEquals(HugeLongArray result1, HugeLongArray result2) {
+        assertThat(result1.toArray()).containsExactly(result2.toArray());
     }
 }
