@@ -27,6 +27,10 @@ import org.neo4j.gds.paths.WritePathOptionsConfig;
 @Configuration
 public interface BellmanFordWriteConfig extends BellmanFordBaseConfig, WriteRelationshipConfig, WritePathOptionsConfig {
 
+    default boolean writeNegativeCycles() {
+        return false;
+    }
+
     static BellmanFordWriteConfig of(CypherMapWrapper userInput) {
         return new BellmanFordWriteConfigImpl(userInput);
     }

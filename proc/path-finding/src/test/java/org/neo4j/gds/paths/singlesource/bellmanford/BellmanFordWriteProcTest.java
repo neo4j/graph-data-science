@@ -34,9 +34,24 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
 
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
-class BellmanFordWriteProcTest {
+class BellmanFordWriteProcTest extends BaseProcTest {
+
+    @Inject
+    public IdFunction idFunction;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        registerProcedures(
+            GraphProjectProc.class,
+            BellmanFordWriteProc.class
+        );
+
+        var projectQuery="CALL gds.graph.project('graph', '*' , { R : { properties :'weight' }})";
+        runQuery(projectQuery);
+    }
 
     @Nested
     @ExtendWith(SoftAssertionsExtension.class)
@@ -55,26 +70,13 @@ class BellmanFordWriteProcTest {
             "  (a3)-[:R {weight: -4.0}]->(a4), " +
             "  (a4)-[:R {weight: 1.0}]->(a2) ";
 
-        @Inject
-        public IdFunction idFunction;
-
-        @BeforeEach
-        void setUp() throws Exception {
-            registerProcedures(
-                GraphProjectProc.class,
-                BellmanFordWriteProc.class
-            );
-
-            var projectQuery="CALL gds.graph.project('graph', '*' , { R : { properties :'weight' }})";
-            runQuery(projectQuery);
-        }
 
         @Test
         void shouldNotWriteBackToNeo4j(SoftAssertions assertions) {
             var rowCounter = new LongAdder();
             runQueryWithRowConsumer(
                 " MATCH (n) WHERE  n.id = 0 " +
-                " CALL gds.bellmanFord.write('graph', {sourceNode: n, relationshipWeightProperty: 'weight', writeRelationshipType: 'BF'}) " +
+                " CALL gds.bellmanFord.write('graph', {sourceNode: n, relationshipWeightProperty: 'weight', writeRelationshipType: 'BF', writeNegativeCycles: false}) " +
                 " YIELD relationshipsWritten, containsNegativeCycle " +
                 " RETURN relationshipsWritten, containsNegativeCycle",
                 row -> {
@@ -84,7 +86,7 @@ class BellmanFordWriteProcTest {
 
                     assertions.assertThat(row.getNumber("relationshipsWritten"))
                         .asInstanceOf(LONG)
-                        .as("The in-memory graph should not have been mutated because it contains negative cycle.")
+                        .as("No relationships should have been written to Neo4j because `writeNegativeCycles` is false.")
                         .isEqualTo(0L);
 
 
@@ -93,6 +95,49 @@ class BellmanFordWriteProcTest {
 
             assertions.assertThat(rowCounter.longValue())
                 .as("There should always be one result row.")
+                .isEqualTo(1L);
+        }
+
+        @Test
+        void shouldWriteBackToNeo4j(SoftAssertions assertions) {
+            var rowCount = runQueryWithRowConsumer(
+                " MATCH (n) WHERE  n.id = 0 " +
+                " CALL gds.bellmanFord.write('graph', {sourceNode: n, relationshipWeightProperty: 'weight', writeRelationshipType: 'BF', writeNegativeCycles: true}) " +
+                " YIELD relationshipsWritten, containsNegativeCycle " +
+                " RETURN relationshipsWritten, containsNegativeCycle",
+                row -> {
+                    assertions.assertThat(row.getBoolean("containsNegativeCycle"))
+                        .as("This graph should contain a negative cycle.")
+                        .isTrue();
+
+                    assertions.assertThat(row.getNumber("relationshipsWritten"))
+                        .asInstanceOf(LONG)
+                        .as("Incorrect count of the written relationships")
+                        .isEqualTo(1L);
+                });
+
+            assertions.assertThat(rowCount)
+                .as("There should always be one result row.")
+                .isEqualTo(1L);
+
+            var matchResultCount = runQueryWithRowConsumer(
+                "MATCH (n)-[r:BF]->(m) RETURN id(n) AS sourceNodeId, id(m) AS targetNodeId, r.totalCost AS totalCost",
+                row -> {
+                    assertions.assertThat(row.getNumber("sourceNodeId"))
+                        .asInstanceOf(LONG)
+                        .isEqualTo(idFunction.of("a3"));
+                    assertions.assertThat(row.getNumber("targetNodeId"))
+                        .asInstanceOf(LONG)
+                        .isEqualTo(idFunction.of("a3"));
+                    assertions.assertThat(row.getNumber("totalCost"))
+                        .asInstanceOf(DOUBLE)
+                        .as("Incorrect `totalCost`.")
+                        .isEqualTo(-11.0);
+                }
+            );
+
+            assertions.assertThat(matchResultCount)
+                .as("Incorrect result count")
                 .isEqualTo(1L);
         }
     }
@@ -114,20 +159,6 @@ class BellmanFordWriteProcTest {
             "  (a0)-[:R {weight: 10.0}]->(a3), " +
             "  (a3)-[:R {weight: -8.0}]->(a4), " +
             "  (a1)-[:R {weight: 3.0}]->(a4) ";
-
-        @Inject
-        public IdFunction idFunction;
-
-        @BeforeEach
-        void setUp() throws Exception {
-            registerProcedures(
-                GraphProjectProc.class,
-                BellmanFordWriteProc.class
-            );
-
-            var projectQuery="CALL gds.graph.project('graph', '*' , { R : { properties :'weight' }})";
-            runQuery(projectQuery);
-        }
 
         @Test
         void shouldWriteBackToNeo4j(SoftAssertions assertions) {
@@ -164,8 +195,7 @@ class BellmanFordWriteProcTest {
                 idFunction.of("a4"), 2d
             );
 
-            var streamPropertyCounter = new LongAdder();
-            runQueryWithRowConsumer(
+            var matchResultCount = runQueryWithRowConsumer(
                 "MATCH (n)-[r:BF]->(m) RETURN id(n) AS sourceNodeId, id(m) AS targetNodeId, r.totalCost AS totalCost",
                 row -> {
                     assertions.assertThat(row.getNumber("sourceNodeId"))
@@ -177,11 +207,10 @@ class BellmanFordWriteProcTest {
                     assertions.assertThat(EXPECTED_COST.get(targetNodeId))
                         .as("The cost between `%s` and `%s` should be `%s`", idFunction.of("a0"), targetNodeId, writtenCost)
                         .isEqualTo(writtenCost);
-                    streamPropertyCounter.increment();
                 }
             );
 
-            assertions.assertThat(streamPropertyCounter.longValue())
+            assertions.assertThat(matchResultCount)
                 .as("Five properties should have been streamed")
                 .isEqualTo(5L);
         }

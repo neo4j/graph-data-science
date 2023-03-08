@@ -80,9 +80,13 @@ public class BellmanFordWriteResultConsumer implements ComputationResultConsumer
 
             var graph = computationResult.graph();
 
-            var relationshipStream = result
-                .shortestPaths()
-                .mapPaths(pathResult -> ImmutableRelationship.of(
+            var paths = result.shortestPaths();
+            if(config.writeNegativeCycles() && result.containsNegativeCycle()) {
+                paths = result.negativeCycles();
+            }
+
+            var relationshipStream = paths.mapPaths(
+                pathResult -> ImmutableRelationship.of(
                     pathResult.sourceNode(),
                     pathResult.targetNode(),
                     createValues(graph, pathResult, writeNodeIds, writeCosts)

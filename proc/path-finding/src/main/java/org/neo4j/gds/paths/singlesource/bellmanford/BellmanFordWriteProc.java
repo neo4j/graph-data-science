@@ -45,7 +45,6 @@ public class BellmanFordWriteProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-
         return new ProcedureExecutor<>(
             new BellmanFordWriteSpec(),
             executionContext()
