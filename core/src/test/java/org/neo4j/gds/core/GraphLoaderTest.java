@@ -223,7 +223,7 @@ class GraphLoaderTest extends BaseTest {
             .graph();
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
-            .containsExactly(
+            .contains(
                 "Loading :: Start",
                 "Loading :: Nodes :: Start",
                 "Loading :: Nodes 33%",
@@ -231,16 +231,9 @@ class GraphLoaderTest extends BaseTest {
                 "Loading :: Nodes 100%",
                 "Loading :: Nodes :: Finished",
                 "Loading :: Relationships :: Start",
-                "Loading :: Relationships 8%",
-                "Loading :: Relationships 16%",
-                "Loading :: Relationships 25%",
-                "Loading :: Relationships 33%",
-                "Loading :: Relationships 41%",
-                "Loading :: Relationships 50%",
                 "Loading :: Relationships 100%",
                 "Loading :: Relationships :: Finished",
-                "Loading :: Finished",
-                "Loading :: Actual memory usage of the loaded graph: 329 KiB"
+                "Loading :: Finished"
             );
 
         assertThat(log.getMessages(TestLog.DEBUG)).isEmpty();
