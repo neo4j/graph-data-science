@@ -19,15 +19,12 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
-import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
 import org.immutables.value.Value;
 import org.neo4j.gds.ImmutablePropertyMappings;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
@@ -52,14 +49,9 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
     private final Context loaderContext;
     private final ProgressTracker progressTracker;
 
-    // Property mappings are either defined upfront in
-    // the procedure configuration or during load time
-    // by looking at the columns returned by the query.
-    private ObjectIntHashMap<String> propertyKeyIdsByName;
     private ObjectDoubleHashMap<String> propertyDefaultValueByName;
     private boolean initializedFromResult;
     private List<GraphFactory.PropertyConfig> propertyConfigs;
-    private RelationshipProjection.Builder projectionBuilder;
 
     CypherRelationshipLoader(
         String relationshipQuery,
@@ -75,15 +67,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
     }
 
     private void initFromPropertyMappings(PropertyMappings propertyMappings) {
-        var propertyKeyId = new MutableInt(0);
-        int numberOfMappings = propertyMappings.numberOfMappings();
-
-        propertyKeyIdsByName = new ObjectIntHashMap<>(numberOfMappings);
-        propertyMappings
-            .stream()
-            .forEach(mapping -> propertyKeyIdsByName.put(mapping.neoPropertyKey(), propertyKeyId.getAndIncrement()));
-
-        propertyDefaultValueByName = new ObjectDoubleHashMap<>(numberOfMappings);
+        propertyDefaultValueByName = new ObjectDoubleHashMap<>(propertyMappings.numberOfMappings());
         propertyMappings
             .stream()
             .forEach(mapping -> propertyDefaultValueByName.put(
@@ -99,11 +83,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
                 mapping.defaultValue()
             ))
             .collect(Collectors.toList());
-
-        projectionBuilder = RelationshipProjection
-            .builder()
-            .orientation(Orientation.NATURAL)
-            .properties(propertyMappings);
     }
 
     @Override
