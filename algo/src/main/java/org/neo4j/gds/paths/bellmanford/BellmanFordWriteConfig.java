@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.paths.bellmanford;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -29,6 +30,13 @@ public interface BellmanFordWriteConfig extends BellmanFordBaseConfig, WriteRela
 
     default boolean writeNegativeCycles() {
         return false;
+    }
+
+    @Override
+    @Value.Derived
+    @Configuration.Ignore
+    default boolean trackNegativeCycles() {
+        return writeNegativeCycles();
     }
 
     static BellmanFordWriteConfig of(CypherMapWrapper userInput) {

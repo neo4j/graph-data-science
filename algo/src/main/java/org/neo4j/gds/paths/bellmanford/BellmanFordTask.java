@@ -41,10 +41,10 @@ public class BellmanFordTask implements Runnable {
     private final HugeLongArray localQueue;
     private final HugeAtomicBitSet validBitset;
     private BellmanFordPhase phase;
-
-    private HugeLongArray negativeCycleVertices;
-    
-    private AtomicLong negativeCycleIndex;
+    private final HugeLongArray negativeCycleVertices;
+    private final AtomicLong negativeCycleIndex;
+    private final boolean shouldNotTrackCycles;
+    private boolean shouldStop;
 
     BellmanFordTask(
         Graph localGraph,
@@ -69,13 +69,13 @@ public class BellmanFordTask implements Runnable {
         this.phase = BellmanFordPhase.RUN;
         this.negativeCycleVertices = negativeCycleVertices;
         this.negativeCycleIndex = negativeCycleIndex;
+        shouldNotTrackCycles = negativeCycleVertices == null;
     }
 
     private void processNode(long nodeId) {
         validBitset.clear(nodeId);
         if (distances.length(nodeId) >= lengthBound) {
-
-            negativeCycleVertices.set(negativeCycleIndex.getAndIncrement(), nodeId);
+            processNegativeCycle(nodeId);
             return;
         }
         localGraph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
@@ -113,21 +113,43 @@ public class BellmanFordTask implements Runnable {
             for (long idx = offset; (idx < chunkSize); idx++) {
                 long nodeId = frontier.get(idx);
                 processNode(nodeId);
+                if (shouldStop || (shouldNotTrackCycles && negativeCycleIndex.longValue() > 0)) {
+                    shouldStop = true;
+                    break;
+                }
             }
         }
         //do some local processing if the localQueue is small enough
         while (localQueueIndex > 0 && localQueueIndex < LOCAL_QUEUE_BOUND) {
             long nodeId = localQueue.get(--localQueueIndex);
             processNode(nodeId);
+            if (shouldStop || (shouldNotTrackCycles && negativeCycleIndex.longValue() > 0)) {
+                shouldStop = true;
+                break;
+            }
         }
     }
 
     private void sync() {
-        long currentIndex = frontierSize.getAndAdd(localQueueIndex);
+        if (!shouldStop) {
+            long currentIndex = frontierSize.getAndAdd(localQueueIndex);
 
-        for (long u = 0; u < localQueueIndex; ++u) {
-            frontier.set(currentIndex++, localQueue.get(u));
+            for (long u = 0; u < localQueueIndex; ++u) {
+                frontier.set(currentIndex++, localQueue.get(u));
+            }
         }
+    }
+
+    private void processNegativeCycle(long nodeId) {
+        // need to always increment the negativeCycleIndex, it's visible by other tasks.
+        var index = negativeCycleIndex.getAndIncrement();
+
+        if(shouldNotTrackCycles) {
+            shouldStop = true;
+            return;
+        }
+
+        negativeCycleVertices.set(index, nodeId);
     }
 
     @Override

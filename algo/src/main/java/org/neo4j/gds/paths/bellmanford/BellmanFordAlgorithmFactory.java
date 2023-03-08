@@ -35,6 +35,7 @@ public class BellmanFordAlgorithmFactory<CONFIG extends BellmanFordBaseConfig> e
             graphOrGraphStore,
             progressTracker,
             graphOrGraphStore.toMappedNodeId(configuration.sourceNode()),
+            configuration.trackNegativeCycles(),
             configuration.concurrency()
         );
     }

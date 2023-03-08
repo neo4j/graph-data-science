@@ -50,12 +50,20 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
 
     private final long sourceNode;
     private final Graph graph;
+    private final boolean trackNegativeCycles;
     private final int concurrency;
 
-    public BellmanFord(Graph graph, ProgressTracker progressTracker, long sourceNode, int concurrency) {
+    public BellmanFord(
+        Graph graph,
+        ProgressTracker progressTracker,
+        long sourceNode,
+        boolean trackNegativeCycles,
+        int concurrency
+    ) {
         super(progressTracker);
         this.graph = graph;
         this.sourceNode = sourceNode;
+        this.trackNegativeCycles = trackNegativeCycles;
         this.concurrency = concurrency;
     }
 
@@ -71,9 +79,10 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
             graph.nodeCount(),
             concurrency
         );
-        var negativeCyclesVertices = HugeLongArray.newArray(graph.nodeCount());
+        var negativeCyclesVertices = trackNegativeCycles ? HugeLongArray.newArray(graph.nodeCount()) : null;
         var negativeCyclesIndex = new AtomicLong();
         var tasks = new ArrayList<BellmanFordTask>();
+
         for (int i = 0; i < concurrency; ++i) {
             tasks.add(new BellmanFordTask(
                 graph.concurrentCopy(),
@@ -127,8 +136,9 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
                 concurrency
             );
 
-        var negativeCycles =
-            negativeCyclesResults(
+        Stream<PathResult> negativeCycles = Stream.empty();
+        if(trackNegativeCycles) {
+            negativeCycles = negativeCyclesResults(
                 graph,
                 distanceTracker,
                 negativeCyclesIndex.longValue(),
@@ -136,6 +146,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
                 graph.nodeCount(),
                 concurrency
             );
+        }
 
         return BellmanFordResult.of(
             containsNegativeCycle,

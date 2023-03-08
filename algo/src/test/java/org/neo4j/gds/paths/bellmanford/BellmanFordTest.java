@@ -22,12 +22,12 @@ package org.neo4j.gds.paths.bellmanford;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -37,9 +37,8 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.paths.delta.config.ImmutableAllShortestPathsDeltaStreamConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 
-import java.util.Optional;
-
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -124,7 +123,7 @@ class BellmanFordTest {
             idFunction.of("a3"),
             idFunction.of("a4")
         };
-        var result = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, a[0], 1).compute();
+        var result = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, a[0], true, 1).compute();
         long[][] EXPECTED_PATHS = new long[5][];
         EXPECTED_PATHS[(int) a[0]] = new long[]{a[0]};
         EXPECTED_PATHS[(int) a[1]] = new long[]{a[0], a[1]};
@@ -150,15 +149,23 @@ class BellmanFordTest {
     }
 
     @Test
-    void shouldStopAtLoops() {
+    void shouldTrackNegativeCycles() {
         long a0 = loopIdFunction.of("a0");
-        var result = new BellmanFord(loopGraph, ProgressTracker.NULL_TRACKER, a0, 1).compute();
-        int counter = 0;
-        for (var path : result.shortestPaths().pathSet()) {
-            counter++;
-        }
+        var result = new BellmanFord(loopGraph, ProgressTracker.NULL_TRACKER, a0, true, 1).compute();
+
         assertThat(result.containsNegativeCycle()).isTrue();
-        assertThat(counter).isEqualTo(0L);
+        assertThat(result.negativeCycles().pathSet()).isNotEmpty();
+        assertThat(result.shortestPaths().pathSet()).isEmpty();
+    }
+
+    @Test
+    void shouldNotTrackNegativeCycles() {
+        long a0 = loopIdFunction.of("a0");
+        var result = new BellmanFord(loopGraph, ProgressTracker.NULL_TRACKER, a0, false, 1).compute();
+
+        assertThat(result.containsNegativeCycle()).isTrue();
+        assertThat(result.negativeCycles().pathSet()).isEmpty();
+        assertThat(result.shortestPaths().pathSet()).isEmpty();
     }
 
     @Test
@@ -171,7 +178,7 @@ class BellmanFordTest {
             thirdIdFunction.of("E"),
             thirdIdFunction.of("F")};
 
-        var result = new BellmanFord(thirdGraph, ProgressTracker.NULL_TRACKER, nodes[0], 1).compute();
+        var result = new BellmanFord(thirdGraph, ProgressTracker.NULL_TRACKER, nodes[0], true, 1).compute();
         long[][] EXPECTED_PATHS = new long[6][];
         EXPECTED_PATHS[(int) nodes[0]] = new long[]{nodes[0]};
         EXPECTED_PATHS[(int) nodes[1]] = new long[]{nodes[0], nodes[3], nodes[2], nodes[1]};
@@ -261,7 +268,7 @@ class BellmanFordTest {
             newGraph,
             ProgressTracker.NULL_TRACKER,
             start,
-            4
+            true, 4
         ).compute().shortestPaths();
 
         var dijkstraAlgo = Dijkstra

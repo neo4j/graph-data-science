@@ -92,7 +92,7 @@ final class BellmanFordCopiedDeltaSteppingTests {
             );
 
             var sourceNode = graph.toMappedNodeId("a");
-            var paths = new BellmanFord(graph,ProgressTracker.NULL_TRACKER,sourceNode,concurrency).compute().shortestPaths().pathSet();
+            var paths = new BellmanFord(graph,ProgressTracker.NULL_TRACKER,sourceNode, true, concurrency).compute().shortestPaths().pathSet();
             assertEquals(expected, paths);
         }
 
@@ -111,7 +111,7 @@ final class BellmanFordCopiedDeltaSteppingTests {
             );
 
             var sourceNode = graph.toMappedNodeId("c");
-            var paths = new BellmanFord(graph,ProgressTracker.NULL_TRACKER,sourceNode,concurrency).compute().shortestPaths().pathSet();
+            var paths = new BellmanFord(graph,ProgressTracker.NULL_TRACKER,sourceNode, true, concurrency).compute().shortestPaths().pathSet();
             assertEquals(expected, paths);
         }
     }
@@ -161,7 +161,7 @@ final class BellmanFordCopiedDeltaSteppingTests {
             );
 
             var sourceNode = graph.toMappedNodeId("n1");
-            var paths = new BellmanFord(graph,ProgressTracker.NULL_TRACKER,sourceNode,concurrency).compute().shortestPaths().pathSet();
+            var paths = new BellmanFord(graph,ProgressTracker.NULL_TRACKER,sourceNode, true, concurrency).compute().shortestPaths().pathSet();
             assertEquals(expected, paths);
         }
     }
@@ -207,7 +207,7 @@ final class BellmanFordCopiedDeltaSteppingTests {
             );
             var sourceNode = graph.toOriginalNodeId(idFunction.of("a"));
 
-            var paths = new BellmanFord(graph,ProgressTracker.NULL_TRACKER,sourceNode,concurrency).compute().shortestPaths().pathSet();
+            var paths = new BellmanFord(graph,ProgressTracker.NULL_TRACKER,sourceNode, true, concurrency).compute().shortestPaths().pathSet();
             assertEquals(expected, paths);
         }
     }
