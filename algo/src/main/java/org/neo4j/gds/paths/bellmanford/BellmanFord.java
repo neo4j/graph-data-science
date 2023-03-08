@@ -322,8 +322,8 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
 
             return pathResultBuilder.
                 index(cycleIndex.getAndIncrement())
-                .sourceNode(-1)
-                .targetNode(-1)
+                .sourceNode(startNode)
+                .targetNode(startNode)
                 .nodeIds(pathArray)
                 .relationshipIds(EMPTY_ARRAY)
                 .costs(costs).build();
