@@ -31,12 +31,9 @@ import org.neo4j.gds.embeddings.node2vec.Node2VecModel;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.QueryExecutionException;
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
