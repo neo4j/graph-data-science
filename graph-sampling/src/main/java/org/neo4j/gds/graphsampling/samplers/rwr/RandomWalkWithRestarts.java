@@ -45,14 +45,14 @@ import java.util.Optional;
 import java.util.SplittableRandom;
 
 public class RandomWalkWithRestarts implements NodesSampler {
-    private static final double QUALITY_MOMENTUM = 0.9;
-    private static final double QUALITY_THRESHOLD_BASE = 0.05;
-    private static final int MAX_WALKS_PER_START = 100;
-    private static final double TOTAL_WEIGHT_MISSING = -1.0;
-    private static final long INVALID_NODE_ID = -1;
+    protected static final double QUALITY_MOMENTUM = 0.9;
+    protected static final double QUALITY_THRESHOLD_BASE = 0.05;
+    protected static final int MAX_WALKS_PER_START = 100;
+    protected static final double TOTAL_WEIGHT_MISSING = -1.0;
+    protected static final long INVALID_NODE_ID = -1;
 
     private final RandomWalkWithRestartsConfig config;
-    private LongHashSet startNodesUsed;
+    protected LongHashSet startNodesUsed;
 
     public RandomWalkWithRestarts(RandomWalkWithRestartsConfig config) {
         this.config = config;
@@ -75,7 +75,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
         Optional<HugeAtomicDoubleArray> totalWeights = initializeTotalWeights(inputGraph.nodeCount());
 
         var tasks = ParallelUtil.tasks(config.concurrency(), () ->
-            new Walker(
+            getWalker(
                 seenNodes,
                 totalWeights,
                 QUALITY_THRESHOLD_BASE / (config.concurrency() * config.concurrency()),
@@ -97,6 +97,10 @@ public class RandomWalkWithRestarts implements NodesSampler {
         progressTracker.endSubTask("Sample nodes");
 
         return seenNodes.sampledNodes();
+    }
+
+    protected Runnable getWalker(SeenNodes seenNodes, Optional<HugeAtomicDoubleArray> totalWeights, double v, WalkQualities walkQualities, SplittableRandom split, Graph concurrentCopy, RandomWalkWithRestartsConfig config, ProgressTracker progressTracker) {
+        return new Walker(seenNodes, totalWeights, v, walkQualities, split, concurrentCopy, config, progressTracker);
     }
 
     @Override
@@ -174,20 +178,20 @@ public class RandomWalkWithRestarts implements NodesSampler {
         return startNodesUsed;
     }
 
-    static class Walker implements Runnable {
+    protected static class Walker implements Runnable {
 
-        private final SeenNodes seenNodes;
-        private final Optional<HugeAtomicDoubleArray> totalWeights;
-        private final double qualityThreshold;
-        private final WalkQualities walkQualities;
-        private final SplittableRandom rng;
-        private final Graph inputGraph;
-        private final RandomWalkWithRestartsConfig config;
-        private final ProgressTracker progressTracker;
+        protected final SeenNodes seenNodes;
+        protected final Optional<HugeAtomicDoubleArray> totalWeights;
+        protected final double qualityThreshold;
+        protected final WalkQualities walkQualities;
+        protected final SplittableRandom rng;
+        protected final Graph inputGraph;
+        protected final RandomWalkWithRestartsConfig config;
+        protected final ProgressTracker progressTracker;
 
-        private final LongSet startNodesUsed;
+        protected final LongSet startNodesUsed;
 
-        Walker(
+        protected Walker(
             SeenNodes seenNodes,
             Optional<HugeAtomicDoubleArray> totalWeights,
             double qualityThreshold,
@@ -265,7 +269,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
             }
         }
 
-        private double computeDegree(long currentNode) {
+        protected double computeDegree(long currentNode) {
             if (totalWeights.isEmpty()) {
                 return inputGraph.degree(currentNode);
             }
@@ -283,7 +287,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
             return presentTotalWeights.get(currentNode);
         }
 
-        private long weightedNextNode(long currentNode) {
+        protected long weightedNextNode(long currentNode) {
             var remainingMass = new MutableDouble(rng.nextDouble(0, computeDegree(currentNode)));
             var target = new MutableLong(INVALID_NODE_ID);
 
@@ -312,7 +316,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
      * of the set of start nodes we are currently interested in. A simple hashmap for example does not work for this
      * reason.
      */
-    static class WalkQualities {
+    protected static class WalkQualities {
         private final LongSet nodeIdIndex;
         private final LongArrayList nodeIds;
         private final DoubleArrayList qualities;
@@ -329,7 +333,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
             this.size = qualities.size();
         }
 
-        boolean addNode(long nodeId) {
+        public boolean addNode(long nodeId) {
             if (nodeIdIndex.contains(nodeId)) {
                 return false;
             }
@@ -350,7 +354,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
             return true;
         }
 
-        void removeNode(int position) {
+        public void removeNode(int position) {
             double quality = qualities.get(position);
             sum -= quality;
             sumOfSquares -= quality * quality;
@@ -360,15 +364,15 @@ public class RandomWalkWithRestarts implements NodesSampler {
             size--;
         }
 
-        long nodeId(int position) {
+        public long nodeId(int position) {
             return nodeIds.get(position);
         }
 
-        double nodeQuality(int position) {
+        public double nodeQuality(int position) {
             return qualities.get(position);
         }
 
-        void updateNodeQuality(int position, double walkQuality) {
+        public void updateNodeQuality(int position, double walkQuality) {
             double previousQuality = qualities.get(position);
             double updatedQuality = QUALITY_MOMENTUM * previousQuality + (1 - QUALITY_MOMENTUM) * walkQuality;
 
@@ -378,14 +382,14 @@ public class RandomWalkWithRestarts implements NodesSampler {
             qualities.set(position, updatedQuality);
         }
 
-        double expectedQuality() {
+        public double expectedQuality() {
             if (size <= 0) {
                 return 0;
             }
             return sumOfSquares / sum;
         }
 
-        int size() {
+        public int size() {
             return size;
         }
     }

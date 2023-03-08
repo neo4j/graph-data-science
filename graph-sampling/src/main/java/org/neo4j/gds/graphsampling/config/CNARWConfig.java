@@ -28,28 +28,7 @@ import java.util.List;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface CNARWConfig extends GraphSampleAlgoConfig, SingleThreadedRandomSeedConfig {
-
-    default List<Long> startNodes() {
-        return List.of();
-    }
-    @Configuration.DoubleRange(min = 0.0, max = 1.0, minInclusive = false, maxInclusive = false)
-    default double restartProbability() {
-        return 0.1;
-    }
-
-    /**
-     * The ratio of nodes that we wish to sample.
-     */
-    @Configuration.DoubleRange(min = 0.0, max = 1.0, minInclusive = false)
-    default double samplingRatio() {
-        return 0.15;
-    }
-
-    default boolean nodeLabelStratification() {
-        return false;
-    }
-
+public interface CNARWConfig extends RandomWalkWithRestartsConfig {
     static CNARWConfig of(
         CypherMapWrapper procedureConfig
     ) {

@@ -19,86 +19,30 @@
  */
 package org.neo4j.gds.graphsampling.samplers.cnarw;
 
-import com.carrotsearch.hppc.DoubleArrayList;
-import com.carrotsearch.hppc.DoubleCollection;
-import com.carrotsearch.hppc.LongArrayList;
-import com.carrotsearch.hppc.LongCollection;
-import com.carrotsearch.hppc.LongHashSet;
-import com.carrotsearch.hppc.LongSet;
-import org.apache.commons.lang3.mutable.MutableDouble;
-import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.graphsampling.NodesSampler;
 import org.neo4j.gds.graphsampling.config.CNARWConfig;
+import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
+import org.neo4j.gds.graphsampling.samplers.rwr.RandomWalkWithRestarts;
+import org.neo4j.gds.graphsampling.samplers.rwr.SeenNodes;
 import org.neo4j.gds.similarity.nodesim.OverlapSimilarityComputer;
 
 import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class CNARW implements NodesSampler {
-    private static final double QUALITY_MOMENTUM = 0.9;
-    private static final double QUALITY_THRESHOLD_BASE = 0.05;
-    private static final int MAX_WALKS_PER_START = 100;
-    private static final double TOTAL_WEIGHT_MISSING = -1.0;
-    private static final long INVALID_NODE_ID = -1;
+public class CNARW extends RandomWalkWithRestarts {
 
     private final CNARWConfig config;
-    private LongHashSet startNodesUsed;
 
     public CNARW(CNARWConfig config) {
+        super(config);
         this.config = config;
-    }
-
-    @Override
-    public HugeAtomicBitSet compute(Graph inputGraph, ProgressTracker progressTracker) {
-        assert inputGraph.hasRelationshipProperty() == config.hasRelationshipWeightProperty();
-
-        progressTracker.beginSubTask("Sample nodes");
-
-        var seenNodes = getSeenNodes(inputGraph, progressTracker);
-
-        progressTracker.beginSubTask("Do common neighbours aware random walks");
-        progressTracker.setSteps(seenNodes.totalExpectedNodes());
-
-        startNodesUsed = new LongHashSet();
-        var rng = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
-        var initialStartQualities = initializeQualities(inputGraph, rng);
-        Optional<HugeAtomicDoubleArray> totalWeights = initializeTotalWeights(inputGraph.nodeCount());
-
-        var tasks = ParallelUtil.tasks(config.concurrency(), () ->
-            new Walker(
-                seenNodes,
-                totalWeights,
-                QUALITY_THRESHOLD_BASE / (config.concurrency() * config.concurrency()),
-                new WalkQualities(initialStartQualities),
-                rng.split(),
-                inputGraph.concurrentCopy(),
-                config,
-                progressTracker
-            )
-        );
-        RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
-            .tasks(tasks)
-            .run();
-        tasks.forEach(task -> startNodesUsed.addAll(((Walker) task).startNodesUsed()));
-
-        progressTracker.endSubTask("Do random walks");
-
-        progressTracker.endSubTask("Sample nodes");
-
-        return seenNodes.sampledNodes();
     }
 
     @Override
@@ -107,108 +51,56 @@ public class CNARW implements NodesSampler {
             return Tasks.task(
                 "Sample nodes",
                 Tasks.leaf("Count node labels", graphStore.nodeCount()),
-                Tasks.leaf("Do random walks", 10 * Math.round(graphStore.nodeCount() * config.samplingRatio()))
+                Tasks.leaf(
+                    "Do common neighbour aware random walks",
+                    10 * Math.round(graphStore.nodeCount() * config.samplingRatio())
+                )
             );
         } else {
             return Tasks.task(
                 "Sample nodes",
-                Tasks.leaf("Do random walks", 10 * Math.round(graphStore.nodeCount() * config.samplingRatio()))
+                Tasks.leaf(
+                    "Do common neighbour aware random walks",
+                    10 * Math.round(graphStore.nodeCount() * config.samplingRatio())
+                )
             );
         }
     }
 
     @Override
     public String progressTaskName() {
-        return "Random walk with restarts sampling";
+        return "Common neighbour aware random walks sampling";
     }
 
-    private SeenNodes getSeenNodes(Graph inputGraph, ProgressTracker progressTracker) {
-        if (config.nodeLabelStratification()) {
-            var nodeLabelHistogram = NodeLabelHistogram.compute(
-                inputGraph,
-                config.concurrency(),
-                progressTracker
-            );
-
-            return new SeenNodes.SeenNodesByLabelSet(inputGraph, nodeLabelHistogram, config.samplingRatio());
-        }
-
-        return new SeenNodes.GlobalSeenNodes(
-            HugeAtomicBitSet.create(inputGraph.nodeCount()),
-            Math.round(inputGraph.nodeCount() * config.samplingRatio())
-        );
+    @Override
+    public Runnable getWalker(
+        SeenNodes seenNodes,
+        Optional<HugeAtomicDoubleArray> totalWeights,
+        double v,
+        WalkQualities walkQualities,
+        SplittableRandom split,
+        Graph concurrentCopy,
+        RandomWalkWithRestartsConfig config,
+        ProgressTracker progressTracker
+    ) {
+        return new Walker(seenNodes, totalWeights, v, walkQualities, split, concurrentCopy, config, progressTracker);
     }
 
-    private Optional<HugeAtomicDoubleArray> initializeTotalWeights(long nodeCount) {
-        if (config.hasRelationshipWeightProperty()) {
-            var totalWeights = HugeAtomicDoubleArray.newArray(nodeCount);
-            totalWeights.setAll(TOTAL_WEIGHT_MISSING);
-            return Optional.of(totalWeights);
-        }
-        return Optional.empty();
-    }
+    static class Walker extends RandomWalkWithRestarts.Walker {
 
-    @ValueClass
-    interface InitialStartQualities {
-        LongCollection nodeIds();
-
-        DoubleCollection qualities();
-    }
-
-    private InitialStartQualities initializeQualities(Graph inputGraph, SplittableRandom rng) {
-        var nodeIds = new LongArrayList();
-        var qualities = new DoubleArrayList();
-
-        if (!config.startNodes().isEmpty()) {
-            config.startNodes().forEach(nodeId -> {
-                nodeIds.add(inputGraph.toMappedNodeId(nodeId));
-                qualities.add(1.0);
-            });
-        } else {
-            nodeIds.add(rng.nextLong(inputGraph.nodeCount()));
-            qualities.add(1.0);
-        }
-
-        return ImmutableInitialStartQualities.of(nodeIds, qualities);
-    }
-
-    public LongSet startNodesUsed() {
-        return startNodesUsed;
-    }
-
-    static class Walker implements Runnable {
-
-        private final SeenNodes seenNodes;
-        private final Optional<HugeAtomicDoubleArray> totalWeights;
-        private final double qualityThreshold;
-        private final WalkQualities walkQualities;
-        private final SplittableRandom rng;
-        private final Graph inputGraph;
-        private final CNARWConfig config;
-        private final ProgressTracker progressTracker;
-
-        private final LongSet startNodesUsed;
         private final OverlapSimilarityComputer overlapSimilarity;
 
         Walker(
             SeenNodes seenNodes,
             Optional<HugeAtomicDoubleArray> totalWeights,
             double qualityThreshold,
-            WalkQualities walkQualities,
+            RandomWalkWithRestarts.WalkQualities walkQualities,
             SplittableRandom rng,
             Graph inputGraph,
-            CNARWConfig config,
+            RandomWalkWithRestartsConfig config,
             ProgressTracker progressTracker
         ) {
-            this.seenNodes = seenNodes;
-            this.totalWeights = totalWeights;
-            this.qualityThreshold = qualityThreshold;
-            this.walkQualities = walkQualities;
-            this.rng = rng;
-            this.inputGraph = inputGraph;
-            this.config = config;
-            this.progressTracker = progressTracker;
-            this.startNodesUsed = new LongHashSet();
+            super(seenNodes, totalWeights, qualityThreshold, walkQualities, rng, inputGraph, config, progressTracker);
             this.overlapSimilarity = new OverlapSimilarityComputer(0.0);
         }
 
@@ -288,42 +180,6 @@ public class CNARW implements NodesSampler {
             }
         }
 
-        private double computeDegree(long currentNode) {
-            if (totalWeights.isEmpty()) {
-                return inputGraph.degree(currentNode);
-            }
-
-            var presentTotalWeights = totalWeights.get();
-            if (presentTotalWeights.get(currentNode) == TOTAL_WEIGHT_MISSING) {
-                var degree = new MutableDouble(0.0);
-                inputGraph.forEachRelationship(currentNode, 0.0, (src, trg, weight) -> {
-                    degree.add(weight);
-                    return true;
-                });
-                presentTotalWeights.set(currentNode, degree.doubleValue());
-            }
-
-            return presentTotalWeights.get(currentNode);
-        }
-
-        private long weightedNextNode(long currentNode) {
-            var remainingMass = new MutableDouble(rng.nextDouble(0, computeDegree(currentNode)));
-            var target = new MutableLong(INVALID_NODE_ID);
-
-            inputGraph.forEachRelationship(currentNode, 0.0, (src, trg, weight) -> {
-                if (remainingMass.doubleValue() < weight) {
-                    target.setValue(trg);
-                    return false;
-                }
-                remainingMass.subtract(weight);
-                return true;
-            });
-
-            assert target.getValue() != -1;
-
-            return target.getValue();
-        }
-
         private double computeOverlapSimilarity(
             long[] currentNodeNeighbours, Optional<double[]> currentWeights,
             long[] candidateNodeNeighbours, Optional<double[]> candidateWeights
@@ -363,94 +219,6 @@ public class CNARW implements NodesSampler {
                 return true;
             });
             return Optional.of(weights);
-        }
-
-        public LongSet startNodesUsed() {
-            return startNodesUsed;
-        }
-    }
-
-    /**
-     * In order be able to sample start nodes uniformly at random (for performance reasons) we have a special data
-     * structure which is optimized for exactly this. In particular, we need to be able to do random access by index
-     * of the set of start nodes we are currently interested in. A simple hashmap for example does not work for this
-     * reason.
-     */
-    static class WalkQualities {
-        private final LongSet nodeIdIndex;
-        private final LongArrayList nodeIds;
-        private final DoubleArrayList qualities;
-        private int size;
-        private double sum;
-        private double sumOfSquares;
-
-        WalkQualities(InitialStartQualities initialStartQualities) {
-            this.nodeIdIndex = new LongHashSet(initialStartQualities.nodeIds());
-            this.nodeIds = new LongArrayList(initialStartQualities.nodeIds());
-            this.qualities = new DoubleArrayList(initialStartQualities.qualities());
-            this.sum = qualities.size();
-            this.sumOfSquares = qualities.size();
-            this.size = qualities.size();
-        }
-
-        boolean addNode(long nodeId) {
-            if (nodeIdIndex.contains(nodeId)) {
-                return false;
-            }
-
-            if (size >= nodeIds.size()) {
-                nodeIds.add(nodeId);
-                qualities.add(1.0);
-            } else {
-                nodeIds.set(size, nodeId);
-                qualities.set(size, 1.0);
-            }
-            nodeIdIndex.add(nodeId);
-            size++;
-
-            sum += 1.0;
-            sumOfSquares += 1.0;
-
-            return true;
-        }
-
-        void removeNode(int position) {
-            double quality = qualities.get(position);
-            sum -= quality;
-            sumOfSquares -= quality * quality;
-
-            nodeIds.set(position, nodeIds.get(size - 1));
-            qualities.set(position, qualities.get(size - 1));
-            size--;
-        }
-
-        long nodeId(int position) {
-            return nodeIds.get(position);
-        }
-
-        double nodeQuality(int position) {
-            return qualities.get(position);
-        }
-
-        void updateNodeQuality(int position, double walkQuality) {
-            double previousQuality = qualities.get(position);
-            double updatedQuality = QUALITY_MOMENTUM * previousQuality + (1 - QUALITY_MOMENTUM) * walkQuality;
-
-            sum += updatedQuality - previousQuality;
-            sumOfSquares += updatedQuality * updatedQuality - previousQuality * previousQuality;
-
-            qualities.set(position, updatedQuality);
-        }
-
-        double expectedQuality() {
-            if (size <= 0) {
-                return 0;
-            }
-            return sumOfSquares / sum;
-        }
-
-        int size() {
-            return size;
         }
     }
 }
