@@ -64,15 +64,18 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
         GraphLoaderContext loadingContext,
         @Nullable GraphDimensions dimensions
     ) {
-        var estimator = new CypherQueryEstimator(loadingContext.transactionContext().withRestrictedAccess(READ));
 
-        EstimationResult nodeQueryEstimation = graphProjectConfig.isFictitiousLoading()
-            ? ImmutableEstimationResult.of(graphProjectConfig.nodeCount(), 0)
-            : estimator.getNodeEstimation(graphProjectConfig.nodeQuery());
+        EstimationResult nodeEstimation;
+        EstimationResult relationEstimation;
 
-        EstimationResult relationshipQueryEstimation = graphProjectConfig.isFictitiousLoading()
-            ? ImmutableEstimationResult.of(graphProjectConfig.relationshipCount(), 0)
-            : estimator.getRelationshipEstimation(graphProjectConfig.relationshipQuery());
+        if (graphProjectConfig.isFictitiousLoading()) {
+            nodeEstimation = ImmutableEstimationResult.of(graphProjectConfig.nodeCount(), 0);
+            relationEstimation = ImmutableEstimationResult.of(graphProjectConfig.relationshipCount(), 0);
+        } else {
+            var estimator = new CypherQueryEstimator(loadingContext.transactionContext().withRestrictedAccess(READ));
+            nodeEstimation = estimator.getNodeEstimation(graphProjectConfig.nodeQuery());
+            relationEstimation = estimator.getRelationshipEstimation(graphProjectConfig.relationshipQuery());
+        }
 
         var dimBuilder = ImmutableGraphDimensions.builder();
 
@@ -81,17 +84,17 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
         }
 
         GraphDimensions dim = ImmutableGraphDimensions.builder()
-            .highestPossibleNodeCount(nodeQueryEstimation.estimatedRows())
-            .nodeCount(nodeQueryEstimation.estimatedRows())
-            .relCountUpperBound(relationshipQueryEstimation.estimatedRows())
+            .highestPossibleNodeCount(nodeEstimation.estimatedRows())
+            .nodeCount(nodeEstimation.estimatedRows())
+            .relCountUpperBound(relationEstimation.estimatedRows())
             .build();
 
         return new CypherFactory(
             graphProjectConfig,
             loadingContext,
             dim,
-            nodeQueryEstimation,
-            relationshipQueryEstimation
+            nodeEstimation,
+            relationEstimation
         );
     }
 
