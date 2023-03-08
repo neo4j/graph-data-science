@@ -59,6 +59,7 @@ import org.neo4j.logging.NullLog;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -220,7 +221,7 @@ class LinkPredictionTrainingPipelineTest {
                 .modelUser("")
                 .modelName(modelName)
                 .relationshipWeightProperty("derivedWeight").build(),
-            Map::of
+            new TestCustomInfo()
         ));
 
         var executionContext = ImmutableExecutionContext.builder()
@@ -264,7 +265,7 @@ class LinkPredictionTrainingPipelineTest {
                 .modelUser("")
                 .modelName(modelName)
                 .build(),
-            Map::of
+            new TestCustomInfo()
         ));
 
         var executionContext = ImmutableExecutionContext.builder()
@@ -448,6 +449,18 @@ class LinkPredictionTrainingPipelineTest {
                     AutoTuningConfig.DEFAULT_CONFIG.toMap(),
                     pipelineMap -> pipelineMap.get("autoTuningConfig")
                 );
+        }
+    }
+
+    static class TestCustomInfo implements Model.CustomInfo {
+        @Override
+        public Map<String, Object> toMap() {
+            return Map.of();
+        }
+
+        @Override
+        public Optional<TrainingMethod> optionalTrainerMethod() {
+            return Optional.empty();
         }
     }
 }
