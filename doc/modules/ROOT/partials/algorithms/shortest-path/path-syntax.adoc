@@ -104,6 +104,10 @@ endif::[]
 ifeval::["{algorithm}" == "Yen's"]
 | k                 | Integer | 1       | yes      | The number of shortest paths to compute between source and target node.
 endif::[]
+ifeval::["{algorithm}" == "Delta-Stepping"]
+| delta                                                                            | Float   | 2.0       | yes      | The bucket width for grouping nodes with the same tentative distance to the source node.
+endif::[]
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 |===
 
 .Results
@@ -164,6 +168,10 @@ endif::[]
 ifeval::["{algorithm}" == "Yen's"]
 | k                 | Integer | 1       | yes      | The number of shortest paths to compute between source and target node.
 endif::[]
+ifeval::["{algorithm}" == "Delta-Stepping"]
+| delta                                                                            | Float   | 2.0       | yes      | The bucket width for grouping nodes with the same tentative distance to the source node.
+endif::[]
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 | writeNodeIds      | Boolean | false   | yes      | If true, the written relationship has a nodeIds list property.
 | writeCosts        | Boolean | false   | yes      | If true, the written relationship has a costs list property.
 |===
@@ -210,15 +218,10 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 ifeval::["{source-target}" == "true"]
 | targetNode        | Integer | n/a     | no       | The Neo4j target node or node id.
 endif::[]
-ifeval::["{algorithm}" == "A*"]
-| latitudeProperty  | Float   | n/a     | no       | The node property that stores the latitude value.
-| longitudeProperty | Float   | n/a     | no       | The node property that stores the longitude value.
-endif::[]
-ifeval::["{algorithm}" == "Yen's"]
-| k                 | Integer | 1       | yes      | The number of shortest paths to compute between source and target node.
-endif::[]
-| writeNodeIds      | Boolean | false   | yes      | If true, the written relationship has a nodeIds list property.
-| writeCosts        | Boolean | false   | yes      | If true, the written relationship has a costs list property.
+| delta                                                                            | Float   | 2.0       | yes      | The bucket width for grouping nodes with the same tentative distance to the source node.
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
+
+
 |===
 
 .Results
