@@ -118,11 +118,16 @@ public class TreeNode<PREDICTION extends Number> {
     }
 
     private static boolean equals(TreeNode o, TreeNode b) {
-        if (o == null && b != null) return false;
-        if (o != null && b == null) return false;
-        if (o == null && b == null) return true;
-        return o.featureIndex == b.featureIndex && Double.compare(o.thresholdValue, b.thresholdValue) == 0
-               && o.prediction.equals(b.prediction) && TreeNode.equals(o.leftChild, b.leftChild) && TreeNode.equals(o.rightChild, b.rightChild);
+        if (o == null) {
+            return b == null;
+        } else {
+            //o nonnull
+            if (b == null) return false;
+            else {
+                return o.featureIndex == b.featureIndex && Double.compare(o.thresholdValue, b.thresholdValue) == 0
+                       && o.prediction.equals(b.prediction) && TreeNode.equals(o.leftChild, b.leftChild) && TreeNode.equals(o.rightChild, b.rightChild);
+            }
+        }
     }
 
     @Override
