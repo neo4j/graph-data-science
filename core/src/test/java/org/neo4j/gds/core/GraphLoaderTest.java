@@ -217,26 +217,30 @@ class GraphLoaderTest extends BaseTest {
             .databaseService(db)
             .graphName("graph")
             .nodeQuery("MATCH (n) RETURN id(n) AS id, coalesce(n.prop1, 42) AS prop1")
-            .relationshipQuery("MATCH (n)-[:REL1|REL2]->(m) RETURN id(n) AS source, id(m) AS target")
+            .relationshipQuery("MATCH (n)-[:REL1|REL2]-(m) RETURN id(n) AS source, id(m) AS target")
             .log(log)
             .build()
             .graph();
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
-            .contains(
+            .containsExactly(
                 "Loading :: Start",
                 "Loading :: Nodes :: Start",
                 "Loading :: Nodes 33%",
                 "Loading :: Nodes 66%",
                 "Loading :: Nodes 100%",
-                "Loading :: Nodes :: Start",
                 "Loading :: Nodes :: Finished",
                 "Loading :: Relationships :: Start",
+                "Loading :: Relationships 8%",
+                "Loading :: Relationships 16%",
                 "Loading :: Relationships 25%",
+                "Loading :: Relationships 33%",
+                "Loading :: Relationships 41%",
                 "Loading :: Relationships 50%",
-                "Loading :: Relationships 75%",
+                "Loading :: Relationships 100%",
                 "Loading :: Relationships :: Finished",
-                "Loading :: Finished"
+                "Loading :: Finished",
+                "Loading :: Actual memory usage of the loaded graph: 329 KiB"
             );
 
         assertThat(log.getMessages(TestLog.DEBUG)).isEmpty();
