@@ -128,7 +128,7 @@ public class TreeNode<PREDICTION extends Number> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || TreeNode.class != o.getClass()) return false;
+        if (o == null || this.getClass() != o.getClass()) return false;
         TreeNode<PREDICTION> treeNode = (TreeNode<PREDICTION>) o;
         return equals(this, treeNode);
     }
