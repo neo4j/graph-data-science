@@ -80,14 +80,14 @@ public interface GraphProjectFromCypherConfig extends GraphProjectConfig {
         return new GraphStoreFactory.Supplier() {
             @Override
             public GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> get(GraphLoaderContext loaderContext) {
-                return new CypherFactory(GraphProjectFromCypherConfig.this, loaderContext);
+                return CypherFactory.createWithDerivedDimensions(GraphProjectFromCypherConfig.this, loaderContext);
             }
 
             @Override
             public GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> getWithDimension(
                 GraphLoaderContext loaderContext, GraphDimensions graphDimensions
             ) {
-                return new CypherFactory(GraphProjectFromCypherConfig.this, loaderContext, graphDimensions);
+                return CypherFactory.createWithBaseDimensions(GraphProjectFromCypherConfig.this, loaderContext, graphDimensions);
             }
         };
     }

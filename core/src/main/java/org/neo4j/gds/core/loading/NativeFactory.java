@@ -54,6 +54,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConfig> {
 
     private final GraphProjectFromStoreConfig storeConfig;
+    private final ProgressTracker progressTracker;
 
     public NativeFactory(
         GraphProjectFromStoreConfig graphProjectConfig,
@@ -77,6 +78,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
     ) {
         super(graphProjectConfig, ImmutableStaticCapabilities.of(true), loadingContext, graphDimensions);
         this.storeConfig = graphProjectConfig;
+        this.progressTracker = initProgressTracker();
     }
 
     @Override
@@ -248,8 +250,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         });
     }
 
-    @Override
-    protected ProgressTracker initProgressTracker() {
+    private ProgressTracker initProgressTracker() {
         long relationshipCount = graphProjectConfig
             .relationshipProjections()
             .projections()
@@ -357,5 +358,10 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         } finally {
             progressTracker.endSubTask();
         }
+    }
+
+    @Override
+    protected ProgressTracker progressTracker() {
+        return progressTracker;
     }
 }
