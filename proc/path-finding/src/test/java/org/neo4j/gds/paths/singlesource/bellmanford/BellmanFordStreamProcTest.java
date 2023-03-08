@@ -101,12 +101,14 @@ class BellmanFordStreamProcTest extends BaseProcTest {
             var rowCount = runQueryWithRowConsumer(
                 "MATCH (n) WHERE  n.id = 0 " +
                 "CALL gds.bellmanFord.stream('graph', {sourceNode: n, relationshipWeightProperty: 'weight'}) " +
-                "YIELD index,sourceNode,targetNode,totalCost,nodeIds,costs,route " +
-                "RETURN index,sourceNode,targetNode,totalCost,nodeIds,costs,route",
+                "YIELD index,sourceNode,targetNode,totalCost,nodeIds,costs,route, isNegativeCycle " +
+                "RETURN index, sourceNode, targetNode, totalCost, nodeIds, costs, route, isNegativeCycle",
                 row -> {
 
                     assertions.assertThat(row.getNumber("index").longValue()).isBetween(0L, 4L);
 
+                    assertions.assertThat(row.getBoolean("isNegativeCycle")).isFalse();
+                    
                     assertions.assertThat(row.getNumber("sourceNode").longValue()).isEqualTo(idFunction.of("a0"));
 
                     long targetNode = row.getNumber("targetNode").longValue();
@@ -166,12 +168,12 @@ class BellmanFordStreamProcTest extends BaseProcTest {
             var rowCount = runQueryWithRowConsumer(
                 " MATCH (n) WHERE  n.id = 0 " +
                 " CALL gds.bellmanFord.stream('graph', {sourceNode: n, relationshipWeightProperty: 'weight'}) " +
-                " YIELD index, totalCost, sourceNode, targetNode, nodeIds, costs, route, isCycle " +
-                " RETURN index, totalCost, sourceNode, targetNode, nodeIds, costs, route, isCycle",
+                " YIELD index, totalCost, sourceNode, targetNode, nodeIds, costs, route, isNegativeCycle " +
+                " RETURN index, totalCost, sourceNode, targetNode, nodeIds, costs, route, isNegativeCycle",
 
                 row -> {
-                    // index, cost, sourceNode, targetNode, nodeIds, costs, route, isCycle
-                    assertions.assertThat(row.getBoolean("isCycle")).isTrue();
+                    // index, cost, sourceNode, targetNode, nodeIds, costs, route, isNegativeCycle
+                    assertions.assertThat(row.getBoolean("isNegativeCycle")).isTrue();
 
                     assertions.assertThat(row.getNumber("sourceNode"))
                         .as("`sourceNode` and `targetNode` should be the same when we have a cycle.")

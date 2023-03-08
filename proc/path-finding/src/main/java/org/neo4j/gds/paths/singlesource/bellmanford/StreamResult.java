@@ -53,7 +53,7 @@ public final class StreamResult {
 
     public Path route;
 
-    public boolean isCycle;
+    public boolean isNegativeCycle;
 
     private StreamResult(
         long index,
@@ -63,7 +63,7 @@ public final class StreamResult {
         List<Long> nodeIds,
         List<Double> costs,
         @Nullable Path route,
-        boolean isCycle
+        boolean isNegativeCycle
     ) {
         this.index = index;
         this.sourceNode = sourceNode;
@@ -72,7 +72,7 @@ public final class StreamResult {
         this.nodeIds = nodeIds;
         this.costs = costs;
         this.route = route;
-        this.isCycle = isCycle;
+        this.isNegativeCycle = isNegativeCycle;
     }
 
     public static class Builder {
