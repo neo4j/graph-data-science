@@ -179,23 +179,20 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
             parallelStream -> parallelStream.flatMap(partition -> {
                 var pathResultBuilder = ImmutablePathResult.builder();
 
+                var localGraph = graph.concurrentCopy();
                 return LongStream
                     .range(partition.startNode(), partition.startNode() + partition.nodeCount())
-                    .filter(target -> tentativeDistances.predecessor(target) != NO_PREDECESSOR)
                     .mapToObj(indexId -> negativeCycleResult(
                         pathResultBuilder,
                         cycleIndex,
                         negativeCycleVertices.get(indexId),
                         tentativeDistances,
-                        graph.concurrentCopy(),
+                        localGraph,
                         nodeCount
-
                     )).filter(cycle -> cycle != PathResult.EMPTY);
             })
         );
-
     }
-
 
     private static Stream<PathResult> pathResults(
         DistanceTracker tentativeDistances,
@@ -349,14 +346,11 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
     ) {
         var minimumCost = new MutableDouble(Double.MAX_VALUE);
         localGraph.forEachRelationship(startNode, 1.0, (sourceNodeId, targetNodeId, cost) -> {
-            if (targetNodeId == endNodeId) {
-                if (minimumCost.doubleValue() > cost) {
-                    minimumCost.setValue(cost);
-                }
+            if (targetNodeId == endNodeId && minimumCost.doubleValue() > cost) {
+                minimumCost.setValue(cost);
             }
             return true;
         });
         return minimumCost.doubleValue();
     }
-
 }
