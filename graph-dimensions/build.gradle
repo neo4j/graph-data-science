@@ -16,6 +16,8 @@ dependencies {
     implementation group: 'com.carrotsearch', name: 'hppc', version: ver.'hppc'
 
 
+    testCompileOnly    group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
+
     testImplementation platform(dep.junit5bom)
     testImplementation dep.junit5jupiter
     testImplementation dep.junit5migration
