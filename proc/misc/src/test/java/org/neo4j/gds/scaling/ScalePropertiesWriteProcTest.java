@@ -34,6 +34,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.isA;
@@ -99,5 +100,30 @@ class ScalePropertiesWriteProcTest extends BaseProcTest {
             var scaledProperties = (double[]) row.get("scaledProperty");
             assertThat(scaledProperties).hasSize(2);
         });
+    }
+
+    @Test
+    void estimate() {
+        var query = GdsCypher
+            .call("g")
+            .algo("gds.beta.scaleProperties")
+            .writeEstimation()
+            .addParameter("nodeProperties", List.of("myProp"))
+            .addParameter("scaler", "stdscore")
+            .addParameter("writeProperty", "scaledProperty")
+            .yields();
+
+        assertCypherResult(query, List.of(Map.of(
+                "mapView", isA(Map.class),
+                "treeView", isA(String.class),
+                "bytesMax", greaterThanOrEqualTo(0L),
+                "heapPercentageMin", greaterThanOrEqualTo(0.0),
+                "nodeCount", 6L,
+                "relationshipCount", 0L,
+                "requiredMemory", isA(String.class),
+                "bytesMin", greaterThanOrEqualTo(0L),
+                "heapPercentageMax", greaterThanOrEqualTo(0.0)
+            ))
+        );
     }
 }
