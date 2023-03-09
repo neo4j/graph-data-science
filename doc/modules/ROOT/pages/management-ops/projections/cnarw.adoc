@@ -147,7 +147,7 @@ RETURN nodeCount, relationshipCount
 [opts="header"]
 |===
 | nodeCount | relationshipCount
-| 4         | 4
+| 4         | 2
 |===
 --
 

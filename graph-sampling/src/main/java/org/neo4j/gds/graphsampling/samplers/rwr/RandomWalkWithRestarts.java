@@ -68,7 +68,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
         var seenNodes = getSeenNodes(inputGraph, progressTracker);
 
-        progressTracker.beginSubTask("Do random walks");
+        progressTracker.beginSubTask(getSubTaskMessage());
         progressTracker.setSteps(seenNodes.totalExpectedNodes());
 
         startNodesUsed = new LongHashSet();
@@ -94,16 +94,27 @@ public class RandomWalkWithRestarts implements NodesSampler {
             .run();
         tasks.forEach(task -> startNodesUsed.addAll(((Walker) task).startNodesUsed()));
 
-        progressTracker.endSubTask("Do random walks");
+        progressTracker.endSubTask(getSubTaskMessage());
 
         progressTracker.endSubTask("Sample nodes");
 
         return seenNodes.sampledNodes();
     }
 
-    protected Runnable getWalker(SeenNodes seenNodes, Optional<HugeAtomicDoubleArray> totalWeights, double v, WalkQualities walkQualities, SplittableRandom split, Graph concurrentCopy, RandomWalkWithRestartsConfig config, ProgressTracker progressTracker) {
+    protected Runnable getWalker(
+        SeenNodes seenNodes,
+        Optional<HugeAtomicDoubleArray> totalWeights,
+        double v,
+        WalkQualities walkQualities,
+        SplittableRandom split,
+        Graph concurrentCopy,
+        RandomWalkWithRestartsConfig config,
+        ProgressTracker progressTracker
+    ) {
         return new Walker(seenNodes, totalWeights, v, walkQualities, split, concurrentCopy, config, progressTracker);
     }
+
+    protected String getSubTaskMessage() {return "Do random walks";}
 
     @Override
     public Task progressTask(GraphStore graphStore) {

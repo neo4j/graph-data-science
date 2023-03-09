@@ -52,7 +52,7 @@ public class CNARW extends RandomWalkWithRestarts {
                 "Sample nodes",
                 Tasks.leaf("Count node labels", graphStore.nodeCount()),
                 Tasks.leaf(
-                    "Do common neighbour aware random walks",
+                    getSubTaskMessage(),
                     10 * Math.round(graphStore.nodeCount() * config.samplingRatio())
                 )
             );
@@ -60,7 +60,7 @@ public class CNARW extends RandomWalkWithRestarts {
             return Tasks.task(
                 "Sample nodes",
                 Tasks.leaf(
-                    "Do common neighbour aware random walks",
+                    getSubTaskMessage(),
                     10 * Math.round(graphStore.nodeCount() * config.samplingRatio())
                 )
             );
@@ -71,6 +71,9 @@ public class CNARW extends RandomWalkWithRestarts {
     public String progressTaskName() {
         return "Common neighbour aware random walks sampling";
     }
+
+    @Override
+    protected String getSubTaskMessage() {return "Do common neighbour aware random walks";}
 
     @Override
     public Runnable getWalker(
