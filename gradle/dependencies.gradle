@@ -47,7 +47,7 @@ ext {
         'hamcrest'             : '2.2',
         'HdrHistogram'         : '2.1.12',
         'hppc'                 : '0.7.3',
-        'immutables'           : '2.8.8',
+        'immutables'           : '2.9.3',
         'ipaddress'            : '5.3.3',
         'jackson'              : '2.14.1',
         'javapoet'             : '1.13.0',
