@@ -561,7 +561,7 @@ This behavior cannot be changed as it is part of the power iteration method.
 
 However, to normalize the final scores as part of the algorithm execution, one can use the `scaler` configuration parameter.
 A common scaler is the `L1Norm`, which normalizes each score to a value between 0 and 1.
-A description of all available scalers can be found in the documentation for the xref:alpha-algorithms/scale-properties.adoc[`scaleProperties`] procedure.
+A description of all available scalers can be found in the documentation for the xref:algorithms/scale-properties.adoc[`scaleProperties`] procedure.
 
 [role=query-example]
 --

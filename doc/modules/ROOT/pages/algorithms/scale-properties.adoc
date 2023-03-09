@@ -27,7 +27,7 @@ There are a number of supported scalers for the Scale Properties algorithm.
 These can be configured using the `scaler` configuration parameter.
 
 List properties are scaled index-by-index.
-See xref:alpha-algorithms/scale-properties.adoc#algorithms-scale-properties-examples-list[the list example] for more details.
+See xref:algorithms/scale-properties.adoc#algorithms-scale-properties-examples-list[the list example] for more details.
 
 In the following equations, `p` denotes the vector containing all property values for a single property across all nodes in the graph.
 
@@ -144,7 +144,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-include::partial$/algorithms/alpha/scale-properties/specific-configuration.adoc[]
+include::partial$/algorithms/scale-properties/specific-configuration.adoc[]
 |===
 
 .Results
@@ -181,7 +181,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
-include::partial$/algorithms/alpha/scale-properties/specific-configuration.adoc[]
+include::partial$/algorithms/scale-properties/specific-configuration.adoc[]
 |===
 
 .Results
@@ -222,7 +222,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-include::partial$/algorithms/alpha/scale-properties/specific-configuration.adoc[]
+include::partial$/algorithms/scale-properties/specific-configuration.adoc[]
 |===
 
 .Results
@@ -263,7 +263,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
-include::partial$/algorithms/alpha/scale-properties/specific-configuration.adoc[]
+include::partial$/algorithms/scale-properties/specific-configuration.adoc[]
 |===
 
 .Results
@@ -416,7 +416,7 @@ The `mutate` mode is especially useful when multiple algorithms are used in conj
 
 For more details on the `mutate` mode in general, see xref:common-usage/running-algos.adoc#running-algos-mutate[Mutate].
 
-In this example we will scale the two hotel properties of `buildYear` and `avgReview` using the xref:alpha-algorithms/scale-properties.adoc#algorithms-scale-properties-mean[Mean scaler].
+In this example we will scale the two hotel properties of `buildYear` and `avgReview` using the xref:algorithms/scale-properties.adoc#algorithms-scale-properties-mean[Mean scaler].
 The output is a list property which we will call `hotelFeatures`, imagining that we will use this as input for a machine learning model later on.
 
 [role=query-example]

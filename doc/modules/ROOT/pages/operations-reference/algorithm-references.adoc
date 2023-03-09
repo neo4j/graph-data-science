@@ -282,7 +282,7 @@
 .2+<.^|xref:algorithms/strongly-connected-components.adoc[Strongly Connected Components]
 | `gds.alpha.scc.stream`
 | `gds.alpha.scc.write`
-.8+<.^|xref:alpha-algorithms/scale-properties.adoc[Scale Properties]
+.8+<.^|xref:algorithms/scale-properties.adoc[Scale Properties]
 | `gds.alpha.scaleProperties.mutate`
 | `gds.beta.scaleProperties.mutate.estimate`
 | `gds.alpha.scaleProperties.stream`

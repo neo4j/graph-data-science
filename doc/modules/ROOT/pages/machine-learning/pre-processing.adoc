@@ -10,4 +10,4 @@ In GDS some options include:
 * xref:machine-learning/node-embeddings/index.adoc[Node embeddings]
 * xref:algorithms/centrality.adoc[Centrality algorithms]
 * xref:algorithms/auxiliary.adoc[Auxiliary algorithms]
-** Of special interest is xref:alpha-algorithms/scale-properties.adoc[Scale Properties]
+** Of special interest is xref:algorithms/scale-properties.adoc[Scale Properties]

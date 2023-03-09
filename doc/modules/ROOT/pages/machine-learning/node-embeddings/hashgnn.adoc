@@ -98,7 +98,7 @@ However, sometimes using binarization with a different `dimension` than the numb
 [NOTE]
 ====
 The hyperplane rounding may not work well if the input features are of different magnitudes since those of larger magnitudes will influence the generated binary features more.
-If this is not the intended behavior for your application we recommend normalizing your node properties (by feature dimension) prior to running HashGNN using xref:alpha-algorithms/scale-properties.adoc[Scale properties] or another similar method.
+If this is not the intended behavior for your application we recommend normalizing your node properties (by feature dimension) prior to running HashGNN using xref:algorithms/scale-properties.adoc[Scale properties] or another similar method.
 ====
 
 
