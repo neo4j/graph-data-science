@@ -21,8 +21,8 @@ package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.core.utils.TimeUtil;
 import org.neo4j.gds.ml.models.TrainerConfig;
-import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
+import org.neo4j.gds.ml_api.TrainingMethod;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;

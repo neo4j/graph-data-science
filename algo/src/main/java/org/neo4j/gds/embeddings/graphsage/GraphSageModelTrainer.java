@@ -41,7 +41,7 @@ import org.neo4j.gds.ml.core.subgraph.SubGraph;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml_api.TrainingMethod;
 
 import java.util.ArrayList;
 import java.util.Arrays;

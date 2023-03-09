@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.training;
 
 import org.neo4j.gds.ml.models.TrainerConfig;
-import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml_api.TrainingMethod;
 
 import java.util.Map;
 

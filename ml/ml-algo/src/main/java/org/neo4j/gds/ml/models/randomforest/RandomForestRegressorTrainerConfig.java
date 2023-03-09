@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.models.randomforest;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.models.TrainerConfig;
-import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml_api.TrainingMethod;
 
 import java.util.Collection;
 import java.util.Map;

@@ -26,7 +26,7 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.models.Classifier;
-import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml_api.TrainingMethod;
 
 import java.io.Serializable;
 import java.util.ArrayList;

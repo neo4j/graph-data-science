@@ -118,6 +118,9 @@ project(':ml-algo').projectDir = file('ml/ml-algo')
 include('ml-test-utils')
 project(':ml-test-utils').projectDir = file('ml/ml-test-utils')
 
+include('ml-api')
+project(':ml-api').projectDir = file('ml/ml-api')
+
 include('model-catalog-api')
 project(':model-catalog-api').projectDir = file('model-catalog-api')
 

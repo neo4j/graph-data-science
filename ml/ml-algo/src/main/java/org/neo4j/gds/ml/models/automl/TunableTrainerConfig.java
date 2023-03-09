@@ -20,12 +20,17 @@
 package org.neo4j.gds.ml.models.automl;
 
 import org.neo4j.gds.ml.models.TrainerConfig;
-import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.ParameterParser.RangeParameters;
 import org.neo4j.gds.ml.models.automl.hyperparameter.ConcreteParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.DoubleRangeParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerRangeParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.NumericalRangeParameter;
+import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;
+import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorTrainerConfig;
+import org.neo4j.gds.ml_api.TrainingMethod;
 
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +42,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.models.automl.ParameterParser.parseConcreteParameters;
 import static org.neo4j.gds.ml.models.automl.ParameterParser.parseRangeParameters;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class TunableTrainerConfig {
     static final double EPSILON = 1e-8;
@@ -62,7 +68,7 @@ public final class TunableTrainerConfig {
 
     public static TunableTrainerConfig of(Map<String, Object> userInput, TrainingMethod method) {
         RangeParameters rangeParameters = parseRangeParameters(userInput);
-        var defaults = method.createConfig(Map.of()).toMap();
+        var defaults = createTrainerConfigFromMap(Map.of(), method).toMap();
         var inputWithDefaults = fillDefaults(userInput, defaults);
         var concreteParameters = parseConcreteParameters(inputWithDefaults);
         var tunableTrainerConfig = new TunableTrainerConfig(
@@ -95,7 +101,7 @@ public final class TunableTrainerConfig {
         var materializedMap = new HashMap<String, Object>();
         concreteParameters.forEach((key, value) -> materializedMap.put(key, value.value()));
         materializedMap.putAll(hyperParameterValues);
-        return trainingMethod().createConfig(materializedMap);
+        return createTrainerConfigFromMap(materializedMap, method);
     }
 
     public Stream<TrainerConfig> streamCornerCaseConfigs() {
@@ -164,5 +170,16 @@ public final class TunableTrainerConfig {
     @Override
     public int hashCode() {
         return Objects.hash(concreteParameters, method);
+    }
+
+    private static TrainerConfig createTrainerConfigFromMap(Map<String, Object> configMap, TrainingMethod method) {
+        switch (method)  {
+            case LogisticRegression: return LogisticRegressionTrainConfig.of(configMap);
+            case RandomForestClassification: return RandomForestClassifierTrainerConfig.of(configMap);
+            case MLPClassification: return MLPClassifierTrainConfig.of(configMap);
+            case LinearRegression: return LinearRegressionTrainConfig.of(configMap);
+            case RandomForestRegression: return RandomForestRegressorTrainerConfig.of(configMap);
+            default: throw new IllegalStateException(formatWithLocale("Method %s does not have a trainerConfig Implemented", method.name()));
+        }
     }
 }

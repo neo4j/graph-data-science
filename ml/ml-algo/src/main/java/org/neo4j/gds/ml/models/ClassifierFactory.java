@@ -29,6 +29,7 @@ import org.neo4j.gds.ml.models.mlp.MLPClassifierData;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifier;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierData;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
+import org.neo4j.gds.ml_api.TrainingMethod;
 
 import java.util.function.LongUnaryOperator;
 

@@ -17,14 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.models;
+package org.neo4j.gds.ml_api;
 
-import org.neo4j.gds.ml_api.TrainingMethod;
+public enum TrainingMethod {
+    LogisticRegression,
+    LinearRegression,
+    RandomForestClassification {
+        @Override
+        public String toString() {
+            return "RandomForest";
+        }
+    },
+    RandomForestRegression {
+        @Override
+        public String toString() {
+            return "RandomForest";
+        }
+    },
 
-public interface BaseModelData {
-
-    TrainingMethod trainerMethod();
-
-    int featureDimension();
+    MLPClassification {
+        @Override
+        public String toString() { return "MultilayerPerceptron"; }
+    };
 
 }

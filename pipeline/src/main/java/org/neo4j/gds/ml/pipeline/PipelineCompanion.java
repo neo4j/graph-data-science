@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml_api.TrainingMethod;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Map;

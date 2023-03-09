@@ -21,8 +21,8 @@ package org.neo4j.gds.ml.pipeline.node.regression.configure;
 
 import org.junit.jupiter.api.AfterEach;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml_api.TrainingMethod;
 
 import java.util.List;
 import java.util.Map;

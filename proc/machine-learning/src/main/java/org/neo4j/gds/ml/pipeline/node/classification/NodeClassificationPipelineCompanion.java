@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification;
 
-import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml_api.TrainingMethod;
 
 import java.util.List;
 import java.util.Map;
