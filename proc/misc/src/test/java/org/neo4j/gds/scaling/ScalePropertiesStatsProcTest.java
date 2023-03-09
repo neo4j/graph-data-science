@@ -33,6 +33,7 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.isA;
@@ -82,6 +83,30 @@ class ScalePropertiesStatsProcTest extends BaseProcTest {
                 "preProcessingMillis", greaterThan(-1L),
                 "computeMillis", greaterThan(-1L),
                 "postProcessingMillis", 0L
+            ))
+        );
+    }
+
+    @Test
+    void estimate() {
+        var query = GdsCypher
+            .call("g")
+            .algo("gds.beta.scaleProperties")
+            .statsEstimation()
+            .addParameter("nodeProperties", List.of("myProp"))
+            .addParameter("scaler", "Mean")
+            .yields();
+
+        assertCypherResult(query, List.of(Map.of(
+                "mapView", isA(Map.class),
+                "treeView", isA(String.class),
+                "bytesMax", greaterThanOrEqualTo(0L),
+                "heapPercentageMin", greaterThanOrEqualTo(0.0),
+                "nodeCount", 6L,
+                "relationshipCount", 0L,
+                "requiredMemory", isA(String.class),
+                "bytesMin", greaterThanOrEqualTo(0L),
+                "heapPercentageMax", greaterThanOrEqualTo(0.0)
             ))
         );
     }

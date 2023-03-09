@@ -20,8 +20,10 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardStatsResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -46,6 +48,21 @@ public class ScalePropertiesStatsProc extends BaseProc {
             new ScalePropertiesStatsSpec(),
             executionContext()
         ).compute(graphName, configuration);
+    }
+
+    @Procedure(value = "gds.beta.scaleProperties.stats.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphName,
+        @Name(value = "algoConfiguration") Map<String, Object> configuration
+    ) {
+        var spec = new ScalePropertiesStatsSpec();
+
+        return new MemoryEstimationExecutor<>(
+            spec,
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphName, configuration);
     }
 
     public static final class StatsResult extends StandardStatsResult {
