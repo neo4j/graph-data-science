@@ -35,6 +35,7 @@ public interface NodeClassificationTrainResult {
     LongMultiSet classCounts();
 
     @ValueClass
+    @SuppressWarnings({"immutables:subtype", "immutables:from"})
     interface NodeClassificationModelResult extends CatalogModelContainer<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> {
         TrainingStatistics trainingStatistics();
     }

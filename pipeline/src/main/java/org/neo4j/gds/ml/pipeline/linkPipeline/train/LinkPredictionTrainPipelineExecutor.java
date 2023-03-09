@@ -229,7 +229,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     }
 
     @ValueClass
-    @SuppressWarnings("immutables:subtype")
+    @SuppressWarnings({"immutables:subtype", "immutables:from"})
     public interface LinkPredictionTrainPipelineResult extends CatalogModelContainer<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> {
         TrainingStatistics trainingStatistics();
     }

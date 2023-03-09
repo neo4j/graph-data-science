@@ -225,6 +225,7 @@ public interface Expression {
         }
 
         @ValueClass
+        @SuppressWarnings("immutables:from")
         interface NewParameter extends UnaryExpression {
 
             @Override

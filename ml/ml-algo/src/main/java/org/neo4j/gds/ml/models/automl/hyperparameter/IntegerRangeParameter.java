@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 @ValueClass
+@SuppressWarnings("immutables:from")
 public interface IntegerRangeParameter extends NumericalRangeParameter<Integer> {
 
     static IntegerRangeParameter of(int min, int max) {
