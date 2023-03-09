@@ -23,10 +23,12 @@ import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.GraphDimensions;
@@ -39,7 +41,10 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.transaction.TransactionContext;
 
-import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 import static org.neo4j.gds.core.loading.CypherQueryEstimator.EstimationResult;
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
@@ -47,22 +52,22 @@ import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherConfig> {
 
     private final GraphProjectFromCypherConfig cypherConfig;
-    private final EstimationResult nodeEstimation;
-    private final EstimationResult relationshipEstimation;
+    private final long numberOfNodeProperties;
+    private final long numberOfRelationshipProperties;
     private final ProgressTracker progressTracker;
 
     public static CypherFactory createWithBaseDimensions(GraphProjectFromCypherConfig graphProjectConfig, GraphLoaderContext loadingContext, GraphDimensions graphDimensions) {
-        return create(graphProjectConfig, loadingContext, graphDimensions);
+        return create(graphProjectConfig, loadingContext, Optional.of(graphDimensions));
     }
 
     public static CypherFactory createWithDerivedDimensions(GraphProjectFromCypherConfig graphProjectConfig, GraphLoaderContext loadingContext) {
-        return create(graphProjectConfig, loadingContext, null);
+        return create(graphProjectConfig, loadingContext, Optional.empty());
     }
 
     private static CypherFactory create(
         GraphProjectFromCypherConfig graphProjectConfig,
         GraphLoaderContext loadingContext,
-        @Nullable GraphDimensions dimensions
+        Optional<GraphDimensions> baseDimensions
     ) {
 
         EstimationResult nodeEstimation;
@@ -79,22 +84,32 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
 
         var dimBuilder = ImmutableGraphDimensions.builder();
 
-        if (dimensions != null) {
-            dimBuilder.from(dimensions);
-        }
+        baseDimensions.ifPresent(dimBuilder::from);
 
-        GraphDimensions dim = ImmutableGraphDimensions.builder()
-            .highestPossibleNodeCount(nodeEstimation.estimatedRows())
-            .nodeCount(nodeEstimation.estimatedRows())
-            .relCountUpperBound(relationEstimation.estimatedRows())
+        long highestPossibleNodeCount = Math.max(baseDimensions
+            .map(GraphDimensions::highestPossibleNodeCount)
+            .orElse(-1L), nodeEstimation.estimatedRows());
+        long nodeCount = Math.max(
+            baseDimensions.map(GraphDimensions::nodeCount).orElse(-1L),
+            nodeEstimation.estimatedRows()
+        );
+        long relCountUpperBound = Math.max(
+            baseDimensions.map(GraphDimensions::relCountUpperBound).orElse(-1L),
+            relationEstimation.estimatedRows()
+        );
+
+        GraphDimensions dim = dimBuilder
+            .highestPossibleNodeCount(highestPossibleNodeCount)
+            .nodeCount(nodeCount)
+            .relCountUpperBound(relCountUpperBound)
             .build();
 
         return new CypherFactory(
             graphProjectConfig,
             loadingContext,
             dim,
-            nodeEstimation,
-            relationEstimation
+            nodeEstimation.propertyCount(),
+            relationEstimation.propertyCount()
         );
     }
 
@@ -102,16 +117,15 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
         GraphProjectFromCypherConfig graphProjectConfig,
         GraphLoaderContext loadingContext,
         GraphDimensions graphDimensions,
-        EstimationResult nodeEstimation,
-        EstimationResult relationshipEstimation
-
+        long estimatedNumberOfNodeProperties,
+        long estimatedNumberOfRelProperties
     ) {
         // TODO: need to pass capabilities from outside?
         super(graphProjectConfig, ImmutableStaticCapabilities.of(true), loadingContext, graphDimensions);
 
         this.cypherConfig = graphProjectConfig;
-        this.nodeEstimation = nodeEstimation;
-        this.relationshipEstimation = relationshipEstimation;
+        this.numberOfNodeProperties = estimatedNumberOfNodeProperties;
+        this.numberOfRelationshipProperties = estimatedNumberOfRelProperties;
         this.progressTracker = initProgressTracker();
     }
 
@@ -140,12 +154,7 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
 
     @Override
     public GraphDimensions estimationDimensions() {
-        return ImmutableGraphDimensions.builder()
-            .from(dimensions)
-            .highestPossibleNodeCount(Math.max(dimensions.highestPossibleNodeCount(), nodeEstimation.estimatedRows()))
-            .nodeCount(Math.max(dimensions.nodeCount(), nodeEstimation.estimatedRows()))
-            .relCountUpperBound(Math.max(dimensions.relCountUpperBound(), relationshipEstimation.estimatedRows()))
-            .build();
+        return dimensions;
     }
 
     @Override
@@ -190,11 +199,10 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
     }
 
     private ProgressTracker initProgressTracker() {
-        var estimatedDimensions = estimationDimensions();
         var task = Tasks.task(
             "Loading",
-            Tasks.leaf("Nodes", estimatedDimensions.highestPossibleNodeCount()),
-            Tasks.leaf("Relationships", estimatedDimensions.relCountUpperBound())
+            Tasks.leaf("Nodes", dimensions.highestPossibleNodeCount()),
+            Tasks.leaf("Relationships", dimensions.relCountUpperBound())
         );
 
         if (graphProjectConfig.logProgress()) {
@@ -226,7 +234,7 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
         var nodeProjection = NodeProjection
             .builder()
             .label(ElementProjection.PROJECT_ALL)
-            .addAllProperties(nodeEstimation.propertyMappings())
+            .addAllProperties(propertyMappings(numberOfNodeProperties))
             .build();
 
         return NodeProjections.single(
@@ -239,12 +247,19 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
         var relationshipProjection = RelationshipProjection
             .builder()
             .type(ElementProjection.PROJECT_ALL)
-            .addAllProperties(relationshipEstimation.propertyMappings())
+            .addAllProperties(propertyMappings(numberOfRelationshipProperties))
             .build();
 
         return RelationshipProjections.single(
             RelationshipType.ALL_RELATIONSHIPS,
             relationshipProjection
         );
+    }
+
+    private static Collection<PropertyMapping> propertyMappings(long propertyCount) {
+        return LongStream
+            .range(0, propertyCount)
+            .mapToObj(property -> PropertyMapping.of(Long.toString(property), DefaultValue.DEFAULT))
+            .collect(Collectors.toList());
     }
 }
