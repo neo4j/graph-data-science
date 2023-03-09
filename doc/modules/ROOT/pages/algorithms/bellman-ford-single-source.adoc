@@ -45,7 +45,7 @@ include::partial$/algorithms/shortest-path/bellman-ford/bellman-ford-syntax.adoc
 
 :algorithm-name: {algorithm}
 :graph-description: example network
-:image-file: dijkstra.svg
+:image-file: bellman-ford.svg
 include::partial$/algorithms/shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
@@ -369,4 +369,3 @@ Similar to the `mutate` mode, the default behavior when encountering negative cy
 ====
 The relationships written are always directed, even if the input graph is undirected.
 ====
-
