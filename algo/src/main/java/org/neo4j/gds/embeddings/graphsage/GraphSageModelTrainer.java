@@ -22,7 +22,6 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -346,7 +345,7 @@ public class GraphSageModelTrainer {
     }
 
     @ValueClass
-    public interface GraphSageTrainMetrics extends ToMapConvertible, CustomInfo {
+    public interface GraphSageTrainMetrics extends CustomInfo {
         static GraphSageTrainMetrics empty() {
             return ImmutableGraphSageTrainMetrics.of(List.of(), false);
         }

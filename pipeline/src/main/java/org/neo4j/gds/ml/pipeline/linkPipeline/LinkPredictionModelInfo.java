@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @ValueClass
-public interface LinkPredictionModelInfo extends ToMapConvertible, CustomInfo {
+public interface LinkPredictionModelInfo extends CustomInfo {
 
     TrainerConfig bestParameters();
     Map<String, Object> metrics();
