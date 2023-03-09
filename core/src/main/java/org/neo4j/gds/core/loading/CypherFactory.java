@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
@@ -28,64 +27,111 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.GraphDimensionsCypherReader;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.internal.id.IdGeneratorFactory;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.core.loading.CypherQueryEstimator.EstimationResult;
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
-import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
-public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherConfig> {
+public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherConfig> {
 
     private final GraphProjectFromCypherConfig cypherConfig;
-    private EstimationResult nodeEstimation;
-    private EstimationResult relationshipEstimation;
+    private final long numberOfNodeProperties;
+    private final long numberOfRelationshipProperties;
+    private final ProgressTracker progressTracker;
 
-    public CypherFactory(
+    public static CypherFactory createWithBaseDimensions(GraphProjectFromCypherConfig graphProjectConfig, GraphLoaderContext loadingContext, GraphDimensions graphDimensions) {
+        return create(graphProjectConfig, loadingContext, Optional.of(graphDimensions));
+    }
+
+    public static CypherFactory createWithDerivedDimensions(GraphProjectFromCypherConfig graphProjectConfig, GraphLoaderContext loadingContext) {
+        return create(graphProjectConfig, loadingContext, Optional.empty());
+    }
+
+    private static CypherFactory create(
         GraphProjectFromCypherConfig graphProjectConfig,
-        GraphLoaderContext loadingContext
+        GraphLoaderContext loadingContext,
+        Optional<GraphDimensions> baseDimensions
     ) {
-        this(
+
+        EstimationResult nodeEstimation;
+        EstimationResult relationEstimation;
+
+        if (graphProjectConfig.isFictitiousLoading()) {
+            nodeEstimation = ImmutableEstimationResult.of(graphProjectConfig.nodeCount(), 0);
+            relationEstimation = ImmutableEstimationResult.of(graphProjectConfig.relationshipCount(), 0);
+        } else {
+            var estimator = new CypherQueryEstimator(loadingContext.transactionContext().withRestrictedAccess(READ));
+            nodeEstimation = estimator.getNodeEstimation(graphProjectConfig.nodeQuery());
+            relationEstimation = estimator.getRelationshipEstimation(graphProjectConfig.relationshipQuery());
+        }
+
+        var dimBuilder = ImmutableGraphDimensions.builder();
+
+        baseDimensions.ifPresent(dimBuilder::from);
+
+        long highestPossibleNodeCount = Math.max(baseDimensions
+            .map(GraphDimensions::highestPossibleNodeCount)
+            .orElse(-1L), nodeEstimation.estimatedRows());
+        long nodeCount = Math.max(
+            baseDimensions.map(GraphDimensions::nodeCount).orElse(-1L),
+            nodeEstimation.estimatedRows()
+        );
+        long relCountUpperBound = Math.max(
+            baseDimensions.map(GraphDimensions::relCountUpperBound).orElse(-1L),
+            relationEstimation.estimatedRows()
+        );
+
+        GraphDimensions dim = dimBuilder
+            .highestPossibleNodeCount(highestPossibleNodeCount)
+            .nodeCount(nodeCount)
+            .relCountUpperBound(relCountUpperBound)
+            .build();
+
+        return new CypherFactory(
             graphProjectConfig,
             loadingContext,
-            new GraphDimensionsCypherReader(
-                loadingContext.transactionContext().withRestrictedAccess(READ),
-                graphProjectConfig,
-                loadingContext.dependencyResolver().resolveDependency(IdGeneratorFactory.class)
-            ).call()
+            dim,
+            nodeEstimation.propertyCount(),
+            relationEstimation.propertyCount()
         );
     }
 
-    public CypherFactory(
+    private CypherFactory(
         GraphProjectFromCypherConfig graphProjectConfig,
         GraphLoaderContext loadingContext,
-        GraphDimensions graphDimensions
+        GraphDimensions graphDimensions,
+        long estimatedNumberOfNodeProperties,
+        long estimatedNumberOfRelProperties
     ) {
         // TODO: need to pass capabilities from outside?
         super(graphProjectConfig, ImmutableStaticCapabilities.of(true), loadingContext, graphDimensions);
-        this.cypherConfig = getCypherConfig(graphProjectConfig).orElseThrow(() -> new IllegalArgumentException(
-            "Expected GraphProjectConfig to be a cypher config."));
+
+        this.cypherConfig = graphProjectConfig;
+        this.numberOfNodeProperties = estimatedNumberOfNodeProperties;
+        this.numberOfRelationshipProperties = estimatedNumberOfRelProperties;
+        this.progressTracker = initProgressTracker();
+    }
+
+    @Override
+    protected ProgressTracker progressTracker() {
+        return progressTracker;
     }
 
     @Override
@@ -108,12 +154,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
 
     @Override
     public GraphDimensions estimationDimensions() {
-        return ImmutableGraphDimensions.builder()
-            .from(dimensions)
-            .highestPossibleNodeCount(getNodeEstimation().estimatedRows())
-            .nodeCount(getNodeEstimation().estimatedRows())
-            .relCountUpperBound(getRelationshipEstimation().estimatedRows())
-            .build();
+        return dimensions;
     }
 
     @Override
@@ -121,7 +162,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
         // Temporarily override the security context to enforce read-only access during load
         return readOnlyTransaction().apply((tx, ktx) -> {
             BatchLoadResult nodeCount = new CountingCypherRecordLoader(
-                nodeQuery(),
+                cypherConfig.nodeQuery(),
                 CypherRecordLoader.QueryType.NODE,
                 cypherConfig,
                 loadingContext
@@ -129,7 +170,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
 
             progressTracker.beginSubTask("Loading");
             var nodes = new CypherNodeLoader(
-                nodeQuery(),
+                cypherConfig.nodeQuery(),
                 nodeCount.rows(),
                 cypherConfig,
                 loadingContext,
@@ -137,7 +178,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
             ).load(ktx.internalTransaction());
 
             var relationshipImportResult = new CypherRelationshipLoader(
-                relationshipQuery(),
+                cypherConfig.relationshipQuery(),
                 nodes.idMap(),
                 cypherConfig,
                 loadingContext,
@@ -157,13 +198,13 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
         });
     }
 
-    @Override
-    protected ProgressTracker initProgressTracker() {
+    private ProgressTracker initProgressTracker() {
         var task = Tasks.task(
             "Loading",
-            Tasks.leaf("Nodes"),
+            Tasks.leaf("Nodes", dimensions.highestPossibleNodeCount()),
             Tasks.leaf("Relationships", dimensions.relCountUpperBound())
         );
+
         if (graphProjectConfig.logProgress()) {
             return new TaskProgressTracker(
                 task,
@@ -175,7 +216,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
             );
         }
 
-        return new TaskProgressTracker(
+        return new TaskTreeProgressTracker(
             task,
             loadingContext.log(),
             graphProjectConfig.readConcurrency(),
@@ -185,72 +226,15 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
         );
     }
 
-    private String nodeQuery() {
-        return getCypherConfig(graphProjectConfig)
-            .orElseThrow(() -> new IllegalArgumentException("Missing node query"))
-            .nodeQuery();
-    }
-
-    private String relationshipQuery() {
-        return getCypherConfig(graphProjectConfig)
-            .orElseThrow(() -> new IllegalArgumentException("Missing relationship query"))
-            .relationshipQuery();
-    }
-
-    private static Optional<GraphProjectFromCypherConfig> getCypherConfig(GraphProjectConfig config) {
-        if (config instanceof GraphProjectFromCypherConfig) {
-            return Optional.of((GraphProjectFromCypherConfig) config);
-        }
-        return Optional.empty();
-    }
-
     private TransactionContext readOnlyTransaction() {
         return loadingContext.transactionContext().withRestrictedAccess(READ);
     }
 
-    private EstimationResult getNodeEstimation() {
-        if (nodeEstimation == null) {
-            nodeEstimation = runEstimationQuery(
-                nodeQuery(),
-                NodeSubscriber.RESERVED_COLUMNS
-            );
-        }
-        return nodeEstimation;
-    }
-
-    private EstimationResult getRelationshipEstimation() {
-        if (relationshipEstimation == null) {
-            relationshipEstimation = runEstimationQuery(
-                relationshipQuery(),
-                RelationshipSubscriber.RESERVED_COLUMNS
-            );
-        }
-        return relationshipEstimation;
-    }
-
-    private EstimationResult runEstimationQuery(String query, Collection<String> reservedColumns) {
-        return readOnlyTransaction().apply((tx, ktx) -> {
-            var explainQuery = formatWithLocale("EXPLAIN %s", query);
-            try (var result = tx.execute(explainQuery)) {
-                var estimatedRows = (Number) result.getExecutionPlanDescription().getArguments().get("EstimatedRows");
-
-                var propertyColumns = new ArrayList<>(result.columns());
-                propertyColumns.removeAll(reservedColumns);
-
-                return ImmutableEstimationResult.of(estimatedRows.longValue(), propertyColumns.size());
-            }
-        });
-    }
-
     private NodeProjections buildEstimateNodeProjections() {
-        if (cypherConfig.isFictitiousLoading()) {
-            nodeEstimation = ImmutableEstimationResult.of(cypherConfig.nodeCount(), 0);
-        }
-
         var nodeProjection = NodeProjection
             .builder()
             .label(ElementProjection.PROJECT_ALL)
-            .addAllProperties(getNodeEstimation().propertyMappings())
+            .addAllProperties(propertyMappings(numberOfNodeProperties))
             .build();
 
         return NodeProjections.single(
@@ -260,14 +244,10 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
     }
 
     private RelationshipProjections buildEstimateRelationshipProjections() {
-        if (cypherConfig.isFictitiousLoading()) {
-            relationshipEstimation = ImmutableEstimationResult.of(cypherConfig.relationshipCount(), 0);
-        }
-
         var relationshipProjection = RelationshipProjection
             .builder()
             .type(ElementProjection.PROJECT_ALL)
-            .addAllProperties(getRelationshipEstimation().propertyMappings())
+            .addAllProperties(propertyMappings(numberOfRelationshipProperties))
             .build();
 
         return RelationshipProjections.single(
@@ -276,30 +256,10 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
         );
     }
 
-    @ValueClass
-    interface EstimationResult {
-        long estimatedRows();
-
-        long propertyCount();
-
-        @Value.Derived
-        default Map<String, Integer> propertyTokens() {
-            return LongStream
-                .range(0, propertyCount())
-                .boxed()
-                .collect(Collectors.toMap(
-                    Object::toString,
-                    property -> NO_SUCH_PROPERTY_KEY
-                ));
-        }
-
-        @Value.Derived
-        default Collection<PropertyMapping> propertyMappings() {
-            return LongStream
-                .range(0, propertyCount())
-                .mapToObj(property -> PropertyMapping.of(Long.toString(property), DefaultValue.DEFAULT))
-                .collect(Collectors.toList());
-        }
-
+    private static Collection<PropertyMapping> propertyMappings(long propertyCount) {
+        return LongStream
+            .range(0, propertyCount)
+            .mapToObj(property -> PropertyMapping.of(Long.toString(property), DefaultValue.DEFAULT))
+            .collect(Collectors.toList());
     }
 }

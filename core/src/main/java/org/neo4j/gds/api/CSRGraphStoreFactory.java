@@ -27,6 +27,7 @@ import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Map;
@@ -65,7 +66,9 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
         var sizeInBytes = MemoryUsage.sizeOf(graphStore);
         if (sizeInBytes >= 0) {
             var memoryUsage = MemoryUsage.humanReadable(sizeInBytes);
-            progressTracker.logInfo(formatWithLocale("Actual memory usage of the loaded graph: %s", memoryUsage));
+            progressTracker().logInfo(formatWithLocale("Actual memory usage of the loaded graph: %s", memoryUsage));
         }
     }
+
+    protected abstract ProgressTracker progressTracker();
 }

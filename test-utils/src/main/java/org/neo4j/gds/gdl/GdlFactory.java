@@ -156,11 +156,6 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     }
 
     @Override
-    protected ProgressTracker initProgressTracker() {
-        return ProgressTracker.NULL_TRACKER;
-    }
-
-    @Override
     public CSRGraphStore build() {
         var nodes = loadNodes();
         var relationshipImportResult = loadRelationships(nodes.idMap());
@@ -368,6 +363,11 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                 element
             ));
         }
+    }
+
+    @Override
+    protected ProgressTracker progressTracker() {
+        return ProgressTracker.NULL_TRACKER;
     }
 
     private static final class GraphDimensionsGdlReader {
