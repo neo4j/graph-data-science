@@ -92,13 +92,6 @@ class NodeRegressionTrainTest {
         "({scalar: 3.5,     target:   7.0 })," +
         "({scalar: 4.5,     target:   9.0 })," +
         "({scalar: 5.5,     target: NaN })," +
-        "({scalar: 6.5,     target:  13.0 })," +
-        "({scalar: 7.5,     target:  15.0 })," +
-        "({scalar: 8.5,     target:  17.0 })," +
-        "({scalar: 9.5,     target:  19.0 })," +
-        "({scalar: 10.5,    target:  21.0 })," +
-        "({scalar: -5.5,    target: -11.0 })," +
-        "({scalar: -12.5,   target: -25.0 })," +
         "({scalar: 42.5,    target:  85.0 }),";
 
     @Inject
