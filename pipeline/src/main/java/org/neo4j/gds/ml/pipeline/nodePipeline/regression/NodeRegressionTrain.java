@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -75,12 +76,42 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
 
         var tasks = new ArrayList<Task>();
         tasks.add(NodePropertyStepExecutor.tasks(pipeline.nodePropertySteps(), nodeCount));
-        tasks.addAll(CrossValidation.progressTasks(validationFolds, pipeline.numberOfModelSelectionTrials(), trainSetSize));
+        tasks.addAll(CrossValidation.progressTasks(
+            validationFolds,
+            pipeline.numberOfModelSelectionTrials(),
+            trainSetSize
+        ));
         tasks.add(ClassifierTrainer.progressTask("Train best model", 5 * trainSetSize));
         tasks.add(Tasks.leaf("Evaluate on test data", testSetSize));
         tasks.add(ClassifierTrainer.progressTask("Retrain best model", 5 * nodeCount));
 
         return Tasks.task("Node Regression Train Pipeline", tasks);
+    }
+
+    private static HugeDoubleArray createTargets(Graph graph, String targetProperty) {
+        var targetNodeProperty = graph.nodeProperties(targetProperty);
+        HugeDoubleArray targets = HugeDoubleArray.newArray(graph.nodeCount());
+
+        for (long i = 0; i < graph.nodeCount(); i++) {
+            double value = targetNodeProperty.doubleValue(i);
+            if (Double.isNaN(value)) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Node with id %d has `%s` target property value `NaN`",
+                    graph.toOriginalNodeId(i),
+                    targetProperty
+                ));
+            }
+            if (Double.isInfinite(value)) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Node with id %d has infinite `%s` target property value",
+                    graph.toOriginalNodeId(i),
+                    targetProperty
+                ));
+            }
+            targets.set(i, value);
+        }
+
+        return targets;
     }
 
     public static NodeRegressionTrain create(
@@ -94,16 +125,11 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         var nodesGraph = graphStore.getGraph(config.targetNodeLabelIdentifiers(graphStore));
         pipeline.splitConfig().validateMinNumNodesInSplitSets(nodesGraph);
 
-        var targetNodeProperty = nodesGraph.nodeProperties(config.targetProperty());
-
-        HugeDoubleArray targets = HugeDoubleArray.newArray(nodesGraph.nodeCount());
-        targets.setAll(targetNodeProperty::doubleValue);
-
         return new NodeRegressionTrain(
             pipeline,
             config,
             nodeFeatureProducer,
-            targets,
+            createTargets(nodesGraph, config.targetProperty()),
             nodesGraph,
             config.metrics(),
             progressTracker
@@ -159,7 +185,11 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
 
         evaluateBestModel(splits.outerSplit(), features, trainingStatistics);
 
-        var retrainedModel = retrainBestModel(splits.allTrainingExamples(), features, trainingStatistics.bestParameters());
+        var retrainedModel = retrainBestModel(
+            splits.allTrainingExamples(),
+            features,
+            trainingStatistics.bestParameters()
+        );
 
         progressTracker.endSubTask();
         return ImmutableNodeRegressionTrainResult.of(retrainedModel, trainingStatistics);
@@ -238,7 +268,12 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         TrainingStatistics trainingStatistics
     ) {
         progressTracker.beginSubTask("Train best model");
-        var bestRegressor = trainModel(outerSplit.trainSet(), trainingStatistics.bestParameters(), features, LogLevel.INFO);
+        var bestRegressor = trainModel(
+            outerSplit.trainSet(),
+            trainingStatistics.bestParameters(),
+            features,
+            LogLevel.INFO
+        );
         progressTracker.endSubTask("Train best model");
 
         progressTracker.beginSubTask("Evaluate on test data");
@@ -254,7 +289,11 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         progressTracker.endSubTask("Evaluate on test data");
     }
 
-    private Regressor retrainBestModel(ReadOnlyHugeLongArray trainSet, Features features, TrainerConfig bestParameters) {
+    private Regressor retrainBestModel(
+        ReadOnlyHugeLongArray trainSet,
+        Features features,
+        TrainerConfig bestParameters
+    ) {
         progressTracker.beginSubTask("Retrain best model");
         var retrainedRegressor = trainModel(trainSet, bestParameters, features, LogLevel.INFO);
         progressTracker.endSubTask("Retrain best model");
