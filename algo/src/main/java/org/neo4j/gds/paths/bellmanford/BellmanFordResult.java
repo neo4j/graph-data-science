@@ -30,8 +30,14 @@ public interface BellmanFordResult {
 
     DijkstraResult shortestPaths();
 
-    static BellmanFordResult of(boolean containsNegativeCycles,DijkstraResult shortestPaths){
-            return  ImmutableBellmanFordResult.of(containsNegativeCycles,shortestPaths);
+    DijkstraResult negativeCycles();
+
+    static BellmanFordResult of(
+        boolean containsNegativeCycles,
+        DijkstraResult shortestPaths,
+        DijkstraResult negativeCycles
+    ) {
+        return ImmutableBellmanFordResult.of(containsNegativeCycles, shortestPaths, negativeCycles);
 
     }
 

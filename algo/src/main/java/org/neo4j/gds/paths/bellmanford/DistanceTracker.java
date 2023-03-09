@@ -24,8 +24,6 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.LongPageCreator;
 
-import java.util.Optional;
-
 final class DistanceTracker {
 
     private static final double DIST_INF = Double.MAX_VALUE;
@@ -49,7 +47,7 @@ final class DistanceTracker {
             LongPageCreator.of(concurrency, index -> NO_LENGTH)
         );
 
-        return new DistanceTracker(predecessors, distances, lengths);
+        return new DistanceTracker(predecessors, distances, lengths, size);
     }
 
     private final HugeAtomicLongArray predecessors;
@@ -57,15 +55,18 @@ final class DistanceTracker {
     private final HugeAtomicDoubleArray distances;
 
     private final HugeAtomicLongArray lengths;
+    private final long size;
 
     private DistanceTracker(
         HugeAtomicLongArray predecessors,
         HugeAtomicDoubleArray distances,
-        HugeAtomicLongArray lengths
+        HugeAtomicLongArray lengths,
+        long size
     ) {
         this.predecessors = predecessors;
         this.distances = distances;
         this.lengths = lengths;
+        this.size = size;
     }
 
     public double distance(long nodeId) {
@@ -82,8 +83,8 @@ final class DistanceTracker {
         return distances;
     }
 
-    Optional<HugeAtomicLongArray> predecessors() {
-        return Optional.of(predecessors);
+    long size() {
+        return size;
     }
 
     public void set(long nodeId, long predecessor, double distance, long length) {
@@ -99,20 +100,24 @@ final class DistanceTracker {
         long predecessor,
         long length
     ) {
-        long currentPredecessor = predecessors.get(nodeId);
+        long currentLength = lengths.get(nodeId);
+
 
         // locked by another thread
-        if (currentPredecessor < 0) {
+        if (currentLength < 0) { //the length is always positive
             //we  should signal failure
             // for that we must be sure not to return the 'expectedDistance' by accident!
             //we hence return its negation (or -1 if ==0)
             return (Double.compare(expectedDistance, 0.0) == 0) ? -1.0 : -expectedDistance;
         }
 
-        var witness = predecessors.compareAndExchange(nodeId, currentPredecessor, -predecessor - 1);
-        
+        //we obtain a lock on nodeId, if we negate it's length to a negative side
+        //if simultaneously nodeId is being relaxed, we can obtain its most recent correct value by negating
+        //if negative
+        var witness = lengths.compareAndExchange(nodeId, currentLength, -currentLength);
+
         // CAX failed
-        if (witness != currentPredecessor) {
+        if (witness != currentLength) {
             //we  should signal failure
             // for that we must be sure not to return the 'expectedDistance' by accident!
             return (Double.compare(expectedDistance, 0.0) == 0) ? -1.0 : -expectedDistance;
@@ -124,14 +129,14 @@ final class DistanceTracker {
 
         if (oldDistance > newDistance) {
             distances.set(nodeId, newDistance);
-            lengths.set(nodeId, length);
-            // unlock
             predecessors.set(nodeId, predecessor);
+            // unlock
+            lengths.set(nodeId, length);
             // return previous distance to signal successful CAX
 
             return expectedDistance;
         }
-        predecessors.set(nodeId, currentPredecessor);
+        lengths.set(nodeId, currentLength);
         //signal unsuccesful update
         //note that this unsuccesful update will be the last attempt
         return (Double.compare(expectedDistance, 0.0) == 0.0) ? -1.0 : -expectedDistance;
