@@ -105,7 +105,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
 [role=query-example]
 --
-.The following will run Bellman-Ford on a component without negative cycles and stream results:
+.The following will run Bellman-Ford on a component without negative cycles in `stream` mode:
 [source, cypher, role=noplay]
 ----
 MATCH (source:Location {name: 'A'})
@@ -150,7 +150,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
 [role=query-example]
 --
-.The following will run Bellman-Ford on a component with a negative cycle and stream results:
+.The following will run Bellman-Ford on a component with a negative cycle in `stream` mode:
 [source, cypher, role=noplay]
 ----
 MATCH (source:Location {name: 'G'})
@@ -190,7 +190,7 @@ include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
 [role=query-example]
 --
-.The following will run Bellman Ford on stats mode and return its statistics.
+.The following will run Bellman Ford on `stats` mode
 [source,cypher,role=noplay]
 ----
 MATCH (source:Location {name: 'A'})
@@ -210,4 +210,74 @@ RETURN containsNegativeCycle
 --
 
 Running stats mode can be useful if we want to discover if the graph has any negative cycles, but we do not to have them computed or store them explicitly.
-For this example, we see that the `containsNegativeCycle` field is false.
+For this example, we can see that the `containsNegativeCycle` field is false as `A` is not in a component with negative cycles.
+
+[[algorithms-bellman-single-source-examples-mutate]]
+=== Mutate
+include::partial$/algorithms/shortest-path/path-examples-mutate-intro.adoc[]
+
+==== Mutate without negative cycles
+
+[role=query-example]
+--
+.The following will run Bellman-Ford  on a component without negative cycles in `mutate` mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Location {name: 'A'})
+CALL gds.bellmanFord.mutate('myGraph', {
+    sourceNode: source,
+    relationshipWeightProperty: 'cost',
+    mutateRelationshipType: 'ROUTE'
+})
+YIELD relationshipsWritten, containsNegativeCycle
+RETURN relationshipsWritten, containsNegativeCycle
+----
+
+.Results
+[opts="header"]
+|===
+| relationshipsWritten |  containsNegativeCycle
+| 6 | false
+|===
+--
+
+After executing the above query, the in-memory graph will be updated with new relationships of type `ROUTE`.
+Since `containsNegativeCycle` is false, these relationships represent shortest paths.
+The new relationships will store a single property `totalCost`, corresponding to the shortest path cost from source to target.
+
+==== Mutate without negative cycles
+
+[role=query-example]
+--
+.The following will run Bellman-Ford on a component with negative cycles in `mutate` mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Location {name: 'G'})
+CALL gds.bellmanFord.mutate('myGraph', {
+    sourceNode: source,
+    relationshipWeightProperty: 'cost',
+    mutateRelationshipType: 'ROUTE',
+    mutateNegativeCycles: true
+})
+YIELD relationshipsWritten, containsNegativeCycle
+RETURN relationshipsWritten, containsNegativeCycle
+----
+
+.Results
+[opts="header"]
+|===
+| relationshipsWritten | containsNegativeCycle
+| 1 | true
+|===
+--
+After executing the above query, the in-memory graph will be updated with new relationships of type `ROUTE`.
+Since `containsNegativeCycle` is true, these relationships represent negative cycles.
+The new relationships will store a single property `totalCost`, corresponding to the weight of the negative cycle.
+
+Note that by default, when negative cycles are detected during mutate mode, they will not be written back to the in-memory graph.
+This can be bypassed by setting the `mutateNegativeCycles` to true as showcased in the above example.
+
+[NOTE]
+====
+The relationships produced are always directed, even if the input graph is undirected.
+====
