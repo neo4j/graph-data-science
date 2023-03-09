@@ -30,5 +30,6 @@ dependencies {
     testCompileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
     testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
+    testImplementation project(':graph-schema-api')
     testImplementation project(':test-utils')
 }

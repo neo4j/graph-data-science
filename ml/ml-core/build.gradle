@@ -36,6 +36,7 @@ dependencies {
     testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     testImplementation project(':test-utils')
+    testImplementation project(':graph-schema-api')
     testImplementation project(':ml-test-utils')
 
     testImplementation group: 'net.jqwik', name: 'jqwik', version: ver.'jqwik'

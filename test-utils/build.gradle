@@ -47,6 +47,7 @@ dependencies {
     }
 
     testImplementation project(':edition-api')
+    testImplementation project(':graph-schema-api')
 
     testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 }
