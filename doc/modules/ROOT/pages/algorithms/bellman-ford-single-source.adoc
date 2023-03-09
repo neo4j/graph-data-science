@@ -185,6 +185,7 @@ This is signaled by the `isNegativeCycle` output field which is set to true.
 
 [[algorithms-bellman-single-source-examples-stats]]
 === Stats
+
 :stats-syntax: algorithms-bellman-single-source-syntax
 include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
@@ -245,7 +246,7 @@ After executing the above query, the in-memory graph will be updated with new re
 Since `containsNegativeCycle` is false, these relationships represent shortest paths.
 The new relationships will store a single property `totalCost`, corresponding to the shortest path cost from source to target.
 
-==== Mutate without negative cycles
+==== Mutate with negative cycles
 
 [role=query-example]
 --
@@ -275,9 +276,87 @@ Since `containsNegativeCycle` is true, these relationships represent negative cy
 The new relationships will store a single property `totalCost`, corresponding to the weight of the negative cycle.
 
 Note that by default, when negative cycles are detected during mutate mode, they will not be written back to the in-memory graph.
+
 This can be bypassed by setting the `mutateNegativeCycles` to true as showcased in the above example.
 
 [NOTE]
 ====
 The relationships produced are always directed, even if the input graph is undirected.
 ====
+
+[[algorithms-bellman-single-source-examples-write]]
+=== Write
+
+include::partial$/algorithms/shortest-path/path-examples-write-intro.adoc[]
+
+==== Write without negative cycles
+
+[role=query-example]
+--
+.The following will run Bellman-Ford on a component without negative cycles in `write` mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Location {name: 'A'})
+CALL gds.bellmanFord.write('myGraph', {
+    sourceNode: source,
+    relationshipWeightProperty: 'cost',
+    writeRelationshipType: 'ROUTE',
+    writeNodeIds: true,
+    writeCosts: true
+})
+YIELD relationshipsWritten, containsNegativeCycle
+RETURN relationshipsWritten, containsNegativeCycle
+----
+
+.Results
+[opts="header"]
+|===
+| relationshipsWritten |containsNegativeCycle
+| 6 | false
+|===
+--
+
+The above query will write 6 relationships of type `ROUTE` back to Neo4j.
+The relationships store three properties describing the path: `totalCost`, `nodeIds` and `costs`.
+
+
+==== Write with negative cycles
+
+[role=query-example]
+--
+.The following will run Bellman-Ford on a component with negative cycles in `write` mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Location {name: 'G'})
+CALL gds.bellmanFord.write('myGraph', {
+    sourceNode: source,
+    relationshipWeightProperty: 'cost',
+    writeRelationshipType: 'ROUTE',
+    writeNodeIds: true,
+    writeCosts: true,
+    writeNegativeCycles:true
+})
+YIELD relationshipsWritten, containsNegativeCycle
+RETURN relationshipsWritten, containsNegativeCycle
+----
+
+.Results
+[opts="header"]
+|===
+| relationshipsWritten | containsNegativeCycle
+| 1 | true
+|===
+--
+
+After executing the above query,  one relationship of type  `ROUTE` is written back to the Neo4j graph.
+Since `containsNegativeCycle` is true, these relationships represent negative cycles.
+The new relationships will store a single property `totalCost`, corresponding to the weight of the negative cycle.
+
+Like mutate mode, the default behavior when encountering negative cycles is to not write them back in tne Neo4j database.
+ We can set `writeNegativeCycles` to true as in the example to override this setting.
+
+[NOTE]
+====
+The relationships written are always directed, even if the input graph is undirected.
+====
+
