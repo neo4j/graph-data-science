@@ -24,7 +24,6 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 /**
  * The Abstract Factory defines the construction of the graph
@@ -46,7 +45,6 @@ public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends
     protected final Capabilities capabilities;
     protected final GraphLoaderContext loadingContext;
     protected final GraphDimensions dimensions;
-    protected final ProgressTracker progressTracker;
 
     public GraphStoreFactory(
         CONFIG graphProjectConfig,
@@ -58,7 +56,6 @@ public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends
         this.capabilities = capabilities;
         this.loadingContext = loadingContext;
         this.dimensions = dimensions;
-        this.progressTracker = initProgressTracker();
     }
 
     public abstract STORE build();
@@ -78,8 +75,6 @@ public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends
     public CONFIG graphProjectConfig() {
         return graphProjectConfig;
     }
-
-    protected abstract ProgressTracker initProgressTracker();
 
     @ValueClass
     public interface ImportResult<STORE extends GraphStore> {
