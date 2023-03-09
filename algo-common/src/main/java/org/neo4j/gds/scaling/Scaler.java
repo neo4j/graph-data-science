@@ -41,7 +41,7 @@ public interface Scaler {
         private final List<ScalarScaler> elementScalers;
         private final ProgressTracker progressTracker;
 
-        ArrayScaler(List<ScalarScaler> elementScalers, ProgressTracker progressTracker) {
+        public ArrayScaler(List<ScalarScaler> elementScalers, ProgressTracker progressTracker) {
             this.elementScalers = elementScalers;
             this.progressTracker = progressTracker;
         }

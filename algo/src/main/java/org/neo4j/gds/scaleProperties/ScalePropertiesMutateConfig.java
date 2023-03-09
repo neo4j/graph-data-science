@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.scaling;
+package org.neo4j.gds.scaleProperties;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.MutatePropertyConfig;
@@ -25,7 +25,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-interface ScalePropertiesMutateConfig extends ScalePropertiesBaseConfig, MutatePropertyConfig {
+public interface ScalePropertiesMutateConfig extends ScalePropertiesBaseConfig, MutatePropertyConfig {
 
     static ScalePropertiesMutateConfig of(CypherMapWrapper userInput) {
         return new ScalePropertiesMutateConfigImpl(userInput);

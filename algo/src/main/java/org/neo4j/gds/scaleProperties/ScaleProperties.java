@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.scaling;
+package org.neo4j.gds.scaleProperties;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
@@ -28,6 +28,8 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.scaling.ScalarScaler;
+import org.neo4j.gds.scaling.Scaler;
 
 import java.util.List;
 import java.util.Map;
@@ -148,7 +150,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
     }
 
     @ValueClass
-    interface Result {
+    public interface Result {
         HugeObjectArray<double[]> scaledProperties();
 
         Map<String, Map<String, List<Double>>> scalerStatistics();

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.scaling;
+package org.neo4j.gds.scaleProperties;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.scaling.ScalerFactory;
 
 import java.util.List;
 import java.util.Map;
