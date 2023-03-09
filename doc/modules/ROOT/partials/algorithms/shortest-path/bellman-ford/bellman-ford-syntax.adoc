@@ -84,7 +84,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
 | sourceNode        | Integer | n/a     | no       | The Neo4j source node or node id.
-| mutateNegativeCycles | Boolean | false | yes      | If set to true, any discovered negative cycles are added in the in-memory graph.
+| mutateNegativeCycles | Boolean | false | yes      | If set to true, any discovered negative cycles will be added in the in-memory graph. Otherwise they will be skipped.
 |===
 
 .Results
@@ -135,7 +135,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 | sourceNode        | Integer | n/a     | no       | The Neo4j source node or node id.
-| writeNegativeCycles | Boolean | false | yes      | If set to true, any discovered negative cycles are written back to  the Neo4j graph.
+| writeNegativeCycles | Boolean | false | yes      | If set to true, any discovered negative cycles will be written back to  the Neo4j graph. Otherwise they will be skipped.
 |===
 
 .Results
