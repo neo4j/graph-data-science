@@ -84,7 +84,7 @@ public final class AdjacencyCompression {
     }
 
     // TODO: requires lots of additional memory ... inline indirect sort to make reuse of - to be created - buffers
-    static int applyDeltaEncoding(
+    public static int applyDeltaEncoding(
         long[] data,
         int length,
         long[][] weights,
