@@ -26,6 +26,8 @@ dependencies {
 
     compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
+    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
+
     testImplementation project(':cypher-aggregation')
     testImplementation project(':proc')
     testImplementation project(':pregel-example')

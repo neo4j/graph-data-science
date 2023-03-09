@@ -22,6 +22,8 @@ dependencies {
         }
     }
 
+    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
+
     implementation project(':annotations')
     implementation project(':core') // TODO move core.concurrency out of core to not depend on whole core
     implementation project(':core-utils')

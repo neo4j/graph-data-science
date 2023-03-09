@@ -15,7 +15,8 @@ dependencies {
     annotationProcessor group: 'org.neo4j',      name: 'annotations',        version: neos.'4.4'
 
     compileOnly project(':annotations')
+    compileOnly project(':progress-tracking')
     compileOnly         group: 'org.immutables', name: 'value-annotations',  version: ver.'immutables'
     compileOnly         group: 'org.neo4j',      name: 'neo4j',              version: neos.'4.4'
-    compileOnly project(':progress-tracking')
+    compileOnly         group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 }

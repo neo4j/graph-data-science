@@ -11,7 +11,8 @@ dependencies {
     annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
     annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
 
-    compileOnly         group: 'com.google.auto.service',  name: 'auto-service',       version: ver.'auto-service'
+    compileOnly         group: 'com.google.auto.service',  name: 'auto-service',         version: ver.'auto-service'
+    compileOnly         group: 'com.github.spotbugs',      name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     implementation project(':annotations')
     implementation project(':algo-common')
@@ -31,6 +32,8 @@ dependencies {
     implementation             group: 'com.google.auto',          name: 'auto-common',          version: ver.'auto-common'
     implementation             group: 'com.squareup',             name: 'javapoet',             version: ver.'javapoet'
     implementation             group: 'org.jetbrains',            name: 'annotations',          version: ver.'jetbrains-annotations'
+
+    testCompileOnly  group: 'com.google.auto.service',  name: 'auto-service',         version: ver.'auto-service'
 
     testImplementation platform(dep.junit5bom)
     testImplementation project(':core-test-utils')

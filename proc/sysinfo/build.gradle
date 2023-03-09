@@ -26,6 +26,8 @@ dependencies {
     implementation project(':licensing')
     implementation project(':proc-common')
 
+    testCompileOnly project(':annotations')
+
     testImplementation project(':edition-api')
     testImplementation project(':test-utils')
     testImplementation project(':test-graph-loaders')

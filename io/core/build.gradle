@@ -38,5 +38,7 @@ dependencies {
         }
     }
 
+    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
+
     testImplementation project(':test-utils')
 }

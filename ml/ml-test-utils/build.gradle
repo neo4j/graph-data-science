@@ -5,6 +5,8 @@ description = 'Neo4j Graph Data Science :: Machine Learning Test Utilities'
 group = 'org.neo4j.gds'
 
 dependencies {
+    compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
+
     implementation project(':core')
     implementation project(':ml-core')
     implementation project(':ml-algo')

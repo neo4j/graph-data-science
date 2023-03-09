@@ -10,7 +10,9 @@ dependencies {
     annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
     compileOnly project(':annotations')
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
+    compileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
     implementation group: 'org.reflections', name: 'reflections',  version: ver.doc.'reflections'
 
     implementation project(':algo-common')
@@ -31,6 +33,10 @@ dependencies {
     api project(':proc-catalog')
     api project(':proc-common')
     api project(':test-utils')
+
+    testCompileOnly project(':annotations')
+    testCompileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
+    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 }
 
 afterEvaluate {

@@ -32,6 +32,7 @@ dependencies {
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     implementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
 
@@ -59,6 +60,11 @@ dependencies {
 
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+
+    testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
+    testCompileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
+    testCompileOnly group: 'org.jetbrains',  name: 'annotations', version: ver.'jetbrains-annotations'
+    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     testImplementation project(':open-model-catalog')
     testImplementation project(':test-utils')
