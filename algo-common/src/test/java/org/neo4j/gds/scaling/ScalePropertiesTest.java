@@ -22,6 +22,7 @@ package org.neo4j.gds.scaling;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.beta.generator.PropertyProducer;
@@ -30,6 +31,7 @@ import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -46,6 +48,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
 
@@ -166,9 +169,15 @@ class ScalePropertiesTest {
         var longArrayBConfig = baseConfigBuilder.nodeProperties(List.of("longArrayB")).build();
         var doubleArrayBConfig = baseConfigBuilder.nodeProperties(List.of("floatArrayB")).build();
 
-        var expected = new ScaleProperties(graph, bConfig, ProgressTracker.NULL_TRACKER, Pools.DEFAULT).compute().scaledProperties();
-        var actualLong = new ScaleProperties(graph, longArrayBConfig, ProgressTracker.NULL_TRACKER, Pools.DEFAULT).compute().scaledProperties();
-        var actualDouble = new ScaleProperties(graph, doubleArrayBConfig, ProgressTracker.NULL_TRACKER, Pools.DEFAULT).compute().scaledProperties();
+        var expected = new ScaleProperties(graph, bConfig, ProgressTracker.NULL_TRACKER, Pools.DEFAULT)
+            .compute()
+            .scaledProperties();
+        var actualLong = new ScaleProperties(graph, longArrayBConfig, ProgressTracker.NULL_TRACKER, Pools.DEFAULT)
+            .compute()
+            .scaledProperties();
+        var actualDouble = new ScaleProperties(graph, doubleArrayBConfig, ProgressTracker.NULL_TRACKER, Pools.DEFAULT)
+            .compute()
+            .scaledProperties();
 
         LongStream.range(0, graph.nodeCount()).forEach(id -> assertArrayEquals(expected.get(id), actualLong.get(id)));
         LongStream.range(0, graph.nodeCount()).forEach(id -> assertArrayEquals(expected.get(id), actualDouble.get(id)));
@@ -176,11 +185,15 @@ class ScalePropertiesTest {
 
     @Test
     void supportDoubleArrays() {
-        var baseConfigBuilder = ScalePropertiesStreamConfigImpl.builder().scaler(MinMax.buildFrom(CypherMapWrapper.empty()));
+        var baseConfigBuilder = ScalePropertiesStreamConfigImpl
+            .builder()
+            .scaler(MinMax.buildFrom(CypherMapWrapper.empty()));
         var config = baseConfigBuilder.nodeProperties(List.of("doubleArray")).build();
 
         var expected = new double[][]{new double[]{0.0}, new double[]{0.2499999722444236}, new double[]{.5}, new double[]{0.7500000277555764}, new double[]{1.0}};
-        var actual = new ScaleProperties(graph, config, ProgressTracker.NULL_TRACKER, Pools.DEFAULT).compute().scaledProperties();
+        var actual = new ScaleProperties(graph, config, ProgressTracker.NULL_TRACKER, Pools.DEFAULT)
+            .compute()
+            .scaledProperties();
 
         IntStream.range(0, (int) graph.nodeCount()).forEach(id -> assertArrayEquals(expected[id], actual.get(id)));
     }
@@ -284,5 +297,30 @@ class ScalePropertiesTest {
                 "ScaleProperties :: Scale properties :: Finished",
                 "ScaleProperties :: Finished"
             );
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        // BASE
+        "   1_000, 1_044_064",
+
+        // Should increase linearly with node count
+        "   2_000, 2_088_064"
+    })
+    void shouldEstimateMemory(
+        long nodeCount,
+        long expectedMemory
+    ) {
+        var config = ScalePropertiesStreamConfigImpl.builder()
+            .nodeProperties(List.of("DUMMY"))
+            .scaler("MEAN")
+            .build();
+
+        assertMemoryEstimation(
+            () -> new ScalePropertiesFactory<>().memoryEstimation(config),
+            nodeCount,
+            1,
+            MemoryRange.of(expectedMemory)
+        );
     }
 }

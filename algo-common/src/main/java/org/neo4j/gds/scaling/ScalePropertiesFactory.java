@@ -23,10 +23,12 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.gds.mem.MemoryUsage;
 
 public final class ScalePropertiesFactory<CONFIG extends ScalePropertiesBaseConfig> extends GraphAlgorithmFactory<ScaleProperties, CONFIG> {
 
@@ -70,6 +72,15 @@ public final class ScalePropertiesFactory<CONFIG extends ScalePropertiesBaseConf
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        throw new MemoryEstimationNotImplementedException();
+        int FUDGED_OUTPUT_DIMENSION = 128;
+
+        MemoryEstimations.Builder builder = MemoryEstimations.builder("Scale properties");
+
+        builder.perNode(
+            "Scaled properties",
+            n -> HugeObjectArray.memoryEstimation(n, MemoryUsage.sizeOfDoubleArray(FUDGED_OUTPUT_DIMENSION))
+        );
+
+        return builder.build();
     }
 }
