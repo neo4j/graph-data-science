@@ -55,6 +55,8 @@ import static org.neo4j.gds.Orientation.UNDIRECTED;
 
 // Does the actual importing work once we can initialize it with the first row
 public final class GraphImporter {
+    public static final int NO_TARGET_NODE = -1;
+
     private final String graphName;
     private final GraphProjectFromCypherAggregationConfig config;
     private final LazyIdMapBuilder idMapBuilder;
@@ -123,7 +125,7 @@ public final class GraphImporter {
 
         var intermediateSourceId = loadNode(sourceNode, sourceNodeLabels, sourceNodePropertyValues);
 
-        if (targetNode != -1) {
+        if (targetNode != NO_TARGET_NODE) {
             RelationshipsBuilder relImporter;
             // we do the check before to avoid having to create a new lambda instance on every call
             if (this.relImporters.containsKey(relationshipType)) {

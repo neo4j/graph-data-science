@@ -46,6 +46,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static org.neo4j.gds.projection.GraphImporter.NO_TARGET_NODE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 // public is required for the Cypher runtime
@@ -153,7 +154,7 @@ public class GraphAggregator implements CompatUserAggregator {
 
         data.update(
             extractNodeId(sourceNode),
-            targetNode == NoValue.NO_VALUE ? -1 : extractNodeId(targetNode),
+            targetNode == NoValue.NO_VALUE ? NO_TARGET_NODE : extractNodeId(targetNode),
             sourceNodePropertyValues,
             targetNodePropertyValues,
             sourceNodeLabels,
