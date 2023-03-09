@@ -25,11 +25,10 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -155,8 +154,6 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
     ) {
 
         AtomicLong cycleIndex = new AtomicLong();
-        var predecessors = tentativeDistances.predecessors().orElseThrow();
-        var distances = tentativeDistances.distances();
 
         var partitions = PartitionUtils.rangePartition(
             concurrency,
@@ -173,13 +170,12 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
 
                 return LongStream
                     .range(partition.startNode(), partition.startNode() + partition.nodeCount())
-                    .filter(target -> predecessors.get(target) != NO_PREDECESSOR)
+                    .filter(target -> tentativeDistances.predecessor(target) != NO_PREDECESSOR)
                     .mapToObj(indexId -> negativeCycleResult(
                         pathResultBuilder,
                         cycleIndex,
                         negativeCycleVertices.get(indexId),
-                        distances,
-                        predecessors,
+                        tentativeDistances,
                         graph.concurrentCopy(),
                         nodeCount
 
@@ -195,14 +191,12 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         long sourceNode,
         int concurrency
     ) {
-        var distances = tentativeDistances.distances();
-        var predecessors = tentativeDistances.predecessors().orElseThrow();
 
         var pathIndex = new AtomicLong(0L);
 
         var partitions = PartitionUtils.rangePartition(
             concurrency,
-            predecessors.size(),
+            tentativeDistances.size(),
             partition -> partition,
             Optional.empty()
         );
@@ -216,14 +210,13 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
 
                 return LongStream
                     .range(partition.startNode(), partition.startNode() + partition.nodeCount())
-                    .filter(target -> predecessors.get(target) != NO_PREDECESSOR)
+                    .filter(target -> tentativeDistances.predecessor(target) != NO_PREDECESSOR)
                     .mapToObj(targetNode -> pathResult(
                         pathResultBuilder,
                         localPathIndex.getAndIncrement(),
                         sourceNode,
                         targetNode,
-                        distances,
-                        predecessors
+                        tentativeDistances
                     ));
             })
         );
@@ -236,8 +229,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         long pathIndex,
         long sourceNode,
         long targetNode,
-        HugeAtomicDoubleArray distances,
-        HugeAtomicLongArray predecessors
+        DistanceTracker tentativeDistances
     ) {
         // TODO: use LongArrayList and then ArrayUtils.reverse
         var pathNodeIds = new LongArrayDeque();
@@ -248,14 +240,14 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
 
         while (true) {
             pathNodeIds.addFirst(lastNode);
-            costs.addFirst(distances.get(lastNode));
+            costs.addFirst(tentativeDistances.distance(lastNode));
 
             // Break if we reach the end by hitting the source node.
             if (lastNode == sourceNode) {
                 break;
             }
 
-            lastNode = predecessors.get(lastNode);
+            lastNode = tentativeDistances.predecessor(lastNode);
         }
 
         return pathResultBuilder
@@ -271,66 +263,89 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         ImmutablePathResult.Builder pathResultBuilder,
         AtomicLong cycleIndex,
         long startNode,
-        HugeAtomicDoubleArray distances,
-        HugeAtomicLongArray predecessors,
-        Graph localGraph,
+        DistanceTracker tentativeDistances,
+        RelationshipIterator localGraph,
         long nodeCount
     ) {
         var pathNodeIds = new LongArrayDeque();
-        double totalCost = 0;
-        long nodeId = startNode;// we have a vertex within a cycle
-        pathNodeIds.addFirst(nodeId);
-        long curr = predecessors.get(nodeId);
+        pathNodeIds.addFirst(startNode);
+        long currentNode = tentativeDistances.predecessor(startNode);
         long length = 0;
         boolean shouldAdd = true;
-        while (curr != nodeId) {
-            pathNodeIds.addFirst(curr);
-            long predecessor = predecessors.get(curr);
+        while (currentNode != startNode) {
+            pathNodeIds.addFirst(currentNode);
+            long predecessor = tentativeDistances.predecessor(currentNode);
             length++;
-            totalCost += distances.get(curr) - distances.get(predecessor); //this is not correct
-            curr = predecessors.get(curr);
+            currentNode = predecessor;
 
             if (length == nodeCount + 1) {
                 shouldAdd = false;
                 break;
             }
         }
-        if (shouldAdd) {
 
-            pathNodeIds.addFirst(startNode);
-            var pathArray = pathNodeIds.toArray();
-            int pathLength = pathArray.length;
-            var costs = new double[pathLength];
-
-            long endNode = pathArray[1];
-            MutableDouble minimum = new MutableDouble(Double.MAX_VALUE);
-            localGraph.forEachRelationship(startNode, 1.0, (s, t, w) -> {
-                if (t == endNode) {
-                    if (minimum.doubleValue() > w) {
-                        minimum.setValue(w);
-                    }
-                }
-                return true;
-            });
-            costs[1] = minimum.doubleValue();
-            for (int j = 2; j < pathLength; ++j) {
-                long node = pathArray[j];
-                long previous = pathArray[j - 1];
-                double currentDist = distances.get(node) - distances.get(previous);
-                costs[j] = costs[j - 1] + currentDist;
-            }
-
-            return pathResultBuilder.
-                index(cycleIndex.getAndIncrement())
-                .sourceNode(startNode)
-                .targetNode(startNode)
-                .nodeIds(pathArray)
-                .relationshipIds(EMPTY_ARRAY)
-                .costs(costs).build();
+        if(!shouldAdd) {
+            return PathResult.EMPTY;
         }
 
-        return PathResult.EMPTY;
+        return createNegativeCycleResult(
+            localGraph,
+            startNode,
+            pathResultBuilder,
+            pathNodeIds,
+            tentativeDistances,
+            cycleIndex
+        );
+    }
 
+    private static PathResult createNegativeCycleResult(
+        RelationshipIterator localGraph,
+        long startNodeId,
+        ImmutablePathResult.Builder pathResultBuilder,
+        LongArrayDeque pathNodeIds,
+        DistanceTracker tentativeDistances,
+        AtomicLong cycleIndex
+    ) {
+        pathNodeIds.addFirst(startNodeId);
+        var pathArray = pathNodeIds.toArray();
+        var pathLength = pathArray.length;
+        var costs = new double[pathLength];
+
+        var endNodeId = pathArray[1];
+        costs[1] = findMinimumCostBetweenNodes(localGraph, startNodeId, endNodeId);
+
+        for (int j = 2; j < pathLength; ++j) {
+            long node = pathArray[j];
+            long previous = pathArray[j - 1];
+            double currentDist = tentativeDistances.distance(node) - tentativeDistances.distance(previous);
+            costs[j] = costs[j - 1] + currentDist;
+        }
+
+        return pathResultBuilder.
+            index(cycleIndex.getAndIncrement())
+            .sourceNode(startNodeId)
+            .targetNode(startNodeId)
+            .nodeIds(pathArray)
+            .relationshipIds(EMPTY_ARRAY)
+            .costs(costs)
+            .build();
+    }
+
+    private static double findMinimumCostBetweenNodes(
+        RelationshipIterator localGraph,
+        long startNode,
+        long endNodeId
+    ) {
+        var minimumCost = new MutableDouble(Double.MAX_VALUE);
+        localGraph.forEachRelationship(startNode, 1.0, (sourceNodeId, targetNodeId, cost) -> {
+            if (targetNodeId == endNodeId) {
+                if (minimumCost.doubleValue() > cost) {
+                    minimumCost.setValue(cost);
+                }
+            }
+            return true;
+        });
+        return minimumCost.doubleValue();
     }
 
 }

@@ -24,8 +24,6 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.LongPageCreator;
 
-import java.util.Optional;
-
 final class DistanceTracker {
 
     private static final double DIST_INF = Double.MAX_VALUE;
@@ -49,7 +47,7 @@ final class DistanceTracker {
             LongPageCreator.of(concurrency, index -> NO_LENGTH)
         );
 
-        return new DistanceTracker(predecessors, distances, lengths);
+        return new DistanceTracker(predecessors, distances, lengths, size);
     }
 
     private final HugeAtomicLongArray predecessors;
@@ -57,15 +55,18 @@ final class DistanceTracker {
     private final HugeAtomicDoubleArray distances;
 
     private final HugeAtomicLongArray lengths;
+    private final long size;
 
     private DistanceTracker(
         HugeAtomicLongArray predecessors,
         HugeAtomicDoubleArray distances,
-        HugeAtomicLongArray lengths
+        HugeAtomicLongArray lengths,
+        long size
     ) {
         this.predecessors = predecessors;
         this.distances = distances;
         this.lengths = lengths;
+        this.size = size;
     }
 
     public double distance(long nodeId) {
@@ -82,8 +83,8 @@ final class DistanceTracker {
         return distances;
     }
 
-    Optional<HugeAtomicLongArray> predecessors() {
-        return Optional.of(predecessors);
+    long size() {
+        return size;
     }
 
     public void set(long nodeId, long predecessor, double distance, long length) {
