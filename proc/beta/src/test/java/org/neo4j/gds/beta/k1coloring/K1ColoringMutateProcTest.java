@@ -20,27 +20,52 @@
 package org.neo4j.gds.beta.k1coloring;
 
 import org.intellij.lang.annotations.Language;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.graphdb.GraphDatabaseService;
 
-import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest<K1ColoringMutateConfig>
+public class K1ColoringMutateProcTest extends BaseProcTest
     implements MutateNodePropertyTest<K1Coloring, K1ColoringMutateConfig, HugeLongArray> {
 
+    private static final String K1COLORING_GRAPH = "myGraph";
+
+    @Neo4jGraph
+    public static final String DB_CYPHER =
+        "CREATE" +
+        " (a)" +
+        ",(b)" +
+        ",(c)" +
+        ",(d)" +
+        ",(a)-[:REL]->(b)" +
+        ",(a)-[:REL]->(c)";
+
     @BeforeEach
-    void addGraphWriteNodePropertiesProc() throws Exception {
-        registerProcedures(GraphWriteNodePropertiesProc.class);
+    void setup() throws Exception {
+        registerProcedures(
+            K1ColoringMutateProc.class,
+            GraphWriteNodePropertiesProc.class,
+            GraphProjectProc.class
+        );
+        loadGraph(K1COLORING_GRAPH);
     }
 
     @Override
@@ -69,14 +94,14 @@ public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest<K1ColoringM
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<K1Coloring, HugeLongArray, K1ColoringMutateConfig, ?>> getProcedureClazz() {
+    public Class<K1ColoringMutateProc> getProcedureClazz() {
         return K1ColoringMutateProc.class;
     }
 
     @Test
     void testMutateYields() {
         @Language("Cypher")
-        String query = algoBuildStage()
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
             .yields();
@@ -95,16 +120,36 @@ public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest<K1ColoringM
     @Test
     void testMutateEstimate() {
         @Language("Cypher")
-        String query = algoBuildStage()
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
             .mutateEstimation()
             .addParameter("mutateProperty", "color")
             .yields("nodeCount", "bytesMin", "bytesMax", "requiredMemory");
 
-        assertCypherResult(query, Arrays.asList(MapUtil.map(
+        assertCypherResult(query, List.of(Map.of(
             "nodeCount", 4L,
             "bytesMin", 552L,
             "bytesMax", 552L,
             "requiredMemory", "552 Bytes"
         )));
+    }
+
+    @Test
+    @Disabled("Mutate on empty graph has not been covered in AlgoBaseProcTest 🙈")
+    public void testRunOnEmptyGraph() {
+    }
+
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
+    @Override
+    public GraphDatabaseService graphDb() {
+        return db;
+    }
+
+    @Override
+    public void assertResultEquals(HugeLongArray result1, HugeLongArray result2) {
+        assertThat(result1.toArray()).containsExactly(result2.toArray());
     }
 }

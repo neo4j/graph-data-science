@@ -56,10 +56,7 @@ public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<RESULT>, CON
 
     @Override
     default CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("mutateProperty")) {
-            mapWrapper = mapWrapper.withString("mutateProperty", mutateProperty());
-        }
-        return mapWrapper;
+        return mapWrapper.withEntryIfMissing("mutateProperty", mutateProperty());
     }
 
     @Override

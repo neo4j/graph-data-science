@@ -20,29 +20,59 @@
 package org.neo4j.gds.beta.k1coloring;
 
 import org.intellij.lang.annotations.Language;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.MemoryEstimateTest;
+import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class K1ColoringStreamProcTest extends K1ColoringProcBaseTest<K1ColoringStreamConfig> {
+class K1ColoringStreamProcTest extends BaseProcTest implements
+    MemoryEstimateTest<K1Coloring, K1ColoringStreamConfig, HugeLongArray> {
+
+    private static final String K1COLORING_GRAPH = "myGraph";
+
+    @Neo4jGraph
+    public static final String DB_CYPHER =
+        "CREATE" +
+        " (a)" +
+        ",(b)" +
+        ",(c)" +
+        ",(d)" +
+        ",(a)-[:REL]->(b)" +
+        ",(a)-[:REL]->(c)";
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            K1ColoringStreamProc.class,
+            GraphProjectProc.class
+        );
+        loadGraph(K1COLORING_GRAPH);
+    }
 
     @Override
-    public Class<? extends AlgoBaseProc<K1Coloring, HugeLongArray, K1ColoringStreamConfig, ?>> getProcedureClazz() {
+    public Class<K1ColoringStreamProc> getProcedureClazz() {
         return K1ColoringStreamProc.class;
     }
 
@@ -54,7 +84,7 @@ class K1ColoringStreamProcTest extends K1ColoringProcBaseTest<K1ColoringStreamCo
     @Test
     void testStreamingImplicit() {
         @Language("Cypher")
-        String yields = algoBuildStage()
+        String yields = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
             .streamMode()
             .yields("nodeId", "color");
 
@@ -72,7 +102,7 @@ class K1ColoringStreamProcTest extends K1ColoringProcBaseTest<K1ColoringStreamCo
     @Test
     void testStreamingEstimate() {
         @Language("Cypher")
-        String query = algoBuildStage()
+        String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
             .estimationMode(GdsCypher.ExecutionModes.STREAM)
             .yields("requiredMemory", "treeView", "bytesMin", "bytesMax");
 
@@ -106,7 +136,7 @@ class K1ColoringStreamProcTest extends K1ColoringProcBaseTest<K1ColoringStreamCo
     @MethodSource("communitySizeInputs")
     void testStreamingMinCommunitySize(Map<String, Long> parameter, Map<Long, Long> expectedResult) {
         @Language("Cypher")
-        String yields = algoBuildStage()
+        String yields = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "beta", "k1coloring")
                 .streamMode()
                 .addAllParameters(parameter)
                 .yields("nodeId", "color");
@@ -119,5 +149,20 @@ class K1ColoringStreamProcTest extends K1ColoringProcBaseTest<K1ColoringStreamCo
         });
 
         assertEquals(coloringResult, expectedResult);
+    }
+
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
+    @Override
+    public GraphDatabaseService graphDb() {
+        return db;
+    }
+
+    @Override
+    public void assertResultEquals(HugeLongArray result1, HugeLongArray result2) {
+        assertThat(result1.toArray()).containsExactly(result2.toArray());
     }
 }
