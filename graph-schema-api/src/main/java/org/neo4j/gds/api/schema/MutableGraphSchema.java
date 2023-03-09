@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @ValueClass
-@SuppressWarnings("immutables:subtype")
+@SuppressWarnings({"immutables:subtype", "immutables:from"})
 public interface MutableGraphSchema extends GraphSchema {
     @Override
     MutableNodeSchema nodeSchema();
