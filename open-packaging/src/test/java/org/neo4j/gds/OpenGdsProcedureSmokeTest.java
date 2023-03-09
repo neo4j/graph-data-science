@@ -176,6 +176,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
         "gds.alpha.scaleProperties.mutate",
         "gds.alpha.scaleProperties.stream",
+        "gds.beta.scaleProperties.stats",
         "gds.beta.scaleProperties.write",
 
         "gds.alpha.sllpa.mutate",
