@@ -19,21 +19,14 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
-import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 public class CypherQueryEstimator {
 
@@ -73,25 +66,5 @@ public class CypherQueryEstimator {
         long estimatedRows();
 
         long propertyCount();
-
-        @Value.Derived
-        default Map<String, Integer> propertyTokens() {
-            return LongStream
-                .range(0, propertyCount())
-                .boxed()
-                .collect(Collectors.toMap(
-                    Object::toString,
-                    property -> NO_SUCH_PROPERTY_KEY
-                ));
-        }
-
-        @Value.Derived
-        default Collection<PropertyMapping> propertyMappings() {
-            return LongStream
-                .range(0, propertyCount())
-                .mapToObj(property -> PropertyMapping.of(Long.toString(property), DefaultValue.DEFAULT))
-                .collect(Collectors.toList());
-        }
-
     }
 }
