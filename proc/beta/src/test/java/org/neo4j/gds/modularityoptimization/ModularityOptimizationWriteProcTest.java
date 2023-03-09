@@ -29,6 +29,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.compat.MapUtil;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -183,16 +184,16 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest
 
     static Stream<Arguments> communitySizeInputs() {
         return Stream.of(
-                Arguments.of(Map.of("minCommunitySize", 1), new Long[] {3L, 4L}),
-                Arguments.of(Map.of("minCommunitySize", 3), new Long[] {4L}),
-                Arguments.of(Map.of("minCommunitySize", 1, "consecutiveIds", true), new Long[] {0L, 1L}),
-                Arguments.of(Map.of("minCommunitySize", 3, "consecutiveIds", true), new Long[] {0L})
+                Arguments.of(Map.of("minCommunitySize", 1), List.of(3L, 4L)),
+                Arguments.of(Map.of("minCommunitySize", 3), List.of(4L)),
+                Arguments.of(Map.of("minCommunitySize", 1, "consecutiveIds", true), List.of(0L, 1L)),
+                Arguments.of(Map.of("minCommunitySize", 3, "consecutiveIds", true), List.of(0L))
         );
     }
 
     @ParameterizedTest
     @MethodSource("communitySizeInputs")
-    void testWriteMinCommunitySize(Map<String, Object> parameters, Long[] expectedCommunityIds) {
+    void testWriteMinCommunitySize(Map<String, Object> parameters, List<Long> expectedCommunityIds) {
         Long totalCommunities = 2L;
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
                 .graphProject()
@@ -217,7 +218,7 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest
                 "MATCH (n) RETURN collect(DISTINCT n." + COMMUNITY + ") AS communities ",
                 row -> Assertions.assertThat(row.get("communities"))
                         .asList()
-                        .containsExactlyInAnyOrder(expectedCommunityIds)
+                        .containsExactlyInAnyOrderElementsOf(expectedCommunityIds)
         );
     }
 

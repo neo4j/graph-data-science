@@ -35,6 +35,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -240,14 +241,14 @@ class LeidenWriteProcTest extends BaseProcTest {
 
     static Stream<Arguments> communitySizeInputs() {
         return Stream.of(
-                Arguments.of(1, new Long[]{3L, 6L}),
-                Arguments.of(10, new Long[]{})
+                Arguments.of(1, List.of(3L, 6L)),
+                Arguments.of(10, List.of())
         );
     }
 
     @ParameterizedTest
     @MethodSource("communitySizeInputs")
-    void writeWithMinCommunitySize(int minCommunitySize, Long[] expectedCommunityIds) {
+    void writeWithMinCommunitySize(int minCommunitySize, List<Long> expectedCommunityIds) {
         var query = "CALL gds.beta.leiden.write('leiden', {" +
                 "   writeProperty: 'communityId'," +
                 "   minCommunitySize: " + minCommunitySize +
@@ -260,7 +261,7 @@ class LeidenWriteProcTest extends BaseProcTest {
                 row -> {
                     Assertions.assertThat(row.get("communityId"))
                             .asList()
-                            .containsExactlyInAnyOrder(expectedCommunityIds);
+                            .containsExactlyInAnyOrderElementsOf(expectedCommunityIds);
                 }
         );
     }

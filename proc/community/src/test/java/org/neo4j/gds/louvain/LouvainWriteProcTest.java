@@ -227,18 +227,18 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
     static Stream<Arguments> communitySizeInputs() {
         return Stream.of(
             // configuration | expectedCommunityCount | expectedCommunityIds
-            Arguments.of(Map.of("minCommunitySize", 1), 3L, new Long[]{11L, 13L, 14L}),
-            Arguments.of(Map.of("minCommunitySize", 3), 3L, new Long[]{14L, 13L}),
-            Arguments.of(Map.of("minCommunitySize", 1, "consecutiveIds", true), 3L, new Long[]{0L, 1L, 2L}),
-            Arguments.of(Map.of("minCommunitySize", 3, "consecutiveIds", true), 3L, new Long[]{0L, 1L}),
-            Arguments.of(Map.of("minCommunitySize", 1, "seedProperty", SEED_PROPERTY), 3L, new Long[]{1L, 2L, 42L}),
-            Arguments.of(Map.of("minCommunitySize", 3, "seedProperty", SEED_PROPERTY), 3L, new Long[]{2L, 42L})
+            Arguments.of(Map.of("minCommunitySize", 1), 3L, List.of(11L, 13L, 14L)),
+            Arguments.of(Map.of("minCommunitySize", 3), 3L, List.of(14L, 13L)),
+            Arguments.of(Map.of("minCommunitySize", 1, "consecutiveIds", true), 3L, List.of(0L, 1L, 2L)),
+            Arguments.of(Map.of("minCommunitySize", 3, "consecutiveIds", true), 3L, List.of(0L, 1L)),
+            Arguments.of(Map.of("minCommunitySize", 1, "seedProperty", SEED_PROPERTY), 3L, List.of(1L, 2L, 42L)),
+            Arguments.of(Map.of("minCommunitySize", 3, "seedProperty", SEED_PROPERTY), 3L, List.of(2L, 42L))
         );
     }
 
     @ParameterizedTest
     @MethodSource("communitySizeInputs")
-    void testWriteWithMinCommunitySize(Map<String, Object> parameters, long expectedCommunityCount, Long[] expectedCommunityIds) {
+    void testWriteWithMinCommunitySize(Map<String, Object> parameters, long expectedCommunityCount, List<Long> expectedCommunityIds) {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .graphProject()
             .withAnyLabel()
@@ -266,7 +266,7 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
             row -> {
                 assertThat(row.get("communities"))
                     .asList()
-                    .containsExactlyInAnyOrder(expectedCommunityIds);
+                    .containsExactlyInAnyOrderElementsOf(expectedCommunityIds);
             }
         );
     }
