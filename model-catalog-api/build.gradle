@@ -6,7 +6,6 @@ group = 'org.neo4j.gds'
 
 dependencies {
     annotationProcessor project(':annotations')
-    annotationProcessor project(':config-generator')
     annotationProcessor group: 'org.immutables', name: 'value',         version: ver.'immutables'
     annotationProcessor group: 'org.neo4j',      name: 'annotations',   version: ver.neo4j
 
@@ -24,7 +23,9 @@ dependencies {
     implementation project(':licensing')
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: ver.'commons-lang3'
 
+
     testAnnotationProcessor project(':annotations')
+    testAnnotationProcessor project(':config-generator')
     testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
 
     testImplementation project(':test-utils')

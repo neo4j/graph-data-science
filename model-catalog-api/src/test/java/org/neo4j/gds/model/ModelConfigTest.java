@@ -22,6 +22,7 @@ package org.neo4j.gds.model;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Map;
@@ -34,14 +35,14 @@ class ModelConfigTest {
     @ParameterizedTest
     @ValueSource(strings = {"graph$", "+graph", "_?+", "my graph"})
     void validNames(String name) {
-        assertThat(new ModelConfigImpl("", CypherMapWrapper.create(Map.of("modelName", name))))
+        assertThat(new TestModelConfigImpl("", CypherMapWrapper.create(Map.of("modelName", name))))
             .matches(config -> config.modelName().equals(name));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {" ", "   graph", "graph ", " graph ", "\tgraph"})
     void failOnWhiteSpaces(String invalidName) {
-        assertThatThrownBy(() -> new ModelConfigImpl("", CypherMapWrapper.create(Map.of("modelName", invalidName))))
+        assertThatThrownBy(() -> new TestModelConfigImpl("", CypherMapWrapper.create(Map.of("modelName", invalidName))))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("modelName")
             .hasMessageContaining("must not end or begin with whitespace characters");
@@ -49,8 +50,11 @@ class ModelConfigTest {
 
     @Test
     void nullOnEmptyString() {
-        assertThatThrownBy(() -> new ModelConfigImpl("", CypherMapWrapper.create(Map.of("modelName", ""))))
+        assertThatThrownBy(() -> new TestModelConfigImpl("", CypherMapWrapper.create(Map.of("modelName", ""))))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("No value specified for the mandatory configuration parameter `modelName`");
     }
+
+    @Configuration
+    interface TestModelConfig extends ModelConfig {}
 }
