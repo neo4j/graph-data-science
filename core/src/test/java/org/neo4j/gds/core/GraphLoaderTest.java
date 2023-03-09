@@ -47,6 +47,8 @@ import org.neo4j.logging.NullLog;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -212,6 +214,7 @@ class GraphLoaderTest extends BaseTest {
 
     @Test
     void shouldLogProgressWithCypherLoading() {
+        var progressRegex = Pattern.compile("(\\d+)%$");
         var log = Neo4jProxy.testLog();
         new CypherLoaderBuilder()
             .databaseService(db)
@@ -234,7 +237,15 @@ class GraphLoaderTest extends BaseTest {
                 "Loading :: Relationships 100%",
                 "Loading :: Relationships :: Finished",
                 "Loading :: Finished"
-            );
+            )
+            .noneMatch(message -> {
+                Matcher matcher = progressRegex.matcher(message);
+                if (matcher.find()) {
+                    int progress = Integer.parseInt(matcher.group(1));
+                    return progress > 100;
+                }
+                return false;
+            });
 
         assertThat(log.getMessages(TestLog.DEBUG)).isEmpty();
     }
