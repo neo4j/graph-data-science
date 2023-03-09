@@ -26,8 +26,8 @@ import org.neo4j.gds.api.properties.Property;
 import org.neo4j.gds.api.schema.PropertySchema;
 
 @ValueClass
-public
-interface NodeProperty extends Property<NodePropertyValues> {
+@SuppressWarnings("immutables:from")
+public interface NodeProperty extends Property<NodePropertyValues> {
 
     static NodeProperty of(
         String key,

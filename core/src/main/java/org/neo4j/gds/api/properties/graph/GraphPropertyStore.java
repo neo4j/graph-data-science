@@ -25,6 +25,7 @@ import org.neo4j.gds.api.properties.PropertyStore;
 import java.util.Collections;
 
 @ValueClass
+@SuppressWarnings("immutables:from")
 public interface GraphPropertyStore extends PropertyStore<GraphPropertyValues, GraphProperty> {
 
     static GraphPropertyStore empty() {

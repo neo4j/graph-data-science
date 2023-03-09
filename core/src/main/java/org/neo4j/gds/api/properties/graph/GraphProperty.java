@@ -26,6 +26,7 @@ import org.neo4j.gds.api.properties.Property;
 import org.neo4j.gds.api.schema.PropertySchema;
 
 @ValueClass
+@SuppressWarnings("immutables:from")
 public interface GraphProperty extends Property<GraphPropertyValues> {
 
     static GraphProperty of(
