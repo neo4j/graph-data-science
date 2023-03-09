@@ -20,6 +20,7 @@ dependencies {
     implementation project(':proc-embeddings')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
+    implementation project(':transaction')
 
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
     compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
