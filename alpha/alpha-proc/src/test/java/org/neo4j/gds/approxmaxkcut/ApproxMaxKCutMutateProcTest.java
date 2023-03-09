@@ -123,12 +123,12 @@ class ApproxMaxKCutMutateProcTest extends BaseProcTest implements
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         return mapWrapper
-            .withNumberIfMissing("k", 2)
-            .withNumberIfMissing("iterations", 8)
-            .withNumberIfMissing("vnsMaxNeighborhoodOrder", 0)
-            .withNumberIfMissing("concurrency", 1)
-            .withNumberIfMissing("randomSeed", 1337L)
-            .withStringIfMissing("mutateProperty", this.mutateProperty());
+            .withEntryIfMissing("k", 2)
+            .withEntryIfMissing("iterations", 8)
+            .withEntryIfMissing("vnsMaxNeighborhoodOrder", 0)
+            .withEntryIfMissing("concurrency", 1)
+            .withEntryIfMissing("randomSeed", 1337L)
+            .withEntryIfMissing("mutateProperty", this.mutateProperty());
     }
 
     // We override this in order to be able to specify an algo config yielding a deterministic result.

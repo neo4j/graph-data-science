@@ -143,7 +143,7 @@ class Node2VecWriteProcTest extends BaseProcTest implements MemoryEstimateTest<N
     }
 
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper userInput) {
-        return userInput.withStringIfMissing("writeProperty", "embedding");
+        return userInput.withEntryIfMissing("writeProperty", "embedding");
     }
 
     @Override

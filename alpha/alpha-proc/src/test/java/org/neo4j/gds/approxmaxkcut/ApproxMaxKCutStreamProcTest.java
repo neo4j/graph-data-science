@@ -201,11 +201,11 @@ class ApproxMaxKCutStreamProcTest extends BaseProcTest implements MemoryEstimate
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         return mapWrapper
-            .withNumberIfMissing("k", 2)
-            .withNumberIfMissing("iterations", 8)
-            .withNumberIfMissing("vnsMaxNeighborhoodOrder", 0)
-            .withNumberIfMissing("concurrency", 1)
-            .withNumberIfMissing("randomSeed", 1337L);
+            .withEntryIfMissing("k", 2)
+            .withEntryIfMissing("iterations", 8)
+            .withEntryIfMissing("vnsMaxNeighborhoodOrder", 0)
+            .withEntryIfMissing("concurrency", 1)
+            .withEntryIfMissing("randomSeed", 1337L);
     }
 
     @Override
