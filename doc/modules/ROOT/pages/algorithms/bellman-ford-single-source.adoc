@@ -105,7 +105,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
 [role=query-example]
 --
-.The following will run the algorithm on a component without negative cycles and stream results:
+.The following will run Bellman-Ford on a component without negative cycles and stream results:
 [source, cypher, role=noplay]
 ----
 MATCH (source:Location {name: 'A'})
@@ -150,7 +150,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
 [role=query-example]
 --
-.The following will run the algorithm on a component with a negative cycle and stream results:
+.The following will run Bellman-Ford on a component with a negative cycle and stream results:
 [source, cypher, role=noplay]
 ----
 MATCH (source:Location {name: 'G'})
@@ -182,3 +182,32 @@ ORDER BY index
 
 As can be seen, Bellman-Ford could not yield the shortest paths as it located a negative cycle with -10 cost which it returns.
 This is signaled by the `isNegativeCycle` output field which is set to true.
+
+[[algorithms-bellman-single-source-examples-stats]]
+=== Stats
+:stats-syntax: algorithms-bellman-single-source-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run Bellman Ford on stats mode and return its statistics.
+[source,cypher,role=noplay]
+----
+MATCH (source:Location {name: 'A'})
+CALL gds.bellmanFord.stats('myGraph', {
+  sourceNode: source,
+  relationshipWeightProperty: 'cost'
+})
+YIELD  containsNegativeCycle
+RETURN containsNegativeCycle
+----
+.Results
+[opts="header"]
+|===
+| containsNegativeCycle
+| false
+|===
+--
+
+Running stats mode can be useful if we want to discover if the graph has any negative cycles, but we do not to have them computed or store them explicitly.
+For this example, we see that the `containsNegativeCycle` field is false.
