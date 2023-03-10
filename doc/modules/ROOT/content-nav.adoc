@@ -85,6 +85,7 @@
 *** xref:algorithms/random-walk.adoc[]
 *** xref:algorithms/bfs.adoc[]
 *** xref:algorithms/dfs.adoc[]
+*** xref:algorithms/bellman-ford-single-source.adoc[Bellman-Ford Single-Source Shortest Path]
 ** xref:machine-learning/node-embeddings/index.adoc[]
 *** xref:machine-learning/node-embeddings/fastrp.adoc[]
 *** xref:machine-learning/node-embeddings/graph-sage.adoc[]
