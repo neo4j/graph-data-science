@@ -27,8 +27,10 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.model.ModelConfig;
 
+import java.io.Serializable;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.ZoneId;
@@ -37,7 +39,7 @@ import java.util.List;
 import java.util.Optional;
 
 @ValueClass
-public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends ToMapConvertible> {
+public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends Model.CustomInfo> {
 
     private static ZonedDateTime now() {
         var zoneId = Config.EMPTY.get(GraphDatabaseSettings.db_temporal_timezone);
@@ -88,7 +90,7 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
         return sharedWith().contains(ALL_USERS);
     }
 
-    static <D, C extends ModelConfig & BaseConfig, INFO extends ToMapConvertible> Model<D, C, INFO> of(
+    static <D, C extends ModelConfig & BaseConfig, INFO extends CustomInfo> Model<D, C, INFO> of(
         String algoType,
         GraphSchema graphSchema,
         D modelData,
@@ -104,5 +106,9 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
             .trainConfig(trainConfig)
             .customInfo(customInfo)
             .build();
+    }
+
+    interface CustomInfo extends ToMapConvertible, Serializable{
+        Optional<TrainingMethod> optionalTrainerMethod();
     }
 }

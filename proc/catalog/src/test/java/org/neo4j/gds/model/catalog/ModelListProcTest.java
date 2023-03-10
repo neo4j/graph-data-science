@@ -26,12 +26,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.TestCustomInfo;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
@@ -58,14 +58,14 @@ class ModelListProcTest extends ModelProcBaseTest {
             GRAPH_SCHEMA,
             "testData",
             TestTrainConfig.of(getUsername(), "testModel1"),
-            Map::of
+            new TestCustomInfo()
         );
         var model2 = Model.of(
             "testAlgo2",
             GRAPH_SCHEMA,
             1337L,
             TestTrainConfig.of(getUsername(), "testModel2"),
-            Map::of
+            new TestCustomInfo()
         );
 
         var otherUserModel = Model.of(
@@ -73,7 +73,7 @@ class ModelListProcTest extends ModelProcBaseTest {
             GRAPH_SCHEMA,
             3435L,
             TestTrainConfig.of("anotheruser", "testModel"),
-            Map::of
+            new TestCustomInfo()
         );
 
         modelCatalog.set(model1);
@@ -129,7 +129,7 @@ class ModelListProcTest extends ModelProcBaseTest {
             GRAPH_SCHEMA,
             "testData",
             TestTrainConfig.of(getUsername(), "testModel1"),
-            Map::of
+            new TestCustomInfo()
         );
 
         var model2 = Model.of(
@@ -137,7 +137,7 @@ class ModelListProcTest extends ModelProcBaseTest {
             GRAPH_SCHEMA,
             1337L,
             TestTrainConfig.of(getUsername(), "testModel2"),
-            Map::of
+            new TestCustomInfo()
         );
         modelCatalog.set(model1);
         modelCatalog.set(model2);

@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.TestCustomInfo;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 
@@ -52,7 +53,7 @@ class ModelDropProcTest extends ModelProcBaseTest {
         String testModelType = "testAlgo";
 
         var trainConfig = TestTrainConfig.of(getUsername(), existingModel);
-        modelCatalog.set(Model.of(testModelType, GRAPH_SCHEMA, "testData", trainConfig, Map::of));
+        modelCatalog.set(Model.of(testModelType, GRAPH_SCHEMA, "testData", trainConfig, new TestCustomInfo()));
 
         var dropQuery = "CALL gds.beta.model.drop($modelName)";
         assertCypherResult(

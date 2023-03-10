@@ -29,6 +29,7 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
+import java.util.Objects;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -87,5 +88,18 @@ public class Weights<T extends Tensor<T>> extends AbstractVariable<T> {
             data.toString(),
             requireGradient()
         );
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Weights<?> weights = (Weights<?>) o;
+        return data.equals(weights.data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(data);
     }
 }

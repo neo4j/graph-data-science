@@ -19,30 +19,20 @@
  */
 package org.neo4j.gds.core.model;
 
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.model.Model.CustomInfo;
-import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.gds.ml.models.TrainingMethod;
 
-import java.time.ZonedDateTime;
-import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-@ValueClass
-public interface ModelMetaData<CONFIG extends ModelConfig, INFO extends CustomInfo> {
+public class TestCustomInfo implements Model.CustomInfo {
 
-    String creator();
+    @Override
+    public Map<String, Object> toMap() {
+        return Map.of();
+    }
 
-    List<String> sharedWith();
-
-    String name();
-
-    String algoType();
-
-    GraphSchema graphSchema();
-
-    CONFIG trainConfig();
-
-    ZonedDateTime creationTime();
-
-    INFO customInfo();
+    @Override
+    public Optional<TrainingMethod> optionalTrainerMethod() {
+        return Optional.empty();
+    }
 }

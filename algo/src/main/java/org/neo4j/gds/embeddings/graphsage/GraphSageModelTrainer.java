@@ -22,8 +22,8 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -41,6 +41,7 @@ import org.neo4j.gds.ml.core.subgraph.SubGraph;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
+import org.neo4j.gds.ml.models.TrainingMethod;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,6 +49,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
@@ -343,7 +345,7 @@ public class GraphSageModelTrainer {
     }
 
     @ValueClass
-    public interface GraphSageTrainMetrics extends ToMapConvertible {
+    public interface GraphSageTrainMetrics extends CustomInfo {
         static GraphSageTrainMetrics empty() {
             return ImmutableGraphSageTrainMetrics.of(List.of(), false);
         }
@@ -384,6 +386,9 @@ public class GraphSageModelTrainer {
                     "ranIterationsPerEpoch", ranIterationsPerEpoch()
             ));
         }
+
+        @Override
+        default Optional<TrainingMethod> optionalTrainerMethod() { return Optional.empty(); }
     }
 
     @ValueClass
