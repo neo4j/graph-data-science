@@ -39,7 +39,7 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
     private static final int QUEUE_CAPACITY = 2;
 
     private final LongUnaryOperator toOriginalId;
-    private final Stream<Relationship> relationships;
+    private final Stream<ExportedRelationship> relationships;
     private final int batchSize;
     private final TerminationFlag terminationFlag;
     private final ProgressTracker progressTracker;
@@ -47,7 +47,7 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
     public static RelationshipStreamExporterBuilder builder(
         TransactionContext transactionContext,
         IdMap idMap,
-        Stream<Relationship> relationships,
+        Stream<ExportedRelationship> relationships,
         TerminationFlag terminationFlag
     ) {
         return new NativeRelationshipStreamExporterBuilder(transactionContext)
@@ -59,7 +59,7 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
     NativeRelationshipStreamExporter(
         TransactionContext tx,
         LongUnaryOperator toOriginalId,
-        Stream<Relationship> relationships,
+        Stream<ExportedRelationship> relationships,
         int batchSize,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
@@ -218,15 +218,15 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
 
     static class Buffer {
         private final long capacity;
-        private final Relationship[] relationships;
+        private final ExportedRelationship[] relationships;
         private int size;
 
         Buffer(int capacity) {
-            this.relationships = new Relationship[capacity];
+            this.relationships = new ExportedRelationship[capacity];
             this.capacity = capacity;
         }
 
-        void add(Relationship relationship) {
+        void add(ExportedRelationship relationship) {
             relationships[size] = relationship;
             size += 1;
         }

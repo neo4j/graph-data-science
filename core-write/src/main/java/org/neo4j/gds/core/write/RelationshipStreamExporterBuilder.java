@@ -28,8 +28,8 @@ import java.util.Optional;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
-public abstract class RelationshipStreamExporterBuilder {
-    protected Stream<Relationship> relationships;
+public abstract class RelationshipStreamExporterBuilder<T extends RelationshipStreamExporter> {
+    protected Stream<ExportedRelationship> relationships;
 
     // FIXME: This looks very dodgy; only being overriden in the Cypher implementation and in some tests...
     protected int batchSize = (int) NativeNodePropertyExporter.MIN_BATCH_SIZE;
@@ -51,7 +51,7 @@ public abstract class RelationshipStreamExporterBuilder {
         return this;
     }
 
-    public RelationshipStreamExporterBuilder withRelationships(Stream<Relationship> relationships) {
+    public RelationshipStreamExporterBuilder<T> withRelationships(Stream<ExportedRelationship> relationships) {
         this.relationships = relationships;
         return this;
     }

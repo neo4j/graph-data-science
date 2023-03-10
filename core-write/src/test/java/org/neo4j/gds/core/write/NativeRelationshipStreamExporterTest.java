@@ -266,8 +266,8 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
             );
     }
 
-    Relationship relationship(String sourceVariable, String targetVariable, Value... values) {
-        return ImmutableRelationship.of(
+    ExportedRelationship relationship(String sourceVariable, String targetVariable, Value... values) {
+        return ImmutableExportedRelationship.of(
             graph.toMappedNodeId(idFunction.of(sourceVariable)),
             graph.toMappedNodeId(idFunction.of(targetVariable)),
             values

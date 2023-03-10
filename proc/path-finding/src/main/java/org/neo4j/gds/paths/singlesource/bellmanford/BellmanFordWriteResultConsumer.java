@@ -22,7 +22,7 @@ package org.neo4j.gds.paths.singlesource.bellmanford;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.write.ImmutableRelationship;
+import org.neo4j.gds.core.write.ImmutableExportedRelationship;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -86,7 +86,7 @@ public class BellmanFordWriteResultConsumer implements ComputationResultConsumer
             }
 
             var relationshipStream = paths.mapPaths(
-                pathResult -> ImmutableRelationship.of(
+                pathResult -> ImmutableExportedRelationship.of(
                     pathResult.sourceNode(),
                     pathResult.targetNode(),
                     createValues(graph, pathResult, writeNodeIds, writeCosts)

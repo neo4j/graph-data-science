@@ -23,7 +23,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.values.storable.Value;
 
 @ValueClass
-public interface Relationship {
+public interface ExportedRelationship {
     long sourceNode();
 
     long targetNode();

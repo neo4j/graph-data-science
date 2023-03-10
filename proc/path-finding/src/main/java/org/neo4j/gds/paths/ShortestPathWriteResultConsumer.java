@@ -25,7 +25,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.write.ImmutableRelationship;
+import org.neo4j.gds.core.write.ImmutableExportedRelationship;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -78,7 +78,7 @@ public class ShortestPathWriteResultConsumer<ALGO extends Algorithm<DijkstraResu
             var graph = computationResult.graph();
 
             var relationshipStream = result
-                .mapPaths(pathResult -> ImmutableRelationship.of(
+                .mapPaths(pathResult -> ImmutableExportedRelationship.of(
                     pathResult.sourceNode(),
                     pathResult.targetNode(),
                     createValues(graph, pathResult, writeNodeIds, writeCosts)
