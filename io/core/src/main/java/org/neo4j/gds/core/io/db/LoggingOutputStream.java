@@ -57,7 +57,9 @@ public class LoggingOutputStream extends OutputStream {
     }
 
     public void flush() {
-        log.debug(buffer.toString());
-        buffer = new StringBuffer();
+        if (buffer.length() > 0) {
+            log.debug(buffer.toString());
+            buffer = new StringBuffer();
+        }
     }
 }
