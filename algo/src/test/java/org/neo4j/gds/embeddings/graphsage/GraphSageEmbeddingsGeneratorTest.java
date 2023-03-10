@@ -112,7 +112,8 @@ class GraphSageEmbeddingsGeneratorTest {
             weightedGraph,
             config,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            "dummyVersion"
         );
 
         var model = trainer.compute();
@@ -166,7 +167,8 @@ class GraphSageEmbeddingsGeneratorTest {
             filteredGraph,
             config,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            "dummyVersion"
         );
 
         var model = trainer.compute();

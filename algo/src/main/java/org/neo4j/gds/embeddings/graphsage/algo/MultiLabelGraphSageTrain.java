@@ -46,16 +46,20 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
     private final GraphSageTrainConfig config;
     private final ExecutorService executor;
 
+    private final String gdsVersion;
+
     public MultiLabelGraphSageTrain(
         Graph graph,
         GraphSageTrainConfig config,
         ExecutorService executor,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        String gdsVersion
     ) {
         super(progressTracker);
         this.graph = graph;
         this.config = config;
         this.executor = executor;
+        this.gdsVersion = gdsVersion;
     }
 
     @Override
@@ -82,6 +86,7 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
         progressTracker.endSubTask("GraphSageTrain");
 
         return Model.of(
+            gdsVersion,
             GraphSage.MODEL_TYPE,
             graph.schema(),
             ModelData.of(trainResult.layers(), multiLabelFeatureFunction),

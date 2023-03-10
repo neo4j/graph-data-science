@@ -98,7 +98,8 @@ class MultiLabelGraphSageTrainTest {
             weightedGraph,
             config,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            "dummyVersion"
         );
         // should not fail
         multiLabelGraphSageTrain.compute();
@@ -118,7 +119,8 @@ class MultiLabelGraphSageTrainTest {
             weightedGraph,
             config,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            "dummyVersion"
         );
         // should not fail
         var model = multiLabelGraphSageTrain.compute();
@@ -146,7 +148,8 @@ class MultiLabelGraphSageTrainTest {
             weightedGraph,
             graphSageTrainConfig,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            "dummyVersion"
         );
 
         var model = graphSageTrain.compute();
@@ -188,7 +191,8 @@ class MultiLabelGraphSageTrainTest {
             unequalGraph,
             config,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            "dummyVersion"
         );
 
         assertThatExceptionOfType(IllegalArgumentException.class)
@@ -212,7 +216,8 @@ class MultiLabelGraphSageTrainTest {
             graph,
             config,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            "dummyVersion"
         );
         assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(multiLabelGraphSageTrain::compute)

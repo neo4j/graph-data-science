@@ -92,7 +92,7 @@ class NodeClassificationToModelConverterTest {
             .targetProperty("t")
             .metrics(List.of(metricSpecification))
             .build();
-        var converter = new NodeClassificationToModelConverter(pipeline, config);
+        var converter = new NodeClassificationToModelConverter(pipeline, config, "dummyVersion");
 
         var originalSchema = MutableGraphSchema.builder()
             .nodeSchema(MutableNodeSchema.empty().addLabel(NodeLabel.of("M")))

@@ -82,7 +82,11 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
         NodeClassificationTrainAlgorithm,
         NodeClassificationPipelineTrainConfig
     > algorithmFactory() {
-        return new NodeClassificationTrainPipelineAlgorithmFactory(executionContext());
+        var gdsVersion = databaseService.executeTransactionally("RETURN gds.version() AS version", Map.of(), result -> {
+            var row = result.next();
+            return (String) row.get("version");
+        });
+        return new NodeClassificationTrainPipelineAlgorithmFactory(executionContext(), gdsVersion);
     }
 
     @Override

@@ -84,7 +84,7 @@ class NodeRegressionTrainAlgorithmTest {
             .build();
 
 
-        var factory = new NodeRegressionTrainPipelineAlgorithmFactory(ExecutionContext.EMPTY);
+        var factory = new NodeRegressionTrainPipelineAlgorithmFactory(ExecutionContext.EMPTY, "dummyVersion");
         Supplier<NodeRegressionTrainAlgorithm> algoSupplier = () -> factory.build(
             graphStore,
             config,

@@ -33,8 +33,11 @@ public class NodeRegressionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
 
     private final ExecutionContext executionContext;
 
-    public NodeRegressionTrainPipelineAlgorithmFactory(ExecutionContext executionContext) {
+    private final String gdsVersion;
+
+    public NodeRegressionTrainPipelineAlgorithmFactory(ExecutionContext executionContext, String gdsVersion) {
         this.executionContext = executionContext;
+        this.gdsVersion = gdsVersion;
     }
 
     @Override
@@ -75,7 +78,8 @@ public class NodeRegressionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
             pipeline,
             graphStore,
             configuration,
-            progressTracker
+            progressTracker,
+            gdsVersion
         );
     }
 

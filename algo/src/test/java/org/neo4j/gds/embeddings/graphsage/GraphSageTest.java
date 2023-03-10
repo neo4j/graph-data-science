@@ -145,7 +145,8 @@ class GraphSageTest {
             orphanGraph,
             trainConfig,
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            "dummyVersion"
         );
         var model = trainAlgo.compute();
         modelCatalog.set(model);
@@ -177,7 +178,7 @@ class GraphSageTest {
             .concurrency(1)
             .build();
 
-        var graphSageTrain = new SingleLabelGraphSageTrain(graph, trainConfig, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
+        var graphSageTrain = new SingleLabelGraphSageTrain(graph, trainConfig, Pools.DEFAULT, ProgressTracker.NULL_TRACKER, "dummyVersion");
         var model = graphSageTrain.compute();
 
 
@@ -215,7 +216,7 @@ class GraphSageTest {
             .relationshipWeightProperty("weight")
             .build();
 
-        var graphSageTrain = new GraphSageTrainAlgorithmFactory().build(
+        var graphSageTrain = new GraphSageTrainAlgorithmFactory("dummyVersion").build(
             graph,
             trainConfig,
             ProgressTracker.NULL_TRACKER

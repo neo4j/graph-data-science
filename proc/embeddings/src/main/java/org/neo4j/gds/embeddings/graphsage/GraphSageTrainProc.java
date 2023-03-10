@@ -69,7 +69,11 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Model<ModelDat
 
     @Override
     public GraphAlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> algorithmFactory() {
-        return new GraphSageTrainAlgorithmFactory();
+        var gdsVersion = databaseService.executeTransactionally("RETURN gds.version() AS version", Map.of(), result -> {
+            var row = result.next();
+            return (String) row.get("version");
+        });
+        return new GraphSageTrainAlgorithmFactory(gdsVersion);
     }
 
     @Override

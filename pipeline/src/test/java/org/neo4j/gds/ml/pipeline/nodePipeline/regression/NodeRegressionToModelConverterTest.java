@@ -110,7 +110,7 @@ class NodeRegressionToModelConverterTest {
 
         var trainResult = ImmutableNodeRegressionTrainResult.of(regressor, trainStats);
 
-        var converter = new NodeRegressionToModelConverter(pipeline, config);
+        var converter = new NodeRegressionToModelConverter(pipeline, config, "dummyVersion");
 
         var result = converter.toModel(trainResult, graphStore.schema());
 

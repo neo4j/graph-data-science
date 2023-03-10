@@ -40,8 +40,11 @@ import static org.neo4j.gds.ml.core.EmbeddingUtils.validateRelationshipWeightPro
 
 public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> {
 
-    public GraphSageTrainAlgorithmFactory() {
+    private final String gdsVersion;
+
+    public GraphSageTrainAlgorithmFactory(String gdsVersion) {
         super();
+        this.gdsVersion = gdsVersion;
     }
 
     @Override
@@ -61,8 +64,8 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
         }
 
         return configuration.isMultiLabel()
-        ? new MultiLabelGraphSageTrain(graph, configuration, executorService, progressTracker)
-        : new SingleLabelGraphSageTrain(graph, configuration, executorService, progressTracker);
+        ? new MultiLabelGraphSageTrain(graph, configuration, executorService, progressTracker, gdsVersion)
+        : new SingleLabelGraphSageTrain(graph, configuration, executorService, progressTracker, gdsVersion);
     }
 
     @Override

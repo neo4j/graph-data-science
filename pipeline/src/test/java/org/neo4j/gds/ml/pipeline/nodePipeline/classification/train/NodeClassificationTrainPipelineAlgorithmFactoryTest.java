@@ -58,7 +58,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactoryTest {
 
     @Test
     void shouldValidateContextConfigsForNodePropertySteps() {
-        var ncAlgoFactory = new NodeClassificationTrainPipelineAlgorithmFactory(ExecutionContext.EMPTY);
+        var ncAlgoFactory = new NodeClassificationTrainPipelineAlgorithmFactory(ExecutionContext.EMPTY, "dummyVersion");
         var ncTrainConfig = NodeClassificationPipelineTrainConfigImpl.builder()
             .pipeline("")
             .graphName("g")

@@ -380,7 +380,7 @@ class GraphSageTrainAlgorithmFactoryTest {
             .add(expectedResidentMemory)
             .add(MemoryRange.of(40L)); // For GraphSage.class
 
-        var actualEstimation = new GraphSageTrainAlgorithmFactory()
+        var actualEstimation = new GraphSageTrainAlgorithmFactory("dummyVersion")
             .memoryEstimation(config)
             .estimate(graphDimensions, concurrency);
 
@@ -405,7 +405,7 @@ class GraphSageTrainAlgorithmFactoryTest {
             ? builder.projectedFeatureDimension(SOME_REASONABLE_VALUE).build()
             : builder.build();
 
-        var actualEstimation = new GraphSageTrainAlgorithmFactory()
+        var actualEstimation = new GraphSageTrainAlgorithmFactory("dummyVersion")
             .memoryEstimation(config)
             .estimate(GraphDimensions.of(1337), 42);
 
@@ -473,7 +473,7 @@ class GraphSageTrainAlgorithmFactoryTest {
             .maxIterations(2)
             .build();
 
-        var factory = new GraphSageTrainAlgorithmFactory();
+        var factory = new GraphSageTrainAlgorithmFactory("dummyVersion");
 
         var progressTracker = new InspectableTestProgressTracker(
             factory.progressTask(graph, config),

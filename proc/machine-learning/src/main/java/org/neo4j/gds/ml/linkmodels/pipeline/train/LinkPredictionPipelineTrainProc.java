@@ -78,7 +78,11 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<
 
     @Override
     public GraphStoreAlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> algorithmFactory() {
-        return new LinkPredictionTrainPipelineAlgorithmFactory(executionContext());
+        var gdsVersion = databaseService.executeTransactionally("RETURN gds.version() AS version", Map.of(), result -> {
+            var row = result.next();
+            return (String) row.get("version");
+        });
+        return new LinkPredictionTrainPipelineAlgorithmFactory(executionContext(), gdsVersion);
     }
 
     @Override

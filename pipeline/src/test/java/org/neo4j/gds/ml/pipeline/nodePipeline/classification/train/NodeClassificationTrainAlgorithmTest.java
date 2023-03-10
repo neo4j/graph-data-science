@@ -85,7 +85,7 @@ class NodeClassificationTrainAlgorithmTest {
             .build();
 
 
-        var factory = new NodeClassificationTrainPipelineAlgorithmFactory(ExecutionContext.EMPTY);
+        var factory = new NodeClassificationTrainPipelineAlgorithmFactory(ExecutionContext.EMPTY, "dummyVersion");
         Supplier<NodeClassificationTrainAlgorithm> algoSupplier = () -> factory.build(
             graphStore,
             config,

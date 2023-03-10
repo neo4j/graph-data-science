@@ -390,7 +390,7 @@ class GraphSageAlgorithmFactoryTest {
                 "projectedFeatureDimension", 42
             ))
         );
-        var multiLabelAlgo = new GraphSageTrainAlgorithmFactory()
+        var multiLabelAlgo = new GraphSageTrainAlgorithmFactory("dummyVersion")
             .build(
                 GdlGraphs.EMPTY,
                 multiLabelConfig,
@@ -406,7 +406,7 @@ class GraphSageAlgorithmFactoryTest {
                 "featureProperties", List.of("a")
             ))
         );
-        var singleLabelAlgo = new GraphSageTrainAlgorithmFactory()
+        var singleLabelAlgo = new GraphSageTrainAlgorithmFactory("dummyVersion")
             .build(
                 GdlGraphs.EMPTY,
                 singleLabelConfig,
