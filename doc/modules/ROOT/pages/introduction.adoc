@@ -47,7 +47,13 @@ The Neo4j Graph Data Science library contains a large number of algorithms, whic
 
 Algorithms in GDS have specific ways to make use of various aspects of its input graph(s).
 We call these _algorithm traits_.
-When an algorithm supports an algorithm trait this indicates that the algorithm has been implemented to produce well-defined results in accordance with the trait.
+
+An algorithm trait can be:
+
+* _supported_: the algorithm has been implemented to produce well-defined results in accordance with the trait;
+* _allowed_: the algorithm has not been specifically implemented to leverage the trait but it still produces results;
+* _unsupported_: the algorithm has not been implemented to produce any results when the trait is present.
+
 The following algorithm traits exist:
 
 [[introduction-algorithms-directed]]
@@ -62,6 +68,10 @@ The algorithm is well-defined on an undirected graph.
 Homogeneous::
 The algorithm will treat all nodes and relationships in its input graph(s) similarly, as if they were all of the same type.
 If multiple types of nodes or relationships exist in the graph, this must be taken into account when analysing the results of the algorithm.
+
+[[introduction-algorithms-heterogeneous]]
+Heterogeneous::
+The algorithm has the ability to distinguish between nodes and/or relationships of different types.
 
 [[introduction-algorithms-heterogeneous-nodes]]
 Heterogeneous nodes::
