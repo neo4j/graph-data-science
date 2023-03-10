@@ -15,7 +15,6 @@ include::partial$/operations-reference/alpha-note.adoc[]
 :undirected:
 :homogeneous:
 :heterogeneous-nodes:
-:heterogeneous-rels-allowed:
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
