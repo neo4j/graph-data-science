@@ -52,7 +52,7 @@ An algorithm trait can be:
 
 * _supported_: the algorithm leverages the trait and produces a well-defined results;
 * _allowed_: the algorithm does not leverage the trait but it still produces results;
-* _unsupported_: the algorithm has not been implemented to produce any results when the trait is present.
+* _unsupported_: the algorithm does not the trait and given a graph with the trait will return an error.
 
 The following algorithm traits exist:
 
