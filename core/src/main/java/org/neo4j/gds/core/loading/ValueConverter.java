@@ -30,6 +30,7 @@ import org.neo4j.values.storable.FloatingPointValue;
 import org.neo4j.values.storable.IntegralValue;
 import org.neo4j.values.storable.LongArray;
 import org.neo4j.values.storable.LongValue;
+import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.ValueGroup;
 import org.neo4j.values.storable.Values;
@@ -59,7 +60,9 @@ public final class ValueConverter {
     }
 
     public static Value toValue(@NotNull AnyValue value) {
-        if (value.isSequenceValue()) {
+        if (value == NoValue.NO_VALUE) {
+            return NoValue.NO_VALUE;
+        } else if (value.isSequenceValue()) {
             return castToNumericArrayOrFail(value);
         } else if (value instanceof Value) {
             var storableValue = (Value) value;

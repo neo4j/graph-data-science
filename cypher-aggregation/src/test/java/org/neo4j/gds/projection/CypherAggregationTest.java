@@ -81,7 +81,7 @@ class CypherAggregationTest extends BaseProcTest {
         ",(f:B { prop1: 47, prop2: 13.40, prop3: [46.0, 17.37], prop4: [18, 42] })" +
 
         ",(a)-[:REL {prop: 42} ]->(b)<-[:REL {prop: 43} ]-(c)" +
-        ",(d)-[:REL {prop: 44} ]->(e)<-[:REL {prop: 45} ]-(f)";
+        ",(d)-[:REL {prop: 44} ]->(e)<-[:REL]-(f)";
 
     @BeforeEach
     void setup() throws Exception {
@@ -546,6 +546,7 @@ class CypherAggregationTest extends BaseProcTest {
         var graph = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore().getUnion();
 
         assertThat(graph.hasRelationshipProperty()).isTrue();
+        assertThat(graph.relationshipCount()).isEqualTo(4);
 
         GraphDatabaseApiProxy.runInTransaction(db, tx -> {
             for (char nodeVariable = 'a'; nodeVariable <= 'f'; nodeVariable++) {
@@ -555,7 +556,7 @@ class CypherAggregationTest extends BaseProcTest {
                 var relationships = node.getRelationships(Direction.OUTGOING, RelationshipType.withName("REL"));
                 var expectedProperties = StreamSupport
                     .stream(relationships.spliterator(), false)
-                    .map(rel -> ((Number) rel.getProperty("prop")).doubleValue())
+                    .map(rel -> ((Number) rel.getProperty("prop", Double.NaN)).doubleValue())
                     .collect(Collectors.toList());
 
                 var nodeId = graph.toMappedNodeId(neoNodeId);
@@ -598,7 +599,7 @@ class CypherAggregationTest extends BaseProcTest {
                     var relationships = node.getRelationships(Direction.OUTGOING, RelationshipType.withName("REL"));
                     var expectedProperties = StreamSupport
                         .stream(relationships.spliterator(), false)
-                        .map(rel -> ((Number) rel.getProperty("prop")).doubleValue())
+                        .map(rel -> ((Number) rel.getProperty("prop", Double.NaN)).doubleValue())
                         .collect(Collectors.toList());
 
                     var nodeId = graph.toMappedNodeId(neoNodeId);
