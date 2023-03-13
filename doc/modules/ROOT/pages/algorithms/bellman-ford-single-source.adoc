@@ -96,6 +96,64 @@ CALL gds.graph.project(
 
 In the following example we will demonstrate the use of the {algorithm} Shortest Path algorithm using this graph.
 
+
+[[algorithms-bellman-single-source-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in write mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Node {name: 'A'})
+CALL gds.bellmanFord.write.estimate('myGraph', {
+    sourceNode: source,
+    relationshipWeightProperty: 'cost',
+    writeRelationshipType: 'PATH'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 9         | 12                | 1336     | 1336      | "1336 Bytes"
+|===
+--
+
+The algorithm supports writing (or mutating) negative cycles if they exist in the graph, this is controlled by the `writeNegativeCycles` (`mutateNegativeCycles`) configuration parameter.
+This requires additional memory because the negative cycles have to be tracked.
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in write mode including the negative cycles:
+[source, cypher, role=noplay]
+----
+MATCH (source:Node {name: 'A'})
+CALL gds.bellmanFord.write.estimate('myGraph', {
+    sourceNode: source,
+    relationshipWeightProperty: 'cost',
+    writeRelationshipType: 'PATH',
+    writeNegativeCycles: true
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 9         | 12                | 1448     | 1448      | "1448 Bytes"
+|===
+--
+
+
 [[algorithms-bellman-single-source-examples-stream]]
 === Stream
 
