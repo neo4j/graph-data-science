@@ -53,7 +53,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.Orientation.UNDIRECTED;
 
-// Does the actual importing work once we can initialize it with the first row
 public final class GraphImporter {
     public static final int NO_TARGET_NODE = -1;
 
