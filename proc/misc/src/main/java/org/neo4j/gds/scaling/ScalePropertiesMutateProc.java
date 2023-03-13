@@ -38,7 +38,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ScalePropertiesMutateProc extends BaseProc {
 
-    @Procedure("gds.alpha.scaleProperties.mutate")
+    @Procedure("gds.beta.scaleProperties.mutate")
     @Description(SCALE_PROPERTIES_DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,

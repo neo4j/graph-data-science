@@ -38,7 +38,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ScalePropertiesStreamProc extends BaseProc {
 
-    @Procedure("gds.alpha.scaleProperties.stream")
+    @Procedure("gds.beta.scaleProperties.stream")
     @Description(SCALE_PROPERTIES_DESCRIPTION)
     public Stream<Result> stream(
         @Name(value = "graphName") String graphName,

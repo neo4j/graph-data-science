@@ -60,7 +60,7 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
     void stream() {
         var query = GdsCypher
             .call("g")
-            .algo("gds.alpha.scaleProperties")
+            .algo("gds.beta.scaleProperties")
             .streamMode()
             .addParameter("nodeProperties", List.of("myProp"))
             .addParameter("scaler", "Mean")
@@ -102,7 +102,7 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
 
     @Test
     void streamLogWithOffset() {
-        var query = "CALL gds.alpha.scaleProperties.stream('g', {" +
+        var query = "CALL gds.beta.scaleProperties.stream('g', {" +
                     "scaler: {type: 'log', offset: 10 }," +
                     "nodeProperties: 'myProp'}) " +
                     "yield nodeId, scaledProperty " +

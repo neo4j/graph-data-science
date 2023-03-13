@@ -79,7 +79,7 @@ class ScalePropertiesMutateProcTest extends BaseProcTest {
     void mutate() {
         String query = GdsCypher
             .call("g")
-            .algo("gds.alpha.scaleProperties")
+            .algo("gds.beta.scaleProperties")
             .mutateMode()
             .addParameter("nodeProperties", List.of("myProp"))
             .addParameter("scaler", "max")
