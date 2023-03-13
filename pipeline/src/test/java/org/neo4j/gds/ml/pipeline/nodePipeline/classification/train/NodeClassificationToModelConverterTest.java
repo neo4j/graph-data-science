@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.TestGdsVersion.testGdsVersion;
 
 class NodeClassificationToModelConverterTest {
 
@@ -92,7 +93,7 @@ class NodeClassificationToModelConverterTest {
             .targetProperty("t")
             .metrics(List.of(metricSpecification))
             .build();
-        var converter = new NodeClassificationToModelConverter(pipeline, config, "dummyVersion");
+        var converter = new NodeClassificationToModelConverter(pipeline, config, testGdsVersion);
 
         var originalSchema = MutableGraphSchema.builder()
             .nodeSchema(MutableNodeSchema.empty().addLabel(NodeLabel.of("M")))

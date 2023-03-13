@@ -44,6 +44,7 @@ import java.util.stream.LongStream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.neo4j.gds.TestGdsVersion.testGdsVersion;
 
 @GdlExtension
 class GraphSageEmbeddingsGeneratorTest {
@@ -113,7 +114,7 @@ class GraphSageEmbeddingsGeneratorTest {
             config,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER,
-            "dummyVersion"
+            testGdsVersion
         );
 
         var model = trainer.compute();
@@ -168,7 +169,7 @@ class GraphSageEmbeddingsGeneratorTest {
             config,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER,
-            "dummyVersion"
+            testGdsVersion
         );
 
         var model = trainer.compute();

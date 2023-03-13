@@ -62,6 +62,7 @@ import java.util.Random;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.neo4j.gds.TestGdsVersion.testGdsVersion;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
 
@@ -146,7 +147,7 @@ class GraphSageTest {
             trainConfig,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER,
-            "dummyVersion"
+            testGdsVersion
         );
         var model = trainAlgo.compute();
         modelCatalog.set(model);
@@ -178,7 +179,7 @@ class GraphSageTest {
             .concurrency(1)
             .build();
 
-        var graphSageTrain = new SingleLabelGraphSageTrain(graph, trainConfig, Pools.DEFAULT, ProgressTracker.NULL_TRACKER, "dummyVersion");
+        var graphSageTrain = new SingleLabelGraphSageTrain(graph, trainConfig, Pools.DEFAULT, ProgressTracker.NULL_TRACKER, testGdsVersion);
         var model = graphSageTrain.compute();
 
 
@@ -216,7 +217,7 @@ class GraphSageTest {
             .relationshipWeightProperty("weight")
             .build();
 
-        var graphSageTrain = new GraphSageTrainAlgorithmFactory("dummyVersion").build(
+        var graphSageTrain = new GraphSageTrainAlgorithmFactory(testGdsVersion).build(
             graph,
             trainConfig,
             ProgressTracker.NULL_TRACKER

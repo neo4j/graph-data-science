@@ -42,6 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.neo4j.gds.TestGdsVersion.testGdsVersion;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
@@ -99,7 +100,7 @@ class MultiLabelGraphSageTrainTest {
             config,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER,
-            "dummyVersion"
+            testGdsVersion
         );
         // should not fail
         multiLabelGraphSageTrain.compute();
@@ -120,7 +121,7 @@ class MultiLabelGraphSageTrainTest {
             config,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER,
-            "dummyVersion"
+            testGdsVersion
         );
         // should not fail
         var model = multiLabelGraphSageTrain.compute();
@@ -149,7 +150,7 @@ class MultiLabelGraphSageTrainTest {
             graphSageTrainConfig,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER,
-            "dummyVersion"
+            testGdsVersion
         );
 
         var model = graphSageTrain.compute();
@@ -192,7 +193,7 @@ class MultiLabelGraphSageTrainTest {
             config,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER,
-            "dummyVersion"
+            testGdsVersion
         );
 
         assertThatExceptionOfType(IllegalArgumentException.class)
@@ -217,7 +218,7 @@ class MultiLabelGraphSageTrainTest {
             config,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER,
-            "dummyVersion"
+            testGdsVersion
         );
         assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(multiLabelGraphSageTrain::compute)
