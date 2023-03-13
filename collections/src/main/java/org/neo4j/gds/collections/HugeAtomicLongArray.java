@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.collections;
 
+import org.neo4j.gds.collections.cursor.HugeCursorSupport;
+
 import java.util.function.LongConsumer;
 import java.util.function.LongUnaryOperator;
 
@@ -37,16 +39,7 @@ public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
     }
 
     /**
-     * Returns the length of this array.
-     * <p>
-     * If the size is greater than zero, the highest supported index is {@code size() - 1}
-     * <p>
-     * The behavior is identical to calling {@code array.length} on primitive arrays.
-     */
-    long size();
-
-    /**
-     * @return the long value at the given index
+     * @return the long value at the given index (volatile)
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
     long get(long index);
@@ -61,18 +54,11 @@ public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
     long getAndAdd(long index, long delta);
 
     /**
-     * Sets the long value at the given index to the given value.
+     * Sets the long value at the given index to the given value (volatile).
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    long set(long index, long value);
-
-    /**
-     * Sets all entries in the array to the given value.
-     *
-     * This method is not thread-safe.
-     */
-    void setAll(long value);
+    void set(long index, long value);
 
     /**
      * Atomically sets the element at position {@code index} to the given
@@ -81,8 +67,8 @@ public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
      * @param index  the index
      * @param expect the expected value
      * @param update the new value
-     * @return {@code true} iff successful. {@code false} indicates that the actual
-     *     value was not equal to the expected value.
+     * @return {@code true} if successful. False return indicates that
+     *     the actual value was not equal to the expected value.
      */
     boolean compareAndSet(long index, long expect, long update);
 
@@ -128,8 +114,8 @@ public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
      * @param expect the expected value
      * @param update the new value
      * @return the result that is the witness value,
-     *     which will be the same as the expected value if successful≤
-     *     or the new current value if unsuccessful.
+     *         which will be the same as the expected value if successful
+     *         or the new current value if unsuccessful.
      */
     long compareAndExchange(long index, long expect, long update);
 
@@ -145,27 +131,36 @@ public interface HugeAtomicLongArray extends HugeCursorSupport<long[]> {
     void update(long index, LongUnaryOperator updateFunction);
 
     /**
-     * Copies the content of this array into the target array.
+     * Returns the length of this array.
      * <p>
-     * The behavior is identical to {@link System#arraycopy(Object, int, Object, int, int)}.
+     * If the size is greater than zero, the highest supported index is {@code size() - 1}
      * <p>
-     * This method is not thread-safe.
+     * The behavior is identical to calling {@code array.length} on primitive arrays.
      */
-    void copyTo(HugeAtomicLongArray dest, long length);
+    long size();
+
+    /**
+     * @return the amount of memory used by the instance of this array, in bytes.
+     *     This should be the same as returned from {@link #release()} without actually releasing the array.
+     */
+    long sizeOf();
+
+    /**
+     * Set all entries in the array to the given value.
+     * This method is not atomic!
+     */
+    void setAll(long value);
 
     /**
      * Destroys the data, allowing the underlying storage arrays to be collected as garbage.
-     * The array is unusable after calling this method and will throw {@link NullPointerException}s
-     * on virtually every method invocation.
+     * The array is unusable after calling this method and will throw {@link NullPointerException}s on virtually every method invocation.
      * <p>
-     * Note that the data might not immediately collectible if there are still cursors alive that
-     * reference this array. You have to {@link HugeCursor#close()} every cursor instance as well.
-     * <p>
-     * The amount is not removed from the {@link java.util.function.LongConsumer} that had been
-     * provided in the constructor.
+     * Note that the data might not immediately collectible if there are still cursors alive that reference this array.
+     * You have to {@link org.neo4j.gds.collections.cursor.HugeCursor#close()} every cursor instance as well.
      *
      * @return the amount of memory freed, in bytes.
      */
     long release();
 
+    void copyTo(HugeAtomicLongArray dest, long length);
 }

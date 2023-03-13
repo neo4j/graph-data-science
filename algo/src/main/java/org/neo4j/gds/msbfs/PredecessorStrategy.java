@@ -21,7 +21,7 @@ package org.neo4j.gds.msbfs;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.RelationshipIterator;
-import org.neo4j.gds.core.utils.paged.HugeCursor;
+import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import java.util.Objects;

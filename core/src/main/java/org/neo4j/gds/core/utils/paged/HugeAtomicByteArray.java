@@ -20,18 +20,20 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.collections.cursor.HugeCursor;
+import org.neo4j.gds.collections.cursor.HugeCursorSupport;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 
+import static org.neo4j.gds.mem.HugeArrays.MAX_ARRAY_LENGTH;
 import static org.neo4j.gds.mem.HugeArrays.PAGE_SIZE;
 import static org.neo4j.gds.mem.HugeArrays.exclusiveIndexOfPage;
 import static org.neo4j.gds.mem.HugeArrays.indexInPage;
 import static org.neo4j.gds.mem.HugeArrays.numberOfPages;
 import static org.neo4j.gds.mem.HugeArrays.pageIndex;
-import static org.neo4j.gds.mem.HugeArrays.MAX_ARRAY_LENGTH;
 
 /**
  * A long-indexable array of atomic bytes that can contain more than 2 bn. elements.
