@@ -38,6 +38,7 @@ import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -122,8 +123,16 @@ public final class GdsCallableFinder {
 
             return classes
                 .stream()
-                .map(clazz -> {
-                    GdsCallable gdsCallable = clazz.getAnnotation(GdsCallable.class);
+                .flatMap(clazz -> {
+                    GdsCallables callables = clazz.getAnnotation(GdsCallables.class);
+                    if (callables == null) {
+                        GdsCallable callable = clazz.getAnnotation(GdsCallable.class);
+                        return Stream.of(ImmutableClassAndCallable.of(clazz, callable));
+                    }
+                    return Arrays.stream(callables.value()).map(gdsCallable -> ImmutableClassAndCallable.of(clazz, gdsCallable));
+                }).map(clazzAndCallable -> {
+                    var gdsCallable = clazzAndCallable.gdsCallable();
+                    var clazz = clazzAndCallable.clazz();
                     //noinspection unchecked
                     return ImmutableGdsCallableDefinition
                         .builder()
@@ -141,11 +150,33 @@ public final class GdsCallableFinder {
         }
 
         private static List<Class<?>> loadPossibleClassesFromJar(ClassLoader classLoader) {
-            return loadPossibleClassesFrom(classLoader, "META-INF/services/" + GdsCallable.class.getCanonicalName());
+            var singularlyAnnotated = loadPossibleClassesFrom(
+                classLoader,
+                "META-INF/services/" + GdsCallable.class.getCanonicalName()
+            );
+            var plurallyAnnotated = loadPossibleClassesFrom(
+                classLoader,
+                "META-INF/services/" + GdsCallables.class.getCanonicalName()
+            );
+            var result = new ArrayList<Class<?>>();
+            result.addAll(singularlyAnnotated);
+            result.addAll(plurallyAnnotated);
+            return result;
         }
 
         private static List<Class<?>> loadPossibleClassesFromResourcesFolder(ClassLoader classLoader) {
-            return loadPossibleClassesFrom(classLoader, "/META-INF/services/" + GdsCallable.class.getCanonicalName());
+            var singularlyAnnotated = loadPossibleClassesFrom(
+                classLoader,
+                "/META-INF/services/" + GdsCallable.class.getCanonicalName()
+            );
+            var plurallyAnnotated = loadPossibleClassesFrom(
+                classLoader,
+                "/META-INF/services/" + GdsCallables.class.getCanonicalName()
+            );
+            var result = new ArrayList<Class<?>>();
+            result.addAll(singularlyAnnotated);
+            result.addAll(plurallyAnnotated);
+            return result;
         }
 
         private static List<Class<?>> loadPossibleClassesFrom(ClassLoader classLoader, String path) {
@@ -181,7 +212,10 @@ public final class GdsCallableFinder {
                     .forPackage(pkg, classLoader)
                     .addScanners(Scanners.TypesAnnotated)
                     .filterInputsBy(new FilterBuilder().includePackage(pkg))))
-                .flatMap(reflections -> reflections.getTypesAnnotatedWith(GdsCallable.class).stream())
+                .flatMap(reflections -> Stream.concat(
+                    reflections.getTypesAnnotatedWith(GdsCallable.class).stream(),
+                    reflections.getTypesAnnotatedWith(GdsCallables.class).stream()
+                ))
                 .collect(Collectors.toList());
         }
 
@@ -191,6 +225,12 @@ public final class GdsCallableFinder {
             }
             return true;
         }
+    }
+
+    @ValueClass
+    interface ClassAndCallable {
+        Class<?> clazz();
+        GdsCallable gdsCallable();
     }
 
     @ValueClass
