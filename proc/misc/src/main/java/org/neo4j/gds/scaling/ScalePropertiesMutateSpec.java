@@ -28,9 +28,9 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.scaleProperties.ScaleProperties;
-import org.neo4j.gds.scaleProperties.ScalePropertiesFactory;
-import org.neo4j.gds.scaleProperties.ScalePropertiesMutateConfig;
+import org.neo4j.gds.scaleproperties.ScaleProperties;
+import org.neo4j.gds.scaleproperties.ScalePropertiesFactory;
+import org.neo4j.gds.scaleproperties.ScalePropertiesMutateConfig;
 
 import java.util.List;
 import java.util.stream.Stream;

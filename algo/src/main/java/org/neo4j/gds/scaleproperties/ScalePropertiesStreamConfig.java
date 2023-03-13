@@ -17,19 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.scaleProperties;
+package org.neo4j.gds.scaleproperties;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ScalePropertiesWriteConfig extends ScalePropertiesBaseConfig, WritePropertyConfig {
+public interface ScalePropertiesStreamConfig extends ScalePropertiesBaseConfig {
 
-    static ScalePropertiesWriteConfig of(CypherMapWrapper userInput) {
-        return new ScalePropertiesWriteConfigImpl(userInput);
+    static ScalePropertiesStreamConfig of(CypherMapWrapper userInput) {
+        return new ScalePropertiesStreamConfigImpl(userInput);
     }
 }
