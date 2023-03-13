@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.paths.bellmanford;
 
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.DoublePageCreator;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
@@ -67,6 +69,14 @@ final class DistanceTracker {
         this.distances = distances;
         this.lengths = lengths;
         this.size = size;
+    }
+
+    static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder(DistanceTracker.class)
+            .perNode("distances", HugeAtomicDoubleArray::memoryEstimation)
+            .perNode("predecessors", HugeAtomicLongArray::memoryEstimation)
+            .perNode("lengths", HugeAtomicLongArray::memoryEstimation)
+            .build();
     }
 
     public double distance(long nodeId) {

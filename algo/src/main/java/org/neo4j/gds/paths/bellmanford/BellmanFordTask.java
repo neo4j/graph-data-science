@@ -20,6 +20,8 @@
 package org.neo4j.gds.paths.bellmanford;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
@@ -70,6 +72,13 @@ public class BellmanFordTask implements Runnable {
         this.negativeCycleVertices = negativeCycleVertices;
         this.negativeCycleIndex = negativeCycleIndex;
         shouldNotTrackCycles = negativeCycleVertices == null;
+    }
+
+    static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations
+            .builder(BellmanFordTask.class)
+            .perNode("localQueue", HugeLongArray::memoryEstimation)
+            .build();
     }
 
     private void processNode(long nodeId) {
