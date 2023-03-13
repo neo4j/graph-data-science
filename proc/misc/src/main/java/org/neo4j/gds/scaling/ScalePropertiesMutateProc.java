@@ -71,10 +71,7 @@ public class ScalePropertiesMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new ScalePropertiesMutateSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return mutate(graphName, configuration);
     }
 
     public static final class MutateResult extends StandardMutateResult {

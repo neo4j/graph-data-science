@@ -71,10 +71,7 @@ public class ScalePropertiesStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new ScalePropertiesStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return stream(graphName, configuration);
     }
 
     public static class Result {
