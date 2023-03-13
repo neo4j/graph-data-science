@@ -310,6 +310,7 @@ public class SysInfoProc {
         trySetting("dbms.tx_state.max_off_heap_memory", config, builder);
         trySetting("dbms.memory.off_heap.max_size", config, builder);
         trySetting("server.memory.off_heap.max_size", config, builder);
+        trySetting("server.memory.off_heap.transaction_max_size", config, builder);
 
         trySetting("dbms.memory.transaction.global_max_size", config, builder);
         trySetting("dbms.memory.transaction.total.max", config, builder);
