@@ -75,7 +75,7 @@ class BellmanFordMultipleNegativeCyclesTest {
                 idFunction.of("a5"),
                 idFunction.of("a6"),
             };
-            var result = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, a[0], true, 4).compute();
+            var result = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, a[0], true, true, 4).compute();
 
             assertThat(result.containsNegativeCycle()).isTrue();
             var negativeCycles = result
@@ -129,7 +129,7 @@ class BellmanFordMultipleNegativeCyclesTest {
                 idFunction.of("a2"),
                 idFunction.of("a3"),
             };
-            var result = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, a[0], true, 4).compute();
+            var result = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, a[0], true, true, 4).compute();
 
             assertThat(result.negativeCycles().pathSet())
                 .hasSize(1)
