@@ -17,29 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc.syntax;
+package org.neo4j.gds.scaling;
 
-import java.util.List;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
-import static org.neo4j.gds.doc.syntax.SyntaxMode.STATS;
-import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
-import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
+@Configuration
+@SuppressWarnings("immutables:subtype")
+interface ScalePropertiesStatsConfig extends ScalePropertiesBaseConfig {
 
-class ScalePropertiesSyntaxTest extends SyntaxTestBase {
-
-    @Override
-    protected Iterable<SyntaxModeMeta> syntaxModes() {
-        return List.of(
-            SyntaxModeMeta.of(STREAM),
-            SyntaxModeMeta.of(MUTATE),
-            SyntaxModeMeta.of(STATS),
-            SyntaxModeMeta.of(WRITE)
-        );
+    static ScalePropertiesStatsConfig of(CypherMapWrapper userInput) {
+        return new ScalePropertiesStatsConfigImpl(userInput);
     }
-    @Override
-    protected String adocFile() {
-        return "pages/alpha-algorithms/scale-properties.adoc";
-    }
-
 }
