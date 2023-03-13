@@ -27,7 +27,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.io.Serializable;

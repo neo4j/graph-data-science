@@ -27,6 +27,7 @@ dependencies {
     implementation project(':progress-tracking')
     implementation project(':memory-usage')
     implementation project(':ml-core')
+    implementation project(':ml-api')
     implementation project(':config-api')
     implementation project(':string-formatting')
     implementation project(':graph-schema-api')

@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.models;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 
 import java.util.HashMap;

@@ -17,26 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.training;
+package org.neo4j.gds.ml.api;
 
-import org.neo4j.gds.ml.api.TrainingMethod;
-import org.neo4j.gds.ml.models.TrainerConfig;
+public enum TrainingMethod {
+    LogisticRegression,
+    LinearRegression,
+    RandomForestClassification {
+        @Override
+        public String toString() {
+            return "RandomForest";
+        }
+    },
+    RandomForestRegression {
+        @Override
+        public String toString() {
+            return "RandomForest";
+        }
+    },
 
-import java.util.Map;
+    MLPClassification {
+        @Override
+        public String toString() { return "MultilayerPerceptron"; }
+    };
 
-final class TestTrainerConfig implements TrainerConfig {
-
-    final String name;
-
-    TestTrainerConfig(String name) {this.name = name;}
-
-    @Override
-    public Map<String, Object> toMap() {
-        return Map.of("name", name);
-    }
-
-    @Override
-    public TrainingMethod method() {
-        return TrainingMethod.RandomForestClassification;
-    }
 }

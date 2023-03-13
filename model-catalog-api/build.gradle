@@ -21,8 +21,7 @@ dependencies {
     implementation project(':graph-projection-api')
     implementation project(':graph-schema-api')
     implementation project(':licensing')
-    //TODO Refactor TrainingMethod to other package
-    implementation project(':ml-algo')
+    implementation project(':ml-api')
 
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: ver.'commons-lang3'
 

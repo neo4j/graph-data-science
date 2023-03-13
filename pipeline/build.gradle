@@ -40,6 +40,7 @@ dependencies {
     // TODO remove this depenency
     implementation project(':ml-core')
     implementation project(':ml-algo')
+    implementation project(':ml-api')
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
