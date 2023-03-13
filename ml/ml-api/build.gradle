@@ -1,5 +1,5 @@
 apply plugin: 'java-library'
 
-description = 'Neo4j Graph Data Science :: Machine Learning Core'
+description = 'Neo4j Graph Data Science :: Machine Learning Api'
 
 group = 'org.neo4j.gds'
