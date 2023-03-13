@@ -337,4 +337,43 @@ class RandomWalkWithRestartsTest {
 
         assertThat(labelCounts).isEqualTo(expectedLabelCounts);
     }
+
+    @Test
+    void shouldSampleUniformlyFromNeighbours() {
+        double casesPassedX1 = 0;
+        double casesPassedX2 = 0;
+        double casesPassedX3 = 0;
+        var validCases = 0;
+
+        for (long seed = 0; seed < 1000; seed++) {
+            var config = RandomWalkWithRestartsConfigImpl.builder()
+                .startNodes(List.of(idFunction.of("x")))
+                .samplingRatio(0.14)
+                .restartProbability(0.0001)
+                .concurrency(1)
+                .randomSeed(seed)
+                .build();
+
+            var rwr = new RandomWalkWithRestarts(config);
+            var graph = getGraph(config);
+            var nodes = rwr.compute(graph, ProgressTracker.NULL_TRACKER);
+
+            assertThat(nodes.cardinality()).isEqualTo(2);
+
+            validCases++;
+
+            if (nodes.get(graph.toMappedNodeId(idFunction.of("x1")))) {
+                casesPassedX1++;
+            }
+            if (nodes.get(graph.toMappedNodeId(idFunction.of("x2")))) {
+                casesPassedX2++;
+            }
+            if (nodes.get(graph.toMappedNodeId(idFunction.of("x3")))) {
+                casesPassedX3++;
+            }
+        }
+        assertThat(casesPassedX1 / validCases).isCloseTo(0.33, Offset.offset(0.02));
+        assertThat(casesPassedX2 / validCases).isCloseTo(0.33, Offset.offset(0.02));
+        assertThat(casesPassedX3 / validCases).isCloseTo(0.33, Offset.offset(0.02));
+    }
 }

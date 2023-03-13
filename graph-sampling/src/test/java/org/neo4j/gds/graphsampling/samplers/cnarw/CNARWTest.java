@@ -106,28 +106,6 @@ class CNARWTest {
     @Inject
     private IdFunction lollipopIdFunction;
 
-    @GdlGraph(graphNamePrefix = "complete", idOffset = 42)
-    private static final String completeGDL =
-        "CREATE" +
-        "  (x0:Z {prop: 42})" +
-        ", (x1:Z {prop: 43})" +
-        ", (x2:Z {prop: 44})" +
-        ", (x3:Z {prop: 45})" +
-        ", (x4:Z {prop: 46})" +
-        ", (x5:Z {prop: 47})" +
-        ",                    (x0)-[:REL]->(x1), (x0)-[:REL]->(x2), (x0)-[:REL]->(x3), (x0)-[:REL]->(x4), (x0)-[:REL]->(x5)" +
-        ", (x1)-[:REL]->(x0),                    (x1)-[:REL]->(x2), (x1)-[:REL]->(x3), (x1)-[:REL]->(x4), (x1)-[:REL]->(x5)" +
-        ", (x2)-[:REL]->(x0), (x2)-[:REL]->(x1),                    (x2)-[:REL]->(x3), (x2)-[:REL]->(x4), (x2)-[:REL]->(x5)" +
-        ", (x3)-[:REL]->(x0), (x3)-[:REL]->(x1), (x3)-[:REL]->(x2),                    (x3)-[:REL]->(x4), (x3)-[:REL]->(x5)" +
-        ", (x4)-[:REL]->(x0), (x4)-[:REL]->(x1), (x4)-[:REL]->(x2), (x4)-[:REL]->(x3),                    (x4)-[:REL]->(x5)" +
-        ", (x5)-[:REL]->(x0), (x5)-[:REL]->(x1), (x5)-[:REL]->(x2), (x5)-[:REL]->(x3), (x5)-[:REL]->(x4)";
-
-    @Inject
-    private TestGraph completeGraph;
-
-    @Inject
-    private IdFunction completeIdFunction;
-
     Graph getGraph(CNARWConfig config) {
         return graphStore.getGraph(
             config.nodeLabelIdentifiers(graphStore),
@@ -180,6 +158,39 @@ class CNARWTest {
     }
 
     @Test
+    void shouldSampleLollipopSeveral() {
+        double casesPassedY1 = 0;
+        double casesPassedX1 = 0;
+        var validCases = 0;
+
+        for (long seed = 0; seed < 1000; seed++) {
+            var config = CNARWConfigImpl.builder()
+                .startNodes(List.of(lollipopIdFunction.of("xy")))
+                .samplingRatio(0.250)
+                .restartProbability(0.0001)
+                .concurrency(1)
+                .randomSeed(seed)
+                .build();
+
+            var cnarw = new CNARW(config);
+            var nodes = cnarw.compute(lollipopGraph, ProgressTracker.NULL_TRACKER);
+
+            assertThat(nodes.cardinality()).isEqualTo(2);
+
+            validCases++;
+
+            if (nodes.get(lollipopGraph.toMappedNodeId(lollipopIdFunction.of("y1")))) {
+                casesPassedY1++;
+            }
+            if (nodes.get(lollipopGraph.toMappedNodeId(lollipopIdFunction.of("x1")))) {
+                casesPassedX1++;
+            }
+        }
+        assertThat(casesPassedY1 / validCases).isCloseTo(0.5, Offset.offset(0.015));
+        assertThat(casesPassedX1 / validCases).isCloseTo(0.1, Offset.offset(0.015));
+    }
+
+    @Test
     void shouldSampleWeighted() {
         double casesPassed = 0;
         var validCases = 0;
@@ -212,12 +223,8 @@ class CNARWTest {
                 casesPassed++;
             }
         }
-        // the probability that we walk from x to x3 everytime until a new startnode is picked
-        // is P(x->x3) ^ <number of walks until new startnode given that x3 is picked every time>
-        // the number of these walks is 30, because first walk keeps quality at 1 and for remaining
-        // walks we have quality *= 0.9 and 0.9 ^ 29 is the first that is lower than the threshold 0.05.
-        // therefore the probability of a case passing is (200 / 202) ^ 30.
-        assertThat(casesPassed / validCases).isCloseTo(Math.pow(200.0 / 202, 45), Offset.offset(0.015));
+
+        assertThat(casesPassed / validCases).isCloseTo(0.637, Offset.offset(0.001));
     }
 
     @Test
@@ -236,9 +243,8 @@ class CNARWTest {
         for (int i = 0; i < 250; i++) {
             var cnarw = new CNARW(config);
             var nodes = cnarw.compute(graph, ProgressTracker.NULL_TRACKER);
-            if (cnarw.startNodesUsed().contains(idFunction.of("x1")) || cnarw
-                .startNodesUsed()
-                .contains(idFunction.of("x2"))) {
+            if (cnarw.startNodesUsed().contains(idFunction.of("x1")) ||
+                cnarw.startNodesUsed().contains(idFunction.of("x2"))) {
                 continue;
             }
             validCases++;
@@ -253,14 +259,7 @@ class CNARWTest {
                 casesPassed++;
             }
         }
-        // the analysis from single threaded case can be partially repeated. it takes 51 walks to get below 0.05/(4 ^ 2),
-        // so the expectation would be (200 / 202) ** (51 * 4) , however the result is closer to (200 / 202) ** (51 * 2),
-        // and its unclear exactly why.
-        // this may be due to the fastest thread picking a new startnode before the other threads finish and therefore the
-        // other threads have less time to find the improbable node x2
-        assertThat(casesPassed / validCases).isCloseTo(
-            Math.pow(200.0 / 202, 51.0 * config.concurrency() / 2),
-            Offset.offset(0.15)
+        assertThat(casesPassed / validCases).isCloseTo(0.3, Offset.offset(0.1)
         );
     }
 
