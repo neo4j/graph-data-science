@@ -13,6 +13,8 @@ dependencies {
     compileOnly         group: 'org.immutables', name: 'builder',            version: ver.'immutables'
     compileOnly         group: 'org.jetbrains',  name: 'annotations',        version: ver.'jetbrains-annotations'
     compileOnly         group: 'org.eclipse.collections', name: 'eclipse-collections', version: ver.'eclipse-collections'
+    compileOnly         group: 'org.apache.logging.log4j', name: 'log4j-api', version: ver.'log4j'
+
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
             transitive = false
