@@ -1,5 +1,5 @@
 [[algorithms-scale-properties]]
-[.alpha]
+[.beta]
 = Scale Properties
 :description: This section describes the Scale Properties algorithm in the Neo4j Graph Data Science library.
 
@@ -7,7 +7,7 @@
 :entity: node
 :result: scaled properties
 
-include::partial$/operations-reference/alpha-note.adoc[]
+include::partial$/operations-reference/beta-note.adoc[]
 
 
 [[algorithms-scale-properties-intro]]
@@ -129,7 +129,7 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 .Run Scale Properties in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.scaleProperties.stream(
+CALL gds.beta.scaleProperties.stream(
   graphName: String,
   configuration: Map
 ) YIELD
@@ -161,7 +161,7 @@ include::partial$/algorithms/scale-properties/specific-configuration.adoc[]
 .Run Scale Properties in mutate mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.scaleProperties.mutate(
+CALL gds.beta.scaleProperties.mutate(
   graphName: String,
   configuration: Map
 ) YIELD
@@ -379,7 +379,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 .The following will run the algorithm in `stream` mode:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.scaleProperties.stream('myGraph', {
+CALL gds.beta.scaleProperties.stream('myGraph', {
   nodeProperties: ['buildYear', 'avgReview'],
   scaler: 'MinMax'
 }) YIELD nodeId, scaledProperty
@@ -424,7 +424,7 @@ The output is a list property which we will call `hotelFeatures`, imagining that
 .The following will run the algorithm in `mutate` mode:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.scaleProperties.mutate('myGraph', {
+CALL gds.beta.scaleProperties.mutate('myGraph', {
   nodeProperties: ['buildYear', 'avgReview'],
   scaler: 'Mean',
   mutateProperty: 'hotelFeatures'
@@ -517,7 +517,7 @@ Additionally, we will include the `avgReview` property in our feature vector.
 .The following will run the algorithm in `mutate` mode:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.scaleProperties.stream('myGraph', {
+CALL gds.beta.scaleProperties.stream('myGraph', {
   nodeProperties: ['avgReview', 'storyCapacity'],
   scaler: 'StdScore'
 }) YIELD nodeId, scaledProperty
@@ -580,7 +580,7 @@ We will use `5.12`, as this will make the smallest scaled value zero.
 .The following will run the algorithm with a custom offset for the log scaler:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.scaleProperties.stream('myGraph', {
+CALL gds.beta.scaleProperties.stream('myGraph', {
   nodeProperties: ['avgReview'],
   scaler: {type: 'Log', offset: 5.12}
 }) YIELD nodeId, scaledProperty

@@ -143,7 +143,7 @@ YIELD name, nodePropertySteps
 [opts="header",cols="1,9"]
 |===
 | name     | nodePropertySteps
-| "pipe"   | [{name=gds.alpha.scaleProperties.mutate, config={scaler=L1Norm, contextRelationshipTypes=[], contextNodeLabels=[], mutateProperty=scaledSizes, nodeProperties=sizePerStory}}]
+| "pipe"   | [{name=gds.beta.scaleProperties.mutate, config={scaler=L1Norm, contextRelationshipTypes=[], contextNodeLabels=[], mutateProperty=scaledSizes, nodeProperties=sizePerStory}}]
 |===
 
 The `scaledSizes` property can be later used as a feature.
