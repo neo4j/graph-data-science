@@ -105,6 +105,35 @@ class ScalePropertiesMutateProcTest extends BaseProcTest {
     }
 
     @Test
+    void alphaMutate() {
+        String query = GdsCypher
+            .call("g")
+            .algo("gds.alpha.scaleProperties")
+            .mutateMode()
+            .addParameter("nodeProperties", List.of("myProp"))
+            .addParameter("scaler", "max")
+            .addParameter("mutateProperty", "scaledProperty")
+            .yields();
+
+        assertCypherResult(query, List.of(Map.of(
+                "nodePropertiesWritten", 6L,
+                "scalerStatistics", hasEntry(
+                    equalTo("myProp"),
+                    Matchers.allOf(hasEntry(equalTo("absMax"), hasSize(2)))
+                ),
+                "configuration", isA(Map.class),
+                "mutateMillis", greaterThan(-1L),
+                "preProcessingMillis", greaterThan(-1L),
+                "computeMillis", greaterThan(-1L),
+                "postProcessingMillis", 0L
+            ))
+        );
+
+        Graph graph = GraphStoreCatalog.get("", DatabaseId.of(db), "g").graphStore().getUnion();
+        assertGraphEquals(fromGdl(EXPECTED_MUTATED_GRAPH), graph);
+    }
+
+    @Test
     void estimate() {
         var query = GdsCypher
             .call("g")

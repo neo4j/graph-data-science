@@ -65,6 +65,18 @@ public class ScalePropertiesStreamProc extends BaseProc {
         ).computeEstimate(graphName, configuration);
     }
 
+    @Procedure(value = "gds.alpha.scaleProperties.stream", deprecatedBy = "gds.beta.scaleProperties.stream")
+    @Description(SCALE_PROPERTIES_DESCRIPTION)
+    public Stream<Result> alphaStream(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return new ProcedureExecutor<>(
+            new ScalePropertiesStreamSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
+    }
+
     public static class Result {
         public final long nodeId;
         public final List<Double> scaledProperty;

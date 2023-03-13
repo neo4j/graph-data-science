@@ -65,6 +65,18 @@ public class ScalePropertiesMutateProc extends BaseProc {
         ).computeEstimate(graphName, configuration);
     }
 
+    @Procedure(value = "gds.alpha.scaleProperties.mutate", deprecatedBy = "gds.beta.scaleProperties.mutate")
+    @Description(SCALE_PROPERTIES_DESCRIPTION)
+    public Stream<MutateResult> alphaMutate(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return new ProcedureExecutor<>(
+            new ScalePropertiesMutateSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
+    }
+
     public static final class MutateResult extends StandardMutateResult {
 
         public final Map<String, Map<String, List<Double>>> scalerStatistics;
