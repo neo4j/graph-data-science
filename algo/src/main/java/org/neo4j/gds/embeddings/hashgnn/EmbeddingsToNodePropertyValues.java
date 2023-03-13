@@ -40,7 +40,7 @@ public final class EmbeddingsToNodePropertyValues {
             }
 
             @Override
-            public long size() {
+            public long nodeCount() {
                 return denseEmbeddings.size();
             }
         };
@@ -101,7 +101,7 @@ public final class EmbeddingsToNodePropertyValues {
         }
 
         @Override
-        public long size() {
+        public long nodeCount() {
             return binaryEmbeddings.size();
         }
 

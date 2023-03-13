@@ -165,7 +165,7 @@ class HashGNNTest {
         var result1 = new HashGNN(binaryGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
         var result2 = new HashGNN(binaryGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
 
-        for (int i = 0; i < result1.size(); i++) {
+        for (int i = 0; i < result1.nodeCount(); i++) {
             assertThat(result1.doubleArrayValue(i)).containsExactly(result2.doubleArrayValue(i));
         }
     }
@@ -288,7 +288,7 @@ class HashGNNTest {
         // Should be unaffected by concurrency
         "    10,  4,  10_000, 20_000, 8, -1, 5_924_072, 86_324_072",
 
-        // Should be
+        // Should be affected by the output dimension
         "    10,  4,  10_000, 20_000, 8, 100, 12_404_072, 12_404_072",
     })
         void shouldEstimateMemory(
