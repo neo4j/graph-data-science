@@ -21,10 +21,10 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
-import org.neo4j.gds.ml_api.TrainingMethod;
 
 import java.util.List;
 import java.util.Map;

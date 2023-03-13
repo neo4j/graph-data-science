@@ -22,9 +22,9 @@ package org.neo4j.gds.ml.nodePropertyPrediction.regression;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.models.Regressor;
-import org.neo4j.gds.ml_api.TrainingMethod;
 
 import java.util.Arrays;
 import java.util.List;

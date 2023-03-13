@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.models;
 
-import org.neo4j.gds.ml_api.TrainingMethod;
+import org.neo4j.gds.ml.api.TrainingMethod;
 
 public interface BaseModelData {
 

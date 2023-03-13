@@ -20,8 +20,8 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification;
 
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyTrainingPipeline;
-import org.neo4j.gds.ml_api.TrainingMethod;
 
 public class NodeClassificationTrainingPipeline extends NodePropertyTrainingPipeline {
     public static final String PIPELINE_TYPE = "Node classification training pipeline";

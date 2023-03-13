@@ -21,10 +21,10 @@ package org.neo4j.gds.ml.models.logisticregression;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.gradientdescent.GradientDescentConfig;
 import org.neo4j.gds.ml.models.ClassAwareTrainerConfig;
 import org.neo4j.gds.ml.models.PenaltyConfig;
-import org.neo4j.gds.ml_api.TrainingMethod;
 
 import java.util.Collection;
 import java.util.Map;

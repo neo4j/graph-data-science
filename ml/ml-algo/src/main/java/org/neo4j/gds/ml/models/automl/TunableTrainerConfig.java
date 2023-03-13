@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.models.automl;
 
+import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.automl.ParameterParser.RangeParameters;
 import org.neo4j.gds.ml.models.automl.hyperparameter.ConcreteParameter;
@@ -30,7 +31,6 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorTrainerConfig;
-import org.neo4j.gds.ml_api.TrainingMethod;
 
 import java.util.HashMap;
 import java.util.List;
