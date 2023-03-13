@@ -109,8 +109,8 @@ image::equations/scale-properties/l2norm.svg[scaled p equals p divided by l2 nor
 
 [NOTE]
 ====
-Some of the scalers are required to do divisions as part of their computation.
-For example, computing the "Standard Score" requires division by the standard deviation.
+Some scalers must do divisions as part of their computation.
+For example, computing the "Standard Score" requires dividing by the standard deviation.
 If computing a scaled property requires division by an illegal value, like 0 or NaN, the resulting scaled property value will be 0.
 ====
 
