@@ -131,7 +131,7 @@ include::partial$/machine-learning/node-property-prediction/pipelineInfoResult.a
 .The following will add a node property step to the pipeline. Here we assume that the input graph contains a property `sizePerStory`.
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.pipeline.nodeClassification.addNodeProperty('pipe', 'alpha.scaleProperties', {
+CALL gds.beta.pipeline.nodeClassification.addNodeProperty('pipe', 'beta.scaleProperties', {
   nodeProperties: 'sizePerStory',
   scaler: 'L1Norm',
   mutateProperty:'scaledSizes'
