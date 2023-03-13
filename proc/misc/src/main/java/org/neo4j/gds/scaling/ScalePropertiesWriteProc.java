@@ -23,8 +23,10 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -36,6 +38,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
+import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class ScalePropertiesWriteProc extends BaseProc {
@@ -53,6 +56,21 @@ public class ScalePropertiesWriteProc extends BaseProc {
             new ScalePropertiesWriteSpec(),
             executionContext()
         ).compute(graphName, configuration);
+    }
+
+    @Procedure(value = "gds.beta.scaleProperties.write.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphName,
+        @Name(value = "algoConfiguration") Map<String, Object> configuration
+    ) {
+        var spec = new ScalePropertiesWriteSpec();
+
+        return new MemoryEstimationExecutor<>(
+            spec,
+            executionContext(),
+            transactionContext()
+        ).computeEstimate(graphName, configuration);
     }
 
     @Override

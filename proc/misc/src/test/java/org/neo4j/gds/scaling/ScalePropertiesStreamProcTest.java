@@ -30,6 +30,9 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.isA;
+
 class ScalePropertiesStreamProcTest extends BaseProcTest {
 
     @Neo4jGraph
@@ -71,6 +74,30 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
             Map.of("nodeId", 4L, "scaledProperty", List.of(3 / 10D, 0D)),
             Map.of("nodeId", 5L, "scaledProperty", List.of(1 / 2D, 0D))
         ));
+    }
+
+    @Test
+    void estimate() {
+        var query = GdsCypher
+            .call("g")
+            .algo("gds.beta.scaleProperties")
+            .streamEstimation()
+            .addParameter("nodeProperties", List.of("myProp"))
+            .addParameter("scaler", "Mean")
+            .yields();
+
+        assertCypherResult(query, List.of(Map.of(
+                "mapView", isA(Map.class),
+                "treeView", isA(String.class),
+                "bytesMax", greaterThanOrEqualTo(0L),
+                "heapPercentageMin", greaterThanOrEqualTo(0.0),
+                "nodeCount", 6L,
+                "relationshipCount", 0L,
+                "requiredMemory", isA(String.class),
+                "bytesMin", greaterThanOrEqualTo(0L),
+                "heapPercentageMax", greaterThanOrEqualTo(0.0)
+            ))
+        );
     }
 
     @Test

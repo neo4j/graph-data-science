@@ -342,6 +342,32 @@ CALL gds.graph.project(
 In the following examples we will demonstrate how to scale the node properties of this graph.
 
 
+=== Memory Estimation
+
+:mode: stream
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.scaleProperties.stream.estimate('myGraph', {
+  nodeProperties: ['buildYear', 'avgReview'],
+  scaler: 'MinMax'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 8         | 0                 | 8416     | 8416     | "8416 Bytes"
+|===
+--
+
+
 [[algorithms-scale-properties-examples-stream]]
 === Stream
 

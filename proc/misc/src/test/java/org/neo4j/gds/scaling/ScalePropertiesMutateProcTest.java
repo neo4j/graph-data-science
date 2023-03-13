@@ -36,6 +36,7 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.isA;
@@ -101,5 +102,30 @@ class ScalePropertiesMutateProcTest extends BaseProcTest {
 
         Graph graph = GraphStoreCatalog.get("", DatabaseId.of(db), "g").graphStore().getUnion();
         assertGraphEquals(fromGdl(EXPECTED_MUTATED_GRAPH), graph);
+    }
+
+    @Test
+    void estimate() {
+        var query = GdsCypher
+            .call("g")
+            .algo("gds.beta.scaleProperties")
+            .mutateEstimation()
+            .addParameter("nodeProperties", List.of("myProp"))
+            .addParameter("scaler", "max")
+            .addParameter("mutateProperty", "scaledProperty")
+            .yields();
+
+        assertCypherResult(query, List.of(Map.of(
+                "mapView", isA(Map.class),
+                "treeView", isA(String.class),
+                "bytesMax", greaterThanOrEqualTo(0L),
+                "heapPercentageMin", greaterThanOrEqualTo(0.0),
+                "nodeCount", 6L,
+                "relationshipCount", 0L,
+                "requiredMemory", isA(String.class),
+                "bytesMin", greaterThanOrEqualTo(0L),
+                "heapPercentageMax", greaterThanOrEqualTo(0.0)
+            ))
+        );
     }
 }
