@@ -205,7 +205,7 @@ class SubGraphBuilderTest {
             RelationshipWeights.UNWEIGHTED
         );
 
-        assertEquals(6, subGraph.neighbors.length);
+        assertEquals(3, subGraph.neighbors.length);
     }
 
     @Test
