@@ -420,6 +420,7 @@ To find out how to inspect the new schema of the in-memory graph, see xref:graph
 
 === Stats
 
+:stats-syntax: algorithms-scale-properties-syntax
 include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
 [role=query-example]
