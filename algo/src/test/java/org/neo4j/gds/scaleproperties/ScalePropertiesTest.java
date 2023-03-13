@@ -163,7 +163,7 @@ class ScalePropertiesTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.scaleProperties.ScalePropertiesBaseConfigTest#scalers")
+    @MethodSource("org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfigTest#scalers")
     void supportLongAndFloatArrays(String scaler) {
         var baseConfigBuilder = ScalePropertiesStreamConfigImpl.builder()
             .scaler(ScalerFactory.SUPPORTED_SCALERS.get(scaler).apply(CypherMapWrapper.empty()));
