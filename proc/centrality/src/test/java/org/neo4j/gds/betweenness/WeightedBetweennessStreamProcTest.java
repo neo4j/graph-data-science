@@ -34,7 +34,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class WeightedBetweennessStreamProcTest extends BaseProcTest {
+class WeightedBetweennessStreamProcTest extends BaseProcTest {
 
     @Neo4jGraph
     static final String weightedGdl =

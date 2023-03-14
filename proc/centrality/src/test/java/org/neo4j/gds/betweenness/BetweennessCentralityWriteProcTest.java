@@ -21,58 +21,58 @@ package org.neo4j.gds.betweenness;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.data.Offset;
-import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.Collection;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 
-class BetweennessCentralityWriteProcTest extends BetweennessCentralityProcTest<BetweennessCentralityWriteConfig> {
+class BetweennessCentralityWriteProcTest extends BaseProcTest {
 
-    @TestFactory
-    final Stream<DynamicTest> configTests() {
-        return Stream.of(
-            WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
-        ).flatMap(Collection::stream);
-    }
+    @Neo4jGraph
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Node {name: 'a'})" +
+        ", (b:Node {name: 'b'})" +
+        ", (c:Node {name: 'c'})" +
+        ", (d:Node {name: 'd'})" +
+        ", (e:Node {name: 'e'})" +
+        ", (a)-[:REL]->(b)" +
+        ", (b)-[:REL]->(c)" +
+        ", (c)-[:REL]->(d)" +
+        ", (d)-[:REL]->(e)";
 
-    @Override
-    public Class<? extends AlgoBaseProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig, ?>> getProcedureClazz() {
-        return BetweennessCentralityWriteProc.class;
-    }
 
-    @Override
-    public BetweennessCentralityWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return BetweennessCentralityWriteConfig.of(mapWrapper);
-    }
+    @BeforeEach
+    void setupGraph() throws Exception {
+        registerProcedures(
+            BetweennessCentralityWriteProc.class,
+            GraphProjectProc.class
+        );
 
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("writeProperty")) {
-            mapWrapper = mapWrapper.withString("writeProperty", DEFAULT_RESULT_PROPERTY);
-        }
-        return mapWrapper;
+        runQuery(
+            GdsCypher.call(DEFAULT_GRAPH_NAME)
+                .graphProject()
+                .loadEverything(Orientation.NATURAL)
+                .yields()
+        );
     }
 
     @Test
     void testWrite() {
-        loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
             .call(DEFAULT_GRAPH_NAME)
             .algo("betweenness")
             .writeMode()
-            .addParameter("writeProperty", DEFAULT_RESULT_PROPERTY)
+            .addParameter("writeProperty", "centrality")
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
