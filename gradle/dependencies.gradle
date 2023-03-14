@@ -71,7 +71,7 @@ ext {
         'log4j'                : log4js[neo4j_minor],
         'memoryfilesystem'     : '2.2.0',
         'mockito'              : '4.11.0',
-        'mockito-junit-jupiter': '4.11.0',
+        'mockito-junit-jupiter': '5.2.0',
         'neo4j'                : properties.getOrDefault('neo4jVersion', neo4jDefault),
         'opencypher-front-end' : '9.0.20210312',
         'picocli'              : '4.6.1',
