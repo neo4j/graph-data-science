@@ -191,14 +191,4 @@ public class SccAlgorithm extends Algorithm<HugeLongArray> {
     /**
      * stream result type
      */
-    public static class StreamResult {
-
-        public final long nodeId;
-        public final long componentId;
-
-        public StreamResult(long nodeId, long componentId) {
-            this.nodeId = nodeId;
-            this.componentId = componentId;
-        }
-    }
 }

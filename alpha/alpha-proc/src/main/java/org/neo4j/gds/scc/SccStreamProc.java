@@ -38,11 +38,11 @@ import static org.neo4j.gds.scc.SccProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.alpha.scc.stream", description = DESCRIPTION, executionMode = STREAM)
-public class SccStreamProc extends SccProc<SccAlgorithm.StreamResult> {
+public class SccStreamProc extends SccProc<StreamResult> {
 
     @Procedure(value = "gds.alpha.scc.stream", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<SccAlgorithm.StreamResult> stream(
+    public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -52,7 +52,7 @@ public class SccStreamProc extends SccProc<SccAlgorithm.StreamResult> {
     }
 
     @Override
-    public ComputationResultConsumer<SccAlgorithm, HugeLongArray, SccConfig, Stream<SccAlgorithm.StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<SccAlgorithm, HugeLongArray, SccConfig, Stream<StreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             Graph graph = computationResult.graph();
             HugeLongArray components = computationResult.result();
@@ -63,7 +63,7 @@ public class SccStreamProc extends SccProc<SccAlgorithm.StreamResult> {
 
             return LongStream.range(0, graph.nodeCount())
                 .filter(i -> components.get(i) != -1)
-                .mapToObj(i -> new SccAlgorithm.StreamResult(graph.toOriginalNodeId(i), components.get(i)));
+                .mapToObj(i -> new StreamResult(graph.toOriginalNodeId(i), components.get(i)));
         };
     }
 }

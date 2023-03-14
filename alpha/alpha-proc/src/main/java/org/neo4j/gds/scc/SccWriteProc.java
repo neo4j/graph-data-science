@@ -46,11 +46,11 @@ import static org.neo4j.gds.scc.SccProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.WRITE;
 
 @GdsCallable(name = "gds.alpha.scc.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
+public class SccWriteProc extends SccProc<WriteResult> {
 
     @Procedure(value = "gds.alpha.scc.write", mode = WRITE)
     @Description(DESCRIPTION)
-    public Stream<SccResult> write(
+    public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -59,14 +59,14 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
     }
 
     @Override
-    public ComputationResultConsumer<SccAlgorithm, HugeLongArray, SccConfig, Stream<SccResult>> computationResultConsumer() {
+    public ComputationResultConsumer<SccAlgorithm, HugeLongArray, SccConfig, Stream<WriteResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             SccAlgorithm algorithm = computationResult.algorithm();
             HugeLongArray components = computationResult.result();
             SccConfig config = computationResult.config();
             Graph graph = computationResult.graph();
 
-            AbstractResultBuilder<SccResult> writeBuilder = new SccResultBuilder(
+            AbstractResultBuilder<WriteResult> writeBuilder = new SccResultBuilder(
                 executionContext.returnColumns(),
                 config.concurrency()
             )
@@ -120,82 +120,15 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
         };
     }
 
-    @SuppressWarnings("unused")
-    public static class SccResult {
-
-        public final long preProcessingMillis;
-        public final long computeMillis;
-        public final long writeMillis;
-        public final long postProcessingMillis;
-        public final long nodes;
-        public final long communityCount;
-        public final long setCount;
-        public final long minSetSize;
-        public final long maxSetSize;
-        public final long p1;
-        public final long p5;
-        public final long p10;
-        public final long p25;
-        public final long p50;
-        public final long p75;
-        public final long p90;
-        public final long p95;
-        public final long p99;
-        public final long p100;
-        public final String writeProperty;
-
-        public SccResult(
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            long writeMillis,
-            long nodes,
-            long communityCount,
-            long p100,
-            long p99,
-            long p95,
-            long p90,
-            long p75,
-            long p50,
-            long p25,
-            long p10,
-            long p5,
-            long p1,
-            long minSetSize,
-            long maxSetSize,
-            String writeProperty
-        ) {
-            this.preProcessingMillis = preProcessingMillis;
-            this.computeMillis = computeMillis;
-            this.postProcessingMillis = postProcessingMillis;
-            this.writeMillis = writeMillis;
-            this.nodes = nodes;
-            this.setCount = this.communityCount = communityCount;
-            this.p100 = p100;
-            this.p99 = p99;
-            this.p95 = p95;
-            this.p90 = p90;
-            this.p75 = p75;
-            this.p50 = p50;
-            this.p25 = p25;
-            this.p10 = p10;
-            this.p5 = p5;
-            this.p1 = p1;
-            this.minSetSize = minSetSize;
-            this.maxSetSize = maxSetSize;
-            this.writeProperty = writeProperty;
-        }
-    }
-
-    public static final class SccResultBuilder extends AbstractCommunityResultBuilder<SccResult> {
+    public static final class SccResultBuilder extends AbstractCommunityResultBuilder<WriteResult> {
 
         SccResultBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
         @Override
-        public SccResult buildResult() {
-            return new SccResult(
+        public WriteResult buildResult() {
+            return new WriteResult(
                 preProcessingMillis,
                 computeMillis,
                 writeMillis,
