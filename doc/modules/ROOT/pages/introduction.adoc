@@ -82,10 +82,10 @@ Heterogeneous relationships::
 The algorithm has the ability to distinguish between relationships of different types.
 
 [[introduction-algorithms-weighted]]
-Weighted::
-The algorithm supports configuration to set node and/or relationship properties to use as weights.
-These values can represent _cost_, _time_, _capacity_ or some other domain-specific properties, specified via the xref:common-usage/running-algos.adoc#common-configuration-node-weight-property[nodeWeightProperty], nodeProperties and xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] configuration parameters.
-The algorithm will by default consider each node and/or relationship as equally important.
+Weighted relationships::
+The algorithm supports configuration to set relationship properties to use as weights.
+These values can represent _cost_, _time_, _capacity_ or some other domain-specific properties, specified via the xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] configuration parameter.
+The algorithm will by default consider each relationship as equally important.
 
 
 [[introduction-catalog]]
