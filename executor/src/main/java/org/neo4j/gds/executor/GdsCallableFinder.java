@@ -124,23 +124,18 @@ public final class GdsCallableFinder {
             return classes
                 .stream()
                 .flatMap(clazz -> {
-                    GdsCallables callables = clazz.getAnnotation(GdsCallables.class);
-                    if (callables == null) {
-                        GdsCallable callable = clazz.getAnnotation(GdsCallable.class);
-                        return Stream.of(ImmutableClassAndCallable.of(clazz, callable));
-                    }
-                    return Arrays.stream(callables.value()).map(gdsCallable -> ImmutableClassAndCallable.of(clazz, gdsCallable));
-                }).map(clazzAndCallable -> {
-                    var gdsCallable = clazzAndCallable.gdsCallable();
-                    var clazz = clazzAndCallable.clazz();
+                    GdsCallable gdsCallable = clazz.getAnnotation(GdsCallable.class);
                     //noinspection unchecked
-                    return ImmutableGdsCallableDefinition
-                        .builder()
-                        .name(gdsCallable.name())
-                        .description(gdsCallable.description())
-                        .executionMode(gdsCallable.executionMode())
-                        .algorithmSpecClass((Class<AlgorithmSpec<Algorithm<Object>, Object, AlgoBaseConfig, Object, AlgorithmFactory<?, Algorithm<Object>, AlgoBaseConfig>>>) clazz)
-                        .build();
+                    return Stream
+                        .concat(Arrays.stream(gdsCallable.aliases()), Stream.of(gdsCallable.name()))
+                        .map(gdsCallableName ->
+                            ImmutableGdsCallableDefinition
+                                .builder()
+                                .name(gdsCallableName)
+                                .description(gdsCallable.description())
+                                .executionMode(gdsCallable.executionMode())
+                                .algorithmSpecClass((Class<AlgorithmSpec<Algorithm<Object>, Object, AlgoBaseConfig, Object, AlgorithmFactory<?, Algorithm<Object>, AlgoBaseConfig>>>) clazz)
+                                .build());
                 })
                 .collect(Collectors.toMap(
                     def -> def.name().toLowerCase(Locale.ENGLISH),
@@ -150,33 +145,11 @@ public final class GdsCallableFinder {
         }
 
         private static List<Class<?>> loadPossibleClassesFromJar(ClassLoader classLoader) {
-            var singularlyAnnotated = loadPossibleClassesFrom(
-                classLoader,
-                "META-INF/services/" + GdsCallable.class.getCanonicalName()
-            );
-            var plurallyAnnotated = loadPossibleClassesFrom(
-                classLoader,
-                "META-INF/services/" + GdsCallables.class.getCanonicalName()
-            );
-            var result = new ArrayList<Class<?>>();
-            result.addAll(singularlyAnnotated);
-            result.addAll(plurallyAnnotated);
-            return result;
+            return loadPossibleClassesFrom(classLoader, "META-INF/services/" + GdsCallable.class.getCanonicalName());
         }
 
         private static List<Class<?>> loadPossibleClassesFromResourcesFolder(ClassLoader classLoader) {
-            var singularlyAnnotated = loadPossibleClassesFrom(
-                classLoader,
-                "/META-INF/services/" + GdsCallable.class.getCanonicalName()
-            );
-            var plurallyAnnotated = loadPossibleClassesFrom(
-                classLoader,
-                "/META-INF/services/" + GdsCallables.class.getCanonicalName()
-            );
-            var result = new ArrayList<Class<?>>();
-            result.addAll(singularlyAnnotated);
-            result.addAll(plurallyAnnotated);
-            return result;
+            return loadPossibleClassesFrom(classLoader, "/META-INF/services/" + GdsCallable.class.getCanonicalName());
         }
 
         private static List<Class<?>> loadPossibleClassesFrom(ClassLoader classLoader, String path) {
@@ -212,10 +185,7 @@ public final class GdsCallableFinder {
                     .forPackage(pkg, classLoader)
                     .addScanners(Scanners.TypesAnnotated)
                     .filterInputsBy(new FilterBuilder().includePackage(pkg))))
-                .flatMap(reflections -> Stream.concat(
-                    reflections.getTypesAnnotatedWith(GdsCallable.class).stream(),
-                    reflections.getTypesAnnotatedWith(GdsCallables.class).stream()
-                ))
+                .flatMap(reflections -> reflections.getTypesAnnotatedWith(GdsCallable.class).stream())
                 .collect(Collectors.toList());
         }
 
@@ -225,12 +195,6 @@ public final class GdsCallableFinder {
             }
             return true;
         }
-    }
-
-    @ValueClass
-    interface ClassAndCallable {
-        Class<?> clazz();
-        GdsCallable gdsCallable();
     }
 
     @ValueClass
