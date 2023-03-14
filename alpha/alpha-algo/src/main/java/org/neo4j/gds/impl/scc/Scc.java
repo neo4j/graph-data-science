@@ -75,7 +75,7 @@ public class Scc extends Algorithm<HugeLongArray> {
      * compute scc
      */
     public HugeLongArray compute() {
-        progressTracker.beginSubTask(graph.nodeCount());
+        progressTracker.beginSubTask();
         index.fill(-1);
         connectedComponents.fill(-1);
         todo.clear();
@@ -122,13 +122,11 @@ public class Scc extends Algorithm<HugeLongArray> {
     private void postVisit(long nodeId) {
         if (boundaries.peek() == index.get(nodeId)) {
             boundaries.pop();
-            int elementCount = 0;
             long element;
             do {
                 element = stack.pop();
                 connectedComponents.set(element, nodeId);
                 visited.set(element);
-                elementCount++;
             } while (element != nodeId);
         }
 

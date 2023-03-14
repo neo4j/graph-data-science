@@ -22,6 +22,8 @@ package org.neo4j.gds.impl.scc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 public class SccAlgorithmFactory<CONFIG extends SccBaseConfig> extends GraphAlgorithmFactory<Scc, CONFIG> {
 
@@ -36,5 +38,10 @@ public class SccAlgorithmFactory<CONFIG extends SccBaseConfig> extends GraphAlgo
     @Override
     public String taskName() {
         return "Scc";
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.leaf(taskName(), graph.nodeCount());
     }
 }
