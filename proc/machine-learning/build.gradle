@@ -38,6 +38,7 @@ dependencies {
     implementation project(':neo4j-api')
     implementation project(':pipeline')
     implementation project(':proc-common')
+    implementation project(':proc-sysinfo')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
 

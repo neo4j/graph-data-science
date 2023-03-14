@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline.node.regression;
 
+import org.neo4j.gds.BuildInfoProperties;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.TrainProc;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -67,10 +68,7 @@ public class NodeRegressionPipelineTrainProc extends TrainProc<
 
     @Override
     public GraphStoreAlgorithmFactory<NodeRegressionTrainAlgorithm, NodeRegressionPipelineTrainConfig> algorithmFactory() {
-        var gdsVersion = databaseService.executeTransactionally("RETURN gds.version() AS version", Map.of(), result -> {
-            var row = result.next();
-            return (String) row.get("version");
-        });
+        var gdsVersion = BuildInfoProperties.require().gdsVersion();
         return new NodeRegressionTrainPipelineAlgorithmFactory(executionContext(), gdsVersion);
     }
 
