@@ -31,4 +31,11 @@ public interface BellmanFordBaseConfig extends AllShortestPathsBaseConfig {
         return true;
     }
 
+    @Value.Derived
+    @Configuration.Ignore
+    default boolean trackPaths() {
+        return true;
+    }
+
+
 }

@@ -51,6 +51,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
     private final long sourceNode;
     private final Graph graph;
     private final boolean trackNegativeCycles;
+    private final boolean trackPaths;
     private final int concurrency;
 
     public BellmanFord(
@@ -58,12 +59,14 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         ProgressTracker progressTracker,
         long sourceNode,
         boolean trackNegativeCycles,
+        boolean trackPaths,
         int concurrency
     ) {
         super(progressTracker);
         this.graph = graph;
         this.sourceNode = sourceNode;
         this.trackNegativeCycles = trackNegativeCycles;
+        this.trackPaths = trackPaths;
         this.concurrency = concurrency;
     }
 
@@ -128,7 +131,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         AtomicLong negativeCyclesIndex,
         DistanceTracker distanceTracker
     ) {
-        Stream<PathResult> paths = (containsNegativeCycle) ?
+        Stream<PathResult> paths = (containsNegativeCycle || !trackPaths) ?
             Stream.empty()
             : pathResults(
                 distanceTracker,

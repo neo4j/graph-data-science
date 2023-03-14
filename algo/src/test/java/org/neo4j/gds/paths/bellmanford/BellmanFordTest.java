@@ -123,7 +123,7 @@ class BellmanFordTest {
             idFunction.of("a3"),
             idFunction.of("a4")
         };
-        var result = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, a[0], true, 1).compute();
+        var result = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, a[0], true, true, 1).compute();
         long[][] EXPECTED_PATHS = new long[5][];
         EXPECTED_PATHS[(int) a[0]] = new long[]{a[0]};
         EXPECTED_PATHS[(int) a[1]] = new long[]{a[0], a[1]};
@@ -151,7 +151,7 @@ class BellmanFordTest {
     @Test
     void shouldTrackNegativeCycles() {
         long a0 = loopIdFunction.of("a0");
-        var result = new BellmanFord(loopGraph, ProgressTracker.NULL_TRACKER, a0, true, 1).compute();
+        var result = new BellmanFord(loopGraph, ProgressTracker.NULL_TRACKER, a0, true, true, 1).compute();
 
         assertThat(result.containsNegativeCycle()).isTrue();
         assertThat(result.negativeCycles().pathSet()).isNotEmpty();
@@ -161,7 +161,7 @@ class BellmanFordTest {
     @Test
     void shouldNotTrackNegativeCycles() {
         long a0 = loopIdFunction.of("a0");
-        var result = new BellmanFord(loopGraph, ProgressTracker.NULL_TRACKER, a0, false, 1).compute();
+        var result = new BellmanFord(loopGraph, ProgressTracker.NULL_TRACKER, a0, false, true, 1).compute();
 
         assertThat(result.containsNegativeCycle()).isTrue();
         assertThat(result.negativeCycles().pathSet()).isEmpty();
@@ -178,7 +178,7 @@ class BellmanFordTest {
             thirdIdFunction.of("E"),
             thirdIdFunction.of("F")};
 
-        var result = new BellmanFord(thirdGraph, ProgressTracker.NULL_TRACKER, nodes[0], true, 1).compute();
+        var result = new BellmanFord(thirdGraph, ProgressTracker.NULL_TRACKER, nodes[0], true, true, 1).compute();
         long[][] EXPECTED_PATHS = new long[6][];
         EXPECTED_PATHS[(int) nodes[0]] = new long[]{nodes[0]};
         EXPECTED_PATHS[(int) nodes[1]] = new long[]{nodes[0], nodes[3], nodes[2], nodes[1]};
@@ -264,12 +264,9 @@ class BellmanFordTest {
             .trackRelationships(true)
             .build();
 
-        var bellmanFord = new BellmanFord(
-            newGraph,
-            ProgressTracker.NULL_TRACKER,
-            start,
-            true, 4
-        ).compute().shortestPaths();
+        var bellmanFord = new BellmanFord(newGraph, ProgressTracker.NULL_TRACKER, start, true, true, 4)
+            .compute()
+            .shortestPaths();
 
         var dijkstraAlgo = Dijkstra
             .singleSource(newGraph, config, Optional.empty(), ProgressTracker.NULL_TRACKER)
