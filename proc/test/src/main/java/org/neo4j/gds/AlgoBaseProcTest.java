@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -78,7 +79,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * @deprecated do not add new uses of this.
  * Instead, copy any test cases you might want to use into your specific procedure test classes.
  */
-@Deprecated(forRemoval = true)
+@ApiStatus.Obsolete
 public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG extends AlgoBaseConfig, RESULT>
     extends GraphProjectConfigSupport {
 
