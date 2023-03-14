@@ -14,12 +14,25 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 == Introduction
 
+The Common Neighbor Aware Random Walk (CNARW) is a graph sampling technique that involves optimizing the selection of the next-hop node.
+It takes into account the number of common neighbors between the current node and the next-hop candidates.
+
+According to researchers [1], a major reason why simple random walks tend to converge slowly is due to the high clustering feature that is typical for some kinds of graphs e.g. for online social networks (OSNs).
+When moving to neighbors uniformly at random, it is easy to get caught in local loops and revisit previously visited nodes, which slows down convergence.
+To address this issue, one solution is to prioritize nodes that offer a higher likelihood of exploring unvisited nodes in each step.
+Nodes with higher degrees may provide this opportunity, but they may also have more common neighbors with previously visited nodes, increasing the likelihood of revisits.
+Therefore, choosing a node with a higher degree and fewer common neighbors with previously visited nodes (or the current node) not only increases the chances of discovering unvisited nodes but also reduces the probability of revisiting previously visited nodes in future steps.
+
+1. https://ieeexplore.ieee.org/abstract/document/9712235 R. Wang et al., "Common Neighbors Matter: Fast Random Walk Sampling with Common Neighbor Awareness," in IEEE Transactions on Knowledge and Data Engineering, doi: 10.1109/TKDE.2022.3150427.
+
 
 === Relationship weights
 
+Same as in the xref:management-ops/projections/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`relationshipWeightProperty`] parameter in RandomWalksWithRestarts algorithm.
 
 === Node label stratification
 
+Same as in the xref:management-ops/projections/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`nodeLabelStratification`] parameter in RandomWalksWithRestarts algorithm.
 
 == Syntax
 
@@ -93,23 +106,28 @@ include::partial$/algorithms/shared/examples-intro.adoc[]
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]
 ----
-CREATE
-  (nAlice:User {name: 'Alice'}),
-  (nBridget:User {name: 'Bridget'}),
-  (nCharles:User {name: 'Charles'}),
-  (nDoug:User {name: 'Doug'}),
-  (nMark:User {name: 'Mark'}),
-  (nMichael:User {name: 'Michael'}),
+  CREATE
+  (A:point {id:'a'}),
+  (B:point {id:'b'}),
+  (C:point {id:'c'}),
+  (D:point {id:'d'}),
+  (E:point {id:'e'}),
+  (F:point {id:'f'}),
+  (G:point {id:'g'}),
+  (H:point {id:'h'}),
 
-  (nAlice)-[:LINK]->(nBridget),
-  (nAlice)-[:LINK]->(nCharles),
-  (nCharles)-[:LINK]->(nBridget),
-
-  (nAlice)-[:LINK]->(nDoug),
-
-  (nMark)-[:LINK]->(nDoug),
-  (nMark)-[:LINK]->(nMichael),
-  (nMichael)-[:LINK]->(nMark);
+  (A)-[:edge]->(B),
+  (B)-[:edge]->(C),
+  (C)-[:edge]->(D),
+  (D)-[:edge]->(C),
+  (D)-[:edge]->(A),
+  (A)-[:edge]->(C),
+  (D)-[:edge]->(B),
+  (D)-[:edge]->(E),
+  (E)-[:edge]->(F),
+  (F)-[:edge]->(G),
+  (G)-[:edge]->(H),
+  (H)-[:edge]->(E);
 ----
 
 This graph has two clusters of _Users_, that are closely connected.
@@ -122,7 +140,7 @@ include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project( 'myGraph', 'User', 'LINK' )
+CALL gds.graph.project( 'myGraph', 'point', 'edge' )
 ----
 
 
@@ -130,15 +148,15 @@ CALL gds.graph.project( 'myGraph', 'User', 'LINK' )
 
 We can now go on to sample a subgraph from "myGraph" using CNARW.
 Using the "Alice" `User` node as our set of start nodes, we will venture to visit four nodes in the graph for our sample.
-Since we have six nodes total in our graph, and 4/6 ≈ 0.66 we will use this as our sampling ratio.
+Since we have six nodes total in our graph, and 4/8 ≈ 0.5 we will use this as our sampling ratio.
 
 [role=query-example]
 --
 .The following will run the Common neighbor awareness random walk sampling algorithm:
 [source, cypher, role=noplay]
 ----
-MATCH (start:User {name: 'Alice'})
-CALL gds.alpha.graph.sample.cnarw('mySample', 'myGraph', { samplingRatio: 0.66, startNodes: [id(start)] })
+MATCH (start:point {id: 'c'})
+CALL gds.alpha.graph.sample.cnarw('mySample', 'myGraph', { samplingRatio: 0.5, startNodes: [id(start)] })
 YIELD nodeCount, relationshipCount
 RETURN nodeCount, relationshipCount
 ----
@@ -147,7 +165,7 @@ RETURN nodeCount, relationshipCount
 [opts="header"]
 |===
 | nodeCount | relationshipCount
-| 4         | 2
+| 4         | 4
 |===
 --
 
