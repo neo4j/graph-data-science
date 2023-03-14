@@ -55,10 +55,6 @@ public class Scc extends Algorithm<HugeLongArray> {
     private PagedLongStack stack;
     private PagedLongStack boundaries;
     private PagedLongStack todo; // stores pairs of (node-Id, TODO-Id)
-    private int setCount;
-
-    private int minSetSize;
-    private int maxSetSize;
 
     public Scc(
         Graph graph,
@@ -80,9 +76,6 @@ public class Scc extends Algorithm<HugeLongArray> {
      */
     public HugeLongArray compute() {
         progressTracker.beginSubTask(graph.nodeCount());
-        setCount = 0;
-        minSetSize = Integer.MAX_VALUE;
-        maxSetSize = 0;
         index.fill(-1);
         connectedComponents.fill(-1);
         todo.clear();
@@ -91,27 +84,6 @@ public class Scc extends Algorithm<HugeLongArray> {
         graph.forEachNode(this::compute);
         progressTracker.endSubTask();
         return connectedComponents;
-    }
-
-    /**
-     * number of connected components in the graph
-     */
-    public long getSetCount() {
-        return setCount;
-    }
-
-    /**
-     * minimum set size
-     */
-    public long getMinSetSize() {
-        return minSetSize;
-    }
-
-    /**
-     * maximum component size
-     */
-    public long getMaxSetSize() {
-        return maxSetSize;
     }
 
     private boolean compute(long nodeId) {
@@ -158,9 +130,6 @@ public class Scc extends Algorithm<HugeLongArray> {
                 visited.set(element);
                 elementCount++;
             } while (element != nodeId);
-            minSetSize = Math.min(minSetSize, elementCount);
-            maxSetSize = Math.max(maxSetSize, elementCount);
-            setCount++;
         }
 
     }
@@ -188,7 +157,4 @@ public class Scc extends Algorithm<HugeLongArray> {
         todo.push(action.code);
     }
 
-    /**
-     * stream result type
-     */
 }

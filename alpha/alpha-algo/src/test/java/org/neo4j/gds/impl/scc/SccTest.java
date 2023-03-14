@@ -33,6 +33,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -83,9 +84,25 @@ class SccTest {
         HugeLongArray components = scc.compute();
 
         assertCC(components);
-        assertEquals(3, scc.getMaxSetSize());
-        assertEquals(3, scc.getMinSetSize());
-        assertEquals(3, scc.getSetCount());
+
+        HashMap<Long, Long> componentsMap = new HashMap<>();
+        for (long nodeId = 0; nodeId < components.size(); ++nodeId) {
+            long componentId = components.get(nodeId);
+            long componentValue = componentsMap.getOrDefault(componentId, 0L);
+            componentsMap.put(componentId, 1 + componentValue);
+        }
+
+        long max = 0;
+        long min = Long.MAX_VALUE;
+        for (var entry : componentsMap.entrySet()) {
+            min = Math.min(entry.getValue(), min);
+            max = Math.max(entry.getValue(), max);
+
+        }
+
+        assertEquals(3, componentsMap.keySet().size());
+        assertEquals(3, min);
+        assertEquals(3, max);
     }
 
     @Test
