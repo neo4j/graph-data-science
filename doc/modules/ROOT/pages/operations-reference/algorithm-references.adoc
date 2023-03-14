@@ -368,10 +368,13 @@
 | `gds.beta.steinerTree.stats`
 | `gds.beta.steinerTree.stream`
 | `gds.beta.steinerTree.write`
-.4+<.^| xref:algorithms/bellman-ford-single-source.adoc[Bellman-Ford]
+.8+<.^| xref:algorithms/bellman-ford-single-source.adoc[Bellman-Ford]
 | `gds.bellmanFord.mutate`
+| `gds.bellmanFord.mutate.estimate`
 | `gds.bellmanFord.stats`
+| `gds.bellmanFord.stats.estimate`
 | `gds.bellmanFord.stream`
+| `gds.bellmanFord.stream.estimate`
 | `gds.bellmanFord.write`
-
+| `gds.bellmanFord.write.estimate`
 |===
