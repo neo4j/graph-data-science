@@ -20,25 +20,17 @@
 package org.neo4j.gds.scc;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.executor.ComputationResultConsumer;
-import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.impl.scc.SccAlgorithm;
-import org.neo4j.gds.impl.scc.SccBaseConfig;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.scc.SccProc.DESCRIPTION;
+import static org.neo4j.gds.scc.SccWriteProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.alpha.scc.stream", description = DESCRIPTION, executionMode = STREAM)
 public class SccStreamProc extends BaseProc {
 
     @Procedure(value = "gds.alpha.scc.stream", mode = READ)
@@ -47,24 +39,12 @@ public class SccStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var computationResult = compute(graphName, configuration);
-        return computationResultConsumer().consume(computationResult, executionContext());
+        return new ProcedureExecutor<>(
+            new SccStreamSpec(),
+            executionContext()
+        ).compute(graphName, configuration);
 
     }
 
-    @Override
-    public ComputationResultConsumer<SccAlgorithm, HugeLongArray, SccBaseConfig, Stream<StreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            Graph graph = computationResult.graph();
-            HugeLongArray components = computationResult.result();
 
-            if (graph.isEmpty()) {
-                return Stream.empty();
-            }
-
-            return LongStream.range(0, graph.nodeCount())
-                .filter(i -> components.get(i) != -1)
-                .mapToObj(i -> new StreamResult(graph.toOriginalNodeId(i), components.get(i)));
-        };
-    }
 }
