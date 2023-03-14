@@ -53,7 +53,7 @@ ext {
         'compile-testing'      : '0.19',
         'cypher-dsl'           : '2021.2.0',
         'eclipse-collections'  : '10.4.0',
-        'ejml'                 : '0.41',
+        'ejml'                 : '0.42',
         'fastcsv'              : '1.0.4',
         'gdl'                  : '0.3.8',
         'hamcrest'             : '2.2',
