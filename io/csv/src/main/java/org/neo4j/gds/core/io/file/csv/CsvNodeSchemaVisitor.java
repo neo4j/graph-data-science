@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
-import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
 import org.neo4j.gds.core.io.schema.NodeSchemaVisitor;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.ArrayList;
 
 public class CsvNodeSchemaVisitor extends NodeSchemaVisitor {
 
@@ -37,11 +37,11 @@ public class CsvNodeSchemaVisitor extends NodeSchemaVisitor {
 
     public static final String NODE_SCHEMA_FILE_NAME = "node-schema.csv";
 
-    private final CsvAppender csvAppender;
+    private final CsvWriter csvWriter;
 
     public CsvNodeSchemaVisitor(Path fileLocation) {
         try {
-            this.csvAppender = new CsvWriter().append(fileLocation.resolve(NODE_SCHEMA_FILE_NAME), StandardCharsets.UTF_8);
+            this.csvWriter = CsvWriter.builder().build(fileLocation.resolve(NODE_SCHEMA_FILE_NAME), StandardCharsets.UTF_8);
             writeHeader();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -50,36 +50,33 @@ public class CsvNodeSchemaVisitor extends NodeSchemaVisitor {
 
     @Override
     protected void export() {
-        try {
-            csvAppender.appendField(nodeLabel().name());
-            if (key() != null) {
-                csvAppender.appendField(key());
-                csvAppender.appendField(valueType().csvName());
-                csvAppender.appendField(defaultValue().toString());
-                csvAppender.appendField(state().name());
-            }
-            csvAppender.endLine();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        var row = new ArrayList<String>();
+        row.add(nodeLabel().name());
+        if (key() != null) {
+            row.add(key());
+            row.add(valueType().csvName());
+            row.add(defaultValue().toString());
+            row.add(state().name());
         }
+        csvWriter.writeRow(row);
     }
 
     @Override
     public void close() {
         try {
-            csvAppender.flush();
-            csvAppender.close();
+            csvWriter.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void writeHeader() throws IOException {
-        csvAppender.appendField(LABEL_COLUMN_NAME);
-        csvAppender.appendField(PROPERTY_KEY_COLUMN_NAME);
-        csvAppender.appendField(VALUE_TYPE_COLUMN_NAME);
-        csvAppender.appendField(DEFAULT_VALUE_COLUMN_NAME);
-        csvAppender.appendField(STATE_COLUMN_NAME);
-        csvAppender.endLine();
+    private void writeHeader() {
+        csvWriter.writeRow(
+            LABEL_COLUMN_NAME,
+            PROPERTY_KEY_COLUMN_NAME,
+            VALUE_TYPE_COLUMN_NAME,
+            DEFAULT_VALUE_COLUMN_NAME,
+            STATE_COLUMN_NAME
+        );
     }
 }

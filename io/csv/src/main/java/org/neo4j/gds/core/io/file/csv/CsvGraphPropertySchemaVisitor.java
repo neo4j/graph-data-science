@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
-import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
 import org.neo4j.gds.core.io.schema.ElementSchemaVisitor;
 
@@ -37,11 +36,11 @@ public class CsvGraphPropertySchemaVisitor extends ElementSchemaVisitor  {
 
     public static final String GRAPH_PROPERTY_SCHEMA_FILE_NAME = "graph-property-schema.csv";
 
-    private final CsvAppender csvAppender;
+    private final CsvWriter csvWriter;
 
     public CsvGraphPropertySchemaVisitor(Path fileLocation) {
         try {
-            this.csvAppender = new CsvWriter().append(fileLocation.resolve(GRAPH_PROPERTY_SCHEMA_FILE_NAME), StandardCharsets.UTF_8);
+            this.csvWriter = CsvWriter.builder().build(fileLocation.resolve(GRAPH_PROPERTY_SCHEMA_FILE_NAME), StandardCharsets.UTF_8);
             writeHeader();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -50,34 +49,26 @@ public class CsvGraphPropertySchemaVisitor extends ElementSchemaVisitor  {
 
     @Override
     protected void export() {
-        try {
-            if (key() != null) {
-                csvAppender.appendField(key());
-                csvAppender.appendField(valueType().csvName());
-                csvAppender.appendField(defaultValue().toString());
-                csvAppender.appendField(state().name());
-            }
-            csvAppender.endLine();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (key() != null) {
+            csvWriter.writeRow(key(), valueType().csvName(), defaultValue().toString(), state().name());
         }
     }
 
     @Override
     public void close() {
         try {
-            csvAppender.flush();
-            csvAppender.close();
+            csvWriter.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void writeHeader() throws IOException {
-        csvAppender.appendField(PROPERTY_KEY_COLUMN_NAME);
-        csvAppender.appendField(VALUE_TYPE_COLUMN_NAME);
-        csvAppender.appendField(DEFAULT_VALUE_COLUMN_NAME);
-        csvAppender.appendField(STATE_COLUMN_NAME);
-        csvAppender.endLine();
+    private void writeHeader() {
+        csvWriter.writeRow(
+            PROPERTY_KEY_COLUMN_NAME,
+            VALUE_TYPE_COLUMN_NAME,
+            DEFAULT_VALUE_COLUMN_NAME,
+            STATE_COLUMN_NAME
+        );
     }
 }
