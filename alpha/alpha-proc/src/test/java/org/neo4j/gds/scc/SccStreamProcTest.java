@@ -72,6 +72,7 @@ class SccStreamProcTest extends BaseProcTest {
 
     @Test
     void shouldStream(){
+        
         final IntIntScatterMap testMap = new IntIntScatterMap();
 
         String query = GdsCypher

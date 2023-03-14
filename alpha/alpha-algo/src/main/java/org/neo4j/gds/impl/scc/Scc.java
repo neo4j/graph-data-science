@@ -33,19 +33,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
  */
 public class Scc extends Algorithm<HugeLongArray> {
 
-    private enum Action {
-        VISIT(0L),
-        VISITEDGE(1L),
-        POSTVISIT(2L);
-
-        public final long code;
-
-        Action(long code) {
-            this.code = code;
-        }
-
-    }
-
     private Graph graph;
 
     private final long nodeCount;
@@ -153,6 +140,19 @@ public class Scc extends Algorithm<HugeLongArray> {
     private void push(Action action, long value) {
         todo.push(value);
         todo.push(action.code);
+    }
+
+    private enum Action {
+        VISIT(0L),
+        VISITEDGE(1L),
+        POSTVISIT(2L);
+
+        public final long code;
+
+        Action(long code) {
+            this.code = code;
+        }
+
     }
 
 }

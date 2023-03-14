@@ -35,6 +35,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class SccWriteProc extends BaseProc {
+
     public static final String DESCRIPTION = "The SCC algorithm finds sets of connected nodes in an directed graph, " +
                                              "where all nodes in the same set form a connected component.";
 

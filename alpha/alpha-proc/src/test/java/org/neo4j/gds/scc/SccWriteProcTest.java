@@ -30,7 +30,6 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SccWriteProcTest extends BaseProcTest {
 
@@ -102,9 +101,9 @@ class SccWriteProcTest extends BaseProcTest {
         runQueryWithRowConsumer(validationQuery, row -> testMap.addTo(row.getNumber("c").intValue(), 1));
 
         // 3 sets with 3 elements each
-        assertEquals(3, testMap.size());
+        assertThat(testMap).hasSize(3);
         for (IntIntCursor cursor : testMap) {
-            assertEquals(3, cursor.value);
+            assertThat(cursor.value).isEqualTo(3);
         }
     }
 

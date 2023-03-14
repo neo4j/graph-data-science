@@ -19,13 +19,8 @@
  */
 package org.neo4j.gds.impl.scc;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
-@ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
 public interface SccBaseConfig extends AlgoBaseConfig {
 
 }
