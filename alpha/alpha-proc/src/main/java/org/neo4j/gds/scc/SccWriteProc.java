@@ -31,7 +31,7 @@ import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.impl.scc.SccAlgorithm;
-import org.neo4j.gds.impl.scc.SccConfig;
+import org.neo4j.gds.impl.scc.SccBaseConfig;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
@@ -59,11 +59,11 @@ public class SccWriteProc extends SccProc<WriteResult> {
     }
 
     @Override
-    public ComputationResultConsumer<SccAlgorithm, HugeLongArray, SccConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<SccAlgorithm, HugeLongArray, SccBaseConfig, Stream<WriteResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             SccAlgorithm algorithm = computationResult.algorithm();
             HugeLongArray components = computationResult.result();
-            SccConfig config = computationResult.config();
+            SccBaseConfig config = computationResult.config();
             Graph graph = computationResult.graph();
 
             AbstractResultBuilder<WriteResult> writeBuilder = new SccResultBuilder(

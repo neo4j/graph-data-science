@@ -19,12 +19,13 @@
  */
 package org.neo4j.gds.scc;
 
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.impl.scc.SccAlgorithm;
-import org.neo4j.gds.impl.scc.SccConfig;
+import org.neo4j.gds.impl.scc.SccBaseConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -38,7 +39,7 @@ import static org.neo4j.gds.scc.SccProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.alpha.scc.stream", description = DESCRIPTION, executionMode = STREAM)
-public class SccStreamProc extends SccProc<StreamResult> {
+public class SccStreamProc extends BaseProc {
 
     @Procedure(value = "gds.alpha.scc.stream", mode = READ)
     @Description(DESCRIPTION)
@@ -52,7 +53,7 @@ public class SccStreamProc extends SccProc<StreamResult> {
     }
 
     @Override
-    public ComputationResultConsumer<SccAlgorithm, HugeLongArray, SccConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<SccAlgorithm, HugeLongArray, SccBaseConfig, Stream<StreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             Graph graph = computationResult.graph();
             HugeLongArray components = computationResult.result();

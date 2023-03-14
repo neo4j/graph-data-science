@@ -19,25 +19,22 @@
  */
 package org.neo4j.gds.impl.scc;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.WritePropertyConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-@ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface SccConfig extends AlgoBaseConfig, WritePropertyConfig {
+public class SccAlgorithmFactory<CONFIG extends SccBaseConfig> extends GraphAlgorithmFactory<SccAlgorithm, CONFIG> {
 
-    @Value.Default
     @Override
-    default String writeProperty() {
-        return "componentId";
+    public SccAlgorithm build(Graph graphOrGraphStore, CONFIG configuration, ProgressTracker progressTracker) {
+        return new SccAlgorithm(
+            graphOrGraphStore,
+            progressTracker
+        );
     }
 
-    static SccConfig of(CypherMapWrapper userInput) {
-        return new SccConfigImpl(userInput);
+    @Override
+    public String taskName() {
+        return "Scc";
     }
 }
