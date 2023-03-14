@@ -54,5 +54,5 @@ dependencies {
     testImplementation project(':proc-test')
     testImplementation project(':proc-community')
 
-    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: ver.'mockito'
+    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: ver.'mockito-junit-jupiter'
 }
