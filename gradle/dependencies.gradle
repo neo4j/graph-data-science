@@ -67,7 +67,7 @@ ext {
         'jjwt'                 : '0.11.5',
         'jol'                  : '0.16',
         'jqwik'                : '1.6.5',
-        'junit5bom'            : '5.9.1',
+        'junit5bom'            : '5.9.2',
         'log4j'                : log4js[neo4j_minor],
         'memoryfilesystem'     : '2.2.0',
         'mockito'              : '4.11.0',
