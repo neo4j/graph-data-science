@@ -40,7 +40,7 @@ ext {
             'asciidoctorj'        : '2.5.6',
             'reflections'         : '0.10.2'
         ],
-        'assertj'              : '3.23.1',
+        'assertj'              : '3.24.2',
         'auto-common'          : '1.2.1',
         'auto-service'         : '1.0.1',
         'bouncycastle-prov'     : '1.71',
