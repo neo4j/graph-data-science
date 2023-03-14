@@ -19,30 +19,65 @@
  */
 package org.neo4j.gds.degree;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class DegreeCentralityStreamProcTest extends DegreeCentralityProcTest<DegreeCentralityStreamConfig> {
+class DegreeCentralityStreamProcTest extends BaseProcTest {
 
-    @Override
-    public Class<? extends AlgoBaseProc<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityStreamConfig, ?>> getProcedureClazz() {
-        return DegreeCentralityStreamProc.class;
-    }
+    @Neo4jGraph
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Label1)" +
+        ", (b:Label1)" +
+        ", (c:Label1)" +
+        ", (d:Label1)" +
+        ", (e:Label1)" +
+        ", (f:Label1)" +
+        ", (g:Label1)" +
+        ", (h:Label1)" +
+        ", (i:Label1)" +
+        ", (j:Label1)" +
 
-    @Override
-    public DegreeCentralityStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return DegreeCentralityStreamConfig.of(mapWrapper);
+        ", (b)-[:TYPE1 {weight: 2.0}]->(c)" +
+
+        ", (c)-[:TYPE1 {weight: 2.0}]->(b)" +
+
+        ", (d)-[:TYPE1 {weight: 2.0}]->(a)" +
+        ", (d)-[:TYPE1 {weight: 2.0}]->(b)" +
+
+        ", (e)-[:TYPE1 {weight: 2.0}]->(b)" +
+        ", (e)-[:TYPE1 {weight: 2.0}]->(d)" +
+        ", (e)-[:TYPE1 {weight: 2.0}]->(f)" +
+
+        ", (f)-[:TYPE1 {weight: 2.0}]->(b)" +
+        ", (f)-[:TYPE1 {weight: 2.0}]->(e)";
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            DegreeCentralityStreamProc.class,
+            GraphProjectProc.class
+        );
+
+        String createQuery = GdsCypher.call("dcGraph")
+            .graphProject()
+            .loadEverything()
+            .yields();
+
+        runQuery(createQuery);
     }
 
     @Test
     void testStream() {
-        String streamQuery = GdsCypher.call(GRAPH_NAME)
+        String streamQuery = GdsCypher.call("dcGraph")
             .algo("degree")
             .streamMode()
             .yields();

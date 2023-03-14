@@ -101,7 +101,7 @@ abstract class DegreeCentralityProcTest<CONFIG extends DegreeCentralityConfig>
             GraphProjectProc.class
         );
 
-        String createQuery = GdsCypher.call(GRAPH_NAME)
+        String createQuery = GdsCypher.call("dcGraph")
             .graphProject()
             .loadEverything()
             .yields();
@@ -113,7 +113,7 @@ abstract class DegreeCentralityProcTest<CONFIG extends DegreeCentralityConfig>
     public void assertResultEquals(
         DegreeCentrality.DegreeFunction result1, DegreeCentrality.DegreeFunction result2
     ) {
-        var graph = GraphStoreCatalog.get(getUsername(), databaseId(), GRAPH_NAME).graphStore().getUnion();
+        var graph = GraphStoreCatalog.get(getUsername(), databaseId(), "dcGraph").graphStore().getUnion();
         graph.forEachNode(nodeId -> {
             assertEquals(result1.get(nodeId), result2.get(nodeId));
             return true;
