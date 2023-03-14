@@ -31,7 +31,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
  *
  * specified in:  http://code.activestate.com/recipes/578507-strongly-connected-components-of-a-directed-graph/
  */
-public class SccAlgorithm extends Algorithm<HugeLongArray> {
+public class Scc extends Algorithm<HugeLongArray> {
 
     private enum Action {
         VISIT(0L),
@@ -60,7 +60,7 @@ public class SccAlgorithm extends Algorithm<HugeLongArray> {
     private int minSetSize;
     private int maxSetSize;
 
-    public SccAlgorithm(
+    public Scc(
         Graph graph,
         ProgressTracker progressTracker
     ) {

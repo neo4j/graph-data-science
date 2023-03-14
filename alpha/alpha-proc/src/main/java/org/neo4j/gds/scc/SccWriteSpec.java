@@ -30,7 +30,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.impl.scc.SccAlgorithm;
+import org.neo4j.gds.impl.scc.Scc;
 import org.neo4j.gds.impl.scc.SccAlgorithmFactory;
 import org.neo4j.gds.impl.scc.SccWriteConfig;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.scc.SccWriteProc.DESCRIPTION;
 
 @GdsCallable(name = "gds.alpha.scc.write", description = DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
-public class SccWriteSpec implements AlgorithmSpec<SccAlgorithm, HugeLongArray, SccWriteConfig, Stream<WriteResult>, SccAlgorithmFactory<SccWriteConfig>> {
+public class SccWriteSpec implements AlgorithmSpec<Scc, HugeLongArray, SccWriteConfig, Stream<WriteResult>, SccAlgorithmFactory<SccWriteConfig>> {
 
     @Override
     public String name() {
@@ -58,9 +58,9 @@ public class SccWriteSpec implements AlgorithmSpec<SccAlgorithm, HugeLongArray, 
     }
 
     @Override
-    public ComputationResultConsumer<SccAlgorithm, HugeLongArray, SccWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Scc, HugeLongArray, SccWriteConfig, Stream<WriteResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            SccAlgorithm algorithm = computationResult.algorithm();
+            Scc algorithm = computationResult.algorithm();
             HugeLongArray components = computationResult.result();
             var config = computationResult.config();
             Graph graph = computationResult.graph();

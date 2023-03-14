@@ -79,7 +79,7 @@ class SccTest {
 
     @Test
     void testDirect() {
-        SccAlgorithm scc = new SccAlgorithm(graph, ProgressTracker.NULL_TRACKER);
+        Scc scc = new Scc(graph, ProgressTracker.NULL_TRACKER);
         HugeLongArray components = scc.compute();
 
         assertCC(components);
@@ -90,7 +90,7 @@ class SccTest {
 
     @Test
     void testHugeIterativeScc() {
-        SccAlgorithm algo = new SccAlgorithm(graph, ProgressTracker.NULL_TRACKER);
+        Scc algo = new Scc(graph, ProgressTracker.NULL_TRACKER);
         HugeLongArray components = algo.compute();
         assertCC(components);
     }
@@ -137,7 +137,7 @@ class SccTest {
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(task, log, 1, EmptyTaskRegistryFactory.INSTANCE);
 
-        var algo = new SccAlgorithm(
+        var algo = new Scc(
             graph,
             progressTracker
         );
