@@ -37,7 +37,7 @@ allprojects {
         }
 
         tasks.register("sourcesJar", Jar) {
-            classifier = 'sources'
+            archiveClassifier = 'sources'
             from(sourceSets.main.allJava)
         }
 
@@ -47,7 +47,7 @@ allprojects {
         }
 
         tasks.register("javadocJar", Jar) {
-            classifier = 'javadoc'
+            archiveClassifier = 'javadoc'
             from javadoc
         }
 
