@@ -34,6 +34,7 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
     protected LongUnaryOperator toOriginalId;
     protected TerminationFlag terminationFlag;
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
+    protected long relationshipCount = -1L;
 
     public abstract T build();
 
@@ -49,6 +50,11 @@ public abstract class RelationshipStreamExporterBuilder<T extends RelationshipSt
 
     public RelationshipStreamExporterBuilder<T> withRelationships(Stream<Relationship> relationships) {
         this.relationships = relationships;
+        return this;
+    }
+
+    public RelationshipStreamExporterBuilder<T> withRelationshipCount(long relationshipCount) {
+        this.relationshipCount = relationshipCount;
         return this;
     }
 
