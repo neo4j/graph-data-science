@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.graphsampling.samplers.rwr;
+package org.neo4j.gds.graphsampling.samplers;
 
 import com.carrotsearch.hppc.LongLongHashMap;
 import com.carrotsearch.hppc.procedures.LongLongProcedure;
@@ -45,7 +45,7 @@ public interface SeenNodes {
         private final HugeAtomicBitSet seenBitSet;
         private final long totalExpectedNodes;
 
-        SeenNodesByLabelSet(Graph inputGraph, NodeLabelHistogram.Result nodeLabelHistogram, double samplingRatio) {
+        public SeenNodesByLabelSet(Graph inputGraph, NodeLabelHistogram.Result nodeLabelHistogram, double samplingRatio) {
             this.inputGraph = inputGraph;
             this.availableNodeLabels = nodeLabelHistogram.availableNodeLabels();
             this.seenBitSet = HugeAtomicBitSet.create(inputGraph.nodeCount());
@@ -97,7 +97,7 @@ public interface SeenNodes {
         private final HugeAtomicBitSet seenBitSet;
         private final long expectedNodes;
 
-        GlobalSeenNodes(HugeAtomicBitSet seenBitSet, long expectedNodes) {
+        public GlobalSeenNodes(HugeAtomicBitSet seenBitSet, long expectedNodes) {
             this.seenBitSet = seenBitSet;
             this.expectedNodes = expectedNodes;
         }

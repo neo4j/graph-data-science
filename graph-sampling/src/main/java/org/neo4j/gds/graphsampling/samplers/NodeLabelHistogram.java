@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.graphsampling.samplers.rwr;
+package org.neo4j.gds.graphsampling.samplers;
 
 import com.carrotsearch.hppc.LongLongHashMap;
 import com.carrotsearch.hppc.procedures.LongLongProcedure;
@@ -44,7 +44,7 @@ public final class NodeLabelHistogram {
         LongLongHashMap histogram();
     }
 
-    static Result compute(Graph inputGraph, int concurrency, ProgressTracker progressTracker) {
+    public static Result compute(Graph inputGraph, int concurrency, ProgressTracker progressTracker) {
         progressTracker.beginSubTask("Count node labels");
         progressTracker.setSteps(inputGraph.nodeCount());
 

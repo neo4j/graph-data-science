@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.graphsampling.samplers.rwr;
+package org.neo4j.gds.graphsampling.samplers.cnarw;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
@@ -29,8 +29,9 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
-import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfigImpl;
+import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
+import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfigImpl;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,7 +42,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-class RandomWalkWithRestartsTest {
+class CommonNeighbourAwareRandomWalkTest {
 
     @GdlGraph(idOffset = 42)
     private static final String DB_CYPHER =
@@ -76,7 +77,36 @@ class RandomWalkWithRestartsTest {
     @Inject
     private GraphStore graphStore;
 
-    Graph getGraph(RandomWalkWithRestartsConfig config) {
+    @Inject
+    private IdFunction idFunction;
+
+    @GdlGraph(graphNamePrefix = "lollipop", idOffset = 42)
+    private static final String lollipopGDL =
+        "CREATE" +
+        "  (xy:Z {prop: 42})" +
+        ", (x1:Z {prop: 43})" +
+        ", (x2:Z {prop: 44})" +
+        ", (x3:Z {prop: 45})" +
+        ", (x4:Z {prop: 46})" +
+        ", (x5:Z {prop: 47})" +
+        ", (y1:Z {prop: 48})" +
+        ", (y2:Z {prop: 49})" +
+        ",                    (xy)-[:REL]->(x1), (xy)-[:REL]->(x2), (xy)-[:REL]->(x3), (xy)-[:REL]->(x4), (xy)-[:REL]->(x5)" +
+        ", (x1)-[:REL]->(xy),                    (x1)-[:REL]->(x2), (x1)-[:REL]->(x3), (x1)-[:REL]->(x4), (x1)-[:REL]->(x5)" +
+        ", (x2)-[:REL]->(xy), (x2)-[:REL]->(x1),                    (x2)-[:REL]->(x3), (x2)-[:REL]->(x4), (x2)-[:REL]->(x5)" +
+        ", (x3)-[:REL]->(xy), (x3)-[:REL]->(x1), (x3)-[:REL]->(x2),                    (x3)-[:REL]->(x4), (x3)-[:REL]->(x5)" +
+        ", (x4)-[:REL]->(xy), (x4)-[:REL]->(x1), (x4)-[:REL]->(x2), (x4)-[:REL]->(x3),                    (x4)-[:REL]->(x5)" +
+        ", (x5)-[:REL]->(xy), (x5)-[:REL]->(x1), (x5)-[:REL]->(x2), (x5)-[:REL]->(x3), (x5)-[:REL]->(x4)" +
+        ", (xy)-[:REL]->(y1)" +
+        ", (y1)-[:REL]->(y2)";
+
+    @Inject
+    private TestGraph lollipopGraph;
+
+    @Inject
+    private IdFunction lollipopIdFunction;
+
+    Graph getGraph(CommonNeighbourAwareRandomWalkConfig config) {
         return graphStore.getGraph(
             config.nodeLabelIdentifiers(graphStore),
             config.internalRelationshipTypes(graphStore),
@@ -84,20 +114,17 @@ class RandomWalkWithRestartsTest {
         );
     }
 
-    @Inject
-    private IdFunction idFunction;
-
     @Test
     void shouldSample() {
-        var config = RandomWalkWithRestartsConfigImpl.builder()
+        var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
             .startNodes(List.of(idFunction.of("a")))
             .samplingRatio(0.5)
             .restartProbability(0.1)
             .build();
 
-        var rwr = new RandomWalkWithRestarts(config);
+        var cnarw = new CommonNeighbourAwareRandomWalk(config);
         var graph = getGraph(config);
-        var nodes = rwr.compute(graph, ProgressTracker.NULL_TRACKER);
+        var nodes = cnarw.compute(graph, ProgressTracker.NULL_TRACKER);
 
         assertThat(nodes.cardinality()).isEqualTo(7);
 
@@ -111,11 +138,64 @@ class RandomWalkWithRestartsTest {
     }
 
     @Test
+    void shouldSampleLollipop() {
+        var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
+            .startNodes(List.of(lollipopIdFunction.of("xy")))
+            .samplingRatio(0.375)
+            .restartProbability(0.0001)
+            .concurrency(1)
+            .randomSeed(777L)
+            .build();
+
+        var cnarw = new CommonNeighbourAwareRandomWalk(config);
+        var nodes = cnarw.compute(lollipopGraph, ProgressTracker.NULL_TRACKER);
+
+        assertThat(nodes.cardinality()).isEqualTo(3);
+
+        assertThat(nodes.get(lollipopGraph.toMappedNodeId(lollipopIdFunction.of("xy")))).isTrue();
+        assertThat(nodes.get(lollipopGraph.toMappedNodeId(lollipopIdFunction.of("y1")))).isTrue();
+        assertThat(nodes.get(lollipopGraph.toMappedNodeId(lollipopIdFunction.of("y2")))).isTrue();
+    }
+
+    @Test
+    void shouldSampleLollipopSeveral() {
+        double casesPassedY1 = 0;
+        double casesPassedX1 = 0;
+        var validCases = 0;
+
+        for (long seed = 0; seed < 1000; seed++) {
+            var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
+                .startNodes(List.of(lollipopIdFunction.of("xy")))
+                .samplingRatio(0.250)
+                .restartProbability(0.0001)
+                .concurrency(1)
+                .randomSeed(seed)
+                .build();
+
+            var cnarw = new CommonNeighbourAwareRandomWalk(config);
+            var nodes = cnarw.compute(lollipopGraph, ProgressTracker.NULL_TRACKER);
+
+            assertThat(nodes.cardinality()).isEqualTo(2);
+
+            validCases++;
+
+            if (nodes.get(lollipopGraph.toMappedNodeId(lollipopIdFunction.of("y1")))) {
+                casesPassedY1++;
+            }
+            if (nodes.get(lollipopGraph.toMappedNodeId(lollipopIdFunction.of("x1")))) {
+                casesPassedX1++;
+            }
+        }
+        assertThat(casesPassedY1 / validCases).isCloseTo(0.5, Offset.offset(0.015));
+        assertThat(casesPassedX1 / validCases).isCloseTo(0.1, Offset.offset(0.015));
+    }
+
+    @Test
     void shouldSampleWeighted() {
         double casesPassed = 0;
         var validCases = 0;
         for (long seed = 0; seed < 250; seed++) {
-            var config = RandomWalkWithRestartsConfigImpl.builder()
+            var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
                 .startNodes(List.of(idFunction.of("x")))
                 .relationshipWeightProperty("distance")
                 .samplingRatio(0.22)
@@ -125,11 +205,10 @@ class RandomWalkWithRestartsTest {
                 .build();
 
             var graph = getGraph(config);
-            var rwr = new RandomWalkWithRestarts(config);
-            var nodes = rwr.compute(graph, ProgressTracker.NULL_TRACKER);
-            if (rwr.startNodesUsed().contains(idFunction.of("x1")) || rwr
-                .startNodesUsed()
-                .contains(idFunction.of("x2"))) {
+            var cnarw = new CommonNeighbourAwareRandomWalk(config);
+            var nodes = cnarw.compute(graph, ProgressTracker.NULL_TRACKER);
+            if (cnarw.startNodesUsed().contains(idFunction.of("x1")) ||
+                cnarw.startNodesUsed().contains(idFunction.of("x2"))) {
                 continue;
             }
             validCases++;
@@ -144,12 +223,8 @@ class RandomWalkWithRestartsTest {
                 casesPassed++;
             }
         }
-        // the probability that we walk from x to x3 everytime until a new startnode is picked
-        // is P(x->x3) ^ <number of walks until new startnode given that x3 is picked every time>
-        // the number of these walks is 30, because first walk keeps quality at 1 and for remaining
-        // walks we have quality *= 0.9 and 0.9 ^ 29 is the first that is lower than the threshold 0.05.
-        // therefore the probability of a case passing is (200 / 202) ^ 30.
-        assertThat(casesPassed / validCases).isCloseTo(Math.pow(200.0 / 202, 30), Offset.offset(0.015));
+
+        assertThat(casesPassed / validCases).isCloseTo(0.637, Offset.offset(0.001));
     }
 
     @Test
@@ -157,7 +232,7 @@ class RandomWalkWithRestartsTest {
 
         double casesPassed = 0;
         var validCases = 0;
-        var config = RandomWalkWithRestartsConfigImpl.builder()
+        var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
             .startNodes(List.of(idFunction.of("x")))
             .relationshipWeightProperty("distance")
             .concurrency(4)
@@ -166,11 +241,10 @@ class RandomWalkWithRestartsTest {
         var graph = getGraph(config);
 
         for (int i = 0; i < 250; i++) {
-            var rwr = new RandomWalkWithRestarts(config);
-            var nodes = rwr.compute(graph, ProgressTracker.NULL_TRACKER);
-            if (rwr.startNodesUsed().contains(idFunction.of("x1")) || rwr
-                .startNodesUsed()
-                .contains(idFunction.of("x2"))) {
+            var cnarw = new CommonNeighbourAwareRandomWalk(config);
+            var nodes = cnarw.compute(graph, ProgressTracker.NULL_TRACKER);
+            if (cnarw.startNodesUsed().contains(idFunction.of("x1")) ||
+                cnarw.startNodesUsed().contains(idFunction.of("x2"))) {
                 continue;
             }
             validCases++;
@@ -185,20 +259,13 @@ class RandomWalkWithRestartsTest {
                 casesPassed++;
             }
         }
-        // the analysis from single threaded case can be partially repeated. it takes 51 walks to get below 0.05/(4 ^ 2),
-        // so the expectation would be (200 / 202) ** (51 * 4) , however the result is closer to (200 / 202) ** (51 * 2),
-        // and its unclear exactly why.
-        // this may be due to the fastest thread picking a new startnode before the other threads finish and therefore the
-        // other threads have less time to find the improbable node x2
-        assertThat(casesPassed / validCases).isCloseTo(
-            Math.pow(200.0 / 202, 51.0 * config.concurrency() / 2),
-            Offset.offset(0.33)
+        assertThat(casesPassed / validCases).isCloseTo(0.3, Offset.offset(0.1)
         );
     }
 
     @Test
     void shouldSampleWithFiltering() {
-        var config = RandomWalkWithRestartsConfigImpl.builder()
+        var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
             .startNodes(List.of(idFunction.of("e")))
             .nodeLabels(List.of("M", "X"))
             .relationshipTypes(List.of("R1"))
@@ -206,9 +273,9 @@ class RandomWalkWithRestartsTest {
             .restartProbability(0.1)
             .build();
 
-        var rwr = new RandomWalkWithRestarts(config);
+        var cnarw = new CommonNeighbourAwareRandomWalk(config);
         var graph = getGraph(config);
-        var nodes = rwr.compute(graph, ProgressTracker.NULL_TRACKER);
+        var nodes = cnarw.compute(graph, ProgressTracker.NULL_TRACKER);
 
         assertThat(nodes.cardinality()).isEqualTo(3);
 
@@ -219,7 +286,7 @@ class RandomWalkWithRestartsTest {
 
     @Test
     void shouldRestartOnDeadEnd() {
-        var config = RandomWalkWithRestartsConfigImpl.builder()
+        var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
             .nodeLabels(List.of("Z"))
             .relationshipTypes(List.of("R1"))
             .startNodes(List.of(idFunction.of("x")))
@@ -227,15 +294,21 @@ class RandomWalkWithRestartsTest {
             .restartProbability(0.0000000001)
             .build();
 
-        var rwr = new RandomWalkWithRestarts(config);
-        var nodes = rwr.compute(getGraph(config), ProgressTracker.NULL_TRACKER);
+        var cnarw = new CommonNeighbourAwareRandomWalk(config);
+        var graph = getGraph(config);
+        var nodes = cnarw.compute(graph, ProgressTracker.NULL_TRACKER);
 
         assertThat(nodes.cardinality()).isEqualTo(4);
+
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("x")))).isTrue();
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("x1")))).isTrue();
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("x2")))).isTrue();
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("x3")))).isTrue();
     }
 
     @Test
     void shouldBeDeterministic() {
-        var config = RandomWalkWithRestartsConfigImpl.builder()
+        var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
             .samplingRatio(0.5)
             .startNodes(List.of(idFunction.of("a")))
             .restartProbability(0.1)
@@ -243,10 +316,10 @@ class RandomWalkWithRestartsTest {
             .randomSeed(42L)
             .build();
 
-        var rwr = new RandomWalkWithRestarts(config);
+        var cnarw = new CommonNeighbourAwareRandomWalk(config);
 
-        var nodes1 = rwr.compute(getGraph(config), ProgressTracker.NULL_TRACKER);
-        var nodes2 = rwr.compute(getGraph(config), ProgressTracker.NULL_TRACKER);
+        var nodes1 = cnarw.compute(getGraph(config), ProgressTracker.NULL_TRACKER);
+        var nodes2 = cnarw.compute(getGraph(config), ProgressTracker.NULL_TRACKER);
 
         assertThat(nodes1.cardinality()).isEqualTo(nodes2.cardinality());
         for (int i = 0; i < nodes1.size(); i++) {
@@ -256,15 +329,15 @@ class RandomWalkWithRestartsTest {
 
     @Test
     void shouldNotExploreNewStartNode() {
-        var config = RandomWalkWithRestartsConfigImpl.builder()
+        var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
             .startNodes(List.of(idFunction.of("x")))
             .samplingRatio(4.0 / graphStore.nodeCount() + 0.001)
             .restartProbability(0.1)
             .build();
 
-        var rwr = new RandomWalkWithRestarts(config);
+        var cnarw = new CommonNeighbourAwareRandomWalk(config);
         var graph = getGraph(config);
-        var nodes = rwr.compute(graph, ProgressTracker.NULL_TRACKER);
+        var nodes = cnarw.compute(graph, ProgressTracker.NULL_TRACKER);
 
         assertThat(nodes.cardinality()).isEqualTo(4);
 
@@ -276,35 +349,35 @@ class RandomWalkWithRestartsTest {
 
     @Test
     void shouldExploreNewStartNode() {
-        var config = RandomWalkWithRestartsConfigImpl.builder()
+        var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
             .startNodes(List.of(idFunction.of("x")))
             .samplingRatio(5.0 / graphStore.nodeCount() + 0.001)
             .restartProbability(0.1)
             .build();
 
-        var rwr = new RandomWalkWithRestarts(config);
-        var nodes = rwr.compute(getGraph(config), ProgressTracker.NULL_TRACKER);
+        var cnarw = new CommonNeighbourAwareRandomWalk(config);
+        var nodes = cnarw.compute(getGraph(config), ProgressTracker.NULL_TRACKER);
 
         assertThat(nodes.cardinality()).isGreaterThan(4);
     }
 
     @Test
     void shouldUseMultipleStartNodes() {
-        var config = RandomWalkWithRestartsConfigImpl.builder()
+        var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
             .startNodes(List.of(idFunction.of("x"), idFunction.of("a"), idFunction.of("h"), idFunction.of("j")))
             .samplingRatio(1)
             .restartProbability(0.05)
             .build();
 
-        var rwr = new RandomWalkWithRestarts(config);
-        var nodes = rwr.compute(getGraph(config), ProgressTracker.NULL_TRACKER);
+        var cnarw = new CommonNeighbourAwareRandomWalk(config);
+        var nodes = cnarw.compute(getGraph(config), ProgressTracker.NULL_TRACKER);
 
         assertThat(nodes.cardinality()).isEqualTo(14);
     }
 
     @Test
     void shouldSampleWithStratification() {
-        var config = RandomWalkWithRestartsConfigImpl.builder()
+        var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
             .startNodes(List.of(idFunction.of("a")))
             .samplingRatio(0.5)
             .restartProbability(0.1)
@@ -313,9 +386,9 @@ class RandomWalkWithRestartsTest {
             .nodeLabelStratification(true)
             .build();
 
-        var rwr = new RandomWalkWithRestarts(config);
+        var cnarw = new CommonNeighbourAwareRandomWalk(config);
         var graph = getGraph(config);
-        var nodes = rwr.compute(graph, ProgressTracker.NULL_TRACKER);
+        var nodes = cnarw.compute(graph, ProgressTracker.NULL_TRACKER);
 
         assertThat(nodes.cardinality()).isEqualTo(8);
 
@@ -336,44 +409,5 @@ class RandomWalkWithRestartsTest {
         }
 
         assertThat(labelCounts).isEqualTo(expectedLabelCounts);
-    }
-
-    @Test
-    void shouldSampleUniformlyFromNeighbours() {
-        double casesPassedX1 = 0;
-        double casesPassedX2 = 0;
-        double casesPassedX3 = 0;
-        var validCases = 0;
-
-        for (long seed = 0; seed < 1000; seed++) {
-            var config = RandomWalkWithRestartsConfigImpl.builder()
-                .startNodes(List.of(idFunction.of("x")))
-                .samplingRatio(0.14)
-                .restartProbability(0.0001)
-                .concurrency(1)
-                .randomSeed(seed)
-                .build();
-
-            var rwr = new RandomWalkWithRestarts(config);
-            var graph = getGraph(config);
-            var nodes = rwr.compute(graph, ProgressTracker.NULL_TRACKER);
-
-            assertThat(nodes.cardinality()).isEqualTo(2);
-
-            validCases++;
-
-            if (nodes.get(graph.toMappedNodeId(idFunction.of("x1")))) {
-                casesPassedX1++;
-            }
-            if (nodes.get(graph.toMappedNodeId(idFunction.of("x2")))) {
-                casesPassedX2++;
-            }
-            if (nodes.get(graph.toMappedNodeId(idFunction.of("x3")))) {
-                casesPassedX3++;
-            }
-        }
-        assertThat(casesPassedX1 / validCases).isCloseTo(0.33, Offset.offset(0.02));
-        assertThat(casesPassedX2 / validCases).isCloseTo(0.33, Offset.offset(0.02));
-        assertThat(casesPassedX3 / validCases).isCloseTo(0.33, Offset.offset(0.02));
     }
 }
