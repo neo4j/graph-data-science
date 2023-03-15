@@ -60,6 +60,7 @@ import static org.neo4j.gds.TestSupport.crossArguments;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.TestSupport.toArguments;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.gds.core.Aggregation.COUNT;
 import static org.neo4j.gds.core.Aggregation.DEFAULT;
 import static org.neo4j.gds.core.Aggregation.MAX;
 import static org.neo4j.gds.core.Aggregation.MIN;
@@ -508,9 +509,10 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
 
     static Stream<Arguments> localAggregationArguments() {
         return Stream.of(
-            Arguments.of(MIN, 42, 45, 1337, 1340),
-            Arguments.of(MAX, 44, 46, 1339, 1341),
-            Arguments.of(SUM, 129, 91, 4014, 2681)
+            Arguments.of(MIN, 42, 45, MAX, 1339, 1341),
+            Arguments.of(MAX, 44, 46, MIN, 1337, 1340),
+            Arguments.of(SUM, 129, 91, COUNT, 3, 2),
+            Arguments.of(COUNT, 3, 2, SUM, 4014, 2681)
         );
     }
 
@@ -597,9 +599,10 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
     @ParameterizedTest
     @MethodSource("localAggregationArguments")
     void multiplePropertiesWithAggregation(
-        Aggregation aggregation,
+        Aggregation aggregation1,
         double expectedNodeAP1,
         double expectedNodeBP1,
+        Aggregation aggregation2,
         double expectedNodeAP2,
         double expectedNodeBP2
     ) {
@@ -616,8 +619,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         );
         GraphStore graphs = TestGraphLoaderFactory.graphLoader(db, NATIVE)
             .withRelationshipProperties(
-                PropertyMapping.of("p1", "p1", DefaultValue.of(1.0), aggregation),
-                PropertyMapping.of("p2", "p2", DefaultValue.of(2.0), aggregation)
+                PropertyMapping.of("p1", "p1", DefaultValue.of(1.0), aggregation1),
+                PropertyMapping.of("p2", "p2", DefaultValue.of(2.0), aggregation2)
             )
             .graphStore();
 
