@@ -76,7 +76,7 @@ ext {
         'opencypher-front-end' : '9.0.20210312',
         'picocli'              : '4.6.1',
         'qala-datagen'         : '2.5.1',
-        'RoaringBitmap'        : '0.9.32',
+        'RoaringBitmap'        : '0.9.39',
         'sb-contrib'           : '7.4.7',
         'scala'                : scalas[neo4j_minor],
         'spotbugsToolVersion'  : '4.7.2',
