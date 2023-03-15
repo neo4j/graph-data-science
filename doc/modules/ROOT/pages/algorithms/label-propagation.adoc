@@ -300,7 +300,7 @@ CALL gds.graph.project(
     'User',
     'FOLLOW',
     {
-        nodeProperties: 'seed_label',
+        nodeProperties: ['posts', 'seed_label'],
         relationshipProperties: 'weight'
     }
 )
