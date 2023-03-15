@@ -125,7 +125,7 @@ public class TreeNode<PREDICTION extends Number> {
             if (b == null) return false;
             else {
                 return o.featureIndex == b.featureIndex && Double.compare(o.thresholdValue, b.thresholdValue) == 0
-                       && o.prediction.equals(b.prediction) && TreeNode.equals(o.leftChild, b.leftChild) && TreeNode.equals(o.rightChild, b.rightChild);
+                       && Objects.equals(o.prediction, b.prediction) && TreeNode.equals(o.leftChild, b.leftChild) && TreeNode.equals(o.rightChild, b.rightChild);
             }
         }
     }
