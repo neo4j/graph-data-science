@@ -51,7 +51,11 @@ public interface ProgressLogger {
         logMessage(() -> msg);
     }
 
-    void logDebug(String msg);
+    void logDebug(Supplier<String> msg);
+
+    default void logDebug(String msg) {
+        logDebug(() -> msg);
+    }
 
     void logWarning(String msg);
 

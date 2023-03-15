@@ -21,6 +21,8 @@ package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 
+import java.util.function.Supplier;
+
 public interface ProgressTracker {
 
     ProgressTracker NULL_TRACKER = new EmptyProgressTracker();
@@ -61,6 +63,8 @@ public interface ProgressTracker {
      * {@link Task#UNKNOWN_VOLUME} if no task volume is set.
      */
     long currentVolume();
+
+    void logDebug(Supplier<String> messageSupplier);
 
     default void logDebug(String message) {
         logMessage(LogLevel.DEBUG, message);
@@ -146,7 +150,10 @@ public interface ProgressTracker {
 
         @Override
         public void logMessage(LogLevel level, String message) {
+        }
 
+        @Override
+        public void logDebug(Supplier<String> messageSupplier) {
         }
 
         @Override
