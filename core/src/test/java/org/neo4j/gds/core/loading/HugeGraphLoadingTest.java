@@ -38,10 +38,10 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
-import org.roaringbitmap.longlong.Roaring64Bitmap;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -285,19 +285,19 @@ final class HugeGraphLoadingTest extends BaseTest {
         var labelA = Label.label("A");
         var labelB = Label.label("B");
 
-        var labelABits = new Roaring64Bitmap();
-        var labelBBits = new Roaring64Bitmap();
+        var labelABits = HugeAtomicBitSet.create(nodeCount);
+        var labelBBits = HugeAtomicBitSet.create(nodeCount);
 
         runInTransaction(db, tx -> {
             for (int i = 0; i < nodeCount; i++) {
                 if (i % 3 == 0) {
-                    labelABits.add(tx.createNode(labelA).getId());
+                    labelABits.set(tx.createNode(labelA).getId());
                 } else if (i % 3 == 1) {
-                    labelBBits.add(tx.createNode(labelB).getId());
+                    labelBBits.set(tx.createNode(labelB).getId());
                 } else {
                     var id = tx.createNode(labelA, labelB).getId();
-                    labelABits.add(id);
-                    labelBBits.add(id);
+                    labelABits.set(id);
+                    labelBBits.set(id);
                 }
             }
         });
@@ -322,14 +322,14 @@ final class HugeGraphLoadingTest extends BaseTest {
 
             var neoId = graphStore.nodes().toOriginalNodeId(node);
 
-            if (labelABits.contains(neoId) && !labelBBits.contains(neoId)) {
+            if (labelABits.get(neoId) && !labelBBits.get(neoId)) {
                 assertThat(nodeLabels).contains(labelA.name());
                 assertThat(nodeLabels).doesNotContain(labelB.name());
             }
-            else if (!labelABits.contains(neoId) && labelBBits.contains(neoId)) {
+            else if (!labelABits.get(neoId) && labelBBits.get(neoId)) {
                 assertThat(nodeLabels).doesNotContain(labelA.name());
                 assertThat(nodeLabels).contains(labelB.name());
-            } else if (labelABits.contains(neoId) && labelBBits.contains(neoId)) {
+            } else if (labelABits.get(neoId) && labelBBits.get(neoId)) {
                 assertThat(nodeLabels).contains(labelA.name());
                 assertThat(nodeLabels).contains(labelB.name());
             } else {
