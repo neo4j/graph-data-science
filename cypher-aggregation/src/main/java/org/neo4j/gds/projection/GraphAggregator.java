@@ -248,7 +248,6 @@ public class GraphAggregator implements CompatUserAggregator {
         }
 
         this.result = importer.result(
-            this.username,
             this.databaseId,
             this.progressTimer,
             extractNodeId.hasSeenArbitraryIds()

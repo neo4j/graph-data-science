@@ -27,6 +27,7 @@ import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -56,8 +57,9 @@ import static org.neo4j.gds.Orientation.UNDIRECTED;
 public final class GraphImporter {
     public static final int NO_TARGET_NODE = -1;
 
-    private final String graphName;
-    private final GraphProjectFromCypherAggregationConfig config;
+    private final GraphProjectConfig config;
+    private final List<String> undirectedRelationshipTypes;
+    private final List<String> inverseIndexedRelationshipTypes;
     private final LazyIdMapBuilder idMapBuilder;
 
     private final boolean canWriteToDatabase;
@@ -66,13 +68,15 @@ public final class GraphImporter {
     private final ImmutableMutableGraphSchema.Builder graphSchemaBuilder;
 
     public GraphImporter(
-        String graphName,
-        GraphProjectFromCypherAggregationConfig config,
+        GraphProjectConfig config,
+        List<String> undirectedRelationshipTypes,
+        List<String> inverseIndexedRelationshipTypes,
         LazyIdMapBuilder idMapBuilder,
         boolean canWriteToDatabase
     ) {
-        this.graphName = graphName;
         this.config = config;
+        this.undirectedRelationshipTypes = undirectedRelationshipTypes;
+        this.inverseIndexedRelationshipTypes = inverseIndexedRelationshipTypes;
         this.idMapBuilder = idMapBuilder;
         this.canWriteToDatabase = canWriteToDatabase;
         this.relImporters = new ConcurrentHashMap<>();
@@ -98,7 +102,13 @@ public final class GraphImporter {
 
         var idMapBuilder = idMapBuilder(config.readConcurrency());
 
-        return new GraphImporter(graphName, config, idMapBuilder, canWriteToDatabase);
+        return new GraphImporter(
+            config,
+            config.undirectedRelationshipTypes(),
+            config.inverseIndexedRelationshipTypes(),
+            idMapBuilder,
+            canWriteToDatabase
+        );
     }
 
     private static void validateGraphName(String graphName, String username, DatabaseId databaseId) {
@@ -162,16 +172,15 @@ public final class GraphImporter {
     }
 
     public AggregationResult result(
-        String username,
         DatabaseId databaseId,
         ProgressTimer timer,
         boolean hasSeenArbitraryId
     ) {
-        var graphName = this.graphName;
+        var graphName = config.graphName();
 
         // in case something else has written something with the same graph name
         // validate again before doing the heavier graph building
-        validateGraphName(graphName, username, databaseId);
+        validateGraphName(config.graphName(), config.username(), databaseId);
 
         this.idMapBuilder.prepareForFlush();
 
@@ -201,12 +210,11 @@ public final class GraphImporter {
     }
 
     private RelationshipsBuilder newRelImporter(RelationshipType relType, @Nullable PropertyValues properties) {
-        var undirectedTypes = this.config.undirectedRelationshipTypes();
-        var orientation = undirectedTypes.contains(relType.name) || undirectedTypes.contains("*")
+        var orientation = this.undirectedRelationshipTypes.contains(relType.name) || this.undirectedRelationshipTypes.contains(
+            "*")
             ? UNDIRECTED
             : NATURAL;
 
-        List<String> inverseIndexedRelationshipTypes = this.config.inverseIndexedRelationshipTypes();
         boolean indexInverse = inverseIndexedRelationshipTypes.contains(relType.name)
                                || inverseIndexedRelationshipTypes.contains("*");
 
