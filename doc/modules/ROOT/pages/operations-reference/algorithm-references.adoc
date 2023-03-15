@@ -248,12 +248,10 @@
 | `gds.beta.influenceMaximization.celf.stream.estimate`
 | `gds.beta.influenceMaximization.celf.write`
 | `gds.beta.influenceMaximization.celf.write.estimate`
-.10+<.^|xref:algorithms/scale-properties.adoc[Scale Properties]
+.8+<.^|xref:algorithms/scale-properties.adoc[Scale Properties]
 | `gds.beta.scaleProperties.mutate`
-| `gds.alpha.scaleProperties.mutate` (deprecated)
 | `gds.beta.scaleProperties.mutate.estimate`
 | `gds.beta.scaleProperties.stream`
-| `gds.alpha.scaleProperties.stream` (deprecated)
 | `gds.beta.scaleProperties.stream.estimate`
 | `gds.beta.scaleProperties.stats`
 | `gds.beta.scaleProperties.stats.estimate`
@@ -379,4 +377,7 @@
 | `gds.bellmanFord.stream.estimate`
 | `gds.bellmanFord.write`
 | `gds.bellmanFord.write.estimate`
+.2+<.^|xref:algorithms/scale-properties.adoc[Scale Properties]
+| `gds.alpha.scaleProperties.mutate` (deprecated)
+| `gds.alpha.scaleProperties.stream` (deprecated)
 |===
