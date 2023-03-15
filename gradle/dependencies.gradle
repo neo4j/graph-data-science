@@ -79,7 +79,7 @@ ext {
         'RoaringBitmap'        : '0.9.32',
         'sb-contrib'           : '7.4.7',
         'scala'                : scalas[neo4j_minor],
-        'spotbugsToolVersion'  : '4.7.2',
+        'spotbugsToolVersion'  : '4.7.3',
         'protobuf'             : '3.22.2',
     ]
     dep = [
