@@ -21,31 +21,51 @@ package org.neo4j.gds.betweenness;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
-public class BetweennessCentralityStatsProcTest extends BetweennessCentralityProcTest<BetweennessCentralityStatsConfig> {
-    @Override
-    public Class<? extends AlgoBaseProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStatsConfig, ?>> getProcedureClazz() {
-        return BetweennessCentralityStatsProc.class;
-    }
+class BetweennessCentralityStatsProcTest extends BaseProcTest {
 
-    @Override
-    public BetweennessCentralityStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return BetweennessCentralityStatsConfig.of(mapWrapper);
+    @Neo4jGraph
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Node {name: 'a'})" +
+        ", (b:Node {name: 'b'})" +
+        ", (c:Node {name: 'c'})" +
+        ", (d:Node {name: 'd'})" +
+        ", (e:Node {name: 'e'})" +
+        ", (a)-[:REL]->(b)" +
+        ", (b)-[:REL]->(c)" +
+        ", (c)-[:REL]->(d)" +
+        ", (d)-[:REL]->(e)";
+
+    @BeforeEach
+    void setupGraph() throws Exception {
+        registerProcedures(
+            BetweennessCentralityStatsProc.class,
+            GraphProjectProc.class
+        );
+
+        runQuery(
+            GdsCypher.call(DEFAULT_GRAPH_NAME)
+                .graphProject()
+                .loadEverything(Orientation.NATURAL)
+                .yields()
+        );
     }
 
     @Test
     void testStats() {
-        loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
             .call(DEFAULT_GRAPH_NAME)
             .algo("betweenness")
@@ -85,7 +105,6 @@ public class BetweennessCentralityStatsProcTest extends BetweennessCentralityPro
 
     @Test
     void testStatsWithDeprecatedFields() {
-        loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher
             .call(DEFAULT_GRAPH_NAME)
             .algo("betweenness")

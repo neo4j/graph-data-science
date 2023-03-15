@@ -22,52 +22,68 @@ package org.neo4j.gds.degree;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.data.Offset;
-import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.test.config.WritePropertyConfigProcTest;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.Collection;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
-class DegreeCentralityWriteProcTest extends DegreeCentralityProcTest<DegreeCentralityWriteConfig> {
+class DegreeCentralityWriteProcTest extends BaseProcTest {
 
-    @Override
-    Stream<DynamicTest> modeSpecificConfigTests() {
-        return Stream.of(
-            WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
-        ).flatMap(Collection::stream);
-    }
+    @Neo4jGraph
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Label1)" +
+        ", (b:Label1)" +
+        ", (c:Label1)" +
+        ", (d:Label1)" +
+        ", (e:Label1)" +
+        ", (f:Label1)" +
+        ", (g:Label1)" +
+        ", (h:Label1)" +
+        ", (i:Label1)" +
+        ", (j:Label1)" +
 
-    @Override
-    public Class<? extends AlgoBaseProc<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityWriteConfig, ?>> getProcedureClazz() {
-        return DegreeCentralityWriteProc.class;
-    }
+        ", (b)-[:TYPE1 {weight: 2.0}]->(c)" +
 
-    @Override
-    public DegreeCentralityWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return DegreeCentralityWriteConfig.of(mapWrapper);
-    }
+        ", (c)-[:TYPE1 {weight: 2.0}]->(b)" +
 
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("writeProperty")) {
-            mapWrapper = mapWrapper.withString("writeProperty", DEFAULT_RESULT_PROPERTY);
-        }
-        return mapWrapper;
+        ", (d)-[:TYPE1 {weight: 2.0}]->(a)" +
+        ", (d)-[:TYPE1 {weight: 2.0}]->(b)" +
+
+        ", (e)-[:TYPE1 {weight: 2.0}]->(b)" +
+        ", (e)-[:TYPE1 {weight: 2.0}]->(d)" +
+        ", (e)-[:TYPE1 {weight: 2.0}]->(f)" +
+
+        ", (f)-[:TYPE1 {weight: 2.0}]->(b)" +
+        ", (f)-[:TYPE1 {weight: 2.0}]->(e)";
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(
+            DegreeCentralityWriteProc.class,
+            GraphProjectProc.class
+        );
+
+        String createQuery = GdsCypher.call("dcGraph")
+            .graphProject()
+            .loadEverything()
+            .yields();
+
+        runQuery(createQuery);
     }
 
     @Test
     void testWrite() {
-        String writeQuery = GdsCypher.call(GRAPH_NAME)
+        String writeQuery = GdsCypher.call("dcGraph")
             .algo("degree")
             .writeMode()
-            .addParameter("writeProperty", DEFAULT_RESULT_PROPERTY)
+            .addParameter("writeProperty", "degreeScore")
             .yields();
 
         runQueryWithRowConsumer(writeQuery, row -> {

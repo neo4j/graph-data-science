@@ -20,13 +20,15 @@
 package org.neo4j.gds.betweenness;
 
 import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.MutateNodePropertyTest;
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.Map;
 
@@ -35,59 +37,51 @@ import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 
-public class BetweennessCentralityMutateProcTest
-    extends BetweennessCentralityProcTest<BetweennessCentralityMutateConfig>
-    implements MutateNodePropertyTest<BetweennessCentrality, BetweennessCentralityMutateConfig, HugeAtomicDoubleArray> {
+class BetweennessCentralityMutateProcTest extends BaseProcTest {
 
-    @Override
-    public String mutateProperty() {
-        return DEFAULT_RESULT_PROPERTY;
-    }
+    @Neo4jGraph
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Node {name: 'a'})" +
+        ", (b:Node {name: 'b'})" +
+        ", (c:Node {name: 'c'})" +
+        ", (d:Node {name: 'd'})" +
+        ", (e:Node {name: 'e'})" +
+        ", (a)-[:REL]->(b)" +
+        ", (b)-[:REL]->(c)" +
+        ", (c)-[:REL]->(d)" +
+        ", (d)-[:REL]->(e)";
 
-    @Override
-    public ValueType mutatePropertyType() {
-        return ValueType.DOUBLE;
-    }
+    @BeforeEach
+    void setupGraph() throws Exception {
+        registerProcedures(
+            BetweennessCentralityMutateProc.class,
+            GraphProjectProc.class
+        );
 
-    @Override
-    public String expectedMutatedGraph() {
-        return "CREATE" +
-               "  (a {centrality: 0.0})" +
-               ", (b {centrality: 3.0})" +
-               ", (c {centrality: 4.0})" +
-               ", (d {centrality: 3.0})" +
-               ", (e {centrality: 0.0})" +
-               ", (a)-->(b)" +
-               ", (b)-->(c)" +
-               ", (c)-->(d)" +
-               ", (d)-->(e)";
-    }
+        String loadQuery = GdsCypher.call("bcGraph")
+            .graphProject()
+            .withNodeLabel("Node")
+            .withRelationshipType(
+                "REL",
+                RelationshipProjection.of(
+                    "REL",
+                    Orientation.UNDIRECTED,
+                    Aggregation.DEFAULT
+                )
+            )
+            .yields();
 
-    @Override
-    public Class<? extends AlgoBaseProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig, ?>> getProcedureClazz() {
-        return BetweennessCentralityMutateProc.class;
-    }
-
-    @Override
-    public BetweennessCentralityMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return BetweennessCentralityMutateConfig.of(mapWrapper);
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("mutateProperty")) {
-            mapWrapper = mapWrapper.withString("mutateProperty", DEFAULT_RESULT_PROPERTY);
-        }
-        return mapWrapper;
+        runQuery(loadQuery);
     }
 
     @Test
     void testMutate() {
-        String query = GdsCypher
-            .call(BC_GRAPH_NAME)
+        var query = GdsCypher
+            .call("bcGraph")
             .algo("betweenness")
             .mutateMode()
-            .addParameter("mutateProperty", DEFAULT_RESULT_PROPERTY)
+            .addParameter("mutateProperty", "centrality")
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
