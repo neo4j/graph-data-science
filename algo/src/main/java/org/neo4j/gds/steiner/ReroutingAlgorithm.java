@@ -21,10 +21,8 @@ package org.neo4j.gds.steiner;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
@@ -38,19 +36,22 @@ abstract class ReroutingAlgorithm implements Rerouter {
 
     protected final Graph graph;
     protected final long sourceId;
-    private final List<Long> terminals;
     protected final int concurrency;
     protected final ProgressTracker progressTracker;
 
-
-    ReroutingAlgorithm(Graph graph, long sourceId, List<Long> terminals, int concurrency, ProgressTracker progressTracker){
-        this.graph=graph;
-        this.progressTracker=progressTracker;
-        this.concurrency=concurrency;
-        this.sourceId=sourceId;
-        this.terminals=terminals;
+    ReroutingAlgorithm(
+        Graph graph,
+        long sourceId,
+        int concurrency,
+        ProgressTracker progressTracker
+    ) {
+        this.graph = graph;
+        this.progressTracker = progressTracker;
+        this.concurrency = concurrency;
+        this.sourceId = sourceId;
     }
-     LinkCutTree createLinkCutTree(HugeLongArray parent) {
+
+    LinkCutTree createLinkCutTree(HugeLongArray parent) {
         var tree = new LinkCutTree(graph.nodeCount());
         for (long nodeId = 0; nodeId < graph.nodeCount(); ++nodeId) {
             var parentId = parent.get(nodeId);
@@ -60,61 +61,29 @@ abstract class ReroutingAlgorithm implements Rerouter {
         }
         return tree;
     }
-    private void cutNodesAfterRerouting(
-        HugeLongArray parent,
-        HugeDoubleArray parentCost,
-        DoubleAdder totalCost,
-        LongAdder effectiveNodeCount
-    ) {
-        BitSet endsAtTerminal = new BitSet(graph.nodeCount());
-        HugeLongArrayQueue queue = HugeLongArrayQueue.newQueue(graph.nodeCount());
-        for (var terminal : terminals) {
-            if (parent.get(terminal) != PRUNED) {
-                queue.add(terminal);
-                endsAtTerminal.set(terminal);
-            }
-        }
-        while (!queue.isEmpty()) {
-            long nodeId = queue.remove();
-            long parentId = parent.get(nodeId);
-            if (parentId != sourceId && !endsAtTerminal.getAndSet(parentId)) {
-                queue.add(parentId);
-            }
-        }
 
-        ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency, nodeId -> {
-            if (parent.get(nodeId) != PRUNED && parent.get(nodeId) != ROOT_NODE) {
-                if (!endsAtTerminal.get(nodeId)) {
-                    parent.set(nodeId, PRUNED);
-                    totalCost.add(-parentCost.get(nodeId));
-                    parentCost.set(nodeId, PRUNED);
-                    effectiveNodeCount.decrement();
-                }
-            }
-        });
 
-    }
-     boolean checkIfRerouteIsValid(
+    boolean checkIfRerouteIsValid(
         LinkCutTree tree,
         long source,
         long target,
         long parentTarget
     ) {
-         //we want to check if the edge source->target causes a loop
-         //i.e.,  target is a predecessor of source
-         //just checking if source is connected to target is not valid (this is a spanning tree all are connected)
-         //we use the LinkCutTree and cut the  target's parent. If the two are connected still, we'll have a loop
-         //Example:
-         //    pp->target-> a->b->->source
-         // after cutting pp->target
-         //  pp  target-> a->b->source
-         // We have loop ==> so source->target is not a viable replacement
+        //we want to check if the edge source->target causes a loop
+        //i.e.,  target is a predecessor of source
+        //just checking if source is connected to target is not valid (this is a spanning tree all are connected)
+        //we use the LinkCutTree and cut the  target's parent. If the two are connected still, we'll have a loop
+        //Example:
+        //    pp->target-> a->b->->source
+        // after cutting pp->target
+        //  pp  target-> a->b->source
+        // We have loop ==> so source->target is not a viable replacement
 
-         //Otherwise, assuming no loop,  there is a root-source path not involving target. So by  setting source->target
-         //all terminals with  target as predecessor can still reach be reached by source.
-         tree.delete(parentTarget, target);
-         return !tree.connected(source, target);
-     }
+        //Otherwise, assuming no loop,  there is a root-source path not involving target. So by  setting source->target
+        //all terminals with  target as predecessor can still reach be reached by source.
+        tree.delete(parentTarget, target);
+        return !tree.connected(source, target);
+    }
 
     void reconnect(
         LinkCutTree tree,
@@ -144,10 +113,9 @@ abstract class ReroutingAlgorithm implements Rerouter {
     ) {
 
         if (graph.characteristics().isInverseIndexed() && !graph.characteristics().isUndirected()) {
-            return new ExtendedRerouter(
+            return new InverseRerouter(
                 graph,
                 sourceId,
-                terminals,
                 isTerminal,
                 examinationQueue,
                 indexQueue,

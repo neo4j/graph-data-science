@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.steiner;
 
- class LinkedNode {
+ final class LinkedNode {
 
      long index;
      LinkedNode siblingLeft;
@@ -27,23 +27,23 @@ package org.neo4j.gds.steiner;
 
      LinkedNode childRight;
 
-     LinkedNode(long index) {
+     private LinkedNode(long index) {
          this.index = index;
          this.siblingLeft = null;
-        this.siblingRight=null;
-        this.childRight=null;
+         this.siblingRight = null;
+         this.childRight = null;
 
-    }
+     }
 
     void addSibling(LinkedNode linkedNode, Direction direction){
         if (Direction.LEFT==direction){
-            siblingLeft= linkedNode;
+            siblingLeft = linkedNode;
         }else{
-            siblingRight= linkedNode;
+            siblingRight = linkedNode;
         }
     }
     void addChild(LinkedNode linkedNode){
-        childRight=linkedNode;
+        childRight = linkedNode;
     }
 
     static LinkedNode createChild(long index){

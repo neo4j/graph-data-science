@@ -28,33 +28,33 @@ import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 
-import java.util.List;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
 
 import static org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm.PRUNED;
 import static org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm.ROOT_NODE;
 
-public class ExtendedRerouter extends ReroutingAlgorithm {
+public class InverseRerouter extends ReroutingAlgorithm {
 
     private final BitSet isTerminal;
     private final HugeLongArray examinationQueue;
     private final LongAdder indexQueue;
+    private final ProgressTracker progressTracker;
 
-    ExtendedRerouter(
+    InverseRerouter(
         Graph graph,
         long sourceId,
-        List<Long> terminals,
         BitSet isTerminal,
         HugeLongArray examinationQueue,
         LongAdder indexQueue,
         int concurrency,
         ProgressTracker progressTracker
     ) {
-        super(graph, sourceId, terminals, concurrency, progressTracker);
+        super(graph, sourceId, concurrency, progressTracker);
         this.isTerminal = isTerminal;
         this.examinationQueue = examinationQueue;
         this.indexQueue = indexQueue;
+        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -64,35 +64,43 @@ public class ExtendedRerouter extends ReroutingAlgorithm {
         DoubleAdder totalCost,
         LongAdder effectiveNodeCount
     ) {
+        progressTracker.beginSubTask("Reroute");
+
         LinkCutTree linkCutTree = createLinkCutTree(parent);
         ReroutingChildrenManager childrenManager = new ReroutingChildrenManager(
             graph.nodeCount(),
             isTerminal,
             sourceId
         );
+
         initializeChildrenManager(childrenManager, parent);
         HugeLongPriorityQueue priorityQueue = HugeLongPriorityQueue.max(graph.nodeCount());
-        HugeLongArray wipArray = HugeLongArray.newArray(graph.nodeCount());
+        HugeLongArray currentSegmentArray = HugeLongArray.newArray(graph.nodeCount());
         HugeLongArrayQueue examinationQueue = HugeLongArrayQueue.newQueue(graph.nodeCount());
         HugeLongArray pruningArray = HugeLongArray.newArray(graph.nodeCount());
         HugeLongArray bestAlternative = HugeLongArray.newArray(graph.nodeCount());
         HugeDoubleArray bestAlternativeParentCost = HugeDoubleArray.newArray(graph.nodeCount());
-        long wipIndex = 0;
+
+        long currentSegmentIndex = 0;
         long endIndex = indexQueue.longValue();
+        //we start traversing paths to terminals in the order they were found
         for (long indexId = 0; indexId < endIndex; ++indexId) {
             boolean reachedSegmentEnd = false;
             long element = this.examinationQueue.get(indexId);
-            if (element == PRUNED) {
+
+            if (element == PRUNED) { //PRUNED signals end of a path
                 reachedSegmentEnd = true;
             } else {
-                wipArray.set(wipIndex++, element);
+                currentSegmentArray.set(currentSegmentIndex++, element);
+            }
 
-            } //3 2 1
             if (reachedSegmentEnd) {
-                while (wipIndex > 0) {
-                    long node = wipArray.get(--wipIndex);
-                    examinationQueue.add(node);
-                    boolean shouldOptimizeSegment = wipIndex == 0 || !childrenManager.prunable(node);
+                while (currentSegmentIndex > 0) {
+                    long node = currentSegmentArray.get(--currentSegmentIndex);
+                    examinationQueue.add(node); //transfer path to the examination queue (FIFO)
+                    //if the node in the path cannot be pruned (because it's part of other paths), we prune what we can so far
+                    //at the end prune
+                    boolean shouldOptimizeSegment = currentSegmentIndex == 0 || !childrenManager.prunable(node);
                     if (shouldOptimizeSegment) {
                         optimizeSegment(
                             childrenManager,
@@ -111,6 +119,7 @@ public class ExtendedRerouter extends ReroutingAlgorithm {
                 }
             }
         }
+        progressTracker.endSubTask("Reroute");
     }
     private void initializeChildrenManager(ReroutingChildrenManager childrenManager, HugeLongArray parent) {
         graph.forEachNode(nodeId -> {
@@ -138,35 +147,35 @@ public class ExtendedRerouter extends ReroutingAlgorithm {
     ) {
         long stopPruningNode = -1;
         double pruningGain = 0;
-        System.out.println("segment: ");
 
         long curr = examinationQueue.peek();
-        while (childrenManager.prunable(parent.get(curr))) {
+
+        //the parent of the path could have had many children (which made it not-runed)
+        //but these children might have been removed, which could perhaps make it prunable now
+        //so when we include the  cost of pruning a node from  the current path, we might be able to gain some more!
+        while (childrenManager.prunable(parent.get(curr))) { //source is always reachable and never prunable
             var nextCurr = parent.get(curr);
             var nextCost = parentCost.get(nextCurr);
-            System.out.println(curr + "'s parent " + nextCurr + " is  prunable: " + childrenManager.prunable(nextCurr));
             pruningGain += nextCost;
-            System.out.println("increase with: " + nextCost);
             curr = nextCurr;
         }
-        if (curr == 4) {
-            int y = 3;
-        }
-        System.out.println("wip prune cost: " + pruningGain);
+
         while (!examinationQueue.isEmpty()) {
             long nodeId = examinationQueue.remove();
 
-            System.out.print(nodeId + " ");
             var parentId = parent.get(nodeId);
 
             if (stopPruningNode == -1) {
                 stopPruningNode = parent.get(curr);
             }
-            pruningGain += parentCost.get(nodeId);
+
+            pruningGain += parentCost.get(nodeId);  //if we cut nodeId, we get rid of extra parentCost(nodeId) cost
             pruningArray.set(nodeId, 0);
             bestAlternative.set(nodeId, PRUNED);
+
             double finalPruningGain = pruningGain;
-            double gain = processNodeInReverseGraph(
+            //find the best node we can make it as parent
+            double gain = processNodeInverseIndexedGraph(
                 parent,
                 bestAlternative,
                 bestAlternativeParentCost,
@@ -175,18 +184,20 @@ public class ExtendedRerouter extends ReroutingAlgorithm {
                 parentId,
                 finalPruningGain
             );
+            
             if (bestAlternative.get(nodeId) != PRUNED) { //add to the priority Queue
-                System.out.println("    " + nodeId + " " + gain);
                 priorityQueue.add(nodeId, gain);
             }
+            progressTracker.logProgress();
         }
-        System.out.println();
         double prunedSoFar = 0;
         while (!priorityQueue.isEmpty()) {
             long node = priorityQueue.top();
             if (node != PRUNED) { //node is still alive
+                //we prune from top to bottom: prunedSoFar will include gain from nodes already pruned
                 double adjustedCost = priorityQueue.cost(node) - prunedSoFar;
-                if (adjustedCost > 0) {
+                if (adjustedCost > 0) { //maybe it's not worth pruning anymore
+                    //if still worthy, we must check we are not creating a cycle
                     boolean canReroute = checkIfRerouteIsValid(
                         linkCutTree,
                         bestAlternative.get(node),
@@ -194,6 +205,7 @@ public class ExtendedRerouter extends ReroutingAlgorithm {
                         parent.get(node)
                     );
                     if (canReroute) {
+                        //if everything is alright, do pruning
                         prunedSoFar += rerouteWithPruning(
                             childrenManager,
                             bestAlternative,
@@ -207,9 +219,10 @@ public class ExtendedRerouter extends ReroutingAlgorithm {
                             effectiveNodeCount
                         );
 
-                        stopPruningNode = node;
+                        stopPruningNode = node; //node becomes the new stop, everything above it has been pruned in the current segment
 
                     } else {
+                        //not ok, restore tree
                         linkCutTree.link(parent.get(node), node);
                     }
                 }
@@ -218,7 +231,8 @@ public class ExtendedRerouter extends ReroutingAlgorithm {
         }
 
     }
-    private double processNodeInReverseGraph(
+
+    private double processNodeInverseIndexedGraph(
         HugeLongArray parent,
         HugeLongArray bestAlternative,
         HugeDoubleArray bestAlternativeParentCost,
@@ -232,11 +246,9 @@ public class ExtendedRerouter extends ReroutingAlgorithm {
             if (parent.get(nodeId) == t) {
                 return true;
             }
-            System.out.println("    looking at : " + nodeId + " -->" + t + "[" + finalPruningGain + "]" + " " + w);
-            if (nodeId == 4) {
-                int x = 3;
-            }
+
             //  t must still be alive, in addition if we prune, we should be able to get a benefit from it
+            //benefit is:  new edge cost - all edges pruned
             if (parent.get(t) != PRUNED && (finalPruningGain - w) > bestGain.doubleValue()) {
                 //now we must check that t is not a descendant of s.
                 boolean canReconnect = checkIfRerouteIsValid(linkCutTree, t, nodeId, parentId);
@@ -270,24 +282,26 @@ public class ExtendedRerouter extends ReroutingAlgorithm {
     ) {
         double pruned = 0;
         long current = node;
-        System.out.println(stopPruningNode + " is  reached");
+        //start pruning until you hit the stop
         while (stopPruningNode != current) {
+
             long nextCurrent = parent.get(current);
-            childrenManager.cut(current);
+            childrenManager.cut(current);  //with pruning we remove some useless nodes
             parent.set(current, PRUNED);
             double nodePruneCost = parentCost.get(current);
             pruned += nodePruneCost;
-            totalCost.add(-nodePruneCost);
+            totalCost.add(-nodePruneCost); //and their associaed cost
             parentCost.set(current, PRUNED);
             current = nextCurrent;
-            effectiveNodeCount.decrement();
+            effectiveNodeCount.decrement(); //this also cuts the node we are going to reroute....
         }
-        effectiveNodeCount.increment();
-        linkCutTree.link(bestAlternative.get(node), node);
+        effectiveNodeCount.increment(); //...hence we need do a +1 to recover it
+        linkCutTree.link(bestAlternative.get(node), node); //now we link node to its new parent
         childrenManager.link(node, bestAlternative.get(node));
-        parentCost.set(node, bestAlternativeParentCost.get(node));
+        parentCost.set(node, bestAlternativeParentCost.get(node));  //and adjust its cost
         parent.set(node, bestAlternative.get(node));
-        totalCost.add(parentCost.get(node));
+        totalCost.add(parentCost.get(node)); //and the overall cost
+
         return pruned;
     }
 }

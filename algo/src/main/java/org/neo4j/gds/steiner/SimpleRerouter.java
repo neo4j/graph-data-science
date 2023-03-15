@@ -37,20 +37,18 @@ import static org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm.ROOT_NODE;
 
 public class SimpleRerouter extends ReroutingAlgorithm {
 
-
     private final List<Long> terminals;
 
-
-    public SimpleRerouter(
-        Graph graph,
-        long sourceId,
-        List<Long> terminals,
-        int concurrency,
-        ProgressTracker progressTracker
-    ) {
-        super(graph, sourceId, terminals, concurrency, progressTracker);
-        this.terminals = terminals;
-    }
+     SimpleRerouter(
+         Graph graph,
+         long sourceId,
+         List<Long> terminals,
+         int concurrency,
+         ProgressTracker progressTracker
+     ) {
+         super(graph, sourceId, concurrency, progressTracker);
+         this.terminals = terminals;
+     }
 
     @Override
     public void reroute(

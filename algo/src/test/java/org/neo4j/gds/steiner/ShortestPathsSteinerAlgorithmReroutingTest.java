@@ -230,7 +230,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
     }
 
     @Test
-    void shouldPruneUnusedIfReroutingOnInvertedInde() {
+    void shouldPruneUnusedIfReroutingOnInvertedIndex() {
         var steinerResultWithReroute = new ShortestPathsSteinerAlgorithm(
             invGraph,
             invIdFunction.of("a0"),
@@ -372,6 +372,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             );
     }
 
+
     @Test
     void shouldLogProgressWithRerouting() {
 
@@ -418,6 +419,53 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
                 "SteinerTree :: Finished"
             );
     }
+
+    @Test
+    void shouldLogProgressWithInverseRerouting() {
+
+        var sourceId = invGraph.toOriginalNodeId(invIdFunction.of("a0"));
+        var target1 = invGraph.toOriginalNodeId(invIdFunction.of("a3"));
+        var target2 = invGraph.toOriginalNodeId(invIdFunction.of("a4"));
+
+        var config = SteinerTreeStatsConfigImpl
+            .builder()
+            .sourceNode(sourceId)
+            .applyRerouting(true)
+            .targetNodes(List.of(target1, target2))
+            .build();
+
+        var steinerTreeAlgorithmFactory = new SteinerTreeAlgorithmFactory();
+        var log = Neo4jProxy.testLog();
+        Task baseTask = steinerTreeAlgorithmFactory.progressTask(invGraph, config);
+        var progressTracker = new TestProgressTracker(
+            baseTask,
+            log,
+            4,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        steinerTreeAlgorithmFactory.build(invGraph, config, progressTracker).compute();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "SteinerTree :: Start",
+                "SteinerTree :: Traverse :: Start",
+                "SteinerTree :: Traverse 50%",
+                "SteinerTree :: Traverse 100%",
+                "SteinerTree :: Traverse :: Finished",
+                "SteinerTree :: Reroute :: Start",
+                "SteinerTree :: Reroute 16%",
+                "SteinerTree :: Reroute 33%",
+                "SteinerTree :: Reroute 50%",
+                "SteinerTree :: Reroute 66%",
+                "SteinerTree :: Reroute 100%",
+                "SteinerTree :: Reroute :: Finished",
+                "SteinerTree :: Finished"
+            );
+    }
+
 
     @Test
     void shouldNotGetOptimalWithoutBetterRerouting() {
