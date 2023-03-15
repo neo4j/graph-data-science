@@ -449,7 +449,8 @@ Additionally, each of the six nodes now has a new property `community` in the Ne
 [[algorithms-label-propagation-examples-weighted]]
 === Weighted
 
-The Label Propagation algorithm can also be configured to use node and/or relationship weights into account.
+TIP: The Label Propagation algorithm can be configured to use weights both on relationships and on nodes.
+
 By specifying a node weight via the `nodeWeightProperty` key, we can control the influence of a nodes community onto its neighbors.
 During the computation of the weight of a specific community, the node property will be multiplied by the weight of that nodes relationships.
 
