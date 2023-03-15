@@ -64,7 +64,7 @@ ext {
         'javapoet'             : '1.13.0',
         'jetbrains-annotations': '24.0.1',
         'jjwt'                 : '0.11.5',
-        'jol'                  : '0.16',
+        'jol'                  : '0.17',
         'jqwik'                : '1.7.2',
         'junit5bom'            : '5.9.2',
         'log4j'                : log4js[neo4j_minor],
