@@ -247,7 +247,10 @@ class GraphLoaderTest extends BaseTest {
                 return false;
             });
 
-        assertThat(log.getMessages(TestLog.DEBUG)).isEmpty();
+        assertThat(log.getMessages(TestLog.DEBUG))
+            .extracting(removingThreadId())
+            .isNotEmpty()
+            .anyMatch(message -> message.startsWith("Loading Actual memory usage of the loaded graph:"));
     }
 
     @AllGraphStoreFactoryTypesTest
