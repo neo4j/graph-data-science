@@ -626,7 +626,7 @@ CALL gds.graph.project(
 The following query is identical to the stream example in the xref:algorithms/wcc.adoc#algorithms-wcc-examples-seeding[previous section].
 This time, we execute WCC on `myIndexedGraph` which will allow the algorithm to use the sampled strategy.
 
-[role=query-example]
+[role=query-example, no-result=true]
 --
 .The following will run the algorithm with sampled strategy and stream results:
 [source, cypher, role=noplay]
