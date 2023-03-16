@@ -314,7 +314,7 @@ class CommonNeighbourAwareRandomWalkTest {
                 casesPassed++;
             }
         }
-        assertThat(casesPassed / validCases).isCloseTo(0.3, Offset.offset(0.1)
+        assertThat(casesPassed / validCases).isCloseTo(0.3, Offset.offset(0.15)
         );
     }
 

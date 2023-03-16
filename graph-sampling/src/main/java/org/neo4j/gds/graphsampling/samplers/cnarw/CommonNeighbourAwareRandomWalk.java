@@ -94,7 +94,7 @@ public class CommonNeighbourAwareRandomWalk extends RandomWalkWithRestarts {
     static class Walker extends RandomWalkWithRestarts.Walker {
 
         private final OverlapSimilarityComputer overlapSimilarity;
-        boolean isWeighted;
+        final boolean isWeighted;
 
         Walker(
             SeenNodes seenNodes,
@@ -177,6 +177,7 @@ public class CommonNeighbourAwareRandomWalk extends RandomWalkWithRestarts {
         private long getCandidateNode(SortedNeighsWithWeights neighsWithWeights) {
             long candidateNode;
             if (isWeighted) {
+                assert neighsWithWeights.getWeights().isPresent();
                 candidateNode = weightedNextNode(neighsWithWeights.getNeighs(), neighsWithWeights.getWeights().get());
             } else {
                 int targetOffsetCandidate = rng.nextInt(neighsWithWeights.getNeighs().length);
@@ -218,7 +219,6 @@ public class CommonNeighbourAwareRandomWalk extends RandomWalkWithRestarts {
         private long weightedNextNode(long[] neighs, double[] weights) {
             var sumWeights = Arrays.stream(weights).sum();
             var remainingMass = rng.nextDouble(0, sumWeights);
-            var target = INVALID_NODE_ID;
 
             int i = 0;
             while (remainingMass > 0) {
@@ -230,12 +230,10 @@ public class CommonNeighbourAwareRandomWalk extends RandomWalkWithRestarts {
     }
 
     static class SortedNeighsWithWeights {
-        long[] neighs;
+        final long[] neighs;
         Optional<double[]> weights;
-        final long nodeId;
 
         SortedNeighsWithWeights(Graph graph, long nodeId, boolean isWeighted) {
-            this.nodeId = nodeId;
             this.neighs = new long[graph.degree(nodeId)];
             this.weights = Optional.empty();
             var idx = new AtomicInteger(0);

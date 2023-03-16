@@ -47,14 +47,14 @@ import java.util.Optional;
 import java.util.SplittableRandom;
 
 public class RandomWalkWithRestarts implements NodesSampler {
-    protected static final double QUALITY_MOMENTUM = 0.9;
-    protected static final double QUALITY_THRESHOLD_BASE = 0.05;
+    private static final double QUALITY_MOMENTUM = 0.9;
+    private static final double QUALITY_THRESHOLD_BASE = 0.05;
     protected static final int MAX_WALKS_PER_START = 100;
-    protected static final double TOTAL_WEIGHT_MISSING = -1.0;
+    private static final double TOTAL_WEIGHT_MISSING = -1.0;
     protected static final long INVALID_NODE_ID = -1;
 
     private final RandomWalkWithRestartsConfig config;
-    protected LongHashSet startNodesUsed;
+    private LongHashSet startNodesUsed;
 
     public RandomWalkWithRestarts(RandomWalkWithRestartsConfig config) {
         this.config = config;
@@ -194,7 +194,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
     protected static class Walker implements Runnable {
 
         protected final SeenNodes seenNodes;
-        protected final Optional<HugeAtomicDoubleArray> totalWeights;
+        private final Optional<HugeAtomicDoubleArray> totalWeights;
         protected final double qualityThreshold;
         protected final WalkQualities walkQualities;
         protected final SplittableRandom rng;
@@ -300,7 +300,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
             return presentTotalWeights.get(currentNode);
         }
 
-        protected long weightedNextNode(long currentNode) {
+        long weightedNextNode(long currentNode) {
             var remainingMass = new MutableDouble(rng.nextDouble(0, computeDegree(currentNode)));
             var target = new MutableLong(INVALID_NODE_ID);
 
@@ -318,7 +318,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
             return target.getValue();
         }
 
-        public LongSet startNodesUsed() {
+        LongSet startNodesUsed() {
             return startNodesUsed;
         }
     }
