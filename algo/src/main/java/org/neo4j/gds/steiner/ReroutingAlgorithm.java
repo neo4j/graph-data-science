@@ -19,15 +19,14 @@
  */
 package org.neo4j.gds.steiner;
 
-import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import java.util.List;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.Supplier;
 
 import static org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm.PRUNED;
 import static org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm.ROOT_NODE;
@@ -49,6 +48,8 @@ abstract class ReroutingAlgorithm {
         this.progressTracker = progressTracker;
         this.concurrency = concurrency;
         this.sourceId = sourceId;
+        Supplier<ReroutingAlgorithm> a;
+
     }
 
     LinkCutTree createLinkCutTree(HugeLongArray parent) {
@@ -105,31 +106,5 @@ abstract class ReroutingAlgorithm {
         parentCost.set(target, weight);
         totalCost.add(-edgeCostOft + weight); //remove old cost, add new cost due to relinking
         tree.link(source, target); // update tree
-    }
-
-    static ReroutingAlgorithm createRerouter(
-        Graph graph,
-        long sourceId,
-        List<Long> terminals,
-        BitSet isTerminal,
-        HugeLongArray examinationQueue,
-        LongAdder indexQueue,
-        int concurrency,
-        ProgressTracker progressTracker
-    ) {
-
-        if (graph.characteristics().isInverseIndexed() && !graph.characteristics().isUndirected()) {
-            return new InverseRerouter(
-                graph,
-                sourceId,
-                isTerminal,
-                examinationQueue,
-                indexQueue,
-                concurrency,
-                progressTracker
-            );
-        } else {
-            return new SimpleRerouter(graph, sourceId, terminals, concurrency, progressTracker);
-        }
     }
 }

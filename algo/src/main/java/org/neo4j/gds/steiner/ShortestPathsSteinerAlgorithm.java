@@ -143,7 +143,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         progressTracker.endSubTask("Traverse");
 
         if (applyRerouting) {
-            var rerouter = ReroutingAlgorithm.createRerouter(
+            var rerouter = ReroutingSupplier.createRerouter(
                 graph,
                 sourceId,
                 terminals,
