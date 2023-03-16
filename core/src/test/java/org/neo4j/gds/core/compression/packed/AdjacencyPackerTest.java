@@ -22,7 +22,11 @@ package org.neo4j.gds.core.compression.packed;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
@@ -30,7 +34,9 @@ import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.OptionalLong;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -224,17 +230,24 @@ class AdjacencyPackerTest {
         compressed.free();
     }
 
-    @ParameterizedTest
-    @EnumSource(value = Features.class)
-    void compressNonBlockAlignedConsecutiveLongs(Features features) {
-        assertThat(1337 % AdjacencyPacking.BLOCK_SIZE).isNotEqualTo(0);
-        var data = LongStream.range(0, 1337).toArray();
+    static Stream<Arguments> nonBlockAlignedArguments() {
+        return TestSupport.crossArgument(
+            () -> Arrays.stream(Features.values()),
+            () -> IntStream.of(42, 1337).boxed()
+        );
+    }
 
-        var compressed = AdjacencyPacker.compress(data.clone(), 0, data.length, features.flags());
+    @ParameterizedTest
+    @MethodSource("nonBlockAlignedArguments")
+    void compressNonBlockAlignedConsecutiveLongs(Features features, int valueCount) {
+        assertThat(valueCount % AdjacencyPacking.BLOCK_SIZE).isNotEqualTo(0);
+        var data = LongStream.range(0, valueCount).toArray();
+
+        var compressed: = AdjacencyPacker.compress(data.clone(), 0, data.length, features.flags());
 
         assertThat(compressed.bytesUsed())
             .as("compressed exceeds original size")
-            .isLessThanOrEqualTo(1337L * Long.BYTES);
+            .isLessThanOrEqualTo((long) valueCount * Long.BYTES);
         assertThat(compressed.address()).isNotZero();
 
         var decompressed = features.decompress(compressed);
@@ -246,20 +259,21 @@ class AdjacencyPackerTest {
         compressed.free();
     }
 
-    @Test
-    void compressNonBlockAlignedRandomLongs() {
-        assertThat(1337 % AdjacencyPacking.BLOCK_SIZE).isNotEqualTo(0);
+    @ParameterizedTest
+    @ValueSource(ints = {42, 1337})
+    void compressNonBlockAlignedRandomLongs(int valueCount) {
+        assertThat(valueCount % AdjacencyPacking.BLOCK_SIZE).isNotEqualTo(0);
         var random = newRandom();
         var data = random.random().longs(4242, 0, 1L << 50)
             .distinct()
-            .limit(1337)
+            .limit(valueCount)
             .toArray();
 
         var compressed = AdjacencyPacker.compress(data.clone(), 0, data.length, Features.SortAndDelta.flags());
 
         assertThat(compressed.bytesUsed())
             .as("compressed exceeds original size, seed = %d", random.seed())
-            .isLessThanOrEqualTo(1337L * Long.BYTES);
+            .isLessThanOrEqualTo((long) valueCount * Long.BYTES);
         assertThat(compressed.address()).isNotZero();
 
         var decompressed = Features.SortAndDelta.decompress(compressed);
