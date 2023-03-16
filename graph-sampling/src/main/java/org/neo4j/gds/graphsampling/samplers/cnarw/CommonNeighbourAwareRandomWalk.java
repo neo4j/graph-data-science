@@ -28,12 +28,11 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
-import org.neo4j.gds.graphsampling.samplers.rwr.RandomWalkWithRestarts;
 import org.neo4j.gds.graphsampling.samplers.SeenNodes;
+import org.neo4j.gds.graphsampling.samplers.rwr.RandomWalkWithRestarts;
 import org.neo4j.gds.similarity.nodesim.OverlapSimilarityComputer;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -233,20 +232,17 @@ public class CommonNeighbourAwareRandomWalk extends RandomWalkWithRestarts {
                     return true;
                 });
             } else {
-                double[] weightsSorted = new double[graph.degree(nodeId)];
+                double[] weightsArray = new double[graph.degree(nodeId)];
                 graph.forEachRelationship(nodeId, 0.0, (src, dst, w) -> {
                     var localIdx = idx.getAndIncrement();
                     neighs[localIdx] = dst;
-                    weightsSorted[localIdx] = w;
+                    weightsArray[localIdx] = w;
                     return true;
                 });
-                weights = Optional.of(
-                    IntStream.range(0, weightsSorted.length)
-                        .boxed()
-                        .sorted(Comparator.comparingLong(i -> neighs[i]))
-                        .map(i -> weightsSorted[i])
-                        .mapToDouble(x -> x)
-                        .toArray());
+
+                weights = Optional.of(IntStream.range(0, weightsArray.length).boxed()
+                    .sorted((i, j) -> Long.compare(neighs[i], neighs[j]))
+                    .map(i -> weightsArray[i]).mapToDouble(x -> x).toArray());
             }
             Arrays.sort(neighs);
         }
