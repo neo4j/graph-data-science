@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.LongAdder;
 import static org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm.PRUNED;
 import static org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm.ROOT_NODE;
 
-abstract class ReroutingAlgorithm implements Rerouter {
+abstract class ReroutingAlgorithm {
 
     protected final Graph graph;
     protected final long sourceId;
@@ -62,6 +62,12 @@ abstract class ReroutingAlgorithm implements Rerouter {
         return tree;
     }
 
+    abstract void reroute(
+        HugeLongArray parent,
+        HugeDoubleArray parentCost,
+        DoubleAdder totalCost,
+        LongAdder effectiveNodeCount
+    );
 
     boolean checkIfRerouteIsValid(
         LinkCutTree tree,
