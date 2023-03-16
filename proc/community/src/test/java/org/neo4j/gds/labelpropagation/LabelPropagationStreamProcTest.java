@@ -100,12 +100,16 @@ class LabelPropagationStreamProcTest extends BaseProcTest {
             .yields();
 
         var expectedCommunities = List.of(2L, 7L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L);
-        runQueryWithRowConsumer(query, row -> {
+        var rowCount = runQueryWithRowConsumer(query, row -> {
             int nodeId = row.getNumber("nodeId").intValue();
             long communityId = row.getNumber("communityId").longValue();
 
             assertions.assertThat(communityId).isEqualTo(expectedCommunities.get(nodeId));
         });
+
+        assertThat(rowCount)
+            .as("Streamed rows should match the expected.")
+            .isEqualTo(expectedCommunities.size());
     }
 
     // FIXME: This doesn't belong here.
