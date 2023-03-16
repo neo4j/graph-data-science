@@ -160,7 +160,7 @@ public class CommonNeighbourAwareRandomWalk extends RandomWalkWithRestarts {
                     long candidateNode;
                     var uSortedNeighs = new SortedNeighsWithWeights(inputGraph, currentNode, isWeighted);
                     do {
-                        candidateNode = getCandidateNode(currentNode);
+                        candidateNode = getCandidateNode(uSortedNeighs);
                         var vSortedNeighs = new SortedNeighsWithWeights(inputGraph, candidateNode, isWeighted);
                         var overlap = computeOverlap(uSortedNeighs, vSortedNeighs);
 
@@ -174,13 +174,13 @@ public class CommonNeighbourAwareRandomWalk extends RandomWalkWithRestarts {
             }
         }
 
-        private long getCandidateNode(long currentNode) {
+        private long getCandidateNode(SortedNeighsWithWeights neighsWithWeights) {
             long candidateNode;
             if (isWeighted) {
-                candidateNode = weightedNextNode(currentNode);
+                candidateNode = weightedNextNode(neighsWithWeights.getNeighs(), neighsWithWeights.getWeights().get());
             } else {
-                int targetOffsetCandidate = rng.nextInt(inputGraph.degree(currentNode));
-                candidateNode = inputGraph.nthTarget(currentNode, targetOffsetCandidate);
+                int targetOffsetCandidate = rng.nextInt(neighsWithWeights.getNeighs().length);
+                candidateNode = neighsWithWeights.getNeighs()[targetOffsetCandidate];
                 assert candidateNode != IdMap.NOT_FOUND : "The offset '" + targetOffsetCandidate +
                                                           "' is bound by the degree but no target could be found for nodeId " + candidateNode;
             }
@@ -213,6 +213,19 @@ public class CommonNeighbourAwareRandomWalk extends RandomWalkWithRestarts {
                 return similarity;
             else
                 return 0.0D;
+        }
+
+        private long weightedNextNode(long[] neighs, double[] weights) {
+            var sumWeights = Arrays.stream(weights).sum();
+            var remainingMass = rng.nextDouble(0, sumWeights);
+            var target = INVALID_NODE_ID;
+
+            int i = 0;
+            while (remainingMass > 0) {
+                remainingMass -= weights[i++];
+            }
+
+            return neighs[i - 1];
         }
     }
 

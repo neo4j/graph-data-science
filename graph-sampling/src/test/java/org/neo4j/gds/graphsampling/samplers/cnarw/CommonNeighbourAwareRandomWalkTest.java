@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -40,6 +41,8 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.gds.Orientation.NATURAL;
 
 @GdlExtension
 class CommonNeighbourAwareRandomWalkTest {
@@ -105,6 +108,58 @@ class CommonNeighbourAwareRandomWalkTest {
 
     @Inject
     private IdFunction lollipopIdFunction;
+
+    @GdlGraph(graphNamePrefix = "natural", orientation = NATURAL)
+    private static final String DB_CYPHER_NATURAL =
+        "CREATE" +
+        "  (a:Person)" +
+        ", (b:Person)" +
+        ", (c:Person)" +
+        ", (d:Person)" +
+        ", (i1:Item)" +
+        ", (i2:Item)" +
+        ", (i3:Item)" +
+        ", (i4:Item)" +
+        ", (a)-[:LIKES {prop: 1.0}]->(i1)" +
+        ", (a)-[:LIKES {prop: 1.0}]->(i2)" +
+        ", (a)-[:LIKES {prop: 2.0}]->(i3)" +
+        ", (b)-[:LIKES {prop: 1.0}]->(i1)" +
+        ", (b)-[:LIKES {prop: 1.0}]->(i2)" +
+        ", (c)-[:LIKES {prop: 1.0}]->(i3)" +
+        ", (d)-[:LIKES {prop: 0.5}]->(i1)" +
+        ", (d)-[:LIKES {prop: 1.0}]->(i2)" +
+        ", (d)-[:LIKES {prop: 1.0}]->(i3)";
+
+    @GdlGraph(graphNamePrefix = "naturalUnion", orientation = NATURAL)
+    private static final String DB_CYPHER_UNION =
+        "CREATE" +
+        "  (a:Person)" +
+        ", (b:Person)" +
+        ", (c:Person)" +
+        ", (d:Person)" +
+        ", (i1:Item)" +
+        ", (i2:Item)" +
+        ", (i3:Item)" +
+        ", (i4:Item)" +
+        ", (a)-[:LIKES3 {prop: 1.0}]->(i1)" +
+        ", (a)-[:LIKES2 {prop: 1.0}]->(i2)" +
+        ", (a)-[:LIKES1 {prop: 2.0}]->(i3)" +
+        ", (b)-[:LIKES2 {prop: 1.0}]->(i1)" +
+        ", (b)-[:LIKES1 {prop: 1.0}]->(i2)" +
+        ", (c)-[:LIKES3 {prop: 1.0}]->(i3)" +
+        ", (d)-[:LIKES2 {prop: 0.5}]->(i1)" +
+        ", (d)-[:LIKES3 {prop: 1.0}]->(i2)" +
+        ", (d)-[:LIKES1 {prop: 1.0}]->(i3)";
+
+    @Inject
+    private TestGraph naturalGraph;
+
+    @Inject
+    private IdFunction naturalIdFunction;
+
+    @Inject
+    private TestGraph naturalUnionGraph;
+
 
     Graph getGraph(CommonNeighbourAwareRandomWalkConfig config) {
         return graphStore.getGraph(
@@ -409,5 +464,33 @@ class CommonNeighbourAwareRandomWalkTest {
         }
 
         assertThat(labelCounts).isEqualTo(expectedLabelCounts);
+    }
+
+    @Test
+    void shouldComputeForUnionGraphs() {
+
+        HugeAtomicBitSet result1, result2;
+        var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
+            .startNodes(List.of(naturalIdFunction.of("a")))
+            .relationshipWeightProperty("prop")
+            .samplingRatio(0.5)
+            .restartProbability(0.1)
+            .randomSeed(42L)
+            .concurrency(1)
+            .build();
+        {
+            var cnarw = new CommonNeighbourAwareRandomWalk(config);
+            result1 = cnarw.compute(naturalGraph, ProgressTracker.NULL_TRACKER);
+        }
+        {
+            var cnarw = new CommonNeighbourAwareRandomWalk(config);
+            result2 = cnarw.compute(naturalUnionGraph, ProgressTracker.NULL_TRACKER);
+        }
+
+        assertThat(result1.size() > 0);
+        assertEquals(result1.size(), result2.size());
+        for (int i = 0; i < result1.size(); i++) {
+            assertEquals(result1.get(i), result2.get(i));
+        }
     }
 }
