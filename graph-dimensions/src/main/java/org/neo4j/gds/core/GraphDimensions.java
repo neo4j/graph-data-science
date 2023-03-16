@@ -142,6 +142,11 @@ public interface GraphDimensions {
     }
 
     @Value.Default
+    default DimensionsMap nodePropertyDimensions() {
+        return new DimensionsMap(Map.of());
+    }
+
+    @Value.Default
     default Map<String, Integer> relationshipPropertyTokens() {
         return Collections.emptyMap();
     }
