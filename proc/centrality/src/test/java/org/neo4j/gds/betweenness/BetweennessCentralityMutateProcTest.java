@@ -86,7 +86,7 @@ class BetweennessCentralityMutateProcTest extends BaseProcTest {
             .addParameter("mutateProperty", "centrality")
             .yields();
 
-        runQueryWithRowConsumer(query, row -> {
+        var rowCount = runQueryWithRowConsumer(query, row -> {
             assertThat(row.get("centralityDistribution"))
                 .isNotNull()
                 .isInstanceOf(Map.class)
@@ -118,6 +118,10 @@ class BetweennessCentralityMutateProcTest extends BaseProcTest {
                 .asInstanceOf(LONG)
                 .isEqualTo(5);
         });
+
+        assertThat(rowCount)
+            .as("`mutate` mode should always return one row")
+            .isEqualTo(1);
     }
 
     @Test
